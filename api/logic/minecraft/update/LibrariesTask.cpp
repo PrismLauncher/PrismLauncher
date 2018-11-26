@@ -22,34 +22,44 @@ void LibrariesTask::executeTask()
     downloadJob.reset(job);
 
     auto metacache = ENV.metacache();
-    QStringList failedLocalFiles;
 
-    QList<LibraryPtr> artifactPool;
-    artifactPool.append(profile->getLibraries());
-    artifactPool.append(profile->getNativeLibraries());
-    artifactPool.append(profile->getJarMods());
-    artifactPool.append(profile->getMainJar());
-    for (auto lib : artifactPool)
+    auto processArtifactPool = [&](const QList<LibraryPtr> & pool, QStringList & errors, const QString & localPath)
     {
-        if(!lib)
+        for (auto lib : pool)
         {
-            emitFailed(tr("Null jar is specified in the metadata, aborting."));
-            return;
+            if(!lib)
+            {
+                emitFailed(tr("Null jar is specified in the metadata, aborting."));
+                return false;
+            }
+            auto dls = lib->getDownloads(currentSystem, metacache.get(), errors, localPath);
+            for(auto dl : dls)
+            {
+                downloadJob->addNetAction(dl);
+            }
         }
-        auto dls = lib->getDownloads(currentSystem, metacache.get(), failedLocalFiles, inst->getLocalLibraryPath());
-        for(auto dl : dls)
-        {
-            downloadJob->addNetAction(dl);
-        }
-    }
+        return true;
+    };
 
-    if (!failedLocalFiles.empty())
+    QStringList failedLocalLibraries;
+    QList<LibraryPtr> libArtifactPool;
+    libArtifactPool.append(profile->getLibraries());
+    libArtifactPool.append(profile->getNativeLibraries());
+    libArtifactPool.append(profile->getMainJar());
+    processArtifactPool(libArtifactPool, failedLocalLibraries, inst->getLocalLibraryPath());
+
+    QStringList failedLocalJarMods;
+    QList<LibraryPtr> jarmodArtifactPool = profile->getJarMods();
+    processArtifactPool(libArtifactPool, failedLocalJarMods, inst->jarModsDir());
+
+    if (!failedLocalJarMods.empty() || !failedLocalLibraries.empty())
     {
         downloadJob.reset();
-        QString failed_all = failedLocalFiles.join("\n");
-        emitFailed(tr("Some libraries marked as 'local' are missing their jar files:\n%1\n\nYou'll have to correct this problem manually.").arg(failed_all));
+        QString failed_all = (failedLocalLibraries + failedLocalJarMods).join("\n");
+        emitFailed(tr("Some artifacts marked as 'local' are missing their files:\n%1\n\nYou need to either add the files, or removed the packages that requires them.\nYou'll have to correct this problem manually.").arg(failed_all));
         return;
     }
+
     connect(downloadJob.get(), &NetJob::succeeded, this, &LibrariesTask::emitSucceeded);
     connect(downloadJob.get(), &NetJob::failed, this, &LibrariesTask::jarlibFailed);
     connect(downloadJob.get(), &NetJob::progress, this, &LibrariesTask::progress);

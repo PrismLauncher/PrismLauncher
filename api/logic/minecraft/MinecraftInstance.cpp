@@ -169,6 +169,12 @@ QString MinecraftInstance::getLocalLibraryPath() const
     return libraries_dir.absolutePath();
 }
 
+QString MinecraftInstance::jarModsDir() const
+{
+    QDir jarmods_dir(FS::PathCombine(instanceRoot(), "jarmods/"));
+    return jarmods_dir.absolutePath();
+}
+
 QString MinecraftInstance::loaderModsDir() const
 {
     return FS::PathCombine(gameRoot(), "mods");
@@ -197,11 +203,6 @@ QString MinecraftInstance::texturePacksDir() const
 QString MinecraftInstance::instanceConfigFolder() const
 {
     return FS::PathCombine(gameRoot(), "config");
-}
-
-QString MinecraftInstance::jarModsDir() const
-{
-    return FS::PathCombine(instanceRoot(), "jarmods");
 }
 
 QString MinecraftInstance::libDir() const
