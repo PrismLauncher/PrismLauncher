@@ -55,7 +55,7 @@ void LibrariesTask::executeTask()
     {
         downloadJob.reset();
         QString failed_all = (failedLocalLibraries + failedLocalJarMods).join("\n");
-        emitFailed(tr("Some artifacts marked as 'local' are missing their files:\n%1\n\nYou need to either add the files, or removed the packages that requires them.\nYou'll have to correct this problem manually.").arg(failed_all));
+        emitFailed(tr("Some artifacts marked as 'local' are missing their files:\n%1\n\nYou need to either add the files, or removed the packages that require them.\nYou'll have to correct this problem manually.").arg(failed_all));
         return;
     }
 
