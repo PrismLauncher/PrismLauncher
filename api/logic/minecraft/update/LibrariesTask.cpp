@@ -49,8 +49,7 @@ void LibrariesTask::executeTask()
     processArtifactPool(libArtifactPool, failedLocalLibraries, inst->getLocalLibraryPath());
 
     QStringList failedLocalJarMods;
-    QList<LibraryPtr> jarmodArtifactPool = profile->getJarMods();
-    processArtifactPool(libArtifactPool, failedLocalJarMods, inst->jarModsDir());
+    processArtifactPool(profile->getJarMods(), failedLocalJarMods, inst->jarModsDir());
 
     if (!failedLocalJarMods.empty() || !failedLocalLibraries.empty())
     {
