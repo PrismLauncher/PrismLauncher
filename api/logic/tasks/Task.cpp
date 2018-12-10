@@ -39,23 +39,49 @@ void Task::setProgress(qint64 current, qint64 total)
 
 void Task::start()
 {
-    m_running = true;
+    switch(m_state)
+    {
+        case State::Inactive:
+        {
+            qDebug() << "Task" << describe() << "starting for the first time";
+            break;
+        }
+        case State::AbortedByUser:
+        {
+            qDebug() << "Task" << describe() << "restarting for after being aborted by user";
+            break;
+        }
+        case State::Failed:
+        {
+            qDebug() << "Task" << describe() << "restarting for after failing at first";
+            break;
+        }
+        case State::Succeeded:
+        {
+            qDebug() << "Task" << describe() << "restarting for after succeeding at first";
+            break;
+        }
+        case State::Running:
+        {
+            qWarning() << "MultiMC tried to start task" << describe() << "while it was already running!";
+            return;
+        }
+    }
+    // NOTE: only fall thorugh to here in end states
+    m_state = State::Running;
     emit started();
-    qDebug() << "Task" << describe() << "started";
     executeTask();
 }
 
 void Task::emitFailed(QString reason)
 {
     // Don't fail twice.
-    if (!m_running)
+    if (!isRunning())
     {
         qCritical() << "Task" << describe() << "failed while not running!!!!: " << reason;
         return;
     }
-    m_running = false;
-    m_finished = true;
-    m_succeeded = false;
+    m_state = State::Failed;
     m_failReason = reason;
     qCritical() << "Task" << describe() << "failed: " << reason;
     emit failed(reason);
@@ -65,14 +91,12 @@ void Task::emitFailed(QString reason)
 void Task::emitAborted()
 {
     // Don't abort twice.
-    if (!m_running)
+    if (!isRunning())
     {
         qCritical() << "Task" << describe() << "aborted while not running!!!!";
         return;
     }
-    m_running = false;
-    m_finished = true;
-    m_succeeded = false;
+    m_state = State::AbortedByUser;
     m_failReason = "Aborted.";
     qDebug() << "Task" << describe() << "aborted.";
     emit failed(m_failReason);
@@ -82,14 +106,12 @@ void Task::emitAborted()
 void Task::emitSucceeded()
 {
     // Don't succeed twice.
-    if (!m_running)
+    if (!isRunning())
     {
         qCritical() << "Task" << describe() << "succeeded while not running!!!!";
         return;
     }
-    m_running = false;
-    m_finished = true;
-    m_succeeded = true;
+    m_state = State::Succeeded;
     qDebug() << "Task" << describe() << "succeeded";
     emit succeeded();
     emit finished();
@@ -116,17 +138,17 @@ QString Task::describe()
 
 bool Task::isRunning() const
 {
-    return m_running;
+    return m_state == State::Running;
 }
 
 bool Task::isFinished() const
 {
-    return m_finished;
+    return m_state != State::Running && m_state != State::Inactive;
 }
 
 bool Task::wasSuccessful() const
 {
-    return m_succeeded;
+    return m_state == State::Succeeded;
 }
 
 QString Task::failReason() const

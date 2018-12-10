@@ -58,6 +58,7 @@ void FtbPackInstallTask::onDownloadSucceeded()
 
 void FtbPackInstallTask::onDownloadFailed(QString reason)
 {
+    abortable = false;
     emitFailed(reason);
 }
 

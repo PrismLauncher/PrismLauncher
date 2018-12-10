@@ -25,6 +25,16 @@ class MULTIMC_LOGIC_EXPORT Task : public QObject
 {
     Q_OBJECT
 public:
+    enum class State
+    {
+        Inactive,
+        Running,
+        Succeeded,
+        Failed,
+        AbortedByUser
+    };
+
+public:
     explicit Task(QObject *parent = 0);
     virtual ~Task() {};
 
@@ -88,9 +98,7 @@ public slots:
     void setProgress(qint64 current, qint64 total);
 
 private:
-    bool m_running = false;
-    bool m_finished = false;
-    bool m_succeeded = false;
+    State m_state = State::Inactive;
     QStringList m_Warnings;
     QString m_failReason = "";
     QString m_status;
