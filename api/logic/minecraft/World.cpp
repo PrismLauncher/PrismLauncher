@@ -385,7 +385,7 @@ void World::loadFromLevelDat(QByteArray data)
         qDebug() << "World Name:" << m_actualName;
         qDebug() << "Last Played:" << m_lastPlayed.toString();
         qDebug() << "Seed:" << m_randomSeed;
-        qDebug() << "GameMode:" << m_randomSeed;
+        qDebug() << "GameMode:" << m_gameType;
     }
     catch (const nbt::io::input_error &e)
     {
