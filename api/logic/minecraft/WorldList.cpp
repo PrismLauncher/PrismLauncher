@@ -138,7 +138,7 @@ bool WorldList::deleteWorlds(int first, int last)
 
 int WorldList::columnCount(const QModelIndex &parent) const
 {
-    return 2;
+    return 3;
 }
 
 QVariant WorldList::data(const QModelIndex &index, int role) const
@@ -160,6 +160,9 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
         {
         case NameColumn:
             return world.name();
+
+        case GameModeColumn:
+            return gameTypeToString(world.gameType());
 
         case LastPlayedColumn:
             return world.lastPlayed();
@@ -206,6 +209,8 @@ QVariant WorldList::headerData(int section, Qt::Orientation orientation, int rol
         {
         case NameColumn:
             return tr("Name");
+        case GameModeColumn:
+            return tr("Game Mode");
         case LastPlayedColumn:
             return tr("Last Played");
         default:
@@ -217,6 +222,8 @@ QVariant WorldList::headerData(int section, Qt::Orientation orientation, int rol
         {
         case NameColumn:
             return tr("The name of the world.");
+        case GameModeColumn:
+            return tr("Game mode of the world.");
         case LastPlayedColumn:
             return tr("Date and time the world was last played.");
         default:

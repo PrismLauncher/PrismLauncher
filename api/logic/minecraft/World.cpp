@@ -30,6 +30,26 @@
 #include <quazipfile.h>
 #include <quazipdir.h>
 
+#include <QCoreApplication>
+
+QString gameTypeToString(GameType type)
+{
+    switch (type)
+    {
+        case GameType::Survival:
+            return QCoreApplication::translate("GameType", "Survival");
+        case GameType::Creative:
+            return QCoreApplication::translate("GameType", "Creative");
+        case GameType::Adventure:
+            return QCoreApplication::translate("GameType", "Adventure");
+        case GameType::Spectator:
+            return QCoreApplication::translate("GameType", "Spectator");
+        default:
+            break;
+    }
+    return QObject::tr("Unknown");
+}
+
 std::unique_ptr <nbt::tag_compound> parseLevelDat(QByteArray data)
 {
     QByteArray output;
@@ -303,6 +323,32 @@ static int64_t read_long (nbt::value& parent, const char * name, const int64_t &
     }
 }
 
+static int read_int (nbt::value& parent, const char * name, const int & fallback = 0)
+{
+    try
+    {
+        auto &namedValue = parent.at(name);
+        if(namedValue.get_type() != nbt::tag_type::Int)
+        {
+            return fallback;
+        }
+        auto & tag_str = namedValue.as<nbt::tag_int>();
+        return tag_str.get();
+    }
+    catch (const std::out_of_range &e)
+    {
+        // fallback for old world formats
+        qWarning() << "Int NBT tag" << name << "could not be found. Defaulting to" << fallback;
+        return fallback;
+    }
+    catch (const std::bad_cast &e)
+    {
+        // type mismatch
+        qWarning() << "NBT tag" << name << "could not be converted to int. Defaulting to" << fallback;
+        return fallback;
+    }
+}
+
 void World::loadFromLevelDat(QByteArray data)
 {
     try
@@ -332,11 +378,14 @@ void World::loadFromLevelDat(QByteArray data)
             m_lastPlayed = QDateTime::fromMSecsSinceEpoch(temp);
         }
 
+        m_gameType = (GameType) read_int(val, "GameType", 0);
+
         m_randomSeed = read_long(val, "RandomSeed", 0);
 
         qDebug() << "World Name:" << m_actualName;
         qDebug() << "Last Played:" << m_lastPlayed.toString();
         qDebug() << "Seed:" << m_randomSeed;
+        qDebug() << "GameMode:" << m_randomSeed;
     }
     catch (const nbt::io::input_error &e)
     {

@@ -19,6 +19,15 @@
 
 #include "multimc_logic_export.h"
 
+enum class GameType
+{
+    Survival,
+    Creative,
+    Adventure,
+    Spectator
+};
+QString MULTIMC_LOGIC_EXPORT gameTypeToString(GameType type);
+
 class MULTIMC_LOGIC_EXPORT World
 {
 public:
@@ -34,6 +43,10 @@ public:
     QDateTime lastPlayed() const
     {
         return m_lastPlayed;
+    }
+    GameType gameType() const
+    {
+        return m_gameType;
     }
     int64_t seed() const
     {
@@ -79,5 +92,6 @@ protected:
     QDateTime levelDatTime;
     QDateTime m_lastPlayed;
     int64_t m_randomSeed = 0;
+    GameType m_gameType = GameType::Survival;
     bool is_valid = false;
 };

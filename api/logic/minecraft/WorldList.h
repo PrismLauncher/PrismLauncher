@@ -33,6 +33,7 @@ public:
     enum Columns
     {
         NameColumn,
+        GameModeColumn,
         LastPlayedColumn
     };
 
@@ -42,6 +43,7 @@ public:
         FolderRole,
         SeedRole,
         NameRole,
+        GameModeRole,
         LastPlayedRole
     };
 
