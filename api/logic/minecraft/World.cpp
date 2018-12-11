@@ -378,14 +378,15 @@ void World::loadFromLevelDat(QByteArray data)
             m_lastPlayed = QDateTime::fromMSecsSinceEpoch(temp);
         }
 
-        m_gameType = (GameType) read_int(val, "GameType", 0);
+        int GameType_val = read_int(val, "GameType", 0);
+        m_gameType = (GameType) GameType_val;
 
         m_randomSeed = read_long(val, "RandomSeed", 0);
 
         qDebug() << "World Name:" << m_actualName;
         qDebug() << "Last Played:" << m_lastPlayed.toString();
         qDebug() << "Seed:" << m_randomSeed;
-        qDebug() << "GameMode:" << m_gameType;
+        qDebug() << "GameMode:" << GameType_val;
     }
     catch (const nbt::io::input_error &e)
     {
