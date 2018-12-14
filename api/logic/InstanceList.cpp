@@ -718,7 +718,7 @@ public:
     // FIXME/TODO: add ability to abort during instance commit retries
     bool abort() override
     {
-        if(m_child)
+        if(m_child && m_child->canAbort())
         {
             return m_child->abort();
         }
@@ -726,9 +726,9 @@ public:
     }
     bool canAbort() const override
     {
-        if(m_child)
+        if(m_child && m_child->canAbort())
         {
-            return m_child->canAbort();
+            return true;
         }
         return false;
     }
@@ -746,7 +746,6 @@ protected:
 private slots:
     void childSucceded()
     {
-        m_child.reset();
         unsigned sleepTime = backoff();
         if(m_parent->commitStagedInstance(m_stagingPath, m_instanceName, m_groupName))
         {
@@ -764,7 +763,6 @@ private slots:
     }
     void childFailed(const QString & reason)
     {
-        m_child.reset();
         m_parent->destroyStagingPath(m_stagingPath);
         emitFailed(reason);
     }

@@ -1283,7 +1283,7 @@ void MainWindow::runModalTask(Task *task)
 
 void MainWindow::instanceFromInstanceTask(InstanceTask *rawTask)
 {
-    std::unique_ptr<Task> task(MMC->instances()->wrapInstanceTask(rawTask));
+    unique_qobject_ptr<Task> task(MMC->instances()->wrapInstanceTask(rawTask));
     runModalTask(task.get());
 }
 
@@ -1300,7 +1300,7 @@ void MainWindow::on_actionCopyInstance_triggered()
     copyTask->setName(copyInstDlg.instName());
     copyTask->setGroup(copyInstDlg.instGroup());
     copyTask->setIcon(copyInstDlg.iconKey());
-    std::unique_ptr<Task> task(MMC->instances()->wrapInstanceTask(copyTask));
+    unique_qobject_ptr<Task> task(MMC->instances()->wrapInstanceTask(copyTask));
     runModalTask(task.get());
 }
 

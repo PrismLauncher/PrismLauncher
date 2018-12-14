@@ -40,7 +40,7 @@ void LegacyUpgradePage::on_upgradeButton_clicked()
     upgradeTask->setName(newName);
     upgradeTask->setGroup(MMC->instances()->getInstanceGroup(m_inst->id()));
     upgradeTask->setIcon(m_inst->iconKey());
-    std::unique_ptr<Task> task(MMC->instances()->wrapInstanceTask(upgradeTask));
+    unique_qobject_ptr<Task> task(MMC->instances()->wrapInstanceTask(upgradeTask));
     runModalTask(task.get());
 }
 
