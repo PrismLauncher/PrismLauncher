@@ -167,13 +167,23 @@ bool Download::handleRedirect()
         }
         QString redirectStr = QString::fromUtf8(redirectBA);
 
-        /*
-         * IF the URL begins with //, we need to insert the URL scheme.
-         * See: https://bugreports.qt-project.org/browse/QTBUG-41061
-         */
         if(redirectStr.startsWith("//"))
         {
+            /*
+             * IF the URL begins with //, we need to insert the URL scheme.
+             * See: https://bugreports.qt.io/browse/QTBUG-41061
+             * See: http://tools.ietf.org/html/rfc3986#section-4.2
+             */
             redirectStr = m_reply->url().scheme() + ":" + redirectStr;
+        }
+        else if(redirectStr.startsWith("/"))
+        {
+            /*
+             * IF the URL begins with /, we need to process it as a relative URL
+             */
+            auto url = m_reply->url();
+            url.setPath(redirectStr, QUrl::TolerantMode);
+            redirectStr = url.toString();
         }
 
         /*
