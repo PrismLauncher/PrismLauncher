@@ -3,6 +3,7 @@
 
 class NullInstance: public BaseInstance
 {
+    Q_OBJECT
 public:
     NullInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString& rootDir)
     :BaseInstance(globalSettings, settings, rootDir)

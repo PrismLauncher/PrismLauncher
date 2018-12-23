@@ -16,6 +16,7 @@ typedef std::function<void(QString)> LogoCallback;
 
 class FtbFilterModel : public QSortFilterProxyModel
 {
+    Q_OBJECT
 public:
     FtbFilterModel(QObject* parent = Q_NULLPTR);
     enum Sorting {

@@ -4,6 +4,7 @@
 
 class ResourcePackPage : public ModFolderPage
 {
+    Q_OBJECT
 public:
     explicit ResourcePackPage(MinecraftInstance *instance, QWidget *parent = 0)
         : ModFolderPage(instance, instance->resourcePackList(), "resourcepacks",

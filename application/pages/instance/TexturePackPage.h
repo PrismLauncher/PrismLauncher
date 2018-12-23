@@ -4,6 +4,7 @@
 
 class TexturePackPage : public ModFolderPage
 {
+    Q_OBJECT
 public:
     explicit TexturePackPage(MinecraftInstance *instance, QWidget *parent = 0)
         : ModFolderPage(instance, instance->texturePackList(), "texturepacks", "resourcepacks",
