@@ -1241,6 +1241,16 @@ void MainWindow::onCatToggled(bool state)
     MMC->settings()->set("TheCat", state);
 }
 
+namespace {
+template <typename T>
+T non_stupid_abs(T in)
+{
+    if (in < 0)
+        return -in;
+    return in;
+}
+}
+
 void MainWindow::setCatBackground(bool enabled)
 {
     if (enabled)
@@ -1248,7 +1258,7 @@ void MainWindow::setCatBackground(bool enabled)
         QDateTime now = QDateTime::currentDateTime();
         QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
         ;
-        QString cat = (std::abs(now.daysTo(xmas)) <= 4) ? "catmas" : "kitteh";
+        QString cat = (non_stupid_abs(now.daysTo(xmas)) <= 4) ? "catmas" : "kitteh";
         view->setStyleSheet(QString(R"(
 GroupView
 {
