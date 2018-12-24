@@ -1245,16 +1245,20 @@ void MainWindow::setCatBackground(bool enabled)
 {
     if (enabled)
     {
-        view->setStyleSheet(R"(
+        QDateTime now = QDateTime::currentDateTime();
+        QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
+        ;
+        QString cat = (abs(now.daysTo(xmas)) <= 4) ? "catmas" : "kitteh";
+        view->setStyleSheet(QString(R"(
 GroupView
 {
-    background-image: url(:/backgrounds/kitteh);
+    background-image: url(:/backgrounds/%1);
     background-attachment: fixed;
     background-clip: padding;
     background-position: top right;
     background-repeat: none;
     background-color:palette(base);
-})");
+})").arg(cat));
     }
     else
     {
