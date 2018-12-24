@@ -1248,7 +1248,7 @@ void MainWindow::setCatBackground(bool enabled)
         QDateTime now = QDateTime::currentDateTime();
         QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
         ;
-        QString cat = (abs(now.daysTo(xmas)) <= 4) ? "catmas" : "kitteh";
+        QString cat = (std::abs(now.daysTo(xmas)) <= 4) ? "catmas" : "kitteh";
         view->setStyleSheet(QString(R"(
 GroupView
 {
