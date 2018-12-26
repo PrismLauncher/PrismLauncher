@@ -52,7 +52,7 @@ This is a release mostly aimed at getting all the small changes and fixes out of
 
   Drag and drop of URLs from a browser locked up the browser. This needs further fixes on macOS.
 
-Instance naming fixes:
+- Instance naming fixes:
 
   - GH-2355: Whitespace prefix or suffix is no longer allowed.
   - GH-2238: Newlines in instance names are no longer allowed either.
