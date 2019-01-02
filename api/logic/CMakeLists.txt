@@ -387,6 +387,8 @@ add_unit_test(JavaVersion
 set(TRANSLATIONS_SOURCES
     translations/TranslationsModel.h
     translations/TranslationsModel.cpp
+    translations/POTranslator.h
+    translations/POTranslator.cpp
 )
 
 set(TOOLS_SOURCES

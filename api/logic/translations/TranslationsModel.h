@@ -40,7 +40,7 @@ public:
 
 private:
     Language *findLanguage(const QString & key);
-    void loadLocalIndex();
+    void reloadLocalFiles();
     void downloadTranslation(QString key);
     void downloadNext();
 
@@ -54,6 +54,8 @@ private slots:
     void indexFailed(QString reason);
     void dlFailed(QString reason);
     void dlGood();
+    void translationDirChanged(const QString &path);
+
 
 private: /* data */
     struct Private;
