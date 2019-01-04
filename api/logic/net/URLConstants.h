@@ -29,6 +29,7 @@ const QString IMGUR_BASE_URL("https://api.imgur.com/3/");
 const QString FMLLIBS_OUR_BASE_URL("https://files.multimc.org/fmllibs/");
 const QString FMLLIBS_FORGE_BASE_URL("https://files.minecraftforge.net/fmllibs/");
 const QString TRANSLATIONS_BASE_URL("https://files.multimc.org/translations/");
+const QString FTB_CDN_BASE_URL("https://ftb.forgecdn.net/FTB2/");
 
 QString getJarPath(QString version);
 QString getLegacyJarUrl(QString version);

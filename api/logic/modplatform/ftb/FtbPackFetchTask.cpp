@@ -2,6 +2,8 @@
 #include <QDomDocument>
 #include "FtbPrivatePackManager.h"
 
+#include "net/URLConstants.h"
+
 void FtbPackFetchTask::fetch()
 {
     publicPacks.clear();
@@ -9,11 +11,11 @@ void FtbPackFetchTask::fetch()
 
     NetJob *netJob = new NetJob("FtbModpackFetch");
 
-    QUrl publicPacksUrl = QUrl("https://ftb.cursecdn.com/FTB2/static/modpacks.xml");
+    QUrl publicPacksUrl = QUrl(URLConstants::FTB_CDN_BASE_URL + "static/modpacks.xml");
     qDebug() << "Downloading public version info from" << publicPacksUrl.toString();
     netJob->addNetAction(Net::Download::makeByteArray(publicPacksUrl, &publicModpacksXmlFileData));
 
-    QUrl thirdPartyUrl = QUrl("https://ftb.cursecdn.com/FTB2/static/thirdparty.xml");
+    QUrl thirdPartyUrl = QUrl(URLConstants::FTB_CDN_BASE_URL + "static/thirdparty.xml");
     qDebug() << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
     netJob->addNetAction(Net::Download::makeByteArray(thirdPartyUrl, &thirdPartyModpacksXmlFileData));
 
@@ -26,7 +28,7 @@ void FtbPackFetchTask::fetch()
 
 void FtbPackFetchTask::fetchPrivate(const QStringList & toFetch)
 {
-    QString privatePackBaseUrl = QString("https://ftb.cursecdn.com/FTB2/static/%1.xml");
+    QString privatePackBaseUrl = URLConstants::FTB_CDN_BASE_URL + "static/%1.xml";
 
     for (auto &packCode: toFetch)
     {
