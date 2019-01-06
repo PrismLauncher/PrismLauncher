@@ -1,8 +1,14 @@
-# MultiMC 0.6.4
+# MultiMC 0.6.5
+
+Work in progress...
+
+# Previous releases
+
+## MultiMC 0.6.4
 
 Update for a better translation workflow, and new FTB API location.
 
-## New or changed features
+### New or changed features
 
 - FTB API location has changed
 
@@ -21,8 +27,6 @@ Update for a better translation workflow, and new FTB API location.
   * When done, post the changed files on discord, or github.
 
   When using a `.po` file, MultiMC logs which strings are missing from the translation on the currently displayed UI screen(s), and which one are marked as fuzzy. This should make it easy to determine what's important.
-
-# Previous releases
 
 ## MultiMC 0.6.3
 
