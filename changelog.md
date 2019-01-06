@@ -1,5 +1,30 @@
 # MultiMC 0.6.3
 
+Update for a better trasnlation workflow, and new FTB API location.
+
+## New or changed features
+
+- FTB API location has changed
+
+  MultiMC now uses the new location and should keep working.
+
+- Translations have been overhauled, again
+
+  It is now possible to put the translation source `.po` files into the `translations` folder and see changes in MultiMC immediately.
+
+  * Get `.po` file from here: https://github.com/MultiMC/MultiMC5-translate
+  * Put it in the `translations` folder
+  * Edit it with [POEdit](https://poedit.net/)
+  * See the changes in real time
+
+  MultiMC also logs which strings are missing from the translation on the currently displayed UI screen(s), and which one are marked as fuzzy.
+
+- Instance creation can now be interrupted / aborted.
+
+# Previous releases
+
+## MultiMC 0.6.3
+
 This is a release mostly aimed at getting all the small changes and fixes out of the door.
 
 ### Potentially breaking changes
@@ -70,8 +95,6 @@ This is a release mostly aimed at getting all the small changes and fixes out of
   Long deleted groups no longer persist in the group list.
 
 - GH-2467: Broken (and nonsensical) sorting indicators have been removed from the versions page header.
-
-# Previous releases
 
 ## MultiMC 0.6.2
 
