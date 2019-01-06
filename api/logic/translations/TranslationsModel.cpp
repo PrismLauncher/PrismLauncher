@@ -54,6 +54,42 @@ struct Language
         total = translated + untranslated + fuzzy;
     }
 
+    bool isOfSameNameAs(const Language& other) const
+    {
+        return key == other.key;
+    }
+
+    bool isIdenticalTo(const Language& other) const
+    {
+        return
+        (
+            key == other.key &&
+            file_name == other.file_name &&
+            file_size == other.file_size &&
+            file_sha1 == other.file_sha1 &&
+            translated == other.translated &&
+            fuzzy == other.fuzzy &&
+            total == other.fuzzy &&
+            localFileType == other.localFileType
+        );
+    }
+
+    Language & apply(Language & other)
+    {
+        if(!isOfSameNameAs(other))
+        {
+            return *this;
+        }
+        file_name = other.file_name;
+        file_size = other.file_size;
+        file_sha1 = other.file_sha1;
+        translated = other.translated;
+        fuzzy = other.fuzzy;
+        total = other.fuzzy;
+        localFileType = other.localFileType;
+        return *this;
+    }
+
     QString key;
     QLocale locale;
     bool updated;
@@ -70,13 +106,14 @@ struct Language
     FileType localFileType = FileType::NONE;
 };
 
+
+
 struct TranslationsModel::Private
 {
     QDir m_dir;
 
     // initial state is just english
     QVector<Language> m_languages = {Language (defaultLangCode)};
-    QMap<QString, int> m_languageLookup = {{defaultLangCode, 0}};
 
     QString m_selectedLanguage = defaultLangCode;
     std::unique_ptr<QTranslator> m_qt_translator;
@@ -125,7 +162,7 @@ void TranslationsModel::indexRecieved()
 }
 
 namespace {
-void readIndex(const QString & path, QVector<Language>& languages, QMap<QString, int>& languagesLookup)
+void readIndex(const QString & path, QMap<QString, Language>& languages)
 {
     QByteArray data;
     try
@@ -169,8 +206,7 @@ void readIndex(const QString & path, QVector<Language>& languages, QMap<QString,
             lang.file_sha1 = Json::requireString(langObj, "sha1");
             lang.file_size = Json::requireInteger(langObj, "size");
 
-            languages.append(std::move(lang));
-            languagesLookup[iter.key()] = index;
+            languages.insert(lang.key, lang);
             index++;
         }
     }
@@ -183,23 +219,9 @@ void readIndex(const QString & path, QVector<Language>& languages, QMap<QString,
 
 void TranslationsModel::reloadLocalFiles()
 {
-    QVector<Language> languages = {Language (defaultLangCode)};
-    QMap<QString, int> languageLookup = {{defaultLangCode, 0}};
+    QMap<QString, Language> languages = {{defaultLangCode, Language(defaultLangCode)}};
 
-    readIndex(d->m_dir.absoluteFilePath("index_v2.json"), languages, languageLookup);
-    auto fileTypeToString = [](FileType ft) -> QString
-    {
-        switch(ft)
-        {
-            case FileType::NONE:
-                return QString();
-            case FileType::QM:
-                return "QM";
-            case FileType::PO:
-                return "PO";
-        }
-        return QString();
-    };
+    readIndex(d->m_dir.absoluteFilePath("index_v2.json"), languages);
     auto entries = d->m_dir.entryInfoList({"mmc_*.qm", "*.po"}, QDir::Files | QDir::NoDotAndDotDot);
     for(auto & entry: entries)
     {
@@ -221,13 +243,12 @@ void TranslationsModel::reloadLocalFiles()
             continue;
         }
 
-        auto langIter = languageLookup.find(langCode);
-        if(langIter != languageLookup.end())
+        auto langIter = languages.find(langCode);
+        if(langIter != languages.end())
         {
-            auto & language = languages[*langIter];
+            auto & language = *langIter;
             if(int(fileType) > int(language.localFileType))
             {
-                qDebug() << "Found" << fileTypeToString(fileType) << "local file for language" << langCode;
                 language.localFileType = fileType;
             }
         }
@@ -237,16 +258,50 @@ void TranslationsModel::reloadLocalFiles()
             {
                 Language localFound(langCode);
                 localFound.localFileType = FileType::PO;
-                languages.append(localFound);
-                qDebug() << "Found standalone translation PO file: " << langCode;
+                languages.insert(langCode, localFound);
             }
         }
-
     }
 
-    beginResetModel();
-    d->m_languages.swap(languages);
-    endResetModel();
+    // changed and removed languages
+    for(auto iter = d->m_languages.begin(); iter != d->m_languages.end();)
+    {
+        auto &language = *iter;
+        auto row = iter - d->m_languages.begin();
+
+        auto updatedLanguageIter = languages.find(language.key);
+        if(updatedLanguageIter != languages.end())
+        {
+            if(language.isIdenticalTo(*updatedLanguageIter))
+            {
+                languages.remove(language.key);
+            }
+            else
+            {
+                language.apply(*updatedLanguageIter);
+                emit dataChanged(index(row), index(row));
+                languages.remove(language.key);
+            }
+            iter++;
+        }
+        else
+        {
+            beginRemoveRows(QModelIndex(), row, row);
+            iter = d->m_languages.erase(iter);
+            endRemoveRows();
+        }
+    }
+    // added languages
+    if(languages.isEmpty())
+    {
+        return;
+    }
+    beginInsertRows(QModelIndex(), d->m_languages.size(), d->m_languages.size() + languages.size() - 1);
+    for(auto & language: languages)
+    {
+        d->m_languages.append(language);
+    }
+    endInsertRows();
 }
 
 QVariant TranslationsModel::data(const QModelIndex& index, int role) const

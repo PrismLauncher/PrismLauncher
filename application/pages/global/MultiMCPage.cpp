@@ -237,7 +237,8 @@ void MultiMCPage::applySettings()
     auto s = MMC->settings();
 
     // Language
-    s->set("Language", ui->languageBox->itemData(ui->languageBox->currentIndex()).toString());
+    auto langCode = ui->languageBox->itemData(ui->languageBox->currentIndex()).toString();
+    s->set("Language", langCode.isEmpty() ? "en" : langCode);
 
     if (ui->resetNotificationsBtn->isChecked())
     {
