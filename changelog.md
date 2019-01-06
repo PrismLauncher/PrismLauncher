@@ -1,6 +1,6 @@
-# MultiMC 0.6.3
+# MultiMC 0.6.4
 
-Update for a better trasnlation workflow, and new FTB API location.
+Update for a better translation workflow, and new FTB API location.
 
 ## New or changed features
 
@@ -12,14 +12,15 @@ Update for a better trasnlation workflow, and new FTB API location.
 
   It is now possible to put the translation source `.po` files into the `translations` folder and see changes in MultiMC immediately.
 
-  * Get `.po` file from here: https://github.com/MultiMC/MultiMC5-translate
-  * Put it in the `translations` folder
-  * Edit it with [POEdit](https://poedit.net/)
-  * See the changes in real time
+  The new translation workflow is like this:
+  * Get a `.po` file from here the [translations repository](https://github.com/MultiMC/MultiMC5-translate).
+  * Alternatively, get the `template.pot` and start a new translation based on it.
+  * Put it in the `translations` folder.
+  * Edit it with [POEdit](https://poedit.net/).
+  * See the changes in real time.
+  * When done, post the changed files on discord, or github.
 
-  MultiMC also logs which strings are missing from the translation on the currently displayed UI screen(s), and which one are marked as fuzzy.
-
-- Instance creation can now be interrupted / aborted.
+  When using a `.po` file, MultiMC logs which strings are missing from the translation on the currently displayed UI screen(s), and which one are marked as fuzzy. This should make it easy to determine what's important.
 
 # Previous releases
 
