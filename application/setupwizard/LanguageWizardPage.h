@@ -3,7 +3,8 @@
 #include "BaseWizardPage.h"
 
 class QVBoxLayout;
-class QListView;
+class QTreeView;
+class QLabel;
 
 class LanguageWizardPage : public BaseWizardPage
 {
@@ -27,5 +28,6 @@ protected slots:
 
 private:
     QVBoxLayout *verticalLayout = nullptr;
-    QListView *languageView = nullptr;
+    QTreeView *languageView = nullptr;
+    QLabel *helpUsLabel = nullptr;
 };

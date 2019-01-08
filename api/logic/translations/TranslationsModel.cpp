@@ -43,7 +43,7 @@ struct Language
         {
             return 100.0f;
         }
-        return float(translated) / float(total);
+        return 100.0f * float(translated) / float(total);
     }
 
     void setTranslationStats(unsigned _translated, unsigned _untranslated, unsigned _fuzzy)
@@ -85,7 +85,7 @@ struct Language
         file_sha1 = other.file_sha1;
         translated = other.translated;
         fuzzy = other.fuzzy;
-        total = other.fuzzy;
+        total = other.total;
         localFileType = other.localFileType;
         return *this;
     }
@@ -304,20 +304,49 @@ void TranslationsModel::reloadLocalFiles()
     endInsertRows();
 }
 
+namespace {
+enum class Column
+{
+    Language,
+    Quality
+};
+}
+
+
 QVariant TranslationsModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
 
     int row = index.row();
+    auto column = static_cast<Column>(index.column());
 
     if (row < 0 || row >= d->m_languages.size())
         return QVariant();
 
+    auto & lang = d->m_languages[row];
     switch (role)
     {
     case Qt::DisplayRole:
-        return d->m_languages[row].locale.nativeLanguageName();
+    {
+        switch(column)
+        {
+            case Column::Language:
+            {
+                return d->m_languages[row].locale.nativeLanguageName();
+            }
+            case Column::Quality:
+            {
+                QString text;
+                text.sprintf("%3.1f %%", lang.percentTranslated());
+                return text;
+            }
+        }
+    }
+    case Qt::ToolTipRole:
+    {
+        return tr("%1:\n%2 translated\n%3 fuzzy\n%4 total").arg(lang.key, QString::number(lang.translated), QString::number(lang.fuzzy), QString::number(lang.total));
+    }
     case Qt::UserRole:
         return d->m_languages[row].key;
     default:
@@ -325,9 +354,48 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
     }
 }
 
+QVariant TranslationsModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    auto column = static_cast<Column>(section);
+    if(role == Qt::DisplayRole)
+    {
+        switch(column)
+        {
+            case Column::Language:
+            {
+                return tr("Language");
+            }
+            case Column::Quality:
+            {
+                return tr("Quality");
+            }
+        }
+    }
+    else if(role == Qt::ToolTipRole)
+    {
+        switch(column)
+        {
+            case Column::Language:
+            {
+                return tr("The native language name.");
+            }
+            case Column::Quality:
+            {
+                return tr("Quality is the percentage of fully translated strings, not counting automatically guessed ones.");
+            }
+        }
+    }
+    return QAbstractListModel::headerData(section, orientation, role);
+}
+
 int TranslationsModel::rowCount(const QModelIndex& parent) const
 {
     return d->m_languages.size();
+}
+
+int TranslationsModel::columnCount(const QModelIndex& parent) const
+{
+    return 2;
 }
 
 Language * TranslationsModel::findLanguage(const QString& key)

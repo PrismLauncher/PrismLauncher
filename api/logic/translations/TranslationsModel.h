@@ -28,8 +28,10 @@ public:
     explicit TranslationsModel(QString path, QObject *parent = 0);
     virtual ~TranslationsModel();
 
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex & parent) const override;
 
     bool selectLanguage(QString key);
     void updateLanguage(QString key);
