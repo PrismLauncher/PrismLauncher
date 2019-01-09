@@ -20,6 +20,9 @@
         <!-- A proxy icon. Our own. SSSsss -->
         <file>scalable/proxy.svg</file>
 
+        <!-- A free language icon. http://www.languageicon.org/ -->
+        <file>scalable/language.svg</file>
+
         <!-- Java icon. From Oracle, fixed because it was derpy. -->
         <file>scalable/java.svg</file>
 

@@ -116,6 +116,8 @@ SET(MULTIMC_SOURCES
     pages/global/ExternalToolsPage.h
     pages/global/JavaPage.cpp
     pages/global/JavaPage.h
+    pages/global/LanguagePage.cpp
+    pages/global/LanguagePage.h
     pages/global/MinecraftPage.cpp
     pages/global/MinecraftPage.h
     pages/global/MultiMCPage.cpp
@@ -191,6 +193,8 @@ SET(MULTIMC_SOURCES
     widgets/JavaSettingsWidget.h
     widgets/LabeledToolButton.cpp
     widgets/LabeledToolButton.h
+    widgets/LanguageSelectionWidget.cpp
+    widgets/LanguageSelectionWidget.h
     widgets/LineSeparator.cpp
     widgets/LineSeparator.h
     widgets/LogView.cpp

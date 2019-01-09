@@ -6,6 +6,7 @@
 #include "pages/global/MultiMCPage.h"
 #include "pages/global/MinecraftPage.h"
 #include "pages/global/JavaPage.h"
+#include "pages/global/LanguagePage.h"
 #include "pages/global/ProxyPage.h"
 #include "pages/global/ExternalToolsPage.h"
 #include "pages/global/AccountListPage.h"
@@ -517,6 +518,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<MultiMCPage>();
             m_globalSettingsProvider->addPage<MinecraftPage>();
             m_globalSettingsProvider->addPage<JavaPage>();
+            m_globalSettingsProvider->addPage<LanguagePage>();
             m_globalSettingsProvider->addPage<CustomCommandsPage>();
             m_globalSettingsProvider->addPage<ProxyPage>();
             // m_globalSettingsProvider->addPage<PackagesPage>();

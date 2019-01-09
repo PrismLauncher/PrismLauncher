@@ -2,9 +2,7 @@
 
 #include "BaseWizardPage.h"
 
-class QVBoxLayout;
-class QTreeView;
-class QLabel;
+class LanguageSelectionWidget;
 
 class LanguageWizardPage : public BaseWizardPage
 {
@@ -23,11 +21,6 @@ public:
 protected:
     void retranslate() override;
 
-protected slots:
-    void languageRowChanged(const QModelIndex &current, const QModelIndex &previous);
-
 private:
-    QVBoxLayout *verticalLayout = nullptr;
-    QTreeView *languageView = nullptr;
-    QLabel *helpUsLabel = nullptr;
+    LanguageSelectionWidget *mainWidget = nullptr;
 };
