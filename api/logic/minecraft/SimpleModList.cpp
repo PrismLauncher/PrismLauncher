@@ -349,11 +349,6 @@ bool SimpleModList::dropMimeData(const QMimeData* data, Qt::DropAction action, i
     // files dropped from outside?
     if (data->hasUrls())
     {
-        bool was_watching = is_watching;
-        if (was_watching)
-        {
-            stopWatching();
-        }
         auto urls = data->urls();
         for (auto url : urls)
         {
@@ -365,10 +360,6 @@ bool SimpleModList::dropMimeData(const QMimeData* data, Qt::DropAction action, i
             // TODO: implement not only copy, but also move
             // FIXME: handle errors here
             installMod(url.toLocalFile());
-        }
-        if (was_watching)
-        {
-            startWatching();
         }
         return true;
     }

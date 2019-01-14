@@ -308,7 +308,7 @@ namespace {
 enum class Column
 {
     Language,
-    Quality
+    Completeness
 };
 }
 
@@ -335,7 +335,7 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
             {
                 return d->m_languages[row].locale.nativeLanguageName();
             }
-            case Column::Quality:
+            case Column::Completeness:
             {
                 QString text;
                 text.sprintf("%3.1f %%", lang.percentTranslated());
@@ -365,9 +365,9 @@ QVariant TranslationsModel::headerData(int section, Qt::Orientation orientation,
             {
                 return tr("Language");
             }
-            case Column::Quality:
+            case Column::Completeness:
             {
-                return tr("Quality");
+                return tr("Completeness");
             }
         }
     }
@@ -379,9 +379,9 @@ QVariant TranslationsModel::headerData(int section, Qt::Orientation orientation,
             {
                 return tr("The native language name.");
             }
-            case Column::Quality:
+            case Column::Completeness:
             {
-                return tr("Quality is the percentage of fully translated strings, not counting automatically guessed ones.");
+                return tr("Completeness is the percentage of fully translated strings, not counting automatically guessed ones.");
             }
         }
     }
