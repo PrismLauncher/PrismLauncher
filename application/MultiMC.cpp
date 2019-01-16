@@ -340,7 +340,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         ENV.setJarsPath( TOSTRING(MULTIMC_JARS_LOCATION) );
 #endif
 
-        qDebug() << "MultiMC 5, (c) 2013-2018 MultiMC Contributors";
+        qDebug() << "MultiMC 5, (c) 2013-2019 MultiMC Contributors";
         qDebug() << "Version                    : " << BuildConfig.printableVersionString();
         qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
         qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
