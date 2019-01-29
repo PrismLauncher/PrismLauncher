@@ -84,6 +84,8 @@ SET(MULTIMC_SOURCES
     pages/BasePageProvider.h
 
     # GUI - instance pages
+    pages/instance/GameOptionsPage.cpp
+    pages/instance/GameOptionsPage.h
     pages/instance/VersionPage.cpp
     pages/instance/VersionPage.h
     pages/instance/TexturePackPage.h
@@ -229,6 +231,7 @@ SET(MULTIMC_SOURCES
 ######## UIs ########
 SET(MULTIMC_UIS
     # Instance pages
+    pages/instance/GameOptionsPage.ui
     pages/instance/VersionPage.ui
     pages/instance/ModFolderPage.ui
     pages/instance/LogPage.ui

@@ -9,6 +9,7 @@
 class ModsModel;
 class SimpleModList;
 class WorldList;
+class GameOptions;
 class LaunchStep;
 class ComponentList;
 
@@ -72,7 +73,7 @@ public:
     std::shared_ptr<SimpleModList> resourcePackList() const;
     std::shared_ptr<SimpleModList> texturePackList() const;
     std::shared_ptr<WorldList> worldList() const;
-
+    std::shared_ptr<GameOptions> gameOptionsModel() const;
 
     //////  Launch stuff //////
     shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) override;
@@ -130,6 +131,7 @@ protected: // data
     mutable std::shared_ptr<SimpleModList> m_resource_pack_list;
     mutable std::shared_ptr<SimpleModList> m_texture_pack_list;
     mutable std::shared_ptr<WorldList> m_world_list;
+    mutable std::shared_ptr<GameOptions> m_game_options;
 };
 
 typedef std::shared_ptr<MinecraftInstance> MinecraftInstancePtr;

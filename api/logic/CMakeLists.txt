@@ -211,6 +211,8 @@ set(MINECRAFT_SOURCES
     minecraft/auth/flows/RefreshTask.cpp
     minecraft/auth/flows/ValidateTask.h
     minecraft/auth/flows/ValidateTask.cpp
+    minecraft/gameoptions/GameOptions.h
+    minecraft/gameoptions/GameOptions.cpp
     minecraft/update/AssetUpdateTask.h
     minecraft/update/AssetUpdateTask.cpp
     minecraft/update/FMLLibrariesTask.cpp

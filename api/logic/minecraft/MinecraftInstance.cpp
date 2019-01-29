@@ -35,6 +35,7 @@
 #include "AssetsUtils.h"
 #include "MinecraftUpdate.h"
 #include "MinecraftLoadAndCheck.h"
+#include <minecraft/gameoptions/GameOptions.h>
 
 #define IBUS "@im=ibus"
 
@@ -933,6 +934,15 @@ std::shared_ptr<WorldList> MinecraftInstance::worldList() const
         m_world_list.reset(new WorldList(worldDir()));
     }
     return m_world_list;
+}
+
+std::shared_ptr<GameOptions> MinecraftInstance::gameOptionsModel() const
+{
+    if (!m_game_options)
+    {
+        m_game_options.reset(new GameOptions(FS::PathCombine(gameRoot(), "options.txt")));
+    }
+    return m_game_options;
 }
 
 QList< Mod > MinecraftInstance::getJarMods() const
