@@ -17,7 +17,7 @@ bool load(const QString& path, std::vector<GameOptionItem> &contents, int & vers
     while(!file.atEnd())
     {
         auto line = file.readLine();
-        if(line.back() == '\n')
+        if(line.endsWith('\n'))
         {
             line.chop(1);
         }
