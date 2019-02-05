@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Copy Instance</string>
+   <string>Add Empty Component</string>
   </property>
   <property name="windowIcon">
    <iconset>
