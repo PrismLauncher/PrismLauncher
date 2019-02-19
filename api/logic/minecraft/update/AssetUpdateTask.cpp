@@ -60,7 +60,7 @@ void AssetUpdateTask::assetIndexFinished()
 
     QString asset_fname = "assets/indexes/" + assets->id + ".json";
     // FIXME: this looks like a job for a generic validator based on json schema?
-    if (!AssetsUtils::loadAssetsIndexJson(assets->id, asset_fname, &index))
+    if (!AssetsUtils::loadAssetsIndexJson(assets->id, asset_fname, index))
     {
         auto metacache = ENV.metacache();
         auto entry = metacache->resolveEntry("asset_indexes", assets->id + ".json");
@@ -101,7 +101,7 @@ bool AssetUpdateTask::abort()
     }
     else
     {
-        qWarning() << "Prematurely aborted FMLLibrariesTask";
+        qWarning() << "Prematurely aborted AssetUpdateTask";
     }
     return true;
 }

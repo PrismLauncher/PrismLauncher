@@ -20,6 +20,7 @@
 #include "minecraft/launch/DirectJavaLaunch.h"
 #include "minecraft/launch/ModMinecraftJar.h"
 #include "minecraft/launch/ClaimAccount.h"
+#include "minecraft/launch/ReconstructAssets.h"
 #include "java/launch/CheckJava.h"
 #include "java/JavaUtils.h"
 #include "meta/Index.h"
@@ -216,6 +217,11 @@ QString MinecraftInstance::worldDir() const
     return FS::PathCombine(gameRoot(), "saves");
 }
 
+QString MinecraftInstance::resourcesDir() const
+{
+    return FS::PathCombine(gameRoot(), "resources");
+}
+
 QDir MinecraftInstance::librariesPath() const
 {
     return QDir::current().absoluteFilePath("libraries");
@@ -408,8 +414,7 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session) cons
     token_mapping["game_directory"] = absRootDir;
     QString absAssetsDir = QDir("assets/").absolutePath();
     auto assets = profile->getMinecraftAssets();
-    // FIXME: this is wrong and should be run as an async task
-    token_mapping["game_assets"] = AssetsUtils::reconstructAssets(assets->id).absolutePath();
+    token_mapping["game_assets"] = AssetsUtils::getAssetsDir(assets->id, resourcesDir()).absolutePath();
 
     // 1.7.3+ assets tokens
     token_mapping["assets_root"] = absAssetsDir;
@@ -839,6 +844,12 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
     // extract native jars if needed
     {
         auto step = std::make_shared<ExtractNatives>(pptr);
+        process->appendStep(step);
+    }
+
+    // reconstruct assets if needed
+    {
+        auto step = std::make_shared<ReconstructAssets>(pptr);
         process->appendStep(step);
     }
 

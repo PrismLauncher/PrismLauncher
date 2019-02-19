@@ -235,6 +235,8 @@ set(MINECRAFT_SOURCES
     minecraft/launch/LauncherPartLaunch.h
     minecraft/launch/PrintInstanceInfo.cpp
     minecraft/launch/PrintInstanceInfo.h
+    minecraft/launch/ReconstructAssets.cpp
+    minecraft/launch/ReconstructAssets.h
     minecraft/legacy/LegacyModList.h
     minecraft/legacy/LegacyModList.cpp
     minecraft/legacy/LegacyInstance.h

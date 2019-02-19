@@ -45,6 +45,7 @@ public:
     QString modsCacheLocation() const;
     QString libDir() const;
     QString worldDir() const;
+    QString resourcesDir() const;
     QDir jarmodsPath() const;
     QDir librariesPath() const;
     QDir versionsPath() const;

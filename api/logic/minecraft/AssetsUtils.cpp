@@ -29,6 +29,34 @@
 #include "net/ChecksumValidator.h"
 #include "net/URLConstants.h"
 
+namespace {
+QSet<QString> collectPathsFromDir(QString dirPath)
+{
+    std::error_code ignoredError;
+    QFileInfo dirInfo(dirPath);
+
+    if (!dirInfo.exists())
+    {
+        return {};
+    }
+
+    QSet<QString> out;
+
+    QDirIterator iter(dirPath, QDirIterator::Subdirectories);
+    while (iter.hasNext())
+    {
+        QString value = iter.next();
+        QFileInfo info(value);
+        if(info.isFile())
+        {
+            out.insert(value);
+            qDebug() << value;
+        }
+    }
+    return out;
+}
+}
+
 
 namespace AssetsUtils
 {
@@ -37,7 +65,7 @@ namespace AssetsUtils
  * Returns true on success, with index populated
  * index is undefined otherwise
  */
-bool loadAssetsIndexJson(QString assetsId, QString path, AssetsIndex *index)
+bool loadAssetsIndexJson(const QString &assetsId, const QString &path, AssetsIndex& index)
 {
     /*
     {
@@ -61,7 +89,7 @@ bool loadAssetsIndexJson(QString assetsId, QString path, AssetsIndex *index)
         qCritical() << "Failed to read assets index file" << path;
         return false;
     }
-    index->id = assetsId;
+    index.id = assetsId;
 
     // Read the file and close it.
     QByteArray jsonData = file.readAll();
@@ -90,7 +118,13 @@ bool loadAssetsIndexJson(QString assetsId, QString path, AssetsIndex *index)
     QJsonValue isVirtual = root.value("virtual");
     if (!isVirtual.isUndefined())
     {
-        index->isVirtual = isVirtual.toBool(false);
+        index.isVirtual = isVirtual.toBool(false);
+    }
+
+    QJsonValue mapToResources = root.value("map_to_resources");
+    if (!mapToResources.isUndefined())
+    {
+        index.mapToResources = mapToResources.toBool(false);
     }
 
     QJsonValue objects = root.value("objects");
@@ -122,13 +156,14 @@ bool loadAssetsIndexJson(QString assetsId, QString path, AssetsIndex *index)
             }
         }
 
-        index->objects.insert(iter.key(), object);
+        index.objects.insert(iter.key(), object);
     }
 
     return true;
 }
 
-QDir reconstructAssets(QString assetsId)
+// FIXME: ugly code duplication
+QDir getAssetsDir(const QString &assetsId, const QString &resourcesFolder)
 {
     QDir assetsDir = QDir("assets/");
     QDir indexDir = QDir(FS::PathCombine(assetsDir.path(), "indexes"));
@@ -141,24 +176,77 @@ QDir reconstructAssets(QString assetsId)
 
     if (!indexFile.exists())
     {
-        qCritical() << "No assets index file" << indexPath << "; can't reconstruct assets";
+        qCritical() << "No assets index file" << indexPath << "; can't determine assets path!";
         return virtualRoot;
     }
 
-    qDebug() << "reconstructAssets" << assetsDir.path() << indexDir.path()
-                 << objectDir.path() << virtualDir.path() << virtualRoot.path();
+    AssetsIndex index;
+    if(!AssetsUtils::loadAssetsIndexJson(assetsId, indexPath, index))
+    {
+        qCritical() << "Failed to load asset index file" << indexPath << "; can't determine assets path!";
+        return virtualRoot;
+    }
+
+    QString targetPath;
+    if(index.isVirtual)
+    {
+        return virtualRoot;
+    }
+    else if(index.mapToResources)
+    {
+        return QDir(resourcesFolder);
+    }
+    return virtualRoot;
+}
+
+// FIXME: ugly code duplication
+bool reconstructAssets(QString assetsId, QString resourcesFolder)
+{
+    QDir assetsDir = QDir("assets/");
+    QDir indexDir = QDir(FS::PathCombine(assetsDir.path(), "indexes"));
+    QDir objectDir = QDir(FS::PathCombine(assetsDir.path(), "objects"));
+    QDir virtualDir = QDir(FS::PathCombine(assetsDir.path(), "virtual"));
+
+    QString indexPath = FS::PathCombine(indexDir.path(), assetsId + ".json");
+    QFile indexFile(indexPath);
+    QDir virtualRoot(FS::PathCombine(virtualDir.path(), assetsId));
+
+    if (!indexFile.exists())
+    {
+        qCritical() << "No assets index file" << indexPath << "; can't reconstruct assets!";
+        return false;
+    }
+
+    qDebug() << "reconstructAssets" << assetsDir.path() << indexDir.path() << objectDir.path() << virtualDir.path() << virtualRoot.path();
 
     AssetsIndex index;
-    bool loadAssetsIndex = AssetsUtils::loadAssetsIndexJson(assetsId, indexPath, &index);
-
-    if (loadAssetsIndex && index.isVirtual)
+    if(!AssetsUtils::loadAssetsIndexJson(assetsId, indexPath, index))
     {
-        qDebug() << "Reconstructing virtual assets folder at" << virtualRoot.path();
+        qCritical() << "Failed to load asset index file" << indexPath << "; can't reconstruct assets!";
+        return false;
+    }
 
+    QString targetPath;
+    bool removeLeftovers = false;
+    if(index.isVirtual)
+    {
+        targetPath = virtualRoot.path();
+        removeLeftovers = true;
+        qDebug() << "Reconstructing virtual assets folder at" << targetPath;
+    }
+    else if(index.mapToResources)
+    {
+        targetPath = resourcesFolder;
+        qDebug() << "Reconstructing resources folder at" << targetPath;
+    }
+
+    if (!targetPath.isNull())
+    {
+        auto presentFiles = collectPathsFromDir(targetPath);
         for (QString map : index.objects.keys())
         {
             AssetObject asset_object = index.objects.value(map);
-            QString target_path = FS::PathCombine(virtualRoot.path(), map);
+            QString target_path = FS::PathCombine(targetPath, map);
             QFile target(target_path);
 
             QString tlk = asset_object.hash.left(2);
@@ -167,24 +255,32 @@ QDir reconstructAssets(QString assetsId)
             QFile original(original_path);
             if (!original.exists())
                 continue;
+
+            presentFiles.remove(target_path);
+
             if (!target.exists())
             {
                 QFileInfo info(target_path);
                 QDir target_dir = info.dir();
-                // qDebug() << target_dir;
-                if (!target_dir.exists())
-                    QDir("").mkpath(target_dir.path());
+
+                qDebug() << target_dir.path();
+                FS::ensureFolderPathExists(target_dir.path());
 
                 bool couldCopy = original.copy(target_path);
-                qDebug() << " Copying" << original_path << "to" << target_path
-                             << QString::number(couldCopy); // << original.errorString();
+                qDebug() << " Copying" << original_path << "to" << target_path << QString::number(couldCopy);
             }
         }
 
         // TODO: Write last used time to virtualRoot/.lastused
+        if(removeLeftovers)
+        {
+            for(auto & file: presentFiles)
+            {
+                qDebug() << "Would remove" << file;
+            }
+        }
     }
-
-    return virtualRoot;
+    return true;
 }
 
 }
