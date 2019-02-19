@@ -32,7 +32,6 @@
 namespace {
 QSet<QString> collectPathsFromDir(QString dirPath)
 {
-    std::error_code ignoredError;
     QFileInfo dirInfo(dirPath);
 
     if (!dirInfo.exists())
