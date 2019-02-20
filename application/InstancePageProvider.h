@@ -47,7 +47,7 @@ public:
             values.append(new NotesPage(onesix.get()));
             values.append(new WorldListPage(onesix.get(), onesix->worldList(), "worlds", "worlds", tr("Worlds"), "Worlds"));
             values.append(new ServersPage(onesix.get()));
-            values.append(new GameOptionsPage(onesix.get()));
+            // values.append(new GameOptionsPage(onesix.get()));
             values.append(new ScreenshotsPage(FS::PathCombine(onesix->gameRoot(), "screenshots")));
             values.append(new InstanceSettingsPage(onesix.get()));
         }
