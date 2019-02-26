@@ -1634,7 +1634,8 @@ void MainWindow::on_actionDeleteInstance_triggered()
         tr("CAREFUL!"),
         tr("About to delete: %1\nThis is permanent and will completely delete the instance.\n\nAre you sure?").arg(m_selectedInstance->name()),
         QMessageBox::Warning,
-        QMessageBox::Yes | QMessageBox::No
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No
     )->exec();
     if (response == QMessageBox::Yes)
     {
