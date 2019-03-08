@@ -52,7 +52,7 @@ private:
     TranslationsModel &operator=(const TranslationsModel &) = delete;
 
 private slots:
-    void indexRecieved();
+    void indexReceived();
     void indexFailed(QString reason);
     void dlFailed(QString reason);
     void dlGood();
