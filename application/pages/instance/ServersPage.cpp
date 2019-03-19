@@ -37,10 +37,10 @@ struct Server
     Server(nbt::tag_compound& server)
     {
         std::string addressStr(server["ip"]);
-        m_address = QString::fromUtf8(addressStr.c_str());
+        m_address = QString::fromUtf8(addressStr.c_str()).trimmed();
 
         std::string nameStr(server["name"]);
-        m_name = QString::fromUtf8(nameStr.c_str());
+        m_name = QString::fromUtf8(nameStr.c_str()).trimmed();
 
         if(server["icon"])
         {
