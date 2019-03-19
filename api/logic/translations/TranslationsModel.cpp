@@ -133,6 +133,7 @@ TranslationsModel::TranslationsModel(QString path, QObject* parent): QAbstractLi
 {
     d.reset(new Private);
     d->m_dir.setPath(path);
+    FS::ensureFolderPathExists(path);
     reloadLocalFiles();
 
     d->watcher = new QFileSystemWatcher(this);
@@ -151,7 +152,7 @@ void TranslationsModel::translationDirChanged(const QString& path)
     selectLanguage(selectedLanguage());
 }
 
-void TranslationsModel::indexRecieved()
+void TranslationsModel::indexReceived()
 {
     qDebug() << "Got translations index!";
     d->m_index_job.reset();
@@ -558,7 +559,7 @@ void TranslationsModel::downloadIndex()
     d->m_index_task = Net::Download::makeCached(QUrl("https://files.multimc.org/translations/index_v2.json"), entry);
     d->m_index_job->addNetAction(d->m_index_task);
     connect(d->m_index_job.get(), &NetJob::failed, this, &TranslationsModel::indexFailed);
-    connect(d->m_index_job.get(), &NetJob::succeeded, this, &TranslationsModel::indexRecieved);
+    connect(d->m_index_job.get(), &NetJob::succeeded, this, &TranslationsModel::indexReceived);
     d->m_index_job->start();
 }
 
