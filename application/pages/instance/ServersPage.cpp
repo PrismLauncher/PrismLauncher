@@ -37,10 +37,10 @@ struct Server
     Server(nbt::tag_compound& server)
     {
         std::string addressStr(server["ip"]);
-        m_address = QString::fromUtf8(addressStr.c_str()).trimmed();
+        m_address = QString::fromUtf8(addressStr.c_str());
 
         std::string nameStr(server["name"]);
-        m_name = QString::fromUtf8(nameStr.c_str()).trimmed();
+        m_name = QString::fromUtf8(nameStr.c_str());
 
         if(server["icon"])
         {
@@ -64,8 +64,8 @@ struct Server
 
     void serialize(nbt::tag_compound& server)
     {
-        server.insert("name", m_name.toUtf8().toStdString());
-        server.insert("ip", m_address.toUtf8().toStdString());
+        server.insert("name", m_name.trimmed().toUtf8().toStdString());
+        server.insert("ip", m_address.trimmed().toUtf8().toStdString());
         if(m_icon.size())
         {
             server.insert("icon", m_icon.toBase64().toStdString());
