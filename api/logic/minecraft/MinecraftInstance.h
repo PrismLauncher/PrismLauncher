@@ -78,7 +78,7 @@ public:
 
     //////  Launch stuff //////
     shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) override;
-    std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) override;
+    shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) override;
     QStringList extraArguments() const override;
     QStringList verboseDescription(AuthSessionPtr session) override;
     QList<Mod> getJarMods() const;

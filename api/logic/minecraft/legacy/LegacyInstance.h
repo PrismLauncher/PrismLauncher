@@ -17,6 +17,7 @@
 
 #include "BaseInstance.h"
 #include "minecraft/Mod.h"
+#include "launch/LaunchTask.h"
 
 #include "multimc_logic_export.h"
 
@@ -112,7 +113,7 @@ public:
     {
         return false;
     }
-    std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) override
+    shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) override
     {
         return nullptr;
     }

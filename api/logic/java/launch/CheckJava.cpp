@@ -60,7 +60,7 @@ void CheckJava::executeTask()
     // if timestamps are not the same, or something is missing, check!
     if (javaUnixTime != storedUnixTime || storedVersion.size() == 0 || storedArchitecture.size() == 0)
     {
-        m_JavaChecker = std::make_shared<JavaChecker>();
+        m_JavaChecker = new JavaChecker();
         emit logLine(tr("Checking Java version..."), MessageLevel::MultiMC);
         connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this, &CheckJava::checkJavaFinished);
         m_JavaChecker->m_path = realJavaPath;

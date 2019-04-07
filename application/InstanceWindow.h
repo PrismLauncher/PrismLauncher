@@ -52,7 +52,7 @@ slots:
     void on_btnKillMinecraft_clicked();
     void on_btnLaunchMinecraftOffline_clicked();
 
-    void on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc);
+    void on_InstanceLaunchTask_changed(shared_qobject_ptr<LaunchTask> proc);
     void on_RunningState_changed(bool running);
     void on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus);
 
@@ -63,7 +63,7 @@ private:
     void updateLaunchButtons();
 
 private:
-    std::shared_ptr<LaunchTask> m_proc;
+    shared_qobject_ptr<LaunchTask> m_proc;
     InstancePtr m_instance;
     bool m_doNotSave = false;
     PageContainer *m_container = nullptr;

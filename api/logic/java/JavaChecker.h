@@ -3,6 +3,8 @@
 #include <QTimer>
 #include <memory>
 
+#include "QObjectPtr.h"
+
 #include "multimc_logic_export.h"
 
 #include "JavaVersion.h"
@@ -27,8 +29,8 @@ struct MULTIMC_LOGIC_EXPORT JavaCheckResult
     } validity = Validity::Errored;
 };
 
-typedef std::shared_ptr<QProcess> QProcessPtr;
-typedef std::shared_ptr<JavaChecker> JavaCheckerPtr;
+typedef shared_qobject_ptr<QProcess> QProcessPtr;
+typedef shared_qobject_ptr<JavaChecker> JavaCheckerPtr;
 class MULTIMC_LOGIC_EXPORT JavaChecker : public QObject
 {
     Q_OBJECT

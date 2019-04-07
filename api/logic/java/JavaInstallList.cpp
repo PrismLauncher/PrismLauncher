@@ -149,7 +149,7 @@ void JavaListLoadTask::executeTask()
     JavaUtils ju;
     QList<QString> candidate_paths = ju.FindJavaPaths();
 
-    m_job = std::shared_ptr<JavaCheckerJob>(new JavaCheckerJob("Java detection"));
+    m_job = new JavaCheckerJob("Java detection");
     connect(m_job.get(), &Task::finished, this, &JavaListLoadTask::javaCheckerFinished);
     connect(m_job.get(), &Task::progress, this, &Task::setProgress);
 

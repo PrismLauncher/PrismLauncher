@@ -1,4 +1,5 @@
 #include "BaseProfiler.h"
+#include "QObjectPtr.h"
 
 #include <QProcess>
 
@@ -7,7 +8,7 @@ BaseProfiler::BaseProfiler(SettingsObjectPtr settings, InstancePtr instance, QOb
 {
 }
 
-void BaseProfiler::beginProfiling(std::shared_ptr<LaunchTask> process)
+void BaseProfiler::beginProfiling(shared_qobject_ptr<LaunchTask> process)
 {
     beginProfilingImpl(process);
 }

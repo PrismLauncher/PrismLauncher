@@ -134,8 +134,6 @@ public:
     /// Sets the last launched time to 'val' milliseconds since epoch
     void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch());
 
-    InstancePtr getSharedPtr();
-
     /*!
      * \brief Gets this instance's settings object.
      * This settings object stores instance-specific settings.
@@ -147,10 +145,10 @@ public:
     virtual shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) = 0;
 
     /// returns a valid launcher (task container)
-    virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) = 0;
+    virtual shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) = 0;
 
     /// returns the current launch task (if any)
-    std::shared_ptr<LaunchTask> getLaunchTask();
+    shared_qobject_ptr<LaunchTask> getLaunchTask();
 
     /*!
      * Create envrironment variables for running the instance
@@ -241,7 +239,7 @@ signals:
      */
     void propertiesChanged(BaseInstance *inst);
 
-    void launchTaskChanged(std::shared_ptr<LaunchTask>);
+    void launchTaskChanged(shared_qobject_ptr<LaunchTask>);
 
     void runningStatusChanged(bool running);
 
@@ -255,7 +253,7 @@ protected: /* data */
     SettingsObjectPtr m_settings;
     // InstanceFlags m_flags;
     bool m_isRunning = false;
-    std::shared_ptr<LaunchTask> m_launchProcess;
+    shared_qobject_ptr<LaunchTask> m_launchProcess;
     QDateTime m_timeStarted;
 
 private: /* data */
@@ -265,6 +263,6 @@ private: /* data */
     bool m_hasBrokenVersion = false;
 };
 
-Q_DECLARE_METATYPE(std::shared_ptr<BaseInstance>)
+Q_DECLARE_METATYPE(shared_qobject_ptr<BaseInstance>)
 //Q_DECLARE_METATYPE(BaseInstance::InstanceFlag)
 //Q_DECLARE_OPERATORS_FOR_FLAGS(BaseInstance::InstanceFlags)

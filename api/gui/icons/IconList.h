@@ -80,7 +80,7 @@ protected slots:
     void fileChanged(const QString &path);
     void SettingChanged(const Setting & setting, QVariant value);
 private:
-    std::shared_ptr<QFileSystemWatcher> m_watcher;
+    shared_qobject_ptr<QFileSystemWatcher> m_watcher;
     bool is_watching;
     QMap<QString, int> name_index;
     QVector<MMCIcon> icons;

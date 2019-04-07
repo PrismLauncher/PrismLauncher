@@ -218,7 +218,7 @@ void LaunchController::launchInstance()
     connect(m_launcher.get(), &LaunchTask::requestProgress, this, &LaunchController::onProgressRequested);
 
 
-    m_launcher->prependStep(std::make_shared<TextPrint>(m_launcher.get(), "MultiMC version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::MultiMC));
+    m_launcher->prependStep(new TextPrint(m_launcher.get(), "MultiMC version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::MultiMC));
     m_launcher->start();
 }
 

@@ -45,11 +45,11 @@ public:
     };
 
 public: /* methods */
-    static std::shared_ptr<LaunchTask> create(InstancePtr inst);
+    static shared_qobject_ptr<LaunchTask> create(InstancePtr inst);
     virtual ~LaunchTask() {};
 
-    void appendStep(std::shared_ptr<LaunchStep> step);
-    void prependStep(std::shared_ptr<LaunchStep> step);
+    void appendStep(shared_qobject_ptr<LaunchStep> step);
+    void prependStep(shared_qobject_ptr<LaunchStep> step);
     void setCensorFilter(QMap<QString, QString> filter);
 
     InstancePtr instance()
@@ -117,7 +117,7 @@ private: /*methods */
 protected: /* data */
     InstancePtr m_instance;
     shared_qobject_ptr<LogModel> m_logModel;
-    QList <std::shared_ptr<LaunchStep>> m_steps;
+    QList <shared_qobject_ptr<LaunchStep>> m_steps;
     QMap<QString, QString> m_censorFilter;
     int currentStep = -1;
     State state = NotStarted;

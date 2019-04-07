@@ -777,22 +777,22 @@ shared_qobject_ptr<Task> MinecraftInstance::createUpdateTask(Net::Mode mode)
     return nullptr;
 }
 
-std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr session)
+shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr session)
 {
-    auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
+    // FIXME: get rid of shared_from_this ...
+    auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(shared_from_this()));
     auto pptr = process.get();
 
     ENV.icons()->saveIcon(iconKey(), FS::PathCombine(gameRoot(), "icon.png"), "PNG");
 
     // print a header
     {
-        process->appendStep(std::make_shared<TextPrint>(pptr, "Minecraft folder is:\n" + gameRoot() + "\n\n", MessageLevel::MultiMC));
+        process->appendStep(new TextPrint(pptr, "Minecraft folder is:\n" + gameRoot() + "\n\n", MessageLevel::MultiMC));
     }
 
     // check java
     {
-        auto step = std::make_shared<CheckJava>(pptr);
-        process->appendStep(step);
+        process->appendStep(new CheckJava(pptr));
     }
 
     // check launch method
@@ -800,14 +800,14 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
     QString method = launchMethod();
     if(!validMethods.contains(method))
     {
-        process->appendStep(std::make_shared<TextPrint>(pptr, "Selected launch method \"" + method + "\" is not valid.\n", MessageLevel::Fatal));
+        process->appendStep(new TextPrint(pptr, "Selected launch method \"" + method + "\" is not valid.\n", MessageLevel::Fatal));
         return process;
     }
 
     // run pre-launch command if that's needed
     if(getPreLaunchCommand().size())
     {
-        auto step = std::make_shared<PreLaunchCommand>(pptr);
+        auto step = new PreLaunchCommand(pptr);
         step->setWorkingDirectory(gameRoot());
         process->appendStep(step);
     }
@@ -815,42 +815,37 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
     // if we aren't in offline mode,.
     if(session->status != AuthSession::PlayableOffline)
     {
-        process->appendStep(std::make_shared<ClaimAccount>(pptr, session));
-        process->appendStep(std::make_shared<Update>(pptr, Net::Mode::Online));
+        process->appendStep(new ClaimAccount(pptr, session));
+        process->appendStep(new Update(pptr, Net::Mode::Online));
     }
     else
     {
-        process->appendStep(std::make_shared<Update>(pptr, Net::Mode::Offline));
+        process->appendStep(new Update(pptr, Net::Mode::Offline));
     }
 
     // if there are any jar mods
     {
-        auto step = std::make_shared<ModMinecraftJar>(pptr);
-        process->appendStep(step);
+        process->appendStep(new ModMinecraftJar(pptr));
     }
 
     // print some instance info here...
     {
-        auto step = std::make_shared<PrintInstanceInfo>(pptr, session);
-        process->appendStep(step);
+        process->appendStep(new PrintInstanceInfo(pptr, session));
     }
 
     // create the server-resource-packs folder (workaround for Minecraft bug MCL-3732)
     {
-        auto step = std::make_shared<CreateServerResourcePacksFolder>(pptr);
-        process->appendStep(step);
+        process->appendStep(new CreateServerResourcePacksFolder(pptr));
     }
 
     // extract native jars if needed
     {
-        auto step = std::make_shared<ExtractNatives>(pptr);
-        process->appendStep(step);
+        process->appendStep(new ExtractNatives(pptr));
     }
 
     // reconstruct assets if needed
     {
-        auto step = std::make_shared<ReconstructAssets>(pptr);
-        process->appendStep(step);
+        process->appendStep(new ReconstructAssets(pptr));
     }
 
     {
@@ -858,14 +853,14 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
         auto method = launchMethod();
         if(method == "LauncherPart")
         {
-            auto step = std::make_shared<LauncherPartLaunch>(pptr);
+            auto step = new LauncherPartLaunch(pptr);
             step->setWorkingDirectory(gameRoot());
             step->setAuthSession(session);
             process->appendStep(step);
         }
         else if (method == "DirectJava")
         {
-            auto step = std::make_shared<DirectJavaLaunch>(pptr);
+            auto step = new DirectJavaLaunch(pptr);
             step->setWorkingDirectory(gameRoot());
             step->setAuthSession(session);
             process->appendStep(step);
@@ -875,7 +870,7 @@ std::shared_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr s
     // run post-exit command if that's needed
     if(getPostExitCommand().size())
     {
-        auto step = std::make_shared<PostLaunchCommand>(pptr);
+        auto step = new PostLaunchCommand(pptr);
         step->setWorkingDirectory(gameRoot());
         process->appendStep(step);
     }

@@ -192,7 +192,7 @@ void LogPage::UIToModelState()
     m_model->suspend(ui->trackLogCheckbox->checkState() != Qt::Checked);
 }
 
-void LogPage::setInstanceLaunchTaskChanged(std::shared_ptr<LaunchTask> proc, bool initial)
+void LogPage::setInstanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc, bool initial)
 {
     m_process = proc;
     if(m_process)
@@ -215,7 +215,7 @@ void LogPage::setInstanceLaunchTaskChanged(std::shared_ptr<LaunchTask> proc, boo
     }
 }
 
-void LogPage::onInstanceLaunchTaskChanged(std::shared_ptr<LaunchTask> proc)
+void LogPage::onInstanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc)
 {
     setInstanceLaunchTaskChanged(proc, false);
 }

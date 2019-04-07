@@ -57,5 +57,5 @@ private:
     QWidget * m_parentWidget = nullptr;
     InstanceWindow *m_console = nullptr;
     AuthSessionPtr m_session;
-    std::shared_ptr <LaunchTask> m_launcher;
+    shared_qobject_ptr<LaunchTask> m_launcher;
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseInstance.h"
+#include "launch/LaunchTask.h"
 
 class NullInstance: public BaseInstance
 {
@@ -11,46 +12,46 @@ public:
         setVersionBroken(true);
     }
     virtual ~NullInstance() {};
-    virtual void saveNow() override
+    void saveNow() override
     {
     }
-    virtual QString getStatusbarDescription() override
+    QString getStatusbarDescription() override
     {
         return tr("Unknown instance type");
     };
-    virtual QSet< QString > traits() const override
+    QSet< QString > traits() const override
     {
         return {};
     };
-    virtual QString instanceConfigFolder() const override
+    QString instanceConfigFolder() const override
     {
         return instanceRoot();
     };
-    virtual std::shared_ptr<LaunchTask> createLaunchTask(AuthSessionPtr) override
+    shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr) override
     {
         return nullptr;
     }
-    virtual shared_qobject_ptr< Task > createUpdateTask(Net::Mode mode) override
+    shared_qobject_ptr< Task > createUpdateTask(Net::Mode mode) override
     {
         return nullptr;
     }
-    virtual QProcessEnvironment createEnvironment() override
+    QProcessEnvironment createEnvironment() override
     {
         return QProcessEnvironment();
     }
-    virtual QMap<QString, QString> getVariables() const override
+    QMap<QString, QString> getVariables() const override
     {
         return QMap<QString, QString>();
     }
-    virtual IPathMatcher::Ptr getLogFileMatcher() override
+    IPathMatcher::Ptr getLogFileMatcher() override
     {
         return nullptr;
     }
-    virtual QString getLogFileRoot() override
+    QString getLogFileRoot() override
     {
         return instanceRoot();
     }
-    virtual QString typeName() const override
+    QString typeName() const override
     {
         return "Null";
     }

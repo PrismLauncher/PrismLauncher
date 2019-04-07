@@ -24,6 +24,8 @@
 #include "JavaCheckerJob.h"
 #include "JavaInstall.h"
 
+#include "QObjectPtr.h"
+
 #include "multimc_logic_export.h"
 
 class JavaListLoadTask;
@@ -75,7 +77,7 @@ public slots:
     void javaCheckerFinished();
 
 protected:
-    std::shared_ptr<JavaCheckerJob> m_job;
+    shared_qobject_ptr<JavaCheckerJob> m_job;
     JavaInstallList *m_list;
     JavaInstall *m_currentRecommended;
 };

@@ -144,7 +144,7 @@ void InstanceWindow::on_btnLaunchMinecraftOffline_clicked()
     MMC->launch(m_instance, false, nullptr);
 }
 
-void InstanceWindow::on_InstanceLaunchTask_changed(std::shared_ptr<LaunchTask> proc)
+void InstanceWindow::on_InstanceLaunchTask_changed(shared_qobject_ptr<LaunchTask> proc)
 {
     m_proc = proc;
 }

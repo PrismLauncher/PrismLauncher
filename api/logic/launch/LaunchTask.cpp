@@ -33,9 +33,9 @@ void LaunchTask::init()
     m_instance->setRunning(true);
 }
 
-std::shared_ptr<LaunchTask> LaunchTask::create(InstancePtr inst)
+shared_qobject_ptr<LaunchTask> LaunchTask::create(InstancePtr inst)
 {
-    std::shared_ptr<LaunchTask> proc(new LaunchTask(inst));
+    shared_qobject_ptr<LaunchTask> proc(new LaunchTask(inst));
     proc->init();
     return proc;
 }
@@ -44,12 +44,12 @@ LaunchTask::LaunchTask(InstancePtr instance): m_instance(instance)
 {
 }
 
-void LaunchTask::appendStep(std::shared_ptr<LaunchStep> step)
+void LaunchTask::appendStep(shared_qobject_ptr<LaunchStep> step)
 {
     m_steps.append(step);
 }
 
-void LaunchTask::prependStep(std::shared_ptr<LaunchStep> step)
+void LaunchTask::prependStep(shared_qobject_ptr<LaunchStep> step)
 {
     m_steps.prepend(step);
 }

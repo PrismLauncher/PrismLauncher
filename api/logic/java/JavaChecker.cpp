@@ -75,8 +75,8 @@ void JavaChecker::stderrReady()
 void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 {
     killTimer.stop();
-    QProcessPtr _process;
-    _process.swap(process);
+    QProcessPtr _process = process;
+    process.reset();
 
     JavaCheckResult result;
     {

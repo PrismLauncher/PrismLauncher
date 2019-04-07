@@ -175,11 +175,6 @@ QString BaseInstance::instanceRoot() const
     return m_rootDir;
 }
 
-InstancePtr BaseInstance::getSharedPtr()
-{
-    return shared_from_this();
-}
-
 SettingsObjectPtr BaseInstance::settings() const
 {
     return m_settings;
@@ -253,7 +248,7 @@ QStringList BaseInstance::extraArguments() const
     return Commandline::splitArgs(settings()->get("JvmArgs").toString());
 }
 
-std::shared_ptr<LaunchTask> BaseInstance::getLaunchTask()
+shared_qobject_ptr<LaunchTask> BaseInstance::getLaunchTask()
 {
     return m_launchProcess;
 }

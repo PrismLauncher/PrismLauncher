@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BaseExternalTool.h"
+#include "QObjectPtr.h"
 
 #include "multimc_logic_export.h"
 
@@ -17,13 +18,13 @@ public:
 
 public
 slots:
-    void beginProfiling(std::shared_ptr<LaunchTask> process);
+    void beginProfiling(shared_qobject_ptr<LaunchTask> process);
     void abortProfiling();
 
 protected:
     QProcess *m_profilerProcess;
 
-    virtual void beginProfilingImpl(std::shared_ptr<LaunchTask> process) = 0;
+    virtual void beginProfilingImpl(shared_qobject_ptr<LaunchTask> process) = 0;
     virtual void abortProfilingImpl();
 
 signals:

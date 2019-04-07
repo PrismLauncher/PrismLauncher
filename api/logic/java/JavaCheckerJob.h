@@ -20,7 +20,7 @@
 #include "tasks/Task.h"
 
 class JavaCheckerJob;
-typedef std::shared_ptr<JavaCheckerJob> JavaCheckerJobPtr;
+typedef shared_qobject_ptr<JavaCheckerJob> JavaCheckerJobPtr;
 
 // FIXME: this just seems horribly redundant
 class JavaCheckerJob : public Task
