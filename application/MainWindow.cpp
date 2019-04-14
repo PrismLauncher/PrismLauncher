@@ -902,7 +902,7 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 void MainWindow::updateToolsMenu()
 {
     QToolButton *launchButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstance));
-    QToolButton* launchOfflineButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstanceOffline));
+    QToolButton *launchOfflineButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstanceOffline));
 
     if(!m_selectedInstance || m_selectedInstance->isRunning())
     {
@@ -914,7 +914,7 @@ void MainWindow::updateToolsMenu()
     }
 
     QMenu *launchMenu = ui->actionLaunchInstance->menu();
-    QMenu* launchOfflineMenu = ui->actionLaunchInstanceOffline->menu();
+    QMenu *launchOfflineMenu = ui->actionLaunchInstanceOffline->menu();
     launchButton->setPopupMode(QToolButton::MenuButtonPopup);
     launchOfflineButton->setPopupMode(QToolButton::MenuButtonPopup);
     if (launchMenu)
@@ -934,7 +934,7 @@ void MainWindow::updateToolsMenu()
     }
 
     QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
-    QAction* normalLaunchOffline = launchOfflineMenu->addAction(tr("Launch"));
+    QAction *normalLaunchOffline = launchOfflineMenu->addAction(tr("Launch"));
     connect(normalLaunch, &QAction::triggered, [this]()
             {
                 MMC->launch(m_selectedInstance, true);
@@ -948,7 +948,7 @@ void MainWindow::updateToolsMenu()
     for (auto profiler : MMC->profilers().values())
     {
         QAction *profilerAction = launchMenu->addAction(profiler->name());
-        QAction* profilerOfflineAction = launchOfflineMenu->addAction(profiler->name());
+        QAction *profilerOfflineAction = launchOfflineMenu->addAction(profiler->name());
         QString error;
         if (!profiler->check(&error))
         {
