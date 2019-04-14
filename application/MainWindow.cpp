@@ -934,7 +934,7 @@ void MainWindow::updateToolsMenu()
     }
 
     QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
-    QAction *normalLaunchOffline = launchOfflineMenu->addAction(tr("Launch"));
+    QAction *normalLaunchOffline = launchOfflineMenu->addAction(tr("Launch Offline"));
     connect(normalLaunch, &QAction::triggered, [this]()
             {
                 MMC->launch(m_selectedInstance, true);
@@ -943,8 +943,9 @@ void MainWindow::updateToolsMenu()
             {
                 MMC->launch(m_selectedInstance, false);
             });
-    launchMenu->addSeparator()->setText(tr("Profilers"));
-    launchOfflineMenu->addSeparator()->setText(tr("Profilers"));
+    QString profilersTitle = tr("Profilers");
+    launchMenu->addSeparator()->setText(profilersTitle);
+    launchOfflineMenu->addSeparator()->setText(profilersTitle);
     for (auto profiler : MMC->profilers().values())
     {
         QAction *profilerAction = launchMenu->addAction(profiler->name());
@@ -954,8 +955,9 @@ void MainWindow::updateToolsMenu()
         {
             profilerAction->setDisabled(true);
             profilerOfflineAction->setDisabled(true);
-            profilerAction->setToolTip(tr("Profiler not setup correctly. Go into settings, \"External Tools\"."));
-            profilerOfflineAction->setToolTip(tr("Profiler not setup correctly. Go into settings, \"External Tools\"."));
+            QString profilerToolTip = tr("Profiler not setup correctly. Go into settings, \"External Tools\".");
+            profilerAction->setToolTip(profilerToolTip);
+            profilerOfflineAction->setToolTip(profilerToolTip);
         }
         else
         {
