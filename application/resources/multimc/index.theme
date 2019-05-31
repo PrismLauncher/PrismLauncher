@@ -2,7 +2,7 @@
 Name=multimc
 Comment=MultiMC Default Icons
 Inherits=default
-Directories=8x8,16x16,22x22,24x24,32x32,32x32/instances,48x48,50x50/instances,64x64,128x128/instances,256x256,scalable
+Directories=8x8,16x16,22x22,24x24,32x32,32x32/instances,48x48,50x50/instances,64x64,128x128/instances,256x256,scalable,scalable/instances
 
 [8x8]
 Size=8
@@ -49,5 +49,10 @@ Size=256
 [scalable]
 Size=48
 Type=Scalable
+MinSize=16
+MaxSize=256
+
+[scalable/instances]
+Size=128
 MinSize=16
 MaxSize=256

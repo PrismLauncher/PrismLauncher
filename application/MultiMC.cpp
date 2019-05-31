@@ -552,7 +552,8 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         {
             ":/icons/multimc/32x32/instances/",
             ":/icons/multimc/50x50/instances/",
-            ":/icons/multimc/128x128/instances/"
+            ":/icons/multimc/128x128/instances/",
+            ":/icons/multimc/scalable/instances/"
         };
         m_icons.reset(new IconList(instFolders, setting->get().toString()));
         connect(setting.get(), &Setting::SettingChanged,[&](const Setting &, QVariant value)

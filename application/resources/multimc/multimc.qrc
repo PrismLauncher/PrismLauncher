@@ -308,5 +308,7 @@
         <file>32x32/instances/tnt.png</file>
 
         <file>50x50/instances/enderman.png</file>
+
+        <file>scalable/instances/fox.svg</file>
     </qresource>
 </RCC>

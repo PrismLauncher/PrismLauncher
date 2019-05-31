@@ -187,8 +187,7 @@ Qt::DropActions IconList::supportedDropActions() const
     return Qt::CopyAction;
 }
 
-bool IconList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
-                            const QModelIndex &parent)
+bool IconList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
 {
     if (action == Qt::IgnoreAction)
         return true;
