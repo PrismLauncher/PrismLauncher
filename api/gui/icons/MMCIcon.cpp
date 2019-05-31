@@ -102,3 +102,17 @@ void MMCIcon::replace(IconType new_type, const QString& key)
     m_images[new_type].filename = QString();
     m_images[new_type].key = key;
 }
+
+QString MMCIcon::getFilePath() const
+{
+    if(m_current_type == IconType::ToBeDeleted){
+        return QString();
+    }
+    return m_images[m_current_type].filename;
+}
+
+
+bool MMCIcon::isBuiltIn() const
+{
+    return m_current_type == IconType::Builtin;
+}

@@ -6,6 +6,7 @@
 #include "NullInstance.h"
 #include "settings/INISettingsObject.h"
 #include "icons/IIconList.h"
+#include "icons/IconUtils.h"
 #include <QtConcurrentRun>
 
 // FIXME: this does not belong here, it's Minecraft/Flame specific
@@ -393,8 +394,9 @@ void InstanceImportTask::processMultiMC()
     else
     {
         m_instIcon = instance.iconKey();
-        auto importIconPath = FS::PathCombine(instance.instanceRoot(), m_instIcon + ".png");
-        if (QFile::exists(importIconPath))
+
+        auto importIconPath = IconUtils::findBestIconIn(instance.instanceRoot(), m_instIcon);
+        if (!importIconPath.isNull() && QFile::exists(importIconPath))
         {
             // import icon
             auto iconList = ENV.icons();

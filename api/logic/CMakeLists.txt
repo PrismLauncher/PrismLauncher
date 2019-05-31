@@ -182,9 +182,11 @@ set(NEWS_SOURCES
 
 # Icon interface
 set(ICONS_SOURCES
-    # News System
+    # Icons System and related code
     icons/IIconList.h
     icons/IIconList.cpp
+    icons/IconUtils.h
+    icons/IconUtils.cpp
 )
 
 # Minecraft services status checker

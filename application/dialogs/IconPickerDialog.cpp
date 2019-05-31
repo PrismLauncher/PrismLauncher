@@ -25,6 +25,7 @@
 #include "groupview/InstanceDelegate.h"
 
 #include "icons/IconList.h"
+#include "icons/IconUtils.h"
 #include <DesktopServices.h>
 
 IconPickerDialog::IconPickerDialog(QWidget *parent)
@@ -103,8 +104,8 @@ void IconPickerDialog::addNewIcon()
     //: The title of the select icons open file dialog
     QString selectIcons = tr("Select Icons");
     //: The type of icon files
-    QStringList fileNames = QFileDialog::getOpenFileNames(this, selectIcons, QString(),
-                                                          tr("Icons") + "(*.png *.jpg *.jpeg *.ico *.svg *.gif)");
+    auto filter = IconUtils::getIconFilter();
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, selectIcons, QString(), tr("Icons %1").arg(filter));
     MMC->icons()->installIcons(fileNames);
 }
 

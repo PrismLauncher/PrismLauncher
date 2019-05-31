@@ -46,4 +46,6 @@ struct MULTIMC_GUI_EXPORT MMCIcon
     void remove(IconType rm_type);
     void replace(IconType new_type, QIcon icon, QString path = QString());
     void replace(IconType new_type, const QString &key);
+    bool isBuiltIn() const;
+    QString getFilePath() const;
 };
