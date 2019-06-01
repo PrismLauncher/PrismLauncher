@@ -181,6 +181,8 @@ private slots:
 
     void konamiTriggered();
 
+    void globalSettingsClosed();
+
 private:
     void addInstance(QString url = QString());
     void activateInstance(InstancePtr instance);

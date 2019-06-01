@@ -64,9 +64,6 @@ SET(MULTIMC_SOURCES
     themes/SystemTheme.cpp
     themes/SystemTheme.h
 
-    # GUI - settings-specific wrappers for paged dialog
-    SettingsUI.h
-
     # Processes
     LaunchController.h
     LaunchController.cpp

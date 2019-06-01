@@ -70,7 +70,6 @@
 #include "InstanceProxyModel.h"
 #include "JavaCommon.h"
 #include "LaunchController.h"
-#include "SettingsUI.h"
 #include "groupview/GroupView.h"
 #include "groupview/InstanceDelegate.h"
 #include "widgets/LabeledToolButton.h"
@@ -702,6 +701,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     // model reset -> selection is invalid. All the instance pointers are wrong.
     connect(MMC->instances().get(), &InstanceList::dataIsInvalid, this, &MainWindow::selectionBad);
+
+    // When the global settings page closes, we want to know about it and update our state
+    connect(MMC, &MultiMC::globalSettingsClosed, this, &MainWindow::globalSettingsClosed);
 
     m_statusLeft = new QLabel(tr("No instance selected"), this);
     m_statusRight = new ServerStatus(this);
@@ -1572,7 +1574,11 @@ void MainWindow::checkForUpdates()
 
 void MainWindow::on_actionSettings_triggered()
 {
-    SettingsUI::ShowPageDialog(MMC->globalSettingsPages(), this, "global-settings");
+    MMC->ShowGlobalSettings(this, "global-settings");
+}
+
+void MainWindow::globalSettingsClosed()
+{
     // FIXME: quick HACK to make this work. improve, optimize.
     MMC->instances()->loadList();
     proxymodel->invalidate();
@@ -1608,7 +1614,7 @@ void MainWindow::on_actionScreenshots_triggered()
 
 void MainWindow::on_actionManageAccounts_triggered()
 {
-    SettingsUI::ShowPageDialog(MMC->globalSettingsPages(), this, "accounts");
+    MMC->ShowGlobalSettings(this, "accounts");
 }
 
 void MainWindow::on_actionReportBug_triggered()

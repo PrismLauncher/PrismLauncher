@@ -66,6 +66,8 @@ private slots:
 
     void checkerFinished();
 
+    void globalSettingsButtonClicked(bool checked);
+
 private:
     Ui::InstanceSettingsPage *ui;
     BaseInstance *m_instance;

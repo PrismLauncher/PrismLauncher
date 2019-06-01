@@ -21,6 +21,9 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
     ui->setupUi(this);
     auto sysMB = Sys::getSystemRam() / Sys::megabyte;
     ui->maxMemSpinBox->setMaximum(sysMB);
+    connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
+    connect(MMC, &MultiMC::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
+    connect(MMC, &MultiMC::globalSettingsClosed, this, &InstanceSettingsPage::loadSettings);
     loadSettings();
 }
 
@@ -32,6 +35,11 @@ bool InstanceSettingsPage::shouldDisplay() const
 InstanceSettingsPage::~InstanceSettingsPage()
 {
     delete ui;
+}
+
+void InstanceSettingsPage::globalSettingsButtonClicked(bool)
+{
+    MMC->ShowGlobalSettings(this, "global-settings");
 }
 
 bool InstanceSettingsPage::apply()

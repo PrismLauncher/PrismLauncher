@@ -6,23 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>553</width>
-    <height>522</height>
+    <width>738</width>
+    <height>804</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
+   <item>
+    <widget class="QCommandLinkButton" name="openGlobalJavaSettingsButton">
+     <property name="text">
+      <string>Open Global Settings</string>
+     </property>
+     <property name="description">
+      <string>The settings here are overrides for global settings.</string>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QTabWidget" name="settingsTabs">
      <property name="tabShape">
@@ -367,6 +365,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>openGlobalJavaSettingsButton</tabstop>
   <tabstop>settingsTabs</tabstop>
   <tabstop>javaSettingsGroupBox</tabstop>
   <tabstop>javaPathTextBox</tabstop>

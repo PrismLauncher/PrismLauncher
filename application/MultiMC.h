@@ -65,11 +65,6 @@ public:
         return m_settings;
     }
 
-    std::shared_ptr<GenericPageProvider> globalSettingsPages() const
-    {
-        return m_globalSettingsProvider;
-    }
-
     qint64 timeSinceStart() const
     {
         return startTime.msecsTo(QDateTime::currentDateTime());
@@ -146,8 +141,12 @@ public:
     void updateIsRunning(bool running);
     bool updatesAreAllowed();
 
+    void ShowGlobalSettings(class QWidget * parent, QString open_page = QString());
+
 signals:
     void updateAllowedChanged(bool status);
+    void globalSettingsAboutToOpen();
+    void globalSettingsClosed();
 
 public slots:
     bool launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);

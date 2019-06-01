@@ -66,6 +66,8 @@
 #include <ganalytics.h>
 #include <sys.h>
 
+#include "pagedialog/PageDialog.h"
+
 
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -1086,6 +1088,20 @@ void MultiMC::controllerFailed(const QString& error)
         m_status = Status::Failed;
         exit(1);
     }
+}
+
+void MultiMC::ShowGlobalSettings(class QWidget* parent, QString open_page)
+{
+    if(!m_globalSettingsProvider) {
+        return;
+    }
+    emit globalSettingsAboutToOpen();
+    {
+        SettingsObject::Lock lock(MMC->settings());
+        PageDialog dlg(m_globalSettingsProvider.get(), open_page, parent);
+        dlg.exec();
+    }
+    emit globalSettingsClosed();
 }
 
 MainWindow* MultiMC::showMainWindow(bool minimized)
