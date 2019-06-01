@@ -39,7 +39,17 @@ InstanceSettingsPage::~InstanceSettingsPage()
 
 void InstanceSettingsPage::globalSettingsButtonClicked(bool)
 {
-    MMC->ShowGlobalSettings(this, "global-settings");
+    switch(ui->settingsTabs->currentIndex()) {
+        case 0:
+            MMC->ShowGlobalSettings(this, "java-settings");
+            return;
+        case 1:
+            MMC->ShowGlobalSettings(this, "minecraft-settings");
+            return;
+        case 2:
+            MMC->ShowGlobalSettings(this, "custom-commands");
+            return;
+    }
 }
 
 bool InstanceSettingsPage::apply()
