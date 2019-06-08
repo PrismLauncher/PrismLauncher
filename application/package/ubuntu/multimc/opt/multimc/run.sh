@@ -22,12 +22,12 @@ deploy() {
 
 runmmc() {
     cd ${INSTDIR}
-    ./MultiMC
+    ./MultiMC "$@"
 }
 
 if [[ ! -f ${INSTDIR}/MultiMC ]]; then
     deploy
-    runmmc
+    runmmc "$@"
 else
-    runmmc
+    runmmc "$@"
 fi
