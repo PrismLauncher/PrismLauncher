@@ -6,14 +6,14 @@
 #include <array>
 
 namespace {
-std::array<const char *, 6> validIconExtensions = {
+std::array<const char *, 6> validIconExtensions = {{
     "svg",
     "png",
     "ico",
     "gif",
     "jpg",
     "jpeg"
-};
+}};
 }
 
 namespace IconUtils{
