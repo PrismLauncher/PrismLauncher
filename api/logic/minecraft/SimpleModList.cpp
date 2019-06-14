@@ -123,8 +123,8 @@ bool SimpleModList::installMod(const QString &filename)
         qDebug() << "Cannot recognize mod type of" << originalPath << ", ignoring it.";
         return false;
     }
-    auto newpath = FS::NormalizePath(FS::PathCombine(m_dir.path(), fileinfo.fileName()));
 
+    auto newpath = FS::NormalizePath(FS::PathCombine(m_dir.path(), fileinfo.fileName()));
     if(originalPath == newpath)
     {
         qDebug() << "Overwriting the mod (" << originalPath << ") with itself makes no sense...";
@@ -133,7 +133,7 @@ bool SimpleModList::installMod(const QString &filename)
 
     if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE || type == Mod::MOD_LITEMOD)
     {
-        if(QFile::exists(newpath))
+        if(QFile::exists(newpath) || QFile::exists(newpath.append(".disabled")))
         {
             if(!QFile::remove(newpath))
             {
