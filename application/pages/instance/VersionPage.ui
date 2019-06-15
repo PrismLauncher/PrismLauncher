@@ -173,7 +173,7 @@
          <item>
           <widget class="QPushButton" name="fabricBtn">
            <property name="toolTip">
-            <string>Install the Minecraft Forge package.</string>
+            <string>Install the Fabric Loader package.</string>
            </property>
            <property name="text">
             <string>Install Fabric</string>
