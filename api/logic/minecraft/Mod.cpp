@@ -254,15 +254,18 @@ void Mod::ReadFabricModInfo(QByteArray contents)
     if (schemaVersion >= 1)
     {
         QJsonArray authors = object.value("authors").toArray();
+        m_authors = "";
 
-        if (authors.size() == 0)
-            m_authors = "";
-        else if (authors.size() >= 1)
+        for (int i = 0; i < authors.size(); i++)
         {
-            m_authors = authors.at(0).toObject().value("name").toString();
-            for (int i = 1; i < authors.size(); i++)
-            {
-                m_authors += ", " + authors.at(i).toObject().value("name").toString();
+            QString author_name = authors.at(i).isObject()
+                    ? authors.at(i).toObject().value("name").toString()
+                    : authors.at(i).toString();
+
+            if (i > 0)
+                m_authors += ", " + author_name;
+            else {
+                m_authors += author_name;
             }
         }
 
