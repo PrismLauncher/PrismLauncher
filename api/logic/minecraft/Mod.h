@@ -113,6 +113,7 @@ public:
 
 private:
     void ReadMCModInfo(QByteArray contents);
+    void ReadFabricModInfo(QByteArray contents);
     void ReadForgeInfo(QByteArray contents);
     void ReadLiteModInfo(QByteArray contents);
 

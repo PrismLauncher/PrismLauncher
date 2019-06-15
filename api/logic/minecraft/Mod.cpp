@@ -96,6 +96,19 @@ void Mod::repath(const QFileInfo &file)
             zip.close();
             return;
         }
+        else if (zip.setCurrentFile("fabric.mod.json"))
+        {
+            if (!file.open(QIODevice::ReadOnly))
+            {
+                zip.close();
+                return;
+            }
+
+            ReadFabricModInfo(file.readAll());
+            file.close();
+            zip.close();
+            return;
+        }
         else if (zip.setCurrentFile("forgeversion.properties"))
         {
             if (!file.open(QIODevice::ReadOnly))
@@ -220,6 +233,48 @@ void Mod::ReadMCModInfo(QByteArray contents)
         if (arrVal.isArray())
         {
             getInfoFromArray(arrVal.toArray());
+        }
+    }
+}
+
+// https://fabricmc.net/wiki/documentation:fabric_mod_json
+void Mod::ReadFabricModInfo(QByteArray contents)
+{
+    QJsonParseError jsonError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
+    auto object = jsonDoc.object();
+    auto schemaVersion = object.contains("schemaVersion") ? object.value("schemaVersion").toInt(0) : 0;
+
+    m_mod_id = object.value("id").toString();
+    m_version = object.value("version").toString();
+
+    m_name = object.contains("name") ? object.value("name").toString() : m_mod_id;
+    m_description = object.value("description").toString();
+
+    if (schemaVersion >= 1)
+    {
+        QJsonArray authors = object.value("authors").toArray();
+        m_authors = "";
+
+        for (int i = 0; i < authors.size(); i++)
+        {
+            QString author_name = authors.at(i).isObject()
+                    ? authors.at(i).toObject().value("name").toString()
+                    : authors.at(i).toString();
+
+            if (i > 0)
+                m_authors += ", " + author_name;
+            else {
+                m_authors += author_name;
+            }
+        }
+
+        if (object.contains("contact"))
+        {
+            QJsonObject contact = object.value("contact").toObject();
+
+            if (contact.contains("homepage"))
+                m_homeurl = contact.value("homepage").toString();
         }
     }
 }
