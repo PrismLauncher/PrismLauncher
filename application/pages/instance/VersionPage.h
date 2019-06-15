@@ -49,6 +49,7 @@ public:
     virtual bool shouldDisplay() const override;
 
 private slots:
+    void on_fabricBtn_clicked();
     void on_forgeBtn_clicked();
     void on_addEmptyBtn_clicked();
     void on_liteloaderBtn_clicked();

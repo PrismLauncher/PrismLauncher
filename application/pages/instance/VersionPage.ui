@@ -171,6 +171,16 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="fabricBtn">
+           <property name="toolTip">
+            <string>Install the Minecraft Forge package.</string>
+           </property>
+           <property name="text">
+            <string>Install Fabric</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="liteloaderBtn">
            <property name="toolTip">
             <string>Install the LiteLoader package.</string>
@@ -298,6 +308,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>tabWidget</tabstop>
   <tabstop>packageView</tabstop>
   <tabstop>changeVersionBtn</tabstop>
   <tabstop>moveUpBtn</tabstop>
@@ -307,6 +318,7 @@
   <tabstop>editBtn</tabstop>
   <tabstop>revertBtn</tabstop>
   <tabstop>forgeBtn</tabstop>
+  <tabstop>fabricBtn</tabstop>
   <tabstop>liteloaderBtn</tabstop>
   <tabstop>modBtn</tabstop>
   <tabstop>jarmodBtn</tabstop>
@@ -314,7 +326,6 @@
   <tabstop>addEmptyBtn</tabstop>
   <tabstop>reloadBtn</tabstop>
   <tabstop>downloadBtn</tabstop>
-  <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>
  <connections/>
