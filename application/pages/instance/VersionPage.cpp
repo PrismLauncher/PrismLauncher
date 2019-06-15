@@ -318,6 +318,12 @@ void VersionPage::on_changeVersionBtn_clicked()
         return;
     }
     VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
+    if (uid == "net.fabricmc.intermediary")
+    {
+        vselect.setEmptyString(tr("No Fabric Loader versions are currently available."));
+        vselect.setEmptyErrorString(tr("Couldn't load or download the Fabric Loader version lists!"));
+        vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
+    }
     auto currentVersion = patch->getVersion();
     if(!currentVersion.isEmpty())
     {
