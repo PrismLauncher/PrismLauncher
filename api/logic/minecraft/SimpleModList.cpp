@@ -133,7 +133,7 @@ bool SimpleModList::installMod(const QString &filename)
 
     if (type == Mod::MOD_SINGLEFILE || type == Mod::MOD_ZIPFILE || type == Mod::MOD_LITEMOD)
     {
-        if(QFile::exists(newpath) || QFile::exists(newpath.append(".disabled")))
+        if(QFile::exists(newpath) || QFile::exists(newpath + QString(".disabled")))
         {
             if(!QFile::remove(newpath))
             {
