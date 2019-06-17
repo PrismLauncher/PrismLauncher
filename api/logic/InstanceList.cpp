@@ -234,7 +234,7 @@ void InstanceList::deleteInstance(const InstanceId& id)
     auto inst = getInstanceById(id);
     if(!inst)
     {
-        qDebug() << "Cannot delete instance" << id << " No such instance is present.";
+        qDebug() << "Cannot delete instance" << id << ". No such instance is present (deleted externally?).";
         return;
     }
 
