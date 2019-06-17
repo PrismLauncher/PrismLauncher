@@ -702,6 +702,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     // model reset -> selection is invalid. All the instance pointers are wrong.
     connect(MMC->instances().get(), &InstanceList::dataIsInvalid, this, &MainWindow::selectionBad);
 
+    // handle newly added instances
+    connect(MMC->instances().get(), &InstanceList::instanceAdded, this, &MainWindow::instanceAdded);
+
     // When the global settings page closes, we want to know about it and update our state
     connect(MMC, &MultiMC::globalSettingsClosed, this, &MainWindow::globalSettingsClosed);
 
@@ -1834,6 +1837,11 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         selectionBad();
         return;
     }
+}
+
+void MainWindow::instanceAdded(QString id)
+{
+    setSelectedInstanceById(id);
 }
 
 void MainWindow::instanceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
