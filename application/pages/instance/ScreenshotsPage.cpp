@@ -286,6 +286,38 @@ void ScreenshotsPage::on_uploadBtn_clicked()
 
     QList<ScreenshotPtr> uploaded;
     auto job = NetJobPtr(new NetJob("Screenshot Upload"));
+    if(selection.size() < 2)
+    {
+        auto item = selection.at(0);
+        auto info = m_model->fileInfo(item);
+        auto screenshot = std::make_shared<ScreenShot>(info);
+        job->addNetAction(ImgurUpload::make(screenshot));
+
+        m_uploadActive = true;
+        ProgressDialog dialog(this);
+        if(dialog.execWithTask(job.get()) != QDialog::Accepted)
+        {
+            CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"),
+                                         tr("Unknown error"), QMessageBox::Warning)->exec();
+        }
+        else
+        {
+            auto link = screenshot->m_url;
+            QClipboard *clipboard = QApplication::clipboard();
+            clipboard->setText(link);
+            CustomMessageBox::selectable(
+                    this,
+                    tr("Upload finished"),
+                    tr("The <a href=\"%1\">link  to the uploaded screenshot</a> has been placed in your clipboard.")
+                        .arg(link),
+                    QMessageBox::Information
+            )->exec();
+        }
+
+        m_uploadActive = false;
+        return;
+    }
+
     for (auto item : selection)
     {
         auto info = m_model->fileInfo(item);
