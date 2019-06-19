@@ -131,7 +131,14 @@ void DownloadTask::processDownloadedVersionInfo()
     QObject::connect(netJob.get(), &NetJob::progress, this, &DownloadTask::fileDownloadProgressChanged);
     QObject::connect(netJob.get(), &NetJob::failed, this, &DownloadTask::fileDownloadFailed);
 
-    setStatus(tr("Downloading %1 update files.").arg(QString::number(netJob->size())));
+    if(netJob->size() == 1) // Translation issues... see https://github.com/MultiMC/MultiMC5/issues/1701
+    {
+        setStatus(tr("Downloading one update file."));
+    }
+    else
+    {
+        setStatus(tr("Downloading %1 update files.").arg(QString::number(netJob->size())));
+    }
     qDebug() << "Begin downloading update files to" << m_updateFilesDir.path();
     m_filesNetJob = netJob;
     m_filesNetJob->start();
