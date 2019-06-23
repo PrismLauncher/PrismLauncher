@@ -26,6 +26,7 @@ slots:
         QTest::newRow("Plain text") << "Lorem ipsum dolor sit amet.";
         QTest::newRow("Escape sequences") << "Lorem\n\t\n\\n\\tAAZ\nipsum dolor\n\nsit amet.";
         QTest::newRow("Escape sequences 2") << "\"\n\n\"";
+        QTest::newRow("Hashtags") << "some data#something";
     }
     void test_Escape()
     {
@@ -40,7 +41,7 @@ slots:
     void test_SaveLoad()
     {
         QString a = "a";
-        QString b = "a\nb\t\n\\\\\\C:\\Program files\\terrible\\name\\of something\\";
+        QString b = "a\nb\t\n\\\\\\C:\\Program files\\terrible\\name\\of something\\#thisIsNotAComment";
         QString filename = "test_SaveLoad.ini";
 
         // save

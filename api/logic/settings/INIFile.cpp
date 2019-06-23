@@ -36,8 +36,10 @@ QString INIFile::unescape(QString orig)
         {
             if(c == 'n')
                 out += '\n';
-            else if (c == 't')
+            else if(c == 't')
                 out += '\t';
+            else if(c == '#')
+                out += '#';
             else
                 out += c;
             prev = 0;
@@ -67,6 +69,8 @@ QString INIFile::escape(QString orig)
             out += "\\t";
         else if(c == '\\')
             out += "\\\\";
+        else if(c == '#')
+            out += "\\#";
         else
             out += c;
     }
@@ -120,7 +124,15 @@ bool INIFile::loadFile(QByteArray file)
     {
         QString &lineRaw = lines[i];
         // Ignore comments.
-        QString line = lineRaw.left(lineRaw.indexOf('#')).trimmed();
+        int commentIndex = 0;
+        QString line = lineRaw;
+        // Search for comments until no more escaped # are available
+        while((commentIndex = line.indexOf('#', commentIndex + 1)) != -1) {
+            if(commentIndex > 0 && line.at(commentIndex - 1) == '\\') {
+                continue;
+            }
+            line = line.left(lineRaw.indexOf('#')).trimmed();
+        }
 
         int eqPos = line.indexOf('=');
         if (eqPos == -1)
