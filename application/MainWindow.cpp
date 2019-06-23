@@ -1667,6 +1667,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
     {
         return;
     }
+    auto id = m_selectedInstance->id();
     auto response = CustomMessageBox::selectable(
         this,
         tr("CAREFUL!"),
@@ -1677,7 +1678,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
     )->exec();
     if (response == QMessageBox::Yes)
     {
-        MMC->instances()->deleteInstance(m_selectedInstance->id());
+        MMC->instances()->deleteInstance(id);
     }
 }
 
