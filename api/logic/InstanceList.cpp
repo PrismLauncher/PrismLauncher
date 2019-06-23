@@ -819,7 +819,7 @@ bool InstanceList::commitStagedInstance(const QString& path, const QString& inst
         instanceSet.insert(instID);
         m_groups.insert(groupName);
         emit instancesChanged();
-        emit instanceAdded(instID);
+        emit instanceSelectRequest(instID);
     }
     saveGroupList();
     return true;

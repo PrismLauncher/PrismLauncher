@@ -703,7 +703,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     connect(MMC->instances().get(), &InstanceList::dataIsInvalid, this, &MainWindow::selectionBad);
 
     // handle newly added instances
-    connect(MMC->instances().get(), &InstanceList::instanceAdded, this, &MainWindow::instanceAdded);
+    connect(MMC->instances().get(), &InstanceList::instanceSelectRequest, this, &MainWindow::instanceSelectRequest);
 
     // When the global settings page closes, we want to know about it and update our state
     connect(MMC, &MultiMC::globalSettingsClosed, this, &MainWindow::globalSettingsClosed);
@@ -1839,7 +1839,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
     }
 }
 
-void MainWindow::instanceAdded(QString id)
+void MainWindow::instanceSelectRequest(QString id)
 {
     setSelectedInstanceById(id);
 }

@@ -152,7 +152,7 @@ private slots:
 
     void instanceChanged(const QModelIndex &current, const QModelIndex &previous);
 
-    void instanceAdded(QString id);
+    void instanceSelectRequest(QString id);
 
     void instanceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
