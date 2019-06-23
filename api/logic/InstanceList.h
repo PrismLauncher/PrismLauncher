@@ -129,6 +129,7 @@ public:
 signals:
     void dataIsInvalid();
     void instancesChanged();
+    void instanceSelectRequest(QString instanceId);
     void groupsChanged(QSet<QString> groups);
 
 public slots:
