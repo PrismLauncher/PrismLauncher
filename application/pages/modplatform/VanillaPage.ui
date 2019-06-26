@@ -99,6 +99,16 @@
           </widget>
          </item>
          <item>
+          <widget class="QCheckBox" name="experimentsFilter">
+           <property name="text">
+            <string>Experiments</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -144,6 +154,16 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>releaseFilter</tabstop>
+  <tabstop>snapshotFilter</tabstop>
+  <tabstop>oldSnapshotFilter</tabstop>
+  <tabstop>betaFilter</tabstop>
+  <tabstop>alphaFilter</tabstop>
+  <tabstop>experimentsFilter</tabstop>
+  <tabstop>refreshBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

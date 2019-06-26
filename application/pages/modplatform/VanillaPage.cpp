@@ -23,6 +23,7 @@ VanillaPage::VanillaPage(NewInstanceDialog *dialog, QWidget *parent)
     connect(ui->snapshotFilter, &QCheckBox::stateChanged, this, &VanillaPage::filterChanged);
     connect(ui->oldSnapshotFilter, &QCheckBox::stateChanged, this, &VanillaPage::filterChanged);
     connect(ui->releaseFilter, &QCheckBox::stateChanged, this, &VanillaPage::filterChanged);
+    connect(ui->experimentsFilter, &QCheckBox::stateChanged, this, &VanillaPage::filterChanged);
     connect(ui->refreshBtn, &QPushButton::clicked, this, &VanillaPage::refresh);
 }
 
@@ -58,6 +59,8 @@ void VanillaPage::filterChanged()
         out << "(old_snapshot)";
     if(ui->releaseFilter->isChecked())
         out << "(release)";
+    if(ui->experimentsFilter->isChecked())
+        out << "(experiment)";
     auto regexp = out.join('|');
     ui->versionList->setFilter(BaseVersionList::TypeRole, new RegexpFilter(regexp, false));
 }
