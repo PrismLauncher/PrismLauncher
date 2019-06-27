@@ -20,6 +20,7 @@
 #include "pages/BasePage.h"
 #include <MultiMC.h>
 #include "tasks/Task.h"
+#include "modplatform/flame/UrlResolvingTask.h"
 
 namespace Ui
 {
@@ -55,7 +56,12 @@ public:
 
     void openedImpl() override;
 
+private slots:
+    void triggerCheck(bool checked);
+    void checkDone();
+
 private:
     Ui::TwitchPage *ui = nullptr;
     NewInstanceDialog* dialog = nullptr;
+    shared_qobject_ptr<Flame::UrlResolvingTask> m_modIdResolver;
 };

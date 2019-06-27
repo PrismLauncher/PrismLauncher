@@ -75,6 +75,11 @@ void ImportPage::updateState()
         }
         else
         {
+            if(input.endsWith("?client=y")) {
+                input.chop(9);
+                input.append("/file");
+                url = QUrl::fromUserInput(input);
+            }
             // hook, line and sinker.
             QFileInfo fi(url.fileName());
             dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url));

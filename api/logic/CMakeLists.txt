@@ -443,6 +443,8 @@ set(FLAME_SOURCES
     modplatform/flame/PackManifest.cpp
     modplatform/flame/FileResolvingTask.h
     modplatform/flame/FileResolvingTask.cpp
+    modplatform/flame/UrlResolvingTask.h
+    modplatform/flame/UrlResolvingTask.cpp
 )
 
 add_unit_test(Index
