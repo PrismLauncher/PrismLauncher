@@ -36,7 +36,7 @@
 #include <pages/modplatform/VanillaPage.h>
 #include <pages/modplatform/FTBPage.h>
 #include <pages/modplatform/TwitchPage.h>
-#include <pages/modplatform/ImportPage.h>
+#include <pages/modplatform/MultiMCPage.h>
 #include <pages/modplatform/TechnicPage.h>
 
 NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString & url, QWidget *parent)
@@ -118,13 +118,13 @@ void NewInstanceDialog::accept()
 
 QList<BasePage *> NewInstanceDialog::getPages()
 {
-    importPage = new ImportPage(this);
+    importPage = new MultiMCPage(this);
     return
     {
         new VanillaPage(this),
-        new FTBPage(this),
         importPage,
         new TwitchPage(this),
+        new FTBPage(this),
         new TechnicPage(this)
     };
 }

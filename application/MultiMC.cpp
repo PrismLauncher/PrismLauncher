@@ -3,7 +3,7 @@
 #include "MainWindow.h"
 #include "InstanceWindow.h"
 #include "pages/BasePageProvider.h"
-#include "pages/global/MultiMCPage.h"
+#include "pages/global/MultiMCSettingsPage.h"
 #include "pages/global/MinecraftPage.h"
 #include "pages/global/JavaPage.h"
 #include "pages/global/LanguagePage.h"
@@ -517,7 +517,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         // Init page provider
         {
             m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
-            m_globalSettingsProvider->addPage<MultiMCPage>();
+            m_globalSettingsProvider->addPage<MultiMCSettingsPage>();
             m_globalSettingsProvider->addPage<MinecraftPage>();
             m_globalSettingsProvider->addPage<JavaPage>();
             m_globalSettingsProvider->addPage<LanguagePage>();

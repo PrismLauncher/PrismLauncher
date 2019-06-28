@@ -23,33 +23,33 @@
 
 namespace Ui
 {
-class ImportPage;
+class MultiMCPage;
 }
 
 class NewInstanceDialog;
 
-class ImportPage : public QWidget, public BasePage
+class MultiMCPage : public QWidget, public BasePage
 {
     Q_OBJECT
 
 public:
-    explicit ImportPage(NewInstanceDialog* dialog, QWidget *parent = 0);
-    virtual ~ImportPage();
+    explicit MultiMCPage(NewInstanceDialog* dialog, QWidget *parent = 0);
+    virtual ~MultiMCPage();
     virtual QString displayName() const override
     {
-        return tr("Import from zip");
+        return tr("MultiMC");
     }
     virtual QIcon icon() const override
     {
-        return MMC->getThemedIcon("viewfolder");
+        return MMC->getThemedIcon("multimc");
     }
     virtual QString id() const override
     {
-        return "import";
+        return "multimc";
     }
     virtual QString helpPage() const override
     {
-        return "Zip-import";
+        return "MultiMC-packs";
     }
     virtual bool shouldDisplay() const override;
 
@@ -64,7 +64,7 @@ private:
     QUrl modpackUrl() const;
 
 private:
-    Ui::ImportPage *ui = nullptr;
+    Ui::MultiMCPage *ui = nullptr;
     NewInstanceDialog* dialog = nullptr;
 };
 
