@@ -648,8 +648,7 @@ QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(AuthSess
     auto i = sessionRef.u.properties.begin();
     while (i != sessionRef.u.properties.end())
     {
-        if(i.key() == "preferredLanguage")
-        {
+        if(i.value().length() <= 3) {
             ++i;
             continue;
         }
