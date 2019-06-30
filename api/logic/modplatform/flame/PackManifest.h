@@ -8,6 +8,9 @@ namespace Flame
 {
 struct File
 {
+    // NOTE: throws JSONValidationError
+    bool parseFromBytes(const QByteArray &bytes);
+
     int projectId = 0;
     int fileId = 0;
     // NOTE: the opposite to 'optional'. This is at the time of writing unused.

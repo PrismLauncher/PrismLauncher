@@ -1,7 +1,9 @@
 #include "FileResolvingTask.h"
 #include "Json.h"
 
-const char * metabase = "https://cursemeta.dries007.net";
+namespace {
+    const char * metabase = "https://cursemeta.dries007.net";
+}
 
 Flame::FileResolvingTask::FileResolvingTask(Flame::Manifest& toProcess)
     : m_toProcess(toProcess)
@@ -34,70 +36,14 @@ void Flame::FileResolvingTask::netJobFinished()
     int index = 0;
     for(auto & bytes: results)
     {
+        auto & out = m_toProcess.files[index];
         try
         {
-            auto doc = Json::requireDocument(bytes);
-            auto obj = Json::requireObject(doc);
-            auto & out = m_toProcess.files[index];
-            // result code signifies true failure.
-            if(obj.contains("code"))
-            {
-                qCritical() << "Resolving of" << out.projectId << out.fileId << "failed because of a negative result:";
-                qCritical() << bytes;
-                failed = true;
-                continue;
-            }
-            out.fileName = Json::requireString(obj, "FileNameOnDisk");
-            QString rawUrl = Json::requireString(obj, "DownloadURL");
-            out.url = QUrl(rawUrl, QUrl::TolerantMode);
-            if(!out.url.isValid())
-            {
-                throw JSONValidationError(QString("Invalid URL: %1").arg(rawUrl));
-            }
-            // This is a piece of a Flame project JSON pulled out into the file metadata (here) for convenience
-            // It is also optional
-            QJsonObject projObj = Json::ensureObject(obj, "_Project", {});
-            if(!projObj.isEmpty())
-            {
-                QString strType = Json::ensureString(projObj, "PackageType", "mod").toLower();
-                if(strType == "singlefile")
-                {
-                    out.type = File::Type::SingleFile;
-                }
-                else if(strType == "ctoc")
-                {
-                    out.type = File::Type::Ctoc;
-                }
-                else if(strType == "cmod2")
-                {
-                    out.type = File::Type::Cmod2;
-                }
-                else if(strType == "mod")
-                {
-                    out.type = File::Type::Mod;
-                }
-                else if(strType == "folder")
-                {
-                    out.type = File::Type::Folder;
-                }
-                else if(strType == "modpack")
-                {
-                    out.type = File::Type::Modpack;
-                }
-                else
-                {
-                    qCritical() << "Resolving of" << out.projectId << out.fileId << "failed because of unknown file type:" << strType;
-                    out.type = File::Type::Unknown;
-                    failed = true;
-                    continue;
-                }
-                out.targetFolder = Json::ensureString(projObj, "Path", "mods");
-            }
-            out.resolved = true;
+            failed &= (!out.parseFromBytes(bytes));
         }
         catch (const JSONValidationError &e)
         {
-            auto & out = m_toProcess.files[index];
+
             qCritical() << "Resolving of" << out.projectId << out.fileId << "failed because of a parsing error:";
             qCritical() << e.cause();
             qCritical() << "JSON:";

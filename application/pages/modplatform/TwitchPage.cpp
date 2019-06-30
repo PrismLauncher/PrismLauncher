@@ -3,6 +3,7 @@
 
 #include "MultiMC.h"
 #include "dialogs/NewInstanceDialog.h"
+#include <InstanceImportTask.h>
 
 TwitchPage::TwitchPage(NewInstanceDialog* dialog, QWidget *parent)
     : QWidget(parent), ui(new Ui::TwitchPage), dialog(dialog)
@@ -42,6 +43,13 @@ void TwitchPage::checkDone()
 {
     auto result = m_modIdResolver->getResults();
     auto formatted = QString("Project %1, File %2").arg(result.projectId).arg(result.fileId);
-    ui->twitchLabel->setText(formatted);
+    if(result.resolved && result.type == Flame::File::Type::Modpack) {
+        ui->twitchLabel->setText(formatted);
+        QFileInfo fi(result.fileName);
+        dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(result.url));
+    } else {
+        ui->twitchLabel->setPixmap(QPixmap(QString::fromUtf8(":/assets/deadglitch")));
+        dialog->setSuggestedPack();
+    }
     m_modIdResolver.reset();
 }

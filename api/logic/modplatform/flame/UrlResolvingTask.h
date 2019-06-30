@@ -26,7 +26,11 @@ protected:
 protected slots:
     void processCCIP();
     void processHTML();
-    void netJobFinished();
+    void processCursemeta();
+
+private:
+    void resolveUrl();
+    void resolveIDs();
 
 private: /* data */
     QString m_url;
@@ -34,7 +38,6 @@ private: /* data */
     Flame::File m_result;
     QByteArray results;
     NetJobPtr m_dljob;
-    bool weAreDigging = false;
 };
 }
 

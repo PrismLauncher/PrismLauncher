@@ -1,11 +1,11 @@
 #include "UrlResolvingTask.h"
 #include <QtXml>
+#include <Json.h>
 
-/*
+
 namespace {
-const char * metabase = "https://cursemeta.dries007.net";
+    const char * metabase = "https://cursemeta.dries007.net";
 }
-*/
 
 Flame::UrlResolvingTask::UrlResolvingTask(const QString& toProcess)
     : m_url(toProcess)
@@ -14,11 +14,16 @@ Flame::UrlResolvingTask::UrlResolvingTask(const QString& toProcess)
 
 void Flame::UrlResolvingTask::executeTask()
 {
+    resolveUrl();
+}
+
+void Flame::UrlResolvingTask::resolveUrl()
+{
     setStatus(tr("Resolving URL..."));
     setProgress(0, 1);
     m_dljob.reset(new NetJob("URL resolver"));
 
-    weAreDigging = false;
+    bool weAreDigging = false;
     needle = QString();
 
     if(m_url.startsWith("https://")) {
@@ -48,17 +53,12 @@ void Flame::UrlResolvingTask::executeTask()
     }
     auto dl = Net::Download::makeByteArray(QUrl(m_url), &results);
     m_dljob->addNetAction(dl);
-    connect(m_dljob.get(), &NetJob::finished, this, &Flame::UrlResolvingTask::netJobFinished);
-    m_dljob->start();
-}
-
-void Flame::UrlResolvingTask::netJobFinished()
-{
     if(weAreDigging) {
-        processHTML();
+        connect(m_dljob.get(), &NetJob::finished, this, &Flame::UrlResolvingTask::processHTML);
     } else {
-        processCCIP();
+        connect(m_dljob.get(), &NetJob::finished, this, &Flame::UrlResolvingTask::processCCIP);
     }
+    m_dljob->start();
 }
 
 void Flame::UrlResolvingTask::processHTML()
@@ -83,7 +83,7 @@ void Flame::UrlResolvingTask::processHTML()
         qDebug() << "Found needle: " << found;
         // twitch://www.curseforge.com/minecraft/modpacks/ftb-sky-odyssey/download-client/2697088
         m_url = found;
-        executeTask();
+        resolveUrl();
         return;
     }
     emitFailed(tr("Couldn't find the end of the needle in the haystack..."));
@@ -135,6 +135,36 @@ void Flame::UrlResolvingTask::processCCIP()
         return;
     }
     qDebug() << "Resolved" << m_url << "as" << m_result.projectId << "/" << m_result.fileId;
-    emitSucceeded();
+    resolveIDs();
 }
 
+void Flame::UrlResolvingTask::resolveIDs()
+{
+    setStatus(tr("Resolving mod IDs..."));
+    m_dljob.reset(new NetJob("Mod id resolver"));
+    auto projectIdStr = QString::number(m_result.projectId);
+    auto fileIdStr = QString::number(m_result.fileId);
+    QString metaurl = QString("%1/%2/%3.json").arg(metabase, projectIdStr, fileIdStr);
+    auto dl = Net::Download::makeByteArray(QUrl(metaurl), &results);
+    m_dljob->addNetAction(dl);
+    connect(m_dljob.get(), &NetJob::finished, this, &Flame::UrlResolvingTask::processCursemeta);
+    m_dljob->start();
+}
+
+void Flame::UrlResolvingTask::processCursemeta()
+{
+    try {
+        if(m_result.parseFromBytes(results)) {
+            emitSucceeded();
+            qDebug() << results;
+            return;
+        }
+    } catch (const JSONValidationError &e) {
+
+        qCritical() << "Resolving of" << m_result.projectId << m_result.fileId << "failed because of a parsing error:";
+        qCritical() << e.cause();
+        qCritical() << "JSON:";
+        qCritical() << results;
+    }
+    emitFailed(tr("Failed to resolve the modpack file."));
+}

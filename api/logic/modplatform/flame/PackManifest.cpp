@@ -64,3 +64,63 @@ void Flame::loadManifest(Flame::Manifest & m, const QString &filepath)
     }
     loadManifestV1(m, obj);
 }
+
+bool Flame::File::parseFromBytes(const QByteArray& bytes)
+{
+    auto doc = Json::requireDocument(bytes);
+    auto obj = Json::requireObject(doc);
+    // result code signifies true failure.
+    if(obj.contains("code"))
+    {
+        qCritical() << "Resolving of" << projectId << fileId << "failed because of a negative result:";
+        qCritical() << bytes;
+        return false;
+    }
+    fileName = Json::requireString(obj, "FileNameOnDisk");
+    QString rawUrl = Json::requireString(obj, "DownloadURL");
+    url = QUrl(rawUrl, QUrl::TolerantMode);
+    if(!url.isValid())
+    {
+        throw JSONValidationError(QString("Invalid URL: %1").arg(rawUrl));
+    }
+    // This is a piece of a Flame project JSON pulled out into the file metadata (here) for convenience
+    // It is also optional
+    QJsonObject projObj = Json::ensureObject(obj, "_Project", {});
+    if(!projObj.isEmpty())
+    {
+        QString strType = Json::ensureString(projObj, "PackageType", "mod").toLower();
+        if(strType == "singlefile")
+        {
+            type = File::Type::SingleFile;
+        }
+        else if(strType == "ctoc")
+        {
+            type = File::Type::Ctoc;
+        }
+        else if(strType == "cmod2")
+        {
+            type = File::Type::Cmod2;
+        }
+        else if(strType == "mod")
+        {
+            type = File::Type::Mod;
+        }
+        else if(strType == "folder")
+        {
+            type = File::Type::Folder;
+        }
+        else if(strType == "modpack")
+        {
+            type = File::Type::Modpack;
+        }
+        else
+        {
+            qCritical() << "Resolving of" << projectId << fileId << "failed because of unknown file type:" << strType;
+            type = File::Type::Unknown;
+            return false;
+        }
+        targetFolder = Json::ensureString(projObj, "Path", "mods");
+    }
+    resolved = true;
+    return true;
+}
