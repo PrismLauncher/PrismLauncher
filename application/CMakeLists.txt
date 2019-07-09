@@ -119,8 +119,8 @@ SET(MULTIMC_SOURCES
     pages/global/LanguagePage.h
     pages/global/MinecraftPage.cpp
     pages/global/MinecraftPage.h
-    pages/global/MultiMCSettingsPage.cpp
-    pages/global/MultiMCSettingsPage.h
+    pages/global/MultiMCPage.cpp
+    pages/global/MultiMCPage.h
     pages/global/ProxyPage.cpp
     pages/global/ProxyPage.h
     pages/global/PasteEEPage.cpp
@@ -139,8 +139,8 @@ SET(MULTIMC_SOURCES
     pages/modplatform/TwitchPage.h
     pages/modplatform/TechnicPage.cpp
     pages/modplatform/TechnicPage.h
-    pages/modplatform/MultiMCPage.cpp
-    pages/modplatform/MultiMCPage.h
+    pages/modplatform/ImportPage.cpp
+    pages/modplatform/ImportPage.h
 
     # GUI - dialogs
     dialogs/AboutDialog.cpp
@@ -245,7 +245,7 @@ SET(MULTIMC_UIS
     pages/global/ExternalToolsPage.ui
     pages/global/JavaPage.ui
     pages/global/MinecraftPage.ui
-    pages/global/MultiMCSettingsPage.ui
+    pages/global/MultiMCPage.ui
     pages/global/ProxyPage.ui
     pages/global/PasteEEPage.ui
     pages/global/PackagesPage.ui
@@ -255,7 +255,7 @@ SET(MULTIMC_UIS
     pages/modplatform/FTBPage.ui
     pages/modplatform/TwitchPage.ui
     pages/modplatform/TechnicPage.ui
-    pages/modplatform/MultiMCPage.ui
+    pages/modplatform/ImportPage.ui
 
     # Dialogs
     dialogs/CopyInstanceDialog.ui

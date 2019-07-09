@@ -28,7 +28,7 @@ class NewInstanceDialog;
 
 class PageContainer;
 class QDialogButtonBox;
-class MultiMCPage;
+class ImportPage;
 
 class NewInstanceDialog : public QDialog, public BasePageProvider
 {
@@ -66,7 +66,7 @@ private:
     QDialogButtonBox * m_buttons = nullptr;
 
     QString InstIconKey;
-    MultiMCPage *importPage = nullptr;
+    ImportPage *importPage = nullptr;
     std::unique_ptr<InstanceTask> creationTask;
 
     bool importIcon = false;

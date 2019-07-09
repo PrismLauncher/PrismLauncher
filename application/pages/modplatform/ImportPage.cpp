@@ -1,5 +1,5 @@
-#include "MultiMCPage.h"
-#include "ui_MultiMCPage.h"
+#include "ImportPage.h"
+#include "ui_ImportPage.h"
 
 #include "MultiMC.h"
 #include "dialogs/NewInstanceDialog.h"
@@ -30,30 +30,30 @@ public:
     }
 };
 
-MultiMCPage::MultiMCPage(NewInstanceDialog* dialog, QWidget *parent)
-    : QWidget(parent), ui(new Ui::MultiMCPage), dialog(dialog)
+ImportPage::ImportPage(NewInstanceDialog* dialog, QWidget *parent)
+    : QWidget(parent), ui(new Ui::ImportPage), dialog(dialog)
 {
     ui->setupUi(this);
     ui->modpackEdit->setValidator(new UrlValidator(ui->modpackEdit));
-    connect(ui->modpackEdit, &QLineEdit::textChanged, this, &MultiMCPage::updateState);
+    connect(ui->modpackEdit, &QLineEdit::textChanged, this, &ImportPage::updateState);
 }
 
-MultiMCPage::~MultiMCPage()
+ImportPage::~ImportPage()
 {
     delete ui;
 }
 
-bool MultiMCPage::shouldDisplay() const
+bool ImportPage::shouldDisplay() const
 {
     return true;
 }
 
-void MultiMCPage::openedImpl()
+void ImportPage::openedImpl()
 {
     updateState();
 }
 
-void MultiMCPage::updateState()
+void ImportPage::updateState()
 {
     if(!isOpened)
     {
@@ -75,6 +75,11 @@ void MultiMCPage::updateState()
         }
         else
         {
+            if(input.endsWith("?client=y")) {
+                input.chop(9);
+                input.append("/file");
+                url = QUrl::fromUserInput(input);
+            }
             // hook, line and sinker.
             QFileInfo fi(url.fileName());
             dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url));
@@ -86,13 +91,13 @@ void MultiMCPage::updateState()
     }
 }
 
-void MultiMCPage::setUrl(const QString& url)
+void ImportPage::setUrl(const QString& url)
 {
     ui->modpackEdit->setText(url);
     updateState();
 }
 
-void MultiMCPage::on_modpackBtn_clicked()
+void ImportPage::on_modpackBtn_clicked()
 {
     const QUrl url = QFileDialog::getOpenFileUrl(this, tr("Choose modpack"), modpackUrl(), tr("Zip (*.zip)"));
     if (url.isValid())
@@ -109,7 +114,7 @@ void MultiMCPage::on_modpackBtn_clicked()
 }
 
 
-QUrl MultiMCPage::modpackUrl() const
+QUrl ImportPage::modpackUrl() const
 {
     const QUrl url(ui->modpackEdit->text());
     if (url.isValid() && !url.isRelative() && !url.host().isEmpty())

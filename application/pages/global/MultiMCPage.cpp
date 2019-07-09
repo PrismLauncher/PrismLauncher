@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "MultiMCSettingsPage.h"
-#include "ui_MultiMCSettingsPage.h"
+#include "MultiMCPage.h"
+#include "ui_MultiMCPage.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -38,7 +38,7 @@ enum InstSortMode
     Sort_LastLaunch
 };
 
-MultiMCSettingsPage::MultiMCSettingsPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCSettingsPage)
+MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCPage)
 {
     ui->setupUi(this);
     auto origForeground = ui->fontPreview->palette().color(ui->fontPreview->foregroundRole());
@@ -56,7 +56,7 @@ MultiMCSettingsPage::MultiMCSettingsPage(QWidget *parent) : QWidget(parent), ui(
     if(BuildConfig.UPDATER_ENABLED)
     {
         QObject::connect(MMC->updateChecker().get(), &UpdateChecker::channelListLoaded, this,
-                        &MultiMCSettingsPage::refreshUpdateChannelList);
+                        &MultiMCPage::refreshUpdateChannelList);
 
         if (MMC->updateChecker()->hasChannels())
         {
@@ -81,18 +81,18 @@ MultiMCSettingsPage::MultiMCSettingsPage(QWidget *parent) : QWidget(parent), ui(
     connect(ui->languageBox, SIGNAL(currentIndexChanged(int)), SLOT(languageIndexChanged(int)));
 }
 
-MultiMCSettingsPage::~MultiMCSettingsPage()
+MultiMCPage::~MultiMCPage()
 {
     delete ui;
 }
 
-bool MultiMCSettingsPage::apply()
+bool MultiMCPage::apply()
 {
     applySettings();
     return true;
 }
 
-void MultiMCSettingsPage::on_instDirBrowseBtn_clicked()
+void MultiMCPage::on_instDirBrowseBtn_clicked()
 {
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Folder"), ui->instDirTextBox->text());
 
@@ -124,7 +124,7 @@ void MultiMCSettingsPage::on_instDirBrowseBtn_clicked()
     }
 }
 
-void MultiMCSettingsPage::on_iconsDirBrowseBtn_clicked()
+void MultiMCPage::on_iconsDirBrowseBtn_clicked()
 {
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Folder"), ui->iconsDirTextBox->text());
 
@@ -135,7 +135,7 @@ void MultiMCSettingsPage::on_iconsDirBrowseBtn_clicked()
         ui->iconsDirTextBox->setText(cooked_dir);
     }
 }
-void MultiMCSettingsPage::on_modsDirBrowseBtn_clicked()
+void MultiMCPage::on_modsDirBrowseBtn_clicked()
 {
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Folder"), ui->modsDirTextBox->text());
 
@@ -147,7 +147,7 @@ void MultiMCSettingsPage::on_modsDirBrowseBtn_clicked()
     }
 }
 
-void MultiMCSettingsPage::languageIndexChanged(int index)
+void MultiMCPage::languageIndexChanged(int index)
 {
     auto languageCode = ui->languageBox->itemData(ui->languageBox->currentIndex()).toString();
     if(languageCode.isEmpty())
@@ -160,7 +160,7 @@ void MultiMCSettingsPage::languageIndexChanged(int index)
     translations->updateLanguage(languageCode);
 }
 
-void MultiMCSettingsPage::refreshUpdateChannelList()
+void MultiMCPage::refreshUpdateChannelList()
 {
     // Stop listening for selection changes. It's going to change a lot while we update it and
     // we don't need to update the
@@ -205,12 +205,12 @@ void MultiMCSettingsPage::refreshUpdateChannelList()
     ui->updateChannelComboBox->setEnabled(true);
 }
 
-void MultiMCSettingsPage::updateChannelSelectionChanged(int index)
+void MultiMCPage::updateChannelSelectionChanged(int index)
 {
     refreshUpdateChannelDesc();
 }
 
-void MultiMCSettingsPage::refreshUpdateChannelDesc()
+void MultiMCPage::refreshUpdateChannelDesc()
 {
     // Get the channel list.
     QList<UpdateChecker::ChannelListEntry> channelList = MMC->updateChecker()->getChannelList();
@@ -232,7 +232,7 @@ void MultiMCSettingsPage::refreshUpdateChannelDesc()
     }
 }
 
-void MultiMCSettingsPage::applySettings()
+void MultiMCPage::applySettings()
 {
     auto s = MMC->settings();
 
@@ -329,7 +329,7 @@ void MultiMCSettingsPage::applySettings()
         s->set("Analytics", ui->analyticsCheck->isChecked());
     }
 }
-void MultiMCSettingsPage::loadSettings()
+void MultiMCPage::loadSettings()
 {
     auto s = MMC->settings();
     // Language
@@ -437,7 +437,7 @@ void MultiMCSettingsPage::loadSettings()
     }
 }
 
-void MultiMCSettingsPage::refreshFontPreview()
+void MultiMCPage::refreshFontPreview()
 {
     int fontSize = ui->fontSizeBox->value();
     QString fontFamily = ui->consoleFont->currentFont().family();

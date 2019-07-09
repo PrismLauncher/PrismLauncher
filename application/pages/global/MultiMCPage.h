@@ -29,16 +29,16 @@ class SettingsObject;
 
 namespace Ui
 {
-class MultiMCSettingsPage;
+class MultiMCPage;
 }
 
-class MultiMCSettingsPage : public QWidget, public BasePage
+class MultiMCPage : public QWidget, public BasePage
 {
     Q_OBJECT
 
 public:
-    explicit MultiMCSettingsPage(QWidget *parent = 0);
-    ~MultiMCSettingsPage();
+    explicit MultiMCPage(QWidget *parent = 0);
+    ~MultiMCPage();
 
     QString displayName() const override
     {
@@ -88,7 +88,7 @@ slots:
     void updateChannelSelectionChanged(int index);
 
 private:
-    Ui::MultiMCSettingsPage *ui;
+    Ui::MultiMCPage *ui;
 
     /*!
      * Stores the currently selected update channel.
