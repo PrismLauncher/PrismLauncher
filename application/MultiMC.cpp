@@ -13,7 +13,6 @@
 #include "pages/global/PasteEEPage.h"
 #include "pages/global/PackagesPage.h"
 #include "pages/global/CustomCommandsPage.h"
-#include "pages/global/DefaultGameOptionsPage.h"
 
 #include "themes/ITheme.h"
 #include "themes/SystemTheme.h"
@@ -486,11 +485,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         // The cat
         m_settings->registerSetting("TheCat", false);
 
-
-        // Default options
-        m_settings->registerSetting("DefaultOptionsMode", "NoAutojump");
-        m_settings->registerSetting("DefaultOptionsText", "autoJump:false");
-
         m_settings->registerSetting("InstSortMode", "Name");
         m_settings->registerSetting("SelectedInstance", QString());
 
@@ -525,7 +519,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
             m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
             m_globalSettingsProvider->addPage<MultiMCSettingsPage>();
             m_globalSettingsProvider->addPage<MinecraftPage>();
-            m_globalSettingsProvider->addPage<DefaultGameOptionsPage>();
             m_globalSettingsProvider->addPage<JavaPage>();
             m_globalSettingsProvider->addPage<LanguagePage>();
             m_globalSettingsProvider->addPage<CustomCommandsPage>();

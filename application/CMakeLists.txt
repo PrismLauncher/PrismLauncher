@@ -111,8 +111,6 @@ SET(MULTIMC_SOURCES
     pages/global/AccountListPage.h
     pages/global/CustomCommandsPage.cpp
     pages/global/CustomCommandsPage.h
-    pages/global/DefaultGameOptionsPage.cpp
-    pages/global/DefaultGameOptionsPage.h
     pages/global/ExternalToolsPage.cpp
     pages/global/ExternalToolsPage.h
     pages/global/JavaPage.cpp
@@ -244,7 +242,6 @@ SET(MULTIMC_UIS
 
     # Global settings pages
     pages/global/AccountListPage.ui
-    pages/global/DefaultGameOptionsPage.ui
     pages/global/ExternalToolsPage.ui
     pages/global/JavaPage.ui
     pages/global/MinecraftPage.ui
