@@ -39,6 +39,8 @@
 #include <pages/modplatform/ImportPage.h>
 #include <pages/modplatform/TechnicPage.h>
 
+
+
 NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString & url, QWidget *parent)
     : QDialog(parent), ui(new Ui::NewInstanceDialog)
 {
@@ -94,8 +96,15 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 
     if(!url.isEmpty())
     {
-        m_container->selectPage("import");
-        importPage->setUrl(url);
+        QUrl actualUrl(url);
+        if(actualUrl.host() == "www.curseforge.com") {
+            m_container->selectPage("twitch");
+            twitchPage->setUrl(url);
+        }
+        else {
+            m_container->selectPage("import");
+            importPage->setUrl(url);
+        }
     }
 
     updateDialogState();
@@ -119,13 +128,13 @@ void NewInstanceDialog::accept()
 QList<BasePage *> NewInstanceDialog::getPages()
 {
     importPage = new ImportPage(this);
+    twitchPage = new TwitchPage(this);
     return
     {
         new VanillaPage(this),
-        new FTBPage(this),
         importPage,
-        new TwitchPage(this),
-        new TechnicPage(this)
+        twitchPage,
+        new FTBPage(this)
     };
 }
 

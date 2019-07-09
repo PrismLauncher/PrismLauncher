@@ -30,13 +30,18 @@ void TwitchPage::openedImpl()
 void TwitchPage::triggerCheck(bool)
 {
     if(m_modIdResolver) {
-        qDebug() << "Click!";
         return;
     }
     auto task = new Flame::UrlResolvingTask(ui->lineEdit->text());
     connect(task, &Task::finished, this, &TwitchPage::checkDone);
     m_modIdResolver.reset(task);
     task->start();
+}
+
+void TwitchPage::setUrl(const QString& url)
+{
+    ui->lineEdit->setText(url);
+    triggerCheck(true);
 }
 
 void TwitchPage::checkDone()

@@ -38,7 +38,7 @@ public:
     virtual ~TwitchPage();
     virtual QString displayName() const override
     {
-        return tr("Twitch");
+        return tr("Twitch URL");
     }
     virtual QIcon icon() const override
     {
@@ -55,6 +55,8 @@ public:
     virtual bool shouldDisplay() const override;
 
     void openedImpl() override;
+
+    void setUrl(const QString & url);
 
 private slots:
     void triggerCheck(bool checked);

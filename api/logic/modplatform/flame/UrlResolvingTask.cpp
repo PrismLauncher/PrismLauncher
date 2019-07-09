@@ -21,6 +21,11 @@ void Flame::UrlResolvingTask::resolveUrl()
 {
     setStatus(tr("Resolving URL..."));
     setProgress(0, 1);
+    QUrl actualUrl(m_url);
+    if(actualUrl.host() != "www.curseforge.com") {
+        emitFailed(tr("Not a Twitch URL."));
+        return;
+    }
     m_dljob.reset(new NetJob("URL resolver"));
 
     bool weAreDigging = false;
