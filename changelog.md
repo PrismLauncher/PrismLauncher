@@ -1,8 +1,91 @@
-# MultiMC 0.6.5
+# MultiMC 0.6.6
+
+This release is mostly the smaller things that have accumulated over time, along with a big change in linux packaging.
+
+No 1.13+ Forge news yet. That's going to be a major overhaul of many of the internals of MultiMC.
+
+## **IMPORTANT**
+
+On linux, MultiMC no longer bundles the Qt libraries. This fixes many issues, but it might not run after the update unless you have the required libraries installed.
+
+Make sure you have the following packages before you update:
+
+- Arch: `qt5-base`
+- Debian/Ubuntu: `qt5-default`
+- CentOS/RHEL: `qt5-qtbase`
+- Suse: `libqt5-qtbase`
+
+MultiMC on linux is built with Qt 5.4 and older versions of Qt will not work.
+
+This should be a massive improvement to system integration on linux and resolves GH-1784, GH-2605, GH-1979, GH-2271, GH-1992, GH-1816 and their many duplicates.
+
+### New or changed features
+
+- GH-2487: No is now the default button when deleting instances.
+
+- It is now possible to launch with profilers in offline mode.
+
+- Massively improved support for icon formats when importing and exporting instances.
+
+  All of the formats MultiMC supports are now supported in exported instances too, instead of just PNG.
+
+- Added the pocket fox icon.
+
+  We still have the big one under the staircase. It's cute. Just hide your chickens.
+
+- Global settings can be opened from instance settings where appropriate.
+
+  Many people use the instance overrides where using the global settings would be more appropriate. Hopefully this makes it clearer that the instance settings are overrides for the global settings.
+
+- Added direct Fabric loader support.
+
+  Much overdue. It's good. Fabric mod metadata is also supported in the mod pages.
+
+- MultiMC now recognizes the new `experimental` Minecraft versions.
+
+  Go mess with the combat experiment. It's interesting.
+
+- Added Twitch URL as an option to the Add Instance dialog.
+
+  You can now drag the purple download buttons from CurseForge into MultiMC and get a modpack out of it. Much easier!
+
+### Bugfixes
+
+- Translation folder is now created sooner, making first launch translation fetch work again.
+
+- GH-2716: MultiMC will no longer try to censor values shorter than 4 characters in logs.
+
+  It was actually leaking information and destroying the logs instead of helping.
+
+- GH-2551: Trim server name and IP before saving them.
+
+- GH-2591: Fix multiple potential memory leaks and crashes related to destroying objects with Qt memory lifecycle model.
+
+- `run.sh` on linux now passes all arguments to MultiMC.
+
+- Adding a disabled mod duplicate now replaces the existing mod.
+
+- GH-2592: Newly created instances are now selected again. This was a very old regression.
+
+- GH-689: MultiMC no longer creates an imgur album for single screenshot uploads.
+
+- GH-1813: `#` is now saved properly when used in instance notes.
+
+- GH-2515: Deleting an instance externally while the delete dialog is open no longer leads to some other instance being deleted when you click OK.
+
+- GH-2499: Proxy settings are applied immediately and no longer need an application restart.
+
+- GH-1701: When downloading updates, the text now reflects the number of downloaded files better.
+
+- Icon scaling issues on macOS should now be fixed.
+
+# Previous releases
+
+## MultiMC 0.6.5
 
 Finalizing the translation workflow improvements and adding fixes for sounds missing in old game versions.
 
-### New or changed features
+#### New or changed features
 
 - UI for the language settings has been unified across the application
 
@@ -12,7 +95,6 @@ Finalizing the translation workflow improvements and adding fixes for sounds mis
 
   Also, a minor issue with the reconstruction being done twice per launch has been fixed.
 
-# Previous releases
 
 ## MultiMC 0.6.4
 
