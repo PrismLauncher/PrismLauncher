@@ -194,6 +194,7 @@ private:
     void setCatBackground(bool enabled);
     void updateInstanceToolIcon(QString new_icon);
     void setSelectedInstanceById(const QString &id);
+    void updateStatusCenter();
 
     void runModalTask(Task *task);
     void instanceFromInstanceTask(InstanceTask *task);
@@ -207,6 +208,7 @@ private:
     InstanceProxyModel *proxymodel = nullptr;
     QToolButton *newsLabel = nullptr;
     QLabel *m_statusLeft = nullptr;
+    QLabel *m_statusCenter = nullptr;
     ServerStatus *m_statusRight = nullptr;
     QMenu *accountMenu = nullptr;
     QToolButton *accountMenuButton = nullptr;
