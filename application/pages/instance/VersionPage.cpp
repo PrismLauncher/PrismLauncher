@@ -41,6 +41,7 @@
 #include "minecraft/Mod.h"
 #include "icons/IconList.h"
 #include "Exception.h"
+#include "Version.h"
 
 #include "MultiMC.h"
 
@@ -126,8 +127,7 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     {
         disableVersionControls();
     }
-    connect(m_inst, &MinecraftInstance::versionReloaded, this,
-            &VersionPage::updateVersionControls);
+    connect(m_inst, &MinecraftInstance::versionReloaded, this, &VersionPage::updateVersionControls);
 }
 
 VersionPage::~VersionPage()
@@ -180,9 +180,13 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
 
 void VersionPage::updateVersionControls()
 {
-    ui->fabricBtn->setEnabled(true);
-    ui->forgeBtn->setEnabled(true);
-    ui->liteloaderBtn->setEnabled(true);
+    // FIXME: this is a dirty hack
+    auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
+    bool newCraft = minecraftVersion >= Version("1.14");
+    bool oldCraft = minecraftVersion <= Version("1.12.2");
+    ui->fabricBtn->setEnabled(newCraft);
+    ui->forgeBtn->setEnabled(oldCraft);
+    ui->liteloaderBtn->setEnabled(oldCraft);
     updateButtons();
 }
 
