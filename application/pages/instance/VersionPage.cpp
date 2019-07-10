@@ -109,25 +109,18 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
 
     reloadComponentList();
 
-    if (m_profile)
-    {
-        auto proxy = new IconProxy(ui->packageView);
-        proxy->setSourceModel(m_profile.get());
-        ui->packageView->setModel(proxy);
-        ui->packageView->installEventFilter(this);
-        ui->packageView->setSelectionMode(QAbstractItemView::SingleSelection);
-        connect(ui->packageView->selectionModel(), &QItemSelectionModel::currentChanged, this, &VersionPage::versionCurrent);
-        auto smodel = ui->packageView->selectionModel();
-        connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::packageCurrent);
-        updateVersionControls();
-        // select first item.
-        preselect(0);
-    }
-    else
-    {
-        disableVersionControls();
-    }
-    connect(m_inst, &MinecraftInstance::versionReloaded, this, &VersionPage::updateVersionControls);
+    auto proxy = new IconProxy(ui->packageView);
+    proxy->setSourceModel(m_profile.get());
+    ui->packageView->setModel(proxy);
+    ui->packageView->installEventFilter(this);
+    ui->packageView->setSelectionMode(QAbstractItemView::SingleSelection);
+    connect(ui->packageView->selectionModel(), &QItemSelectionModel::currentChanged, this, &VersionPage::versionCurrent);
+    auto smodel = ui->packageView->selectionModel();
+    connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::packageCurrent);
+
+    updateVersionControls();
+    preselect(0);
+    connect(m_profile.get(), &ComponentList::minecraftChanged, this, &VersionPage::updateVersionControls);
 }
 
 VersionPage::~VersionPage()
@@ -181,21 +174,20 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
 void VersionPage::updateVersionControls()
 {
     // FIXME: this is a dirty hack
-    auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
-    bool newCraft = minecraftVersion >= Version("1.14");
-    bool oldCraft = minecraftVersion <= Version("1.12.2");
-    ui->fabricBtn->setEnabled(newCraft);
-    ui->forgeBtn->setEnabled(oldCraft);
-    ui->liteloaderBtn->setEnabled(oldCraft);
-    updateButtons();
-}
-
-void VersionPage::disableVersionControls()
-{
-    ui->fabricBtn->setEnabled(false);
-    ui->forgeBtn->setEnabled(false);
-    ui->liteloaderBtn->setEnabled(false);
-    ui->reloadBtn->setEnabled(false);
+    if(m_profile) {
+        auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
+        bool newCraft = minecraftVersion >= Version("1.14");
+        bool oldCraft = minecraftVersion <= Version("1.12.2");
+        ui->fabricBtn->setEnabled(newCraft);
+        ui->forgeBtn->setEnabled(oldCraft);
+        ui->liteloaderBtn->setEnabled(oldCraft);
+    }
+    else {
+        ui->fabricBtn->setEnabled(false);
+        ui->forgeBtn->setEnabled(false);
+        ui->liteloaderBtn->setEnabled(false);
+        ui->reloadBtn->setEnabled(false);
+    }
     updateButtons();
 }
 

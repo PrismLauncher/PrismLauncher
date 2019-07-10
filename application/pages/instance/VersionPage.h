@@ -66,7 +66,6 @@ private slots:
     void on_downloadBtn_clicked();
 
     void updateVersionControls();
-    void disableVersionControls();
     void on_changeVersionBtn_clicked();
 
 private:

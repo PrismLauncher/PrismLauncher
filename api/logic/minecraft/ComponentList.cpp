@@ -635,6 +635,9 @@ void ComponentList::componentDataChanged()
         qWarning() << "ComponentList got dataChenged signal from a non-Component!";
         return;
     }
+    if(objPtr->getID() == "net.minecraft") {
+        emit minecraftChanged();
+    }
     // figure out which one is it... in a seriously dumb way.
     int index = 0;
     for (auto component: d->components)

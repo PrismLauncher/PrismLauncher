@@ -113,9 +113,6 @@ public:
 
     virtual JavaVersion getJavaVersion() const;
 
-signals:
-    void versionReloaded();
-
 protected:
     QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
     QStringList validLaunchMethods();
