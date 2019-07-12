@@ -12,7 +12,7 @@ Make sure you have the following packages before you update:
 
 - Arch: `qt5-base`
 - Debian/Ubuntu: `qt5-default`
-- CentOS/RHEL: `qt5-qtbase`
+- CentOS/RHEL/Fedora: `qt5-qtbase-gui`
 - Suse: `libqt5-qtbase`
 
 MultiMC on linux is built with Qt 5.4 and older versions of Qt will not work.
