@@ -106,6 +106,9 @@ public:
         return mods;
     }
 
+public slots:
+    void disableInteraction(bool disabled);
+
 private
 slots:
     void directoryChanged(QString path);
@@ -116,6 +119,7 @@ signals:
 protected:
     QFileSystemWatcher *m_watcher;
     bool is_watching = false;
+    bool interaction_disabled = false;
     QDir m_dir;
     QList<Mod> mods;
 };

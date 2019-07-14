@@ -897,8 +897,9 @@ std::shared_ptr<SimpleModList> MinecraftInstance::loaderModList() const
     if (!m_loader_mod_list)
     {
         m_loader_mod_list.reset(new SimpleModList(loaderModsDir()));
+        m_loader_mod_list->disableInteraction(isRunning());
+        connect(this, &BaseInstance::runningStatusChanged, m_loader_mod_list.get(), &SimpleModList::disableInteraction);
     }
-    m_loader_mod_list->update();
     return m_loader_mod_list;
 }
 
@@ -907,8 +908,9 @@ std::shared_ptr<SimpleModList> MinecraftInstance::coreModList() const
     if (!m_core_mod_list)
     {
         m_core_mod_list.reset(new SimpleModList(coreModsDir()));
+        m_core_mod_list->disableInteraction(isRunning());
+        connect(this, &BaseInstance::runningStatusChanged, m_core_mod_list.get(), &SimpleModList::disableInteraction);
     }
-    m_core_mod_list->update();
     return m_core_mod_list;
 }
 
@@ -917,8 +919,9 @@ std::shared_ptr<SimpleModList> MinecraftInstance::resourcePackList() const
     if (!m_resource_pack_list)
     {
         m_resource_pack_list.reset(new SimpleModList(resourcePacksDir()));
+        m_resource_pack_list->disableInteraction(isRunning());
+        connect(this, &BaseInstance::runningStatusChanged, m_resource_pack_list.get(), &SimpleModList::disableInteraction);
     }
-    m_resource_pack_list->update();
     return m_resource_pack_list;
 }
 
@@ -927,8 +930,9 @@ std::shared_ptr<SimpleModList> MinecraftInstance::texturePackList() const
     if (!m_texture_pack_list)
     {
         m_texture_pack_list.reset(new SimpleModList(texturePacksDir()));
+        m_texture_pack_list->disableInteraction(isRunning());
+        connect(this, &BaseInstance::runningStatusChanged, m_texture_pack_list.get(), &SimpleModList::disableInteraction);
     }
-    m_texture_pack_list->update();
     return m_texture_pack_list;
 }
 

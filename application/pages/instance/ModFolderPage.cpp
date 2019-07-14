@@ -39,6 +39,7 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> 
     ui->setupUi(this);
     ui->tabWidget->tabBar()->hide();
     m_inst = inst;
+    on_RunningState_changed(m_inst && m_inst->isRunning());
     m_mods = mods;
     m_id = id;
     m_displayName = displayName;
@@ -57,6 +58,7 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> 
     auto smodel = ui->modTreeView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &ModFolderPage::modCurrent);
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ModFolderPage::on_filterTextChanged );
+    connect(m_inst, &BaseInstance::runningStatusChanged, this, &ModFolderPage::on_RunningState_changed);
 }
 
 void ModFolderPage::openedImpl()
@@ -89,10 +91,20 @@ ModFolderPage::~ModFolderPage()
     delete ui;
 }
 
+void ModFolderPage::on_RunningState_changed(bool running)
+{
+    if(m_controlsEnabled == !running) {
+        return;
+    }
+    m_controlsEnabled = !running;
+    ui->addModBtn->setEnabled(m_controlsEnabled);
+    ui->disableModBtn->setEnabled(m_controlsEnabled);
+    ui->enableModBtn->setEnabled(m_controlsEnabled);
+    ui->rmModBtn->setEnabled(m_controlsEnabled);
+}
+
 bool ModFolderPage::shouldDisplay() const
 {
-    if (m_inst)
-        return !m_inst->isRunning();
     return true;
 }
 
@@ -152,6 +164,9 @@ bool ModFolderPage::eventFilter(QObject *obj, QEvent *ev)
 
 void ModFolderPage::on_addModBtn_clicked()
 {
+    if(!m_controlsEnabled) {
+        return;
+    }
     auto list = GuiUtil::BrowseForFiles(
         m_helpName,
         tr("Select %1",
@@ -170,18 +185,27 @@ void ModFolderPage::on_addModBtn_clicked()
 
 void ModFolderPage::on_enableModBtn_clicked()
 {
+    if(!m_controlsEnabled) {
+        return;
+    }
     auto selection = m_filterModel->mapSelectionToSource(ui->modTreeView->selectionModel()->selection());
     m_mods->enableMods(selection.indexes(), true);
 }
 
 void ModFolderPage::on_disableModBtn_clicked()
 {
+    if(!m_controlsEnabled) {
+        return;
+    }
     auto selection = m_filterModel->mapSelectionToSource(ui->modTreeView->selectionModel()->selection());
     m_mods->enableMods(selection.indexes(), false);
 }
 
 void ModFolderPage::on_rmModBtn_clicked()
 {
+    if(!m_controlsEnabled) {
+        return;
+    }
     auto selection = m_filterModel->mapSelectionToSource(ui->modTreeView->selectionModel()->selection());
     m_mods->deleteMods(selection.indexes());
 }

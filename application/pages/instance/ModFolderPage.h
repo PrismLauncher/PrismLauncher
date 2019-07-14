@@ -67,18 +67,19 @@ protected:
     bool modListFilter(QKeyEvent *ev);
 
 protected:
-    BaseInstance *m_inst;
+    BaseInstance *m_inst = nullptr;
 
 protected:
-    Ui::ModFolderPage *ui;
+    Ui::ModFolderPage *ui = nullptr;
     std::shared_ptr<SimpleModList> m_mods;
-    QSortFilterProxyModel *m_filterModel;
+    QSortFilterProxyModel *m_filterModel = nullptr;
     QString m_iconName;
     QString m_id;
     QString m_displayName;
     QString m_helpName;
     QString m_fileSelectionFilter;
     QString m_viewFilter;
+    bool m_controlsEnabled = true;
 
 public
 slots:
@@ -87,6 +88,7 @@ slots:
 private
 slots:
     void on_filterTextChanged(const QString & newContents);
+    void on_RunningState_changed(bool running);
     void on_addModBtn_clicked();
     void on_rmModBtn_clicked();
     void on_viewModBtn_clicked();

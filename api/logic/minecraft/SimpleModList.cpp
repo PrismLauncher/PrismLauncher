@@ -86,6 +86,17 @@ bool SimpleModList::update()
     return true;
 }
 
+void SimpleModList::disableInteraction(bool disabled)
+{
+    if (interaction_disabled == disabled) {
+        return;
+    }
+    interaction_disabled = disabled;
+    if(size()) {
+        emit dataChanged(index(0), index(size() - 1));
+    }
+}
+
 void SimpleModList::directoryChanged(QString path)
 {
     update();
@@ -99,6 +110,10 @@ bool SimpleModList::isValid()
 // FIXME: this does not take disabled mod (with extra .disable extension) into account...
 bool SimpleModList::installMod(const QString &filename)
 {
+    if(interaction_disabled) {
+        return false;
+    }
+
     // NOTE: fix for GH-1178: remove trailing slash to avoid issues with using the empty result of QFileInfo::fileName
     auto originalPath = FS::NormalizePath(filename);
     QFileInfo fileinfo(originalPath);
@@ -177,6 +192,10 @@ bool SimpleModList::installMod(const QString &filename)
 
 bool SimpleModList::enableMods(const QModelIndexList& indexes, bool enable)
 {
+    if(interaction_disabled) {
+        return false;
+    }
+
     if(indexes.isEmpty())
         return true;
 
@@ -192,6 +211,10 @@ bool SimpleModList::enableMods(const QModelIndexList& indexes, bool enable)
 
 bool SimpleModList::deleteMods(const QModelIndexList& indexes)
 {
+    if(interaction_disabled) {
+        return false;
+    }
+
     if(indexes.isEmpty())
         return true;
 
@@ -313,11 +336,17 @@ QVariant SimpleModList::headerData(int section, Qt::Orientation orientation, int
 Qt::ItemFlags SimpleModList::flags(const QModelIndex &index) const
 {
     Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
-    if (index.isValid())
-        return Qt::ItemIsUserCheckable | Qt::ItemIsDropEnabled |
-               defaultFlags;
-    else
-        return Qt::ItemIsDropEnabled | defaultFlags;
+    auto flags = defaultFlags;
+    if(index.isValid()) {
+        if(interaction_disabled) {
+            flags &= ~Qt::ItemIsDropEnabled;
+            flags &= ~Qt::ItemIsUserCheckable;
+        } else {
+            flags |= Qt::ItemIsUserCheckable;
+            flags |= Qt::ItemIsDropEnabled;
+        }
+    }
+    return flags;
 }
 
 Qt::DropActions SimpleModList::supportedDropActions() const
