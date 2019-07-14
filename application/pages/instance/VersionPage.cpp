@@ -16,8 +16,10 @@
 #include "MultiMC.h"
 
 #include <QMessageBox>
+#include <QLabel>
 #include <QEvent>
 #include <QKeyEvent>
+#include <QMenu>
 
 #include "VersionPage.h"
 #include "ui_VersionPage.h"
@@ -42,8 +44,6 @@
 #include "icons/IconList.h"
 #include "Exception.h"
 #include "Version.h"
-
-#include "MultiMC.h"
 
 #include <meta/Index.h>
 #include <meta/VersionList.h>
@@ -100,11 +100,33 @@ bool VersionPage::shouldDisplay() const
     return !m_inst->isRunning();
 }
 
+QMenu * VersionPage::createPopupMenu()
+{
+    QMenu* filteredMenu = QMainWindow::createPopupMenu();
+    filteredMenu->removeAction( ui->toolBar->toggleViewAction() );
+    return filteredMenu;
+}
+
 VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
-    : QWidget(parent), ui(new Ui::VersionPage), m_inst(inst)
+    : QMainWindow(parent), ui(new Ui::VersionPage), m_inst(inst)
 {
     ui->setupUi(this);
-    ui->tabWidget->tabBar()->hide();
+    auto labelSelection = new QLabel(tr("Selection"));
+    labelSelection->setAlignment(Qt::AlignHCenter);
+    ui->toolBar->insertWidget(ui->actionChange_version, labelSelection);
+
+    auto labelEdit = new QLabel(tr("Edit"));
+    labelEdit->setAlignment(Qt::AlignHCenter);
+    ui->toolBar->insertWidget(ui->actionCustomize, labelEdit);
+
+    auto labelInstall = new QLabel(tr("Install"));
+    labelInstall->setAlignment(Qt::AlignHCenter);
+    ui->toolBar->insertWidget(ui->actionInstall_Forge, labelInstall);
+
+    auto labelAdvanced = new QLabel(tr("Advanced"));
+    labelAdvanced->setAlignment(Qt::AlignHCenter);
+    ui->toolBar->insertWidget(ui->actionAdd_to_Minecraft_jar, labelAdvanced);
+
     m_profile = m_inst->getComponentList();
 
     reloadComponentList();
@@ -178,15 +200,16 @@ void VersionPage::updateVersionControls()
         auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
         bool newCraft = minecraftVersion >= Version("1.14");
         bool oldCraft = minecraftVersion <= Version("1.12.2");
-        ui->fabricBtn->setEnabled(newCraft);
-        ui->forgeBtn->setEnabled(oldCraft);
-        ui->liteloaderBtn->setEnabled(oldCraft);
+        ui->actionInstall_Fabric->setEnabled(newCraft);
+        ui->actionInstall_Forge->setEnabled(oldCraft);
+        ui->actionInstall_LiteLoader->setEnabled(oldCraft);
+        ui->actionReload->setEnabled(true);
     }
     else {
-        ui->fabricBtn->setEnabled(false);
-        ui->forgeBtn->setEnabled(false);
-        ui->liteloaderBtn->setEnabled(false);
-        ui->reloadBtn->setEnabled(false);
+        ui->actionInstall_Fabric->setEnabled(false);
+        ui->actionInstall_Forge->setEnabled(false);
+        ui->actionInstall_LiteLoader->setEnabled(false);
+        ui->actionReload->setEnabled(false);
     }
     updateButtons();
 }
@@ -212,13 +235,13 @@ bool VersionPage::reloadComponentList()
     }
 }
 
-void VersionPage::on_reloadBtn_clicked()
+void VersionPage::on_actionReload_triggered()
 {
     reloadComponentList();
     m_container->refreshContainer();
 }
 
-void VersionPage::on_removeBtn_clicked()
+void VersionPage::on_actionRemove_triggered()
 {
     if (ui->packageView->currentIndex().isValid())
     {
@@ -233,7 +256,7 @@ void VersionPage::on_removeBtn_clicked()
     m_container->refreshContainer();
 }
 
-void VersionPage::on_modBtn_clicked()
+void VersionPage::on_actionInstall_mods_triggered()
 {
     if(m_container)
     {
@@ -241,7 +264,7 @@ void VersionPage::on_modBtn_clicked()
     }
 }
 
-void VersionPage::on_jarmodBtn_clicked()
+void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 {
     auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"), MMC->settings()->get("CentralModsDir").toString(), this->parentWidget());
     if(!list.empty())
@@ -251,7 +274,7 @@ void VersionPage::on_jarmodBtn_clicked()
     updateButtons();
 }
 
-void VersionPage::on_jarBtn_clicked()
+void VersionPage::on_actionReplace_Minecraft_jar_triggered()
 {
     auto jarPath = GuiUtil::BrowseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement (*.jar)"), MMC->settings()->get("CentralModsDir").toString(), this->parentWidget());
     if(!jarPath.isEmpty())
@@ -261,7 +284,7 @@ void VersionPage::on_jarBtn_clicked()
     updateButtons();
 }
 
-void VersionPage::on_moveUpBtn_clicked()
+void VersionPage::on_actionMove_up_triggered()
 {
     try
     {
@@ -274,7 +297,7 @@ void VersionPage::on_moveUpBtn_clicked()
     updateButtons();
 }
 
-void VersionPage::on_moveDownBtn_clicked()
+void VersionPage::on_actionMove_down_triggered()
 {
     try
     {
@@ -287,7 +310,7 @@ void VersionPage::on_moveDownBtn_clicked()
     updateButtons();
 }
 
-void VersionPage::on_changeVersionBtn_clicked()
+void VersionPage::on_actionChange_version_triggered()
 {
     auto versionRow = currentRow();
     if(versionRow == -1)
@@ -305,12 +328,12 @@ void VersionPage::on_changeVersionBtn_clicked()
     // FIXME: this is a horrible HACK. Get version filtering information from the actual metadata...
     if(uid == "net.minecraftforge")
     {
-        on_forgeBtn_clicked();
+        on_actionInstall_Forge_triggered();
         return;
     }
     else if (uid == "com.mumfrey.liteloader")
     {
-        on_liteloaderBtn_clicked();
+        on_actionInstall_LiteLoader_triggered();
         return;
     }
     VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
@@ -339,7 +362,7 @@ void VersionPage::on_changeVersionBtn_clicked()
     m_container->refreshContainer();
 }
 
-void VersionPage::on_downloadBtn_clicked()
+void VersionPage::on_actionDownload_triggered()
 {
     if (!MMC->accounts()->anyAccountIsValid())
     {
@@ -364,7 +387,7 @@ void VersionPage::on_downloadBtn_clicked()
     m_container->refreshContainer();
 }
 
-void VersionPage::on_forgeBtn_clicked()
+void VersionPage::on_actionInstall_Forge_triggered()
 {
     auto vlist = ENV.metadataIndex()->get("net.minecraftforge");
     if(!vlist)
@@ -393,7 +416,7 @@ void VersionPage::on_forgeBtn_clicked()
     }
 }
 
-void VersionPage::on_fabricBtn_clicked()
+void VersionPage::on_actionInstall_Fabric_triggered()
 {
     auto vlist = ENV.metadataIndex()->get("net.fabricmc.fabric-loader");
     if(!vlist)
@@ -420,7 +443,7 @@ void VersionPage::on_fabricBtn_clicked()
     }
 }
 
-void VersionPage::on_addEmptyBtn_clicked()
+void VersionPage::on_actionAdd_Empty_triggered()
 {
     NewComponentDialog compdialog(QString(), QString(), this);
     QStringList blacklist;
@@ -438,7 +461,7 @@ void VersionPage::on_addEmptyBtn_clicked()
     }
 }
 
-void VersionPage::on_liteloaderBtn_clicked()
+void VersionPage::on_actionInstall_LiteLoader_triggered()
 {
     auto vlist = ENV.metadataIndex()->get("com.mumfrey.liteloader");
     if(!vlist)
@@ -499,23 +522,23 @@ void VersionPage::updateButtons(int row)
     auto patch = m_profile->getComponent(row);
     if (!patch)
     {
-        ui->removeBtn->setDisabled(true);
-        ui->moveDownBtn->setDisabled(true);
-        ui->moveUpBtn->setDisabled(true);
-        ui->changeVersionBtn->setDisabled(true);
-        ui->editBtn->setDisabled(true);
-        ui->customizeBtn->setDisabled(true);
-        ui->revertBtn->setDisabled(true);
+        ui->actionRemove->setDisabled(true);
+        ui->actionMove_down->setDisabled(true);
+        ui->actionMove_up->setDisabled(true);
+        ui->actionChange_version->setDisabled(true);
+        ui->actionEdit->setDisabled(true);
+        ui->actionCustomize->setDisabled(true);
+        ui->actionRevert->setDisabled(true);
     }
     else
     {
-        ui->removeBtn->setEnabled(patch->isRemovable());
-        ui->moveDownBtn->setEnabled(patch->isMoveable());
-        ui->moveUpBtn->setEnabled(patch->isMoveable());
-        ui->changeVersionBtn->setEnabled(patch->isVersionChangeable());
-        ui->editBtn->setEnabled(patch->isCustom());
-        ui->customizeBtn->setEnabled(patch->isCustomizable());
-        ui->revertBtn->setEnabled(patch->isRevertible());
+        ui->actionRemove->setEnabled(patch->isRemovable());
+        ui->actionMove_down->setEnabled(patch->isMoveable());
+        ui->actionMove_up->setEnabled(patch->isMoveable());
+        ui->actionChange_version->setEnabled(patch->isVersionChangeable());
+        ui->actionEdit->setEnabled(patch->isCustom());
+        ui->actionCustomize->setEnabled(patch->isCustomizable());
+        ui->actionRevert->setEnabled(patch->isRevertible());
     }
 }
 
@@ -544,7 +567,7 @@ int VersionPage::currentRow()
     return ui->packageView->selectionModel()->selectedRows().first().row();
 }
 
-void VersionPage::on_customizeBtn_clicked()
+void VersionPage::on_actionCustomize_triggered()
 {
     auto version = currentRow();
     if(version == -1)
@@ -565,7 +588,7 @@ void VersionPage::on_customizeBtn_clicked()
     preselect(currentIdx);
 }
 
-void VersionPage::on_editBtn_clicked()
+void VersionPage::on_actionEdit_triggered()
 {
     auto version = current();
     if(!version)
@@ -581,7 +604,7 @@ void VersionPage::on_editBtn_clicked()
     MMC->openJsonEditor(filename);
 }
 
-void VersionPage::on_revertBtn_clicked()
+void VersionPage::on_actionRevert_triggered()
 {
     auto version = currentRow();
     if(version == -1)

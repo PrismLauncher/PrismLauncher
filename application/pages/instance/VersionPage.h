@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <QWidget>
+#include <QMainWindow>
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/ComponentList.h"
@@ -26,7 +26,7 @@ namespace Ui
 class VersionPage;
 }
 
-class VersionPage : public QWidget, public BasePage
+class VersionPage : public QMainWindow, public BasePage
 {
     Q_OBJECT
 
@@ -49,24 +49,24 @@ public:
     virtual bool shouldDisplay() const override;
 
 private slots:
-    void on_fabricBtn_clicked();
-    void on_forgeBtn_clicked();
-    void on_addEmptyBtn_clicked();
-    void on_liteloaderBtn_clicked();
-    void on_reloadBtn_clicked();
-    void on_removeBtn_clicked();
-    void on_moveUpBtn_clicked();
-    void on_moveDownBtn_clicked();
-    void on_jarmodBtn_clicked();
-    void on_jarBtn_clicked();
-    void on_revertBtn_clicked();
-    void on_editBtn_clicked();
-    void on_modBtn_clicked();
-    void on_customizeBtn_clicked();
-    void on_downloadBtn_clicked();
+    void on_actionChange_version_triggered();
+    void on_actionInstall_Forge_triggered();
+    void on_actionInstall_Fabric_triggered();
+    void on_actionAdd_Empty_triggered();
+    void on_actionInstall_LiteLoader_triggered();
+    void on_actionReload_triggered();
+    void on_actionRemove_triggered();
+    void on_actionMove_up_triggered();
+    void on_actionMove_down_triggered();
+    void on_actionAdd_to_Minecraft_jar_triggered();
+    void on_actionReplace_Minecraft_jar_triggered();
+    void on_actionRevert_triggered();
+    void on_actionEdit_triggered();
+    void on_actionInstall_mods_triggered();
+    void on_actionCustomize_triggered();
+    void on_actionDownload_triggered();
 
     void updateVersionControls();
-    void on_changeVersionBtn_clicked();
 
 private:
     Component * current();
@@ -76,6 +76,8 @@ private:
     int doUpdate();
 
 protected:
+    QMenu * createPopupMenu() override;
+
     /// FIXME: this shouldn't be necessary!
     bool reloadComponentList();
 

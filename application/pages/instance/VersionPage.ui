@@ -1,292 +1,231 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>VersionPage</class>
- <widget class="QWidget" name="VersionPage">
+ <widget class="QMainWindow" name="VersionPage">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>870</width>
-    <height>1008</height>
+    <width>961</width>
+    <height>1091</height>
    </rect>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>0</number>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="ModListView" name="packageView">
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOn</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="sortingEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="headerHidden">
+         <bool>false</bool>
+        </property>
+        <attribute name="headerVisible">
+         <bool>true</bool>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="MCModInfoFrame" name="frame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
    </property>
-   <property name="topMargin">
-    <number>0</number>
+   <property name="allowedAreas">
+    <set>Qt::LeftToolBarArea|Qt::RightToolBarArea</set>
    </property>
-   <property name="rightMargin">
-    <number>0</number>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextOnly</enum>
    </property>
-   <property name="bottomMargin">
-    <number>0</number>
+   <property name="floatable">
+    <bool>false</bool>
    </property>
-   <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string notr="true">Tab 1</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
-        <widget class="ModListView" name="packageView">
-         <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOn</enum>
-         </property>
-         <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="sortingEnabled">
-          <bool>false</bool>
-         </property>
-         <property name="headerHidden">
-          <bool>false</bool>
-         </property>
-         <attribute name="headerVisible">
-          <bool>true</bool>
-         </attribute>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <layout class="QVBoxLayout" name="verticalLayout_4">
-         <item>
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Selection</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="changeVersionBtn">
-           <property name="toolTip">
-            <string>Change version of the selected package.</string>
-           </property>
-           <property name="text">
-            <string>Change version</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="moveUpBtn">
-           <property name="toolTip">
-            <string>Make the selected package apply sooner.</string>
-           </property>
-           <property name="text">
-            <string>Move up</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="moveDownBtn">
-           <property name="toolTip">
-            <string>Make the selected package apply later.</string>
-           </property>
-           <property name="text">
-            <string>Move down</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="removeBtn">
-           <property name="toolTip">
-            <string>Remove selected package from the instance.</string>
-           </property>
-           <property name="text">
-            <string>Remove</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="LineSeparator" name="separator_4" native="true"/>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_10">
-           <property name="text">
-            <string>Edit</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="customizeBtn">
-           <property name="toolTip">
-            <string>Customize selected package.</string>
-           </property>
-           <property name="text">
-            <string>Customize</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="editBtn">
-           <property name="toolTip">
-            <string>Edit selected package.</string>
-           </property>
-           <property name="text">
-            <string>Edit</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="revertBtn">
-           <property name="toolTip">
-            <string>Revert the selected package to default.</string>
-           </property>
-           <property name="text">
-            <string>Revert</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="LineSeparator" name="separator" native="true"/>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Install</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="forgeBtn">
-           <property name="toolTip">
-            <string>Install the Minecraft Forge package.</string>
-           </property>
-           <property name="text">
-            <string>Install Forge</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="fabricBtn">
-           <property name="toolTip">
-            <string>Install the Fabric Loader package.</string>
-           </property>
-           <property name="text">
-            <string>Install Fabric</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="liteloaderBtn">
-           <property name="toolTip">
-            <string>Install the LiteLoader package.</string>
-           </property>
-           <property name="text">
-            <string>Install LiteLoader</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="modBtn">
-           <property name="toolTip">
-            <string>Install normal mods.</string>
-           </property>
-           <property name="text">
-            <string>Install mods</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="LineSeparator" name="widget" native="true"/>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>Advanced</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="jarmodBtn">
-           <property name="toolTip">
-            <string>Add a mod into the Minecraft jar file.</string>
-           </property>
-           <property name="text">
-            <string>Add to Minecraft.jar</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="jarBtn">
-           <property name="text">
-            <string>Replace Minecraft.jar</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="addEmptyBtn">
-           <property name="text">
-            <string>Add Empty</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="reloadBtn">
-           <property name="toolTip">
-            <string>Reload all packages.</string>
-           </property>
-           <property name="text">
-            <string>Reload</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="downloadBtn">
-           <property name="toolTip">
-            <string>Download the files needed to launch the instance now.</string>
-           </property>
-           <property name="text">
-            <string>Download All</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer_7">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>111</width>
-             <height>13</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="MCModInfoFrame" name="frame">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-   </item>
-  </layout>
+   <attribute name="toolBarArea">
+    <enum>RightToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionChange_version"/>
+   <addaction name="actionMove_up"/>
+   <addaction name="actionMove_down"/>
+   <addaction name="actionRemove"/>
+   <addaction name="separator"/>
+   <addaction name="actionCustomize"/>
+   <addaction name="actionEdit"/>
+   <addaction name="actionRevert"/>
+   <addaction name="separator"/>
+   <addaction name="actionInstall_Forge"/>
+   <addaction name="actionInstall_Fabric"/>
+   <addaction name="actionInstall_LiteLoader"/>
+   <addaction name="actionInstall_mods"/>
+   <addaction name="separator"/>
+   <addaction name="actionAdd_to_Minecraft_jar"/>
+   <addaction name="actionReplace_Minecraft_jar"/>
+   <addaction name="actionAdd_Empty"/>
+   <addaction name="actionReload"/>
+   <addaction name="actionDownload_All"/>
+  </widget>
+  <action name="actionChange_version">
+   <property name="text">
+    <string>Change version</string>
+   </property>
+   <property name="toolTip">
+    <string>Change version of the selected package.</string>
+   </property>
+  </action>
+  <action name="actionMove_up">
+   <property name="text">
+    <string>Move up</string>
+   </property>
+   <property name="toolTip">
+    <string>Make the selected package apply sooner.</string>
+   </property>
+  </action>
+  <action name="actionMove_down">
+   <property name="text">
+    <string>Move down</string>
+   </property>
+   <property name="toolTip">
+    <string>Make the selected package apply later.</string>
+   </property>
+  </action>
+  <action name="actionRemove">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove selected package from the instance.</string>
+   </property>
+  </action>
+  <action name="actionCustomize">
+   <property name="text">
+    <string>Customize</string>
+   </property>
+   <property name="toolTip">
+    <string>Customize selected package.</string>
+   </property>
+  </action>
+  <action name="actionEdit">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit selected package.</string>
+   </property>
+  </action>
+  <action name="actionRevert">
+   <property name="text">
+    <string>Revert</string>
+   </property>
+   <property name="toolTip">
+    <string>Revert the selected package to default.</string>
+   </property>
+  </action>
+  <action name="actionInstall_Forge">
+   <property name="text">
+    <string>Install Forge</string>
+   </property>
+   <property name="toolTip">
+    <string>Install the Minecraft Forge package.</string>
+   </property>
+  </action>
+  <action name="actionInstall_Fabric">
+   <property name="text">
+    <string>Install Fabric</string>
+   </property>
+   <property name="toolTip">
+    <string>Install the Fabric Loader package.</string>
+   </property>
+  </action>
+  <action name="actionInstall_LiteLoader">
+   <property name="text">
+    <string>Install LiteLoader</string>
+   </property>
+   <property name="toolTip">
+    <string>Install the LiteLoader package.</string>
+   </property>
+  </action>
+  <action name="actionInstall_mods">
+   <property name="text">
+    <string>Install mods</string>
+   </property>
+   <property name="toolTip">
+    <string>Install normal mods.</string>
+   </property>
+  </action>
+  <action name="actionAdd_to_Minecraft_jar">
+   <property name="text">
+    <string>Add to Minecraft.jar</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a mod into the Minecraft jar file.</string>
+   </property>
+  </action>
+  <action name="actionReplace_Minecraft_jar">
+   <property name="text">
+    <string>Replace Minecraft.jar</string>
+   </property>
+  </action>
+  <action name="actionAdd_Empty">
+   <property name="text">
+    <string>Add Empty</string>
+   </property>
+   <property name="toolTip">
+    <string>Add an empty custom package.</string>
+   </property>
+  </action>
+  <action name="actionReload">
+   <property name="text">
+    <string>Reload</string>
+   </property>
+   <property name="toolTip">
+    <string>Reload all packages.</string>
+   </property>
+  </action>
+  <action name="actionDownload_All">
+   <property name="text">
+    <string>Download All</string>
+   </property>
+   <property name="toolTip">
+    <string>Download the files needed to launch the instance now.</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -295,38 +234,12 @@
    <header>widgets/ModListView.h</header>
   </customwidget>
   <customwidget>
-   <class>LineSeparator</class>
-   <extends>QWidget</extends>
-   <header>widgets/LineSeparator.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>MCModInfoFrame</class>
    <extends>QFrame</extends>
    <header>widgets/MCModInfoFrame.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <tabstops>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>packageView</tabstop>
-  <tabstop>changeVersionBtn</tabstop>
-  <tabstop>moveUpBtn</tabstop>
-  <tabstop>moveDownBtn</tabstop>
-  <tabstop>removeBtn</tabstop>
-  <tabstop>customizeBtn</tabstop>
-  <tabstop>editBtn</tabstop>
-  <tabstop>revertBtn</tabstop>
-  <tabstop>forgeBtn</tabstop>
-  <tabstop>fabricBtn</tabstop>
-  <tabstop>liteloaderBtn</tabstop>
-  <tabstop>modBtn</tabstop>
-  <tabstop>jarmodBtn</tabstop>
-  <tabstop>jarBtn</tabstop>
-  <tabstop>addEmptyBtn</tabstop>
-  <tabstop>reloadBtn</tabstop>
-  <tabstop>downloadBtn</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>
