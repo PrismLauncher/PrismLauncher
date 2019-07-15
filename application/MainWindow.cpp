@@ -828,6 +828,13 @@ MainWindow::~MainWindow()
 {
 }
 
+QMenu * MainWindow::createPopupMenu()
+{
+    QMenu* filteredMenu = QMainWindow::createPopupMenu();
+    filteredMenu->removeAction( ui->mainToolBar->toggleViewAction() );
+    return filteredMenu;
+}
+
 void MainWindow::konamiTriggered()
 {
     // ENV.enableFeature("NewModsPage");
@@ -1652,13 +1659,6 @@ void MainWindow::on_actionAbout_triggered()
 {
     AboutDialog dialog(this);
     dialog.exec();
-}
-
-void MainWindow::on_mainToolBar_visibilityChanged(bool)
-{
-    // Don't allow hiding the main toolbar.
-    // This is the only way I could find to prevent it... :/
-    ui->mainToolBar->setVisible(true);
 }
 
 void MainWindow::on_actionDeleteInstance_triggered()

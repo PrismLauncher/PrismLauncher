@@ -60,6 +60,9 @@ public:
 signals:
     void isClosing();
 
+protected:
+    QMenu * createPopupMenu() override;
+
 private slots:
     void onCatToggled(bool);
 
@@ -108,8 +111,6 @@ private slots:
     void on_actionMoreNews_triggered();
 
     void newsButtonClicked();
-
-    void on_mainToolBar_visibilityChanged(bool);
 
     void on_actionLaunchInstance_triggered();
 
