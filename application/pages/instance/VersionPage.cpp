@@ -97,7 +97,7 @@ QIcon VersionPage::icon() const
 }
 bool VersionPage::shouldDisplay() const
 {
-    return !m_inst->isRunning();
+    return true;
 }
 
 QMenu * VersionPage::createPopupMenu()
@@ -140,9 +140,11 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     auto smodel = ui->packageView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::packageCurrent);
 
+    connect(m_profile.get(), &ComponentList::minecraftChanged, this, &VersionPage::updateVersionControls);
+    controlsEnabled = !m_inst->isRunning();
     updateVersionControls();
     preselect(0);
-    connect(m_profile.get(), &ComponentList::minecraftChanged, this, &VersionPage::updateVersionControls);
+    connect(m_inst, &BaseInstance::runningStatusChanged, this, &VersionPage::updateRunningStatus);
 }
 
 VersionPage::~VersionPage()
@@ -192,26 +194,45 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
     ui->frame->setModDescription(problemOut);
 }
 
+void VersionPage::updateRunningStatus(bool running)
+{
+    if(controlsEnabled == running) {
+        controlsEnabled = !running;
+        updateVersionControls();
+    }
+}
 
 void VersionPage::updateVersionControls()
 {
     // FIXME: this is a dirty hack
-    if(m_profile) {
-        auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
-        bool newCraft = minecraftVersion >= Version("1.14");
-        bool oldCraft = minecraftVersion <= Version("1.12.2");
-        ui->actionInstall_Fabric->setEnabled(newCraft);
-        ui->actionInstall_Forge->setEnabled(oldCraft);
-        ui->actionInstall_LiteLoader->setEnabled(oldCraft);
-        ui->actionReload->setEnabled(true);
-    }
-    else {
-        ui->actionInstall_Fabric->setEnabled(false);
-        ui->actionInstall_Forge->setEnabled(false);
-        ui->actionInstall_LiteLoader->setEnabled(false);
-        ui->actionReload->setEnabled(false);
-    }
+    auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
+    bool newCraft = controlsEnabled && (minecraftVersion >= Version("1.14"));
+    bool oldCraft = controlsEnabled && (minecraftVersion <= Version("1.12.2"));
+    ui->actionInstall_Fabric->setEnabled(newCraft);
+    ui->actionInstall_Forge->setEnabled(oldCraft);
+    ui->actionInstall_LiteLoader->setEnabled(oldCraft);
+    ui->actionReload->setEnabled(true);
     updateButtons();
+}
+
+void VersionPage::updateButtons(int row)
+{
+    if(row == -1)
+        row = currentRow();
+    auto patch = m_profile->getComponent(row);
+    ui->actionRemove->setEnabled(controlsEnabled && patch && patch->isRemovable());
+    ui->actionMove_down->setEnabled(controlsEnabled && patch && patch->isMoveable());
+    ui->actionMove_up->setEnabled(controlsEnabled && patch && patch->isMoveable());
+    ui->actionChange_version->setEnabled(controlsEnabled && patch && patch->isVersionChangeable());
+    ui->actionEdit->setEnabled(controlsEnabled && patch && patch->isCustom());
+    ui->actionCustomize->setEnabled(controlsEnabled && patch && patch->isCustomizable());
+    ui->actionRevert->setEnabled(controlsEnabled && patch && patch->isRevertible());
+    ui->actionDownload_All->setEnabled(controlsEnabled);
+    ui->actionAdd_Empty->setEnabled(controlsEnabled);
+    ui->actionReload->setEnabled(controlsEnabled);
+    ui->actionInstall_mods->setEnabled(controlsEnabled);
+    ui->actionReplace_Minecraft_jar->setEnabled(controlsEnabled);
+    ui->actionAdd_to_Minecraft_jar->setEnabled(controlsEnabled);
 }
 
 bool VersionPage::reloadComponentList()
@@ -515,37 +536,9 @@ void VersionPage::preselect(int row)
     updateButtons(row);
 }
 
-void VersionPage::updateButtons(int row)
-{
-    if(row == -1)
-        row = currentRow();
-    auto patch = m_profile->getComponent(row);
-    if (!patch)
-    {
-        ui->actionRemove->setDisabled(true);
-        ui->actionMove_down->setDisabled(true);
-        ui->actionMove_up->setDisabled(true);
-        ui->actionChange_version->setDisabled(true);
-        ui->actionEdit->setDisabled(true);
-        ui->actionCustomize->setDisabled(true);
-        ui->actionRevert->setDisabled(true);
-    }
-    else
-    {
-        ui->actionRemove->setEnabled(patch->isRemovable());
-        ui->actionMove_down->setEnabled(patch->isMoveable());
-        ui->actionMove_up->setEnabled(patch->isMoveable());
-        ui->actionChange_version->setEnabled(patch->isVersionChangeable());
-        ui->actionEdit->setEnabled(patch->isCustom());
-        ui->actionCustomize->setEnabled(patch->isCustomizable());
-        ui->actionRevert->setEnabled(patch->isRevertible());
-    }
-}
-
 void VersionPage::onGameUpdateError(QString error)
 {
-    CustomMessageBox::selectable(this, tr("Error updating instance"), error,
-                                 QMessageBox::Warning)->show();
+    CustomMessageBox::selectable(this, tr("Error updating instance"), error, QMessageBox::Warning)->show();
 }
 
 Component * VersionPage::current()

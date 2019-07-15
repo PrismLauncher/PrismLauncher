@@ -38,5 +38,6 @@ struct ComponentListData
     QTimer m_saveTimer;
     shared_qobject_ptr<Task> m_updateTask;
     bool loaded = false;
+    bool interactionDisabled = true;
 };
 

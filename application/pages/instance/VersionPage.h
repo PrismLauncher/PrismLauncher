@@ -86,11 +86,13 @@ private:
     std::shared_ptr<ComponentList> m_profile;
     MinecraftInstance *m_inst;
     int currentIdx = 0;
+    bool controlsEnabled = false;
 
 public slots:
     void versionCurrent(const QModelIndex &current, const QModelIndex &previous);
 
 private slots:
+    void updateRunningStatus(bool running);
     void onGameUpdateError(QString error);
     void packageCurrent(const QModelIndex &current, const QModelIndex &previous);
 

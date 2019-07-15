@@ -134,6 +134,7 @@ private slots:
     void updateSucceeded();
     void updateFailed(const QString & error);
     void componentDataChanged();
+    void disableInteraction(bool disable);
 
 private:
     bool load();
