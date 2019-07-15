@@ -20,6 +20,7 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QAbstractItemModel>
+#include <QMenu>
 
 #include "MultiMC.h"
 #include "dialogs/CustomMessageBox.h"
@@ -34,10 +35,9 @@
 ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> mods, QString id,
                              QString iconName, QString displayName, QString helpPage,
                              QWidget *parent)
-    : QWidget(parent), ui(new Ui::ModFolderPage)
+    : QMainWindow(parent), ui(new Ui::ModFolderPage)
 {
     ui->setupUi(this);
-    ui->tabWidget->tabBar()->hide();
     m_inst = inst;
     on_RunningState_changed(m_inst && m_inst->isRunning());
     m_mods = mods;
@@ -59,6 +59,13 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> 
     connect(smodel, &QItemSelectionModel::currentChanged, this, &ModFolderPage::modCurrent);
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ModFolderPage::on_filterTextChanged );
     connect(m_inst, &BaseInstance::runningStatusChanged, this, &ModFolderPage::on_RunningState_changed);
+}
+
+QMenu * ModFolderPage::createPopupMenu()
+{
+    QMenu* filteredMenu = QMainWindow::createPopupMenu();
+    filteredMenu->removeAction(ui->actionsToolbar->toggleViewAction() );
+    return filteredMenu;
 }
 
 void ModFolderPage::openedImpl()
@@ -97,10 +104,10 @@ void ModFolderPage::on_RunningState_changed(bool running)
         return;
     }
     m_controlsEnabled = !running;
-    ui->addModBtn->setEnabled(m_controlsEnabled);
-    ui->disableModBtn->setEnabled(m_controlsEnabled);
-    ui->enableModBtn->setEnabled(m_controlsEnabled);
-    ui->rmModBtn->setEnabled(m_controlsEnabled);
+    ui->actionAdd->setEnabled(m_controlsEnabled);
+    ui->actionDisable->setEnabled(m_controlsEnabled);
+    ui->actionEnable->setEnabled(m_controlsEnabled);
+    ui->actionRemove->setEnabled(m_controlsEnabled);
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -139,10 +146,10 @@ bool ModFolderPage::modListFilter(QKeyEvent *keyEvent)
     switch (keyEvent->key())
     {
     case Qt::Key_Delete:
-        on_rmModBtn_clicked();
+        on_actionRemove_triggered();
         return true;
     case Qt::Key_Plus:
-        on_addModBtn_clicked();
+        on_actionAdd_triggered();
         return true;
     default:
         break;
@@ -162,7 +169,7 @@ bool ModFolderPage::eventFilter(QObject *obj, QEvent *ev)
     return QWidget::eventFilter(obj, ev);
 }
 
-void ModFolderPage::on_addModBtn_clicked()
+void ModFolderPage::on_actionAdd_triggered()
 {
     if(!m_controlsEnabled) {
         return;
@@ -183,7 +190,7 @@ void ModFolderPage::on_addModBtn_clicked()
     }
 }
 
-void ModFolderPage::on_enableModBtn_clicked()
+void ModFolderPage::on_actionEnable_triggered()
 {
     if(!m_controlsEnabled) {
         return;
@@ -192,7 +199,7 @@ void ModFolderPage::on_enableModBtn_clicked()
     m_mods->enableMods(selection.indexes(), true);
 }
 
-void ModFolderPage::on_disableModBtn_clicked()
+void ModFolderPage::on_actionDisable_triggered()
 {
     if(!m_controlsEnabled) {
         return;
@@ -201,7 +208,7 @@ void ModFolderPage::on_disableModBtn_clicked()
     m_mods->enableMods(selection.indexes(), false);
 }
 
-void ModFolderPage::on_rmModBtn_clicked()
+void ModFolderPage::on_actionRemove_triggered()
 {
     if(!m_controlsEnabled) {
         return;
@@ -210,12 +217,12 @@ void ModFolderPage::on_rmModBtn_clicked()
     m_mods->deleteMods(selection.indexes());
 }
 
-void ModFolderPage::on_configFolderBtn_clicked()
+void ModFolderPage::on_actionView_configs_triggered()
 {
     DesktopServices::openDirectory(m_inst->instanceConfigFolder(), true);
 }
 
-void ModFolderPage::on_viewModBtn_clicked()
+void ModFolderPage::on_actionView_Folder_triggered()
 {
     DesktopServices::openDirectory(m_mods->dir().absolutePath(), true);
 }

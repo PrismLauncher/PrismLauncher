@@ -10,7 +10,7 @@ public:
         : ModFolderPage(instance, instance->texturePackList(), "texturepacks", "resourcepacks",
                         tr("Texture packs"), "Texture-packs", parent)
     {
-        ui->configFolderBtn->setHidden(true);
+        ui->actionView_configs->setVisible(false);
     }
     virtual ~TexturePackPage() {}
     virtual bool shouldDisplay() const override

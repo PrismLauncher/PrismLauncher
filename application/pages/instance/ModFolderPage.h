@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <QWidget>
+#include <QMainWindow>
 
 #include "minecraft/MinecraftInstance.h"
 #include "pages/BasePage.h"
@@ -27,14 +27,20 @@ namespace Ui
 class ModFolderPage;
 }
 
-class ModFolderPage : public QWidget, public BasePage
+class ModFolderPage : public QMainWindow, public BasePage
 {
     Q_OBJECT
 
 public:
-    explicit ModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> mods, QString id,
-                           QString iconName, QString displayName, QString helpPage = "",
-                           QWidget *parent = 0);
+    explicit ModFolderPage(
+        BaseInstance *inst,
+        std::shared_ptr<SimpleModList> mods,
+        QString id,
+        QString iconName,
+        QString displayName,
+        QString helpPage = "",
+        QWidget *parent = 0
+    );
     virtual ~ModFolderPage();
 
     void setFilter(const QString & filter)
@@ -65,6 +71,7 @@ public:
 protected:
     bool eventFilter(QObject *obj, QEvent *ev) override;
     bool modListFilter(QKeyEvent *ev);
+    QMenu * createPopupMenu() override;
 
 protected:
     BaseInstance *m_inst = nullptr;
@@ -89,12 +96,12 @@ private
 slots:
     void on_filterTextChanged(const QString & newContents);
     void on_RunningState_changed(bool running);
-    void on_addModBtn_clicked();
-    void on_rmModBtn_clicked();
-    void on_viewModBtn_clicked();
-    void on_enableModBtn_clicked();
-    void on_disableModBtn_clicked();
-    void on_configFolderBtn_clicked();
+    void on_actionAdd_triggered();
+    void on_actionRemove_triggered();
+    void on_actionEnable_triggered();
+    void on_actionDisable_triggered();
+    void on_actionView_Folder_triggered();
+    void on_actionView_configs_triggered();
 };
 
 class CoreModFolderPage : public ModFolderPage
