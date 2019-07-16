@@ -111,6 +111,7 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::VersionPage), m_inst(inst)
 {
     ui->setupUi(this);
+/*
     auto labelSelection = new QLabel(tr("Selection"));
     labelSelection->setAlignment(Qt::AlignHCenter);
     ui->toolBar->insertWidget(ui->actionChange_version, labelSelection);
@@ -126,6 +127,7 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     auto labelAdvanced = new QLabel(tr("Advanced"));
     labelAdvanced->setAlignment(Qt::AlignHCenter);
     ui->toolBar->insertWidget(ui->actionAdd_to_Minecraft_jar, labelAdvanced);
+*/
 
     m_profile = m_inst->getComponentList();
 
