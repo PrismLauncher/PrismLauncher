@@ -223,6 +223,12 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget *parent)
     m_valid = FS::ensureFolderPathExists(m_folder);
 
     ui->setupUi(this);
+
+    QWidget* spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    // toolBar is a pointer to an existing toolbar
+    ui->toolBar->insertWidget(ui->actionView_Folder, spacer);
+
     ui->listView->setIconSize(QSize(128, 128));
     ui->listView->setGridSize(QSize(192, 160));
     ui->listView->setSpacing(9);
