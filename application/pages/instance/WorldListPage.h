@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <QWidget>
+#include <QMainWindow>
 
 #include "minecraft/MinecraftInstance.h"
 #include "pages/BasePage.h"
@@ -28,31 +28,33 @@ namespace Ui
 class WorldListPage;
 }
 
-class WorldListPage : public QWidget, public BasePage
+class WorldListPage : public QMainWindow, public BasePage
 {
     Q_OBJECT
 
 public:
-    explicit WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worlds, QString id,
-                           QString iconName, QString displayName, QString helpPage = "",
-                           QWidget *parent = 0);
+    explicit WorldListPage(
+        BaseInstance *inst,
+        std::shared_ptr<WorldList> worlds,
+        QWidget *parent = 0
+    );
     virtual ~WorldListPage();
 
     virtual QString displayName() const override
     {
-        return m_displayName;
+        return tr("Worlds");
     }
     virtual QIcon icon() const override
     {
-        return MMC->getThemedIcon(m_iconName);
+        return MMC->getThemedIcon("worlds");
     }
     virtual QString id() const override
     {
-        return m_id;
+        return "worlds";
     }
     virtual QString helpPage() const override
     {
-        return m_helpName;
+        return "Worlds";
     }
     virtual bool shouldDisplay() const override;
 
@@ -62,6 +64,7 @@ public:
 protected:
     bool eventFilter(QObject *obj, QEvent *ev) override;
     bool worldListFilter(QKeyEvent *ev);
+    QMenu * createPopupMenu() override;
 
 protected:
     BaseInstance *m_inst;
@@ -77,20 +80,16 @@ private:
     std::shared_ptr<WorldList> m_worlds;
     unique_qobject_ptr<LoggedProcess> m_mceditProcess;
     bool m_mceditStarting = false;
-    QString m_iconName;
-    QString m_id;
-    QString m_displayName;
-    QString m_helpName;
 
 private slots:
-    void on_copySeedBtn_clicked();
-    void on_mcEditBtn_clicked();
-    void on_rmWorldBtn_clicked();
-    void on_addBtn_clicked();
-    void on_copyBtn_clicked();
-    void on_renameBtn_clicked();
-    void on_refreshBtn_clicked();
-    void on_viewFolderBtn_clicked();
+    void on_actionCopy_Seed_triggered();
+    void on_actionMCEdit_triggered();
+    void on_actionRemove_triggered();
+    void on_actionAdd_triggered();
+    void on_actionCopy_triggered();
+    void on_actionRename_triggered();
+    void on_actionRefresh_triggered();
+    void on_actionView_Folder_triggered();
     void worldChanged(const QModelIndex &current, const QModelIndex &previous);
     void mceditState(LoggedProcess::State state);
 };

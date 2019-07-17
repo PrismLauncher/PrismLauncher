@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <QWidget>
+#include <QMainWindow>
 #include <QString>
 
 #include "pages/BasePage.h"
@@ -30,7 +30,7 @@ struct Server;
 class ServersModel;
 class MinecraftInstance;
 
-class ServersPage : public QWidget, public BasePage
+class ServersPage : public QMainWindow, public BasePage
 {
     Q_OBJECT
 
@@ -57,6 +57,10 @@ public:
     {
         return "Servers-management";
     }
+
+protected:
+    QMenu * createPopupMenu() override;
+
 private:
     void updateState();
     void scheduleSave();
@@ -66,10 +70,11 @@ private slots:
     void currentChanged(const QModelIndex &current, const QModelIndex &previous);
     void rowsRemoved(const QModelIndex &parent, int first, int last);
 
-    void on_addBtn_clicked();
-    void on_removeBtn_clicked();
-    void on_moveUpBtn_clicked();
-    void on_moveDownBtn_clicked();
+    void on_actionAdd_triggered();
+    void on_actionRemove_triggered();
+    void on_actionMove_Up_triggered();
+    void on_actionMove_Down_triggered();
+
     void on_RunningState_changed(bool running);
 
     void nameEdited(const QString & name);

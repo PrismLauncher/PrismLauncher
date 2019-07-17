@@ -111,23 +111,11 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::VersionPage), m_inst(inst)
 {
     ui->setupUi(this);
-/*
-    auto labelSelection = new QLabel(tr("Selection"));
-    labelSelection->setAlignment(Qt::AlignHCenter);
-    ui->toolBar->insertWidget(ui->actionChange_version, labelSelection);
 
-    auto labelEdit = new QLabel(tr("Edit"));
-    labelEdit->setAlignment(Qt::AlignHCenter);
-    ui->toolBar->insertWidget(ui->actionCustomize, labelEdit);
-
-    auto labelInstall = new QLabel(tr("Install"));
-    labelInstall->setAlignment(Qt::AlignHCenter);
-    ui->toolBar->insertWidget(ui->actionInstall_Forge, labelInstall);
-
-    auto labelAdvanced = new QLabel(tr("Advanced"));
-    labelAdvanced->setAlignment(Qt::AlignHCenter);
-    ui->toolBar->insertWidget(ui->actionAdd_to_Minecraft_jar, labelAdvanced);
-*/
+    QWidget* spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    // toolBar is a pointer to an existing toolbar
+    ui->toolBar->insertWidget(ui->actionReload, spacer);
 
     m_profile = m_inst->getComponentList();
 

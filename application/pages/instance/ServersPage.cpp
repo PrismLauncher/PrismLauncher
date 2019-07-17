@@ -11,6 +11,7 @@
 #include <minecraft/MinecraftInstance.h>
 
 #include <QFileSystemWatcher>
+#include <QMenu>
 
 static const int COLUMN_COUNT = 2; // 3 , TBD: latency and other nice things.
 
@@ -556,10 +557,9 @@ private:
 };
 
 ServersPage::ServersPage(MinecraftInstance * inst, QWidget* parent)
-    : QWidget(parent), ui(new Ui::ServersPage)
+    : QMainWindow(parent), ui(new Ui::ServersPage)
 {
     ui->setupUi(this);
-    ui->tabWidget->tabBar()->hide();
     m_inst = inst;
     m_model = new ServersModel(inst->gameRoot(), this);
     ui->serversView->setIconSize(QSize(64,64));
@@ -594,6 +594,13 @@ ServersPage::ServersPage(MinecraftInstance * inst, QWidget* parent)
 ServersPage::~ServersPage()
 {
     m_model->saveNow();
+}
+
+QMenu * ServersPage::createPopupMenu()
+{
+    QMenu* filteredMenu = QMainWindow::createPopupMenu();
+    filteredMenu->removeAction( ui->toolBar->toggleViewAction() );
+    return filteredMenu;
 }
 
 void ServersPage::on_RunningState_changed(bool running)
@@ -674,9 +681,9 @@ void ServersPage::updateState()
     ui->addressLine->setEnabled(serverEditEnabled);
     ui->nameLine->setEnabled(serverEditEnabled);
     ui->resourceComboBox->setEnabled(serverEditEnabled);
-    ui->moveDownBtn->setEnabled(serverEditEnabled);
-    ui->moveUpBtn->setEnabled(serverEditEnabled);
-    ui->removeBtn->setEnabled(serverEditEnabled);
+    ui->actionMove_Down->setEnabled(serverEditEnabled);
+    ui->actionMove_Up->setEnabled(serverEditEnabled);
+    ui->actionRemove->setEnabled(serverEditEnabled);
 
     if(server)
     {
@@ -691,7 +698,7 @@ void ServersPage::updateState()
         ui->resourceComboBox->setCurrentIndex(0);
     }
 
-    ui->addBtn->setDisabled(m_locked);
+    ui->actionAdd->setDisabled(m_locked);
 }
 
 void ServersPage::openedImpl()
@@ -704,7 +711,7 @@ void ServersPage::closedImpl()
     m_model->unobserve();
 }
 
-void ServersPage::on_addBtn_clicked()
+void ServersPage::on_actionAdd_triggered()
 {
     int position = m_model->addEmptyRow(currentServer + 1);
     if(position < 0)
@@ -719,12 +726,12 @@ void ServersPage::on_addBtn_clicked()
     currentServer = position;
 }
 
-void ServersPage::on_removeBtn_clicked()
+void ServersPage::on_actionRemove_triggered()
 {
     m_model->removeRow(currentServer);
 }
 
-void ServersPage::on_moveUpBtn_clicked()
+void ServersPage::on_actionMove_Up_triggered()
 {
     if(m_model->moveUp(currentServer))
     {
@@ -732,7 +739,7 @@ void ServersPage::on_moveUpBtn_clicked()
     }
 }
 
-void ServersPage::on_moveDownBtn_clicked()
+void ServersPage::on_actionMove_Down_triggered()
 {
     if(m_model->moveDown(currentServer))
     {

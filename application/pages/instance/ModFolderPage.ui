@@ -96,7 +96,6 @@
    <addaction name="actionRemove"/>
    <addaction name="actionEnable"/>
    <addaction name="actionDisable"/>
-   <addaction name="separator"/>
    <addaction name="actionView_configs"/>
    <addaction name="actionView_Folder"/>
   </widget>

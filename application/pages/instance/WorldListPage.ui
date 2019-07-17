@@ -1,171 +1,133 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>WorldListPage</class>
- <widget class="QWidget" name="WorldListPage">
+ <widget class="QMainWindow" name="WorldListPage">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>723</width>
-    <height>532</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
-   <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string notr="true">Tab 1</string>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QTreeView" name="worldTreeView">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
+      <property name="dragDropMode">
+       <enum>QAbstractItemView::DragDrop</enum>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <property name="allColumnsShowFocus">
+       <bool>true</bool>
+      </property>
+      <attribute name="headerStretchLastSection">
+       <bool>false</bool>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="2">
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QPushButton" name="addBtn">
-           <property name="text">
-            <string>Add</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="LineSeparator" name="separator" native="true"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="renameBtn">
-           <property name="text">
-            <string>Rename</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="copyBtn">
-           <property name="text">
-            <string>Copy</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="rmWorldBtn">
-           <property name="text">
-            <string>&amp;Remove</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="mcEditBtn">
-           <property name="text">
-            <string notr="true">MCEdit</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="LineSeparator" name="separator_2" native="true"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="copySeedBtn">
-           <property name="text">
-            <string>Copy Seed</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="refreshBtn">
-           <property name="text">
-            <string>Refresh</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="viewFolderBtn">
-           <property name="text">
-            <string>&amp;View Folder</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="0" column="1">
-        <widget class="QTreeView" name="worldTreeView">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="acceptDrops">
-          <bool>true</bool>
-         </property>
-         <property name="dragDropMode">
-          <enum>QAbstractItemView::DragDrop</enum>
-         </property>
-         <property name="alternatingRowColors">
-          <bool>true</bool>
-         </property>
-         <property name="sortingEnabled">
-          <bool>true</bool>
-         </property>
-         <property name="allColumnsShowFocus">
-          <bool>true</bool>
-         </property>
-         <attribute name="headerStretchLastSection">
-          <bool>false</bool>
-         </attribute>
-        </widget>
-       </item>
-      </layout>
      </widget>
-    </widget>
-   </item>
-  </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::LeftToolBarArea|Qt::RightToolBarArea</set>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextOnly</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>RightToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionAdd"/>
+   <addaction name="separator"/>
+   <addaction name="actionRename"/>
+   <addaction name="actionCopy"/>
+   <addaction name="actionRemove"/>
+   <addaction name="actionMCEdit"/>
+   <addaction name="separator"/>
+   <addaction name="actionCopy_Seed"/>
+   <addaction name="actionRefresh"/>
+   <addaction name="actionView_Folder"/>
+  </widget>
+  <action name="actionAdd">
+   <property name="text">
+    <string>Add</string>
+   </property>
+  </action>
+  <action name="actionRename">
+   <property name="text">
+    <string>Rename</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionRemove">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+  </action>
+  <action name="actionMCEdit">
+   <property name="text">
+    <string>MCEdit</string>
+   </property>
+  </action>
+  <action name="actionCopy_Seed">
+   <property name="text">
+    <string>Copy Seed</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+  </action>
+  <action name="actionView_Folder">
+   <property name="text">
+    <string>View Folder</string>
+   </property>
+  </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>LineSeparator</class>
-   <extends>QWidget</extends>
-   <header>widgets/LineSeparator.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
- <tabstops>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>worldTreeView</tabstop>
-  <tabstop>addBtn</tabstop>
-  <tabstop>renameBtn</tabstop>
-  <tabstop>copyBtn</tabstop>
-  <tabstop>rmWorldBtn</tabstop>
-  <tabstop>mcEditBtn</tabstop>
-  <tabstop>copySeedBtn</tabstop>
-  <tabstop>refreshBtn</tabstop>
-  <tabstop>viewFolderBtn</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>
