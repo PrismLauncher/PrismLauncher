@@ -1,122 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>AccountListPage</class>
- <widget class="QWidget" name="AccountListPage">
+ <widget class="QMainWindow" name="AccountListPage">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>694</width>
-    <height>609</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
-   <property name="leftMargin">
-    <number>0</number>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="VersionListView" name="listView"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
    </property>
-   <property name="topMargin">
-    <number>0</number>
+   <property name="movable">
+    <bool>true</bool>
    </property>
-   <property name="rightMargin">
-    <number>0</number>
+   <property name="allowedAreas">
+    <set>Qt::LeftToolBarArea|Qt::RightToolBarArea</set>
    </property>
-   <property name="bottomMargin">
-    <number>0</number>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextOnly</enum>
    </property>
-   <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string notr="true">Tab 1</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QLabel" name="welcomeLabel">
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Welcome! If you're new here, you can click the &amp;quot;Add&amp;quot; button to add your Mojang or Minecraft account.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QTreeView" name="listView"/>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="manageAcctsBtnBox">
-           <item>
-            <widget class="QPushButton" name="addAccountBtn">
-             <property name="text">
-              <string>&amp;Add</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="rmAccountBtn">
-             <property name="text">
-              <string>&amp;Remove</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="buttonSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="setDefaultBtn">
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the currently selected account as the active account. The active account is the account that is used to log in (unless it is overridden in an instance-specific setting).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-             <property name="text">
-              <string>&amp;Set Default</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="noDefaultBtn">
-             <property name="toolTip">
-              <string>Set no default account. This will cause MultiMC to prompt you to select an account every time you launch an instance that doesn't have its own default set.</string>
-             </property>
-             <property name="text">
-              <string>&amp;No Default</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="uploadSkinBtn">
-             <property name="toolTip">
-              <string>Opens a dialog to select and upload a skin image to the selected account.</string>
-             </property>
-             <property name="text">
-              <string>&amp;Upload Skin</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-   </item>
-  </layout>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>RightToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionAdd"/>
+   <addaction name="actionRemove"/>
+   <addaction name="actionSetDefault"/>
+   <addaction name="actionNoDefault"/>
+   <addaction name="actionUploadSkin"/>
+  </widget>
+  <action name="actionAdd">
+   <property name="text">
+    <string>Add</string>
+   </property>
+  </action>
+  <action name="actionRemove">
+   <property name="text">
+    <string>Remove</string>
+   </property>
+  </action>
+  <action name="actionSetDefault">
+   <property name="text">
+    <string>Set Default</string>
+   </property>
+  </action>
+  <action name="actionNoDefault">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>No Default</string>
+   </property>
+  </action>
+  <action name="actionUploadSkin">
+   <property name="text">
+    <string>Upload Skin</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>VersionListView</class>
+   <extends>QTreeView</extends>
+   <header>widgets/VersionListView.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -29,9 +29,8 @@ VersionListView::VersionListView(QWidget *parent)
 
 void VersionListView::rowsInserted(const QModelIndex &parent, int start, int end)
 {
-    if(!m_itemCount)
-        viewport()->update();
     m_itemCount += end-start+1;
+    updateEmptyViewPort();
     QTreeView::rowsInserted(parent, start, end);
 }
 
@@ -39,16 +38,14 @@ void VersionListView::rowsInserted(const QModelIndex &parent, int start, int end
 void VersionListView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
 {
     m_itemCount -= end-start+1;
-    if(!m_itemCount)
-        viewport()->update();
+    updateEmptyViewPort();
     QTreeView::rowsInserted(parent, start, end);
 }
 
 void VersionListView::setModel(QAbstractItemModel *model)
 {
     m_itemCount = model->rowCount();
-    if(!m_itemCount)
-        viewport()->update();
+    updateEmptyViewPort();
     QTreeView::setModel(model);
 }
 
@@ -58,7 +55,10 @@ void VersionListView::reset()
     {
         m_itemCount = model()->rowCount();
     }
-    viewport()->update();
+    else {
+        m_itemCount = 0;
+    }
+    updateEmptyViewPort();
     QTreeView::reset();
 }
 
@@ -82,6 +82,8 @@ void VersionListView::setEmptyMode(VersionListView::EmptyMode mode)
 
 void VersionListView::updateEmptyViewPort()
 {
+    setAccessibleDescription(currentEmptyString());
+
     if(!m_itemCount)
     {
         viewport()->update();
@@ -100,77 +102,60 @@ void VersionListView::paintEvent(QPaintEvent *event)
     }
 }
 
-void VersionListView::paintInfoLabel(QPaintEvent *event)
+QString VersionListView::currentEmptyString() const
 {
-    QString emptyString;
+    if(m_itemCount) {
+        return QString();
+    }
     switch(m_emptyMode)
     {
+        default:
         case VersionListView::Empty:
-            return;
+            return QString();
         case VersionListView::String:
-            emptyString = m_emptyString;
-            break;
+            return m_emptyString;
         case VersionListView::ErrorString:
-            emptyString = m_emptyErrorString;
-            break;
+            return m_emptyErrorString;
     }
+}
+
+
+void VersionListView::paintInfoLabel(QPaintEvent *event) const
+{
+    QString emptyString = currentEmptyString();
+
     //calculate the rect for the overlay
     QPainter painter(viewport());
     painter.setRenderHint(QPainter::Antialiasing, true);
     QFont font("sans", 20);
     font.setBold(true);
-    
+
     QRect bounds = viewport()->geometry();
     bounds.moveTop(0);
-    QTextLayout layout(emptyString, font);
-    qreal height = 0.0;
-    qreal widthUsed = 0.0;
-    QStringList lines = viewItemTextLayout(layout, bounds.width() - 20, height, widthUsed);
-    QRect rect (0,0, widthUsed, height);
-    rect.setWidth(rect.width()+20);
-    rect.setHeight(rect.height()+20);
-    rect.moveCenter(bounds.center());
-    //check if we are allowed to draw in our area
-    if (!event->rect().intersects(rect)) {
-        return;
-    }
-    //draw the letter of the topmost item semitransparent in the middle
+    auto innerBounds = bounds;
+    innerBounds.adjust(10, 10, -10, -10);
+
     QColor background = QApplication::palette().color(QPalette::Foreground);
     QColor foreground = QApplication::palette().color(QPalette::Base);
-    /*
-    background.setAlpha(128 - scrollFade);
-    foreground.setAlpha(128 - scrollFade);
-    */
+    foreground.setAlpha(190);
+    painter.setFont(font);
+    auto fontMetrics = painter.fontMetrics();
+    auto textRect = fontMetrics.boundingRect(innerBounds, Qt::AlignHCenter | Qt::TextWordWrap, emptyString);
+    textRect.moveCenter(bounds.center());
+
+    auto wrapRect = textRect;
+    wrapRect.adjust(-10, -10, 10, 10);
+
+    //check if we are allowed to draw in our area
+    if (!event->rect().intersects(wrapRect)) {
+        return;
+    }
+
     painter.setBrush(QBrush(background));
     painter.setPen(foreground);
-    painter.drawRoundedRect(rect, 5.0, 5.0);
-    foreground.setAlpha(190);
+    painter.drawRoundedRect(wrapRect, 5.0, 5.0);
+
     painter.setPen(foreground);
     painter.setFont(font);
-    painter.drawText(rect, Qt::AlignCenter, lines.join("\n"));
-    
+    painter.drawText(textRect, Qt::AlignHCenter | Qt::TextWordWrap, emptyString);
 }
-
-/*
-void ModListView::setModel ( QAbstractItemModel* model )
-{
-    QTreeView::setModel ( model );
-    auto head = header();
-    head->setStretchLastSection(false);
-    // HACK: this is true for the checkbox column of mod lists
-    auto string = model->headerData(0,head->orientation()).toString();
-    if(!string.size())
-    {
-        head->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-        head->setSectionResizeMode(1, QHeaderView::Stretch);
-        for(int i = 2; i < head->count(); i++)
-            head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
-    }
-    else
-    {
-        head->setSectionResizeMode(0, QHeaderView::Stretch);
-        for(int i = 1; i < head->count(); i++)
-            head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
-    }
-}
-*/

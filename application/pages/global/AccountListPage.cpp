@@ -34,10 +34,14 @@
 #include "MultiMC.h"
 
 AccountListPage::AccountListPage(QWidget *parent)
-    : QWidget(parent), ui(new Ui::AccountListPage)
+    : QMainWindow(parent), ui(new Ui::AccountListPage)
 {
     ui->setupUi(this);
-    ui->tabWidget->tabBar()->hide();
+    ui->listView->setEmptyString(tr(
+        "Welcome!\n"
+        "If you're new here, you can click the \"Add\" button to add your Mojang or Minecraft account."
+    ));
+    ui->listView->setEmptyMode(VersionListView::String);
 
     m_accounts = MMC->accounts();
 
@@ -64,18 +68,27 @@ AccountListPage::~AccountListPage()
     delete ui;
 }
 
+void AccountListPage::changeEvent(QEvent* event)
+{
+    if (event->type() == QEvent::LanguageChange)
+    {
+        ui->retranslateUi(this);
+    }
+    QMainWindow::changeEvent(event);
+}
+
 void AccountListPage::listChanged()
 {
     updateButtonStates();
 }
 
-void AccountListPage::on_addAccountBtn_clicked()
+void AccountListPage::on_actionAdd_triggered()
 {
     addAccount(tr("Please enter your Mojang or Minecraft account username and password to add "
                   "your account."));
 }
 
-void AccountListPage::on_rmAccountBtn_clicked()
+void AccountListPage::on_actionRemove_triggered()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
     if (selection.size() > 0)
@@ -85,7 +98,7 @@ void AccountListPage::on_rmAccountBtn_clicked()
     }
 }
 
-void AccountListPage::on_setDefaultBtn_clicked()
+void AccountListPage::on_actionSetDefault_triggered()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
     if (selection.size() > 0)
@@ -97,7 +110,7 @@ void AccountListPage::on_setDefaultBtn_clicked()
     }
 }
 
-void AccountListPage::on_noDefaultBtn_clicked()
+void AccountListPage::on_actionNoDefault_triggered()
 {
     m_accounts->setActiveAccount("");
 }
@@ -107,11 +120,19 @@ void AccountListPage::updateButtonStates()
     // If there is no selection, disable buttons that require something selected.
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
 
-    ui->rmAccountBtn->setEnabled(selection.size() > 0);
-    ui->setDefaultBtn->setEnabled(selection.size() > 0);
-    ui->uploadSkinBtn->setEnabled(selection.size() > 0);
+    ui->actionRemove->setEnabled(selection.size() > 0);
+    ui->actionSetDefault->setEnabled(selection.size() > 0);
+    ui->actionUploadSkin->setEnabled(selection.size() > 0);
 
-    ui->noDefaultBtn->setDown(m_accounts->activeAccount().get() == nullptr);
+    if(m_accounts->activeAccount().get() == nullptr) {
+        ui->actionNoDefault->setEnabled(false);
+        ui->actionNoDefault->setChecked(true);
+    }
+    else {
+        ui->actionNoDefault->setEnabled(true);
+        ui->actionNoDefault->setChecked(false);
+    }
+
 }
 
 void AccountListPage::addAccount(const QString &errMsg)
@@ -140,7 +161,7 @@ void AccountListPage::addAccount(const QString &errMsg)
     }
 }
 
-void AccountListPage::on_uploadSkinBtn_clicked()
+void AccountListPage::on_actionUploadSkin_triggered()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
     if (selection.size() > 0)

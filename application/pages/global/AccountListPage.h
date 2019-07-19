@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <QDialog>
+#include <QMainWindow>
 #include <memory>
 
 #include "pages/BasePage.h"
@@ -30,7 +30,7 @@ class AccountListPage;
 
 class AuthenticateTask;
 
-class AccountListPage : public QWidget, public BasePage
+class AccountListPage : public QMainWindow, public BasePage
 {
     Q_OBJECT
 public:
@@ -59,17 +59,20 @@ public:
         return "Getting-Started#adding-an-account";
     }
 
+private:
+    void changeEvent(QEvent * event) override;
+
 public
 slots:
-    void on_addAccountBtn_clicked();
+    void on_actionAdd_triggered();
 
-    void on_rmAccountBtn_clicked();
+    void on_actionRemove_triggered();
 
-    void on_setDefaultBtn_clicked();
+    void on_actionSetDefault_triggered();
 
-    void on_noDefaultBtn_clicked();
+    void on_actionNoDefault_triggered();
 
-    void on_uploadSkinBtn_clicked();
+    void on_actionUploadSkin_triggered();
 
     void listChanged();
 
