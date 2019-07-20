@@ -27,7 +27,7 @@ We use [Clang Format](http://clang.llvm.org/docs/ClangFormat.html) to format the
 
 
 ## Translations
-Translations can be done either directly in the [translations repository](https://github.com/MultiMC/MultiMC5). For more details, see: [Translating-MultiMC](https://github.com/MultiMC/MultiMC5/wiki/Translating-MultiMC).
+Translations can be done either directly in the [translations repository](https://github.com/MultiMC/MultiMC5-translate). For more details, see: [Translating-MultiMC](https://github.com/MultiMC/MultiMC5/wiki/Translating-MultiMC).
 
 ## Forking/Redistributing
 We keep MultiMC open source because we think it's important to be able to see the source code for a project like this, and we do so using the Apache license.
