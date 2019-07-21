@@ -2,6 +2,10 @@
 #include "BuildConfig.h"
 #include "MainWindow.h"
 #include "InstanceWindow.h"
+
+#include "groupview/AccessibleGroupView.h"
+#include <QAccessible>
+
 #include "pages/BasePageProvider.h"
 #include "pages/global/MultiMCPage.h"
 #include "pages/global/MinecraftPage.h"
@@ -530,6 +534,8 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         }
         qDebug() << "<> Settings loaded.";
     }
+
+    QAccessible::installFactory(groupViewAccessibleFactory);
 
     // load translations
     {

@@ -25,6 +25,7 @@
 #include <QMimeData>
 #include <QCache>
 #include <QScrollBar>
+#include <QAccessible>
 
 #include "VisualGroup.h"
 #include <QDebug>
@@ -87,6 +88,18 @@ void GroupView::rowsRemoved()
 {
     scheduleDelayedItemsLayout();
 }
+
+void GroupView::currentChanged(const QModelIndex& current, const QModelIndex& previous)
+{
+    QAbstractItemView::currentChanged(current, previous);
+    // TODO: for accessibility support, implement+register a factory, steal QAccessibleTable from Qt and return an instance of it for GroupView.
+    if (QAccessible::isActive() && current.isValid()) {
+        QAccessibleEvent event(this, QAccessible::Focus);
+        event.setChild(current.row());
+        QAccessible::updateAccessibility(&event);
+    }
+}
+
 
 class LocaleString : public QString
 {

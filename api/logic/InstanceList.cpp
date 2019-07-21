@@ -100,6 +100,10 @@ QVariant InstanceList::data(const QModelIndex &index, int role) const
     {
         return pdata->name();
     }
+    case Qt::AccessibleTextRole:
+    {
+        return tr("%1 Instance").arg(pdata->name());
+    }
     case Qt::ToolTipRole:
     {
         return pdata->instanceRoot();

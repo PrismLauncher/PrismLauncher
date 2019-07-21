@@ -76,6 +76,7 @@ protected slots:
     virtual void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end) override;
     void modelReset();
     void rowsRemoved();
+    void currentChanged(const QModelIndex &current, const QModelIndex &previous) override;
 
 signals:
     void droppedURLs(QList<QUrl> urls);

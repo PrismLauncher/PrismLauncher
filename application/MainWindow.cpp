@@ -288,6 +288,7 @@ public:
         foldersMenuButton->setPopupMode(QToolButton::InstantPopup);
         foldersMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         foldersMenuButton->setIcon(MMC->getThemedIcon("viewfolder"));
+        foldersMenuButton->setFocusPolicy(Qt::NoFocus);
         all_toolbuttons.append(&foldersMenuButton);
         QWidgetAction* foldersButtonAction = new QWidgetAction(MainWindow);
         foldersButtonAction->setDefaultWidget(foldersMenuButton);
@@ -345,6 +346,7 @@ public:
         helpMenuButton->setPopupMode(QToolButton::InstantPopup);
         helpMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         helpMenuButton->setIcon(MMC->getThemedIcon("help"));
+        helpMenuButton->setFocusPolicy(Qt::NoFocus);
         all_toolbuttons.append(&helpMenuButton);
         QWidgetAction* helpButtonAction = new QWidgetAction(MainWindow);
         helpButtonAction->setDefaultWidget(helpMenuButton);
@@ -652,6 +654,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         newsLabel->setIcon(MMC->getThemedIcon("news"));
         newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        newsLabel->setFocusPolicy(Qt::NoFocus);
         ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
         QObject::connect(newsLabel, &QAbstractButton::clicked, this, &MainWindow::newsButtonClicked);
         QObject::connect(m_newsChecker.get(), &NewsChecker::newsLoaded, this, &MainWindow::updateNewsLabel);

@@ -205,6 +205,8 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     {
         // FIXME: unused
         // QSize textSize = viewItemTextSize ( &opt );
+        drawSelectionRect(painter, opt, textHighlightRect);
+        /*
         QPalette::ColorGroup cg;
         QStyleOptionViewItem opt2(opt);
 
@@ -219,9 +221,12 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         {
             cg = QPalette::Disabled;
         }
+        */
+        /*
         opt2.palette.setCurrentColorGroup(cg);
 
         // fill in background, if any
+
 
         if (opt.backgroundBrush.style() != Qt::NoBrush)
         {
@@ -232,6 +237,7 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         }
 
         drawSelectionRect(painter, opt2, textHighlightRect);
+        */
 
         /*
         if (opt.showDecorationSelected)
