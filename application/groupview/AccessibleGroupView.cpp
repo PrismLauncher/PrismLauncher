@@ -46,7 +46,7 @@ bool AccessibleGroupView::isValid() const
 
 AccessibleGroupView::~AccessibleGroupView()
 {
-    for (QAccessible::Id id : qAsConst(childToId)) {
+    for (QAccessible::Id id : childToId) {
         QAccessible::deleteAccessibleInterface(id);
     }
 }
@@ -246,7 +246,7 @@ bool AccessibleGroupView::selectColumn(int column)
             if (view()->selectionBehavior() != QAbstractItemView::SelectColumns && rowCount() > 1) {
                 return false;
             }
-            Q_FALLTHROUGH();
+            // fallthrough intentional
         }
         case QAbstractItemView::ContiguousSelection: {
             if ((!column || !view()->selectionModel()->isColumnSelected(column - 1, view()->rootIndex())) && !view()->selectionModel()->isColumnSelected(column + 1, view()->rootIndex())) {
@@ -469,7 +469,7 @@ void AccessibleGroupView::modelChange(QAccessibleTableModelChangeEvent *event)
 
     switch (event->modelChangeType()) {
         case QAccessibleTableModelChangeEvent::ModelReset:
-            for (QAccessible::Id id : qAsConst(childToId))
+            for (QAccessible::Id id : childToId)
                 QAccessible::deleteAccessibleInterface(id);
             childToId.clear();
             break;
