@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QToolBar>
+#include <QAction>
+#include <QMap>
 
 class WideBar : public QToolBar
 {
