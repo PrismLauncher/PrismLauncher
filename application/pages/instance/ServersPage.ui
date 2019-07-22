@@ -128,7 +128,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QToolBar" name="toolBar">
+  <widget class="WideBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -173,6 +173,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>WideBar</class>
+   <extends>QToolBar</extends>
+   <header>widgets/WideBar.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>serversView</tabstop>
   <tabstop>nameLine</tabstop>

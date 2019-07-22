@@ -61,6 +61,7 @@ public:
 
 private:
     void changeEvent(QEvent * event) override;
+    QMenu * createPopupMenu() override;
 
 public
 slots:

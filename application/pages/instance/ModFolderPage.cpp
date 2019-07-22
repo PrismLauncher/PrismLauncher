@@ -38,11 +38,7 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> 
     : QMainWindow(parent), ui(new Ui::ModFolderPage)
 {
     ui->setupUi(this);
-
-    QWidget* spacer = new QWidget();
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    // toolBar is a pointer to an existing toolbar
-    ui->actionsToolbar->insertWidget(ui->actionView_configs, spacer);
+    ui->actionsToolbar->insertSpacer(ui->actionView_configs);
 
     m_inst = inst;
     on_RunningState_changed(m_inst && m_inst->isRunning());

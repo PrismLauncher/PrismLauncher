@@ -17,6 +17,7 @@
 #include "ui_AccountListPage.h"
 
 #include <QItemSelectionModel>
+#include <QMenu>
 
 #include <QDebug>
 
@@ -76,6 +77,14 @@ void AccountListPage::changeEvent(QEvent* event)
     }
     QMainWindow::changeEvent(event);
 }
+
+QMenu * AccountListPage::createPopupMenu()
+{
+    QMenu* filteredMenu = QMainWindow::createPopupMenu();
+    filteredMenu->removeAction(ui->toolBar->toggleViewAction() );
+    return filteredMenu;
+}
+
 
 void AccountListPage::listChanged()
 {

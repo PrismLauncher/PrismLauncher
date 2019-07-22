@@ -37,10 +37,7 @@ WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worl
 {
     ui->setupUi(this);
 
-    QWidget* spacer = new QWidget();
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    // toolBar is a pointer to an existing toolbar
-    ui->toolBar->insertWidget(ui->actionRefresh, spacer);
+    ui->toolBar->insertSpacer(ui->actionRefresh);
 
     QSortFilterProxyModel * proxy = new QSortFilterProxyModel(this);
     proxy->setSortCaseSensitivity(Qt::CaseInsensitive);

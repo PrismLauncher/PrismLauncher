@@ -213,6 +213,8 @@ SET(MULTIMC_SOURCES
     widgets/VersionSelectWidget.h
     widgets/ProgressWidget.h
     widgets/ProgressWidget.cpp
+    widgets/WideBar.h
+    widgets/WideBar.cpp
 
     # GUI - instance group view
     groupview/GroupedProxyModel.cpp

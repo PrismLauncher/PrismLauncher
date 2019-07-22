@@ -62,7 +62,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QToolBar" name="toolBar">
+  <widget class="WideBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -238,6 +238,11 @@
    <extends>QFrame</extends>
    <header>widgets/MCModInfoFrame.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WideBar</class>
+   <extends>QToolBar</extends>
+   <header>widgets/WideBar.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

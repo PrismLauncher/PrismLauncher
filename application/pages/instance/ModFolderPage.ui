@@ -73,18 +73,12 @@
     </item>
    </layout>
   </widget>
-  <widget class="QToolBar" name="actionsToolbar">
+  <widget class="WideBar" name="actionsToolbar">
    <property name="windowTitle">
     <string>Actions</string>
    </property>
-   <property name="allowedAreas">
-    <set>Qt::LeftToolBarArea|Qt::RightToolBarArea</set>
-   </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextOnly</enum>
-   </property>
-   <property name="floatable">
-    <bool>false</bool>
    </property>
    <attribute name="toolBarArea">
     <enum>RightToolBarArea</enum>
@@ -144,6 +138,11 @@
    <extends>QFrame</extends>
    <header>widgets/MCModInfoFrame.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WideBar</class>
+   <extends>QToolBar</extends>
+   <header>widgets/WideBar.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

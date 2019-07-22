@@ -112,10 +112,7 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
 {
     ui->setupUi(this);
 
-    QWidget* spacer = new QWidget();
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    // toolBar is a pointer to an existing toolbar
-    ui->toolBar->insertWidget(ui->actionReload, spacer);
+    ui->toolBar->insertSpacer(ui->actionReload);
 
     m_profile = m_inst->getComponentList();
 
