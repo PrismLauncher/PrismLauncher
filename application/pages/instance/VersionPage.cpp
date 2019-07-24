@@ -123,6 +123,8 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     ui->packageView->setModel(proxy);
     ui->packageView->installEventFilter(this);
     ui->packageView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->packageView->setContextMenuPolicy(Qt::CustomContextMenu);
+
     connect(ui->packageView->selectionModel(), &QItemSelectionModel::currentChanged, this, &VersionPage::versionCurrent);
     auto smodel = ui->packageView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::packageCurrent);
@@ -132,11 +134,19 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     updateVersionControls();
     preselect(0);
     connect(m_inst, &BaseInstance::runningStatusChanged, this, &VersionPage::updateRunningStatus);
+    connect(ui->packageView, &ModListView::customContextMenuRequested, this, &VersionPage::ShowContextMenu);
 }
 
 VersionPage::~VersionPage()
 {
     delete ui;
+}
+
+void VersionPage::ShowContextMenu(const QPoint& pos)
+{
+    auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+    menu->exec(ui->packageView->mapToGlobal(pos));
+    delete menu;
 }
 
 void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &previous)

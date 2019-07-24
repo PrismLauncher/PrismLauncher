@@ -95,5 +95,5 @@ private slots:
     void updateRunningStatus(bool running);
     void onGameUpdateError(QString error);
     void packageCurrent(const QModelIndex &current, const QModelIndex &previous);
-
+    void ShowContextMenu(const QPoint &pos);
 };

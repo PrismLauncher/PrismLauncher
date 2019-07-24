@@ -92,4 +92,6 @@ private slots:
     void on_actionView_Folder_triggered();
     void worldChanged(const QModelIndex &current, const QModelIndex &previous);
     void mceditState(LoggedProcess::State state);
+
+    void ShowContextMenu(const QPoint &pos);
 };

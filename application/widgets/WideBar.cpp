@@ -1,5 +1,6 @@
 #include "WideBar.h"
 #include <QToolButton>
+#include <QMenu>
 
 class ActionButton : public QToolButton
 {
@@ -20,6 +21,7 @@ private slots:
         setIcon(m_action->icon());
         setToolTip(m_action->toolTip());
         setHidden(!m_action->isVisible());
+        setFocusPolicy(Qt::NoFocus);
     }
 private:
     QAction * m_action;
@@ -38,22 +40,77 @@ WideBar::WideBar(QWidget* parent) : QToolBar(parent)
     setMovable(false);
 }
 
+struct WideBar::BarEntry {
+    enum Type {
+        None,
+        Action,
+        Separator,
+        Spacer
+    } type = None;
+    QAction *qAction = nullptr;
+    QAction *wideAction = nullptr;
+};
+
+
+WideBar::~WideBar()
+{
+    for(auto *iter: m_entries) {
+        delete iter;
+    }
+}
+
 void WideBar::addAction(QAction* action)
 {
-    auto actionButton = new ActionButton(action, this);
-    auto newAction = addWidget(actionButton);
-    m_actionMap[action] = newAction;
+    auto entry = new BarEntry();
+    entry->qAction = addWidget(new ActionButton(action, this));
+    entry->wideAction = action;
+    entry->type = BarEntry::Action;
+    m_entries.push_back(entry);
+}
+
+void WideBar::addSeparator()
+{
+    auto entry = new BarEntry();
+    entry->qAction = QToolBar::addSeparator();
+    entry->type = BarEntry::Separator;
+    m_entries.push_back(entry);
 }
 
 void WideBar::insertSpacer(QAction* action)
 {
-    if(!m_actionMap.contains(action)) {
+    auto iter = std::find_if(m_entries.begin(), m_entries.end(), [action](BarEntry * entry) {
+        return entry->wideAction == action;
+    });
+    if(iter == m_entries.end()) {
         return;
     }
-
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    insertWidget(m_actionMap[action], spacer);
+
+    auto entry = new BarEntry();
+    entry->qAction = insertWidget((*iter)->qAction, spacer);
+    entry->type = BarEntry::Spacer;
+    m_entries.insert(iter, entry);
+}
+
+QMenu * WideBar::createContextMenu(QWidget *parent, const QString & title)
+{
+    QMenu *contextMenu = new QMenu(title, parent);
+    for(auto & item: m_entries) {
+        switch(item->type) {
+            default:
+            case BarEntry::None:
+                break;
+            case BarEntry::Separator:
+            case BarEntry::Spacer:
+                contextMenu->addSeparator();
+                break;
+            case BarEntry::Action:
+                contextMenu->addAction(item->wideAction);
+                break;
+        }
+    }
+    return contextMenu;
 }
 
 #include "WideBar.moc"

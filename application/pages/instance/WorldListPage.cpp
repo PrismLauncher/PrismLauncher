@@ -45,6 +45,8 @@ WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worl
     ui->worldTreeView->setSortingEnabled(true);
     ui->worldTreeView->setModel(proxy);
     ui->worldTreeView->installEventFilter(this);
+    ui->worldTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->worldTreeView, &QTreeView::customContextMenuRequested, this, &WorldListPage::ShowContextMenu);
 
     auto head = ui->worldTreeView->header();
     head->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -68,6 +70,13 @@ WorldListPage::~WorldListPage()
 {
     m_worlds->stopWatching();
     delete ui;
+}
+
+void WorldListPage::ShowContextMenu(const QPoint& pos)
+{
+    auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+    menu->exec(ui->worldTreeView->mapToGlobal(pos));
+    delete menu;
 }
 
 QMenu * WorldListPage::createPopupMenu()

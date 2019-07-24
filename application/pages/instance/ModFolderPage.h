@@ -102,6 +102,7 @@ slots:
     void on_actionDisable_triggered();
     void on_actionView_Folder_triggered();
     void on_actionView_configs_triggered();
+    void ShowContextMenu(const QPoint &pos);
 };
 
 class CoreModFolderPage : public ModFolderPage

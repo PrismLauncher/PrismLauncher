@@ -43,20 +43,23 @@ AccountListPage::AccountListPage(QWidget *parent)
         "If you're new here, you can click the \"Add\" button to add your Mojang or Minecraft account."
     ));
     ui->listView->setEmptyMode(VersionListView::String);
+    ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
     m_accounts = MMC->accounts();
 
     ui->listView->setModel(m_accounts.get());
     ui->listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->listView->setSelectionMode(QAbstractItemView::SingleSelection);
 
     // Expand the account column
     ui->listView->header()->setSectionResizeMode(1, QHeaderView::Stretch);
 
     QItemSelectionModel *selectionModel = ui->listView->selectionModel();
 
-    connect(selectionModel, &QItemSelectionModel::selectionChanged,
-            [this](const QItemSelection &sel, const QItemSelection &dsel)
-    { updateButtonStates(); });
+    connect(selectionModel, &QItemSelectionModel::selectionChanged, [this](const QItemSelection &sel, const QItemSelection &dsel) {
+        updateButtonStates();
+    });
+    connect(ui->listView, &VersionListView::customContextMenuRequested, this, &AccountListPage::ShowContextMenu);
 
     connect(m_accounts.get(), SIGNAL(listChanged()), SLOT(listChanged()));
     connect(m_accounts.get(), SIGNAL(activeAccountChanged()), SLOT(listChanged()));
@@ -67,6 +70,13 @@ AccountListPage::AccountListPage(QWidget *parent)
 AccountListPage::~AccountListPage()
 {
     delete ui;
+}
+
+void AccountListPage::ShowContextMenu(const QPoint& pos)
+{
+    auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+    menu->exec(ui->listView->mapToGlobal(pos));
+    delete menu;
 }
 
 void AccountListPage::changeEvent(QEvent* event)

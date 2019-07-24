@@ -85,6 +85,7 @@ protected:
 
 protected
 slots:
+    void ShowContextMenu(const QPoint &pos);
     void addAccount(const QString& errMsg="");
 
 private:

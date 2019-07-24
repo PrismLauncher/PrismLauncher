@@ -79,7 +79,9 @@ private slots:
 
     void nameEdited(const QString & name);
     void addressEdited(const QString & address);
-    void resourceIndexChanged(int index);
+    void resourceIndexChanged(int index);\
+
+    void ShowContextMenu(const QPoint &pos);
 
 private: // data
     int currentServer = -1;

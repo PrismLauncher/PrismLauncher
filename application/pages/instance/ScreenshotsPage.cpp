@@ -235,6 +235,8 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget *parent)
     ui->listView->installEventFilter(this);
     ui->listView->setEditTriggers(0);
     ui->listView->setItemDelegate(new CenteredEditingDelegate(this));
+    ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->listView, &QListView::customContextMenuRequested, this, &ScreenshotsPage::ShowContextMenu);
     connect(ui->listView, SIGNAL(activated(QModelIndex)), SLOT(onItemActivated(QModelIndex)));
 }
 
@@ -264,6 +266,13 @@ bool ScreenshotsPage::eventFilter(QObject *obj, QEvent *evt)
 ScreenshotsPage::~ScreenshotsPage()
 {
     delete ui;
+}
+
+void ScreenshotsPage::ShowContextMenu(const QPoint& pos)
+{
+    auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+    menu->exec(ui->listView->mapToGlobal(pos));
+    delete menu;
 }
 
 QMenu * ScreenshotsPage::createPopupMenu()

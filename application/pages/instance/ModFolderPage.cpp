@@ -32,10 +32,17 @@
 #include "minecraft/ComponentList.h"
 #include <DesktopServices.h>
 
-ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> mods, QString id,
-                             QString iconName, QString displayName, QString helpPage,
-                             QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::ModFolderPage)
+ModFolderPage::ModFolderPage(
+    BaseInstance *inst,
+    std::shared_ptr<SimpleModList> mods,
+    QString id,
+    QString iconName,
+    QString displayName,
+    QString helpPage,
+    QWidget *parent
+) :
+    QMainWindow(parent),
+    ui(new Ui::ModFolderPage)
 {
     ui->setupUi(this);
     ui->actionsToolbar->insertSpacer(ui->actionView_configs);
@@ -57,6 +64,9 @@ ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> 
     ui->modTreeView->setModel(m_filterModel);
     ui->modTreeView->installEventFilter(this);
     ui->modTreeView->sortByColumn(1, Qt::AscendingOrder);
+    ui->modTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->modTreeView, &ModListView::customContextMenuRequested, this, &ModFolderPage::ShowContextMenu);
+
     auto smodel = ui->modTreeView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &ModFolderPage::modCurrent);
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ModFolderPage::on_filterTextChanged );
@@ -68,6 +78,13 @@ QMenu * ModFolderPage::createPopupMenu()
     QMenu* filteredMenu = QMainWindow::createPopupMenu();
     filteredMenu->removeAction(ui->actionsToolbar->toggleViewAction() );
     return filteredMenu;
+}
+
+void ModFolderPage::ShowContextMenu(const QPoint& pos)
+{
+    auto menu = ui->actionsToolbar->createContextMenu(this, tr("Context menu"));
+    menu->exec(ui->modTreeView->mapToGlobal(pos));
+    delete menu;
 }
 
 void ModFolderPage::openedImpl()

@@ -564,6 +564,9 @@ ServersPage::ServersPage(MinecraftInstance * inst, QWidget* parent)
     m_model = new ServersModel(inst->gameRoot(), this);
     ui->serversView->setIconSize(QSize(64,64));
     ui->serversView->setModel(m_model);
+    ui->serversView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->serversView, &QTreeView::customContextMenuRequested, this, &ServersPage::ShowContextMenu);
+
     auto head = ui->serversView->header();
     if(head->count())
     {
@@ -594,6 +597,13 @@ ServersPage::ServersPage(MinecraftInstance * inst, QWidget* parent)
 ServersPage::~ServersPage()
 {
     m_model->saveNow();
+}
+
+void ServersPage::ShowContextMenu(const QPoint& pos)
+{
+    auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+    menu->exec(ui->serversView->mapToGlobal(pos));
+    delete menu;
 }
 
 QMenu * ServersPage::createPopupMenu()
