@@ -33,6 +33,7 @@
 #include <DesktopServices.h>
 
 #include <QSortFilterProxyModel>
+#include "Version.h"
 
 namespace {
     // FIXME: wasteful
