@@ -32,6 +32,64 @@
 #include "minecraft/ComponentList.h"
 #include <DesktopServices.h>
 
+#include <QSortFilterProxyModel>
+
+namespace {
+    // FIXME: wasteful
+    void RemoveThePrefix(QString & string) {
+        QRegularExpression regex(QStringLiteral("^(([Tt][Hh][eE])|([Tt][eE][Hh])) +"));
+        string.remove(regex);
+        string = string.trimmed();
+    }
+}
+
+class ModSortProxy : public QSortFilterProxyModel
+{
+public:
+    explicit ModSortProxy(QObject *parent = 0) : QSortFilterProxyModel(parent)
+    {
+    }
+
+protected:
+    bool lessThan(const QModelIndex & source_left, const QModelIndex & source_right) const override
+    {
+        SimpleModList *model = qobject_cast<SimpleModList *>(sourceModel());
+        if(
+            !model ||
+            !source_left.isValid() ||
+            !source_right.isValid() ||
+            source_left.column() != source_right.column()
+        ) {
+            return QSortFilterProxyModel::lessThan(source_left, source_right);
+        }
+
+        // we are now guaranteed to have two valid indexes in the same column... we love the provided invariants unconditionally and proceed.
+
+        auto column = (SimpleModList::Columns) source_left.column();
+        switch(column) {
+            // GH-2722 - sort mod names in a way that discards "The" prefixes
+            case SimpleModList::NameColumn: {
+                auto dataL = source_left.data(Qt::DisplayRole).toString();
+                RemoveThePrefix(dataL);
+                auto dataR = source_right.data(Qt::DisplayRole).toString();
+                RemoveThePrefix(dataR);
+
+                auto less = dataL.compare(dataR, sortCaseSensitivity()) < 0;
+                return less;
+            }
+            // GH-2762 - sort versions by parsing them as versions
+            case SimpleModList::VersionColumn: {
+                auto dataL = Version(source_left.data(Qt::DisplayRole).toString());
+                auto dataR = Version(source_right.data(Qt::DisplayRole).toString());
+                return dataL < dataR;
+            }
+            default: {
+                return QSortFilterProxyModel::lessThan(source_left, source_right);
+            }
+        }
+    }
+};
+
 ModFolderPage::ModFolderPage(
     BaseInstance *inst,
     std::shared_ptr<SimpleModList> mods,
@@ -55,7 +113,7 @@ ModFolderPage::ModFolderPage(
     m_iconName = iconName;
     m_helpName = helpPage;
     m_fileSelectionFilter = "%1 (*.zip *.jar)";
-    m_filterModel = new QSortFilterProxyModel(this);
+    m_filterModel = new ModSortProxy(this);
     m_filterModel->setDynamicSortFilter(true);
     m_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
