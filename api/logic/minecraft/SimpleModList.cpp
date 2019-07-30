@@ -337,13 +337,14 @@ Qt::ItemFlags SimpleModList::flags(const QModelIndex &index) const
 {
     Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
     auto flags = defaultFlags;
-    if(index.isValid()) {
-        if(interaction_disabled) {
-            flags &= ~Qt::ItemIsDropEnabled;
-            flags &= ~Qt::ItemIsUserCheckable;
-        } else {
+    if(interaction_disabled) {
+        flags &= ~Qt::ItemIsDropEnabled;
+    }
+    else
+    {
+        flags |= Qt::ItemIsDropEnabled;
+        if(index.isValid()) {
             flags |= Qt::ItemIsUserCheckable;
-            flags |= Qt::ItemIsDropEnabled;
         }
     }
     return flags;
