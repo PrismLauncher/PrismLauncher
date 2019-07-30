@@ -67,22 +67,37 @@ protected:
         // we are now guaranteed to have two valid indexes in the same column... we love the provided invariants unconditionally and proceed.
 
         auto column = (SimpleModList::Columns) source_left.column();
+        bool invert = false;
         switch(column) {
+            // GH-2550 - sort by enabled/disabled
+            case SimpleModList::ActiveColumn: {
+                auto dataL = source_left.data(Qt::CheckStateRole).toBool();
+                auto dataR = source_right.data(Qt::CheckStateRole).toBool();
+                if(dataL != dataR) {
+                    return dataL > dataR;
+                }
+                // fallthrough
+                invert = sortOrder() == Qt::DescendingOrder;
+            }
             // GH-2722 - sort mod names in a way that discards "The" prefixes
             case SimpleModList::NameColumn: {
-                auto dataL = source_left.data(Qt::DisplayRole).toString();
+                auto dataL = model->data(model->index(source_left.row(), SimpleModList::NameColumn)).toString();
                 RemoveThePrefix(dataL);
-                auto dataR = source_right.data(Qt::DisplayRole).toString();
+                auto dataR = model->data(model->index(source_right.row(), SimpleModList::NameColumn)).toString();
                 RemoveThePrefix(dataR);
 
-                auto less = dataL.compare(dataR, sortCaseSensitivity()) < 0;
-                return less;
+                auto less = dataL.compare(dataR, sortCaseSensitivity());
+                if(less != 0) {
+                    return invert ? (less > 0) : (less < 0);
+                }
+                // fallthrough
+                invert = sortOrder() == Qt::DescendingOrder;
             }
             // GH-2762 - sort versions by parsing them as versions
             case SimpleModList::VersionColumn: {
-                auto dataL = Version(source_left.data(Qt::DisplayRole).toString());
-                auto dataR = Version(source_right.data(Qt::DisplayRole).toString());
-                return dataL < dataR;
+                auto dataL = Version(model->data(model->index(source_left.row(), SimpleModList::VersionColumn)).toString());
+                auto dataR = Version(model->data(model->index(source_right.row(), SimpleModList::VersionColumn)).toString());
+                return invert ? (dataL > dataR) : (dataL < dataR);
             }
             default: {
                 return QSortFilterProxyModel::lessThan(source_left, source_right);
