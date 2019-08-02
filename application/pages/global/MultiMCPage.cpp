@@ -78,7 +78,6 @@ MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCP
     }
     connect(ui->fontSizeBox, SIGNAL(valueChanged(int)), SLOT(refreshFontPreview()));
     connect(ui->consoleFont, SIGNAL(currentFontChanged(QFont)), SLOT(refreshFontPreview()));
-    connect(ui->languageBox, SIGNAL(currentIndexChanged(int)), SLOT(languageIndexChanged(int)));
 }
 
 MultiMCPage::~MultiMCPage()
@@ -145,19 +144,6 @@ void MultiMCPage::on_modsDirBrowseBtn_clicked()
         QString cooked_dir = FS::NormalizePath(raw_dir);
         ui->modsDirTextBox->setText(cooked_dir);
     }
-}
-
-void MultiMCPage::languageIndexChanged(int index)
-{
-    auto languageCode = ui->languageBox->itemData(ui->languageBox->currentIndex()).toString();
-    if(languageCode.isEmpty())
-    {
-        qWarning() << "Unknown language at index" << index;
-        return;
-    }
-    auto translations = MMC->translations();
-    translations->selectLanguage(languageCode);
-    translations->updateLanguage(languageCode);
 }
 
 void MultiMCPage::refreshUpdateChannelList()
@@ -235,10 +221,6 @@ void MultiMCPage::refreshUpdateChannelDesc()
 void MultiMCPage::applySettings()
 {
     auto s = MMC->settings();
-
-    // Language
-    auto langCode = ui->languageBox->itemData(ui->languageBox->currentIndex()).toString();
-    s->set("Language", langCode.isEmpty() ? "en" : langCode);
 
     if (ui->resetNotificationsBtn->isChecked())
     {
@@ -332,12 +314,6 @@ void MultiMCPage::applySettings()
 void MultiMCPage::loadSettings()
 {
     auto s = MMC->settings();
-    // Language
-    {
-        ui->languageBox->setModel(m_languageModel.get());
-        ui->languageBox->setCurrentIndex(ui->languageBox->findData(s->get("Language").toString()));
-    }
-
     // Updates
     ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
     m_currentUpdateChannel = s->get("UpdateChannel").toString();

@@ -36,6 +36,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget *parent) :
     languageView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     languageView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     connect(languageView->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &LanguageSelectionWidget::languageRowChanged);
+    verticalLayout->setContentsMargins(0,0,0,0);
 }
 
 QString LanguageSelectionWidget::getSelectedLanguageKey() const

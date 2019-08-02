@@ -140,15 +140,13 @@ void PageContainer::createUI()
 
     QHBoxLayout *headerHLayout = new QHBoxLayout;
     const int leftMargin = MMC->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
-    headerHLayout->addSpacerItem(
-        new QSpacerItem(leftMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
+    headerHLayout->addSpacerItem(new QSpacerItem(leftMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->addWidget(m_header);
-    headerHLayout->addSpacerItem(
-        new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Ignored));
+    headerHLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Ignored));
     headerHLayout->addWidget(m_iconHeader);
     const int rightMargin = MMC->style()->pixelMetric(QStyle::PM_LayoutRightMargin);
-    headerHLayout->addSpacerItem(
-        new QSpacerItem(rightMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
+    headerHLayout->addSpacerItem(new QSpacerItem(rightMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
+    headerHLayout->setContentsMargins(0, 6, 0, 0);
 
     m_pageStack->setMargin(0);
     m_pageStack->addWidget(new QWidget(this));
@@ -158,6 +156,7 @@ void PageContainer::createUI()
     m_layout->addWidget(m_pageList, 0, 0, 2, 1);
     m_layout->addLayout(m_pageStack, 1, 1, 1, 1);
     m_layout->setColumnStretch(1, 4);
+    m_layout->setContentsMargins(0,0,0,6);
     setLayout(m_layout);
 }
 

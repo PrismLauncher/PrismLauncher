@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>467</width>
+    <width>514</width>
     <height>629</height>
    </rect>
   </property>
@@ -224,18 +224,6 @@
              <string notr="true">sortingModeGroup</string>
             </attribute>
            </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_2">
-         <property name="title">
-          <string>Language:</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QComboBox" name="languageBox"/>
           </item>
          </layout>
         </widget>
@@ -570,7 +558,6 @@
   <tabstop>resetNotificationsBtn</tabstop>
   <tabstop>sortLastLaunchedBtn</tabstop>
   <tabstop>sortByNameBtn</tabstop>
-  <tabstop>languageBox</tabstop>
   <tabstop>themeComboBox</tabstop>
   <tabstop>themeComboBoxColors</tabstop>
   <tabstop>showConsoleCheck</tabstop>

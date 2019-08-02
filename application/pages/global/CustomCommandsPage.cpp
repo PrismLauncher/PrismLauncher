@@ -13,6 +13,7 @@ CustomCommandsPage::CustomCommandsPage(QWidget* parent): QWidget(parent)
     auto tabWidget = new QTabWidget(this);
     tabWidget->setObjectName(QStringLiteral("tabWidget"));
     commands = new CustomCommands(this);
+    commands->setContentsMargins(6, 6, 6, 6);
     tabWidget->addTab(commands, "Foo");
     tabWidget->tabBar()->hide();
     verticalLayout->addWidget(tabWidget);

@@ -68,8 +68,6 @@ slots:
     void on_modsDirBrowseBtn_clicked();
     void on_iconsDirBrowseBtn_clicked();
 
-    void languageIndexChanged(int index);
-
     /*!
      * Updates the list of update channels in the combo box.
      */

@@ -50,6 +50,7 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
         m_container = new PageContainer(provider.get(), "console", this);
         m_container->setParentContainer(this);
         setCentralWidget(m_container);
+        setContentsMargins(0, 0, 0, 0);
     }
 
     // Add custom buttons to the page container layout.
