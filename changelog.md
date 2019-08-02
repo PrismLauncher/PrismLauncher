@@ -1,10 +1,43 @@
-# MultiMC 0.6.6
+# MultiMC 0.6.7
+
+UI improvements!
+
+### New or changed features
+
+- GH-358: Switched all the dialog pages from using buttons in layouts to toolbars.
+
+  Toolbar buttons are smaller, and the toolbars can overflow buttons into an overflow space. This allows requiring a lot less space for the windows.
+
+  All of the relevant pages now also have context menus to offset the issues toolbars create when using screen readers.
+
+- Main window instance list is now compatible with screen readers.
+
+  If you have poor or no eyesight, this makes MultiMC usable.
+
+- More instance pages are now visible when the instance is running.
+
+  Mods, version and the lkike should now be visible, but most of the controls are disabled until the game closes.
+
+- GH-2550, GH-2722, GH-2762: Mod list sorting is much improved.
+
+  You can now sort mods by enabled status.
+
+  Sorting by version actually looks at the versions as versions, not words.
+
+  Sorting by name ignores 'The' prefixes in mod names. For example, 'The Betweenlands' will be sorted as 'Betweenlands'.
+
+  Sorting cascades from 'Enabled' to 'Name' and then 'Version'. This means that if you sort 'Enabled', the enabled and disabled mods are still sorted
+  by name and mods with the same name will be also sorted by version.
+
+# Previous releases
+
+## MultiMC 0.6.6
 
 This release is mostly the smaller things that have accumulated over time, along with a big change in linux packaging.
 
 No 1.13+ Forge news yet. That's going to be a major overhaul of many of the internals of MultiMC.
 
-## **IMPORTANT**
+### **IMPORTANT**
 
 On linux, MultiMC no longer bundles the Qt libraries. This fixes many issues, but it might not run after the update unless you have the required libraries installed.
 
@@ -19,7 +52,7 @@ MultiMC on linux is built with Qt 5.4 and older versions of Qt will not work.
 
 This should be a massive improvement to system integration on linux and resolves GH-1784, GH-2605, GH-1979, GH-2271, GH-1992, GH-1816 and their many duplicates.
 
-### New or changed features
+#### New or changed features
 
 - GH-2487: No is now the default button when deleting instances.
 
@@ -49,7 +82,7 @@ This should be a massive improvement to system integration on linux and resolves
 
   You can now drag the purple download buttons from CurseForge into MultiMC and get a modpack out of it. Much easier!
 
-### Bugfixes
+#### Bugfixes
 
 - Translation folder is now created sooner, making first launch translation fetch work again.
 
@@ -78,8 +111,6 @@ This should be a massive improvement to system integration on linux and resolves
 - GH-1701: When downloading updates, the text now reflects the number of downloaded files better.
 
 - Icon scaling issues on macOS should now be fixed.
-
-# Previous releases
 
 ## MultiMC 0.6.5
 
