@@ -7,6 +7,7 @@
 #include "LegacyInstance.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/ComponentList.h"
+#include "LegacyModList.h"
 #include "classparser.h"
 
 LegacyUpgradeTask::LegacyUpgradeTask(InstancePtr origInstance)
@@ -96,10 +97,10 @@ void LegacyUpgradeTask::copyFinished()
             components->installCustomJar(jarPath);
         }
 
-        auto jarMods = legacyInst->getJarMods();
+        auto jarMods = legacyInst->jarModList()->allMods();
         for(auto & jarMod: jarMods)
         {
-            QString modPath = jarMod.filename().absoluteFilePath();
+            QString modPath = jarMod.absoluteFilePath();
             qDebug() << "jarMod: " << modPath;
             components->installJarMods({modPath});
         }

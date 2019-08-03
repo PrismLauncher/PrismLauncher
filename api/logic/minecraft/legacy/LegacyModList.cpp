@@ -22,8 +22,7 @@ LegacyModList::LegacyModList(const QString &dir, const QString &list_file)
     : m_dir(dir), m_list_file(list_file)
 {
     FS::ensureFolderPathExists(m_dir.absolutePath());
-    m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs |
-                    QDir::NoSymLinks);
+    m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs | QDir::NoSymLinks);
     m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
 }
 
@@ -34,15 +33,11 @@ LegacyModList::LegacyModList(const QString &dir, const QString &list_file)
     };
     typedef QList<OrderItem> OrderList;
 
-static void internalSort(QList<Mod> &what)
+static void internalSort(QList<LegacyModList::Mod> &what)
 {
-    auto predicate = [](const Mod &left, const Mod &right)
+    auto predicate = [](const LegacyModList::Mod &left, const LegacyModList::Mod &right)
     {
-        if (left.name() == right.name())
-        {
-            return left.mmc_id().localeAwareCompare(right.mmc_id()) < 0;
-        }
-        return left.name().localeAwareCompare(right.name()) < 0;
+        return left.fileName().localeAwareCompare(right.fileName()) < 0;
     };
     std::sort(what.begin(), what.end(), predicate);
 }
@@ -90,7 +85,6 @@ bool LegacyModList::update()
     QList<Mod> newMods;
     m_dir.refresh();
     auto folderContents = m_dir.entryInfoList();
-    bool orderOrStateChanged = false;
 
     // first, process the ordered items (if any)
     OrderList listOrder = readListFile(m_list_file);
@@ -124,48 +118,19 @@ bool LegacyModList::update()
             // remove from the actual folder contents list
             folderContents.takeAt(idx);
             // append the new mod
-            orderedMods.append(Mod(info));
-            if (isEnabled != item.enabled)
-                orderOrStateChanged = true;
-        }
-        else
-        {
-            orderOrStateChanged = true;
+            orderedMods.append(info);
         }
     }
-    // if there are any untracked files...
+    // if there are any untracked files... append them sorted at the end
     if (folderContents.size())
     {
-        // the order surely changed!
         for (auto entry : folderContents)
         {
-            newMods.append(Mod(entry));
+            newMods.append(entry);
         }
         internalSort(newMods);
         orderedMods.append(newMods);
-        orderOrStateChanged = true;
-    }
-    // otherwise, if we were already tracking some mods
-    else if (mods.size())
-    {
-        // if the number doesn't match, order changed.
-        if (mods.size() != orderedMods.size())
-            orderOrStateChanged = true;
-        // if it does match, compare the mods themselves
-        else
-            for (int i = 0; i < mods.size(); i++)
-            {
-                if (!mods[i].strongCompare(orderedMods[i]))
-                {
-                    orderOrStateChanged = true;
-                    break;
-                }
-            }
     }
     mods.swap(orderedMods);
-    if (orderOrStateChanged && !m_list_file.isEmpty())
-    {
-        qDebug() << "Mod list " << m_list_file << " changed!";
-    }
     return true;
 }

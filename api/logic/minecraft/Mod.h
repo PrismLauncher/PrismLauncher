@@ -47,11 +47,6 @@ public:
     {
         return m_type;
     }
-    QString mcversion() const
-    {
-        return m_mcversion;
-    }
-    ;
     bool valid()
     {
         return m_type != MOD_UNKNOWN;
@@ -118,13 +113,6 @@ private:
     void ReadLiteModInfo(QByteArray contents);
 
 protected:
-
-    // FIXME: what do do with those? HMM...
-    /*
-    void ReadModInfoData(QString info);
-    void ReadForgeInfoData(QString infoFileData);
-    */
-
     QFileInfo m_file;
     QDateTime m_changedDateTime;
     QString m_mmc_id;

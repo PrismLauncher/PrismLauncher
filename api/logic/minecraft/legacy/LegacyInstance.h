@@ -78,7 +78,6 @@ public:
     QString customBaseJar() const;
 
     std::shared_ptr<LegacyModList> jarModList() const;
-    QList<Mod> getJarMods() const;
     std::shared_ptr<WorldList> worldList() const;
 
     /*!

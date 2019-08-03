@@ -34,6 +34,8 @@ class MULTIMC_LOGIC_EXPORT LegacyModList
 {
 public:
 
+    using Mod = QFileInfo;
+
     LegacyModList(const QString &dir, const QString &list_file = QString());
 
     /// Reloads the mod list and returns true if the list changed.
