@@ -16,8 +16,26 @@
 #pragma once
 #include <QFileInfo>
 #include <QDateTime>
+#include "multimc_logic_export.h"
 
-class Mod
+struct ModDetails
+{
+    operator bool() const {
+        return valid;
+    }
+    bool valid = false;
+    QString mod_id;
+    QString name;
+    QString version;
+    QString mcversion;
+    QString homeurl;
+    QString updateurl;
+    QString description;
+    QStringList authors;
+    QString credits;
+};
+
+class MULTIMC_LOGIC_EXPORT Mod
 {
 public:
     enum ModType
@@ -39,10 +57,6 @@ public:
     {
         return m_mmc_id;
     }
-    QString mod_id() const
-    {
-        return m_mod_id;
-    }
     ModType type() const
     {
         return m_type;
@@ -50,37 +64,6 @@ public:
     bool valid()
     {
         return m_type != MOD_UNKNOWN;
-    }
-    QString name() const
-    {
-        QString name = m_name.trimmed();
-        if(name.isEmpty() || name == "Example Mod")
-        {
-            return m_mmc_id;
-        }
-        return m_name;
-    }
-
-    QString version() const;
-
-    QString homeurl() const
-    {
-        return m_homeurl;
-    }
-
-    QString description() const
-    {
-        return m_description;
-    }
-
-    QString authors() const
-    {
-        return m_authors;
-    }
-
-    QString credits() const
-    {
-        return m_credits;
     }
 
     QDateTime dateTimeChanged() const
@@ -93,39 +76,29 @@ public:
         return m_enabled;
     }
 
+    const ModDetails &details() const;
+
+    QString name() const;
+    QString version() const;
+    QString homeurl() const;
+    QString description() const;
+    QStringList authors() const;
+
     bool enable(bool value);
 
     // delete all the files of this mod
     bool destroy();
-    // replace this mod with a copy of the other
-    bool replace(Mod &with);
+
     // change the mod's filesystem path (used by mod lists for *MAGIC* purposes)
     void repath(const QFileInfo &file);
-
-    // WEAK compare operator - used for replacing mods
-    bool operator==(const Mod &other) const;
-    bool strongCompare(const Mod &other) const;
-
-private:
-    void ReadMCModInfo(QByteArray contents);
-    void ReadFabricModInfo(QByteArray contents);
-    void ReadForgeInfo(QByteArray contents);
-    void ReadLiteModInfo(QByteArray contents);
 
 protected:
     QFileInfo m_file;
     QDateTime m_changedDateTime;
     QString m_mmc_id;
-    QString m_mod_id;
-    bool m_enabled = true;
     QString m_name;
-    QString m_version;
-    QString m_mcversion;
-    QString m_homeurl;
-    QString m_updateurl;
-    QString m_description;
-    QString m_authors;
-    QString m_credits;
-
-    ModType m_type;
+    bool m_enabled = true;
+    ModType m_type = MOD_UNKNOWN;
+    bool m_bare = true;
+    ModDetails m_localDetails;
 };

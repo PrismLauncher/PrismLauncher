@@ -249,8 +249,17 @@ QVariant SimpleModList::data(const QModelIndex &index, int role) const
         {
         case NameColumn:
             return mods[row].name();
-        case VersionColumn:
+        case VersionColumn: {
+            switch(mods[row].type()) {
+                case Mod::MOD_FOLDER:
+                    return tr("Folder");
+                case Mod::MOD_SINGLEFILE:
+                    return tr("File");
+                default:
+                    break;
+            }
             return mods[row].version();
+        }
         case DateColumn:
             return mods[row].dateTimeChanged();
 

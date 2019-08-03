@@ -19,17 +19,8 @@
 #include <QString>
 #include <QDir>
 
-#include "minecraft/Mod.h"
-
 #include "multimc_logic_export.h"
 
-class LegacyInstance;
-class BaseInstance;
-
-/**
- * A legacy mod list.
- * Backed by a folder.
- */
 class MULTIMC_LOGIC_EXPORT LegacyModList
 {
 public:

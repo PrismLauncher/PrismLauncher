@@ -16,8 +16,6 @@
 #pragma once
 #include <QTreeView>
 
-class Mod;
-
 class VersionListView : public QTreeView
 {
     Q_OBJECT

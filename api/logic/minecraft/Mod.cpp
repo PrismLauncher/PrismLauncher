@@ -27,6 +27,183 @@
 #include <FileSystem.h>
 #include <QDebug>
 
+namespace {
+// NEW format
+// https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/6f62b37cea040daf350dc253eae6326dd9c822c3
+
+// OLD format:
+// https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/5bf6a2d05145ec79387acc0d45c958642fb049fc
+ModDetails ReadMCModInfo(QByteArray contents)
+{
+    auto getInfoFromArray = [&](QJsonArray arr)->ModDetails
+    {
+        ModDetails details;
+        if (!arr.at(0).isObject()) {
+            return details;
+        }
+        auto firstObj = arr.at(0).toObject();
+        details.mod_id = firstObj.value("modid").toString();
+        auto name = firstObj.value("name").toString();
+        // NOTE: ignore stupid example mods copies where the author didn't even bother to change the name
+        if(name != "Example Mod") {
+            details.name = name;
+        }
+        details.version = firstObj.value("version").toString();
+        details.updateurl = firstObj.value("updateUrl").toString();
+        auto homeurl = firstObj.value("url").toString().trimmed();
+        if(!homeurl.isEmpty())
+        {
+            // fix up url.
+            if (!homeurl.startsWith("http://") && !homeurl.startsWith("https://") && !homeurl.startsWith("ftp://"))
+            {
+                homeurl.prepend("http://");
+            }
+        }
+        details.homeurl = homeurl;
+        details.description = firstObj.value("description").toString();
+        QJsonArray authors = firstObj.value("authorList").toArray();
+        if (authors.size() == 0) {
+            // FIXME: what is the format of this? is there any?
+            authors = firstObj.value("authors").toArray();
+        }
+
+        for (auto author: authors)
+        {
+            details.authors.append(author.toString());
+        }
+        details.credits = firstObj.value("credits").toString();
+        details.valid = true;
+        return details;
+    };
+    QJsonParseError jsonError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
+    // this is the very old format that had just the array
+    if (jsonDoc.isArray())
+    {
+        return getInfoFromArray(jsonDoc.array());
+    }
+    else if (jsonDoc.isObject())
+    {
+        auto val = jsonDoc.object().value("modinfoversion");
+        if(val.isUndefined()) {
+            val = jsonDoc.object().value("modListVersion");
+        }
+        int version = val.toDouble();
+        if (version != 2)
+        {
+            qCritical() << "BAD stuff happened to mod json:";
+            qCritical() << contents;
+            return ModDetails();
+        }
+        auto arrVal = jsonDoc.object().value("modlist");
+        if(arrVal.isUndefined()) {
+            arrVal = jsonDoc.object().value("modList");
+        }
+        if (arrVal.isArray())
+        {
+            return getInfoFromArray(arrVal.toArray());
+        }
+    }
+    return ModDetails();
+}
+
+// https://fabricmc.net/wiki/documentation:fabric_mod_json
+ModDetails ReadFabricModInfo(QByteArray contents)
+{
+    QJsonParseError jsonError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
+    auto object = jsonDoc.object();
+    auto schemaVersion = object.contains("schemaVersion") ? object.value("schemaVersion").toInt(0) : 0;
+
+    ModDetails details;
+
+    details.mod_id = object.value("id").toString();
+    details.version = object.value("version").toString();
+
+    details.name = object.contains("name") ? object.value("name").toString() : details.mod_id;
+    details.description = object.value("description").toString();
+
+    if (schemaVersion >= 1)
+    {
+        QJsonArray authors = object.value("authors").toArray();
+        for (auto author: authors)
+        {
+            if(author.isObject()) {
+                details.authors.append(author.toObject().value("name").toString());
+            }
+            else {
+                details.authors.append(author.toString());
+            }
+        }
+
+        if (object.contains("contact"))
+        {
+            QJsonObject contact = object.value("contact").toObject();
+
+            if (contact.contains("homepage"))
+            {
+                details.homeurl = contact.value("homepage").toString();
+            }
+        }
+    }
+    details.valid = !details.name.isEmpty();
+    return details;
+}
+
+ModDetails ReadForgeInfo(QByteArray contents)
+{
+    ModDetails details;
+    // Read the data
+    details.name = "Minecraft Forge";
+    details.mod_id = "Forge";
+    details.homeurl = "http://www.minecraftforge.net/forum/";
+    details.valid = true;
+    INIFile ini;
+    if (!ini.loadFile(contents))
+        return details;
+
+    QString major = ini.get("forge.major.number", "0").toString();
+    QString minor = ini.get("forge.minor.number", "0").toString();
+    QString revision = ini.get("forge.revision.number", "0").toString();
+    QString build = ini.get("forge.build.number", "0").toString();
+
+    details.version = major + "." + minor + "." + revision + "." + build;
+    return details;
+}
+
+ModDetails ReadLiteModInfo(QByteArray contents)
+{
+    ModDetails details;
+    QJsonParseError jsonError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
+    auto object = jsonDoc.object();
+    if (object.contains("name"))
+    {
+        details.mod_id = details.name = object.value("name").toString();
+    }
+    if (object.contains("version"))
+    {
+        details.version = object.value("version").toString("");
+    }
+    else
+    {
+        details.version = object.value("revision").toString("");
+    }
+    details.mcversion = object.value("mcversion").toString();
+    auto author = object.value("author").toString();
+    if(!author.isEmpty()) {
+        details.authors.append(author);
+    }
+    details.description = object.value("description").toString();
+    details.homeurl = object.value("url").toString();
+    return details;
+}
+
+ModDetails invalidDetails;
+
+}
+
+
 Mod::Mod(const QFileInfo &file)
 {
     repath(file);
@@ -91,7 +268,7 @@ void Mod::repath(const QFileInfo &file)
                 return;
             }
 
-            ReadMCModInfo(file.readAll());
+            m_localDetails = ReadMCModInfo(file.readAll());
             file.close();
             zip.close();
             return;
@@ -104,7 +281,7 @@ void Mod::repath(const QFileInfo &file)
                 return;
             }
 
-            ReadFabricModInfo(file.readAll());
+            m_localDetails = ReadFabricModInfo(file.readAll());
             file.close();
             zip.close();
             return;
@@ -117,7 +294,7 @@ void Mod::repath(const QFileInfo &file)
                 return;
             }
 
-            ReadForgeInfo(file.readAll());
+            m_localDetails = ReadForgeInfo(file.readAll());
             file.close();
             zip.close();
             return;
@@ -136,7 +313,7 @@ void Mod::repath(const QFileInfo &file)
             auto data = mcmod.readAll();
             if (data.isEmpty() || data.isNull())
                 return;
-            ReadMCModInfo(data);
+            m_localDetails = ReadMCModInfo(data);
         }
     }
     else if (m_type == MOD_LITEMOD)
@@ -155,242 +332,10 @@ void Mod::repath(const QFileInfo &file)
                 return;
             }
 
-            ReadLiteModInfo(file.readAll());
+            m_localDetails = ReadLiteModInfo(file.readAll());
             file.close();
         }
         zip.close();
-    }
-}
-
-// NEW format
-// https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/6f62b37cea040daf350dc253eae6326dd9c822c3
-
-// OLD format:
-// https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/5bf6a2d05145ec79387acc0d45c958642fb049fc
-void Mod::ReadMCModInfo(QByteArray contents)
-{
-    auto getInfoFromArray = [&](QJsonArray arr)->void
-    {
-        if (!arr.at(0).isObject())
-            return;
-        auto firstObj = arr.at(0).toObject();
-        m_mod_id = firstObj.value("modid").toString();
-        m_name = firstObj.value("name").toString();
-        m_version = firstObj.value("version").toString();
-        m_homeurl = firstObj.value("url").toString();
-        m_updateurl = firstObj.value("updateUrl").toString();
-        m_homeurl = m_homeurl.trimmed();
-        if(!m_homeurl.isEmpty())
-        {
-            // fix up url.
-            if (!m_homeurl.startsWith("http://") && !m_homeurl.startsWith("https://") &&
-                !m_homeurl.startsWith("ftp://"))
-            {
-                m_homeurl.prepend("http://");
-            }
-        }
-        m_description = firstObj.value("description").toString();
-        QJsonArray authors = firstObj.value("authorList").toArray();
-        if (authors.size() == 0)
-            authors = firstObj.value("authors").toArray();
-
-        if (authors.size() == 0)
-            m_authors = "";
-        else if (authors.size() >= 1)
-        {
-            m_authors = authors.at(0).toString();
-            for (int i = 1; i < authors.size(); i++)
-            {
-                m_authors += ", " + authors.at(i).toString();
-            }
-        }
-        m_credits = firstObj.value("credits").toString();
-        return;
-    }
-    ;
-    QJsonParseError jsonError;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
-    // this is the very old format that had just the array
-    if (jsonDoc.isArray())
-    {
-        getInfoFromArray(jsonDoc.array());
-    }
-    else if (jsonDoc.isObject())
-    {
-        auto val = jsonDoc.object().value("modinfoversion");
-        if(val.isUndefined())
-            val = jsonDoc.object().value("modListVersion");
-        int version = val.toDouble();
-        if (version != 2)
-        {
-            qCritical() << "BAD stuff happened to mod json:";
-            qCritical() << contents;
-            return;
-        }
-        auto arrVal = jsonDoc.object().value("modlist");
-        if(arrVal.isUndefined())
-            arrVal = jsonDoc.object().value("modList");
-        if (arrVal.isArray())
-        {
-            getInfoFromArray(arrVal.toArray());
-        }
-    }
-}
-
-// https://fabricmc.net/wiki/documentation:fabric_mod_json
-void Mod::ReadFabricModInfo(QByteArray contents)
-{
-    QJsonParseError jsonError;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
-    auto object = jsonDoc.object();
-    auto schemaVersion = object.contains("schemaVersion") ? object.value("schemaVersion").toInt(0) : 0;
-
-    m_mod_id = object.value("id").toString();
-    m_version = object.value("version").toString();
-
-    m_name = object.contains("name") ? object.value("name").toString() : m_mod_id;
-    m_description = object.value("description").toString();
-
-    if (schemaVersion >= 1)
-    {
-        QJsonArray authors = object.value("authors").toArray();
-        m_authors = "";
-
-        for (int i = 0; i < authors.size(); i++)
-        {
-            QString author_name = authors.at(i).isObject()
-                    ? authors.at(i).toObject().value("name").toString()
-                    : authors.at(i).toString();
-
-            if (i > 0)
-                m_authors += ", " + author_name;
-            else {
-                m_authors += author_name;
-            }
-        }
-
-        if (object.contains("contact"))
-        {
-            QJsonObject contact = object.value("contact").toObject();
-
-            if (contact.contains("homepage"))
-                m_homeurl = contact.value("homepage").toString();
-        }
-    }
-}
-
-void Mod::ReadForgeInfo(QByteArray contents)
-{
-    // Read the data
-    m_name = "Minecraft Forge";
-    m_mod_id = "Forge";
-    m_homeurl = "http://www.minecraftforge.net/forum/";
-    INIFile ini;
-    if (!ini.loadFile(contents))
-        return;
-
-    QString major = ini.get("forge.major.number", "0").toString();
-    QString minor = ini.get("forge.minor.number", "0").toString();
-    QString revision = ini.get("forge.revision.number", "0").toString();
-    QString build = ini.get("forge.build.number", "0").toString();
-
-    m_version = major + "." + minor + "." + revision + "." + build;
-}
-
-void Mod::ReadLiteModInfo(QByteArray contents)
-{
-    QJsonParseError jsonError;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
-    auto object = jsonDoc.object();
-    if (object.contains("name"))
-    {
-        m_mod_id = m_name = object.value("name").toString();
-    }
-    if (object.contains("version"))
-    {
-        m_version = object.value("version").toString("");
-    }
-    else
-    {
-        m_version = object.value("revision").toString("");
-    }
-    m_mcversion = object.value("mcversion").toString();
-    m_authors = object.value("author").toString();
-    m_description = object.value("description").toString();
-    m_homeurl = object.value("url").toString();
-}
-
-bool Mod::replace(Mod &with)
-{
-    if (!destroy())
-        return false;
-    bool success = false;
-    auto t = with.type();
-
-    if (t == MOD_ZIPFILE || t == MOD_SINGLEFILE || t == MOD_LITEMOD)
-    {
-        qDebug() << "Copy: " << with.m_file.filePath() << " to " << m_file.filePath();
-        success = QFile::copy(with.m_file.filePath(), m_file.filePath());
-    }
-    if (t == MOD_FOLDER)
-    {
-        success = FS::copy(with.m_file.filePath(), m_file.path())();
-    }
-    if (success)
-    {
-        m_name = with.m_name;
-        m_mmc_id = with.m_mmc_id;
-        m_mod_id = with.m_mod_id;
-        m_version = with.m_version;
-        m_mcversion = with.m_mcversion;
-        m_description = with.m_description;
-        m_authors = with.m_authors;
-        m_credits = with.m_credits;
-        m_homeurl = with.m_homeurl;
-        m_type = with.m_type;
-        m_file.refresh();
-    }
-    return success;
-}
-
-bool Mod::destroy()
-{
-    if (m_type == MOD_FOLDER)
-    {
-        QDir d(m_file.filePath());
-        if (d.removeRecursively())
-        {
-            m_type = MOD_UNKNOWN;
-            return true;
-        }
-        return false;
-    }
-    else if (m_type == MOD_SINGLEFILE || m_type == MOD_ZIPFILE || m_type == MOD_LITEMOD)
-    {
-        QFile f(m_file.filePath());
-        if (f.remove())
-        {
-            m_type = MOD_UNKNOWN;
-            return true;
-        }
-        return false;
-    }
-    return true;
-}
-
-QString Mod::version() const
-{
-    switch (type())
-    {
-    case MOD_ZIPFILE:
-    case MOD_LITEMOD:
-        return m_version;
-    case MOD_FOLDER:
-        return "Folder";
-    case MOD_SINGLEFILE:
-        return "File";
-    default:
-        return "VOID";
     }
 }
 
@@ -423,11 +368,66 @@ bool Mod::enable(bool value)
     m_enabled = value;
     return true;
 }
-bool Mod::operator==(const Mod &other) const
+
+bool Mod::destroy()
 {
-    return mmc_id() == other.mmc_id();
+    if (m_type == MOD_FOLDER)
+    {
+        QDir d(m_file.filePath());
+        if (d.removeRecursively())
+        {
+            m_type = MOD_UNKNOWN;
+            return true;
+        }
+        return false;
+    }
+    else if (m_type == MOD_SINGLEFILE || m_type == MOD_ZIPFILE || m_type == MOD_LITEMOD)
+    {
+        QFile f(m_file.filePath());
+        if (f.remove())
+        {
+            m_type = MOD_UNKNOWN;
+            return true;
+        }
+        return false;
+    }
+    return true;
 }
-bool Mod::strongCompare(const Mod &other) const
+
+
+const ModDetails & Mod::details() const
 {
-    return mmc_id() == other.mmc_id() && version() == other.version() && type() == other.type();
+    if(!m_localDetails)
+        return invalidDetails;
+    return m_localDetails;
+}
+
+
+QString Mod::version() const
+{
+    return details().version;
+}
+
+QString Mod::name() const
+{
+    auto & d = details();
+    if(d && !d.name.isEmpty()) {
+        return d.name;
+    }
+    return m_name;
+}
+
+QString Mod::homeurl() const
+{
+    return details().homeurl;
+}
+
+QString Mod::description() const
+{
+    return details().description;
+}
+
+QStringList Mod::authors() const
+{
+    return details().authors;
 }

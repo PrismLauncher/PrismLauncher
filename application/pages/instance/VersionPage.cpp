@@ -27,7 +27,6 @@
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/VersionSelectDialog.h"
 #include "dialogs/NewComponentDialog.h"
-#include "dialogs/ModEditDialogCommon.h"
 
 #include "dialogs/ProgressDialog.h"
 #include <GuiUtil.h>

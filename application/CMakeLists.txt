@@ -159,8 +159,6 @@ SET(MULTIMC_SOURCES
     dialogs/IconPickerDialog.h
     dialogs/LoginDialog.cpp
     dialogs/LoginDialog.h
-    dialogs/ModEditDialogCommon.cpp
-    dialogs/ModEditDialogCommon.h
     dialogs/NewComponentDialog.cpp
     dialogs/NewComponentDialog.h
     dialogs/NewInstanceDialog.cpp

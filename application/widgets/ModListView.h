@@ -16,8 +16,6 @@
 #pragma once
 #include <QTreeView>
 
-class Mod;
-
 class ModListView: public QTreeView
 {
     Q_OBJECT

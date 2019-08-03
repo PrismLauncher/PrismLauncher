@@ -429,7 +429,3 @@ bool World::operator==(const World &other) const
 {
     return is_valid == other.is_valid && folderName() == other.folderName();
 }
-bool World::strongCompare(const World &other) const
-{
-    return is_valid == other.is_valid && folderName() == other.folderName();
-}

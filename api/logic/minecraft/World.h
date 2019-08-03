@@ -76,7 +76,6 @@ public:
 
     // WEAK compare operator - used for replacing worlds
     bool operator==(const World &other) const;
-    bool strongCompare(const World &other) const;
 
 private:
     void readFromZip(const QFileInfo &file);

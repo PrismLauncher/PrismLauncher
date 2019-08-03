@@ -40,7 +40,7 @@ void MCModInfoFrame::updateWithMod(Mod &m)
     else
         text = "<a href=\"" + m.homeurl() + "\">" + name + "</a>";
     if (!m.authors().isEmpty())
-        text += " by " + m.authors();
+        text += " by " + m.authors().join(", ");
 
     setModText(text);
 

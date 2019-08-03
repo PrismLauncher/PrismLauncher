@@ -24,7 +24,6 @@
 
 #include "MultiMC.h"
 #include "dialogs/CustomMessageBox.h"
-#include "dialogs/ModEditDialogCommon.h"
 #include <GuiUtil.h>
 #include "minecraft/SimpleModList.h"
 #include "minecraft/Mod.h"
