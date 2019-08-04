@@ -76,6 +76,7 @@ bool ModFolderModel::update()
     }
     if(m_update) {
         scheduled_update = true;
+        return true;
     }
 
     auto task = new ModFolderLoadTask(m_dir);
