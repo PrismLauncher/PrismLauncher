@@ -39,7 +39,7 @@
 
 #include "minecraft/ComponentList.h"
 #include "minecraft/auth/MojangAccountList.h"
-#include "minecraft/Mod.h"
+#include "minecraft/mod/Mod.h"
 #include "icons/IconList.h"
 #include "Exception.h"
 #include "Version.h"

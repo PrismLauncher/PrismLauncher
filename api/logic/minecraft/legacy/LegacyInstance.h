@@ -16,12 +16,11 @@
 #pragma once
 
 #include "BaseInstance.h"
-#include "minecraft/Mod.h"
 #include "launch/LaunchTask.h"
 
 #include "multimc_logic_export.h"
 
-class SimpleModList;
+class ModFolderModel;
 class LegacyModList;
 class WorldList;
 class Task;

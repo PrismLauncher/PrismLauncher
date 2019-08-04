@@ -18,7 +18,7 @@
 #include <QString>
 #include <QFileInfo>
 #include <QSet>
-#include "minecraft/Mod.h"
+#include "minecraft/mod/Mod.h"
 #include <functional>
 
 #include "multimc_logic_export.h"

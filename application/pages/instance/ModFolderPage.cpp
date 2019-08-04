@@ -25,8 +25,8 @@
 #include "MultiMC.h"
 #include "dialogs/CustomMessageBox.h"
 #include <GuiUtil.h>
-#include "minecraft/SimpleModList.h"
-#include "minecraft/Mod.h"
+#include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/Mod.h"
 #include "minecraft/VersionFilterData.h"
 #include "minecraft/ComponentList.h"
 #include <DesktopServices.h>
@@ -53,7 +53,7 @@ public:
 protected:
     bool lessThan(const QModelIndex & source_left, const QModelIndex & source_right) const override
     {
-        SimpleModList *model = qobject_cast<SimpleModList *>(sourceModel());
+        ModFolderModel *model = qobject_cast<ModFolderModel *>(sourceModel());
         if(
             !model ||
             !source_left.isValid() ||
@@ -65,11 +65,11 @@ protected:
 
         // we are now guaranteed to have two valid indexes in the same column... we love the provided invariants unconditionally and proceed.
 
-        auto column = (SimpleModList::Columns) source_left.column();
+        auto column = (ModFolderModel::Columns) source_left.column();
         bool invert = false;
         switch(column) {
             // GH-2550 - sort by enabled/disabled
-            case SimpleModList::ActiveColumn: {
+            case ModFolderModel::ActiveColumn: {
                 auto dataL = source_left.data(Qt::CheckStateRole).toBool();
                 auto dataR = source_right.data(Qt::CheckStateRole).toBool();
                 if(dataL != dataR) {
@@ -79,10 +79,10 @@ protected:
                 invert = sortOrder() == Qt::DescendingOrder;
             }
             // GH-2722 - sort mod names in a way that discards "The" prefixes
-            case SimpleModList::NameColumn: {
-                auto dataL = model->data(model->index(source_left.row(), SimpleModList::NameColumn)).toString();
+            case ModFolderModel::NameColumn: {
+                auto dataL = model->data(model->index(source_left.row(), ModFolderModel::NameColumn)).toString();
                 RemoveThePrefix(dataL);
-                auto dataR = model->data(model->index(source_right.row(), SimpleModList::NameColumn)).toString();
+                auto dataR = model->data(model->index(source_right.row(), ModFolderModel::NameColumn)).toString();
                 RemoveThePrefix(dataR);
 
                 auto less = dataL.compare(dataR, sortCaseSensitivity());
@@ -93,9 +93,9 @@ protected:
                 invert = sortOrder() == Qt::DescendingOrder;
             }
             // GH-2762 - sort versions by parsing them as versions
-            case SimpleModList::VersionColumn: {
-                auto dataL = Version(model->data(model->index(source_left.row(), SimpleModList::VersionColumn)).toString());
-                auto dataR = Version(model->data(model->index(source_right.row(), SimpleModList::VersionColumn)).toString());
+            case ModFolderModel::VersionColumn: {
+                auto dataL = Version(model->data(model->index(source_left.row(), ModFolderModel::VersionColumn)).toString());
+                auto dataR = Version(model->data(model->index(source_right.row(), ModFolderModel::VersionColumn)).toString());
                 return invert ? (dataL > dataR) : (dataL < dataR);
             }
             default: {
@@ -107,7 +107,7 @@ protected:
 
 ModFolderPage::ModFolderPage(
     BaseInstance *inst,
-    std::shared_ptr<SimpleModList> mods,
+    std::shared_ptr<ModFolderModel> mods,
     QString id,
     QString iconName,
     QString displayName,
@@ -177,7 +177,7 @@ void ModFolderPage::on_filterTextChanged(const QString& newContents)
 }
 
 
-CoreModFolderPage::CoreModFolderPage(BaseInstance *inst, std::shared_ptr<SimpleModList> mods,
+CoreModFolderPage::CoreModFolderPage(BaseInstance *inst, std::shared_ptr<ModFolderModel> mods,
                                      QString id, QString iconName, QString displayName,
                                      QString helpPage, QWidget *parent)
     : ModFolderPage(inst, mods, id, iconName, displayName, helpPage, parent)

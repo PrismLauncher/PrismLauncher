@@ -279,14 +279,20 @@ set(MINECRAFT_SOURCES
     minecraft/VersionFile.h
     minecraft/VersionFilterData.h
     minecraft/VersionFilterData.cpp
-    minecraft/Mod.h
-    minecraft/Mod.cpp
-    minecraft/SimpleModList.h
-    minecraft/SimpleModList.cpp
     minecraft/World.h
     minecraft/World.cpp
     minecraft/WorldList.h
     minecraft/WorldList.cpp
+
+    minecraft/mod/Mod.h
+    minecraft/mod/Mod.cpp
+    minecraft/mod/ModDetails.h
+    minecraft/mod/ModFolderModel.h
+    minecraft/mod/ModFolderModel.cpp
+    minecraft/mod/ModFolderLoadTask.h
+    minecraft/mod/ModFolderLoadTask.cpp
+    minecraft/mod/LocalModParseTask.h
+    minecraft/mod/LocalModParseTask.cpp
 
     # Assets
     minecraft/AssetsUtils.h
@@ -318,8 +324,8 @@ add_unit_test(Library
     )
 
 # FIXME: shares data with FileSystem test
-add_unit_test(SimpleModList
-    SOURCES minecraft/SimpleModList_test.cpp
+add_unit_test(ModFolderModel
+    SOURCES minecraft/mod/ModFolderModel_test.cpp
     DATA testdata
     LIBS MultiMC_logic
     )
@@ -478,8 +484,6 @@ set(LOGIC_SOURCES
     ${FTB_SOURCES}
     ${FLAME_SOURCES}
 )
-
-message(STATUS "FOO! ${LOGIC_SOURCES}")
 
 add_library(MultiMC_logic SHARED ${LOGIC_SOURCES})
 set_target_properties(MultiMC_logic PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN 1)

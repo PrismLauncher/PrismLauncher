@@ -26,7 +26,7 @@
 #include "meta/Index.h"
 #include "meta/VersionList.h"
 
-#include "SimpleModList.h"
+#include "mod/ModFolderModel.h"
 #include "WorldList.h"
 
 #include "icons/IIconList.h"
@@ -892,46 +892,46 @@ JavaVersion MinecraftInstance::getJavaVersion() const
     return JavaVersion(settings()->get("JavaVersion").toString());
 }
 
-std::shared_ptr<SimpleModList> MinecraftInstance::loaderModList() const
+std::shared_ptr<ModFolderModel> MinecraftInstance::loaderModList() const
 {
     if (!m_loader_mod_list)
     {
-        m_loader_mod_list.reset(new SimpleModList(loaderModsDir()));
+        m_loader_mod_list.reset(new ModFolderModel(loaderModsDir()));
         m_loader_mod_list->disableInteraction(isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_loader_mod_list.get(), &SimpleModList::disableInteraction);
+        connect(this, &BaseInstance::runningStatusChanged, m_loader_mod_list.get(), &ModFolderModel::disableInteraction);
     }
     return m_loader_mod_list;
 }
 
-std::shared_ptr<SimpleModList> MinecraftInstance::coreModList() const
+std::shared_ptr<ModFolderModel> MinecraftInstance::coreModList() const
 {
     if (!m_core_mod_list)
     {
-        m_core_mod_list.reset(new SimpleModList(coreModsDir()));
+        m_core_mod_list.reset(new ModFolderModel(coreModsDir()));
         m_core_mod_list->disableInteraction(isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_core_mod_list.get(), &SimpleModList::disableInteraction);
+        connect(this, &BaseInstance::runningStatusChanged, m_core_mod_list.get(), &ModFolderModel::disableInteraction);
     }
     return m_core_mod_list;
 }
 
-std::shared_ptr<SimpleModList> MinecraftInstance::resourcePackList() const
+std::shared_ptr<ModFolderModel> MinecraftInstance::resourcePackList() const
 {
     if (!m_resource_pack_list)
     {
-        m_resource_pack_list.reset(new SimpleModList(resourcePacksDir()));
+        m_resource_pack_list.reset(new ModFolderModel(resourcePacksDir()));
         m_resource_pack_list->disableInteraction(isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_resource_pack_list.get(), &SimpleModList::disableInteraction);
+        connect(this, &BaseInstance::runningStatusChanged, m_resource_pack_list.get(), &ModFolderModel::disableInteraction);
     }
     return m_resource_pack_list;
 }
 
-std::shared_ptr<SimpleModList> MinecraftInstance::texturePackList() const
+std::shared_ptr<ModFolderModel> MinecraftInstance::texturePackList() const
 {
     if (!m_texture_pack_list)
     {
-        m_texture_pack_list.reset(new SimpleModList(texturePacksDir()));
+        m_texture_pack_list.reset(new ModFolderModel(texturePacksDir()));
         m_texture_pack_list->disableInteraction(isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_texture_pack_list.get(), &SimpleModList::disableInteraction);
+        connect(this, &BaseInstance::runningStatusChanged, m_texture_pack_list.get(), &ModFolderModel::disableInteraction);
     }
     return m_texture_pack_list;
 }

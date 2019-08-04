@@ -1,13 +1,13 @@
 #pragma once
 #include "BaseInstance.h"
 #include <java/JavaVersion.h>
-#include "minecraft/Mod.h"
+#include "minecraft/mod/Mod.h"
 #include <QProcess>
 #include <QDir>
 #include "multimc_logic_export.h"
 
 class ModsModel;
-class SimpleModList;
+class ModFolderModel;
 class WorldList;
 class GameOptions;
 class LaunchStep;
@@ -69,10 +69,10 @@ public:
 
     //////  Mod Lists  //////
     std::shared_ptr<ModsModel> modsModel() const;
-    std::shared_ptr<SimpleModList> loaderModList() const;
-    std::shared_ptr<SimpleModList> coreModList() const;
-    std::shared_ptr<SimpleModList> resourcePackList() const;
-    std::shared_ptr<SimpleModList> texturePackList() const;
+    std::shared_ptr<ModFolderModel> loaderModList() const;
+    std::shared_ptr<ModFolderModel> coreModList() const;
+    std::shared_ptr<ModFolderModel> resourcePackList() const;
+    std::shared_ptr<ModFolderModel> texturePackList() const;
     std::shared_ptr<WorldList> worldList() const;
     std::shared_ptr<GameOptions> gameOptionsModel() const;
 
@@ -124,10 +124,10 @@ private:
 protected: // data
     std::shared_ptr<ComponentList> m_components;
     mutable std::shared_ptr<ModsModel> m_mods_model;
-    mutable std::shared_ptr<SimpleModList> m_loader_mod_list;
-    mutable std::shared_ptr<SimpleModList> m_core_mod_list;
-    mutable std::shared_ptr<SimpleModList> m_resource_pack_list;
-    mutable std::shared_ptr<SimpleModList> m_texture_pack_list;
+    mutable std::shared_ptr<ModFolderModel> m_loader_mod_list;
+    mutable std::shared_ptr<ModFolderModel> m_core_mod_list;
+    mutable std::shared_ptr<ModFolderModel> m_resource_pack_list;
+    mutable std::shared_ptr<ModFolderModel> m_texture_pack_list;
     mutable std::shared_ptr<WorldList> m_world_list;
     mutable std::shared_ptr<GameOptions> m_game_options;
 };

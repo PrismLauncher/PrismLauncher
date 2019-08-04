@@ -33,7 +33,7 @@ slots:
 
         auto time_parsed = timeFromS3Time(timestamp);
         auto time_serialized = timeToS3Time(time_parsed);
-        
+
         QCOMPARE(time_serialized, timestamp);
     }
 

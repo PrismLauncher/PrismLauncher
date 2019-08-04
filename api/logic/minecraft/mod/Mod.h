@@ -16,24 +16,14 @@
 #pragma once
 #include <QFileInfo>
 #include <QDateTime>
+#include <QList>
+#include <memory>
+
 #include "multimc_logic_export.h"
 
-struct ModDetails
-{
-    operator bool() const {
-        return valid;
-    }
-    bool valid = false;
-    QString mod_id;
-    QString name;
-    QString version;
-    QString mcversion;
-    QString homeurl;
-    QString updateurl;
-    QString description;
-    QStringList authors;
-    QString credits;
-};
+#include "ModDetails.h"
+
+
 
 class MULTIMC_LOGIC_EXPORT Mod
 {
@@ -47,6 +37,7 @@ public:
         MOD_LITEMOD, //!< The mod is a litemod
     };
 
+    Mod() = default;
     Mod(const QFileInfo &file);
 
     QFileInfo filename() const
@@ -92,13 +83,35 @@ public:
     // change the mod's filesystem path (used by mod lists for *MAGIC* purposes)
     void repath(const QFileInfo &file);
 
+    bool shouldResolve() {
+        return !m_resolving && !m_resolved;
+    }
+    bool isResolving() {
+        return m_resolving;
+    }
+    int resolutionTicket()
+    {
+        return m_resolutionTicket;
+    }
+    void setResolving(bool resolving, int resolutionTicket) {
+        m_resolving = resolving;
+        m_resolutionTicket = resolutionTicket;
+    }
+    void finishResolvingWithDetails(std::shared_ptr<ModDetails> details){
+        m_resolving = false;
+        m_resolved = true;
+        m_localDetails = details;
+    }
+
 protected:
     QFileInfo m_file;
     QDateTime m_changedDateTime;
     QString m_mmc_id;
     QString m_name;
     bool m_enabled = true;
+    bool m_resolving = false;
+    bool m_resolved = false;
+    int m_resolutionTicket = 0;
     ModType m_type = MOD_UNKNOWN;
-    bool m_bare = true;
-    ModDetails m_localDetails;
+    std::shared_ptr<ModDetails> m_localDetails;
 };
