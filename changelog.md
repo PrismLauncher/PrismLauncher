@@ -1,8 +1,20 @@
 # MultiMC 0.6.7
 
-UI improvements!
+The previous release introduced some extra buttons that made the instance window way too big for some displays. This release is aimed at fixing that, along with other UI and performance improvements.
+
+There are some accessibility fixes thrown in too.
 
 ### New or changed features
+
+- Mod lists are now asynchronous and heavily threaded.
+
+  Basically, both faster and more responsive.
+
+  The changes necessary for this also pave the way for having other sources of mod metadata, and for adding more mod-related features support in general.
+
+- Mod list printed in log has been improved.
+
+  It now also shows disabled mods, and has prefix and suffix that shows if the mod is enabled, and if it is a folder.
 
 - GH-358: Switched all the dialog pages from using buttons in layouts to toolbars.
 
@@ -16,7 +28,7 @@ UI improvements!
 
 - More instance pages are now visible when the instance is running.
 
-  Mods, version and the lkike should now be visible, but most of the controls are disabled until the game closes.
+  Mods, version and the like should now be visible, but most of the controls are disabled until the game closes.
 
 - GH-2550, GH-2722, GH-2762: Mod list sorting is much improved.
 
