@@ -122,8 +122,8 @@ void ModFolderModel::updateFinished()
         for(auto & removedMod: removed) {
             removedRows.append(modsIndex[removedMod]);
         }
-        std::sort(removedRows.begin(), removedRows.end());
-        for(auto iter = removedRows.rbegin(); iter != removedRows.rend(); iter++) {
+        std::sort(removedRows.begin(), removedRows.end(), std::greater<int>());
+        for(auto iter = removedRows.begin(); iter != removedRows.end(); iter++) {
             int removedIndex = *iter;
             beginRemoveRows(QModelIndex(), removedIndex, removedIndex);
             auto removedIter = mods.begin() + removedIndex;
