@@ -1896,7 +1896,7 @@ void MainWindow::checkInstancePathForProblems()
         warning.setDefaultButton(QMessageBox::Ok);
         warning.exec();
     }
-    else if (pathfoldername.startsWith(QDir::tempPath()))
+    else if (pathfoldername.startsWith(QDir::tempPath()) || pathfoldername.contains("/TempState/"))
     {
         QMessageBox warning(this);
         warning.setText(tr("Your instance folder is in a temporary folder: \'%1\'!").arg(QDir::tempPath()));
