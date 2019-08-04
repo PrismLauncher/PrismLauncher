@@ -48,6 +48,11 @@ public:
         DateColumn,
         NUM_COLUMNS
     };
+    enum ModStatusAction {
+        Disable,
+        Enable,
+        Toggle
+    };
     ModFolderModel(const QString &dir);
 
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -93,8 +98,7 @@ public:
     bool deleteMods(const QModelIndexList &indexes);
 
     /// Enable or disable listed mods
-    bool enableMods(const QModelIndexList &indexes, bool enable = true);
-    void toggleEnabled(const QModelIndex &index);
+    bool setModStatus(const QModelIndexList &indexes, ModStatusAction action);
 
     void startWatching();
     void stopWatching();
@@ -125,6 +129,7 @@ signals:
 
 private:
     void resolveMod(Mod& m);
+    bool setModStatus(int index, ModStatusAction action);
 
 protected:
     QFileSystemWatcher *m_watcher;

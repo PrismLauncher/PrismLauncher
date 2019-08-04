@@ -147,12 +147,13 @@ ModFolderPage::ModFolderPage(
     connect(m_inst, &BaseInstance::runningStatusChanged, this, &ModFolderPage::on_RunningState_changed);
 }
 
-void ModFolderPage::modItemActivated(const QModelIndex& index)
+void ModFolderPage::modItemActivated(const QModelIndex&)
 {
-    auto modsModelIndex = m_filterModel->mapToSource(index);
-    if(modsModelIndex.isValid()) {
-        m_mods->toggleEnabled(modsModelIndex);
+    if(!m_controlsEnabled) {
+        return;
     }
+    auto selection = m_filterModel->mapSelectionToSource(ui->modTreeView->selectionModel()->selection());
+    m_mods->setModStatus(selection.indexes(), ModFolderModel::Toggle);
 }
 
 QMenu * ModFolderPage::createPopupMenu()
@@ -297,7 +298,7 @@ void ModFolderPage::on_actionEnable_triggered()
         return;
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->modTreeView->selectionModel()->selection());
-    m_mods->enableMods(selection.indexes(), true);
+    m_mods->setModStatus(selection.indexes(), ModFolderModel::Enable);
 }
 
 void ModFolderPage::on_actionDisable_triggered()
@@ -306,7 +307,7 @@ void ModFolderPage::on_actionDisable_triggered()
         return;
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->modTreeView->selectionModel()->selection());
-    m_mods->enableMods(selection.indexes(), false);
+    m_mods->setModStatus(selection.indexes(), ModFolderModel::Disable);
 }
 
 void ModFolderPage::on_actionRemove_triggered()

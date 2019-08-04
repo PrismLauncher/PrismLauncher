@@ -16,6 +16,12 @@ There are some accessibility fixes thrown in too.
 
   It now also shows disabled mods, and has prefix and suffix that shows if the mod is enabled, and if it is a folder.
 
+- You can now enable and disable mods with the keyboard.
+
+  Toggle with enter.
+
+- Enabling and disabling mods no longer makes the list forget what was selected.
+
 - GH-358: Switched all the dialog pages from using buttons in layouts to toolbars.
 
   Toolbar buttons are smaller, and the toolbars can overflow buttons into an overflow space. This allows requiring a lot less space for the windows.

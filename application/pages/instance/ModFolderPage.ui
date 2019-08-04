@@ -87,6 +87,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAdd"/>
+   <addaction name="separator"/>
    <addaction name="actionRemove"/>
    <addaction name="actionEnable"/>
    <addaction name="actionDisable"/>
@@ -95,27 +96,39 @@
   </widget>
   <action name="actionAdd">
    <property name="text">
-    <string>Add</string>
+    <string>&amp;Add</string>
+   </property>
+   <property name="toolTip">
+    <string>Add mods</string>
    </property>
   </action>
   <action name="actionRemove">
    <property name="text">
-    <string>Remove</string>
+    <string>&amp;Remove</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove selected mods</string>
    </property>
   </action>
   <action name="actionEnable">
    <property name="text">
-    <string>Enable</string>
+    <string>&amp;Enable</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable selected mods</string>
    </property>
   </action>
   <action name="actionDisable">
    <property name="text">
-    <string>Disable</string>
+    <string>&amp;Disable</string>
+   </property>
+   <property name="toolTip">
+    <string>Disable selected mods</string>
    </property>
   </action>
   <action name="actionView_configs">
    <property name="text">
-    <string>View configs</string>
+    <string>View &amp;Configs</string>
    </property>
    <property name="toolTip">
     <string>Open the 'config' folder in the system file manager.</string>
@@ -123,7 +136,7 @@
   </action>
   <action name="actionView_Folder">
    <property name="text">
-    <string>View Folder</string>
+    <string>View &amp;Folder</string>
    </property>
   </action>
  </widget>
@@ -145,6 +158,10 @@
    <header>widgets/WideBar.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>modTreeView</tabstop>
+  <tabstop>filterEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

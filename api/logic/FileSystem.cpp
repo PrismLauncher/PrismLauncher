@@ -174,6 +174,11 @@ bool copy::operator()(const QString &offset)
 bool deletePath(QString path)
 {
     bool OK = true;
+    QFileInfo finfo(path);
+    if(finfo.isFile()) {
+        return QFile::remove(path);
+    }
+
     QDir dir(path);
 
     if (!dir.exists())

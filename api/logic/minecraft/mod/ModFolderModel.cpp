@@ -303,7 +303,7 @@ bool ModFolderModel::installMod(const QString &filename)
     return false;
 }
 
-bool ModFolderModel::enableMods(const QModelIndexList& indexes, bool enable)
+bool ModFolderModel::setModStatus(const QModelIndexList& indexes, ModStatusAction enable)
 {
     if(interaction_disabled) {
         return false;
@@ -314,25 +314,12 @@ bool ModFolderModel::enableMods(const QModelIndexList& indexes, bool enable)
 
     for (auto index: indexes)
     {
-        Mod &m = mods[index.row()];
-        m.enable(enable);
-        emit dataChanged(index, index);
+        if(index.column() != 0) {
+            continue;
+        }
+        setModStatus(index.row(), enable);
     }
     return true;
-}
-
-void ModFolderModel::toggleEnabled(const QModelIndex& index)
-{
-    if(interaction_disabled) {
-        return;
-    }
-    if(!index.isValid()) {
-        return;
-    }
-
-    Mod &m = mods[index.row()];
-    m.enable(!m.enabled());
-    emit dataChanged(index, index);
 }
 
 bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
@@ -418,14 +405,50 @@ bool ModFolderModel::setData(const QModelIndex &index, const QVariant &value, in
 
     if (role == Qt::CheckStateRole)
     {
-        auto &mod = mods[index.row()];
-        if (mod.enable(!mod.enabled()))
-        {
-            emit dataChanged(index, index);
-            return true;
-        }
+        return setModStatus(index.row(), Toggle);
     }
     return false;
+}
+
+bool ModFolderModel::setModStatus(int row, ModFolderModel::ModStatusAction action)
+{
+    if(row < 0 || row >= mods.size()) {
+        return false;
+    }
+
+    auto &mod = mods[row];
+    bool desiredStatus;
+    switch(action) {
+        case Enable:
+            desiredStatus = true;
+            break;
+        case Disable:
+            desiredStatus = false;
+            break;
+        case Toggle:
+        default:
+            desiredStatus = !mod.enabled();
+            break;
+    }
+
+    if(desiredStatus == mod.enabled()) {
+        return true;
+    }
+
+    // preserve the row, but change its ID
+    auto oldId = mod.mmc_id();
+    if(!mod.enable(!mod.enabled())) {
+        return false;
+    }
+    auto newId = mod.mmc_id();
+    if(modsIndex.contains(newId)) {
+        // NOTE: this could handle a corner case, where we are overwriting a file, because the same 'mod' exists both enabled and disabled
+        // But is it necessary?
+    }
+    modsIndex.remove(oldId);
+    modsIndex[newId] = row;
+    emit dataChanged(index(row, 0), index(row, columnCount(QModelIndex()) - 1));
+    return true;
 }
 
 QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, int role) const

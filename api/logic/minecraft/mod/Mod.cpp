@@ -18,6 +18,7 @@
 
 #include "Mod.h"
 #include <QDebug>
+#include <FileSystem.h>
 
 namespace {
 
@@ -100,34 +101,15 @@ bool Mod::enable(bool value)
         if (!foo.rename(path))
             return false;
     }
-    m_file = QFileInfo(path);
+    repath(QFileInfo(path));
     m_enabled = value;
     return true;
 }
 
 bool Mod::destroy()
 {
-    if (m_type == MOD_FOLDER)
-    {
-        QDir d(m_file.filePath());
-        if (d.removeRecursively())
-        {
-            m_type = MOD_UNKNOWN;
-            return true;
-        }
-        return false;
-    }
-    else if (m_type == MOD_SINGLEFILE || m_type == MOD_ZIPFILE || m_type == MOD_LITEMOD)
-    {
-        QFile f(m_file.filePath());
-        if (f.remove())
-        {
-            m_type = MOD_UNKNOWN;
-            return true;
-        }
-        return false;
-    }
-    return true;
+    m_type = MOD_UNKNOWN;
+    return FS::deletePath(m_file.filePath());
 }
 
 
