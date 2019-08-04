@@ -116,11 +116,11 @@ public slots:
 private
 slots:
     void directoryChanged(QString path);
-    void updateFinished();
-    void modParseFinished(int token);
+    void finishUpdate();
+    void finishModParse(int token);
 
 signals:
-    void changed();
+    void updateFinished();
 
 private:
     void resolveMod(Mod& m);

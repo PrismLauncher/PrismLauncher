@@ -81,12 +81,12 @@ bool ModFolderModel::update()
     auto task = new ModFolderLoadTask(m_dir);
     m_update = task->result();
     QThreadPool *threadPool = QThreadPool::globalInstance();
-    connect(task, &ModFolderLoadTask::succeeded, this, &ModFolderModel::updateFinished);
+    connect(task, &ModFolderLoadTask::succeeded, this, &ModFolderModel::finishUpdate);
     threadPool->start(task);
     return true;
 }
 
-void ModFolderModel::updateFinished()
+void ModFolderModel::finishUpdate()
 {
     QSet<QString> currentSet = modsIndex.keys().toSet();
     auto & newMods = m_update->mods;
@@ -159,7 +159,7 @@ void ModFolderModel::updateFinished()
 
     m_update.reset();
 
-    emit changed();
+    emit updateFinished();
 
     if(scheduled_update) {
         scheduled_update = false;
@@ -180,11 +180,11 @@ void ModFolderModel::resolveMod(Mod& m)
     m.setResolving(true, nextResolutionTicket);
     nextResolutionTicket++;
     QThreadPool *threadPool = QThreadPool::globalInstance();
-    connect(task, &LocalModParseTask::finished, this, &ModFolderModel::modParseFinished);
+    connect(task, &LocalModParseTask::finished, this, &ModFolderModel::finishModParse);
     threadPool->start(task);
 }
 
-void ModFolderModel::modParseFinished(int token)
+void ModFolderModel::finishModParse(int token)
 {
     auto iter = activeTickets.find(token);
     if(iter == activeTickets.end()) {
@@ -317,7 +317,6 @@ bool ModFolderModel::enableMods(const QModelIndexList& indexes, bool enable)
         m.enable(enable);
         emit dataChanged(i, i);
     }
-    emit changed();
     return true;
 }
 
@@ -335,7 +334,6 @@ bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
         Mod &m = mods[i.row()];
         m.destroy();
     }
-    emit changed();
     return true;
 }
 

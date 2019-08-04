@@ -213,8 +213,10 @@ set(MINECRAFT_SOURCES
     minecraft/auth/flows/RefreshTask.cpp
     minecraft/auth/flows/ValidateTask.h
     minecraft/auth/flows/ValidateTask.cpp
+
     minecraft/gameoptions/GameOptions.h
     minecraft/gameoptions/GameOptions.cpp
+
     minecraft/update/AssetUpdateTask.h
     minecraft/update/AssetUpdateTask.cpp
     minecraft/update/FMLLibrariesTask.cpp
@@ -223,6 +225,7 @@ set(MINECRAFT_SOURCES
     minecraft/update/FoldersTask.h
     minecraft/update/LibrariesTask.cpp
     minecraft/update/LibrariesTask.h
+
     minecraft/launch/ClaimAccount.cpp
     minecraft/launch/ClaimAccount.h
     minecraft/launch/CreateServerResourcePacksFolder.cpp
@@ -239,12 +242,16 @@ set(MINECRAFT_SOURCES
     minecraft/launch/PrintInstanceInfo.h
     minecraft/launch/ReconstructAssets.cpp
     minecraft/launch/ReconstructAssets.h
+    minecraft/launch/ScanModFolders.cpp
+    minecraft/launch/ScanModFolders.h
+
     minecraft/legacy/LegacyModList.h
     minecraft/legacy/LegacyModList.cpp
     minecraft/legacy/LegacyInstance.h
     minecraft/legacy/LegacyInstance.cpp
     minecraft/legacy/LegacyUpgradeTask.h
     minecraft/legacy/LegacyUpgradeTask.cpp
+
     minecraft/GradleSpecifier.h
     minecraft/MinecraftInstance.cpp
     minecraft/MinecraftInstance.h

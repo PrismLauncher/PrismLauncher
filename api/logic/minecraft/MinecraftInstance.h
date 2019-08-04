@@ -6,7 +6,6 @@
 #include <QDir>
 #include "multimc_logic_export.h"
 
-class ModsModel;
 class ModFolderModel;
 class WorldList;
 class GameOptions;
@@ -68,7 +67,6 @@ public:
     std::shared_ptr<ComponentList> getComponentList() const;
 
     //////  Mod Lists  //////
-    std::shared_ptr<ModsModel> modsModel() const;
     std::shared_ptr<ModFolderModel> loaderModList() const;
     std::shared_ptr<ModFolderModel> coreModList() const;
     std::shared_ptr<ModFolderModel> resourcePackList() const;
@@ -123,7 +121,6 @@ private:
 
 protected: // data
     std::shared_ptr<ComponentList> m_components;
-    mutable std::shared_ptr<ModsModel> m_mods_model;
     mutable std::shared_ptr<ModFolderModel> m_loader_mod_list;
     mutable std::shared_ptr<ModFolderModel> m_core_mod_list;
     mutable std::shared_ptr<ModFolderModel> m_resource_pack_list;

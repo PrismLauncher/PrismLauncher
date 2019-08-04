@@ -21,6 +21,7 @@
 #include "minecraft/launch/ModMinecraftJar.h"
 #include "minecraft/launch/ClaimAccount.h"
 #include "minecraft/launch/ReconstructAssets.h"
+#include "minecraft/launch/ScanModFolders.h"
 #include "java/launch/CheckJava.h"
 #include "java/JavaUtils.h"
 #include "meta/Index.h"
@@ -550,37 +551,38 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session)
         out << "";
     }
 
-    if(loaderModList()->size())
-    {
-        out << "Mods:";
-        for(auto & mod: loaderModList()->allMods())
+    auto printModList = [&](const QString & label, ModFolderModel & model) {
+        if(model.size())
         {
-            if(!mod.enabled())
-                continue;
-            if(mod.type() == Mod::MOD_FOLDER)
-                continue;
-            // TODO: proper implementation would need to descend into folders.
+            out << QString("%1:").arg(label);
+            auto modList = model.allMods();
+            std::sort(modList.begin(), modList.end(), [](Mod &a, Mod &b) {
+                auto aName = a.filename().completeBaseName();
+                auto bName = b.filename().completeBaseName();
+                return aName.localeAwareCompare(bName) < 0;
+            });
+            for(auto & mod: modList)
+            {
+                if(mod.type() == Mod::MOD_FOLDER)
+                {
+                    out << u8"  [📁] " + mod.filename().completeBaseName() + " (folder)";
+                    continue;
+                }
 
-            out << "  " + mod.filename().completeBaseName();
+                if(mod.enabled()) {
+                    out << u8"  [✔️] " + mod.filename().completeBaseName();
+                }
+                else {
+                    out << u8"  [❌] " + mod.filename().completeBaseName() + " (disabled)";
+                }
+
+            }
+            out << "";
         }
-        out << "";
-    }
+    };
 
-    if(coreModList()->size())
-    {
-        out << "Core Mods:";
-        for(auto & coremod: coreModList()->allMods())
-        {
-            if(!coremod.enabled())
-                continue;
-            if(coremod.type() == Mod::MOD_FOLDER)
-                continue;
-            // TODO: proper implementation would need to descend into folders.
-
-            out << "  " + coremod.filename().completeBaseName();
-        }
-        out << "";
-    }
+    printModList("Mods", *(loaderModList().get()));
+    printModList("Core Mods", *(coreModList().get()));
 
     auto & jarMods = profile->getJarMods();
     if(jarMods.size())
@@ -825,6 +827,11 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     // if there are any jar mods
     {
         process->appendStep(new ModMinecraftJar(pptr));
+    }
+
+    // if there are any jar mods
+    {
+        process->appendStep(new ScanModFolders(pptr));
     }
 
     // print some instance info here...
