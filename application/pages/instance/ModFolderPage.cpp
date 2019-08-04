@@ -139,11 +139,20 @@ ModFolderPage::ModFolderPage(
     ui->modTreeView->sortByColumn(1, Qt::AscendingOrder);
     ui->modTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->modTreeView, &ModListView::customContextMenuRequested, this, &ModFolderPage::ShowContextMenu);
+    connect(ui->modTreeView, &ModListView::activated, this, &ModFolderPage::modItemActivated);
 
     auto smodel = ui->modTreeView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &ModFolderPage::modCurrent);
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ModFolderPage::on_filterTextChanged );
     connect(m_inst, &BaseInstance::runningStatusChanged, this, &ModFolderPage::on_RunningState_changed);
+}
+
+void ModFolderPage::modItemActivated(const QModelIndex& index)
+{
+    auto modsModelIndex = m_filterModel->mapToSource(index);
+    if(modsModelIndex.isValid()) {
+        m_mods->toggleEnabled(modsModelIndex);
+    }
 }
 
 QMenu * ModFolderPage::createPopupMenu()

@@ -312,13 +312,27 @@ bool ModFolderModel::enableMods(const QModelIndexList& indexes, bool enable)
     if(indexes.isEmpty())
         return true;
 
-    for (auto i: indexes)
+    for (auto index: indexes)
     {
-        Mod &m = mods[i.row()];
+        Mod &m = mods[index.row()];
         m.enable(enable);
-        emit dataChanged(i, i);
+        emit dataChanged(index, index);
     }
     return true;
+}
+
+void ModFolderModel::toggleEnabled(const QModelIndex& index)
+{
+    if(interaction_disabled) {
+        return;
+    }
+    if(!index.isValid()) {
+        return;
+    }
+
+    Mod &m = mods[index.row()];
+    m.enable(!m.enabled());
+    emit dataChanged(index, index);
 }
 
 bool ModFolderModel::deleteMods(const QModelIndexList& indexes)

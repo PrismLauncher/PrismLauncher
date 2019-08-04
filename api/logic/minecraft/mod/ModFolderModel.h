@@ -82,7 +82,7 @@ public:
     }
 
     /// Reloads the mod list and returns true if the list changed.
-    virtual bool update();
+    bool update();
 
     /**
      * Adds the given mod to the list at the given index - if the list supports custom ordering
@@ -90,15 +90,16 @@ public:
     bool installMod(const QString& filename);
 
     /// Deletes all the selected mods
-    virtual bool deleteMods(const QModelIndexList &indexes);
+    bool deleteMods(const QModelIndexList &indexes);
 
     /// Enable or disable listed mods
-    virtual bool enableMods(const QModelIndexList &indexes, bool enable = true);
+    bool enableMods(const QModelIndexList &indexes, bool enable = true);
+    void toggleEnabled(const QModelIndex &index);
 
     void startWatching();
     void stopWatching();
 
-    virtual bool isValid();
+    bool isValid();
 
     QDir dir()
     {
