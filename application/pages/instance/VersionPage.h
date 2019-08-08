@@ -64,7 +64,7 @@ private slots:
     void on_actionEdit_triggered();
     void on_actionInstall_mods_triggered();
     void on_actionCustomize_triggered();
-    void on_actionDownload_triggered();
+    void on_actionDownload_All_triggered();
 
     void updateVersionControls();
 

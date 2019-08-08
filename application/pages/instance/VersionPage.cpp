@@ -379,7 +379,7 @@ void VersionPage::on_actionChange_version_triggered()
     m_container->refreshContainer();
 }
 
-void VersionPage::on_actionDownload_triggered()
+void VersionPage::on_actionDownload_All_triggered()
 {
     if (!MMC->accounts()->anyAccountIsValid())
     {
