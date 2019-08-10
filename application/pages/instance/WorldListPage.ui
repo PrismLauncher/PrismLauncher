@@ -59,7 +59,7 @@
   </widget>
   <widget class="WideBar" name="toolBar">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Actions</string>
    </property>
    <property name="allowedAreas">
     <set>Qt::LeftToolBarArea|Qt::RightToolBarArea</set>
