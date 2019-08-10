@@ -3,6 +3,7 @@
 
 CustomCommands::~CustomCommands()
 {
+    delete ui;
 }
 
 CustomCommands::CustomCommands(QWidget* parent):

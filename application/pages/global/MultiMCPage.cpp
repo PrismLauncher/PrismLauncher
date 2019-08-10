@@ -83,6 +83,7 @@ MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCP
 MultiMCPage::~MultiMCPage()
 {
     delete ui;
+    delete defaultFormat;
 }
 
 bool MultiMCPage::apply()

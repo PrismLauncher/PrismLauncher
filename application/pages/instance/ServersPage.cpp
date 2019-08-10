@@ -597,6 +597,7 @@ ServersPage::ServersPage(MinecraftInstance * inst, QWidget* parent)
 ServersPage::~ServersPage()
 {
     m_model->saveNow();
+    delete ui;
 }
 
 void ServersPage::ShowContextMenu(const QPoint& pos)

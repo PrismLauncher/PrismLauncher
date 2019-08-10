@@ -28,7 +28,7 @@ class CustomCommands : public QWidget
 
 public:
     explicit CustomCommands(QWidget *parent = 0);
-    ~CustomCommands();
+    virtual ~CustomCommands();
     void initialize(bool checkable, bool checked, const QString & prelaunch, const QString & wrapper, const QString & postexit);
 
     bool checked() const;
