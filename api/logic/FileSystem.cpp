@@ -299,7 +299,7 @@ QString NormalizePath(QString path)
     }
 }
 
-QString badFilenameChars = "\"\\/?<>:*|!+\r\n";
+QString badFilenameChars = "\"\\/?<>:;*|!+\r\n";
 
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
 {
