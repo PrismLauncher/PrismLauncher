@@ -20,6 +20,7 @@
 #include <QScrollBar>
 #include <QCache>
 #include "VisualGroup.h"
+#include <functional>
 
 struct GroupViewRoles
 {
@@ -41,6 +42,11 @@ public:
 
     void setModel(QAbstractItemModel *model) override;
 
+    using visibilityFunction = std::function<bool(const QString &)>;
+    void setSourceOfGroupCollapseStatus(visibilityFunction f) {
+        fVisibility = f;
+    }
+
     /// return geometry rectangle occupied by the specified model item
     QRect geometryRect(const QModelIndex &index) const;
     /// return visual rectangle occupied by the specified model item
@@ -48,8 +54,7 @@ public:
     /// get the model index at the specified visual point
     virtual QModelIndex indexAt(const QPoint &point) const override;
     QString groupNameAt(const QPoint &point);
-    void setSelection(const QRect &rect,
-                      const QItemSelectionModel::SelectionFlags commands) override;
+    void setSelection(const QRect &rect, const QItemSelectionModel::SelectionFlags commands) override;
 
     virtual int horizontalOffset() const override;
     virtual int verticalOffset() const override;
@@ -80,6 +85,7 @@ protected slots:
 
 signals:
     void droppedURLs(QList<QUrl> urls);
+    void groupStateChanged(QString group, bool collapsed);
 
 protected:
     virtual bool isIndexHidden(const QModelIndex &index) const override;
@@ -102,6 +108,8 @@ protected:
 private:
     friend struct VisualGroup;
     QList<VisualGroup *> m_groups;
+
+    visibilityFunction fVisibility;
 
     // geometry
     int m_leftMargin = 5;

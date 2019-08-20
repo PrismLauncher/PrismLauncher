@@ -160,8 +160,8 @@ GroupId InstanceList::getInstanceGroup(const InstanceId& id) const
     {
         return GroupId();
     }
-    auto iter = m_groupMap.find(inst->id());
-    if(iter != m_groupMap.end())
+    auto iter = m_instanceGroupIndex.find(inst->id());
+    if(iter != m_instanceGroupIndex.end())
     {
         return *iter;
     }
@@ -178,8 +178,8 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
     }
 
     bool changed = false;
-    auto iter = m_groupMap.find(inst->id());
-    if(iter != m_groupMap.end())
+    auto iter = m_instanceGroupIndex.find(inst->id());
+    if(iter != m_instanceGroupIndex.end())
     {
         if(*iter != name)
         {
@@ -190,12 +190,12 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
     else
     {
         changed = true;
-        m_groupMap[id] = name;
+        m_instanceGroupIndex[id] = name;
     }
 
     if(changed)
     {
-        m_groups.insert(name);
+        m_groupNameCache.insert(name);
         auto idx = getInstIndex(inst.get());
         emit dataChanged(index(idx), index(idx), {GroupRole});
         saveGroupList();
@@ -204,7 +204,7 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
 
 QStringList InstanceList::getGroups()
 {
-    return m_groups.toList();
+    return m_groupNameCache.toList();
 }
 
 void InstanceList::deleteGroup(const QString& name)
@@ -217,7 +217,7 @@ void InstanceList::deleteGroup(const QString& name)
         auto instGroupName = getInstanceGroup(instID);
         if(instGroupName == name)
         {
-            m_groupMap.remove(instID);
+            m_instanceGroupIndex.remove(instID);
             qDebug() << "Remove" << instID << "from group" << name;
             removed = true;
             auto idx = getInstIndex(instance.get());
@@ -233,6 +233,11 @@ void InstanceList::deleteGroup(const QString& name)
     }
 }
 
+bool InstanceList::isGroupCollapsed(const QString& group)
+{
+    return m_collapsedGroups.contains(group);
+}
+
 void InstanceList::deleteInstance(const InstanceId& id)
 {
     auto inst = getInstanceById(id);
@@ -242,7 +247,7 @@ void InstanceList::deleteInstance(const InstanceId& id)
         return;
     }
 
-    if(m_groupMap.remove(id))
+    if(m_instanceGroupIndex.remove(id))
     {
         saveGroupList();
     }
@@ -515,7 +520,7 @@ void InstanceList::saveGroupList()
     WatchLock foo(m_watcher, m_instDir);
     QString groupFileName = m_instDir + "/instgroups.json";
     QMap<QString, QSet<QString>> reverseGroupMap;
-    for (auto iter = m_groupMap.begin(); iter != m_groupMap.end(); iter++)
+    for (auto iter = m_instanceGroupIndex.begin(); iter != m_instanceGroupIndex.end(); iter++)
     {
         QString id = iter.key();
         QString group = iter.value();
@@ -548,7 +553,7 @@ void InstanceList::saveGroupList()
         auto name = iter.key();
         QJsonObject groupObj;
         QJsonArray instanceArr;
-        groupObj.insert("hidden", QJsonValue(QString("false")));
+        groupObj.insert("hidden", QJsonValue(m_collapsedGroups.contains(name)));
         for (auto item : list)
         {
             instanceArr.append(QJsonValue(item));
@@ -572,7 +577,6 @@ void InstanceList::saveGroupList()
 void InstanceList::loadGroupList()
 {
     qDebug() << "Will load group list now.";
-    QSet<QString> groupSet;
 
     QString groupFileName = m_instDir + "/instgroups.json";
 
@@ -623,7 +627,8 @@ void InstanceList::loadGroupList()
         return;
     }
 
-    m_groupMap.clear();
+    QSet<QString> groupSet;
+    m_instanceGroupIndex.clear();
 
     // Iterate through all the groups.
     QJsonObject groupMapping = rootObj.value("groups").toObject();
@@ -634,37 +639,35 @@ void InstanceList::loadGroupList()
         // If not an object, complain and skip to the next one.
         if (!iter.value().isObject())
         {
-            qWarning() << QString("Group '%1' in the group list should "
-                                   "be an object.")
-                               .arg(groupName)
-                               .toUtf8();
+            qWarning() << QString("Group '%1' in the group list should be an object.").arg(groupName).toUtf8();
             continue;
         }
 
         QJsonObject groupObj = iter.value().toObject();
         if (!groupObj.value("instances").isArray())
         {
-            qWarning() << QString("Group '%1' in the group list is invalid. "
-                                   "It should contain an array "
-                                   "called 'instances'.")
-                               .arg(groupName)
-                               .toUtf8();
+            qWarning() << QString("Group '%1' in the group list is invalid. It should contain an array called 'instances'.").arg(groupName).toUtf8();
             continue;
         }
 
         // keep a list/set of groups for choosing
         groupSet.insert(groupName);
 
+        auto hidden = groupObj.value("hidden").toBool(false);
+        if(hidden) {
+            m_collapsedGroups.insert(groupName);
+        }
+
         // Iterate through the list of instances in the group.
         QJsonArray instancesArray = groupObj.value("instances").toArray();
 
         for (QJsonArray::iterator iter2 = instancesArray.begin(); iter2 != instancesArray.end(); iter2++)
         {
-            m_groupMap[(*iter2).toString()] = groupName;
+            m_instanceGroupIndex[(*iter2).toString()] = groupName;
         }
     }
     m_groupsLoaded = true;
-    m_groups.unite(groupSet);
+    m_groupNameCache.unite(groupSet);
     qDebug() << "Group list loaded.";
 }
 
@@ -687,6 +690,17 @@ void InstanceList::on_InstFolderChanged(const Setting &setting, QVariant value)
         m_groupsLoaded = false;
         emit instancesChanged();
     }
+}
+
+void InstanceList::on_GroupStateChanged(const QString& group, bool collapsed)
+{
+    qDebug() << "Group" << group << (collapsed ? "collapsed" : "expanded");
+    if(collapsed) {
+        m_collapsedGroups.insert(group);
+    } else {
+        m_collapsedGroups.remove(group);
+    }
+    saveGroupList();
 }
 
 class InstanceStaging : public Task
@@ -819,9 +833,9 @@ bool InstanceList::commitStagedInstance(const QString& path, const QString& inst
             qWarning() << "Failed to move" << path << "to" << destination;
             return false;
         }
-        m_groupMap[instID] = groupName;
+        m_instanceGroupIndex[instID] = groupName;
         instanceSet.insert(instID);
-        m_groups.insert(groupName);
+        m_groupNameCache.insert(groupName);
         emit instancesChanged();
         emit instanceSelectRequest(instID);
     }
