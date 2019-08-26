@@ -310,5 +310,6 @@
         <file>50x50/instances/enderman.png</file>
 
         <file>scalable/instances/fox.svg</file>
+        <file>scalable/instances/bee.svg</file>
     </qresource>
 </RCC>
