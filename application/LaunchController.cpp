@@ -24,7 +24,7 @@ void LaunchController::executeTask()
 {
     if (!m_instance)
     {
-        emitFailed(tr("No instance specified"));
+        emitFailed(tr("No instance specified!"));
         return;
     }
 
@@ -74,7 +74,7 @@ void LaunchController::login()
     // if no account is selected, we bail
     if (!account.get())
     {
-        emitFailed(tr("No account selected for launch"));
+        emitFailed(tr("No account selected for launch."));
         return;
     }
 
@@ -192,7 +192,7 @@ void LaunchController::launchInstance()
 
     if(!m_instance->reloadSettings())
     {
-        QMessageBox::critical(m_parentWidget, tr("Error"), tr("Couldn't load the instance profile."));
+        QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Couldn't load the instance profile."));
         emitFailed(tr("Couldn't load the instance profile."));
         return;
     }
@@ -232,8 +232,8 @@ void LaunchController::readyForLaunch()
     if (!m_profiler->check(&error))
     {
         m_launcher->abort();
-        QMessageBox::critical(m_parentWidget, tr("Error"), tr("Couldn't start profiler: %1").arg(error));
-        emitFailed("Profiler startup failed");
+        QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Couldn't start profiler: %1").arg(error));
+        emitFailed("Profiler startup failed!");
         return;
     }
     BaseProfiler *profilerInstance = m_profiler->createProfiler(m_launcher->instance(), this);
@@ -244,7 +244,7 @@ void LaunchController::readyForLaunch()
         msg.setText(tr("The game launch is delayed until you press the "
                         "button. This is the right time to setup the profiler, as the "
                         "profiler server is running now.\n\n%1").arg(message));
-        msg.setWindowTitle(tr("Waiting"));
+        msg.setWindowTitle(tr("Waiting."));
         msg.setIcon(QMessageBox::Information);
         msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
         msg.setModal(true);
@@ -261,7 +261,7 @@ void LaunchController::readyForLaunch()
         msg.setModal(true);
         msg.exec();
         m_launcher->abort();
-        emitFailed("Profiler startup failed");
+        emitFailed("Profiler startup failed!");
     });
     profilerInstance->beginProfiling(m_launcher);
 }
