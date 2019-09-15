@@ -575,7 +575,7 @@ public:
         {
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         }
-        MainWindow->resize(694, 563);
+        MainWindow->resize(800, 600);
         MainWindow->setWindowIcon(MMC->getThemedIcon("logo"));
         MainWindow->setWindowTitle("MultiMC 5");
 
