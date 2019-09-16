@@ -157,23 +157,23 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         // --help
         parser.addSwitch("help");
         parser.addShortOpt("help", 'h');
-        parser.addDocumentation("help", "display this help and exit.");
+        parser.addDocumentation("help", "Display this help and exit.");
         // --version
         parser.addSwitch("version");
         parser.addShortOpt("version", 'V');
-        parser.addDocumentation("version", "display program version and exit.");
+        parser.addDocumentation("version", "Display program version and exit.");
         // --dir
         parser.addOption("dir");
         parser.addShortOpt("dir", 'd');
-        parser.addDocumentation("dir", "use the supplied folder as MultiMC root instead of "
+        parser.addDocumentation("dir", "Use the supplied folder as MultiMC root instead of "
                                        "the binary location (use '.' for current)");
         // --launch
         parser.addOption("launch");
         parser.addShortOpt("launch", 'l');
-        parser.addDocumentation("launch", "launch the specified instance (by instance ID)");
+        parser.addDocumentation("launch", "Launch the specified instance (by instance ID)");
         // --alive
         parser.addSwitch("alive");
-        parser.addDocumentation("alive", "write a small '" + liveCheckFile + "' file after MultiMC starts");
+        parser.addDocumentation("alive", "Write a small '" + liveCheckFile + "' file after MultiMC starts");
 
         // parse the arguments
         try
@@ -382,7 +382,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
             auto payload = appID.toString().toUtf8();
             if(check.write(payload) != payload.size())
             {
-                qWarning() << "Could not write into" << liveCheckFile;
+                qWarning() << "Could not write into" << liveCheckFile << "!";
                 check.remove();
                 break;
             }
@@ -600,12 +600,12 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
     {
         auto InstDirSetting = m_settings->getSetting("InstanceDir");
         // instance path: check for problems with '!' in instance path and warn the user in the log
-        // and rememer that we have to show him a dialog when the gui starts (if it does so)
+        // and remember that we have to show him a dialog when the gui starts (if it does so)
         QString instDir = InstDirSetting->get().toString();
         qDebug() << "Instance path              : " << instDir;
         if (FS::checkProblemticPathJava(QDir(instDir)))
         {
-            qWarning() << "Your instance path contains \'!\' and this is known to cause java problems";
+            qWarning() << "Your instance path contains \'!\' and this is known to cause java problems!";
         }
         m_instances.reset(new InstanceList(m_settings, instDir, this));
         connect(InstDirSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
@@ -947,7 +947,7 @@ bool MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *pro
 {
     if(m_updateRunning)
     {
-        qDebug() << "Cannot launch instances while an update is running.";
+        qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
     }
     else if(instance->canLaunch())
     {
@@ -996,7 +996,7 @@ bool MultiMC::kill(InstancePtr instance)
 {
     if (!instance->isRunning())
     {
-        qWarning() << "Attempted to kill instance" << instance->id() << "which isn't running.";
+        qWarning() << "Attempted to kill instance" << instance->id() << ", which isn't running.";
         return false;
     }
     auto & extras = m_instanceExtras[instance->id()];
