@@ -77,7 +77,7 @@ set(MultiMC_RELEASE_VERSION_NAME "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MIN
 
 #### Custom target to just print the version.
 add_custom_target(version echo "Version: ${MultiMC_RELEASE_VERSION_NAME}")
-add_custom_target(tcversion echo "\\#\\#teamcity[setParameter name='env.MULTIMC_VERSION' value='${MultiMC_RELEASE_VERSION_NAME}']")
+add_custom_target(tcversion echo "\\#\\#teamcity[setParameter name=\\'env.MULTIMC_VERSION\\' value=\\'${MultiMC_RELEASE_VERSION_NAME}\\']")
 
 ################################ 3rd Party Libs ################################
 
