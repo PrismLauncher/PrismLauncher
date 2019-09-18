@@ -33,13 +33,7 @@ bool parseVersionInfo(const QByteArray &data, VersionFileList &list, QString &er
         QJsonObject fileObj = fileValue.toObject();
 
         QString file_path = fileObj.value("Path").toString();
-#ifdef Q_OS_MAC
-        // On OSX, the paths for the updater need to be fixed.
-        // basically, anything that isn't in the .app folder is ignored.
-        // everything else is changed so the code that processes the files actually finds
-        // them and puts the replacements in the right spots.
-        fixPathForOSX(file_path);
-#endif
+
         VersionFileEntry file{file_path,        fileObj.value("Perms").toVariant().toInt(),
                               FileSourceList(), fileObj.value("MD5").toString(), };
         qDebug() << "File" << file.path << "with perms" << file.mode;
@@ -200,20 +194,5 @@ bool processFileLists
         }
     }
     return true;
-}
-
-bool fixPathForOSX(QString &path)
-{
-    if (path.startsWith("MultiMC.app/"))
-    {
-        // remove the prefix and add a new, more appropriate one.
-        path.remove(0, 12);
-        return true;
-    }
-    else
-    {
-        qCritical() << "Update path not within .app: " << path;
-        return false;
-    }
 }
 }

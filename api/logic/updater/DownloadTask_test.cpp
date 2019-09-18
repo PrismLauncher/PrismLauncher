@@ -185,25 +185,6 @@ slots:
         qDebug() << expectedOperations;
         QCOMPARE(operations, expectedOperations);
     }
-
-    void test_OSXPathFixup()
-    {
-        QString path, pathOrig;
-        bool result;
-        // Proper OSX path
-        pathOrig = path = "MultiMC.app/Foo/Bar/Baz";
-        qDebug() << "Proper OSX path: " << path;
-        result = fixPathForOSX(path);
-        QCOMPARE(path, QString("Foo/Bar/Baz"));
-        QCOMPARE(result, true);
-
-        // Bad OSX path
-        pathOrig = path = "translations/klingon.lol";
-        qDebug() << "Bad OSX path: " << path;
-        result = fixPathForOSX(path);
-        QCOMPARE(path, pathOrig);
-        QCOMPARE(result, false);
-    }
 };
 
 extern "C"
