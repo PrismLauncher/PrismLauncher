@@ -131,12 +131,12 @@ void Flame::UrlResolvingTask::processCCIP()
     bool success = true;
     m_result.projectId = projectId.toInt(&success);
     if(!success) {
-        emitFailed(tr("Failed to resove projectId as a number."));
+        emitFailed(tr("Failed to resolve projectId as a number."));
         return;
     }
     m_result.fileId = fileId.toInt(&success);
     if(!success) {
-        emitFailed(tr("Failed to resove fileId as a number."));
+        emitFailed(tr("Failed to resolve fileId as a number."));
         return;
     }
     qDebug() << "Resolved" << m_url << "as" << m_result.projectId << "/" << m_result.fileId;
