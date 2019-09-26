@@ -1,5 +1,5 @@
 Thumbs.db
-.kdev4
+*.kdev4
 .user
 .directory
 resources/CMakeFiles
@@ -9,8 +9,7 @@ resources/MultiMCLauncher.jar
 html/
 
 # Project Files
-MultiMC5.kdev4
-MultiMC.pro.user
+*.pro.user
 CMakeLists.txt.user
 CMakeLists.txt.user.*
 /.project
