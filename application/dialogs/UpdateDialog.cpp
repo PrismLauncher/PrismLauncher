@@ -22,6 +22,7 @@ UpdateDialog::UpdateDialog(bool hasUpdate, QWidget *parent) : QDialog(parent), u
         ui->btnUpdateNow->setHidden(true);
         ui->btnUpdateLater->setText(tr("Close"));
     }
+    ui->changelogBrowser->setHtml(tr("<center><h1>Loading changelog...</h1></center>"));
     loadChangelog();
     restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("UpdateDialogGeometry").toByteArray()));
 }
