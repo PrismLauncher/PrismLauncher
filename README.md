@@ -13,21 +13,22 @@ The project uses C++ and Qt5 as the language and base framework. This might seem
 
 We can do more, with less, on worse hardware and leave more resources for the game while keeping the launcher running and providing extra features.
 
-If you want to contribute, either talk to us on [Discord](https://discord.gg/0k2zsXGNHs0fE4Wm), [IRC](http://webchat.esper.net/?nick=&channels=MultiMC)(esper.net/#MultiMC) or pick up some item from [workflowy](https://workflowy.com/s/2EyDMcp7CU) - there are many.
+If you want to contribute, either talk to us on [Discord](https://discord.gg/0k2zsXGNHs0fE4Wm), [IRC](http://webchat.esper.net/?nick=&channels=MultiMC)(esper.net/#MultiMC) or pick up some item from the github issues [workflowy](https://github.com/MultiMC/MultiMC5/issues) - there is always plenty of ideas around.
 
 ### Building
 If you want to build MultiMC yourself, check [BUILD.md](BUILD.md) for build instructions.
 
-The ci server is running at [ci.multimc.org](http://ci.multimc.org), where you can watch the builds happen in (or very close to) real time. It can also serve as a nice reference on how to set up the build environment on your end.
-
-According to travis.ci, the builds are currently [![Build Status](https://travis-ci.org/MultiMC/MultiMC5.svg?branch=develop)](https://travis-ci.org/MultiMC/MultiMC5)
-
 ### Code formatting
-We use [Clang Format](http://clang.llvm.org/docs/ClangFormat.html) to format the project. We highly recommend setting it up so the project stays well formatted.
+Just follow the existing formatting.
+
+In general:
+* Indent with 4 space unless it's in a submodule
+* Keep lists (of arguments, parameters, initializators...) as lists, not paragraphs.
+* Prefer readability over dogma.
 
 
 ## Translations
-Translations can be done either directly in the [translations repository](https://github.com/MultiMC/MultiMC5-translate). For more details, see: [Translating-MultiMC](https://github.com/MultiMC/MultiMC5/wiki/Translating-MultiMC).
+Translations can be done [on crowdin](https://translate.multimc.org).
 
 ## Forking/Redistributing
 We keep MultiMC open source because we think it's important to be able to see the source code for a project like this, and we do so using the Apache license.
