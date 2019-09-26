@@ -33,7 +33,12 @@ struct Language
     Language(const QString & _key)
     {
         key = _key;
-        locale = QLocale(key);
+        if(key == "pt") {
+            locale = QLocale("pt_PT");
+        }
+        else {
+            locale = QLocale(key);
+        }
         updated = (key == defaultLangCode);
     }
 
