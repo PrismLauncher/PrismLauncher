@@ -23,62 +23,51 @@
 
 #include "HoeDown.h"
 
+namespace {
 // Credits
 // This is a hack, but I can't think of a better way to do this easily without screwing with QTextDocument...
-static QString getCreditsHtml(QStringList patrons)
+QString getCreditsHtml(QStringList patrons)
 {
-    QString creditsHtml = QObject::tr(
-        "<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.0//EN' 'http://www.w3.org/TR/REC-html40/strict.dtd'>"
-        "<html>"
-        ""
-        "<head>"
-        "<meta name='qrichtext' content='1' />"
-        "<style type='text/css'>"
-        "p { white-space: pre-wrap; margin-top:2px; margin-bottom:2px; }"
-        "</style>"
-        "</head>"
-        ""
-        "<body style=' font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;'>"
-        ""
-        "<h3>MultiMC Developers</h3>"
-        "<p>Andrew Okin &lt;<a href='mailto:forkk@forkk.net'>forkk@forkk.net</a>&gt;</p>"
-        "<p>Petr Mrázek &lt;<a href='mailto:peterix@gmail.com'>peterix@gmail.com</a>&gt;</p>"
-        "<p>Sky Welch &lt;<a href='mailto:multimc@bunnies.io'>multimc@bunnies.io</a>&gt;</p>"
-        "<p>Jan (02JanDal) &lt;<a href='mailto:02jandal@gmail.com'>02jandal@gmail.com</a>&gt;</p>"
-        "<p>RoboSky &lt;<a href='https://twitter.com/RoboSky_'>@RoboSky_</a>&gt;</p>"
-        ""
-        "<h3>With thanks to</h3>"
-        "<p>Orochimarufan &lt;<a href='mailto:orochimarufan.x3@gmail.com'>orochimarufan.x3@gmail.com</a>&gt;</p>"
-        "<p>TakSuyu &lt;<a href='mailto:taksuyu@gmail.com'>taksuyu@gmail.com</a>&gt;</p>"
-        "<p>Kilobyte &lt;<a href='mailto:stiepen22@gmx.de'>stiepen22@gmx.de</a>&gt;</p>"
-        "<p>Rootbear75 &lt;<a href='https://twitter.com/rootbear75'>@rootbear75</a>&gt;</p>"
-        ""
-        "<h3>Patrons</h3>"
-        "%1"
-        ""
-        "</body>"
-        "</html>");
-    if (patrons.isEmpty())
-        return creditsHtml.arg(QObject::tr("<p>Loading...</p>"));
-    else
-    {
-        QString patronsStr;
+    QString patronsHeading = QObject::tr("Patrons", "About Credits");
+    QString output;
+    QTextStream stream(&output);
+    stream << "<center>\n";
+    // TODO: possibly retrieve from git history at build time?
+    stream << "<h3>" << QObject::tr("MultiMC Developers", "About Credits") << "</h3>\n";
+    stream << "<p>Andrew Okin &lt;<a href='mailto:forkk@forkk.net'>forkk@forkk.net</a>&gt;</p>\n";
+    stream << "<p>Petr Mrázek &lt;<a href='mailto:peterix@gmail.com'>peterix@gmail.com</a>&gt;</p>\n";
+    stream << "<p>Sky Welch &lt;<a href='mailto:multimc@bunnies.io'>multimc@bunnies.io</a>&gt;</p>\n";
+    stream << "<p>Jan (02JanDal) &lt;<a href='mailto:02jandal@gmail.com'>02jandal@gmail.com</a>&gt;</p>\n";
+    stream << "<p>RoboSky &lt;<a href='https://twitter.com/RoboSky_'>@RoboSky_</a>&gt;</p>\n";
+    stream << "<br />\n";
+
+    stream << "<h3>" << QObject::tr("With thanks to", "About Credits") << "</h3>\n";
+    stream << "<p>Orochimarufan &lt;<a href='mailto:orochimarufan.x3@gmail.com'>orochimarufan.x3@gmail.com</a>&gt;</p>\n";
+    stream << "<p>TakSuyu &lt;<a href='mailto:taksuyu@gmail.com'>taksuyu@gmail.com</a>&gt;</p>\n";
+    stream << "<p>Kilobyte &lt;<a href='mailto:stiepen22@gmx.de'>stiepen22@gmx.de</a>&gt;</p>\n";
+    stream << "<p>Rootbear75 &lt;<a href='https://twitter.com/rootbear75'>@rootbear75</a>&gt;</p>\n";
+    stream << "<br />\n";
+
+    if(!patrons.isEmpty()) {
+        stream << "<h3>" << QObject::tr("Patrons", "About Credits") << "</h3>\n";
         for (QString patron : patrons)
         {
-            patronsStr.append(QString("<p>%1</p>").arg(patron));
+            stream << "<p>" << patron << "</p>\n";
         }
-
-        return creditsHtml.arg(patronsStr);
     }
+    stream << "</center>\n";
+    return output;
 }
 
-static QString getLicenseHtml()
+QString getLicenseHtml()
 {
     HoeDown hoedown;
     QFile dataFile(":/documents/COPYING.md");
     dataFile.open(QIODevice::ReadOnly);
     QString output = hoedown.process(dataFile.readAll());
     return output;
+}
+
 }
 
 AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDialog)
@@ -108,6 +97,15 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
         ui->channelLabel->setText(tr("Channel") +": " + BuildConfig.VERSION_CHANNEL);
     else
         ui->channelLabel->setVisible(false);
+
+    ui->redistributionText->setHtml(tr(
+"<p>We keep MultiMC open source because we think it's important to be able to see the source code for a project like this, and we do so using the Apache license.</p>\n"
+"<p>Part of the reason for using the Apache license is we don't want people using the &quot;MultiMC&quot; name when redistributing the project. "
+"This means people must take the time to go through the source code and remove all references to &quot;MultiMC&quot;, including but not limited to the project "
+"icon and the title of windows, (no <b>MultiMC-fork</b> in the title).</p>\n"
+"<p>The Apache license covers reasonable use for the name - a mention of the project's origins in the About dialog and the license is acceptable. "
+"However, it should be abundantly clear that the project is a fork <b>without</b> implying that you have our blessing.</p>"
+    ));
 
     connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
 

@@ -217,16 +217,6 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QLineEdit" name="translationInfo">
-         <property name="text">
-          <string extracomment="Hey, Translator, feel free to put credit to you here">No Language file loaded.</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="licenseTab">
@@ -263,18 +253,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QTextEdit" name="textEdit">
-         <property name="html">
-          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Noto Sans'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Bitstream Vera Sans'; font-size:11pt;&quot;&gt;We keep MultiMC open source because we think it's important to be able to see the source code for a project like this, and we do so using the Apache license.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Bitstream Vera Sans'; font-size:11pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Bitstream Vera Sans'; font-size:11pt;&quot;&gt;Part of the reason for using the Apache license is we don't want people using the &amp;quot;MultiMC&amp;quot; name when redistributing the project. This means people must take the time to go through the source code and remove all references to &amp;quot;MultiMC&amp;quot;, including but not limited to the project icon and the title of windows, (no *MultiMC-fork* in the title).&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Bitstream Vera Sans'; font-size:11pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Bitstream Vera Sans'; font-size:11pt;&quot;&gt;The Apache license covers reasonable use for the name - a mention of the project's origins in the About dialog and the license is acceptable. However, it should be abundantly clear that the project is a fork &lt;/span&gt;&lt;span style=&quot; font-family:'Bitstream Vera Sans'; font-size:11pt; font-weight:600;&quot;&gt;without&lt;/span&gt;&lt;span style=&quot; font-family:'Bitstream Vera Sans'; font-size:11pt;&quot;&gt; implying that you have our blessing.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
+        <widget class="QTextEdit" name="redistributionText">
          <property name="textInteractionFlags">
           <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
          </property>
@@ -323,14 +302,11 @@ p, li { white-space: pre-wrap; }
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>creditsText</tabstop>
-  <tabstop>translationInfo</tabstop>
   <tabstop>licenseText</tabstop>
-  <tabstop>textEdit</tabstop>
+  <tabstop>redistributionText</tabstop>
   <tabstop>aboutQt</tabstop>
   <tabstop>closeButton</tabstop>
  </tabstops>
- <resources>
-  <include location="../../resources/multimc/multimc.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
