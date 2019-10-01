@@ -93,11 +93,13 @@ void GroupView::currentChanged(const QModelIndex& current, const QModelIndex& pr
 {
     QAbstractItemView::currentChanged(current, previous);
     // TODO: for accessibility support, implement+register a factory, steal QAccessibleTable from Qt and return an instance of it for GroupView.
+#ifndef QT_NO_ACCESSIBILITY
     if (QAccessible::isActive() && current.isValid()) {
         QAccessibleEvent event(this, QAccessible::Focus);
         event.setChild(current.row());
         QAccessible::updateAccessibility(&event);
     }
+#endif /* !QT_NO_ACCESSIBILITY */
 }
 
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <qtguiglobal.h>
+#ifndef QT_NO_ACCESSIBILITY
 #include "GroupView.h"
 #include "QtCore/qpointer.h"
 #include <QtGui/qaccessible.h>
@@ -114,3 +116,4 @@ private:
 
     friend class AccessibleGroupView;
 };
+#endif /* !QT_NO_ACCESSIBILITY */

@@ -535,7 +535,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         qDebug() << "<> Settings loaded.";
     }
 
+#ifndef QT_NO_ACCESSIBILITY
     QAccessible::installFactory(groupViewAccessibleFactory);
+#endif /* !QT_NO_ACCESSIBILITY */
 
     // load translations
     {
