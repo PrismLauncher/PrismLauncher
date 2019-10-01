@@ -82,7 +82,9 @@ void VersionListView::setEmptyMode(VersionListView::EmptyMode mode)
 
 void VersionListView::updateEmptyViewPort()
 {
+#ifndef QT_NO_ACCESSIBILITY
     setAccessibleDescription(currentEmptyString());
+#endif /* !QT_NO_ACCESSIBILITY */
 
     if(!m_itemCount)
     {

@@ -6,6 +6,8 @@
 #include <qaccessible.h>
 #include <qheaderview.h>
 
+#ifndef QT_NO_ACCESSIBILITY
+
 QAccessibleInterface *groupViewAccessibleFactory(const QString &classname, QObject *object)
 {
     QAccessibleInterface *iface = 0;
@@ -772,3 +774,5 @@ QAccessibleInterface *AccessibleGroupViewItem::child(int) const
 {
     return 0;
 }
+
+#endif /* !QT_NO_ACCESSIBILITY */
