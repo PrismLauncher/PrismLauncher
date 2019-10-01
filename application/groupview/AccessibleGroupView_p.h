@@ -1,12 +1,11 @@
 #pragma once
 
-#include <qtguiglobal.h>
-#ifndef QT_NO_ACCESSIBILITY
-#include "GroupView.h"
 #include "QtCore/qpointer.h"
 #include <QtGui/qaccessible.h>
 #include <QAccessibleWidget>
 #include <QAbstractItemView>
+#ifndef QT_NO_ACCESSIBILITY
+#include "GroupView.h"
 // #include <QHeaderView>
 
 class QAccessibleTableCell;
