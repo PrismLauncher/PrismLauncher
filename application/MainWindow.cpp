@@ -578,6 +578,7 @@ public:
         MainWindow->resize(800, 600);
         MainWindow->setWindowIcon(MMC->getThemedIcon("logo"));
         MainWindow->setWindowTitle("MultiMC 5");
+        MainWindow->setAccessibleName("MultiMC");
 
         createMainToolbar(MainWindow);
 
