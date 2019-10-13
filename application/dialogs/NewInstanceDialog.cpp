@@ -37,8 +37,6 @@
 #include <pages/modplatform/FTBPage.h>
 #include <pages/modplatform/TwitchPage.h>
 #include <pages/modplatform/ImportPage.h>
-#include <pages/modplatform/TechnicPage.h>
-
 
 
 NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString & url, QWidget *parent)

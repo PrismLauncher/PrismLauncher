@@ -135,8 +135,6 @@ SET(MULTIMC_SOURCES
     pages/modplatform/FtbListModel.cpp
     pages/modplatform/TwitchPage.cpp
     pages/modplatform/TwitchPage.h
-    pages/modplatform/TechnicPage.cpp
-    pages/modplatform/TechnicPage.h
     pages/modplatform/ImportPage.cpp
     pages/modplatform/ImportPage.h
 
@@ -254,7 +252,6 @@ SET(MULTIMC_UIS
     pages/modplatform/VanillaPage.ui
     pages/modplatform/FTBPage.ui
     pages/modplatform/TwitchPage.ui
-    pages/modplatform/TechnicPage.ui
     pages/modplatform/ImportPage.ui
 
     # Dialogs
