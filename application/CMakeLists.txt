@@ -125,8 +125,6 @@ SET(MULTIMC_SOURCES
     pages/global/ProxyPage.h
     pages/global/PasteEEPage.cpp
     pages/global/PasteEEPage.h
-    pages/global/PackagesPage.cpp
-    pages/global/PackagesPage.h
 
     # GUI - platform pages
     pages/modplatform/VanillaPage.cpp
@@ -251,7 +249,6 @@ SET(MULTIMC_UIS
     pages/global/MultiMCPage.ui
     pages/global/ProxyPage.ui
     pages/global/PasteEEPage.ui
-    pages/global/PackagesPage.ui
 
     # Platform pages
     pages/modplatform/VanillaPage.ui

@@ -15,7 +15,6 @@
 #include "pages/global/ExternalToolsPage.h"
 #include "pages/global/AccountListPage.h"
 #include "pages/global/PasteEEPage.h"
-#include "pages/global/PackagesPage.h"
 #include "pages/global/CustomCommandsPage.h"
 
 #include "themes/ITheme.h"
@@ -527,7 +526,6 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<LanguagePage>();
             m_globalSettingsProvider->addPage<CustomCommandsPage>();
             m_globalSettingsProvider->addPage<ProxyPage>();
-            // m_globalSettingsProvider->addPage<PackagesPage>();
             m_globalSettingsProvider->addPage<ExternalToolsPage>();
             m_globalSettingsProvider->addPage<AccountListPage>();
             m_globalSettingsProvider->addPage<PasteEEPage>();
