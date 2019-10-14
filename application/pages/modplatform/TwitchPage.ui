@@ -52,7 +52,7 @@
    <item row="2" column="0" colspan="3">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Drag and drop an Install button from CurseForge into the are above.</string>
+      <string>Drag and drop an Install button from CurseForge into the area above.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
