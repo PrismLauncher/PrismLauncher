@@ -178,6 +178,8 @@ SET(MULTIMC_SOURCES
     widgets/Common.h
     widgets/CustomCommands.cpp
     widgets/CustomCommands.h
+    widgets/DropLabel.cpp
+    widgets/DropLabel.h
     widgets/FocusLineEdit.cpp
     widgets/FocusLineEdit.h
     widgets/IconLabel.cpp

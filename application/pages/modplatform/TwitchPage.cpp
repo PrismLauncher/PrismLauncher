@@ -10,6 +10,11 @@ TwitchPage::TwitchPage(NewInstanceDialog* dialog, QWidget *parent)
 {
     ui->setupUi(this);
     connect(ui->checkButton, &QPushButton::clicked, this, &TwitchPage::triggerCheck);
+    connect(ui->twitchLabel, &DropLabel::droppedURLs, [this](QList<QUrl> urls){
+        if(urls.size()) {
+            setUrl(urls[0].toString());
+        }
+    });
 }
 
 TwitchPage::~TwitchPage()
