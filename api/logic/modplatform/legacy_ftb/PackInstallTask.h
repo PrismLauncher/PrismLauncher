@@ -6,15 +6,17 @@
 #include "meta/Index.h"
 #include "meta/Version.h"
 #include "meta/VersionList.h"
-#include "modplatform/ftb/PackHelpers.h"
+#include "PackHelpers.h"
 
-class MULTIMC_LOGIC_EXPORT FtbPackInstallTask : public InstanceTask
+namespace LegacyFTB {
+
+class MULTIMC_LOGIC_EXPORT PackInstallTask : public InstanceTask
 {
     Q_OBJECT
 
 public:
-    explicit FtbPackInstallTask(FtbModpack pack, QString version);
-    virtual ~FtbPackInstallTask(){}
+    explicit PackInstallTask(Modpack pack, QString version);
+    virtual ~PackInstallTask(){}
 
     bool abort() override;
 
@@ -43,6 +45,8 @@ private: /* data */
     NetJobPtr netJobContainer;
     QString archivePath;
 
-    FtbModpack m_pack;
+    Modpack m_pack;
     QString m_version;
 };
+
+}

@@ -5,10 +5,12 @@
 #include <QFile>
 #include "multimc_logic_export.h"
 
-class MULTIMC_LOGIC_EXPORT FtbPrivatePackManager
+namespace LegacyFTB {
+
+class MULTIMC_LOGIC_EXPORT PrivatePackManager
 {
 public:
-    ~FtbPrivatePackManager()
+    ~PrivatePackManager()
     {
         save();
     }
@@ -38,3 +40,5 @@ private:
     QString m_filename = "private_packs.txt";
     mutable bool dirty = false;
 };
+
+}

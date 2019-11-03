@@ -1,28 +1,32 @@
-#include "FtbPackInstallTask.h"
+#include "PackInstallTask.h"
+
 #include "Env.h"
 #include "MMCZip.h"
-#include "QtConcurrent"
+
 #include "BaseInstance.h"
 #include "FileSystem.h"
 #include "settings/INISettingsObject.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/ComponentList.h"
 #include "minecraft/GradleSpecifier.h"
-
 #include "net/URLConstants.h"
 
-FtbPackInstallTask::FtbPackInstallTask(FtbModpack pack, QString version)
+#include <QtConcurrent>
+
+namespace LegacyFTB {
+
+PackInstallTask::PackInstallTask(Modpack pack, QString version)
 {
     m_pack = pack;
     m_version = version;
 }
 
-void FtbPackInstallTask::executeTask()
+void PackInstallTask::executeTask()
 {
     downloadPack();
 }
 
-void FtbPackInstallTask::downloadPack()
+void PackInstallTask::downloadPack()
 {
     setStatus(tr("Downloading zip for %1").arg(m_pack.name));
 
@@ -32,46 +36,46 @@ void FtbPackInstallTask::downloadPack()
 
     entry->setStale(true);
     QString url;
-    if(m_pack.type == FtbPackType::Private)
+    if(m_pack.type == PackType::Private)
     {
-        url = QString(URLConstants::FTB_CDN_BASE_URL + "privatepacks/%1").arg(packoffset);
+        url = QString(URLConstants::LEGACY_FTB_CDN_BASE_URL + "privatepacks/%1").arg(packoffset);
     }
     else
     {
-        url = QString(URLConstants::FTB_CDN_BASE_URL + "modpacks/%1").arg(packoffset);
+        url = QString(URLConstants::LEGACY_FTB_CDN_BASE_URL + "modpacks/%1").arg(packoffset);
     }
     job->addNetAction(Net::Download::makeCached(url, entry));
     archivePath = entry->getFullPath();
 
     netJobContainer.reset(job);
-    connect(job, &NetJob::succeeded, this, &FtbPackInstallTask::onDownloadSucceeded);
-    connect(job, &NetJob::failed, this, &FtbPackInstallTask::onDownloadFailed);
-    connect(job, &NetJob::progress, this, &FtbPackInstallTask::onDownloadProgress);
+    connect(job, &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
+    connect(job, &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
+    connect(job, &NetJob::progress, this, &PackInstallTask::onDownloadProgress);
     job->start();
 
     progress(1, 4);
 }
 
-void FtbPackInstallTask::onDownloadSucceeded()
+void PackInstallTask::onDownloadSucceeded()
 {
     abortable = false;
     unzip();
 }
 
-void FtbPackInstallTask::onDownloadFailed(QString reason)
+void PackInstallTask::onDownloadFailed(QString reason)
 {
     abortable = false;
     emitFailed(reason);
 }
 
-void FtbPackInstallTask::onDownloadProgress(qint64 current, qint64 total)
+void PackInstallTask::onDownloadProgress(qint64 current, qint64 total)
 {
     abortable = true;
     progress(current, total * 4);
     setStatus(tr("Downloading zip for %1 (%2%)").arg(m_pack.name).arg(current / 10));
 }
 
-void FtbPackInstallTask::unzip()
+void PackInstallTask::unzip()
 {
     progress(2, 4);
     setStatus(tr("Extracting modpack"));
@@ -85,22 +89,22 @@ void FtbPackInstallTask::unzip()
     }
 
     m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/unzip");
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &FtbPackInstallTask::onUnzipFinished);
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &FtbPackInstallTask::onUnzipCanceled);
+    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onUnzipFinished);
+    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &PackInstallTask::onUnzipCanceled);
     m_extractFutureWatcher.setFuture(m_extractFuture);
 }
 
-void FtbPackInstallTask::onUnzipFinished()
+void PackInstallTask::onUnzipFinished()
 {
     install();
 }
 
-void FtbPackInstallTask::onUnzipCanceled()
+void PackInstallTask::onUnzipCanceled()
 {
     emitAborted();
 }
 
-void FtbPackInstallTask::install()
+void PackInstallTask::install()
 {
     progress(3, 4);
     setStatus(tr("Installing modpack"));
@@ -197,11 +201,13 @@ void FtbPackInstallTask::install()
     emitSucceeded();
 }
 
-bool FtbPackInstallTask::abort()
+bool PackInstallTask::abort()
 {
     if(abortable)
     {
         return netJobContainer->abort();
     }
     return false;
+}
+
 }

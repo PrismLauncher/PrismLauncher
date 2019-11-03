@@ -1,34 +1,36 @@
-#include "FtbPackFetchTask.h"
-#include <QDomDocument>
-#include "FtbPrivatePackManager.h"
+#include "PackFetchTask.h"
+#include "PrivatePackManager.h"
 
+#include <QDomDocument>
 #include "net/URLConstants.h"
 
-void FtbPackFetchTask::fetch()
+namespace LegacyFTB {
+
+void PackFetchTask::fetch()
 {
     publicPacks.clear();
     thirdPartyPacks.clear();
 
-    NetJob *netJob = new NetJob("FtbModpackFetch");
+    NetJob *netJob = new NetJob("LegacyFTB::ModpackFetch");
 
-    QUrl publicPacksUrl = QUrl(URLConstants::FTB_CDN_BASE_URL + "static/modpacks.xml");
+    QUrl publicPacksUrl = QUrl(URLConstants::LEGACY_FTB_CDN_BASE_URL + "static/modpacks.xml");
     qDebug() << "Downloading public version info from" << publicPacksUrl.toString();
     netJob->addNetAction(Net::Download::makeByteArray(publicPacksUrl, &publicModpacksXmlFileData));
 
-    QUrl thirdPartyUrl = QUrl(URLConstants::FTB_CDN_BASE_URL + "static/thirdparty.xml");
+    QUrl thirdPartyUrl = QUrl(URLConstants::LEGACY_FTB_CDN_BASE_URL + "static/thirdparty.xml");
     qDebug() << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
     netJob->addNetAction(Net::Download::makeByteArray(thirdPartyUrl, &thirdPartyModpacksXmlFileData));
 
-    QObject::connect(netJob, &NetJob::succeeded, this, &FtbPackFetchTask::fileDownloadFinished);
-    QObject::connect(netJob, &NetJob::failed, this, &FtbPackFetchTask::fileDownloadFailed);
+    QObject::connect(netJob, &NetJob::succeeded, this, &PackFetchTask::fileDownloadFinished);
+    QObject::connect(netJob, &NetJob::failed, this, &PackFetchTask::fileDownloadFailed);
 
     jobPtr.reset(netJob);
     netJob->start();
 }
 
-void FtbPackFetchTask::fetchPrivate(const QStringList & toFetch)
+void PackFetchTask::fetchPrivate(const QStringList & toFetch)
 {
-    QString privatePackBaseUrl = URLConstants::FTB_CDN_BASE_URL + "static/%1.xml";
+    QString privatePackBaseUrl = URLConstants::LEGACY_FTB_CDN_BASE_URL + "static/%1.xml";
 
     for (auto &packCode: toFetch)
     {
@@ -38,9 +40,9 @@ void FtbPackFetchTask::fetchPrivate(const QStringList & toFetch)
 
         QObject::connect(job, &NetJob::succeeded, this, [this, job, data, packCode]
         {
-            FtbModpackList packs;
-            parseAndAddPacks(*data, FtbPackType::Private, packs);
-            foreach(FtbModpack currentPack, packs)
+            ModpackList packs;
+            parseAndAddPacks(*data, PackType::Private, packs);
+            foreach(Modpack currentPack, packs)
             {
                 currentPack.packCode = packCode;
                 emit privateFileDownloadFinished(currentPack);
@@ -65,18 +67,18 @@ void FtbPackFetchTask::fetchPrivate(const QStringList & toFetch)
     }
 }
 
-void FtbPackFetchTask::fileDownloadFinished()
+void PackFetchTask::fileDownloadFinished()
 {
     jobPtr.reset();
 
     QStringList failedLists;
 
-    if(!parseAndAddPacks(publicModpacksXmlFileData, FtbPackType::Public, publicPacks))
+    if(!parseAndAddPacks(publicModpacksXmlFileData, PackType::Public, publicPacks))
     {
         failedLists.append(tr("Public Packs"));
     }
 
-    if(!parseAndAddPacks(thirdPartyModpacksXmlFileData, FtbPackType::ThirdParty, thirdPartyPacks))
+    if(!parseAndAddPacks(thirdPartyModpacksXmlFileData, PackType::ThirdParty, thirdPartyPacks))
     {
         failedLists.append(tr("Third Party Packs"));
     }
@@ -91,7 +93,7 @@ void FtbPackFetchTask::fileDownloadFinished()
     }
 }
 
-bool FtbPackFetchTask::parseAndAddPacks(QByteArray &data, FtbPackType packType, FtbModpackList &list)
+bool PackFetchTask::parseAndAddPacks(QByteArray &data, PackType packType, ModpackList &list)
 {
     QDomDocument doc;
 
@@ -112,7 +114,7 @@ bool FtbPackFetchTask::parseAndAddPacks(QByteArray &data, FtbPackType packType, 
     {
         QDomElement element = nodes.at(i).toElement();
 
-        FtbModpack modpack;
+        Modpack modpack;
         modpack.name = element.attribute("name");
         modpack.currentVersion = element.attribute("version");
         modpack.mcVersion = element.attribute("mcVersion");
@@ -161,8 +163,10 @@ bool FtbPackFetchTask::parseAndAddPacks(QByteArray &data, FtbPackType packType, 
     return true;
 }
 
-void FtbPackFetchTask::fileDownloadFailed(QString reason)
+void PackFetchTask::fileDownloadFailed(QString reason)
 {
-    qWarning() << "Fetching FtbPacks failed:" << reason;
+    qWarning() << "Fetching FTBPacks failed:" << reason;
     emit failed(reason);
+}
+
 }

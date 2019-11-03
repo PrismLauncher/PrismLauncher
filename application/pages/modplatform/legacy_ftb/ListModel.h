@@ -1,6 +1,6 @@
 #pragma once
 
-#include <modplatform/ftb/PackHelpers.h>
+#include <modplatform/legacy_ftb/PackHelpers.h>
 #include <RWStorage.h>
 
 #include <QAbstractListModel>
@@ -11,14 +11,16 @@
 
 #include <functional>
 
-typedef QMap<QString, QIcon> FtbLogoMap;
+namespace LegacyFTB {
+
+typedef QMap<QString, QIcon> FTBLogoMap;
 typedef std::function<void(QString)> LogoCallback;
 
-class FtbFilterModel : public QSortFilterProxyModel
+class FilterModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 public:
-    FtbFilterModel(QObject* parent = Q_NULLPTR);
+    FilterModel(QObject* parent = Q_NULLPTR);
     enum Sorting {
         ByName,
         ByGameVersion
@@ -38,18 +40,18 @@ private:
 
 };
 
-class FtbListModel : public QAbstractListModel
+class ListModel : public QAbstractListModel
 {
     Q_OBJECT
 private:
-    FtbModpackList modpacks;
+    ModpackList modpacks;
     QStringList m_failedLogos;
     QStringList m_loadingLogos;
-    FtbLogoMap m_logoMap;
+    FTBLogoMap m_logoMap;
     QMap<QString, LogoCallback> waitingCallbacks;
 
     void requestLogo(QString file);
-    QString translatePackType(FtbPackType type) const;
+    QString translatePackType(PackType type) const;
 
 
 private slots:
@@ -57,18 +59,20 @@ private slots:
     void logoLoaded(QString logo, QIcon out);
 
 public:
-    FtbListModel(QObject *parent);
-    ~FtbListModel();
+    ListModel(QObject *parent);
+    ~ListModel();
     int rowCount(const QModelIndex &parent) const override;
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-    void fill(FtbModpackList modpacks);
-    void addPack(FtbModpack modpack);
+    void fill(ModpackList modpacks);
+    void addPack(Modpack modpack);
     void clear();
     void remove(int row);
 
-    FtbModpack at(int row);
+    Modpack at(int row);
     void getLogo(const QString &logo, LogoCallback callback);
 };
+
+}

@@ -1,4 +1,4 @@
-#include "FtbListModel.h"
+#include "ListModel.h"
 #include "MultiMC.h"
 
 #include <MMCStrings.h>
@@ -12,17 +12,19 @@
 
 #include "net/URLConstants.h"
 
-FtbFilterModel::FtbFilterModel(QObject *parent) : QSortFilterProxyModel(parent)
+namespace LegacyFTB {
+
+FilterModel::FilterModel(QObject *parent) : QSortFilterProxyModel(parent)
 {
     currentSorting = Sorting::ByGameVersion;
     sortings.insert(tr("Sort by name"), Sorting::ByName);
     sortings.insert(tr("Sort by game version"), Sorting::ByGameVersion);
 }
 
-bool FtbFilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+bool FilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
-    FtbModpack leftPack = sourceModel()->data(left, Qt::UserRole).value<FtbModpack>();
-    FtbModpack rightPack = sourceModel()->data(right, Qt::UserRole).value<FtbModpack>();
+    Modpack leftPack = sourceModel()->data(left, Qt::UserRole).value<Modpack>();
+    Modpack rightPack = sourceModel()->data(right, Qt::UserRole).value<Modpack>();
 
     if(currentSorting == Sorting::ByGameVersion) {
         Version lv(leftPack.mcVersion);
@@ -38,66 +40,66 @@ bool FtbFilterModel::lessThan(const QModelIndex &left, const QModelIndex &right)
     return true;
 }
 
-bool FtbFilterModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
     return true;
 }
 
-const QMap<QString, FtbFilterModel::Sorting> FtbFilterModel::getAvailableSortings()
+const QMap<QString, FilterModel::Sorting> FilterModel::getAvailableSortings()
 {
     return sortings;
 }
 
-QString FtbFilterModel::translateCurrentSorting()
+QString FilterModel::translateCurrentSorting()
 {
     return sortings.key(currentSorting);
 }
 
-void FtbFilterModel::setSorting(Sorting s)
+void FilterModel::setSorting(Sorting s)
 {
     currentSorting = s;
     invalidate();
 }
 
-FtbFilterModel::Sorting FtbFilterModel::getCurrentSorting()
+FilterModel::Sorting FilterModel::getCurrentSorting()
 {
     return currentSorting;
 }
 
-FtbListModel::FtbListModel(QObject *parent) : QAbstractListModel(parent)
+ListModel::ListModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
 
-FtbListModel::~FtbListModel()
+ListModel::~ListModel()
 {
 }
 
-QString FtbListModel::translatePackType(FtbPackType type) const
+QString ListModel::translatePackType(PackType type) const
 {
     switch(type)
     {
-        case FtbPackType::Public:
+        case PackType::Public:
             return tr("Public Modpack");
-        case FtbPackType::ThirdParty:
+        case PackType::ThirdParty:
             return tr("Third Party Modpack");
-        case FtbPackType::Private:
+        case PackType::Private:
             return tr("Private Modpack");
     }
     qWarning() << "Unknown FTB modpack type:" << int(type);
     return QString();
 }
 
-int FtbListModel::rowCount(const QModelIndex &parent) const
+int ListModel::rowCount(const QModelIndex &parent) const
 {
     return modpacks.size();
 }
 
-int FtbListModel::columnCount(const QModelIndex &parent) const
+int ListModel::columnCount(const QModelIndex &parent) const
 {
     return 1;
 }
 
-QVariant FtbListModel::data(const QModelIndex &index, int role) const
+QVariant ListModel::data(const QModelIndex &index, int role) const
 {
     int pos = index.row();
     if(pos >= modpacks.size() || pos < 0 || !index.isValid())
@@ -105,7 +107,7 @@ QVariant FtbListModel::data(const QModelIndex &index, int role) const
         return QString("INVALID INDEX %1").arg(pos);
     }
 
-    FtbModpack pack = modpacks.at(pos);
+    Modpack pack = modpacks.at(pos);
     if(role == Qt::DisplayRole)
     {
         return pack.name + "\n" + translatePackType(pack.type);
@@ -129,7 +131,7 @@ QVariant FtbListModel::data(const QModelIndex &index, int role) const
             return (m_logoMap.value(pack.logo));
         }
         QIcon icon = MMC->getThemedIcon("screenshot-placeholder");
-        ((FtbListModel *)this)->requestLogo(pack.logo);
+        ((ListModel *)this)->requestLogo(pack.logo);
         return icon;
     }
     else if(role == Qt::TextColorRole)
@@ -156,33 +158,33 @@ QVariant FtbListModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void FtbListModel::fill(FtbModpackList modpacks)
+void ListModel::fill(ModpackList modpacks)
 {
     beginResetModel();
     this->modpacks = modpacks;
     endResetModel();
 }
 
-void FtbListModel::addPack(FtbModpack modpack)
+void ListModel::addPack(Modpack modpack)
 {
     beginResetModel();
     this->modpacks.append(modpack);
     endResetModel();
 }
 
-void FtbListModel::clear()
+void ListModel::clear()
 {
     beginResetModel();
     modpacks.clear();
     endResetModel();
 }
 
-FtbModpack FtbListModel::at(int row)
+Modpack ListModel::at(int row)
 {
     return modpacks.at(row);
 }
 
-void FtbListModel::remove(int row)
+void ListModel::remove(int row)
 {
     if(row < 0 || row >= modpacks.size())
     {
@@ -194,20 +196,20 @@ void FtbListModel::remove(int row)
     endRemoveRows();
 }
 
-void FtbListModel::logoLoaded(QString logo, QIcon out)
+void ListModel::logoLoaded(QString logo, QIcon out)
 {
     m_loadingLogos.removeAll(logo);
     m_logoMap.insert(logo, out);
     emit dataChanged(createIndex(0, 0), createIndex(1, 0));
 }
 
-void FtbListModel::logoFailed(QString logo)
+void ListModel::logoFailed(QString logo)
 {
     m_failedLogos.append(logo);
     m_loadingLogos.removeAll(logo);
 }
 
-void FtbListModel::requestLogo(QString file)
+void ListModel::requestLogo(QString file)
 {
     if(m_loadingLogos.contains(file) || m_failedLogos.contains(file))
     {
@@ -216,7 +218,7 @@ void FtbListModel::requestLogo(QString file)
 
     MetaEntryPtr entry = ENV.metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
     NetJob *job = new NetJob(QString("FTB Icon Download for %1").arg(file));
-    job->addNetAction(Net::Download::makeCached(QUrl(QString(URLConstants::FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
+    job->addNetAction(Net::Download::makeCached(QUrl(QString(URLConstants::LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
 
     auto fullPath = entry->getFullPath();
     QObject::connect(job, &NetJob::finished, this, [this, file, fullPath]
@@ -238,7 +240,7 @@ void FtbListModel::requestLogo(QString file)
     m_loadingLogos.append(file);
 }
 
-void FtbListModel::getLogo(const QString &logo, LogoCallback callback)
+void ListModel::getLogo(const QString &logo, LogoCallback callback)
 {
     if(m_logoMap.contains(logo))
     {
@@ -250,7 +252,9 @@ void FtbListModel::getLogo(const QString &logo, LogoCallback callback)
     }
 }
 
-Qt::ItemFlags FtbListModel::flags(const QModelIndex &index) const
+Qt::ItemFlags ListModel::flags(const QModelIndex &index) const
 {
     return QAbstractListModel::flags(index);
+}
+
 }

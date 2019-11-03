@@ -6,13 +6,15 @@
 #include <QObject>
 #include "PackHelpers.h"
 
-class MULTIMC_LOGIC_EXPORT FtbPackFetchTask : public QObject {
+namespace LegacyFTB {
+
+class MULTIMC_LOGIC_EXPORT PackFetchTask : public QObject {
 
     Q_OBJECT
 
 public:
-    FtbPackFetchTask() = default;
-    virtual ~FtbPackFetchTask() = default;
+    PackFetchTask() = default;
+    virtual ~PackFetchTask() = default;
 
     void fetch();
     void fetchPrivate(const QStringList &toFetch);
@@ -23,18 +25,20 @@ private:
     QByteArray publicModpacksXmlFileData;
     QByteArray thirdPartyModpacksXmlFileData;
 
-    bool parseAndAddPacks(QByteArray &data, FtbPackType packType, FtbModpackList &list);
-    FtbModpackList publicPacks;
-    FtbModpackList thirdPartyPacks;
+    bool parseAndAddPacks(QByteArray &data, PackType packType, ModpackList &list);
+    ModpackList publicPacks;
+    ModpackList thirdPartyPacks;
 
 protected slots:
     void fileDownloadFinished();
     void fileDownloadFailed(QString reason);
 
 signals:
-    void finished(FtbModpackList publicPacks, FtbModpackList thirdPartyPacks);
+    void finished(ModpackList publicPacks, ModpackList thirdPartyPacks);
     void failed(QString reason);
 
-    void privateFileDownloadFinished(FtbModpack modpack);
+    void privateFileDownloadFinished(Modpack modpack);
     void privateFileDownloadFailed(QString reason, QString packCode);
 };
+
+}

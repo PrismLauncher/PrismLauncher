@@ -5,15 +5,17 @@
 #include <QStringList>
 #include <QMetaType>
 
+namespace LegacyFTB {
+
 //Header for structs etc...
-enum class FtbPackType
+enum class PackType
 {
     Public,
     ThirdParty,
     Private
 };
 
-struct FtbModpack
+struct Modpack
 {
     QString name;
     QString description;
@@ -31,11 +33,13 @@ struct FtbModpack
     bool bugged = false;
     bool broken = false;
 
-    FtbPackType type;
+    PackType type;
     QString packCode;
 };
 
-//We need it for the proxy model
-Q_DECLARE_METATYPE(FtbModpack)
+typedef QList<Modpack> ModpackList;
 
-typedef QList<FtbModpack> FtbModpackList;
+}
+
+//We need it for the proxy model
+Q_DECLARE_METATYPE(LegacyFTB::Modpack)

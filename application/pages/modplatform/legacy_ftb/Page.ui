@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FTBPage</class>
- <widget class="QWidget" name="FTBPage">
+ <class>LegacyFTB::Page</class>
+ <widget class="QWidget" name="LegacyFTB::Page">
   <property name="geometry">
    <rect>
     <x>0</x>

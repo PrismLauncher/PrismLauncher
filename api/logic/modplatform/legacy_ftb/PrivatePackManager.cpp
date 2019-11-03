@@ -1,10 +1,12 @@
-#include "FtbPrivatePackManager.h"
+#include "PrivatePackManager.h"
 
 #include <QDebug>
 
 #include "FileSystem.h"
 
-void FtbPrivatePackManager::load()
+namespace LegacyFTB {
+
+void PrivatePackManager::load()
 {
     try
     {
@@ -18,7 +20,7 @@ void FtbPrivatePackManager::load()
     }
 }
 
-void FtbPrivatePackManager::save() const
+void PrivatePackManager::save() const
 {
     if(!dirty)
     {
@@ -34,4 +36,6 @@ void FtbPrivatePackManager::save() const
     {
         qWarning() << "Failed to write third party FTB pack codes to" << m_filename;
     }
+}
+
 }

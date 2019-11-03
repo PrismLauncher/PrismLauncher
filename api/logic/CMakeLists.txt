@@ -439,15 +439,14 @@ set(META_SOURCES
 )
 
 set(FTB_SOURCES
-    modplatform/ftb/FtbPackFetchTask.h
-    modplatform/ftb/FtbPackFetchTask.cpp
-    modplatform/ftb/FtbPackInstallTask.h
-    modplatform/ftb/FtbPackInstallTask.cpp
+    modplatform/legacy_ftb/PackFetchTask.h
+    modplatform/legacy_ftb/PackFetchTask.cpp
+    modplatform/legacy_ftb/PackInstallTask.h
+    modplatform/legacy_ftb/PackInstallTask.cpp
+    modplatform/legacy_ftb/PrivatePackManager.h
+    modplatform/legacy_ftb/PrivatePackManager.cpp
 
-    modplatform/ftb/FtbPrivatePackManager.h
-    modplatform/ftb/FtbPrivatePackManager.cpp
-
-    modplatform/ftb/PackHelpers.h
+    modplatform/legacy_ftb/PackHelpers.h
 )
 
 set(FLAME_SOURCES

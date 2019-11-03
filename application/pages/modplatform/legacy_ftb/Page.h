@@ -22,29 +22,32 @@
 #include "pages/BasePage.h"
 #include <MultiMC.h>
 #include "tasks/Task.h"
-#include "modplatform/ftb/PackHelpers.h"
-#include "modplatform/ftb/FtbPackFetchTask.h"
+#include "modplatform/legacy_ftb/PackHelpers.h"
+#include "modplatform/legacy_ftb/PackFetchTask.h"
 #include "QObjectPtr.h"
+
+class NewInstanceDialog;
+
+namespace LegacyFTB {
 
 namespace Ui
 {
-class FTBPage;
+class Page;
 }
 
-class FtbListModel;
-class FtbFilterModel;
-class NewInstanceDialog;
-class FtbPrivatePackListModel;
-class FtbPrivatePackFilterModel;
-class FtbPrivatePackManager;
+class ListModel;
+class FilterModel;
+class PrivatePackListModel;
+class PrivatePackFilterModel;
+class PrivatePackManager;
 
-class FTBPage : public QWidget, public BasePage
+class Page : public QWidget, public BasePage
 {
     Q_OBJECT
 
 public:
-    explicit FTBPage(NewInstanceDialog * dialog, QWidget *parent = 0);
-    virtual ~FTBPage();
+    explicit Page(NewInstanceDialog * dialog, QWidget *parent = 0);
+    virtual ~Page();
     QString displayName() const override
     {
         return tr("FTB Legacy");
@@ -55,7 +58,7 @@ public:
     }
     QString id() const override
     {
-        return "ftb";
+        return "legacy_ftb";
     }
     QString helpPage() const override
     {
@@ -66,13 +69,13 @@ public:
 
 private:
     void suggestCurrent();
-    void onPackSelectionChanged(FtbModpack *pack = nullptr);
+    void onPackSelectionChanged(Modpack *pack = nullptr);
 
 private slots:
-    void ftbPackDataDownloadSuccessfully(FtbModpackList publicPacks, FtbModpackList thirdPartyPacks);
+    void ftbPackDataDownloadSuccessfully(ModpackList publicPacks, ModpackList thirdPartyPacks);
     void ftbPackDataDownloadFailed(QString reason);
 
-    void ftbPrivatePackDataDownloadSuccessfully(FtbModpack pack);
+    void ftbPrivatePackDataDownloadSuccessfully(Modpack pack);
     void ftbPrivatePackDataDownloadFailed(QString reason, QString packCode);
 
     void onSortingSelectionChanged(QString data);
@@ -88,27 +91,29 @@ private slots:
     void onRemovePackClicked();
 
 private:
-    FtbFilterModel* currentModel = nullptr;
+    FilterModel* currentModel = nullptr;
     QTreeView* currentList = nullptr;
     QTextBrowser* currentModpackInfo = nullptr;
 
     bool initialized = false;
-    FtbModpack selected;
+    Modpack selected;
     QString selectedVersion;
 
-    FtbListModel* publicListModel = nullptr;
-    FtbFilterModel* publicFilterModel = nullptr;
+    ListModel* publicListModel = nullptr;
+    FilterModel* publicFilterModel = nullptr;
 
-    FtbListModel *thirdPartyModel = nullptr;
-    FtbFilterModel *thirdPartyFilterModel = nullptr;
+    ListModel *thirdPartyModel = nullptr;
+    FilterModel *thirdPartyFilterModel = nullptr;
 
-    FtbListModel *privateListModel = nullptr;
-    FtbFilterModel *privateFilterModel = nullptr;
+    ListModel *privateListModel = nullptr;
+    FilterModel *privateFilterModel = nullptr;
 
-    unique_qobject_ptr<FtbPackFetchTask> ftbFetchTask;
-    std::unique_ptr<FtbPrivatePackManager> ftbPrivatePacks;
+    unique_qobject_ptr<PackFetchTask> ftbFetchTask;
+    std::unique_ptr<PrivatePackManager> ftbPrivatePacks;
 
     NewInstanceDialog* dialog = nullptr;
 
-    Ui::FTBPage *ui = nullptr;
+    Ui::Page *ui = nullptr;
 };
+
+}
