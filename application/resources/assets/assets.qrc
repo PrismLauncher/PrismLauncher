@@ -1,6 +1,0 @@
-<!DOCTYPE RCC>
-<RCC version="1.0">
-    <qresource prefix="/assets">
-        <file alias="deadglitch">deadglitch.svg</file>
-    </qresource>
-</RCC>
