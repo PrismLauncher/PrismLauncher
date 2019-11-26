@@ -69,8 +69,8 @@ namespace ArgumentStyle
 {
 enum Enum
 {
-    Space,          /**< --option=value */
-    Equals,         /**< --option value */
+    Space,          /**< --option value */
+    Equals,         /**< --option=value */
     SpaceAndEquals, /**< --option[= ]value */
 #ifdef Q_OS_WIN32
     Default = Equals
