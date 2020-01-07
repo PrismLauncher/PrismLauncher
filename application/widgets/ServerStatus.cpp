@@ -125,7 +125,7 @@ void ServerStatus::addStatus(QString key, QString name)
 
 void ServerStatus::clicked()
 {
-    DesktopServices::openUrl(QUrl("https://help.mojang.com/"));
+    DesktopServices::openUrl(QUrl("https://github.com/MultiMC/MultiMC5/wiki/Mojang-Services-Status"));
 }
 
 void ServerStatus::setStatus(QString key, int value)
