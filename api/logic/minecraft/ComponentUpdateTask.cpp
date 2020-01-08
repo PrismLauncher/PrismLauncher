@@ -451,13 +451,17 @@ static bool getTrivialComponentChanges(const ComponentIndex & index, const Requi
                 auto & comp = (*compIter);
                 if(comp->getVersion() != req.equalsVersion)
                 {
-                    if(comp->m_dependencyOnly)
-                    {
-                        decision = Decision::VersionNotSame;
-                    }
-                    else
-                    {
+                    if(comp->isCustom()) {
                         decision = Decision::LockedVersionNotSame;
+                    } else {
+                        if(comp->m_dependencyOnly)
+                        {
+                            decision = Decision::VersionNotSame;
+                        }
+                        else
+                        {
+                            decision = Decision::LockedVersionNotSame;
+                        }
                     }
                     break;
                 }
