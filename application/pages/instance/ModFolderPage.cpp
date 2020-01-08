@@ -51,6 +51,26 @@ public:
     }
 
 protected:
+    bool filterAcceptsRow(int source_row, const QModelIndex & source_parent) const override {
+        ModFolderModel *model = qobject_cast<ModFolderModel *>(sourceModel());
+        if(!model) {
+            return false;
+        }
+        const auto &mod = model->at(source_row);
+        if(mod.name().contains(filterRegExp())) {
+            return true;
+        }
+        if(mod.description().contains(filterRegExp())) {
+            return true;
+        }
+        for(auto & author: mod.authors()) {
+            if (author.contains(filterRegExp())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     bool lessThan(const QModelIndex & source_left, const QModelIndex & source_right) const override
     {
         ModFolderModel *model = qobject_cast<ModFolderModel *>(sourceModel());

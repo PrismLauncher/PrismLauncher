@@ -85,6 +85,10 @@ public:
     {
         return mods[index];
     }
+    const Mod &at(size_t index) const
+    {
+        return mods.at(index);
+    }
 
     /// Reloads the mod list and returns true if the list changed.
     bool update();
