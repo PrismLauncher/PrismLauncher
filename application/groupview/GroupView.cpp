@@ -394,6 +394,8 @@ void GroupView::mouseReleaseEvent(QMouseEvent *event)
             updateGeometries();
             viewport()->update();
             event->accept();
+            m_pressedCategory = nullptr;
+            setState(NoState);
             return;
         }
         else if (state() == CollapsingState)
@@ -404,6 +406,8 @@ void GroupView::mouseReleaseEvent(QMouseEvent *event)
             updateGeometries();
             viewport()->update();
             event->accept();
+            m_pressedCategory = nullptr;
+            setState(NoState);
             return;
         }
     }
