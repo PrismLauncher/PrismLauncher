@@ -95,6 +95,10 @@
    <addaction name="actionAdd_to_Minecraft_jar"/>
    <addaction name="actionReplace_Minecraft_jar"/>
    <addaction name="actionAdd_Empty"/>
+   <addaction name="separator"/>
+   <addaction name="actionMinecraftFolder"/>
+   <addaction name="actionLibrariesFolder"/>
+   <addaction name="separator"/>
    <addaction name="actionReload"/>
    <addaction name="actionDownload_All"/>
   </widget>
@@ -221,6 +225,22 @@
    </property>
    <property name="toolTip">
     <string>Download the files needed to launch the instance now.</string>
+   </property>
+  </action>
+  <action name="actionMinecraftFolder">
+   <property name="text">
+    <string>Open .minecraft</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the instance's .minecraft folder.</string>
+   </property>
+  </action>
+  <action name="actionLibrariesFolder">
+   <property name="text">
+    <string>Open libraries</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the instance's local libraries folder.</string>
    </property>
   </action>
  </widget>

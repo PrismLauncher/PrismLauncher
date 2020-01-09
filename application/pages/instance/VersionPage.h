@@ -66,6 +66,9 @@ private slots:
     void on_actionCustomize_triggered();
     void on_actionDownload_All_triggered();
 
+    void on_actionMinecraftFolder_triggered();
+    void on_actionLibrariesFolder_triggered();
+
     void updateVersionControls();
 
 private:
