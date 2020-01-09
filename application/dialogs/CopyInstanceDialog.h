@@ -40,16 +40,19 @@ public:
     QString instGroup() const;
     QString iconKey() const;
     bool shouldCopySaves() const;
+    bool shouldKeepPlaytime() const;
 
 private
 slots:
     void on_iconButton_clicked();
     void on_instNameTextBox_textChanged(const QString &arg1);
     void on_copySavesCheckbox_stateChanged(int state);
+    void on_keepPlaytimeCheckbox_stateChanged(int state);
 
 private:
     Ui::CopyInstanceDialog *ui;
     QString InstIconKey;
     InstancePtr m_original;
     bool m_copySaves = true;
+    bool m_keepPlaytime = true;
 };

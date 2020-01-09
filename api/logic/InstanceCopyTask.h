@@ -15,7 +15,7 @@ class MULTIMC_LOGIC_EXPORT InstanceCopyTask : public InstanceTask
 {
     Q_OBJECT
 public:
-    explicit InstanceCopyTask(InstancePtr origInstance, bool copySaves);
+    explicit InstanceCopyTask(InstancePtr origInstance, bool copySaves, bool keepPlaytime);
 
 protected:
     //! Entry point for tasks.
@@ -28,4 +28,5 @@ private: /* data */
     QFuture<bool> m_copyFuture;
     QFutureWatcher<bool> m_copyFutureWatcher;
     std::unique_ptr<IPathMatcher> m_matcher;
+    bool m_keepPlaytime;
 };

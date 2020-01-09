@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>345</width>
-    <height>240</height>
+    <height>323</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -117,6 +117,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="keepPlaytimeCheckbox">
+     <property name="text">
+      <string>Keep play time</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -128,6 +135,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>iconButton</tabstop>
+  <tabstop>instNameTextBox</tabstop>
+  <tabstop>groupBox</tabstop>
+  <tabstop>copySavesCheckbox</tabstop>
+  <tabstop>keepPlaytimeCheckbox</tabstop>
+ </tabstops>
  <resources>
   <include location="../../graphics.qrc"/>
  </resources>

@@ -5,9 +5,10 @@
 #include "pathmatcher/RegexpMatcher.h"
 #include <QtConcurrentRun>
 
-InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, bool copySaves)
+InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, bool copySaves, bool keepPlaytime)
 {
     m_origInstance = origInstance;
+    m_keepPlaytime = keepPlaytime;
 
     if(!copySaves)
     {
@@ -46,6 +47,9 @@ void InstanceCopyTask::copyFinished()
     InstancePtr inst(new NullInstance(m_globalSettings, instanceSettings, m_stagingPath));
     inst->setName(m_instName);
     inst->setIconKey(m_instIcon);
+    if(!m_keepPlaytime) {
+        inst->resetTimePlayed();
+    }
     emitSucceeded();
 }
 
