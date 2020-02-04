@@ -34,6 +34,7 @@
 #include <QNetworkAccessManager>
 #include <QTranslator>
 #include <QLibraryInfo>
+#include <QList>
 #include <QStringList>
 #include <QDebug>
 #include <QStyleFactory>
@@ -174,6 +175,10 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         parser.addSwitch("alive");
         parser.addDocumentation("alive", "Write a small '" + liveCheckFile + "' file after MultiMC starts");
 
+        parser.addOption("import");
+        parser.addShortOpt("import", 'I');
+        parser.addDocumentation("import", "Import instance from specified zip (local path or URL)");
+
         // parse the arguments
         try
         {
@@ -207,6 +212,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
     }
     m_instanceIdToLaunch = args["launch"].toString();
     m_liveCheck = args["alive"].toBool();
+    m_zipToImport = args["import"].toUrl();
 
     QString origcwdPath = QDir::currentPath();
     QString binPath = applicationDirPath();
@@ -811,6 +817,12 @@ void MultiMC::performMainStartupAction()
         // normal main window
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
+    }
+
+    if (!m_zipToImport.isEmpty()) {
+        qDebug() << "<> Importing instance from zip:" << m_zipToImport.toString();
+        QList<QUrl> urls = { m_zipToImport };
+        m_mainWindow->droppedURLs(urls);
     }
 }
 

@@ -57,6 +57,8 @@ public:
     void checkInstancePathForProblems();
 
     void updatesAllowedChanged(bool allowed);
+
+    void droppedURLs(QList<QUrl> urls);
 signals:
     void isClosing();
 
@@ -179,8 +181,6 @@ private slots:
      * Runs the DownloadTask and installs updates.
      */
     void downloadUpdates(GoUpdate::Status status);
-
-    void droppedURLs(QList<QUrl> urls);
 
     void konamiTriggered();
 
