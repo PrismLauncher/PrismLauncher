@@ -6,6 +6,7 @@
 #include <QFlag>
 #include <QIcon>
 #include <QDateTime>
+#include <QUrl>
 #include <updater/GoUpdate.h>
 
 #include <BaseInstance.h>
@@ -221,5 +222,6 @@ private:
 public:
     QString m_instanceIdToLaunch;
     bool m_liveCheck = false;
+    QUrl m_zipToImport;
     std::unique_ptr<QFile> logFile;
 };
