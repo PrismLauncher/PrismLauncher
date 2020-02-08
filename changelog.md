@@ -1,4 +1,52 @@
-# MultiMC 0.6.7
+# MultiMC 0.6.8
+
+This is mostly about removal of the 'curse URL' related features, because they were of low quality and generally unreliable.
+
+There are some bug fixes included.
+
+MultiMC also migrated to a new continuous deployment system, which makes everything that much smoother.
+
+### New or changed features
+
+- GH-852: Instance group expansion status now saves/loads as expected.
+
+- The bees have invaded the launcher. We now have a bee icon.
+
+- Translations have been overhauled, yet again...
+
+    - We now have a [crowdin site](https://translate.multimc.org/) for all the translation work.
+
+    - Translations are made based on the development version, and for the development version.
+
+    - Many strings have been tweaked to make translating the application easier.
+
+    - When selecting languages, European Portuguese is now displaying properly.
+
+- Accessibility has been further improved - the main window reads as `MultiMC`, not a long string of nonsensical version numbers, when announced by a screen reader.
+
+- Removed the unimplemented Technic page from instance creation dialog.
+
+- GH-2859: Broken twitch URL import method was removed.
+
+- GH-2819: Filter bar in mod lists now also works with descriptions and author lists.
+
+- GH-2832: Version page now has buttons for opening the Minecraft and internal libraries folders of the instance.
+
+- GH-2769: When copying an instance, there's now an option to keep or remove the total play time from the copy.
+
+### Bugfixes
+
+- GH-2880: Clicking the service status indicators now opens a valid site again, instead of going nowhere.
+
+- GH-2853: When collapsing groups in instance view, the action no longer becomes 'sticky' and doesn't apply to items clicked afterwards.
+
+- GH-2787: "Download All" button works again.
+
+- When dependencies are customized, the la ncher will not try to update them in an infinite loop when something else requires a different version.
+
+# Previous releases
+
+## MultiMC 0.6.7
 
 The previous release introduced some extra buttons that made the instance window way too big for some displays. This release is aimed at fixing that, along with other UI and performance improvements.
 
@@ -47,8 +95,6 @@ There are some accessibility fixes thrown in too.
   Sorting cascades from 'Enabled' to 'Name' and then 'Version'. This means that if you sort 'Enabled', the enabled and disabled mods are still sorted
   by name and mods with the same name will be also sorted by version.
 
-# Previous releases
-
 ## MultiMC 0.6.6
 
 This release is mostly the smaller things that have accumulated over time, along with a big change in linux packaging.
@@ -70,7 +116,7 @@ MultiMC on linux is built with Qt 5.4 and older versions of Qt will not work.
 
 This should be a massive improvement to system integration on linux and resolves GH-1784, GH-2605, GH-1979, GH-2271, GH-1992, GH-1816 and their many duplicates.
 
-#### New or changed features
+### New or changed features
 
 - GH-2487: No is now the default button when deleting instances.
 
@@ -100,7 +146,7 @@ This should be a massive improvement to system integration on linux and resolves
 
   You can now drag the purple download buttons from CurseForge into MultiMC and get a modpack out of it. Much easier!
 
-#### Bugfixes
+### Bugfixes
 
 - Translation folder is now created sooner, making first launch translation fetch work again.
 
@@ -134,7 +180,7 @@ This should be a massive improvement to system integration on linux and resolves
 
 Finalizing the translation workflow improvements and adding fixes for sounds missing in old game versions.
 
-#### New or changed features
+### New or changed features
 
 - UI for the language settings has been unified across the application
 
