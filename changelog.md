@@ -42,7 +42,7 @@ MultiMC also migrated to a new continuous deployment system, which makes everyth
 
 - GH-2787: "Download All" button works again.
 
-- When dependencies are customized, the la ncher will not try to update them in an infinite loop when something else requires a different version.
+- When a component is customized, the launcher will not try to update it in an infinite loop when something else requires a different version.
 
 # Previous releases
 
