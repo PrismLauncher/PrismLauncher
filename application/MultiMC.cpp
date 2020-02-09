@@ -174,7 +174,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         // --alive
         parser.addSwitch("alive");
         parser.addDocumentation("alive", "Write a small '" + liveCheckFile + "' file after MultiMC starts");
-
+        // --import
         parser.addOption("import");
         parser.addShortOpt("import", 'I');
         parser.addDocumentation("import", "Import instance from specified zip (local path or URL)");
@@ -818,8 +818,8 @@ void MultiMC::performMainStartupAction()
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
     }
-
-    if (!m_zipToImport.isEmpty()) {
+    if(!m_zipToImport.isEmpty())
+    {
         qDebug() << "<> Importing instance from zip:" << m_zipToImport.toString();
         QList<QUrl> urls = { m_zipToImport };
         m_mainWindow->droppedURLs(urls);
