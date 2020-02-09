@@ -284,13 +284,20 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         connect(m_peerInstance, &LocalPeer::messageReceived, this, &MultiMC::messageReceived);
         if(m_peerInstance->isClient())
         {
+            int timeout = 2000;
+
             if(m_instanceIdToLaunch.isEmpty())
             {
-                m_peerInstance->sendMessage("activate", 2000);
+                m_peerInstance->sendMessage("activate", timeout);
+
+                if(!m_zipToImport.isEmpty())
+                {
+                    m_peerInstance->sendMessage("import " + m_zipToImport.toString(), timeout);
+                }
             }
             else
             {
-                m_peerInstance->sendMessage(m_instanceIdToLaunch, 2000);
+                m_peerInstance->sendMessage("launch " + m_instanceIdToLaunch, timeout);
             }
             m_status = MultiMC::Succeeded;
             return;
@@ -820,9 +827,8 @@ void MultiMC::performMainStartupAction()
     }
     if(!m_zipToImport.isEmpty())
     {
-        qDebug() << "<> Importing instance from zip:" << m_zipToImport.toString();
-        QList<QUrl> urls = { m_zipToImport };
-        m_mainWindow->droppedURLs(urls);
+        qDebug() << "<> Importing instance from zip:" << m_zipToImport;
+        m_mainWindow->droppedURLs({ m_zipToImport });
     }
 }
 
@@ -860,17 +866,39 @@ void MultiMC::messageReceived(const QString& message)
         qDebug() << "Received message" << message << "while still initializing. It will be ignored.";
         return;
     }
-    if(message == "activate")
+
+    QStringList args = message.split(' ');
+    QString command = args.takeFirst();
+
+    if(command == "activate")
     {
         showMainWindow();
     }
-    else
+    else if(command == "import")
     {
-        auto inst = instances()->getInstanceById(message);
+        if(args.isEmpty())
+        {
+            qWarning() << "Received" << command << "message without a zip path/URL.";
+            return;
+        }
+        m_mainWindow->droppedURLs({ QUrl(args.takeFirst()) });
+    }
+    else if(command == "launch")
+    {
+        if(args.isEmpty())
+        {
+            qWarning() << "Received" << command << "message without an instance ID.";
+            return;
+        }
+        auto inst = instances()->getInstanceById(args.takeFirst());
         if(inst)
         {
             launch(inst, true, nullptr);
         }
+    }
+    else
+    {
+        qWarning() << "Received invalid message" << message;
     }
 }
 
