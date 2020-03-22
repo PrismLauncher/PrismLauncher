@@ -169,9 +169,9 @@ Pick an installation path - this is where the final `.app` will be constructed w
 
 ```
 git clone https://github.com/MultiMC/MultiMC5.git
+cd MultiMC5
 git submodule init
 git submodule update
-cd MultiMC5
 mkdir build
 cd build
 export CMAKE_PREFIX_PATH=/usr/local/opt/qt5
