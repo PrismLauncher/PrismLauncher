@@ -130,10 +130,6 @@ void MojangVersionFormat::readVersionProperties(const QJsonObject &in, VersionFi
 {
     Bits::readString(in, "id", out->minecraftVersion);
     Bits::readString(in, "mainClass", out->mainClass);
-    if(out->mainClass.contains("forgewrapper") || out->mainClass.contains("zekerzhayard")) {
-        out->mainClass.clear();
-        out->addProblem(ProblemSeverity::Error, QObject::tr("Forge workarounds have no place in MultiMC."));
-    }
     Bits::readString(in, "minecraftArguments", out->minecraftArguments);
     if(out->minecraftArguments.isEmpty())
     {
