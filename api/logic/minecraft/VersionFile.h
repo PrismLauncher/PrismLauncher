@@ -75,6 +75,9 @@ public: /* data */
     /// Mojang: list of libraries to add to the version
     QList<LibraryPtr> libraries;
 
+    /// MultiMC: list of maven files to put in the libraries folder, but not in classpath
+    QList<LibraryPtr> mavenFiles;
+
     /// The main jar (Minecraft version library, normally)
     LibraryPtr mainJar;
 
