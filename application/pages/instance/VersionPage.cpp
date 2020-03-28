@@ -206,7 +206,7 @@ void VersionPage::updateVersionControls()
     bool newCraft = controlsEnabled && (minecraftVersion >= Version("1.14"));
     bool oldCraft = controlsEnabled && (minecraftVersion <= Version("1.12.2"));
     ui->actionInstall_Fabric->setEnabled(newCraft);
-    ui->actionInstall_Forge->setEnabled(oldCraft);
+    ui->actionInstall_Forge->setEnabled(true);
     ui->actionInstall_LiteLoader->setEnabled(oldCraft);
     ui->actionReload->setEnabled(true);
     updateButtons();
