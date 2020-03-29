@@ -1,4 +1,22 @@
-# MultiMC 0.6.8
+# MultiMC 0.6.11
+
+This adds Forge 1.13+ support using [ForgeWrapper](https://github.com/ZekerZhayard/ForgeWrapper) by ZekerZhayard.
+
+### New or changed features
+
+- GH-2988: You can now import instances and curse modpacks from the command line with the `--import` option followed by either an URL or a local file path.
+
+- GH-2544: MultiMC now supports downloading library files without including them on the Java classpath.
+
+  This is done by adding them to the `mavenFiles` list instead of the `libraries` list.
+
+  Such downloads are not deduplicated or version upgraded like libraries are.
+
+  This enables ForgeWrapper to work - MultiMC downloads all the files, and ForgeWrapper runs the Forge installer during instance start when needed.
+
+# Previous releases
+
+## MultiMC 0.6.8
 
 This is mostly about removal of the 'curse URL' related features, because they were of low quality and generally unreliable.
 
@@ -44,7 +62,6 @@ MultiMC also migrated to a new continuous deployment system, which makes everyth
 
 - When a component is customized, the launcher will not try to update it in an infinite loop when something else requires a different version.
 
-# Previous releases
 
 ## MultiMC 0.6.7
 
