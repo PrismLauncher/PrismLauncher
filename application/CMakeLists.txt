@@ -257,7 +257,7 @@ SET(MULTIMC_UIS
     pages/modplatform/VanillaPage.ui
     pages/modplatform/legacy_ftb/Page.ui
     pages/modplatform/twitch/TwitchPage.ui
-    pages/modplatform/twitch/ImportPage.ui
+    pages/modplatform/ImportPage.ui
 
     # Dialogs
     dialogs/CopyInstanceDialog.ui
