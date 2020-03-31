@@ -29,6 +29,7 @@ class NewInstanceDialog;
 class PageContainer;
 class QDialogButtonBox;
 class ImportPage;
+class TwitchPage;
 
 class NewInstanceDialog : public QDialog, public BasePageProvider
 {
@@ -67,6 +68,7 @@ private:
 
     QString InstIconKey;
     ImportPage *importPage = nullptr;
+    TwitchPage *twitchPage = nullptr;
     std::unique_ptr<InstanceTask> creationTask;
 
     bool importIcon = false;

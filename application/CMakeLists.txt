@@ -133,6 +133,11 @@ SET(MULTIMC_SOURCES
     pages/modplatform/legacy_ftb/Page.h
     pages/modplatform/legacy_ftb/ListModel.h
     pages/modplatform/legacy_ftb/ListModel.cpp
+    pages/modplatform/twitch/TwitchData.h
+    pages/modplatform/twitch/TwitchModel.cpp
+    pages/modplatform/twitch/TwitchModel.h
+    pages/modplatform/twitch/TwitchPage.cpp
+    pages/modplatform/twitch/TwitchPage.h
     pages/modplatform/ImportPage.cpp
     pages/modplatform/ImportPage.h
 
@@ -251,7 +256,8 @@ SET(MULTIMC_UIS
     # Platform pages
     pages/modplatform/VanillaPage.ui
     pages/modplatform/legacy_ftb/Page.ui
-    pages/modplatform/ImportPage.ui
+    pages/modplatform/twitch/TwitchPage.ui
+    pages/modplatform/twitch/ImportPage.ui
 
     # Dialogs
     dialogs/CopyInstanceDialog.ui
