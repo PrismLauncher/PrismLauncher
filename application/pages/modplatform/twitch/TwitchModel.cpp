@@ -142,28 +142,62 @@ Qt::ItemFlags ListModel::flags(const QModelIndex &index) const
     return QAbstractListModel::flags(index);
 }
 
-void ListModel::searchWithTerm(const QString& term)
+bool ListModel::canFetchMore(const QModelIndex& parent) const
 {
-    if(currentSearchTerm == term) {
+    return searchState == CanPossiblyFetchMore;
+}
+
+void ListModel::fetchMore(const QModelIndex& parent)
+{
+    if (parent.isValid())
+        return;
+    if(nextSearchOffset == 0) {
+        qWarning() << "fetchMore with 0 offset is wrong...";
         return;
     }
+    performPaginatedSearch();
+}
+
+void ListModel::performPaginatedSearch()
+{
     NetJob *netJob = new NetJob("Twitch::Search");
     auto searchUrl = QString(
         "https://addons-ecs.forgesvc.net/api/v2/addon/search?"
         "categoryId=0&"
         "gameId=432&"
         //"gameVersion=1.12.2&"
-        "index=0&"
+        "index=%1&"
         "pageSize=25&"
-        "searchFilter=%1&"
+        "searchFilter=%2&"
         "sectionId=4471&"
         "sort=0"
-    ).arg(term);
+    ).arg(nextSearchOffset).arg(currentSearchTerm);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();
     QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::searchRequestFinished);
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
+}
+
+void ListModel::searchWithTerm(const QString& term)
+{
+    if(currentSearchTerm == term) {
+        return;
+    }
+    currentSearchTerm = term;
+    if(jobPtr) {
+        jobPtr->abort();
+        searchState = ResetRequested;
+        return;
+    }
+    else {
+        beginResetModel();
+        modpacks.clear();
+        endResetModel();
+        searchState = None;
+    }
+    nextSearchOffset = 0;
+    performPaginatedSearch();
 }
 
 void Twitch::ListModel::searchRequestFinished()
@@ -185,20 +219,27 @@ void Twitch::ListModel::searchRequestFinished()
         auto project = projectIter.toObject();
         pack.addonId = project.value("id").toInt(0);
         if (pack.addonId == 0) {
+            qWarning() << "Pack without an ID, skipping: " << pack.name;
             continue;
         }
         pack.name = project.value("name").toString();
         pack.websiteUrl = project.value("websiteUrl").toString();
         pack.description = project.value("summary").toString();
+        bool thumbnailFound = false;
         auto attachments = project.value("attachments").toArray();
         for(auto attachmentIter: attachments) {
             auto attachment = attachmentIter.toObject();
             bool isDefault = attachment.value("isDefault").toBool(false);
-            if(!isDefault) {
-                continue;
+            if(isDefault) {
+                thumbnailFound = true;
+                pack.logoName = attachment.value("title").toString();
+                pack.logoUrl = attachment.value("thumbnailUrl").toString();
+                break;
             }
-            pack.logoName = attachment.value("title").toString();
-            pack.logoUrl = attachment.value("thumbnailUrl").toString();
+        }
+        if(!thumbnailFound) {
+            qWarning() << "Pack without an icon, skipping: " << pack.name;
+            continue;
         }
         auto authors = project.value("authors").toArray();
         for(auto authorIter: authors) {
@@ -210,6 +251,7 @@ void Twitch::ListModel::searchRequestFinished()
         }
         int defaultFileId = project.value("defaultFileId").toInt(0);
         if(defaultFileId == 0) {
+            qWarning() << "Pack without default file, skipping: " << pack.name;
             continue;
         }
         bool found = false;
@@ -235,19 +277,38 @@ void Twitch::ListModel::searchRequestFinished()
             break;
         }
         if(!found) {
-            return;
+            qWarning() << "Pack with no good file, skipping: " << pack.name;
+            continue;
         }
         pack.broken = false;
         newList.append(pack);
     }
-    beginResetModel();
-    newList.swap(modpacks);
-    endResetModel();
+    if(objs.size() < 25) {
+        searchState = Finished;
+    } else {
+        nextSearchOffset += 25;
+        searchState = CanPossiblyFetchMore;
+    }
+    beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);
+    modpacks.append(newList);
+    endInsertRows();
 }
 
 void Twitch::ListModel::searchRequestFailed(QString reason)
 {
     jobPtr.reset();
+
+    if(searchState == ResetRequested) {
+        beginResetModel();
+        modpacks.clear();
+        endResetModel();
+
+        nextSearchOffset = 0;
+        performPaginatedSearch();
+    } else {
+        searchState = Finished;
+    }
 }
 
 }
+

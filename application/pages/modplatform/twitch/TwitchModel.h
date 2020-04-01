@@ -36,11 +36,15 @@ public:
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
+    bool canFetchMore(const QModelIndex & parent) const override;
+    void fetchMore(const QModelIndex & parent) override;
 
     void getLogo(const QString &logo, const QString &logoUrl, LogoCallback callback);
     void searchWithTerm(const QString & term);
 
 private slots:
+    void performPaginatedSearch();
+
     void logoFailed(QString logo);
     void logoLoaded(QString logo, QIcon out);
 
@@ -58,6 +62,13 @@ private:
     QMap<QString, LogoCallback> waitingCallbacks;
 
     QString currentSearchTerm;
+    int nextSearchOffset = 0;
+    enum SearchState {
+        None,
+        CanPossiblyFetchMore,
+        ResetRequested,
+        Finished
+    } searchState = None;
     NetJobPtr jobPtr;
     QByteArray response;
 };
