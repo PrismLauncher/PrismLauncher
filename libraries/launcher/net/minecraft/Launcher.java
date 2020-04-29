@@ -143,7 +143,7 @@ public class Launcher extends Applet implements AppletStub
     public URL getDocumentBase()
     {
         try {
-            return new URL("http://www.minecraft.net/game/");
+            return new URL("http", "www.minecraft.net", 80, "/game/", null);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
