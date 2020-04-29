@@ -59,9 +59,34 @@ void TwitchPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         {
             dialog->setSuggestedPack();
         }
+        ui->frame->clear();
         return;
     }
+
     current = model->data(first, Qt::UserRole).value<Twitch::Modpack>();
+    QString text = "";
+    QString name = current.name;
+
+    if (current.websiteUrl.isEmpty())
+        text = name;
+    else
+        text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
+    if (!current.authors.empty()) {
+        auto authorToStr = [](Twitch::ModpackAuthor & author) {
+            if(author.url.isEmpty()) {
+                return author.name;
+            }
+            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
+        };
+        QStringList authorStrs;
+        for(auto & author: current.authors) {
+            authorStrs.push_back(authorToStr(author));
+        }
+        text += tr(" by ") + authorStrs.join(", ");
+    }
+
+    ui->frame->setModText(text);
+    ui->frame->setModDescription(current.description);
     suggestCurrent();
 }
 
