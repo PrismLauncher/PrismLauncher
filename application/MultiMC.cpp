@@ -867,8 +867,7 @@ void MultiMC::messageReceived(const QString& message)
         return;
     }
 
-    QStringList args = message.split(' ');
-    QString command = args.takeFirst();
+    QString command = message.section(' ', 0, 0);
 
     if(command == "activate")
     {
@@ -876,21 +875,23 @@ void MultiMC::messageReceived(const QString& message)
     }
     else if(command == "import")
     {
-        if(args.isEmpty())
+        QString arg = message.section(' ', 1);
+        if(arg.isEmpty())
         {
             qWarning() << "Received" << command << "message without a zip path/URL.";
             return;
         }
-        m_mainWindow->droppedURLs({ QUrl(args.takeFirst()) });
+        m_mainWindow->droppedURLs({ QUrl(arg) });
     }
     else if(command == "launch")
     {
-        if(args.isEmpty())
+        QString arg = message.section(' ', 1);
+        if(arg.isEmpty())
         {
             qWarning() << "Received" << command << "message without an instance ID.";
             return;
         }
-        auto inst = instances()->getInstanceById(args.takeFirst());
+        auto inst = instances()->getInstanceById(arg);
         if(inst)
         {
             launch(inst, true, nullptr);
