@@ -41,6 +41,10 @@ void VersionFile::applyTo(LaunchProfile *profile)
     {
         profile->applyLibrary(library);
     }
+    for (auto mavenFile : mavenFiles)
+    {
+        profile->applyMavenFile(mavenFile);
+    }
     profile->applyProblemSeverity(getProblemSeverity());
 }
 

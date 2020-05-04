@@ -45,6 +45,7 @@ void LibrariesTask::executeTask()
     QList<LibraryPtr> libArtifactPool;
     libArtifactPool.append(profile->getLibraries());
     libArtifactPool.append(profile->getNativeLibraries());
+    libArtifactPool.append(profile->getMavenFiles());
     libArtifactPool.append(profile->getMainJar());
     processArtifactPool(libArtifactPool, failedLocalLibraries, inst->getLocalLibraryPath());
 

@@ -20,6 +20,7 @@ public: /* application of profile variables from patches */
     void applyJarMods(const QList<LibraryPtr> &jarMods);
     void applyMods(const QList<LibraryPtr> &jarMods);
     void applyLibrary(LibraryPtr library);
+    void applyMavenFile(LibraryPtr library);
     void applyMainJar(LibraryPtr jar);
     void applyProblemSeverity(ProblemSeverity severity);
     /// clear the profile
@@ -37,6 +38,7 @@ public: /* getters for profile variables */
     const QList<LibraryPtr> & getJarMods() const;
     const QList<LibraryPtr> & getLibraries() const;
     const QList<LibraryPtr> & getNativeLibraries() const;
+    const QList<LibraryPtr> & getMavenFiles() const;
     const LibraryPtr getMainJar() const;
     void getLibraryFiles(
         const QString & architecture,
@@ -79,10 +81,13 @@ private:
     /// the list of libraries
     QList<LibraryPtr> m_libraries;
 
+    /// the list of maven files to be placed in the libraries folder, but not acted upon
+    QList<LibraryPtr> m_mavenFiles;
+
     /// the main jar
     LibraryPtr m_mainJar;
 
-    /// the list of libraries
+    /// the list of native libraries
     QList<LibraryPtr> m_nativeLibraries;
 
     /// traits, collected from all the version files (version files can only add)

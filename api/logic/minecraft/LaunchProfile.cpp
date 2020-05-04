@@ -11,6 +11,7 @@ void LaunchProfile::clear()
     m_mainClass.clear();
     m_appletClass.clear();
     m_libraries.clear();
+    m_mavenFiles.clear();
     m_traits.clear();
     m_jarMods.clear();
     m_mainJar.reset();
@@ -157,6 +158,22 @@ void LaunchProfile::applyLibrary(LibraryPtr library)
     }
 }
 
+void LaunchProfile::applyMavenFile(LibraryPtr mavenFile)
+{
+    if(!mavenFile->isActive())
+    {
+        return;
+    }
+
+    if(mavenFile->isNative())
+    {
+        return;
+    }
+
+    // unlike libraries, we do not keep only one version or try to dedupe them
+    m_mavenFiles.append(Library::limitedCopy(mavenFile));
+}
+
 const LibraryPtr LaunchProfile::getMainJar() const
 {
     return m_mainJar;
@@ -251,6 +268,11 @@ const QList<LibraryPtr> & LaunchProfile::getLibraries() const
 const QList<LibraryPtr> & LaunchProfile::getNativeLibraries() const
 {
     return m_nativeLibraries;
+}
+
+const QList<LibraryPtr> & LaunchProfile::getMavenFiles() const
+{
+    return m_mavenFiles;
 }
 
 void LaunchProfile::getLibraryFiles(

@@ -144,14 +144,14 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
         }
     }
 
-    auto readLibs = [&](const char * which)
+    auto readLibs = [&](const char * which, QList<LibraryPtr> & out)
     {
         for (auto libVal : requireArray(root.value(which)))
         {
             QJsonObject libObj = requireObject(libVal);
             // parse the library
             auto lib = libraryFromJson(libObj, filename);
-            out->libraries.append(lib);
+            out.append(lib);
         }
     };
     bool hasPlusLibs = root.contains("+libraries");
@@ -160,16 +160,20 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
     {
         out->addProblem(ProblemSeverity::Warning,
                         QObject::tr("Version file has both '+libraries' and 'libraries'. This is no longer supported."));
-        readLibs("libraries");
-        readLibs("+libraries");
+        readLibs("libraries", out->libraries);
+        readLibs("+libraries", out->libraries);
     }
     else if (hasLibs)
     {
-        readLibs("libraries");
+        readLibs("libraries", out->libraries);
     }
     else if(hasPlusLibs)
     {
-        readLibs("+libraries");
+        readLibs("+libraries", out->libraries);
+    }
+
+    if(root.contains("mavenFiles")) {
+        readLibs("mavenFiles", out->mavenFiles);
     }
 
     // if we have mainJar, just use it
@@ -275,6 +279,15 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
             array.append(OneSixVersionFormat::libraryToJson(value.get()));
         }
         root.insert("libraries", array);
+    }
+    if (!patch->mavenFiles.isEmpty())
+    {
+        QJsonArray array;
+        for (auto value: patch->mavenFiles)
+        {
+            array.append(OneSixVersionFormat::libraryToJson(value.get()));
+        }
+        root.insert("mavenFiles", array);
     }
     if (!patch->jarMods.isEmpty())
     {
