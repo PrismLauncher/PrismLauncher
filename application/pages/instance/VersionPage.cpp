@@ -61,7 +61,7 @@ public:
 
     virtual QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const override
     {
-        QVariant var = QIdentityProxyModel::data(mapToSource(proxyIndex), role);
+        QVariant var = QIdentityProxyModel::data(proxyIndex, role);
         int column = proxyIndex.column();
         if(column == 0 && role == Qt::DecorationRole && m_parentWidget)
         {
