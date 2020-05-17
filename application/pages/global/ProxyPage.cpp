@@ -95,7 +95,7 @@ void ProxyPage::loadSettings()
         ui->proxyHTTPBtn->setChecked(true);
 
     ui->proxyAddrEdit->setText(s->get("ProxyAddr").toString());
-    ui->proxyPortEdit->setValue(s->get("ProxyPort").value<qint16>());
+    ui->proxyPortEdit->setValue(s->get("ProxyPort").value<uint16_t>());
     ui->proxyUserEdit->setText(s->get("ProxyUser").toString());
     ui->proxyPassEdit->setText(s->get("ProxyPass").toString());
 }
