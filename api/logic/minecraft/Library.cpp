@@ -3,7 +3,6 @@
 
 #include <net/Download.h>
 #include <net/ChecksumValidator.h>
-#include <minecraft/forge/ForgeXzDownload.h>
 #include <Env.h>
 #include <FileSystem.h>
 
@@ -88,26 +87,19 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(
         {
             options |= Net::Download::Option::AcceptLocalFiles;
         }
-        if (isForge())
+
+        if(sha1.size())
         {
-            qDebug() << "XzDownload for:" << rawName() << "storage:" << storage << "url:" << url;
-            out.append(ForgeXzDownload::make(url, storage, entry));
+            auto rawSha1 = QByteArray::fromHex(sha1.toLatin1());
+            auto dl = Net::Download::makeCached(url, entry, options);
+            dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
+            qDebug() << "Checksummed Download for:" << rawName() << "storage:" << storage << "url:" << url;
+            out.append(dl);
         }
         else
         {
-            if(sha1.size())
-            {
-                auto rawSha1 = QByteArray::fromHex(sha1.toLatin1());
-                auto dl = Net::Download::makeCached(url, entry, options);
-                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
-                qDebug() << "Checksummed Download for:" << rawName() << "storage:" << storage << "url:" << url;
-                out.append(dl);
-            }
-            else
-            {
-                out.append(Net::Download::makeCached(url, entry, options));
-                qDebug() << "Download for:" << rawName() << "storage:" << storage << "url:" << url;
-            }
+            out.append(Net::Download::makeCached(url, entry, options));
+            qDebug() << "Download for:" << rawName() << "storage:" << storage << "url:" << url;
         }
         return true;
     };
@@ -241,11 +233,6 @@ bool Library::isLocal() const
 bool Library::isAlwaysStale() const
 {
     return m_hint == "always-stale";
-}
-
-bool Library::isForge() const
-{
-    return m_hint == "forge-pack-xz";
 }
 
 void Library::setStoragePrefix(QString prefix)

@@ -14,7 +14,6 @@
  */
 
 #include "Env.h"
-#include <minecraft/forge/ForgeXzDownload.h>
 #include "MinecraftUpdate.h"
 #include "MinecraftInstance.h"
 

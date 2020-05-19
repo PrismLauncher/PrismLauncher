@@ -128,35 +128,6 @@
     This license is copied below, and is also available with a FAQ at:
     http://scripts.sil.org/OFL
 
-# Pack200
-
-    The GNU General Public License (GPL)
-
-    Version 2, June 1991
-
-    + "CLASSPATH" EXCEPTION TO THE GPL
-
-    Certain source files distributed by Oracle America and/or its affiliates are
-    subject to the following clarification and special exception to the GPL, but
-    only where Oracle has expressly included in the particular source file's header
-    the words "Oracle designates this particular file as subject to the "Classpath"
-    exception as provided by Oracle in the LICENSE file that accompanied this code."
-
-    Linking this library statically or dynamically with other modules is making
-    a combined work based on this library.  Thus, the terms and conditions of
-    the GNU General Public License cover the whole combination.
-
-    As a special exception, the copyright holders of this library give you
-    permission to link this library with independent modules to produce an
-    executable, regardless of the license terms of these independent modules,
-    and to copy and distribute the resulting executable under terms of your
-    choice, provided that you also meet, for each linked independent module,
-    the terms and conditions of the license of that module.  An independent
-    module is a module which is not derived from or based on this library.  If
-    you modify this library, you may extend this exception to your version of
-    the library, but you are not obligated to do so.  If you do not wish to do
-    so, delete this exception statement from your version.
-
 # Quazip
 
     Copyright (C) 2005-2011 Sergey A. Tachenov
