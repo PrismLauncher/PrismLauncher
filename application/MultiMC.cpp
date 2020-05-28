@@ -154,8 +154,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
             auto contents = in.readAll();
             if(
                 contents.contains("WSL", Qt::CaseInsensitive) ||
-                contents.contains("Microsoft", Qt::CaseInsensitive) ||
-                true
+                contents.contains("Microsoft", Qt::CaseInsensitive)
             ) {
                 showFatalErrorMessage(
                     "Unsupported system detected!",
