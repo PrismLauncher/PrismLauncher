@@ -158,8 +158,8 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
             ) {
                 showFatalErrorMessage(
                     "Unsupported system detected!",
-                    "It seems you are supporting the exploitation of Free Software.\n\n"
-                    "You smell bad and you should feel bad."
+                    "Linux-on-Windows distributions are not supported.\n\n"
+                    "Please use the Windows MultiMC binary when playing on Windows."
                 );
                 return;
             }
