@@ -2,7 +2,15 @@ cmake_minimum_required(VERSION 3.1)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
 if(IS_IN_SOURCE_BUILD)
-    message(AUTHOR_WARNING "You are building MultiMC in-source. This is NOT recommended!")
+    message(FATAL_ERROR "You are building MultiMC in-source. Please separate the build tree from the source tree.")
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    if(CMAKE_HOST_SYSTEM_VERSION MATCHES ".*[Mm]icrosoft.*" OR
+        CMAKE_HOST_SYSTEM_VERSION MATCHES ".*WSL.*"
+    )
+        message(FATAL_ERROR "This is not a supported environment for any purpose and should never be used.")
+    endif()
 endif()
 
 if(WIN32)
@@ -12,6 +20,7 @@ endif()
 
 project(MultiMC)
 enable_testing()
+
 
 ##################################### Set CMake options #####################################
 set(CMAKE_AUTOMOC ON)

@@ -146,6 +146,28 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
     startTime = QDateTime::currentDateTime();
 
+#ifdef Q_OS_LINUX
+    {
+        QFile osrelease("/proc/sys/kernel/osrelease");
+        if (osrelease.open(QFile::ReadOnly | QFile::Text)) {
+            QTextStream in(&osrelease);
+            auto contents = in.readAll();
+            if(
+                contents.contains("WSL", Qt::CaseInsensitive) ||
+                contents.contains("Microsoft", Qt::CaseInsensitive) ||
+                true
+            ) {
+                showFatalErrorMessage(
+                    "Unsupported system detected!",
+                    "It seems you are supporting the exploitation of Free Software.\n\n"
+                    "You smell bad and you should feel bad."
+                );
+                return;
+            }
+        }
+    }
+#endif
+
     // Don't quit on hiding the last window
     this->setQuitOnLastWindowClosed(false);
 
