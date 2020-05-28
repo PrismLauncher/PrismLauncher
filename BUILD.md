@@ -50,7 +50,7 @@ mkdir ~/MultiMC && cd ~/MultiMC
 mkdir build
 mkdir install
 # clone the complete source
-git clone --recursive git@github.com:MultiMC/MultiMC5.git src
+git clone --recursive https://github.com/MultiMC/MultiMC5.git src
 # configure the project
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=../install ../src
