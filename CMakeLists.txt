@@ -9,7 +9,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     if(CMAKE_HOST_SYSTEM_VERSION MATCHES ".*[Mm]icrosoft.*" OR
         CMAKE_HOST_SYSTEM_VERSION MATCHES ".*WSL.*"
     )
-        message(FATAL_ERROR "This is not a supported environment for any purpose and should never be used.")
+        message(FATAL_ERROR "Building MultiMC is not supported in Linux-on-Windows distributions.")
     endif()
 endif()
 
