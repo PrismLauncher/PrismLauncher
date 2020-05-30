@@ -578,7 +578,9 @@ public:
         MainWindow->resize(800, 600);
         MainWindow->setWindowIcon(MMC->getThemedIcon("logo"));
         MainWindow->setWindowTitle("MultiMC 5");
+#ifndef QT_NO_ACCESSIBILITY
         MainWindow->setAccessibleName("MultiMC");
+#endif
 
         createMainToolbar(MainWindow);
 
