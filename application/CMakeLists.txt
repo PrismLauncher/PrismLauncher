@@ -124,6 +124,10 @@ SET(MULTIMC_SOURCES
     # GUI - platform pages
     pages/modplatform/VanillaPage.cpp
     pages/modplatform/VanillaPage.h
+    pages/modplatform/ftb/FtbModel.cpp
+    pages/modplatform/ftb/FtbModel.h
+    pages/modplatform/ftb/FtbPage.cpp
+    pages/modplatform/ftb/FtbPage.h
     pages/modplatform/legacy_ftb/Page.cpp
     pages/modplatform/legacy_ftb/Page.h
     pages/modplatform/legacy_ftb/ListModel.h
@@ -250,6 +254,7 @@ SET(MULTIMC_UIS
 
     # Platform pages
     pages/modplatform/VanillaPage.ui
+    pages/modplatform/ftb/FtbPage.ui
     pages/modplatform/legacy_ftb/Page.ui
     pages/modplatform/twitch/TwitchPage.ui
     pages/modplatform/ImportPage.ui

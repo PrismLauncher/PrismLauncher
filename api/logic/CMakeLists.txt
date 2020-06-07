@@ -451,6 +451,13 @@ set(FLAME_SOURCES
     modplatform/flame/FileResolvingTask.cpp
 )
 
+set(MODPACKSCH_SOURCES
+    modplatform/modpacksch/PackInstallTask.h
+    modplatform/modpacksch/PackInstallTask.cpp
+    modplatform/modpacksch/PackManifest.h
+    modplatform/modpacksch/PackManifest.cpp
+)
+
 add_unit_test(Index
     SOURCES meta/Index_test.cpp
     LIBS MultiMC_logic
@@ -481,6 +488,7 @@ set(LOGIC_SOURCES
     ${ICONS_SOURCES}
     ${FTB_SOURCES}
     ${FLAME_SOURCES}
+    ${MODPACKSCH_SOURCES}
 )
 
 add_library(MultiMC_logic SHARED ${LOGIC_SOURCES})

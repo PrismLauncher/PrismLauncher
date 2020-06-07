@@ -75,6 +75,8 @@ public:
     QString FMLLIBS_FORGE_BASE_URL = "https://files.minecraftforge.net/fmllibs/";
     QString TRANSLATIONS_BASE_URL = "https://files.multimc.org/translations/";
 
+    QString MODPACKSCH_API_BASE_URL = "https://api.modpacks.ch/";
+
     QString LEGACY_FTB_CDN_BASE_URL = "https://dist.creeper.host/FTB2/";
 
     /**

@@ -34,6 +34,7 @@
 
 #include "widgets/PageContainer.h"
 #include <pages/modplatform/VanillaPage.h>
+#include <pages/modplatform/ftb/FtbPage.h>
 #include <pages/modplatform/legacy_ftb/Page.h>
 #include <pages/modplatform/twitch/TwitchPage.h>
 #include <pages/modplatform/ImportPage.h>
@@ -125,6 +126,7 @@ QList<BasePage *> NewInstanceDialog::getPages()
     {
         new VanillaPage(this),
         importPage,
+        new FtbPage(this),
         new LegacyFTB::Page(this),
         twitchPage
     };
