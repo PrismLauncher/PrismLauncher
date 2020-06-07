@@ -214,3 +214,5 @@ bool NetJob::addNetAction(NetActionPtr action)
     }
     return true;
 }
+
+NetJob::~NetJob() = default;

@@ -1,4 +1,4 @@
-/* Copyright 2013-2019 MultiMC Contributors
+/* Copyright 2013-2020 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,5 +67,4 @@ namespace MMCZip
      * \return The list of the full paths of the files extracted, empty on failure.
      */
     QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir);
-
 }

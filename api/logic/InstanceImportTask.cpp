@@ -1,3 +1,18 @@
+/* Copyright 2013-2020 MultiMC Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "InstanceImportTask.h"
 #include "BaseInstance.h"
 #include "FileSystem.h"
@@ -15,6 +30,8 @@
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/PackManifest.h"
 #include "Json.h"
+#include <quazipdir.h>
+#include "modplatform/technic/TechnicPackProcessor.h"
 
 InstanceImportTask::InstanceImportTask(const QUrl sourceUrl)
 {
@@ -23,8 +40,6 @@ InstanceImportTask::InstanceImportTask(const QUrl sourceUrl)
 
 void InstanceImportTask::executeTask()
 {
-    InstancePtr newInstance;
-
     if (m_sourceUrl.isLocalFile())
     {
         m_archivePath = m_sourceUrl.toLocalFile();
@@ -82,6 +97,7 @@ void InstanceImportTask::processZipPack()
 
     QStringList blacklist = {"instance.cfg", "manifest.json"};
     QString mmcFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "instance.cfg");
+    bool technicFound = QuaZipDir(m_packZip.get()).exists("/bin/modpack.jar") || QuaZipDir(m_packZip.get()).exists("/bin/version.json");
     QString flameFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "manifest.json");
     QString root;
     if(!mmcFound.isNull())
@@ -91,6 +107,14 @@ void InstanceImportTask::processZipPack()
         root = mmcFound;
         m_modpackType = ModpackType::MultiMC;
     }
+    else if (technicFound)
+    {
+        // process as Technic pack
+        qDebug() << "Technic:" << technicFound;
+        extractDir.mkpath(".minecraft");
+        extractDir.cd(".minecraft");
+        m_modpackType = ModpackType::Technic;
+    }
     else if(!flameFound.isNull())
     {
         // process as Flame pack
@@ -98,7 +122,6 @@ void InstanceImportTask::processZipPack()
         root = flameFound;
         m_modpackType = ModpackType::Flame;
     }
-
     if(m_modpackType == ModpackType::Unknown)
     {
         emitFailed(tr("Archive does not contain a recognized modpack type."));
@@ -160,6 +183,9 @@ void InstanceImportTask::extractFinished()
             return;
         case ModpackType::MultiMC:
             processMultiMC();
+            return;
+        case ModpackType::Technic:
+            processTechnic();
             return;
         case ModpackType::Unknown:
             emitFailed(tr("Archive does not contain a recognized modpack type."));
@@ -369,6 +395,14 @@ void InstanceImportTask::processFlame()
         setStatus(status);
     });
     m_modIdResolver->start();
+}
+
+void InstanceImportTask::processTechnic()
+{
+    shared_qobject_ptr<Technic::TechnicPackProcessor> packProcessor = new Technic::TechnicPackProcessor();
+    connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &InstanceImportTask::emitSucceeded);
+    connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &InstanceImportTask::emitFailed);
+    packProcessor->run(m_globalSettings, m_instName, m_instIcon, m_stagingPath);
 }
 
 void InstanceImportTask::processMultiMC()

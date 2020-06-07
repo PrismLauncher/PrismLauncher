@@ -13,38 +13,34 @@
  * limitations under the License.
  */
 
+
 #pragma once
 
+#ifndef TECHNIC_SINGLEZIPPACKINSTALLTASK_H
+#define TECHNIC_SINGLEZIPPACKINSTALLTASK_H
+
 #include "InstanceTask.h"
-#include "multimc_logic_export.h"
 #include "net/NetJob.h"
-#include <QUrl>
-#include <QFuture>
+#include "multimc_logic_export.h"
+
+#include "quazip.h"
+
 #include <QFutureWatcher>
-#include "settings/SettingsObject.h"
-#include "QObjectPtr.h"
+#include <QStringList>
+#include <QUrl>
 
-class QuaZip;
-namespace Flame
-{
-    class FileResolvingTask;
-}
+namespace Technic {
 
-class MULTIMC_LOGIC_EXPORT InstanceImportTask : public InstanceTask
+class MULTIMC_LOGIC_EXPORT SingleZipPackInstallTask : public InstanceTask
 {
     Q_OBJECT
+
 public:
-    explicit InstanceImportTask(const QUrl sourceUrl);
+    SingleZipPackInstallTask(const QUrl &sourceUrl, const QString &minecraftVersion);
 
 protected:
-    //! Entry point for tasks.
-    virtual void executeTask() override;
+    void executeTask() override;
 
-private:
-    void processZipPack();
-    void processMultiMC();
-    void processFlame();
-    void processTechnic();
 
 private slots:
     void downloadSucceeded();
@@ -53,19 +49,16 @@ private slots:
     void extractFinished();
     void extractAborted();
 
-private: /* data */
-    NetJobPtr m_filesNetJob;
-    shared_qobject_ptr<Flame::FileResolvingTask> m_modIdResolver;
+private:
     QUrl m_sourceUrl;
+    QString m_minecraftVersion;
     QString m_archivePath;
-    bool m_downloadRequired = false;
+    NetJobPtr m_filesNetJob;
     std::unique_ptr<QuaZip> m_packZip;
     QFuture<QStringList> m_extractFuture;
     QFutureWatcher<QStringList> m_extractFutureWatcher;
-    enum class ModpackType{
-        Unknown,
-        MultiMC,
-        Flame,
-        Technic
-    } m_modpackType = ModpackType::Unknown;
 };
+
+} // namespace Technic
+
+#endif // TECHNIC_SINGLEZIPPACKINSTALLTASK_H

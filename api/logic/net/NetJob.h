@@ -34,7 +34,7 @@ public:
     {
         setObjectName(job_name);
     }
-    virtual ~NetJob() {}
+    virtual ~NetJob();
 
     bool addNetAction(NetActionPtr action);
 
