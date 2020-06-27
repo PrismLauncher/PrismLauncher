@@ -5,7 +5,7 @@
 #include <QList>
 #include "net/Mode.h"
 
-class ComponentList;
+class PackProfile;
 
 struct RemoteLoadStatus
 {
@@ -15,7 +15,7 @@ struct RemoteLoadStatus
         List,
         Version
     } type = Type::Version;
-    size_t componentListIndex = 0;
+    size_t PackProfileIndex = 0;
     bool finished = false;
     bool succeeded = false;
     QString error;
@@ -23,7 +23,7 @@ struct RemoteLoadStatus
 
 struct ComponentUpdateTaskData
 {
-    ComponentList * m_list = nullptr;
+    PackProfile * m_list = nullptr;
     QList<RemoteLoadStatus> remoteLoadStatusList;
     bool remoteLoadSuccessful = true;
     size_t remoteTasksInProgress = 0;

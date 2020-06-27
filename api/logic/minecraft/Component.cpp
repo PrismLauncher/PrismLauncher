@@ -5,13 +5,13 @@
 
 #include "meta/Version.h"
 #include "VersionFile.h"
-#include "minecraft/ComponentList.h"
+#include "minecraft/PackProfile.h"
 #include <FileSystem.h>
 #include <QSaveFile>
 #include "OneSixVersionFormat.h"
 #include <assert.h>
 
-Component::Component(ComponentList * parent, const QString& uid)
+Component::Component(PackProfile * parent, const QString& uid)
 {
     assert(parent);
     m_parent = parent;
@@ -19,7 +19,7 @@ Component::Component(ComponentList * parent, const QString& uid)
     m_uid = uid;
 }
 
-Component::Component(ComponentList * parent, std::shared_ptr<Meta::Version> version)
+Component::Component(PackProfile * parent, std::shared_ptr<Meta::Version> version)
 {
     assert(parent);
     m_parent = parent;
@@ -31,7 +31,7 @@ Component::Component(ComponentList * parent, std::shared_ptr<Meta::Version> vers
     m_loaded = version->isLoaded();
 }
 
-Component::Component(ComponentList * parent, const QString& uid, std::shared_ptr<VersionFile> file)
+Component::Component(PackProfile * parent, const QString& uid, std::shared_ptr<VersionFile> file)
 {
     assert(parent);
     m_parent = parent;

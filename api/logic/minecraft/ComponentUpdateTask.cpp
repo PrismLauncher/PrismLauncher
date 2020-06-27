@@ -1,7 +1,7 @@
 #include "ComponentUpdateTask.h"
 
-#include "ComponentList_p.h"
-#include "ComponentList.h"
+#include "PackProfile_p.h"
+#include "PackProfile.h"
 #include "Component.h"
 #include <Env.h>
 #include <meta/Index.h>
@@ -22,16 +22,16 @@
  * Really, it should be a reactor/state machine that receives input from the application
  * and dynamically adapts to changing requirements...
  *
- * The reactor should be the only entry into manipulating the ComponentList.
+ * The reactor should be the only entry into manipulating the PackProfile.
  * See: https://en.wikipedia.org/wiki/Reactor_pattern
  */
 
 /*
- * Or make this operate on a snapshot of the ComponentList state, then merge results in as long as the snapshot and ComponentList didn't change?
+ * Or make this operate on a snapshot of the PackProfile state, then merge results in as long as the snapshot and PackProfile didn't change?
  * If the component list changes, start over.
  */
 
-ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, ComponentList* list, QObject* parent)
+ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list, QObject* parent)
     : Task(parent)
 {
     d.reset(new ComponentUpdateTaskData);
@@ -126,7 +126,7 @@ static LoadResult loadComponent(ComponentPtr component, shared_qobject_ptr<Task>
 
 // FIXME: dead code. determine if this can still be useful?
 /*
-static LoadResult loadComponentList(ComponentPtr component, shared_qobject_ptr<Task>& loadTask, Net::Mode netmode)
+static LoadResult loadPackProfile(ComponentPtr component, shared_qobject_ptr<Task>& loadTask, Net::Mode netmode)
 {
     if(component->m_loaded)
     {
@@ -217,7 +217,7 @@ void ComponentUpdateTask::loadComponents()
             }
             case Mode::Resolution:
             {
-                singleResult = loadComponentList(component, loadTask, d->netmode);
+                singleResult = loadPackProfile(component, loadTask, d->netmode);
                 loadType = RemoteLoadStatus::Type::List;
                 break;
             }
@@ -244,7 +244,7 @@ void ComponentUpdateTask::loadComponents()
             });
             RemoteLoadStatus status;
             status.type = loadType;
-            status.componentListIndex = componentIndex;
+            status.PackProfileIndex = componentIndex;
             d->remoteLoadStatusList.append(status);
             taskIndex++;
         }
@@ -495,7 +495,7 @@ static bool getTrivialComponentChanges(const ComponentIndex & index, const Requi
 }
 
 // FIXME, TODO: decouple dependency resolution from loading
-// FIXME: This works directly with the ComponentList internals. It shouldn't! It needs richer data types than ComponentList uses.
+// FIXME: This works directly with the PackProfile internals. It shouldn't! It needs richer data types than PackProfile uses.
 // FIXME: throw all this away and use a graph
 void ComponentUpdateTask::resolveDependencies(bool checkOnly)
 {
@@ -648,7 +648,7 @@ void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex)
     // update the cached data of the component from the downloaded version file.
     if (taskSlot.type == RemoteLoadStatus::Type::Version)
     {
-        auto component = d->m_list->getComponent(taskSlot.componentListIndex);
+        auto component = d->m_list->getComponent(taskSlot.PackProfileIndex);
         component->m_loaded = true;
         component->updateCachedData();
     }

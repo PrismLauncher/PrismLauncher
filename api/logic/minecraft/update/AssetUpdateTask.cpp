@@ -1,7 +1,7 @@
 #include "Env.h"
 #include "AssetUpdateTask.h"
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/ComponentList.h"
+#include "minecraft/PackProfile.h"
 #include "net/ChecksumValidator.h"
 #include "minecraft/AssetsUtils.h"
 
@@ -17,7 +17,7 @@ AssetUpdateTask::~AssetUpdateTask()
 void AssetUpdateTask::executeTask()
 {
     setStatus(tr("Updating assets index..."));
-    auto components = m_inst->getComponentList();
+    auto components = m_inst->getPackProfile();
     auto profile = components->getProfile();
     auto assets = profile->getMinecraftAssets();
     QUrl indexUrl = assets->url;
@@ -54,7 +54,7 @@ void AssetUpdateTask::assetIndexFinished()
     AssetsIndex index;
     qDebug() << m_inst->name() << ": Finished asset index download";
 
-    auto components = m_inst->getComponentList();
+    auto components = m_inst->getPackProfile();
     auto profile = components->getProfile();
     auto assets = profile->getMinecraftAssets();
 

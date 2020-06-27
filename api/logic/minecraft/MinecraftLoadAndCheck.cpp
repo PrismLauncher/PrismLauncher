@@ -1,6 +1,6 @@
 #include "MinecraftLoadAndCheck.h"
 #include "MinecraftInstance.h"
-#include "ComponentList.h"
+#include "PackProfile.h"
 
 MinecraftLoadAndCheck::MinecraftLoadAndCheck(MinecraftInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
 {
@@ -9,7 +9,7 @@ MinecraftLoadAndCheck::MinecraftLoadAndCheck(MinecraftInstance *inst, QObject *p
 void MinecraftLoadAndCheck::executeTask()
 {
     // add offline metadata load task
-    auto components = m_inst->getComponentList();
+    auto components = m_inst->getPackProfile();
     components->reload(Net::Mode::Offline);
     m_task = components->getCurrentTask();
 

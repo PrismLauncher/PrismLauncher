@@ -7,7 +7,7 @@
 #include "FileSystem.h"
 #include "settings/INISettingsObject.h"
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/ComponentList.h"
+#include "minecraft/PackProfile.h"
 #include "minecraft/GradleSpecifier.h"
 #include "net/URLConstants.h"
 
@@ -125,7 +125,7 @@ void PackInstallTask::install()
     instanceSettings->set("InstanceType", "OneSix");
 
     MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
-    auto components = instance.getComponentList();
+    auto components = instance.getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
 

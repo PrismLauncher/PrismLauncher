@@ -6,7 +6,7 @@
 #include <QtConcurrentRun>
 #include "LegacyInstance.h"
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/ComponentList.h"
+#include "minecraft/PackProfile.h"
 #include "LegacyModList.h"
 #include "classparser.h"
 
@@ -84,7 +84,7 @@ void LegacyUpgradeTask::copyFinished()
                 }
             }
         }
-        auto components = inst.getComponentList();
+        auto components = inst.getPackProfile();
         components->buildingFromScratch();
         components->setComponentVersion("net.minecraft", preferredVersionNumber, true);
 

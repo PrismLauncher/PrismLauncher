@@ -9,7 +9,7 @@
 #include "QObjectPtr.h"
 #include "multimc_logic_export.h"
 
-class ComponentList;
+class PackProfile;
 class LaunchProfile;
 namespace Meta
 {
@@ -22,11 +22,11 @@ class MULTIMC_LOGIC_EXPORT Component : public QObject, public ProblemProvider
 {
 Q_OBJECT
 public:
-    Component(ComponentList * parent, const QString &uid);
+    Component(PackProfile * parent, const QString &uid);
 
     // DEPRECATED: remove these constructors?
-    Component(ComponentList * parent, std::shared_ptr<Meta::Version> version);
-    Component(ComponentList * parent, const QString & uid, std::shared_ptr<VersionFile> file);
+    Component(PackProfile * parent, std::shared_ptr<Meta::Version> version);
+    Component(PackProfile * parent, const QString & uid, std::shared_ptr<VersionFile> file);
 
     virtual ~Component(){};
     void applyTo(LaunchProfile *profile);
@@ -73,7 +73,7 @@ signals:
     void dataChanged();
 
 public: /* data */
-    ComponentList * m_parent;
+    PackProfile * m_parent;
 
     // BEGIN: persistent component list properties
     /// ID of the component

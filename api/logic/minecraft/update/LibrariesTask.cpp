@@ -1,7 +1,7 @@
 #include "Env.h"
 #include "LibrariesTask.h"
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/ComponentList.h"
+#include "minecraft/PackProfile.h"
 
 LibrariesTask::LibrariesTask(MinecraftInstance * inst)
 {
@@ -15,7 +15,7 @@ void LibrariesTask::executeTask()
     MinecraftInstance *inst = (MinecraftInstance *)m_inst;
 
     // Build a list of URLs that will need to be downloaded.
-    auto components = inst->getComponentList();
+    auto components = inst->getPackProfile();
     auto profile = components->getProfile();
 
     auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()));

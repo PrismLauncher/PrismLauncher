@@ -11,7 +11,7 @@
 
 // FIXME: this does not belong here, it's Minecraft/Flame specific
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/ComponentList.h"
+#include "minecraft/PackProfile.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/PackManifest.h"
 #include "Json.h"
@@ -236,7 +236,7 @@ void InstanceImportTask::processFlame()
         mcVersion.remove(QRegExp("[.]+$"));
         logWarning(tr("Mysterious trailing dots removed from Minecraft version while importing pack."));
     }
-    auto components = instance.getComponentList();
+    auto components = instance.getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", mcVersion, true);
     if(!forgeVersion.isEmpty())
@@ -288,7 +288,7 @@ void InstanceImportTask::processFlame()
             qDebug() << info.fileName();
             jarMods.push_back(info.absoluteFilePath());
         }
-        auto profile = instance.getComponentList();
+        auto profile = instance.getPackProfile();
         profile->installJarMods(jarMods);
         // nuke the original files
         FS::deletePath(jarmodsPath);

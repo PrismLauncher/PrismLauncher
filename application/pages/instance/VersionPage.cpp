@@ -37,7 +37,7 @@
 #include <QString>
 #include <QUrl>
 
-#include "minecraft/ComponentList.h"
+#include "minecraft/PackProfile.h"
 #include "minecraft/auth/MojangAccountList.h"
 #include "minecraft/mod/Mod.h"
 #include "icons/IconList.h"
@@ -114,9 +114,9 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
 
     ui->toolBar->insertSpacer(ui->actionReload);
 
-    m_profile = m_inst->getComponentList();
+    m_profile = m_inst->getPackProfile();
 
-    reloadComponentList();
+    reloadPackProfile();
 
     auto proxy = new IconProxy(ui->packageView);
     proxy->setSourceModel(m_profile.get());
@@ -129,7 +129,7 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     auto smodel = ui->packageView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::packageCurrent);
 
-    connect(m_profile.get(), &ComponentList::minecraftChanged, this, &VersionPage::updateVersionControls);
+    connect(m_profile.get(), &PackProfile::minecraftChanged, this, &VersionPage::updateVersionControls);
     controlsEnabled = !m_inst->isRunning();
     updateVersionControls();
     preselect(0);
@@ -232,7 +232,7 @@ void VersionPage::updateButtons(int row)
     ui->actionAdd_to_Minecraft_jar->setEnabled(controlsEnabled);
 }
 
-bool VersionPage::reloadComponentList()
+bool VersionPage::reloadPackProfile()
 {
     try
     {
@@ -255,7 +255,7 @@ bool VersionPage::reloadComponentList()
 
 void VersionPage::on_actionReload_triggered()
 {
-    reloadComponentList();
+    reloadPackProfile();
     m_container->refreshContainer();
 }
 
@@ -270,7 +270,7 @@ void VersionPage::on_actionRemove_triggered()
         }
     }
     updateButtons();
-    reloadComponentList();
+    reloadPackProfile();
     m_container->refreshContainer();
 }
 
@@ -306,7 +306,7 @@ void VersionPage::on_actionMove_up_triggered()
 {
     try
     {
-        m_profile->move(currentRow(), ComponentList::MoveUp);
+        m_profile->move(currentRow(), PackProfile::MoveUp);
     }
     catch (const Exception &e)
     {
@@ -319,7 +319,7 @@ void VersionPage::on_actionMove_down_triggered()
 {
     try
     {
-        m_profile->move(currentRow(), ComponentList::MoveDown);
+        m_profile->move(currentRow(), PackProfile::MoveDown);
     }
     catch (const Exception &e)
     {

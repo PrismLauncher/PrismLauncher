@@ -4,7 +4,7 @@
 
 //FIXME: remove this
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/ComponentList.h"
+#include "minecraft/PackProfile.h"
 
 InstanceCreationTask::InstanceCreationTask(BaseVersionPtr version)
 {
@@ -20,7 +20,7 @@ void InstanceCreationTask::executeTask()
         instanceSettings->registerSetting("InstanceType", "Legacy");
         instanceSettings->set("InstanceType", "OneSix");
         MinecraftInstance inst(m_globalSettings, instanceSettings, m_stagingPath);
-        auto components = inst.getComponentList();
+        auto components = inst.getPackProfile();
         components->buildingFromScratch();
         components->setComponentVersion("net.minecraft", m_version->descriptor(), true);
         inst.setName(m_instName);

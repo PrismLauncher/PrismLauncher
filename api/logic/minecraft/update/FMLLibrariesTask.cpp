@@ -3,7 +3,7 @@
 #include <minecraft/VersionFilterData.h>
 #include "FMLLibrariesTask.h"
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/ComponentList.h"
+#include "minecraft/PackProfile.h"
 
 FMLLibrariesTask::FMLLibrariesTask(MinecraftInstance * inst)
 {
@@ -13,7 +13,7 @@ void FMLLibrariesTask::executeTask()
 {
     // Get the mod list
     MinecraftInstance *inst = (MinecraftInstance *)m_inst;
-    auto components = inst->getComponentList();
+    auto components = inst->getPackProfile();
     auto profile = components->getProfile();
 
     if (!profile->hasTrait("legacyFML"))

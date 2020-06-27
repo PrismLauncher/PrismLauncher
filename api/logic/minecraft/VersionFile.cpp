@@ -5,7 +5,7 @@
 
 #include "minecraft/VersionFile.h"
 #include "minecraft/Library.h"
-#include "minecraft/ComponentList.h"
+#include "minecraft/PackProfile.h"
 #include "ParseUtils.h"
 
 #include <Version.h>

@@ -4,7 +4,7 @@
 #include "net/Mode.h"
 
 #include <memory>
-class ComponentList;
+class PackProfile;
 struct ComponentUpdateTaskData;
 
 class ComponentUpdateTask : public Task
@@ -18,7 +18,7 @@ public:
     };
 
 public:
-    explicit ComponentUpdateTask(Mode mode, Net::Mode netmode, ComponentList * list, QObject *parent = 0);
+    explicit ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile * list, QObject *parent = 0);
     virtual ~ComponentUpdateTask();
 
 protected:

@@ -31,10 +31,10 @@
 #include "net/Mode.h"
 
 class MinecraftInstance;
-struct ComponentListData;
+struct PackProfileData;
 class ComponentUpdateTask;
 
-class MULTIMC_LOGIC_EXPORT ComponentList : public QAbstractListModel
+class MULTIMC_LOGIC_EXPORT PackProfile : public QAbstractListModel
 {
     Q_OBJECT
     friend ComponentUpdateTask;
@@ -46,8 +46,8 @@ public:
         NUM_COLUMNS
     };
 
-    explicit ComponentList(MinecraftInstance * instance);
-    virtual ~ComponentList();
+    explicit PackProfile(MinecraftInstance * instance);
+    virtual ~PackProfile();
 
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
@@ -146,5 +146,5 @@ private:
 
 private: /* data */
 
-    std::unique_ptr<ComponentListData> d;
+    std::unique_ptr<PackProfileData> d;
 };

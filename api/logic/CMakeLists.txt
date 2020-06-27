@@ -259,8 +259,8 @@ set(MINECRAFT_SOURCES
     minecraft/LaunchProfile.h
     minecraft/Component.cpp
     minecraft/Component.h
-    minecraft/ComponentList.cpp
-    minecraft/ComponentList.h
+    minecraft/PackProfile.cpp
+    minecraft/PackProfile.h
     minecraft/ComponentUpdateTask.cpp
     minecraft/ComponentUpdateTask.h
     minecraft/MinecraftLoadAndCheck.h

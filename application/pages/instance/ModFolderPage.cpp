@@ -28,7 +28,7 @@
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/Mod.h"
 #include "minecraft/VersionFilterData.h"
-#include "minecraft/ComponentList.h"
+#include "minecraft/PackProfile.h"
 #include <DesktopServices.h>
 
 #include <QSortFilterProxyModel>
@@ -244,7 +244,7 @@ bool CoreModFolderPage::shouldDisplay() const
         auto inst = dynamic_cast<MinecraftInstance *>(m_inst);
         if (!inst)
             return true;
-        auto version = inst->getComponentList();
+        auto version = inst->getPackProfile();
         if (!version)
             return true;
         if(!version->getComponent("net.minecraftforge"))

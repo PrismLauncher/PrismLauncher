@@ -12,7 +12,7 @@
 #include "Library.h"
 #include <meta/JsonFormat.h>
 
-class ComponentList;
+class PackProfile;
 class VersionFile;
 class LaunchProfile;
 struct MojangDownloadInfo;
