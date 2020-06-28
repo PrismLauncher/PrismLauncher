@@ -53,7 +53,9 @@ public: /* methods */
         auto fname = m_entity->localFilename();
         try
         {
-            m_entity->parse(Json::requireObject(Json::requireDocument(data, fname), fname));
+            auto doc = Json::requireDocument(data, fname);
+            auto obj = Json::requireObject(doc, fname);
+            m_entity->parse(obj);
             return true;
         }
         catch (const Exception &e)
@@ -87,7 +89,9 @@ bool Meta::BaseEntity::loadLocalFile()
     // TODO: check if the file has the expected checksum
     try
     {
-        parse(Json::requireObject(Json::requireDocument(fname, fname), fname));
+        auto doc = Json::requireDocument(fname, fname);
+        auto obj = Json::requireObject(doc, fname);
+        parse(obj);
         return true;
     }
     catch (const Exception &e)

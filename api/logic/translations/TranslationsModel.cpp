@@ -184,7 +184,8 @@ void readIndex(const QString & path, QMap<QString, Language>& languages)
     int index = 1;
     try
     {
-        auto doc = Json::requireObject(Json::requireDocument(data));
+        auto toplevel_doc = Json::requireDocument(data);
+        auto doc = Json::requireObject(toplevel_doc);
         auto file_type = Json::requireString(doc, "file_type");
         if(file_type != "MMC-TRANSLATION-INDEX")
         {
