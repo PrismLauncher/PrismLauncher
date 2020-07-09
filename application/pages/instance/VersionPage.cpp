@@ -357,8 +357,8 @@ void VersionPage::on_actionChange_version_triggered()
     VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
     if (uid == "net.fabricmc.intermediary")
     {
-        vselect.setEmptyString(tr("No Fabric Loader versions are currently available."));
-        vselect.setEmptyErrorString(tr("Couldn't load or download the Fabric Loader version lists!"));
+        vselect.setEmptyString(tr("No intermediary mappings versions are currently available."));
+        vselect.setEmptyErrorString(tr("Couldn't load or download the intermediary mappings version lists!"));
         vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
     }
     auto currentVersion = patch->getVersion();
