@@ -69,6 +69,9 @@ set(MultiMC_CHANLIST_URL "" CACHE STRING "URL for the channel list.")
 # Notification URL
 set(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
 
+# The metadata server
+set(MultiMC_META_URL "https://meta.multimc.org/v1/" CACHE STRING "URL to fetch MultiMC's meta files from.")
+
 # paste.ee API key
 set(MultiMC_PASTE_EE_API_KEY "utLvciUouSURFzfjPxLBf5W4ISsUX4pwBDF7N1AfZ" CACHE STRING "API key you can get from paste.ee when you register an account")
 
@@ -264,6 +267,7 @@ add_subdirectory(libraries/classparser) # google analytics library
 
 ############################### Built Artifacts ###############################
 
+add_subdirectory(buildconfig)
 add_subdirectory(api/logic)
 add_subdirectory(api/gui)
 

@@ -2,7 +2,7 @@
 #include "PrivatePackManager.h"
 
 #include <QDomDocument>
-#include "net/URLConstants.h"
+#include <BuildConfig.h>
 
 namespace LegacyFTB {
 
@@ -13,11 +13,11 @@ void PackFetchTask::fetch()
 
     NetJob *netJob = new NetJob("LegacyFTB::ModpackFetch");
 
-    QUrl publicPacksUrl = QUrl(URLConstants::LEGACY_FTB_CDN_BASE_URL + "static/modpacks.xml");
+    QUrl publicPacksUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/modpacks.xml");
     qDebug() << "Downloading public version info from" << publicPacksUrl.toString();
     netJob->addNetAction(Net::Download::makeByteArray(publicPacksUrl, &publicModpacksXmlFileData));
 
-    QUrl thirdPartyUrl = QUrl(URLConstants::LEGACY_FTB_CDN_BASE_URL + "static/thirdparty.xml");
+    QUrl thirdPartyUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/thirdparty.xml");
     qDebug() << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
     netJob->addNetAction(Net::Download::makeByteArray(thirdPartyUrl, &thirdPartyModpacksXmlFileData));
 
@@ -30,7 +30,7 @@ void PackFetchTask::fetch()
 
 void PackFetchTask::fetchPrivate(const QStringList & toFetch)
 {
-    QString privatePackBaseUrl = URLConstants::LEGACY_FTB_CDN_BASE_URL + "static/%1.xml";
+    QString privatePackBaseUrl = BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1.xml";
 
     for (auto &packCode: toFetch)
     {

@@ -12,7 +12,6 @@
 #include "Rule.h"
 #include "minecraft/OpSys.h"
 #include "GradleSpecifier.h"
-#include "net/URLConstants.h"
 #include "MojangDownloadInfo.h"
 
 #include "multimc_logic_export.h"

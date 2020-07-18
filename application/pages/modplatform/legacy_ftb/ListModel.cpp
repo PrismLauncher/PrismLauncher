@@ -10,7 +10,7 @@
 #include <RWStorage.h>
 #include <Env.h>
 
-#include "net/URLConstants.h"
+#include <BuildConfig.h>
 
 namespace LegacyFTB {
 
@@ -218,7 +218,7 @@ void ListModel::requestLogo(QString file)
 
     MetaEntryPtr entry = ENV.metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
     NetJob *job = new NetJob(QString("FTB Icon Download for %1").arg(file));
-    job->addNetAction(Net::Download::makeCached(QUrl(QString(URLConstants::LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
+    job->addNetAction(Net::Download::makeCached(QUrl(QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
 
     auto fullPath = entry->getFullPath();
     QObject::connect(job, &NetJob::finished, this, [this, file, fullPath]

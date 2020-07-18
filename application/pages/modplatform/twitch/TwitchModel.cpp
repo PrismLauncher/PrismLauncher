@@ -10,8 +10,6 @@
 #include <RWStorage.h>
 #include <Env.h>
 
-#include "net/URLConstants.h"
-
 namespace Twitch {
 
 ListModel::ListModel(QObject *parent) : QAbstractListModel(parent)

@@ -24,6 +24,8 @@
 #include "Env.h"
 #include "Json.h"
 
+#include "BuildConfig.h"
+
 class ParsingValidator : public Net::Validator
 {
 public: /* con/des */
@@ -76,7 +78,7 @@ Meta::BaseEntity::~BaseEntity()
 
 QUrl Meta::BaseEntity::url() const
 {
-    return QUrl("https://meta.multimc.org/v1/").resolved(localFilename());
+    return QUrl(BuildConfig.META_URL).resolved(localFilename());
 }
 
 bool Meta::BaseEntity::loadLocalFile()

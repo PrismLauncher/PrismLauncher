@@ -25,7 +25,6 @@
 #include "BaseInstance.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/Library.h"
-#include "net/URLConstants.h"
 #include <FileSystem.h>
 
 #include "update/FoldersTask.h"

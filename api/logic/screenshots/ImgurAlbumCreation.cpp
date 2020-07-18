@@ -6,13 +6,13 @@
 #include <QUrl>
 #include <QStringList>
 
-#include "net/URLConstants.h"
+#include "BuildConfig.h"
 #include "Env.h"
 #include <QDebug>
 
 ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenshotPtr> screenshots) : NetAction(), m_screenshots(screenshots)
 {
-    m_url = URLConstants::IMGUR_BASE_URL + "album.json";
+    m_url = BuildConfig.IMGUR_BASE_URL + "album.json";
     m_status = Job_NotStarted;
 }
 

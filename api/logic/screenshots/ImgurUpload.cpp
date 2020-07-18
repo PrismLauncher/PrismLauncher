@@ -8,13 +8,13 @@
 #include <QFile>
 #include <QUrl>
 
-#include "net/URLConstants.h"
+#include "BuildConfig.h"
 #include "Env.h"
 #include <QDebug>
 
 ImgurUpload::ImgurUpload(ScreenshotPtr shot) : NetAction(), m_shot(shot)
 {
-    m_url = URLConstants::IMGUR_BASE_URL + "upload.json";
+    m_url = BuildConfig.IMGUR_BASE_URL + "upload.json";
     m_status = Job_NotStarted;
 }
 

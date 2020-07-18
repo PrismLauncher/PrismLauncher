@@ -1,7 +1,7 @@
 #include "BuildConfig.h"
 #include <QObject>
 
-Config BuildConfig;
+const Config BuildConfig;
 
 Config::Config()
 {
@@ -33,6 +33,7 @@ Config::Config()
     VERSION_STR = "@MultiMC_VERSION_STRING@";
     NEWS_RSS_URL = "@MultiMC_NEWS_RSS_URL@";
     PASTE_EE_KEY = "@MultiMC_PASTE_EE_API_KEY@";
+    META_URL = "@MultiMC_META_URL@";
 }
 
 QString Config::printableVersionString() const

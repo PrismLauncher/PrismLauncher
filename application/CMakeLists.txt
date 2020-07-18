@@ -1,8 +1,5 @@
 project(application)
 
-######## Configure the file with build properties ########
-configure_file("${PROJECT_SOURCE_DIR}/BuildConfig.cpp.in" "${PROJECT_BINARY_DIR}/BuildConfig.cpp")
-
 ################################ FILES ################################
 
 ######## Sources and headers ########
@@ -11,8 +8,6 @@ SET(MULTIMC_SOURCES
     main.cpp
     MultiMC.h
     MultiMC.cpp
-    BuildConfig.h
-    ${PROJECT_BINARY_DIR}/BuildConfig.cpp
     UpdateController.cpp
     UpdateController.h
 

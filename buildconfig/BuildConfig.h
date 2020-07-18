@@ -61,10 +61,27 @@ public:
     QString PASTE_EE_KEY;
 
     /**
+     * MultiMC Metadata repository URL prefix
+     */
+    QString META_URL;
+
+    QString RESOURCE_BASE = "https://resources.download.minecraft.net/";
+    QString LIBRARY_BASE = "https://libraries.minecraft.net/";
+    QString SKINS_BASE = "https://crafatar.com/skins/";
+    QString AUTH_BASE = "https://authserver.mojang.com/";
+    QString MOJANG_STATUS_URL = "https://status.mojang.com/check";
+    QString IMGUR_BASE_URL = "https://api.imgur.com/3/";
+    QString FMLLIBS_OUR_BASE_URL = "https://files.multimc.org/fmllibs/";
+    QString FMLLIBS_FORGE_BASE_URL = "https://files.minecraftforge.net/fmllibs/";
+    QString TRANSLATIONS_BASE_URL = "https://files.multimc.org/translations/";
+
+    QString LEGACY_FTB_CDN_BASE_URL = "https://dist.creeper.host/FTB2/";
+
+    /**
      * \brief Converts the Version to a string.
      * \return The version number in string format (major.minor.revision.build).
      */
     QString printableVersionString() const;
 };
 
-extern Config BuildConfig;
+extern const Config BuildConfig;

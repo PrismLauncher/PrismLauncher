@@ -198,7 +198,10 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
         // FIXME: this will eventually break...
         else
         {
-            lib->setAbsoluteUrl(URLConstants::getLegacyJarUrl(out->minecraftVersion));
+            out->addProblem(
+                ProblemSeverity::Error,
+                QObject::tr("URL for the main jar could not be determined - Mojang removed the server that we used as fallback.")
+            );
         }
         out->mainJar = lib;
     }

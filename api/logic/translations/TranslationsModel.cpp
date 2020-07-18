@@ -10,7 +10,7 @@
 #include <net/NetJob.h>
 #include <net/ChecksumValidator.h>
 #include <Env.h>
-#include <net/URLConstants.h>
+#include <BuildConfig.h>
 #include "Json.h"
 
 #include "POTranslator.h"
@@ -606,7 +606,7 @@ void TranslationsModel::downloadTranslation(QString key)
     MetaEntryPtr entry = ENV.metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
     entry->setStale(true);
 
-    auto dl = Net::Download::makeCached(QUrl(URLConstants::TRANSLATIONS_BASE_URL + lang->file_name), entry);
+    auto dl = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + lang->file_name), entry);
     auto rawHash = QByteArray::fromHex(lang->file_sha1.toLatin1());
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
     dl->m_total_progress = lang->file_size;

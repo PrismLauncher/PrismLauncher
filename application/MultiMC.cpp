@@ -45,7 +45,6 @@
 #include <minecraft/auth/MojangAccountList.h>
 #include "icons/IconList.h"
 #include "net/HttpMetaCache.h"
-#include "net/URLConstants.h"
 #include "Env.h"
 
 #include "java/JavaUtils.h"

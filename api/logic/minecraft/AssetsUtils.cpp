@@ -27,7 +27,7 @@
 #include "FileSystem.h"
 #include "net/Download.h"
 #include "net/ChecksumValidator.h"
-#include "net/URLConstants.h"
+#include "BuildConfig.h"
 
 namespace {
 QSet<QString> collectPathsFromDir(QString dirPath)
@@ -308,7 +308,7 @@ QString AssetObject::getLocalPath()
 
 QUrl AssetObject::getUrl()
 {
-    return URLConstants::RESOURCE_BASE + getRelPath();
+    return BuildConfig.RESOURCE_BASE + getRelPath();
 }
 
 QString AssetObject::getRelPath()

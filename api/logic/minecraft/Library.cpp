@@ -5,6 +5,7 @@
 #include <net/ChecksumValidator.h>
 #include <Env.h>
 #include <FileSystem.h>
+#include <BuildConfig.h>
 
 
 void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& native, QStringList& native32,
@@ -171,7 +172,7 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(
 
             if (m_repositoryURL.isEmpty())
             {
-                return URLConstants::LIBRARY_BASE + raw_storage;
+                return BuildConfig.LIBRARY_BASE + raw_storage;
             }
 
             if(m_repositoryURL.endsWith('/'))

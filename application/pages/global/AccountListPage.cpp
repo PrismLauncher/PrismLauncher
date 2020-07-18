@@ -22,7 +22,6 @@
 #include <QDebug>
 
 #include "net/NetJob.h"
-#include "net/URLConstants.h"
 #include "Env.h"
 
 #include "dialogs/ProgressDialog.h"
@@ -33,6 +32,8 @@
 #include "minecraft/auth/YggdrasilTask.h"
 
 #include "MultiMC.h"
+
+#include "BuildConfig.h"
 
 AccountListPage::AccountListPage(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::AccountListPage)
@@ -170,7 +171,7 @@ void AccountListPage::addAccount(const QString &errMsg)
         for (AccountProfile profile : account->profiles())
         {
             auto meta = Env::getInstance().metacache()->resolveEntry("skins", profile.id + ".png");
-            auto action = Net::Download::makeCached(QUrl(URLConstants::SKINS_BASE + profile.id + ".png"), meta);
+            auto action = Net::Download::makeCached(QUrl(BuildConfig.SKINS_BASE + profile.id + ".png"), meta);
             job->addNetAction(action);
             meta->setStale(true);
         }

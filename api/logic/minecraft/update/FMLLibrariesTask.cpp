@@ -4,6 +4,7 @@
 #include "FMLLibrariesTask.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "BuildConfig.h"
 
 FMLLibrariesTask::FMLLibrariesTask(MinecraftInstance * inst)
 {
@@ -63,7 +64,7 @@ void FMLLibrariesTask::executeTask()
     for (auto &lib : fmlLibsToProcess)
     {
         auto entry = metacache->resolveEntry("fmllibs", lib.filename);
-        QString urlString = (lib.ours ? URLConstants::FMLLIBS_OUR_BASE_URL : URLConstants::FMLLIBS_FORGE_BASE_URL) + lib.filename;
+        QString urlString = (lib.ours ? BuildConfig.FMLLIBS_OUR_BASE_URL : BuildConfig.FMLLIBS_FORGE_BASE_URL) + lib.filename;
         dljob->addNetAction(Net::Download::makeCached(QUrl(urlString), entry));
     }
 
