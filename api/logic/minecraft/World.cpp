@@ -138,12 +138,29 @@ void World::repath(const QFileInfo &file)
     m_folderName = file.fileName();
     if(file.isFile() && file.suffix() == "zip")
     {
+        m_iconFile = QString();
         readFromZip(file);
     }
     else if(file.isDir())
     {
+        QFileInfo assumedIconPath(file.absoluteFilePath() + "/icon.png");
+        if(assumedIconPath.exists()) {
+            m_iconFile = assumedIconPath.absoluteFilePath();
+        }
         readFromFS(file);
     }
+}
+
+bool World::resetIcon()
+{
+    if(m_iconFile.isNull()) {
+        return false;
+    }
+    if(QFile(m_iconFile).remove()) {
+        m_iconFile = QString();
+        return true;
+    }
+    return false;
 }
 
 void World::readFromFS(const QFileInfo &file)

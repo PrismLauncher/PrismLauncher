@@ -40,6 +40,10 @@ public:
     {
         return m_actualName;
     }
+    QString iconFile() const
+    {
+        return m_iconFile;
+    }
     QDateTime lastPlayed() const
     {
         return m_lastPlayed;
@@ -70,6 +74,8 @@ public:
     bool replace(World &with);
     // change the world's filesystem path (used by world lists for *MAGIC* purposes)
     void repath(const QFileInfo &file);
+    // remove the icon file, if any
+    bool resetIcon();
 
     bool rename(const QString &to);
     bool install(const QString &to, const QString &name= QString());
@@ -88,6 +94,7 @@ protected:
     QString m_containerOffsetPath;
     QString m_folderName;
     QString m_actualName;
+    QString m_iconFile;
     QDateTime levelDatTime;
     QDateTime m_lastPlayed;
     int64_t m_randomSeed = 0;

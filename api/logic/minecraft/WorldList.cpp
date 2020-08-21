@@ -136,6 +136,19 @@ bool WorldList::deleteWorlds(int first, int last)
     return true;
 }
 
+bool WorldList::resetIcon(int row)
+{
+    if (row >= worlds.size() || row < 0)
+        return false;
+    World &m = worlds[row];
+    if(m.resetIcon()) {
+        emit dataChanged(index(row), index(row), {WorldList::IconFileRole});
+        return true;
+    }
+    return false;
+}
+
+
 int WorldList::columnCount(const QModelIndex &parent) const
 {
     return 3;
@@ -194,6 +207,10 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
     case LastPlayedRole:
     {
         return world.lastPlayed();
+    }
+    case IconFileRole:
+    {
+        return world.iconFile();
     }
     default:
         return QVariant();

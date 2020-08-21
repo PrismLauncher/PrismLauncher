@@ -31,6 +31,33 @@
 #include <QProcess>
 #include <FileSystem.h>
 
+class WorldListProxyModel : public QSortFilterProxyModel
+{
+    Q_OBJECT
+
+public:
+    WorldListProxyModel(QObject *parent) : QSortFilterProxyModel(parent) {}
+
+    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const
+    {
+        QModelIndex sourceIndex = mapToSource(index);
+
+        if (index.column() == 0 && role == Qt::DecorationRole)
+        {
+            WorldList *worlds = qobject_cast<WorldList *>(sourceModel());
+            auto iconFile = worlds->data(sourceIndex, WorldList::IconFileRole).toString();
+            if(iconFile.isNull()) {
+                // NOTE: Minecraft uses the same placeholder for servers AND worlds
+                return MMC->getThemedIcon("unknown_server");
+            }
+            return QIcon(iconFile);
+        }
+
+        return sourceIndex.data(role);
+    }
+};
+
+
 WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worlds, QWidget *parent)
     : QMainWindow(parent), m_inst(inst), ui(new Ui::WorldListPage), m_worlds(worlds)
 {
@@ -38,13 +65,14 @@ WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worl
 
     ui->toolBar->insertSpacer(ui->actionRefresh);
 
-    QSortFilterProxyModel * proxy = new QSortFilterProxyModel(this);
+    WorldListProxyModel * proxy = new WorldListProxyModel(this);
     proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
     proxy->setSourceModel(m_worlds.get());
     ui->worldTreeView->setSortingEnabled(true);
     ui->worldTreeView->setModel(proxy);
     ui->worldTreeView->installEventFilter(this);
     ui->worldTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->worldTreeView->setIconSize(QSize(64,64));
     connect(ui->worldTreeView, &QTreeView::customContextMenuRequested, this, &WorldListPage::ShowContextMenu);
 
     auto head = ui->worldTreeView->header();
@@ -141,6 +169,19 @@ void WorldListPage::on_actionView_Folder_triggered()
 {
     DesktopServices::openDirectory(m_worlds->dir().absolutePath(), true);
 }
+
+void WorldListPage::on_actionReset_Icon_triggered()
+{
+    auto proxiedIndex = getSelectedWorld();
+
+    if(!proxiedIndex.isValid())
+        return;
+
+    if(m_worlds->resetIcon(proxiedIndex.row())) {
+        ui->actionReset_Icon->setEnabled(false);
+    }
+}
+
 
 QModelIndex WorldListPage::getSelectedWorld()
 {
@@ -255,6 +296,8 @@ void WorldListPage::worldChanged(const QModelIndex &current, const QModelIndex &
     ui->actionRemove->setEnabled(enable);
     ui->actionCopy->setEnabled(enable);
     ui->actionRename->setEnabled(enable);
+    bool hasIcon = !index.data(WorldList::IconFileRole).isNull();
+    ui->actionReset_Icon->setEnabled(enable && hasIcon);
 }
 
 void WorldListPage::on_actionAdd_triggered()
@@ -342,3 +385,5 @@ void WorldListPage::on_actionRefresh_triggered()
 {
     m_worlds->update();
 }
+
+#include "WorldListPage.moc"

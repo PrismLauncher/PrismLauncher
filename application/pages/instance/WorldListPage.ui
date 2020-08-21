@@ -41,6 +41,12 @@
       <property name="alternatingRowColors">
        <bool>true</bool>
       </property>
+      <property name="rootIsDecorated">
+       <bool>false</bool>
+      </property>
+      <property name="itemsExpandable">
+       <bool>false</bool>
+      </property>
       <property name="sortingEnabled">
        <bool>true</bool>
       </property>
@@ -79,6 +85,7 @@
    <addaction name="actionCopy"/>
    <addaction name="actionRemove"/>
    <addaction name="actionMCEdit"/>
+   <addaction name="actionReset_Icon"/>
    <addaction name="separator"/>
    <addaction name="actionCopy_Seed"/>
    <addaction name="actionRefresh"/>
@@ -122,6 +129,14 @@
   <action name="actionView_Folder">
    <property name="text">
     <string>View Folder</string>
+   </property>
+  </action>
+  <action name="actionReset_Icon">
+   <property name="text">
+    <string>Reset Icon</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove world icon to make the game re-generate it on next load.</string>
    </property>
   </action>
  </widget>
