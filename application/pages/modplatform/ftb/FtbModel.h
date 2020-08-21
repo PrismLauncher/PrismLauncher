@@ -2,7 +2,7 @@
 
 #include <QAbstractListModel>
 
-#include "modplatform/modpacksch/PackManifest.h"
+#include "modplatform/modpacksch/FTBPackManifest.h"
 #include "net/NetJob.h"
 #include <QIcon>
 

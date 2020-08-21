@@ -1,4 +1,4 @@
-#include "PackManifest.h"
+#include "FTBPackManifest.h"
 
 #include "Json.h"
 

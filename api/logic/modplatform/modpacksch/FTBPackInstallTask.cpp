@@ -1,4 +1,4 @@
-#include "PackInstallTask.h"
+#include "FTBPackInstallTask.h"
 
 #include "BuildConfig.h"
 #include "FileSystem.h"

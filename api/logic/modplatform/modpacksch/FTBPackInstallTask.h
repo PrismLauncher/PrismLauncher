@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PackManifest.h"
+#include "FTBPackManifest.h"
 
 #include "InstanceTask.h"
 #include "multimc_logic_export.h"

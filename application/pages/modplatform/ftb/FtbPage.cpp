@@ -4,7 +4,7 @@
 #include <QKeyEvent>
 
 #include "dialogs/NewInstanceDialog.h"
-#include "modplatform/modpacksch/PackInstallTask.h"
+#include "modplatform/modpacksch/FTBPackInstallTask.h"
 
 FtbPage::FtbPage(NewInstanceDialog* dialog, QWidget *parent)
         : QWidget(parent), ui(new Ui::FtbPage), dialog(dialog)
