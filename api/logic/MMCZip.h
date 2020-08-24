@@ -59,6 +59,8 @@ namespace MMCZip
      */
     QStringList MULTIMC_LOGIC_EXPORT extractSubDir(QuaZip *zip, const QString & subdir, const QString &target);
 
+    bool MULTIMC_LOGIC_EXPORT extractRelFile(QuaZip *zip, const QString & file, const QString &target);
+
     /**
      * Extract a whole archive.
      *
@@ -67,4 +69,25 @@ namespace MMCZip
      * \return The list of the full paths of the files extracted, empty on failure.
      */
     QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir);
+
+    /**
+     * Extract a subdirectory from an archive
+     *
+     * \param fileCompressed The name of the archive.
+     * \param subdir The directory within the archive to extract
+     * \param dir The directory to extract to, the current directory if left empty.
+     * \return The list of the full paths of the files extracted, empty on failure.
+     */
+    QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString subdir, QString dir);
+
+    /**
+     * Extract a single file from an archive into a directory
+     *
+     * \param fileCompressed The name of the archive.
+     * \param file The file within the archive to extract
+     * \param dir The directory to extract to, the current directory if left empty.
+     * \return true for success or false for failure
+     */
+    bool MULTIMC_LOGIC_EXPORT extractFile(QString fileCompressed, QString file, QString dir);
+
 }

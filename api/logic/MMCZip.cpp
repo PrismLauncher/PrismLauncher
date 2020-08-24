@@ -244,6 +244,12 @@ QStringList MMCZip::extractSubDir(QuaZip *zip, const QString & subdir, const QSt
 }
 
 // ours
+bool MMCZip::extractRelFile(QuaZip *zip, const QString &file, const QString &target)
+{
+    return JlCompress::extractFile(zip, file, target);
+}
+
+// ours
 QStringList MMCZip::extractDir(QString fileCompressed, QString dir)
 {
     QuaZip zip(fileCompressed);
@@ -252,4 +258,26 @@ QStringList MMCZip::extractDir(QString fileCompressed, QString dir)
         return {};
     }
     return MMCZip::extractSubDir(&zip, "", dir);
+}
+
+// ours
+QStringList MMCZip::extractDir(QString fileCompressed, QString subdir, QString dir)
+{
+    QuaZip zip(fileCompressed);
+    if (!zip.open(QuaZip::mdUnzip))
+    {
+        return {};
+    }
+    return MMCZip::extractSubDir(&zip, subdir, dir);
+}
+
+// ours
+bool MMCZip::extractFile(QString fileCompressed, QString file, QString target)
+{
+    QuaZip zip(fileCompressed);
+    if (!zip.open(QuaZip::mdUnzip))
+    {
+        return {};
+    }
+    return MMCZip::extractRelFile(&zip, file, target);
 }

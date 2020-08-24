@@ -79,6 +79,8 @@ public:
 
     QString LEGACY_FTB_CDN_BASE_URL = "https://dist.creeper.host/FTB2/";
 
+    QString ATL_DOWNLOAD_SERVER_URL = "https://download.nodecdn.net/containers/atl/";
+
     /**
      * \brief Converts the Version to a string.
      * \return The version number in string format (major.minor.revision.build).

@@ -114,6 +114,10 @@ public:
     /// get the profile component by index
     Component * getComponent(int index);
 
+    /// Add the component to the internal list of patches
+    // todo(merged): is this the best approach
+    void appendComponent(ComponentPtr component);
+
 private:
     void scheduleSave();
     bool saveIsScheduled() const;
@@ -121,8 +125,6 @@ private:
     /// apply the component patches. Catches all the errors and returns true/false for success/failure
     void invalidateLaunchProfile();
 
-    /// Add the component to the internal list of patches
-    void appendComponent(ComponentPtr component);
     /// insert component so that its index is ideally the specified one (returns real index)
     void insertComponent(size_t index, ComponentPtr component);
 

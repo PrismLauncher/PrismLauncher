@@ -124,25 +124,38 @@ SET(MULTIMC_SOURCES
     # GUI - platform pages
     pages/modplatform/VanillaPage.cpp
     pages/modplatform/VanillaPage.h
+
+    pages/modplatform/atlauncher/AtlModel.cpp
+    pages/modplatform/atlauncher/AtlModel.h
+    pages/modplatform/atlauncher/AtlFilterModel.cpp
+    pages/modplatform/atlauncher/AtlFilterModel.h
+    pages/modplatform/atlauncher/AtlPage.cpp
+    pages/modplatform/atlauncher/AtlPage.h
+    pages/modplatform/atlauncher/AtlPage.h
+
     pages/modplatform/ftb/FtbFilterModel.cpp
     pages/modplatform/ftb/FtbFilterModel.h
     pages/modplatform/ftb/FtbListModel.cpp
     pages/modplatform/ftb/FtbListModel.h
     pages/modplatform/ftb/FtbPage.cpp
     pages/modplatform/ftb/FtbPage.h
+
     pages/modplatform/legacy_ftb/Page.cpp
     pages/modplatform/legacy_ftb/Page.h
     pages/modplatform/legacy_ftb/ListModel.h
     pages/modplatform/legacy_ftb/ListModel.cpp
+
     pages/modplatform/twitch/TwitchData.h
     pages/modplatform/twitch/TwitchModel.cpp
     pages/modplatform/twitch/TwitchModel.h
     pages/modplatform/twitch/TwitchPage.cpp
     pages/modplatform/twitch/TwitchPage.h
+
     pages/modplatform/technic/TechnicModel.cpp
     pages/modplatform/technic/TechnicModel.h
     pages/modplatform/technic/TechnicPage.cpp
     pages/modplatform/technic/TechnicPage.h
+
     pages/modplatform/ImportPage.cpp
     pages/modplatform/ImportPage.h
 
@@ -260,6 +273,7 @@ SET(MULTIMC_UIS
 
     # Platform pages
     pages/modplatform/VanillaPage.ui
+    pages/modplatform/atlauncher/AtlPage.ui
     pages/modplatform/ftb/FtbPage.ui
     pages/modplatform/legacy_ftb/Page.ui
     pages/modplatform/twitch/TwitchPage.ui
