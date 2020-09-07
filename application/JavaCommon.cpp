@@ -24,7 +24,8 @@ void JavaCommon::javaWasOk(QWidget *parent, JavaCheckResult result)
 {
     QString text;
     text += QObject::tr("Java test succeeded!<br />Platform reported: %1<br />Java version "
-        "reported: %2<br />").arg(result.realPlatform, result.javaVersion.toString());
+        "reported: %2<br />Java vendor "
+        "reported: %3<br />").arg(result.realPlatform, result.javaVersion.toString(), result.javaVendor);
     if (result.errorLog.size())
     {
         auto htmlError = result.errorLog;

@@ -2,7 +2,7 @@ import java.lang.Integer;
 
 public class JavaCheck
 {
-    private static final String[] keys = {"os.arch", "java.version"};
+    private static final String[] keys = {"os.arch", "java.version", "java.vendor"};
     public static void main (String [] args)
     {
         int ret = 0;

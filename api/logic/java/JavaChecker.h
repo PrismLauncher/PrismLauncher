@@ -17,6 +17,7 @@ struct MULTIMC_LOGIC_EXPORT JavaCheckResult
     QString mojangPlatform;
     QString realPlatform;
     JavaVersion javaVersion;
+    QString javaVendor;
     QString outLog;
     QString errorLog;
     bool is_64bit = false;
