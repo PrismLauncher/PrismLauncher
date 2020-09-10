@@ -509,6 +509,10 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("LastHostname", "");
         m_settings->registerSetting("JvmArgs", "");
 
+        // Native library workarounds
+        m_settings->registerSetting("UseNativeOpenAL", false);
+        m_settings->registerSetting("UseNativeGLFW", false);
+
         // Minecraft launch method
         m_settings->registerSetting("MCLaunchMethod", "LauncherPart");
 

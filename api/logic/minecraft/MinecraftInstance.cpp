@@ -100,6 +100,11 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
     auto launchMethodOverride = m_settings->registerSetting("OverrideMCLaunchMethod", false);
     m_settings->registerOverride(globalSettings->getSetting("MCLaunchMethod"), launchMethodOverride);
 
+    // Native library workarounds
+    auto nativeLibraryWorkaroundsOverride = m_settings->registerSetting("OverrideNativeWorkarounds", false);
+    m_settings->registerOverride(globalSettings->getSetting("UseNativeOpenAL"), nativeLibraryWorkaroundsOverride);
+    m_settings->registerOverride(globalSettings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
+
     // DEPRECATED: Read what versions the user configuration thinks should be used
     m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
     m_settings->registerSetting("LWJGLVersion", "");

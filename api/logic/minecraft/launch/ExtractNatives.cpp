@@ -33,7 +33,7 @@ static QString replaceSuffix (QString target, const QString &suffix, const QStri
     return target + replacement;
 }
 
-static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibHack)
+static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibHack, bool nativeOpenAL, bool nativeGLFW)
 {
     QuaZip zip(source);
     if(!zip.open(QuaZip::mdUnzip))
@@ -48,6 +48,13 @@ static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibH
     do
     {
         QString name = zip.getCurrentFileName();
+        auto lowercase = name.toLower();
+        if (nativeGLFW && name.contains("glfw")) {
+            continue;
+        }
+        if (nativeOpenAL && name.contains("openal")) {
+            continue;
+        }
         if(applyJnilibHack)
         {
             name = replaceSuffix(name, ".jnilib", ".dylib");
@@ -76,12 +83,16 @@ void ExtractNatives::executeTask()
         emitSucceeded();
         return;
     }
+    auto settings = minecraftInstance->settings();
+    bool nativeOpenAL = settings->get("UseNativeOpenAL").toBool();
+    bool nativeGLFW = settings->get("UseNativeGLFW").toBool();
+
     auto outputPath  = minecraftInstance->getNativePath();
     auto javaVersion = minecraftInstance->getJavaVersion();
     bool jniHackEnabled = javaVersion.major() >= 8;
     for(const auto &source: toExtract)
     {
-        if(!unzipNatives(source, outputPath, jniHackEnabled))
+        if(!unzipNatives(source, outputPath, jniHackEnabled, nativeOpenAL, nativeGLFW))
         {
             auto reason = tr("Couldn't extract native jar '%1' to destination '%2'").arg(source, outputPath);
             emit logLine(reason, MessageLevel::Fatal);

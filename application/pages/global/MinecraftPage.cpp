@@ -63,6 +63,10 @@ void MinecraftPage::applySettings()
     s->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
     s->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
     s->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
+
+    // Native library workarounds
+    s->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
+    s->set("UseNativeGLFW", ui->useNativeGLFWCheck->isChecked());
 }
 
 void MinecraftPage::loadSettings()
@@ -73,4 +77,7 @@ void MinecraftPage::loadSettings()
     ui->maximizedCheckBox->setChecked(s->get("LaunchMaximized").toBool());
     ui->windowWidthSpinBox->setValue(s->get("MinecraftWinWidth").toInt());
     ui->windowHeightSpinBox->setValue(s->get("MinecraftWinHeight").toInt());
+
+    ui->useNativeOpenALCheck->setChecked(s->get("UseNativeOpenAL").toBool());
+    ui->useNativeGLFWCheck->setChecked(s->get("UseNativeGLFW").toBool());
 }

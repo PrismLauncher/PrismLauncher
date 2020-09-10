@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>545</width>
-    <height>195</height>
+    <width>936</width>
+    <height>1134</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -112,6 +112,29 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="nativeLibWorkaroundGroupBox">
+         <property name="title">
+          <string>Native library workarounds</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QCheckBox" name="useNativeGLFWCheck">
+            <property name="text">
+             <string>Use system installation of GLFW</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="useNativeOpenALCheck">
+            <property name="text">
+             <string>Use system installation of OpenAL</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacerMinecraft">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -135,6 +158,8 @@
   <tabstop>maximizedCheckBox</tabstop>
   <tabstop>windowWidthSpinBox</tabstop>
   <tabstop>windowHeightSpinBox</tabstop>
+  <tabstop>useNativeGLFWCheck</tabstop>
+  <tabstop>useNativeOpenALCheck</tabstop>
  </tabstops>
  <resources/>
  <connections/>

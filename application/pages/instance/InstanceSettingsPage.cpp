@@ -163,6 +163,20 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("WrapperCommand");
         m_settings->reset("PostExitCommand");
     }
+
+    // Workarounds
+    bool workarounds = ui->nativeWorkaroundsGroupBox->isChecked();
+    m_settings->set("OverrideNativeWorkarounds", workarounds);
+    if(workarounds)
+    {
+        m_settings->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
+        m_settings->set("UseNativeGLFW", ui->useNativeGLFWCheck->isChecked());
+    }
+    else
+    {
+        m_settings->reset("UseNativeOpenAL");
+        m_settings->reset("UseNativeGLFW");
+    }
 }
 
 void InstanceSettingsPage::loadSettings()
@@ -219,6 +233,11 @@ void InstanceSettingsPage::loadSettings()
         m_settings->get("WrapperCommand").toString(),
         m_settings->get("PostExitCommand").toString()
     );
+
+    // Workarounds
+    ui->nativeWorkaroundsGroupBox->setChecked(m_settings->get("OverrideNativeWorkarounds").toBool());
+    ui->useNativeGLFWCheck->setChecked(m_settings->get("UseNativeGLFW").toBool());
+    ui->useNativeOpenALCheck->setChecked(m_settings->get("UseNativeOpenAL").toBool());
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
