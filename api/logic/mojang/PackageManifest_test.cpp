@@ -61,13 +61,13 @@ QByteArray basic_manifest = R"END(
 void PackageManifestTest::test_parse()
 {
     auto manifest = Package::fromManifestContents(basic_manifest);
-    QCOMPARE(manifest.valid, true);
+    QVERIFY(manifest.valid == true);
     QVERIFY(manifest.files.size() == 1);
     QVERIFY(manifest.files.count(Path("a/b.txt")));
     auto &file = manifest.files[Path("a/b.txt")];
-    QCOMPARE(file.executable, true);
-    QCOMPARE(file.hash, "da39a3ee5e6b4b0d3255bfef95601890afd80709");
-    QCOMPARE(file.size, 0);
+    QVERIFY(file.executable == true);
+    QVERIFY(file.hash == "da39a3ee5e6b4b0d3255bfef95601890afd80709");
+    QVERIFY(file.size == 0);
     QVERIFY(manifest.folders.size() == 4);
     QVERIFY(manifest.folders.count(Path(".")));
     QVERIFY(manifest.folders.count(Path("a")));
@@ -77,26 +77,26 @@ void PackageManifestTest::test_parse()
     auto symlinkPath = Path("a/b/c.txt");
     QVERIFY(manifest.symlinks.count(symlinkPath));
     auto &symlink = manifest.symlinks[symlinkPath];
-    QCOMPARE(symlink, Path("../b.txt"));
+    QVERIFY(symlink == Path("../b.txt"));
     QVERIFY(manifest.sources.size() == 1);
 }
 
 void PackageManifestTest::test_parse_file() {
     auto path = QFINDTESTDATA("testdata/1.8.0_202-x64.json");
     auto manifest = Package::fromManifestFile(path);
-    QCOMPARE(manifest.valid, true);
+    QVERIFY(manifest.valid == true);
 }
 
 void PackageManifestTest::test_inspect() {
     auto path = QFINDTESTDATA("testdata/inspect/");
     auto manifest = Package::fromInspectedFolder(path);
-    QCOMPARE(manifest.valid, true);
+    QVERIFY(manifest.valid == true);
     QVERIFY(manifest.files.size() == 1);
     QVERIFY(manifest.files.count(Path("a/b.txt")));
     auto &file = manifest.files[Path("a/b.txt")];
-    QCOMPARE(file.executable, true);
-    QCOMPARE(file.hash, "da39a3ee5e6b4b0d3255bfef95601890afd80709");
-    QCOMPARE(file.size, 0);
+    QVERIFY(file.executable == true);
+    QVERIFY(file.hash == "da39a3ee5e6b4b0d3255bfef95601890afd80709");
+    QVERIFY(file.size == 0);
     QVERIFY(manifest.folders.size() == 3);
     QVERIFY(manifest.folders.count(Path(".")));
     QVERIFY(manifest.folders.count(Path("a")));
@@ -109,17 +109,17 @@ void PackageManifestTest::test_diff() {
     auto from = Package::fromInspectedFolder(path);
     auto to = Package::fromManifestContents(basic_manifest);
     auto operations = UpdateOperations::resolve(from, to);
-    QCOMPARE(operations.valid, true);
+    QVERIFY(operations.valid == true);
     QVERIFY(operations.mkdirs.size() == 1);
-    QCOMPARE(operations.mkdirs[0], Path("a/b/c"));
+    QVERIFY(operations.mkdirs[0] == Path("a/b/c"));
 
     QVERIFY(operations.rmdirs.size() == 0);
     QVERIFY(operations.deletes.size() == 1);
-    QCOMPARE(operations.deletes[0], Path("a/b/b.txt"));
+    QVERIFY(operations.deletes[0] == Path("a/b/b.txt"));
     QVERIFY(operations.downloads.size() == 0);
     QVERIFY(operations.mklinks.size() == 1);
     QVERIFY(operations.mklinks.count(Path("a/b/c.txt")));
-    QCOMPARE(operations.mklinks[Path("a/b/c.txt")], Path("../b.txt"));
+    QVERIFY(operations.mklinks[Path("a/b/c.txt")] == Path("../b.txt"));
 }
 
 void PackageManifestTest::mkdir_deep() {
@@ -139,12 +139,12 @@ void PackageManifestTest::mkdir_deep() {
     QVERIFY(operations.rmdirs.size() == 0);
 
     QVERIFY(operations.mkdirs.size() == 6);
-    QCOMPARE(operations.mkdirs[0], Path("."));
-    QCOMPARE(operations.mkdirs[1], Path("a"));
-    QCOMPARE(operations.mkdirs[2], Path("a/b"));
-    QCOMPARE(operations.mkdirs[3], Path("a/b/c"));
-    QCOMPARE(operations.mkdirs[4], Path("a/b/c/d"));
-    QCOMPARE(operations.mkdirs[5], Path("a/b/c/d/e"));
+    QVERIFY(operations.mkdirs[0] == Path("."));
+    QVERIFY(operations.mkdirs[1] == Path("a"));
+    QVERIFY(operations.mkdirs[2] == Path("a/b"));
+    QVERIFY(operations.mkdirs[3] == Path("a/b/c"));
+    QVERIFY(operations.mkdirs[4] == Path("a/b/c/d"));
+    QVERIFY(operations.mkdirs[5] == Path("a/b/c/d/e"));
 
     QVERIFY(operations.downloads.size() == 0);
     QVERIFY(operations.mklinks.size() == 0);
@@ -167,12 +167,12 @@ void PackageManifestTest::rmdir_deep() {
     QVERIFY(operations.deletes.size() == 0);
 
     QVERIFY(operations.rmdirs.size() == 6);
-    QCOMPARE(operations.rmdirs[0], Path("a/b/c/d/e"));
-    QCOMPARE(operations.rmdirs[1], Path("a/b/c/d"));
-    QCOMPARE(operations.rmdirs[2], Path("a/b/c"));
-    QCOMPARE(operations.rmdirs[3], Path("a/b"));
-    QCOMPARE(operations.rmdirs[4], Path("a"));
-    QCOMPARE(operations.rmdirs[5], Path("."));
+    QVERIFY(operations.rmdirs[0] == Path("a/b/c/d/e"));
+    QVERIFY(operations.rmdirs[1] == Path("a/b/c/d"));
+    QVERIFY(operations.rmdirs[2] == Path("a/b/c"));
+    QVERIFY(operations.rmdirs[3] == Path("a/b"));
+    QVERIFY(operations.rmdirs[4] == Path("a"));
+    QVERIFY(operations.rmdirs[5] == Path("."));
 
     QVERIFY(operations.mkdirs.size() == 0);
     QVERIFY(operations.downloads.size() == 0);
