@@ -20,8 +20,9 @@ private slots:
     void test_parse();
     void test_parse_file();
     void test_inspect();
-    void test_diff();
-
+#ifndef Q_OS_WIN32
+    void test_inspect_symlinks();
+#endif
     void mkdir_deep();
     void rmdir_deep();
 
@@ -87,7 +88,31 @@ void PackageManifestTest::test_parse_file() {
     QVERIFY(manifest.valid == true);
 }
 
+
 void PackageManifestTest::test_inspect() {
+    auto path = QFINDTESTDATA("testdata/inspect_win/");
+    auto manifest = Package::fromInspectedFolder(path);
+    QVERIFY(manifest.valid == true);
+    QVERIFY(manifest.files.size() == 2);
+    QVERIFY(manifest.files.count(Path("a/b.txt")));
+    auto &file1 = manifest.files[Path("a/b.txt")];
+    QVERIFY(file1.executable == false);
+    QVERIFY(file1.hash == "da39a3ee5e6b4b0d3255bfef95601890afd80709");
+    QVERIFY(file1.size == 0);
+    QVERIFY(manifest.files.count(Path("a/b/b.txt")));
+    auto &file2 = manifest.files[Path("a/b/b.txt")];
+    QVERIFY(file2.executable == false);
+    QVERIFY(file2.hash == "da39a3ee5e6b4b0d3255bfef95601890afd80709");
+    QVERIFY(file2.size == 0);
+    QVERIFY(manifest.folders.size() == 3);
+    QVERIFY(manifest.folders.count(Path(".")));
+    QVERIFY(manifest.folders.count(Path("a")));
+    QVERIFY(manifest.folders.count(Path("a/b")));
+    QVERIFY(manifest.symlinks.size() == 0);
+}
+
+#ifndef Q_OS_WIN32
+void PackageManifestTest::test_inspect_symlinks() {
     auto path = QFINDTESTDATA("testdata/inspect/");
     auto manifest = Package::fromInspectedFolder(path);
     QVERIFY(manifest.valid == true);
@@ -102,25 +127,11 @@ void PackageManifestTest::test_inspect() {
     QVERIFY(manifest.folders.count(Path("a")));
     QVERIFY(manifest.folders.count(Path("a/b")));
     QVERIFY(manifest.symlinks.size() == 1);
+    QVERIFY(manifest.symlinks.count(Path("a/b/b.txt")));
+    qDebug() << manifest.symlinks[Path("a/b/b.txt")];
+    QVERIFY(manifest.symlinks[Path("a/b/b.txt")] == Path("../b.txt"));
 }
-
-void PackageManifestTest::test_diff() {
-    auto path = QFINDTESTDATA("testdata/inspect/");
-    auto from = Package::fromInspectedFolder(path);
-    auto to = Package::fromManifestContents(basic_manifest);
-    auto operations = UpdateOperations::resolve(from, to);
-    QVERIFY(operations.valid == true);
-    QVERIFY(operations.mkdirs.size() == 1);
-    QVERIFY(operations.mkdirs[0] == Path("a/b/c"));
-
-    QVERIFY(operations.rmdirs.size() == 0);
-    QVERIFY(operations.deletes.size() == 1);
-    QVERIFY(operations.deletes[0] == Path("a/b/b.txt"));
-    QVERIFY(operations.downloads.size() == 0);
-    QVERIFY(operations.mklinks.size() == 1);
-    QVERIFY(operations.mklinks.count(Path("a/b/c.txt")));
-    QVERIFY(operations.mklinks[Path("a/b/c.txt")] == Path("../b.txt"));
-}
+#endif
 
 void PackageManifestTest::mkdir_deep() {
 

@@ -5,6 +5,12 @@
 #include <QCryptographicHash>
 #include <QDebug>
 
+#ifndef Q_OS_WIN32
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
+
 namespace mojang_files {
 
 const Hash hash_of_empty_string = "da39a3ee5e6b4b0d3255bfef95601890afd80709";
@@ -177,6 +183,49 @@ Package Package::fromManifestFile(const QString & filename) {
     }
 }
 
+#ifndef Q_OS_WIN32
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+namespace {
+// FIXME: Qt obscures symlink targets by making them absolute. that is useless. this is the workaround - we do it ourselves
+bool actually_read_symlink_target(const QString & filepath, Path & out)
+{
+    struct ::stat st;
+    // FIXME: here, we assume the native filesystem encoding. May the Gods have mercy upon our Souls.
+    QByteArray nativePath = filepath.toUtf8();
+    const char * filepath_cstr = nativePath.data();
+
+    if (lstat(filepath_cstr, &st) != 0)
+    {
+        return false;
+    }
+
+    auto size = st.st_size ? st.st_size + 1 : PATH_MAX;
+    std::string temp(size, '\0');
+    // because we don't realiably know how long the damn thing actually is, we loop and expand. POSIX is naff
+    do
+    {
+        auto link_length = ::readlink(filepath_cstr, &temp[0], temp.size());
+        if(link_length == -1)
+        {
+            return false;
+        }
+        if(std::string::size_type(link_length) < temp.size())
+        {
+            // buffer was long enough and we managed to read the link target. RETURN here.
+            temp.resize(link_length);
+            out = Path(QString::fromUtf8(temp.c_str()));
+            return true;
+        }
+        temp.resize(temp.size() * 2);
+    } while (true);
+}
+}
+#endif
+
 // FIXME: Qt filesystem abstraction is bad, but ... let's hope it doesn't break too much?
 // FIXME: The error handling is just DEFICIENT
 Package Package::fromInspectedFolder(const QString& folderPath)
@@ -190,10 +239,22 @@ Package Package::fromInspectedFolder(const QString& folderPath)
 
         auto fileInfo = iterator.fileInfo();
         auto relPath = root.relativeFilePath(fileInfo.filePath());
+        // FIXME: this is probably completely busted on Windows anyway, so just disable it.
+        // Qt makes shit up and doesn't understand the platform details
+        // TODO: Actually use a filesystem library that isn't terrible and has decen license.
+        //       I only know one, and I wrote it. Sadly, currently proprietary. PAIN.
+#ifndef Q_OS_WIN32
         if(fileInfo.isSymLink()) {
-            out.addLink(relPath, fileInfo.symLinkTarget());
+            Path targetPath;
+            if(!actually_read_symlink_target(fileInfo.filePath(), targetPath)) {
+                qCritical() << "Folder inspection: Unknown filesystem object:" << fileInfo.absoluteFilePath();
+                out.valid = false;
+            }
+            out.addLink(relPath, targetPath);
         }
-        else if(fileInfo.isDir()) {
+        else
+#endif
+        if(fileInfo.isDir()) {
             out.addFolder(relPath);
         }
         else if(fileInfo.isFile()) {
