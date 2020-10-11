@@ -306,12 +306,31 @@ set(MINECRAFT_SOURCES
     # Skin upload utilities
     minecraft/SkinUpload.cpp
     minecraft/SkinUpload.h
+
+    mojang/PackageManifest.h
+    mojang/PackageManifest.cpp
     )
 
 add_unit_test(GradleSpecifier
     SOURCES minecraft/GradleSpecifier_test.cpp
     LIBS MultiMC_logic
     )
+
+add_executable(PackageManifest
+    mojang/PackageManifest_test.cpp
+)
+target_link_libraries(PackageManifest
+    MultiMC_logic
+    Qt5::Test
+)
+target_include_directories(PackageManifest
+    PRIVATE ../../cmake/UnitTest/
+)
+add_test(
+    NAME PackageManifest
+    COMMAND PackageManifest
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 add_unit_test(MojangVersionFormat
     SOURCES minecraft/MojangVersionFormat_test.cpp
