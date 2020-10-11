@@ -100,7 +100,7 @@ void fromJson(QJsonDocument & doc, Package & out) {
         else if(type == "file") {
             FileSource bestSource;
             File file;
-            file.executable = Json::ensureBoolean(fileObject, "executable", false);
+            file.executable = Json::ensureBoolean(fileObject, QString("executable"), false);
             auto downloads = Json::requireObject(fileObject, "downloads");
             for(auto iter2 = downloads.begin(); iter2 != downloads.end(); iter2++) {
                 FileSource source;
