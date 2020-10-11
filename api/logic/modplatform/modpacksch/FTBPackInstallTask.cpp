@@ -123,16 +123,20 @@ void PackInstallTask::install()
         auto dl = Net::Download::makeFile(file.url, path);
         jobPtr->addNetAction(dl);
     }
+
     connect(jobPtr.get(), &NetJob::succeeded, this, [&]()
     {
         jobPtr.reset();
         emitSucceeded();
     });
-
     connect(jobPtr.get(), &NetJob::failed, [&](QString reason)
     {
         jobPtr.reset();
-        emitFailed(reason);
+
+        // FIXME: Temporarily ignore file download failures (matching FTB's installer),
+        // while FTB's data is fucked.
+        qWarning() << "Failed to download files for modpack: " + reason;
+        emitSucceeded();
     });
     connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total)
     {
