@@ -87,7 +87,11 @@ public:
 
 private:
     Path(const parts_type::const_iterator & start, const parts_type::const_iterator & end) {
-        parts = QStringList(start, end);
+        auto cursor = start;
+        while(cursor != end) {
+            parts.push_back(*cursor);
+            cursor++;
+        }
     }
     int compare(const Path& p) const;
 
