@@ -104,7 +104,7 @@ void ListModel::requestLogo(QString logo, QString url)
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
-    QObject::connect(job, &NetJob::finished, this, [this, logo, fullPath]
+    QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath]
     {
         emit logoLoaded(logo, QIcon(fullPath));
         if(waitingCallbacks.contains(logo))

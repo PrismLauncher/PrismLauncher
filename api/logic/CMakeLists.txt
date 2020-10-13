@@ -477,6 +477,15 @@ set(MODPACKSCH_SOURCES
     modplatform/modpacksch/FTBPackManifest.cpp
 )
 
+set(TECHNIC_SOURCES
+    modplatform/technic/SingleZipPackInstallTask.h
+    modplatform/technic/SingleZipPackInstallTask.cpp
+    modplatform/technic/SolderPackInstallTask.h
+    modplatform/technic/SolderPackInstallTask.cpp
+    modplatform/technic/TechnicPackProcessor.h
+    modplatform/technic/TechnicPackProcessor.cpp
+)
+
 add_unit_test(Index
     SOURCES meta/Index_test.cpp
     LIBS MultiMC_logic
@@ -508,6 +517,7 @@ set(LOGIC_SOURCES
     ${FTB_SOURCES}
     ${FLAME_SOURCES}
     ${MODPACKSCH_SOURCES}
+    ${TECHNIC_SOURCES}
 )
 
 add_library(MultiMC_logic SHARED ${LOGIC_SOURCES})
