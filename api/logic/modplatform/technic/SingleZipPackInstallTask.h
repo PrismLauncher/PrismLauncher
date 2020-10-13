@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-
 #pragma once
-
-#ifndef TECHNIC_SINGLEZIPPACKINSTALLTASK_H
-#define TECHNIC_SINGLEZIPPACKINSTALLTASK_H
 
 #include "InstanceTask.h"
 #include "net/NetJob.h"
@@ -60,5 +56,3 @@ private:
 };
 
 } // namespace Technic
-
-#endif // TECHNIC_SINGLEZIPPACKINSTALLTASK_H

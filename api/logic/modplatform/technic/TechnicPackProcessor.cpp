@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "TechnicPackProcessor.h"
 
 #include <FileSystem.h>
@@ -26,7 +25,6 @@
 #include <settings/INISettingsObject.h>
 
 #include <memory>
-
 
 void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings, const QString &instName, const QString &instIcon, const QString &stagingPath, const QString &minecraftVersion, const bool isSolder)
 {

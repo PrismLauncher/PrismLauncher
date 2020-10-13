@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "TechnicPage.h"
 #include "ui_TechnicPage.h"
 

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "SingleZipPackInstallTask.h"
 
 #include "Env.h"

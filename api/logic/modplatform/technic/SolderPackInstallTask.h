@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #pragma once
 
 #include <InstanceTask.h>
@@ -21,7 +20,6 @@
 #include <tasks/Task.h>
 
 #include <QUrl>
-
 
 namespace Technic
 {
