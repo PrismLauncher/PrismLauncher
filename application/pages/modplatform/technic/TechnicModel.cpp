@@ -16,6 +16,7 @@
 #include "TechnicModel.h"
 #include "Env.h"
 #include "MultiMC.h"
+#include "Json.h"
 
 #include <QIcon>
 
@@ -117,26 +118,34 @@ void Technic::ListModel::searchRequestFinished()
     }
 
     QList<Modpack> newList;
-    auto objs = doc["modpacks"].toArray();
-    for (auto technicPack: objs) {
-        Modpack pack;
-        auto technicPackObject = technicPack.toObject();
-        pack.name = technicPackObject["name"].toString();
-        pack.slug = technicPackObject["slug"].toString();
-        if (pack.slug == "vanilla")
-            continue;
-        if (technicPackObject["iconUrl"].isString())
-        {
-            pack.logoUrl = technicPackObject["iconUrl"].toString();
-            pack.logoName = pack.logoUrl.section(QLatin1Char('/'), -1).section(QLatin1Char('.'), 0, 0);
+    try {
+        auto root = Json::requireObject(doc);
+        auto objs = Json::requireArray(root, "modpacks");
+        for (auto technicPack: objs) {
+            Modpack pack;
+            auto technicPackObject = Json::requireObject(technicPack);
+            pack.name = Json::requireString(technicPackObject, "name");
+            pack.slug = Json::requireString(technicPackObject, "slug");
+            if (pack.slug == "vanilla")
+                continue;
+
+            auto rawURL = Json::ensureString(technicPackObject, "iconUrl", "null");
+            if(rawURL == "null") {
+                pack.logoUrl = "null";
+                pack.logoName = "null";
+            }
+            else {
+                pack.logoUrl = rawURL;
+                pack.logoName = rawURL.section(QLatin1Char('/'), -1).section(QLatin1Char('.'), 0, 0);
+            }
+            pack.broken = false;
+            newList.append(pack);
         }
-        else
-        {
-            pack.logoUrl = "null";
-            pack.logoName = "null";
-        }
-        pack.broken = false;
-        newList.append(pack);
+    }
+    catch (const JSONValidationError &err)
+    {
+        qCritical() << "Couldn't parse technic search results:" << err.cause() ;
+        return;
     }
     searchState = Finished;
     beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);
