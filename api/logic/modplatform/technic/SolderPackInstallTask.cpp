@@ -92,7 +92,8 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     int i = 0;
     for (auto &modUrl: modUrls)
     {
-        m_filesNetJob->addNetAction(Net::Download::makeFile(modUrl, m_outputDir.filePath(QString("%1").arg(i))));
+        auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
+        m_filesNetJob->addNetAction(Net::Download::makeFile(modUrl, path));
         i++;
     }
 
@@ -116,7 +117,8 @@ void Technic::SolderPackInstallTask::downloadSucceeded()
 
         while (m_modCount > i)
         {
-            if (MMCZip::extractDir(m_outputDir.filePath(QString("%1").arg(i)), extractDir).isEmpty())
+            auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
+            if (MMCZip::extractDir(path, extractDir).isEmpty())
             {
                 return false;
             }
