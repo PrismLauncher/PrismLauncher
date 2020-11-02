@@ -158,6 +158,9 @@ void TechnicPage::suggestCurrent()
             }
 
             current.minecraftVersion = Json::ensureString(obj, "minecraft", QString(), "__placeholder__");
+            current.websiteUrl = Json::ensureString(obj, "platformUrl", QString(), "__placeholder__");
+            current.author = Json::ensureString(obj, "user", QString(), "__placeholder__");
+            current.description = Json::ensureString(obj, "description", QString(), "__placeholder__");
             current.metadataLoaded = true;
             metadataLoaded();
         });
@@ -168,29 +171,22 @@ void TechnicPage::suggestCurrent()
 // expects current.metadataLoaded to be true
 void TechnicPage::metadataLoaded()
 {
-    /*QString text = "";
+    QString text = "";
     QString name = current.name;
 
     if (current.websiteUrl.isEmpty())
+        // This allows injecting HTML here.
         text = name;
     else
+        // URL not properly escaped for inclusion in HTML. The name allows for injecting HTML.
         text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
-    if (!current.authors.empty()) {
-        auto authorToStr = [](Technic::ModpackAuthor & author) {
-            if(author.url.isEmpty()) {
-                return author.name;
-            }
-            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
-        };
-        QStringList authorStrs;
-        for(auto & author: current.authors) {
-            authorStrs.push_back(authorToStr(author));
-        }
-        text += tr(" by ") + authorStrs.join(", ");
+    if (!current.author.isEmpty()) {
+        // This allows injecting HTML here
+        text += tr(" by ") + current.author;
     }
 
     ui->frame->setModText(text);
-    ui->frame->setModDescription(current.description);*/
+    ui->frame->setModDescription(current.description);
     if (!current.isSolder)
     {
         dialog->setSuggestedPack(current.name, new Technic::SingleZipPackInstallTask(current.url, current.minecraftVersion));

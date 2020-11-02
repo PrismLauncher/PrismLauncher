@@ -55,8 +55,37 @@
      </property>
     </widget>
    </item>
+   <item>
+    <widget class="MCModInfoFrame" name="frame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MCModInfoFrame</class>
+   <extends>QFrame</extends>
+   <header>widgets/MCModInfoFrame.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>searchEdit</tabstop>
+  <tabstop>searchButton</tabstop>
+  <tabstop>packView</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
