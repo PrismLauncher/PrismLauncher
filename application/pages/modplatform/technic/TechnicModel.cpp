@@ -20,7 +20,6 @@
 
 #include <QIcon>
 
-
 Technic::ListModel::ListModel(QObject *parent) : QAbstractListModel(parent)
 {
 }

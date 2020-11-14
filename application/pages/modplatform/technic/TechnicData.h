@@ -18,7 +18,6 @@
 #include <QList>
 #include <QString>
 
-
 namespace Technic {
 struct Modpack {
     QString slug;

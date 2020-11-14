@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "SingleZipPackInstallTask.h"
 
 #include "Env.h"
@@ -21,6 +20,7 @@
 #include "TechnicPackProcessor.h"
 
 #include <QtConcurrent>
+#include <FileSystem.h>
 
 Technic::SingleZipPackInstallTask::SingleZipPackInstallTask(const QUrl &sourceUrl, const QString &minecraftVersion)
 {
@@ -48,7 +48,7 @@ void Technic::SingleZipPackInstallTask::executeTask()
 void Technic::SingleZipPackInstallTask::downloadSucceeded()
 {
     setStatus(tr("Extracting modpack"));
-    QDir extractDir(m_stagingPath);
+    QDir extractDir(FS::PathCombine(m_stagingPath, ".minecraft"));
     qDebug() << "Attempting to create instance from" << m_archivePath;
 
     // open the zip and find relevant files in it

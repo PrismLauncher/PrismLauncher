@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-
 #pragma once
 
 #include <QString>
 #include "settings/SettingsObject.h"
-
 
 namespace Technic
 {

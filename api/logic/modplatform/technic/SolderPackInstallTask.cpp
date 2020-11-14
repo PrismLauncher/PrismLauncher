@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "SolderPackInstallTask.h"
 
 #include <FileSystem.h>
