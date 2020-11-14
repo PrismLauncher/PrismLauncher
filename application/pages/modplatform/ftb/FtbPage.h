@@ -15,7 +15,8 @@
 
 #pragma once
 
-#include "FtbModel.h"
+#include "FtbFilterModel.h"
+#include "FtbListModel.h"
 
 #include <QWidget>
 
@@ -64,13 +65,15 @@ private:
 
 private slots:
     void triggerSearch();
+    void onSortingSelectionChanged(QString data);
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);
 
 private:
     Ui::FtbPage *ui = nullptr;
     NewInstanceDialog* dialog = nullptr;
-    Ftb::ListModel* model = nullptr;
+    Ftb::ListModel* listModel = nullptr;
+    Ftb::FilterModel* filterModel = nullptr;
 
     ModpacksCH::Modpack selected;
     QString selectedVersion;

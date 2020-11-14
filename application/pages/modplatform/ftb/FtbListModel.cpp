@@ -1,4 +1,4 @@
-#include "FtbModel.h"
+#include "FtbListModel.h"
 
 #include "BuildConfig.h"
 #include "Env.h"

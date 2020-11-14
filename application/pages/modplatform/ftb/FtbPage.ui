@@ -11,22 +11,6 @@
    </rect>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0" colspan="2">
-    <widget class="QListView" name="packView">
-     <property name="alternatingRowColors">
-      <bool>true</bool>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>48</width>
-       <height>48</height>
-      </size>
-     </property>
-     <property name="uniformItemSizes">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="1">
     <widget class="QPushButton" name="searchButton">
      <property name="text">
@@ -38,18 +22,37 @@
     <widget class="QLineEdit" name="searchEdit"/>
    </item>
    <item row="2" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0" rowminimumheight="0" columnminimumwidth="0,0">
-     <item row="0" column="1">
+    <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0" rowminimumheight="0" columnminimumwidth="0,0,0">
+     <item row="0" column="2">
       <widget class="QComboBox" name="versionSelectionBox"/>
      </item>
-     <item row="0" column="0">
+     <item row="0" column="1">
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Version selected:</string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
       </widget>
      </item>
+     <item row="0" column="0">
+      <widget class="QComboBox" name="sortByBox"/>
+     </item>
     </layout>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QTreeView" name="packView">
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>48</width>
+       <height>48</height>
+      </size>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

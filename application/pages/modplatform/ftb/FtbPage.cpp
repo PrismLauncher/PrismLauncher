@@ -10,12 +10,26 @@ FtbPage::FtbPage(NewInstanceDialog* dialog, QWidget *parent)
         : QWidget(parent), ui(new Ui::FtbPage), dialog(dialog)
 {
     ui->setupUi(this);
-    connect(ui->searchButton, &QPushButton::clicked, this, &FtbPage::triggerSearch);
-    ui->searchEdit->installEventFilter(this);
-    model = new Ftb::ListModel(this);
-    ui->packView->setModel(model);
-    connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FtbPage::onSelectionChanged);
 
+    filterModel = new Ftb::FilterModel(this);
+    listModel = new Ftb::ListModel(this);
+    filterModel->setSourceModel(listModel);
+    ui->packView->setModel(filterModel);
+    ui->packView->setSortingEnabled(true);
+    ui->packView->header()->hide();
+    ui->packView->setIndentation(0);
+
+    ui->searchEdit->installEventFilter(this);
+
+    for(int i = 0; i < filterModel->getAvailableSortings().size(); i++)
+    {
+        ui->sortByBox->addItem(filterModel->getAvailableSortings().keys().at(i));
+    }
+    ui->sortByBox->setCurrentText(filterModel->translateCurrentSorting());
+
+    connect(ui->searchButton, &QPushButton::clicked, this, &FtbPage::triggerSearch);
+    connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &FtbPage::onSortingSelectionChanged);
+    connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FtbPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FtbPage::onVersionSelectionChanged);
 }
 
@@ -59,7 +73,7 @@ void FtbPage::suggestCurrent()
                 QString editedLogoName;
                 editedLogoName = selected.name;
 
-                model->getLogo(selected.name, art.url, [this, editedLogoName](QString logo)
+                listModel->getLogo(selected.name, art.url, [this, editedLogoName](QString logo)
                 {
                     dialog->setSuggestedIconFromFile(logo + ".small", editedLogoName);
                 });
@@ -70,7 +84,13 @@ void FtbPage::suggestCurrent()
 
 void FtbPage::triggerSearch()
 {
-    model->searchWithTerm(ui->searchEdit->text());
+    listModel->searchWithTerm(ui->searchEdit->text());
+}
+
+void FtbPage::onSortingSelectionChanged(QString data)
+{
+    auto toSet = filterModel->getAvailableSortings().value(data);
+    filterModel->setSorting(toSet);
 }
 
 void FtbPage::onSelectionChanged(QModelIndex first, QModelIndex second)
@@ -86,7 +106,7 @@ void FtbPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         return;
     }
 
-    selected = model->data(first, Qt::UserRole).value<ModpacksCH::Modpack>();
+    selected = filterModel->data(first, Qt::UserRole).value<ModpacksCH::Modpack>();
 
     // reverse foreach, so that the newest versions are first
     for (auto i = selected.versions.size(); i--;) {
