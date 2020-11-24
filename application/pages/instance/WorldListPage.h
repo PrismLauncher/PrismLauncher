@@ -90,6 +90,7 @@ private slots:
     void on_actionRename_triggered();
     void on_actionRefresh_triggered();
     void on_actionView_Folder_triggered();
+    void on_actionDatapacks_triggered();
     void on_actionReset_Icon_triggered();
     void worldChanged(const QModelIndex &current, const QModelIndex &previous);
     void mceditState(LoggedProcess::State state);

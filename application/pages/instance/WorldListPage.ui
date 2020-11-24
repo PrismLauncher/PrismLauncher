@@ -85,6 +85,7 @@
    <addaction name="actionCopy"/>
    <addaction name="actionRemove"/>
    <addaction name="actionMCEdit"/>
+   <addaction name="actionDatapacks"/>
    <addaction name="actionReset_Icon"/>
    <addaction name="separator"/>
    <addaction name="actionCopy_Seed"/>
@@ -137,6 +138,14 @@
    </property>
    <property name="toolTip">
     <string>Remove world icon to make the game re-generate it on next load.</string>
+   </property>
+  </action>
+  <action name="actionDatapacks">
+   <property name="text">
+    <string>Datapacks</string>
+   </property>
+   <property name="toolTip">
+    <string>Manage datapacks inside the world.</string>
    </property>
   </action>
  </widget>

@@ -170,6 +170,24 @@ void WorldListPage::on_actionView_Folder_triggered()
     DesktopServices::openDirectory(m_worlds->dir().absolutePath(), true);
 }
 
+void WorldListPage::on_actionDatapacks_triggered()
+{
+    QModelIndex index = getSelectedWorld();
+
+    if (!index.isValid())
+    {
+        return;
+    }
+
+    if(!worldSafetyNagQuestion())
+        return;
+
+    auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
+
+    DesktopServices::openDirectory(FS::PathCombine(fullPath, "datapacks"), true);
+}
+
+
 void WorldListPage::on_actionReset_Icon_triggered()
 {
     auto proxiedIndex = getSelectedWorld();
