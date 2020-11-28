@@ -206,6 +206,14 @@ void ListModel::packRequestFinished()
         return;
     }
 
+    // Since there is no guarantee that packs have a version, this will just
+    // ignore those "dud" packs.
+    if (pack.versions.empty())
+    {
+        qWarning() << "FTB Pack " << pack.id << " ignored. reason: lacking any versions";
+        return;
+    }
+
     beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size());
     modpacks.append(pack);
     endInsertRows();
