@@ -79,7 +79,7 @@ void ListModel::performSearch()
     auto *netJob = new NetJob("Ftb::Search");
     QString searchUrl;
     if(currentSearchTerm.isEmpty()) {
-        searchUrl = BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/popular/plays/100";
+        searchUrl = BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/all";
     }
     else {
         searchUrl = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/search/25?term=%1")
