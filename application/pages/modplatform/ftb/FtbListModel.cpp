@@ -211,12 +211,13 @@ void ListModel::packRequestFinished()
     if (pack.versions.empty())
     {
         qWarning() << "FTB Pack " << pack.id << " ignored. reason: lacking any versions";
-        return;
     }
-
-    beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size());
-    modpacks.append(pack);
-    endInsertRows();
+    else
+    {
+        beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size());
+        modpacks.append(pack);
+        endInsertRows();
+    }
 
     if(!remainingPacks.isEmpty()) {
         currentPack = remainingPacks.at(0);
