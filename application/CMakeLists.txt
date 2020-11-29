@@ -124,8 +124,10 @@ SET(MULTIMC_SOURCES
     # GUI - platform pages
     pages/modplatform/VanillaPage.cpp
     pages/modplatform/VanillaPage.h
-    pages/modplatform/ftb/FtbModel.cpp
-    pages/modplatform/ftb/FtbModel.h
+    pages/modplatform/ftb/FtbFilterModel.cpp
+    pages/modplatform/ftb/FtbFilterModel.h
+    pages/modplatform/ftb/FtbListModel.cpp
+    pages/modplatform/ftb/FtbListModel.h
     pages/modplatform/ftb/FtbPage.cpp
     pages/modplatform/ftb/FtbPage.h
     pages/modplatform/legacy_ftb/Page.cpp
