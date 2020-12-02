@@ -92,14 +92,19 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
 
 ## Dependencies
 * [Qt 5.6+ Development tools](http://qt-project.org/downloads) -- Qt Online Installer for Windows
-* [OpenSSL](http://slproweb.com/products/Win32OpenSSL.html) -- Newest Win32 OpenSSL Light
+    - http://download.qt.io/new_archive/qt/5.6/5.6.0/qt-opensource-windows-x86-mingw492-5.6.0.exe
+    - Download the MinGW version (MSVC version does not work).
+* [OpenSSL](https://indy.fulgan.com/SSL/Archive/) -- Win32 OpenSSL, version 1.0.2g (from 2016)
+    - https://indy.fulgan.com/SSL/Archive/openssl-1.0.2g-i386-win32.zip
+    - the usual OpenSSL for Windows (http://slproweb.com/products/Win32OpenSSL.html) only provides the newest version of OpenSSL, and we need the 1.0.2g version
+    - **Download the 32-bit version, not 64-bit.**
     - Microsoft Visual C++ 2008 Redist is required for this, there's a link on the OpenSSL download page above next to the main download.
     - We use a custom build of OpenSSL that doesn't have this dependency. For normal development, the custom build is not necessary though.
 * [zlib 1.2+](http://gnuwin32.sourceforge.net/packages/zlib.htm) - the Setup is fine
 * [Java JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 * [CMake](http://www.cmake.org/cmake/resources/software.html) -- Windows (Win32 Installer)
 
-  Put it somewhere on the `PATH`, so that it is accessible from the console.
+Ensure that OpenSSL, zlib, Java and CMake are on `PATH`.
 
 ## Getting set up
 
@@ -115,9 +120,8 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
     - Installation can take a very long time, go grab a cup of tea or something and let it work.
 
 ### Installing OpenSSL
-1. Run the OpenSSL installer,
-2. It's best to choose the option to copy OpenSSL DLLs to the `/bin` directory
-    - If you do this you'll need to add that directory (the default being `C:\OpenSSL-Win32\bin`) to your PATH system variable (Google how to do this, or use this guide for Java: http://www.java.com/en/download/help/path.xml).
+1. Download .zip file from the link above.
+2. Unzip and add the directory to PATH, so CMake can find it.
 
 ### Installing CMake
 1. Run the CMake installer,
@@ -139,6 +143,24 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
 7. Cross your fingers and press the Run button (bottom left of Qt Creator)!
     - If the project builds successfully it will run and the MultiMC5 window will pop up,
     - Test OpenSSL by making an instance and trying to log in. If Qt Creator couldn't find OpenSSL during the CMake stage, login will fail and you'll get an error.
+
+The following .dlls are needed for the app to run (copy them to build directory if you want to be able to move the build to another pc):
+```
+platforms/qwindows.dll
+libeay32.dll
+libgcc_s_dw2-1.dll
+libssp-0.dll
+libstdc++-6.dll
+libwinpthread-1.dll
+Qt5Core.dll
+Qt5Gui.dll
+Qt5Network.dll
+Qt5Svg.dll
+Qt5Widgets.dll
+Qt5Xml.dll
+ssleay32.dll
+zlib1.dll
+```
 
 **These build instructions worked for me (Drayshak) on a fresh Windows 8 x64 Professional install. If they don't work for you, let us know on IRC ([Esper/#MultiMC](http://webchat.esper.net/?nick=&channels=MultiMC))!**
 ### Compile from command line on Windows
