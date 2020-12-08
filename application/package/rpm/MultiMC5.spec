@@ -26,7 +26,7 @@ install -m 0755 ../ubuntu/multimc/opt/multimc/run.sh %{buildroot}/opt/multimc/ru
 mkdir -p %{buildroot}/%{_datadir}/applications
 install -m 0644 ../ubuntu/multimc/usr/share/applications/multimc.desktop %{buildroot}/%{_datadir}/applications/multimc.desktop
 mkdir -p %{buildroot}/%{_metainfodir}
-install -m 0644 ../linux/multimc.metainfo.xml %{buildroot}/%{_metainfodir}/multimc.metainfo.xml
+install -m 0644 ../ubuntu/multimc/usr/share/metainfo/multimc.metainfo.xml %{buildroot}/%{_metainfodir}/multimc.metainfo.xml
 
 %files
 %dir /opt/multimc
