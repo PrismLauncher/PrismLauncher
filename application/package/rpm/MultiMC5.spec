@@ -25,15 +25,15 @@ install -m 0644 ../ubuntu/multimc/opt/multimc/icon.svg %{buildroot}/opt/multimc/
 install -m 0755 ../ubuntu/multimc/opt/multimc/run.sh %{buildroot}/opt/multimc/run.sh
 mkdir -p %{buildroot}/%{_datadir}/applications
 install -m 0644 ../ubuntu/multimc/usr/share/applications/multimc.desktop %{buildroot}/%{_datadir}/applications/multimc.desktop
-mkdir -p %{buildroot}/%{_datadir}/metainfo
-install -m 0644 ../linux/multimc.metainfo.xml %{buildroot}/%{_datadir}/metainfo/multimc.metainfo.xml
+mkdir -p %{buildroot}/%{_metainfodir}
+install -m 0644 ../linux/multimc.metainfo.xml %{buildroot}/%{_metainfodir}/multimc.metainfo.xml
 
 %files
 %dir /opt/multimc
 /opt/multimc/icon.svg
 /opt/multimc/run.sh
 %{_datadir}/applications/multimc.desktop
-%{_datadir}/metainfo/multimc.metainfo.xml
+%{_metainfodir}/multimc.metainfo.xml
 
 
 %changelog
