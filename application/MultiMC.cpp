@@ -514,6 +514,10 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("UseNativeOpenAL", false);
         m_settings->registerSetting("UseNativeGLFW", false);
 
+        // Game time
+        m_settings->registerSetting("ShowGameTime", true);
+        m_settings->registerSetting("RecordGameTime", true);
+
         // Minecraft launch method
         m_settings->registerSetting("MCLaunchMethod", "LauncherPart");
 

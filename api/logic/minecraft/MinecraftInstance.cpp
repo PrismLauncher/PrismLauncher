@@ -106,6 +106,11 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
     m_settings->registerOverride(globalSettings->getSetting("UseNativeOpenAL"), nativeLibraryWorkaroundsOverride);
     m_settings->registerOverride(globalSettings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
 
+    // Game time
+    auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
+    m_settings->registerOverride(globalSettings->getSetting("ShowGameTime"), gameTimeOverride);
+    m_settings->registerOverride(globalSettings->getSetting("RecordGameTime"), gameTimeOverride);
+
     // DEPRECATED: Read what versions the user configuration thinks should be used
     m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
     m_settings->registerSetting("LWJGLVersion", "");
@@ -769,7 +774,7 @@ QString MinecraftInstance::getStatusbarDescription()
 
     QString description;
     description.append(tr("Minecraft %1 (%2)").arg(m_components->getComponentVersion("net.minecraft")).arg(typeName()));
-    if(totalTimePlayed() > 0)
+    if(m_settings->get("ShowGameTime").toBool() && totalTimePlayed() > 0)
     {
         description.append(tr(", played for %1").arg(prettifyTimeDuration(totalTimePlayed())));
     }
