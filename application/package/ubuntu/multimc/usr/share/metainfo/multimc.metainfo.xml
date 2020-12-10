@@ -23,11 +23,19 @@
   </description>
   <screenshots>
     <screenshot type="default">
-      <image type="source">https://multimc.org/images/screenshots/main.png</image>
-      <image type="source">https://multimc.org/images/screenshots/editmods.png</image>
-      <image type="source">https://multimc.org/images/screenshots/version.png</image>
-      <image type="source">https://multimc.org/images/screenshots/console.png</image>
-      <image type="source">https://multimc.org/images/screenshots/settings.png</image>
+      <image type="source" width="936" height="921">https://multimc.org/images/screenshots/main.png</image>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="936" height="998">https://multimc.org/images/screenshots/editmods.png</image>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="936" height="998">https://multimc.org/images/screenshots/version.png</image>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="936" height="998">https://multimc.org/images/screenshots/console.png</image>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="936" height="921">https://multimc.org/images/screenshots/settings.png</image>
     </screenshot>
   </screenshots>
   <releases>
