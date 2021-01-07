@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>multimc</id>
+  <launchable type="desktop-id">multimc.desktop</launchable>
+  <name>MultiMC</name>
+  <summary>Manage Minecraft instances with ease</summary>
+  <description>
+    <p>Overview</p>
+    <p>MultiMC is a free, open source launcher for Minecraft. It allows you to have multiple, cleanly separated instances of Minecraft (each with their own mods, texture packs, saves, etc) and helps you manage them and their associated options with a simple and powerful interface.</p>
+    <p>Features</p>
+    <ul>
+      <li>Manage multiple instances of Minecraft at once</li>
+      <li>Start Minecraft with a custom resolution</li>
+      <li>Change Java's runtime options (including memory options)</li>
+      <li>Shows Minecraft's console output in a colour coded window</li>
+      <li>Kill Minecraft easily if it crashes / freezes</li>
+      <li>Custom icons and groups for instances</li>
+      <li>Forge integration (automatic installation, version downloads, mod management)</li>
+      <li>Minecraft world management</li>
+      <li>Import and export Minecraft instances to share them with anyone</li>
+      <li>Supports every version of Minecraft that the vanilla launcher does</li>
+    </ul>
+  </description>
+  <screenshots>
+    <screenshot type="default">
+      <image type="source" width="936" height="921">https://multimc.org/images/screenshots/main.png</image>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="936" height="998">https://multimc.org/images/screenshots/editmods.png</image>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="936" height="998">https://multimc.org/images/screenshots/version.png</image>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="936" height="998">https://multimc.org/images/screenshots/console.png</image>
+    </screenshot>
+    <screenshot>
+      <image type="source" width="936" height="921">https://multimc.org/images/screenshots/settings.png</image>
+    </screenshot>
+  </screenshots>
+  <releases>
+    <release date="2020-03-28" version="0.6.11"/>
+  </releases>
+  <url type="homepage">https://multimc.org/</url>
+  <url type="help">https://discord.com/invite/0k2zsXGNHs0fE4Wm</url>
+  <url type="faq">https://github.com/MultiMC/MultiMC5/wiki/FAQ</url>
+  <url type="bugtracker">https://github.com/flathub/multimc/issues</url>
+  <url type="translate">https://translate.multimc.org/</url>
+  <url type="donation">https://www.patreon.com/multimc</url>
+  <developer_name>The MultiMC Team</developer_name>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>Apache-2.0</project_license>
+  <content_rating type="oars-1.1">
+    <content_attribute id="language-humor">mild</content_attribute>
+    <content_attribute id="language-discrimination">mild</content_attribute>
+    <content_attribute id="social-chat">mild</content_attribute>
+    <content_attribute id="social-info">mild</content_attribute>
+    <content_attribute id="money-purchasing">mild</content_attribute>
+  </content_rating>
+  <update_contact>peterix_at_gmail.com</update_contact>
+</component>
