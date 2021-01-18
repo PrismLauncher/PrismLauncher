@@ -1,4 +1,4 @@
-/* Copyright 2013-2019 MultiMC Contributors
+/* Copyright 2013-2021 MultiMC Contributors
  *
  * Authors: Orochimarufan <orochimarufan.x3@gmail.com>
  *
