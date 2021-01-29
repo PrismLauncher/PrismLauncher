@@ -176,7 +176,16 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings, const 
 
             if (libraryName.startsWith("net.minecraftforge:forge:") && libraryName.contains('-'))
             {
-                components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1));
+                QString libraryVersion = libraryName.section(':', 2);
+                if (!libraryVersion.startsWith("1.7.10-"))
+                {
+                    components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1));
+                }
+                else
+                {
+                    // 1.7.10 versions sometimes look like 1.7.10-10.13.4.1614-1.7.10, this filters out the 10.13.4.1614 part
+                    components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1, 1));
+                }
             }
             else if (libraryName.startsWith("net.minecraftforge:minecraftforge:"))
             {
