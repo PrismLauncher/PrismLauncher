@@ -16,17 +16,27 @@
 #pragma once
 #include <QFileInfo>
 #include <QDateTime>
+#include <nonstd/optional>
 
 #include "multimc_logic_export.h"
 
-enum class GameType
-{
-    Survival,
-    Creative,
-    Adventure,
-    Spectator
+struct MULTIMC_LOGIC_EXPORT GameType {
+    GameType() = default;
+    GameType (nonstd::optional<int> original);
+
+    QString toTranslatedString() const;
+    QString toLogString() const;
+
+    enum
+    {
+        Unknown = -1,
+        Survival = 0,
+        Creative,
+        Adventure,
+        Spectator
+    } type = Unknown;
+    nonstd::optional<int> original;
 };
-QString MULTIMC_LOGIC_EXPORT gameTypeToString(GameType type);
 
 class MULTIMC_LOGIC_EXPORT World
 {
@@ -98,6 +108,6 @@ protected:
     QDateTime levelDatTime;
     QDateTime m_lastPlayed;
     int64_t m_randomSeed = 0;
-    GameType m_gameType = GameType::Survival;
+    GameType m_gameType;
     bool is_valid = false;
 };
