@@ -1,8 +1,52 @@
-# MultiMC 0.6.11
+# MultiMC 0.6.12
+
+After roughly one year of maintenance and development work by various contributors, we're just calling it a good time to release.
+
+What got added since the last time? Quite a bit!
+
+### Visible changes
+
+- Added a CurseForge pack browser
+
+- GH-3095: Added an FTB pack browser
+
+  Temporarily, MultiMC ignores download failures for FTB packs (GH-3304). This is because the platform has consistency issues.
+
+- GH-469: Added a Technic/Solder pack browser
+
+- Fixed online saving in Classic versions
+
+- GH-3131: Fixed not working with proxy ports greater than 32767.
+
+- Skins (the part used for account icons) are now rendered with the overlay on.
+
+- GH-3189: Updated nbt library - this makes `View Worlds` work properly again for newer versions of the game.
+
+- MultiMC now shows world icons and allows resetting world icons in `View Worlds`.
+
+- GH-3427: `View Worlds` now has a very simple `Datapacks` button - it just opens the system file browser.
+
+- Added the option to not use OpenAL and/or GLFW libraries bundled with the game.
+
+  This is interesting if you have ones that come with youre system and work better.
+
+### Technical changes
+
+- GH-3234: At build time, the meta URL can be changed.
+
+- Removed some hacks previously required to get Forge working
+
+  MultiMC no longer contains pack200 and the custom lzma format support used by Forge only.
+
+- Some preparations have been done to allow downloading Java runtimes from Mojang - support for the Piston repository.
+
+# Previous releases
+
+## MultiMC 0.6.11
 
 This adds Forge 1.13+ support using [ForgeWrapper](https://github.com/ZekerZhayard/ForgeWrapper) by ZekerZhayard.
 
-### New or changed features
+#### New or changed features
 
 - GH-2988: You can now import instances and curse modpacks from the command line with the `--import` option followed by either an URL or a local file path.
 
@@ -13,8 +57,6 @@ This adds Forge 1.13+ support using [ForgeWrapper](https://github.com/ZekerZhaya
   Such downloads are not deduplicated or version upgraded like libraries are.
 
   This enables ForgeWrapper to work - MultiMC downloads all the files, and ForgeWrapper runs the Forge installer during instance start when needed.
-
-# Previous releases
 
 ## MultiMC 0.6.8
 
