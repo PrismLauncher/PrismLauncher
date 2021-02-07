@@ -207,8 +207,9 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         catch (const ParsingError &e)
         {
             std::cerr << "CommandLineError: " << e.what() << std::endl;
-            std::cerr << "Try '%1 -h' to get help on MultiMC's command line parameters."
-                      << std::endl;
+            if(argc > 0)
+                std::cerr << "Try '" << argv[0] << " -h' to get help on MultiMC's command line parameters."
+                          << std::endl;
             m_status = MultiMC::Failed;
             return;
         }
