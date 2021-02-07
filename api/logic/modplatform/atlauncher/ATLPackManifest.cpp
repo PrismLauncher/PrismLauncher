@@ -81,9 +81,9 @@ static ATLauncher::ModType parseModType(QString rawType) {
 
 static void loadVersionLoader(ATLauncher::VersionLoader & p, QJsonObject & obj) {
     p.type = Json::requireString(obj, "type");
-    p.latest = Json::ensureBoolean(obj, "latest", false);
-    p.choose = Json::ensureBoolean(obj, "choose", false);
-    p.recommended = Json::ensureBoolean(obj, "recommended", false);
+    p.latest = Json::ensureBoolean(obj, QString("latest"), false);
+    p.choose = Json::ensureBoolean(obj, QString("choose"), false);
+    p.recommended = Json::ensureBoolean(obj, QString("recommended"), false);
 
     auto metadata = Json::requireObject(obj, "metadata");
     p.version = Json::requireString(metadata, "version");
@@ -141,7 +141,7 @@ void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
 {
     v.version = Json::requireString(obj, "version");
     v.minecraft = Json::requireString(obj, "minecraft");
-    v.noConfigs = Json::ensureBoolean(obj, "noConfigs", false);
+    v.noConfigs = Json::ensureBoolean(obj, QString("noConfigs"), false);
 
     if(obj.contains("mainClass")) {
         auto main = Json::requireObject(obj, "mainClass");
