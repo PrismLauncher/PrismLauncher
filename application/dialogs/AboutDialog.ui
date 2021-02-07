@@ -165,7 +165,7 @@
           </font>
          </property>
          <property name="text">
-          <string>© 2012-2019 MultiMC Contributors</string>
+          <string>© 2012-2021 MultiMC Contributors</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
