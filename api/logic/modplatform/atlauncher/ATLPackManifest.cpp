@@ -134,7 +134,7 @@ static void loadVersionMod(ATLauncher::VersionMod & p, QJsonObject & obj) {
         p.decompFile = Json::requireString(obj, "decompFile");
     }
 
-    p.optional = Json::ensureBoolean(obj, "optional", false);
+    p.optional = Json::ensureBoolean(obj, QString("optional"), false);
 }
 
 void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
