@@ -471,7 +471,7 @@ void World::loadFromLevelDat(QByteArray data)
         auto &WorldGen_val = val.at("WorldGenSettings");
         randomSeed = read_long(WorldGen_val, "seed");
     }
-    catch (std::out_of_range) {}
+    catch (const std::out_of_range &) {}
     if(!randomSeed) {
         randomSeed = read_long(val, "RandomSeed");
     }
