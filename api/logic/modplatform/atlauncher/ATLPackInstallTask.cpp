@@ -363,7 +363,7 @@ void PackInstallTask::installConfigs()
     setStatus(tr("Downloading configs..."));
     jobPtr.reset(new NetJob(tr("Config download")));
 
-    auto path = QString("Configs/%1/%2").arg(m_pack).arg(m_version_name);
+    auto path = QString("Configs/%1/%2.zip").arg(m_pack).arg(m_version_name);
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.zip")
             .arg(m_pack).arg(m_version_name);
     auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", path);
@@ -441,8 +441,12 @@ void PackInstallTask::installMods()
                 return;
         }
 
+        QFileInfo fileName(mod.file);
+        auto cacheName = fileName.completeBaseName() + "-" + mod.md5 + "." + fileName.suffix();
+
         if (mod.type == ModType::Extract || mod.type == ModType::TexturePackExtract || mod.type == ModType::ResourcePackExtract) {
-            auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", mod.url);
+
+            auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
             modsToExtract.insert(entry->getFullPath(), mod);
 
@@ -450,7 +454,7 @@ void PackInstallTask::installMods()
             jobPtr->addNetAction(dl);
         }
         else if(mod.type == ModType::Decomp) {
-            auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", mod.url);
+            auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
             modsToDecomp.insert(entry->getFullPath(), mod);
 
