@@ -31,6 +31,7 @@ bool PackInstallTask::abort()
 
 void PackInstallTask::executeTask()
 {
+    qDebug() << "PackInstallTask::executeTask: " << QThread::currentThreadId();
     auto *netJob = new NetJob("ATLauncher::VersionFetch");
     auto searchUrl = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json")
             .arg(m_pack).arg(m_version_name);
@@ -44,6 +45,7 @@ void PackInstallTask::executeTask()
 
 void PackInstallTask::onDownloadSucceeded()
 {
+    qDebug() << "PackInstallTask::onDownloadSucceeded: " << QThread::currentThreadId();
     jobPtr.reset();
 
     QJsonParseError parse_error;
@@ -84,7 +86,7 @@ void PackInstallTask::onDownloadSucceeded()
     minecraftVersion = ver;
 
     if(m_version.noConfigs) {
-        installMods();
+        downloadMods();
     }
     else {
         installConfigs();
@@ -93,6 +95,7 @@ void PackInstallTask::onDownloadSucceeded()
 
 void PackInstallTask::onDownloadFailed(QString reason)
 {
+    qDebug() << "PackInstallTask::onDownloadFailed: " << QThread::currentThreadId();
     jobPtr.reset();
     emitFailed(reason);
 }
@@ -360,6 +363,7 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<
 
 void PackInstallTask::installConfigs()
 {
+    qDebug() << "PackInstallTask::installConfigs: " << QThread::currentThreadId();
     setStatus(tr("Downloading configs..."));
     jobPtr.reset(new NetJob(tr("Config download")));
 
@@ -392,6 +396,7 @@ void PackInstallTask::installConfigs()
 
 void PackInstallTask::extractConfigs()
 {
+    qDebug() << "PackInstallTask::extractConfigs: " << QThread::currentThreadId();
     setStatus(tr("Extracting configs..."));
 
     QDir extractDir(m_stagingPath);
@@ -406,7 +411,7 @@ void PackInstallTask::extractConfigs()
     m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/minecraft");
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, [&]()
     {
-        installMods();
+        downloadMods();
     });
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]()
     {
@@ -415,8 +420,9 @@ void PackInstallTask::extractConfigs()
     m_extractFutureWatcher.setFuture(m_extractFuture);
 }
 
-void PackInstallTask::installMods()
+void PackInstallTask::downloadMods()
 {
+    qDebug() << "PackInstallTask::installMods: " << QThread::currentThreadId();
     setStatus(tr("Downloading mods..."));
 
     jarmods.clear();
@@ -464,11 +470,16 @@ void PackInstallTask::installMods()
         else {
             auto relpath = getDirForModType(mod.type, mod.type_raw);
             if(relpath == Q_NULLPTR) continue;
-            auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
 
-            qDebug() << "Will download" << url << "to" << path;
-            auto dl = Net::Download::makeFile(url, path);
+            auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", cacheName);
+            entry->setStale(true);
+
+            auto dl = Net::Download::makeCached(url, entry);
             jobPtr->addNetAction(dl);
+
+            auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
+            qDebug() << "Will download" << url << "to" << path;
+            modsToCopy[entry->getFullPath()] = path;
 
             if(mod.type == ModType::Forge) {
                 auto vlist = ENV.metadataIndex()->get("net.minecraftforge");
@@ -493,11 +504,7 @@ void PackInstallTask::installMods()
         }
     }
 
-    connect(jobPtr.get(), &NetJob::succeeded, this, [&]()
-    {
-        jobPtr.reset();
-        extractMods();
-    });
+    connect(jobPtr.get(), &NetJob::succeeded, this, &PackInstallTask::onModsDownloaded);
     connect(jobPtr.get(), &NetJob::failed, [&](QString reason)
     {
         jobPtr.reset();
@@ -511,88 +518,103 @@ void PackInstallTask::installMods()
     jobPtr->start();
 }
 
-void PackInstallTask::extractMods()
-{
-    setStatus(tr("Extracting mods..."));
+void PackInstallTask::onModsDownloaded() {
+    qDebug() << "PackInstallTask::onModsDownloaded: " << QThread::currentThreadId();
+    jobPtr.reset();
 
-    if(modsToExtract.isEmpty()) {
-        decompMods();
-        return;
+    if(modsToExtract.size() || modsToDecomp.size() || modsToCopy.size()) {
+        m_modExtractFuture = QtConcurrent::run(QThreadPool::globalInstance(), this, &PackInstallTask::extractMods, modsToExtract, modsToDecomp, modsToCopy);
+        connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onModsExtracted);
+        connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]()
+        {
+            emitAborted();
+        });
+        m_modExtractFutureWatcher.setFuture(m_modExtractFuture);
     }
-
-    auto modPath = modsToExtract.firstKey();
-    auto mod = modsToExtract.value(modPath);
-
-    QString extractToDir;
-    if(mod.type == ModType::Extract) {
-        extractToDir = getDirForModType(mod.extractTo, mod.extractTo_raw);
+    else {
+        install();
     }
-    else if(mod.type == ModType::TexturePackExtract) {
-        extractToDir = FS::PathCombine("texturepacks", "extracted");
-    }
-    else if(mod.type == ModType::ResourcePackExtract) {
-        extractToDir = FS::PathCombine("resourcepacks", "extracted");
-    }
-
-    qDebug() << "Extracting " + mod.file + " to " + extractToDir;
-
-    QDir extractDir(m_stagingPath);
-    auto extractToPath = FS::PathCombine(extractDir.absolutePath(), "minecraft", extractToDir);
-
-    QString folderToExtract = "";
-    if(mod.type == ModType::Extract) {
-        folderToExtract = mod.extractFolder;
-    }
-
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, modPath, folderToExtract, extractToPath);
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, [&]()
-    {
-        extractMods();
-    });
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]()
-    {
-        emitAborted();
-    });
-    m_extractFutureWatcher.setFuture(m_extractFuture);
-
-    modsToExtract.remove(modPath);
 }
 
-void PackInstallTask::decompMods()
-{
-    setStatus(tr("Extracting 'decomp' mods..."));
-
-    if(modsToDecomp.isEmpty()) {
+void PackInstallTask::onModsExtracted() {
+    qDebug() << "PackInstallTask::onModsExtracted: " << QThread::currentThreadId();
+    if(m_modExtractFuture.result()) {
         install();
-        return;
+    }
+    else {
+        emitFailed(tr("Failed to extract mods..."));
+    }
+}
+
+bool PackInstallTask::extractMods(
+    const QMap<QString, VersionMod> &toExtract,
+    const QMap<QString, VersionMod> &toDecomp,
+    const QMap<QString, QString> &toCopy
+) {
+    qDebug() << "PackInstallTask::extractMods: " << QThread::currentThreadId();
+
+    setStatus(tr("Extracting mods..."));
+    for (auto iter = toExtract.begin(); iter != toExtract.end(); iter++) {
+        auto &modPath = iter.key();
+        auto &mod = iter.value();
+
+        QString extractToDir;
+        if(mod.type == ModType::Extract) {
+            extractToDir = getDirForModType(mod.extractTo, mod.extractTo_raw);
+        }
+        else if(mod.type == ModType::TexturePackExtract) {
+            extractToDir = FS::PathCombine("texturepacks", "extracted");
+        }
+        else if(mod.type == ModType::ResourcePackExtract) {
+            extractToDir = FS::PathCombine("resourcepacks", "extracted");
+        }
+
+        QDir extractDir(m_stagingPath);
+        auto extractToPath = FS::PathCombine(extractDir.absolutePath(), "minecraft", extractToDir);
+
+        QString folderToExtract = "";
+        if(mod.type == ModType::Extract) {
+            folderToExtract = mod.extractFolder;
+            folderToExtract.remove(QRegExp("^/"));
+        }
+
+        qDebug() << "Extracting " + mod.file + " to " + extractToDir;
+        if(!MMCZip::extractDir(modPath, folderToExtract, extractToPath)) {
+            // assume error
+            return false;
+        }
     }
 
-    auto modPath = modsToDecomp.firstKey();
-    auto mod = modsToDecomp.value(modPath);
+    for (auto iter = toDecomp.begin(); iter != toDecomp.end(); iter++) {
+        auto &modPath = iter.key();
+        auto &mod = iter.value();
+        auto extractToDir = getDirForModType(mod.decompType, mod.decompType_raw);
 
-    auto extractToDir = getDirForModType(mod.decompType, mod.decompType_raw);
+        QDir extractDir(m_stagingPath);
+        auto extractToPath = FS::PathCombine(extractDir.absolutePath(), "minecraft", extractToDir, mod.decompFile);
 
-    QDir extractDir(m_stagingPath);
-    auto extractToPath = FS::PathCombine(extractDir.absolutePath(), "minecraft", extractToDir, mod.decompFile);
+        qDebug() << "Extracting " + mod.decompFile + " to " + extractToDir;
+        if(!MMCZip::extractFile(modPath, mod.decompFile, extractToPath)) {
+            qWarning() << "Failed to extract" << mod.decompFile;
+            return false;
+        }
+    }
 
-    qWarning() << "Extracting " + mod.decompFile + " to " + extractToDir;
-
-    m_decompFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractFile, modPath, mod.decompFile, extractToPath);
-    connect(&m_decompFutureWatcher, &QFutureWatcher<bool>::finished, this, [&]()
-    {
-        install();
-    });
-    connect(&m_decompFutureWatcher, &QFutureWatcher<bool>::canceled, this, [&]()
-    {
-        emitAborted();
-    });
-    m_decompFutureWatcher.setFuture(m_decompFuture);
-
-    modsToDecomp.remove(modPath);
+    for (auto iter = toCopy.begin(); iter != toCopy.end(); iter++) {
+        auto &from = iter.key();
+        auto &to = iter.value();
+        FS::copy fileCopyOperation(from, to);
+        if(!fileCopyOperation()) {
+            qWarning() << "Failed to copy" << from << "to" << to;
+            return false;
+        }
+    }
+    return true;
 }
 
 void PackInstallTask::install()
 {
+    qDebug() << "PackInstallTask::install: " << QThread::currentThreadId();
     setStatus(tr("Installing modpack"));
 
     auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");

@@ -79,7 +79,7 @@ void Technic::SingleZipPackInstallTask::downloadProgressChanged(qint64 current, 
 void Technic::SingleZipPackInstallTask::extractFinished()
 {
     m_packZip.reset();
-    if (m_extractFuture.result().isEmpty())
+    if (!m_extractFuture.result())
     {
         emitFailed(tr("Failed to extract modpack"));
         return;

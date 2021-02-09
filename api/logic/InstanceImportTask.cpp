@@ -138,7 +138,7 @@ void InstanceImportTask::processZipPack()
 void InstanceImportTask::extractFinished()
 {
     m_packZip.reset();
-    if (m_extractFuture.result().isEmpty())
+    if (!m_extractFuture.result())
     {
         emitFailed(tr("Failed to extract modpack"));
         return;

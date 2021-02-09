@@ -24,6 +24,8 @@
 #include "settings/SettingsObject.h"
 #include "QObjectPtr.h"
 
+#include <nonstd/optional>
+
 class QuaZip;
 namespace Flame
 {
@@ -60,8 +62,8 @@ private: /* data */
     QString m_archivePath;
     bool m_downloadRequired = false;
     std::unique_ptr<QuaZip> m_packZip;
-    QFuture<QStringList> m_extractFuture;
-    QFutureWatcher<QStringList> m_extractFutureWatcher;
+    QFuture<nonstd::optional<QStringList>> m_extractFuture;
+    QFutureWatcher<nonstd::optional<QStringList>> m_extractFutureWatcher;
     enum class ModpackType{
         Unknown,
         MultiMC,

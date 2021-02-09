@@ -25,6 +25,8 @@
 #include <QStringList>
 #include <QUrl>
 
+#include <nonstd/optional>
+
 namespace Technic {
 
 class MULTIMC_LOGIC_EXPORT SingleZipPackInstallTask : public InstanceTask
@@ -51,8 +53,8 @@ private:
     QString m_archivePath;
     NetJobPtr m_filesNetJob;
     std::unique_ptr<QuaZip> m_packZip;
-    QFuture<QStringList> m_extractFuture;
-    QFutureWatcher<QStringList> m_extractFutureWatcher;
+    QFuture<nonstd::optional<QStringList>> m_extractFuture;
+    QFutureWatcher<nonstd::optional<QStringList>> m_extractFutureWatcher;
 };
 
 } // namespace Technic

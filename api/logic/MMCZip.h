@@ -24,6 +24,7 @@
 #include "multimc_logic_export.h"
 
 #include <JlCompress.h>
+#include <nonstd/optional>
 
 namespace MMCZip
 {
@@ -57,7 +58,7 @@ namespace MMCZip
     /**
      * Extract a subdirectory from an archive
      */
-    QStringList MULTIMC_LOGIC_EXPORT extractSubDir(QuaZip *zip, const QString & subdir, const QString &target);
+    nonstd::optional<QStringList> MULTIMC_LOGIC_EXPORT extractSubDir(QuaZip *zip, const QString & subdir, const QString &target);
 
     bool MULTIMC_LOGIC_EXPORT extractRelFile(QuaZip *zip, const QString & file, const QString &target);
 
@@ -68,7 +69,7 @@ namespace MMCZip
      * \param dir The directory to extract to, the current directory if left empty.
      * \return The list of the full paths of the files extracted, empty on failure.
      */
-    QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir);
+    nonstd::optional<QStringList> MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString dir);
 
     /**
      * Extract a subdirectory from an archive
@@ -78,7 +79,7 @@ namespace MMCZip
      * \param dir The directory to extract to, the current directory if left empty.
      * \return The list of the full paths of the files extracted, empty on failure.
      */
-    QStringList MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString subdir, QString dir);
+    nonstd::optional<QStringList> MULTIMC_LOGIC_EXPORT extractDir(QString fileCompressed, QString subdir, QString dir);
 
     /**
      * Extract a single file from an archive into a directory
