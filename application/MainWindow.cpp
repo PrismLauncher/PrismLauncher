@@ -1460,7 +1460,7 @@ void MainWindow::on_actionREDDIT_triggered()
 
 void MainWindow::on_actionDISCORD_triggered()
 {
-    DesktopServices::openUrl(QUrl("https://discord.gg/0k2zsXGNHs0fE4Wm"));
+    DesktopServices::openUrl(QUrl("https://discord.gg/multimc"));
 }
 
 void MainWindow::on_actionChangeInstIcon_triggered()
