@@ -121,6 +121,7 @@ void PackInstallTask::install()
 
     QString instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(instanceConfigPath);
+    instanceSettings->suspendSave();
     instanceSettings->registerSetting("InstanceType", "Legacy");
     instanceSettings->set("InstanceType", "OneSix");
 
