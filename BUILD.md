@@ -7,7 +7,7 @@ Build Instructions
 * [Getting the source](#source)
 * [Linux](#linux)
 * [Windows](#windows)
-* [OS X](#os-x)
+* [macOS](#macos)
 
 # Note
 
@@ -172,36 +172,32 @@ zlib1.dll
 5. Run the command `mingw32-make install`, and it should install MultiMC, to whatever the `-DCMAKE_INSTALL_PREFIX` was.
 6. In most cases, whenever compiling, the OpenSSL dll's aren't put into the directory to where MultiMC installs, meaning you cannot log in. The best way to fix this is just to do `copy C:\OpenSSL-Win32\*.dll C:\Where\you\installed\MultiMC\to`. This should copy the required OpenSSL dll's to log in.
 
-# OS X
+# macOS
 
 ### Install prerequisites:
-* install homebrew
-* then:
-
-```
-brew install qt5
-brew tap homebrew/versions
-brew install gcc48
-brew install cmake
-```
+- Install XCode and set it up to the point where you can build things from a terminal
+- Install the official build of CMake (https://cmake.org/download/)
+- Install JDK 8 (https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html)
+- Get Qt 5.6 and install it (https://download.qt.io/new_archive/qt/5.6/5.6.3/)
 
 ### Build
 
 Pick an installation path - this is where the final `.app` will be constructed when you run `make install`. Supply it as the `CMAKE_INSTALL_PREFIX` argument during CMake configuration.
 
 ```
-git clone https://github.com/MultiMC/MultiMC5.git
+git clone --recursive https://github.com/MultiMC/MultiMC5.git
 cd MultiMC5
-git submodule init
-git submodule update
 mkdir build
 cd build
-export CMAKE_PREFIX_PATH=/usr/local/opt/qt5
-export CC=/usr/local/bin/gcc-4.8
-export CXX=/usr/local/bin/g++-4.8
-cmake .. -DCMAKE_INSTALL_PREFIX:PATH=/Users/YOU/some/path/that/makes/sense/
-make
+cmake \
+ -DCMAKE_C_COMPILER=/usr/bin/clang \
+ -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
+ -DCMAKE_BUILD_TYPE=Release \
+ -DCMAKE_INSTALL_PREFIX:PATH="../dist/" \
+ -DCMAKE_PREFIX_PATH="/path/to/Qt5.6/" \
+ -DQt5_DIR="/path/to/Qt5.6/" \
+ -DMultiMC_LAYOUT=mac-bundle \
+ -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
+ ..
 make install
 ```
-  
-**These build instructions were taken and adapted from https://gist.github.com/number5/7250865 If they don't work for you, let us know on IRC ([Esper/#MultiMC](http://webchat.esper.net/?nick=&channels=MultiMC))!**
