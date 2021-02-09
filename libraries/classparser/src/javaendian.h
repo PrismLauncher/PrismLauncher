@@ -11,32 +11,17 @@ inline uint64_t bigswap(uint64_t x)
 {
     return x;
 }
-;
+
 inline uint32_t bigswap(uint32_t x)
 {
     return x;
 }
-;
+
 inline uint16_t bigswap(uint16_t x)
 {
     return x;
 }
-;
-inline int64_t bigswap(int64_t x)
-{
-    return x;
-}
-;
-inline int32_t bigswap(int32_t x)
-{
-    return x;
-}
-;
-inline int16_t bigswap(int16_t x)
-{
-    return x;
-}
-;
+
 #else
 inline uint64_t bigswap(uint64_t x)
 {
@@ -55,22 +40,20 @@ inline uint16_t bigswap(uint16_t x)
     return (x >> 8) | (x << 8);
 }
 
+#endif
+
 inline int64_t bigswap(int64_t x)
 {
-    return (x >> 56) | ((x << 40) & 0x00FF000000000000) | ((x << 24) & 0x0000FF0000000000) |
-           ((x << 8) & 0x000000FF00000000) | ((x >> 8) & 0x00000000FF000000) |
-           ((x >> 24) & 0x0000000000FF0000) | ((x >> 40) & 0x000000000000FF00) | (x << 56);
+    return static_cast<int64_t>(bigswap(static_cast<uint64_t>(x)));
 }
 
 inline int32_t bigswap(int32_t x)
 {
-    return (x >> 24) | ((x << 8) & 0x00FF0000) | ((x >> 8) & 0x0000FF00) | (x << 24);
+    return static_cast<int32_t>(bigswap(static_cast<uint32_t>(x)));
 }
 
 inline int16_t bigswap(int16_t x)
 {
-    return (x >> 8) | (x << 8);
+    return static_cast<int16_t>(bigswap(static_cast<uint16_t>(x)));
 }
-
-#endif
 }
