@@ -80,6 +80,8 @@ void AtlPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
     selected = filterModel->data(first, Qt::UserRole).value<ATLauncher::IndexedPack>();
 
+    ui->packDescription->setHtml(selected.description.replace("\n", "<br>"));
+
     for(const auto& version : selected.versions) {
         ui->versionSelectionBox->addItem(version.version);
     }

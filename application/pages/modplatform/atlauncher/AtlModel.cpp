@@ -39,7 +39,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::ToolTipRole)
     {
-        return pack.description;
+        return pack.name;
     }
     else if(role == Qt::DecorationRole)
     {
