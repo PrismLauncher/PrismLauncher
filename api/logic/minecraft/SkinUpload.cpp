@@ -3,15 +3,14 @@
 #include <QHttpMultiPart>
 #include <Env.h>
 
-QByteArray getModelString(SkinUpload::Model model) {
+QByteArray getVariant(SkinUpload::Model model) {
     switch (model) {
-        case SkinUpload::STEVE:
-            return "";
-        case SkinUpload::ALEX:
-            return "slim";
         default:
             qDebug() << "Unknown skin type!";
-            return "";
+        case SkinUpload::STEVE:
+            return "CLASSIC";
+        case SkinUpload::ALEX:
+            return "SLIM";
     }
 }
 
@@ -22,25 +21,23 @@ SkinUpload::SkinUpload(QObject *parent, AuthSessionPtr session, QByteArray skin,
 
 void SkinUpload::executeTask()
 {
-    QNetworkRequest request(QUrl(QString("https://api.mojang.com/user/profile/%1/skin").arg(m_session->uuid)));
-    request.setRawHeader("Authorization", QString("Bearer: %1").arg(m_session->access_token).toLocal8Bit());
-
+    QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/skins"));
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_session->access_token).toLocal8Bit());
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
-
-    QHttpPart model;
-    model.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"model\""));
-    model.setBody(getModelString(m_model));
 
     QHttpPart skin;
     skin.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
-    skin.setHeader(QNetworkRequest::ContentDispositionHeader,
-                QVariant("form-data; name=\"file\"; filename=\"skin.png\""));
+    skin.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"skin.png\""));
     skin.setBody(m_skin);
 
-    multiPart->append(model);
-    multiPart->append(skin);
+    QHttpPart model;
+    model.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"variant\""));
+    model.setBody(getVariant(m_model));
 
-    QNetworkReply *rep = ENV.qnam().put(request, multiPart);
+    multiPart->append(skin);
+    multiPart->append(model);
+
+    QNetworkReply *rep = ENV.qnam().post(request, multiPart);
     m_reply = std::shared_ptr<QNetworkReply>(rep);
 
     setStatus(tr("Uploading skin"));
