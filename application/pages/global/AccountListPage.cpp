@@ -30,6 +30,7 @@
 #include "dialogs/SkinUploadDialog.h"
 #include "tasks/Task.h"
 #include "minecraft/auth/YggdrasilTask.h"
+#include "minecraft/services/SkinDelete.h"
 
 #include "MultiMC.h"
 
@@ -142,6 +143,7 @@ void AccountListPage::updateButtonStates()
     ui->actionRemove->setEnabled(selection.size() > 0);
     ui->actionSetDefault->setEnabled(selection.size() > 0);
     ui->actionUploadSkin->setEnabled(selection.size() > 0);
+    ui->actionDeleteSkin->setEnabled(selection.size() > 0);
 
     if(m_accounts->activeAccount().get() == nullptr) {
         ui->actionNoDefault->setEnabled(false);
@@ -189,5 +191,27 @@ void AccountListPage::on_actionUploadSkin_triggered()
         MojangAccountPtr account = selected.data(MojangAccountList::PointerRole).value<MojangAccountPtr>();
         SkinUploadDialog dialog(account, this);
         dialog.exec();
+    }
+}
+
+void AccountListPage::on_actionDeleteSkin_triggered()
+{
+    QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
+    if (selection.size() <= 0)
+        return;
+
+    QModelIndex selected = selection.first();
+    AuthSessionPtr session = std::make_shared<AuthSession>();
+    MojangAccountPtr account = selected.data(MojangAccountList::PointerRole).value<MojangAccountPtr>();
+    auto login = account->login(session);
+    ProgressDialog prog(this);
+    if (prog.execWithTask((Task*)login.get()) != QDialog::Accepted) {
+        CustomMessageBox::selectable(this, tr("Skin Delete"), tr("Failed to login!"), QMessageBox::Warning)->exec();
+        return;
+    }
+    auto deleteSkinTask = std::make_shared<SkinDelete>(this, session);
+    if (prog.execWithTask((Task*)deleteSkinTask.get()) != QDialog::Accepted) {
+        CustomMessageBox::selectable(this, tr("Skin Delete"), tr("Failed to delete current skin!"), QMessageBox::Warning)->exec();
+        return;
     }
 }

@@ -40,7 +40,9 @@
    <addaction name="actionRemove"/>
    <addaction name="actionSetDefault"/>
    <addaction name="actionNoDefault"/>
+   <addaction name="separator"/>
    <addaction name="actionUploadSkin"/>
+   <addaction name="actionDeleteSkin"/>
   </widget>
   <action name="actionAdd">
    <property name="text">
@@ -68,6 +70,14 @@
   <action name="actionUploadSkin">
    <property name="text">
     <string>Upload Skin</string>
+   </property>
+  </action>
+  <action name="actionDeleteSkin">
+   <property name="text">
+    <string>Delete Skin</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete the currently active skin and go back to the default one</string>
    </property>
   </action>
  </widget>

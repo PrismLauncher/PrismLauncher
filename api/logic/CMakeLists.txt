@@ -303,9 +303,11 @@ set(MINECRAFT_SOURCES
     minecraft/AssetsUtils.h
     minecraft/AssetsUtils.cpp
 
-    # Skin upload utilities
-    minecraft/SkinUpload.cpp
-    minecraft/SkinUpload.h
+    # Minecraft services
+    minecraft/services/SkinUpload.cpp
+    minecraft/services/SkinUpload.h
+    minecraft/services/SkinDelete.cpp
+    minecraft/services/SkinDelete.h
 
     mojang/PackageManifest.h
     mojang/PackageManifest.cpp
