@@ -62,6 +62,9 @@ private:
     void suggestCurrent();
 
 private slots:
+    void triggerSearch();
+    void resetSearch();
+
     void onSortingSelectionChanged(QString data);
 
     void onSelectionChanged(QModelIndex first, QModelIndex second);

@@ -18,6 +18,7 @@ public:
     QString translateCurrentSorting();
     void setSorting(Sorting sorting);
     Sorting getCurrentSorting();
+    void setSearchTerm(QString term);
 
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
@@ -26,6 +27,7 @@ protected:
 private:
     QMap<QString, Sorting> sortings;
     Sorting currentSorting;
+    QString searchTerm;
 
 };
 

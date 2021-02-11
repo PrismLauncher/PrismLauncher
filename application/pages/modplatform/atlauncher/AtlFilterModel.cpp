@@ -14,6 +14,8 @@ FilterModel::FilterModel(QObject *parent) : QSortFilterProxyModel(parent)
     sortings.insert(tr("Sort by popularity"), Sorting::ByPopularity);
     sortings.insert(tr("Sort by name"), Sorting::ByName);
     sortings.insert(tr("Sort by game version"), Sorting::ByGameVersion);
+
+    searchTerm = "";
 }
 
 const QMap<QString, FilterModel::Sorting> FilterModel::getAvailableSortings()
@@ -37,9 +39,21 @@ FilterModel::Sorting FilterModel::getCurrentSorting()
     return currentSorting;
 }
 
+void FilterModel::setSearchTerm(const QString term)
+{
+    searchTerm = term.trimmed();
+    invalidate();
+}
+
 bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
-    return true;
+    if (searchTerm.isEmpty()) {
+        return true;
+    }
+
+    QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+    ATLauncher::IndexedPack pack = sourceModel()->data(index, Qt::UserRole).value<ATLauncher::IndexedPack>();
+    return pack.name.contains(searchTerm, Qt::CaseInsensitive);
 }
 
 bool FilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
