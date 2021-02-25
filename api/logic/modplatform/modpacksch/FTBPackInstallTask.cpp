@@ -30,7 +30,7 @@ void PackInstallTask::executeTask()
         if (vInfo.name == m_version_name) {
             found = true;
             version = vInfo;
-            continue;
+            break;
         }
     }
 
@@ -102,13 +102,18 @@ void PackInstallTask::install()
     for(auto target : m_version.targets) {
         if(target.type == "game" && target.name == "minecraft") {
             components->setComponentVersion("net.minecraft", target.version, true);
-            continue;
+            break;
         }
     }
 
     for(auto target : m_version.targets) {
-        if(target.type == "modloader" && target.name == "forge") {
+        if(target.type != "modloader") continue;
+
+        if(target.name == "forge") {
             components->setComponentVersion("net.minecraftforge", target.version, true);
+        }
+        else if(target.name == "fabric") {
+            components->setComponentVersion("net.fabricmc.fabric-loader", target.version, true);
         }
     }
     components->saveNow();
