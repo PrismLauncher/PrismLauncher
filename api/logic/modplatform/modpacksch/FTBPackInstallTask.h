@@ -26,6 +26,7 @@ private slots:
     void onDownloadFailed(QString reason);
 
 private:
+    void downloadPack();
     void install();
 
 private:

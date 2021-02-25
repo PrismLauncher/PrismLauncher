@@ -76,13 +76,52 @@ void PackInstallTask::onDownloadSucceeded()
     }
     m_version = version;
 
-    install();
+    downloadPack();
 }
 
 void PackInstallTask::onDownloadFailed(QString reason)
 {
     jobPtr.reset();
     emitFailed(reason);
+}
+
+void PackInstallTask::downloadPack()
+{
+    setStatus(tr("Downloading mods..."));
+
+    jobPtr.reset(new NetJob(tr("Mod download")));
+    for(auto file : m_version.files) {
+        if(file.serverOnly) continue;
+
+        auto relpath = FS::PathCombine("minecraft", file.path, file.name);
+        auto path = FS::PathCombine(m_stagingPath, relpath);
+
+        qDebug() << "Will download" << file.url << "to" << path;
+        auto dl = Net::Download::makeFile(file.url, path);
+        jobPtr->addNetAction(dl);
+    }
+
+    connect(jobPtr.get(), &NetJob::succeeded, this, [&]()
+    {
+        jobPtr.reset();
+        install();
+    });
+    connect(jobPtr.get(), &NetJob::failed, [&](QString reason)
+    {
+        jobPtr.reset();
+
+        // FIXME: Temporarily ignore file download failures (matching FTB's installer),
+        // while FTB's data is fucked.
+        qWarning() << "Failed to download files for modpack: " + reason;
+
+        install();
+    });
+    connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total)
+    {
+        setProgress(current, total);
+    });
+
+    jobPtr->start();
 }
 
 void PackInstallTask::install()
@@ -116,45 +155,14 @@ void PackInstallTask::install()
             components->setComponentVersion("net.fabricmc.fabric-loader", target.version, true);
         }
     }
+
     components->saveNow();
-
-    jobPtr.reset(new NetJob(tr("Mod download")));
-    for(auto file : m_version.files) {
-        if(file.serverOnly) continue;
-
-        auto relpath = FS::PathCombine("minecraft", file.path, file.name);
-        auto path = FS::PathCombine(m_stagingPath, relpath);
-
-        qDebug() << "Will download" << file.url << "to" << path;
-        auto dl = Net::Download::makeFile(file.url, path);
-        jobPtr->addNetAction(dl);
-    }
-
-    connect(jobPtr.get(), &NetJob::succeeded, this, [&]()
-    {
-        jobPtr.reset();
-        emitSucceeded();
-    });
-    connect(jobPtr.get(), &NetJob::failed, [&](QString reason)
-    {
-        jobPtr.reset();
-
-        // FIXME: Temporarily ignore file download failures (matching FTB's installer),
-        // while FTB's data is fucked.
-        qWarning() << "Failed to download files for modpack: " + reason;
-        emitSucceeded();
-    });
-    connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total)
-    {
-        setProgress(current, total);
-    });
-
-    setStatus(tr("Downloading mods..."));
-    jobPtr->start();
 
     instance.setName(m_instName);
     instance.setIconKey(m_instIcon);
     instanceSettings->resumeSave();
+
+    emitSucceeded();
 }
 
 }
