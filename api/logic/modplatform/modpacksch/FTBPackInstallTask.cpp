@@ -156,6 +156,18 @@ void PackInstallTask::install()
         }
     }
 
+    // install any jar mods
+    QDir jarModsDir(FS::PathCombine(m_stagingPath, "minecraft", "jarmods"));
+    if (jarModsDir.exists()) {
+        QStringList jarMods;
+
+        for (const auto& info : jarModsDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files)) {
+            jarMods.push_back(info.absoluteFilePath());
+        }
+
+        components->installJarMods(jarMods);
+    }
+
     components->saveNow();
 
     instance.setName(m_instName);
