@@ -94,8 +94,8 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
 * [Qt 5.6+ Development tools](http://qt-project.org/downloads) -- Qt Online Installer for Windows
     - http://download.qt.io/new_archive/qt/5.6/5.6.0/qt-opensource-windows-x86-mingw492-5.6.0.exe
     - Download the MinGW version (MSVC version does not work).
-* [OpenSSL](https://indy.fulgan.com/SSL/Archive/) -- Win32 OpenSSL, version 1.0.2g (from 2016)
-    - https://indy.fulgan.com/SSL/Archive/openssl-1.0.2g-i386-win32.zip
+* [OpenSSL](https://github.com/IndySockets/OpenSSL-Binaries/tree/master/Archive/) -- Win32 OpenSSL, version 1.0.2g (from 2016)
+    - https://github.com/IndySockets/OpenSSL-Binaries/raw/master/Archive/openssl-1.0.2g-i386-win32.zip
     - the usual OpenSSL for Windows (http://slproweb.com/products/Win32OpenSSL.html) only provides the newest version of OpenSSL, and we need the 1.0.2g version
     - **Download the 32-bit version, not 64-bit.**
     - Microsoft Visual C++ 2008 Redist is required for this, there's a link on the OpenSSL download page above next to the main download.
