@@ -1,0 +1,41 @@
+name: Suggestion
+description: Make a suggestion
+labels: [idea, needs-triage]
+issue_body: true
+body:
+- type: markdown
+  attributes:
+    value: |
+      ### Use this form to suggest a feature for MultiMC.
+- type: input
+  attributes:
+    label: Role
+    description: In what way do you use MultiMC that needs this feature?
+    placeholder: I play modded Minecraft.
+  validations:
+    required: true
+- type: input
+  attributes:
+    label: Suggestion
+    description: What do you want MultiMC to do?
+    placeholder: I want the cat button to meow.
+  validations:
+    required: true
+- type: input
+  attributes:
+    label: Benefit
+    description: Why do you need MultiMC to do this?
+    placeholder: so that I can always hear a cat when I need to.
+  validations:
+    required: true
+- type: checkboxes
+  attributes:
+    label: This suggestion is unique
+    options:
+    - label: I have searched the issue tracker and did not find an issue describing my suggestion, especially not one that has been rejected.
+      required: true      
+- type: markdown
+  attributes:
+    value: |
+      ### You may use the editor below to elaborate further.
+# The issue_body: true up there makes the standard WYSIWYG editor for issues show up down here.
