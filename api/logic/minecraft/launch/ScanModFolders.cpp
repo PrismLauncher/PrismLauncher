@@ -27,11 +27,16 @@ void ScanModFolders::executeTask()
 
     auto loaders = m_inst->loaderModList();
     connect(loaders.get(), &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone);
-    loaders->update();
+    if(!loaders->update()) {
+        m_modsDone = true;
+    }
 
     auto cores = m_inst->coreModList();
     connect(cores.get(), &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone);
-    cores->update();
+    if(!cores->update()) {
+        m_coreModsDone = true;
+    }
+    checkDone();
 }
 
 void ScanModFolders::modsDone()
