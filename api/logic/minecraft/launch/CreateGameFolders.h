@@ -19,13 +19,13 @@
 #include <LoggedProcess.h>
 #include <minecraft/auth/AuthSession.h>
 
-// HACK: this is a workaround for MCL-3732 - 'server-resource-packs' folder is created.
-class CreateServerResourcePacksFolder: public LaunchStep
+// Create the main .minecraft for the instance and any other necessary folders
+class CreateGameFolders: public LaunchStep
 {
     Q_OBJECT
 public:
-    explicit CreateServerResourcePacksFolder(LaunchTask *parent);
-    virtual ~CreateServerResourcePacksFolder() {};
+    explicit CreateGameFolders(LaunchTask *parent);
+    virtual ~CreateGameFolders() {};
 
     virtual void executeTask();
     virtual bool canAbort() const

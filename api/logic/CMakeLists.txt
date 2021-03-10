@@ -226,8 +226,8 @@ set(MINECRAFT_SOURCES
 
     minecraft/launch/ClaimAccount.cpp
     minecraft/launch/ClaimAccount.h
-    minecraft/launch/CreateServerResourcePacksFolder.cpp
-    minecraft/launch/CreateServerResourcePacksFolder.h
+    minecraft/launch/CreateGameFolders.cpp
+    minecraft/launch/CreateGameFolders.h
     minecraft/launch/ModMinecraftJar.cpp
     minecraft/launch/ModMinecraftJar.h
     minecraft/launch/DirectJavaLaunch.cpp
