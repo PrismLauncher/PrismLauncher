@@ -31,7 +31,7 @@ We've added a whole bunch of new modpack platforms to pick from right into the n
 
 - Added the option to not use OpenAL and/or GLFW libraries bundled with the game.
 
-  This is interesting if you have ones that come with youre system and work better.
+  This is interesting if you have ones that come with your system and work better.
 
 - Skins (the part used for account icons) are now rendered with the overlay on.
 
