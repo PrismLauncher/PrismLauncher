@@ -4,15 +4,6 @@ After roughly one year of maintenance and development work by various contributo
 
 What got added since the last time? Quite a bit! But in general, this is more of a spring cleaning before the major changes that we need to make come in.
 
-What comes next after this:
-
-- Rework of the account system to add support for Microsoft accounts
-- Rework of the Mojang accounts to allow them to co-exist with Microsoft accounts
-- General fixes to dealing with account state and skins -- currently, we use a third party service to fetch skins and we only do it on application start.
-- Complete rework of Java runtime management. The game will soon require different versions of the JRE and our approach will no longer work in that environment.
-
-We'll probably call it 0.7 once all these are in place.
-
 ### Modpack platforms
 
 We've added a whole bunch of new modpack platforms to pick from right into the new instance dialog. If you run into any unusual issues with the imported packs, report them on the bug tracker.
