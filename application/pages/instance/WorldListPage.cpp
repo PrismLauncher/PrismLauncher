@@ -314,6 +314,7 @@ void WorldListPage::worldChanged(const QModelIndex &current, const QModelIndex &
     ui->actionRemove->setEnabled(enable);
     ui->actionCopy->setEnabled(enable);
     ui->actionRename->setEnabled(enable);
+    ui->actionDatapacks->setEnabled(enable);
     bool hasIcon = !index.data(WorldList::IconFileRole).isNull();
     ui->actionReset_Icon->setEnabled(enable && hasIcon);
 }
