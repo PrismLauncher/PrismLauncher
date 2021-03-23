@@ -3,7 +3,7 @@
 #include <QString>
 #include <QList>
 
-namespace Twitch {
+namespace Flame {
 
 struct ModpackAuthor {
     QString name;
@@ -35,4 +35,4 @@ struct Modpack
 };
 }
 
-Q_DECLARE_METATYPE(Twitch::Modpack)
+Q_DECLARE_METATYPE(Flame::Modpack)

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <modplatform/legacy_ftb/PackHelpers.h>
 #include <RWStorage.h>
 
 #include <QAbstractListModel>
@@ -16,9 +15,9 @@
 #include <functional>
 #include <net/NetJob.h>
 
-#include "TwitchData.h"
+#include "FlameData.h"
 
-namespace Twitch {
+namespace Flame {
 
 
 typedef QMap<QString, QIcon> LogoMap;
