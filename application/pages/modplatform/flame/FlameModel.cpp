@@ -263,11 +263,12 @@ void Flame::ListModel::searchRequestFinished()
             }
             pack.latestFile.addonId = pack.addonId;
             pack.latestFile.fileId = id;
-            // FIXME: what to do when there's more than one, or there's no version?
             auto versionArray = file.value("gameVersion").toArray();
-            if(versionArray.size() != 1) {
+            if(versionArray.size() < 1) {
                 continue;
             }
+
+            // pick the latest version supported
             pack.latestFile.mcVersion = versionArray[0].toString();
             pack.latestFile.version = file.value("displayName").toString();
             pack.latestFile.downloadUrl = file.value("downloadUrl").toString();
