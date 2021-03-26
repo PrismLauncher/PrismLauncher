@@ -526,11 +526,23 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session)
         out << "";
     }
 
+    auto settings = this->settings();
+    bool nativeOpenAL = settings->get("UseNativeOpenAL").toBool();
+    bool nativeGLFW = settings->get("UseNativeGLFW").toBool();
+    if (nativeOpenAL || nativeGLFW)
+    {
+        if (nativeOpenAL)
+            out << "Using system OpenAL.";
+        if (nativeGLFW)
+            out << "Using system GLFW.";
+        out << "";
+    }
+
     // libraries and class path.
     {
         out << "Libraries:";
         QStringList jars, nativeJars;
-        auto javaArchitecture = settings()->get("JavaArchitecture").toString();
+        auto javaArchitecture = settings->get("JavaArchitecture").toString();
         profile->getLibraryFiles(javaArchitecture, jars, nativeJars, getLocalLibraryPath(), binRoot());
         auto printLibFile = [&](const QString & path)
         {
@@ -616,14 +628,14 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session)
     out << "";
 
     QString windowParams;
-    if (settings()->get("LaunchMaximized").toBool())
+    if (settings->get("LaunchMaximized").toBool())
     {
         out << "Window size: max (if available)";
     }
     else
     {
-        auto width = settings()->get("MinecraftWinWidth").toInt();
-        auto height = settings()->get("MinecraftWinHeight").toInt();
+        auto width = settings->get("MinecraftWinWidth").toInt();
+        auto height = settings->get("MinecraftWinHeight").toInt();
         out << "Window size: " + QString::number(width) + " x " + QString::number(height);
     }
     out << "";
