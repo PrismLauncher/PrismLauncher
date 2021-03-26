@@ -106,21 +106,22 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
 
 void ListModel::searchWithTerm(const QString &term)
 {
-    if(currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull()) {
+    if(searchState != Failed && currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull()) {
+        // unless the search has failed, then there is no need to perform an identical search.
         return;
     }
     currentSearchTerm = term;
+
     if(jobPtr) {
         jobPtr->abort();
-        searchState = ResetRequested;
-        return;
+        jobPtr.reset();
     }
-    else {
-        beginResetModel();
-        modpacks.clear();
-        endResetModel();
-        searchState = None;
-    }
+
+    beginResetModel();
+    modpacks.clear();
+    endResetModel();
+    searchState = None;
+
     performSearch();
 }
 
@@ -154,15 +155,7 @@ void ListModel::searchRequestFailed(QString reason)
     jobPtr.reset();
     remainingPacks.clear();
 
-    if(searchState == ResetRequested) {
-        beginResetModel();
-        modpacks.clear();
-        endResetModel();
-
-        performSearch();
-    } else {
-        searchState = Finished;
-    }
+    searchState = Failed;
 }
 
 void ListModel::requestPack()

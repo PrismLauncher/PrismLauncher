@@ -57,7 +57,8 @@ private:
         None,
         CanPossiblyFetchMore,
         ResetRequested,
-        Finished
+        Finished,
+        Failed,
     } searchState = None;
     NetJobPtr jobPtr;
     int currentPack;
