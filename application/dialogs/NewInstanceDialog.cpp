@@ -37,7 +37,7 @@
 #include <pages/modplatform/atlauncher/AtlPage.h>
 #include <pages/modplatform/ftb/FtbPage.h>
 #include <pages/modplatform/legacy_ftb/Page.h>
-#include <pages/modplatform/twitch/TwitchPage.h>
+#include <pages/modplatform/flame/FlamePage.h>
 #include <pages/modplatform/ImportPage.h>
 #include <pages/modplatform/technic/TechnicPage.h>
 
@@ -124,17 +124,17 @@ void NewInstanceDialog::accept()
 QList<BasePage *> NewInstanceDialog::getPages()
 {
     importPage = new ImportPage(this);
-    twitchPage = new TwitchPage(this);
+    flamePage = new FlamePage(this);
     auto technicPage = new TechnicPage(this);
     return
     {
         new VanillaPage(this),
         importPage,
         new AtlPage(this),
+        flamePage,
         new FtbPage(this),
         new LegacyFTB::Page(this),
-        technicPage,
-        twitchPage
+        technicPage
     };
 }
 

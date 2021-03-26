@@ -20,41 +20,41 @@
 #include "pages/BasePage.h"
 #include <MultiMC.h>
 #include "tasks/Task.h"
-#include "TwitchData.h"
+#include "FlameData.h"
 
 namespace Ui
 {
-class TwitchPage;
+class FlamePage;
 }
 
 class NewInstanceDialog;
 
-namespace Twitch {
+namespace Flame {
     class ListModel;
 }
 
-class TwitchPage : public QWidget, public BasePage
+class FlamePage : public QWidget, public BasePage
 {
     Q_OBJECT
 
 public:
-    explicit TwitchPage(NewInstanceDialog* dialog, QWidget *parent = 0);
-    virtual ~TwitchPage();
+    explicit FlamePage(NewInstanceDialog* dialog, QWidget *parent = 0);
+    virtual ~FlamePage();
     virtual QString displayName() const override
     {
-        return tr("Twitch");
+        return tr("CurseForge");
     }
     virtual QIcon icon() const override
     {
-        return MMC->getThemedIcon("twitch");
+        return MMC->getThemedIcon("flame");
     }
     virtual QString id() const override
     {
-        return "twitch";
+        return "flame";
     }
     virtual QString helpPage() const override
     {
-        return "Twitch-platform";
+        return "Flame-platform";
     }
     virtual bool shouldDisplay() const override;
 
@@ -70,8 +70,8 @@ private slots:
     void onSelectionChanged(QModelIndex first, QModelIndex second);
 
 private:
-    Ui::TwitchPage *ui = nullptr;
+    Ui::FlamePage *ui = nullptr;
     NewInstanceDialog* dialog = nullptr;
-    Twitch::ListModel* model = nullptr;
-    Twitch::Modpack current;
+    Flame::ListModel* model = nullptr;
+    Flame::Modpack current;
 };

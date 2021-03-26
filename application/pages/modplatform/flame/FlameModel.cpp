@@ -1,4 +1,4 @@
-#include "TwitchModel.h"
+#include "FlameModel.h"
 #include "MultiMC.h"
 
 #include <MMCStrings.h>
@@ -10,7 +10,7 @@
 #include <RWStorage.h>
 #include <Env.h>
 
-namespace Twitch {
+namespace Flame {
 
 ListModel::ListModel(QObject *parent) : QAbstractListModel(parent)
 {
@@ -99,8 +99,8 @@ void ListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = ENV.metacache()->resolveEntry("TwitchPacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
-    NetJob *job = new NetJob(QString("Twitch Icon Download %1").arg(logo));
+    MetaEntryPtr entry = ENV.metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
+    NetJob *job = new NetJob(QString("Flame Icon Download %1").arg(logo));
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
@@ -127,7 +127,7 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
 {
     if(m_logoMap.contains(logo))
     {
-        callback(ENV.metacache()->resolveEntry("TwitchPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(ENV.metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }
     else
     {
@@ -158,7 +158,7 @@ void ListModel::fetchMore(const QModelIndex& parent)
 
 void ListModel::performPaginatedSearch()
 {
-    NetJob *netJob = new NetJob("Twitch::Search");
+    NetJob *netJob = new NetJob("Flame::Search");
     auto searchUrl = QString(
         "https://addons-ecs.forgesvc.net/api/v2/addon/search?"
         "categoryId=0&"
@@ -198,14 +198,14 @@ void ListModel::searchWithTerm(const QString& term)
     performPaginatedSearch();
 }
 
-void Twitch::ListModel::searchRequestFinished()
+void Flame::ListModel::searchRequestFinished()
 {
     jobPtr.reset();
 
     QJsonParseError parse_error;
     QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if(parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Twitch at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qWarning() << "Error while parsing JSON response from CurseForge at " << parse_error.offset << " reason: " << parse_error.errorString();
         qWarning() << response;
         return;
     }
@@ -292,7 +292,7 @@ void Twitch::ListModel::searchRequestFinished()
     endInsertRows();
 }
 
-void Twitch::ListModel::searchRequestFailed(QString reason)
+void Flame::ListModel::searchRequestFailed(QString reason)
 {
     jobPtr.reset();
 

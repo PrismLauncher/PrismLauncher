@@ -1,29 +1,29 @@
-#include "TwitchPage.h"
-#include "ui_TwitchPage.h"
+#include "FlamePage.h"
+#include "ui_FlamePage.h"
 
 #include "MultiMC.h"
 #include "dialogs/NewInstanceDialog.h"
 #include <InstanceImportTask.h>
-#include "TwitchModel.h"
+#include "FlameModel.h"
 #include <QKeyEvent>
 
-TwitchPage::TwitchPage(NewInstanceDialog* dialog, QWidget *parent)
-    : QWidget(parent), ui(new Ui::TwitchPage), dialog(dialog)
+FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget *parent)
+    : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog)
 {
     ui->setupUi(this);
-    connect(ui->searchButton, &QPushButton::clicked, this, &TwitchPage::triggerSearch);
+    connect(ui->searchButton, &QPushButton::clicked, this, &FlamePage::triggerSearch);
     ui->searchEdit->installEventFilter(this);
-    model = new Twitch::ListModel(this);
+    model = new Flame::ListModel(this);
     ui->packView->setModel(model);
-    connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &TwitchPage::onSelectionChanged);
+    connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlamePage::onSelectionChanged);
 }
 
-TwitchPage::~TwitchPage()
+FlamePage::~FlamePage()
 {
     delete ui;
 }
 
-bool TwitchPage::eventFilter(QObject* watched, QEvent* event)
+bool FlamePage::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == ui->searchEdit && event->type() == QEvent::KeyPress) {
         QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
@@ -36,22 +36,22 @@ bool TwitchPage::eventFilter(QObject* watched, QEvent* event)
     return QWidget::eventFilter(watched, event);
 }
 
-bool TwitchPage::shouldDisplay() const
+bool FlamePage::shouldDisplay() const
 {
     return true;
 }
 
-void TwitchPage::openedImpl()
+void FlamePage::openedImpl()
 {
     suggestCurrent();
 }
 
-void TwitchPage::triggerSearch()
+void FlamePage::triggerSearch()
 {
     model->searchWithTerm(ui->searchEdit->text());
 }
 
-void TwitchPage::onSelectionChanged(QModelIndex first, QModelIndex second)
+void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
 {
     if(!first.isValid())
     {
@@ -63,7 +63,7 @@ void TwitchPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         return;
     }
 
-    current = model->data(first, Qt::UserRole).value<Twitch::Modpack>();
+    current = model->data(first, Qt::UserRole).value<Flame::Modpack>();
     QString text = "";
     QString name = current.name;
 
@@ -72,7 +72,7 @@ void TwitchPage::onSelectionChanged(QModelIndex first, QModelIndex second)
     else
         text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
     if (!current.authors.empty()) {
-        auto authorToStr = [](Twitch::ModpackAuthor & author) {
+        auto authorToStr = [](Flame::ModpackAuthor & author) {
             if(author.url.isEmpty()) {
                 return author.name;
             }
@@ -90,7 +90,7 @@ void TwitchPage::onSelectionChanged(QModelIndex first, QModelIndex second)
     suggestCurrent();
 }
 
-void TwitchPage::suggestCurrent()
+void FlamePage::suggestCurrent()
 {
     if(!isOpened)
     {
@@ -103,7 +103,7 @@ void TwitchPage::suggestCurrent()
 
     dialog->setSuggestedPack(current.name, new InstanceImportTask(current.latestFile.downloadUrl));
     QString editedLogoName;
-    editedLogoName = "twitch_" + current.logoName.section(".", 0, 0);
+    editedLogoName = "curseforge_" + current.logoName.section(".", 0, 0);
     model->getLogo(current.logoName, current.logoUrl, [this, editedLogoName](QString logo)
     {
         dialog->setSuggestedIconFromFile(logo, editedLogoName);

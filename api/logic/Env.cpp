@@ -100,7 +100,7 @@ void Env::initHttpMetaCache()
     m_metacache->addBase("FTBPacks", QDir("cache/FTBPacks").absolutePath());
     m_metacache->addBase("ModpacksCHPacks", QDir("cache/ModpacksCHPacks").absolutePath());
     m_metacache->addBase("TechnicPacks", QDir("cache/TechnicPacks").absolutePath());
-    m_metacache->addBase("TwitchPacks", QDir("cache/TwitchPacks").absolutePath());
+    m_metacache->addBase("FlamePacks", QDir("cache/FlamePacks").absolutePath());
     m_metacache->addBase("skins", QDir("accounts/skins").absolutePath());
     m_metacache->addBase("root", QDir::currentPath());
     m_metacache->addBase("translations", QDir("translations").absolutePath());

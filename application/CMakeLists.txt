@@ -145,11 +145,11 @@ SET(MULTIMC_SOURCES
     pages/modplatform/legacy_ftb/ListModel.h
     pages/modplatform/legacy_ftb/ListModel.cpp
 
-    pages/modplatform/twitch/TwitchData.h
-    pages/modplatform/twitch/TwitchModel.cpp
-    pages/modplatform/twitch/TwitchModel.h
-    pages/modplatform/twitch/TwitchPage.cpp
-    pages/modplatform/twitch/TwitchPage.h
+    pages/modplatform/flame/FlameData.h
+    pages/modplatform/flame/FlameModel.cpp
+    pages/modplatform/flame/FlameModel.h
+    pages/modplatform/flame/FlamePage.cpp
+    pages/modplatform/flame/FlamePage.h
 
     pages/modplatform/technic/TechnicModel.cpp
     pages/modplatform/technic/TechnicModel.h
@@ -276,7 +276,7 @@ SET(MULTIMC_UIS
     pages/modplatform/atlauncher/AtlPage.ui
     pages/modplatform/ftb/FtbPage.ui
     pages/modplatform/legacy_ftb/Page.ui
-    pages/modplatform/twitch/TwitchPage.ui
+    pages/modplatform/flame/FlamePage.ui
     pages/modplatform/technic/TechnicPage.ui
     pages/modplatform/ImportPage.ui
 
