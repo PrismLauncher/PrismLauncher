@@ -2,6 +2,7 @@
 #include "ui_FlamePage.h"
 
 #include "MultiMC.h"
+#include <Json.h>
 #include "dialogs/NewInstanceDialog.h"
 #include <InstanceImportTask.h>
 #include "FlameModel.h"
@@ -13,9 +14,20 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget *parent)
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &FlamePage::triggerSearch);
     ui->searchEdit->installEventFilter(this);
-    model = new Flame::ListModel(this);
-    ui->packView->setModel(model);
+    listModel = new Flame::ListModel(this);
+    ui->packView->setModel(listModel);
+
+    // index is used to set the sorting with the curseforge api
+    ui->sortByBox->addItem(tr("Sort by featured"));
+    ui->sortByBox->addItem(tr("Sort by popularity"));
+    ui->sortByBox->addItem(tr("Sort by last updated"));
+    ui->sortByBox->addItem(tr("Sort by name"));
+    ui->sortByBox->addItem(tr("Sort by author"));
+    ui->sortByBox->addItem(tr("Sort by total downloads"));
+
+    connect(ui->sortByBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FlamePage::triggerSearch);
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlamePage::onSelectionChanged);
+    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlamePage::onVersionSelectionChanged);
 }
 
 FlamePage::~FlamePage()
@@ -44,26 +56,28 @@ bool FlamePage::shouldDisplay() const
 void FlamePage::openedImpl()
 {
     suggestCurrent();
+    triggerSearch();
 }
 
 void FlamePage::triggerSearch()
 {
-    model->searchWithTerm(ui->searchEdit->text());
+    listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
 }
 
 void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
 {
+    ui->versionSelectionBox->clear();
+
     if(!first.isValid())
     {
         if(isOpened)
         {
             dialog->setSuggestedPack();
         }
-        ui->frame->clear();
         return;
     }
 
-    current = model->data(first, Qt::UserRole).value<Flame::Modpack>();
+    current = listModel->data(first, Qt::UserRole).value<Flame::IndexedPack>();
     QString text = "";
     QString name = current.name;
 
@@ -82,12 +96,56 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
         for(auto & author: current.authors) {
             authorStrs.push_back(authorToStr(author));
         }
-        text += tr(" by ") + authorStrs.join(", ");
+        text += "<br>" + tr(" by ") + authorStrs.join(", ");
     }
+    text += "<br><br>";
 
-    ui->frame->setModText(text);
-    ui->frame->setModDescription(current.description);
-    suggestCurrent();
+    ui->packDescription->setHtml(text + current.description);
+
+    if (current.versionsLoaded == false)
+    {
+        qDebug() << "Loading flame modpack versions";
+        NetJob *netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name));
+        std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
+        int addonId = current.addonId;
+        netJob->addNetAction(Net::Download::makeByteArray(QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files").arg(addonId), response.get()));
+        
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response]
+        {
+            QJsonParseError parse_error;
+            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+            if(parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response from CurseForge at " << parse_error.offset << " reason: " << parse_error.errorString();
+                qWarning() << *response;
+                return;
+            }
+            QJsonArray arr = doc.array();
+            try
+            {
+                Flame::loadIndexedPackVersions(current, arr);
+            }
+            catch(const JSONValidationError &e)
+            {
+                qDebug() << *response;
+                qWarning() << "Error while reading flame modpack version: " << e.cause();
+            }
+
+            for(auto version : current.versions) {
+                ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
+            }
+
+            suggestCurrent();
+        });
+        netJob->start();
+    }
+    else
+    {
+        for(auto version : current.versions) {
+            ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
+        }
+
+        suggestCurrent();
+    }
 }
 
 void FlamePage::suggestCurrent()
@@ -96,16 +154,23 @@ void FlamePage::suggestCurrent()
     {
         return;
     }
-    if(current.broken)
-    {
-        dialog->setSuggestedPack();
-    }
 
-    dialog->setSuggestedPack(current.name, new InstanceImportTask(current.latestFile.downloadUrl));
+    dialog->setSuggestedPack(current.name, new InstanceImportTask(selectedVersion));
     QString editedLogoName;
     editedLogoName = "curseforge_" + current.logoName.section(".", 0, 0);
-    model->getLogo(current.logoName, current.logoUrl, [this, editedLogoName](QString logo)
+    listModel->getLogo(current.logoName, current.logoUrl, [this, editedLogoName](QString logo)
     {
         dialog->setSuggestedIconFromFile(logo, editedLogoName);
     });
+}
+
+void FlamePage::onVersionSelectionChanged(QString data)
+{
+    if(data.isNull() || data.isEmpty())
+    {
+        selectedVersion = "";
+        return;
+    }
+    selectedVersion = ui->versionSelectionBox->currentData().toString();
+    suggestCurrent();
 }

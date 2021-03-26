@@ -145,7 +145,6 @@ SET(MULTIMC_SOURCES
     pages/modplatform/legacy_ftb/ListModel.h
     pages/modplatform/legacy_ftb/ListModel.cpp
 
-    pages/modplatform/flame/FlameData.h
     pages/modplatform/flame/FlameModel.cpp
     pages/modplatform/flame/FlameModel.h
     pages/modplatform/flame/FlamePage.cpp
