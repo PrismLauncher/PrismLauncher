@@ -4,10 +4,6 @@
 #include <InstanceList.h>
 #include <QDebug>
 
-#ifdef Q_OS_WIN
-    #include<windows.h>
-#endif
-
 // #define BREAK_INFINITE_LOOP
 // #define BREAK_EXCEPTION
 // #define BREAK_RETURN
@@ -33,19 +29,7 @@ int main(int argc, char *argv[])
 #endif
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
-    #ifdef Q_OS_WIN
-        BOOL (__stdcall *pFn)(void);
-        HINSTANCE hInstance=LoadLibrary("user32.dll");
-        if(hInstance) {
-            pFn = (BOOL (__stdcall*)(void))GetProcAddress(hInstance, "SetProcessDPIAware");
-            if(pFn)
-                pFn();
-            FreeLibrary(hInstance);
-        }
-        QApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
-    #else
-        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    #endif
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif
 
