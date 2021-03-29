@@ -21,7 +21,7 @@ static void loadMinecraftV1(Flame::Minecraft & m, QJsonObject & minecraft)
     // intended use is likely hardcoded in the 'Flame' client, the manifest says nothing
     m.libraries = Json::ensureString(minecraft, QString("libraries"), QString());
     auto arr = Json::ensureArray(minecraft, "modLoaders", QJsonArray());
-    for (const auto & item : arr)
+    for (QJsonValueRef item : arr)
     {
         auto obj = Json::requireObject(item);
         Flame::Modloader loader;
@@ -38,7 +38,7 @@ static void loadManifestV1(Flame::Manifest & m, QJsonObject & manifest)
     m.version = Json::ensureString(manifest, QString("version"), QString());
     m.author = Json::ensureString(manifest, QString("author"), "Anonymous Coward");
     auto arr = Json::ensureArray(manifest, "files", QJsonArray());
-    for (const auto & item : arr)
+    for (QJsonValueRef item : arr)
     {
         auto obj = Json::requireObject(item);
         Flame::File file;
