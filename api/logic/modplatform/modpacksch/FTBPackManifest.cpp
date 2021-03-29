@@ -60,7 +60,7 @@ void ModpacksCH::loadModpack(ModpacksCH::Modpack & m, QJsonObject & obj)
     m.updated = Json::requireInteger(obj, "updated");
     m.refreshed = Json::requireInteger(obj, "refreshed");
     auto artArr = Json::requireArray(obj, "art");
-    for (const auto & artRaw : artArr)
+    for (QJsonValueRef artRaw : artArr)
     {
         auto artObj = Json::requireObject(artRaw);
         ModpacksCH::Art art;
@@ -68,7 +68,7 @@ void ModpacksCH::loadModpack(ModpacksCH::Modpack & m, QJsonObject & obj)
         m.art.append(art);
     }
     auto authorArr = Json::requireArray(obj, "authors");
-    for (const auto & authorRaw : authorArr)
+    for (QJsonValueRef authorRaw : authorArr)
     {
         auto authorObj = Json::requireObject(authorRaw);
         ModpacksCH::Author author;
@@ -76,7 +76,7 @@ void ModpacksCH::loadModpack(ModpacksCH::Modpack & m, QJsonObject & obj)
         m.authors.append(author);
     }
     auto versionArr = Json::requireArray(obj, "versions");
-    for (const auto & versionRaw : versionArr)
+    for (QJsonValueRef versionRaw : versionArr)
     {
         auto versionObj = Json::requireObject(versionRaw);
         ModpacksCH::VersionInfo version;
@@ -84,7 +84,7 @@ void ModpacksCH::loadModpack(ModpacksCH::Modpack & m, QJsonObject & obj)
         m.versions.append(version);
     }
     auto tagArr = Json::requireArray(obj, "tags");
-    for (const auto & tagRaw : tagArr)
+    for (QJsonValueRef tagRaw : tagArr)
     {
         auto tagObj = Json::requireObject(tagRaw);
         ModpacksCH::Tag tag;
@@ -132,7 +132,7 @@ void ModpacksCH::loadVersion(ModpacksCH::Version & m, QJsonObject & obj)
     auto specs = Json::requireObject(obj, "specs");
     loadSpecs(m.specs, specs);
     auto targetArr = Json::requireArray(obj, "targets");
-    for (const auto & targetRaw : targetArr)
+    for (QJsonValueRef targetRaw : targetArr)
     {
         auto versionObj = Json::requireObject(targetRaw);
         ModpacksCH::VersionTarget target;
@@ -140,7 +140,7 @@ void ModpacksCH::loadVersion(ModpacksCH::Version & m, QJsonObject & obj)
         m.targets.append(target);
     }
     auto fileArr = Json::requireArray(obj, "files");
-    for (const auto & fileRaw : fileArr)
+    for (QJsonValueRef fileRaw : fileArr)
     {
         auto fileObj = Json::requireObject(fileRaw);
         ModpacksCH::VersionFile file;
