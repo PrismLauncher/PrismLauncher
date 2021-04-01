@@ -18,7 +18,8 @@ private:
         jsonFile.open(QIODevice::ReadOnly);
         auto data = jsonFile.readAll();
         jsonFile.close();
-        return MojangVersionFormat::libraryFromJson(QJsonDocument::fromJson(data).object(), file);
+        ProblemContainer problems;
+        return MojangVersionFormat::libraryFromJson(problems, QJsonDocument::fromJson(data).object(), file);
     }
     // get absolute path to expected storage, assuming default cache prefix
     QStringList getStorage(QString relative)

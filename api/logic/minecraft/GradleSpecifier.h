@@ -18,32 +18,35 @@ struct GradleSpecifier
     {
         /*
         org.gradle.test.classifiers : service : 1.0 : jdk15 @ jar
-        DEBUG   0 "org.gradle.test.classifiers:service:1.0:jdk15@jar" 
-        DEBUG   1 "org.gradle.test.classifiers" 
-        DEBUG   2 "service" 
-        DEBUG   3 "1.0" 
-        DEBUG   4 ":jdk15" 
-        DEBUG   5 "jdk15" 
-        DEBUG   6 "@jar" 
-        DEBUG   7 "jar"
+         0 "org.gradle.test.classifiers:service:1.0:jdk15@jar"
+         1 "org.gradle.test.classifiers"
+         2 "service"
+         3 "1.0"
+         4 "jdk15"
+         5 "jar"
         */
-        QRegExp matcher("([^:@]+):([^:@]+):([^:@]+)" "(:([^:@]+))?" "(@([^:@]+))?");
+        QRegExp matcher("([^:@]+):([^:@]+):([^:@]+)" "(?::([^:@]+))?" "(?:@([^:@]+))?");
         m_valid = matcher.exactMatch(value);
+        if(!m_valid) {
+            m_invalidValue = value;
+            return *this;
+        }
         auto elements = matcher.capturedTexts();
         m_groupId = elements[1];
         m_artifactId = elements[2];
         m_version = elements[3];
-        m_classifier = elements[5];
-        if(!elements[7].isEmpty())
+        m_classifier = elements[4];
+        if(!elements[5].isEmpty())
         {
-            m_extension = elements[7];
+            m_extension = elements[5];
         }
         return *this;
     }
-    operator QString() const
+    QString serialize() const
     {
-        if(!m_valid)
-            return "INVALID";
+        if(!m_valid) {
+            return m_invalidValue;
+        }
         QString retval = m_groupId + ":" + m_artifactId + ":" + m_version;
         if(!m_classifier.isEmpty())
         {
@@ -57,6 +60,9 @@ struct GradleSpecifier
     }
     QString getFileName() const
     {
+        if(!m_valid) {
+            return QString();
+        }
         QString filename = m_artifactId + '-' + m_version;
         if(!m_classifier.isEmpty())
         {
@@ -67,8 +73,9 @@ struct GradleSpecifier
     }
     QString toPath(const QString & filenameOverride = QString()) const
     {
-        if(!m_valid)
-            return "INVALID";
+        if(!m_valid) {
+            return QString();
+        }
         QString filename;
         if(filenameOverride.isEmpty())
         {
@@ -134,6 +141,7 @@ struct GradleSpecifier
         return true;
     }
 private:
+    QString m_invalidValue;
     QString m_groupId;
     QString m_artifactId;
     QString m_version;

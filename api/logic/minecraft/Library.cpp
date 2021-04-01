@@ -94,13 +94,13 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(
             auto rawSha1 = QByteArray::fromHex(sha1.toLatin1());
             auto dl = Net::Download::makeCached(url, entry, options);
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
-            qDebug() << "Checksummed Download for:" << rawName() << "storage:" << storage << "url:" << url;
+            qDebug() << "Checksummed Download for:" << rawName().serialize() << "storage:" << storage << "url:" << url;
             out.append(dl);
         }
         else
         {
             out.append(Net::Download::makeCached(url, entry, options));
-            qDebug() << "Download for:" << rawName() << "storage:" << storage << "url:" << url;
+            qDebug() << "Download for:" << rawName().serialize() << "storage:" << storage << "url:" << url;
         }
         return true;
     };
@@ -145,7 +145,7 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(
             }
             else
             {
-                qDebug() << "Ignoring native library" << m_name << "because it has no classifier for current OS";
+                qDebug() << "Ignoring native library" << m_name.serialize() << "because it has no classifier for current OS";
             }
         }
         else
@@ -157,7 +157,7 @@ QList< std::shared_ptr< NetAction > > Library::getDownloads(
             }
             else
             {
-                qDebug() << "Ignoring java library" << m_name << "because it has no artifact";
+                qDebug() << "Ignoring java library" << m_name.serialize() << "because it has no artifact";
             }
         }
     }

@@ -31,7 +31,7 @@ slots:
     {
         QFETCH(QString, through);
 
-        QString converted = GradleSpecifier(through);
+        QString converted = GradleSpecifier(through).serialize();
 
         QCOMPARE(converted, through);
     }
@@ -68,7 +68,8 @@ slots:
 
         GradleSpecifier spec(input);
         QVERIFY(!spec.valid());
-        QCOMPARE(spec.operator QString(), QString("INVALID"));
+        QCOMPARE(spec.serialize(), input);
+        QCOMPARE(spec.toPath(), QString());
     }
 };
 

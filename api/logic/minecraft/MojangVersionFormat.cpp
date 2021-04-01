@@ -220,7 +220,7 @@ VersionFilePtr MojangVersionFormat::versionFileFromJson(const QJsonDocument &doc
         {
             auto libObj = requireObject(libVal);
 
-            auto lib = MojangVersionFormat::libraryFromJson(libObj, filename);
+            auto lib = MojangVersionFormat::libraryFromJson(*out, libObj, filename);
             out->libraries.append(lib);
         }
     }
@@ -283,14 +283,18 @@ QJsonDocument MojangVersionFormat::versionFileToJson(const VersionFilePtr &patch
     }
 }
 
-LibraryPtr MojangVersionFormat::libraryFromJson(const QJsonObject &libObj, const QString &filename)
+LibraryPtr MojangVersionFormat::libraryFromJson(ProblemContainer & problems, const QJsonObject &libObj, const QString &filename)
 {
     LibraryPtr out(new Library());
     if (!libObj.contains("name"))
     {
         throw JSONValidationError(filename + "contains a library that doesn't have a 'name' field");
     }
-    out->m_name = libObj.value("name").toString();
+    auto rawName = libObj.value("name").toString();
+    out->m_name = rawName;
+    if(!out->m_name.valid()) {
+        problems.addProblem(ProblemSeverity::Error, QObject::tr("Library %1 name is broken and cannot be processed.").arg(rawName));
+    }
 
     Bits::readString(libObj, "url", out->m_repositoryURL);
     if (libObj.contains("extract"))
@@ -333,7 +337,7 @@ LibraryPtr MojangVersionFormat::libraryFromJson(const QJsonObject &libObj, const
 QJsonObject MojangVersionFormat::libraryToJson(Library *library)
 {
     QJsonObject libRoot;
-    libRoot.insert("name", (QString)library->m_name);
+    libRoot.insert("name", library->m_name.serialize());
     if (!library->m_repositoryURL.isEmpty())
     {
         libRoot.insert("url", library->m_repositoryURL);

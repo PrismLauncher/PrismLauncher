@@ -3,6 +3,7 @@
 #include <minecraft/VersionFile.h>
 #include <minecraft/Library.h>
 #include <QJsonDocument>
+#include <ProblemProvider.h>
 
 #include "multimc_logic_export.h"
 
@@ -20,6 +21,6 @@ public:
     static QJsonDocument versionFileToJson(const VersionFilePtr &patch);
 
     // libraries
-    static LibraryPtr libraryFromJson(const QJsonObject &libObj, const QString &filename);
+    static LibraryPtr libraryFromJson(ProblemContainer & problems, const QJsonObject &libObj, const QString &filename);
     static QJsonObject libraryToJson(Library *library);
 };

@@ -13,9 +13,9 @@ static void readString(const QJsonObject &root, const QString &key, QString &var
     }
 }
 
-LibraryPtr OneSixVersionFormat::libraryFromJson(const QJsonObject &libObj, const QString &filename)
+LibraryPtr OneSixVersionFormat::libraryFromJson(ProblemContainer & problems, const QJsonObject &libObj, const QString &filename)
 {
-    LibraryPtr out = MojangVersionFormat::libraryFromJson(libObj, filename);
+    LibraryPtr out = MojangVersionFormat::libraryFromJson(problems, libObj, filename);
     readString(libObj, "MMC-hint", out->m_hint);
     readString(libObj, "MMC-absulute_url", out->m_absoluteURL);
     readString(libObj, "MMC-absoluteUrl", out->m_absoluteURL);
@@ -115,7 +115,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
         {
             QJsonObject libObj = requireObject(libVal);
             // parse the jarmod
-            auto lib = OneSixVersionFormat::jarModFromJson(libObj, filename);
+            auto lib = OneSixVersionFormat::jarModFromJson(*out, libObj, filename);
             // and add to jar mods
             out->jarMods.append(lib);
         }
@@ -126,7 +126,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
         {
             QJsonObject libObj = requireObject(libVal);
             // parse the jarmod
-            auto lib = OneSixVersionFormat::plusJarModFromJson(libObj, filename, out->name);
+            auto lib = OneSixVersionFormat::plusJarModFromJson(*out, libObj, filename, out->name);
             // and add to jar mods
             out->jarMods.append(lib);
         }
@@ -138,20 +138,20 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
         {
             QJsonObject libObj = requireObject(libVal);
             // parse the jarmod
-            auto lib = OneSixVersionFormat::modFromJson(libObj, filename);
+            auto lib = OneSixVersionFormat::modFromJson(*out, libObj, filename);
             // and add to jar mods
             out->mods.append(lib);
         }
     }
 
-    auto readLibs = [&](const char * which, QList<LibraryPtr> & out)
+    auto readLibs = [&](const char * which, QList<LibraryPtr> & outList)
     {
         for (auto libVal : requireArray(root.value(which)))
         {
             QJsonObject libObj = requireObject(libVal);
             // parse the library
-            auto lib = libraryFromJson(libObj, filename);
-            out.append(lib);
+            auto lib = libraryFromJson(*out, libObj, filename);
+            outList.append(lib);
         }
     };
     bool hasPlusLibs = root.contains("+libraries");
@@ -180,7 +180,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
     if(root.contains("mainJar"))
     {
         QJsonObject libObj = requireObject(root, "mainJar");
-        out->mainJar = libraryFromJson(libObj, filename);
+        out->mainJar = libraryFromJson(*out, libObj, filename);
     }
     // else reconstruct it from downloads and id ... if that's available
     else if(!out->minecraftVersion.isEmpty())
@@ -330,8 +330,12 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
     }
 }
 
-LibraryPtr OneSixVersionFormat::plusJarModFromJson(const QJsonObject &libObj, const QString &filename, const QString &originalName)
-{
+LibraryPtr OneSixVersionFormat::plusJarModFromJson(
+    ProblemContainer & problems,
+    const QJsonObject &libObj,
+    const QString &filename,
+    const QString &originalName
+) {
     LibraryPtr out(new Library());
     if (!libObj.contains("name"))
     {
@@ -366,9 +370,9 @@ LibraryPtr OneSixVersionFormat::plusJarModFromJson(const QJsonObject &libObj, co
     return out;
 }
 
-LibraryPtr OneSixVersionFormat::jarModFromJson(const QJsonObject& libObj, const QString& filename)
+LibraryPtr OneSixVersionFormat::jarModFromJson(ProblemContainer & problems, const QJsonObject& libObj, const QString& filename)
 {
-    return libraryFromJson(libObj, filename);
+    return libraryFromJson(problems, libObj, filename);
 }
 
 
@@ -377,9 +381,9 @@ QJsonObject OneSixVersionFormat::jarModtoJson(Library *jarmod)
     return libraryToJson(jarmod);
 }
 
-LibraryPtr OneSixVersionFormat::modFromJson(const QJsonObject& libObj, const QString& filename)
+LibraryPtr OneSixVersionFormat::modFromJson(ProblemContainer & problems, const QJsonObject& libObj, const QString& filename)
 {
-    return  libraryFromJson(libObj, filename);
+    return  libraryFromJson(problems, libObj, filename);
 }
 
 QJsonObject OneSixVersionFormat::modtoJson(Library *jarmod)
