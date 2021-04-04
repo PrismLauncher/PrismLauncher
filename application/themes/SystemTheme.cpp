@@ -6,16 +6,19 @@
 
 SystemTheme::SystemTheme()
 {
+    qDebug() << "Determining System Theme...";
     const auto & style = QApplication::style();
     systemPalette = style->standardPalette();
     QString lowerThemeName = style->objectName();
-    qDebug() << systemTheme;
+    qDebug() << "System theme seems to be:" << lowerThemeName;
     QStringList styles = QStyleFactory::keys();
     for(auto &st: styles)
     {
+        qDebug() << "Considering theme from theme factory:" << st.toLower();
         if(st.toLower() == lowerThemeName)
         {
             systemTheme = st;
+            qDebug() << "System theme has been determined to be:" << systemTheme;
             return;
         }
     }
