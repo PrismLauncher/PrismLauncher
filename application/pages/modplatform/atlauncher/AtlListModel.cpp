@@ -1,8 +1,9 @@
-#include "AtlModel.h"
+#include "AtlListModel.h"
 
 #include <BuildConfig.h>
 #include <MultiMC.h>
 #include <Env.h>
+#include <Json.h>
 
 namespace Atl {
 
@@ -99,7 +100,15 @@ void ListModel::requestFinished()
         auto packObj = packRaw.toObject();
 
         ATLauncher::IndexedPack pack;
-        ATLauncher::loadIndexedPack(pack, packObj);
+
+        try {
+            ATLauncher::loadIndexedPack(pack, packObj);
+        }
+        catch (const JSONValidationError &e) {
+            qDebug() << QString::fromUtf8(response);
+            qWarning() << "Error while reading pack manifest from ATLauncher: " << e.cause();
+            return;
+        }
 
         // ignore packs without a published version
         if(pack.versions.length() == 0) continue;

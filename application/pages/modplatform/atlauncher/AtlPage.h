@@ -16,7 +16,7 @@
 #pragma once
 
 #include "AtlFilterModel.h"
-#include "AtlModel.h"
+#include "AtlListModel.h"
 
 #include <QWidget>
 
