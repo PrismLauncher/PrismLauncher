@@ -35,7 +35,7 @@ void KonamiCode::input(QEvent* event)
         {
             m_progress = 0;
         }
-        if(m_progress == konamiCode.size())
+        if(m_progress == static_cast<int>(konamiCode.size()))
         {
             m_progress = 0;
             emit triggered();
