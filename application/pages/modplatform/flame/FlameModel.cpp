@@ -1,5 +1,6 @@
 #include "FlameModel.h"
 #include "MultiMC.h"
+#include <Json.h>
 
 #include <MMCStrings.h>
 #include <Version.h>
@@ -38,7 +39,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
         return QString("INVALID INDEX %1").arg(pos);
     }
 
-    Modpack pack = modpacks.at(pos);
+    IndexedPack pack = modpacks.at(pos);
     if(role == Qt::DisplayRole)
     {
         return pack.name;
@@ -163,13 +164,12 @@ void ListModel::performPaginatedSearch()
         "https://addons-ecs.forgesvc.net/api/v2/addon/search?"
         "categoryId=0&"
         "gameId=432&"
-        //"gameVersion=1.12.2&"
         "index=%1&"
         "pageSize=25&"
         "searchFilter=%2&"
         "sectionId=4471&"
-        "sort=0"
-    ).arg(nextSearchOffset).arg(currentSearchTerm);
+        "sort=%3"
+    ).arg(nextSearchOffset).arg(currentSearchTerm).arg(currentSort);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();
@@ -177,12 +177,13 @@ void ListModel::performPaginatedSearch()
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
 }
 
-void ListModel::searchWithTerm(const QString& term)
+void ListModel::searchWithTerm(const QString& term, int sort)
 {
-    if(currentSearchTerm == term) {
+    if(currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort) {
         return;
     }
     currentSearchTerm = term;
+    currentSort = sort;
     if(jobPtr) {
         jobPtr->abort();
         searchState = ResetRequested;
@@ -210,79 +211,24 @@ void Flame::ListModel::searchRequestFinished()
         return;
     }
 
-    QList<Modpack> newList;
-    auto objs = doc.array();
-    for(auto projectIter: objs) {
-        Modpack pack;
-        auto project = projectIter.toObject();
-        pack.addonId = project.value("id").toInt(0);
-        if (pack.addonId == 0) {
-            qWarning() << "Pack without an ID, skipping: " << pack.name;
-            continue;
-        }
-        pack.name = project.value("name").toString();
-        pack.websiteUrl = project.value("websiteUrl").toString();
-        pack.description = project.value("summary").toString();
-        bool thumbnailFound = false;
-        auto attachments = project.value("attachments").toArray();
-        for(auto attachmentIter: attachments) {
-            auto attachment = attachmentIter.toObject();
-            bool isDefault = attachment.value("isDefault").toBool(false);
-            if(isDefault) {
-                thumbnailFound = true;
-                pack.logoName = attachment.value("title").toString();
-                pack.logoUrl = attachment.value("thumbnailUrl").toString();
-                break;
-            }
-        }
-        if(!thumbnailFound) {
-            qWarning() << "Pack without an icon, skipping: " << pack.name;
-            continue;
-        }
-        auto authors = project.value("authors").toArray();
-        for(auto authorIter: authors) {
-            auto author = authorIter.toObject();
-            ModpackAuthor packAuthor;
-            packAuthor.name = author.value("name").toString();
-            packAuthor.url = author.value("url").toString();
-            pack.authors.append(packAuthor);
-        }
-        int defaultFileId = project.value("defaultFileId").toInt(0);
-        if(defaultFileId == 0) {
-            qWarning() << "Pack without default file, skipping: " << pack.name;
-            continue;
-        }
-        bool found = false;
-        auto files = project.value("latestFiles").toArray();
-        for(auto fileIter: files) {
-            auto file = fileIter.toObject();
-            int id = file.value("id").toInt(0);
-            // NOTE: for now, ignore everything that's not the default...
-            if(id != defaultFileId) {
-                continue;
-            }
-            pack.latestFile.addonId = pack.addonId;
-            pack.latestFile.fileId = id;
-            auto versionArray = file.value("gameVersion").toArray();
-            if(versionArray.size() < 1) {
-                continue;
-            }
+    QList<Flame::IndexedPack> newList;
+    auto packs = doc.array();
+    for(auto packRaw : packs) {
+        auto packObj = packRaw.toObject();
 
-            // pick the latest version supported
-            pack.latestFile.mcVersion = versionArray[0].toString();
-            pack.latestFile.version = file.value("displayName").toString();
-            pack.latestFile.downloadUrl = file.value("downloadUrl").toString();
-            found = true;
-            break;
+        Flame::IndexedPack pack;
+        try
+        {
+            Flame::loadIndexedPack(pack, packObj);
+            newList.append(pack);
         }
-        if(!found) {
-            qWarning() << "Pack with no good file, skipping: " << pack.name;
+        catch(const JSONValidationError &e)
+        {
+            qWarning() << "Error while loading pack from CurseForge: " << e.cause();
             continue;
         }
-        pack.broken = false;
-        newList.append(pack);
     }
-    if(objs.size() < 25) {
+    if(packs.size() < 25) {
         searchState = Finished;
     } else {
         nextSearchOffset += 25;

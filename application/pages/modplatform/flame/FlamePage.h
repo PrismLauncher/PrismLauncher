@@ -20,7 +20,7 @@
 #include "pages/BasePage.h"
 #include <MultiMC.h>
 #include "tasks/Task.h"
-#include "FlameData.h"
+#include <modplatform/flame/FlamePackIndex.h>
 
 namespace Ui
 {
@@ -68,10 +68,13 @@ private:
 private slots:
     void triggerSearch();
     void onSelectionChanged(QModelIndex first, QModelIndex second);
+    void onVersionSelectionChanged(QString data);
 
 private:
     Ui::FlamePage *ui = nullptr;
     NewInstanceDialog* dialog = nullptr;
-    Flame::ListModel* model = nullptr;
-    Flame::Modpack current;
+    Flame::ListModel* listModel = nullptr;
+    Flame::IndexedPack current;
+
+    QString selectedVersion;
 };
