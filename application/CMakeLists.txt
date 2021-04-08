@@ -125,12 +125,11 @@ SET(MULTIMC_SOURCES
     pages/modplatform/VanillaPage.cpp
     pages/modplatform/VanillaPage.h
 
-    pages/modplatform/atlauncher/AtlModel.cpp
-    pages/modplatform/atlauncher/AtlModel.h
     pages/modplatform/atlauncher/AtlFilterModel.cpp
     pages/modplatform/atlauncher/AtlFilterModel.h
+    pages/modplatform/atlauncher/AtlListModel.cpp
+    pages/modplatform/atlauncher/AtlListModel.h
     pages/modplatform/atlauncher/AtlPage.cpp
-    pages/modplatform/atlauncher/AtlPage.h
     pages/modplatform/atlauncher/AtlPage.h
 
     pages/modplatform/ftb/FtbFilterModel.cpp

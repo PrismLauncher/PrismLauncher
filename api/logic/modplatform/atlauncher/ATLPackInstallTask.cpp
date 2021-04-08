@@ -73,13 +73,13 @@ void PackInstallTask::onDownloadSucceeded()
     auto vlist = ENV.metadataIndex()->get("net.minecraft");
     if(!vlist)
     {
-        emitFailed(tr("Failed to get local metadata index for ") + "net.minecraft");
+        emitFailed(tr("Failed to get local metadata index for %1").arg("net.minecraft"));
         return;
     }
 
     auto ver = vlist->getVersion(m_version.minecraft);
     if (!ver) {
-        emitFailed(tr("Failed to get local metadata index for ") + "net.minecraft" + " " + m_version.minecraft);
+        emitFailed(tr("Failed to get local metadata index for '%1' v%2").arg("net.minecraft").arg(m_version.minecraft));
         return;
     }
     ver->load(Net::Mode::Online);
@@ -141,7 +141,7 @@ QString PackInstallTask::getDirForModType(ModType type, QString raw)
             qWarning() << "Unsupported mod type: " + raw;
             return Q_NULLPTR;
         case ModType::Unknown:
-            emitFailed(tr("Unknown mod type: ") + raw);
+            emitFailed(tr("Unknown mod type: %1").arg(raw));
             return Q_NULLPTR;
     }
 
@@ -271,7 +271,7 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
                 break;
             case DownloadType::Browser:
             case DownloadType::Unknown:
-                emitFailed(tr("Unknown or unsupported download type: ") + lib.download_raw);
+                emitFailed(tr("Unknown or unsupported download type: %1").arg(lib.download_raw));
                 return false;
         }
 
@@ -437,13 +437,13 @@ void PackInstallTask::downloadMods()
                 url = BuildConfig.ATL_DOWNLOAD_SERVER_URL + mod.url;
                 break;
             case DownloadType::Browser:
-                emitFailed(tr("Unsupported download type: ") + mod.download_raw);
+                emitFailed(tr("Unsupported download type: %1").arg(mod.download_raw));
                 return;
             case DownloadType::Direct:
                 url = mod.url;
                 break;
             case DownloadType::Unknown:
-                emitFailed(tr("Unknown download type: ") + mod.download_raw);
+                emitFailed(tr("Unknown download type: %1").arg(mod.download_raw));
                 return;
         }
 

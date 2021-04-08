@@ -15,7 +15,19 @@
 
 #include "POTranslator.h"
 
-const static QLatin1Literal defaultLangCode("en");
+const static QLatin1Literal defaultLangCode("en_US");
+
+static QLocale getLocaleFromKey(const QString &key) {
+    if(key == "pt") {
+        return QLocale("pt_PT");
+    }
+    else if (key == "en") {
+        return QLocale("en_GB");
+    }
+    else {
+        return QLocale(key);
+    }
+}
 
 enum class FileType
 {
@@ -33,12 +45,7 @@ struct Language
     Language(const QString & _key)
     {
         key = _key;
-        if(key == "pt") {
-            locale = QLocale("pt_PT");
-        }
-        else {
-            locale = QLocale(key);
-        }
+        locale = getLocaleFromKey(key);
         updated = (key == defaultLangCode);
     }
 
@@ -452,7 +459,7 @@ bool TranslationsModel::selectLanguage(QString key)
      * In a multithreaded application, the default locale should be set at application startup, before any non-GUI threads are created.
      * This function is not reentrant.
      */
-    QLocale locale(langCode);
+    QLocale locale = getLocaleFromKey(langCode);
     QLocale::setDefault(locale);
 
     // if it's the default UI language, finish

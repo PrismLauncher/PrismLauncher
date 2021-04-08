@@ -237,7 +237,7 @@ void GAnalyticsWorker::postMessageFinished()
     int httpStausCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (httpStausCode < 200 || httpStausCode > 299)
     {
-        logMessage(GAnalytics::Error, QString("Error posting message: %s").arg(reply->errorString()));
+        logMessage(GAnalytics::Error, QString("Error posting message: %1").arg(reply->errorString()));
 
         // An error ocurred. Try sending later.
         m_timer.start();

@@ -35,7 +35,7 @@ void PackInstallTask::executeTask()
     }
 
     if(!found) {
-        emitFailed("failed to find pack version " + m_version_name);
+        emitFailed(tr("Failed to find pack version %1").arg(m_version_name));
         return;
     }
 
