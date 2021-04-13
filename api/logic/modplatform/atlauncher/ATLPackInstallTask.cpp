@@ -18,8 +18,9 @@
 
 namespace ATLauncher {
 
-PackInstallTask::PackInstallTask(QString pack, QString version)
+PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString pack, QString version)
 {
+    m_support = support;
     m_pack = pack;
     m_version_name = version;
 }
@@ -154,20 +155,47 @@ QString PackInstallTask::getVersionForLoader(QString uid)
         auto vlist = ENV.metadataIndex()->get(uid);
         if(!vlist)
         {
-            emitFailed(tr("Failed to get local metadata index for ") + uid);
+            emitFailed(tr("Failed to get local metadata index for %1").arg(uid));
             return Q_NULLPTR;
         }
 
-        // todo: filter by Minecraft version
-
-        if(m_version.loader.recommended) {
-            return vlist.get()->getRecommended().get()->descriptor();
+        if(!vlist->isLoaded()) {
+            vlist->load(Net::Mode::Online);
         }
-        else if(m_version.loader.latest) {
-            return vlist.get()->at(0)->descriptor();
+
+        if(m_version.loader.recommended || m_version.loader.latest) {
+            for (int i = 0; i < vlist->versions().size(); i++) {
+                auto version = vlist->versions().at(i);
+                auto reqs = version->requires();
+
+                // filter by minecraft version, if the loader depends on a certain version.
+                // not all mod loaders depend on a given Minecraft version, so we won't do this
+                // filtering for those loaders.
+                if (m_version.loader.type != "fabric") {
+                    auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Meta::Require &req) {
+                        return req.uid == "net.minecraft";
+                    });
+                    if (iter == reqs.end()) continue;
+                    if (iter->equalsVersion != m_version.minecraft) continue;
+                }
+
+                if (m_version.loader.recommended) {
+                    // first recommended build we find, we use.
+                    if (!version->isRecommended()) continue;
+                }
+
+                return version->descriptor();
+            }
+
+            emitFailed(tr("Failed to find version for %1 loader").arg(m_version.loader.type));
         }
         else if(m_version.loader.choose) {
-            // todo: implement
+            // Fabric Loader doesn't depend on a given Minecraft version.
+            if (m_version.loader.type == "fabric") {
+                return m_support->chooseVersion(vlist, Q_NULLPTR);
+            }
+
+            return m_support->chooseVersion(vlist, m_version.minecraft);
         }
     }
 
@@ -451,7 +479,6 @@ void PackInstallTask::downloadMods()
         auto cacheName = fileName.completeBaseName() + "-" + mod.md5 + "." + fileName.suffix();
 
         if (mod.type == ModType::Extract || mod.type == ModType::TexturePackExtract || mod.type == ModType::ResourcePackExtract) {
-
             auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
             modsToExtract.insert(entry->getFullPath(), mod);

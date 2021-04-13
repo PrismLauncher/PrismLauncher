@@ -15,12 +15,23 @@
 
 namespace ATLauncher {
 
+class MULTIMC_LOGIC_EXPORT UserInteractionSupport {
+
+public:
+    /**
+     * Requests a user interaction to select a component version from a given version list
+     * and constrained to a given Minecraft version.
+     */
+    virtual QString chooseVersion(Meta::VersionListPtr vlist, QString minecraftVersion) = 0;
+
+};
+
 class MULTIMC_LOGIC_EXPORT PackInstallTask : public InstanceTask
 {
 Q_OBJECT
 
 public:
-    explicit PackInstallTask(QString pack, QString version);
+    explicit PackInstallTask(UserInteractionSupport *support, QString pack, QString version);
     virtual ~PackInstallTask(){}
 
     bool abort() override;
@@ -54,6 +65,8 @@ private:
     void install();
 
 private:
+    UserInteractionSupport *m_support;
+
     NetJobPtr jobPtr;
     QByteArray response;
 
@@ -75,9 +88,6 @@ private:
 
     QFuture<bool> m_modExtractFuture;
     QFutureWatcher<bool> m_modExtractFutureWatcher;
-
-    QFuture<bool> m_decompFuture;
-    QFutureWatcher<bool> m_decompFutureWatcher;
 
 };
 
