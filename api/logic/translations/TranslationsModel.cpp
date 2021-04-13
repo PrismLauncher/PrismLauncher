@@ -17,18 +17,6 @@
 
 const static QLatin1Literal defaultLangCode("en_US");
 
-static QLocale getLocaleFromKey(const QString &key) {
-    if(key == "pt") {
-        return QLocale("pt_PT");
-    }
-    else if (key == "en") {
-        return QLocale("en_GB");
-    }
-    else {
-        return QLocale(key);
-    }
-}
-
 enum class FileType
 {
     NONE,
@@ -45,7 +33,7 @@ struct Language
     Language(const QString & _key)
     {
         key = _key;
-        locale = getLocaleFromKey(key);
+        locale = QLocale(key);
         updated = (key == defaultLangCode);
     }
 
@@ -310,11 +298,14 @@ void TranslationsModel::reloadLocalFiles()
     {
         return;
     }
-    beginInsertRows(QModelIndex(), d->m_languages.size(), d->m_languages.size() + languages.size() - 1);
+    beginInsertRows(QModelIndex(), 0, d->m_languages.size() + languages.size() - 1);
     for(auto & language: languages)
     {
         d->m_languages.append(language);
     }
+    std::sort(d->m_languages.begin(), d->m_languages.end(), [](const Language& a, const Language& b) {
+        return a.key.compare(b.key) < 0;
+    });
     endInsertRows();
 }
 
@@ -347,7 +338,7 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
         {
             case Column::Language:
             {
-                return d->m_languages[row].locale.nativeLanguageName();
+                return lang.locale.nativeLanguageName();
             }
             case Column::Completeness:
             {
@@ -362,7 +353,7 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
         return tr("%1:\n%2 translated\n%3 fuzzy\n%4 total").arg(lang.key, QString::number(lang.translated), QString::number(lang.fuzzy), QString::number(lang.total));
     }
     case Qt::UserRole:
-        return d->m_languages[row].key;
+        return lang.key;
     default:
         return QVariant();
     }
@@ -459,7 +450,7 @@ bool TranslationsModel::selectLanguage(QString key)
      * In a multithreaded application, the default locale should be set at application startup, before any non-GUI threads are created.
      * This function is not reentrant.
      */
-    QLocale locale = getLocaleFromKey(langCode);
+    QLocale locale = QLocale(langCode);
     QLocale::setDefault(locale);
 
     // if it's the default UI language, finish
