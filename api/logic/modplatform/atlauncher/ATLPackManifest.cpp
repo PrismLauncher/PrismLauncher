@@ -84,12 +84,18 @@ static void loadVersionLoader(ATLauncher::VersionLoader & p, QJsonObject & obj) 
     p.choose = Json::ensureBoolean(obj, QString("choose"), false);
 
     auto metadata = Json::requireObject(obj, "metadata");
-
-    if (metadata.contains("version")) {
-        p.version = Json::requireString(metadata, "version");
-    }
     p.latest = Json::ensureBoolean(metadata, QString("latest"), false);
     p.recommended = Json::ensureBoolean(metadata, QString("recommended"), false);
+
+    // Minecraft Forge
+    if (p.type == "forge") {
+        p.version = Json::ensureString(metadata, "version", "");
+    }
+
+    // Fabric Loader
+    if (p.type == "fabric") {
+        p.version = Json::ensureString(metadata, "loader", "");
+    }
 }
 
 static void loadVersionLibrary(ATLauncher::VersionLibrary & p, QJsonObject & obj) {
