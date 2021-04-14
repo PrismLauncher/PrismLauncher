@@ -188,6 +188,7 @@ QString PackInstallTask::getVersionForLoader(QString uid)
             }
 
             emitFailed(tr("Failed to find version for %1 loader").arg(m_version.loader.type));
+            return Q_NULLPTR;
         }
         else if(m_version.loader.choose) {
             // Fabric Loader doesn't depend on a given Minecraft version.
@@ -197,6 +198,11 @@ QString PackInstallTask::getVersionForLoader(QString uid)
 
             return m_support->chooseVersion(vlist, m_version.minecraft);
         }
+    }
+
+    if (m_version.loader.version == Q_NULLPTR || m_version.loader.version.isEmpty()) {
+        emitFailed(tr("No loader version set for modpack!"));
+        return Q_NULLPTR;
     }
 
     return m_version.loader.version;
@@ -549,7 +555,7 @@ void PackInstallTask::onModsDownloaded() {
     qDebug() << "PackInstallTask::onModsDownloaded: " << QThread::currentThreadId();
     jobPtr.reset();
 
-    if(modsToExtract.size() || modsToDecomp.size() || modsToCopy.size()) {
+    if(!modsToExtract.empty() || !modsToDecomp.empty() || !modsToCopy.empty()) {
         m_modExtractFuture = QtConcurrent::run(QThreadPool::globalInstance(), this, &PackInstallTask::extractMods, modsToExtract, modsToDecomp, modsToCopy);
         connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onModsExtracted);
         connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]()
@@ -656,6 +662,7 @@ void PackInstallTask::install()
 
     // Use a component to add libraries BEFORE Minecraft
     if(!createLibrariesComponent(instance.instanceRoot(), components)) {
+        emitFailed(tr("Failed to create libraries component"));
         return;
     }
 
@@ -693,6 +700,7 @@ void PackInstallTask::install()
     // Use a component to fill in the rest of the data
     // todo: use more detection
     if(!createPackComponent(instance.instanceRoot(), components)) {
+        emitFailed(tr("Failed to create pack component"));
         return;
     }
 
