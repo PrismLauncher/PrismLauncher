@@ -6,6 +6,7 @@
 #include <QJsonValue>
 #include <quazip.h>
 #include <quazipfile.h>
+#include <toml.hpp>
 
 #include "settings/INIFile.h"
 #include "FileSystem.h"
@@ -88,6 +89,64 @@ std::shared_ptr<ModDetails> ReadMCModInfo(QByteArray contents)
         }
     }
     return nullptr;
+}
+
+
+std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
+{
+    std::shared_ptr<ModDetails> details = std::make_shared<ModDetails>();
+
+    // toml11 throws an error when something goes wrong in parsing, so we need to catch that
+    try {
+        // data under the root table
+        auto tomlData = toml::parse(contents);
+        // data under [[mods]]
+        auto tomlModsArr = toml::find<std::vector<toml::value>>(tomlData, "mods");
+
+        // these properties are required in this location by forge, and thus can be assumed to exist
+        // forge supports multiple mods in one file, details of which are accessable here from tomlModsArr[n]
+        details->mod_id = QString::fromStdString(toml::find<std::string>(tomlModsArr[0], "modId"));
+        details->version = QString::fromStdString(toml::find<std::string>(tomlModsArr[0], "version"));
+        details->name = QString::fromStdString(toml::find<std::string>(tomlModsArr[0], "displayName"));
+        // known issue: sometimes overflows the description box for some reason
+        details->description = QString::fromStdString(toml::find<std::string>(tomlModsArr[0], "description"));
+
+        // optional properties - can be stored either in the root table or in [[mods]]
+        auto authors = QString::fromStdString(toml::find_or<std::string>(tomlData, "authors", ""));
+        if(authors.isEmpty())
+        {
+            authors = QString::fromStdString(toml::find_or<std::string>(tomlModsArr[0], "authors", ""));
+        }
+        if(!authors.isEmpty())
+        {
+            // author information is stored as a string now, not a list
+            details->authors.append(authors);
+        }
+        // is credits even used anywhere? including this for completion/parity with old data version
+        auto credits = QString::fromStdString(toml::find_or<std::string>(tomlData, "credits", ""));
+        if(credits.isEmpty())
+        {
+            credits = QString::fromStdString(toml::find_or<std::string>(tomlModsArr[0], "credits", ""));
+        }
+        details->credits = credits;
+        auto homeurl = QString::fromStdString(toml::find_or<std::string>(tomlData, "displayURL", ""));
+        if(homeurl.isEmpty())
+        {
+            homeurl = QString::fromStdString(toml::find_or<std::string>(tomlModsArr[0], "displayURL", ""));
+        }
+        if(!homeurl.isEmpty())
+        {
+            // fix up url.
+            if (!homeurl.startsWith("http://") && !homeurl.startsWith("https://") && !homeurl.startsWith("ftp://"))
+            {
+                homeurl.prepend("http://");
+            }
+        }
+        details->homeurl = homeurl;
+    } catch (toml::syntax_error&) {
+        return nullptr;
+    }
+    return details;
 }
 
 // https://fabricmc.net/wiki/documentation:fabric_mod_json
@@ -198,7 +257,20 @@ void LocalModParseTask::processAsZip()
 
     QuaZipFile file(&zip);
 
-    if (zip.setCurrentFile("mcmod.info"))
+    if (zip.setCurrentFile("META-INF/mods.toml"))
+    {
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            zip.close();
+            return;
+        }
+
+        m_result->details = ReadMCModTOML(file.readAll());
+        file.close();
+        zip.close();
+        return;
+    }
+    else if (zip.setCurrentFile("mcmod.info"))
     {
         if (!file.open(QIODevice::ReadOnly))
         {
