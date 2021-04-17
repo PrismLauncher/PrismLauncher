@@ -91,64 +91,124 @@ std::shared_ptr<ModDetails> ReadMCModInfo(QByteArray contents)
     return nullptr;
 }
 
-/*
+// https://github.com/MinecraftForge/Documentation/blob/5ab4ba6cf9abc0ac4c0abd96ad187461aefd72af/docs/gettingstarted/structuring.md
 std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
 {
     std::shared_ptr<ModDetails> details = std::make_shared<ModDetails>();
 
-    // toml11 throws an error when something goes wrong in parsing, so we need to catch that
-    try {
-        // data under the root table
-        auto tomlData = toml::parse(contents);
-        // data under [[mods]]
-        auto tomlModsArr = toml::find<std::vector<toml::value>>(tomlData, "mods");
+    char errbuf[200];
+    // top-level table
+    toml_table_t* tomlData = toml_parse(contents.data(), errbuf, sizeof(errbuf));
 
-        // these properties are required in this location by forge, and thus can be assumed to exist
-        // forge supports multiple mods in one file, details of which are accessable here from tomlModsArr[n]
-        details->mod_id = QString::fromStdString(toml::find<std::string>(tomlModsArr[0], "modId"));
-        details->version = QString::fromStdString(toml::find<std::string>(tomlModsArr[0], "version"));
-        details->name = QString::fromStdString(toml::find<std::string>(tomlModsArr[0], "displayName"));
-        // known issue: sometimes overflows the description box for some reason
-        details->description = QString::fromStdString(toml::find<std::string>(tomlModsArr[0], "description"));
-
-        // optional properties - can be stored either in the root table or in [[mods]]
-        auto authors = QString::fromStdString(toml::find_or<std::string>(tomlData, "authors", ""));
-        if(authors.isEmpty())
-        {
-            authors = QString::fromStdString(toml::find_or<std::string>(tomlModsArr[0], "authors", ""));
-        }
-        if(!authors.isEmpty())
-        {
-            // author information is stored as a string now, not a list
-            details->authors.append(authors);
-        }
-        // is credits even used anywhere? including this for completion/parity with old data version
-        auto credits = QString::fromStdString(toml::find_or<std::string>(tomlData, "credits", ""));
-        if(credits.isEmpty())
-        {
-            credits = QString::fromStdString(toml::find_or<std::string>(tomlModsArr[0], "credits", ""));
-        }
-        details->credits = credits;
-        auto homeurl = QString::fromStdString(toml::find_or<std::string>(tomlData, "displayURL", ""));
-        if(homeurl.isEmpty())
-        {
-            homeurl = QString::fromStdString(toml::find_or<std::string>(tomlModsArr[0], "displayURL", ""));
-        }
-        if(!homeurl.isEmpty())
-        {
-            // fix up url.
-            if (!homeurl.startsWith("http://") && !homeurl.startsWith("https://") && !homeurl.startsWith("ftp://"))
-            {
-                homeurl.prepend("http://");
-            }
-        }
-        details->homeurl = homeurl;
-    } catch (toml::syntax_error&) {
+    if(!tomlData)
+    {
         return nullptr;
     }
+
+    // array defined by [[mods]]
+    toml_array_t* tomlModsArr = toml_array_in(tomlData, "mods");
+    // we only really care about the first element, since multiple mods in one file is not supported by us at the moment
+    toml_table_t* tomlModsTable0 = toml_table_at(tomlModsArr, 0);
+
+    // mandatory properties - always in [[mods]]
+    toml_datum_t modIdDatum = toml_string_in(tomlModsTable0, "modId");
+    if(modIdDatum.ok)
+    {
+        details->mod_id = modIdDatum.u.s;
+        // library says this is required for strings
+        free(modIdDatum.u.s);
+    }
+    toml_datum_t versionDatum = toml_string_in(tomlModsTable0, "version");
+    if(versionDatum.ok)
+    {
+        details->version = versionDatum.u.s;
+        free(versionDatum.u.s);
+    }
+    toml_datum_t displayNameDatum = toml_string_in(tomlModsTable0, "displayName");
+    if(displayNameDatum.ok)
+    {
+        details->name = displayNameDatum.u.s;
+        free(displayNameDatum.u.s);
+    }
+    toml_datum_t descriptionDatum = toml_string_in(tomlModsTable0, "description");
+    if(descriptionDatum.ok)
+    {
+        details->description = descriptionDatum.u.s;
+        free(descriptionDatum.u.s);
+    }
+
+    // optional properties - can be in the root table or [[mods]]
+    toml_datum_t authorsDatum = toml_string_in(tomlData, "authors");
+    QString authors = "";
+    if(authorsDatum.ok)
+    {
+        authors = authorsDatum.u.s;
+        free(authorsDatum.u.s);
+    }
+    else
+    {
+        authorsDatum = toml_string_in(tomlModsTable0, "authors");
+        if(authorsDatum.ok)
+        {
+            authors = authorsDatum.u.s;
+            free(authorsDatum.u.s);
+        }
+    }
+    if(!authors.isEmpty())
+    {
+        // author information is stored as a string now, not a list
+        details->authors.append(authors);
+    }
+    // is credits even used anywhere? including this for completion/parity with old data version
+    toml_datum_t creditsDatum = toml_string_in(tomlData, "credits");
+    QString credits = "";
+    if(creditsDatum.ok)
+    {
+        authors = creditsDatum.u.s;
+        free(creditsDatum.u.s);
+    }
+    else
+    {
+        creditsDatum = toml_string_in(tomlModsTable0, "credits");
+        if(creditsDatum.ok)
+        {
+            credits = creditsDatum.u.s;
+            free(creditsDatum.u.s);
+        }
+    }
+    details->credits = credits;
+    toml_datum_t homeurlDatum = toml_string_in(tomlData, "displayURL");
+    QString homeurl = "";
+    if(homeurlDatum.ok)
+    {
+        homeurl = homeurlDatum.u.s;
+        free(homeurlDatum.u.s);
+    }
+    else
+    {
+        homeurlDatum = toml_string_in(tomlModsTable0, "displayURL");
+        if(homeurlDatum.ok)
+        {
+            homeurl = homeurlDatum.u.s;
+            free(homeurlDatum.u.s);
+        }
+    }
+    if(!homeurl.isEmpty())
+    {
+        // fix up url.
+        if (!homeurl.startsWith("http://") && !homeurl.startsWith("https://") && !homeurl.startsWith("ftp://"))
+        {
+            homeurl.prepend("http://");
+        }
+    }
+    details->homeurl = homeurl;
+
+    // this seems to be recursive, so it should free everything
+    toml_free(tomlData);
+
     return details;
 }
-*/
+
 // https://fabricmc.net/wiki/documentation:fabric_mod_json
 std::shared_ptr<ModDetails> ReadFabricModInfo(QByteArray contents)
 {
@@ -257,7 +317,7 @@ void LocalModParseTask::processAsZip()
 
     QuaZipFile file(&zip);
 
-    /*if (zip.setCurrentFile("META-INF/mods.toml"))
+    if (zip.setCurrentFile("META-INF/mods.toml"))
     {
         if (!file.open(QIODevice::ReadOnly))
         {
@@ -307,7 +367,7 @@ void LocalModParseTask::processAsZip()
         zip.close();
         return;
     }
-    else*/ if (zip.setCurrentFile("mcmod.info"))
+    else if (zip.setCurrentFile("mcmod.info"))
     {
         if (!file.open(QIODevice::ReadOnly))
         {
