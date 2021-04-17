@@ -6,7 +6,7 @@
 #include <QJsonValue>
 #include <quazip.h>
 #include <quazipfile.h>
-#include <toml.hpp>
+#include <toml.h>
 
 #include "settings/INIFile.h"
 #include "FileSystem.h"
@@ -91,7 +91,7 @@ std::shared_ptr<ModDetails> ReadMCModInfo(QByteArray contents)
     return nullptr;
 }
 
-
+/*
 std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
 {
     std::shared_ptr<ModDetails> details = std::make_shared<ModDetails>();
@@ -148,7 +148,7 @@ std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
     }
     return details;
 }
-
+*/
 // https://fabricmc.net/wiki/documentation:fabric_mod_json
 std::shared_ptr<ModDetails> ReadFabricModInfo(QByteArray contents)
 {
@@ -257,7 +257,7 @@ void LocalModParseTask::processAsZip()
 
     QuaZipFile file(&zip);
 
-    if (zip.setCurrentFile("META-INF/mods.toml"))
+    /*if (zip.setCurrentFile("META-INF/mods.toml"))
     {
         if (!file.open(QIODevice::ReadOnly))
         {
@@ -307,7 +307,7 @@ void LocalModParseTask::processAsZip()
         zip.close();
         return;
     }
-    else if (zip.setCurrentFile("mcmod.info"))
+    else*/ if (zip.setCurrentFile("mcmod.info"))
     {
         if (!file.open(QIODevice::ReadOnly))
         {

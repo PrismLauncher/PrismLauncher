@@ -265,7 +265,7 @@ add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader
 add_subdirectory(libraries/LocalPeer) # fork of a library from Qt solutions
 add_subdirectory(libraries/classparser) # google analytics library
 add_subdirectory(libraries/optional-bare)
-add_subdirectory(libraries/toml11) # toml parser
+add_subdirectory(libraries/tomlc99) # toml parser
 
 ############################### Built Artifacts ###############################
 
