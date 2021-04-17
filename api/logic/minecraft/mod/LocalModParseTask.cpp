@@ -267,6 +267,43 @@ void LocalModParseTask::processAsZip()
 
         m_result->details = ReadMCModTOML(file.readAll());
         file.close();
+
+        // to replace ${file.jarVersion} with the actual version, as needed
+        if (m_result->details && m_result->details->version == "${file.jarVersion}")
+        {
+            if (zip.setCurrentFile("META-INF/MANIFEST.MF"))
+            {
+                if (!file.open(QIODevice::ReadOnly))
+                {
+                    zip.close();
+                    return;
+                }
+
+                // quick and dirty line-by-line parser
+                auto manifestLines = file.readAll().split('\n');
+                QString manifestVersion = "";
+                for (auto &line : manifestLines)
+                {
+                    if (QString(line).startsWith("Implementation-Version: "))
+                    {
+                        manifestVersion = QString(line).remove("Implementation-Version: ");
+                        break;
+                    }
+                }
+
+                // some mods use ${projectversion} in their build.gradle, causing this mess to show up in MANIFEST.MF
+                // also keep with forge's behavior of setting the version to "NONE" if none is found
+                if (manifestVersion.contains("task ':jar' property 'archiveVersion'") || manifestVersion == "")
+                {
+                    manifestVersion = "NONE";
+                }
+
+                m_result->details->version = manifestVersion;
+
+                file.close();
+            }
+        }
+
         zip.close();
         return;
     }
