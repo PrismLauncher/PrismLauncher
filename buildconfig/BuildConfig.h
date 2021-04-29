@@ -71,8 +71,7 @@ public:
     QString AUTH_BASE = "https://authserver.mojang.com/";
     QString MOJANG_STATUS_URL = "https://status.mojang.com/check";
     QString IMGUR_BASE_URL = "https://api.imgur.com/3/";
-    QString FMLLIBS_OUR_BASE_URL = "https://files.multimc.org/fmllibs/";
-    QString FMLLIBS_FORGE_BASE_URL = "https://files.minecraftforge.net/fmllibs/";
+    QString FMLLIBS_BASE_URL = "https://files.multimc.org/fmllibs/";
     QString TRANSLATIONS_BASE_URL = "https://files.multimc.org/translations/";
 
     QString MODPACKSCH_API_BASE_URL = "https://api.modpacks.ch/";

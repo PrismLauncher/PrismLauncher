@@ -10,7 +10,6 @@ struct FMLlib
 {
     QString filename;
     QString checksum;
-    bool ours;
 };
 
 struct VersionFilterData
