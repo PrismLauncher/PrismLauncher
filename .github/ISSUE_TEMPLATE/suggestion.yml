@@ -1,7 +1,6 @@
 name: Suggestion
 description: Make a suggestion
 labels: [idea, needs-triage]
-issue_body: true
 body:
 - type: markdown
   attributes:
