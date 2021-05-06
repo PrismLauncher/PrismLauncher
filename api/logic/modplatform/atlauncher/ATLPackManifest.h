@@ -87,6 +87,7 @@ struct VersionMod
     QString decompFile;
 
     bool optional;
+    bool client;
 };
 
 struct PackVersion

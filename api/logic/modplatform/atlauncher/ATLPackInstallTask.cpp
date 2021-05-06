@@ -462,6 +462,9 @@ void PackInstallTask::downloadMods()
     jarmods.clear();
     jobPtr.reset(new NetJob(tr("Mod download")));
     for(const auto& mod : m_version.mods) {
+        // skip non-client mods
+        if (!mod.client) continue;
+
         // skip optional mods for now
         if(mod.optional) continue;
 

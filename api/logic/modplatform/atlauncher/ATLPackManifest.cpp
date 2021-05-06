@@ -144,6 +144,7 @@ static void loadVersionMod(ATLauncher::VersionMod & p, QJsonObject & obj) {
     }
 
     p.optional = Json::ensureBoolean(obj, QString("optional"), false);
+    p.client = Json::ensureBoolean(obj, QString("client"), false);
 }
 
 void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
