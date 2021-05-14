@@ -416,6 +416,58 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="miscellanousPage">
+      <attribute name="title">
+       <string>Miscellanous</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="QGroupBox" name="gameTimeGroupBox">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="title">
+          <string>Override global game time settings</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_10">
+          <item>
+           <widget class="QCheckBox" name="showGameTime">
+            <property name="text">
+             <string>Show time spent playing this instance</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="recordGameTime">
+            <property name="text">
+             <string>Record time spent playing this instance</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacerMiscellanous">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
@@ -453,6 +505,8 @@
   <tabstop>nativeWorkaroundsGroupBox</tabstop>
   <tabstop>useNativeGLFWCheck</tabstop>
   <tabstop>useNativeOpenALCheck</tabstop>
+  <tabstop>showGameTime</tabstop>
+  <tabstop>recordGameTime</tabstop>
  </tabstops>
  <resources/>
  <connections/>

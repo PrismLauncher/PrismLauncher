@@ -135,6 +135,29 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="gameTimeGroupBox">
+         <property name="title">
+          <string>Game time</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QCheckBox" name="showGameTime">
+            <property name="text">
+             <string>Show time spent playing instances</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="recordGameTime">
+            <property name="text">
+             <string>Record time spent playing instances</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacerMinecraft">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

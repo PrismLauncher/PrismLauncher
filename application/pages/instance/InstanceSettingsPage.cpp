@@ -177,6 +177,20 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("UseNativeOpenAL");
         m_settings->reset("UseNativeGLFW");
     }
+
+    // Game time
+    bool gameTime = ui->gameTimeGroupBox->isChecked();
+    m_settings->set("OverrideGameTime", gameTime);
+    if (gameTime)
+    {
+        m_settings->set("ShowGameTime", ui->showGameTime->isChecked());
+        m_settings->set("RecordGameTime", ui->recordGameTime->isChecked());
+    }
+    else
+    {
+        m_settings->reset("ShowGameTime");
+        m_settings->reset("RecordGameTime");
+    }
 }
 
 void InstanceSettingsPage::loadSettings()
@@ -238,6 +252,11 @@ void InstanceSettingsPage::loadSettings()
     ui->nativeWorkaroundsGroupBox->setChecked(m_settings->get("OverrideNativeWorkarounds").toBool());
     ui->useNativeGLFWCheck->setChecked(m_settings->get("UseNativeGLFW").toBool());
     ui->useNativeOpenALCheck->setChecked(m_settings->get("UseNativeOpenAL").toBool());
+
+    // Miscellanous
+    ui->gameTimeGroupBox->setChecked(m_settings->get("OverrideGameTime").toBool());
+    ui->showGameTime->setChecked(m_settings->get("ShowGameTime").toBool());
+    ui->recordGameTime->setChecked(m_settings->get("RecordGameTime").toBool());
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
