@@ -158,3 +158,10 @@ A Google Analytics library for Qt.
 BSD licensed, derived from [qt-google-analytics](https://github.com/HSAnet/qt-google-analytics).
 
 Modifications include better handling of IP anonymization (can be enabled) and general improvements of the API (application handles persistence and ID generation instead of the library).
+
+## tomlc99
+A TOML language parser. Used by Forge 1.14+ to store mod metadata.
+
+See [github repo](https://github.com/cktan/tomlc99).
+
+Licenced under the MIT licence.
