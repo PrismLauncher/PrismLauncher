@@ -4,6 +4,7 @@
 
 #include <sys/utsname.h>
 #include <fstream>
+#include <limits>
 
 Sys::KernelInfo Sys::getKernelInfo()
 {
