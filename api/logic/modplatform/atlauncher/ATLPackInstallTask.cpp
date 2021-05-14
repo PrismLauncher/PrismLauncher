@@ -18,8 +18,9 @@
 
 namespace ATLauncher {
 
-PackInstallTask::PackInstallTask(QString pack, QString version)
+PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString pack, QString version)
 {
+    m_support = support;
     m_pack = pack;
     m_version_name = version;
 }
@@ -154,21 +155,54 @@ QString PackInstallTask::getVersionForLoader(QString uid)
         auto vlist = ENV.metadataIndex()->get(uid);
         if(!vlist)
         {
-            emitFailed(tr("Failed to get local metadata index for ") + uid);
+            emitFailed(tr("Failed to get local metadata index for %1").arg(uid));
             return Q_NULLPTR;
         }
 
-        // todo: filter by Minecraft version
-
-        if(m_version.loader.recommended) {
-            return vlist.get()->getRecommended().get()->descriptor();
+        if(!vlist->isLoaded()) {
+            vlist->load(Net::Mode::Online);
         }
-        else if(m_version.loader.latest) {
-            return vlist.get()->at(0)->descriptor();
+
+        if(m_version.loader.recommended || m_version.loader.latest) {
+            for (int i = 0; i < vlist->versions().size(); i++) {
+                auto version = vlist->versions().at(i);
+                auto reqs = version->requires();
+
+                // filter by minecraft version, if the loader depends on a certain version.
+                // not all mod loaders depend on a given Minecraft version, so we won't do this
+                // filtering for those loaders.
+                if (m_version.loader.type != "fabric") {
+                    auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Meta::Require &req) {
+                        return req.uid == "net.minecraft";
+                    });
+                    if (iter == reqs.end()) continue;
+                    if (iter->equalsVersion != m_version.minecraft) continue;
+                }
+
+                if (m_version.loader.recommended) {
+                    // first recommended build we find, we use.
+                    if (!version->isRecommended()) continue;
+                }
+
+                return version->descriptor();
+            }
+
+            emitFailed(tr("Failed to find version for %1 loader").arg(m_version.loader.type));
+            return Q_NULLPTR;
         }
         else if(m_version.loader.choose) {
-            // todo: implement
+            // Fabric Loader doesn't depend on a given Minecraft version.
+            if (m_version.loader.type == "fabric") {
+                return m_support->chooseVersion(vlist, Q_NULLPTR);
+            }
+
+            return m_support->chooseVersion(vlist, m_version.minecraft);
         }
+    }
+
+    if (m_version.loader.version == Q_NULLPTR || m_version.loader.version.isEmpty()) {
+        emitFailed(tr("No loader version set for modpack!"));
+        return Q_NULLPTR;
     }
 
     return m_version.loader.version;
@@ -428,6 +462,9 @@ void PackInstallTask::downloadMods()
     jarmods.clear();
     jobPtr.reset(new NetJob(tr("Mod download")));
     for(const auto& mod : m_version.mods) {
+        // skip non-client mods
+        if (!mod.client) continue;
+
         // skip optional mods for now
         if(mod.optional) continue;
 
@@ -451,7 +488,6 @@ void PackInstallTask::downloadMods()
         auto cacheName = fileName.completeBaseName() + "-" + mod.md5 + "." + fileName.suffix();
 
         if (mod.type == ModType::Extract || mod.type == ModType::TexturePackExtract || mod.type == ModType::ResourcePackExtract) {
-
             auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
             modsToExtract.insert(entry->getFullPath(), mod);
@@ -522,7 +558,7 @@ void PackInstallTask::onModsDownloaded() {
     qDebug() << "PackInstallTask::onModsDownloaded: " << QThread::currentThreadId();
     jobPtr.reset();
 
-    if(modsToExtract.size() || modsToDecomp.size() || modsToCopy.size()) {
+    if(!modsToExtract.empty() || !modsToDecomp.empty() || !modsToCopy.empty()) {
         m_modExtractFuture = QtConcurrent::run(QThreadPool::globalInstance(), this, &PackInstallTask::extractMods, modsToExtract, modsToDecomp, modsToCopy);
         connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onModsExtracted);
         connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]()
@@ -629,6 +665,7 @@ void PackInstallTask::install()
 
     // Use a component to add libraries BEFORE Minecraft
     if(!createLibrariesComponent(instance.instanceRoot(), components)) {
+        emitFailed(tr("Failed to create libraries component"));
         return;
     }
 
@@ -666,6 +703,7 @@ void PackInstallTask::install()
     // Use a component to fill in the rest of the data
     // todo: use more detection
     if(!createPackComponent(instance.instanceRoot(), components)) {
+        emitFailed(tr("Failed to create pack component"));
         return;
     }
 

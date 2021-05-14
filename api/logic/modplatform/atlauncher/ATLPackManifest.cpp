@@ -81,12 +81,21 @@ static ATLauncher::ModType parseModType(QString rawType) {
 
 static void loadVersionLoader(ATLauncher::VersionLoader & p, QJsonObject & obj) {
     p.type = Json::requireString(obj, "type");
-    p.latest = Json::ensureBoolean(obj, QString("latest"), false);
     p.choose = Json::ensureBoolean(obj, QString("choose"), false);
-    p.recommended = Json::ensureBoolean(obj, QString("recommended"), false);
 
     auto metadata = Json::requireObject(obj, "metadata");
-    p.version = Json::requireString(metadata, "version");
+    p.latest = Json::ensureBoolean(metadata, QString("latest"), false);
+    p.recommended = Json::ensureBoolean(metadata, QString("recommended"), false);
+
+    // Minecraft Forge
+    if (p.type == "forge") {
+        p.version = Json::ensureString(metadata, "version", "");
+    }
+
+    // Fabric Loader
+    if (p.type == "fabric") {
+        p.version = Json::ensureString(metadata, "loader", "");
+    }
 }
 
 static void loadVersionLibrary(ATLauncher::VersionLibrary & p, QJsonObject & obj) {
@@ -135,6 +144,7 @@ static void loadVersionMod(ATLauncher::VersionMod & p, QJsonObject & obj) {
     }
 
     p.optional = Json::ensureBoolean(obj, QString("optional"), false);
+    p.client = Json::ensureBoolean(obj, QString("client"), false);
 }
 
 void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
@@ -169,12 +179,15 @@ void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
         }
     }
 
-    auto mods = Json::requireArray(obj, "mods");
-    for (const auto modRaw : mods)
-    {
-        auto modObj = Json::requireObject(modRaw);
-        ATLauncher::VersionMod mod;
-        loadVersionMod(mod, modObj);
-        v.mods.append(mod);
+
+    if(obj.contains("mods")) {
+        auto mods = Json::requireArray(obj, "mods");
+        for (const auto modRaw : mods)
+        {
+            auto modObj = Json::requireObject(modRaw);
+            ATLauncher::VersionMod mod;
+            loadVersionMod(mod, modObj);
+            v.mods.append(mod);
+        }
     }
 }
