@@ -39,7 +39,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="minecraftTab">
       <attribute name="title">
@@ -449,6 +449,58 @@
              <string>Record time spent playing this instance</string>
             </property>
            </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="serverJoinGroupBox">
+         <property name="title">
+          <string>Set a server to join on launch</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_11">
+          <item>
+           <layout class="QGridLayout" name="serverJoinLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="serverJoinAddressLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Server address:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="serverJoinAddress"/>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="serverJoinPortLabel">
+              <property name="text">
+               <string>Server port:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="serverJoinPort">
+              <property name="maximum">
+               <number>65535</number>
+              </property>
+              <property name="value">
+               <number>25565</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
