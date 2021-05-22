@@ -55,7 +55,7 @@ void DirectJavaLaunch::executeTask()
     // make detachable - this will keep the process running even if the object is destroyed
     m_process.setDetachable(true);
 
-    auto mcArgs = minecraftInstance->processMinecraftArgs(m_session);
+    auto mcArgs = minecraftInstance->processMinecraftArgs(m_session, m_serverToJoin);
     args.append(mcArgs);
 
     QString wrapperCommandStr = instance->getWrapperCommand().trimmed();

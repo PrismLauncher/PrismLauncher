@@ -19,6 +19,8 @@
 #include <LoggedProcess.h>
 #include <minecraft/auth/AuthSession.h>
 
+#include "MinecraftServerTarget.h"
+
 class LauncherPartLaunch: public LaunchStep
 {
     Q_OBJECT
@@ -39,6 +41,11 @@ public:
         m_session = session;
     }
 
+    void setServerToJoin(MinecraftServerTargetPtr serverToJoin)
+    {
+        m_serverToJoin = std::move(serverToJoin);
+    }
+
 private slots:
     void on_state(LoggedProcess::State state);
 
@@ -47,5 +54,7 @@ private:
     QString m_command;
     AuthSessionPtr m_session;
     QString m_launchScript;
+    MinecraftServerTargetPtr m_serverToJoin;
+
     bool mayProceed = false;
 };

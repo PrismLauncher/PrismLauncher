@@ -67,7 +67,7 @@ public:
     {
         return false;
     }
-    QStringList verboseDescription(AuthSessionPtr session) override
+    QStringList verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) override
     {
         QStringList out;
         out << "Null instance - placeholder.";

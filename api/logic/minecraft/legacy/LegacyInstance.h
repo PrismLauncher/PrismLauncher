@@ -125,7 +125,7 @@ public:
     }
 
     QString getStatusbarDescription() override;
-    QStringList verboseDescription(AuthSessionPtr session) override;
+    QStringList verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) override;
 
     QProcessEnvironment createEnvironment() override
     {

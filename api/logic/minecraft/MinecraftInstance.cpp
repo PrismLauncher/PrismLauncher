@@ -12,6 +12,7 @@
 #include <java/JavaVersion.h>
 
 #include "launch/LaunchTask.h"
+#include "launch/steps/LookupServerAddress.h"
 #include "launch/steps/PostLaunchCommand.h"
 #include "launch/steps/Update.h"
 #include "launch/steps/PreLaunchCommand.h"
@@ -400,7 +401,8 @@ static QString replaceTokensIn(QString text, QMap<QString, QString> with)
     return result;
 }
 
-QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session) const
+QStringList MinecraftInstance::processMinecraftArgs(
+        AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) const
 {
     auto profile = m_components->getProfile();
     QString args_pattern = profile->getMinecraftArguments();
@@ -409,10 +411,10 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session) cons
         args_pattern += " --tweakClass " + tweaker;
     }
 
-    if (m_settings->get("JoinServerOnLaunch").toBool())
+    if (serverToJoin && !serverToJoin->address.isEmpty())
     {
-        args_pattern += " --server " + m_settings->get("JoinServerOnLaunchAddress").toString();
-        args_pattern += " --port " + m_settings->get("JoinServerOnLaunchPort").toString();
+        args_pattern += " --server " + serverToJoin->address;
+        args_pattern += " --port " + QString::number(serverToJoin->port);
     }
 
     QMap<QString, QString> token_mapping;
@@ -451,7 +453,7 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session) cons
     return parts;
 }
 
-QString MinecraftInstance::createLaunchScript(AuthSessionPtr session)
+QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin)
 {
     QString launchScript;
 
@@ -473,7 +475,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session)
     }
 
     // generic minecraft params
-    for (auto param : processMinecraftArgs(session))
+    for (auto param : processMinecraftArgs(session, serverToJoin))
     {
         launchScript += "param " + param + "\n";
     }
@@ -523,7 +525,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session)
     return launchScript;
 }
 
-QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session)
+QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin)
 {
     QStringList out;
     out << "Main Class:" << "  " + getMainClass() << "";
@@ -638,7 +640,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session)
         out << "";
     }
 
-    auto params = processMinecraftArgs(nullptr);
+    auto params = processMinecraftArgs(nullptr, serverToJoin);
     out << "Params:";
     out << "  " + params.join(' ');
     out << "";
@@ -844,6 +846,18 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
         process->appendStep(new CreateGameFolders(pptr));
     }
 
+    MinecraftServerTargetPtr serverToJoin = std::make_shared<MinecraftServerTarget>();
+
+    if (m_settings->get("JoinServerOnLaunch").toBool())
+    {
+        // Resolve server address to join on launch
+        auto *step = new LookupServerAddress(pptr);
+        step->setLookupAddress(m_settings->get("JoinServerOnLaunchAddress").toString());
+        step->setPort(m_settings->get("JoinServerOnLaunchPort").toInt());
+        step->setOutputAddressPtr(serverToJoin);
+        process->appendStep(step);
+    }
+
     // run pre-launch command if that's needed
     if(getPreLaunchCommand().size())
     {
@@ -875,7 +889,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
 
     // print some instance info here...
     {
-        process->appendStep(new PrintInstanceInfo(pptr, session));
+        process->appendStep(new PrintInstanceInfo(pptr, session, serverToJoin));
     }
 
     // extract native jars if needed
@@ -896,6 +910,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
             auto step = new LauncherPartLaunch(pptr);
             step->setWorkingDirectory(gameRoot());
             step->setAuthSession(session);
+            step->setServerToJoin(serverToJoin);
             process->appendStep(step);
         }
         else if (method == "DirectJava")
@@ -903,6 +918,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
             auto step = new DirectJavaLaunch(pptr);
             step->setWorkingDirectory(gameRoot());
             step->setAuthSession(session);
+            step->setServerToJoin(serverToJoin);
             process->appendStep(step);
         }
     }

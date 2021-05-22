@@ -59,7 +59,7 @@ void LauncherPartLaunch::executeTask()
     auto instance = m_parent->instance();
     std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
 
-    m_launchScript = minecraftInstance->createLaunchScript(m_session);
+    m_launchScript = minecraftInstance->createLaunchScript(m_session, m_serverToJoin);
     QStringList args = minecraftInstance->javaArguments();
     QString allArgs = args.join(", ");
     emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::MultiMC);
