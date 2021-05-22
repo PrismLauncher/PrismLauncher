@@ -409,6 +409,12 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session) cons
         args_pattern += " --tweakClass " + tweaker;
     }
 
+    if (m_settings->get("JoinServerOnLaunch").toBool())
+    {
+        args_pattern += " --server " + m_settings->get("JoinServerOnLaunchAddress").toString();
+        args_pattern += " --port " + m_settings->get("JoinServerOnLaunchPort").toString();
+    }
+
     QMap<QString, QString> token_mapping;
     // yggdrasil!
     if(session)
