@@ -111,6 +111,11 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
     m_settings->registerOverride(globalSettings->getSetting("ShowGameTime"), gameTimeOverride);
     m_settings->registerOverride(globalSettings->getSetting("RecordGameTime"), gameTimeOverride);
 
+    // Join server on launch, this does not have a global override
+    m_settings->registerSetting("JoinServerOnLaunch", false);
+    m_settings->registerSetting("JoinServerOnLaunchAddress", "");
+    m_settings->registerSetting("JoinServerOnLaunchPort", 25565);
+
     // DEPRECATED: Read what versions the user configuration thinks should be used
     m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
     m_settings->registerSetting("LWJGLVersion", "");
