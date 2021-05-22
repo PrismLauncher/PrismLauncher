@@ -27,7 +27,7 @@ public:
     {
         return instanceRoot();
     };
-    shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr) override
+    shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr, MinecraftServerTargetPtr) override
     {
         return nullptr;
     }

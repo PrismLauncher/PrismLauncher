@@ -556,7 +556,7 @@ private:
     QTimer m_saveTimer;
 };
 
-ServersPage::ServersPage(MinecraftInstance * inst, QWidget* parent)
+ServersPage::ServersPage(InstancePtr inst, QWidget* parent)
     : QMainWindow(parent), ui(new Ui::ServersPage)
 {
     ui->setupUi(this);
@@ -579,7 +579,7 @@ ServersPage::ServersPage(MinecraftInstance * inst, QWidget* parent)
 
     auto selectionModel = ui->serversView->selectionModel();
     connect(selectionModel, &QItemSelectionModel::currentChanged, this, &ServersPage::currentChanged);
-    connect(m_inst, &MinecraftInstance::runningStatusChanged, this, &ServersPage::on_RunningState_changed);
+    connect(m_inst.get(), &MinecraftInstance::runningStatusChanged, this, &ServersPage::on_RunningState_changed);
     connect(ui->nameLine, &QLineEdit::textEdited, this, &ServersPage::nameEdited);
     connect(ui->addressLine, &QLineEdit::textEdited, this, &ServersPage::addressEdited);
     connect(ui->resourceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(resourceIndexChanged(int)));
@@ -695,6 +695,7 @@ void ServersPage::updateState()
     ui->actionMove_Down->setEnabled(serverEditEnabled);
     ui->actionMove_Up->setEnabled(serverEditEnabled);
     ui->actionRemove->setEnabled(serverEditEnabled);
+    ui->actionJoin->setEnabled(serverEditEnabled);
 
     if(server)
     {
@@ -756,6 +757,12 @@ void ServersPage::on_actionMove_Down_triggered()
     {
         currentServer ++;
     }
+}
+
+void ServersPage::on_actionJoin_triggered()
+{
+    const auto &address = m_model->at(currentServer)->m_address;
+    MMC->launch(m_inst, true, nullptr, std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(address)));
 }
 
 #include "ServersPage.moc"

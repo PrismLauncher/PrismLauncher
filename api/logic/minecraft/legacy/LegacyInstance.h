@@ -111,7 +111,8 @@ public:
     {
         return false;
     }
-    shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) override
+    shared_qobject_ptr<LaunchTask> createLaunchTask(
+            AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) override
     {
         return nullptr;
     }

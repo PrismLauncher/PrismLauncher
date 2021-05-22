@@ -17,9 +17,14 @@
 
 #include <memory>
 
+#include <QString>
+#include <multimc_logic_export.h>
+
 struct MinecraftServerTarget {
     QString address;
     quint16 port;
+
+    static MULTIMC_LOGIC_EXPORT MinecraftServerTarget parse(const QString &fullAddress);
 };
 
 typedef std::shared_ptr<MinecraftServerTarget> MinecraftServerTargetPtr;

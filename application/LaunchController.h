@@ -3,6 +3,8 @@
 #include <BaseInstance.h>
 #include <tools/BaseProfiler.h>
 
+#include "minecraft/launch/MinecraftServerTarget.h"
+
 class InstanceWindow;
 class LaunchController: public Task
 {
@@ -33,6 +35,10 @@ public:
     {
         m_parentWidget = widget;
     }
+    void setServerToJoin(MinecraftServerTargetPtr serverToJoin)
+    {
+        m_serverToJoin = std::move(serverToJoin);
+    }
     QString id()
     {
         return m_instance->id();
@@ -58,4 +64,5 @@ private:
     InstanceWindow *m_console = nullptr;
     AuthSessionPtr m_session;
     shared_qobject_ptr<LaunchTask> m_launcher;
+    MinecraftServerTargetPtr m_serverToJoin;
 };

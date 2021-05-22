@@ -1014,8 +1014,12 @@ bool MultiMC::openJsonEditor(const QString &filename)
     }
 }
 
-bool MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *profiler)
-{
+bool MultiMC::launch(
+        InstancePtr instance,
+        bool online,
+        BaseProfilerFactory *profiler,
+        MinecraftServerTargetPtr serverToJoin
+) {
     if(m_updateRunning)
     {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
@@ -1036,6 +1040,7 @@ bool MultiMC::launch(InstancePtr instance, bool online, BaseProfilerFactory *pro
         controller->setInstance(instance);
         controller->setOnline(online);
         controller->setProfiler(profiler);
+        controller->setServerToJoin(serverToJoin);
         if(window)
         {
             controller->setParentWidget(window);

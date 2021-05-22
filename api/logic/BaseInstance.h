@@ -147,7 +147,8 @@ public:
     virtual shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) = 0;
 
     /// returns a valid launcher (task container)
-    virtual shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) = 0;
+    virtual shared_qobject_ptr<LaunchTask> createLaunchTask(
+            AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) = 0;
 
     /// returns the current launch task (if any)
     shared_qobject_ptr<LaunchTask> getLaunchTask();

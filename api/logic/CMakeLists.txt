@@ -238,6 +238,7 @@ set(MINECRAFT_SOURCES
     minecraft/launch/ExtractNatives.h
     minecraft/launch/LauncherPartLaunch.cpp
     minecraft/launch/LauncherPartLaunch.h
+    minecraft/launch/MinecraftServerTarget.cpp
     minecraft/launch/MinecraftServerTarget.h
     minecraft/launch/PrintInstanceInfo.cpp
     minecraft/launch/PrintInstanceInfo.h
