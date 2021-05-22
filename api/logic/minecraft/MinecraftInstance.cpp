@@ -115,7 +115,6 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
     // Join server on launch, this does not have a global override
     m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
-    m_settings->registerSetting("JoinServerOnLaunchPort", 25565);
 
     // DEPRECATED: Read what versions the user configuration thinks should be used
     m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
@@ -859,17 +858,59 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
 
     if (m_settings->get("JoinServerOnLaunch").toBool())
     {
-        quint16 port = m_settings->get("JoinServerOnLaunchPort").toInt();
-        QString address = m_settings->get("JoinServerOnLaunchAddress").toString();
+        QString fullAddress = m_settings->get("JoinServerOnLaunchAddress").toString();
+        QStringList split = fullAddress.split(":");
 
-        serverToJoin->port = port;
-        serverToJoin->address = address;
+        // The logic below replicates the exact logic minecraft uses for parsing server addresses.
+        // While the conversion is not lossless and eats errors, it ensures the same behavior
+        // within Minecraft and MultiMC when entering server addresses.
+        if (fullAddress.startsWith("["))
+        {
+            int bracket = fullAddress.indexOf("]");
+            if (bracket > 0)
+            {
+                QString ipv6 = fullAddress.mid(1, bracket - 1);
+                QString port = fullAddress.mid(bracket + 1).trimmed();
 
-        if(port == 25565)
+                if (port.startsWith(":") && !ipv6.isEmpty())
+                {
+                    port = port.mid(1);
+                    split = QStringList({ ipv6, port });
+                }
+                else
+                {
+                    split = QStringList({ipv6});
+                }
+            }
+        }
+
+        if (split.size() > 2)
+        {
+            split = QStringList({fullAddress});
+        }
+
+        QString realAddress = split[0];
+
+        quint16 realPort = 25565;
+        if (split.size() > 1)
+        {
+            bool ok;
+            realPort = split[1].toUInt(&ok);
+
+            if (!ok)
+            {
+                realPort = 25565;
+            }
+        }
+
+        serverToJoin->port = realPort;
+        serverToJoin->address = realAddress;
+
+        if(realPort == 25565)
         {
             // Resolve server address to join on launch
             auto *step = new LookupServerAddress(pptr);
-            step->setLookupAddress(address);
+            step->setLookupAddress(realAddress);
             step->setOutputAddressPtr(serverToJoin);
             process->appendStep(step);
         }
