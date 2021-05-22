@@ -859,12 +859,20 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
 
     if (m_settings->get("JoinServerOnLaunch").toBool())
     {
-        // Resolve server address to join on launch
-        auto *step = new LookupServerAddress(pptr);
-        step->setLookupAddress(m_settings->get("JoinServerOnLaunchAddress").toString());
-        step->setPort(m_settings->get("JoinServerOnLaunchPort").toInt());
-        step->setOutputAddressPtr(serverToJoin);
-        process->appendStep(step);
+        quint16 port = m_settings->get("JoinServerOnLaunchPort").toInt();
+        QString address = m_settings->get("JoinServerOnLaunchAddress").toString();
+
+        serverToJoin->port = port;
+        serverToJoin->address = address;
+
+        if(port == 25565)
+        {
+            // Resolve server address to join on launch
+            auto *step = new LookupServerAddress(pptr);
+            step->setLookupAddress(address);
+            step->setOutputAddressPtr(serverToJoin);
+            process->appendStep(step);
+        }
     }
 
     // run pre-launch command if that's needed

@@ -35,7 +35,6 @@ public:
     }
 
     void setLookupAddress(const QString &lookupAddress);
-    void setPort(quint16 port);
     void setOutputAddressPtr(MinecraftServerTargetPtr output);
 
 private slots:
@@ -46,6 +45,5 @@ private:
 
     QDnsLookup *m_dnsLookup;
     QString m_lookupAddress;
-    quint16 m_port;
     MinecraftServerTargetPtr m_output;
 };
