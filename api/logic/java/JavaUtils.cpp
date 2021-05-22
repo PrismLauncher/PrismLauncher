@@ -241,21 +241,33 @@ QList<QString> JavaUtils::FindJavaPaths()
         KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
     QList<JavaInstallPtr> JDK64s = this->FindJavaFromRegistryKey(
         KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
+    QList<JavaInstallPtr> NEWJRE64s = this->FindJavaFromRegistryKey(
+        KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\JRE");
+    QList<JavaInstallPtr> NEWJDK64s = this->FindJavaFromRegistryKey(
+        KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\JDK");
     QList<JavaInstallPtr> JRE32s = this->FindJavaFromRegistryKey(
         KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
     QList<JavaInstallPtr> JDK32s = this->FindJavaFromRegistryKey(
         KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
+    QList<JavaInstallPtr> NEWJRE32s = this->FindJavaFromRegistryKey(
+        KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\JRE");
+    QList<JavaInstallPtr> NEWJDK32s = this->FindJavaFromRegistryKey(
+        KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\JDK");
 
     java_candidates.append(JRE64s);
+    java_candidates.append(NEWJRE64s);
     java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre8/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre7/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre6/bin/javaw.exe"));
     java_candidates.append(JDK64s);
+    java_candidates.append(NEWJDK64s);
     java_candidates.append(JRE32s);
+    java_candidates.append(NEWJRE32s);
     java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre8/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre7/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre6/bin/javaw.exe"));
     java_candidates.append(JDK32s);
+    java_candidates.append(NEWJDK32s);
     java_candidates.append(MakeJavaPtr(this->GetDefaultJava()->path));
 
     QList<QString> candidates;
