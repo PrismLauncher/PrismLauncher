@@ -474,8 +474,17 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
         launchScript += "appletClass " + appletClass + "\n";
     }
 
+    if (serverToJoin && !serverToJoin->address.isEmpty())
+    {
+        launchScript += "serverAddress " + serverToJoin->address + "\n";
+        launchScript += "serverPort " + QString::number(serverToJoin->port) + "\n";
+    }
+
     // generic minecraft params
-    for (auto param : processMinecraftArgs(session, serverToJoin))
+    for (auto param : processMinecraftArgs(
+            session,
+            nullptr /* When using a launch script, the server parameters are handled by it*/
+    ))
     {
         launchScript += "param " + param + "\n";
     }
