@@ -228,6 +228,7 @@ private:
     SetupWizard * m_setupWizard = nullptr;
 public:
     QString m_instanceIdToLaunch;
+    QString m_serverToJoin;
     bool m_liveCheck = false;
     QUrl m_zipToImport;
     std::unique_ptr<QFile> logFile;
