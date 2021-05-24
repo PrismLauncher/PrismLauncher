@@ -124,6 +124,8 @@ set(NET_SOURCES
 
 # Game launch logic
 set(LAUNCH_SOURCES
+    launch/steps/LookupServerAddress.cpp
+    launch/steps/LookupServerAddress.h
     launch/steps/PostLaunchCommand.cpp
     launch/steps/PostLaunchCommand.h
     launch/steps/PreLaunchCommand.cpp
@@ -236,6 +238,8 @@ set(MINECRAFT_SOURCES
     minecraft/launch/ExtractNatives.h
     minecraft/launch/LauncherPartLaunch.cpp
     minecraft/launch/LauncherPartLaunch.h
+    minecraft/launch/MinecraftServerTarget.cpp
+    minecraft/launch/MinecraftServerTarget.h
     minecraft/launch/PrintInstanceInfo.cpp
     minecraft/launch/PrintInstanceInfo.h
     minecraft/launch/ReconstructAssets.cpp

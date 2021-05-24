@@ -191,6 +191,18 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("ShowGameTime");
         m_settings->reset("RecordGameTime");
     }
+
+    // Join server on launch
+    bool joinServerOnLaunch = ui->serverJoinGroupBox->isChecked();
+    m_settings->set("JoinServerOnLaunch", joinServerOnLaunch);
+    if (joinServerOnLaunch)
+    {
+        m_settings->set("JoinServerOnLaunchAddress", ui->serverJoinAddress->text());
+    }
+    else
+    {
+        m_settings->reset("JoinServerOnLaunchAddress");
+    }
 }
 
 void InstanceSettingsPage::loadSettings()
@@ -257,6 +269,9 @@ void InstanceSettingsPage::loadSettings()
     ui->gameTimeGroupBox->setChecked(m_settings->get("OverrideGameTime").toBool());
     ui->showGameTime->setChecked(m_settings->get("ShowGameTime").toBool());
     ui->recordGameTime->setChecked(m_settings->get("RecordGameTime").toBool());
+
+    ui->serverJoinGroupBox->setChecked(m_settings->get("JoinServerOnLaunch").toBool());
+    ui->serverJoinAddress->setText(m_settings->get("JoinServerOnLaunchAddress").toString());
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

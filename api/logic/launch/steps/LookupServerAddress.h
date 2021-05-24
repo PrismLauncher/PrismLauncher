@@ -16,43 +16,34 @@
 #pragma once
 
 #include <launch/LaunchStep.h>
-#include <LoggedProcess.h>
-#include <minecraft/auth/AuthSession.h>
+#include <QObjectPtr.h>
+#include <QDnsLookup>
 
-#include "MinecraftServerTarget.h"
+#include "minecraft/launch/MinecraftServerTarget.h"
 
-class DirectJavaLaunch: public LaunchStep
-{
-    Q_OBJECT
+class LookupServerAddress: public LaunchStep {
+Q_OBJECT
 public:
-    explicit DirectJavaLaunch(LaunchTask *parent);
-    virtual ~DirectJavaLaunch() {};
+    explicit LookupServerAddress(LaunchTask *parent);
+    virtual ~LookupServerAddress() {};
 
     virtual void executeTask();
     virtual bool abort();
-    virtual void proceed();
     virtual bool canAbort() const
     {
         return true;
     }
-    void setWorkingDirectory(const QString &wd);
-    void setAuthSession(AuthSessionPtr session)
-    {
-        m_session = session;
-    }
 
-    void setServerToJoin(MinecraftServerTargetPtr serverToJoin)
-    {
-        m_serverToJoin = std::move(serverToJoin);
-    }
+    void setLookupAddress(const QString &lookupAddress);
+    void setOutputAddressPtr(MinecraftServerTargetPtr output);
 
 private slots:
-    void on_state(LoggedProcess::State state);
+    void on_dnsLookupFinished();
 
 private:
-    LoggedProcess m_process;
-    QString m_command;
-    AuthSessionPtr m_session;
-    MinecraftServerTargetPtr m_serverToJoin;
-};
+    void resolve(const QString &address, quint16 port);
 
+    QDnsLookup *m_dnsLookup;
+    QString m_lookupAddress;
+    MinecraftServerTargetPtr m_output;
+};

@@ -5,6 +5,7 @@
 #include <QProcess>
 #include <QDir>
 #include "multimc_logic_export.h"
+#include "minecraft/launch/MinecraftServerTarget.h"
 
 class ModFolderModel;
 class WorldList;
@@ -76,11 +77,11 @@ public:
 
     //////  Launch stuff //////
     shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) override;
-    shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) override;
+    shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) override;
     QStringList extraArguments() const override;
-    QStringList verboseDescription(AuthSessionPtr session) override;
+    QStringList verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) override;
     QList<Mod> getJarMods() const;
-    QString createLaunchScript(AuthSessionPtr session);
+    QString createLaunchScript(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin);
     /// get arguments passed to java
     QStringList javaArguments() const;
 
@@ -107,7 +108,7 @@ public:
     virtual QString getMainClass() const;
 
     // FIXME: remove
-    virtual QStringList processMinecraftArgs(AuthSessionPtr account) const;
+    virtual QStringList processMinecraftArgs(AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) const;
 
     virtual JavaVersion getJavaVersion() const;
 

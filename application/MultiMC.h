@@ -11,6 +11,8 @@
 
 #include <BaseInstance.h>
 
+#include "minecraft/launch/MinecraftServerTarget.h"
+
 class LaunchController;
 class LocalPeer;
 class InstanceWindow;
@@ -150,7 +152,12 @@ signals:
     void globalSettingsClosed();
 
 public slots:
-    bool launch(InstancePtr instance, bool online = true, BaseProfilerFactory *profiler = nullptr);
+    bool launch(
+            InstancePtr instance,
+            bool online = true,
+            BaseProfilerFactory *profiler = nullptr,
+            MinecraftServerTargetPtr serverToJoin = nullptr
+    );
     bool kill(InstancePtr instance);
 
 private slots:
@@ -221,6 +228,7 @@ private:
     SetupWizard * m_setupWizard = nullptr;
 public:
     QString m_instanceIdToLaunch;
+    QString m_serverToJoin;
     bool m_liveCheck = false;
     QUrl m_zipToImport;
     std::unique_ptr<QFile> logFile;

@@ -101,6 +101,6 @@ void PrintInstanceInfo::executeTask()
 #endif
 
     logLines(log, MessageLevel::MultiMC);
-    logLines(instance->verboseDescription(m_session), MessageLevel::MultiMC);
+    logLines(instance->verboseDescription(m_session, m_serverToJoin), MessageLevel::MultiMC);
     emitSucceeded();
 }

@@ -47,6 +47,9 @@ public class OneSixLauncher implements Launcher
     private boolean maximize;
     private String cwd;
 
+    private String serverAddress;
+    private String serverPort;
+
     // the much abused system classloader, for convenience (for further abuse)
     private ClassLoader cl;
 
@@ -63,6 +66,9 @@ public class OneSixLauncher implements Launcher
         sessionId = params.first("sessionId");
         windowTitle = params.firstSafe("windowTitle", "Minecraft");
         windowParams = params.firstSafe("windowParams", "854x480");
+
+        serverAddress = params.firstSafe("serverAddress", null);
+        serverPort = params.firstSafe("serverPort", null);
 
         cwd = System.getProperty("user.dir");
 
@@ -122,7 +128,7 @@ public class OneSixLauncher implements Launcher
                 Class<?> MCAppletClass = cl.loadClass(appletClass);
                 Applet mcappl = (Applet) MCAppletClass.newInstance();
                 LegacyFrame mcWindow = new LegacyFrame(windowTitle);
-                mcWindow.start(mcappl, userName, sessionId, winSizeW, winSizeH, maximize);
+                mcWindow.start(mcappl, userName, sessionId, winSizeW, winSizeH, maximize, serverAddress, serverPort);
                 return 0;
             } catch (Exception e)
             {
@@ -162,6 +168,14 @@ public class OneSixLauncher implements Launcher
             mcparams.add(Integer.toString(winSizeW));
             mcparams.add("--height");
             mcparams.add(Integer.toString(winSizeH));
+        }
+
+        if (serverAddress != null)
+        {
+            mcparams.add("--server");
+            mcparams.add(serverAddress);
+            mcparams.add("--port");
+            mcparams.add(serverPort);
         }
 
         // Get the Minecraft Class.

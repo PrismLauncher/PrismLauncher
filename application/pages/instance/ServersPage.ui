@@ -148,6 +148,7 @@
    <addaction name="actionRemove"/>
    <addaction name="actionMove_Up"/>
    <addaction name="actionMove_Down"/>
+   <addaction name="actionJoin"/>
   </widget>
   <action name="actionAdd">
    <property name="text">
@@ -167,6 +168,11 @@
   <action name="actionMove_Down">
    <property name="text">
     <string>Move Down</string>
+   </property>
+  </action>
+  <action name="actionJoin">
+   <property name="text">
+    <string>Join</string>
    </property>
   </action>
  </widget>

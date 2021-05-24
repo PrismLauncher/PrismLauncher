@@ -111,7 +111,8 @@ public:
     {
         return false;
     }
-    shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account) override
+    shared_qobject_ptr<LaunchTask> createLaunchTask(
+            AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) override
     {
         return nullptr;
     }
@@ -125,7 +126,7 @@ public:
     }
 
     QString getStatusbarDescription() override;
-    QStringList verboseDescription(AuthSessionPtr session) override;
+    QStringList verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) override;
 
     QProcessEnvironment createEnvironment() override
     {
