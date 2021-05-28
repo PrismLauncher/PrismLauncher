@@ -143,7 +143,10 @@ static void loadVersionMod(ATLauncher::VersionMod & p, QJsonObject & obj) {
         p.decompFile = Json::requireString(obj, "decompFile");
     }
 
+    p.description = Json::ensureString(obj, QString("description"), "");
     p.optional = Json::ensureBoolean(obj, QString("optional"), false);
+    p.recommended = Json::ensureBoolean(obj, QString("recommended"), false);
+    p.selected = Json::ensureBoolean(obj, QString("selected"), false);
     p.client = Json::ensureBoolean(obj, QString("client"), false);
 }
 

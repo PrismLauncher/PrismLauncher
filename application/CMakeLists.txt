@@ -129,6 +129,8 @@ SET(MULTIMC_SOURCES
     pages/modplatform/atlauncher/AtlFilterModel.h
     pages/modplatform/atlauncher/AtlListModel.cpp
     pages/modplatform/atlauncher/AtlListModel.h
+    pages/modplatform/atlauncher/AtlOptionalModDialog.cpp
+    pages/modplatform/atlauncher/AtlOptionalModDialog.h
     pages/modplatform/atlauncher/AtlPage.cpp
     pages/modplatform/atlauncher/AtlPage.h
 
@@ -277,6 +279,9 @@ SET(MULTIMC_UIS
     pages/modplatform/flame/FlamePage.ui
     pages/modplatform/technic/TechnicPage.ui
     pages/modplatform/ImportPage.ui
+
+    # Platform Dialogs
+    pages/modplatform/atlauncher/AtlOptionalModDialog.ui
 
     # Dialogs
     dialogs/CopyInstanceDialog.ui

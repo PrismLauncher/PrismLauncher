@@ -86,7 +86,10 @@ struct VersionMod
     QString decompType_raw;
     QString decompFile;
 
+    QString description;
     bool optional;
+    bool recommended;
+    bool selected;
     bool client;
 };
 

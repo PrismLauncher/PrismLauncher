@@ -457,16 +457,31 @@ void PackInstallTask::extractConfigs()
 void PackInstallTask::downloadMods()
 {
     qDebug() << "PackInstallTask::installMods: " << QThread::currentThreadId();
+
+    QVector<ATLauncher::VersionMod> optionalMods;
+    for (const auto& mod : m_version.mods) {
+        if (mod.optional) {
+            optionalMods.push_back(mod);
+        }
+    }
+
+    // Select optional mods, if pack contains any
+    QVector<QString> selectedMods;
+    if (!optionalMods.isEmpty()) {
+        setStatus(tr("Selecting optional mods..."));
+        selectedMods = m_support->chooseOptionalMods(optionalMods);
+    }
+
     setStatus(tr("Downloading mods..."));
 
     jarmods.clear();
     jobPtr.reset(new NetJob(tr("Mod download")));
     for(const auto& mod : m_version.mods) {
         // skip non-client mods
-        if (!mod.client) continue;
+        if(!mod.client) continue;
 
-        // skip optional mods for now
-        if(mod.optional) continue;
+        // skip optional mods that were not selected
+        if(mod.optional && !selectedMods.contains(mod.name)) continue;
 
         QString url;
         switch(mod.download) {
