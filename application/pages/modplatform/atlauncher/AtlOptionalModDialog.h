@@ -38,8 +38,14 @@ public slots:
     void clearAll();
 
 private:
+    void toggleMod(ATLauncher::VersionMod mod, int index);
+    void setMod(ATLauncher::VersionMod mod, int index, bool enable, bool shouldEmit = true);
+
+private:
     QVector<ATLauncher::VersionMod> m_mods;
     QMap<QString, bool> m_selection;
+    QMap<QString, int> m_index;
+    QMap<QString, QVector<QString>> m_dependants;
 };
 
 class AtlOptionalModDialog : public QDialog {

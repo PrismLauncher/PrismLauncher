@@ -90,7 +90,15 @@ struct VersionMod
     bool optional;
     bool recommended;
     bool selected;
+    bool hidden;
+    bool library;
+    QString group;
+    QVector<QString> depends;
+
     bool client;
+
+    // computed
+    bool effectively_hidden;
 };
 
 struct PackVersion

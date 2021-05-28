@@ -147,7 +147,20 @@ static void loadVersionMod(ATLauncher::VersionMod & p, QJsonObject & obj) {
     p.optional = Json::ensureBoolean(obj, QString("optional"), false);
     p.recommended = Json::ensureBoolean(obj, QString("recommended"), false);
     p.selected = Json::ensureBoolean(obj, QString("selected"), false);
+    p.hidden = Json::ensureBoolean(obj, QString("hidden"), false);
+    p.library = Json::ensureBoolean(obj, QString("library"), false);
+    p.group = Json::ensureString(obj, QString("group"), "");
+    if(obj.contains("depends")) {
+        auto dependsArr = Json::requireArray(obj, "depends");
+        for (const auto depends : dependsArr) {
+            p.depends.append(Json::requireString(depends));
+        }
+    }
+
     p.client = Json::ensureBoolean(obj, QString("client"), false);
+
+    // computed
+    p.effectively_hidden = p.hidden || p.library;
 }
 
 void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)

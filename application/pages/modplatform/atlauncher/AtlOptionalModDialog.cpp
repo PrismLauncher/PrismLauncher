@@ -4,8 +4,16 @@
 AtlOptionalModListModel::AtlOptionalModListModel(QWidget *parent, QVector<ATLauncher::VersionMod> mods)
     : QAbstractListModel(parent), m_mods(mods) {
 
-    for (const auto& mod : mods) {
-        m_selection[mod.name] = mod.selected;
+    // fill mod index
+    for (int i = 0; i < m_mods.size(); i++) {
+        auto mod = m_mods.at(i);
+        m_index[mod.name] = i;
+    }
+    // set initial state
+    for (int i = 0; i < m_mods.size(); i++) {
+        auto mod = m_mods.at(i);
+        m_selection[mod.name] = false;
+        setMod(mod, i, mod.selected, false);
     }
 }
 
@@ -61,11 +69,7 @@ bool AtlOptionalModListModel::setData(const QModelIndex &index, const QVariant &
         auto row = index.row();
         auto mod = m_mods.at(row);
 
-        // toggle the state
-        m_selection[mod.name] = !m_selection[mod.name];
-
-        emit dataChanged(AtlOptionalModListModel::index(index.row(), EnabledColumn),
-                         AtlOptionalModListModel::index(index.row(), EnabledColumn));
+        toggleMod(mod, row);
         return true;
     }
 
@@ -111,6 +115,71 @@ void AtlOptionalModListModel::clearAll() {
 
     emit dataChanged(AtlOptionalModListModel::index(0, EnabledColumn),
                      AtlOptionalModListModel::index(m_mods.size() - 1, EnabledColumn));
+}
+
+void AtlOptionalModListModel::toggleMod(ATLauncher::VersionMod mod, int index) {
+    setMod(mod, index, !m_selection[mod.name]);
+}
+
+void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool enable, bool shouldEmit) {
+    if (m_selection[mod.name] == enable) return;
+
+    m_selection[mod.name] = enable;
+
+    // disable other mods in the group, if applicable
+    if (enable && !mod.group.isEmpty()) {
+        for (int i = 0; i < m_mods.size(); i++) {
+            if (index == i) continue;
+            auto other = m_mods.at(i);
+
+            if (mod.group == other.group) {
+                setMod(other, i, false, shouldEmit);
+            }
+        }
+    }
+
+    for (const auto& dependencyName : mod.depends) {
+        auto dependencyIndex = m_index[dependencyName];
+        auto dependencyMod = m_mods.at(dependencyIndex);
+
+        // enable/disable dependencies
+        if (enable) {
+            setMod(dependencyMod, dependencyIndex, true, shouldEmit);
+        }
+
+        // if the dependency is 'effectively hidden', then track which mods
+        // depend on it - so we can efficiently disable it when no more dependents
+        // depend on it.
+        auto dependants = m_dependants[dependencyName];
+
+        if (enable) {
+            dependants.append(mod.name);
+        }
+        else {
+            dependants.removeAll(mod.name);
+
+            // if there are no longer any dependents, let's disable the mod
+            if (dependencyMod.effectively_hidden && dependants.isEmpty()) {
+                setMod(dependencyMod, dependencyIndex, false, shouldEmit);
+            }
+        }
+    }
+
+    // disable mods that depend on this one, if disabling
+    if (!enable) {
+        auto dependants = m_dependants[mod.name];
+        for (const auto& dependencyName : dependants) {
+            auto dependencyIndex = m_index[dependencyName];
+            auto dependencyMod = m_mods.at(dependencyIndex);
+
+            setMod(dependencyMod, dependencyIndex, false, shouldEmit);
+        }
+    }
+
+    if (shouldEmit) {
+        emit dataChanged(AtlOptionalModListModel::index(index, EnabledColumn),
+                         AtlOptionalModListModel::index(index, EnabledColumn));
+    }
 }
 
 
