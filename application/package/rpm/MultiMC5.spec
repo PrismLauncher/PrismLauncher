@@ -1,13 +1,13 @@
 Name:           MultiMC5
 Version:        1.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        A local install wrapper for MultiMC
 
 License:        ASL 2.0
 URL:            https://multimc.org
 BuildArch:      x86_64
 
-Requires:       zenity qt5-qtbase wget
+Requires:       zenity qt5-qtbase wget xrandr
 Provides:       multimc MultiMC multimc5
 
 %description
@@ -37,6 +37,8 @@ install -m 0644 ../ubuntu/multimc/usr/share/metainfo/multimc.metainfo.xml %{buil
 
 
 %changelog
+* Tue Jun 01 2021 kb1000 <fedora@kb1000.de> - 1.4-2
+- Add xrandr to the dependencies
 
 * Tue Dec 08 00:34:35 CET 2020 joshua-stone <joshua.gage.stone@gmail.com>
 - Add metainfo.xml for improving package metadata
