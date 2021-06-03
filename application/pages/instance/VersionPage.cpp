@@ -203,11 +203,11 @@ void VersionPage::updateVersionControls()
 {
     // FIXME: this is a dirty hack
     auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
-    bool newCraft = controlsEnabled && (minecraftVersion >= Version("1.14"));
-    bool oldCraft = controlsEnabled && (minecraftVersion <= Version("1.12.2"));
-    ui->actionInstall_Fabric->setEnabled(newCraft);
-    ui->actionInstall_Forge->setEnabled(true);
-    ui->actionInstall_LiteLoader->setEnabled(oldCraft);
+    bool newCraft = minecraftVersion >= Version("1.14");
+    bool oldCraft = minecraftVersion <= Version("1.12.2");
+    ui->actionInstall_Fabric->setEnabled(controlsEnabled && newCraft);
+    ui->actionInstall_Forge->setEnabled(controlsEnabled);
+    ui->actionInstall_LiteLoader->setEnabled(controlsEnabled && oldCraft);
     ui->actionReload->setEnabled(true);
     updateButtons();
 }
