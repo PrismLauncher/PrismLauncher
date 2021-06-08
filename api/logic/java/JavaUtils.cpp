@@ -150,7 +150,7 @@ JavaInstallPtr JavaUtils::GetDefaultJava()
 }
 
 #if defined(Q_OS_WIN32)
-QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString keyName)
+QList<JavaInstallPtr> JavaUtils::FindOracleJavaFromRegistryKey(DWORD keyType, QString keyName)
 {
     QList<JavaInstallPtr> javas;
 
@@ -174,8 +174,6 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
             value = new char[valueSz];
             RegQueryValueExA(jreKey, "CurrentVersion", NULL, NULL, (BYTE *)value, &valueSz);
         }
-
-        QString recommended = value;
 
         TCHAR subKeyName[255];
         DWORD subKeyNameSize, numSubKeys, retCode;
@@ -233,41 +231,126 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
     return javas;
 }
 
+QList<JavaInstallPtr> JavaUtils::FindAdoptJavaFromRegistryKey(DWORD keyType, QString keyName)
+{
+    QList<JavaInstallPtr> javas;
+
+    QString archType = "unknown";
+    if (keyType == KEY_WOW64_64KEY)
+        archType = "64";
+    else if (keyType == KEY_WOW64_32KEY)
+        archType = "32";
+
+    HKEY jreKey;
+    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, keyName.toStdString().c_str(), 0, KEY_READ | keyType | KEY_ENUMERATE_SUB_KEYS, &jreKey) == ERROR_SUCCESS)
+    {
+        char *value = new char[0];
+        DWORD valueSz = 0;
+        TCHAR subKeyName[255];
+        DWORD subKeyNameSize, numSubKeys, retCode;
+
+        // Get the number of subkeys
+        RegQueryInfoKey(jreKey, NULL, NULL, NULL, &numSubKeys, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+        // Iterate until RegEnumKeyEx fails
+        if (numSubKeys > 0)
+        {
+            for (DWORD i = 0; i < numSubKeys; i++)
+            {
+                subKeyNameSize = 255;
+                retCode = RegEnumKeyEx(jreKey, i, subKeyName, &subKeyNameSize, NULL, NULL, NULL, NULL);
+                if (retCode == ERROR_SUCCESS)
+                {
+                    // Now open the registry key for the version that we just got.
+                    QString newKeyName = keyName + "\\" + subKeyName + "\\hotspot\\MSI";
+
+                    HKEY newKey;
+                    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, newKeyName.toStdString().c_str(), 0, KEY_READ | KEY_WOW64_64KEY, &newKey) == ERROR_SUCCESS)
+                    {
+                        // Read the Path value to find where Java is installed.
+                        value = new char[0];
+                        valueSz = 0;
+                        if (RegQueryValueEx(newKey, "Path", NULL, NULL, (BYTE *)value, &valueSz) == ERROR_MORE_DATA)
+                        {
+                            value = new char[valueSz];
+                            RegQueryValueEx(newKey, "Path", NULL, NULL, (BYTE *)value, &valueSz);
+
+                            // Now, we construct the version object and add it to the list.
+                            JavaInstallPtr javaVersion(new JavaInstall());
+
+                            javaVersion->id = subKeyName;
+                            javaVersion->arch = archType;
+                            javaVersion->path = QDir(FS::PathCombine(value, "bin")).absoluteFilePath("javaw.exe");
+                            javas.append(javaVersion);
+                        }
+
+                        RegCloseKey(newKey);
+                    }
+                }
+            }
+        }
+
+        RegCloseKey(jreKey);
+    }
+
+    return javas;
+}
+
 QList<QString> JavaUtils::FindJavaPaths()
 {
     QList<JavaInstallPtr> java_candidates;
 
-    QList<JavaInstallPtr> JRE64s = this->FindJavaFromRegistryKey(
+    // Oracle
+    QList<JavaInstallPtr> JRE64s = this->FindOracleJavaFromRegistryKey(
         KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
-    QList<JavaInstallPtr> JDK64s = this->FindJavaFromRegistryKey(
+    QList<JavaInstallPtr> JDK64s = this->FindOracleJavaFromRegistryKey(
         KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
-    QList<JavaInstallPtr> NEWJRE64s = this->FindJavaFromRegistryKey(
-        KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\JRE");
-    QList<JavaInstallPtr> NEWJDK64s = this->FindJavaFromRegistryKey(
-        KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\JDK");
-    QList<JavaInstallPtr> JRE32s = this->FindJavaFromRegistryKey(
+    QList<JavaInstallPtr> JRE32s = this->FindOracleJavaFromRegistryKey(
         KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Runtime Environment");
-    QList<JavaInstallPtr> JDK32s = this->FindJavaFromRegistryKey(
+    QList<JavaInstallPtr> JDK32s = this->FindOracleJavaFromRegistryKey(
         KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\Java Development Kit");
-    QList<JavaInstallPtr> NEWJRE32s = this->FindJavaFromRegistryKey(
+
+    // Oracle for Java 9 and newer
+    QList<JavaInstallPtr> NEWJRE64s = this->FindOracleJavaFromRegistryKey(
+        KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\JRE");
+    QList<JavaInstallPtr> NEWJDK64s = this->FindOracleJavaFromRegistryKey(
+        KEY_WOW64_64KEY, "SOFTWARE\\JavaSoft\\JDK");
+    QList<JavaInstallPtr> NEWJRE32s = this->FindOracleJavaFromRegistryKey(
         KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\JRE");
-    QList<JavaInstallPtr> NEWJDK32s = this->FindJavaFromRegistryKey(
+    QList<JavaInstallPtr> NEWJDK32s = this->FindOracleJavaFromRegistryKey(
         KEY_WOW64_32KEY, "SOFTWARE\\JavaSoft\\JDK");
 
+    // AdoptOpenJDK
+    QList<JavaInstallPtr> ADOPTOPENJRE32s = this->FindAdoptJavaFromRegistryKey(
+        KEY_WOW64_32KEY, "SOFTWARE\\AdoptOpenJDK\\JRE");
+    QList<JavaInstallPtr> ADOPTOPENJRE64s = this->FindAdoptJavaFromRegistryKey(
+        KEY_WOW64_64KEY, "SOFTWARE\\AdoptOpenJDK\\JRE");
+    QList<JavaInstallPtr> ADOPTOPENJDK32s = this->FindAdoptJavaFromRegistryKey(
+        KEY_WOW64_32KEY, "SOFTWARE\\AdoptOpenJDK\\JDK");
+    QList<JavaInstallPtr> ADOPTOPENJDK64s = this->FindAdoptJavaFromRegistryKey(
+        KEY_WOW64_64KEY, "SOFTWARE\\AdoptOpenJDK\\JDK");
+
+    // List x64 before x86
     java_candidates.append(JRE64s);
     java_candidates.append(NEWJRE64s);
+    java_candidates.append(ADOPTOPENJRE64s);
     java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre8/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre7/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre6/bin/javaw.exe"));
     java_candidates.append(JDK64s);
     java_candidates.append(NEWJDK64s);
+    java_candidates.append(ADOPTOPENJDK64s);
+
     java_candidates.append(JRE32s);
     java_candidates.append(NEWJRE32s);
+    java_candidates.append(ADOPTOPENJRE32s);
     java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre8/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre7/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre6/bin/javaw.exe"));
     java_candidates.append(JDK32s);
     java_candidates.append(NEWJDK32s);
+    java_candidates.append(ADOPTOPENJDK32s);
+    
     java_candidates.append(MakeJavaPtr(this->GetDefaultJava()->path));
 
     QList<QString> candidates;
