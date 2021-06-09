@@ -238,6 +238,7 @@ void InstanceImportTask::processFlame()
     }
 
     QString forgeVersion;
+    QString fabricVersion;
     for(auto &loader: pack.minecraft.modLoaders)
     {
         auto id = loader.id;
@@ -245,6 +246,12 @@ void InstanceImportTask::processFlame()
         {
             id.remove("forge-");
             forgeVersion = id;
+            continue;
+        }
+        if(id.startsWith("fabric-"))
+        {
+            id.remove("fabric-");
+            fabricVersion = id;
             continue;
         }
         logWarning(tr("Unknown mod loader in manifest: %1").arg(id));
@@ -280,6 +287,10 @@ void InstanceImportTask::processFlame()
             }
         }
         components->setComponentVersion("net.minecraftforge", forgeVersion);
+    }
+    if(!fabricVersion.isEmpty())
+    {
+        components->setComponentVersion("net.fabricmc.fabric-loader", fabricVersion);
     }
     if (m_instIcon != "default")
     {
