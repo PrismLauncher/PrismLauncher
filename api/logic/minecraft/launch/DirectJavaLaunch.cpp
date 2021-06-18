@@ -66,9 +66,9 @@ void DirectJavaLaunch::executeTask()
         auto realWrapperCommand = QStandardPaths::findExecutable(wrapperCommand);
         if (realWrapperCommand.isEmpty())
         {
-            QString reason = tr("The wrapper command \"%1\" couldn't be found.").arg(wrapperCommand);
-            emit logLine(reason, MessageLevel::Fatal);
-            emitFailed(reason);
+            const char *reason = QT_TR_NOOP("The wrapper command \"%1\" couldn't be found.");
+            emit logLine(QString(reason).arg(wrapperCommand), MessageLevel::Fatal);
+            emitFailed(tr(reason).arg(wrapperCommand));
             return;
         }
         emit logLine("Wrapper command is:\n" + wrapperCommandStr + "\n\n", MessageLevel::MultiMC);
@@ -87,18 +87,17 @@ void DirectJavaLaunch::on_state(LoggedProcess::State state)
     {
         case LoggedProcess::FailedToStart:
         {
-            //: Error message displayed if instace can't start
-            QString reason = tr("Could not launch minecraft!");
+            //: Error message displayed if instance can't start
+            const char *reason = QT_TR_NOOP("Could not launch minecraft!");
             emit logLine(reason, MessageLevel::Fatal);
-            emitFailed(reason);
+            emitFailed(tr(reason));
             return;
         }
         case LoggedProcess::Aborted:
         case LoggedProcess::Crashed:
-
         {
             m_parent->setPid(-1);
-            emitFailed("Game crashed.");
+            emitFailed(tr("Game crashed."));
             return;
         }
         case LoggedProcess::Finished:
@@ -108,7 +107,7 @@ void DirectJavaLaunch::on_state(LoggedProcess::State state)
             auto exitCode = m_process.exitCode();
             if(exitCode != 0)
             {
-                emitFailed("Game crashed.");
+                emitFailed(tr("Game crashed."));
                 return;
             }
             //FIXME: make this work again
@@ -118,7 +117,7 @@ void DirectJavaLaunch::on_state(LoggedProcess::State state)
             break;
         }
         case LoggedProcess::Running:
-            emit logLine(tr("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::MultiMC);
+            emit logLine(QString("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::MultiMC);
             m_parent->setPid(m_process.processId());
             m_parent->instance()->setLastLaunch();
             break;

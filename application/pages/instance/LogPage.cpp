@@ -236,15 +236,15 @@ void LogPage::on_btnPaste_clicked()
         return;
 
     //FIXME: turn this into a proper task and move the upload logic out of GuiUtil!
-    m_model->append(MessageLevel::MultiMC, tr("MultiMC: Log upload triggered at: %1").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date)));
+    m_model->append(MessageLevel::MultiMC, QString("MultiMC: Log upload triggered at: %1").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date)));
     auto url = GuiUtil::uploadPaste(m_model->toPlainText(), this);
     if(!url.isEmpty())
     {
-        m_model->append(MessageLevel::MultiMC, tr("MultiMC: Log uploaded to: %1").arg(url));
+        m_model->append(MessageLevel::MultiMC, QString("MultiMC: Log uploaded to: %1").arg(url));
     }
     else
     {
-        m_model->append(MessageLevel::Error, tr("MultiMC: Log upload failed!"));
+        m_model->append(MessageLevel::Error, "MultiMC: Log upload failed!");
     }
 }
 
