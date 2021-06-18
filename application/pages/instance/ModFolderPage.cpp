@@ -163,7 +163,7 @@ ModFolderPage::ModFolderPage(
 
     auto smodel = ui->modTreeView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &ModFolderPage::modCurrent);
-    connect(ui->filterEdit, &QLineEdit::textChanged, this, &ModFolderPage::on_filterTextChanged );
+    connect(ui->filterEdit, &QLineEdit::textChanged, this, &ModFolderPage::on_filterTextChanged);
     connect(m_inst, &BaseInstance::runningStatusChanged, this, &ModFolderPage::on_RunningState_changed);
 }
 
