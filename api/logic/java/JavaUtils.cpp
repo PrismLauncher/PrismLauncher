@@ -269,6 +269,18 @@ QList<QString> JavaUtils::FindJavaPaths()
     QList<JavaInstallPtr> MICROSOFTJDK64s = this->FindJavaFromRegistryKey(
         KEY_WOW64_64KEY, "SOFTWARE\\Microsoft\\JDK", "Path", "\\hotspot\\MSI");
 
+    // Azul Zulu
+    QList<JavaInstallPtr> ZULU64s = this->FindJavaFromRegistryKey(
+        KEY_WOW64_64KEY, "SOFTWARE\\Azul Systems\\Zulu", "InstallationPath");
+    QList<JavaInstallPtr> ZULU32s = this->FindJavaFromRegistryKey(
+        KEY_WOW64_64KEY, "SOFTWARE\\Azul Systems\\Zulu", "InstallationPath");
+    
+    // BellSoft Liberica
+    QList<JavaInstallPtr> LIBERICA64s = this->FindJavaFromRegistryKey(
+        KEY_WOW64_64KEY, "SOFTWARE\\BellSoft\\Liberica", "InstallationPath");
+    QList<JavaInstallPtr> LIBERICA32s = this->FindJavaFromRegistryKey(
+        KEY_WOW64_64KEY, "SOFTWARE\\BellSoft\\Liberica", "InstallationPath");
+
     // List x64 before x86
     java_candidates.append(JRE64s);
     java_candidates.append(NEWJRE64s);
@@ -280,6 +292,8 @@ QList<QString> JavaUtils::FindJavaPaths()
     java_candidates.append(NEWJDK64s);
     java_candidates.append(ADOPTOPENJDK64s);
     java_candidates.append(MICROSOFTJDK64s);
+    java_candidates.append(ZULU64s);
+    java_candidates.append(LIBERICA64s);
 
     java_candidates.append(JRE32s);
     java_candidates.append(NEWJRE32s);
@@ -290,6 +304,8 @@ QList<QString> JavaUtils::FindJavaPaths()
     java_candidates.append(JDK32s);
     java_candidates.append(NEWJDK32s);
     java_candidates.append(ADOPTOPENJDK32s);
+    java_candidates.append(ZULU32s);
+    java_candidates.append(LIBERICA32s);
     
     java_candidates.append(MakeJavaPtr(this->GetDefaultJava()->path));
 
