@@ -65,6 +65,10 @@ public:
      */
     QString META_URL;
 
+    QString BUG_TRACKER_URL;
+    QString DISCORD_URL;
+    QString SUBREDDIT_URL;
+
     QString RESOURCE_BASE = "https://resources.download.minecraft.net/";
     QString LIBRARY_BASE = "https://libraries.minecraft.net/";
     QString SKINS_BASE = "https://crafatar.com/skins/";
