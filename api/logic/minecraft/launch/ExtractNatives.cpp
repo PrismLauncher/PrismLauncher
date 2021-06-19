@@ -94,9 +94,9 @@ void ExtractNatives::executeTask()
     {
         if(!unzipNatives(source, outputPath, jniHackEnabled, nativeOpenAL, nativeGLFW))
         {
-            auto reason = tr("Couldn't extract native jar '%1' to destination '%2'").arg(source, outputPath);
-            emit logLine(reason, MessageLevel::Fatal);
-            emitFailed(reason);
+            const char *reason = QT_TR_NOOP("Couldn't extract native jar '%1' to destination '%2'");
+            emit logLine(QString(reason).arg(source, outputPath), MessageLevel::Fatal);
+            emitFailed(tr(reason).arg(source, outputPath));
         }
     }
     emitSucceeded();

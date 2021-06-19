@@ -15,7 +15,7 @@ void CreateGameFolders::executeTask()
     if(!FS::ensureFolderPathExists(minecraftInstance->gameRoot()))
     {
         emit logLine("Couldn't create the main game folder", MessageLevel::Error);
-        emitFailed("Couldn't create the main game folder");
+        emitFailed(tr("Couldn't create the main game folder"));
         return;
     }
 

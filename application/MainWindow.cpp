@@ -738,7 +738,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     repopulateAccountsMenu();
 
     accountMenuButton = new QToolButton(this);
-    accountMenuButton->setText(tr("Profiles"));
     accountMenuButton->setMenu(accountMenu);
     accountMenuButton->setPopupMode(QToolButton::InstantPopup);
     accountMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -837,6 +836,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     // removing this looks stupid
     view->setFocus();
+
+    retranslateUi();
+}
+
+void MainWindow::retranslateUi()
+{
+    accountMenuButton->setText(tr("Profiles"));
+
+    if (m_selectedInstance) {
+        m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
+    } else {
+        m_statusLeft->setText(tr("No instance selected"));
+    }
+
+    ui->retranslateUi(this);
 }
 
 MainWindow::~MainWindow()
@@ -1751,7 +1765,7 @@ void MainWindow::changeEvent(QEvent* event)
 {
     if (event->type() == QEvent::LanguageChange)
     {
-        ui->retranslateUi(this);
+        retranslateUi();
     }
     QMainWindow::changeEvent(event);
 }

@@ -302,6 +302,10 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ModFolderLoadTask.cpp
     minecraft/mod/LocalModParseTask.h
     minecraft/mod/LocalModParseTask.cpp
+    minecraft/mod/ResourcePackFolderModel.h
+    minecraft/mod/ResourcePackFolderModel.cpp
+    minecraft/mod/TexturePackFolderModel.h
+    minecraft/mod/TexturePackFolderModel.cpp
 
     # Assets
     minecraft/AssetsUtils.h
