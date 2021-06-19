@@ -32,7 +32,11 @@
     </layout>
    </item>
    <item row="0" column="0">
-    <widget class="QLineEdit" name="searchEdit"/>
+    <widget class="QLineEdit" name="searchEdit">
+     <property name="placeholderText">
+      <string>Search and filter ...</string>
+     </property>
+    </widget>
    </item>
    <item row="0" column="1">
     <widget class="QPushButton" name="searchButton">
@@ -50,6 +54,9 @@
          <width>48</width>
          <height>48</height>
         </size>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

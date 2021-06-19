@@ -60,7 +60,8 @@ bool TechnicPage::shouldDisplay() const
 
 void TechnicPage::openedImpl()
 {
-    dialog->setSuggestedPack();
+    suggestCurrent();
+    triggerSearch();
 }
 
 void TechnicPage::triggerSearch() {
@@ -95,8 +96,7 @@ void TechnicPage::suggestCurrent()
         return;
     }
 
-    QString editedLogoName;
-    editedLogoName = "technic_" + current.logoName.section(".", 0, 0);
+    QString editedLogoName = "technic_" + current.logoName.section(".", 0, 0);
     model->getLogo(current.logoName, current.logoUrl, [this, editedLogoName](QString logo)
     {
         dialog->setSuggestedIconFromFile(logo, editedLogoName);
@@ -105,67 +105,66 @@ void TechnicPage::suggestCurrent()
     if (current.metadataLoaded)
     {
         metadataLoaded();
+        return;
     }
-    else
+    
+    NetJob *netJob = new NetJob(QString("Technic::PackMeta(%1)").arg(current.name));
+    std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
+    QString slug = current.slug;
+    netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.technicpack.net/modpack/%1?build=multimc").arg(slug), response.get()));
+    QObject::connect(netJob, &NetJob::succeeded, this, [this, response, slug]
     {
-        NetJob *netJob = new NetJob(QString("Technic::PackMeta(%1)").arg(current.name));
-        std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
-        QString slug = current.slug;
-        netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.technicpack.net/modpack/%1?build=multimc").arg(slug), response.get()));
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, slug]
+        if (current.slug != slug)
         {
-            if (current.slug != slug)
+            return;
+        }
+        QJsonParseError parse_error;
+        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+        QJsonObject obj = doc.object();
+        if(parse_error.error != QJsonParseError::NoError)
+        {
+            qWarning() << "Error while parsing JSON response from Technic at " << parse_error.offset << " reason: " << parse_error.errorString();
+            qWarning() << *response;
+            return;
+        }
+        if (!obj.contains("url"))
+        {
+            qWarning() << "Json doesn't contain an url key";
+            return;
+        }
+        QJsonValueRef url = obj["url"];
+        if (url.isString())
+        {
+            current.url = url.toString();
+        }
+        else
+        {
+            if (!obj.contains("solder"))
             {
+                qWarning() << "Json doesn't contain a valid url or solder key";
                 return;
             }
-            QJsonParseError parse_error;
-            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-            QJsonObject obj = doc.object();
-            if(parse_error.error != QJsonParseError::NoError)
+            QJsonValueRef solderUrl = obj["solder"];
+            if (solderUrl.isString())
             {
-                qWarning() << "Error while parsing JSON response from Technic at " << parse_error.offset << " reason: " << parse_error.errorString();
-                qWarning() << *response;
-                return;
-            }
-            if (!obj.contains("url"))
-            {
-                qWarning() << "Json doesn't contain an url key";
-                return;
-            }
-            QJsonValueRef url = obj["url"];
-            if (url.isString())
-            {
-                current.url = url.toString();
+                current.url = solderUrl.toString();
+                current.isSolder = true;
             }
             else
             {
-                if (!obj.contains("solder"))
-                {
-                    qWarning() << "Json doesn't contain a valid url or solder key";
-                    return;
-                }
-                QJsonValueRef solderUrl = obj["solder"];
-                if (solderUrl.isString())
-                {
-                    current.url = solderUrl.toString();
-                    current.isSolder = true;
-                }
-                else
-                {
-                    qWarning() << "Json doesn't contain a valid url or solder key";
-                    return;
-                }
+                qWarning() << "Json doesn't contain a valid url or solder key";
+                return;
             }
+        }
 
-            current.minecraftVersion = Json::ensureString(obj, "minecraft", QString(), "__placeholder__");
-            current.websiteUrl = Json::ensureString(obj, "platformUrl", QString(), "__placeholder__");
-            current.author = Json::ensureString(obj, "user", QString(), "__placeholder__");
-            current.description = Json::ensureString(obj, "description", QString(), "__placeholder__");
-            current.metadataLoaded = true;
-            metadataLoaded();
-        });
-        netJob->start();
-    }
+        current.minecraftVersion = Json::ensureString(obj, "minecraft", QString(), "__placeholder__");
+        current.websiteUrl = Json::ensureString(obj, "platformUrl", QString(), "__placeholder__");
+        current.author = Json::ensureString(obj, "user", QString(), "__placeholder__");
+        current.description = Json::ensureString(obj, "description", QString(), "__placeholder__");
+        current.metadataLoaded = true;
+        metadataLoaded();
+    });
+    netJob->start();
 }
 
 // expects current.metadataLoaded to be true

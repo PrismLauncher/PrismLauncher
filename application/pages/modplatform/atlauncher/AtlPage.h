@@ -81,4 +81,6 @@ private:
 
     ATLauncher::IndexedPack selected;
     QString selectedVersion;
+
+    bool initialized = false;
 };

@@ -29,6 +29,9 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item row="0" column="1">
@@ -52,6 +55,9 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
       </layout>
@@ -68,6 +74,9 @@
            <width>250</width>
            <height>16777215</height>
           </size>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

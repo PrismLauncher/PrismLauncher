@@ -45,15 +45,29 @@ bool AtlPage::shouldDisplay() const
 
 void AtlPage::openedImpl()
 {
-    listModel->request();
+    if(!initialized)
+    {
+        listModel->request();
+        initialized = true;
+    }
+
+    suggestCurrent();
 }
 
 void AtlPage::suggestCurrent()
 {
-    if(isOpened) {
-        dialog->setSuggestedPack(selected.name, new ATLauncher::PackInstallTask(this, selected.safeName, selectedVersion));
+    if(!isOpened)
+    {
+        return;
     }
 
+    if (selectedVersion.isEmpty())
+    {
+        dialog->setSuggestedPack();
+        return;
+    }
+
+    dialog->setSuggestedPack(selected.name, new ATLauncher::PackInstallTask(this, selected.safeName, selectedVersion));
     auto editedLogoName = selected.safeName;
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1.png").arg(selected.safeName.toLower());
     listModel->getLogo(selected.safeName, url, [this, editedLogoName](QString logo)

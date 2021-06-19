@@ -18,6 +18,8 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget *parent)
     ui->packView->setModel(listModel);
 
     ui->versionSelectionBox->setMaxVisibleItems(10);
+    // fix height for themes that dont respect max visible like fusion
+    ui->versionSelectionBox->setStyleSheet("combobox-popup: 0;");
 
     // index is used to set the sorting with the curseforge api
     ui->sortByBox->addItem(tr("Sort by featured"));
@@ -154,6 +156,12 @@ void FlamePage::suggestCurrent()
 {
     if(!isOpened)
     {
+        return;
+    }
+
+    if (selectedVersion.isEmpty())
+    {
+        dialog->setSuggestedPack();
         return;
     }
 

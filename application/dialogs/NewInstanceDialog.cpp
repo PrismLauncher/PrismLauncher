@@ -173,6 +173,14 @@ void NewInstanceDialog::setSuggestedIconFromFile(const QString &path, const QStr
     ui->iconButton->setIcon(QIcon(path));
 }
 
+void NewInstanceDialog::setSuggestedIcon(const QString &key)
+{
+    auto icon = MMC->icons()->getIcon(key);
+    importIcon = false;
+
+    ui->iconButton->setIcon(icon);
+}
+
 InstanceTask * NewInstanceDialog::extractTask()
 {
     InstanceTask * extracted = creationTask.get();
