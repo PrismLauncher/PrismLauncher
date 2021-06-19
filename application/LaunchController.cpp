@@ -15,6 +15,9 @@
 #include <minecraft/auth/YggdrasilTask.h>
 #include <launch/steps/TextPrint.h>
 #include <QStringList>
+#include <QHostInfo>
+#include <QList>
+#include <QHostAddress>
 
 LaunchController::LaunchController(QObject *parent) : Task(parent)
 {
@@ -215,7 +218,46 @@ void LaunchController::launchInstance()
     connect(m_launcher.get(), &LaunchTask::failed, this,  &LaunchController::onFailed);
     connect(m_launcher.get(), &LaunchTask::requestProgress, this, &LaunchController::onProgressRequested);
 
+    // Prepend Online and Auth Status
+    QString online_mode;
+    if(m_session->wants_online) {
+        online_mode = "online";
 
+        // Prepend Server Status
+        QStringList servers = {"authserver.mojang.com", "session.minecraft.net", "textures.minecraft.net", "api.mojang.com"};
+        QString resolved_servers = "";
+        QHostInfo host_info;
+
+        for(QString server : servers) {
+            host_info = QHostInfo::fromName(server);
+            resolved_servers = resolved_servers + server + " resolves to:\n    [";
+            if(!host_info.addresses().isEmpty()) {
+                for(QHostAddress address : host_info.addresses()) {
+                    resolved_servers = resolved_servers + address.toString();
+                    if(!host_info.addresses().endsWith(address)) {
+                        resolved_servers = resolved_servers + ", ";
+                    }
+                }
+            } else {
+                resolved_servers = resolved_servers + "N/A";
+            }
+            resolved_servers = resolved_servers + "]\n\n";
+        }
+        m_launcher->prependStep(new TextPrint(m_launcher.get(), resolved_servers, MessageLevel::MultiMC));
+    } else {
+        online_mode = "offline";
+    }
+
+    QString auth_server_status;
+    if(m_session->auth_server_online) {
+        auth_server_status = "online";
+    } else {
+        auth_server_status = "offline";
+    }
+
+    m_launcher->prependStep(new TextPrint(m_launcher.get(), "Launched instance in " + online_mode + " mode\nAuthentication server is " + auth_server_status + "\n", MessageLevel::MultiMC));
+
+    // Prepend Version
     m_launcher->prependStep(new TextPrint(m_launcher.get(), "MultiMC version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::MultiMC));
     m_launcher->start();
 }
