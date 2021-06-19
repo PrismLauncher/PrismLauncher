@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>162</height>
+    <width>421</width>
+    <height>238</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,6 +20,16 @@
    <string>Add Account</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="microsoftAccountsNoticeLabel">
+     <property name="text">
+      <string>NOTICE: MultiMC does not currently support Microsoft accounts. This means that accounts created from December 2020 onwards cannot be used.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
