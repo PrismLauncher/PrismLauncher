@@ -17,9 +17,8 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget *parent)
     listModel = new Flame::ListModel(this);
     ui->packView->setModel(listModel);
 
-    ui->versionSelectionBox->setMaxVisibleItems(10);
-    // fix height for themes that dont respect max visible like fusion
-    ui->versionSelectionBox->setStyleSheet("combobox-popup: 0;");
+    ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
     // index is used to set the sorting with the curseforge api
     ui->sortByBox->addItem(tr("Sort by featured"));
