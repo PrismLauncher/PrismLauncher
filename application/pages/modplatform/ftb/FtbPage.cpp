@@ -60,26 +60,33 @@ bool FtbPage::shouldDisplay() const
 
 void FtbPage::openedImpl()
 {
-    dialog->setSuggestedPack();
     triggerSearch();
+    suggestCurrent();
 }
 
 void FtbPage::suggestCurrent()
 {
-    if(isOpened)
+    if(!isOpened)
     {
-        dialog->setSuggestedPack(selected.name, new ModpacksCH::PackInstallTask(selected, selectedVersion));
+        return;
+    }
 
-        for(auto art : selected.art) {
-            if(art.type == "square") {
-                QString editedLogoName;
-                editedLogoName = selected.name;
+    if (selectedVersion.isEmpty())
+    {
+        dialog->setSuggestedPack();
+        return;
+    }
 
-                listModel->getLogo(selected.name, art.url, [this, editedLogoName](QString logo)
-                {
-                    dialog->setSuggestedIconFromFile(logo + ".small", editedLogoName);
-                });
-            }
+    dialog->setSuggestedPack(selected.name, new ModpacksCH::PackInstallTask(selected, selectedVersion));
+    for(auto art : selected.art) {
+        if(art.type == "square") {
+            QString editedLogoName;
+            editedLogoName = selected.name;
+
+            listModel->getLogo(selected.name, art.url, [this, editedLogoName](QString logo)
+            {
+                dialog->setSuggestedIconFromFile(logo + ".small", editedLogoName);
+            });
         }
     }
 }

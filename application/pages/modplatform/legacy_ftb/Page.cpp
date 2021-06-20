@@ -122,49 +122,50 @@ void Page::openedImpl()
 
 void Page::suggestCurrent()
 {
-    if(isOpened)
+    if(!isOpened)
     {
-        if(!selected.broken)
-        {
-            dialog->setSuggestedPack(selected.name, new PackInstallTask(selected, selectedVersion));
-            QString editedLogoName;
-            if(selected.logo.toLower().startsWith("ftb"))
-            {
-                editedLogoName = selected.logo;
-            }
-            else
-            {
-                editedLogoName = "ftb_" + selected.logo;
-            }
+        return;
+    }
 
-            editedLogoName = editedLogoName.left(editedLogoName.lastIndexOf(".png"));
+    if(!selected.broken || !selectedVersion.isEmpty())
+    {
+        dialog->setSuggestedPack();
+        return;
+    }
 
-            if(selected.type == PackType::Public)
-            {
-                publicListModel->getLogo(selected.logo, [this, editedLogoName](QString logo)
-                {
-                    dialog->setSuggestedIconFromFile(logo, editedLogoName);
-                });
-            }
-            else if (selected.type == PackType::ThirdParty)
-            {
-                thirdPartyModel->getLogo(selected.logo, [this, editedLogoName](QString logo)
-                {
-                    dialog->setSuggestedIconFromFile(logo, editedLogoName);
-                });
-            }
-            else if (selected.type == PackType::Private)
-            {
-                privateListModel->getLogo(selected.logo, [this, editedLogoName](QString logo)
-                {
-                    dialog->setSuggestedIconFromFile(logo, editedLogoName);
-                });
-            }
-        }
-        else
+    dialog->setSuggestedPack(selected.name, new PackInstallTask(selected, selectedVersion));
+    QString editedLogoName;
+    if(selected.logo.toLower().startsWith("ftb"))
+    {
+        editedLogoName = selected.logo;
+    }
+    else
+    {
+        editedLogoName = "ftb_" + selected.logo;
+    }
+
+    editedLogoName = editedLogoName.left(editedLogoName.lastIndexOf(".png"));
+
+    if(selected.type == PackType::Public)
+    {
+        publicListModel->getLogo(selected.logo, [this, editedLogoName](QString logo)
         {
-            dialog->setSuggestedPack();
-        }
+            dialog->setSuggestedIconFromFile(logo, editedLogoName);
+        });
+    }
+    else if (selected.type == PackType::ThirdParty)
+    {
+        thirdPartyModel->getLogo(selected.logo, [this, editedLogoName](QString logo)
+        {
+            dialog->setSuggestedIconFromFile(logo, editedLogoName);
+        });
+    }
+    else if (selected.type == PackType::Private)
+    {
+        privateListModel->getLogo(selected.logo, [this, editedLogoName](QString logo)
+        {
+            dialog->setSuggestedIconFromFile(logo, editedLogoName);
+        });
     }
 }
 
