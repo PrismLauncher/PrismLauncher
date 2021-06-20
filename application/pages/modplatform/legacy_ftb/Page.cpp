@@ -127,7 +127,7 @@ void Page::suggestCurrent()
         return;
     }
 
-    if(!selected.broken || !selectedVersion.isEmpty())
+    if(selected.broken || selectedVersion.isEmpty())
     {
         dialog->setSuggestedPack();
         return;
