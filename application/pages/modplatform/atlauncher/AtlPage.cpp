@@ -20,6 +20,9 @@ AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget *parent)
     ui->packView->header()->hide();
     ui->packView->setIndentation(0);
 
+    ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
+
     for(int i = 0; i < filterModel->getAvailableSortings().size(); i++)
     {
         ui->sortByBox->addItem(filterModel->getAvailableSortings().keys().at(i));
