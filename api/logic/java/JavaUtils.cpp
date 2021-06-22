@@ -381,6 +381,9 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDir("/usr/lib32/jvm");
     // javas stored in MultiMC's folder
     scanJavaDir("java");
+    // manually installed JDKs in /opt
+    scanJavaDir("/opt/jdk");
+    scanJavaDir("/opt/jdks");
     return javas;
 }
 #else
