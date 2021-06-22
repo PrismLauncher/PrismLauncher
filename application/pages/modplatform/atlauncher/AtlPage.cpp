@@ -2,6 +2,7 @@
 #include "ui_AtlPage.h"
 
 #include "dialogs/NewInstanceDialog.h"
+#include "AtlOptionalModDialog.h"
 #include <modplatform/atlauncher/ATLPackInstallTask.h>
 #include <BuildConfig.h>
 #include <dialogs/VersionSelectDialog.h>
@@ -129,6 +130,12 @@ void AtlPage::onVersionSelectionChanged(QString data)
 
     selectedVersion = data;
     suggestCurrent();
+}
+
+QVector<QString> AtlPage::chooseOptionalMods(QVector<ATLauncher::VersionMod> mods) {
+    AtlOptionalModDialog optionalModDialog(this, mods);
+    optionalModDialog.exec();
+    return optionalModDialog.getResult();
 }
 
 QString AtlPage::chooseVersion(Meta::VersionListPtr vlist, QString minecraftVersion) {

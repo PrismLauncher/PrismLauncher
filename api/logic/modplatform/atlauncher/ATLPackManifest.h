@@ -86,8 +86,19 @@ struct VersionMod
     QString decompType_raw;
     QString decompFile;
 
+    QString description;
     bool optional;
+    bool recommended;
+    bool selected;
+    bool hidden;
+    bool library;
+    QString group;
+    QVector<QString> depends;
+
     bool client;
+
+    // computed
+    bool effectively_hidden;
 };
 
 struct PackVersion

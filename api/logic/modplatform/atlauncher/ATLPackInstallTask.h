@@ -19,6 +19,11 @@ class MULTIMC_LOGIC_EXPORT UserInteractionSupport {
 
 public:
     /**
+     * Requests a user interaction to select which optional mods should be installed.
+     */
+    virtual QVector<QString> chooseOptionalMods(QVector<ATLauncher::VersionMod> mods) = 0;
+
+    /**
      * Requests a user interaction to select a component version from a given version list
      * and constrained to a given Minecraft version.
      */
