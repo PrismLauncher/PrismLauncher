@@ -51,14 +51,7 @@
    <item row="2" column="0" colspan="2">
     <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0" rowminimumheight="0" columnminimumwidth="0,0,0">
      <item row="0" column="2">
-      <widget class="QComboBox" name="versionSelectionBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
+      <widget class="QComboBox" name="versionSelectionBox"/>
      </item>
      <item row="0" column="1">
       <widget class="QLabel" name="label">
