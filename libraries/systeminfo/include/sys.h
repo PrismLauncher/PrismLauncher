@@ -3,7 +3,7 @@
 
 namespace Sys
 {
-const uint64_t megabyte = 1024ull * 1024ull;
+const uint64_t mebibyte = 1024ull * 1024ull;
 struct KernelInfo
 {
     QString kernelName;
