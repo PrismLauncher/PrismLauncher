@@ -23,6 +23,7 @@
 #include "minecraft/launch/ClaimAccount.h"
 #include "minecraft/launch/ReconstructAssets.h"
 #include "minecraft/launch/ScanModFolders.h"
+#include "minecraft/launch/VerifyJavaInstall.h"
 #include "java/launch/CheckJava.h"
 #include "java/JavaUtils.h"
 #include "meta/Index.h"
@@ -913,6 +914,11 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     // reconstruct assets if needed
     {
         process->appendStep(new ReconstructAssets(pptr));
+    }
+
+    // verify that minimum Java requirements are met
+    {
+        process->appendStep(new VerifyJavaInstall(pptr));
     }
 
     {

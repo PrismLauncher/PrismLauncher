@@ -65,4 +65,7 @@ VersionFilterData::VersionFilterData()
         QSet<QString>{"net.java.jinput:jinput",     "net.java.jinput:jinput-platform",
                       "net.java.jutils:jutils",     "org.lwjgl.lwjgl:lwjgl",
                       "org.lwjgl.lwjgl:lwjgl_util", "org.lwjgl.lwjgl:lwjgl-platform"};
+
+    java8BeginsDate  = timeFromS3Time("2017-03-30T09:32:19+00:00");
+    java16BeginsDate = timeFromS3Time("2021-05-12T11:19:15+00:00");
 }

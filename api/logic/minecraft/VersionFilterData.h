@@ -23,5 +23,9 @@ struct VersionFilterData
     QDateTime legacyCutoffDate;
     // Libraries that belong to LWJGL
     QSet<QString> lwjglWhitelist;
+    // release date of first version to require Java 8 (17w13a)
+    QDateTime java8BeginsDate;
+    // release data of first version to require Java 16 (21w19a)
+    QDateTime java16BeginsDate;
 };
 extern VersionFilterData MULTIMC_LOGIC_EXPORT g_VersionFilterData;
