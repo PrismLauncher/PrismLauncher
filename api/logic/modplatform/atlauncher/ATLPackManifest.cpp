@@ -109,6 +109,11 @@ static void loadVersionLibrary(ATLauncher::VersionLibrary & p, QJsonObject & obj
     p.server = Json::ensureString(obj, "server", "");
 }
 
+static void loadVersionConfigs(ATLauncher::VersionConfigs & p, QJsonObject & obj) {
+    p.filesize = Json::requireInteger(obj, "filesize");
+    p.sha1 = Json::requireString(obj, "sha1");
+}
+
 static void loadVersionMod(ATLauncher::VersionMod & p, QJsonObject & obj) {
     p.name = Json::requireString(obj, "name");
     p.version = Json::requireString(obj, "version");
@@ -195,7 +200,6 @@ void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
         }
     }
 
-
     if(obj.contains("mods")) {
         auto mods = Json::requireArray(obj, "mods");
         for (const auto modRaw : mods)
@@ -205,5 +209,10 @@ void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
             loadVersionMod(mod, modObj);
             v.mods.append(mod);
         }
+    }
+
+    if(obj.contains("configs")) {
+        auto configsObj = Json::requireObject(obj, "configs");
+        loadVersionConfigs(v.configs, configsObj);
     }
 }

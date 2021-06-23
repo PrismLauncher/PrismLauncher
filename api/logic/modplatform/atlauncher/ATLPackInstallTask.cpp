@@ -4,6 +4,7 @@
 #include <MMCZip.h>
 #include <minecraft/OneSixVersionFormat.h>
 #include <Version.h>
+#include <net/ChecksumValidator.h>
 #include "ATLPackInstallTask.h"
 
 #include "BuildConfig.h"
@@ -407,7 +408,12 @@ void PackInstallTask::installConfigs()
     auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", path);
     entry->setStale(true);
 
-    jobPtr->addNetAction(Net::Download::makeCached(url, entry));
+    auto dl = Net::Download::makeCached(url, entry);
+    if (!m_version.configs.sha1.isEmpty()) {
+        auto rawSha1 = QByteArray::fromHex(m_version.configs.sha1.toLatin1());
+        dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
+    }
+    jobPtr->addNetAction(dl);
     archivePath = entry->getFullPath();
 
     connect(jobPtr.get(), &NetJob::succeeded, this, [&]()
@@ -508,6 +514,10 @@ void PackInstallTask::downloadMods()
             modsToExtract.insert(entry->getFullPath(), mod);
 
             auto dl = Net::Download::makeCached(url, entry);
+            if (!mod.md5.isEmpty()) {
+                auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
+                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+            }
             jobPtr->addNetAction(dl);
         }
         else if(mod.type == ModType::Decomp) {
@@ -516,6 +526,10 @@ void PackInstallTask::downloadMods()
             modsToDecomp.insert(entry->getFullPath(), mod);
 
             auto dl = Net::Download::makeCached(url, entry);
+            if (!mod.md5.isEmpty()) {
+                auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
+                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+            }
             jobPtr->addNetAction(dl);
         }
         else {
@@ -526,6 +540,10 @@ void PackInstallTask::downloadMods()
             entry->setStale(true);
 
             auto dl = Net::Download::makeCached(url, entry);
+            if (!mod.md5.isEmpty()) {
+                auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
+                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+            }
             jobPtr->addNetAction(dl);
 
             auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
