@@ -37,8 +37,8 @@ JavaPage::JavaPage(QWidget *parent) : QWidget(parent), ui(new Ui::JavaPage)
     ui->setupUi(this);
     ui->tabWidget->tabBar()->hide();
 
-    auto sysMB = Sys::getSystemRam() / Sys::megabyte;
-    ui->maxMemSpinBox->setMaximum(sysMB);
+    auto sysMiB = Sys::getSystemRam() / Sys::mebibyte;
+    ui->maxMemSpinBox->setMaximum(sysMiB);
     loadSettings();
 }
 
