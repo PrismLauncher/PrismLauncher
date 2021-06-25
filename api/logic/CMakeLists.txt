@@ -246,6 +246,8 @@ set(MINECRAFT_SOURCES
     minecraft/launch/ReconstructAssets.h
     minecraft/launch/ScanModFolders.cpp
     minecraft/launch/ScanModFolders.h
+    minecraft/launch/VerifyJavaInstall.cpp
+    minecraft/launch/VerifyJavaInstall.h
 
     minecraft/legacy/LegacyModList.h
     minecraft/legacy/LegacyModList.cpp

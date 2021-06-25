@@ -101,6 +101,12 @@ struct VersionMod
     bool effectively_hidden;
 };
 
+struct VersionConfigs
+{
+    int filesize;
+    QString sha1;
+};
+
 struct PackVersion
 {
     QString version;
@@ -112,6 +118,7 @@ struct PackVersion
     VersionLoader loader;
     QVector<VersionLibrary> libraries;
     QVector<VersionMod> mods;
+    VersionConfigs configs;
 };
 
 MULTIMC_LOGIC_EXPORT void loadVersion(PackVersion & v, QJsonObject & obj);

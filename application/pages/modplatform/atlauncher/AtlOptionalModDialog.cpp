@@ -200,6 +200,8 @@ AtlOptionalModDialog::AtlOptionalModDialog(QWidget *parent, QVector<ATLauncher::
             listModel, &AtlOptionalModListModel::selectRecommended);
     connect(ui->clearAllButton, &QPushButton::pressed,
             listModel, &AtlOptionalModListModel::clearAll);
+    connect(ui->installButton, &QPushButton::pressed,
+            this, &QDialog::close);
 }
 
 AtlOptionalModDialog::~AtlOptionalModDialog() {
