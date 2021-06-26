@@ -12,7 +12,7 @@ Build Instructions
 # Note
 
 MultiMC is a portable application and is not supposed to be installed into any system folders.
-That would be anything outside your home folder. Before runing `make install`, make sure
+That would be anything outside your home folder. Before running `make install`, make sure
 you set the install path to something you have write access to. Never build this under
 an administrator/root level account. Don't use `sudo`. It won't work and it's not supposed to work.
 
@@ -22,7 +22,7 @@ an administrator/root level account. Don't use `sudo`. It won't work and it's no
 Clone the source code using git and grab all the submodules:
 
 ```
-git clone git@github.com:MultiMC/MultiMC5.git
+git clone https://github.com/MultiMC/MultiMC5.git
 git submodule init
 git submodule update
 ```
