@@ -5,6 +5,7 @@
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "net/ChecksumValidator.h"
 #include "settings/INISettingsObject.h"
 
 namespace ModpacksCH {
@@ -98,6 +99,10 @@ void PackInstallTask::downloadPack()
 
         qDebug() << "Will download" << file.url << "to" << path;
         auto dl = Net::Download::makeFile(file.url, path);
+        if (!file.sha1.isEmpty()) {
+            auto rawSha1 = QByteArray::fromHex(file.sha1.toLatin1());
+            dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
+        }
         jobPtr->addNetAction(dl);
     }
 
