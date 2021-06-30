@@ -273,13 +273,13 @@ QList<QString> JavaUtils::FindJavaPaths()
     QList<JavaInstallPtr> ZULU64s = this->FindJavaFromRegistryKey(
         KEY_WOW64_64KEY, "SOFTWARE\\Azul Systems\\Zulu", "InstallationPath");
     QList<JavaInstallPtr> ZULU32s = this->FindJavaFromRegistryKey(
-        KEY_WOW64_64KEY, "SOFTWARE\\Azul Systems\\Zulu", "InstallationPath");
+        KEY_WOW64_32KEY, "SOFTWARE\\Azul Systems\\Zulu", "InstallationPath");
     
     // BellSoft Liberica
     QList<JavaInstallPtr> LIBERICA64s = this->FindJavaFromRegistryKey(
         KEY_WOW64_64KEY, "SOFTWARE\\BellSoft\\Liberica", "InstallationPath");
     QList<JavaInstallPtr> LIBERICA32s = this->FindJavaFromRegistryKey(
-        KEY_WOW64_64KEY, "SOFTWARE\\BellSoft\\Liberica", "InstallationPath");
+        KEY_WOW64_32KEY, "SOFTWARE\\BellSoft\\Liberica", "InstallationPath");
 
     // List x64 before x86
     java_candidates.append(JRE64s);
