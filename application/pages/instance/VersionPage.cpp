@@ -212,12 +212,16 @@ void VersionPage::updateVersionControls()
 {
     // FIXME: this is a dirty hack
     auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
-    bool newCraft = minecraftVersion >= Version("1.14");
-    bool oldCraft = minecraftVersion <= Version("1.12.2");
-    ui->actionInstall_Fabric->setEnabled(controlsEnabled && newCraft);
-    ui->actionInstall_Forge->setEnabled(controlsEnabled);
-    ui->actionInstall_LiteLoader->setEnabled(controlsEnabled && oldCraft);
-    ui->actionReload->setEnabled(true);
+
+    bool supportsFabric = minecraftVersion >= Version("1.14");
+    ui->actionInstall_Fabric->setEnabled(controlsEnabled && supportsFabric);
+
+    bool supportsForge = minecraftVersion <= Version("1.16.5");
+    ui->actionInstall_Forge->setEnabled(controlsEnabled && supportsForge);
+
+    bool supportsLiteLoader = minecraftVersion <= Version("1.12.2");
+    ui->actionInstall_LiteLoader->setEnabled(controlsEnabled && supportsLiteLoader);
+
     updateButtons();
 }
 

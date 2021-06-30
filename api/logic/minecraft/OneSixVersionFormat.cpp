@@ -194,8 +194,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
             LibDLInfo->artifact = out->mojangDownloads["client"];
             lib->setMojangDownloadInfo(LibDLInfo);
         }
-        // we got nothing... guess based on ancient hardcoded Mojang behaviour
-        // FIXME: this will eventually break...
+        // we got nothing...
         else
         {
             out->addProblem(
