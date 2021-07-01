@@ -23,7 +23,7 @@ void ImgurUpload::start()
     finished = false;
     m_status = Job_InProgress;
     QNetworkRequest request(m_url);
-    request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
+    request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
     request.setRawHeader("Authorization", "Client-ID 5b97b0713fba4a3");
     request.setRawHeader("Accept", "application/json");
 

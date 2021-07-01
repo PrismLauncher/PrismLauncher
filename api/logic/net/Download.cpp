@@ -15,6 +15,7 @@
 
 #include "Download.h"
 
+#include "BuildConfig.h"
 #include <QFileInfo>
 #include <QDateTime>
 #include <QDebug>
@@ -94,7 +95,7 @@ void Download::start()
             return;
     }
 
-    request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0");
+    request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT);
 
     QNetworkReply *rep =  ENV.qnam().get(request);
 

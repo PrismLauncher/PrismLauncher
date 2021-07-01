@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QFile>
+#include <BuildConfig.h>
 
 PasteUpload::PasteUpload(QWidget *window, QString text, QString key) : m_window(window)
 {
@@ -34,7 +35,7 @@ bool PasteUpload::validateText()
 void PasteUpload::executeTask()
 {
     QNetworkRequest request(QUrl("https://api.paste.ee/v1/pastes"));
-    request.setHeader(QNetworkRequest::UserAgentHeader, "MultiMC/5.0 (Uncached)");
+    request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
 
     request.setRawHeader("Content-Type", "application/json");
     request.setRawHeader("Content-Length", QByteArray::number(m_jsonContent.size()));
