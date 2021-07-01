@@ -29,6 +29,9 @@
 #include "BuildConfig.h"
 #include "themes/ITheme.h"
 
+#include <QApplication>
+#include <QProcess>
+
 // FIXME: possibly move elsewhere
 enum InstSortMode
 {
@@ -78,6 +81,13 @@ MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCP
     }
     connect(ui->fontSizeBox, SIGNAL(valueChanged(int)), SLOT(refreshFontPreview()));
     connect(ui->consoleFont, SIGNAL(currentFontChanged(QFont)), SLOT(refreshFontPreview()));
+
+    //move mac data button
+    QFile file(QDir::current().absolutePath() + "/dontmovemacdata");
+    if (!file.exists())
+    {
+        ui->migrateDataFolderMacBtn->setVisible(false);
+    }
 }
 
 MultiMCPage::~MultiMCPage()
@@ -145,6 +155,13 @@ void MultiMCPage::on_modsDirBrowseBtn_clicked()
         QString cooked_dir = FS::NormalizePath(raw_dir);
         ui->modsDirTextBox->setText(cooked_dir);
     }
+}
+void MultiMCPage::on_migrateDataFolderMacBtn_clicked()
+{
+    QFile file(QDir::current().absolutePath() + "/dontmovemacdata");
+    file.remove();
+    QProcess::startDetached(qApp->arguments()[0]);
+    qApp->quit();
 }
 
 void MultiMCPage::refreshUpdateChannelList()
