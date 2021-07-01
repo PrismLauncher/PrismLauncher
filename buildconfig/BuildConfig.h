@@ -66,6 +66,11 @@ public:
     QString PASTE_EE_KEY;
 
     /**
+     * Client ID you can get from Imgur when you register an application
+     */
+    QString IMGUR_CLIENT_ID;
+
+    /**
      * MultiMC Metadata repository URL prefix
      */
     QString META_URL;
