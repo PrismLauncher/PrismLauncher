@@ -27,6 +27,14 @@ Technic::SolderPackInstallTask::SolderPackInstallTask(const QUrl &sourceUrl, con
     m_minecraftVersion = minecraftVersion;
 }
 
+bool Technic::SolderPackInstallTask::abort() {
+    if(m_abortable)
+    {
+        return m_filesNetJob->abort();
+    }
+    return false;
+}
+
 void Technic::SolderPackInstallTask::executeTask()
 {
     setStatus(tr("Finding recommended version:\n%1").arg(m_sourceUrl.toString()));
@@ -106,6 +114,8 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
 
 void Technic::SolderPackInstallTask::downloadSucceeded()
 {
+    m_abortable = false;
+
     setStatus(tr("Extracting modpack"));
     m_filesNetJob.reset();
     m_extractFuture = QtConcurrent::run([this]()
@@ -132,12 +142,14 @@ void Technic::SolderPackInstallTask::downloadSucceeded()
 
 void Technic::SolderPackInstallTask::downloadFailed(QString reason)
 {
+    m_abortable = false;
     emitFailed(reason);
     m_filesNetJob.reset();
 }
 
 void Technic::SolderPackInstallTask::downloadProgressChanged(qint64 current, qint64 total)
 {
+    m_abortable = true;
     setProgress(current / 2, total);
 }
 

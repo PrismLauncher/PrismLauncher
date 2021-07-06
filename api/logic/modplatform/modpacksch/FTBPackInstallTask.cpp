@@ -19,7 +19,11 @@ PackInstallTask::PackInstallTask(Modpack pack, QString version)
 
 bool PackInstallTask::abort()
 {
-    return true;
+    if(abortable)
+    {
+        return jobPtr->abort();
+    }
+    return false;
 }
 
 void PackInstallTask::executeTask()
@@ -117,16 +121,19 @@ void PackInstallTask::downloadPack()
 
     connect(jobPtr.get(), &NetJob::succeeded, this, [&]()
     {
+        abortable = false;
         jobPtr.reset();
         install();
     });
     connect(jobPtr.get(), &NetJob::failed, [&](QString reason)
     {
+        abortable = false;
         jobPtr.reset();
         emitFailed(reason);
     });
     connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total)
     {
+        abortable = true;
         setProgress(current, total);
     });
 

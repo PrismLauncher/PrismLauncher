@@ -29,6 +29,9 @@ namespace Technic
     public:
         explicit SolderPackInstallTask(const QUrl &sourceUrl, const QString &minecraftVersion);
 
+        bool canAbort() const override { return true; }
+        bool abort() override;
+
     protected:
         //! Entry point for tasks.
         virtual void executeTask() override;
@@ -43,6 +46,8 @@ namespace Technic
         void extractAborted();
 
     private:
+        bool m_abortable = false;
+
         NetJobPtr m_filesNetJob;
         QUrl m_sourceUrl;
         QString m_minecraftVersion;

@@ -28,7 +28,11 @@ PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString pack, 
 
 bool PackInstallTask::abort()
 {
-    return true;
+    if(abortable)
+    {
+        return jobPtr->abort();
+    }
+    return false;
 }
 
 void PackInstallTask::executeTask()
@@ -418,16 +422,19 @@ void PackInstallTask::installConfigs()
 
     connect(jobPtr.get(), &NetJob::succeeded, this, [&]()
     {
+        abortable = false;
         jobPtr.reset();
         extractConfigs();
     });
     connect(jobPtr.get(), &NetJob::failed, [&](QString reason)
     {
+        abortable = false;
         jobPtr.reset();
         emitFailed(reason);
     });
     connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total)
     {
+        abortable = true;
         setProgress(current, total);
     });
 
@@ -576,11 +583,13 @@ void PackInstallTask::downloadMods()
     connect(jobPtr.get(), &NetJob::succeeded, this, &PackInstallTask::onModsDownloaded);
     connect(jobPtr.get(), &NetJob::failed, [&](QString reason)
     {
+        abortable = false;
         jobPtr.reset();
         emitFailed(reason);
     });
     connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total)
     {
+        abortable = true;
         setProgress(current, total);
     });
 
@@ -588,6 +597,8 @@ void PackInstallTask::downloadMods()
 }
 
 void PackInstallTask::onModsDownloaded() {
+    abortable = false;
+
     qDebug() << "PackInstallTask::onModsDownloaded: " << QThread::currentThreadId();
     jobPtr.reset();
 

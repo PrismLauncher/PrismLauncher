@@ -20,6 +20,7 @@ public:
     explicit PackInstallTask(Modpack pack, QString version);
     virtual ~PackInstallTask(){}
 
+    bool canAbort() const override { return true; }
     bool abort() override;
 
 protected:
