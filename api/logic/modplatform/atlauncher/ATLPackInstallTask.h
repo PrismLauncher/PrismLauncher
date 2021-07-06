@@ -39,6 +39,7 @@ public:
     explicit PackInstallTask(UserInteractionSupport *support, QString pack, QString version);
     virtual ~PackInstallTask(){}
 
+    bool canAbort() const override { return true; }
     bool abort() override;
 
 protected:
@@ -71,6 +72,8 @@ private:
 
 private:
     UserInteractionSupport *m_support;
+
+    bool abortable = false;
 
     NetJobPtr jobPtr;
     QByteArray response;
