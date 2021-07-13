@@ -95,9 +95,7 @@ void Technic::ListModel::performSearch()
     NetJob *netJob = new NetJob("Technic::Search");
     QString searchUrl = "";
     if (currentSearchTerm.isEmpty()) {
-        searchUrl = QString(
-            "https://api.technicpack.net/trending?build=multimc"
-        ).arg(currentSearchTerm);
+        searchUrl = "https://api.technicpack.net/trending?build=multimc";
     }
     else
     {
