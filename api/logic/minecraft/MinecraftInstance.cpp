@@ -798,9 +798,15 @@ QString MinecraftInstance::getStatusbarDescription()
 
     QString description;
     description.append(tr("Minecraft %1 (%2)").arg(m_components->getComponentVersion("net.minecraft")).arg(typeName()));
-    if(m_settings->get("ShowGameTime").toBool() && totalTimePlayed() > 0)
+    if(m_settings->get("ShowGameTime").toBool())
     {
-        description.append(tr(", played for %1").arg(prettifyTimeDuration(totalTimePlayed())));
+        if (lastTimePlayed() > 0) {
+            description.append(tr(", last played for %1").arg(prettifyTimeDuration(lastTimePlayed())));
+        }
+
+        if (totalTimePlayed() > 0) {
+            description.append(tr(", total played for %1").arg(prettifyTimeDuration(totalTimePlayed())));
+        }
     }
     if(hasCrashed())
     {
