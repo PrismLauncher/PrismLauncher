@@ -1940,9 +1940,10 @@ void MainWindow::checkInstancePathForProblems()
 void MainWindow::updateStatusCenter()
 {
     int timeplayed = MMC->instances()->getTotalPlayTime();
-    int minutes = timeplayed / 60;
-    int hours = minutes / 60;
+    int minutesTotal = timeplayed / 60;
     int seconds = timeplayed % 60;
+    int minutes = minutesTotal % 60;
+    int hours = minutesTotal / 60;
     if(hours != 0)
         m_statusCenter->setText(tr("Total playtime: %1h %2m %3s").arg(hours).arg(minutes).arg(seconds));
     else if(minutes != 0)
