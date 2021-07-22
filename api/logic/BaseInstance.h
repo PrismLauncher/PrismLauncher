@@ -87,6 +87,7 @@ public:
     void setRunning(bool running);
     bool isRunning() const;
     int64_t totalTimePlayed() const;
+    int64_t lastTimePlayed() const;
     void resetTimePlayed();
 
     /// get the type of this instance

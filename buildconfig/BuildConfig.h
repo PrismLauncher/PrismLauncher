@@ -31,6 +31,11 @@ public:
     /// URL for the updater's channel
     QString CHANLIST_URL;
 
+    /// User-Agent to use.
+    QString USER_AGENT = "MultiMC/5.0";
+    /// User-Agent to use for uncached requests.
+    QString USER_AGENT_UNCACHED = "MultiMC/5.0 (Uncached)";
+
     /// Google analytics ID
     QString ANALYTICS_ID;
 
@@ -59,6 +64,11 @@ public:
      * API key you can get from paste.ee when you register an account
      */
     QString PASTE_EE_KEY;
+
+    /**
+     * Client ID you can get from Imgur when you register an application
+     */
+    QString IMGUR_CLIENT_ID;
 
     /**
      * MultiMC Metadata repository URL prefix
