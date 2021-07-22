@@ -1,0 +1,9 @@
+#include "BuildConfig.h"
+#include <QObject>
+
+const Config BuildConfig;
+
+Config::Config()
+{
+    CLIENT_ID = "@MOJANGDEMO_CLIENT_ID@";
+}

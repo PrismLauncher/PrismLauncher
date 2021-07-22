@@ -278,6 +278,7 @@ add_subdirectory(libraries/LocalPeer) # fork of a library from Qt solutions
 add_subdirectory(libraries/classparser) # google analytics library
 add_subdirectory(libraries/optional-bare)
 add_subdirectory(libraries/tomlc99) # toml parser
+add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too much
 
 ############################### Built Artifacts ###############################
 
