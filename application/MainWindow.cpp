@@ -259,7 +259,6 @@ public:
         actionAddInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Add a new instance."));
         all_actions.append(&actionAddInstance);
         mainToolBar->addAction(actionAddInstance);
-        actionAddInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "A"));
 
         mainToolBar->addSeparator();
 
