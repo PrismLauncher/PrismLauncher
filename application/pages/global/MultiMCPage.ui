@@ -158,6 +158,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="migrateDataFolderMacBtn">
+         <property name="text">
+          <string>Move MultiMC data to new location (will restart MultiMC)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

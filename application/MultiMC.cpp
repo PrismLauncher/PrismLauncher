@@ -262,6 +262,10 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
             xdgDataHome = QDir::homePath() + QLatin1String("/.local/share");
         dataPath = xdgDataHome + "/multimc";
         adjustedBy += "XDG standard " + dataPath;
+#elif defined(Q_OS_MAC)
+        QDir foo(FS::PathCombine(applicationDirPath(), "../../Data"));
+        dataPath = foo.absolutePath();
+        adjustedBy += "Fallback to special Mac location " + dataPath;
 #else
         dataPath = applicationDirPath();
         adjustedBy += "Fallback to binary path " + dataPath;
@@ -305,6 +309,63 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         m_status = MultiMC::Failed;
         return;
     }
+
+#if defined(Q_OS_MAC)
+    // move user data to new location if on macOS and it still exists in Contents/MacOS
+    QDir fi(applicationDirPath());
+    QString originalData = fi.absolutePath();
+    // if the config file exists in Contents/MacOS, then user data is still there and needs to moved
+    if (QFileInfo::exists(FS::PathCombine(originalData, "multimc.cfg")))
+    {
+        if (!QFileInfo::exists(FS::PathCombine(originalData, "dontmovemacdata")))
+        {
+            QMessageBox::StandardButton askMoveDialogue;
+            askMoveDialogue = QMessageBox::question(nullptr, "MultiMC 5", "Would you like to move application data to a new data location? It will improve MultiMC's performance, but if you switch to older versions it will look like instances have disappeared. If you select no, you can migrate later in settings. You should select yes unless you're commonly switching between different versions of MultiMC (eg. develop and stable).", QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+            if (askMoveDialogue == QMessageBox::Yes)
+            {
+                qDebug() << "On macOS and found config file in old location, moving user data...";
+                QDir dir;
+                QStringList dataFiles {
+                    "*.log", // MultiMC-@.log
+                    "accounts.json",
+                    "accounts",
+                    "assets",
+                    "cache",
+                    "icons",
+                    "instances",
+                    "libraries",
+                    "meta",
+                    "metacache",
+                    "mods",
+                    "multimc.cfg",
+                    "themes",
+                    "translations"
+                };
+                QDirIterator files(originalData, dataFiles);
+                while (files.hasNext()) {
+                    QString filePath(files.next());
+                    QString fileName(files.fileName());
+                    if (!dir.rename(filePath, FS::PathCombine(dataPath, fileName)))
+                    {
+                        qWarning() << "Failed to move " << fileName;
+                    }
+                }
+            }
+            else
+            {
+                dataPath = originalData;
+                QDir::setCurrent(dataPath);
+                QFile file(originalData + "/dontmovemacdata");
+                file.open(QIODevice::WriteOnly);
+            }
+        }
+        else
+        {
+            dataPath = originalData;
+            QDir::setCurrent(dataPath);
+        }
+    }
+#endif
 
     /*
      * Establish the mechanism for communication with an already running MultiMC that uses the same data path.
