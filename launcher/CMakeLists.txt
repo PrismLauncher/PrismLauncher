@@ -918,8 +918,10 @@ endif()
 if(DEFINED MultiMC_BINARY_RPATH)
     SET_TARGET_PROPERTIES(MultiMC PROPERTIES INSTALL_RPATH "${MultiMC_BINARY_RPATH}")
 endif()
+
 if(DEFINED MultiMC_APP_BINARY_DEFS)
     target_compile_definitions(MultiMC PRIVATE ${MultiMC_APP_BINARY_DEFS})
+    target_compile_definitions(MultiMC_logic PRIVATE ${MultiMC_APP_BINARY_DEFS})
 endif()
 
 install(TARGETS MultiMC
