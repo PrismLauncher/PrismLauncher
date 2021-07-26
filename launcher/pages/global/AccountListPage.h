@@ -20,7 +20,7 @@
 
 #include "pages/BasePage.h"
 
-#include "minecraft/auth/MojangAccountList.h"
+#include "minecraft/auth/AccountList.h"
 #include "MultiMC.h"
 
 namespace Ui
@@ -60,7 +60,8 @@ public:
     }
 
 public slots:
-    void on_actionAdd_triggered();
+    void on_actionAddMojang_triggered();
+    void on_actionAddMicrosoft_triggered();
     void on_actionRemove_triggered();
     void on_actionSetDefault_triggered();
     void on_actionNoDefault_triggered();
@@ -74,11 +75,10 @@ public slots:
 
 protected slots:
     void ShowContextMenu(const QPoint &pos);
-    void addAccount(const QString& errMsg="");
 
 private:
     void changeEvent(QEvent * event) override;
     QMenu * createPopupMenu() override;
-    std::shared_ptr<MojangAccountList> m_accounts;
+    std::shared_ptr<AccountList> m_accounts;
     Ui::AccountListPage *ui;
 };

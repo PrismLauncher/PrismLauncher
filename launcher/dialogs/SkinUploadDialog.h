@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDialog>
-#include <minecraft/auth/MojangAccount.h>
+#include <minecraft/auth/MinecraftAccount.h>
 
 namespace Ui
 {
@@ -11,7 +11,7 @@ namespace Ui
 class SkinUploadDialog : public QDialog {
     Q_OBJECT
 public:
-    explicit SkinUploadDialog(MojangAccountPtr acct, QWidget *parent = 0);
+    explicit SkinUploadDialog(MinecraftAccountPtr acct, QWidget *parent = 0);
     virtual ~SkinUploadDialog() {};
 
 public slots:
@@ -22,7 +22,7 @@ public slots:
     void on_skinBrowseBtn_clicked();
 
 protected:
-    MojangAccountPtr m_acct;
+    MinecraftAccountPtr m_acct;
 
 private:
     Ui::SkinUploadDialog *ui;

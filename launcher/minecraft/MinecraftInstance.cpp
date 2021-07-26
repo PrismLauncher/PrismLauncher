@@ -423,7 +423,7 @@ QStringList MinecraftInstance::processMinecraftArgs(
     // yggdrasil!
     if(session)
     {
-        token_mapping["auth_username"] = session->username;
+        // token_mapping["auth_username"] = session->username;
         token_mapping["auth_session"] = session->session;
         token_mapping["auth_access_token"] = session->access_token;
         token_mapping["auth_player_name"] = session->player_name;
@@ -691,19 +691,11 @@ QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(AuthSess
         addToFilter(sessionRef.session, tr("<SESSION ID>"));
     }
     addToFilter(sessionRef.access_token, tr("<ACCESS TOKEN>"));
-    addToFilter(sessionRef.client_token, tr("<CLIENT TOKEN>"));
+    if(sessionRef.client_token.size()) {
+        addToFilter(sessionRef.client_token, tr("<CLIENT TOKEN>"));
+    }
     addToFilter(sessionRef.uuid, tr("<PROFILE ID>"));
 
-    auto i = sessionRef.u.properties.begin();
-    while (i != sessionRef.u.properties.end())
-    {
-        if(i.value().length() <= 3) {
-            ++i;
-            continue;
-        }
-        addToFilter(i.value(), "<" + i.key().toUpper() + ">");
-        ++i;
-    }
     return filter;
 }
 

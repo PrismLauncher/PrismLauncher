@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "YggdrasilTask.h"
-#include "MojangAccount.h"
+#include "Yggdrasil.h"
+#include "../AccountData.h"
 
 #include <QObject>
 #include <QString>
@@ -29,68 +29,147 @@
 
 #include <QDebug>
 
-YggdrasilTask::YggdrasilTask(MojangAccount *account, QObject *parent)
-    : Task(parent), m_account(account)
+Yggdrasil::Yggdrasil(AccountData *data, QObject *parent)
+    : AccountTask(data, parent)
 {
     changeState(STATE_CREATED);
 }
 
-void YggdrasilTask::executeTask()
-{
-    changeState(STATE_SENDING_REQUEST);
+void Yggdrasil::sendRequest(QUrl endpoint, QByteArray content) {
+    changeState(STATE_WORKING);
 
-    // Get the content of the request we're going to send to the server.
-    QJsonDocument doc(getRequestContent());
-
-    QUrl reqUrl(BuildConfig.AUTH_BASE + getEndpoint());
-    QNetworkRequest netRequest(reqUrl);
+    QNetworkRequest netRequest(endpoint);
     netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-
-    QByteArray requestData = doc.toJson();
-    m_netReply = ENV.qnam().post(netRequest, requestData);
-    connect(m_netReply, &QNetworkReply::finished, this, &YggdrasilTask::processReply);
-    connect(m_netReply, &QNetworkReply::uploadProgress, this, &YggdrasilTask::refreshTimers);
-    connect(m_netReply, &QNetworkReply::downloadProgress, this, &YggdrasilTask::refreshTimers);
-    connect(m_netReply, &QNetworkReply::sslErrors, this, &YggdrasilTask::sslErrors);
+    m_netReply = ENV.qnam().post(netRequest, content);
+    connect(m_netReply, &QNetworkReply::finished, this, &Yggdrasil::processReply);
+    connect(m_netReply, &QNetworkReply::uploadProgress, this, &Yggdrasil::refreshTimers);
+    connect(m_netReply, &QNetworkReply::downloadProgress, this, &Yggdrasil::refreshTimers);
+    connect(m_netReply, &QNetworkReply::sslErrors, this, &Yggdrasil::sslErrors);
     timeout_keeper.setSingleShot(true);
     timeout_keeper.start(timeout_max);
     counter.setSingleShot(false);
     counter.start(time_step);
     progress(0, timeout_max);
-    connect(&timeout_keeper, &QTimer::timeout, this, &YggdrasilTask::abortByTimeout);
-    connect(&counter, &QTimer::timeout, this, &YggdrasilTask::heartbeat);
+    connect(&timeout_keeper, &QTimer::timeout, this, &Yggdrasil::abortByTimeout);
+    connect(&counter, &QTimer::timeout, this, &Yggdrasil::heartbeat);
 }
 
-void YggdrasilTask::refreshTimers(qint64, qint64)
+void Yggdrasil::executeTask() {
+}
+
+void Yggdrasil::refresh() {
+    start();
+    /*
+     * {
+     *  "clientToken": "client identifier"
+     *  "accessToken": "current access token to be refreshed"
+     *  "selectedProfile":                      // specifying this causes errors
+     *  {
+     *   "id": "profile ID"
+     *   "name": "profile name"
+     *  }
+     *  "requestUser": true/false               // request the user structure
+     * }
+     */
+    QJsonObject req;
+    req.insert("clientToken", m_data->clientToken());
+    req.insert("accessToken", m_data->accessToken());
+    /*
+    {
+        auto currentProfile = m_account->currentProfile();
+        QJsonObject profile;
+        profile.insert("id", currentProfile->id());
+        profile.insert("name", currentProfile->name());
+        req.insert("selectedProfile", profile);
+    }
+    */
+    req.insert("requestUser", false);
+    QJsonDocument doc(req);
+
+    QUrl reqUrl(BuildConfig.AUTH_BASE + "refresh");
+    QByteArray requestData = doc.toJson();
+
+    sendRequest(reqUrl, requestData);
+}
+
+void Yggdrasil::login(QString password) {
+    start();
+    /*
+     * {
+     *   "agent": {                              // optional
+     *   "name": "Minecraft",                    // So far this is the only encountered value
+     *   "version": 1                            // This number might be increased
+     *                                           // by the vanilla client in the future
+     *   },
+     *   "username": "mojang account name",      // Can be an email address or player name for
+     *                                           // unmigrated accounts
+     *   "password": "mojang account password",
+     *   "clientToken": "client identifier",     // optional
+     *   "requestUser": true/false               // request the user structure
+     * }
+     */
+    QJsonObject req;
+
+    {
+        QJsonObject agent;
+        // C++ makes string literals void* for some stupid reason, so we have to tell it
+        // QString... Thanks Obama.
+        agent.insert("name", QString("Minecraft"));
+        agent.insert("version", 1);
+        req.insert("agent", agent);
+    }
+
+    req.insert("username", m_data->userName());
+    req.insert("password", password);
+    req.insert("requestUser", false);
+
+    // If we already have a client token, give it to the server.
+    // Otherwise, let the server give us one.
+
+    m_data->generateClientTokenIfMissing();
+    req.insert("clientToken", m_data->clientToken());
+
+    QJsonDocument doc(req);
+
+    QUrl reqUrl(BuildConfig.AUTH_BASE + "authenticate");
+    QNetworkRequest netRequest(reqUrl);
+    QByteArray requestData = doc.toJson();
+
+    sendRequest(reqUrl, requestData);
+}
+
+
+
+void Yggdrasil::refreshTimers(qint64, qint64)
 {
     timeout_keeper.stop();
     timeout_keeper.start(timeout_max);
     progress(count = 0, timeout_max);
 }
-void YggdrasilTask::heartbeat()
+void Yggdrasil::heartbeat()
 {
     count += time_step;
     progress(count, timeout_max);
 }
 
-bool YggdrasilTask::abort()
+bool Yggdrasil::abort()
 {
     progress(timeout_max, timeout_max);
     // TODO: actually use this in a meaningful way
-    m_aborted = YggdrasilTask::BY_USER;
+    m_aborted = Yggdrasil::BY_USER;
     m_netReply->abort();
     return true;
 }
 
-void YggdrasilTask::abortByTimeout()
+void Yggdrasil::abortByTimeout()
 {
     progress(timeout_max, timeout_max);
     // TODO: actually use this in a meaningful way
-    m_aborted = YggdrasilTask::BY_TIMEOUT;
+    m_aborted = Yggdrasil::BY_TIMEOUT;
     m_netReply->abort();
 }
 
-void YggdrasilTask::sslErrors(QList<QSslError> errors)
+void Yggdrasil::sslErrors(QList<QSslError> errors)
 {
     int i = 1;
     for (auto error : errors)
@@ -102,9 +181,52 @@ void YggdrasilTask::sslErrors(QList<QSslError> errors)
     }
 }
 
-void YggdrasilTask::processReply()
+void Yggdrasil::processResponse(QJsonObject responseData)
 {
-    changeState(STATE_PROCESSING_RESPONSE);
+    // Read the response data. We need to get the client token, access token, and the selected
+    // profile.
+    qDebug() << "Processing authentication response.";
+
+    // qDebug() << responseData;
+    // If we already have a client token, make sure the one the server gave us matches our
+    // existing one.
+    QString clientToken = responseData.value("clientToken").toString("");
+    if (clientToken.isEmpty())
+    {
+        // Fail if the server gave us an empty client token
+        changeState(STATE_FAILED_HARD, tr("Authentication server didn't send a client token."));
+        return;
+    }
+    if(m_data->clientToken().isEmpty()) {
+        m_data->setClientToken(clientToken);
+    }
+    else if(clientToken != m_data->clientToken()) {
+        changeState(STATE_FAILED_HARD, tr("Authentication server attempted to change the client token. This isn't supported."));
+        return;
+    }
+
+    // Now, we set the access token.
+    qDebug() << "Getting access token.";
+    QString accessToken = responseData.value("accessToken").toString("");
+    if (accessToken.isEmpty())
+    {
+        // Fail if the server didn't give us an access token.
+        changeState(STATE_FAILED_HARD, tr("Authentication server didn't send an access token."));
+        return;
+    }
+    // Set the access token.
+    m_data->yggdrasilToken.token = accessToken;
+    m_data->yggdrasilToken.validity = Katabasis::Validity::Certain;
+
+    // We've made it through the minefield of possible errors. Return true to indicate that
+    // we've succeeded.
+    qDebug() << "Finished reading authentication response.";
+    changeState(STATE_SUCCEEDED);
+}
+
+void Yggdrasil::processReply()
+{
+    changeState(STATE_WORKING);
 
     switch (m_netReply->error())
     {
@@ -195,7 +317,7 @@ void YggdrasilTask::processReply()
     }
 }
 
-void YggdrasilTask::processError(QJsonObject responseData)
+void Yggdrasil::processError(QJsonObject responseData)
 {
     QJsonValue errorVal = responseData.value("error");
     QJsonValue errorMessageValue = responseData.value("errorMessage");
@@ -212,44 +334,4 @@ void YggdrasilTask::processError(QJsonObject responseData)
         // Error is not in standard format. Don't set m_error and return unknown error.
         changeState(STATE_FAILED_HARD, tr("An unknown Yggdrasil error occurred."));
     }
-}
-
-QString YggdrasilTask::getStateMessage() const
-{
-    switch (m_state)
-    {
-    case STATE_CREATED:
-        return "Waiting...";
-    case STATE_SENDING_REQUEST:
-        return tr("Sending request to auth servers...");
-    case STATE_PROCESSING_RESPONSE:
-        return tr("Processing response from servers...");
-    case STATE_SUCCEEDED:
-        return tr("Authentication task succeeded.");
-    case STATE_FAILED_SOFT:
-        return tr("Failed to contact the authentication server.");
-    case STATE_FAILED_HARD:
-        return tr("Failed to authenticate.");
-    default:
-        return tr("...");
-    }
-}
-
-void YggdrasilTask::changeState(YggdrasilTask::State newState, QString reason)
-{
-    m_state = newState;
-    setStatus(getStateMessage());
-    if (newState == STATE_SUCCEEDED)
-    {
-        emitSucceeded();
-    }
-    else if (newState == STATE_FAILED_HARD || newState == STATE_FAILED_SOFT)
-    {
-        emitFailed(reason);
-    }
-}
-
-YggdrasilTask::State YggdrasilTask::state()
-{
-    return m_state;
 }

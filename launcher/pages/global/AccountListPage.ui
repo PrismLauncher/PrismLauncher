@@ -25,7 +25,23 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="VersionListView" name="listView"/>
+     <widget class="VersionListView" name="listView">
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="rootIsDecorated">
+       <bool>false</bool>
+      </property>
+      <property name="itemsExpandable">
+       <bool>false</bool>
+      </property>
+      <property name="allColumnsShowFocus">
+       <bool>true</bool>
+      </property>
+      <attribute name="headerStretchLastSection">
+       <bool>false</bool>
+      </attribute>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -36,7 +52,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionAdd"/>
+   <addaction name="actionAddMicrosoft"/>
+   <addaction name="actionAddMojang"/>
    <addaction name="actionRemove"/>
    <addaction name="actionSetDefault"/>
    <addaction name="actionNoDefault"/>
@@ -44,9 +61,9 @@
    <addaction name="actionUploadSkin"/>
    <addaction name="actionDeleteSkin"/>
   </widget>
-  <action name="actionAdd">
+  <action name="actionAddMojang">
    <property name="text">
-    <string>Add</string>
+    <string>Add Mojang</string>
    </property>
   </action>
   <action name="actionRemove">
@@ -78,6 +95,11 @@
    </property>
    <property name="toolTip">
     <string>Delete the currently active skin and go back to the default one</string>
+   </property>
+  </action>
+  <action name="actionAddMicrosoft">
+   <property name="text">
+    <string>Add Microsoft</string>
    </property>
   </action>
  </widget>

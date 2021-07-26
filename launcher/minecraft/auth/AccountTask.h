@@ -22,19 +22,17 @@
 #include <QTimer>
 #include <qsslerror.h>
 
-#include "MojangAccount.h"
+#include "MinecraftAccount.h"
 
 class QNetworkReply;
 
-/**
- * A Yggdrasil task is a task that performs an operation on a given mojang account.
- */
-class YggdrasilTask : public Task
+class AccountTask : public Task
 {
+    friend class AuthContext;
     Q_OBJECT
 public:
-    explicit YggdrasilTask(MojangAccount * account, QObject *parent = 0);
-    virtual ~YggdrasilTask() {};
+    explicit AccountTask(AccountData * data, QObject *parent = 0);
+    virtual ~AccountTask() {};
 
     /**
      * assign a session to this task. the session will be filled with required infomration
@@ -52,7 +50,7 @@ public:
     }
 
     /**
-     * Class describing a Yggdrasil error response.
+     * Class describing a Account error response.
      */
     struct Error
     {
@@ -75,45 +73,17 @@ public:
     enum State
     {
         STATE_CREATED,
-        STATE_SENDING_REQUEST,
-        STATE_PROCESSING_RESPONSE,
+        STATE_WORKING,
         STATE_FAILED_SOFT, //!< soft failure. this generally means the user auth details haven't been invalidated
         STATE_FAILED_HARD, //!< hard failure. auth is invalid
         STATE_SUCCEEDED
-    } m_state = STATE_CREATED;
+    } m_accountState = STATE_CREATED;
+
+    State accountState() {
+        return m_accountState;
+    }
 
 protected:
-
-    virtual void executeTask() override;
-
-    /**
-     * Gets the JSON object that will be sent to the authentication server.
-     * Should be overridden by subclasses.
-     */
-    virtual QJsonObject getRequestContent() const = 0;
-
-    /**
-     * Gets the endpoint to POST to.
-     * No leading slash.
-     */
-    virtual QString getEndpoint() const = 0;
-
-    /**
-     * Processes the response received from the server.
-     * If an error occurred, this should emit a failed signal and return false.
-     * If Yggdrasil gave an error response, it should call setError() first, and then return false.
-     * Otherwise, it should return true.
-     * Note: If the response from the server was blank, and the HTTP code was 200, this function is called with
-     * an empty QJsonObject.
-     */
-    virtual void processResponse(QJsonObject responseData) = 0;
-
-    /**
-     * Processes an error response received from the server.
-     * The default implementation will read data from Yggdrasil's standard error response format and set it as this task's Error.
-     * \returns a QString error message that will be passed to emitFailed.
-     */
-    virtual void processError(QJsonObject responseData);
 
     /**
      * Returns the state message for the given state.
@@ -122,30 +92,12 @@ protected:
      */
     virtual QString getStateMessage() const;
 
-protected
-slots:
-    void processReply();
-    void refreshTimers(qint64, qint64);
-    void heartbeat();
-    void sslErrors(QList<QSslError>);
-
+protected slots:
     void changeState(State newState, QString reason=QString());
-public
-slots:
-    virtual bool abort() override;
-    void abortByTimeout();
-    State state();
+
 protected:
     // FIXME: segfault disaster waiting to happen
-    MojangAccount *m_account = nullptr;
-    QNetworkReply *m_netReply = nullptr;
+    AccountData *m_data = nullptr;
     std::shared_ptr<Error> m_error;
-    QTimer timeout_keeper;
-    QTimer counter;
-    int count = 0; // num msec since time reset
-
-    const int timeout_max = 30000;
-    const int time_step = 50;
-
     AuthSessionPtr m_session;
 };

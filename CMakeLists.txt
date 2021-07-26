@@ -90,6 +90,9 @@ set(MultiMC_DISCORD_URL "" CACHE STRING "URL for the Discord guild.")
 # Subreddit URL
 set(MultiMC_SUBREDDIT_URL "" CACHE STRING "URL for the subreddit.")
 
+# MSA Client ID
+set(MultiMC_MSA_CLIENT_ID "" CACHE STRING "Client ID used for MSA authentication")
+
 #### Check the current Git commit and branch
 include(GetGitRevisionDescription)
 get_git_head_revision(MultiMC_GIT_REFSPEC MultiMC_GIT_COMMIT)

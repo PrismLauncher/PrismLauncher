@@ -7,87 +7,47 @@
 #include <QImage>
 
 #include <katabasis/OAuth2.h>
+#include "Yggdrasil.h"
+#include "../AccountData.h"
+#include "../AccountTask.h"
 
-struct Skin {
-    QString id;
-    QString url;
-    QString variant;
-
-    QByteArray data;
-};
-
-struct Cape {
-    QString id;
-    QString url;
-    QString alias;
-
-    QByteArray data;
-};
-
-struct MinecraftProfile  {
-    QString id;
-    QString name;
-    Skin skin;
-    int currentCape = -1;
-    QVector<Cape> capes;
-    Katabasis::Validity validity = Katabasis::Validity::None;
-};
-
-enum class AccountType {
-    MSA,
-    Mojang
-};
-
-struct AccountData {
-    AccountType type = AccountType::MSA;
-
-    Katabasis::Token msaToken;
-    Katabasis::Token userToken;
-    Katabasis::Token xboxApiToken;
-    Katabasis::Token mojangservicesToken;
-    Katabasis::Token minecraftToken;
-
-    MinecraftProfile minecraftProfile;
-    Katabasis::Validity validity_ = Katabasis::Validity::None;
-};
-
-class Context : public QObject
+class AuthContext : public AccountTask
 {
     Q_OBJECT
 
 public:
-    explicit Context(QObject *parent = 0);
-
-    QByteArray saveState();
-    bool resumeFromState(QByteArray data);
+    explicit AuthContext(AccountData * data, QObject *parent = 0);
 
     bool isBusy() {
-        return activity_ != Katabasis::Activity::Idle;
+        return m_activity != Katabasis::Activity::Idle;
     };
     Katabasis::Validity validity() {
-        return m_account.validity_;
+        return m_data->validity_;
     };
 
-    bool signIn();
-    bool silentSignIn();
-    bool signOut();
+    //bool signOut();
 
-    QString userName();
-    QString userId();
-    QString gameToken();
+    QString getStateMessage() const override;
+
 signals:
-    void succeeded();
-    void failed();
     void activityChanged(Katabasis::Activity activity);
 
 private slots:
-    void onLinkingSucceeded();
-    void onLinkingFailed();
+// OAuth-specific callbacks
+    void onOAuthLinkingSucceeded();
+    void onOAuthLinkingFailed();
     void onOpenBrowser(const QUrl &url);
     void onCloseBrowser();
     void onOAuthActivityChanged(Katabasis::Activity activity);
 
-private:
+// Yggdrasil specific callbacks
+    void onMojangSucceeded();
+    void onMojangFailed();
+
+protected:
+    void initMSA();
+    void initMojang();
+
     void doUserAuth();
     Q_SLOT void onUserAuthDone(int, QNetworkReply::NetworkError, QByteArray, QList<QNetworkReply::RawHeaderPair>);
 
@@ -109,20 +69,26 @@ private:
 
     void checkResult();
 
-private:
+protected:
     void beginActivity(Katabasis::Activity activity);
     void finishActivity();
     void clearTokens();
 
-private:
-    Katabasis::OAuth2 *oauth2 = nullptr;
+protected:
+    Katabasis::OAuth2 *m_oauth2 = nullptr;
+    Yggdrasil *m_yggdrasil = nullptr;
 
-    int requestsDone = 0;
-    bool xboxProfileSucceeded = false;
-    bool mcAuthSucceeded = false;
-    Katabasis::Activity activity_ = Katabasis::Activity::Idle;
-
-    AccountData m_account;
+    int m_requestsDone = 0;
+    bool m_xboxProfileSucceeded = false;
+    bool m_mcAuthSucceeded = false;
+    Katabasis::Activity m_activity = Katabasis::Activity::Idle;
+    enum class MSAStage {
+        Idle,
+        UserAuth,
+        XboxAuth,
+        MinecraftProfile,
+        Skin
+    } m_stage = MSAStage::Idle;
 
     QNetworkAccessManager *mgr = nullptr;
 };

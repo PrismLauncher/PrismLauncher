@@ -1,6 +1,6 @@
 #include "LaunchController.h"
 #include "MainWindow.h"
-#include <minecraft/auth/MojangAccountList.h>
+#include <minecraft/auth/AccountList.h>
 #include "MultiMC.h"
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/ProfileSelectDialog.h"
@@ -12,7 +12,7 @@
 #include <QLineEdit>
 #include <QInputDialog>
 #include <tasks/Task.h>
-#include <minecraft/auth/YggdrasilTask.h>
+#include <minecraft/auth/AccountTask.h>
 #include <launch/steps/TextPrint.h>
 #include <QStringList>
 #include <QHostInfo>
@@ -35,22 +35,23 @@ void LaunchController::executeTask()
 }
 
 // FIXME: minecraft specific
-void LaunchController::login()
-{
+void LaunchController::login() {
     JavaCommon::checkJVMArgs(m_instance->settings()->get("JvmArgs").toString(), m_parentWidget);
 
     // Find an account to use.
-    std::shared_ptr<MojangAccountList> accounts = MMC->accounts();
-    MojangAccountPtr account = accounts->activeAccount();
+    std::shared_ptr<AccountList> accounts = MMC->accounts();
     if (accounts->count() <= 0)
     {
         // Tell the user they need to log in at least one account in order to play.
         auto reply = CustomMessageBox::selectable(
-            m_parentWidget, tr("No Accounts"),
+            m_parentWidget,
+            tr("No Accounts"),
             tr("In order to play Minecraft, you must have at least one Mojang or Minecraft "
                "account logged in to MultiMC."
                "Would you like to open the account manager to add an account now?"),
-            QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)->exec();
+            QMessageBox::Information,
+            QMessageBox::Yes | QMessageBox::No
+        )->exec();
 
         if (reply == QMessageBox::Yes)
         {
@@ -58,11 +59,16 @@ void LaunchController::login()
             MMC->ShowGlobalSettings(m_parentWidget, "accounts");
         }
     }
-    else if (account.get() == nullptr)
+
+    MinecraftAccountPtr account = accounts->activeAccount();
+    if (account.get() == nullptr)
     {
         // If no default account is set, ask the user which one to use.
-        ProfileSelectDialog selectDialog(tr("Which profile would you like to use?"),
-                                         ProfileSelectDialog::GlobalDefaultCheckbox, m_parentWidget);
+        ProfileSelectDialog selectDialog(
+            tr("Which account would you like to use?"),
+            ProfileSelectDialog::GlobalDefaultCheckbox,
+            m_parentWidget
+        );
 
         selectDialog.exec();
 
@@ -70,8 +76,9 @@ void LaunchController::login()
         account = selectDialog.selectedAccount();
 
         // If the user said to use the account as default, do that.
-        if (selectDialog.useAsGlobalDefault() && account.get() != nullptr)
-            accounts->setActiveAccount(account->username());
+        if (selectDialog.useAsGlobalDefault() && account.get() != nullptr) {
+            accounts->setActiveAccount(account->profileId());
+        }
     }
 
     // if no account is selected, we bail
@@ -93,7 +100,13 @@ void LaunchController::login()
     {
         m_session = std::make_shared<AuthSession>();
         m_session->wants_online = m_online;
-        auto task = account->login(m_session, password);
+        std::shared_ptr<AccountTask> task;
+        if(!password.isNull()) {
+            task = account->login(m_session, password);
+        }
+        else {
+            task = account->refresh(m_session);
+        }
         if (task)
         {
             // We'll need to validate the access token to make sure the account
@@ -107,9 +120,9 @@ void LaunchController::login()
             if (!task->wasSuccessful())
             {
                 auto failReasonNew = task->failReason();
-                if(failReasonNew == "Invalid token.")
+                if(failReasonNew == "Invalid token." || failReasonNew == "Invalid Signature")
                 {
-                    account->invalidateClientToken();
+                    // account->invalidateClientToken();
                     failReason = needLoginAgain;
                 }
                 else failReason = failReasonNew;
@@ -117,72 +130,82 @@ void LaunchController::login()
         }
         switch (m_session->status)
         {
-        case AuthSession::Undetermined:
-        {
-            qCritical() << "Received undetermined session status during login. Bye.";
-            tryagain = false;
-            emitFailed(tr("Received undetermined session status during login."));
-            break;
-        }
-        case AuthSession::RequiresPassword:
-        {
-            EditAccountDialog passDialog(failReason, m_parentWidget, EditAccountDialog::PasswordField);
-            auto username = m_session->username;
-            auto chopN = [](QString toChop, int N) -> QString
-            {
-                if(toChop.size() > N)
+            case AuthSession::Undetermined: {
+                qCritical() << "Received undetermined session status during login. Bye.";
+                tryagain = false;
+                emitFailed(tr("Received undetermined session status during login."));
+                return;
+            }
+            case AuthSession::RequiresPassword: {
+                // FIXME: this needs to understand MSA
+                EditAccountDialog passDialog(failReason, m_parentWidget, EditAccountDialog::PasswordField);
+                auto username = m_session->username;
+                auto chopN = [](QString toChop, int N) -> QString
                 {
-                    auto left = toChop.left(N);
-                    left += QString("\u25CF").repeated(toChop.size() - N);
-                    return left;
-                }
-                return toChop;
-            };
+                    if(toChop.size() > N)
+                    {
+                        auto left = toChop.left(N);
+                        left += QString("\u25CF").repeated(toChop.size() - N);
+                        return left;
+                    }
+                    return toChop;
+                };
 
-            if(username.contains('@'))
-            {
-                auto parts = username.split('@');
-                auto mailbox = chopN(parts[0],3);
-                QString domain = chopN(parts[1], 3);
-                username = mailbox + '@' + domain;
-            }
-            passDialog.setUsername(username);
-            if (passDialog.exec() == QDialog::Accepted)
-            {
-                password = passDialog.password();
-            }
-            else
-            {
-                tryagain = false;
-            }
-            break;
-        }
-        case AuthSession::PlayableOffline:
-        {
-            // we ask the user for a player name
-            bool ok = false;
-            QString usedname = m_session->player_name;
-            QString name = QInputDialog::getText(m_parentWidget, tr("Player name"),
-                                                 tr("Choose your offline mode player name."),
-                                                 QLineEdit::Normal, m_session->player_name, &ok);
-            if (!ok)
-            {
-                tryagain = false;
+                if(username.contains('@'))
+                {
+                    auto parts = username.split('@');
+                    auto mailbox = chopN(parts[0],3);
+                    QString domain = chopN(parts[1], 3);
+                    username = mailbox + '@' + domain;
+                }
+                passDialog.setUsername(username);
+                if (passDialog.exec() == QDialog::Accepted)
+                {
+                    password = passDialog.password();
+                }
+                else
+                {
+                    tryagain = false;
+                    emitFailed(tr("Received undetermined session status during login."));
+                }
                 break;
             }
-            if (name.length())
-            {
-                usedname = name;
+            case AuthSession::RequiresOAuth: {
+                // FIXME: add UI for expired / broken MS accounts
+                tryagain = false;
+                emitFailed(tr("Microsoft account has expired and needs to be logged into again."));
+                return;
             }
-            m_session->MakeOffline(usedname);
-            // offline flavored game from here :3
-        }
-        case AuthSession::PlayableOnline:
-        {
-            launchInstance();
-            tryagain = false;
-            return;
-        }
+            case AuthSession::PlayableOffline: {
+                // we ask the user for a player name
+                bool ok = false;
+                QString usedname = m_session->player_name;
+                QString name = QInputDialog::getText(
+                    m_parentWidget,
+                    tr("Player name"),
+                    tr("Choose your offline mode player name."),
+                    QLineEdit::Normal,
+                    m_session->player_name,
+                    &ok
+                );
+                if (!ok)
+                {
+                    tryagain = false;
+                    break;
+                }
+                if (name.length())
+                {
+                    usedname = name;
+                }
+                m_session->MakeOffline(usedname);
+                // offline flavored game from here :3
+            }
+            case AuthSession::PlayableOnline:
+            {
+                launchInstance();
+                tryagain = false;
+                return;
+            }
         }
     }
     emitFailed(tr("Failed to launch."));

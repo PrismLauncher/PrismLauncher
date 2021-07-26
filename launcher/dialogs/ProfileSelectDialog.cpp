@@ -33,9 +33,10 @@ ProfileSelectDialog::ProfileSelectDialog(const QString &message, int flags, QWid
     m_accounts = MMC->accounts();
     auto view = ui->listView;
     //view->setModel(m_accounts.get());
-    //view->hideColumn(MojangAccountList::ActiveColumn);
+    //view->hideColumn(AccountList::ActiveColumn);
     view->setColumnCount(1);
     view->setRootIsDecorated(false);
+    // FIXME: use a real model, not this
     if(QTreeWidgetItem* header = view->headerItem())
     {
         header->setText(0, tr("Name"));
@@ -47,20 +48,19 @@ ProfileSelectDialog::ProfileSelectDialog(const QString &message, int flags, QWid
     QList <QTreeWidgetItem *> items;
     for (int i = 0; i < m_accounts->count(); i++)
     {
-        MojangAccountPtr account = m_accounts->at(i);
-        for (auto profile : account->profiles())
-        {
-            auto profileLabel = profile.name;
-            if(account->isInUse())
-            {
-                profileLabel += tr(" (in use)");
-            }
-            auto item = new QTreeWidgetItem(view);
-            item->setText(0, profileLabel);
-            item->setIcon(0, SkinUtils::getFaceFromCache(profile.id));
-            item->setData(0, MojangAccountList::PointerRole, QVariant::fromValue(account));
-            items.append(item);
+        MinecraftAccountPtr account = m_accounts->at(i);
+        QString profileLabel;
+        if(account->isInUse()) {
+            profileLabel = tr("%1 (in use)").arg(account->profileName());
         }
+        else {
+            profileLabel = account->profileName();
+        }
+        auto item = new QTreeWidgetItem(view);
+        item->setText(0, profileLabel);
+        item->setIcon(0, account->getFace());
+        item->setData(0, AccountList::PointerRole, QVariant::fromValue(account));
+        items.append(item);
     }
     view->addTopLevelItems(items);
 
@@ -84,7 +84,7 @@ ProfileSelectDialog::~ProfileSelectDialog()
     delete ui;
 }
 
-MojangAccountPtr ProfileSelectDialog::selectedAccount() const
+MinecraftAccountPtr ProfileSelectDialog::selectedAccount() const
 {
     return m_selected;
 }
@@ -105,7 +105,7 @@ void ProfileSelectDialog::on_buttonBox_accepted()
     if (selection.size() > 0)
     {
         QModelIndex selected = selection.first();
-        m_selected = selected.data(MojangAccountList::PointerRole).value<MojangAccountPtr>();
+        m_selected = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
     }
     close();
 }

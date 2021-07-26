@@ -19,7 +19,7 @@
 
 #include <memory>
 
-#include "minecraft/auth/MojangAccountList.h"
+#include "minecraft/auth/AccountList.h"
 
 namespace Ui
 {
@@ -59,7 +59,7 @@ public:
      * Gets a pointer to the account that the user selected.
      * This is null if the user clicked cancel or hasn't clicked OK yet.
      */
-    MojangAccountPtr selectedAccount() const;
+    MinecraftAccountPtr selectedAccount() const;
 
     /*!
      * Returns true if the user checked the "use as global default" checkbox.
@@ -80,10 +80,10 @@ slots:
     void on_buttonBox_rejected();
 
 protected:
-    std::shared_ptr<MojangAccountList> m_accounts;
+    std::shared_ptr<AccountList> m_accounts;
 
     //! The account that was selected when the user clicked OK.
-    MojangAccountPtr m_selected;
+    MinecraftAccountPtr m_selected;
 
 private:
     Ui::ProfileSelectDialog *ui;

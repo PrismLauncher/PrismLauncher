@@ -24,7 +24,7 @@ class QFile;
 class HttpMetaCache;
 class SettingsObject;
 class InstanceList;
-class MojangAccountList;
+class AccountList;
 class IconList;
 class QNetworkAccessManager;
 class JavaInstallList;
@@ -111,7 +111,7 @@ public:
         return m_mcedit.get();
     }
 
-    std::shared_ptr<MojangAccountList> accounts() const
+    std::shared_ptr<AccountList> accounts() const
     {
         return m_accounts;
     }
@@ -188,7 +188,7 @@ private:
     FolderInstanceProvider * m_instanceFolder = nullptr;
     std::shared_ptr<IconList> m_icons;
     std::shared_ptr<UpdateChecker> m_updateChecker;
-    std::shared_ptr<MojangAccountList> m_accounts;
+    std::shared_ptr<AccountList> m_accounts;
     std::shared_ptr<JavaInstallList> m_javalist;
     std::shared_ptr<TranslationsModel> m_translations;
     std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;

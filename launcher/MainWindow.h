@@ -22,7 +22,7 @@
 #include <QTimer>
 
 #include "BaseInstance.h"
-#include "minecraft/auth/MojangAccount.h"
+#include "minecraft/auth/MinecraftAccount.h"
 #include "net/NetJob.h"
 #include "updater/GoUpdate.h"
 
@@ -149,8 +149,6 @@ private slots:
 
     void updateToolsMenu();
 
-    void skinJobFinished();
-
     void instanceActivated(QModelIndex);
 
     void instanceChanged(const QModelIndex &current, const QModelIndex &previous);
@@ -214,7 +212,6 @@ private:
     QToolButton *accountMenuButton = nullptr;
     KonamiCode * secretEventFilter = nullptr;
 
-    unique_qobject_ptr<NetJob> skin_download_job;
     unique_qobject_ptr<NewsChecker> m_newsChecker;
     unique_qobject_ptr<NotificationChecker> m_notificationChecker;
 

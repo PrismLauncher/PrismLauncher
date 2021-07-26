@@ -75,13 +75,17 @@ public:
      */
     QString META_URL;
 
+    /**
+     * MSA client ID - registered with Azure / Microsoft, needs correct setup on MS side.
+     */
+    QString MSA_CLIENT_ID;
+
     QString BUG_TRACKER_URL;
     QString DISCORD_URL;
     QString SUBREDDIT_URL;
 
     QString RESOURCE_BASE = "https://resources.download.minecraft.net/";
     QString LIBRARY_BASE = "https://libraries.minecraft.net/";
-    QString SKINS_BASE = "https://crafatar.com/skins/";
     QString AUTH_BASE = "https://authserver.mojang.com/";
     QString MOJANG_STATUS_URL = "https://status.mojang.com/check";
     QString IMGUR_BASE_URL = "https://api.imgur.com/3/";

@@ -14,9 +14,8 @@
 #include <QPixmap>
 #include <QPainter>
 
-#include "context.h"
+#include "AuthContext.h"
 #include "katabasis/Globals.h"
-#include "katabasis/StoreQSettings.h"
 #include "katabasis/Requestor.h"
 #include "BuildConfig.h"
 
@@ -24,117 +23,107 @@ using OAuth2 = Katabasis::OAuth2;
 using Requestor = Katabasis::Requestor;
 using Activity = Katabasis::Activity;
 
-Context::Context(QObject *parent) :
-    QObject(parent)
+AuthContext::AuthContext(AccountData * data, QObject *parent) :
+    AccountTask(data, parent)
 {
     mgr = new QNetworkAccessManager(this);
+}
 
+void AuthContext::beginActivity(Activity activity) {
+    if(isBusy()) {
+        throw 0;
+    }
+    m_activity = activity;
+    changeState(STATE_WORKING, "Initializing");
+    emit activityChanged(m_activity);
+}
+
+void AuthContext::finishActivity() {
+    if(!isBusy()) {
+        throw 0;
+    }
+    m_activity = Katabasis::Activity::Idle;
+    m_stage = MSAStage::Idle;
+    m_data->validity_ = m_data->minecraftProfile.validity;
+    emit activityChanged(m_activity);
+}
+
+void AuthContext::initMSA() {
+    if(m_oauth2) {
+        return;
+    }
     Katabasis::OAuth2::Options opts;
     opts.scope = "XboxLive.signin offline_access";
-    opts.clientIdentifier = BuildConfig.CLIENT_ID;
+    opts.clientIdentifier = BuildConfig.MSA_CLIENT_ID;
     opts.authorizationUrl = "https://login.live.com/oauth20_authorize.srf";
     opts.accessTokenUrl = "https://login.live.com/oauth20_token.srf";
     opts.listenerPorts = {28562, 28563, 28564, 28565, 28566};
 
-    oauth2 = new OAuth2(opts, m_account.msaToken, this, mgr);
+    m_oauth2 = new OAuth2(opts, m_data->msaToken, this, mgr);
 
-    connect(oauth2, &OAuth2::linkingFailed, this, &Context::onLinkingFailed);
-    connect(oauth2, &OAuth2::linkingSucceeded, this, &Context::onLinkingSucceeded);
-    connect(oauth2, &OAuth2::openBrowser, this, &Context::onOpenBrowser);
-    connect(oauth2, &OAuth2::closeBrowser, this, &Context::onCloseBrowser);
-    connect(oauth2, &OAuth2::activityChanged, this, &Context::onOAuthActivityChanged);
+    connect(m_oauth2, &OAuth2::linkingFailed, this, &AuthContext::onOAuthLinkingFailed);
+    connect(m_oauth2, &OAuth2::linkingSucceeded, this, &AuthContext::onOAuthLinkingSucceeded);
+    connect(m_oauth2, &OAuth2::openBrowser, this, &AuthContext::onOpenBrowser);
+    connect(m_oauth2, &OAuth2::closeBrowser, this, &AuthContext::onCloseBrowser);
+    connect(m_oauth2, &OAuth2::activityChanged, this, &AuthContext::onOAuthActivityChanged);
 }
 
-void Context::beginActivity(Activity activity) {
-    if(isBusy()) {
-        throw 0;
+void AuthContext::initMojang() {
+    if(m_yggdrasil) {
+        return;
     }
-    activity_ = activity;
-    emit activityChanged(activity_);
+    m_yggdrasil = new Yggdrasil(m_data, this);
+
+    connect(m_yggdrasil, &Task::failed, this, &AuthContext::onMojangFailed);
+    connect(m_yggdrasil, &Task::succeeded, this, &AuthContext::onMojangSucceeded);
 }
 
-void Context::finishActivity() {
-    if(!isBusy()) {
-        throw 0;
-    }
-    activity_ = Katabasis::Activity::Idle;
-    m_account.validity_ = m_account.minecraftProfile.validity;
-    emit activityChanged(activity_);
+void AuthContext::onMojangSucceeded() {
+    doMinecraftProfile();
 }
 
-QString Context::gameToken() {
-    return m_account.minecraftToken.token;
+
+void AuthContext::onMojangFailed() {
+    finishActivity();
+    m_error = m_yggdrasil->m_error;
+    m_aborted = m_yggdrasil->m_aborted;
+    changeState(m_yggdrasil->accountState(), "Microsoft user authentication failed.");
 }
 
-QString Context::userId() {
-    return m_account.minecraftProfile.id;
-}
-
-QString Context::userName() {
-    return m_account.minecraftProfile.name;
-}
-
-bool Context::silentSignIn() {
-    if(isBusy()) {
-        return false;
-    }
-    beginActivity(Activity::Refreshing);
-    if(!oauth2->refresh()) {
-        finishActivity();
-        return false;
-    }
-
-    requestsDone = 0;
-    xboxProfileSucceeded = false;
-    mcAuthSucceeded = false;
-
-    return true;
-}
-
-bool Context::signIn() {
+/*
+bool AuthContext::signOut() {
     if(isBusy()) {
         return false;
     }
 
-    requestsDone = 0;
-    xboxProfileSucceeded = false;
-    mcAuthSucceeded = false;
+    start();
 
-    beginActivity(Activity::LoggingIn);
-    oauth2->unlink();
-    m_account = AccountData();
-    oauth2->link();
-    return true;
-}
-
-bool Context::signOut() {
-    if(isBusy()) {
-        return false;
-    }
     beginActivity(Activity::LoggingOut);
-    oauth2->unlink();
+    m_oauth2->unlink();
     m_account = AccountData();
     finishActivity();
     return true;
 }
+*/
 
-
-void Context::onOpenBrowser(const QUrl &url) {
+void AuthContext::onOpenBrowser(const QUrl &url) {
     QDesktopServices::openUrl(url);
 }
 
-void Context::onCloseBrowser() {
+void AuthContext::onCloseBrowser() {
 
 }
 
-void Context::onLinkingFailed() {
+void AuthContext::onOAuthLinkingFailed() {
     finishActivity();
+    changeState(STATE_FAILED_HARD, "Microsoft user authentication failed.");
 }
 
-void Context::onLinkingSucceeded() {
+void AuthContext::onOAuthLinkingSucceeded() {
     auto *o2t = qobject_cast<OAuth2 *>(sender());
     if (!o2t->linked()) {
         finishActivity();
+        changeState(STATE_FAILED_HARD, "Microsoft user authentication ended with an impossible state (succeeded, but not succeeded at the same time).");
         return;
     }
     QVariantMap extraTokens = o2t->extraTokens();
@@ -147,11 +136,14 @@ void Context::onLinkingSucceeded() {
     doUserAuth();
 }
 
-void Context::onOAuthActivityChanged(Katabasis::Activity activity) {
+void AuthContext::onOAuthActivityChanged(Katabasis::Activity activity) {
     // respond to activity change here
 }
 
-void Context::doUserAuth() {
+void AuthContext::doUserAuth() {
+    m_stage = MSAStage::UserAuth;
+    changeState(STATE_WORKING, "Starting user authentication");
+
     QString xbox_auth_template = R"XXX(
 {
     "Properties": {
@@ -163,15 +155,15 @@ void Context::doUserAuth() {
     "TokenType": "JWT"
 }
 )XXX";
-    auto xbox_auth_data = xbox_auth_template.arg(m_account.msaToken.token);
+    auto xbox_auth_data = xbox_auth_template.arg(m_data->msaToken.token);
 
     QNetworkRequest request = QNetworkRequest(QUrl("https://user.auth.xboxlive.com/user/authenticate"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    auto *requestor = new Katabasis::Requestor(mgr, oauth2, this);
+    auto *requestor = new Katabasis::Requestor(mgr, m_oauth2, this);
     requestor->setAddAccessTokenInQuery(false);
 
-    connect(requestor, &Requestor::finished, this, &Context::onUserAuthDone);
+    connect(requestor, &Requestor::finished, this, &AuthContext::onUserAuthDone);
     requestor->post(request, xbox_auth_data.toUtf8());
     qDebug() << "First layer of XBox auth ... commencing.";
 }
@@ -181,7 +173,7 @@ bool getDateTime(QJsonValue value, QDateTime & out) {
     if(!value.isString()) {
         return false;
     }
-    out = QDateTime::fromString(value.toString(), Qt::ISODateWithMs);
+    out = QDateTime::fromString(value.toString(), Qt::ISODate);
     return out.isValid();
 }
 
@@ -294,7 +286,7 @@ bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output) {
 
 }
 
-void Context::onUserAuthDone(
+void AuthContext::onUserAuthDone(
     int requestId,
     QNetworkReply::NetworkError error,
     QByteArray replyData,
@@ -303,6 +295,7 @@ void Context::onUserAuthDone(
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
         finishActivity();
+        changeState(STATE_FAILED_HARD, "XBox user authentication failed.");
         return;
     }
 
@@ -310,9 +303,13 @@ void Context::onUserAuthDone(
     if(!parseXTokenResponse(replyData, temp)) {
         qWarning() << "Could not parse user authentication response...";
         finishActivity();
+        changeState(STATE_FAILED_HARD, "XBox user authentication response could not be understood.");
         return;
     }
-    m_account.userToken = temp;
+    m_data->userToken = temp;
+
+    m_stage = MSAStage::XboxAuth;
+    changeState(STATE_WORKING, "Starting XBox authentication");
 
     doSTSAuthMinecraft();
     doSTSAuthGeneric();
@@ -329,7 +326,7 @@ void Context::onUserAuthDone(
             },
         }
 */
-void Context::doSTSAuthMinecraft() {
+void AuthContext::doSTSAuthMinecraft() {
     QString xbox_auth_template = R"XXX(
 {
     "Properties": {
@@ -342,20 +339,20 @@ void Context::doSTSAuthMinecraft() {
     "TokenType": "JWT"
 }
 )XXX";
-    auto xbox_auth_data = xbox_auth_template.arg(m_account.userToken.token);
+    auto xbox_auth_data = xbox_auth_template.arg(m_data->userToken.token);
 
     QNetworkRequest request = QNetworkRequest(QUrl("https://xsts.auth.xboxlive.com/xsts/authorize"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    Requestor *requestor = new Requestor(mgr, oauth2, this);
+    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
     requestor->setAddAccessTokenInQuery(false);
 
-    connect(requestor, &Requestor::finished, this, &Context::onSTSAuthMinecraftDone);
+    connect(requestor, &Requestor::finished, this, &AuthContext::onSTSAuthMinecraftDone);
     requestor->post(request, xbox_auth_data.toUtf8());
     qDebug() << "Second layer of XBox auth ... commencing.";
 }
 
-void Context::onSTSAuthMinecraftDone(
+void AuthContext::onSTSAuthMinecraftDone(
     int requestId,
     QNetworkReply::NetworkError error,
     QByteArray replyData,
@@ -363,29 +360,29 @@ void Context::onSTSAuthMinecraftDone(
 ) {
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
-        finishActivity();
+        m_requestsDone ++;
         return;
     }
 
     Katabasis::Token temp;
     if(!parseXTokenResponse(replyData, temp)) {
         qWarning() << "Could not parse authorization response for access to mojang services...";
-        finishActivity();
+        m_requestsDone ++;
         return;
     }
 
-    if(temp.extra["uhs"] != m_account.userToken.extra["uhs"]) {
+    if(temp.extra["uhs"] != m_data->userToken.extra["uhs"]) {
         qWarning() << "Server has changed user hash in the reply... something is wrong. ABORTING";
         qDebug() << replyData;
-        finishActivity();
+        m_requestsDone ++;
         return;
     }
-    m_account.mojangservicesToken = temp;
+    m_data->mojangservicesToken = temp;
 
     doMinecraftAuth();
 }
 
-void Context::doSTSAuthGeneric() {
+void AuthContext::doSTSAuthGeneric() {
     QString xbox_auth_template = R"XXX(
 {
     "Properties": {
@@ -398,20 +395,20 @@ void Context::doSTSAuthGeneric() {
     "TokenType": "JWT"
 }
 )XXX";
-    auto xbox_auth_data = xbox_auth_template.arg(m_account.userToken.token);
+    auto xbox_auth_data = xbox_auth_template.arg(m_data->userToken.token);
 
     QNetworkRequest request = QNetworkRequest(QUrl("https://xsts.auth.xboxlive.com/xsts/authorize"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    Requestor *requestor = new Requestor(mgr, oauth2, this);
+    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
     requestor->setAddAccessTokenInQuery(false);
 
-    connect(requestor, &Requestor::finished, this, &Context::onSTSAuthGenericDone);
+    connect(requestor, &Requestor::finished, this, &AuthContext::onSTSAuthGenericDone);
     requestor->post(request, xbox_auth_data.toUtf8());
     qDebug() << "Second layer of XBox auth ... commencing.";
 }
 
-void Context::onSTSAuthGenericDone(
+void AuthContext::onSTSAuthGenericDone(
     int requestId,
     QNetworkReply::NetworkError error,
     QByteArray replyData,
@@ -419,44 +416,44 @@ void Context::onSTSAuthGenericDone(
 ) {
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
-        finishActivity();
+        m_requestsDone ++;
         return;
     }
 
     Katabasis::Token temp;
     if(!parseXTokenResponse(replyData, temp)) {
         qWarning() << "Could not parse authorization response for access to xbox API...";
-        finishActivity();
+        m_requestsDone ++;
         return;
     }
 
-    if(temp.extra["uhs"] != m_account.userToken.extra["uhs"]) {
+    if(temp.extra["uhs"] != m_data->userToken.extra["uhs"]) {
         qWarning() << "Server has changed user hash in the reply... something is wrong. ABORTING";
         qDebug() << replyData;
-        finishActivity();
+        m_requestsDone ++;
         return;
     }
-    m_account.xboxApiToken = temp;
+    m_data->xboxApiToken = temp;
 
     doXBoxProfile();
 }
 
 
-void Context::doMinecraftAuth() {
+void AuthContext::doMinecraftAuth() {
     QString mc_auth_template = R"XXX(
 {
     "identityToken": "XBL3.0 x=%1;%2"
 }
 )XXX";
-    auto data = mc_auth_template.arg(m_account.mojangservicesToken.extra["uhs"].toString(), m_account.mojangservicesToken.token);
+    auto data = mc_auth_template.arg(m_data->mojangservicesToken.extra["uhs"].toString(), m_data->mojangservicesToken.token);
 
     QNetworkRequest request = QNetworkRequest(QUrl("https://api.minecraftservices.com/authentication/login_with_xbox"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    Requestor *requestor = new Requestor(mgr, oauth2, this);
+    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
     requestor->setAddAccessTokenInQuery(false);
 
-    connect(requestor, &Requestor::finished, this, &Context::onMinecraftAuthDone);
+    connect(requestor, &Requestor::finished, this, &AuthContext::onMinecraftAuthDone);
     requestor->post(request, data.toUtf8());
     qDebug() << "Getting Minecraft access token...";
 }
@@ -501,33 +498,31 @@ bool parseMojangResponse(QByteArray & data, Katabasis::Token &output) {
 }
 }
 
-void Context::onMinecraftAuthDone(
+void AuthContext::onMinecraftAuthDone(
     int requestId,
     QNetworkReply::NetworkError error,
     QByteArray replyData,
     QList<QNetworkReply::RawHeaderPair> headers
 ) {
-    requestsDone++;
+    m_requestsDone ++;
 
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
         qDebug() << replyData;
-        finishActivity();
         return;
     }
 
-    if(!parseMojangResponse(replyData, m_account.minecraftToken)) {
+    if(!parseMojangResponse(replyData, m_data->yggdrasilToken)) {
         qWarning() << "Could not parse login_with_xbox response...";
         qDebug() << replyData;
-        finishActivity();
         return;
     }
-    mcAuthSucceeded = true;
+    m_mcAuthSucceeded = true;
 
     checkResult();
 }
 
-void Context::doXBoxProfile() {
+void AuthContext::doXBoxProfile() {
     auto url = QUrl("https://profile.xboxlive.com/users/me/profile/settings");
     QUrlQuery q;
     q.addQueryItem(
@@ -544,45 +539,45 @@ void Context::doXBoxProfile() {
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
     request.setRawHeader("x-xbl-contract-version", "3");
-    request.setRawHeader("Authorization", QString("XBL3.0 x=%1;%2").arg(m_account.userToken.extra["uhs"].toString(), m_account.xboxApiToken.token).toUtf8());
-    Requestor *requestor = new Requestor(mgr, oauth2, this);
+    request.setRawHeader("Authorization", QString("XBL3.0 x=%1;%2").arg(m_data->userToken.extra["uhs"].toString(), m_data->xboxApiToken.token).toUtf8());
+    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
     requestor->setAddAccessTokenInQuery(false);
 
-    connect(requestor, &Requestor::finished, this, &Context::onXBoxProfileDone);
+    connect(requestor, &Requestor::finished, this, &AuthContext::onXBoxProfileDone);
     requestor->get(request);
     qDebug() << "Getting Xbox profile...";
 }
 
-void Context::onXBoxProfileDone(
+void AuthContext::onXBoxProfileDone(
     int requestId,
     QNetworkReply::NetworkError error,
     QByteArray replyData,
     QList<QNetworkReply::RawHeaderPair> headers
 ) {
-    requestsDone ++;
+    m_requestsDone ++;
 
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
         qDebug() << replyData;
-        finishActivity();
         return;
     }
 
     qDebug() << "XBox profile: " << replyData;
 
-    xboxProfileSucceeded = true;
+    m_xboxProfileSucceeded = true;
     checkResult();
 }
 
-void Context::checkResult() {
-    if(requestsDone != 2) {
+void AuthContext::checkResult() {
+    if(m_requestsDone != 2) {
         return;
     }
-    if(mcAuthSucceeded && xboxProfileSucceeded) {
+    if(m_mcAuthSucceeded && m_xboxProfileSucceeded) {
         doMinecraftProfile();
     }
     else {
         finishActivity();
+        changeState(STATE_FAILED_HARD, "XBox and/or Mojang authentication steps did not succeed");
     }
 }
 
@@ -666,273 +661,92 @@ bool parseMinecraftProfile(QByteArray & data, MinecraftProfile &output) {
 }
 }
 
-void Context::doMinecraftProfile() {
+void AuthContext::doMinecraftProfile() {
+    m_stage = MSAStage::MinecraftProfile;
+    changeState(STATE_WORKING, "Starting minecraft profile acquisition");
+
     auto url = QUrl("https://api.minecraftservices.com/minecraft/profile");
     QNetworkRequest request = QNetworkRequest(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     // request.setRawHeader("Accept", "application/json");
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_account.minecraftToken.token).toUtf8());
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8());
 
-    Requestor *requestor = new Requestor(mgr, oauth2, this);
+    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
     requestor->setAddAccessTokenInQuery(false);
 
-    connect(requestor, &Requestor::finished, this, &Context::onMinecraftProfileDone);
+    connect(requestor, &Requestor::finished, this, &AuthContext::onMinecraftProfileDone);
     requestor->get(request);
 }
 
-void Context::onMinecraftProfileDone(int, QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers) {
+void AuthContext::onMinecraftProfileDone(int, QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers) {
     qDebug() << data;
     if (error == QNetworkReply::ContentNotFoundError) {
-        m_account.minecraftProfile = MinecraftProfile();
+        m_data->minecraftProfile = MinecraftProfile();
         finishActivity();
+        changeState(STATE_FAILED_HARD, "Account is missing a profile");
         return;
     }
     if (error != QNetworkReply::NoError) {
         finishActivity();
+        changeState(STATE_FAILED_HARD, "Profile acquisition failed");
         return;
     }
-    if(!parseMinecraftProfile(data, m_account.minecraftProfile)) {
-        m_account.minecraftProfile = MinecraftProfile();
+    if(!parseMinecraftProfile(data, m_data->minecraftProfile)) {
+        m_data->minecraftProfile = MinecraftProfile();
         finishActivity();
+        changeState(STATE_FAILED_HARD, "Profile response could not be parsed");
         return;
     }
     doGetSkin();
 }
 
-void Context::doGetSkin() {
-    auto url = QUrl(m_account.minecraftProfile.skin.url);
+void AuthContext::doGetSkin() {
+    m_stage = MSAStage::Skin;
+    changeState(STATE_WORKING, "Starting skin acquisition");
+
+    auto url = QUrl(m_data->minecraftProfile.skin.url);
     QNetworkRequest request = QNetworkRequest(url);
-    Requestor *requestor = new Requestor(mgr, oauth2, this);
+    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
     requestor->setAddAccessTokenInQuery(false);
-    connect(requestor, &Requestor::finished, this, &Context::onSkinDone);
+    connect(requestor, &Requestor::finished, this, &AuthContext::onSkinDone);
     requestor->get(request);
 }
 
-void Context::onSkinDone(int, QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair>) {
+void AuthContext::onSkinDone(int, QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair>) {
     if (error == QNetworkReply::NoError) {
-        m_account.minecraftProfile.skin.data = data;
+        m_data->minecraftProfile.skin.data = data;
     }
+    m_data->validity_ = Katabasis::Validity::Certain;
     finishActivity();
+    changeState(STATE_SUCCEEDED, "Finished whole chain");
 }
 
-namespace {
-void tokenToJSON(QJsonObject &parent, Katabasis::Token t, const char * tokenName) {
-    if(t.validity == Katabasis::Validity::None || !t.persistent) {
-        return;
-    }
-    QJsonObject out;
-    if(t.issueInstant.isValid()) {
-        out["iat"] = QJsonValue(t.issueInstant.toSecsSinceEpoch());
-    }
-
-    if(t.notAfter.isValid()) {
-        out["exp"] = QJsonValue(t.notAfter.toSecsSinceEpoch());
-    }
-
-    if(!t.token.isEmpty()) {
-        out["token"] = QJsonValue(t.token);
-    }
-    if(!t.refresh_token.isEmpty()) {
-        out["refresh_token"] = QJsonValue(t.refresh_token);
-    }
-    if(t.extra.size()) {
-        out["extra"] = QJsonObject::fromVariantMap(t.extra);
-    }
-    if(out.size()) {
-        parent[tokenName] = out;
-    }
-}
-
-Katabasis::Token tokenFromJSON(const QJsonObject &parent, const char * tokenName) {
-    Katabasis::Token out;
-    auto tokenObject = parent.value(tokenName).toObject();
-    if(tokenObject.isEmpty()) {
-        return out;
-    }
-    auto issueInstant = tokenObject.value("iat");
-    if(issueInstant.isDouble()) {
-        out.issueInstant = QDateTime::fromSecsSinceEpoch((int64_t) issueInstant.toDouble());
-    }
-
-    auto notAfter = tokenObject.value("exp");
-    if(notAfter.isDouble()) {
-        out.notAfter = QDateTime::fromSecsSinceEpoch((int64_t) notAfter.toDouble());
-    }
-
-    auto token = tokenObject.value("token");
-    if(token.isString()) {
-        out.token = token.toString();
-        out.validity = Katabasis::Validity::Assumed;
-    }
-
-    auto refresh_token = tokenObject.value("refresh_token");
-    if(refresh_token.isString()) {
-        out.refresh_token = refresh_token.toString();
-    }
-
-    auto extra = tokenObject.value("extra");
-    if(extra.isObject()) {
-        out.extra = extra.toObject().toVariantMap();
-    }
-    return out;
-}
-
-void profileToJSON(QJsonObject &parent, MinecraftProfile p, const char * tokenName) {
-    if(p.id.isEmpty()) {
-        return;
-    }
-    QJsonObject out;
-    out["id"] = QJsonValue(p.id);
-    out["name"] = QJsonValue(p.name);
-    if(p.currentCape != -1) {
-        out["cape"] = p.capes[p.currentCape].id;
-    }
-
+QString AuthContext::getStateMessage() const {
+    switch (m_accountState)
     {
-        QJsonObject skinObj;
-        skinObj["id"] = p.skin.id;
-        skinObj["url"] = p.skin.url;
-        skinObj["variant"] = p.skin.variant;
-        if(p.skin.data.size()) {
-            skinObj["data"] = QString::fromLatin1(p.skin.data.toBase64());
-        }
-        out["skin"] = skinObj;
+        case STATE_WORKING:
+            switch(m_stage) {
+                case MSAStage::Idle: {
+                    QString loginMessage = tr("Logging in as %1 user");
+                    if(m_data->type == AccountType::MSA) {
+                        return loginMessage.arg("Microsoft");
+                    }
+                    else {
+                        return loginMessage.arg("Mojang");
+                    }
+                }
+                case MSAStage::UserAuth:
+                    return tr("Logging in as XBox user");
+                case MSAStage::XboxAuth:
+                    return tr("Logging in with XBox and Mojang services");
+                case MSAStage::MinecraftProfile:
+                    return tr("Getting Minecraft profile");
+                case MSAStage::Skin:
+                    return tr("Getting Minecraft skin");
+                default:
+                    break;
+            }
+        default:
+            return AccountTask::getStateMessage();
     }
-
-    QJsonArray capesArray;
-    for(auto & cape: p.capes) {
-        QJsonObject capeObj;
-        capeObj["id"] = cape.id;
-        capeObj["url"] = cape.url;
-        capeObj["alias"] = cape.alias;
-        if(cape.data.size()) {
-            capeObj["data"] = QString::fromLatin1(cape.data.toBase64());
-        }
-        capesArray.push_back(capeObj);
-    }
-    out["capes"] = capesArray;
-    parent[tokenName] = out;
-}
-
-MinecraftProfile profileFromJSON(const QJsonObject &parent, const char * tokenName) {
-    MinecraftProfile out;
-    auto tokenObject = parent.value(tokenName).toObject();
-    if(tokenObject.isEmpty()) {
-        return out;
-    }
-    {
-        auto idV = tokenObject.value("id");
-        auto nameV = tokenObject.value("name");
-        if(!idV.isString() || !nameV.isString()) {
-            qWarning() << "mandatory profile attributes are missing or of unexpected type";
-            return MinecraftProfile();
-        }
-        out.name = nameV.toString();
-        out.id = idV.toString();
-    }
-
-    {
-        auto skinV = tokenObject.value("skin");
-        if(!skinV.isObject()) {
-            qWarning() << "skin is missing";
-            return MinecraftProfile();
-        }
-        auto skinObj = skinV.toObject();
-        auto idV = skinObj.value("id");
-        auto urlV = skinObj.value("url");
-        auto variantV = skinObj.value("variant");
-        if(!idV.isString() || !urlV.isString() || !variantV.isString()) {
-            qWarning() << "mandatory skin attributes are missing or of unexpected type";
-            return MinecraftProfile();
-        }
-        out.skin.id = idV.toString();
-        out.skin.url = urlV.toString();
-        out.skin.variant = variantV.toString();
-
-        // data for skin is optional
-        auto dataV = skinObj.value("data");
-        if(dataV.isString()) {
-            // TODO: validate base64
-            out.skin.data = QByteArray::fromBase64(dataV.toString().toLatin1());
-        }
-        else if (!dataV.isUndefined()) {
-            qWarning() << "skin data is something unexpected";
-            return MinecraftProfile();
-        }
-    }
-
-    auto capesV = tokenObject.value("capes");
-    if(!capesV.isArray()) {
-        qWarning() << "capes is not an array!";
-        return MinecraftProfile();
-    }
-    auto capesArray = capesV.toArray();
-    for(auto capeV: capesArray) {
-        if(!capeV.isObject()) {
-            qWarning() << "cape is not an object!";
-            return MinecraftProfile();
-        }
-        auto capeObj = capeV.toObject();
-        auto idV = capeObj.value("id");
-        auto urlV = capeObj.value("url");
-        auto aliasV = capeObj.value("alias");
-        if(!idV.isString() || !urlV.isString() || !aliasV.isString()) {
-            qWarning() << "mandatory skin attributes are missing or of unexpected type";
-            return MinecraftProfile();
-        }
-        Cape cape;
-        cape.id = idV.toString();
-        cape.url = urlV.toString();
-        cape.alias = aliasV.toString();
-
-        // data for cape is optional.
-        auto dataV = capeObj.value("data");
-        if(dataV.isString()) {
-            // TODO: validate base64
-            cape.data = QByteArray::fromBase64(dataV.toString().toLatin1());
-        }
-        else if (!dataV.isUndefined()) {
-            qWarning() << "cape data is something unexpected";
-            return MinecraftProfile();
-        }
-        out.capes.push_back(cape);
-    }
-    out.validity = Katabasis::Validity::Assumed;
-    return out;
-}
-
-}
-
-bool Context::resumeFromState(QByteArray data) {
-    QJsonParseError error;
-    auto doc = QJsonDocument::fromJson(data, &error);
-    if(error.error != QJsonParseError::NoError) {
-        qWarning() << "Failed to parse account data as JSON.";
-        return false;
-    }
-    auto docObject = doc.object();
-    m_account.msaToken = tokenFromJSON(docObject, "msa");
-    m_account.userToken = tokenFromJSON(docObject, "utoken");
-    m_account.xboxApiToken = tokenFromJSON(docObject, "xrp-main");
-    m_account.mojangservicesToken = tokenFromJSON(docObject, "xrp-mc");
-    m_account.minecraftToken = tokenFromJSON(docObject, "ygg");
-
-    m_account.minecraftProfile = profileFromJSON(docObject, "profile");
-
-    m_account.validity_ = m_account.minecraftProfile.validity;
-
-    return true;
-}
-
-QByteArray Context::saveState() {
-    QJsonDocument doc;
-    QJsonObject output;
-    tokenToJSON(output, m_account.msaToken, "msa");
-    tokenToJSON(output, m_account.userToken, "utoken");
-    tokenToJSON(output, m_account.xboxApiToken, "xrp-main");
-    tokenToJSON(output, m_account.mojangservicesToken, "xrp-mc");
-    tokenToJSON(output, m_account.minecraftToken, "ygg");
-    profileToJSON(output, m_account.minecraftProfile, "profile");
-    doc.setObject(output);
-    return doc.toJson(QJsonDocument::Indented);
 }

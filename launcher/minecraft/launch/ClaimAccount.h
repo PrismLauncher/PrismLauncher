@@ -16,7 +16,7 @@
 #pragma once
 
 #include <launch/LaunchStep.h>
-#include <minecraft/auth/MojangAccount.h>
+#include <minecraft/auth/MinecraftAccount.h>
 
 class ClaimAccount: public LaunchStep
 {
@@ -33,5 +33,5 @@ public:
     }
 private:
     std::unique_ptr<UseLock> lock;
-    MojangAccountPtr m_account;
+    MinecraftAccountPtr m_account;
 };

@@ -38,7 +38,7 @@
 #include <QUrl>
 
 #include "minecraft/PackProfile.h"
-#include "minecraft/auth/MojangAccountList.h"
+#include "minecraft/auth/AccountList.h"
 #include "minecraft/mod/Mod.h"
 #include "icons/IconList.h"
 #include "Exception.h"

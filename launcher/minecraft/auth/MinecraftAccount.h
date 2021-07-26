@@ -21,17 +21,19 @@
 #include <QJsonObject>
 #include <QPair>
 #include <QMap>
+#include <QPixmap>
 
 #include <memory>
 #include "AuthSession.h"
 #include "Usable.h"
+#include "AccountData.h"
 
 class Task;
-class YggdrasilTask;
-class MojangAccount;
+class AccountTask;
+class MinecraftAccount;
 
-typedef std::shared_ptr<MojangAccount> MojangAccountPtr;
-Q_DECLARE_METATYPE(MojangAccountPtr)
+typedef std::shared_ptr<MinecraftAccount> MinecraftAccountPtr;
+Q_DECLARE_METATYPE(MinecraftAccountPtr)
 
 /**
  * A profile within someone's Mojang account.
@@ -59,74 +61,89 @@ enum AccountStatus
  * Said information may include things such as that account's username, client token, and access
  * token if the user chose to stay logged in.
  */
-class MojangAccount :
+class MinecraftAccount :
     public QObject,
     public Usable,
-    public std::enable_shared_from_this<MojangAccount>
+    public std::enable_shared_from_this<MinecraftAccount>
 {
     Q_OBJECT
 public: /* construction */
     //! Do not copy accounts. ever.
-    explicit MojangAccount(const MojangAccount &other, QObject *parent) = delete;
+    explicit MinecraftAccount(const MinecraftAccount &other, QObject *parent) = delete;
 
     //! Default constructor
-    explicit MojangAccount(QObject *parent = 0) : QObject(parent) {};
+    explicit MinecraftAccount(QObject *parent = 0) : QObject(parent) {};
 
-    //! Creates an empty account for the specified user name.
-    static MojangAccountPtr createFromUsername(const QString &username);
+    static MinecraftAccountPtr createFromUsername(const QString &username);
 
-    //! Loads a MojangAccount from the given JSON object.
-    static MojangAccountPtr loadFromJson(const QJsonObject &json);
+    static MinecraftAccountPtr createBlankMSA();
 
-    //! Saves a MojangAccount to a JSON object and returns it.
+    static MinecraftAccountPtr loadFromJsonV2(const QJsonObject &json);
+    static MinecraftAccountPtr loadFromJsonV3(const QJsonObject &json);
+
+    //! Saves a MinecraftAccount to a JSON object and returns it.
     QJsonObject saveToJson() const;
 
 public: /* manipulation */
-        /**
-     * Sets the currently selected profile to the profile with the given ID string.
-     * If profileId is not in the list of available profiles, the function will simply return
-     * false.
-     */
-    bool setCurrentProfile(const QString &profileId);
 
     /**
      * Attempt to login. Empty password means we use the token.
      * If the attempt fails because we already are performing some task, it returns false.
      */
-    std::shared_ptr<YggdrasilTask> login(AuthSessionPtr session, QString password = QString());
-    void invalidateClientToken();
+    std::shared_ptr<AccountTask> login(AuthSessionPtr session, QString password = QString());
+
+    std::shared_ptr<AccountTask> loginMSA(AuthSessionPtr session);
+
+    std::shared_ptr<AccountTask> refresh(AuthSessionPtr session);
 
 public: /* queries */
-    const QString &username() const
-    {
-        return m_username;
+    QString accountDisplayString() const {
+        return data.accountDisplayString();
     }
 
-    const QString &clientToken() const
-    {
-        return m_clientToken;
+    QString mojangUserName() const {
+        return data.userName();
     }
 
-    const QString &accessToken() const
-    {
-        return m_accessToken;
+    QString accessToken() const {
+        return data.accessToken();
     }
 
-    const QList<AccountProfile> &profiles() const
-    {
-        return m_profiles;
+    QString profileId() const {
+        return data.profileId();
     }
 
-    const User &user()
-    {
-        return m_user;
+    QString profileName() const {
+        return data.profileName();
     }
 
-    //! Returns the currently selected profile (if none, returns nullptr)
-    const AccountProfile *currentProfile() const;
+    QString typeString() const {
+        switch(data.type) {
+            case AccountType::Mojang: {
+                if(data.legacy) {
+                    return "legacy";
+                }
+                return "mojang";
+            }
+            break;
+            case AccountType::MSA: {
+                return "msa";
+            }
+            break;
+            default: {
+                return "unknown";
+            }
+        }
+    }
+
+    QPixmap getFace() const;
 
     //! Returns whether the account is NotVerified, Verified or Online
     AccountStatus accountStatus() const;
+
+    AccountData * accountData() {
+        return &data;
+    }
 
 signals:
     /**
@@ -137,27 +154,10 @@ signals:
     // TODO: better signalling for the various possible state changes - especially errors
 
 protected: /* variables */
-    QString m_username;
-
-    // Used to identify the client - the user can have multiple clients for the same account
-    // Think: different launchers, all connecting to the same account/profile
-    QString m_clientToken;
-
-    // Blank if not logged in.
-    QString m_accessToken;
-
-    // Index of the selected profile within the list of available
-    // profiles. -1 if nothing is selected.
-    int m_currentProfile = -1;
-
-    // List of available profiles.
-    QList<AccountProfile> m_profiles;
-
-    // the user structure, whatever it is.
-    User m_user;
+    AccountData data;
 
     // current task we are executing here
-    std::shared_ptr<YggdrasilTask> m_currentTask;
+    std::shared_ptr<AccountTask> m_currentTask;
 
 protected: /* methods */
 
@@ -171,10 +171,4 @@ slots:
 
 private:
     void fillSession(AuthSessionPtr session);
-
-public:
-    friend class YggdrasilTask;
-    friend class AuthenticateTask;
-    friend class ValidateTask;
-    friend class RefreshTask;
 };
