@@ -35,7 +35,7 @@ if [ "x$DEPS_LIST" = "x" ]; then
     chmod +x "${MMC_DIR}/bin/MultiMC"
 
     # Run MultiMC
-    "${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" "$@"
+    exec -a "${MMC_DIR}/MultiMC" "${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" "$@"
 
     # Run MultiMC in valgrind
     # valgrind --log-file="valgrind.log" --leak-check=full --track-origins=yes "${MMC_DIR}/bin/MultiMC" -d "${MMC_DIR}" "$@"
@@ -45,7 +45,7 @@ if [ "x$DEPS_LIST" = "x" ]; then
     # use callgrind_control -i on/off to profile actions
 
     # Exit with MultiMC's exit code.
-    exit $?
+    # exit $?
 else
     # apt
     if which apt-file &>/dev/null; then
