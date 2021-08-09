@@ -265,6 +265,12 @@ QList<QString> JavaUtils::FindJavaPaths()
     QList<JavaInstallPtr> ADOPTOPENJDK64s = this->FindJavaFromRegistryKey(
         KEY_WOW64_64KEY, "SOFTWARE\\AdoptOpenJDK\\JDK", "Path", "\\hotspot\\MSI");
 
+    // Adoptium (Eclipse)
+    QList<JavaInstallPtr> ECLIPSEJDK32s = this->FindJavaFromRegistryKey(
+        KEY_WOW64_32KEY, "SOFTWARE\\Eclipse Foundation\\JDK", "Path", "\\hotspot\\MSI");
+    QList<JavaInstallPtr> ECLIPSEJDK64s = this->FindJavaFromRegistryKey(
+        KEY_WOW64_64KEY, "SOFTWARE\\Eclipse Foundation\\JDK", "Path", "\\hotspot\\MSI");
+
     // Microsoft
     QList<JavaInstallPtr> MICROSOFTJDK64s = this->FindJavaFromRegistryKey(
         KEY_WOW64_64KEY, "SOFTWARE\\Microsoft\\JDK", "Path", "\\hotspot\\MSI");
@@ -291,6 +297,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     java_candidates.append(JDK64s);
     java_candidates.append(NEWJDK64s);
     java_candidates.append(ADOPTOPENJDK64s);
+    java_candidates.append(ECLIPSEJDK64s);
     java_candidates.append(MICROSOFTJDK64s);
     java_candidates.append(ZULU64s);
     java_candidates.append(LIBERICA64s);
@@ -304,6 +311,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     java_candidates.append(JDK32s);
     java_candidates.append(NEWJDK32s);
     java_candidates.append(ADOPTOPENJDK32s);
+    java_candidates.append(ECLIPSEJDK32s);
     java_candidates.append(ZULU32s);
     java_candidates.append(LIBERICA32s);
     
