@@ -15,7 +15,7 @@ void SkinUploadDialog::on_buttonBox_rejected()
 void SkinUploadDialog::on_buttonBox_accepted()
 {
     AuthSessionPtr session = std::make_shared<AuthSession>();
-    auto login = m_acct->login(session);
+    auto login = m_acct->refresh(session);
     ProgressDialog prog(this);
     if (prog.execWithTask((Task*)login.get()) != QDialog::Accepted)
     {
