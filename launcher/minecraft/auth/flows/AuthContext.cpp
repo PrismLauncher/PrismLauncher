@@ -87,7 +87,7 @@ void AuthContext::onMojangFailed() {
     finishActivity();
     m_error = m_yggdrasil->m_error;
     m_aborted = m_yggdrasil->m_aborted;
-    changeState(m_yggdrasil->accountState(), "Microsoft user authentication failed.");
+    changeState(m_yggdrasil->accountState(), tr("Mojang user authentication failed."));
 }
 
 /*
@@ -116,14 +116,14 @@ void AuthContext::onCloseBrowser() {
 
 void AuthContext::onOAuthLinkingFailed() {
     finishActivity();
-    changeState(STATE_FAILED_HARD, "Microsoft user authentication failed.");
+    changeState(STATE_FAILED_HARD, tr("Microsoft user authentication failed."));
 }
 
 void AuthContext::onOAuthLinkingSucceeded() {
     auto *o2t = qobject_cast<OAuth2 *>(sender());
     if (!o2t->linked()) {
         finishActivity();
-        changeState(STATE_FAILED_HARD, "Microsoft user authentication ended with an impossible state (succeeded, but not succeeded at the same time).");
+        changeState(STATE_FAILED_HARD, tr("Microsoft user authentication ended with an impossible state (succeeded, but not succeeded at the same time)."));
         return;
     }
     QVariantMap extraTokens = o2t->extraTokens();
@@ -142,7 +142,7 @@ void AuthContext::onOAuthActivityChanged(Katabasis::Activity activity) {
 
 void AuthContext::doUserAuth() {
     m_stage = MSAStage::UserAuth;
-    changeState(STATE_WORKING, "Starting user authentication");
+    changeState(STATE_WORKING, tr("Starting user authentication"));
 
     QString xbox_auth_template = R"XXX(
 {
@@ -295,7 +295,7 @@ void AuthContext::onUserAuthDone(
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
         finishActivity();
-        changeState(STATE_FAILED_HARD, "XBox user authentication failed.");
+        changeState(STATE_FAILED_HARD, tr("XBox user authentication failed."));
         return;
     }
 
@@ -303,13 +303,13 @@ void AuthContext::onUserAuthDone(
     if(!parseXTokenResponse(replyData, temp)) {
         qWarning() << "Could not parse user authentication response...";
         finishActivity();
-        changeState(STATE_FAILED_HARD, "XBox user authentication response could not be understood.");
+        changeState(STATE_FAILED_HARD, tr("XBox user authentication response could not be understood."));
         return;
     }
     m_data->userToken = temp;
 
     m_stage = MSAStage::XboxAuth;
-    changeState(STATE_WORKING, "Starting XBox authentication");
+    changeState(STATE_WORKING, tr("Starting XBox authentication"));
 
     doSTSAuthMinecraft();
     doSTSAuthGeneric();
@@ -577,7 +577,7 @@ void AuthContext::checkResult() {
     }
     else {
         finishActivity();
-        changeState(STATE_FAILED_HARD, "XBox and/or Mojang authentication steps did not succeed");
+        changeState(STATE_FAILED_HARD, tr("XBox and/or Mojang authentication steps did not succeed"));
     }
 }
 
@@ -663,7 +663,7 @@ bool parseMinecraftProfile(QByteArray & data, MinecraftProfile &output) {
 
 void AuthContext::doMinecraftProfile() {
     m_stage = MSAStage::MinecraftProfile;
-    changeState(STATE_WORKING, "Starting minecraft profile acquisition");
+    changeState(STATE_WORKING, tr("Starting minecraft profile acquisition"));
 
     auto url = QUrl("https://api.minecraftservices.com/minecraft/profile");
     QNetworkRequest request = QNetworkRequest(url);
@@ -683,18 +683,18 @@ void AuthContext::onMinecraftProfileDone(int, QNetworkReply::NetworkError error,
     if (error == QNetworkReply::ContentNotFoundError) {
         m_data->minecraftProfile = MinecraftProfile();
         finishActivity();
-        changeState(STATE_FAILED_HARD, "Account is missing a profile");
+        changeState(STATE_FAILED_HARD, tr("Account is missing a profile"));
         return;
     }
     if (error != QNetworkReply::NoError) {
         finishActivity();
-        changeState(STATE_FAILED_HARD, "Profile acquisition failed");
+        changeState(STATE_FAILED_HARD, tr("Profile acquisition failed"));
         return;
     }
     if(!parseMinecraftProfile(data, m_data->minecraftProfile)) {
         m_data->minecraftProfile = MinecraftProfile();
         finishActivity();
-        changeState(STATE_FAILED_HARD, "Profile response could not be parsed");
+        changeState(STATE_FAILED_HARD, tr("Profile response could not be parsed"));
         return;
     }
     doGetSkin();
@@ -702,7 +702,7 @@ void AuthContext::onMinecraftProfileDone(int, QNetworkReply::NetworkError error,
 
 void AuthContext::doGetSkin() {
     m_stage = MSAStage::Skin;
-    changeState(STATE_WORKING, "Starting skin acquisition");
+    changeState(STATE_WORKING, tr("Fetching player skin"));
 
     auto url = QUrl(m_data->minecraftProfile.skin.url);
     QNetworkRequest request = QNetworkRequest(url);
@@ -718,7 +718,7 @@ void AuthContext::onSkinDone(int, QNetworkReply::NetworkError error, QByteArray 
     }
     m_data->validity_ = Katabasis::Validity::Certain;
     finishActivity();
-    changeState(STATE_SUCCEEDED, "Finished whole chain");
+    changeState(STATE_SUCCEEDED, tr("Finished all authentication steps"));
 }
 
 QString AuthContext::getStateMessage() const {
