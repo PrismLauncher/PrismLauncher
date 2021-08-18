@@ -40,6 +40,7 @@ int Requestor::get(const QNetworkRequest &req, int timeout/* = 60*1000*/) {
     timedReplies_.add(new Reply(reply_, timeout));
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
     return id_;
 }
 
@@ -53,6 +54,7 @@ int Requestor::post(const QNetworkRequest &req, const QByteArray &data, int time
     timedReplies_.add(new Reply(reply_, timeout));
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
     connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
     return id_;
 }
@@ -69,6 +71,7 @@ int Requestor::post(const QNetworkRequest & req, QHttpMultiPart* data, int timeo
     timedReplies_.add(new Reply(reply_, timeout));
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
     connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
     return id_;
 }
@@ -83,6 +86,7 @@ int Requestor::put(const QNetworkRequest &req, const QByteArray &data, int timeo
     timedReplies_.add(new Reply(reply_, timeout));
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
     connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
     return id_;
 }
@@ -99,6 +103,7 @@ int Requestor::put(const QNetworkRequest & req, QHttpMultiPart* data, int timeou
     timedReplies_.add(new Reply(reply_, timeout));
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
     connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
     return id_;
 }
@@ -118,6 +123,7 @@ int Requestor::customRequest(const QNetworkRequest &req, const QByteArray &verb,
     timedReplies_.add(new Reply(reply_));
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
     connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
     return id_;
 }
@@ -131,6 +137,7 @@ int Requestor::head(const QNetworkRequest &req, int timeout/* = 60*1000*/)
     timedReplies_.add(new Reply(reply_, timeout));
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
     return id_;
 }
 
@@ -178,6 +185,16 @@ void Requestor::onRequestError(QNetworkReply::NetworkError error) {
     }
     error_ = error;
     QTimer::singleShot(10, this, SLOT(finish()));
+}
+
+void Requestor::onSslErrors(QList<QSslError> errors) {
+    int i = 1;
+    for (auto error : errors) {
+        qCritical() << "LOGIN SSL Error #" << i << " : " << error.errorString();
+        auto cert = error.certificate();
+        qCritical() << "Certificate in question:\n" << cert.toText();
+        i++;
+    }
 }
 
 void Requestor::onUploadProgress(qint64 uploaded, qint64 total) {

@@ -80,6 +80,9 @@ protected slots:
     /// Handle request error.
     void onRequestError(QNetworkReply::NetworkError error);
 
+    /// Handle ssl errors.
+    void onSslErrors(QList<QSslError> errors);
+
     /// Re-try request (after successful token refresh).
     void retry();
 
