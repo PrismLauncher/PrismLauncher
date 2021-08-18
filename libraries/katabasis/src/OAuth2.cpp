@@ -516,7 +516,9 @@ QString OAuth2::refreshToken() {
     return token_.refresh_token;
 }
 void OAuth2::setRefreshToken(const QString &v) {
+#ifndef NDEBUG
     qDebug() << "OAuth2::setRefreshToken" << v << "...";
+#endif
     token_.refresh_token = v;
 }
 
@@ -573,7 +575,7 @@ void OAuth2::onRefreshFinished() {
         setLinked(true);
         emit linkingSucceeded();
         emit refreshFinished(QNetworkReply::NoError);
-        qDebug() << " New token expires in" << expires() << "seconds";
+        qDebug() << "New token expires in" << expires() << "seconds";
     } else {
         qDebug() << "OAuth2::onRefreshFinished: Error" << (int)refreshReply->error() << refreshReply->errorString();
     }

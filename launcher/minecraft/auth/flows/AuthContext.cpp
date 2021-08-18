@@ -127,12 +127,14 @@ void AuthContext::onOAuthLinkingSucceeded() {
         return;
     }
     QVariantMap extraTokens = o2t->extraTokens();
+#ifndef NDEBUG
     if (!extraTokens.isEmpty()) {
         qDebug() << "Extra tokens in response:";
         foreach (QString key, extraTokens.keys()) {
             qDebug() << "\t" << key << ":" << extraTokens.value(key);
         }
     }
+#endif
     doUserAuth();
 }
 
@@ -219,35 +221,34 @@ bool getNumber(QJsonValue value, double & out) {
 // 2148916238 = child account not linked to a family
 */
 
-bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output) {
+bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output, const char * name) {
+    qInfo() << "Parsing" << name <<":";
+#ifndef NDEBUG
+    qDebug() << data;
+#endif
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if(jsonError.error) {
         qWarning() << "Failed to parse response from user.auth.xboxlive.com as JSON: " << jsonError.errorString();
-        qDebug() << data;
         return false;
     }
 
     auto obj = doc.object();
     if(!getDateTime(obj.value("IssueInstant"), output.issueInstant)) {
         qWarning() << "User IssueInstant is not a timestamp";
-        qDebug() << data;
         return false;
     }
     if(!getDateTime(obj.value("NotAfter"), output.notAfter)) {
         qWarning() << "User NotAfter is not a timestamp";
-        qDebug() << data;
         return false;
     }
     if(!getString(obj.value("Token"), output.token)) {
         qWarning() << "User Token is not a timestamp";
-        qDebug() << data;
         return false;
     }
     auto arrayVal = obj.value("DisplayClaims").toObject().value("xui");
     if(!arrayVal.isArray()) {
         qWarning() << "Missing xui claims array";
-        qDebug() << data;
         return false;
     }
     bool foundUHS = false;
@@ -266,7 +267,6 @@ bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output) {
             QString claim;
             if(!getString(obj.value(iter.key()), claim)) {
                 qWarning() << "display claim " << iter.key() << " is not a string...";
-                qDebug() << data;
                 return false;
             }
             output.extra[iter.key()] = claim;
@@ -276,11 +276,10 @@ bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output) {
     }
     if(!foundUHS) {
         qWarning() << "Missing uhs";
-        qDebug() << data;
         return false;
     }
     output.validity = Katabasis::Validity::Certain;
-    qDebug() << data;
+    qInfo() << name << "is valid.";
     return true;
 }
 
@@ -300,7 +299,7 @@ void AuthContext::onUserAuthDone(
     }
 
     Katabasis::Token temp;
-    if(!parseXTokenResponse(replyData, temp)) {
+    if(!parseXTokenResponse(replyData, temp, "UToken")) {
         qWarning() << "Could not parse user authentication response...";
         finishActivity();
         changeState(STATE_FAILED_HARD, tr("XBox user authentication response could not be understood."));
@@ -349,7 +348,7 @@ void AuthContext::doSTSAuthMinecraft() {
 
     connect(requestor, &Requestor::finished, this, &AuthContext::onSTSAuthMinecraftDone);
     requestor->post(request, xbox_auth_data.toUtf8());
-    qDebug() << "Second layer of XBox auth ... commencing.";
+    qDebug() << "Getting Minecraft services STS token...";
 }
 
 void AuthContext::onSTSAuthMinecraftDone(
@@ -365,7 +364,7 @@ void AuthContext::onSTSAuthMinecraftDone(
     }
 
     Katabasis::Token temp;
-    if(!parseXTokenResponse(replyData, temp)) {
+    if(!parseXTokenResponse(replyData, temp, "STSAuthMinecraft")) {
         qWarning() << "Could not parse authorization response for access to mojang services...";
         m_requestsDone ++;
         return;
@@ -405,7 +404,7 @@ void AuthContext::doSTSAuthGeneric() {
 
     connect(requestor, &Requestor::finished, this, &AuthContext::onSTSAuthGenericDone);
     requestor->post(request, xbox_auth_data.toUtf8());
-    qDebug() << "Second layer of XBox auth ... commencing.";
+    qDebug() << "Getting generic STS token...";
 }
 
 void AuthContext::onSTSAuthGenericDone(
@@ -421,7 +420,7 @@ void AuthContext::onSTSAuthGenericDone(
     }
 
     Katabasis::Token temp;
-    if(!parseXTokenResponse(replyData, temp)) {
+    if(!parseXTokenResponse(replyData, temp, "STSAuthGaneric")) {
         qWarning() << "Could not parse authorization response for access to xbox API...";
         m_requestsDone ++;
         return;
@@ -461,10 +460,13 @@ void AuthContext::doMinecraftAuth() {
 namespace {
 bool parseMojangResponse(QByteArray & data, Katabasis::Token &output) {
     QJsonParseError jsonError;
+    qDebug() << "Parsing Mojang response...";
+#ifndef NDEBUG
+    qDebug() << data;
+#endif
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if(jsonError.error) {
-        qWarning() << "Failed to parse response from user.auth.xboxlive.com as JSON: " << jsonError.errorString();
-        qDebug() << data;
+        qWarning() << "Failed to parse response from api.minecraftservices.com/authentication/login_with_xbox as JSON: " << jsonError.errorString();
         return false;
     }
 
@@ -472,7 +474,6 @@ bool parseMojangResponse(QByteArray & data, Katabasis::Token &output) {
     double expires_in = 0;
     if(!getNumber(obj.value("expires_in"), expires_in)) {
         qWarning() << "expires_in is not a valid number";
-        qDebug() << data;
         return false;
     }
     auto currentTime = QDateTime::currentDateTimeUtc();
@@ -482,18 +483,16 @@ bool parseMojangResponse(QByteArray & data, Katabasis::Token &output) {
     QString username;
     if(!getString(obj.value("username"), username)) {
         qWarning() << "username is not valid";
-        qDebug() << data;
         return false;
     }
 
     // TODO: it's a JWT... validate it?
     if(!getString(obj.value("access_token"), output.token)) {
         qWarning() << "access_token is not valid";
-        qDebug() << data;
         return false;
     }
     output.validity = Katabasis::Validity::Certain;
-    qDebug() << data;
+    qDebug() << "Mojang response is valid.";
     return true;
 }
 }
@@ -508,13 +507,17 @@ void AuthContext::onMinecraftAuthDone(
 
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
+#ifndef NDEBUG
         qDebug() << replyData;
+#endif
         return;
     }
 
     if(!parseMojangResponse(replyData, m_data->yggdrasilToken)) {
         qWarning() << "Could not parse login_with_xbox response...";
+#ifndef NDEBUG
         qDebug() << replyData;
+#endif
         return;
     }
     m_mcAuthSucceeded = true;
@@ -558,11 +561,15 @@ void AuthContext::onXBoxProfileDone(
 
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
+#ifndef NDEBUG
         qDebug() << replyData;
+#endif
         return;
     }
 
+#ifndef NDEBUG
     qDebug() << "XBox profile: " << replyData;
+#endif
 
     m_xboxProfileSucceeded = true;
     checkResult();
@@ -583,24 +590,26 @@ void AuthContext::checkResult() {
 
 namespace {
 bool parseMinecraftProfile(QByteArray & data, MinecraftProfile &output) {
+    qDebug() << "Parsing Minecraft profile...";
+#ifndef NDEBUG
+    qDebug() << data;
+#endif
+
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if(jsonError.error) {
         qWarning() << "Failed to parse response from user.auth.xboxlive.com as JSON: " << jsonError.errorString();
-        qDebug() << data;
         return false;
     }
 
     auto obj = doc.object();
     if(!getString(obj.value("id"), output.id)) {
-        qWarning() << "minecraft profile id is not a string";
-        qDebug() << data;
+        qWarning() << "Minecraft profile id is not a string";
         return false;
     }
 
     if(!getString(obj.value("name"), output.name)) {
-        qWarning() << "minecraft profile name is not a string";
-        qDebug() << data;
+        qWarning() << "Minecraft profile name is not a string";
         return false;
     }
 
