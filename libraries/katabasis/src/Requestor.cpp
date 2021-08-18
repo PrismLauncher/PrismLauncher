@@ -174,6 +174,7 @@ void Requestor::onRequestError(QNetworkReply::NetworkError error) {
     if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
         return;
     }
+    qWarning() << "O2Requestor::onRequestError: Error string: " << reply_->errorString();
     int httpStatus = reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     qWarning() << "O2Requestor::onRequestError: HTTP status" << httpStatus << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
     if ((status_ == Requesting) && (httpStatus == 401)) {
