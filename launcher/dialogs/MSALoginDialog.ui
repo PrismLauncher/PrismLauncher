@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>421</width>
-    <height>114</height>
+    <width>491</width>
+    <height>143</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,10 +23,12 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string notr="true">Message label placeholder.</string>
+      <string notr="true">Message label placeholder.
+
+aaaaa</string>
      </property>
      <property name="textFormat">
-      <enum>Qt::RichText</enum>
+      <enum>Qt::MarkdownText</enum>
      </property>
      <property name="textInteractionFlags">
       <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>

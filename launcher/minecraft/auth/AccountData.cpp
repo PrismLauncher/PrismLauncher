@@ -78,8 +78,8 @@ void profileToJSONV3(QJsonObject &parent, MinecraftProfile p, const char * token
     QJsonObject out;
     out["id"] = QJsonValue(p.id);
     out["name"] = QJsonValue(p.name);
-    if(p.currentCape != -1) {
-        out["cape"] = p.capes[p.currentCape].id;
+    if(!p.currentCape.isEmpty()) {
+        out["cape"] = p.currentCape;
     }
 
     {
@@ -155,41 +155,53 @@ MinecraftProfile profileFromJSONV3(const QJsonObject &parent, const char * token
         }
     }
 
-    auto capesV = tokenObject.value("capes");
-    if(!capesV.isArray()) {
-        qWarning() << "capes is not an array!";
-        return MinecraftProfile();
-    }
-    auto capesArray = capesV.toArray();
-    for(auto capeV: capesArray) {
-        if(!capeV.isObject()) {
-            qWarning() << "cape is not an object!";
+    {
+        auto capesV = tokenObject.value("capes");
+        if(!capesV.isArray()) {
+            qWarning() << "capes is not an array!";
             return MinecraftProfile();
         }
-        auto capeObj = capeV.toObject();
-        auto idV = capeObj.value("id");
-        auto urlV = capeObj.value("url");
-        auto aliasV = capeObj.value("alias");
-        if(!idV.isString() || !urlV.isString() || !aliasV.isString()) {
-            qWarning() << "mandatory skin attributes are missing or of unexpected type";
-            return MinecraftProfile();
-        }
-        Cape cape;
-        cape.id = idV.toString();
-        cape.url = urlV.toString();
-        cape.alias = aliasV.toString();
+        auto capesArray = capesV.toArray();
+        for(auto capeV: capesArray) {
+            if(!capeV.isObject()) {
+                qWarning() << "cape is not an object!";
+                return MinecraftProfile();
+            }
+            auto capeObj = capeV.toObject();
+            auto idV = capeObj.value("id");
+            auto urlV = capeObj.value("url");
+            auto aliasV = capeObj.value("alias");
+            if(!idV.isString() || !urlV.isString() || !aliasV.isString()) {
+                qWarning() << "mandatory skin attributes are missing or of unexpected type";
+                return MinecraftProfile();
+            }
+            Cape cape;
+            cape.id = idV.toString();
+            cape.url = urlV.toString();
+            cape.alias = aliasV.toString();
 
-        // data for cape is optional.
-        auto dataV = capeObj.value("data");
-        if(dataV.isString()) {
-            // TODO: validate base64
-            cape.data = QByteArray::fromBase64(dataV.toString().toLatin1());
+            // data for cape is optional.
+            auto dataV = capeObj.value("data");
+            if(dataV.isString()) {
+                // TODO: validate base64
+                cape.data = QByteArray::fromBase64(dataV.toString().toLatin1());
+            }
+            else if (!dataV.isUndefined()) {
+                qWarning() << "cape data is something unexpected";
+                return MinecraftProfile();
+            }
+            out.capes[cape.id] = cape;
         }
-        else if (!dataV.isUndefined()) {
-            qWarning() << "cape data is something unexpected";
-            return MinecraftProfile();
+    }
+    // current cape
+    {
+        auto capeV = tokenObject.value("cape");
+        if(capeV.isString()) {
+            auto currentCape = capeV.toString();
+            if(out.capes.contains(currentCape)) {
+                out.currentCape = currentCape;
+            }
         }
-        out.capes.push_back(cape);
     }
     out.validity = Katabasis::Validity::Assumed;
     return out;

@@ -73,7 +73,17 @@ void LoginDialog::on_passTextBox_textEdited(const QString &newText)
 void LoginDialog::onTaskFailed(const QString &reason)
 {
     // Set message
-    ui->label->setText("<span style='color:red'>" + reason + "</span>");
+    auto lines = reason.split('\n');
+    QString processed;
+    for(auto line: lines) {
+        if(line.size()) {
+            processed += "<font color='red'>" + line + "</font>\n";
+        }
+        else {
+            processed += '\n';
+        }
+    }
+    ui->label->setText(processed);
 
     // Re-enable user-interaction
     setUserInputsEnabled(true);

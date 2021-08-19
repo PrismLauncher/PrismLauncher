@@ -25,8 +25,8 @@ struct MinecraftProfile {
     QString id;
     QString name;
     Skin skin;
-    int currentCape = -1;
-    QVector<Cape> capes;
+    QString currentCape;
+    QMap<QString, Cape> capes;
     Katabasis::Validity validity = Katabasis::Validity::None;
 };
 

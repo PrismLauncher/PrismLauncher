@@ -329,6 +329,8 @@ set(MINECRAFT_SOURCES
     minecraft/AssetsUtils.cpp
 
     # Minecraft services
+    minecraft/services/CapeChange.cpp
+    minecraft/services/CapeChange.h
     minecraft/services/SkinUpload.cpp
     minecraft/services/SkinUpload.h
     minecraft/services/SkinDelete.cpp

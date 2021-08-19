@@ -576,7 +576,9 @@ void AuthContext::onXBoxProfileDone(
 }
 
 void AuthContext::checkResult() {
+    qDebug() << "AuthContext::checkResult called";
     if(m_requestsDone != 2) {
+        qDebug() << "Number of ready results:" << m_requestsDone;
         return;
     }
     if(m_mcAuthSucceeded && m_xboxProfileSucceeded) {
@@ -638,10 +640,9 @@ bool parseMinecraftProfile(QByteArray & data, MinecraftProfile &output) {
         break;
     }
     auto capesArray = obj.value("capes").toArray();
-    int i = -1;
-    int currentCape = -1;
+
+    QString currentCape;
     for(auto cape: capesArray) {
-        i++;
         auto capeObj = cape.toObject();
         Cape capeOut;
         if(!getString(capeObj.value("id"), capeOut.id)) {
@@ -652,7 +653,7 @@ bool parseMinecraftProfile(QByteArray & data, MinecraftProfile &output) {
             continue;
         }
         if(state == "ACTIVE") {
-            currentCape = i;
+            currentCape = capeOut.id;
         }
         if(!getString(capeObj.value("url"), capeOut.url)) {
             continue;
@@ -661,8 +662,7 @@ bool parseMinecraftProfile(QByteArray & data, MinecraftProfile &output) {
             continue;
         }
 
-        // we deal with only the active skin
-        output.capes.push_back(capeOut);
+        output.capes[capeOut.id] = capeOut;
     }
     output.currentCape = currentCape;
     output.validity = Katabasis::Validity::Certain;
@@ -692,18 +692,18 @@ void AuthContext::onMinecraftProfileDone(int, QNetworkReply::NetworkError error,
     if (error == QNetworkReply::ContentNotFoundError) {
         m_data->minecraftProfile = MinecraftProfile();
         finishActivity();
-        changeState(STATE_FAILED_HARD, tr("Account is missing a profile"));
+        changeState(STATE_FAILED_HARD, tr("Account is missing a Minecraft Java profile.\n\nWhile the Microsoft account is valid, it does not own the game.\n\nYou might own Bedrock on this account, but that does not give you access to Java currently."));
         return;
     }
     if (error != QNetworkReply::NoError) {
         finishActivity();
-        changeState(STATE_FAILED_HARD, tr("Profile acquisition failed"));
+        changeState(STATE_FAILED_HARD, tr("Minecraft Java profile acquisition failed."));
         return;
     }
     if(!parseMinecraftProfile(data, m_data->minecraftProfile)) {
         m_data->minecraftProfile = MinecraftProfile();
         finishActivity();
-        changeState(STATE_FAILED_HARD, tr("Profile response could not be parsed"));
+        changeState(STATE_FAILED_HARD, tr("Minecraft Java profile response could not be parsed"));
         return;
     }
     doGetSkin();

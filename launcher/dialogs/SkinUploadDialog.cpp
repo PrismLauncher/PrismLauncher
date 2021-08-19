@@ -1,11 +1,16 @@
 #include <QFileInfo>
 #include <QFileDialog>
+#include <QPainter>
+
 #include <FileSystem.h>
 #include <minecraft/services/SkinUpload.h>
+#include <tasks/SequentialTask.h>
+
 #include "SkinUploadDialog.h"
 #include "ui_SkinUploadDialog.h"
 #include "ProgressDialog.h"
 #include "CustomMessageBox.h"
+#include <minecraft/services/CapeChange.h>
 
 void SkinUploadDialog::on_buttonBox_rejected()
 {
@@ -85,8 +90,13 @@ void SkinUploadDialog::on_buttonBox_accepted()
     {
         model = SkinUpload::ALEX;
     }
-    SkinUploadPtr upload = std::make_shared<SkinUpload>(this, session, FS::read(fileName), model);
-    if (prog.execWithTask((Task*)upload.get()) != QDialog::Accepted)
+    SequentialTask skinUpload;
+    skinUpload.addTask(std::make_shared<SkinUpload>(this, session, FS::read(fileName), model));
+    auto selectedCape = ui->capeCombo->currentData().toString();
+    if(selectedCape != session->m_accountPtr->accountData()->minecraftProfile.currentCape) {
+        skinUpload.addTask(std::make_shared<CapeChange>(this, session, selectedCape));
+    }
+    if (prog.execWithTask(&skinUpload) != QDialog::Accepted)
     {
         CustomMessageBox::selectable(this, tr("Skin Upload"), tr("Failed to upload skin!"), QMessageBox::Warning)->exec();
         close();
@@ -111,4 +121,34 @@ SkinUploadDialog::SkinUploadDialog(MinecraftAccountPtr acct, QWidget *parent)
     :QDialog(parent), m_acct(acct), ui(new Ui::SkinUploadDialog)
 {
     ui->setupUi(this);
+
+    // FIXME: add a model for this, download/refresh the capes on demand
+    auto &data = *acct->accountData();
+    int index = 0;
+    ui->capeCombo->addItem(tr("No Cape"), QVariant());
+    auto currentCape = data.minecraftProfile.currentCape;
+    if(currentCape.isEmpty()) {
+        ui->capeCombo->setCurrentIndex(index);
+    }
+
+    for(auto & cape: data.minecraftProfile.capes) {
+        index++;
+        if(cape.data.size()) {
+            QPixmap capeImage;
+            if(capeImage.loadFromData(cape.data, "PNG")) {
+                QPixmap preview = QPixmap(10, 16);
+                QPainter painter(&preview);
+                painter.drawPixmap(0, 0, capeImage.copy(1, 1, 10, 16));
+                ui->capeCombo->addItem(capeImage, cape.alias, cape.id);
+                if(currentCape == cape.id) {
+                    ui->capeCombo->setCurrentIndex(index);
+                }
+                continue;
+            }
+        }
+        ui->capeCombo->addItem(cape.alias, cape.id);
+        if(currentCape == cape.id) {
+            ui->capeCombo->setCurrentIndex(index);
+        }
+    }
 }
