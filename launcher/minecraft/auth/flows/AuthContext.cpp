@@ -222,7 +222,7 @@ bool getNumber(QJsonValue value, double & out) {
 */
 
 bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output, const char * name) {
-    qInfo() << "Parsing" << name <<":";
+    qDebug() << "Parsing" << name <<":";
 #ifndef NDEBUG
     qDebug() << data;
 #endif
@@ -279,7 +279,7 @@ bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output, const char
         return false;
     }
     output.validity = Katabasis::Validity::Certain;
-    qInfo() << name << "is valid.";
+    qDebug() << name << "is valid.";
     return true;
 }
 
