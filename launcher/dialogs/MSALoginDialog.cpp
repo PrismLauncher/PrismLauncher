@@ -64,10 +64,10 @@ void MSALoginDialog::onTaskFailed(const QString &reason)
     QString processed;
     for(auto line: lines) {
         if(line.size()) {
-            processed += "<font color='red'>" + line + "</font>\n";
+            processed += "<font color='red'>" + line + "</font><br />";
         }
         else {
-            processed += '\n';
+            processed += "<br />";
         }
     }
     ui->label->setText(processed);
