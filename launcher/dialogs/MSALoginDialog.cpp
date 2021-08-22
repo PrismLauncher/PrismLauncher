@@ -19,6 +19,7 @@
 #include "minecraft/auth/AccountTask.h"
 
 #include <QtWidgets/QPushButton>
+#include <QUrl>
 
 MSALoginDialog::MSALoginDialog(QWidget *parent) : QDialog(parent), ui(new Ui::MSALoginDialog)
 {
