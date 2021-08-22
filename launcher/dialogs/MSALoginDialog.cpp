@@ -41,6 +41,9 @@ int MSALoginDialog::exec() {
     connect(m_loginTask.get(), &Task::succeeded, this, &MSALoginDialog::onTaskSucceeded);
     connect(m_loginTask.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
     connect(m_loginTask.get(), &Task::progress, this, &MSALoginDialog::onTaskProgress);
+    connect(m_loginTask.get(), &AccountTask::showVerificationUriAndCode, this, &MSALoginDialog::showVerificationUriAndCode);
+    connect(m_loginTask.get(), &AccountTask::hideVerificationUriAndCode, this, &MSALoginDialog::hideVerificationUriAndCode);
+    connect(&m_externalLoginTimer, &QTimer::timeout, this, &MSALoginDialog::externalLoginTick);
     m_loginTask->start();
 
     return QDialog::exec();
@@ -50,6 +53,37 @@ int MSALoginDialog::exec() {
 MSALoginDialog::~MSALoginDialog()
 {
     delete ui;
+}
+
+void MSALoginDialog::externalLoginTick() {
+    m_externalLoginElapsed++;
+    ui->progressBar->setValue(m_externalLoginElapsed);
+    ui->progressBar->repaint();
+
+    if(m_externalLoginElapsed >= m_externalLoginTimeout) {
+        m_externalLoginTimer.stop();
+    }
+}
+
+
+void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& code, int expiresIn) {
+    m_externalLoginElapsed = 0;
+    m_externalLoginTimeout = expiresIn;
+
+    m_externalLoginTimer.setInterval(1000);
+    m_externalLoginTimer.setSingleShot(false);
+    m_externalLoginTimer.start();
+
+    ui->progressBar->setMaximum(expiresIn);
+    ui->progressBar->setValue(m_externalLoginElapsed);
+
+    QString urlString = uri.toString();
+    QString linkString = QString("<a href=\"%1\">%2</a>").arg(urlString, urlString);
+    ui->label->setText(tr("<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>").arg(linkString, code));
+}
+
+void MSALoginDialog::hideVerificationUriAndCode() {
+    m_externalLoginTimer.stop();
 }
 
 void MSALoginDialog::setUserInputsEnabled(bool enable)

@@ -140,7 +140,7 @@ signals:
     void closeBrowser();
 
     /// Emitted when client needs to show a verification uri and user code
-    void showVerificationUriAndCode(const QUrl &uri, const QString &code);
+    void showVerificationUriAndCode(const QUrl &uri, const QString &code, int expiresIn);
 
     /// Emitted when authentication/deauthentication succeeded.
     void linkingSucceeded();
@@ -181,7 +181,7 @@ protected:
     void setExpires(QDateTime v);
 
     /// Start polling authorization server
-    void startPollServer(const QVariantMap &params);
+    void startPollServer(const QVariantMap &params, int expiresIn);
 
     /// Set authentication token.
     void setToken(const QString &v);

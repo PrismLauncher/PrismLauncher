@@ -472,16 +472,8 @@ void OAuth2::setExpires(QDateTime v) {
     token_.notAfter = v;
 }
 
-void OAuth2::startPollServer(const QVariantMap &params)
+void OAuth2::startPollServer(const QVariantMap &params, int expiresIn)
 {
-    bool ok = false;
-    int expiresIn = params[OAUTH2_EXPIRES_IN].toInt(&ok);
-    if (!ok) {
-        qWarning() << "OAuth2::startPollServer: No expired_in parameter";
-        emit linkingFailed();
-        return;
-    }
-
     qDebug() << "OAuth2::startPollServer: device_ and user_code expires in" << expiresIn << "seconds";
 
     QUrl url(options_.accessTokenUrl);
@@ -502,6 +494,7 @@ void OAuth2::startPollServer(const QVariantMap &params)
 
     PollServer * pollServer = new PollServer(manager_, authRequest, payload, expiresIn, this);
     if (params.contains(OAUTH2_INTERVAL)) {
+        bool ok = false;
         int interval = params[OAUTH2_INTERVAL].toInt(&ok);
         if (ok)
             pollServer->setInterval(interval);
@@ -629,9 +622,17 @@ void OAuth2::onDeviceAuthReplyFinished()
             if (params.contains(OAUTH2_VERIFICATION_URI_COMPLETE))
                 emit openBrowser(params.take(OAUTH2_VERIFICATION_URI_COMPLETE).toUrl());
 
-            emit showVerificationUriAndCode(uri, userCode);
+            bool ok = false;
+            int expiresIn = params[OAUTH2_EXPIRES_IN].toInt(&ok);
+            if (!ok) {
+                qWarning() << "OAuth2::startPollServer: No expired_in parameter";
+                emit linkingFailed();
+                return;
+            }
 
-            startPollServer(params);
+            emit showVerificationUriAndCode(uri, userCode, expiresIn);
+
+            startPollServer(params, expiresIn);
         } else {
             qWarning() << "OAuth2::onDeviceAuthReplyFinished: Mandatory parameters missing from response";
             emit linkingFailed();

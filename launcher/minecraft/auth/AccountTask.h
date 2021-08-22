@@ -83,6 +83,10 @@ public:
         return m_accountState;
     }
 
+signals:
+    void showVerificationUriAndCode(const QUrl &uri, const QString &code, int expiresIn);
+    void hideVerificationUriAndCode();
+
 protected:
 
     /**

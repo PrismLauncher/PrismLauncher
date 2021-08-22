@@ -43,7 +43,7 @@ void AuthContext::finishActivity() {
         throw 0;
     }
     m_activity = Katabasis::Activity::Idle;
-    m_stage = MSAStage::Idle;
+    setStage(AuthStage::Complete);
     m_data->validity_ = m_data->minecraftProfile.validity;
     emit activityChanged(m_activity);
 }
@@ -55,16 +55,16 @@ void AuthContext::initMSA() {
     Katabasis::OAuth2::Options opts;
     opts.scope = "XboxLive.signin offline_access";
     opts.clientIdentifier = BuildConfig.MSA_CLIENT_ID;
-    opts.authorizationUrl = "https://login.live.com/oauth20_authorize.srf";
-    opts.accessTokenUrl = "https://login.live.com/oauth20_token.srf";
+    opts.authorizationUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
+    opts.accessTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     opts.listenerPorts = {28562, 28563, 28564, 28565, 28566};
 
     m_oauth2 = new OAuth2(opts, m_data->msaToken, this, mgr);
+    m_oauth2->setGrantFlow(Katabasis::OAuth2::GrantFlowDevice);
 
     connect(m_oauth2, &OAuth2::linkingFailed, this, &AuthContext::onOAuthLinkingFailed);
     connect(m_oauth2, &OAuth2::linkingSucceeded, this, &AuthContext::onOAuthLinkingSucceeded);
-    connect(m_oauth2, &OAuth2::openBrowser, this, &AuthContext::onOpenBrowser);
-    connect(m_oauth2, &OAuth2::closeBrowser, this, &AuthContext::onCloseBrowser);
+    connect(m_oauth2, &OAuth2::showVerificationUriAndCode, this, &AuthContext::showVerificationUriAndCode);
     connect(m_oauth2, &OAuth2::activityChanged, this, &AuthContext::onOAuthActivityChanged);
 }
 
@@ -106,20 +106,14 @@ bool AuthContext::signOut() {
 }
 */
 
-void AuthContext::onOpenBrowser(const QUrl &url) {
-    QDesktopServices::openUrl(url);
-}
-
-void AuthContext::onCloseBrowser() {
-
-}
-
 void AuthContext::onOAuthLinkingFailed() {
+    emit hideVerificationUriAndCode();
     finishActivity();
     changeState(STATE_FAILED_HARD, tr("Microsoft user authentication failed."));
 }
 
 void AuthContext::onOAuthLinkingSucceeded() {
+    emit hideVerificationUriAndCode();
     auto *o2t = qobject_cast<OAuth2 *>(sender());
     if (!o2t->linked()) {
         finishActivity();
@@ -143,7 +137,7 @@ void AuthContext::onOAuthActivityChanged(Katabasis::Activity activity) {
 }
 
 void AuthContext::doUserAuth() {
-    m_stage = MSAStage::UserAuth;
+    setStage(AuthStage::UserAuth);
     changeState(STATE_WORKING, tr("Starting user authentication"));
 
     QString xbox_auth_template = R"XXX(
@@ -307,7 +301,7 @@ void AuthContext::onUserAuthDone(
     }
     m_data->userToken = temp;
 
-    m_stage = MSAStage::XboxAuth;
+    setStage(AuthStage::XboxAuth);
     changeState(STATE_WORKING, tr("Starting XBox authentication"));
 
     doSTSAuthMinecraft();
@@ -671,7 +665,7 @@ bool parseMinecraftProfile(QByteArray & data, MinecraftProfile &output) {
 }
 
 void AuthContext::doMinecraftProfile() {
-    m_stage = MSAStage::MinecraftProfile;
+    setStage(AuthStage::MinecraftProfile);
     changeState(STATE_WORKING, tr("Starting minecraft profile acquisition"));
 
     auto url = QUrl("https://api.minecraftservices.com/minecraft/profile");
@@ -710,7 +704,7 @@ void AuthContext::onMinecraftProfileDone(int, QNetworkReply::NetworkError error,
 }
 
 void AuthContext::doGetSkin() {
-    m_stage = MSAStage::Skin;
+    setStage(AuthStage::Skin);
     changeState(STATE_WORKING, tr("Fetching player skin"));
 
     auto url = QUrl(m_data->minecraftProfile.skin.url);
@@ -730,12 +724,18 @@ void AuthContext::onSkinDone(int, QNetworkReply::NetworkError error, QByteArray 
     changeState(STATE_SUCCEEDED, tr("Finished all authentication steps"));
 }
 
+void AuthContext::setStage(AuthContext::AuthStage stage) {
+    m_stage = stage;
+    emit progress((int)m_stage, (int)AuthStage::Complete);
+}
+
+
 QString AuthContext::getStateMessage() const {
     switch (m_accountState)
     {
         case STATE_WORKING:
             switch(m_stage) {
-                case MSAStage::Idle: {
+                case AuthStage::Initial: {
                     QString loginMessage = tr("Logging in as %1 user");
                     if(m_data->type == AccountType::MSA) {
                         return loginMessage.arg("Microsoft");
@@ -744,14 +744,16 @@ QString AuthContext::getStateMessage() const {
                         return loginMessage.arg("Mojang");
                     }
                 }
-                case MSAStage::UserAuth:
+                case AuthStage::UserAuth:
                     return tr("Logging in as XBox user");
-                case MSAStage::XboxAuth:
+                case AuthStage::XboxAuth:
                     return tr("Logging in with XBox and Mojang services");
-                case MSAStage::MinecraftProfile:
+                case AuthStage::MinecraftProfile:
                     return tr("Getting Minecraft profile");
-                case MSAStage::Skin:
+                case AuthStage::Skin:
                     return tr("Getting Minecraft skin");
+                case AuthStage::Complete:
+                    return tr("Finished");
                 default:
                     break;
             }

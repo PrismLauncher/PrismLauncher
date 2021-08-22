@@ -36,8 +36,7 @@ private slots:
 // OAuth-specific callbacks
     void onOAuthLinkingSucceeded();
     void onOAuthLinkingFailed();
-    void onOpenBrowser(const QUrl &url);
-    void onCloseBrowser();
+
     void onOAuthActivityChanged(Katabasis::Activity activity);
 
 // Yggdrasil specific callbacks
@@ -82,13 +81,16 @@ protected:
     bool m_xboxProfileSucceeded = false;
     bool m_mcAuthSucceeded = false;
     Katabasis::Activity m_activity = Katabasis::Activity::Idle;
-    enum class MSAStage {
-        Idle,
+    enum class AuthStage {
+        Initial,
         UserAuth,
         XboxAuth,
         MinecraftProfile,
-        Skin
-    } m_stage = MSAStage::Idle;
+        Skin,
+        Complete
+    } m_stage = AuthStage::Initial;
+
+    void setStage(AuthStage stage);
 
     QNetworkAccessManager *mgr = nullptr;
 };
