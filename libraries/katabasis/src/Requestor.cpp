@@ -11,25 +11,17 @@
 
 namespace Katabasis {
 
-Requestor::Requestor(QNetworkAccessManager *manager, OAuth2 *authenticator, QObject *parent): QObject(parent), reply_(NULL), status_(Idle), addAccessTokenInQuery_(true), rawData_(false) {
+Requestor::Requestor(QNetworkAccessManager *manager, OAuth2 *authenticator, QObject *parent): QObject(parent), reply_(NULL), status_(Idle) {
     manager_ = manager;
     authenticator_ = authenticator;
     if (authenticator) {
         timedReplies_.setIgnoreSslErrors(authenticator->ignoreSslErrors());
     }
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
-    connect(authenticator, &OAuth2::refreshFinished, this, &Requestor::onRefreshFinished, Qt::QueuedConnection);
+    connect(authenticator, &OAuth2::refreshFinished, this, &Requestor::onRefreshFinished);
 }
 
 Requestor::~Requestor() {
-}
-
-void Requestor::setAddAccessTokenInQuery(bool value) {
-    addAccessTokenInQuery_ = value;
-}
-
-void Requestor::setAccessTokenInAuthenticationHTTPHeaderFormat(const QString &value) {
-    accessTokenInAuthenticationHTTPHeaderFormat_ = value;
 }
 
 int Requestor::get(const QNetworkRequest &req, int timeout/* = 60*1000*/) {
@@ -38,8 +30,8 @@ int Requestor::get(const QNetworkRequest &req, int timeout/* = 60*1000*/) {
     }
     reply_ = manager_->get(request_);
     timedReplies_.add(new Reply(reply_, timeout));
-    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
-    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)));
+    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()));
     connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
     return id_;
 }
@@ -48,96 +40,13 @@ int Requestor::post(const QNetworkRequest &req, const QByteArray &data, int time
     if (-1 == setup(req, QNetworkAccessManager::PostOperation)) {
         return -1;
     }
-    rawData_ = true;
     data_ = data;
     reply_ = manager_->post(request_, data_);
     timedReplies_.add(new Reply(reply_, timeout));
-    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
-    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)));
+    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()));
     connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
     connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
-    return id_;
-}
-
-int Requestor::post(const QNetworkRequest & req, QHttpMultiPart* data, int timeout/* = 60*1000*/)
-{
-    if (-1 == setup(req, QNetworkAccessManager::PostOperation)) {
-        return -1;
-    }
-    rawData_ = false;
-    multipartData_ = data;
-    reply_ = manager_->post(request_, multipartData_);
-    multipartData_->setParent(reply_);
-    timedReplies_.add(new Reply(reply_, timeout));
-    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
-    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
-    connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
-    connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
-    return id_;
-}
-
-int Requestor::put(const QNetworkRequest &req, const QByteArray &data, int timeout/* = 60*1000*/) {
-    if (-1 == setup(req, QNetworkAccessManager::PutOperation)) {
-        return -1;
-    }
-    rawData_ = true;
-    data_ = data;
-    reply_ = manager_->put(request_, data_);
-    timedReplies_.add(new Reply(reply_, timeout));
-    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
-    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
-    connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
-    connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
-    return id_;
-}
-
-int Requestor::put(const QNetworkRequest & req, QHttpMultiPart* data, int timeout/* = 60*1000*/)
-{
-    if (-1 == setup(req, QNetworkAccessManager::PutOperation)) {
-        return -1;
-    }
-    rawData_ = false;
-    multipartData_ = data;
-    reply_ = manager_->put(request_, multipartData_);
-    multipartData_->setParent(reply_);
-    timedReplies_.add(new Reply(reply_, timeout));
-    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
-    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
-    connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
-    connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
-    return id_;
-}
-
-int Requestor::customRequest(const QNetworkRequest &req, const QByteArray &verb, const QByteArray &data, int timeout/* = 60*1000*/)
-{
-    (void)timeout;
-
-    if (-1 == setup(req, QNetworkAccessManager::CustomOperation, verb)) {
-        return -1;
-    }
-    data_ = data;
-    QBuffer * buffer = new QBuffer;
-    buffer->setData(data_);
-    reply_ = manager_->sendCustomRequest(request_, verb, buffer);
-    buffer->setParent(reply_);
-    timedReplies_.add(new Reply(reply_));
-    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
-    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
-    connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
-    connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
-    return id_;
-}
-
-int Requestor::head(const QNetworkRequest &req, int timeout/* = 60*1000*/)
-{
-    if (-1 == setup(req, QNetworkAccessManager::HeadOperation)) {
-        return -1;
-    }
-    reply_ = manager_->head(request_);
-    timedReplies_.add(new Reply(reply_, timeout));
-    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
-    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
-    connect(reply_, &QNetworkReply::sslErrors, this, &Requestor::onSslErrors);
     return id_;
 }
 
@@ -227,18 +136,7 @@ int Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operatio
     url_ = req.url();
 
     QUrl url = url_;
-    if (addAccessTokenInQuery_) {
-        QUrlQuery query(url);
-        query.addQueryItem(OAUTH2_ACCESS_TOKEN, authenticator_->token());
-        url.setQuery(query);
-    }
-
     request_.setUrl(url);
-
-    // If the service require the access token to be sent as a Authentication HTTP header, we add the access token.
-    if (!accessTokenInAuthenticationHTTPHeaderFormat_.isEmpty()) {
-        request_.setRawHeader(HTTP_AUTHORIZATION_HEADER, accessTokenInAuthenticationHTTPHeaderFormat_.arg(authenticator_->token()).toLatin1());
-    }
 
     if (!verb.isEmpty()) {
         request_.setRawHeader(HTTP_HTTP_HEADER, verb);
@@ -273,18 +171,7 @@ void Requestor::retry() {
     reply_->disconnect(this);
     reply_->deleteLater();
     QUrl url = url_;
-    if (addAccessTokenInQuery_) {
-        QUrlQuery query(url);
-        query.addQueryItem(OAUTH2_ACCESS_TOKEN, authenticator_->token());
-        url.setQuery(query);
-    }
     request_.setUrl(url);
-
-    // If the service require the access token to be sent as a Authentication HTTP header,
-    // we update the access token when retrying.
-    if(!accessTokenInAuthenticationHTTPHeaderFormat_.isEmpty()) {
-        request_.setRawHeader(HTTP_AUTHORIZATION_HEADER, accessTokenInAuthenticationHTTPHeaderFormat_.arg(authenticator_->token()).toLatin1());
-    }
 
     status_ = ReRequesting;
     switch (operation_) {
@@ -292,21 +179,7 @@ void Requestor::retry() {
         reply_ = manager_->get(request_);
         break;
     case QNetworkAccessManager::PostOperation:
-        reply_ = rawData_ ? manager_->post(request_, data_) : manager_->post(request_, multipartData_);
-        break;
-    case QNetworkAccessManager::CustomOperation:
-    {
-        QBuffer * buffer = new QBuffer;
-        buffer->setData(data_);
-        reply_ = manager_->sendCustomRequest(request_, request_.rawHeader(HTTP_HTTP_HEADER), buffer);
-        buffer->setParent(reply_);
-    }
-        break;
-    case QNetworkAccessManager::PutOperation:
-        reply_ = rawData_ ? manager_->post(request_, data_) : manager_->put(request_, multipartData_);
-        break;
-    case QNetworkAccessManager::HeadOperation:
-        reply_ = manager_->head(request_);
+        reply_ = manager_->post(request_, data_);
         break;
     default:
         assert(!"Unspecified operation for request");
