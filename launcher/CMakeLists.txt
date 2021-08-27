@@ -947,6 +947,10 @@ install(TARGETS MultiMC
     RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
 )
 
+if(MultiMC_EMBED_SECRETS)
+    target_link_libraries(MultiMC_logic secrets)
+endif()
+
 #### The MultiMC bundle mess! ####
 # Bundle utilities are used to complete the portable packages - they add all the libraries that would otherwise be missing on the target system.
 # NOTE: it seems that this absolutely has to be here, and nowhere else.

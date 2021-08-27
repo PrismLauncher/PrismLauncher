@@ -570,6 +570,7 @@ void OAuth2::onRefreshFinished() {
         emit refreshFinished(QNetworkReply::NoError);
         qDebug() << "New token expires in" << expires() << "seconds";
     } else {
+        emit linkingFailed();
         qDebug() << "OAuth2::onRefreshFinished: Error" << (int)refreshReply->error() << refreshReply->errorString();
     }
     refreshReply->deleteLater();

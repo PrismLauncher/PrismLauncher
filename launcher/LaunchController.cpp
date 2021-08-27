@@ -171,9 +171,16 @@ void LaunchController::login() {
                 break;
             }
             case AuthSession::RequiresOAuth: {
-                // FIXME: add UI for expired / broken MS accounts
+                auto errorString = tr("Microsoft account has expired and needs to be logged into manually again.");
+                QMessageBox::warning(
+                    nullptr,
+                    tr("Microsoft Account refresh failed"),
+                    errorString,
+                    QMessageBox::StandardButton::Ok,
+                    QMessageBox::StandardButton::Ok
+                );
                 tryagain = false;
-                emitFailed(tr("Microsoft account has expired and needs to be logged into again."));
+                emitFailed(errorString);
                 return;
             }
             case AuthSession::PlayableOffline: {

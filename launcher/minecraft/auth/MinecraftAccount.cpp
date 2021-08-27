@@ -245,7 +245,12 @@ void MinecraftAccount::authFailed(QString reason)
         emit changed();
         if (session)
         {
-            session->status = AuthSession::RequiresPassword;
+            if(data.type == AccountType::MSA) {
+                session->status = AuthSession::RequiresOAuth;
+            }
+            else {
+                session->status = AuthSession::RequiresPassword;
+            }
             session->auth_server_online = true;
             fillSession(session);
         }

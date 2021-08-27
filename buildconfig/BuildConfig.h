@@ -75,11 +75,6 @@ public:
      */
     QString META_URL;
 
-    /**
-     * MSA client ID - registered with Azure / Microsoft, needs correct setup on MS side.
-     */
-    QString MSA_CLIENT_ID;
-
     QString BUG_TRACKER_URL;
     QString DISCORD_URL;
     QString SUBREDDIT_URL;

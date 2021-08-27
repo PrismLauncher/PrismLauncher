@@ -72,9 +72,9 @@ AccountListPage::AccountListPage(QWidget *parent)
 
     // Xbox authentication won't work without a client identifier, so disable the button
     // if the build didn't specify one (GH-4012)
-    if (BuildConfig.MSA_CLIENT_ID.isEmpty()) {
-        ui->actionAddMicrosoft->setVisible(false);
-    }
+#ifndef EMBED_SECRETS
+    ui->actionAddMicrosoft->setVisible(false);
+#endif
 }
 
 AccountListPage::~AccountListPage()

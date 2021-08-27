@@ -90,8 +90,8 @@ set(MultiMC_DISCORD_URL "" CACHE STRING "URL for the Discord guild.")
 # Subreddit URL
 set(MultiMC_SUBREDDIT_URL "" CACHE STRING "URL for the subreddit.")
 
-# MSA Client ID
-set(MultiMC_MSA_CLIENT_ID "" CACHE STRING "Client ID used for MSA authentication")
+
+option(MultiMC_EMBED_SECRETS "Determines whether to embed secrets. Secrets are separate and non-public." OFF)
 
 #### Check the current Git commit and branch
 include(GetGitRevisionDescription)
@@ -286,6 +286,10 @@ add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too m
 ############################### Built Artifacts ###############################
 
 add_subdirectory(buildconfig)
+
+if(MultiMC_EMBED_SECRETS)
+    add_subdirectory(secrets)
+endif()
 
 # NOTE: this must always be last to appease the CMake deity of quirky install command evaluation order.
 add_subdirectory(launcher)
