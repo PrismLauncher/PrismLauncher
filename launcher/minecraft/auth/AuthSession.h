@@ -18,7 +18,8 @@ struct AuthSession
         RequiresOAuth,
         RequiresPassword,
         PlayableOffline,
-        PlayableOnline
+        PlayableOnline,
+        GoneOrMigrated
     } status = Undetermined;
 
     // client token

@@ -183,6 +183,19 @@ void LaunchController::login() {
                 emitFailed(errorString);
                 return;
             }
+            case AuthSession::GoneOrMigrated: {
+                auto errorString = tr("The account no longer exists on the servers. It may have been migrated, in which case please add the new account you migrated this one to.");
+                QMessageBox::warning(
+                    nullptr,
+                    tr("Account gone"),
+                    errorString,
+                    QMessageBox::StandardButton::Ok,
+                    QMessageBox::StandardButton::Ok
+                );
+                tryagain = false;
+                emitFailed(errorString);
+                return;
+            }
             case AuthSession::PlayableOffline: {
                 // we ask the user for a player name
                 bool ok = false;

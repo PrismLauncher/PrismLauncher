@@ -227,32 +227,60 @@ void MinecraftAccount::authFailed(QString reason)
     auto session = m_currentTask->getAssignedSession();
     // This is emitted when the yggdrasil tasks time out or are cancelled.
     // -> we treat the error as no-op
-    if (m_currentTask->accountState() == AccountTask::STATE_FAILED_SOFT)
-    {
-        if (session)
-        {
-            session->status = accountStatus() == Verified ? AuthSession::PlayableOffline : AuthSession::RequiresPassword;
-            session->auth_server_online = false;
-            fillSession(session);
+    switch (m_currentTask->accountState()) {
+        case AccountTask::STATE_FAILED_SOFT: {
+            if (session)
+            {
+                if(accountStatus() == Verified) {
+                    session->status = AuthSession::PlayableOffline;
+                }
+                else {
+                    if(data.type == AccountType::MSA) {
+                        session->status = AuthSession::RequiresOAuth;
+                    }
+                    else {
+                        session->status = AuthSession::RequiresPassword;
+                    }
+                }
+                session->auth_server_online = false;
+                fillSession(session);
+            }
         }
-    }
-    else
-    {
-        // FIXME: MSA ...
-        data.yggdrasilToken.token = QString();
-        data.yggdrasilToken.validity = Katabasis::Validity::None;
-        data.validity_ = Katabasis::Validity::None;
-        emit changed();
-        if (session)
-        {
-            if(data.type == AccountType::MSA) {
-                session->status = AuthSession::RequiresOAuth;
+        break;
+        case AccountTask::STATE_FAILED_HARD: {
+            // FIXME: MSA data clearing
+            data.yggdrasilToken.token = QString();
+            data.yggdrasilToken.validity = Katabasis::Validity::None;
+            data.validity_ = Katabasis::Validity::None;
+            emit changed();
+            if (session)
+            {
+                if(data.type == AccountType::MSA) {
+                    session->status = AuthSession::RequiresOAuth;
+                }
+                else {
+                    session->status = AuthSession::RequiresPassword;
+                }
+                session->auth_server_online = true;
+                fillSession(session);
             }
-            else {
-                session->status = AuthSession::RequiresPassword;
+        }
+        break;
+        case AccountTask::STATE_FAILED_GONE: {
+            data.validity_ = Katabasis::Validity::None;
+            emit changed();
+            if (session)
+            {
+                session->status = AuthSession::GoneOrMigrated;
+                session->auth_server_online = true;
+                fillSession(session);
             }
-            session->auth_server_online = true;
-            fillSession(session);
+        }
+        break;
+        case AccountTask::STATE_CREATED:
+        case AccountTask::STATE_WORKING:
+        case AccountTask::STATE_SUCCEEDED: {
+            // Not reachable here, as they are not failures.
         }
     }
     m_currentTask.reset();

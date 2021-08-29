@@ -76,6 +76,7 @@ public:
         STATE_WORKING,
         STATE_FAILED_SOFT, //!< soft failure. this generally means the user auth details haven't been invalidated
         STATE_FAILED_HARD, //!< hard failure. auth is invalid
+        STATE_FAILED_GONE, //!< hard failure. auth is invalid, and the account no longer exists
         STATE_SUCCEEDED
     } m_accountState = STATE_CREATED;
 

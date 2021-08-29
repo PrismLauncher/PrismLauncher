@@ -49,6 +49,8 @@ QString AccountTask::getStateMessage() const
         return tr("Failed to contact the authentication server.");
     case STATE_FAILED_HARD:
         return tr("Failed to authenticate.");
+    case STATE_FAILED_GONE:
+        return tr("Failed to authenticate. The account no longer exists.");
     default:
         return tr("...");
     }
@@ -62,7 +64,7 @@ void AccountTask::changeState(AccountTask::State newState, QString reason)
     {
         emitSucceeded();
     }
-    else if (newState == STATE_FAILED_HARD || newState == STATE_FAILED_SOFT)
+    else if (newState == STATE_FAILED_HARD || newState == STATE_FAILED_SOFT || newState == STATE_FAILED_GONE)
     {
         emitFailed(reason);
     }

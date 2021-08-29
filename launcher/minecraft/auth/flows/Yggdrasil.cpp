@@ -255,10 +255,17 @@ void Yggdrasil::processReply()
     case QNetworkReply::ContentAccessDenied:
     case QNetworkReply::ContentOperationNotPermittedError:
         break;
+    case QNetworkReply::ContentGoneError: {
+        changeState(
+            STATE_FAILED_GONE,
+            tr("The Mojang account no longer exists. It may have been migrated to a Microsoft account.")
+        );
+    }
     default:
-        changeState(STATE_FAILED_SOFT,
-                    tr("Authentication operation failed due to a network error: %1 (%2)")
-                        .arg(m_netReply->errorString()).arg(m_netReply->error()));
+        changeState(
+            STATE_FAILED_SOFT,
+            tr("Authentication operation failed due to a network error: %1 (%2)").arg(m_netReply->errorString()).arg(m_netReply->error())
+        );
         return;
     }
 
@@ -283,10 +290,10 @@ void Yggdrasil::processReply()
         }
         else
         {
-            changeState(STATE_FAILED_SOFT, tr("Failed to parse authentication server response "
-                                              "JSON response: %1 at offset %2.")
-                                               .arg(jsonError.errorString())
-                                               .arg(jsonError.offset));
+            changeState(
+                STATE_FAILED_SOFT,
+                tr("Failed to parse authentication server response JSON response: %1 at offset %2.").arg(jsonError.errorString()).arg(jsonError.offset)
+            );
             qCritical() << replyData;
         }
         return;
@@ -301,19 +308,18 @@ void Yggdrasil::processReply()
         // We were able to parse the server's response. Woo!
         // Call processError. If a subclass has overridden it then they'll handle their
         // stuff there.
-        qDebug() << "The request failed, but the server gave us an error message. "
-                        "Processing error.";
+        qDebug() << "The request failed, but the server gave us an error message. Processing error.";
         processError(doc.object());
     }
     else
     {
         // The server didn't say anything regarding the error. Give the user an unknown
         // error.
-        qDebug()
-            << "The request failed and the server gave no error message. Unknown error.";
-        changeState(STATE_FAILED_SOFT,
-                    tr("An unknown error occurred when trying to communicate with the "
-                       "authentication server: %1").arg(m_netReply->errorString()));
+        qDebug() << "The request failed and the server gave no error message. Unknown error.";
+        changeState(
+            STATE_FAILED_SOFT,
+            tr("An unknown error occurred when trying to communicate with the authentication server: %1").arg(m_netReply->errorString())
+        );
     }
 }
 
@@ -325,8 +331,13 @@ void Yggdrasil::processError(QJsonObject responseData)
 
     if (errorVal.isString() && errorMessageValue.isString())
     {
-        m_error = std::shared_ptr<Error>(new Error{
-            errorVal.toString(""), errorMessageValue.toString(""), causeVal.toString("")});
+        m_error = std::shared_ptr<Error>(
+            new Error {
+                errorVal.toString(""),
+                errorMessageValue.toString(""),
+                causeVal.toString("")
+            }
+        );
         changeState(STATE_FAILED_HARD, m_error->m_errorMessageVerbose);
     }
     else
