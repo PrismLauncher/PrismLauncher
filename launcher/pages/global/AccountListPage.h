@@ -63,6 +63,7 @@ public slots:
     void on_actionAddMojang_triggered();
     void on_actionAddMicrosoft_triggered();
     void on_actionRemove_triggered();
+    void on_actionRefresh_triggered();
     void on_actionSetDefault_triggered();
     void on_actionNoDefault_triggered();
     void on_actionUploadSkin_triggered();

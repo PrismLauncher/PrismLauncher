@@ -63,6 +63,9 @@ protected:
     void doMinecraftProfile();
     Q_SLOT void onMinecraftProfileDone(int, QNetworkReply::NetworkError, QByteArray, QList<QNetworkReply::RawHeaderPair>);
 
+    void doMigrationEligibilityCheck();
+    Q_SLOT void onMigrationEligibilityCheckDone(int, QNetworkReply::NetworkError, QByteArray, QList<QNetworkReply::RawHeaderPair>);
+
     void doGetSkin();
     Q_SLOT void onSkinDone(int, QNetworkReply::NetworkError, QByteArray, QList<QNetworkReply::RawHeaderPair>);
 
@@ -86,6 +89,7 @@ protected:
         UserAuth,
         XboxAuth,
         MinecraftProfile,
+        MigrationEligibility,
         Skin,
         Complete
     } m_stage = AuthStage::Initial;

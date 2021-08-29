@@ -192,6 +192,15 @@ bool getNumber(QJsonValue value, double & out) {
     return true;
 }
 
+
+bool getBool(QJsonValue value, bool & out) {
+    if(!value.isBool()) {
+        return false;
+    }
+    out = value.toBool();
+    return true;
+}
+
 /*
 {
    "IssueInstant":"2020-12-07T19:52:08.4463796Z",
@@ -693,6 +702,63 @@ void AuthContext::onMinecraftProfileDone(int, QNetworkReply::NetworkError error,
         changeState(STATE_FAILED_HARD, tr("Minecraft Java profile response could not be parsed"));
         return;
     }
+
+    if(m_data->type == AccountType::Mojang) {
+        doMigrationEligibilityCheck();
+    }
+    else {
+        doGetSkin();
+    }
+}
+
+void AuthContext::doMigrationEligibilityCheck() {
+    setStage(AuthStage::MigrationEligibility);
+    changeState(STATE_WORKING, tr("Starting check for migration eligibility"));
+
+    auto url = QUrl("https://api.minecraftservices.com/rollout/v1/msamigration");
+    QNetworkRequest request = QNetworkRequest(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8());
+
+    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
+    connect(requestor, &Requestor::finished, this, &AuthContext::onMigrationEligibilityCheckDone);
+    requestor->get(request);
+}
+
+bool parseRolloutResponse(QByteArray & data, bool& result) {
+    qDebug() << "Parsing Rollout response...";
+#ifndef NDEBUG
+    qDebug() << data;
+#endif
+
+    QJsonParseError jsonError;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
+    if(jsonError.error) {
+        qWarning() << "Failed to parse response from https://api.minecraftservices.com/rollout/v1/msamigration as JSON: " << jsonError.errorString();
+        return false;
+    }
+
+    auto obj = doc.object();
+    QString feature;
+    if(!getString(obj.value("feature"), feature)) {
+        qWarning() << "Rollout feature is not a string";
+        return false;
+    }
+    if(feature != "msamigration") {
+        qWarning() << "Rollout feature is not what we expected (msamigration), but is instead \"" << feature << "\"";
+        return false;
+    }
+    if(!getBool(obj.value("rollout"), result)) {
+        qWarning() << "Rollout feature is not a string";
+        return false;
+    }
+    return true;
+}
+
+void AuthContext::onMigrationEligibilityCheckDone(int, QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers) {
+    if (error == QNetworkReply::NoError) {
+        parseRolloutResponse(data, m_data->canMigrateToMSA);
+    }
     doGetSkin();
 }
 
@@ -742,6 +808,8 @@ QString AuthContext::getStateMessage() const {
                     return tr("Logging in with XBox and Mojang services");
                 case AuthStage::MinecraftProfile:
                     return tr("Getting Minecraft profile");
+                case AuthStage::MigrationEligibility:
+                    return tr("Checking for migration eligibility");
                 case AuthStage::Skin:
                     return tr("Getting Minecraft skin");
                 case AuthStage::Complete:

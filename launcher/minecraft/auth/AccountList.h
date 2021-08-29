@@ -40,6 +40,7 @@ public:
         // TODO: Add icon column.
         NameColumn = 0,
         ProfileNameColumn,
+        MigrationColumn,
         TypeColumn,
 
         NUM_COLUMNS

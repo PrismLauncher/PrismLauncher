@@ -153,6 +153,22 @@ void AccountListPage::on_actionRemove_triggered()
     }
 }
 
+void AccountListPage::on_actionRefresh_triggered() {
+    QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
+    if (selection.size() > 0) {
+        QModelIndex selected = selection.first();
+        MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
+        AuthSessionPtr session = std::make_shared<AuthSession>();
+        auto task = account->refresh(session);
+        if (task) {
+            ProgressDialog progDialog(this);
+            progDialog.execWithTask(task.get());
+            // TODO: respond to results of the task
+        }
+    }
+}
+
+
 void AccountListPage::on_actionSetDefault_triggered()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
@@ -178,6 +194,7 @@ void AccountListPage::updateButtonStates()
     ui->actionSetDefault->setEnabled(selection.size() > 0);
     ui->actionUploadSkin->setEnabled(selection.size() > 0);
     ui->actionDeleteSkin->setEnabled(selection.size() > 0);
+    ui->actionRefresh->setEnabled(selection.size() > 0);
 
     if(m_accounts->activeAccount().get() == nullptr) {
         ui->actionNoDefault->setEnabled(false);

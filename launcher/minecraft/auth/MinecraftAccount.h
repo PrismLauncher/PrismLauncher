@@ -117,6 +117,14 @@ public: /* queries */
         return data.profileName();
     }
 
+    bool canMigrate() const {
+        return data.canMigrateToMSA;
+    }
+
+    bool isMSA() const {
+        return data.type == AccountType::MSA;
+    }
+
     QString typeString() const {
         switch(data.type) {
             case AccountType::Mojang: {
