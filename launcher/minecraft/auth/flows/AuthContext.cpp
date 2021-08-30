@@ -16,20 +16,21 @@
 
 #include "AuthContext.h"
 #include "katabasis/Globals.h"
-#include "katabasis/Requestor.h"
+#include "AuthRequest.h"
 
 #ifdef EMBED_SECRETS
 #include "Secrets.h"
 #endif
 
+#include "Env.h"
+
 using OAuth2 = Katabasis::OAuth2;
-using Requestor = Katabasis::Requestor;
+using Requestor = AuthRequest;
 using Activity = Katabasis::Activity;
 
 AuthContext::AuthContext(AccountData * data, QObject *parent) :
     AccountTask(data, parent)
 {
-    mgr = new QNetworkAccessManager(this);
 }
 
 void AuthContext::beginActivity(Activity activity) {
@@ -63,7 +64,7 @@ void AuthContext::initMSA() {
     opts.accessTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     opts.listenerPorts = {28562, 28563, 28564, 28565, 28566};
 
-    m_oauth2 = new OAuth2(opts, m_data->msaToken, this, mgr);
+    m_oauth2 = new OAuth2(opts, m_data->msaToken, this, &ENV.qnam());
     m_oauth2->setGrantFlow(Katabasis::OAuth2::GrantFlowDevice);
 
     connect(m_oauth2, &OAuth2::linkingFailed, this, &AuthContext::onOAuthLinkingFailed);
@@ -161,7 +162,7 @@ void AuthContext::doUserAuth() {
     QNetworkRequest request = QNetworkRequest(QUrl("https://user.auth.xboxlive.com/user/authenticate"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    auto *requestor = new Requestor(mgr, m_oauth2, this);
+    auto *requestor = new Requestor(this);
     connect(requestor, &Requestor::finished, this, &AuthContext::onUserAuthDone);
     requestor->post(request, xbox_auth_data.toUtf8());
     qDebug() << "First layer of XBox auth ... commencing.";
@@ -192,6 +193,13 @@ bool getNumber(QJsonValue value, double & out) {
     return true;
 }
 
+bool getNumber(QJsonValue value, int64_t & out) {
+    if(!value.isDouble()) {
+        return false;
+    }
+    out = (int64_t) value.toDouble();
+    return true;
+}
 
 bool getBool(QJsonValue value, bool & out) {
     if(!value.isBool()) {
@@ -292,7 +300,6 @@ bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output, const char
 }
 
 void AuthContext::onUserAuthDone(
-    int requestId,
     QNetworkReply::NetworkError error,
     QByteArray replyData,
     QList<QNetworkReply::RawHeaderPair> headers
@@ -349,96 +356,64 @@ void AuthContext::doSTSAuthMinecraft() {
     QNetworkRequest request = QNetworkRequest(QUrl("https://xsts.auth.xboxlive.com/xsts/authorize"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
+    Requestor *requestor = new Requestor(this);
     connect(requestor, &Requestor::finished, this, &AuthContext::onSTSAuthMinecraftDone);
     requestor->post(request, xbox_auth_data.toUtf8());
     qDebug() << "Getting Minecraft services STS token...";
 }
 
+void AuthContext::processSTSError(QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers) {
+    if(error == QNetworkReply::AuthenticationRequiredError) {
+    QJsonParseError jsonError;
+        QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
+        if(jsonError.error) {
+            qWarning() << "Cannot parse error XSTS response as JSON: " << jsonError.errorString();
+            return;
+        }
+
+        int64_t errorCode = -1;
+        auto obj = doc.object();
+        if(!getNumber(obj.value("XErr"), errorCode)) {
+            qWarning() << "XErr is not a number";
+            return;
+        }
+        stsErrors.insert(errorCode);
+        stsFailed = true;
+    }
+}
+
+
 void AuthContext::onSTSAuthMinecraftDone(
-    int requestId,
     QNetworkReply::NetworkError error,
     QByteArray replyData,
     QList<QNetworkReply::RawHeaderPair> headers
 ) {
+#ifndef NDEBUG
+    qDebug() << replyData;
+#endif
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
-        m_requestsDone ++;
+        processSTSError(error, replyData, headers);
+        failResult(m_mcAuthSucceeded);
         return;
     }
 
     Katabasis::Token temp;
     if(!parseXTokenResponse(replyData, temp, "STSAuthMinecraft")) {
         qWarning() << "Could not parse authorization response for access to mojang services...";
-        m_requestsDone ++;
+        failResult(m_mcAuthSucceeded);
         return;
     }
 
     if(temp.extra["uhs"] != m_data->userToken.extra["uhs"]) {
         qWarning() << "Server has changed user hash in the reply... something is wrong. ABORTING";
-        qDebug() << replyData;
-        m_requestsDone ++;
+        failResult(m_mcAuthSucceeded);
         return;
     }
     m_data->mojangservicesToken = temp;
 
     doMinecraftAuth();
 }
-
-void AuthContext::doSTSAuthGeneric() {
-    QString xbox_auth_template = R"XXX(
-{
-    "Properties": {
-        "SandboxId": "RETAIL",
-        "UserTokens": [
-            "%1"
-        ]
-    },
-    "RelyingParty": "http://xboxlive.com",
-    "TokenType": "JWT"
-}
-)XXX";
-    auto xbox_auth_data = xbox_auth_template.arg(m_data->userToken.token);
-
-    QNetworkRequest request = QNetworkRequest(QUrl("https://xsts.auth.xboxlive.com/xsts/authorize"));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader("Accept", "application/json");
-    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
-    connect(requestor, &Requestor::finished, this, &AuthContext::onSTSAuthGenericDone);
-    requestor->post(request, xbox_auth_data.toUtf8());
-    qDebug() << "Getting generic STS token...";
-}
-
-void AuthContext::onSTSAuthGenericDone(
-    int requestId,
-    QNetworkReply::NetworkError error,
-    QByteArray replyData,
-    QList<QNetworkReply::RawHeaderPair> headers
-) {
-    if (error != QNetworkReply::NoError) {
-        qWarning() << "Reply error:" << error;
-        m_requestsDone ++;
-        return;
-    }
-
-    Katabasis::Token temp;
-    if(!parseXTokenResponse(replyData, temp, "STSAuthGaneric")) {
-        qWarning() << "Could not parse authorization response for access to xbox API...";
-        m_requestsDone ++;
-        return;
-    }
-
-    if(temp.extra["uhs"] != m_data->userToken.extra["uhs"]) {
-        qWarning() << "Server has changed user hash in the reply... something is wrong. ABORTING";
-        qDebug() << replyData;
-        m_requestsDone ++;
-        return;
-    }
-    m_data->xboxApiToken = temp;
-
-    doXBoxProfile();
-}
-
 
 void AuthContext::doMinecraftAuth() {
     QString mc_auth_template = R"XXX(
@@ -451,7 +426,7 @@ void AuthContext::doMinecraftAuth() {
     QNetworkRequest request = QNetworkRequest(QUrl("https://api.minecraftservices.com/authentication/login_with_xbox"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
+    Requestor *requestor = new Requestor(this);
     connect(requestor, &Requestor::finished, this, &AuthContext::onMinecraftAuthDone);
     requestor->post(request, data.toUtf8());
     qDebug() << "Getting Minecraft access token...";
@@ -498,18 +473,16 @@ bool parseMojangResponse(QByteArray & data, Katabasis::Token &output) {
 }
 
 void AuthContext::onMinecraftAuthDone(
-    int requestId,
     QNetworkReply::NetworkError error,
     QByteArray replyData,
     QList<QNetworkReply::RawHeaderPair> headers
 ) {
-    m_requestsDone ++;
-
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
 #ifndef NDEBUG
         qDebug() << replyData;
 #endif
+        failResult(m_mcAuthSucceeded);
         return;
     }
 
@@ -518,11 +491,67 @@ void AuthContext::onMinecraftAuthDone(
 #ifndef NDEBUG
         qDebug() << replyData;
 #endif
+        failResult(m_mcAuthSucceeded);
         return;
     }
-    m_mcAuthSucceeded = true;
 
-    checkResult();
+    succeedResult(m_mcAuthSucceeded);
+}
+
+void AuthContext::doSTSAuthGeneric() {
+    QString xbox_auth_template = R"XXX(
+{
+    "Properties": {
+        "SandboxId": "RETAIL",
+        "UserTokens": [
+            "%1"
+        ]
+    },
+    "RelyingParty": "http://xboxlive.com",
+    "TokenType": "JWT"
+}
+)XXX";
+    auto xbox_auth_data = xbox_auth_template.arg(m_data->userToken.token);
+
+    QNetworkRequest request = QNetworkRequest(QUrl("https://xsts.auth.xboxlive.com/xsts/authorize"));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setRawHeader("Accept", "application/json");
+    Requestor *requestor = new Requestor(this);
+    connect(requestor, &Requestor::finished, this, &AuthContext::onSTSAuthGenericDone);
+    requestor->post(request, xbox_auth_data.toUtf8());
+    qDebug() << "Getting generic STS token...";
+}
+
+void AuthContext::onSTSAuthGenericDone(
+    QNetworkReply::NetworkError error,
+    QByteArray replyData,
+    QList<QNetworkReply::RawHeaderPair> headers
+) {
+#ifndef NDEBUG
+    qDebug() << replyData;
+#endif
+    if (error != QNetworkReply::NoError) {
+        qWarning() << "Reply error:" << error;
+        processSTSError(error, replyData, headers);
+        failResult(m_xboxProfileSucceeded);
+        return;
+    }
+
+    Katabasis::Token temp;
+    if(!parseXTokenResponse(replyData, temp, "STSAuthGaneric")) {
+        qWarning() << "Could not parse authorization response for access to xbox API...";
+        failResult(m_xboxProfileSucceeded);
+        return;
+    }
+
+    if(temp.extra["uhs"] != m_data->userToken.extra["uhs"]) {
+        qWarning() << "Server has changed user hash in the reply... something is wrong. ABORTING";
+        failResult(m_xboxProfileSucceeded);
+        return;
+    }
+    m_data->xboxApiToken = temp;
+
+    doXBoxProfile();
 }
 
 void AuthContext::doXBoxProfile() {
@@ -543,25 +572,23 @@ void AuthContext::doXBoxProfile() {
     request.setRawHeader("Accept", "application/json");
     request.setRawHeader("x-xbl-contract-version", "3");
     request.setRawHeader("Authorization", QString("XBL3.0 x=%1;%2").arg(m_data->userToken.extra["uhs"].toString(), m_data->xboxApiToken.token).toUtf8());
-    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
+    Requestor *requestor = new Requestor(this);
     connect(requestor, &Requestor::finished, this, &AuthContext::onXBoxProfileDone);
     requestor->get(request);
     qDebug() << "Getting Xbox profile...";
 }
 
 void AuthContext::onXBoxProfileDone(
-    int requestId,
     QNetworkReply::NetworkError error,
     QByteArray replyData,
     QList<QNetworkReply::RawHeaderPair> headers
 ) {
-    m_requestsDone ++;
-
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
 #ifndef NDEBUG
         qDebug() << replyData;
 #endif
+        failResult(m_xboxProfileSucceeded);
         return;
     }
 
@@ -569,7 +596,18 @@ void AuthContext::onXBoxProfileDone(
     qDebug() << "XBox profile: " << replyData;
 #endif
 
-    m_xboxProfileSucceeded = true;
+    succeedResult(m_xboxProfileSucceeded);
+}
+
+void AuthContext::succeedResult(bool& flag) {
+    m_requestsDone ++;
+    flag = true;
+    checkResult();
+}
+
+void AuthContext::failResult(bool& flag) {
+    m_requestsDone ++;
+    flag = false;
     checkResult();
 }
 
@@ -584,7 +622,42 @@ void AuthContext::checkResult() {
     }
     else {
         finishActivity();
-        changeState(STATE_FAILED_HARD, tr("XBox and/or Mojang authentication steps did not succeed"));
+        if(stsFailed) {
+            if(stsErrors.contains(2148916233)) {
+                changeState(
+                    STATE_FAILED_HARD,
+                    tr("This Microsoft account does not have an XBox Live profile. Buy the game on %1 first.")
+                        .arg("<a href=\"https://www.minecraft.net/en-us/store/minecraft-java-edition\">minecraft.net</a>")
+                );
+            }
+            else if (stsErrors.contains(2148916235)){
+                // NOTE: this is the Grulovia error
+                changeState(
+                    STATE_FAILED_HARD,
+                    tr("XBox Live is not available in your country. You've been blocked.")
+                );
+            }
+            else if (stsErrors.contains(2148916238)){
+                changeState(
+                    STATE_FAILED_HARD,
+                    tr("This Microsoft account is underaged and is not linked to a family.\n\nPlease set up your account according to %1.")
+                        .arg("<a href=\"https://help.minecraft.net/hc/en-us/articles/360042649591\">help.minecraft.net</a>")
+                );
+            }
+            else {
+                QStringList errorList;
+                for(auto & error: stsErrors) {
+                    errorList.append(QString::number(error));
+                }
+                changeState(
+                    STATE_FAILED_HARD,
+                    tr("XSTS authentication ended with unrecognized error(s):\n\n%1").arg(errorList.join("\n"))
+                );
+            }
+        }
+        else {
+            changeState(STATE_FAILED_HARD, tr("XBox and/or Mojang authentication steps did not succeed"));
+        }
     }
 }
 
@@ -678,13 +751,19 @@ void AuthContext::doMinecraftProfile() {
     // request.setRawHeader("Accept", "application/json");
     request.setRawHeader("Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8());
 
-    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
+    Requestor *requestor = new Requestor(this);
     connect(requestor, &Requestor::finished, this, &AuthContext::onMinecraftProfileDone);
     requestor->get(request);
 }
 
-void AuthContext::onMinecraftProfileDone(int, QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers) {
+void AuthContext::onMinecraftProfileDone(
+    QNetworkReply::NetworkError error,
+    QByteArray data,
+    QList<QNetworkReply::RawHeaderPair> headers
+) {
+#ifndef NDEBUG
     qDebug() << data;
+#endif
     if (error == QNetworkReply::ContentNotFoundError) {
         m_data->minecraftProfile = MinecraftProfile();
         finishActivity();
@@ -720,7 +799,7 @@ void AuthContext::doMigrationEligibilityCheck() {
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8());
 
-    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
+    Requestor *requestor = new Requestor(this);
     connect(requestor, &Requestor::finished, this, &AuthContext::onMigrationEligibilityCheckDone);
     requestor->get(request);
 }
@@ -755,7 +834,11 @@ bool parseRolloutResponse(QByteArray & data, bool& result) {
     return true;
 }
 
-void AuthContext::onMigrationEligibilityCheckDone(int, QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers) {
+void AuthContext::onMigrationEligibilityCheckDone(
+    QNetworkReply::NetworkError error,
+    QByteArray data,
+    QList<QNetworkReply::RawHeaderPair> headers
+) {
     if (error == QNetworkReply::NoError) {
         parseRolloutResponse(data, m_data->canMigrateToMSA);
     }
@@ -768,12 +851,16 @@ void AuthContext::doGetSkin() {
 
     auto url = QUrl(m_data->minecraftProfile.skin.url);
     QNetworkRequest request = QNetworkRequest(url);
-    Requestor *requestor = new Requestor(mgr, m_oauth2, this);
+    Requestor *requestor = new Requestor(this);
     connect(requestor, &Requestor::finished, this, &AuthContext::onSkinDone);
     requestor->get(request);
 }
 
-void AuthContext::onSkinDone(int, QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair>) {
+void AuthContext::onSkinDone(
+    QNetworkReply::NetworkError error,
+    QByteArray data,
+    QList<QNetworkReply::RawHeaderPair>
+) {
     if (error == QNetworkReply::NoError) {
         m_data->minecraftProfile.skin.data = data;
     }

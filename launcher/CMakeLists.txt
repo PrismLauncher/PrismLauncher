@@ -215,6 +215,8 @@ set(MINECRAFT_SOURCES
     minecraft/auth/MinecraftAccount.cpp
     minecraft/auth/flows/AuthContext.h
     minecraft/auth/flows/AuthContext.cpp
+    minecraft/auth/flows/AuthRequest.h
+    minecraft/auth/flows/AuthRequest.cpp
 
     minecraft/auth/flows/MSAInteractive.h
     minecraft/auth/flows/MSAInteractive.cpp
