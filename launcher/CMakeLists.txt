@@ -985,6 +985,14 @@ if(INSTALL_BUNDLE STREQUAL "full")
             COMPONENT Runtime
             REGEX "minimal|linuxfb|offscreen" EXCLUDE
         )
+        # Style plugins
+        if(EXISTS "${QT_PLUGINS_DIR}/styles")
+            install(
+                DIRECTORY "${QT_PLUGINS_DIR}/styles"
+                DESTINATION ${PLUGIN_DEST_DIR}
+                COMPONENT Runtime
+            )
+        endif()
     else()
         # Image formats
         install(
@@ -1016,6 +1024,17 @@ if(INSTALL_BUNDLE STREQUAL "full")
             REGEX "_debug\\." EXCLUDE
             REGEX "\\.dSYM" EXCLUDE
         )
+        # Style plugins
+        if(EXISTS "${QT_PLUGINS_DIR}/styles")
+            install(
+                DIRECTORY "${QT_PLUGINS_DIR}/styles"
+                DESTINATION ${PLUGIN_DEST_DIR}
+                COMPONENT Runtime
+                REGEX "d\\." EXCLUDE
+                REGEX "_debug\\." EXCLUDE
+                REGEX "\\.dSYM" EXCLUDE
+            )
+        endif()
     endif()
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
