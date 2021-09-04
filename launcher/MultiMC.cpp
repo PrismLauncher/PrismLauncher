@@ -126,6 +126,9 @@ QString getIdealPlatform(QString currentPlatform) {
             }
         }
         case Sys::KernelType::Windows: {
+            // FIXME: 5.15.2 is not stable on Windows, due to a large number of completely unpredictable and hard to reproduce issues
+            break;
+/*
             if(info.kernelMajor == 6 && info.kernelMinor >= 1) {
                 // Windows 7
                 return "win32-5.15.2";
@@ -138,6 +141,7 @@ QString getIdealPlatform(QString currentPlatform) {
                 // Below Windows 7
                 return "win32";
             }
+*/
         }
         case Sys::KernelType::Undetermined:
         case Sys::KernelType::Linux: {
