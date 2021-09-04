@@ -8,6 +8,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QDebug>
 
 Sys::KernelInfo Sys::getKernelInfo()
 {
@@ -28,11 +29,17 @@ Sys::KernelInfo Sys::getKernelInfo()
     auto sections = release.split('-');
     if(sections.size() >= 1) {
         auto versionParts = sections[0].split('.');
-        if(sections.size() >= 3) {
+        if(versionParts.size() >= 3) {
             out.kernelMajor = sections[0].toInt();
             out.kernelMinor = sections[1].toInt();
             out.kernelPatch = sections[2].toInt();
         }
+        else {
+            qWarning() << "Not enough version numbers in " << sections[0] << " found " << versionParts.size();
+        }
+    }
+    else {
+        qWarning() << "Not enough '-' sections in " << release << " found " << sections.size();
     }
     return out;
 }
