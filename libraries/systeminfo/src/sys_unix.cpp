@@ -6,13 +6,34 @@
 #include <fstream>
 #include <limits>
 
+#include <QString>
+#include <QStringList>
+
 Sys::KernelInfo Sys::getKernelInfo()
 {
     Sys::KernelInfo out;
     struct utsname buf;
     uname(&buf);
+    // NOTE: we assume linux here. this needs further elaboration
+    out.kernelType = KernelType::Linux;
     out.kernelName = buf.sysname;
-    out.kernelVersion = buf.release;
+    QString release = out.kernelVersion = buf.release;
+
+    // linux binary running on WSL is cursed.
+    out.isCursed = release.contains("WSL", Qt::CaseInsensitive) || release.contains("Microsoft", Qt::CaseInsensitive);
+
+    out.kernelMajor = 0;
+    out.kernelMinor = 0;
+    out.kernelPatch = 0;
+    auto sections = release.split('-');
+    if(sections.size() >= 1) {
+        auto versionParts = sections[0].split('.');
+        if(sections.size() >= 3) {
+            out.kernelMajor = sections[0].toInt();
+            out.kernelMinor = sections[1].toInt();
+            out.kernelPatch = sections[2].toInt();
+        }
+    }
     return out;
 }
 

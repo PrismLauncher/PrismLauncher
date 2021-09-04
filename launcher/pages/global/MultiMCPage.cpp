@@ -58,8 +58,7 @@ MultiMCPage::MultiMCPage(QWidget *parent) : QWidget(parent), ui(new Ui::MultiMCP
 
     if(BuildConfig.UPDATER_ENABLED)
     {
-        QObject::connect(MMC->updateChecker().get(), &UpdateChecker::channelListLoaded, this,
-                        &MultiMCPage::refreshUpdateChannelList);
+        QObject::connect(MMC->updateChecker().get(), &UpdateChecker::channelListLoaded, this, &MultiMCPage::refreshUpdateChannelList);
 
         if (MMC->updateChecker()->hasChannels())
         {

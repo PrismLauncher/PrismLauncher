@@ -91,7 +91,8 @@ using namespace Commandline;
     "This usually fixes the problem and you can move the application elsewhere afterwards.\n"\
     "\n"
 
-static void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+namespace {
+void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     const char *levels = "DWCFIS";
     const QString format("%1 %2 %3\n");
@@ -109,6 +110,43 @@ static void appDebugOutput(QtMsgType type, const QMessageLogContext &context, co
     MMC->logFile->flush();
     QTextStream(stderr) << out.toLocal8Bit();
     fflush(stderr);
+}
+
+QString getIdealPlatform(QString currentPlatform) {
+    auto info = Sys::getKernelInfo();
+    switch(info.kernelType) {
+        case Sys::KernelType::Darwin: {
+            if(info.kernelMajor >= 17) {
+                // macOS 10.13 or newer
+                return "osx64-5.15.2";
+            }
+            else {
+                // macOS 10.12 or older
+                return "osx64";
+            }
+        }
+        case Sys::KernelType::Windows: {
+            if(info.kernelMajor == 6 && info.kernelMinor >= 1) {
+                // Windows 7
+                return "win32-5.15.2";
+            }
+            else if (info.kernelMajor > 6) {
+                // Above Windows 7
+                return "win32-5.15.2";
+            }
+            else {
+                // Below Windows 7
+                return "win32";
+            }
+        }
+        case Sys::KernelType::Undetermined:
+        case Sys::KernelType::Linux: {
+            break;
+        }
+    }
+    return currentPlatform;
+}
+
 }
 
 MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
@@ -678,7 +716,10 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
     // initialize the updater
     if(BuildConfig.UPDATER_ENABLED)
     {
-        m_updateChecker.reset(new UpdateChecker(BuildConfig.CHANLIST_URL, BuildConfig.VERSION_CHANNEL, BuildConfig.VERSION_BUILD));
+        auto platform = getIdealPlatform(BuildConfig.BUILD_PLATFORM);
+        auto channelUrl = BuildConfig.UPDATER_BASE + platform + "/channels.json";
+        qDebug() << "Initializing updater with platform: " << platform << " -- " << channelUrl;
+        m_updateChecker.reset(new UpdateChecker(channelUrl, BuildConfig.VERSION_CHANNEL, BuildConfig.VERSION_BUILD));
         qDebug() << "<> Updater started.";
     }
 

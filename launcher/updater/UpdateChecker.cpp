@@ -23,9 +23,12 @@
 #define API_VERSION 0
 #define CHANLIST_FORMAT 0
 
-UpdateChecker::UpdateChecker(QString channelListUrl, QString currentChannel, int currentBuild)
+#include "BuildConfig.h"
+#include "sys.h"
+
+UpdateChecker::UpdateChecker(QString channelUrl, QString currentChannel, int currentBuild)
 {
-    m_channelListUrl = channelListUrl;
+    m_channelUrl = channelUrl;
     m_currentChannel = currentChannel;
     m_currentBuild = currentBuild;
 }
@@ -48,8 +51,7 @@ void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
     // later.
     if (!m_chanListLoaded)
     {
-        qDebug() << "Channel list isn't loaded yet. Loading channel list and deferring "
-                        "update check.";
+        qDebug() << "Channel list isn't loaded yet. Loading channel list and deferring update check.";
         m_checkUpdateWaiting = true;
         m_deferredUpdateChannel = updateChannel;
         updateChanList(notifyNoUpdate);
@@ -62,28 +64,42 @@ void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
         return;
     }
 
-    m_updateChecking = true;
-
     // Find the desired channel within the channel list and get its repo URL. If if cannot be
     // found, error.
+    QString stableUrl;
     m_newRepoUrl = "";
     for (ChannelListEntry entry : m_channels)
     {
-        if (entry.id == updateChannel)
+        qDebug() << "channelEntry = " << entry.id;
+        if(entry.id == "stable") {
+            stableUrl = entry.url;
+        }
+        if (entry.id == updateChannel) {
             m_newRepoUrl = entry.url;
-        if (entry.id == m_currentChannel)
+            qDebug() << "is intended update channel: " << entry.id;
+        }
+        if (entry.id == m_currentChannel) {
             m_currentRepoUrl = entry.url;
+            qDebug() << "is current update channel: " << entry.id;
+        }
     }
 
     qDebug() << "m_repoUrl = " << m_newRepoUrl;
 
-    // If we didn't find our channel, error.
+    if (m_newRepoUrl.isEmpty()) {
+        qWarning() << "m_repoUrl was empty. defaulting to 'stable': " << stableUrl;
+        m_newRepoUrl = stableUrl;
+    }
+
+    // If nothing applies, error
     if (m_newRepoUrl.isEmpty())
     {
-        qCritical() << "m_repoUrl is empty!";
+        qCritical() << "failed to select any update repository for: " << updateChannel;
         emit updateCheckFailed();
         return;
     }
+
+    m_updateChecking = true;
 
     QUrl indexUrl = QUrl(m_newRepoUrl).resolved(QUrl("index.json"));
 
@@ -174,7 +190,7 @@ void UpdateChecker::updateChanList(bool notifyNoUpdate)
         return;
     }
 
-    if (m_channelListUrl.isEmpty())
+    if (m_channelUrl.isEmpty())
     {
         qCritical() << "Failed to update channel list. No channel list URL set."
                     << "If you'd like to use MultiMC's update system, please pass the channel "
@@ -184,7 +200,7 @@ void UpdateChecker::updateChanList(bool notifyNoUpdate)
 
     m_chanListLoading = true;
     NetJob *job = new NetJob("Update System Channel List");
-    job->addNetAction(Net::Download::makeByteArray(QUrl(m_channelListUrl), &chanlistData));
+    job->addNetAction(Net::Download::makeByteArray(QUrl(m_channelUrl), &chanlistData));
     connect(job, &NetJob::succeeded, [this, notifyNoUpdate]() { chanListDownloadFinished(notifyNoUpdate); });
     QObject::connect(job, &NetJob::failed, this, &UpdateChecker::chanListDownloadFailed);
     chanListJob.reset(job);

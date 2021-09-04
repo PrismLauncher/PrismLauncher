@@ -23,7 +23,7 @@ class UpdateChecker : public QObject
     Q_OBJECT
 
 public:
-    UpdateChecker(QString channelListUrl, QString currentChannel, int currentBuild);
+    UpdateChecker(QString channelUrl, QString currentChannel, int currentBuild);
     void checkForUpdate(QString updateChannel, bool notifyNoUpdate);
 
     /*!
@@ -78,7 +78,7 @@ private:
     NetJobPtr chanListJob;
     QByteArray chanlistData;
 
-    QString m_channelListUrl;
+    QString m_channelUrl;
 
     QList<ChannelListEntry> m_channels;
 

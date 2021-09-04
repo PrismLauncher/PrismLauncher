@@ -538,7 +538,7 @@ void AuthContext::onSTSAuthGenericDone(
     }
 
     Katabasis::Token temp;
-    if(!parseXTokenResponse(replyData, temp, "STSAuthGaneric")) {
+    if(!parseXTokenResponse(replyData, temp, "STSAuthGeneric")) {
         qWarning() << "Could not parse authorization response for access to xbox API...";
         failResult(m_xboxProfileSucceeded);
         return;

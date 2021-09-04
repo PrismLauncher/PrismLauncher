@@ -12,14 +12,14 @@ Config::Config()
     VERSION_BUILD = @MultiMC_VERSION_BUILD@;
 
     BUILD_PLATFORM = "@MultiMC_BUILD_PLATFORM@";
-    CHANLIST_URL = "@MultiMC_CHANLIST_URL@";
+    UPDATER_BASE = "@MultiMC_UPDATER_BASE@";
     ANALYTICS_ID = "@MultiMC_ANALYTICS_ID@";
     NOTIFICATION_URL = "@MultiMC_NOTIFICATION_URL@";
     FULL_VERSION_STR = "@MultiMC_VERSION_MAJOR@.@MultiMC_VERSION_MINOR@.@MultiMC_VERSION_BUILD@";
 
     GIT_COMMIT = "@MultiMC_GIT_COMMIT@";
     GIT_REFSPEC = "@MultiMC_GIT_REFSPEC@";
-    if(GIT_REFSPEC.startsWith("refs/heads/") && !CHANLIST_URL.isEmpty() && VERSION_BUILD >= 0)
+    if(GIT_REFSPEC.startsWith("refs/heads/") && !UPDATER_BASE.isEmpty() && !BUILD_PLATFORM.isEmpty() && VERSION_BUILD >= 0)
     {
         VERSION_CHANNEL = GIT_REFSPEC;
         VERSION_CHANNEL.remove("refs/heads/");

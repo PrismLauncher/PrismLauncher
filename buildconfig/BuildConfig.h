@@ -29,7 +29,7 @@ public:
     QString BUILD_PLATFORM;
 
     /// URL for the updater's channel
-    QString CHANLIST_URL;
+    QString UPDATER_BASE;
 
     /// User-Agent to use.
     QString USER_AGENT = "MultiMC/5.0";
