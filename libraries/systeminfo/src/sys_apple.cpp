@@ -25,9 +25,9 @@ Sys::KernelInfo Sys::getKernelInfo()
     if(sections.size() >= 1) {
         auto versionParts = sections[0].split('.');
         if(versionParts.size() >= 3) {
-            out.kernelMajor = sections[0].toInt();
-            out.kernelMinor = sections[1].toInt();
-            out.kernelPatch = sections[2].toInt();
+            out.kernelMajor = versionParts[0].toInt();
+            out.kernelMinor = versionParts[1].toInt();
+            out.kernelPatch = versionParts[2].toInt();
         }
         else {
             qWarning() << "Not enough version numbers in " << sections[0] << " found " << versionParts.size();
