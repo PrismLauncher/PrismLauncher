@@ -289,7 +289,10 @@ add_subdirectory(buildconfig)
 
 if(MultiMC_EMBED_SECRETS)
     add_subdirectory(secrets)
+else()
+    add_subdirectory(notsecrets)
 endif()
+
 
 # NOTE: this must always be last to appease the CMake deity of quirky install command evaluation order.
 add_subdirectory(launcher)

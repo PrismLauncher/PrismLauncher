@@ -37,6 +37,8 @@
 #include "BuildConfig.h"
 #include <dialogs/MSALoginDialog.h>
 
+#include "Secrets.h"
+
 AccountListPage::AccountListPage(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::AccountListPage)
 {
@@ -70,11 +72,8 @@ AccountListPage::AccountListPage(QWidget *parent)
 
     updateButtonStates();
 
-    // Xbox authentication won't work without a client identifier, so disable the button
-    // if the build didn't specify one (GH-4012)
-#ifndef EMBED_SECRETS
-    ui->actionAddMicrosoft->setVisible(false);
-#endif
+    // Xbox authentication won't work without a client identifier, so disable the button if it is missing
+    ui->actionAddMicrosoft->setVisible(Secrets::hasMSAClientID());
 }
 
 AccountListPage::~AccountListPage()

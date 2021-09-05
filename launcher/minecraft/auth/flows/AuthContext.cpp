@@ -18,9 +18,7 @@
 #include "katabasis/Globals.h"
 #include "AuthRequest.h"
 
-#ifdef EMBED_SECRETS
 #include "Secrets.h"
-#endif
 
 #include "Env.h"
 
@@ -53,13 +51,18 @@ void AuthContext::finishActivity() {
 }
 
 void AuthContext::initMSA() {
-#ifdef EMBED_SECRETS
     if(m_oauth2) {
         return;
     }
+
+    auto clientId = Secrets::getMSAClientID('-');
+    if(clientId.isEmpty()) {
+        return;
+    }
+
     Katabasis::OAuth2::Options opts;
     opts.scope = "XboxLive.signin offline_access";
-    opts.clientIdentifier = Secrets::getMSAClientID('-');
+    opts.clientIdentifier = clientId;
     opts.authorizationUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
     opts.accessTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     opts.listenerPorts = {28562, 28563, 28564, 28565, 28566};
@@ -71,7 +74,6 @@ void AuthContext::initMSA() {
     connect(m_oauth2, &OAuth2::linkingSucceeded, this, &AuthContext::onOAuthLinkingSucceeded);
     connect(m_oauth2, &OAuth2::showVerificationUriAndCode, this, &AuthContext::showVerificationUriAndCode);
     connect(m_oauth2, &OAuth2::activityChanged, this, &AuthContext::onOAuthActivityChanged);
-#endif
 }
 
 void AuthContext::initMojang() {
