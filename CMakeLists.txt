@@ -55,7 +55,7 @@ set(MultiMC_NEWS_RSS_URL "https://multimc.org/rss.xml" CACHE STRING "URL to fetc
 ######## Set version numbers ########
 set(MultiMC_VERSION_MAJOR    0)
 set(MultiMC_VERSION_MINOR    6)
-set(MultiMC_VERSION_HOTFIX   12)
+set(MultiMC_VERSION_HOTFIX   13)
 
 # Build number
 set(MultiMC_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
