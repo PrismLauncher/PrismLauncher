@@ -20,7 +20,9 @@ Implementation is loosely based on documentation available from [wiki.vg](https:
 
     This lets you authenticate on a completely separate device like your phone, leaving code we ship and the computer you may not even trust out of the picture.
 
-As part of this, the skin fetching no longer uses a third party services and instead gets skins directly from Mojang. Capes can also be selected in MultiMC now.
+As part of this, the skin fetching no longer uses a third party service and instead gets skins directly from Mojang.
+
+Capes can also be selected in MultiMC now. With how many people will now get one for migrating their accounts, it only makes sense.
 
 ### macOS update
 
@@ -28,7 +30,7 @@ Because of issues with the Microsoft accounts, we now have two builds on macOS:
 
 - The old build with Qt 5.6 that does not work with Microsoft accounts, but can run on macOS older than 10.13.
 
-- A new build with Qt 5.15.2 that does work with Microsoft accounts, supports the new macOS dark theme and highlight colors, but requires at least macOS 10.13.
+- A new build with Qt 5.15.2 that does work with Microsoft accounts, can use the new macOS dark theme and highlight colors, but requires at least macOS 10.13.
 
 MultiMC will update to the 5.15.2 builds when it detects that this is possible. **It may look like it is updating twice, just let it do its thing.**
 
@@ -56,7 +58,7 @@ In general, the modpack platform pages have been made more consistent with each 
 
     - GH-3611: Added ability to install beta versions
 
-    - GH-3633: When a CurseForge pack suppors multiple Minecraft versions, we assume the latest one.
+    - GH-3633: When a CurseForge pack is available for multiple Minecraft versions, we assume the latest one.
 
 - ATLauncher improvements:
 
