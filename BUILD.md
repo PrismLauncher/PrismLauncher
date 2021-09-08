@@ -15,7 +15,7 @@ MultiMC is a portable application and is not supposed to be installed into any s
 That would be anything outside your home folder. Before running `make install`, make sure
 you set the install path to something you have write access to. Never build this under
 an administrator/root level account. Don't use `sudo`. It won't work and it's not supposed to work.
-Also note that this guide is for development purposes only. No support is given for building your own fork or special build for what reasons what so ever.
+Also note that this guide is for development purposes only. No support is given for building your own fork or special build for any reason whatsoever.
 
 
 # Getting the source
