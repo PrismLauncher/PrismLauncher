@@ -416,9 +416,9 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="miscellanousPage">
+     <widget class="QWidget" name="miscellaneousPage">
       <attribute name="title">
-       <string>Miscellanous</string>
+       <string>Miscellaneous</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
@@ -489,7 +489,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacerMiscellanous">
+        <spacer name="verticalSpacerMiscellaneous">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
