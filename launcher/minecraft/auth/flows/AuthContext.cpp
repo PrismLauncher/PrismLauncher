@@ -643,7 +643,7 @@ void AuthContext::checkResult() {
                 changeState(
                     STATE_FAILED_HARD,
                     tr("This Microsoft account is underaged and is not linked to a family.\n\nPlease set up your account according to %1.")
-                        .arg("<a href=\"https://help.minecraft.net/hc/en-us/articles/360042649591\">help.minecraft.net</a>")
+                        .arg("<a href=\"https://help.minecraft.net/hc/en-us/articles/4403181904525-How-to-Migrate-Your-Mojang-Account-to-a-Microsoft-Account\">help.minecraft.net</a>")
                 );
             }
             else {
