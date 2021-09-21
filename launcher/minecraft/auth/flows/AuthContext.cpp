@@ -23,7 +23,6 @@
 #include "Env.h"
 
 using OAuth2 = Katabasis::OAuth2;
-using Requestor = AuthRequest;
 using Activity = Katabasis::Activity;
 
 AuthContext::AuthContext(AccountData * data, QObject *parent) :
@@ -164,8 +163,8 @@ void AuthContext::doUserAuth() {
     QNetworkRequest request = QNetworkRequest(QUrl("https://user.auth.xboxlive.com/user/authenticate"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    auto *requestor = new Requestor(this);
-    connect(requestor, &Requestor::finished, this, &AuthContext::onUserAuthDone);
+    auto *requestor = new AuthRequest(this);
+    connect(requestor, &AuthRequest::finished, this, &AuthContext::onUserAuthDone);
     requestor->post(request, xbox_auth_data.toUtf8());
     qDebug() << "First layer of XBox auth ... commencing.";
 }
@@ -358,8 +357,8 @@ void AuthContext::doSTSAuthMinecraft() {
     QNetworkRequest request = QNetworkRequest(QUrl("https://xsts.auth.xboxlive.com/xsts/authorize"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    Requestor *requestor = new Requestor(this);
-    connect(requestor, &Requestor::finished, this, &AuthContext::onSTSAuthMinecraftDone);
+    AuthRequest *requestor = new AuthRequest(this);
+    connect(requestor, &AuthRequest::finished, this, &AuthContext::onSTSAuthMinecraftDone);
     requestor->post(request, xbox_auth_data.toUtf8());
     qDebug() << "Getting Minecraft services STS token...";
 }
@@ -428,8 +427,8 @@ void AuthContext::doMinecraftAuth() {
     QNetworkRequest request = QNetworkRequest(QUrl("https://api.minecraftservices.com/authentication/login_with_xbox"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    Requestor *requestor = new Requestor(this);
-    connect(requestor, &Requestor::finished, this, &AuthContext::onMinecraftAuthDone);
+    AuthRequest *requestor = new AuthRequest(this);
+    connect(requestor, &AuthRequest::finished, this, &AuthContext::onMinecraftAuthDone);
     requestor->post(request, data.toUtf8());
     qDebug() << "Getting Minecraft access token...";
 }
@@ -518,8 +517,8 @@ void AuthContext::doSTSAuthGeneric() {
     QNetworkRequest request = QNetworkRequest(QUrl("https://xsts.auth.xboxlive.com/xsts/authorize"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    Requestor *requestor = new Requestor(this);
-    connect(requestor, &Requestor::finished, this, &AuthContext::onSTSAuthGenericDone);
+    AuthRequest *requestor = new AuthRequest(this);
+    connect(requestor, &AuthRequest::finished, this, &AuthContext::onSTSAuthGenericDone);
     requestor->post(request, xbox_auth_data.toUtf8());
     qDebug() << "Getting generic STS token...";
 }
@@ -574,8 +573,8 @@ void AuthContext::doXBoxProfile() {
     request.setRawHeader("Accept", "application/json");
     request.setRawHeader("x-xbl-contract-version", "3");
     request.setRawHeader("Authorization", QString("XBL3.0 x=%1;%2").arg(m_data->userToken.extra["uhs"].toString(), m_data->xboxApiToken.token).toUtf8());
-    Requestor *requestor = new Requestor(this);
-    connect(requestor, &Requestor::finished, this, &AuthContext::onXBoxProfileDone);
+    AuthRequest *requestor = new AuthRequest(this);
+    connect(requestor, &AuthRequest::finished, this, &AuthContext::onXBoxProfileDone);
     requestor->get(request);
     qDebug() << "Getting Xbox profile...";
 }
@@ -753,8 +752,8 @@ void AuthContext::doMinecraftProfile() {
     // request.setRawHeader("Accept", "application/json");
     request.setRawHeader("Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8());
 
-    Requestor *requestor = new Requestor(this);
-    connect(requestor, &Requestor::finished, this, &AuthContext::onMinecraftProfileDone);
+    AuthRequest *requestor = new AuthRequest(this);
+    connect(requestor, &AuthRequest::finished, this, &AuthContext::onMinecraftProfileDone);
     requestor->get(request);
 }
 
@@ -801,8 +800,8 @@ void AuthContext::doMigrationEligibilityCheck() {
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8());
 
-    Requestor *requestor = new Requestor(this);
-    connect(requestor, &Requestor::finished, this, &AuthContext::onMigrationEligibilityCheckDone);
+    AuthRequest *requestor = new AuthRequest(this);
+    connect(requestor, &AuthRequest::finished, this, &AuthContext::onMigrationEligibilityCheckDone);
     requestor->get(request);
 }
 
@@ -853,8 +852,8 @@ void AuthContext::doGetSkin() {
 
     auto url = QUrl(m_data->minecraftProfile.skin.url);
     QNetworkRequest request = QNetworkRequest(url);
-    Requestor *requestor = new Requestor(this);
-    connect(requestor, &Requestor::finished, this, &AuthContext::onSkinDone);
+    AuthRequest *requestor = new AuthRequest(this);
+    connect(requestor, &AuthRequest::finished, this, &AuthContext::onSkinDone);
     requestor->get(request);
 }
 
