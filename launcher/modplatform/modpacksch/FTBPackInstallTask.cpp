@@ -108,6 +108,10 @@ void PackInstallTask::downloadPack()
         auto relpath = FS::PathCombine("minecraft", file.path, file.name);
         auto path = FS::PathCombine(m_stagingPath, relpath);
 
+        if (filesToCopy.contains(entry->getFullPath())) {
+            qWarning() << "Ignoring" << file.url << "as a file of that path is already downloading.";
+            continue;
+        }
         qDebug() << "Will download" << file.url << "to" << path;
         filesToCopy[entry->getFullPath()] = path;
 
