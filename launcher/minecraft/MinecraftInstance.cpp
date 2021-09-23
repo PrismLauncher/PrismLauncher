@@ -222,6 +222,11 @@ QString MinecraftInstance::texturePacksDir() const
     return FS::PathCombine(gameRoot(), "texturepacks");
 }
 
+QString MinecraftInstance::shaderPacksDir() const
+{
+    return FS::PathCombine(gameRoot(), "shaderpacks");
+}
+
 QString MinecraftInstance::instanceConfigFolder() const
 {
     return FS::PathCombine(gameRoot(), "config");
@@ -1008,6 +1013,17 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::texturePackList() const
         connect(this, &BaseInstance::runningStatusChanged, m_texture_pack_list.get(), &ModFolderModel::disableInteraction);
     }
     return m_texture_pack_list;
+}
+
+std::shared_ptr<ModFolderModel> MinecraftInstance::shaderPackList() const
+{
+    if (!m_shader_pack_list)
+    {
+        m_shader_pack_list.reset(new ResourcePackFolderModel(shaderPacksDir()));
+        m_shader_pack_list->disableInteraction(isRunning());
+        connect(this, &BaseInstance::runningStatusChanged, m_shader_pack_list.get(), &ModFolderModel::disableInteraction);
+    }
+    return m_shader_pack_list;
 }
 
 std::shared_ptr<WorldList> MinecraftInstance::worldList() const

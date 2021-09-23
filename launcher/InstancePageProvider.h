@@ -9,6 +9,7 @@
 #include "pages/instance/ModFolderPage.h"
 #include "pages/instance/ResourcePackPage.h"
 #include "pages/instance/TexturePackPage.h"
+#include "pages/instance/ShaderPackPage.h"
 #include "pages/instance/NotesPage.h"
 #include "pages/instance/ScreenshotsPage.h"
 #include "pages/instance/InstanceSettingsPage.h"
@@ -44,6 +45,7 @@ public:
             values.append(new CoreModFolderPage(onesix.get(), onesix->coreModList(), "coremods", "coremods", tr("Core mods"), "Core-mods"));
             values.append(new ResourcePackPage(onesix.get()));
             values.append(new TexturePackPage(onesix.get()));
+            values.append(new ShaderPackPage(onesix.get()));
             values.append(new NotesPage(onesix.get()));
             values.append(new WorldListPage(onesix.get(), onesix->worldList()));
             values.append(new ServersPage(onesix));

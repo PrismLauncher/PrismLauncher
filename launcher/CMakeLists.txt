@@ -653,6 +653,7 @@ SET(MULTIMC_SOURCES
     pages/instance/VersionPage.h
     pages/instance/TexturePackPage.h
     pages/instance/ResourcePackPage.h
+    pages/instance/ShaderPackPage.h
     pages/instance/ModFolderPage.cpp
     pages/instance/ModFolderPage.h
     pages/instance/NotesPage.cpp
