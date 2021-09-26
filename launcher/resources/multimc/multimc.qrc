@@ -197,6 +197,9 @@
         <file>32x32/resourcepacks.png</file>
         <file>64x64/resourcepacks.png</file>
 
+        <!-- Resource packs, CC-BY-SA 3.0, Oxygen icons. -->
+        <file>128x128/shaderpacks.png</file>
+
         <!-- Refresh, CC-BY-SA 3.0, Oxygen icons. -->
         <file>16x16/refresh.png</file>
         <file>22x22/refresh.png</file>
