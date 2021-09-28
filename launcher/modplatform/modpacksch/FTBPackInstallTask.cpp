@@ -108,12 +108,12 @@ void PackInstallTask::downloadPack()
         auto relpath = FS::PathCombine("minecraft", file.path, file.name);
         auto path = FS::PathCombine(m_stagingPath, relpath);
 
-        if (filesToCopy.contains(entry->getFullPath())) {
+        if (filesToCopy.contains(path)) {
             qWarning() << "Ignoring" << file.url << "as a file of that path is already downloading.";
             continue;
         }
         qDebug() << "Will download" << file.url << "to" << path;
-        filesToCopy[entry->getFullPath()] = path;
+        filesToCopy[path] = entry->getFullPath();
 
         auto dl = Net::Download::makeCached(file.url, entry);
         if (!file.sha1.isEmpty()) {
@@ -149,8 +149,8 @@ void PackInstallTask::install()
     setStatus(tr("Copying modpack files"));
 
     for (auto iter = filesToCopy.begin(); iter != filesToCopy.end(); iter++) {
-        auto &from = iter.key();
-        auto &to = iter.value();
+        auto &to = iter.key();
+        auto &from = iter.value();
         FS::copy fileCopyOperation(from, to);
         if(!fileCopyOperation()) {
             qWarning() << "Failed to copy" << from << "to" << to;
