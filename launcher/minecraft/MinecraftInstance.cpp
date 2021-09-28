@@ -10,6 +10,7 @@
 #include <pathmatcher/MultiMatcher.h>
 #include <FileSystem.h>
 #include <java/JavaVersion.h>
+#include "MMCTime.h"
 
 #include "launch/LaunchTask.h"
 #include "launch/steps/LookupServerAddress.h"
@@ -766,25 +767,6 @@ QString MinecraftInstance::getLogFileRoot()
     return gameRoot();
 }
 
-QString MinecraftInstance::prettifyTimeDuration(int64_t duration)
-{
-    int seconds = (int) (duration % 60);
-    duration /= 60;
-    int minutes = (int) (duration % 60);
-    duration /= 60;
-    int hours = (int) (duration % 24);
-    int days = (int) (duration / 24);
-    if((hours == 0)&&(days == 0))
-    {
-        return tr("%1m %2s").arg(minutes).arg(seconds);
-    }
-    if (days == 0)
-    {
-        return tr("%1h %2m").arg(hours).arg(minutes);
-    }
-    return tr("%1d %2h %3m").arg(days).arg(hours).arg(minutes);
-}
-
 QString MinecraftInstance::getStatusbarDescription()
 {
     QStringList traits;
@@ -798,11 +780,11 @@ QString MinecraftInstance::getStatusbarDescription()
     if(m_settings->get("ShowGameTime").toBool())
     {
         if (lastTimePlayed() > 0) {
-            description.append(tr(", last played for %1").arg(prettifyTimeDuration(lastTimePlayed())));
+            description.append(tr(", last played for %1").arg(Time::prettifyDuration(lastTimePlayed())));
         }
 
         if (totalTimePlayed() > 0) {
-            description.append(tr(", total played for %1").arg(prettifyTimeDuration(totalTimePlayed())));
+            description.append(tr(", total played for %1").arg(Time::prettifyDuration(totalTimePlayed())));
         }
     }
     if(hasCrashed())

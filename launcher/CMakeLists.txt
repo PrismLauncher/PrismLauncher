@@ -84,6 +84,10 @@ set(CORE_SOURCES
     # A Recursive file system watcher
     RecursiveFileSystemWatcher.h
     RecursiveFileSystemWatcher.cpp
+
+    # Time
+    MMCTime.h
+    MMCTime.cpp
 )
 
 add_unit_test(FileSystem
