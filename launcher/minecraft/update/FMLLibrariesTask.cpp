@@ -58,7 +58,7 @@ void FMLLibrariesTask::executeTask()
     }
 
     // download missing libs to our place
-    setStatus(tr("Dowloading FML libraries..."));
+    setStatus(tr("Downloading FML libraries..."));
     auto dljob = new NetJob("FML libraries");
     auto metacache = ENV.metacache();
     for (auto &lib : fmlLibsToProcess)
