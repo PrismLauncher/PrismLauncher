@@ -739,7 +739,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     m_statusLeft = new QLabel(tr("No instance selected"), this);
     m_statusCenter = new QLabel(tr("Total playtime: 0s."), this);
     statusBar()->addPermanentWidget(m_statusLeft, 1);
-    statusBar()->addPermanentWidget(m_statusCenter, 1);
+    statusBar()->addPermanentWidget(m_statusCenter, 0);
 
     // Add "manage accounts" button, right align
     QWidget *spacer = new QWidget();
