@@ -32,7 +32,7 @@
 #include "minecraft/auth/AccountTask.h"
 #include "minecraft/services/SkinDelete.h"
 
-#include "MultiMC.h"
+#include "Launcher.h"
 
 #include "BuildConfig.h"
 #include <dialogs/MSALoginDialog.h>
@@ -50,7 +50,7 @@ AccountListPage::AccountListPage(QWidget *parent)
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    m_accounts = MMC->accounts();
+    m_accounts = LAUNCHER->accounts();
 
     ui->listView->setModel(m_accounts.get());
     ui->listView->header()->setSectionResizeMode(0, QHeaderView::Stretch);

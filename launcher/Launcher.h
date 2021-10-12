@@ -36,12 +36,12 @@ class ITheme;
 class MCEditTool;
 class GAnalytics;
 
-#if defined(MMC)
-#undef MMC
+#if defined(LAUNCHER)
+#undef LAUNCHER
 #endif
-#define MMC (static_cast<MultiMC *>(QCoreApplication::instance()))
+#define LAUNCHER (static_cast<Launcher *>(QCoreApplication::instance()))
 
-class MultiMC : public QApplication
+class Launcher : public QApplication
 {
     // friends for the purpose of limiting access to deprecated stuff
     Q_OBJECT
@@ -55,8 +55,8 @@ public:
     };
 
 public:
-    MultiMC(int &argc, char **argv);
-    virtual ~MultiMC();
+    Launcher(int &argc, char **argv);
+    virtual ~Launcher();
 
     GAnalytics *analytics() const
     {
@@ -198,7 +198,7 @@ private:
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 
     QString m_rootPath;
-    Status m_status = MultiMC::StartingUp;
+    Status m_status = Launcher::StartingUp;
 
 #if defined Q_OS_WIN32
     // used on Windows to attach the standard IO streams

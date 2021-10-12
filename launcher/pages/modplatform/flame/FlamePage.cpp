@@ -1,7 +1,7 @@
 #include "FlamePage.h"
 #include "ui_FlamePage.h"
 
-#include "MultiMC.h"
+#include "Launcher.h"
 #include <Json.h>
 #include "dialogs/NewInstanceDialog.h"
 #include <InstanceImportTask.h>

@@ -324,7 +324,7 @@ public:
                         if(px.loadFromData(bytes))
                             return QIcon(px);
                     }
-                    return MMC->getThemedIcon("unknown_server");
+                    return LAUNCHER->getThemedIcon("unknown_server");
                 }
                 case Qt::DisplayRole:
                     return m_servers[row].m_name;
@@ -762,7 +762,7 @@ void ServersPage::on_actionMove_Down_triggered()
 void ServersPage::on_actionJoin_triggered()
 {
     const auto &address = m_model->at(currentServer)->m_address;
-    MMC->launch(m_inst, true, nullptr, std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(address)));
+    LAUNCHER->launch(m_inst, true, nullptr, std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(address)));
 }
 
 #include "ServersPage.moc"

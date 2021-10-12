@@ -17,7 +17,7 @@
 
 #include <memory>
 #include "pages/BasePage.h"
-#include <MultiMC.h>
+#include <Launcher.h>
 #include <QWidget>
 
 class LanguageSelectionWidget;
@@ -36,7 +36,7 @@ public:
     }
     QIcon icon() const override
     {
-        return MMC->getThemedIcon("language");
+        return LAUNCHER->getThemedIcon("language");
     }
     QString id() const override
     {

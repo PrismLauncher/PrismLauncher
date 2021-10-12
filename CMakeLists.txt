@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 3.1)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
 if(IS_IN_SOURCE_BUILD)
-    message(FATAL_ERROR "You are building MultiMC in-source. Please separate the build tree from the source tree.")
+    message(FATAL_ERROR "You are building the Launcher in-source. Please separate the build tree from the source tree.")
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     if(CMAKE_HOST_SYSTEM_VERSION MATCHES ".*[Mm]icrosoft.*" OR
         CMAKE_HOST_SYSTEM_VERSION MATCHES ".*WSL.*"
     )
-        message(FATAL_ERROR "Building MultiMC is not supported in Linux-on-Windows distributions.")
+        message(FATAL_ERROR "Building the Launcher is not supported in Linux-on-Windows distributions.")
     endif()
 endif()
 
@@ -18,7 +18,7 @@ if(WIN32)
     cmake_policy(SET CMP0020 OLD)
 endif()
 
-project(MultiMC)
+project(Launcher)
 enable_testing()
 
 
@@ -50,61 +50,61 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 ##################################### Set Application options #####################################
 
 ######## Set URLs ########
-set(MultiMC_NEWS_RSS_URL "https://multimc.org/rss.xml" CACHE STRING "URL to fetch MultiMC's news RSS feed from.")
+set(Launcher_NEWS_RSS_URL "https://multimc.org/rss.xml" CACHE STRING "URL to fetch Launcher's news RSS feed from.")
 
 ######## Set version numbers ########
-set(MultiMC_VERSION_MAJOR    0)
-set(MultiMC_VERSION_MINOR    6)
-set(MultiMC_VERSION_HOTFIX   13)
+set(Launcher_VERSION_MAJOR    0)
+set(Launcher_VERSION_MINOR    6)
+set(Launcher_VERSION_HOTFIX   13)
 
 # Build number
-set(MultiMC_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
+set(Launcher_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
 
 # Build platform.
-set(MultiMC_BUILD_PLATFORM "" CACHE STRING "A short string identifying the platform that this build was built for. Only used by the notification system and to display in the about dialog.")
+set(Launcher_BUILD_PLATFORM "" CACHE STRING "A short string identifying the platform that this build was built for. Only used by the notification system and to display in the about dialog.")
 
 # Channel list URL
-set(MultiMC_UPDATER_BASE "" CACHE STRING "Base URL for the updater.")
+set(Launcher_UPDATER_BASE "" CACHE STRING "Base URL for the updater.")
 
 # Notification URL
-set(MultiMC_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
+set(Launcher_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
 
 # The metadata server
-set(MultiMC_META_URL "https://meta.multimc.org/v1/" CACHE STRING "URL to fetch MultiMC's meta files from.")
+set(Launcher_META_URL "https://meta.multimc.org/v1/" CACHE STRING "URL to fetch Launcher's meta files from.")
 
 # paste.ee API key
-set(MultiMC_PASTE_EE_API_KEY "utLvciUouSURFzfjPxLBf5W4ISsUX4pwBDF7N1AfZ" CACHE STRING "API key you can get from paste.ee when you register an account")
+set(Launcher_PASTE_EE_API_KEY "utLvciUouSURFzfjPxLBf5W4ISsUX4pwBDF7N1AfZ" CACHE STRING "API key you can get from paste.ee when you register an account")
 
 # Imgur API Client ID
-set(MultiMC_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can get from Imgur when you register an application")
+set(Launcher_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can get from Imgur when you register an application")
 
 # Google analytics ID
-set(MultiMC_ANALYTICS_ID "UA-87731965-2" CACHE STRING "ID you can get from Google analytics")
+set(Launcher_ANALYTICS_ID "UA-87731965-2" CACHE STRING "ID you can get from Google analytics")
 
 # Bug tracker URL
-set(MultiMC_BUG_TRACKER_URL "" CACHE STRING "URL for the bug tracker.")
+set(Launcher_BUG_TRACKER_URL "" CACHE STRING "URL for the bug tracker.")
 
 # Discord URL
-set(MultiMC_DISCORD_URL "" CACHE STRING "URL for the Discord guild.")
+set(Launcher_DISCORD_URL "" CACHE STRING "URL for the Discord guild.")
 
 # Subreddit URL
-set(MultiMC_SUBREDDIT_URL "" CACHE STRING "URL for the subreddit.")
+set(Launcher_SUBREDDIT_URL "" CACHE STRING "URL for the subreddit.")
 
-
-option(MultiMC_EMBED_SECRETS "Determines whether to embed secrets. Secrets are separate and non-public." OFF)
+# Use the secrets library or a public stub?
+option(Launcher_EMBED_SECRETS "Determines whether to embed secrets. Secrets are separate and non-public." OFF)
 
 #### Check the current Git commit and branch
 include(GetGitRevisionDescription)
-get_git_head_revision(MultiMC_GIT_REFSPEC MultiMC_GIT_COMMIT)
+get_git_head_revision(Launcher_GIT_REFSPEC Launcher_GIT_COMMIT)
 
-message(STATUS "Git commit: ${MultiMC_GIT_COMMIT}")
-message(STATUS "Git refspec: ${MultiMC_GIT_REFSPEC}")
+message(STATUS "Git commit: ${Launcher_GIT_COMMIT}")
+message(STATUS "Git refspec: ${Launcher_GIT_REFSPEC}")
 
-set(MultiMC_RELEASE_VERSION_NAME "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}")
+set(Launcher_RELEASE_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}")
 
 #### Custom target to just print the version.
-add_custom_target(version echo "Version: ${MultiMC_RELEASE_VERSION_NAME}")
-add_custom_target(tcversion echo "\\#\\#teamcity[setParameter name=\\'env.MULTIMC_VERSION\\' value=\\'${MultiMC_RELEASE_VERSION_NAME}\\']")
+add_custom_target(version echo "Version: ${Launcher_RELEASE_VERSION_NAME}")
+add_custom_target(tcversion echo "\\#\\#teamcity[setParameter name=\\'env.LAUNCHER_VERSION\\' value=\\'${Launcher_RELEASE_VERSION_NAME}\\']")
 
 ################################ 3rd Party Libs ################################
 
@@ -129,47 +129,55 @@ if (Qt5_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+####################################### Secrets #######################################
+
+if(Launcher_EMBED_SECRETS)
+    add_subdirectory(secrets)
+else()
+    add_subdirectory(notsecrets)
+endif()
+
 ####################################### Install layout #######################################
 
 # How to install the build results
-set(MultiMC_LAYOUT "auto" CACHE STRING "The layout for MultiMC installation (auto, win-bundle, lin-bundle, lin-nodeps, lin-system, mac-bundle)")
-set_property(CACHE MultiMC_LAYOUT PROPERTY STRINGS auto win-bundle lin-bundle lin-nodeps lin-system mac-bundle)
+set(Launcher_LAYOUT "auto" CACHE STRING "The layout for the launcher installation (auto, win-bundle, lin-nodeps, mac-bundle)")
+set_property(CACHE Launcher_LAYOUT PROPERTY STRINGS auto win-bundle lin-nodeps mac-bundle)
 
-if(MultiMC_LAYOUT STREQUAL "auto")
+if(Launcher_LAYOUT STREQUAL "auto")
     if(UNIX AND APPLE)
-        set(MultiMC_LAYOUT_REAL "mac-bundle")
+        set(Launcher_LAYOUT_REAL "mac-bundle")
     elseif(UNIX)
-        set(MultiMC_LAYOUT_REAL "lin-nodeps")
+        set(Launcher_LAYOUT_REAL "lin-nodeps")
     elseif(WIN32)
-        set(MultiMC_LAYOUT_REAL "win-bundle")
+        set(Launcher_LAYOUT_REAL "win-bundle")
     else()
         message(FATAL_ERROR "Cannot choose a sensible install layout for your platform.")
     endif()
 else()
-    set(MultiMC_LAYOUT_REAL ${MultiMC_LAYOUT})
+    set(Launcher_LAYOUT_REAL ${Launcher_LAYOUT})
 endif()
 
-if(MultiMC_LAYOUT_REAL STREQUAL "mac-bundle")
-    set(BINARY_DEST_DIR "MultiMC.app/Contents/MacOS")
-    set(LIBRARY_DEST_DIR "MultiMC.app/Contents/MacOS")
-    set(PLUGIN_DEST_DIR "MultiMC.app/Contents/MacOS")
-    set(RESOURCES_DEST_DIR "MultiMC.app/Contents/Resources")
-    set(JARS_DEST_DIR "MultiMC.app/Contents/MacOS/jars")
+if(Launcher_LAYOUT_REAL STREQUAL "mac-bundle")
+    set(BINARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
+    set(LIBRARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
+    set(PLUGIN_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
+    set(RESOURCES_DEST_DIR "${Launcher_Name}.app/Contents/Resources")
+    set(JARS_DEST_DIR "${Launcher_Name}.app/Contents/MacOS/jars")
 
     set(BUNDLE_DEST_DIR ".")
 
     # Apps to bundle
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.app")
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_Name}.app")
 
     # Mac bundle settings
-    set(MACOSX_BUNDLE_BUNDLE_NAME "MultiMC")
-    set(MACOSX_BUNDLE_INFO_STRING "MultiMC Minecraft launcher and management utility.")
-    set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.multimc.MultiMC5")
-    set(MACOSX_BUNDLE_BUNDLE_VERSION "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
-    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
-    set(MACOSX_BUNDLE_LONG_VERSION_STRING "${MultiMC_VERSION_MAJOR}.${MultiMC_VERSION_MINOR}.${MultiMC_VERSION_HOTFIX}.${MultiMC_VERSION_BUILD}")
-    set(MACOSX_BUNDLE_ICON_FILE MultiMC.icns)
-    set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2015-2021 MultiMC Contributors")
+    set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_Name}")
+    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_Name}:  Minecraft launcher and management utility.")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.multimc.${Launcher_Name}")
+    set(MACOSX_BUNDLE_BUNDLE_VERSION "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}.${Launcher_VERSION_BUILD}")
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}.${Launcher_VERSION_BUILD}")
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}.${Launcher_VERSION_BUILD}")
+    set(MACOSX_BUNDLE_ICON_FILE ${Launcher_Name}.icns)
+    set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2015-2021 ${Launcher_Copyright}")
 
     # directories to look for dependencies
     set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -178,32 +186,9 @@ if(MultiMC_LAYOUT_REAL STREQUAL "mac-bundle")
     set(INSTALL_BUNDLE "full")
 
     # Add the icon
-    install(FILES launcher/resources/MultiMC.icns DESTINATION ${RESOURCES_DEST_DIR})
+    install(FILES ${Launcher_Branding_ICNS} DESTINATION ${RESOURCES_DEST_DIR})
 
-elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-bundle")
-    set(BINARY_DEST_DIR "bin")
-    set(LIBRARY_DEST_DIR "bin")
-    set(PLUGIN_DEST_DIR "plugins")
-    set(BUNDLE_DEST_DIR ".")
-    set(RESOURCES_DEST_DIR ".")
-    set(JARS_DEST_DIR "bin/jars")
-
-    # Apps to bundle
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/MultiMC")
-
-    # directories to look for dependencies
-    set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-    # install as bundle
-    set(INSTALL_BUNDLE "full")
-
-    # Set RPATH
-    SET(MultiMC_BINARY_RPATH "$ORIGIN/")
-
-    # Install basic runner script
-    install(PROGRAMS launcher/package/linux/MultiMC DESTINATION ${BUNDLE_DEST_DIR})
-
-elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-nodeps")
+elseif(Launcher_LAYOUT_REAL STREQUAL "lin-nodeps")
     set(BINARY_DEST_DIR "bin")
     set(LIBRARY_DEST_DIR "bin")
     set(PLUGIN_DEST_DIR "plugins")
@@ -215,28 +200,13 @@ elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-nodeps")
     set(INSTALL_BUNDLE "nodeps")
 
     # Set RPATH
-    SET(MultiMC_BINARY_RPATH "$ORIGIN/")
+    SET(Launcher_BINARY_RPATH "$ORIGIN/")
 
     # Install basic runner script
-    install(PROGRAMS launcher/package/linux/MultiMC DESTINATION ${BUNDLE_DEST_DIR})
+    configure_file(launcher/Launcher.in "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" @ONLY)
+    install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" DESTINATION ${BUNDLE_DEST_DIR} RENAME ${Launcher_Name})
 
-elseif(MultiMC_LAYOUT_REAL STREQUAL "lin-system")
-    set(MultiMC_APP_BINARY_NAME "multimc" CACHE STRING "Name of the MultiMC binary")
-    set(MultiMC_BINARY_DEST_DIR "bin" CACHE STRING "Path to the binary directory")
-    set(MultiMC_LIBRARY_DEST_DIR "lib${LIB_SUFFIX}" CACHE STRING "Path to the library directory")
-    set(MultiMC_SHARE_DEST_DIR "share/multimc" CACHE STRING "Path to the shared data directory")
-    set(JARS_DEST_DIR "${MultiMC_SHARE_DEST_DIR}/jars")
-
-    set(BINARY_DEST_DIR ${MultiMC_BINARY_DEST_DIR})
-    set(LIBRARY_DEST_DIR ${MultiMC_LIBRARY_DEST_DIR})
-
-    MESSAGE(STATUS "Compiling for linux system with ${MultiMC_SHARE_DEST_DIR} and MULTIMC_LINUX_DATADIR")
-    SET(MultiMC_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DMULTIMC_LINUX_DATADIR")
-
-    # install as bundle with no dependencies included
-    set(INSTALL_BUNDLE "nodeps")
-
-elseif(MultiMC_LAYOUT_REAL STREQUAL "win-bundle")
+elseif(Launcher_LAYOUT_REAL STREQUAL "win-bundle")
     set(BINARY_DEST_DIR ".")
     set(LIBRARY_DEST_DIR ".")
     set(PLUGIN_DEST_DIR ".")
@@ -245,7 +215,7 @@ elseif(MultiMC_LAYOUT_REAL STREQUAL "win-bundle")
     set(JARS_DEST_DIR "jars")
 
     # Apps to bundle
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/MultiMC.exe")
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_Name}.exe")
 
     # directories to look for dependencies
     set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -264,7 +234,7 @@ set_directory_properties(PROPERTIES EP_BASE External)
 option(NBT_BUILD_SHARED "Build NBT shared library" ON)
 option(NBT_USE_ZLIB "Build NBT library with zlib support" OFF)
 option(NBT_BUILD_TESTS "Build NBT library tests" OFF) #FIXME: fix unit tests.
-set(NBT_NAME MultiMC_nbt++)
+set(NBT_NAME Launcher_nbt++)
 set(NBT_DEST_DIR ${LIBRARY_DEST_DIR})
 add_subdirectory(libraries/libnbtplusplus)
 
@@ -286,13 +256,6 @@ add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too m
 ############################### Built Artifacts ###############################
 
 add_subdirectory(buildconfig)
-
-if(MultiMC_EMBED_SECRETS)
-    add_subdirectory(secrets)
-else()
-    add_subdirectory(notsecrets)
-endif()
-
 
 # NOTE: this must always be last to appease the CMake deity of quirky install command evaluation order.
 add_subdirectory(launcher)

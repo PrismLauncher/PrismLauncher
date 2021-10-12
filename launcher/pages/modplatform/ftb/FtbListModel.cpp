@@ -2,7 +2,7 @@
 
 #include "BuildConfig.h"
 #include "Env.h"
-#include "MultiMC.h"
+#include "Launcher.h"
 #include "Json.h"
 
 #include <QPainter>
@@ -46,7 +46,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
     }
     else if(role == Qt::DecorationRole)
     {
-        QIcon placeholder = MMC->getThemedIcon("screenshot-placeholder");
+        QIcon placeholder = LAUNCHER->getThemedIcon("screenshot-placeholder");
 
         auto iter = m_logoMap.find(pack.name);
         if (iter != m_logoMap.end()) {

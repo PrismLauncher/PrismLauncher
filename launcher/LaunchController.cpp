@@ -1,7 +1,7 @@
 #include "LaunchController.h"
 #include "MainWindow.h"
 #include <minecraft/auth/AccountList.h>
-#include "MultiMC.h"
+#include "Launcher.h"
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/ProfileSelectDialog.h"
 #include "dialogs/ProgressDialog.h"
@@ -39,7 +39,7 @@ void LaunchController::login() {
     JavaCommon::checkJVMArgs(m_instance->settings()->get("JvmArgs").toString(), m_parentWidget);
 
     // Find an account to use.
-    std::shared_ptr<AccountList> accounts = MMC->accounts();
+    std::shared_ptr<AccountList> accounts = LAUNCHER->accounts();
     if (accounts->count() <= 0)
     {
         // Tell the user they need to log in at least one account in order to play.
@@ -56,7 +56,7 @@ void LaunchController::login() {
         if (reply == QMessageBox::Yes)
         {
             // Open the account manager.
-            MMC->ShowGlobalSettings(m_parentWidget, "accounts");
+            LAUNCHER->ShowGlobalSettings(m_parentWidget, "accounts");
         }
     }
 
@@ -254,7 +254,7 @@ void LaunchController::launchInstance()
     auto showConsole = m_instance->settings()->get("ShowConsole").toBool();
     if(!console && showConsole)
     {
-        MMC->showInstanceWindow(m_instance);
+        LAUNCHER->showInstanceWindow(m_instance);
     }
     connect(m_launcher.get(), &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
     connect(m_launcher.get(), &LaunchTask::succeeded, this, &LaunchController::onSucceeded);
@@ -360,7 +360,7 @@ void LaunchController::onFailed(QString reason)
 {
     if(m_instance->settings()->get("ShowConsoleOnError").toBool())
     {
-        MMC->showInstanceWindow(m_instance, "console");
+        LAUNCHER->showInstanceWindow(m_instance, "console");
     }
     emitFailed(reason);
 }

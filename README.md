@@ -48,33 +48,33 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 ## Build status
 ### Linux (Intel32)
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=MultiMC_Launcher_Linux32_Build&guest=1">
-Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:MultiMC_Launcher_Linux32_Build)/statusIcon"/>
+<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Linux32_Build&guest=1">
+Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Linux32_Build)/statusIcon"/>
 </a>
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=MultiMC_Launcher_Linux32_Deploy&guest=1">
-Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:MultiMC_Launcher_Linux32_Deploy)/statusIcon"/>
+<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Linux32_Deploy&guest=1">
+Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Linux32_Deploy)/statusIcon"/>
 </a>
 
 ### Linux (AMD64)
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=MultiMC_Launcher_Linux64_Build&guest=1">
-Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:MultiMC_Launcher_Linux64_Build)/statusIcon"/>
+<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Linux64_Build&guest=1">
+Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Linux64_Build)/statusIcon"/>
 </a>
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=MultiMC_Launcher_Linux64_Deploy&guest=1">
-Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:MultiMC_Launcher_Linux64_Deploy)/statusIcon"/>
+<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Linux64_Deploy&guest=1">
+Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Linux64_Deploy)/statusIcon"/>
 </a>
 
 ### macOS (AMD64)
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=MultiMC_Launcher_MacOS_Build&guest=1">
-Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:MultiMC_Launcher_MacOS_Build)/statusIcon"/>
+<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_MacOS_Build&guest=1">
+Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_MacOS_Build)/statusIcon"/>
 </a>
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=MultiMC_Launcher_MacOS_Deploy&guest=1">
-Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:MultiMC_Launcher_MacOS_Deploy)/statusIcon"/>
+<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_MacOS_Deploy&guest=1">
+Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_MacOS_Deploy)/statusIcon"/>
 </a>
 
 ### Windows (Intel32)
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=MultiMC_Launcher_Windows_Build&guest=1">
-Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:MultiMC_Launcher_Windows_Build)/statusIcon"/>
+<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Windows_Build&guest=1">
+Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Windows_Build)/statusIcon"/>
 </a>
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=MultiMC_Launcher_Windows_Deploy&guest=1">
-Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:MultiMC_Launcher_Windows_Deploy)/statusIcon"/>
+<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Windows_Deploy&guest=1">
+Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Windows_Deploy)/statusIcon"/>
 </a>

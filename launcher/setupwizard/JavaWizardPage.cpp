@@ -1,5 +1,5 @@
 #include "JavaWizardPage.h"
-#include <MultiMC.h>
+#include <Launcher.h>
 
 #include <QVBoxLayout>
 #include <QGroupBox>
@@ -55,7 +55,7 @@ bool JavaWizardPage::wantsRefreshButton()
 
 bool JavaWizardPage::validatePage()
 {
-    auto settings = MMC->settings();
+    auto settings = LAUNCHER->settings();
     auto result = m_java_widget->validate();
     switch(result)
     {
@@ -71,7 +71,7 @@ bool JavaWizardPage::validatePage()
         case JavaSettingsWidget::ValidationStatus::JavaBad:
         {
             // Memory
-            auto s = MMC->settings();
+            auto s = LAUNCHER->settings();
             s->set("MinMemAlloc", m_java_widget->minHeapSize());
             s->set("MaxMemAlloc", m_java_widget->maxHeapSize());
             if (m_java_widget->permGenEnabled())

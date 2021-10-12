@@ -1,5 +1,5 @@
 #include "ListModel.h"
-#include "MultiMC.h"
+#include "Launcher.h"
 
 #include <MMCStrings.h>
 #include <Version.h>
@@ -130,7 +130,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
         {
             return (m_logoMap.value(pack.logo));
         }
-        QIcon icon = MMC->getThemedIcon("screenshot-placeholder");
+        QIcon icon = LAUNCHER->getThemedIcon("screenshot-placeholder");
         ((ListModel *)this)->requestLogo(pack.logo);
         return icon;
     }

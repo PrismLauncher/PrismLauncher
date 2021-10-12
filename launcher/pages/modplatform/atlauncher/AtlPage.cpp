@@ -139,7 +139,7 @@ QVector<QString> AtlPage::chooseOptionalMods(QVector<ATLauncher::VersionMod> mod
 }
 
 QString AtlPage::chooseVersion(Meta::VersionListPtr vlist, QString minecraftVersion) {
-    VersionSelectDialog vselect(vlist.get(), "Choose Version", MMC->activeWindow(), false);
+    VersionSelectDialog vselect(vlist.get(), "Choose Version", LAUNCHER->activeWindow(), false);
     if (minecraftVersion != Q_NULLPTR) {
         vselect.setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
         vselect.setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));

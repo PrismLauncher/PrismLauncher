@@ -78,7 +78,7 @@ public:
      */
     void invalidate();
 
-    /// The instance's ID. The ID SHALL be determined by MMC internally. The ID IS guaranteed to
+    /// The instance's ID. The ID SHALL be determined by LAUNCHER internally. The ID IS guaranteed to
     /// be unique.
     virtual QString id() const;
 

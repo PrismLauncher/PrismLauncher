@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "MultiMC.h"
+#include "Launcher.h"
 #include "BuildConfig.h"
 
 #include "MainWindow.h"
@@ -267,7 +267,7 @@ public:
 
         actionAddInstance = TranslatedAction(MainWindow);
         actionAddInstance->setObjectName(QStringLiteral("actionAddInstance"));
-        actionAddInstance->setIcon(MMC->getThemedIcon("new"));
+        actionAddInstance->setIcon(LAUNCHER->getThemedIcon("new"));
         actionAddInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Add Instance"));
         actionAddInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Add a new instance."));
         all_actions.append(&actionAddInstance);
@@ -280,7 +280,7 @@ public:
 
         actionViewInstanceFolder = TranslatedAction(MainWindow);
         actionViewInstanceFolder->setObjectName(QStringLiteral("actionViewInstanceFolder"));
-        actionViewInstanceFolder->setIcon(MMC->getThemedIcon("viewfolder"));
+        actionViewInstanceFolder->setIcon(LAUNCHER->getThemedIcon("viewfolder"));
         actionViewInstanceFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "View Instance Folder"));
         actionViewInstanceFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the instance folder in a file browser."));
         all_actions.append(&actionViewInstanceFolder);
@@ -288,7 +288,7 @@ public:
 
         actionViewCentralModsFolder = TranslatedAction(MainWindow);
         actionViewCentralModsFolder->setObjectName(QStringLiteral("actionViewCentralModsFolder"));
-        actionViewCentralModsFolder->setIcon(MMC->getThemedIcon("centralmods"));
+        actionViewCentralModsFolder->setIcon(LAUNCHER->getThemedIcon("centralmods"));
         actionViewCentralModsFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "View Central Mods Folder"));
         actionViewCentralModsFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the central mods folder in a file browser."));
         all_actions.append(&actionViewCentralModsFolder);
@@ -300,7 +300,7 @@ public:
         foldersMenuButton->setMenu(foldersMenu);
         foldersMenuButton->setPopupMode(QToolButton::InstantPopup);
         foldersMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        foldersMenuButton->setIcon(MMC->getThemedIcon("viewfolder"));
+        foldersMenuButton->setIcon(LAUNCHER->getThemedIcon("viewfolder"));
         foldersMenuButton->setFocusPolicy(Qt::NoFocus);
         all_toolbuttons.append(&foldersMenuButton);
         QWidgetAction* foldersButtonAction = new QWidgetAction(MainWindow);
@@ -309,7 +309,7 @@ public:
 
         actionSettings = TranslatedAction(MainWindow);
         actionSettings->setObjectName(QStringLiteral("actionSettings"));
-        actionSettings->setIcon(MMC->getThemedIcon("settings"));
+        actionSettings->setIcon(LAUNCHER->getThemedIcon("settings"));
         actionSettings->setMenuRole(QAction::PreferencesRole);
         actionSettings.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Settings"));
         actionSettings.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change settings."));
@@ -322,7 +322,7 @@ public:
         if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
             actionReportBug = TranslatedAction(MainWindow);
             actionReportBug->setObjectName(QStringLiteral("actionReportBug"));
-            actionReportBug->setIcon(MMC->getThemedIcon("bug"));
+            actionReportBug->setIcon(LAUNCHER->getThemedIcon("bug"));
             actionReportBug.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Report a Bug"));
             actionReportBug.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the bug tracker to report a bug with MultiMC."));
             all_actions.append(&actionReportBug);
@@ -332,7 +332,7 @@ public:
         if (!BuildConfig.DISCORD_URL.isEmpty()) {
             actionDISCORD = TranslatedAction(MainWindow);
             actionDISCORD->setObjectName(QStringLiteral("actionDISCORD"));
-            actionDISCORD->setIcon(MMC->getThemedIcon("discord"));
+            actionDISCORD->setIcon(LAUNCHER->getThemedIcon("discord"));
             actionDISCORD.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Discord"));
             actionDISCORD.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open MultiMC discord voice chat."));
             all_actions.append(&actionDISCORD);
@@ -342,7 +342,7 @@ public:
         if (!BuildConfig.SUBREDDIT_URL.isEmpty()) {
             actionREDDIT = TranslatedAction(MainWindow);
             actionREDDIT->setObjectName(QStringLiteral("actionREDDIT"));
-            actionREDDIT->setIcon(MMC->getThemedIcon("reddit-alien"));
+            actionREDDIT->setIcon(LAUNCHER->getThemedIcon("reddit-alien"));
             actionREDDIT.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Reddit"));
             actionREDDIT.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open MultiMC subreddit."));
             all_actions.append(&actionREDDIT);
@@ -351,7 +351,7 @@ public:
 
         actionAbout = TranslatedAction(MainWindow);
         actionAbout->setObjectName(QStringLiteral("actionAbout"));
-        actionAbout->setIcon(MMC->getThemedIcon("about"));
+        actionAbout->setIcon(LAUNCHER->getThemedIcon("about"));
         actionAbout->setMenuRole(QAction::AboutRole);
         actionAbout.setTextId(QT_TRANSLATE_NOOP("MainWindow", "About MultiMC"));
         actionAbout.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "View information about MultiMC."));
@@ -364,7 +364,7 @@ public:
         helpMenuButton->setMenu(helpMenu);
         helpMenuButton->setPopupMode(QToolButton::InstantPopup);
         helpMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        helpMenuButton->setIcon(MMC->getThemedIcon("help"));
+        helpMenuButton->setIcon(LAUNCHER->getThemedIcon("help"));
         helpMenuButton->setFocusPolicy(Qt::NoFocus);
         all_toolbuttons.append(&helpMenuButton);
         QWidgetAction* helpButtonAction = new QWidgetAction(MainWindow);
@@ -375,7 +375,7 @@ public:
         {
             actionCheckUpdate = TranslatedAction(MainWindow);
             actionCheckUpdate->setObjectName(QStringLiteral("actionCheckUpdate"));
-            actionCheckUpdate->setIcon(MMC->getThemedIcon("checkupdate"));
+            actionCheckUpdate->setIcon(LAUNCHER->getThemedIcon("checkupdate"));
             actionCheckUpdate.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Update"));
             actionCheckUpdate.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Check for new updates for MultiMC."));
             all_actions.append(&actionCheckUpdate);
@@ -386,7 +386,7 @@ public:
 
         actionPatreon = TranslatedAction(MainWindow);
         actionPatreon->setObjectName(QStringLiteral("actionPatreon"));
-        actionPatreon->setIcon(MMC->getThemedIcon("patreon"));
+        actionPatreon->setIcon(LAUNCHER->getThemedIcon("patreon"));
         actionPatreon.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Support MultiMC"));
         actionPatreon.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the MultiMC Patreon page."));
         all_actions.append(&actionPatreon);
@@ -395,7 +395,7 @@ public:
         actionCAT = TranslatedAction(MainWindow);
         actionCAT->setObjectName(QStringLiteral("actionCAT"));
         actionCAT->setCheckable(true);
-        actionCAT->setIcon(MMC->getThemedIcon("cat"));
+        actionCAT->setIcon(LAUNCHER->getThemedIcon("cat"));
         actionCAT.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Meow"));
         actionCAT.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "It's a fluffy kitty :3"));
         actionCAT->setPriority(QAction::LowPriority);
@@ -408,7 +408,7 @@ public:
         actionManageAccounts.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Manage Accounts"));
         // FIXME: no tooltip!
         actionManageAccounts->setCheckable(false);
-        actionManageAccounts->setIcon(MMC->getThemedIcon("accounts"));
+        actionManageAccounts->setIcon(LAUNCHER->getThemedIcon("accounts"));
         all_actions.append(&actionManageAccounts);
 
         all_toolbars.append(&mainToolBar);
@@ -435,7 +435,7 @@ public:
 
         actionMoreNews = TranslatedAction(MainWindow);
         actionMoreNews->setObjectName(QStringLiteral("actionMoreNews"));
-        actionMoreNews->setIcon(MMC->getThemedIcon("news"));
+        actionMoreNews->setIcon(LAUNCHER->getThemedIcon("news"));
         actionMoreNews.setTextId(QT_TRANSLATE_NOOP("MainWindow", "More news..."));
         actionMoreNews.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the MultiMC development blog to read more news about MultiMC."));
         all_actions.append(&actionMoreNews);
@@ -467,7 +467,7 @@ public:
 
         changeIconButton = new LabeledToolButton(MainWindow);
         changeIconButton->setObjectName(QStringLiteral("changeIconButton"));
-        changeIconButton->setIcon(MMC->getThemedIcon("news"));
+        changeIconButton->setIcon(LAUNCHER->getThemedIcon("news"));
         changeIconButton->setToolTip(actionChangeInstIcon->toolTip());
         changeIconButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         instanceToolBar->addWidget(changeIconButton);
@@ -578,7 +578,7 @@ public:
 
         actionCopyInstance = TranslatedAction(MainWindow);
         actionCopyInstance->setObjectName(QStringLiteral("actionCopyInstance"));
-        actionCopyInstance->setIcon(MMC->getThemedIcon("copy"));
+        actionCopyInstance->setIcon(LAUNCHER->getThemedIcon("copy"));
         actionCopyInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Copy Instance"));
         actionCopyInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Copy the selected instance."));
         all_actions.append(&actionCopyInstance);
@@ -595,7 +595,7 @@ public:
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         }
         MainWindow->resize(800, 600);
-        MainWindow->setWindowIcon(MMC->getThemedIcon("logo"));
+        MainWindow->setWindowIcon(LAUNCHER->getThemedIcon("logo"));
         MainWindow->setWindowTitle("MultiMC 5");
 #ifndef QT_NO_ACCESSIBILITY
         MainWindow->setAccessibleName("MultiMC");
@@ -672,7 +672,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     {
         m_newsChecker.reset(new NewsChecker(BuildConfig.NEWS_RSS_URL));
         newsLabel = new QToolButton();
-        newsLabel->setIcon(MMC->getThemedIcon("news"));
+        newsLabel->setIcon(LAUNCHER->getThemedIcon("news"));
         newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         newsLabel->setFocusPolicy(Qt::NoFocus);
@@ -699,20 +699,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         connect(view, &GroupView::droppedURLs, this, &MainWindow::droppedURLs, Qt::QueuedConnection);
 
         proxymodel = new InstanceProxyModel(this);
-        proxymodel->setSourceModel(MMC->instances().get());
+        proxymodel->setSourceModel(LAUNCHER->instances().get());
         proxymodel->sort(0);
         connect(proxymodel, &InstanceProxyModel::dataChanged, this, &MainWindow::instanceDataChanged);
 
         view->setModel(proxymodel);
         view->setSourceOfGroupCollapseStatus([](const QString & groupName)->bool {
-            return MMC->instances()->isGroupCollapsed(groupName);
+            return LAUNCHER->instances()->isGroupCollapsed(groupName);
         });
-        connect(view, &GroupView::groupStateChanged, MMC->instances().get(), &InstanceList::on_GroupStateChanged);
+        connect(view, &GroupView::groupStateChanged, LAUNCHER->instances().get(), &InstanceList::on_GroupStateChanged);
         ui->horizontalLayout->addWidget(view);
     }
     // The cat background
     {
-        bool cat_enable = MMC->settings()->get("TheCat").toBool();
+        bool cat_enable = LAUNCHER->settings()->get("TheCat").toBool();
         ui->actionCAT->setChecked(cat_enable);
         // NOTE: calling the operator like that is an ugly hack to appease ancient gcc...
         connect(ui->actionCAT.operator->(), SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
@@ -725,16 +725,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::instanceChanged);
 
     // track icon changes and update the toolbar!
-    connect(MMC->icons().get(), &IconList::iconUpdated, this, &MainWindow::iconUpdated);
+    connect(LAUNCHER->icons().get(), &IconList::iconUpdated, this, &MainWindow::iconUpdated);
 
     // model reset -> selection is invalid. All the instance pointers are wrong.
-    connect(MMC->instances().get(), &InstanceList::dataIsInvalid, this, &MainWindow::selectionBad);
+    connect(LAUNCHER->instances().get(), &InstanceList::dataIsInvalid, this, &MainWindow::selectionBad);
 
     // handle newly added instances
-    connect(MMC->instances().get(), &InstanceList::instanceSelectRequest, this, &MainWindow::instanceSelectRequest);
+    connect(LAUNCHER->instances().get(), &InstanceList::instanceSelectRequest, this, &MainWindow::instanceSelectRequest);
 
     // When the global settings page closes, we want to know about it and update our state
-    connect(MMC, &MultiMC::globalSettingsClosed, this, &MainWindow::globalSettingsClosed);
+    connect(LAUNCHER, &Launcher::globalSettingsClosed, this, &MainWindow::globalSettingsClosed);
 
     m_statusLeft = new QLabel(tr("No instance selected"), this);
     m_statusCenter = new QLabel(tr("Total playtime: 0s."), this);
@@ -754,7 +754,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     accountMenuButton->setMenu(accountMenu);
     accountMenuButton->setPopupMode(QToolButton::InstantPopup);
     accountMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    accountMenuButton->setIcon(MMC->getThemedIcon("noaccount"));
+    accountMenuButton->setIcon(LAUNCHER->getThemedIcon("noaccount"));
 
     QWidgetAction *accountMenuButtonAction = new QWidgetAction(this);
     accountMenuButtonAction->setDefaultWidget(accountMenuButton);
@@ -765,14 +765,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     // Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit.
     // Template hell sucks...
     connect(
-        MMC->accounts().get(),
+        LAUNCHER->accounts().get(),
         &AccountList::activeAccountChanged,
         [this] {
             activeAccountChanged();
         }
     );
     connect(
-        MMC->accounts().get(),
+        LAUNCHER->accounts().get(),
         &AccountList::listChanged,
         [this]
         {
@@ -784,7 +784,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     activeAccountChanged();
 
     // TODO: refresh accounts here?
-    // auto accounts = MMC->accounts();
+    // auto accounts = LAUNCHER->accounts();
 
     // load the news
     {
@@ -795,20 +795,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     if(BuildConfig.UPDATER_ENABLED)
     {
-        bool updatesAllowed = MMC->updatesAreAllowed();
+        bool updatesAllowed = LAUNCHER->updatesAreAllowed();
         updatesAllowedChanged(updatesAllowed);
 
         // NOTE: calling the operator like that is an ugly hack to appease ancient gcc...
         connect(ui->actionCheckUpdate.operator->(), &QAction::triggered, this, &MainWindow::checkForUpdates);
 
         // set up the updater object.
-        auto updater = MMC->updateChecker();
+        auto updater = LAUNCHER->updateChecker();
         connect(updater.get(), &UpdateChecker::updateAvailable, this, &MainWindow::updateAvailable);
         connect(updater.get(), &UpdateChecker::noUpdateFound, this, &MainWindow::updateNotAvailable);
         // if automatic update checks are allowed, start one.
-        if (MMC->settings()->get("AutoUpdate").toBool() && updatesAllowed)
+        if (LAUNCHER->settings()->get("AutoUpdate").toBool() && updatesAllowed)
         {
-            updater->checkForUpdate(MMC->settings()->get("UpdateChannel").toString(), false);
+            updater->checkForUpdate(LAUNCHER->settings()->get("UpdateChannel").toString(), false);
         }
     }
 
@@ -823,7 +823,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         checker->checkForNotifications();
     }
 
-    setSelectedInstanceById(MMC->settings()->get("SelectedInstance").toString());
+    setSelectedInstanceById(LAUNCHER->settings()->get("SelectedInstance").toString());
 
     // removing this looks stupid
     view->setFocus();
@@ -833,7 +833,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
 void MainWindow::retranslateUi()
 {
-    std::shared_ptr<AccountList> accounts = MMC->accounts();
+    std::shared_ptr<AccountList> accounts = LAUNCHER->accounts();
     MinecraftAccountPtr active_account = accounts->activeAccount();
     if(active_account) {
         auto profileLabel = profileInUseFilter(active_account->profileName(), active_account->isInUse());
@@ -971,16 +971,16 @@ void MainWindow::updateToolsMenu()
     QAction *normalLaunchOffline = launchOfflineMenu->addAction(tr("Launch Offline"));
     connect(normalLaunch, &QAction::triggered, [this]()
             {
-                MMC->launch(m_selectedInstance, true);
+                LAUNCHER->launch(m_selectedInstance, true);
             });
     connect(normalLaunchOffline, &QAction::triggered, [this]()
             {
-                MMC->launch(m_selectedInstance, false);
+                LAUNCHER->launch(m_selectedInstance, false);
             });
     QString profilersTitle = tr("Profilers");
     launchMenu->addSeparator()->setText(profilersTitle);
     launchOfflineMenu->addSeparator()->setText(profilersTitle);
-    for (auto profiler : MMC->profilers().values())
+    for (auto profiler : LAUNCHER->profilers().values())
     {
         QAction *profilerAction = launchMenu->addAction(profiler->name());
         QAction *profilerOfflineAction = launchOfflineMenu->addAction(profiler->name());
@@ -997,11 +997,11 @@ void MainWindow::updateToolsMenu()
         {
             connect(profilerAction, &QAction::triggered, [this, profiler]()
                     {
-                        MMC->launch(m_selectedInstance, true, profiler.get());
+                        LAUNCHER->launch(m_selectedInstance, true, profiler.get());
                     });
             connect(profilerOfflineAction, &QAction::triggered, [this, profiler]()
                     {
-                        MMC->launch(m_selectedInstance, false, profiler.get());
+                        LAUNCHER->launch(m_selectedInstance, false, profiler.get());
                     });
         }
     }
@@ -1013,7 +1013,7 @@ void MainWindow::repopulateAccountsMenu()
 {
     accountMenu->clear();
 
-    std::shared_ptr<AccountList> accounts = MMC->accounts();
+    std::shared_ptr<AccountList> accounts = LAUNCHER->accounts();
     MinecraftAccountPtr active_account = accounts->activeAccount();
 
     QString active_profileId = "";
@@ -1059,7 +1059,7 @@ void MainWindow::repopulateAccountsMenu()
 
     QAction *action = new QAction(tr("No Default Account"), this);
     action->setCheckable(true);
-    action->setIcon(MMC->getThemedIcon("noaccount"));
+    action->setIcon(LAUNCHER->getThemedIcon("noaccount"));
     action->setData("");
     if (active_profileId.isEmpty()) {
         action->setChecked(true);
@@ -1099,7 +1099,7 @@ void MainWindow::changeActiveAccount()
         id = data.toString();
     }
 
-    MMC->accounts()->setActiveAccount(id);
+    LAUNCHER->accounts()->setActiveAccount(id);
 
     activeAccountChanged();
 }
@@ -1108,7 +1108,7 @@ void MainWindow::activeAccountChanged()
 {
     repopulateAccountsMenu();
 
-    MinecraftAccountPtr account = MMC->accounts()->activeAccount();
+    MinecraftAccountPtr account = LAUNCHER->accounts()->activeAccount();
 
     // FIXME: this needs adjustment for MSA
     if (account != nullptr && account->profileName() != "")
@@ -1120,7 +1120,7 @@ void MainWindow::activeAccountChanged()
     }
 
     // Set the icon to the "no account" icon.
-    accountMenuButton->setIcon(MMC->getThemedIcon("noaccount"));
+    accountMenuButton->setIcon(LAUNCHER->getThemedIcon("noaccount"));
     accountMenuButton->setText(tr("Profiles"));
 }
 
@@ -1182,7 +1182,7 @@ void MainWindow::updateNewsLabel()
 
 void MainWindow::updateAvailable(GoUpdate::Status status)
 {
-    if(!MMC->updatesAreAllowed())
+    if(!LAUNCHER->updatesAreAllowed())
     {
         updateNotAvailable();
         return;
@@ -1228,7 +1228,7 @@ QString intListToString(const QList<int> &list)
 void MainWindow::notificationsChanged()
 {
     QList<NotificationChecker::NotificationEntry> entries = m_notificationChecker->notificationEntries();
-    QList<int> shownNotifications = stringToIntList(MMC->settings()->get("ShownNotifications").toString());
+    QList<int> shownNotifications = stringToIntList(LAUNCHER->settings()->get("ShownNotifications").toString());
     for (auto it = entries.begin(); it != entries.end(); ++it)
     {
         NotificationChecker::NotificationEntry entry = *it;
@@ -1241,20 +1241,20 @@ void MainWindow::notificationsChanged()
             }
         }
     }
-    MMC->settings()->set("ShownNotifications", intListToString(shownNotifications));
+    LAUNCHER->settings()->set("ShownNotifications", intListToString(shownNotifications));
 }
 
 void MainWindow::downloadUpdates(GoUpdate::Status status)
 {
-    if(!MMC->updatesAreAllowed())
+    if(!LAUNCHER->updatesAreAllowed())
     {
         return;
     }
     qDebug() << "Downloading updates.";
     ProgressDialog updateDlg(this);
-    status.rootPath = MMC->root();
+    status.rootPath = LAUNCHER->root();
 
-    auto dlPath = FS::PathCombine(MMC->root(), "update", "XXXXXX");
+    auto dlPath = FS::PathCombine(LAUNCHER->root(), "update", "XXXXXX");
     if (!FS::ensureFilePathExists(dlPath))
     {
         CustomMessageBox::selectable(this, tr("Error"), tr("Couldn't create folder for update downloads:\n%1").arg(dlPath), QMessageBox::Warning)->show();
@@ -1267,10 +1267,10 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
          * NOTE: This disables launching instances until the update either succeeds (and this process exits)
          * or the update fails (and the control leaves this scope).
          */
-        MMC->updateIsRunning(true);
-        UpdateController update(this, MMC->root(), updateTask.updateFilesDir(), updateTask.operations());
+        LAUNCHER->updateIsRunning(true);
+        UpdateController update(this, LAUNCHER->root(), updateTask.updateFilesDir(), updateTask.operations());
         update.installUpdates();
-        MMC->updateIsRunning(false);
+        LAUNCHER->updateIsRunning(false);
     }
     else
     {
@@ -1281,7 +1281,7 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
 void MainWindow::onCatToggled(bool state)
 {
     setCatBackground(state);
-    MMC->settings()->set("TheCat", state);
+    LAUNCHER->settings()->set("TheCat", state);
 }
 
 namespace {
@@ -1339,7 +1339,7 @@ void MainWindow::runModalTask(Task *task)
 
 void MainWindow::instanceFromInstanceTask(InstanceTask *rawTask)
 {
-    unique_qobject_ptr<Task> task(MMC->instances()->wrapInstanceTask(rawTask));
+    unique_qobject_ptr<Task> task(LAUNCHER->instances()->wrapInstanceTask(rawTask));
     runModalTask(task.get());
 }
 
@@ -1356,7 +1356,7 @@ void MainWindow::on_actionCopyInstance_triggered()
     copyTask->setName(copyInstDlg.instName());
     copyTask->setGroup(copyInstDlg.instGroup());
     copyTask->setIcon(copyInstDlg.iconKey());
-    unique_qobject_ptr<Task> task(MMC->instances()->wrapInstanceTask(copyTask));
+    unique_qobject_ptr<Task> task(LAUNCHER->instances()->wrapInstanceTask(copyTask));
     runModalTask(task.get());
 }
 
@@ -1364,7 +1364,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
 {
     view->updateGeometries();
     setSelectedInstanceById(inst->id());
-    if (MMC->accounts()->anyAccountIsValid())
+    if (LAUNCHER->accounts()->anyAccountIsValid())
     {
         ProgressDialog loadDialog(this);
         auto update = inst->createUpdateTask(Net::Mode::Online);
@@ -1407,14 +1407,14 @@ void MainWindow::addInstance(QString url)
 
     if(groupName.isEmpty())
     {
-        groupName = MMC->settings()->get("LastUsedGroupForNewInstance").toString();
+        groupName = LAUNCHER->settings()->get("LastUsedGroupForNewInstance").toString();
     }
 
     NewInstanceDialog newInstDlg(groupName, url, this);
     if (!newInstDlg.exec())
         return;
 
-    MMC->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
+    LAUNCHER->settings()->set("LastUsedGroupForNewInstance", newInstDlg.instGroup());
 
     InstanceTask * creationTask = newInstDlg.extractTask();
     if(creationTask)
@@ -1465,7 +1465,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
     if (dlg.result() == QDialog::Accepted)
     {
         m_selectedInstance->setIconKey(dlg.selectedIconKey);
-        auto icon = MMC->icons()->getIcon(dlg.selectedIconKey);
+        auto icon = LAUNCHER->icons()->getIcon(dlg.selectedIconKey);
         ui->actionChangeInstIcon->setIcon(icon);
         ui->changeIconButton->setIcon(icon);
     }
@@ -1475,7 +1475,7 @@ void MainWindow::iconUpdated(QString icon)
 {
     if (icon == m_currentInstIcon)
     {
-        auto icon = MMC->icons()->getIcon(m_currentInstIcon);
+        auto icon = LAUNCHER->icons()->getIcon(m_currentInstIcon);
         ui->actionChangeInstIcon->setIcon(icon);
         ui->changeIconButton->setIcon(icon);
     }
@@ -1484,7 +1484,7 @@ void MainWindow::iconUpdated(QString icon)
 void MainWindow::updateInstanceToolIcon(QString new_icon)
 {
     m_currentInstIcon = new_icon;
-    auto icon = MMC->icons()->getIcon(m_currentInstIcon);
+    auto icon = LAUNCHER->icons()->getIcon(m_currentInstIcon);
     ui->actionChangeInstIcon->setIcon(icon);
     ui->changeIconButton->setIcon(icon);
 }
@@ -1493,7 +1493,7 @@ void MainWindow::setSelectedInstanceById(const QString &id)
 {
     if (id.isNull())
         return;
-    const QModelIndex index = MMC->instances()->getInstanceIndexById(id);
+    const QModelIndex index = LAUNCHER->instances()->getInstanceIndexById(id);
     if (index.isValid())
     {
         QModelIndex selectionIndex = proxymodel->mapFromSource(index);
@@ -1509,8 +1509,8 @@ void MainWindow::on_actionChangeInstGroup_triggered()
 
     bool ok = false;
     InstanceId instId = m_selectedInstance->id();
-    QString name(MMC->instances()->getInstanceGroup(instId));
-    auto groups = MMC->instances()->getGroups();
+    QString name(LAUNCHER->instances()->getInstanceGroup(instId));
+    auto groups = LAUNCHER->instances()->getGroups();
     groups.insert(0, "");
     groups.sort(Qt::CaseInsensitive);
     int foo = groups.indexOf(name);
@@ -1519,7 +1519,7 @@ void MainWindow::on_actionChangeInstGroup_triggered()
     name = name.simplified();
     if (ok)
     {
-        MMC->instances()->setInstanceGroup(instId, name);
+        LAUNCHER->instances()->setInstanceGroup(instId, name);
     }
 }
 
@@ -1541,25 +1541,25 @@ void MainWindow::deleteGroup()
             .arg(groupName), QMessageBox::Yes | QMessageBox::No);
         if(reply == QMessageBox::Yes)
         {
-            MMC->instances()->deleteGroup(groupName);
+            LAUNCHER->instances()->deleteGroup(groupName);
         }
     }
 }
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
-    QString str = MMC->settings()->get("InstanceDir").toString();
+    QString str = LAUNCHER->settings()->get("InstanceDir").toString();
     DesktopServices::openDirectory(str);
 }
 
 void MainWindow::refreshInstances()
 {
-    MMC->instances()->loadList();
+    LAUNCHER->instances()->loadList();
 }
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-    DesktopServices::openDirectory(MMC->settings()->get("CentralModsDir").toString(), true);
+    DesktopServices::openDirectory(LAUNCHER->settings()->get("CentralModsDir").toString(), true);
 }
 
 void MainWindow::on_actionConfig_Folder_triggered()
@@ -1575,8 +1575,8 @@ void MainWindow::checkForUpdates()
 {
     if(BuildConfig.UPDATER_ENABLED)
     {
-        auto updater = MMC->updateChecker();
-        updater->checkForUpdate(MMC->settings()->get("UpdateChannel").toString(), true);
+        auto updater = LAUNCHER->updateChecker();
+        updater->checkForUpdate(LAUNCHER->settings()->get("UpdateChannel").toString(), true);
     }
     else
     {
@@ -1586,13 +1586,13 @@ void MainWindow::checkForUpdates()
 
 void MainWindow::on_actionSettings_triggered()
 {
-    MMC->ShowGlobalSettings(this, "global-settings");
+    LAUNCHER->ShowGlobalSettings(this, "global-settings");
 }
 
 void MainWindow::globalSettingsClosed()
 {
     // FIXME: quick HACK to make this work. improve, optimize.
-    MMC->instances()->loadList();
+    LAUNCHER->instances()->loadList();
     proxymodel->invalidate();
     proxymodel->sort(0);
     updateToolsMenu();
@@ -1601,32 +1601,32 @@ void MainWindow::globalSettingsClosed()
 
 void MainWindow::on_actionInstanceSettings_triggered()
 {
-    MMC->showInstanceWindow(m_selectedInstance, "settings");
+    LAUNCHER->showInstanceWindow(m_selectedInstance, "settings");
 }
 
 void MainWindow::on_actionEditInstNotes_triggered()
 {
-    MMC->showInstanceWindow(m_selectedInstance, "notes");
+    LAUNCHER->showInstanceWindow(m_selectedInstance, "notes");
 }
 
 void MainWindow::on_actionWorlds_triggered()
 {
-    MMC->showInstanceWindow(m_selectedInstance, "worlds");
+    LAUNCHER->showInstanceWindow(m_selectedInstance, "worlds");
 }
 
 void MainWindow::on_actionEditInstance_triggered()
 {
-    MMC->showInstanceWindow(m_selectedInstance);
+    LAUNCHER->showInstanceWindow(m_selectedInstance);
 }
 
 void MainWindow::on_actionScreenshots_triggered()
 {
-    MMC->showInstanceWindow(m_selectedInstance, "screenshots");
+    LAUNCHER->showInstanceWindow(m_selectedInstance, "screenshots");
 }
 
 void MainWindow::on_actionManageAccounts_triggered()
 {
-    MMC->ShowGlobalSettings(this, "accounts");
+    LAUNCHER->ShowGlobalSettings(this, "accounts");
 }
 
 void MainWindow::on_actionReportBug_triggered()
@@ -1680,7 +1680,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
     )->exec();
     if (response == QMessageBox::Yes)
     {
-        MMC->instances()->deleteInstance(id);
+        LAUNCHER->instances()->deleteInstance(id);
     }
 }
 
@@ -1728,8 +1728,8 @@ void MainWindow::on_actionViewSelectedMCFolder_triggered()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     // Save the window state and geometry.
-    MMC->settings()->set("MainWindowState", saveState().toBase64());
-    MMC->settings()->set("MainWindowGeometry", saveGeometry().toBase64());
+    LAUNCHER->settings()->set("MainWindowState", saveState().toBase64());
+    LAUNCHER->settings()->set("MainWindowGeometry", saveGeometry().toBase64());
     event->accept();
     emit isClosing();
 }
@@ -1748,7 +1748,7 @@ void MainWindow::instanceActivated(QModelIndex index)
     if (!index.isValid())
         return;
     QString id = index.data(InstanceList::InstanceIDRole).toString();
-    InstancePtr inst = MMC->instances()->getInstanceById(id);
+    InstancePtr inst = LAUNCHER->instances()->getInstanceById(id);
     if (!inst)
         return;
 
@@ -1763,24 +1763,24 @@ void MainWindow::on_actionLaunchInstance_triggered()
     }
     if(m_selectedInstance->isRunning())
     {
-        MMC->kill(m_selectedInstance);
+        LAUNCHER->kill(m_selectedInstance);
     }
     else
     {
-        MMC->launch(m_selectedInstance);
+        LAUNCHER->launch(m_selectedInstance);
     }
 }
 
 void MainWindow::activateInstance(InstancePtr instance)
 {
-    MMC->launch(instance);
+    LAUNCHER->launch(instance);
 }
 
 void MainWindow::on_actionLaunchInstanceOffline_triggered()
 {
     if (m_selectedInstance)
     {
-        MMC->launch(m_selectedInstance, false);
+        LAUNCHER->launch(m_selectedInstance, false);
     }
 }
 
@@ -1804,12 +1804,12 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 {
     if (!current.isValid())
     {
-        MMC->settings()->set("SelectedInstance", QString());
+        LAUNCHER->settings()->set("SelectedInstance", QString());
         selectionBad();
         return;
     }
     QString id = current.data(InstanceList::InstanceIDRole).toString();
-    m_selectedInstance = MMC->instances()->getInstanceById(id);
+    m_selectedInstance = LAUNCHER->instances()->getInstanceById(id);
     if (m_selectedInstance)
     {
         ui->instanceToolBar->setEnabled(true);
@@ -1832,12 +1832,12 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 
         updateToolsMenu();
 
-        MMC->settings()->set("SelectedInstance", m_selectedInstance->id());
+        LAUNCHER->settings()->set("SelectedInstance", m_selectedInstance->id());
     }
     else
     {
         ui->instanceToolBar->setEnabled(false);
-        MMC->settings()->set("SelectedInstance", QString());
+        LAUNCHER->settings()->set("SelectedInstance", QString());
         selectionBad();
         return;
     }
@@ -1869,12 +1869,12 @@ void MainWindow::selectionBad()
     updateInstanceToolIcon("infinity");
 
     // ...and then see if we can enable the previously selected instance
-    setSelectedInstanceById(MMC->settings()->get("SelectedInstance").toString());
+    setSelectedInstanceById(LAUNCHER->settings()->get("SelectedInstance").toString());
 }
 
 void MainWindow::checkInstancePathForProblems()
 {
-    QString instanceFolder = MMC->settings()->get("InstanceDir").toString();
+    QString instanceFolder = LAUNCHER->settings()->get("InstanceDir").toString();
     if (FS::checkProblemticPathJava(QDir(instanceFolder)))
     {
         QMessageBox warning(this);
@@ -1909,7 +1909,7 @@ void MainWindow::checkInstancePathForProblems()
 
 void MainWindow::updateStatusCenter()
 {
-    int timeplayed = MMC->instances()->getTotalPlayTime();
+    int timeplayed = LAUNCHER->instances()->getTotalPlayTime();
     int minutesTotal = timeplayed / 60;
     int seconds = timeplayed % 60;
     int minutes = minutesTotal % 60;

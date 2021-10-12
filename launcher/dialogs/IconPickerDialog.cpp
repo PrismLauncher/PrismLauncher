@@ -17,7 +17,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 
-#include "MultiMC.h"
+#include "Launcher.h"
 
 #include "IconPickerDialog.h"
 #include "ui_IconPickerDialog.h"
@@ -59,7 +59,7 @@ IconPickerDialog::IconPickerDialog(QWidget *parent)
 
     contentsWidget->installEventFilter(this);
 
-    contentsWidget->setModel(MMC->icons().get());
+    contentsWidget->setModel(LAUNCHER->icons().get());
 
     // NOTE: ResetRole forces the button to be on the left, while the OK/Cancel ones are on the right. We win.
     auto buttonAdd = ui->buttonBox->addButton(tr("Add Icon"), QDialogButtonBox::ResetRole);
@@ -106,12 +106,12 @@ void IconPickerDialog::addNewIcon()
     //: The type of icon files
     auto filter = IconUtils::getIconFilter();
     QStringList fileNames = QFileDialog::getOpenFileNames(this, selectIcons, QString(), tr("Icons %1").arg(filter));
-    MMC->icons()->installIcons(fileNames);
+    LAUNCHER->icons()->installIcons(fileNames);
 }
 
 void IconPickerDialog::removeSelectedIcon()
 {
-    MMC->icons()->deleteIcon(selectedIconKey);
+    LAUNCHER->icons()->deleteIcon(selectedIconKey);
 }
 
 void IconPickerDialog::activated(QModelIndex index)
@@ -132,7 +132,7 @@ void IconPickerDialog::selectionChanged(QItemSelection selected, QItemSelection 
 
 int IconPickerDialog::execWithSelection(QString selection)
 {
-    auto list = MMC->icons();
+    auto list = LAUNCHER->icons();
     auto contentsWidget = ui->iconView;
     selectedIconKey = selection;
 
@@ -159,5 +159,5 @@ IconPickerDialog::~IconPickerDialog()
 
 void IconPickerDialog::openFolder()
 {
-    DesktopServices::openDirectory(MMC->icons()->getDirectory(), true);
+    DesktopServices::openDirectory(LAUNCHER->icons()->getDirectory(), true);
 }

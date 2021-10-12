@@ -19,7 +19,7 @@
 
 #include "BaseInstance.h"
 #include "pages/BasePage.h"
-#include <MultiMC.h>
+#include <Launcher.h>
 
 namespace Ui
 {
@@ -39,9 +39,9 @@ public:
     }
     virtual QIcon icon() const override
     {
-        auto icon = MMC->getThemedIcon("notes");
+        auto icon = LAUNCHER->getThemedIcon("notes");
         if(icon.isNull())
-            icon = MMC->getThemedIcon("news");
+            icon = LAUNCHER->getThemedIcon("news");
         return icon;
     }
     virtual QString id() const override

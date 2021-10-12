@@ -4,7 +4,7 @@
 #include "InstanceList.h"
 #include "minecraft/legacy/LegacyInstance.h"
 #include "minecraft/legacy/LegacyUpgradeTask.h"
-#include "MultiMC.h"
+#include "Launcher.h"
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/ProgressDialog.h"
 
@@ -38,9 +38,9 @@ void LegacyUpgradePage::on_upgradeButton_clicked()
     QString newName = tr("%1 (Migrated)").arg(m_inst->name());
     auto upgradeTask = new LegacyUpgradeTask(m_inst);
     upgradeTask->setName(newName);
-    upgradeTask->setGroup(MMC->instances()->getInstanceGroup(m_inst->id()));
+    upgradeTask->setGroup(LAUNCHER->instances()->getInstanceGroup(m_inst->id()));
     upgradeTask->setIcon(m_inst->iconKey());
-    unique_qobject_ptr<Task> task(MMC->instances()->wrapInstanceTask(upgradeTask));
+    unique_qobject_ptr<Task> task(LAUNCHER->instances()->wrapInstanceTask(upgradeTask));
     runModalTask(task.get());
 }
 

@@ -1,7 +1,7 @@
 #include "UpdateDialog.h"
 #include "ui_UpdateDialog.h"
 #include <QDebug>
-#include "MultiMC.h"
+#include "Launcher.h"
 #include <settings/SettingsObject.h>
 #include <Json.h>
 
@@ -11,7 +11,7 @@
 UpdateDialog::UpdateDialog(bool hasUpdate, QWidget *parent) : QDialog(parent), ui(new Ui::UpdateDialog)
 {
     ui->setupUi(this);
-    auto channel = MMC->settings()->get("UpdateChannel").toString();
+    auto channel = LAUNCHER->settings()->get("UpdateChannel").toString();
     if(hasUpdate)
     {
         ui->label->setText(tr("A new %1 update is available!").arg(channel));
@@ -24,7 +24,7 @@ UpdateDialog::UpdateDialog(bool hasUpdate, QWidget *parent) : QDialog(parent), u
     }
     ui->changelogBrowser->setHtml(tr("<center><h1>Loading changelog...</h1></center>"));
     loadChangelog();
-    restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("UpdateDialogGeometry").toByteArray()));
+    restoreGeometry(QByteArray::fromBase64(LAUNCHER->settings()->get("UpdateDialogGeometry").toByteArray()));
 }
 
 UpdateDialog::~UpdateDialog()
@@ -33,7 +33,7 @@ UpdateDialog::~UpdateDialog()
 
 void UpdateDialog::loadChangelog()
 {
-    auto channel = MMC->settings()->get("UpdateChannel").toString();
+    auto channel = LAUNCHER->settings()->get("UpdateChannel").toString();
     dljob.reset(new NetJob("Changelog"));
     QString url;
     if(channel == "stable")
@@ -65,7 +65,7 @@ QString reprocessMarkdown(QByteArray markdown)
 
 QString reprocessCommits(QByteArray json)
 {
-    auto channel = MMC->settings()->get("UpdateChannel").toString();
+    auto channel = LAUNCHER->settings()->get("UpdateChannel").toString();
     try
     {
         QString result;
@@ -177,6 +177,6 @@ void UpdateDialog::on_btnUpdateNow_clicked()
 
 void UpdateDialog::closeEvent(QCloseEvent* evt)
 {
-    MMC->settings()->set("UpdateDialogGeometry", saveGeometry().toBase64());
+    LAUNCHER->settings()->set("UpdateDialogGeometry", saveGeometry().toBase64());
     QDialog::closeEvent(evt);
 }

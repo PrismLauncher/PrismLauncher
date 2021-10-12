@@ -822,7 +822,7 @@ Task * InstanceList::wrapInstanceTask(InstanceTask * task)
 QString InstanceList::getStagedInstancePath()
 {
     QString key = QUuid::createUuid().toString();
-    QString relPath = FS::PathCombine("_MMC_TEMP/" , key);
+    QString relPath = FS::PathCombine("_LAUNCHER_TEMP/" , key);
     QDir rootPath(m_instDir);
     auto path = FS::PathCombine(m_instDir, relPath);
     if(!rootPath.mkpath(relPath))

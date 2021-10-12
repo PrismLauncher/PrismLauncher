@@ -22,7 +22,7 @@
 #include <QAbstractItemModel>
 #include <QMenu>
 
-#include "MultiMC.h"
+#include "Launcher.h"
 #include "dialogs/CustomMessageBox.h"
 #include <GuiUtil.h>
 #include "minecraft/mod/ModFolderModel.h"
@@ -301,7 +301,7 @@ void ModFolderPage::on_actionAdd_triggered()
         tr("Select %1",
            "Select whatever type of files the page contains. Example: 'Loader Mods'")
             .arg(m_displayName),
-        m_fileSelectionFilter.arg(m_displayName), MMC->settings()->get("CentralModsDir").toString(),
+        m_fileSelectionFilter.arg(m_displayName), LAUNCHER->settings()->get("CentralModsDir").toString(),
         this->parentWidget());
     if (!list.empty())
     {

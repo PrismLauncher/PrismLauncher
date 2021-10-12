@@ -19,7 +19,7 @@
 #include <QDialog>
 
 #include "pages/BasePage.h"
-#include <MultiMC.h>
+#include <Launcher.h>
 
 namespace Ui
 {
@@ -40,7 +40,7 @@ public:
     }
     QIcon icon() const override
     {
-        return MMC->getThemedIcon("proxy");
+        return LAUNCHER->getThemedIcon("proxy");
     }
     QString id() const override
     {

@@ -36,6 +36,6 @@ src/annotations.cpp
 
 add_definitions(-DCLASSPARSER_LIBRARY)
 
-add_library(MultiMC_classparser STATIC ${CLASSPARSER_SOURCES} ${CLASSPARSER_HEADERS})
-target_include_directories(MultiMC_classparser PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(MultiMC_classparser MultiMC_quazip Qt5::Core)
+add_library(Launcher_classparser STATIC ${CLASSPARSER_SOURCES} ${CLASSPARSER_HEADERS})
+target_include_directories(Launcher_classparser PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(Launcher_classparser Launcher_quazip Qt5::Core)

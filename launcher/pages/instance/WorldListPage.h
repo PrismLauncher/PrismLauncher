@@ -19,7 +19,7 @@
 
 #include "minecraft/MinecraftInstance.h"
 #include "pages/BasePage.h"
-#include <MultiMC.h>
+#include <Launcher.h>
 #include <LoggedProcess.h>
 
 class WorldList;
@@ -46,7 +46,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return MMC->getThemedIcon("worlds");
+        return LAUNCHER->getThemedIcon("worlds");
     }
     virtual QString id() const override
     {

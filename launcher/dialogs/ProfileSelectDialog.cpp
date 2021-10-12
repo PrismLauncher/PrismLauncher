@@ -23,14 +23,14 @@
 
 #include <dialogs/ProgressDialog.h>
 
-#include <MultiMC.h>
+#include <Launcher.h>
 
 ProfileSelectDialog::ProfileSelectDialog(const QString &message, int flags, QWidget *parent)
     : QDialog(parent), ui(new Ui::ProfileSelectDialog)
 {
     ui->setupUi(this);
 
-    m_accounts = MMC->accounts();
+    m_accounts = LAUNCHER->accounts();
     auto view = ui->listView;
     //view->setModel(m_accounts.get());
     //view->hideColumn(AccountList::ActiveColumn);

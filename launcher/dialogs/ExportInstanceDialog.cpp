@@ -27,7 +27,7 @@
 #include <QSaveFile>
 #include "MMCStrings.h"
 #include "SeparatorPrefixTree.h"
-#include "MultiMC.h"
+#include "Launcher.h"
 #include <icons/IconList.h>
 #include <FileSystem.h>
 
@@ -341,7 +341,7 @@ ExportInstanceDialog::~ExportInstanceDialog()
 void SaveIcon(InstancePtr m_instance)
 {
     auto iconKey = m_instance->iconKey();
-    auto iconList = MMC->icons();
+    auto iconList = LAUNCHER->icons();
     auto mmcIcon = iconList->icon(iconKey);
     if(!mmcIcon || mmcIcon->isBuiltIn()) {
         return;

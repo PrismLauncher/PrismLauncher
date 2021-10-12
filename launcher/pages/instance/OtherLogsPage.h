@@ -18,7 +18,7 @@
 #include <QWidget>
 
 #include "pages/BasePage.h"
-#include <MultiMC.h>
+#include <Launcher.h>
 #include <pathmatcher/IPathMatcher.h>
 
 namespace Ui
@@ -46,7 +46,7 @@ public:
     }
     QIcon icon() const override
     {
-        return MMC->getThemedIcon("log");
+        return LAUNCHER->getThemedIcon("log");
     }
     QString helpPage() const override
     {

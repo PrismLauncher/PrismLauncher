@@ -24,7 +24,7 @@
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
 #include <FileSystem.h>
-#include "MultiMC.h"
+#include "Launcher.h"
 #include <tools/MCEditTool.h>
 
 ExternalToolsPage::ExternalToolsPage(QWidget *parent) :
@@ -51,7 +51,7 @@ ExternalToolsPage::~ExternalToolsPage()
 
 void ExternalToolsPage::loadSettings()
 {
-    auto s = MMC->settings();
+    auto s = LAUNCHER->settings();
     ui->jprofilerPathEdit->setText(s->get("JProfilerPath").toString());
     ui->jvisualvmPathEdit->setText(s->get("JVisualVMPath").toString());
     ui->mceditPathEdit->setText(s->get("MCEditPath").toString());
@@ -61,7 +61,7 @@ void ExternalToolsPage::loadSettings()
 }
 void ExternalToolsPage::applySettings()
 {
-    auto s = MMC->settings();
+    auto s = LAUNCHER->settings();
 
     s->set("JProfilerPath", ui->jprofilerPathEdit->text());
     s->set("JVisualVMPath", ui->jvisualvmPathEdit->text());
@@ -93,7 +93,7 @@ void ExternalToolsPage::on_jprofilerPathBtn_clicked()
             break;
         }
         QString cooked_dir = FS::NormalizePath(raw_dir);
-        if (!MMC->profilers()["jprofiler"]->check(cooked_dir, &error))
+        if (!LAUNCHER->profilers()["jprofiler"]->check(cooked_dir, &error))
         {
             QMessageBox::critical(this, tr("Error"), tr("Error while checking JProfiler install:\n%1").arg(error));
             continue;
@@ -108,7 +108,7 @@ void ExternalToolsPage::on_jprofilerPathBtn_clicked()
 void ExternalToolsPage::on_jprofilerCheckBtn_clicked()
 {
     QString error;
-    if (!MMC->profilers()["jprofiler"]->check(ui->jprofilerPathEdit->text(), &error))
+    if (!LAUNCHER->profilers()["jprofiler"]->check(ui->jprofilerPathEdit->text(), &error))
     {
         QMessageBox::critical(this, tr("Error"), tr("Error while checking JProfiler install:\n%1").arg(error));
     }
@@ -130,7 +130,7 @@ void ExternalToolsPage::on_jvisualvmPathBtn_clicked()
             break;
         }
         QString cooked_dir = FS::NormalizePath(raw_dir);
-        if (!MMC->profilers()["jvisualvm"]->check(cooked_dir, &error))
+        if (!LAUNCHER->profilers()["jvisualvm"]->check(cooked_dir, &error))
         {
             QMessageBox::critical(this, tr("Error"), tr("Error while checking JVisualVM install:\n%1").arg(error));
             continue;
@@ -145,7 +145,7 @@ void ExternalToolsPage::on_jvisualvmPathBtn_clicked()
 void ExternalToolsPage::on_jvisualvmCheckBtn_clicked()
 {
     QString error;
-    if (!MMC->profilers()["jvisualvm"]->check(ui->jvisualvmPathEdit->text(), &error))
+    if (!LAUNCHER->profilers()["jvisualvm"]->check(ui->jvisualvmPathEdit->text(), &error))
     {
         QMessageBox::critical(this, tr("Error"), tr("Error while checking JVisualVM install:\n%1").arg(error));
     }
@@ -171,7 +171,7 @@ void ExternalToolsPage::on_mceditPathBtn_clicked()
             break;
         }
         QString cooked_dir = FS::NormalizePath(raw_dir);
-        if (!MMC->mcedit()->check(cooked_dir, error))
+        if (!LAUNCHER->mcedit()->check(cooked_dir, error))
         {
             QMessageBox::critical(this, tr("Error"), tr("Error while checking MCEdit install:\n%1").arg(error));
             continue;
@@ -186,7 +186,7 @@ void ExternalToolsPage::on_mceditPathBtn_clicked()
 void ExternalToolsPage::on_mceditCheckBtn_clicked()
 {
     QString error;
-    if (!MMC->mcedit()->check(ui->mceditPathEdit->text(), error))
+    if (!LAUNCHER->mcedit()->check(ui->mceditPathEdit->text(), error))
     {
         QMessageBox::critical(this, tr("Error"), tr("Error while checking MCEdit install:\n%1").arg(error));
     }

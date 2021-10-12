@@ -1,5 +1,5 @@
 #include "LanguageWizardPage.h"
-#include <MultiMC.h>
+#include <Launcher.h>
 #include <translations/TranslationsModel.h>
 
 #include "widgets/LanguageSelectionWidget.h"
@@ -28,13 +28,13 @@ bool LanguageWizardPage::wantsRefreshButton()
 
 void LanguageWizardPage::refresh()
 {
-    auto translations = MMC->translations();
+    auto translations = LAUNCHER->translations();
     translations->downloadIndex();
 }
 
 bool LanguageWizardPage::validatePage()
 {
-    auto settings = MMC->settings();
+    auto settings = LAUNCHER->settings();
     QString key = mainWidget->getSelectedLanguageKey();
     settings->set("Language", key);
     return true;

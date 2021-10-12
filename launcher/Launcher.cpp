@@ -1,4 +1,4 @@
-#include "MultiMC.h"
+#include "Launcher.h"
 #include "BuildConfig.h"
 #include "MainWindow.h"
 #include "InstanceWindow.h"
@@ -7,7 +7,7 @@
 #include <QAccessible>
 
 #include "pages/BasePageProvider.h"
-#include "pages/global/MultiMCPage.h"
+#include "pages/global/LauncherPage.h"
 #include "pages/global/MinecraftPage.h"
 #include "pages/global/JavaPage.h"
 #include "pages/global/LanguagePage.h"
@@ -97,7 +97,7 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QSt
     const char *levels = "DWCFIS";
     const QString format("%1 %2 %3\n");
 
-    qint64 msecstotal = MMC->timeSinceStart();
+    qint64 msecstotal = LAUNCHER->timeSinceStart();
     qint64 seconds = msecstotal / 1000;
     qint64 msecs = msecstotal % 1000;
     QString foo;
@@ -106,8 +106,8 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QSt
 
     QString out = format.arg(buf).arg(levels[type]).arg(msg);
 
-    MMC->logFile->write(out.toUtf8());
-    MMC->logFile->flush();
+    LAUNCHER->logFile->write(out.toUtf8());
+    LAUNCHER->logFile->flush();
     QTextStream(stderr) << out.toLocal8Bit();
     fflush(stderr);
 }
@@ -153,7 +153,7 @@ QString getIdealPlatform(QString currentPlatform) {
 
 }
 
-MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
+Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
 {
 #if defined Q_OS_WIN32
     // attach the parent console
@@ -257,7 +257,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
             if(argc > 0)
                 std::cerr << "Try '" << argv[0] << " -h' to get help on MultiMC's command line parameters."
                           << std::endl;
-            m_status = MultiMC::Failed;
+            m_status = Launcher::Failed;
             return;
         }
 
@@ -265,7 +265,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         if (args["help"].toBool())
         {
             std::cout << qPrintable(parser.compileHelp(arguments()[0]));
-            m_status = MultiMC::Succeeded;
+            m_status = Launcher::Succeeded;
             return;
         }
 
@@ -274,7 +274,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         {
             std::cout << "Version " << BuildConfig.printableVersionString().toStdString() << std::endl;
             std::cout << "Git " << BuildConfig.GIT_COMMIT.toStdString() << std::endl;
-            m_status = MultiMC::Succeeded;
+            m_status = Launcher::Succeeded;
             return;
         }
     }
@@ -348,7 +348,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
     if(m_instanceIdToLaunch.isEmpty() && !m_serverToJoin.isEmpty())
     {
         std::cerr << "--server can only be used in combination with --launch!" << std::endl;
-        m_status = MultiMC::Failed;
+        m_status = Launcher::Failed;
         return;
     }
 
@@ -418,7 +418,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
     {
         // FIXME: you can run the same binaries with multiple data dirs and they won't clash. This could cause issues for updates.
         m_peerInstance = new LocalPeer(this, appID);
-        connect(m_peerInstance, &LocalPeer::messageReceived, this, &MultiMC::messageReceived);
+        connect(m_peerInstance, &LocalPeer::messageReceived, this, &Launcher::messageReceived);
         if(m_peerInstance->isClient())
         {
             int timeout = 2000;
@@ -444,7 +444,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
                     m_peerInstance->sendMessage("launch " + m_instanceIdToLaunch, timeout);
                 }
             }
-            m_status = MultiMC::Succeeded;
+            m_status = Launcher::Succeeded;
             return;
         }
     }
@@ -691,7 +691,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         // Init page provider
         {
             m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
-            m_globalSettingsProvider->addPage<MultiMCPage>();
+            m_globalSettingsProvider->addPage<LauncherPage>();
             m_globalSettingsProvider->addPage<MinecraftPage>();
             m_globalSettingsProvider->addPage<JavaPage>();
             m_globalSettingsProvider->addPage<LanguagePage>();
@@ -729,7 +729,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
 
     // Instance icons
     {
-        auto setting = MMC->settings()->getSetting("IconsDir");
+        auto setting = LAUNCHER->settings()->getSetting("IconsDir");
         QStringList instFolders =
         {
             ":/icons/multimc/32x32/instances/",
@@ -830,7 +830,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         m_mcedit.reset(new MCEditTool(m_settings));
     }
 
-    connect(this, &MultiMC::aboutToQuit, [this](){
+    connect(this, &Launcher::aboutToQuit, [this](){
         if(m_instances)
         {
             // save any remaining instance state
@@ -860,7 +860,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
         }
 
         auto analyticsSetting = m_settings->getSetting("Analytics");
-        connect(analyticsSetting.get(), &Setting::SettingChanged, this, &MultiMC::analyticsSettingChanged);
+        connect(analyticsSetting.get(), &Setting::SettingChanged, this, &Launcher::analyticsSettingChanged);
         QString clientID = m_settings->get("AnalyticsClientID").toString();
         if(clientID.isEmpty())
         {
@@ -896,7 +896,7 @@ MultiMC::MultiMC(int &argc, char **argv) : QApplication(argc, argv)
     performMainStartupAction();
 }
 
-bool MultiMC::createSetupWizard()
+bool Launcher::createSetupWizard()
 {
     bool javaRequired = [&]()
     {
@@ -954,22 +954,22 @@ bool MultiMC::createSetupWizard()
         {
             m_setupWizard->addPage(new AnalyticsWizardPage(m_setupWizard));
         }
-        connect(m_setupWizard, &QDialog::finished, this, &MultiMC::setupWizardFinished);
+        connect(m_setupWizard, &QDialog::finished, this, &Launcher::setupWizardFinished);
         m_setupWizard->show();
         return true;
     }
     return false;
 }
 
-void MultiMC::setupWizardFinished(int status)
+void Launcher::setupWizardFinished(int status)
 {
     qDebug() << "Wizard result =" << status;
     performMainStartupAction();
 }
 
-void MultiMC::performMainStartupAction()
+void Launcher::performMainStartupAction()
 {
-    m_status = MultiMC::Initialized;
+    m_status = Launcher::Initialized;
     if(!m_instanceIdToLaunch.isEmpty())
     {
         auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
@@ -1004,14 +1004,14 @@ void MultiMC::performMainStartupAction()
     }
 }
 
-void MultiMC::showFatalErrorMessage(const QString& title, const QString& content)
+void Launcher::showFatalErrorMessage(const QString& title, const QString& content)
 {
-    m_status = MultiMC::Failed;
+    m_status = Launcher::Failed;
     auto dialog = CustomMessageBox::selectable(nullptr, title, content, QMessageBox::Critical);
     dialog->exec();
 }
 
-MultiMC::~MultiMC()
+Launcher::~Launcher()
 {
     // kill the other globals.
     Env::dispose();
@@ -1031,7 +1031,7 @@ MultiMC::~MultiMC()
 #endif
 }
 
-void MultiMC::messageReceived(const QString& message)
+void Launcher::messageReceived(const QString& message)
 {
     if(status() != Initialized)
     {
@@ -1100,7 +1100,7 @@ void MultiMC::messageReceived(const QString& message)
     }
 }
 
-void MultiMC::analyticsSettingChanged(const Setting&, QVariant value)
+void Launcher::analyticsSettingChanged(const Setting&, QVariant value)
 {
     if(!m_analytics)
         return;
@@ -1116,12 +1116,12 @@ void MultiMC::analyticsSettingChanged(const Setting&, QVariant value)
     m_analytics->enable(enabled);
 }
 
-std::shared_ptr<TranslationsModel> MultiMC::translations()
+std::shared_ptr<TranslationsModel> Launcher::translations()
 {
     return m_translations;
 }
 
-std::shared_ptr<JavaInstallList> MultiMC::javalist()
+std::shared_ptr<JavaInstallList> Launcher::javalist()
 {
     if (!m_javalist)
     {
@@ -1130,7 +1130,7 @@ std::shared_ptr<JavaInstallList> MultiMC::javalist()
     return m_javalist;
 }
 
-std::vector<ITheme *> MultiMC::getValidApplicationThemes()
+std::vector<ITheme *> Launcher::getValidApplicationThemes()
 {
     std::vector<ITheme *> ret;
     auto iter = m_themes.cbegin();
@@ -1142,7 +1142,7 @@ std::vector<ITheme *> MultiMC::getValidApplicationThemes()
     return ret;
 }
 
-void MultiMC::setApplicationTheme(const QString& name, bool initial)
+void Launcher::setApplicationTheme(const QString& name, bool initial)
 {
     auto systemPalette = qApp->palette();
     auto themeIter = m_themes.find(name);
@@ -1157,17 +1157,17 @@ void MultiMC::setApplicationTheme(const QString& name, bool initial)
     }
 }
 
-void MultiMC::setIconTheme(const QString& name)
+void Launcher::setIconTheme(const QString& name)
 {
     XdgIcon::setThemeName(name);
 }
 
-QIcon MultiMC::getThemedIcon(const QString& name)
+QIcon Launcher::getThemedIcon(const QString& name)
 {
     return XdgIcon::fromTheme(name);
 }
 
-bool MultiMC::openJsonEditor(const QString &filename)
+bool Launcher::openJsonEditor(const QString &filename)
 {
     const QString file = QDir::current().absoluteFilePath(filename);
     if (m_settings->get("JsonEditor").toString().isEmpty())
@@ -1181,7 +1181,7 @@ bool MultiMC::openJsonEditor(const QString &filename)
     }
 }
 
-bool MultiMC::launch(
+bool Launcher::launch(
         InstancePtr instance,
         bool online,
         BaseProfilerFactory *profiler,
@@ -1216,8 +1216,8 @@ bool MultiMC::launch(
         {
             controller->setParentWidget(m_mainWindow);
         }
-        connect(controller.get(), &LaunchController::succeeded, this, &MultiMC::controllerSucceeded);
-        connect(controller.get(), &LaunchController::failed, this, &MultiMC::controllerFailed);
+        connect(controller.get(), &LaunchController::succeeded, this, &Launcher::controllerSucceeded);
+        connect(controller.get(), &LaunchController::failed, this, &Launcher::controllerFailed);
         addRunningInstance();
         controller->start();
         return true;
@@ -1235,7 +1235,7 @@ bool MultiMC::launch(
     return false;
 }
 
-bool MultiMC::kill(InstancePtr instance)
+bool Launcher::kill(InstancePtr instance)
 {
     if (!instance->isRunning())
     {
@@ -1252,7 +1252,7 @@ bool MultiMC::kill(InstancePtr instance)
     return true;
 }
 
-void MultiMC::addRunningInstance()
+void Launcher::addRunningInstance()
 {
     m_runningInstances ++;
     if(m_runningInstances == 1)
@@ -1261,7 +1261,7 @@ void MultiMC::addRunningInstance()
     }
 }
 
-void MultiMC::subRunningInstance()
+void Launcher::subRunningInstance()
 {
     if(m_runningInstances == 0)
     {
@@ -1275,23 +1275,23 @@ void MultiMC::subRunningInstance()
     }
 }
 
-bool MultiMC::shouldExitNow() const
+bool Launcher::shouldExitNow() const
 {
     return m_runningInstances == 0 && m_openWindows == 0;
 }
 
-bool MultiMC::updatesAreAllowed()
+bool Launcher::updatesAreAllowed()
 {
     return m_runningInstances == 0;
 }
 
-void MultiMC::updateIsRunning(bool running)
+void Launcher::updateIsRunning(bool running)
 {
     m_updateRunning = running;
 }
 
 
-void MultiMC::controllerSucceeded()
+void Launcher::controllerSucceeded()
 {
     auto controller = qobject_cast<LaunchController *>(QObject::sender());
     if(!controller)
@@ -1318,7 +1318,7 @@ void MultiMC::controllerSucceeded()
     }
 }
 
-void MultiMC::controllerFailed(const QString& error)
+void Launcher::controllerFailed(const QString& error)
 {
     Q_UNUSED(error);
     auto controller = qobject_cast<LaunchController *>(QObject::sender());
@@ -1339,21 +1339,21 @@ void MultiMC::controllerFailed(const QString& error)
     }
 }
 
-void MultiMC::ShowGlobalSettings(class QWidget* parent, QString open_page)
+void Launcher::ShowGlobalSettings(class QWidget* parent, QString open_page)
 {
     if(!m_globalSettingsProvider) {
         return;
     }
     emit globalSettingsAboutToOpen();
     {
-        SettingsObject::Lock lock(MMC->settings());
+        SettingsObject::Lock lock(LAUNCHER->settings());
         PageDialog dlg(m_globalSettingsProvider.get(), open_page, parent);
         dlg.exec();
     }
     emit globalSettingsClosed();
 }
 
-MainWindow* MultiMC::showMainWindow(bool minimized)
+MainWindow* Launcher::showMainWindow(bool minimized)
 {
     if(m_mainWindow)
     {
@@ -1364,8 +1364,8 @@ MainWindow* MultiMC::showMainWindow(bool minimized)
     else
     {
         m_mainWindow = new MainWindow();
-        m_mainWindow->restoreState(QByteArray::fromBase64(MMC->settings()->get("MainWindowState").toByteArray()));
-        m_mainWindow->restoreGeometry(QByteArray::fromBase64(MMC->settings()->get("MainWindowGeometry").toByteArray()));
+        m_mainWindow->restoreState(QByteArray::fromBase64(LAUNCHER->settings()->get("MainWindowState").toByteArray()));
+        m_mainWindow->restoreGeometry(QByteArray::fromBase64(LAUNCHER->settings()->get("MainWindowGeometry").toByteArray()));
         if(minimized)
         {
             m_mainWindow->showMinimized();
@@ -1376,8 +1376,8 @@ MainWindow* MultiMC::showMainWindow(bool minimized)
         }
 
         m_mainWindow->checkInstancePathForProblems();
-        connect(this, &MultiMC::updateAllowedChanged, m_mainWindow, &MainWindow::updatesAllowedChanged);
-        connect(m_mainWindow, &MainWindow::isClosing, this, &MultiMC::on_windowClose);
+        connect(this, &Launcher::updateAllowedChanged, m_mainWindow, &MainWindow::updatesAllowedChanged);
+        connect(m_mainWindow, &MainWindow::isClosing, this, &Launcher::on_windowClose);
         m_openWindows++;
     }
     // FIXME: move this somewhere else...
@@ -1437,7 +1437,7 @@ MainWindow* MultiMC::showMainWindow(bool minimized)
     return m_mainWindow;
 }
 
-InstanceWindow *MultiMC::showInstanceWindow(InstancePtr instance, QString page)
+InstanceWindow *Launcher::showInstanceWindow(InstancePtr instance, QString page)
 {
     if(!instance)
         return nullptr;
@@ -1454,7 +1454,7 @@ InstanceWindow *MultiMC::showInstanceWindow(InstancePtr instance, QString page)
     {
         window = new InstanceWindow(instance);
         m_openWindows ++;
-        connect(window, &InstanceWindow::isClosing, this, &MultiMC::on_windowClose);
+        connect(window, &InstanceWindow::isClosing, this, &Launcher::on_windowClose);
     }
     if(!page.isEmpty())
     {
@@ -1467,7 +1467,7 @@ InstanceWindow *MultiMC::showInstanceWindow(InstancePtr instance, QString page)
     return window;
 }
 
-void MultiMC::on_windowClose()
+void Launcher::on_windowClose()
 {
     m_openWindows--;
     auto instWindow = qobject_cast<InstanceWindow *>(QObject::sender());

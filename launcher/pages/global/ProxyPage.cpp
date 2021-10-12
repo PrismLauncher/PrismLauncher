@@ -19,7 +19,7 @@
 #include <QTabBar>
 
 #include "settings/SettingsObject.h"
-#include "MultiMC.h"
+#include "Launcher.h"
 #include "Env.h"
 
 ProxyPage::ProxyPage(QWidget *parent) : QWidget(parent), ui(new Ui::ProxyPage)
@@ -58,7 +58,7 @@ void ProxyPage::proxyChanged(int)
 
 void ProxyPage::applySettings()
 {
-    auto s = MMC->settings();
+    auto s = LAUNCHER->settings();
 
     // Proxy
     QString proxyType = "None";
@@ -82,7 +82,7 @@ void ProxyPage::applySettings()
 }
 void ProxyPage::loadSettings()
 {
-    auto s = MMC->settings();
+    auto s = LAUNCHER->settings();
     // Proxy
     QString proxyType = s->get("ProxyType").toString();
     if (proxyType == "Default")

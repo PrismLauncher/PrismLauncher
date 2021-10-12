@@ -1,5 +1,5 @@
 #include "AnalyticsWizardPage.h"
-#include <MultiMC.h>
+#include <Launcher.h>
 
 #include <QVBoxLayout>
 #include <QTextBrowser>
@@ -33,8 +33,8 @@ AnalyticsWizardPage::~AnalyticsWizardPage()
 
 bool AnalyticsWizardPage::validatePage()
 {
-    auto settings = MMC->settings();
-    auto analytics = MMC->analytics();
+    auto settings = LAUNCHER->settings();
+    auto analytics = LAUNCHER->analytics();
     auto status = checkBox->isChecked();
     settings->set("AnalyticsSeen", analytics->version());
     settings->set("Analytics", status);

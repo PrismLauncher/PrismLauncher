@@ -1,7 +1,7 @@
 #include "LogPage.h"
 #include "ui_LogPage.h"
 
-#include "MultiMC.h"
+#include "Launcher.h"
 
 #include <QIcon>
 #include <QScrollBar>
@@ -124,9 +124,9 @@ LogPage::LogPage(InstancePtr instance, QWidget *parent)
 
     // set up fonts in the log proxy
     {
-        QString fontFamily = MMC->settings()->get("ConsoleFont").toString();
+        QString fontFamily = LAUNCHER->settings()->get("ConsoleFont").toString();
         bool conversionOk = false;
-        int fontSize = MMC->settings()->get("ConsoleFontSize").toInt(&conversionOk);
+        int fontSize = LAUNCHER->settings()->get("ConsoleFontSize").toInt(&conversionOk);
         if(!conversionOk)
         {
             fontSize = 11;

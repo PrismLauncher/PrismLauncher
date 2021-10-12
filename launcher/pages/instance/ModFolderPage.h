@@ -19,7 +19,7 @@
 
 #include "minecraft/MinecraftInstance.h"
 #include "pages/BasePage.h"
-#include <MultiMC.h>
+#include <Launcher.h>
 
 class ModFolderModel;
 namespace Ui
@@ -54,7 +54,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return MMC->getThemedIcon(m_iconName);
+        return LAUNCHER->getThemedIcon(m_iconName);
     }
     virtual QString id() const override
     {

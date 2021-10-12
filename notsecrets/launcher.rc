@@ -1,0 +1,29 @@
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
+IDI_ICON1               ICON    DISCARDABLE     "Laucher.ico"
+1 RT_MANIFEST "Laucher.manifest"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     1,0,0,0
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+BEGIN
+        BLOCK "StringFileInfo"
+        BEGIN
+                BLOCK "000004b0"
+                BEGIN
+                        VALUE "CompanyName", "MultiMC Contributors"
+                        VALUE "FileDescription", "A Minecraft Launcher"
+                        VALUE "FileVersion", "1.0.0.0"
+                        VALUE "ProductName", "Laucher"
+                        VALUE "ProductVersion", "5"
+                END
+        END
+        BLOCK "VarFileInfo"
+        BEGIN
+                VALUE "Translation", 0x0000, 0x04b0 // Unicode
+        END
+END

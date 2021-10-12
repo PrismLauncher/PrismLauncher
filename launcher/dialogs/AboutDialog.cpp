@@ -16,7 +16,7 @@
 #include "AboutDialog.h"
 #include "ui_AboutDialog.h"
 #include <QIcon>
-#include "MultiMC.h"
+#include "Launcher.h"
 #include "BuildConfig.h"
 
 #include <net/NetJob.h>
@@ -83,7 +83,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
 
     ui->urlLabel->setOpenExternalLinks(true);
 
-    ui->icon->setPixmap(MMC->getThemedIcon("logo").pixmap(64));
+    ui->icon->setPixmap(LAUNCHER->getThemedIcon("logo").pixmap(64));
     ui->title->setText("MultiMC 5");
 
     ui->versionLabel->setText(tr("Version") +": " + BuildConfig.printableVersionString());

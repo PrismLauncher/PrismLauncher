@@ -12,17 +12,17 @@ internal/qiconloader.cpp
 internal/qiconloader_p.h
 )
 
-add_library(MultiMC_iconfix SHARED ${ICONFIX_SOURCES})
-target_include_directories(MultiMC_iconfix PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_BINARY_DIR}" )
+add_library(Launcher_iconfix SHARED ${ICONFIX_SOURCES})
+target_include_directories(Launcher_iconfix PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_BINARY_DIR}" )
 
-target_link_libraries(MultiMC_iconfix Qt5::Core Qt5::Widgets)
+target_link_libraries(Launcher_iconfix Qt5::Core Qt5::Widgets)
 
-set_target_properties(MultiMC_iconfix PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN 1)
-generate_export_header(MultiMC_iconfix)
+set_target_properties(Launcher_iconfix PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN 1)
+generate_export_header(Launcher_iconfix)
 
 # Install it
 install(
-    TARGETS MultiMC_iconfix
+    TARGETS Launcher_iconfix
     RUNTIME DESTINATION ${LIBRARY_DEST_DIR}
     LIBRARY DESTINATION ${LIBRARY_DEST_DIR}
 )

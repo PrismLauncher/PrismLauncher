@@ -197,7 +197,7 @@ cmake \
  -DCMAKE_INSTALL_PREFIX:PATH="../dist/" \
  -DCMAKE_PREFIX_PATH="/path/to/Qt5.6/" \
  -DQt5_DIR="/path/to/Qt5.6/" \
- -DMultiMC_LAYOUT=mac-bundle \
+ -DLauncher_LAYOUT=mac-bundle \
  -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
  ..
 make install
