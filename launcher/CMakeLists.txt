@@ -883,7 +883,7 @@ set(MULTIMC_QRCS
 
 ######## Windows resource files ########
 if(WIN32)
-    set(MULTIMC_RCS resources/multimc.rc)
+    set(MULTIMC_RCS ../${Launcher_Branding_WindowsRC})
 endif()
 
 # Qt 5 stuff
