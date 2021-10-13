@@ -54,7 +54,6 @@ void MinecraftPage::on_maximizedCheckBox_clicked(bool checked)
     updateCheckboxStuff();
 }
 
-
 void MinecraftPage::applySettings()
 {
     auto s = LAUNCHER->settings();
@@ -70,6 +69,7 @@ void MinecraftPage::applySettings()
 
     // Game time
     s->set("ShowGameTime", ui->showGameTime->isChecked());
+    s->set("ShowGlobalGameTime", ui->showGlobalGameTime->isChecked());
     s->set("RecordGameTime", ui->recordGameTime->isChecked());
 }
 
@@ -86,5 +86,6 @@ void MinecraftPage::loadSettings()
     ui->useNativeGLFWCheck->setChecked(s->get("UseNativeGLFW").toBool());
 
     ui->showGameTime->setChecked(s->get("ShowGameTime").toBool());
+    ui->showGlobalGameTime->setChecked(s->get("ShowGlobalGameTime").toBool());
     ui->recordGameTime->setChecked(s->get("RecordGameTime").toBool());
 }
