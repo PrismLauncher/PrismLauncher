@@ -54,7 +54,7 @@
           <item>
            <widget class="QCheckBox" name="autoUpdateCheckBox">
             <property name="text">
-             <string>Check for updates when MultiMC starts?</string>
+             <string>Check for updates on start?</string>
             </property>
            </widget>
           </item>
@@ -160,7 +160,7 @@
        <item>
         <widget class="QPushButton" name="migrateDataFolderMacBtn">
          <property name="text">
-          <string>Move MultiMC data to new location (will restart MultiMC)</string>
+          <string>Move the data to new location (will restart the launcher)</string>
          </property>
         </widget>
        </item>
@@ -187,7 +187,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>MultiMC notifications</string>
+          <string>Launcher notifications</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
@@ -515,9 +515,9 @@
             <property name="text">
              <string>&lt;html&gt;&lt;head/&gt;
 &lt;body&gt;
-&lt;p&gt;MultiMC sends anonymous usage statistics on every start of the application.&lt;/p&gt;&lt;p&gt;The following data is collected:&lt;/p&gt;
+&lt;p&gt;The launcher sends anonymous usage statistics on every start of the application.&lt;/p&gt;&lt;p&gt;The following data is collected:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;MultiMC version.&lt;/li&gt;
+&lt;li&gt;Launcher version.&lt;/li&gt;
 &lt;li&gt;Operating system name, version and architecture.&lt;/li&gt;
 &lt;li&gt;CPU architecture (kernel architecture on linux).&lt;/li&gt;
 &lt;li&gt;Size of system memory.&lt;/li&gt;

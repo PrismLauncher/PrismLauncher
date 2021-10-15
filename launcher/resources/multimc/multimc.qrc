@@ -2,11 +2,6 @@
 <RCC version="1.0">
     <qresource prefix="/icons/multimc">
         <file>index.theme</file>
-        <!-- Logo. Our own. For use in branding. -->
-        <file>scalable/logo.svg</file>
-
-        <!-- Logo. Our own. For use within the application (Settings pages and similar). -->
-        <file>scalable/multimc.svg</file>
 
         <!-- REDDIT logo icon, needs reddit license! -->
         <file>scalable/reddit-alien.svg</file>
@@ -283,9 +278,6 @@
 
         <file>32x32/instances/herobrine.png</file>
         <file>128x128/instances/herobrine.png</file>
-
-        <file>32x32/instances/infinity.png</file>
-        <file>128x128/instances/infinity.png</file>
 
         <file>32x32/instances/magitech.png</file>
         <file>128x128/instances/magitech.png</file>
