@@ -77,4 +77,6 @@ private:
 
     ModpacksCH::Modpack selected;
     QString selectedVersion;
+
+    bool initialised { false };
 };

@@ -63,7 +63,12 @@ bool FtbPage::shouldDisplay() const
 
 void FtbPage::openedImpl()
 {
-    triggerSearch();
+    if(!initialised)
+    {
+        listModel->request();
+        initialised = true;
+    }
+
     suggestCurrent();
 }
 
@@ -96,7 +101,7 @@ void FtbPage::suggestCurrent()
 
 void FtbPage::triggerSearch()
 {
-    listModel->searchWithTerm(ui->searchEdit->text());
+    filterModel->setSearchTerm(ui->searchEdit->text());
 }
 
 void FtbPage::onSortingSelectionChanged(QString data)

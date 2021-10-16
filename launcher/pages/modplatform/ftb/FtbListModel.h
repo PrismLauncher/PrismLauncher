@@ -30,13 +30,13 @@ public:
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
 
+    void request();
+
     void getLogo(const QString &logo, const QString &logoUrl, LogoCallback callback);
-    void searchWithTerm(const QString & term);
 
 private slots:
-    void performSearch();
-    void searchRequestFinished();
-    void searchRequestFailed(QString reason);
+    void requestFinished();
+    void requestFailed(QString reason);
 
     void requestPack();
     void packRequestFinished();
@@ -52,14 +52,6 @@ private:
     QList<ModpacksCH::Modpack> modpacks;
     LogoMap m_logoMap;
 
-    QString currentSearchTerm;
-    enum SearchState {
-        None,
-        CanPossiblyFetchMore,
-        ResetRequested,
-        Finished,
-        Failed,
-    } searchState = None;
     NetJobPtr jobPtr;
     int currentPack;
     QList<int> remainingPacks;

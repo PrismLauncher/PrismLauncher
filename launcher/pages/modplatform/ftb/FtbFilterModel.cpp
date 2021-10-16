@@ -36,9 +36,21 @@ FilterModel::Sorting FilterModel::getCurrentSorting()
     return currentSorting;
 }
 
+void FilterModel::setSearchTerm(const QString& term)
+{
+    searchTerm = term.trimmed();
+    invalidate();
+}
+
 bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
-    return true;
+    if (searchTerm.isEmpty()) {
+        return true;
+    }
+
+    auto index = sourceModel()->index(sourceRow, 0, sourceParent);
+    auto pack = sourceModel()->data(index, Qt::UserRole).value<ModpacksCH::Modpack>();
+    return pack.name.contains(searchTerm, Qt::CaseInsensitive);
 }
 
 bool FilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
