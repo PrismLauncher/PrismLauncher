@@ -71,7 +71,7 @@ public:
     virtual void saveNow() = 0;
 
     /***
-     * the instance has been invalidated - it is no longer tracked by MultiMC for some reason,
+     * the instance has been invalidated - it is no longer tracked by the launcher for some reason,
      * but it has not necessarily been deleted.
      *
      * Happens when the instance folder changes to some other location, or the instance is removed by external means.

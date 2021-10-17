@@ -28,7 +28,7 @@ PostLaunchCommand::PostLaunchCommand(LaunchTask *parent) : LaunchStep(parent)
 void PostLaunchCommand::executeTask()
 {
     QString postlaunch_cmd = m_parent->substituteVariables(m_command);
-    emit logLine(tr("Running Post-Launch command: %1").arg(postlaunch_cmd), MessageLevel::MultiMC);
+    emit logLine(tr("Running Post-Launch command: %1").arg(postlaunch_cmd), MessageLevel::Launcher);
     m_process.start(postlaunch_cmd);
 }
 
@@ -59,7 +59,7 @@ void PostLaunchCommand::on_state(LoggedProcess::State state)
             }
             else
             {
-                emit logLine(tr("Post-Launch command ran successfully.\n\n"), MessageLevel::MultiMC);
+                emit logLine(tr("Post-Launch command ran successfully.\n\n"), MessageLevel::Launcher);
                 emitSucceeded();
             }
         }

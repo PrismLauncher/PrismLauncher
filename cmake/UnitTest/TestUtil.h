@@ -23,6 +23,6 @@ public:
     }
 };
 
-#define MULTIMC_GET_TEST_FILE(file) TestsInternal::readFile(QFINDTESTDATA(file))
-#define MULTIMC_GET_TEST_FILE_UTF8(file) TestsInternal::readFileUtf8(QFINDTESTDATA(file))
+#define GET_TEST_FILE(file) TestsInternal::readFile(QFINDTESTDATA(file))
+#define GET_TEST_FILE_UTF8(file) TestsInternal::readFileUtf8(QFINDTESTDATA(file))
 

@@ -5,6 +5,16 @@ const Config BuildConfig;
 
 Config::Config()
 {
+    // Name and copyright
+    LAUNCHER_NAME = "@Launcher_Name@";
+    LAUNCHER_DISPLAYNAME = "@Launcher_DisplayName@";
+    LAUNCHER_COPYRIGHT = "@Launcher_Copyright@";
+    LAUNCHER_DOMAIN = "@Launcher_Domain@";
+    LAUNCHER_CONFIGFILE = "@Launcher_ConfigFile@";
+
+    USER_AGENT = "@Launcher_UserAgent@";
+    USER_AGENT_UNCACHED = USER_AGENT + " (Uncached)";
+
     // Version information
     VERSION_MAJOR = @Launcher_VERSION_MAJOR@;
     VERSION_MINOR = @Launcher_VERSION_MINOR@;

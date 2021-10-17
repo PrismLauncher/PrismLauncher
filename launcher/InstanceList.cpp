@@ -259,7 +259,7 @@ void InstanceList::deleteInstance(const InstanceId& id)
         return;
     }
 
-    qDebug() << "Instance" << id << "has been deleted by MultiMC.";
+    qDebug() << "Instance" << id << "has been deleted by the launcher.";
 }
 
 static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstancePtr> &list)
@@ -799,7 +799,7 @@ private slots:
 private:
     /*
      * WHY: the whole reason why this uses an exponential backoff retry scheme is antivirus on Windows.
-     * Basically, it starts messing things up while MultiMC is extracting/creating instances
+     * Basically, it starts messing things up while the launcher is extracting/creating instances
      * and causes that horrible failure that is NTFS to lock files in place because they are open.
      */
     ExponentialSeries backoff;

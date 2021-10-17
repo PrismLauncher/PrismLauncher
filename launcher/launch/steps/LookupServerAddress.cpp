@@ -60,7 +60,7 @@ void LookupServerAddress::on_dnsLookupFinished()
     if (m_dnsLookup->error() != QDnsLookup::NoError)
     {
         emit logLine(QString("Failed to resolve server address (this is NOT an error!) %1: %2\n")
-            .arg(m_dnsLookup->name(), m_dnsLookup->errorString()), MessageLevel::MultiMC);
+            .arg(m_dnsLookup->name(), m_dnsLookup->errorString()), MessageLevel::Launcher);
         resolve(m_lookupAddress, 25565); // Technically the task failed, however, we don't abort the launch
                                                       // and leave it up to minecraft to fail (or maybe not) when connecting
         return;
@@ -81,7 +81,7 @@ void LookupServerAddress::on_dnsLookupFinished()
     quint16 port = firstRecord.port();
 
     emit logLine(QString("Resolved server address %1 to %2 with port %3\n").arg(
-            m_dnsLookup->name(), firstRecord.target(), QString::number(port)),MessageLevel::MultiMC);
+            m_dnsLookup->name(), firstRecord.target(), QString::number(port)),MessageLevel::Launcher);
     resolve(firstRecord.target(), port);
 }
 

@@ -77,7 +77,7 @@ slots:
         QTest::addColumn<bool>("ret");
 
         QTest::newRow("one")
-            << MULTIMC_GET_TEST_FILE("data/1.json")
+            << GET_TEST_FILE("data/1.json")
             << (VersionFileList()
                 << VersionFileEntry{"fileOne",
                                                         493,
@@ -93,7 +93,7 @@ slots:
                                                         "f12df554b21e320be6471d7154130e70"})
             << QString() << true;
         QTest::newRow("two")
-            << MULTIMC_GET_TEST_FILE("data/2.json")
+            << GET_TEST_FILE("data/2.json")
             << (VersionFileList()
                 << VersionFileEntry{"fileOne",
                                                         493,

@@ -46,7 +46,7 @@ void DirectJavaLaunch::executeTask()
     args.append(minecraftInstance->getMainClass());
 
     QString allArgs = args.join(", ");
-    emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::MultiMC);
+    emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::Launcher);
 
     auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
 
@@ -71,7 +71,7 @@ void DirectJavaLaunch::executeTask()
             emitFailed(tr(reason).arg(wrapperCommand));
             return;
         }
-        emit logLine("Wrapper command is:\n" + wrapperCommandStr + "\n\n", MessageLevel::MultiMC);
+        emit logLine("Wrapper command is:\n" + wrapperCommandStr + "\n\n", MessageLevel::Launcher);
         args.prepend(javaPath);
         m_process.start(wrapperCommand, wrapperArgs + args);
     }
@@ -117,7 +117,7 @@ void DirectJavaLaunch::on_state(LoggedProcess::State state)
             break;
         }
         case LoggedProcess::Running:
-            emit logLine(QString("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::MultiMC);
+            emit logLine(QString("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::Launcher);
             m_parent->setPid(m_process.processId());
             m_parent->instance()->setLastLaunch();
             break;

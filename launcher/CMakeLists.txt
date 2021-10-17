@@ -555,7 +555,7 @@ set(LOGIC_SOURCES
     ${ATLAUNCHER_SOURCES}
 )
 
-SET(MULTIMC_SOURCES
+SET(LAUNCHER_SOURCES
     # Application base
     Launcher.h
     Launcher.cpp
@@ -812,7 +812,7 @@ SET(MULTIMC_SOURCES
     )
 
 ######## UIs ########
-SET(MULTIMC_UIS
+SET(LAUNCHER_UIS
     # Instance pages
     pages/instance/GameOptionsPage.ui
     pages/instance/VersionPage.ui
@@ -868,7 +868,7 @@ SET(MULTIMC_UIS
     widgets/MCModInfoFrame.ui
 )
 
-set(MULTIMC_QRCS
+set(LAUNCHER_QRCS
     resources/backgrounds/backgrounds.qrc
     resources/multimc/multimc.qrc
     resources/pe_dark/pe_dark.qrc
@@ -879,19 +879,20 @@ set(MULTIMC_QRCS
     resources/iOS/iOS.qrc
     resources/flat/flat.qrc
     resources/documents/documents.qrc
+    ../${Launcher_Branding_LogoQRC}
 )
 
 ######## Windows resource files ########
 if(WIN32)
-    set(MULTIMC_RCS ../${Launcher_Branding_WindowsRC})
+    set(LAUNCHER_RCS ../${Launcher_Branding_WindowsRC})
 endif()
 
 # Qt 5 stuff
-qt5_wrap_ui(MULTIMC_UI ${MULTIMC_UIS})
-qt5_add_resources(MULTIMC_RESOURCES ${MULTIMC_QRCS})
+qt5_wrap_ui(LAUNCHER_UI ${LAUNCHER_UIS})
+qt5_add_resources(LAUNCHER_RESOURCES ${LAUNCHER_QRCS})
 
 # Add executable
-add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${MULTIMC_SOURCES} ${MULTIMC_UI} ${MULTIMC_RESOURCES})
+add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
 target_link_libraries(Launcher_logic
     systeminfo
     Launcher_quazip
@@ -921,7 +922,7 @@ target_link_libraries(Launcher_logic
 
 target_link_libraries(Launcher_logic secrets)
 
-add_executable(${Launcher_Name} MACOSX_BUNDLE WIN32 main.cpp ${MULTIMC_RCS})
+add_executable(${Launcher_Name} MACOSX_BUNDLE WIN32 main.cpp ${LAUNCHER_RCS})
 target_link_libraries(${Launcher_Name} Launcher_logic)
 
 if(DEFINED Launcher_APP_BINARY_NAME)

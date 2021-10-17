@@ -63,7 +63,7 @@ void Task::start()
         }
         case State::Running:
         {
-            qWarning() << "MultiMC tried to start task" << describe() << "while it was already running!";
+            qWarning() << "The launcher tried to start task" << describe() << "while it was already running!";
             return;
         }
     }

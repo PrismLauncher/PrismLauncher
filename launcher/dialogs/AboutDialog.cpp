@@ -31,9 +31,10 @@ QString getCreditsHtml(QStringList patrons)
     QString patronsHeading = QObject::tr("Patrons", "About Credits");
     QString output;
     QTextStream stream(&output);
+    stream.setCodec(QTextCodec::codecForName("UTF-8"));
     stream << "<center>\n";
     // TODO: possibly retrieve from git history at build time?
-    stream << "<h3>" << QObject::tr("MultiMC Developers", "About Credits") << "</h3>\n";
+    stream << "<h3>" << QObject::tr("Developers", "About Credits") << "</h3>\n";
     stream << "<p>Andrew Okin &lt;<a href='mailto:forkk@forkk.net'>forkk@forkk.net</a>&gt;</p>\n";
     stream << "<p>Petr Mrázek &lt;<a href='mailto:peterix@gmail.com'>peterix@gmail.com</a>&gt;</p>\n";
     stream << "<p>Sky Welch &lt;<a href='mailto:multimc@bunnies.io'>multimc@bunnies.io</a>&gt;</p>\n";
@@ -75,6 +76,10 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
 {
     ui->setupUi(this);
 
+    QString launcherName = BuildConfig.LAUNCHER_NAME;
+
+    setWindowTitle(tr("About %1").arg(launcherName));
+
     QString chtml = getCreditsHtml(QStringList());
     ui->creditsText->setHtml(chtml);
 
@@ -84,7 +89,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
     ui->urlLabel->setOpenExternalLinks(true);
 
     ui->icon->setPixmap(LAUNCHER->getThemedIcon("logo").pixmap(64));
-    ui->title->setText("MultiMC 5");
+    ui->title->setText(launcherName);
 
     ui->versionLabel->setText(tr("Version") +": " + BuildConfig.printableVersionString());
     ui->platformLabel->setText(tr("Platform") +": " + BuildConfig.BUILD_PLATFORM);

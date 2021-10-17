@@ -16,6 +16,7 @@
 #include <widgets/VersionSelectWidget.h>
 #include <FileSystem.h>
 #include <QFileDialog>
+#include <BuildConfig.h>
 
 JavaSettingsWidget::JavaSettingsWidget(QWidget* parent) : QWidget(parent)
 {
@@ -146,11 +147,11 @@ JavaSettingsWidget::ValidationStatus JavaSettingsWidget::validate()
                 this,
                 tr("No Java version selected"),
                 tr("You didn't select a Java version or selected something that doesn't work.\n"
-                    "MultiMC will not be able to start Minecraft.\n"
+                    "%1 will not be able to start Minecraft.\n"
                     "Do you wish to proceed without any Java?"
                     "\n\n"
                     "You can change the Java version in the settings later.\n"
-                ),
+                ).arg(BuildConfig.LAUNCHER_NAME),
                 QMessageBox::Warning,
                 QMessageBox::Yes | QMessageBox::No,
                 QMessageBox::NoButton

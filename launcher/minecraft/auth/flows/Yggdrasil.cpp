@@ -241,13 +241,16 @@ void Yggdrasil::processReply()
     case QNetworkReply::SslHandshakeFailedError:
         changeState(
             STATE_FAILED_SOFT,
-            tr("<b>SSL Handshake failed.</b><br/>There might be a few causes for it:<br/>"
-               "<ul>"
-               "<li>You use Windows and need to update your root certificates, please install any outstanding updates.</li>"
-               "<li>Some device on your network is interfering with SSL traffic. In that case, "
-               "you have bigger worries than Minecraft not starting.</li>"
-               "<li>Possibly something else. Check the MultiMC log file for details</li>"
-               "</ul>"));
+            tr(
+                "<b>SSL Handshake failed.</b><br/>There might be a few causes for it:<br/>"
+                "<ul>"
+                "<li>You use Windows and need to update your root certificates, please install any outstanding updates.</li>"
+                "<li>Some device on your network is interfering with SSL traffic. In that case, "
+                "you have bigger worries than Minecraft not starting.</li>"
+                "<li>Possibly something else. Check the %1 log file for details</li>"
+                "</ul>"
+            ).arg(BuildConfig.LAUNCHER_NAME)
+        );
         return;
     // used for invalid credentials and similar errors. Fall through.
     case QNetworkReply::ContentAccessDenied:

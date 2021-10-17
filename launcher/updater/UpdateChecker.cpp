@@ -190,14 +190,6 @@ void UpdateChecker::updateChanList(bool notifyNoUpdate)
         return;
     }
 
-    if (m_channelUrl.isEmpty())
-    {
-        qCritical() << "Failed to update channel list. No channel list URL set."
-                    << "If you'd like to use MultiMC's update system, please pass the channel "
-                        "list URL to CMake at compile time.";
-        return;
-    }
-
     m_chanListLoading = true;
     NetJob *job = new NetJob("Update System Channel List");
     job->addNetAction(Net::Download::makeByteArray(QUrl(m_channelUrl), &chanlistData));

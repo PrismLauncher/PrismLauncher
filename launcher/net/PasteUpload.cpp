@@ -16,7 +16,7 @@ PasteUpload::PasteUpload(QWidget *window, QString text, QString key) : m_window(
     sectionObject.insert("contents", text);
     QJsonArray sectionArray;
     sectionArray.append(sectionObject);
-    topLevelObj.insert("description", "MultiMC Log Upload");
+    topLevelObj.insert("description", "Log Upload");
     topLevelObj.insert("sections", sectionArray);
     QJsonDocument docOut;
     docOut.setObject(topLevelObj);

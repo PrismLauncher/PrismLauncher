@@ -25,6 +25,7 @@
 
 #include "FileSystem.h"
 #include "Commandline.h"
+#include "BuildConfig.h"
 
 BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
     : QObject()
@@ -260,7 +261,7 @@ QString BaseInstance::name() const
 
 QString BaseInstance::windowTitle() const
 {
-    return "MultiMC: " + name().replace(QRegExp("[ \n\r\t]+"), " ");
+    return BuildConfig.LAUNCHER_NAME + ": " + name().replace(QRegExp("[ \n\r\t]+"), " ");
 }
 
 // FIXME: why is this here? move it to MinecraftInstance!!!

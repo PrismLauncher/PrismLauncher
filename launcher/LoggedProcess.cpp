@@ -65,16 +65,16 @@ void LoggedProcess::on_exit(int exit_code, QProcess::ExitStatus status)
         if (status == QProcess::NormalExit)
         {
             //: Message displayed on instance exit
-            emit log({tr("Process exited with code %1.").arg(exit_code)}, MessageLevel::MultiMC);
+            emit log({tr("Process exited with code %1.").arg(exit_code)}, MessageLevel::Launcher);
             changeState(LoggedProcess::Finished);
         }
         else
         {
             //: Message displayed on instance crashed
             if(exit_code == -1)
-                emit log({tr("Process crashed.")}, MessageLevel::MultiMC);
+                emit log({tr("Process crashed.")}, MessageLevel::Launcher);
             else
-                emit log({tr("Process crashed with exitcode %1.").arg(exit_code)}, MessageLevel::MultiMC);
+                emit log({tr("Process crashed with exitcode %1.").arg(exit_code)}, MessageLevel::Launcher);
             changeState(LoggedProcess::Crashed);
         }
     }

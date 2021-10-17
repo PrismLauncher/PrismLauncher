@@ -135,7 +135,7 @@ public class EntryPoint
         }
         if(isAborted)
         {
-            System.err.println("Launch aborted by MultiMC.");
+            System.err.println("Launch aborted by the launcher.");
             return 1;
         }
         if(m_launcher != null)

@@ -29,7 +29,7 @@ void PreLaunchCommand::executeTask()
 {
     //FIXME: where to put this?
     QString prelaunch_cmd = m_parent->substituteVariables(m_command);
-    emit logLine(tr("Running Pre-Launch command: %1").arg(prelaunch_cmd), MessageLevel::MultiMC);
+    emit logLine(tr("Running Pre-Launch command: %1").arg(prelaunch_cmd), MessageLevel::Launcher);
     m_process.start(prelaunch_cmd);
 }
 
@@ -60,7 +60,7 @@ void PreLaunchCommand::on_state(LoggedProcess::State state)
             }
             else
             {
-                emit logLine(tr("Pre-Launch command ran successfully.\n\n"), MessageLevel::MultiMC);
+                emit logLine(tr("Pre-Launch command ran successfully.\n\n"), MessageLevel::Launcher);
                 emitSucceeded();
             }
         }

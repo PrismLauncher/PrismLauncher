@@ -87,7 +87,7 @@ static const QLatin1String liveCheckFile("live.check");
 
 using namespace Commandline;
 
-#define MACOS_HINT "If you are on macOS Sierra, you might have to move MultiMC.app to your /Applications or ~/Applications folder. "\
+#define MACOS_HINT "If you are on macOS Sierra, you might have to move the app to your /Applications or ~/Applications folder. "\
     "This usually fixes the problem and you can move the application elsewhere afterwards.\n"\
     "\n"
 
@@ -179,10 +179,10 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         consoleAttached = true;
     }
 #endif
-    setOrganizationName("MultiMC");
-    setOrganizationDomain("multimc.org");
-    setApplicationName("MultiMC5");
-    setApplicationDisplayName("MultiMC 5");
+    setOrganizationName(BuildConfig.LAUNCHER_NAME);
+    setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
+    setApplicationName(BuildConfig.LAUNCHER_NAME);
+    setApplicationDisplayName(BuildConfig.LAUNCHER_DISPLAYNAME);
     setApplicationVersion(BuildConfig.printableVersionString());
 
     startTime = QDateTime::currentDateTime();
@@ -200,7 +200,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
                 showFatalErrorMessage(
                     "Unsupported system detected!",
                     "Linux-on-Windows distributions are not supported.\n\n"
-                    "Please use the Windows MultiMC binary when playing on Windows."
+                    "Please use the Windows binary when playing on Windows."
                 );
                 return;
             }
@@ -227,7 +227,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         // --dir
         parser.addOption("dir");
         parser.addShortOpt("dir", 'd');
-        parser.addDocumentation("dir", "Use the supplied folder as MultiMC root instead of "
+        parser.addDocumentation("dir", "Use the supplied folder as application root instead of "
                                        "the binary location (use '.' for current)");
         // --launch
         parser.addOption("launch");
@@ -240,7 +240,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
                                           "(only valid in combination with --launch)");
         // --alive
         parser.addSwitch("alive");
-        parser.addDocumentation("alive", "Write a small '" + liveCheckFile + "' file after MultiMC starts");
+        parser.addDocumentation("alive", "Write a small '" + liveCheckFile + "' file after the launcher starts");
         // --import
         parser.addOption("import");
         parser.addShortOpt("import", 'I');
@@ -255,7 +255,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         {
             std::cerr << "CommandLineError: " << e.what() << std::endl;
             if(argc > 0)
-                std::cerr << "Try '" << argv[0] << " -h' to get help on MultiMC's command line parameters."
+                std::cerr << "Try '" << argv[0] << " -h' to get help on command line parameters."
                           << std::endl;
             m_status = Launcher::Failed;
             return;
@@ -298,13 +298,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
     }
     else
     {
-#ifdef MULTIMC_LINUX_DATADIR
-        QString xdgDataHome = QFile::decodeName(qgetenv("XDG_DATA_HOME"));
-        if (xdgDataHome.isEmpty())
-            xdgDataHome = QDir::homePath() + QLatin1String("/.local/share");
-        dataPath = xdgDataHome + "/multimc";
-        adjustedBy += "XDG standard " + dataPath;
-#elif defined(Q_OS_MAC)
+#if defined(Q_OS_MAC)
         QDir foo(FS::PathCombine(applicationDirPath(), "../../Data"));
         dataPath = foo.absolutePath();
         adjustedBy += "Fallback to special Mac location " + dataPath;
@@ -317,30 +311,30 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
     if (!FS::ensureFolderPathExists(dataPath))
     {
         showFatalErrorMessage(
-            "MultiMC data folder could not be created.",
-            "MultiMC data folder could not be created.\n"
+            "The launcher data folder could not be created.",
+            "The launcher data folder could not be created.\n"
             "\n"
 #if defined(Q_OS_MAC)
             MACOS_HINT
 #endif
-            "Make sure you have the right permissions to the MultiMC data folder and any folder needed to access it.\n"
+            "Make sure you have the right permissions to the launcher data folder and any folder needed to access it.\n"
             "\n"
-            "MultiMC cannot continue until you fix this problem."
+            "The launcher cannot continue until you fix this problem."
         );
         return;
     }
     if (!QDir::setCurrent(dataPath))
     {
         showFatalErrorMessage(
-            "MultiMC data folder could not be opened.",
-            "MultiMC data folder could not be opened.\n"
+            "The launcher data folder could not be opened.",
+            "The launcher data folder could not be opened.\n"
             "\n"
 #if defined(Q_OS_MAC)
             MACOS_HINT
 #endif
-            "Make sure you have the right permissions to the MultiMC data folder.\n"
+            "Make sure you have the right permissions to the launcher data folder.\n"
             "\n"
-            "MultiMC cannot continue until you fix this problem."
+            "The launcher cannot continue until you fix this problem."
         );
         return;
     }
@@ -357,18 +351,24 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
     QDir fi(applicationDirPath());
     QString originalData = fi.absolutePath();
     // if the config file exists in Contents/MacOS, then user data is still there and needs to moved
-    if (QFileInfo::exists(FS::PathCombine(originalData, "multimc.cfg")))
+    if (QFileInfo::exists(FS::PathCombine(originalData, BuildConfig.LAUNCHER_CONFIGFILE)))
     {
         if (!QFileInfo::exists(FS::PathCombine(originalData, "dontmovemacdata")))
         {
             QMessageBox::StandardButton askMoveDialogue;
-            askMoveDialogue = QMessageBox::question(nullptr, "MultiMC 5", "Would you like to move application data to a new data location? It will improve MultiMC's performance, but if you switch to older versions it will look like instances have disappeared. If you select no, you can migrate later in settings. You should select yes unless you're commonly switching between different versions of MultiMC (eg. develop and stable).", QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+            askMoveDialogue = QMessageBox::question(
+                nullptr,
+                BuildConfig.LAUNCHER_DISPLAYNAME,
+                "Would you like to move application data to a new data location? It will improve the launcher's performance, but if you switch to older versions it will look like instances have disappeared. If you select no, you can migrate later in settings. You should select yes unless you're commonly switching between different versions (eg. develop and stable).",
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::Yes
+            );
             if (askMoveDialogue == QMessageBox::Yes)
             {
                 qDebug() << "On macOS and found config file in old location, moving user data...";
                 QDir dir;
                 QStringList dataFiles {
-                    "*.log", // MultiMC-@.log
+                    "*.log", // Launcher log files: ${Launcher_Name}-@.log
                     "accounts.json",
                     "accounts",
                     "assets",
@@ -379,7 +379,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
                     "meta",
                     "metacache",
                     "mods",
-                    "multimc.cfg",
+                    BuildConfig.LAUNCHER_CONFIGFILE,
                     "themes",
                     "translations"
                 };
@@ -451,7 +451,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
 
     // init the logger
     {
-        static const QString logBase = "MultiMC-%0.log";
+        static const QString logBase = BuildConfig.LAUNCHER_NAME + "-%0.log";
         auto moveFile = [](const QString &oldName, const QString &newName)
         {
             QFile::remove(newName);
@@ -468,15 +468,15 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         if(!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
         {
             showFatalErrorMessage(
-                "MultiMC data folder is not writable!",
-                "MultiMC couldn't create a log file - the MultiMC data folder is not writable.\n"
+                "The launcher data folder is not writable!",
+                "The launcher couldn't create a log file - the data folder is not writable.\n"
                 "\n"
     #if defined(Q_OS_MAC)
                 MACOS_HINT
     #endif
-                "Make sure you have write permissions to the MultiMC data folder.\n"
+                "Make sure you have write permissions to the data folder.\n"
                 "\n"
-                "MultiMC cannot continue until you fix this problem."
+                "The launcher cannot continue until you fix this problem."
             );
             return;
         }
@@ -503,7 +503,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         ENV.setJarsPath( TOSTRING(MULTIMC_JARS_LOCATION) );
 #endif
 
-        qDebug() << "MultiMC 5, (c) 2013-2021 MultiMC Contributors";
+        qDebug() << BuildConfig.LAUNCHER_DISPLAYNAME << ", (c) 2013-2021 " << BuildConfig.LAUNCHER_COPYRIGHT;
         qDebug() << "Version                    : " << BuildConfig.printableVersionString();
         qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
         qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
@@ -553,7 +553,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
 
     // Initialize application settings
     {
-        m_settings.reset(new INISettingsObject("multimc.cfg", this));
+        m_settings.reset(new INISettingsObject(BuildConfig.LAUNCHER_CONFIGFILE, this));
         // Updates
         m_settings->registerSetting("UpdateChannel", BuildConfig.VERSION_CHANNEL);
         m_settings->registerSetting("AutoUpdate", true);
@@ -1164,6 +1164,9 @@ void Launcher::setIconTheme(const QString& name)
 
 QIcon Launcher::getThemedIcon(const QString& name)
 {
+    if(name == "logo") {
+        return QIcon(":/logo.svg");
+    }
     return XdgIcon::fromTheme(name);
 }
 

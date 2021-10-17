@@ -8,6 +8,12 @@ class Config
 {
 public:
     Config();
+    QString LAUNCHER_NAME;
+    QString LAUNCHER_DISPLAYNAME;
+    QString LAUNCHER_COPYRIGHT;
+    QString LAUNCHER_DOMAIN;
+    QString LAUNCHER_CONFIGFILE;
+
     /// The major version number.
     int VERSION_MAJOR;
     /// The minor version number.
@@ -31,10 +37,13 @@ public:
     /// URL for the updater's channel
     QString UPDATER_BASE;
 
+
     /// User-Agent to use.
-    QString USER_AGENT = "MultiMC/5.0";
+    QString USER_AGENT;
+
     /// User-Agent to use for uncached requests.
-    QString USER_AGENT_UNCACHED = "MultiMC/5.0 (Uncached)";
+    QString USER_AGENT_UNCACHED;
+
 
     /// Google analytics ID
     QString ANALYTICS_ID;
@@ -71,7 +80,7 @@ public:
     QString IMGUR_CLIENT_ID;
 
     /**
-     * MultiMC Metadata repository URL prefix
+     * Metadata repository URL prefix
      */
     QString META_URL;
 

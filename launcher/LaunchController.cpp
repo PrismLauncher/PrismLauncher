@@ -47,7 +47,7 @@ void LaunchController::login() {
             m_parentWidget,
             tr("No Accounts"),
             tr("In order to play Minecraft, you must have at least one Mojang or Minecraft "
-               "account logged in to MultiMC."
+               "account logged in."
                "Would you like to open the account manager to add an account now?"),
             QMessageBox::Information,
             QMessageBox::Yes | QMessageBox::No
@@ -286,7 +286,7 @@ void LaunchController::launchInstance()
             }
             resolved_servers = resolved_servers + "]\n\n";
         }
-        m_launcher->prependStep(new TextPrint(m_launcher.get(), resolved_servers, MessageLevel::MultiMC));
+        m_launcher->prependStep(new TextPrint(m_launcher.get(), resolved_servers, MessageLevel::Launcher));
     } else {
         online_mode = "offline";
     }
@@ -298,10 +298,10 @@ void LaunchController::launchInstance()
         auth_server_status = "offline";
     }
 
-    m_launcher->prependStep(new TextPrint(m_launcher.get(), "Launched instance in " + online_mode + " mode\nAuthentication server is " + auth_server_status + "\n", MessageLevel::MultiMC));
+    m_launcher->prependStep(new TextPrint(m_launcher.get(), "Launched instance in " + online_mode + " mode\nAuthentication server is " + auth_server_status + "\n", MessageLevel::Launcher));
 
     // Prepend Version
-    m_launcher->prependStep(new TextPrint(m_launcher.get(), "MultiMC version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::MultiMC));
+    m_launcher->prependStep(new TextPrint(m_launcher.get(), BuildConfig.LAUNCHER_NAME + " version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::Launcher));
     m_launcher->start();
 }
 

@@ -5,6 +5,7 @@
 #include "Json.h"
 using namespace Json;
 #include "ParseUtils.h"
+#include <BuildConfig.h>
 
 static const int CURRENT_MINIMUM_LAUNCHER_VERSION = 18;
 
@@ -175,9 +176,11 @@ void MojangVersionFormat::readVersionProperties(const QJsonObject &in, VersionFi
         {
             out->addProblem(
                 ProblemSeverity::Warning,
-                QObject::tr("The 'minimumLauncherVersion' value of this version (%1) is higher than supported by MultiMC (%2). It might not work properly!")
+                QObject::tr("The 'minimumLauncherVersion' value of this version (%1) is higher than supported by %3 (%2). It might not work properly!")
                     .arg(out->minimumLauncherVersion)
-                    .arg(CURRENT_MINIMUM_LAUNCHER_VERSION));
+                    .arg(CURRENT_MINIMUM_LAUNCHER_VERSION)
+                    .arg(BuildConfig.LAUNCHER_NAME)
+            );
         }
     }
     if(in.contains("downloads"))

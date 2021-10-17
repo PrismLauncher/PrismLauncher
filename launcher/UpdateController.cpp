@@ -8,6 +8,9 @@
 #include <chrono>
 #include <LocalPeer.h>
 
+#include "BuildConfig.h"
+
+
 // from <sys/stat.h>
 #ifndef S_IRUSR
 #define __S_IREAD 0400         /* Read by owner.  */
@@ -91,7 +94,7 @@ void UpdateController::installUpdates()
 #ifdef Q_OS_WIN
     QString finishCmd = QApplication::applicationFilePath();
 #elif defined Q_OS_LINUX
-    QString finishCmd = FS::PathCombine(m_root, "MultiMC");
+    QString finishCmd = FS::PathCombine(m_root, BuildConfig.LAUNCHER_NAME);
 #elif defined Q_OS_MAC
     QString finishCmd = QApplication::applicationFilePath();
 #else
@@ -127,8 +130,9 @@ void UpdateController::installUpdates()
             case GoUpdate::Operation::OP_REPLACE:
             {
 #ifdef Q_OS_WIN32
+                QString windowsExeName = BuildConfig.LAUNCHER_NAME + ".exe";
                 // hack for people renaming the .exe because ... reasons :)
-                if(op.destination == "MultiMC.exe")
+                if(op.destination == windowsExeName)
                 {
                     op.destination = QFileInfo(QApplication::applicationFilePath()).fileName();
                 }
@@ -137,7 +141,7 @@ void UpdateController::installUpdates()
 #ifdef Q_OS_WIN32
                 if(QSysInfo::windowsVersion() < QSysInfo::WV_VISTA)
                 {
-                    if(destination.fileName() == "MultiMC.exe")
+                    if(destination.fileName() == windowsExeName)
                     {
                         QDir rootDir(m_root);
                         exeOrigin = rootDir.relativeFilePath(op.source);
@@ -365,16 +369,20 @@ void UpdateController::fail()
     {
         case Replace:
         {
-            msg = QObject::tr("Couldn't replace file %1. Changes will be reverted.\n"
-                "See the MultiMC log file for details.").arg(m_failedFile);
+            msg = QObject::tr(
+                "Couldn't replace file %1. Changes will be reverted.\n"
+                "See the %2 log file for details."
+            ).arg(m_failedFile, BuildConfig.LAUNCHER_NAME);
             doRollback = true;
             QMessageBox::critical(m_parent, failTitle, msg);
             break;
         }
         case Delete:
         {
-            msg = QObject::tr("Couldn't remove file %1. Changes will be reverted.\n"
-                "See the MultiMC log file for details.").arg(m_failedFile);
+            msg = QObject::tr(
+                "Couldn't remove file %1. Changes will be reverted.\n"
+                "See the %2 log file for details."
+            ).arg(m_failedFile, BuildConfig.LAUNCHER_NAME);
             doRollback = true;
             QMessageBox::critical(m_parent, failTitle, msg);
             break;
@@ -404,8 +412,8 @@ void UpdateController::fail()
         if(!rollbackOK)
         {
             msg = QObject::tr("The rollback failed too.\n"
-                "You will have to repair MultiMC manually.\n"
-                "Please let us know why and how this happened.").arg(m_failedFile);
+                "You will have to repair %1 manually.\n"
+                "Please let us know why and how this happened.").arg(BuildConfig.LAUNCHER_NAME);
             QMessageBox::critical(m_parent, rollFailTitle, msg);
             qApp->quit();
         }

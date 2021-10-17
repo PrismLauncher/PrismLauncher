@@ -221,7 +221,7 @@ private:
     // main window, if any
     MainWindow * m_mainWindow = nullptr;
 
-    // peer MultiMC instance connector - used to implement single instance MultiMC and signalling
+    // peer launcher instance connector - used to implement single instance launcher and signalling
     LocalPeer * m_peerInstance = nullptr;
 
     GAnalytics * m_analytics = nullptr;

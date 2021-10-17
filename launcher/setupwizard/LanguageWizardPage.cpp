@@ -4,6 +4,7 @@
 
 #include "widgets/LanguageSelectionWidget.h"
 #include <QVBoxLayout>
+#include <BuildConfig.h>
 
 LanguageWizardPage::LanguageWizardPage(QWidget *parent)
     : BaseWizardPage(parent)
@@ -43,6 +44,6 @@ bool LanguageWizardPage::validatePage()
 void LanguageWizardPage::retranslate()
 {
     setTitle(tr("Language"));
-    setSubTitle(tr("Select the language to use in MultiMC"));
+    setSubTitle(tr("Select the language to use in %1").arg(BuildConfig.LAUNCHER_NAME));
     mainWidget->retranslate();
 }

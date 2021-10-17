@@ -133,11 +133,21 @@ public:
     {
         if(m_text)
         {
-            m_contained->setText(QApplication::translate("MainWindow", m_text));
+            QString result;
+            result = QApplication::translate("MainWindow", m_text);
+            if(result.contains("%1")) {
+                result = result.arg(BuildConfig.LAUNCHER_NAME);
+            }
+            m_contained->setText(result);
         }
         if(m_tooltip)
         {
-            m_contained->setToolTip(QApplication::translate("MainWindow", m_tooltip));
+            QString result;
+            result = QApplication::translate("MainWindow", m_tooltip);
+            if(result.contains("%1")) {
+                result = result.arg(BuildConfig.LAUNCHER_NAME);
+            }
+            m_contained->setToolTip(result);
         }
     }
 private:
@@ -324,7 +334,7 @@ public:
             actionReportBug->setObjectName(QStringLiteral("actionReportBug"));
             actionReportBug->setIcon(LAUNCHER->getThemedIcon("bug"));
             actionReportBug.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Report a Bug"));
-            actionReportBug.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the bug tracker to report a bug with MultiMC."));
+            actionReportBug.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the bug tracker to report a bug with %1."));
             all_actions.append(&actionReportBug);
             helpMenu->addAction(actionReportBug);
         }
@@ -334,7 +344,7 @@ public:
             actionDISCORD->setObjectName(QStringLiteral("actionDISCORD"));
             actionDISCORD->setIcon(LAUNCHER->getThemedIcon("discord"));
             actionDISCORD.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Discord"));
-            actionDISCORD.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open MultiMC discord voice chat."));
+            actionDISCORD.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open %1 discord voice chat."));
             all_actions.append(&actionDISCORD);
             helpMenu->addAction(actionDISCORD);
         }
@@ -344,7 +354,7 @@ public:
             actionREDDIT->setObjectName(QStringLiteral("actionREDDIT"));
             actionREDDIT->setIcon(LAUNCHER->getThemedIcon("reddit-alien"));
             actionREDDIT.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Reddit"));
-            actionREDDIT.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open MultiMC subreddit."));
+            actionREDDIT.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open %1 subreddit."));
             all_actions.append(&actionREDDIT);
             helpMenu->addAction(actionREDDIT);
         }
@@ -353,14 +363,14 @@ public:
         actionAbout->setObjectName(QStringLiteral("actionAbout"));
         actionAbout->setIcon(LAUNCHER->getThemedIcon("about"));
         actionAbout->setMenuRole(QAction::AboutRole);
-        actionAbout.setTextId(QT_TRANSLATE_NOOP("MainWindow", "About MultiMC"));
-        actionAbout.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "View information about MultiMC."));
+        actionAbout.setTextId(QT_TRANSLATE_NOOP("MainWindow", "About %1"));
+        actionAbout.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "View information about %1."));
         all_actions.append(&actionAbout);
         helpMenu->addAction(actionAbout);
 
         helpMenuButton = TranslatedToolButton(MainWindow);
         helpMenuButton.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Help"));
-        helpMenuButton.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Get help with MultiMC or Minecraft."));
+        helpMenuButton.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Get help with %1 or Minecraft."));
         helpMenuButton->setMenu(helpMenu);
         helpMenuButton->setPopupMode(QToolButton::InstantPopup);
         helpMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -377,7 +387,7 @@ public:
             actionCheckUpdate->setObjectName(QStringLiteral("actionCheckUpdate"));
             actionCheckUpdate->setIcon(LAUNCHER->getThemedIcon("checkupdate"));
             actionCheckUpdate.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Update"));
-            actionCheckUpdate.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Check for new updates for MultiMC."));
+            actionCheckUpdate.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Check for new updates for %1."));
             all_actions.append(&actionCheckUpdate);
             mainToolBar->addAction(actionCheckUpdate);
         }
@@ -387,8 +397,8 @@ public:
         actionPatreon = TranslatedAction(MainWindow);
         actionPatreon->setObjectName(QStringLiteral("actionPatreon"));
         actionPatreon->setIcon(LAUNCHER->getThemedIcon("patreon"));
-        actionPatreon.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Support MultiMC"));
-        actionPatreon.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the MultiMC Patreon page."));
+        actionPatreon.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Support %1"));
+        actionPatreon.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the %1 Patreon page."));
         all_actions.append(&actionPatreon);
         mainToolBar->addAction(actionPatreon);
 
@@ -437,7 +447,7 @@ public:
         actionMoreNews->setObjectName(QStringLiteral("actionMoreNews"));
         actionMoreNews->setIcon(LAUNCHER->getThemedIcon("news"));
         actionMoreNews.setTextId(QT_TRANSLATE_NOOP("MainWindow", "More news..."));
-        actionMoreNews.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the MultiMC development blog to read more news about MultiMC."));
+        actionMoreNews.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the development blog to read more news about %1."));
         all_actions.append(&actionMoreNews);
         newsToolBar->addAction(actionMoreNews);
 
@@ -596,9 +606,9 @@ public:
         }
         MainWindow->resize(800, 600);
         MainWindow->setWindowIcon(LAUNCHER->getThemedIcon("logo"));
-        MainWindow->setWindowTitle("MultiMC 5");
+        MainWindow->setWindowTitle(BuildConfig.LAUNCHER_DISPLAYNAME);
 #ifndef QT_NO_ACCESSIBILITY
-        MainWindow->setAccessibleName("MultiMC");
+        MainWindow->setAccessibleName(BuildConfig.LAUNCHER_NAME);
 #endif
 
         createMainToolbar(MainWindow);
@@ -623,7 +633,7 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        QString winTitle = tr("MultiMC 5 - Version %1").arg(BuildConfig.printableVersionString());
+        QString winTitle = tr("%1 - Version %2", "Launcher - Version X").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString());
         if (!BuildConfig.BUILD_PLATFORM.isEmpty())
         {
             winTitle += tr(" on %1", "on platform, as in operating system").arg(BuildConfig.BUILD_PLATFORM);
@@ -897,7 +907,7 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
     {
         auto group = view->groupNameAt(pos);
 
-        QAction *actionVoid = new QAction("MultiMC", this);
+        QAction *actionVoid = new QAction(BuildConfig.LAUNCHER_NAME, this);
         actionVoid->setEnabled(false);
 
         QAction *actionCreateInstance = new QAction(tr("Create instance"), this);
@@ -1381,10 +1391,13 @@ void MainWindow::finalizeInstance(InstancePtr inst)
     }
     else
     {
-        CustomMessageBox::selectable(this, tr("Error"), tr("MultiMC cannot download Minecraft or update instances unless you have at least "
-                                                           "one account added.\nPlease add your Mojang or Minecraft account."),
-                                     QMessageBox::Warning)
-            ->show();
+        CustomMessageBox::selectable(
+            this,
+            tr("Error"),
+            tr("The launcher cannot download Minecraft or update instances unless you have at least "
+                "one account added.\nPlease add your Mojang or Minecraft account."),
+            QMessageBox::Warning
+        )->show();
     }
 }
 
@@ -1879,20 +1892,24 @@ void MainWindow::checkInstancePathForProblems()
     {
         QMessageBox warning(this);
         warning.setText(tr("Your instance folder contains \'!\' and this is known to cause Java problems!"));
-        warning.setInformativeText(tr("You have now two options: <br/>"
-                                      " - change the instance folder in the settings <br/>"
-                                      " - move this installation of MultiMC5 to a different folder"));
+        warning.setInformativeText(
+            tr(
+                "You have now two options: <br/>"
+                " - change the instance folder in the settings <br/>"
+                " - move this installation of %1 to a different folder"
+            ).arg(BuildConfig.LAUNCHER_NAME)
+        );
         warning.setDefaultButton(QMessageBox::Ok);
         warning.exec();
     }
     auto tempFolderText = tr("This is a problem: <br/>"
-                             " - MultiMC will likely be deleted without warning by the operating system <br/>"
-                             " - close MultiMC now and extract it to a real location, not a temporary folder");
+                             " - The launcher will likely be deleted without warning by the operating system <br/>"
+                             " - close the launcher now and extract it to a real location, not a temporary folder");
     QString pathfoldername = QDir(instanceFolder).absolutePath();
     if (pathfoldername.contains("Rar$", Qt::CaseInsensitive))
     {
         QMessageBox warning(this);
-        warning.setText(tr("Your instance folder contains \'Rar$\' - that means you haven't extracted the MultiMC zip!"));
+        warning.setText(tr("Your instance folder contains \'Rar$\' - that means you haven't extracted the launcher archive!"));
         warning.setInformativeText(tempFolderText);
         warning.setDefaultButton(QMessageBox::Ok);
         warning.exec();

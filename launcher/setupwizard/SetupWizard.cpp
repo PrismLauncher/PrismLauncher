@@ -10,6 +10,7 @@
 #include <ganalytics.h>
 
 #include <QAbstractButton>
+#include <BuildConfig.h>
 
 SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 {
@@ -30,7 +31,7 @@ void SetupWizard::retranslate()
     setButtonText(QWizard::BackButton, tr("< &Back"));
     setButtonText(QWizard::FinishButton, tr("&Finish"));
     setButtonText(QWizard::CustomButton1, tr("&Refresh"));
-    setWindowTitle(tr("MultiMC Quick Setup"));
+    setWindowTitle(tr("%1 Quick Setup").arg(BuildConfig.LAUNCHER_NAME));
 }
 
 BaseWizardPage * SetupWizard::getBasePage(int id)
