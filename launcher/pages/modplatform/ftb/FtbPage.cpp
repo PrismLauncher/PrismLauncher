@@ -33,7 +33,6 @@ FtbPage::FtbPage(NewInstanceDialog* dialog, QWidget *parent)
     ui->sortByBox->setCurrentText(filterModel->translateCurrentSorting());
 
     connect(ui->searchEdit, &QLineEdit::textChanged, this, &FtbPage::triggerSearch);
-    connect(ui->resetButton, &QPushButton::clicked, this, &FtbPage::resetSearch);
     connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &FtbPage::onSortingSelectionChanged);
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FtbPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FtbPage::onVersionSelectionChanged);
@@ -103,11 +102,6 @@ void FtbPage::suggestCurrent()
 void FtbPage::triggerSearch()
 {
     filterModel->setSearchTerm(ui->searchEdit->text());
-}
-
-void FtbPage::resetSearch()
-{
-    ui->searchEdit->setText("");
 }
 
 void FtbPage::onSortingSelectionChanged(QString data)
