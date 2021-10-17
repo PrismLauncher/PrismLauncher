@@ -31,7 +31,6 @@ AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget *parent)
     ui->sortByBox->setCurrentText(filterModel->translateCurrentSorting());
 
     connect(ui->searchEdit, &QLineEdit::textChanged, this, &AtlPage::triggerSearch);
-    connect(ui->resetButton, &QPushButton::clicked, this, &AtlPage::resetSearch);
     connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &AtlPage::onSortingSelectionChanged);
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &AtlPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &AtlPage::onVersionSelectionChanged);
@@ -83,11 +82,6 @@ void AtlPage::suggestCurrent()
 void AtlPage::triggerSearch()
 {
     filterModel->setSearchTerm(ui->searchEdit->text());
-}
-
-void AtlPage::resetSearch()
-{
-    ui->searchEdit->setText("");
 }
 
 void AtlPage::onSortingSelectionChanged(QString data)

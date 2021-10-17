@@ -15,14 +15,14 @@
     <layout class="QGridLayout" name="gridLayout_3">
      <item row="1" column="0">
       <widget class="QTreeView" name="packView">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
        <property name="iconSize">
         <size>
          <width>96</width>
          <height>48</height>
         </size>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -68,17 +68,13 @@
      </item>
     </layout>
    </item>
-   <item row="0" column="1">
-    <widget class="QPushButton" name="resetButton">
-     <property name="text">
-      <string>Reset</string>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="0">
     <widget class="QLineEdit" name="searchEdit">
      <property name="placeholderText">
       <string>Search and filter ...</string>
+     </property>
+     <property name="clearButtonEnabled">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -86,7 +82,6 @@
  </widget>
  <tabstops>
   <tabstop>searchEdit</tabstop>
-  <tabstop>resetButton</tabstop>
   <tabstop>packView</tabstop>
   <tabstop>packDescription</tabstop>
   <tabstop>sortByBox</tabstop>
