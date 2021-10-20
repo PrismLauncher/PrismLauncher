@@ -131,7 +131,7 @@ void DownloadTask::processDownloadedVersionInfo()
     QObject::connect(netJob.get(), &NetJob::progress, this, &DownloadTask::fileDownloadProgressChanged);
     QObject::connect(netJob.get(), &NetJob::failed, this, &DownloadTask::fileDownloadFailed);
 
-    if(netJob->size() == 1) // Translation issues... see https://github.com/MultiMC/MultiMC5/issues/1701
+    if(netJob->size() == 1) // Translation issues... see https://github.com/MultiMC/Launcher/issues/1701
     {
         setStatus(tr("Downloading one update file."));
     }
