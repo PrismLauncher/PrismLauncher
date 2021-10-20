@@ -113,6 +113,12 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
 "However, it should be abundantly clear that the project is a fork <b>without</b> implying that you have our blessing.</p>"
     ));
 
+    QString urlText("<html><head/><body><p><a href=\"%1\">%1</a></p></body></html>");
+    ui->urlLabel->setText(urlText.arg(BuildConfig.LAUNCHER_GIT));
+
+    QString copyText("© 2012-2021 %1");
+    ui->copyLabel->setText(copyText.arg(BuildConfig.LAUNCHER_COPYRIGHT));
+
     connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
 
     connect(ui->aboutQt, &QPushButton::clicked, &QApplication::aboutQt);

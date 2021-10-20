@@ -13,6 +13,7 @@ public:
     QString LAUNCHER_COPYRIGHT;
     QString LAUNCHER_DOMAIN;
     QString LAUNCHER_CONFIGFILE;
+    QString LAUNCHER_GIT;
 
     /// The major version number.
     int VERSION_MAJOR;

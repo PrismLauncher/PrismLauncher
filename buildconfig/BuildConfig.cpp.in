@@ -11,6 +11,7 @@ Config::Config()
     LAUNCHER_COPYRIGHT = "@Launcher_Copyright@";
     LAUNCHER_DOMAIN = "@Launcher_Domain@";
     LAUNCHER_CONFIGFILE = "@Launcher_ConfigFile@";
+    LAUNCHER_GIT = "@Launcher_Git@";
 
     USER_AGENT = "@Launcher_UserAgent@";
     USER_AGENT_UNCACHED = USER_AGENT + " (Uncached)";
