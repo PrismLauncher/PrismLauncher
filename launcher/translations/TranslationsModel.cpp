@@ -182,7 +182,7 @@ void readIndex(const QString & path, QMap<QString, Language>& languages)
         auto toplevel_doc = Json::requireDocument(data);
         auto doc = Json::requireObject(toplevel_doc);
         auto file_type = Json::requireString(doc, "file_type");
-        if(file_type != "LAUNCHER-TRANSLATION-INDEX")
+        if(file_type != "MMC-TRANSLATION-INDEX")
         {
             qCritical() << "Translations Download Failed: index file is of unknown file type" << file_type;
             return;
