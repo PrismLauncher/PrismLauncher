@@ -23,7 +23,7 @@ Also note that this guide is for development purposes only. No support is given 
 Clone the source code using git and grab all the submodules:
 
 ```
-git clone https://github.com/MultiMC/MultiMC5.git
+git clone https://github.com/MultiMC/Launcher.git
 git submodule init
 git submodule update
 ```
@@ -51,7 +51,7 @@ mkdir ~/MultiMC && cd ~/MultiMC
 mkdir build
 mkdir install
 # clone the complete source
-git clone --recursive https://github.com/MultiMC/MultiMC5.git src
+git clone --recursive https://github.com/MultiMC/Launcher.git src
 # configure the project
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=../install ../src

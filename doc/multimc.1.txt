@@ -47,11 +47,11 @@ EXIT STATUS
 
 BUGS
 ----
-<https://github.com/MultiMC/MultiMC5/issues>
+<https://github.com/MultiMC/Launcher/issues>
 
 RESOURCES
 ---------
-GitHub: <https://github.com/MultiMC/MultiMC5>
+GitHub: <https://github.com/MultiMC/Launcher>
 
 Main website: <https://multimc.org>
 

@@ -1453,7 +1453,7 @@ Long time coming, this release brought a lot of incremental improvements and fix
 - Update to the German translation.
 
 ## MultiMC 0.1.1
-- Hotfix - Changed the issue tracker URL to [GitHub issues](https://github.com/MultiMC/MultiMC5/issues).
+- Hotfix - Changed the issue tracker URL to [GitHub issues](https://github.com/MultiMC/Launcher/issues).
 
 ## MultiMC 0.1
 - Reworked the version numbering system to support our [new Git workflow](http://nvie.com/posts/a-successful-git-branching-model/).

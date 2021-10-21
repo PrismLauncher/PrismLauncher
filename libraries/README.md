@@ -9,6 +9,13 @@ This library has served as a base for some (much more full-featured and advanced
 
 Copyright belongs to Petr Mrázek, unless explicitly stated otherwise in the source files. Available under the Apache 2.0 license.
 
+## ganalytics
+A Google Analytics library for Qt.
+
+BSD licensed, derived from [qt-google-analytics](https://github.com/HSAnet/qt-google-analytics).
+
+Modifications include better handling of IP anonymization (can be enabled) and general improvements of the API (application handles persistence and ID generation instead of the library).
+
 ## hoedown
 Hoedown is a revived fork of Sundown, the Markdown parser based on the original code of the Upskirt library by Natacha Porté.
 
@@ -23,6 +30,13 @@ Licensed under LGPL 2.1
 Simple Java tool that prints the JVM details - version and platform bitness.
 
 Do what you want with it. It is so trivial that noone cares.
+
+## Katabasis
+Oauth2 library customized for Microsoft authentication.
+
+This is a fork of the [O2 library](https://github.com/pipacs/o2).
+
+MIT licensed.
 
 ## launcher
 Java launcher part for Minecraft.
@@ -127,23 +141,6 @@ See [github repo](https://github.com/ljfa-ag/libnbtplusplus).
 
 Available either under LGPL version 3 or later.
 
-## pack200
-Unpacks pack200 archives (squished, compression-optimized Java jars). This format is only used by Forge to save bandwidth.
-
-A horrible little thing extracted from the depths of the OpenJDK codebase. Please don't look at it, or you will praise Cthulhu for his clean code for the rest of your days.
-
-Available under GPL 2 with classpath exception.
-
-## rainbow
-Color functions extracted from [KGuiAddons](https://inqlude.org/libraries/kguiaddons.html). Used for adaptive text coloring.
-
-Available either under LGPL version 2.1 or later.
-
-## xz-embedded
-Tiny implementation of LZMA2 de/compression. This format is only used by Forge to save bandwidth.
-
-Public domain.
-
 ## LocalPeer
 Library for making only one instance of the application run at all times.
 
@@ -151,17 +148,41 @@ BSD licensed, derived from [QtSingleApplication](https://github.com/qtproject/qt
 
 Changes are made to make the code more generic and useful in less usual conditions.
 
+## optional-bare
 
-## ganalytics
-A Google Analytics library for Qt.
+A simple single-file header-only version of a C++17-like optional for default-constructible, copyable types, for C++98 and later.
 
-BSD licensed, derived from [qt-google-analytics](https://github.com/HSAnet/qt-google-analytics).
+Imported from: https://github.com/martinmoene/optional-bare/commit/0bb1d183bcee1e854c4ea196b533252c51f98b81
 
-Modifications include better handling of IP anonymization (can be enabled) and general improvements of the API (application handles persistence and ID generation instead of the library).
+Boost Software License - Version 1.0
+
+## quazip
+
+A zip manipulation library, forked for MultiMC's use.
+
+LGPL 2.1
+
+## rainbow
+Color functions extracted from [KGuiAddons](https://inqlude.org/libraries/kguiaddons.html). Used for adaptive text coloring.
+
+Available either under LGPL version 2.1 or later.
+
+## systeminfo
+
+A MultiMC-specific library for probing system information.
+
+Apache 2.0
 
 ## tomlc99
+
 A TOML language parser. Used by Forge 1.14+ to store mod metadata.
 
 See [github repo](https://github.com/cktan/tomlc99).
 
 Licenced under the MIT licence.
+
+## xz-embedded
+
+Tiny implementation of LZMA2 de/compression. This format is only used by Forge to save bandwidth.
+
+Public domain.
