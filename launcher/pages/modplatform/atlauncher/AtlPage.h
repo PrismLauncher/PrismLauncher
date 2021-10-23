@@ -67,7 +67,6 @@ private:
 
 private slots:
     void triggerSearch();
-    void resetSearch();
 
     void onSortingSelectionChanged(QString data);
 
