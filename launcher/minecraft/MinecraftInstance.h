@@ -118,9 +118,6 @@ protected:
     QStringList validLaunchMethods();
     QString launchMethod();
 
-private:
-    QString prettifyTimeDuration(int64_t duration);
-
 protected: // data
     std::shared_ptr<PackProfile> m_components;
     mutable std::shared_ptr<ModFolderModel> m_loader_mod_list;

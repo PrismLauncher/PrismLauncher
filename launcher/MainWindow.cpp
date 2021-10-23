@@ -88,6 +88,7 @@
 #include "UpdateController.h"
 #include "KonamiCode.h"
 #include <InstanceCopyTask.h>
+#include "MMCTime.h"
 
 namespace {
 QString profileInUseFilter(const QString & profile, bool used)
@@ -747,7 +748,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     connect(LAUNCHER, &Launcher::globalSettingsClosed, this, &MainWindow::globalSettingsClosed);
 
     m_statusLeft = new QLabel(tr("No instance selected"), this);
-    m_statusCenter = new QLabel(tr("Total playtime: 0s."), this);
+    m_statusCenter = new QLabel(tr("Total playtime: 0s"), this);
     statusBar()->addPermanentWidget(m_statusLeft, 1);
     statusBar()->addPermanentWidget(m_statusCenter, 0);
 
@@ -1926,15 +1927,8 @@ void MainWindow::checkInstancePathForProblems()
 
 void MainWindow::updateStatusCenter()
 {
-    int timeplayed = LAUNCHER->instances()->getTotalPlayTime();
-    int minutesTotal = timeplayed / 60;
-    int seconds = timeplayed % 60;
-    int minutes = minutesTotal % 60;
-    int hours = minutesTotal / 60;
-    if(hours != 0)
-        m_statusCenter->setText(tr("Total playtime: %1h %2m %3s").arg(hours).arg(minutes).arg(seconds));
-    else if(minutes != 0)
-        m_statusCenter->setText(tr("Total playtime: %1m %2s").arg(minutes).arg(seconds));
-    else if(seconds != 0)
-        m_statusCenter->setText(tr("Total playtime: %1s").arg(seconds));
+    int timePlayed = LAUNCHER->instances()->getTotalPlayTime();
+    if (timePlayed > 0) {
+        m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
+    }
 }
