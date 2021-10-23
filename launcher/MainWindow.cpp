@@ -1610,6 +1610,7 @@ void MainWindow::globalSettingsClosed()
     proxymodel->invalidate();
     proxymodel->sort(0);
     updateToolsMenu();
+    updateStatusCenter();
     update();
 }
 
@@ -1927,6 +1928,8 @@ void MainWindow::checkInstancePathForProblems()
 
 void MainWindow::updateStatusCenter()
 {
+    m_statusCenter->setVisible(LAUNCHER->settings()->get("ShowGlobalGameTime").toBool());
+
     int timePlayed = LAUNCHER->instances()->getTotalPlayTime();
     if (timePlayed > 0) {
         m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));

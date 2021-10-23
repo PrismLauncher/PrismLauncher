@@ -148,6 +148,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="showGlobalGameTime">
+            <property name="text">
+             <string>Show time spent playing across all instances</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="recordGameTime">
             <property name="text">
              <string>Record time spent playing instances</string>

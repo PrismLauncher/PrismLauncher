@@ -644,6 +644,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
 
         // Game time
         m_settings->registerSetting("ShowGameTime", true);
+        m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
 
         // Minecraft launch method
