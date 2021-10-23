@@ -74,24 +74,6 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void ListModel::performSearch()
-{
-    auto *netJob = new NetJob("Ftb::Search");
-    QString searchUrl;
-    if(currentSearchTerm.isEmpty()) {
-        searchUrl = BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/all";
-    }
-    else {
-        searchUrl = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/search/25?term=%1")
-            .arg(currentSearchTerm);
-    }
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
-    jobPtr = netJob;
-    jobPtr->start();
-    QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::searchRequestFinished);
-    QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
-}
-
 void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallback callback)
 {
     if(m_logoMap.contains(logo))
@@ -104,28 +86,23 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
     }
 }
 
-void ListModel::searchWithTerm(const QString &term)
+void ListModel::request()
 {
-    if(searchState != Failed && currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull()) {
-        // unless the search has failed, then there is no need to perform an identical search.
-        return;
-    }
-    currentSearchTerm = term;
-
-    if(jobPtr) {
-        jobPtr->abort();
-        jobPtr.reset();
-    }
-
     beginResetModel();
     modpacks.clear();
     endResetModel();
-    searchState = None;
 
-    performSearch();
+    auto *netJob = new NetJob("Ftb::Request");
+    auto url = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/all");
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), &response));
+    jobPtr = netJob;
+    jobPtr->start();
+
+    QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::requestFinished);
+    QObject::connect(netJob, &NetJob::failed, this, &ListModel::requestFailed);
 }
 
-void ListModel::searchRequestFinished()
+void ListModel::requestFinished()
 {
     jobPtr.reset();
     remainingPacks.clear();
@@ -150,12 +127,10 @@ void ListModel::searchRequestFinished()
     }
 }
 
-void ListModel::searchRequestFailed(QString reason)
+void ListModel::requestFailed(QString reason)
 {
     jobPtr.reset();
     remainingPacks.clear();
-
-    searchState = Failed;
 }
 
 void ListModel::requestPack()

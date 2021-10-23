@@ -65,6 +65,7 @@ private:
 
 private slots:
     void triggerSearch();
+
     void onSortingSelectionChanged(QString data);
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);
@@ -77,4 +78,6 @@ private:
 
     ModpacksCH::Modpack selected;
     QString selectedVersion;
+
+    bool initialised { false };
 };
