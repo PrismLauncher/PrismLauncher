@@ -1,0 +1,90 @@
+'\" t
+.\"     Title: multimc
+.\"    Author: [see the "AUTHORS" section]
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 10/21/2021
+.\"    Manual: \ \&
+.\"    Source: \ \&
+.\"  Language: English
+.\"
+.TH "MULTIMC" "1" "10/21/2021" "\ \&" "\ \&"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+multimc \- a launcher and instance manager for Minecraft\&.
+.SH "SYNOPSIS"
+.sp
+\fBmultimc\fR [\fIOPTIONS\fR]
+.SH "DESCRIPTION"
+.sp
+MultiMC is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once\&. It also allows you to easily install and remove mods by simply dragging and dropping\&. Here are the current features of MultiMC\&.
+.SH "OPTIONS"
+.PP
+\fB\-d, \-\-dir\fR=\fIDIRECTORY\fR
+.RS 4
+Use
+\fIDIRECTORY\fR
+as the MultiMC root\&.
+.RE
+.PP
+\fB\-l, \-\-launch\fR=\fIINSTANCE_ID\fR
+.RS 4
+Launch the instance specified by
+\fIINSTANCE_ID\fR\&.
+.RE
+.PP
+\fB\-\-alive\fR
+.RS 4
+Write a small
+\fIlive\&.check\fR
+file after MultiMC starts\&.
+.RE
+.PP
+\fB\-h, \-\-help\fR
+.RS 4
+Display help text and exit\&.
+.RE
+.PP
+\fB\-v, \-\-version\fR
+.RS 4
+Display program version and exit\&.
+.RE
+.SH "EXIT STATUS"
+.PP
+\fB0\fR
+.RS 4
+Success
+.RE
+.PP
+\fB1\fR
+.RS 4
+Failure (syntax or usage error; configuration error; unexpected error)\&.
+.RE
+.SH "BUGS"
+.sp
+https://github\&.com/MultiMC/Launcher/issues
+.SH "RESOURCES"
+.sp
+GitHub: https://github\&.com/MultiMC/Launcher
+.sp
+Main website: https://multimc\&.org
+.SH "AUTHORS"
+.sp
+peterix <peterix@gmail\&.com>
