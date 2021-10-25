@@ -1,6 +1,7 @@
 #pragma once
 
 #include "groupview/GroupedProxyModel.h"
+#include <QCollator>
 
 /**
  * A proxy model that is responsible for sorting instances into groups
@@ -13,4 +14,6 @@ public:
 
 protected:
     virtual bool subSortLessThan(const QModelIndex &left, const QModelIndex &right) const override;
+private:
+    QCollator m_naturalSort;
 };

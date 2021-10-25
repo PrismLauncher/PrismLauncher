@@ -5,6 +5,10 @@
 
 InstanceProxyModel::InstanceProxyModel(QObject *parent) : GroupedProxyModel(parent)
 {
+    m_naturalSort.setNumericMode(true);
+    m_naturalSort.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
+    // FIXME: use loaded translation as source of locale instead, hook this up to translation changes
+    m_naturalSort.setLocale(QLocale::system());
 }
 
 QVariant InstanceProxyModel::data(const QModelIndex & index, int role) const
@@ -29,6 +33,6 @@ bool InstanceProxyModel::subSortLessThan(const QModelIndex &left,
     }
     else
     {
-        return QString::localeAwareCompare(pdataLeft->name(), pdataRight->name()) < 0;
+        return m_naturalSort.compare(pdataLeft->name(), pdataRight->name()) < 0;
     }
 }
