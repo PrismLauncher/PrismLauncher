@@ -142,8 +142,12 @@ void JavaChecker::error(QProcess::ProcessError err)
 {
     if(err == QProcess::FailedToStart)
     {
-        killTimer.stop();
         qDebug() << "Java checker has failed to start.";
+        qDebug() << "Process environment:";
+        qDebug() << process->environment();
+        qDebug() << "Native environment:";
+        qDebug() << QProcessEnvironment::systemEnvironment().toStringList();
+        killTimer.stop();
         JavaCheckResult result;
         {
             result.path = m_path;
