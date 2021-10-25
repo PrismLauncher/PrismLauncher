@@ -35,7 +35,7 @@ class LabeledToolButton;
 class QLabel;
 class MinecraftLauncher;
 class BaseProfilerFactory;
-class GroupView;
+class InstanceView;
 class KonamiCode;
 class InstanceTask;
 
@@ -201,7 +201,7 @@ private:
     std::unique_ptr<Ui> ui;
 
     // these are managed by Qt's memory management model!
-    GroupView *view = nullptr;
+    InstanceView *view = nullptr;
     InstanceProxyModel *proxymodel = nullptr;
     QToolButton *newsLabel = nullptr;
     QLabel *m_statusLeft = nullptr;

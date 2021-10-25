@@ -26,6 +26,7 @@
 #include <QUuid>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QMimeData>
 
 #include "InstanceList.h"
 #include "BaseInstance.h"
@@ -62,6 +63,50 @@ InstanceList::InstanceList(SettingsObjectPtr settings, const QString & instDir, 
 InstanceList::~InstanceList()
 {
 }
+
+Qt::DropActions InstanceList::supportedDragActions() const
+{
+    return Qt::MoveAction;
+}
+
+Qt::DropActions InstanceList::supportedDropActions() const
+{
+    return Qt::MoveAction;
+}
+
+bool InstanceList::canDropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) const
+{
+    if(data && data->hasFormat("application/x-instanceid")) {
+        return true;
+    }
+    return false;
+}
+
+bool InstanceList::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
+{
+    if(data && data->hasFormat("application/x-instanceid")) {
+        return true;
+    }
+    return false;
+}
+
+QStringList InstanceList::mimeTypes() const
+{
+    auto types = QAbstractListModel::mimeTypes();
+    types.push_back("application/x-instanceid");
+    return types;
+}
+
+QMimeData * InstanceList::mimeData(const QModelIndexList& indexes) const
+{
+    auto mimeData = QAbstractListModel::mimeData(indexes);
+    if(indexes.size() == 1) {
+        auto instanceId = data(indexes[0], InstanceIDRole).toString();
+        mimeData->setData("application/x-instanceid", instanceId.toUtf8());
+    }
+    return mimeData;
+}
+
 
 int InstanceList::rowCount(const QModelIndex &parent) const
 {
@@ -112,7 +157,7 @@ QVariant InstanceList::data(const QModelIndex &index, int role) const
     {
         return pdata->iconKey();
     }
-    // HACK: see GroupView.h in gui!
+    // HACK: see InstanceView.h in gui!
     case GroupRole:
     {
         return getInstanceGroup(pdata->id());

@@ -3,7 +3,7 @@
 #include "MainWindow.h"
 #include "InstanceWindow.h"
 
-#include "groupview/AccessibleGroupView.h"
+#include "instanceview/AccessibleInstanceView.h"
 #include <QAccessible>
 
 #include "pages/BasePageProvider.h"

@@ -573,8 +573,6 @@ SET(LAUNCHER_SOURCES
     GuiUtil.cpp
     ColumnResizer.h
     ColumnResizer.cpp
-    InstanceProxyModel.h
-    InstanceProxyModel.cpp
     VersionProxyModel.h
     VersionProxyModel.cpp
     ColorCache.h
@@ -802,17 +800,17 @@ SET(LAUNCHER_SOURCES
     widgets/WideBar.cpp
 
     # GUI - instance group view
-    groupview/GroupedProxyModel.cpp
-    groupview/GroupedProxyModel.h
-    groupview/AccessibleGroupView.cpp
-    groupview/AccessibleGroupView.h
-    groupview/AccessibleGroupView_p.h
-    groupview/GroupView.cpp
-    groupview/GroupView.h
-    groupview/InstanceDelegate.cpp
-    groupview/InstanceDelegate.h
-    groupview/VisualGroup.cpp
-    groupview/VisualGroup.h
+    instanceview/InstanceProxyModel.cpp
+    instanceview/InstanceProxyModel.h
+    instanceview/AccessibleInstanceView.cpp
+    instanceview/AccessibleInstanceView.h
+    instanceview/AccessibleInstanceView_p.h
+    instanceview/InstanceView.cpp
+    instanceview/InstanceView.h
+    instanceview/InstanceDelegate.cpp
+    instanceview/InstanceDelegate.h
+    instanceview/VisualGroup.cpp
+    instanceview/VisualGroup.h
     )
 
 ######## UIs ########

@@ -16,15 +16,20 @@
 #pragma once
 
 #include <QSortFilterProxyModel>
+#include <QCollator>
 
-class GroupedProxyModel : public QSortFilterProxyModel
+class InstanceProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 
 public:
-    GroupedProxyModel(QObject *parent = 0);
+    InstanceProxyModel(QObject *parent = 0);
 
 protected:
-    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
-    virtual bool subSortLessThan(const QModelIndex &left, const QModelIndex &right) const;
+    QVariant data(const QModelIndex & index, int role) const override;
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+    bool subSortLessThan(const QModelIndex &left, const QModelIndex &right) const;
+
+private:
+    QCollator m_naturalSort;
 };

@@ -20,7 +20,7 @@
 #include <QVector>
 #include <QStyleOption>
 
-class GroupView;
+class InstanceView;
 class QPainter;
 class QModelIndex;
 
@@ -42,11 +42,11 @@ struct VisualRow
 struct VisualGroup
 {
 /* constructors */
-    VisualGroup(const QString &text, GroupView *view);
+    VisualGroup(const QString &text, InstanceView *view);
     VisualGroup(const VisualGroup *other);
 
 /* data */
-    GroupView *view = nullptr;
+    InstanceView *view = nullptr;
     QString text;
     bool collapsed = false;
     QVector<VisualRow> rows;

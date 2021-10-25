@@ -22,7 +22,7 @@
 #include "IconPickerDialog.h"
 #include "ui_IconPickerDialog.h"
 
-#include "groupview/InstanceDelegate.h"
+#include "instanceview/InstanceDelegate.h"
 
 #include "icons/IconList.h"
 #include "icons/IconUtils.h"
@@ -126,8 +126,9 @@ void IconPickerDialog::selectionChanged(QItemSelection selected, QItemSelection 
         return;
 
     QString key = selected.first().indexes().first().data(Qt::UserRole).toString();
-    if (!key.isEmpty())
+    if (!key.isEmpty()) {
         selectedIconKey = key;
+    }
 }
 
 int IconPickerDialog::execWithSelection(QString selection)
@@ -141,8 +142,7 @@ int IconPickerDialog::execWithSelection(QString selection)
     contentsWidget->selectionModel()->select(
         model_index, QItemSelectionModel::Current | QItemSelectionModel::Select);
 
-    QMetaObject::invokeMethod(this, "delayed_scroll", Qt::QueuedConnection,
-                              Q_ARG(QModelIndex, model_index));
+    QMetaObject::invokeMethod(this, "delayed_scroll", Qt::QueuedConnection, Q_ARG(QModelIndex, model_index));
     return QDialog::exec();
 }
 

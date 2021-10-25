@@ -67,11 +67,11 @@
 #include <DesktopServices.h>
 #include "InstanceWindow.h"
 #include "InstancePageProvider.h"
-#include "InstanceProxyModel.h"
+#include "instanceview/InstanceProxyModel.h"
 #include "JavaCommon.h"
 #include "LaunchController.h"
-#include "groupview/GroupView.h"
-#include "groupview/InstanceDelegate.h"
+#include "instanceview/InstanceView.h"
+#include "instanceview/InstanceDelegate.h"
 #include "widgets/LabeledToolButton.h"
 #include "dialogs/NewInstanceDialog.h"
 #include "dialogs/ProgressDialog.h"
@@ -695,7 +695,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     // Create the instance list widget
     {
-        view = new GroupView(ui->centralWidget);
+        view = new InstanceView(ui->centralWidget);
 
         view->setSelectionMode(QAbstractItemView::SingleSelection);
         // FIXME: leaks ListViewDelegate
@@ -707,7 +707,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         view->installEventFilter(this);
         view->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(view, &QWidget::customContextMenuRequested, this, &MainWindow::showInstanceContextMenu);
-        connect(view, &GroupView::droppedURLs, this, &MainWindow::droppedURLs, Qt::QueuedConnection);
+        connect(view, &InstanceView::droppedURLs, this, &MainWindow::droppedURLs, Qt::QueuedConnection);
 
         proxymodel = new InstanceProxyModel(this);
         proxymodel->setSourceModel(LAUNCHER->instances().get());
@@ -718,7 +718,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         view->setSourceOfGroupCollapseStatus([](const QString & groupName)->bool {
             return LAUNCHER->instances()->isGroupCollapsed(groupName);
         });
-        connect(view, &GroupView::groupStateChanged, LAUNCHER->instances().get(), &InstanceList::on_GroupStateChanged);
+        connect(view, &InstanceView::groupStateChanged, LAUNCHER->instances().get(), &InstanceList::on_GroupStateChanged);
         ui->horizontalLayout->addWidget(view);
     }
     // The cat background
@@ -730,7 +730,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         setCatBackground(cat_enable);
     }
     // start instance when double-clicked
-    connect(view, &GroupView::activated, this, &MainWindow::instanceActivated);
+    connect(view, &InstanceView::activated, this, &MainWindow::instanceActivated);
 
     // track the selection -- update the instance toolbar
     connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::instanceChanged);
@@ -1313,7 +1313,7 @@ void MainWindow::setCatBackground(bool enabled)
         QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
         QString cat = (non_stupid_abs(now.daysTo(xmas)) <= 4) ? "catmas" : "kitteh";
         view->setStyleSheet(QString(R"(
-GroupView
+InstanceView
 {
     background-image: url(:/backgrounds/%1);
     background-attachment: fixed;

@@ -21,9 +21,9 @@
 #include <QApplication>
 #include <QDebug>
 
-#include "GroupView.h"
+#include "InstanceView.h"
 
-VisualGroup::VisualGroup(const QString &text, GroupView *view) : view(view), text(text), collapsed(false)
+VisualGroup::VisualGroup(const QString &text, InstanceView *view) : view(view), text(text), collapsed(false)
 {
 }
 
@@ -308,7 +308,7 @@ QList<QModelIndex> VisualGroup::items() const
     for (int i = 0; i < view->model()->rowCount(); ++i)
     {
         const QModelIndex index = view->model()->index(i, 0);
-        if (index.data(GroupViewRoles::GroupRole).toString() == text)
+        if (index.data(InstanceViewRoles::GroupRole).toString() == text)
         {
             indices.append(index);
         }

@@ -21,7 +21,7 @@
 #include <QtMath>
 #include <QDebug>
 
-#include "GroupView.h"
+#include "InstanceView.h"
 #include "BaseInstance.h"
 #include "InstanceList.h"
 #include <xdgicon.h>
@@ -321,8 +321,8 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         drawBadges(painter, opt, instance, mode, state);
     }
 
-    drawProgressOverlay(painter, opt, index.data(GroupViewRoles::ProgressValueRole).toInt(),
-                        index.data(GroupViewRoles::ProgressMaximumRole).toInt());
+    drawProgressOverlay(painter, opt, index.data(InstanceViewRoles::ProgressValueRole).toInt(),
+                        index.data(InstanceViewRoles::ProgressMaximumRole).toInt());
 
     painter->restore();
 }

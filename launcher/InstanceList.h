@@ -93,7 +93,6 @@ public:
     InstListError loadList();
     void saveNow();
 
-
     InstancePtr getInstanceById(QString id) const;
     QModelIndex getInstanceIndexById(const QString &id) const;
     QStringList getGroups();
@@ -127,6 +126,17 @@ public:
     bool destroyStagingPath(const QString & keyPath);
 
     int getTotalPlayTime();
+
+    Qt::DropActions supportedDragActions() const override;
+
+    Qt::DropActions supportedDropActions() const override;
+
+    bool canDropMimeData(const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent) const override;
+
+    bool dropMimeData(const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent) override;
+
+    QStringList mimeTypes() const override;
+    QMimeData *mimeData(const QModelIndexList &indexes) const override;
 
 signals:
     void dataIsInvalid();

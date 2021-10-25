@@ -5,16 +5,16 @@
 #include <QAccessibleWidget>
 #include <QAbstractItemView>
 #ifndef QT_NO_ACCESSIBILITY
-#include "GroupView.h"
+#include "InstanceView.h"
 // #include <QHeaderView>
 
 class QAccessibleTableCell;
 class QAccessibleTableHeaderCell;
 
-class AccessibleGroupView :public QAccessibleTableInterface, public QAccessibleObject
+class AccessibleInstanceView :public QAccessibleTableInterface, public QAccessibleObject
 {
 public:
-    explicit AccessibleGroupView(QWidget *w);
+    explicit AccessibleInstanceView(QWidget *w);
     bool isValid() const override;
 
     QAccessible::Role role() const override;
@@ -63,16 +63,16 @@ protected:
     typedef QHash<int, QAccessible::Id> ChildCache;
     mutable ChildCache childToId;
 
-    virtual ~AccessibleGroupView();
+    virtual ~AccessibleInstanceView();
 
 private:
     inline int logicalIndex(const QModelIndex &index) const;
 };
 
-class AccessibleGroupViewItem: public QAccessibleInterface, public QAccessibleTableCellInterface, public QAccessibleActionInterface
+class AccessibleInstanceViewItem: public QAccessibleInterface, public QAccessibleTableCellInterface, public QAccessibleActionInterface
 {
 public:
-    AccessibleGroupViewItem(QAbstractItemView *view, const QModelIndex &m_index);
+    AccessibleInstanceViewItem(QAbstractItemView *view, const QModelIndex &m_index);
 
     void *interface_cast(QAccessible::InterfaceType t) override;
     QObject *object() const override { return nullptr; }
@@ -113,6 +113,6 @@ private:
     void selectCell();
     void unselectCell();
 
-    friend class AccessibleGroupView;
+    friend class AccessibleInstanceView;
 };
 #endif /* !QT_NO_ACCESSIBILITY */

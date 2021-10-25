@@ -22,7 +22,7 @@
 #include "VisualGroup.h"
 #include <functional>
 
-struct GroupViewRoles
+struct InstanceViewRoles
 {
     enum
     {
@@ -32,13 +32,13 @@ struct GroupViewRoles
     };
 };
 
-class GroupView : public QAbstractItemView
+class InstanceView : public QAbstractItemView
 {
     Q_OBJECT
 
 public:
-    GroupView(QWidget *parent = 0);
-    ~GroupView();
+    InstanceView(QWidget *parent = 0);
+    ~InstanceView();
 
     void setModel(QAbstractItemModel *model) override;
 
@@ -61,8 +61,7 @@ public:
     virtual void scrollContentsBy(int dx, int dy) override;
     virtual void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible) override;
 
-    virtual QModelIndex moveCursor(CursorAction cursorAction,
-                                   Qt::KeyboardModifiers modifiers) override;
+    virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
 
     virtual QRegion visualRegionForSelection(const QItemSelection &selection) const override;
 
@@ -75,8 +74,7 @@ public slots:
     virtual void updateGeometries() override;
 
 protected slots:
-    virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                             const QVector<int> &roles) override;
+    virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles) override;
     virtual void rowsInserted(const QModelIndex &parent, int start, int end) override;
     virtual void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end) override;
     void modelReset();
@@ -88,7 +86,7 @@ signals:
     void groupStateChanged(QString group, bool collapsed);
 
 protected:
-    virtual bool isIndexHidden(const QModelIndex &index) const override;
+    bool isIndexHidden(const QModelIndex &index) const override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
@@ -143,15 +141,13 @@ private:
 private: /* methods */
     int itemWidth() const;
     int calculateItemsPerRow() const;
-    int verticalScrollToValue(const QModelIndex &index, const QRect &rect,
-                              QListView::ScrollHint hint) const;
+    int verticalScrollToValue(const QModelIndex &index, const QRect &rect, QListView::ScrollHint hint) const;
     QPixmap renderToPixmap(const QModelIndexList &indices, QRect *r) const;
-    QList<QPair<QRect, QModelIndex>> draggablePaintPairs(const QModelIndexList &indices,
-                                                         QRect *r) const;
+    QList<QPair<QRect, QModelIndex>> draggablePaintPairs(const QModelIndexList &indices, QRect *r) const;
 
     bool isDragEventAccepted(QDropEvent *event);
 
-    QPair<VisualGroup *, int> rowDropPos(const QPoint &pos);
+    QPair<VisualGroup *, VisualGroup::HitResults> rowDropPos(const QPoint &pos);
 
     QPoint offset() const;
 };
