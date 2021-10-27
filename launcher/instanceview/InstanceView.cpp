@@ -669,11 +669,10 @@ void InstanceView::startDrag(Qt::DropActions supportedActions)
     }
     QRect rect;
     QPixmap pixmap = renderToPixmap(indexes, &rect);
-    //rect.translate(offset());
-    // rect.adjust(horizontalOffset(), verticalOffset(), 0, 0);
     QDrag *drag = new QDrag(this);
     drag->setPixmap(pixmap);
     drag->setMimeData(data);
+    drag->setHotSpot(m_pressedPosition - rect.topLeft());
     Qt::DropAction defaultDropAction = Qt::IgnoreAction;
     if (this->defaultDropAction() != Qt::IgnoreAction && (supportedActions & this->defaultDropAction()))
     {
