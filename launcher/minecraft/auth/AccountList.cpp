@@ -47,6 +47,16 @@ int AccountList::findAccountByProfileId(const QString& profileId) const {
     return -1;
 }
 
+MinecraftAccountPtr AccountList::getAccountByProfileName(const QString& profileName) const {
+    for (int i = 0; i < count(); i++) {
+        MinecraftAccountPtr account = at(i);
+        if (account->profileName() == profileName) {
+            return account;
+        }
+    }
+    return nullptr;
+}
+
 const MinecraftAccountPtr AccountList::at(int i) const
 {
     return MinecraftAccountPtr(m_accounts.at(i));

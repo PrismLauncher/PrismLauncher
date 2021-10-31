@@ -23,6 +23,8 @@
 #include "themes/BrightTheme.h"
 #include "themes/CustomTheme.h"
 
+#include "LauncherMessage.h"
+
 #include "setupwizard/SetupWizard.h"
 #include "setupwizard/LanguageWizardPage.h"
 #include "setupwizard/JavaWizardPage.h"
@@ -227,8 +229,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         // --dir
         parser.addOption("dir");
         parser.addShortOpt("dir", 'd');
-        parser.addDocumentation("dir", "Use the supplied folder as application root instead of "
-                                       "the binary location (use '.' for current)");
+        parser.addDocumentation("dir", "Use the supplied folder as application root instead of the binary location (use '.' for current)");
         // --launch
         parser.addOption("launch");
         parser.addShortOpt("launch", 'l');
@@ -236,8 +237,11 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         // --server
         parser.addOption("server");
         parser.addShortOpt("server", 's');
-        parser.addDocumentation("server", "Join the specified server on launch "
-                                          "(only valid in combination with --launch)");
+        parser.addDocumentation("server", "Join the specified server on launch (only valid in combination with --launch)");
+        // --profile
+        parser.addOption("profile");
+        parser.addShortOpt("profile", 'a');
+        parser.addDocumentation("profile", "Use the account specified by its profile name (only valid in combination with --launch)");
         // --alive
         parser.addSwitch("alive");
         parser.addDocumentation("alive", "Write a small '" + liveCheckFile + "' file after the launcher starts");
@@ -280,6 +284,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
     }
     m_instanceIdToLaunch = args["launch"].toString();
     m_serverToJoin = args["server"].toString();
+    m_profileToUse = args["profile"].toString();
     m_liveCheck = args["alive"].toBool();
     m_zipToImport = args["import"].toUrl();
 
@@ -342,6 +347,13 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
     if(m_instanceIdToLaunch.isEmpty() && !m_serverToJoin.isEmpty())
     {
         std::cerr << "--server can only be used in combination with --launch!" << std::endl;
+        m_status = Launcher::Failed;
+        return;
+    }
+
+    if(m_instanceIdToLaunch.isEmpty() && !m_profileToUse.isEmpty())
+    {
+        std::cerr << "--account can only be used in combination with --launch!" << std::endl;
         m_status = Launcher::Failed;
         return;
     }
@@ -419,30 +431,38 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         // FIXME: you can run the same binaries with multiple data dirs and they won't clash. This could cause issues for updates.
         m_peerInstance = new LocalPeer(this, appID);
         connect(m_peerInstance, &LocalPeer::messageReceived, this, &Launcher::messageReceived);
-        if(m_peerInstance->isClient())
-        {
+        if(m_peerInstance->isClient()) {
             int timeout = 2000;
 
             if(m_instanceIdToLaunch.isEmpty())
             {
-                m_peerInstance->sendMessage("activate", timeout);
+                LauncherMessage activate;
+                activate.command = "activate";
+                m_peerInstance->sendMessage(activate.serialize(), timeout);
 
                 if(!m_zipToImport.isEmpty())
                 {
-                    m_peerInstance->sendMessage("import " + m_zipToImport.toString(), timeout);
+                    LauncherMessage import;
+                    import.command = "import";
+                    import.args.insert("path", m_zipToImport.toString());
+                    m_peerInstance->sendMessage(import.serialize(), timeout);
                 }
             }
             else
             {
+                LauncherMessage launch;
+                launch.command = "launch";
+                launch.args["id"] = m_instanceIdToLaunch;
+
                 if(!m_serverToJoin.isEmpty())
                 {
-                    m_peerInstance->sendMessage(
-                            "launch-with-server " + m_instanceIdToLaunch + " " + m_serverToJoin, timeout);
+                    launch.args["server"] = m_serverToJoin;
                 }
-                else
+                if(!m_profileToUse.isEmpty())
                 {
-                    m_peerInstance->sendMessage("launch " + m_instanceIdToLaunch, timeout);
+                    launch.args["profile"] = m_profileToUse;
                 }
+                m_peerInstance->sendMessage(launch.serialize(), timeout);
             }
             m_status = Launcher::Succeeded;
             return;
@@ -977,18 +997,26 @@ void Launcher::performMainStartupAction()
         if(inst)
         {
             MinecraftServerTargetPtr serverToJoin = nullptr;
+            MinecraftAccountPtr accountToUse = nullptr;
 
+            qDebug() << "<> Instance" << m_instanceIdToLaunch << "launching";
             if(!m_serverToJoin.isEmpty())
             {
+                // FIXME: validate the server string
                 serverToJoin.reset(new MinecraftServerTarget(MinecraftServerTarget::parse(m_serverToJoin)));
-                qDebug() << "<> Instance" << m_instanceIdToLaunch << "launching with server" << m_serverToJoin;
-            }
-            else
-            {
-                qDebug() << "<> Instance" << m_instanceIdToLaunch << "launching";
+                qDebug() << "   Launching with server" << m_serverToJoin;
             }
 
-            launch(inst, true, nullptr, serverToJoin);
+            if(!m_profileToUse.isEmpty())
+            {
+                accountToUse = accounts()->getAccountByProfileName(m_profileToUse);
+                if(!accountToUse) {
+                    return;
+                }
+                qDebug() << "   Launching with account" << m_profileToUse;
+            }
+
+            launch(inst, true, nullptr, serverToJoin, accountToUse);
             return;
         }
     }
@@ -1032,7 +1060,7 @@ Launcher::~Launcher()
 #endif
 }
 
-void Launcher::messageReceived(const QString& message)
+void Launcher::messageReceived(const QByteArray& message)
 {
     if(status() != Initialized)
     {
@@ -1040,7 +1068,10 @@ void Launcher::messageReceived(const QString& message)
         return;
     }
 
-    QString command = message.section(' ', 0, 0);
+    LauncherMessage received;
+    received.parse(message);
+
+    auto & command = received.command;
 
     if(command == "activate")
     {
@@ -1048,52 +1079,54 @@ void Launcher::messageReceived(const QString& message)
     }
     else if(command == "import")
     {
-        QString arg = message.section(' ', 1);
-        if(arg.isEmpty())
+        QString path = received.args["path"];
+        if(path.isEmpty())
         {
             qWarning() << "Received" << command << "message without a zip path/URL.";
             return;
         }
-        m_mainWindow->droppedURLs({ QUrl(arg) });
+        m_mainWindow->droppedURLs({ QUrl(path) });
     }
     else if(command == "launch")
     {
-        QString arg = message.section(' ', 1);
-        if(arg.isEmpty())
-        {
-            qWarning() << "Received" << command << "message without an instance ID.";
+        QString id = received.args["id"];
+        QString server = received.args["server"];
+        QString profile = received.args["profile"];
+
+        InstancePtr instance;
+        if(!id.isEmpty()) {
+            instance = instances()->getInstanceById(id);
+            if(!instance) {
+                qWarning() << "Launch command requires an valid instance ID. " << id << "resolves to nothing.";
+                return;
+            }
+        }
+        else {
+            qWarning() << "Launch command called without an instance ID...";
             return;
         }
-        auto inst = instances()->getInstanceById(arg);
-        if(inst)
-        {
-            launch(inst, true, nullptr);
+
+        MinecraftServerTargetPtr serverObject = nullptr;
+        if(!server.isEmpty()) {
+            serverObject = std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(server));
         }
-    }
-    else if(command == "launch-with-server")
-    {
-        QString instanceID = message.section(' ', 1, 1);
-        QString serverToJoin = message.section(' ', 2, 2);
-        if(instanceID.isEmpty())
-        {
-            qWarning() << "Received" << command << "message without an instance ID.";
-            return;
+
+        MinecraftAccountPtr accountObject;
+        if(!profile.isEmpty()) {
+            accountObject = accounts()->getAccountByProfileName(profile);
+            if(!accountObject) {
+                qWarning() << "Launch command requires the specified profile to be valid. " << profile << "does not resolve to any account.";
+                return;
+            }
         }
-        if(serverToJoin.isEmpty())
-        {
-            qWarning() << "Received" << command << "message without a server to join.";
-            return;
-        }
-        auto inst = instances()->getInstanceById(instanceID);
-        if(inst)
-        {
-            launch(
-                    inst,
-                    true,
-                    nullptr,
-                    std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(serverToJoin))
-            );
-        }
+
+        launch(
+            instance,
+            true,
+            nullptr,
+            serverObject,
+            accountObject
+        );
     }
     else
     {
@@ -1189,7 +1222,8 @@ bool Launcher::launch(
         InstancePtr instance,
         bool online,
         BaseProfilerFactory *profiler,
-        MinecraftServerTargetPtr serverToJoin
+        MinecraftServerTargetPtr serverToJoin,
+        MinecraftAccountPtr accountToUse
 ) {
     if(m_updateRunning)
     {
@@ -1212,6 +1246,7 @@ bool Launcher::launch(
         controller->setOnline(online);
         controller->setProfiler(profiler);
         controller->setServerToJoin(serverToJoin);
+        controller->setAccountToUse(accountToUse);
         if(window)
         {
             controller->setParentWidget(window);

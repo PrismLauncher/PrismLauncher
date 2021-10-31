@@ -156,13 +156,14 @@ public slots:
             InstancePtr instance,
             bool online = true,
             BaseProfilerFactory *profiler = nullptr,
-            MinecraftServerTargetPtr serverToJoin = nullptr
+            MinecraftServerTargetPtr serverToJoin = nullptr,
+            MinecraftAccountPtr accountToUse = nullptr
     );
     bool kill(InstancePtr instance);
 
 private slots:
     void on_windowClose();
-    void messageReceived(const QString & message);
+    void messageReceived(const QByteArray & message);
     void controllerSucceeded();
     void controllerFailed(const QString & error);
     void analyticsSettingChanged(const Setting &setting, QVariant value);
@@ -229,6 +230,7 @@ private:
 public:
     QString m_instanceIdToLaunch;
     QString m_serverToJoin;
+    QString m_profileToUse;
     bool m_liveCheck = false;
     QUrl m_zipToImport;
     std::unique_ptr<QFile> logFile;

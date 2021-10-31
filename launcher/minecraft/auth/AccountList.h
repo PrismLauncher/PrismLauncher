@@ -62,6 +62,7 @@ public:
     void addAccount(const MinecraftAccountPtr account);
     void removeAccount(QModelIndex index);
     int findAccountByProfileId(const QString &profileId) const;
+    MinecraftAccountPtr getAccountByProfileName(const QString &profileName) const;
 
     /*!
      * Sets the path to load/save the list file from/to.

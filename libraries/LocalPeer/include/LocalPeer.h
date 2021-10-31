@@ -83,11 +83,11 @@ public:
     LocalPeer(QObject *parent, const ApplicationId &appId);
     ~LocalPeer();
     bool isClient();
-    bool sendMessage(const QString &message, int timeout);
+    bool sendMessage(const QByteArray &message, int timeout);
     ApplicationId applicationId() const;
 
 Q_SIGNALS:
-    void messageReceived(const QString &message);
+    void messageReceived(const QByteArray &message);
 
 protected Q_SLOTS:
     void receiveConnection();

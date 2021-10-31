@@ -34,9 +34,11 @@ void LaunchController::executeTask()
     login();
 }
 
-// FIXME: minecraft specific
-void LaunchController::login() {
-    JavaCommon::checkJVMArgs(m_instance->settings()->get("JvmArgs").toString(), m_parentWidget);
+void LaunchController::decideAccount()
+{
+    if(m_accountToUse) {
+        return;
+    }
 
     // Find an account to use.
     std::shared_ptr<AccountList> accounts = LAUNCHER->accounts();
@@ -60,8 +62,8 @@ void LaunchController::login() {
         }
     }
 
-    MinecraftAccountPtr account = accounts->activeAccount();
-    if (account.get() == nullptr)
+    m_accountToUse = accounts->activeAccount();
+    if (m_accountToUse == nullptr)
     {
         // If no default account is set, ask the user which one to use.
         ProfileSelectDialog selectDialog(
@@ -73,16 +75,23 @@ void LaunchController::login() {
         selectDialog.exec();
 
         // Launch the instance with the selected account.
-        account = selectDialog.selectedAccount();
+        m_accountToUse = selectDialog.selectedAccount();
 
         // If the user said to use the account as default, do that.
-        if (selectDialog.useAsGlobalDefault() && account.get() != nullptr) {
-            accounts->setActiveAccount(account->profileId());
+        if (selectDialog.useAsGlobalDefault() && m_accountToUse) {
+            accounts->setActiveAccount(m_accountToUse->profileId());
         }
     }
+}
+
+
+void LaunchController::login() {
+    JavaCommon::checkJVMArgs(m_instance->settings()->get("JvmArgs").toString(), m_parentWidget);
+
+    decideAccount();
 
     // if no account is selected, we bail
-    if (!account.get())
+    if (!m_accountToUse)
     {
         emitFailed(tr("No account selected for launch."));
         return;
@@ -102,10 +111,10 @@ void LaunchController::login() {
         m_session->wants_online = m_online;
         std::shared_ptr<AccountTask> task;
         if(!password.isNull()) {
-            task = account->login(m_session, password);
+            task = m_accountToUse->login(m_session, password);
         }
         else {
-            task = account->refresh(m_session);
+            task = m_accountToUse->refresh(m_session);
         }
         if (task)
         {
