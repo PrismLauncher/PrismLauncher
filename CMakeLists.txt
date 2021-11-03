@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.1)
 
+if(WIN32)
+    # In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
+    cmake_policy(SET CMP0020 OLD)
+endif()
+
+project(Launcher)
+enable_testing()
+
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
 if(IS_IN_SOURCE_BUILD)
     message(FATAL_ERROR "You are building the Launcher in-source. Please separate the build tree from the source tree.")
@@ -12,14 +20,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         message(FATAL_ERROR "Building the Launcher is not supported in Linux-on-Windows distributions.")
     endif()
 endif()
-
-if(WIN32)
-    # In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
-    cmake_policy(SET CMP0020 OLD)
-endif()
-
-project(Launcher)
-enable_testing()
 
 
 ##################################### Set CMake options #####################################

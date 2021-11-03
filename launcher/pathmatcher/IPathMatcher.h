@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <QString>
 
 class IPathMatcher
 {

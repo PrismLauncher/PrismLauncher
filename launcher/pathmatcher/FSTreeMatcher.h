@@ -12,7 +12,7 @@ public:
     {
     }
 
-    virtual bool matches(const QString &string) const override
+    bool matches(const QString &string) const override
     {
         return m_fsTree.covers(string);
     }
