@@ -107,8 +107,19 @@ std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
 
     // array defined by [[mods]]
     toml_array_t* tomlModsArr = toml_array_in(tomlData, "mods");
+    if(!tomlModsArr)
+    {
+        qWarning() << "Corrupted mods.toml? Couldn't find [[mods]] array!";
+        return nullptr;
+    }
+
     // we only really care about the first element, since multiple mods in one file is not supported by us at the moment
     toml_table_t* tomlModsTable0 = toml_table_at(tomlModsArr, 0);
+    if(!tomlModsTable0)
+    {
+        qWarning() << "Corrupted mods.toml? [[mods]] didn't have an element at index 0!";
+        return nullptr;
+    }
 
     // mandatory properties - always in [[mods]]
     toml_datum_t modIdDatum = toml_string_in(tomlModsTable0, "modId");
