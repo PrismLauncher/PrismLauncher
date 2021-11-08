@@ -36,6 +36,8 @@ OPTIONS
 
 *-v, --version*::
     Display program version and exit.
+*-a, --profile*='PROFILE'::
+    Use the account specified by 'PROFILE' (only valid in combination with --launch).
 
 EXIT STATUS
 -----------
