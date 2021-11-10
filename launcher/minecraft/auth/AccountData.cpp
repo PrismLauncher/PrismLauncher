@@ -207,6 +207,35 @@ MinecraftProfile profileFromJSONV3(const QJsonObject &parent, const char * token
     return out;
 }
 
+void entitlementToJSONV3(QJsonObject &parent, MinecraftEntitlement p) {
+    if(p.validity == Katabasis::Validity::None) {
+        return;
+    }
+    QJsonObject out;
+    out["ownsMinecraft"] = QJsonValue(p.ownsMinecraft);
+    out["canPlayMinecraft"] = QJsonValue(p.canPlayMinecraft);
+    parent["entitlement"] = out;
+}
+
+bool entitlementFromJSONV3(const QJsonObject &parent, MinecraftEntitlement & out) {
+    auto entitlementObject = parent.value("entitlement").toObject();
+    if(entitlementObject.isEmpty()) {
+        return false;
+    }
+    {
+        auto ownsMinecraftV = entitlementObject.value("ownsMinecraft");
+        auto canPlayMinecraftV = entitlementObject.value("canPlayMinecraft");
+        if(!ownsMinecraftV.isBool() || !canPlayMinecraftV.isBool()) {
+            qWarning() << "mandatory attributes are missing or of unexpected type";
+            return false;
+        }
+        out.canPlayMinecraft = canPlayMinecraftV.toBool(false);
+        out.ownsMinecraft = ownsMinecraftV.toBool(false);
+        out.validity = Katabasis::Validity::Assumed;
+    }
+    return true;
+}
+
 }
 
 bool AccountData::resumeStateFromV2(QJsonObject data) {
@@ -304,9 +333,15 @@ bool AccountData::resumeStateFromV3(QJsonObject data) {
 
     yggdrasilToken = tokenFromJSONV3(data, "ygg");
     minecraftProfile = profileFromJSONV3(data, "profile");
+    if(!entitlementFromJSONV3(data, minecraftEntitlement)) {
+        if(minecraftProfile.validity != Katabasis::Validity::None) {
+            minecraftEntitlement.canPlayMinecraft = true;
+            minecraftEntitlement.ownsMinecraft = true;
+            minecraftEntitlement.validity = Katabasis::Validity::Assumed;
+        }
+    }
 
     validity_ = minecraftProfile.validity;
-
     return true;
 }
 
@@ -331,6 +366,7 @@ QJsonObject AccountData::saveState() const {
 
     tokenToJSONV3(output, yggdrasilToken, "ygg");
     profileToJSONV3(output, minecraftProfile, "profile");
+    entitlementToJSONV3(output, minecraftEntitlement);
     return output;
 }
 
@@ -378,7 +414,12 @@ QString AccountData::profileId() const {
 }
 
 QString AccountData::profileName() const {
-    return minecraftProfile.name;
+    if(minecraftProfile.name.size() == 0) {
+        return QObject::tr("No profile (%1)").arg(accountDisplayString());
+    }
+    else {
+        return minecraftProfile.name;
+    }
 }
 
 QString AccountData::accountDisplayString() const {

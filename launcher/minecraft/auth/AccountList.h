@@ -79,7 +79,7 @@ public:
     bool saveList();
 
     MinecraftAccountPtr activeAccount() const;
-    void setActiveAccount(const QString &profileId);
+    void setActiveAccount(MinecraftAccountPtr profileId);
     bool anyAccountIsValid();
 
 signals:

@@ -18,6 +18,7 @@
 #include <QHostInfo>
 #include <QList>
 #include <QHostAddress>
+#include "dialogs/ProfileSetupDialog.h"
 
 LaunchController::LaunchController(QObject *parent) : Task(parent)
 {
@@ -79,7 +80,7 @@ void LaunchController::decideAccount()
 
         // If the user said to use the account as default, do that.
         if (selectDialog.useAsGlobalDefault() && m_accountToUse) {
-            accounts->setActiveAccount(m_accountToUse->profileId());
+            accounts->setActiveAccount(m_accountToUse);
         }
     }
 }
@@ -179,10 +180,40 @@ void LaunchController::login() {
                 }
                 break;
             }
+            case AuthSession::RequiresProfileSetup: {
+                auto entitlement = m_accountToUse->accountData()->minecraftEntitlement;
+                QString errorString;
+                if(!entitlement.canPlayMinecraft) {
+                    errorString = tr("The account does not own Minecraft. You need to purchase the game first to play it.");
+                    QMessageBox::warning(
+                        nullptr,
+                        tr("Missing Minecraft profile"),
+                        errorString,
+                        QMessageBox::StandardButton::Ok,
+                        QMessageBox::StandardButton::Ok
+                    );
+                    tryagain = false;
+                    emitFailed(errorString);
+                    return;
+                }
+                // Now handle setting up a profile name here...
+                ProfileSetupDialog dialog(m_accountToUse, m_parentWidget);
+                if (dialog.exec() == QDialog::Accepted)
+                {
+                    tryagain = true;
+                    continue;
+                }
+                else
+                {
+                    tryagain = false;
+                    emitFailed(tr("Received undetermined session status during login."));
+                    return;
+                }
+            }
             case AuthSession::RequiresOAuth: {
                 auto errorString = tr("Microsoft account has expired and needs to be logged into manually again.");
                 QMessageBox::warning(
-                    nullptr,
+                    m_parentWidget,
                     tr("Microsoft Account refresh failed"),
                     errorString,
                     QMessageBox::StandardButton::Ok,
@@ -195,7 +226,7 @@ void LaunchController::login() {
             case AuthSession::GoneOrMigrated: {
                 auto errorString = tr("The account no longer exists on the servers. It may have been migrated, in which case please add the new account you migrated this one to.");
                 QMessageBox::warning(
-                    nullptr,
+                    m_parentWidget,
                     tr("Account gone"),
                     errorString,
                     QMessageBox::StandardButton::Ok,

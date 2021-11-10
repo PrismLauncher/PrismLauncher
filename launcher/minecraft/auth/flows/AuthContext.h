@@ -63,6 +63,9 @@ protected:
     void doXBoxProfile();
     Q_SLOT void onXBoxProfileDone(QNetworkReply::NetworkError, QByteArray, QList<QNetworkReply::RawHeaderPair>);
 
+    void doEntitlements();
+    Q_SLOT void onEntitlementsDone(QNetworkReply::NetworkError, QByteArray, QList<QNetworkReply::RawHeaderPair>);
+
     void doMinecraftProfile();
     Q_SLOT void onMinecraftProfileDone(QNetworkReply::NetworkError, QByteArray, QList<QNetworkReply::RawHeaderPair>);
 
@@ -71,6 +74,8 @@ protected:
 
     void doGetSkin();
     Q_SLOT void onSkinDone(QNetworkReply::NetworkError, QByteArray, QList<QNetworkReply::RawHeaderPair>);
+
+    void succeed();
 
     void failResult(bool & flag);
     void succeedResult(bool & flag);
@@ -88,6 +93,7 @@ protected:
     int m_requestsDone = 0;
     bool m_xboxProfileSucceeded = false;
     bool m_mcAuthSucceeded = false;
+    QString entitlementsRequestId;
 
     QSet<int64_t> stsErrors;
     bool stsFailed = false;

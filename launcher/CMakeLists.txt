@@ -228,6 +228,9 @@ set(MINECRAFT_SOURCES
     minecraft/auth/flows/Yggdrasil.h
     minecraft/auth/flows/Yggdrasil.cpp
 
+    minecraft/auth/flows/Parsers.h
+    minecraft/auth/flows/Parsers.cpp
+
     minecraft/gameoptions/GameOptions.h
     minecraft/gameoptions/GameOptions.cpp
 
@@ -732,6 +735,8 @@ SET(LAUNCHER_SOURCES
     dialogs/AboutDialog.h
     dialogs/ProfileSelectDialog.cpp
     dialogs/ProfileSelectDialog.h
+    dialogs/ProfileSetupDialog.cpp
+    dialogs/ProfileSetupDialog.h
     dialogs/CopyInstanceDialog.cpp
     dialogs/CopyInstanceDialog.h
     dialogs/CustomMessageBox.cpp
@@ -859,6 +864,7 @@ SET(LAUNCHER_UIS
     dialogs/ProgressDialog.ui
     dialogs/IconPickerDialog.ui
     dialogs/ProfileSelectDialog.ui
+    dialogs/ProfileSetupDialog.ui
     dialogs/EditAccountDialog.ui
     dialogs/ExportInstanceDialog.ui
     dialogs/LoginDialog.ui

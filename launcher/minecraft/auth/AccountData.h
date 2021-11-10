@@ -21,6 +21,12 @@ struct Cape {
     QByteArray data;
 };
 
+struct MinecraftEntitlement {
+    bool ownsMinecraft = false;
+    bool canPlayMinecraft = false;
+    Katabasis::Validity validity = Katabasis::Validity::None;
+};
+
 struct MinecraftProfile {
     QString id;
     QString name;
@@ -69,5 +75,6 @@ struct AccountData {
 
     Katabasis::Token yggdrasilToken;
     MinecraftProfile minecraftProfile;
+    MinecraftEntitlement minecraftEntitlement;
     Katabasis::Validity validity_ = Katabasis::Validity::None;
 };

@@ -213,8 +213,21 @@ void MinecraftAccount::authSucceeded()
     auto session = m_currentTask->getAssignedSession();
     if (session)
     {
-        session->status =
-            session->wants_online ? AuthSession::PlayableOnline : AuthSession::PlayableOffline;
+        /*
+            session->status = AuthSession::RequiresProfileSetup;
+            session->auth_server_online = true;
+        */
+        if(data.profileId().size() == 0) {
+            session->status = AuthSession::RequiresProfileSetup;
+        }
+        else {
+            if(session->wants_online) {
+                session->status = AuthSession::PlayableOnline;
+            }
+            else {
+                session->status = AuthSession::PlayableOffline;
+            }
+        }
         fillSession(session);
         session->auth_server_online = true;
     }

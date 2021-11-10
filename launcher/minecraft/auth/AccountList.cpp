@@ -64,21 +64,18 @@ const MinecraftAccountPtr AccountList::at(int i) const
 
 void AccountList::addAccount(const MinecraftAccountPtr account)
 {
-    // We only ever want accounts with valid profiles.
-    // Keeping profile-less accounts is pointless and serves no purpose.
     auto profileId = account->profileId();
-    if(!profileId.size()) {
-        return;
+    if(profileId.size()) {
+        // override/replace existing account with the same profileId
+        auto existingAccount = findAccountByProfileId(profileId);
+        if(existingAccount != -1) {
+            m_accounts[existingAccount] = account;
+            emit dataChanged(index(existingAccount), index(existingAccount, columnCount(QModelIndex()) - 1));
+            onListChanged();
+            return;
+        }
     }
 
-    // override/replace existing account with the same profileId
-    auto existingAccount = findAccountByProfileId(profileId);
-    if(existingAccount != -1) {
-        m_accounts[existingAccount] = account;
-        emit dataChanged(index(existingAccount), index(existingAccount, columnCount(QModelIndex()) - 1));
-        onListChanged();
-        return;
-    }
 
     // if we don't have this porfileId yet, add the account to the end
     int row = m_accounts.count();
@@ -112,9 +109,9 @@ MinecraftAccountPtr AccountList::activeAccount() const
     return m_activeAccount;
 }
 
-void AccountList::setActiveAccount(const QString &profileId)
+void AccountList::setActiveAccount(MinecraftAccountPtr newAccount)
 {
-    if (profileId.isEmpty() && m_activeAccount)
+    if (!newAccount && m_activeAccount)
     {
         int idx = 0;
         auto prevActiveAcc = m_activeAccount;
@@ -138,7 +135,7 @@ void AccountList::setActiveAccount(const QString &profileId)
         int idx = 0;
         for (MinecraftAccountPtr account : m_accounts)
         {
-            if (account->profileId() == profileId)
+            if (account == newAccount)
             {
                 newActiveAccount = account;
                 newActiveAccountIdx = idx;
@@ -321,7 +318,7 @@ bool AccountList::setData(const QModelIndex &index, const QVariant &value, int r
         if(value == Qt::Checked)
         {
             MinecraftAccountPtr account = at(index.row());
-            setActiveAccount(account->profileId());
+            setActiveAccount(account);
         }
     }
 
@@ -435,11 +432,10 @@ bool AccountList::loadV3(QJsonObject& root) {
         if (account.get() != nullptr)
         {
             auto profileId = account->profileId();
-            if(!profileId.size()) {
-                continue;
-            }
-            if(findAccountByProfileId(profileId) != -1) {
-                continue;
+            if(profileId.size()) {
+                if(findAccountByProfileId(profileId) != -1) {
+                    continue;
+                }
             }
             connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
             m_accounts.append(account);

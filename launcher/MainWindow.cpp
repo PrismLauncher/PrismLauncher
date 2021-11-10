@@ -1030,7 +1030,6 @@ void MainWindow::repopulateAccountsMenu()
     QString active_profileId = "";
     if (active_account != nullptr)
     {
-        active_profileId = active_account->profileId();
         // this can be called before accountMenuButton exists
         if (accountMenuButton)
         {
@@ -1053,14 +1052,20 @@ void MainWindow::repopulateAccountsMenu()
             MinecraftAccountPtr account = accounts->at(i);
             auto profileLabel = profileInUseFilter(account->profileName(), account->isInUse());
             QAction *action = new QAction(profileLabel, this);
-            action->setData(account->profileId());
+            action->setData(i);
             action->setCheckable(true);
-            if (active_profileId == account->profileId())
+            if (active_account == account)
             {
                 action->setChecked(true);
             }
 
-            action->setIcon(account->getFace());
+            auto face = account->getFace();
+            if(!face.isNull()) {
+                action->setIcon(face);
+            }
+            else {
+                action->setIcon(LAUNCHER->getThemedIcon("noaccount"));
+            }
             accountMenu->addAction(action);
             connect(action, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
         }
@@ -1071,8 +1076,8 @@ void MainWindow::repopulateAccountsMenu()
     QAction *action = new QAction(tr("No Default Account"), this);
     action->setCheckable(true);
     action->setIcon(LAUNCHER->getThemedIcon("noaccount"));
-    action->setData("");
-    if (active_profileId.isEmpty()) {
+    action->setData(-1);
+    if (active_account == nullptr) {
         action->setChecked(true);
     }
 
@@ -1098,20 +1103,19 @@ void MainWindow::updatesAllowedChanged(bool allowed)
 void MainWindow::changeActiveAccount()
 {
     QAction *sAction = (QAction *)sender();
+
     // Profile's associated Mojang username
-    // Will need to change when profiles are properly implemented
-    if (sAction->data().type() != QVariant::Type::String)
+    if (sAction->data().type() != QVariant::Type::Int)
         return;
 
     QVariant data = sAction->data();
-    QString id = "";
-    if (!data.isNull())
-    {
-        id = data.toString();
+    bool valid = false;
+    int index = data.toInt(&valid);
+    if(!valid) {
+        index = -1;
     }
-
-    LAUNCHER->accounts()->setActiveAccount(id);
-
+    std::shared_ptr<AccountList> accounts = LAUNCHER->accounts();
+    accounts->setActiveAccount(index == -1 ? nullptr : accounts->at(index));
     activeAccountChanged();
 }
 
@@ -1126,7 +1130,13 @@ void MainWindow::activeAccountChanged()
     {
         auto profileLabel = profileInUseFilter(account->profileName(), account->isInUse());
         accountMenuButton->setText(profileLabel);
-        accountMenuButton->setIcon(account->getFace());
+        auto face = account->getFace();
+        if(face.isNull()) {
+            accountMenuButton->setIcon(LAUNCHER->getThemedIcon("noaccount"));
+        }
+        else {
+            accountMenuButton->setIcon(face);
+        }
         return;
     }
 

@@ -17,6 +17,7 @@ struct AuthSession
         Undetermined,
         RequiresOAuth,
         RequiresPassword,
+        RequiresProfileSetup,
         PlayableOffline,
         PlayableOnline,
         GoneOrMigrated
