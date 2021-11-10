@@ -2,6 +2,7 @@
 
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QDebug>
 
 namespace Parsers {
 
