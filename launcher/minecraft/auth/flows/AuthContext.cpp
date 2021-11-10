@@ -9,6 +9,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
+#include <QUuid>
+
 #include <QUrlQuery>
 
 #include <QPixmap>
