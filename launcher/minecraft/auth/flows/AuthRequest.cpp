@@ -89,17 +89,13 @@ void AuthRequest::onUploadProgress(qint64 uploaded, qint64 total) {
     emit uploadProgress(uploaded, total);
 }
 
-void AuthRequest::setup(const QNetworkRequest &req, QNetworkAccessManager::Operation operation, const QByteArray &verb) {
+void AuthRequest::setup(const QNetworkRequest &req, QNetworkAccessManager::Operation operation) {
     request_ = req;
     operation_ = operation;
     url_ = req.url();
 
     QUrl url = url_;
     request_.setUrl(url);
-
-    if (!verb.isEmpty()) {
-        request_.setRawHeader(Katabasis::HTTP_HTTP_HEADER, verb);
-    }
 
     status_ = Requesting;
     error_ = QNetworkReply::NoError;

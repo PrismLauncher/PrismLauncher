@@ -69,13 +69,16 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
         // override/replace existing account with the same profileId
         auto existingAccount = findAccountByProfileId(profileId);
         if(existingAccount != -1) {
+            MinecraftAccountPtr existingAccountPtr = m_accounts[existingAccount];
             m_accounts[existingAccount] = account;
+            if(m_activeAccount == existingAccountPtr) {
+                m_activeAccount = account;
+            }
             emit dataChanged(index(existingAccount), index(existingAccount, columnCount(QModelIndex()) - 1));
             onListChanged();
             return;
         }
     }
-
 
     // if we don't have this porfileId yet, add the account to the end
     int row = m_accounts.count();

@@ -48,7 +48,7 @@ protected slots:
     void onUploadProgress(qint64 uploaded, qint64 total);
 
 protected:
-    void setup(const QNetworkRequest &request, QNetworkAccessManager::Operation operation, const QByteArray &verb = QByteArray());
+    void setup(const QNetworkRequest &request, QNetworkAccessManager::Operation operation);
 
     enum Status {
         Idle, Requesting, ReRequesting
