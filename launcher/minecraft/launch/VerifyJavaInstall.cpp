@@ -11,8 +11,17 @@ void VerifyJavaInstall::executeTask() {
     auto javaVersion = m_inst->getJavaVersion();
     auto minecraftComponent = m_inst->getPackProfile()->getComponent("net.minecraft");
 
+    // Java 17 requirement
+    if (minecraftComponent->getReleaseDateTime() >= g_VersionFilterData.java17BeginsDate) {
+        if (javaVersion.major() < 17) {
+            emit logLine("Minecraft 1.18 Pre Release 2 and above require the use of Java 17",
+                         MessageLevel::Fatal);
+            emitFailed(tr("Minecraft 1.18 Pre Release 2 and above require the use of Java 17"));
+            return;
+        }
+    }
     // Java 16 requirement
-    if (minecraftComponent->getReleaseDateTime() >= g_VersionFilterData.java16BeginsDate) {
+    else if (minecraftComponent->getReleaseDateTime() >= g_VersionFilterData.java16BeginsDate) {
         if (javaVersion.major() < 16) {
             emit logLine("Minecraft 21w19a and above require the use of Java 16",
                          MessageLevel::Fatal);

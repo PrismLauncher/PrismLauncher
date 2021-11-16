@@ -68,4 +68,5 @@ VersionFilterData::VersionFilterData()
 
     java8BeginsDate  = timeFromS3Time("2017-03-30T09:32:19+00:00");
     java16BeginsDate = timeFromS3Time("2021-05-12T11:19:15+00:00");
+    java17BeginsDate = timeFromS3Time("2021-11-16T17:04:48+00:00");
 }
