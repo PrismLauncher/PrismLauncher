@@ -34,7 +34,7 @@ private:
 public:
     static Env& getInstance();
 
-    QNetworkAccessManager &qnam() const;
+    QNetworkAccessManager &network() const;
 
     shared_qobject_ptr<HttpMetaCache> metacache();
 

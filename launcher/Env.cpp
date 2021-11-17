@@ -59,7 +59,7 @@ shared_qobject_ptr< HttpMetaCache > Env::metacache()
     return d->m_metacache;
 }
 
-QNetworkAccessManager& Env::qnam() const
+QNetworkAccessManager& Env::network() const
 {
     return d->m_qnam;
 }

@@ -893,7 +893,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         m_analytics = new GAnalytics(BuildConfig.ANALYTICS_ID, clientID, analyticsVersion, this);
         m_analytics->setLogLevel(GAnalytics::Debug);
         m_analytics->setAnonymizeIPs(true);
-        m_analytics->setNetworkAccessManager(&ENV.qnam());
+        m_analytics->setNetworkAccessManager(&ENV.network());
 
         if(m_settings->get("AnalyticsSeen").toInt() < m_analytics->version())
         {

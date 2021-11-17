@@ -70,7 +70,7 @@ void AuthContext::initMSA() {
     opts.accessTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     opts.listenerPorts = {28562, 28563, 28564, 28565, 28566};
 
-    m_oauth2 = new OAuth2(opts, m_data->msaToken, this, &ENV.qnam());
+    m_oauth2 = new OAuth2(opts, m_data->msaToken, this, &ENV.network());
     m_oauth2->setGrantFlow(Katabasis::OAuth2::GrantFlowDevice);
 
     connect(m_oauth2, &OAuth2::linkingFailed, this, &AuthContext::onOAuthLinkingFailed);

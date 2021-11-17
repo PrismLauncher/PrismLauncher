@@ -97,7 +97,7 @@ void Download::start()
 
     request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT);
 
-    QNetworkReply *rep =  ENV.qnam().get(request);
+    QNetworkReply *rep =  ENV.network().get(request);
 
     m_reply.reset(rep);
     connect(rep, SIGNAL(downloadProgress(qint64, qint64)), SLOT(downloadProgress(qint64, qint64)));

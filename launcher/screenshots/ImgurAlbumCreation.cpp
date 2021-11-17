@@ -33,7 +33,7 @@ void ImgurAlbumCreation::start()
 
     const QByteArray data = "deletehashes=" + hashes.join(',').toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
 
-    QNetworkReply *rep = ENV.qnam().post(request, data);
+    QNetworkReply *rep = ENV.network().post(request, data);
 
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &ImgurAlbumCreation::downloadProgress);
