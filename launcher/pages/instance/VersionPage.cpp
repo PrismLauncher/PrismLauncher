@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "Launcher.h"
+#include "Application.h"
 
 #include <QMessageBox>
 #include <QLabel>
@@ -70,14 +70,14 @@ public:
                 auto string = var.toString();
                 if(string == "warning")
                 {
-                    return LAUNCHER->getThemedIcon("status-yellow");
+                    return APPLICATION->getThemedIcon("status-yellow");
                 }
                 else if(string == "error")
                 {
-                    return LAUNCHER->getThemedIcon("status-bad");
+                    return APPLICATION->getThemedIcon("status-bad");
                 }
             }
-            return LAUNCHER->getThemedIcon("status-good");
+            return APPLICATION->getThemedIcon("status-good");
         }
         return var;
     }
@@ -93,7 +93,7 @@ private:
 
 QIcon VersionPage::icon() const
 {
-    return LAUNCHER->icons()->getIcon(m_inst->iconKey());
+    return APPLICATION->icons()->getIcon(m_inst->iconKey());
 }
 bool VersionPage::shouldDisplay() const
 {
@@ -297,7 +297,7 @@ void VersionPage::on_actionInstall_mods_triggered()
 
 void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 {
-    auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"), LAUNCHER->settings()->get("CentralModsDir").toString(), this->parentWidget());
+    auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
     if(!list.empty())
     {
         m_profile->installJarMods(list);
@@ -307,7 +307,7 @@ void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 
 void VersionPage::on_actionReplace_Minecraft_jar_triggered()
 {
-    auto jarPath = GuiUtil::BrowseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement (*.jar)"), LAUNCHER->settings()->get("CentralModsDir").toString(), this->parentWidget());
+    auto jarPath = GuiUtil::BrowseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement (*.jar)"), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
     if(!jarPath.isEmpty())
     {
         m_profile->installCustomJar(jarPath);
@@ -395,7 +395,7 @@ void VersionPage::on_actionChange_version_triggered()
 
 void VersionPage::on_actionDownload_All_triggered()
 {
-    if (!LAUNCHER->accounts()->anyAccountIsValid())
+    if (!APPLICATION->accounts()->anyAccountIsValid())
     {
         CustomMessageBox::selectable(
             this, tr("Error"),
@@ -420,7 +420,7 @@ void VersionPage::on_actionDownload_All_triggered()
 
 void VersionPage::on_actionInstall_Forge_triggered()
 {
-    auto vlist = ENV.metadataIndex()->get("net.minecraftforge");
+    auto vlist = ENV->metadataIndex()->get("net.minecraftforge");
     if(!vlist)
     {
         return;
@@ -449,7 +449,7 @@ void VersionPage::on_actionInstall_Forge_triggered()
 
 void VersionPage::on_actionInstall_Fabric_triggered()
 {
-    auto vlist = ENV.metadataIndex()->get("net.fabricmc.fabric-loader");
+    auto vlist = ENV->metadataIndex()->get("net.fabricmc.fabric-loader");
     if(!vlist)
     {
         return;
@@ -494,7 +494,7 @@ void VersionPage::on_actionAdd_Empty_triggered()
 
 void VersionPage::on_actionInstall_LiteLoader_triggered()
 {
-    auto vlist = ENV.metadataIndex()->get("com.mumfrey.liteloader");
+    auto vlist = ENV->metadataIndex()->get("com.mumfrey.liteloader");
     if(!vlist)
     {
         return;
@@ -614,7 +614,7 @@ void VersionPage::on_actionEdit_triggered()
         qWarning() << "file" << filename << "can't be opened for editing, doesn't exist!";
         return;
     }
-    LAUNCHER->openJsonEditor(filename);
+    APPLICATION->openJsonEditor(filename);
 }
 
 void VersionPage::on_actionRevert_triggered()

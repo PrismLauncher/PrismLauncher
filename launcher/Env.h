@@ -25,14 +25,14 @@ class Index;
 
 class Env
 {
-    friend class Launcher;
+    friend class Application;
 private:
     struct Private;
     Env();
     ~Env();
     static void dispose();
 public:
-    static Env& getInstance();
+    static Env* getInstance();
 
     QNetworkAccessManager &network() const;
 

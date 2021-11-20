@@ -80,7 +80,7 @@ slots:
     void on_buttonBox_rejected();
 
 protected:
-    std::shared_ptr<AccountList> m_accounts;
+    shared_qobject_ptr<AccountList> m_accounts;
 
     //! The account that was selected when the user clicked OK.
     MinecraftAccountPtr m_selected;

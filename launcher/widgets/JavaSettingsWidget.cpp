@@ -1,5 +1,5 @@
 #include "JavaSettingsWidget.h"
-#include <Launcher.h>
+#include <Application.h>
 
 #include <java/JavaInstall.h>
 #include <dialogs/CustomMessageBox.h>
@@ -22,9 +22,9 @@ JavaSettingsWidget::JavaSettingsWidget(QWidget* parent) : QWidget(parent)
 {
     m_availableMemory = Sys::getSystemRam() / Sys::mebibyte;
 
-    goodIcon = LAUNCHER->getThemedIcon("status-good");
-    yellowIcon = LAUNCHER->getThemedIcon("status-yellow");
-    badIcon = LAUNCHER->getThemedIcon("status-bad");
+    goodIcon = APPLICATION->getThemedIcon("status-good");
+    yellowIcon = APPLICATION->getThemedIcon("status-yellow");
+    badIcon = APPLICATION->getThemedIcon("status-bad");
     setupUi();
 
     connect(m_minMemSpinBox, SIGNAL(valueChanged(int)), this, SLOT(memoryValueChanged(int)));
@@ -116,9 +116,9 @@ void JavaSettingsWidget::setupUi()
 
 void JavaSettingsWidget::initialize()
 {
-    m_versionWidget->initialize(LAUNCHER->javalist().get());
+    m_versionWidget->initialize(APPLICATION->javalist().get());
     m_versionWidget->setResizeOn(2);
-    auto s = LAUNCHER->settings();
+    auto s = APPLICATION->settings();
     // Memory
     observedMinMemory = s->get("MinMemAlloc").toInt();
     observedMaxMemory = s->get("MaxMemAlloc").toInt();

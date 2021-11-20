@@ -23,7 +23,7 @@
 
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
-#include "Launcher.h"
+#include "Application.h"
 
 PasteEEPage::PasteEEPage(QWidget *parent) :
     QWidget(parent),
@@ -42,7 +42,7 @@ PasteEEPage::~PasteEEPage()
 
 void PasteEEPage::loadSettings()
 {
-    auto s = LAUNCHER->settings();
+    auto s = APPLICATION->settings();
     QString keyToUse = s->get("PasteEEAPIKey").toString();
     if(keyToUse == "multimc")
     {
@@ -57,7 +57,7 @@ void PasteEEPage::loadSettings()
 
 void PasteEEPage::applySettings()
 {
-    auto s = LAUNCHER->settings();
+    auto s = APPLICATION->settings();
 
     QString pasteKeyToUse;
     if (ui->customButton->isChecked())

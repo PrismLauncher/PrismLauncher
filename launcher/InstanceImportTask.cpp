@@ -51,7 +51,7 @@ void InstanceImportTask::executeTask()
         m_downloadRequired = true;
 
         const QString path = m_sourceUrl.host() + '/' + m_sourceUrl.path();
-        auto entry = ENV.metacache()->resolveEntry("general", path);
+        auto entry = ENV->metacache()->resolveEntry("general", path);
         entry->setStale(true);
         m_filesNetJob.reset(new NetJob(tr("Modpack download")));
         m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
@@ -444,7 +444,7 @@ void InstanceImportTask::processMultiMC()
         if (!importIconPath.isNull() && QFile::exists(importIconPath))
         {
             // import icon
-            auto iconList = ENV.icons();
+            auto iconList = ENV->icons();
             if (iconList->iconFileExists(m_instIcon))
             {
                 iconList->deleteIcon(m_instIcon);

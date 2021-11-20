@@ -481,7 +481,7 @@ bool PackProfile::migratePreComponentConfig()
         }
         else if(!intendedVersion.isEmpty())
         {
-            auto metaVersion = ENV.metadataIndex()->get(uid, intendedVersion);
+            auto metaVersion = ENV->metadataIndex()->get(uid, intendedVersion);
             component = new Component(this, metaVersion);
         }
         else
@@ -546,7 +546,7 @@ bool PackProfile::migratePreComponentConfig()
         auto patchVersion = d->getOldConfigVersion(uid);
         if(!patchVersion.isEmpty() && !loadedComponents.contains(uid))
         {
-            auto patch = new Component(this, ENV.metadataIndex()->get(uid, patchVersion));
+            auto patch = new Component(this, ENV->metadataIndex()->get(uid, patchVersion));
             patch->setOrder(order);
             loadedComponents[uid] = patch;
         }

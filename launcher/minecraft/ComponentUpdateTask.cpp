@@ -102,7 +102,7 @@ static LoadResult loadComponent(ComponentPtr component, shared_qobject_ptr<Task>
     }
     else
     {
-        auto metaVersion = ENV.metadataIndex()->get(component->m_uid, component->m_version);
+        auto metaVersion = ENV->metadataIndex()->get(component->m_uid, component->m_version);
         component->m_metaVersion = metaVersion;
         if(metaVersion->isLoaded())
         {
@@ -135,7 +135,7 @@ static LoadResult loadPackProfile(ComponentPtr component, shared_qobject_ptr<Tas
     }
 
     LoadResult result = LoadResult::Failed;
-    auto metaList = ENV.metadataIndex()->get(component->m_uid);
+    auto metaList = ENV->metadataIndex()->get(component->m_uid);
     if(metaList->isLoaded())
     {
         component->m_loaded = true;
@@ -154,13 +154,13 @@ static LoadResult loadPackProfile(ComponentPtr component, shared_qobject_ptr<Tas
 static LoadResult loadIndex(shared_qobject_ptr<Task>& loadTask, Net::Mode netmode)
 {
     // FIXME: DECIDE. do we want to run the update task anyway?
-    if(ENV.metadataIndex()->isLoaded())
+    if(ENV->metadataIndex()->isLoaded())
     {
         qDebug() << "Index is already loaded";
         return LoadResult::LoadedLocal;
     }
-    ENV.metadataIndex()->load(netmode);
-    loadTask = ENV.metadataIndex()->getCurrentTask();
+    ENV->metadataIndex()->load(netmode);
+    loadTask = ENV->metadataIndex()->getCurrentTask();
     if(loadTask)
     {
         return LoadResult::RequiresRemote;

@@ -39,13 +39,13 @@ Env::~Env()
     delete d;
 }
 
-Env& Env::Env::getInstance()
+Env* Env::Env::getInstance()
 {
     if(!instance)
     {
         instance = new Env();
     }
-    return *instance;
+    return instance;
 }
 
 void Env::dispose()

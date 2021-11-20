@@ -1,4 +1,4 @@
-#include "Launcher.h"
+#include "Application.h"
 #include "BuildConfig.h"
 #include "MainWindow.h"
 #include "InstanceWindow.h"
@@ -23,7 +23,7 @@
 #include "themes/BrightTheme.h"
 #include "themes/CustomTheme.h"
 
-#include "LauncherMessage.h"
+#include "ApplicationMessage.h"
 
 #include "setupwizard/SetupWizard.h"
 #include "setupwizard/LanguageWizardPage.h"
@@ -72,6 +72,7 @@
 #include <sys.h>
 
 #include "pagedialog/PageDialog.h"
+#include <Secrets.h>
 
 
 #if defined Q_OS_WIN32
@@ -99,7 +100,7 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QSt
     const char *levels = "DWCFIS";
     const QString format("%1 %2 %3\n");
 
-    qint64 msecstotal = LAUNCHER->timeSinceStart();
+    qint64 msecstotal = APPLICATION->timeSinceStart();
     qint64 seconds = msecstotal / 1000;
     qint64 msecs = msecstotal % 1000;
     QString foo;
@@ -108,8 +109,8 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QSt
 
     QString out = format.arg(buf).arg(levels[type]).arg(msg);
 
-    LAUNCHER->logFile->write(out.toUtf8());
-    LAUNCHER->logFile->flush();
+    APPLICATION->logFile->write(out.toUtf8());
+    APPLICATION->logFile->flush();
     QTextStream(stderr) << out.toLocal8Bit();
     fflush(stderr);
 }
@@ -155,7 +156,7 @@ QString getIdealPlatform(QString currentPlatform) {
 
 }
 
-Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
+Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 {
 #if defined Q_OS_WIN32
     // attach the parent console
@@ -261,7 +262,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
             if(argc > 0)
                 std::cerr << "Try '" << argv[0] << " -h' to get help on command line parameters."
                           << std::endl;
-            m_status = Launcher::Failed;
+            m_status = Application::Failed;
             return;
         }
 
@@ -269,7 +270,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         if (args["help"].toBool())
         {
             std::cout << qPrintable(parser.compileHelp(arguments()[0]));
-            m_status = Launcher::Succeeded;
+            m_status = Application::Succeeded;
             return;
         }
 
@@ -278,7 +279,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         {
             std::cout << "Version " << BuildConfig.printableVersionString().toStdString() << std::endl;
             std::cout << "Git " << BuildConfig.GIT_COMMIT.toStdString() << std::endl;
-            m_status = Launcher::Succeeded;
+            m_status = Application::Succeeded;
             return;
         }
     }
@@ -347,14 +348,14 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
     if(m_instanceIdToLaunch.isEmpty() && !m_serverToJoin.isEmpty())
     {
         std::cerr << "--server can only be used in combination with --launch!" << std::endl;
-        m_status = Launcher::Failed;
+        m_status = Application::Failed;
         return;
     }
 
     if(m_instanceIdToLaunch.isEmpty() && !m_profileToUse.isEmpty())
     {
         std::cerr << "--account can only be used in combination with --launch!" << std::endl;
-        m_status = Launcher::Failed;
+        m_status = Application::Failed;
         return;
     }
 
@@ -430,19 +431,19 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
     {
         // FIXME: you can run the same binaries with multiple data dirs and they won't clash. This could cause issues for updates.
         m_peerInstance = new LocalPeer(this, appID);
-        connect(m_peerInstance, &LocalPeer::messageReceived, this, &Launcher::messageReceived);
+        connect(m_peerInstance, &LocalPeer::messageReceived, this, &Application::messageReceived);
         if(m_peerInstance->isClient()) {
             int timeout = 2000;
 
             if(m_instanceIdToLaunch.isEmpty())
             {
-                LauncherMessage activate;
+                ApplicationMessage activate;
                 activate.command = "activate";
                 m_peerInstance->sendMessage(activate.serialize(), timeout);
 
                 if(!m_zipToImport.isEmpty())
                 {
-                    LauncherMessage import;
+                    ApplicationMessage import;
                     import.command = "import";
                     import.args.insert("path", m_zipToImport.toString());
                     m_peerInstance->sendMessage(import.serialize(), timeout);
@@ -450,7 +451,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
             }
             else
             {
-                LauncherMessage launch;
+                ApplicationMessage launch;
                 launch.command = "launch";
                 launch.args["id"] = m_instanceIdToLaunch;
 
@@ -464,7 +465,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
                 }
                 m_peerInstance->sendMessage(launch.serialize(), timeout);
             }
-            m_status = Launcher::Succeeded;
+            m_status = Application::Succeeded;
             return;
         }
     }
@@ -520,7 +521,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
 #endif
 
 #ifdef MULTIMC_JARS_LOCATION
-        ENV.setJarsPath( TOSTRING(MULTIMC_JARS_LOCATION) );
+        ENV->setJarsPath( TOSTRING(MULTIMC_JARS_LOCATION) );
 #endif
 
         qDebug() << BuildConfig.LAUNCHER_DISPLAYNAME << ", (c) 2013-2021 " << BuildConfig.LAUNCHER_COPYRIGHT;
@@ -750,7 +751,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
 
     // Instance icons
     {
-        auto setting = LAUNCHER->settings()->getSetting("IconsDir");
+        auto setting = APPLICATION->settings()->getSetting("IconsDir");
         QStringList instFolders =
         {
             ":/icons/multimc/32x32/instances/",
@@ -763,7 +764,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         {
             m_icons->directoryChanged(value.toString());
         });
-        ENV.registerIconList(m_icons);
+        ENV->registerIconList(m_icons);
         qDebug() << "<> Instance icons intialized.";
     }
 
@@ -820,7 +821,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
 
     // init the http meta cache
     {
-        ENV.initHttpMetaCache();
+        ENV->initHttpMetaCache();
         qDebug() << "<> Cache initialized.";
     }
 
@@ -831,7 +832,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         int port = settings()->get("ProxyPort").value<qint16>();
         QString user = settings()->get("ProxyUser").toString();
         QString pass = settings()->get("ProxyPass").toString();
-        ENV.updateProxySettings(proxyTypeStr, addr, port, user, pass);
+        ENV->updateProxySettings(proxyTypeStr, addr, port, user, pass);
         qDebug() << "<> Proxy settings done.";
     }
 
@@ -851,7 +852,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         m_mcedit.reset(new MCEditTool(m_settings));
     }
 
-    connect(this, &Launcher::aboutToQuit, [this](){
+    connect(this, &Application::aboutToQuit, [this](){
         if(m_instances)
         {
             // save any remaining instance state
@@ -881,7 +882,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         }
 
         auto analyticsSetting = m_settings->getSetting("Analytics");
-        connect(analyticsSetting.get(), &Setting::SettingChanged, this, &Launcher::analyticsSettingChanged);
+        connect(analyticsSetting.get(), &Setting::SettingChanged, this, &Application::analyticsSettingChanged);
         QString clientID = m_settings->get("AnalyticsClientID").toString();
         if(clientID.isEmpty())
         {
@@ -893,7 +894,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
         m_analytics = new GAnalytics(BuildConfig.ANALYTICS_ID, clientID, analyticsVersion, this);
         m_analytics->setLogLevel(GAnalytics::Debug);
         m_analytics->setAnonymizeIPs(true);
-        m_analytics->setNetworkAccessManager(&ENV.network());
+        m_analytics->setNetworkAccessManager(&ENV->network());
 
         if(m_settings->get("AnalyticsSeen").toInt() < m_analytics->version())
         {
@@ -917,7 +918,7 @@ Launcher::Launcher(int &argc, char **argv) : QApplication(argc, argv)
     performMainStartupAction();
 }
 
-bool Launcher::createSetupWizard()
+bool Application::createSetupWizard()
 {
     bool javaRequired = [&]()
     {
@@ -975,22 +976,22 @@ bool Launcher::createSetupWizard()
         {
             m_setupWizard->addPage(new AnalyticsWizardPage(m_setupWizard));
         }
-        connect(m_setupWizard, &QDialog::finished, this, &Launcher::setupWizardFinished);
+        connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();
         return true;
     }
     return false;
 }
 
-void Launcher::setupWizardFinished(int status)
+void Application::setupWizardFinished(int status)
 {
     qDebug() << "Wizard result =" << status;
     performMainStartupAction();
 }
 
-void Launcher::performMainStartupAction()
+void Application::performMainStartupAction()
 {
-    m_status = Launcher::Initialized;
+    m_status = Application::Initialized;
     if(!m_instanceIdToLaunch.isEmpty())
     {
         auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
@@ -1033,14 +1034,14 @@ void Launcher::performMainStartupAction()
     }
 }
 
-void Launcher::showFatalErrorMessage(const QString& title, const QString& content)
+void Application::showFatalErrorMessage(const QString& title, const QString& content)
 {
-    m_status = Launcher::Failed;
+    m_status = Application::Failed;
     auto dialog = CustomMessageBox::selectable(nullptr, title, content, QMessageBox::Critical);
     dialog->exec();
 }
 
-Launcher::~Launcher()
+Application::~Application()
 {
     // kill the other globals.
     Env::dispose();
@@ -1060,7 +1061,7 @@ Launcher::~Launcher()
 #endif
 }
 
-void Launcher::messageReceived(const QByteArray& message)
+void Application::messageReceived(const QByteArray& message)
 {
     if(status() != Initialized)
     {
@@ -1068,7 +1069,7 @@ void Launcher::messageReceived(const QByteArray& message)
         return;
     }
 
-    LauncherMessage received;
+    ApplicationMessage received;
     received.parse(message);
 
     auto & command = received.command;
@@ -1134,7 +1135,7 @@ void Launcher::messageReceived(const QByteArray& message)
     }
 }
 
-void Launcher::analyticsSettingChanged(const Setting&, QVariant value)
+void Application::analyticsSettingChanged(const Setting&, QVariant value)
 {
     if(!m_analytics)
         return;
@@ -1150,12 +1151,12 @@ void Launcher::analyticsSettingChanged(const Setting&, QVariant value)
     m_analytics->enable(enabled);
 }
 
-std::shared_ptr<TranslationsModel> Launcher::translations()
+std::shared_ptr<TranslationsModel> Application::translations()
 {
     return m_translations;
 }
 
-std::shared_ptr<JavaInstallList> Launcher::javalist()
+std::shared_ptr<JavaInstallList> Application::javalist()
 {
     if (!m_javalist)
     {
@@ -1164,7 +1165,7 @@ std::shared_ptr<JavaInstallList> Launcher::javalist()
     return m_javalist;
 }
 
-std::vector<ITheme *> Launcher::getValidApplicationThemes()
+std::vector<ITheme *> Application::getValidApplicationThemes()
 {
     std::vector<ITheme *> ret;
     auto iter = m_themes.cbegin();
@@ -1176,7 +1177,7 @@ std::vector<ITheme *> Launcher::getValidApplicationThemes()
     return ret;
 }
 
-void Launcher::setApplicationTheme(const QString& name, bool initial)
+void Application::setApplicationTheme(const QString& name, bool initial)
 {
     auto systemPalette = qApp->palette();
     auto themeIter = m_themes.find(name);
@@ -1191,12 +1192,12 @@ void Launcher::setApplicationTheme(const QString& name, bool initial)
     }
 }
 
-void Launcher::setIconTheme(const QString& name)
+void Application::setIconTheme(const QString& name)
 {
     XdgIcon::setThemeName(name);
 }
 
-QIcon Launcher::getThemedIcon(const QString& name)
+QIcon Application::getThemedIcon(const QString& name)
 {
     if(name == "logo") {
         return QIcon(":/logo.svg");
@@ -1204,7 +1205,7 @@ QIcon Launcher::getThemedIcon(const QString& name)
     return XdgIcon::fromTheme(name);
 }
 
-bool Launcher::openJsonEditor(const QString &filename)
+bool Application::openJsonEditor(const QString &filename)
 {
     const QString file = QDir::current().absoluteFilePath(filename);
     if (m_settings->get("JsonEditor").toString().isEmpty())
@@ -1218,7 +1219,7 @@ bool Launcher::openJsonEditor(const QString &filename)
     }
 }
 
-bool Launcher::launch(
+bool Application::launch(
         InstancePtr instance,
         bool online,
         BaseProfilerFactory *profiler,
@@ -1255,8 +1256,8 @@ bool Launcher::launch(
         {
             controller->setParentWidget(m_mainWindow);
         }
-        connect(controller.get(), &LaunchController::succeeded, this, &Launcher::controllerSucceeded);
-        connect(controller.get(), &LaunchController::failed, this, &Launcher::controllerFailed);
+        connect(controller.get(), &LaunchController::succeeded, this, &Application::controllerSucceeded);
+        connect(controller.get(), &LaunchController::failed, this, &Application::controllerFailed);
         addRunningInstance();
         controller->start();
         return true;
@@ -1274,7 +1275,7 @@ bool Launcher::launch(
     return false;
 }
 
-bool Launcher::kill(InstancePtr instance)
+bool Application::kill(InstancePtr instance)
 {
     if (!instance->isRunning())
     {
@@ -1291,7 +1292,7 @@ bool Launcher::kill(InstancePtr instance)
     return true;
 }
 
-void Launcher::addRunningInstance()
+void Application::addRunningInstance()
 {
     m_runningInstances ++;
     if(m_runningInstances == 1)
@@ -1300,7 +1301,7 @@ void Launcher::addRunningInstance()
     }
 }
 
-void Launcher::subRunningInstance()
+void Application::subRunningInstance()
 {
     if(m_runningInstances == 0)
     {
@@ -1314,23 +1315,23 @@ void Launcher::subRunningInstance()
     }
 }
 
-bool Launcher::shouldExitNow() const
+bool Application::shouldExitNow() const
 {
     return m_runningInstances == 0 && m_openWindows == 0;
 }
 
-bool Launcher::updatesAreAllowed()
+bool Application::updatesAreAllowed()
 {
     return m_runningInstances == 0;
 }
 
-void Launcher::updateIsRunning(bool running)
+void Application::updateIsRunning(bool running)
 {
     m_updateRunning = running;
 }
 
 
-void Launcher::controllerSucceeded()
+void Application::controllerSucceeded()
 {
     auto controller = qobject_cast<LaunchController *>(QObject::sender());
     if(!controller)
@@ -1357,7 +1358,7 @@ void Launcher::controllerSucceeded()
     }
 }
 
-void Launcher::controllerFailed(const QString& error)
+void Application::controllerFailed(const QString& error)
 {
     Q_UNUSED(error);
     auto controller = qobject_cast<LaunchController *>(QObject::sender());
@@ -1378,21 +1379,21 @@ void Launcher::controllerFailed(const QString& error)
     }
 }
 
-void Launcher::ShowGlobalSettings(class QWidget* parent, QString open_page)
+void Application::ShowGlobalSettings(class QWidget* parent, QString open_page)
 {
     if(!m_globalSettingsProvider) {
         return;
     }
     emit globalSettingsAboutToOpen();
     {
-        SettingsObject::Lock lock(LAUNCHER->settings());
+        SettingsObject::Lock lock(APPLICATION->settings());
         PageDialog dlg(m_globalSettingsProvider.get(), open_page, parent);
         dlg.exec();
     }
     emit globalSettingsClosed();
 }
 
-MainWindow* Launcher::showMainWindow(bool minimized)
+MainWindow* Application::showMainWindow(bool minimized)
 {
     if(m_mainWindow)
     {
@@ -1403,8 +1404,8 @@ MainWindow* Launcher::showMainWindow(bool minimized)
     else
     {
         m_mainWindow = new MainWindow();
-        m_mainWindow->restoreState(QByteArray::fromBase64(LAUNCHER->settings()->get("MainWindowState").toByteArray()));
-        m_mainWindow->restoreGeometry(QByteArray::fromBase64(LAUNCHER->settings()->get("MainWindowGeometry").toByteArray()));
+        m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
+        m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
         if(minimized)
         {
             m_mainWindow->showMinimized();
@@ -1415,8 +1416,8 @@ MainWindow* Launcher::showMainWindow(bool minimized)
         }
 
         m_mainWindow->checkInstancePathForProblems();
-        connect(this, &Launcher::updateAllowedChanged, m_mainWindow, &MainWindow::updatesAllowedChanged);
-        connect(m_mainWindow, &MainWindow::isClosing, this, &Launcher::on_windowClose);
+        connect(this, &Application::updateAllowedChanged, m_mainWindow, &MainWindow::updatesAllowedChanged);
+        connect(m_mainWindow, &MainWindow::isClosing, this, &Application::on_windowClose);
         m_openWindows++;
     }
     // FIXME: move this somewhere else...
@@ -1476,7 +1477,7 @@ MainWindow* Launcher::showMainWindow(bool minimized)
     return m_mainWindow;
 }
 
-InstanceWindow *Launcher::showInstanceWindow(InstancePtr instance, QString page)
+InstanceWindow *Application::showInstanceWindow(InstancePtr instance, QString page)
 {
     if(!instance)
         return nullptr;
@@ -1493,7 +1494,7 @@ InstanceWindow *Launcher::showInstanceWindow(InstancePtr instance, QString page)
     {
         window = new InstanceWindow(instance);
         m_openWindows ++;
-        connect(window, &InstanceWindow::isClosing, this, &Launcher::on_windowClose);
+        connect(window, &InstanceWindow::isClosing, this, &Application::on_windowClose);
     }
     if(!page.isEmpty())
     {
@@ -1506,7 +1507,7 @@ InstanceWindow *Launcher::showInstanceWindow(InstancePtr instance, QString page)
     return window;
 }
 
-void Launcher::on_windowClose()
+void Application::on_windowClose()
 {
     m_openWindows--;
     auto instWindow = qobject_cast<InstanceWindow *>(QObject::sender());
@@ -1529,4 +1530,8 @@ void Launcher::on_windowClose()
     {
         exit(0);
     }
+}
+
+QString Application::msaClientId() const {
+    return Secrets::getMSAClientID('-');
 }

@@ -42,11 +42,13 @@ public:
         ProfileNameColumn,
         MigrationColumn,
         TypeColumn,
+        StatusColumn,
 
         NUM_COLUMNS
     };
 
     explicit AccountList(QObject *parent = 0);
+    virtual ~AccountList() noexcept;
 
     const MinecraftAccountPtr at(int i) const;
     int count() const;
@@ -63,6 +65,7 @@ public:
     void removeAccount(QModelIndex index);
     int findAccountByProfileId(const QString &profileId) const;
     MinecraftAccountPtr getAccountByProfileName(const QString &profileName) const;
+    QStringList profileNames() const;
 
     /*!
      * Sets the path to load/save the list file from/to.
@@ -78,19 +81,25 @@ public:
     bool loadV3(QJsonObject &root);
     bool saveList();
 
-    MinecraftAccountPtr activeAccount() const;
-    void setActiveAccount(MinecraftAccountPtr profileId);
+    MinecraftAccountPtr defaultAccount() const;
+    void setDefaultAccount(MinecraftAccountPtr profileId);
     bool anyAccountIsValid();
 
 signals:
     void listChanged();
-    void activeAccountChanged();
+    void listActivityChanged();
+    void defaultAccountChanged();
 
 public slots:
     /**
      * This is called when one of the accounts changes and the list needs to be updated
      */
     void accountChanged();
+
+    /**
+     * This is called when a (refresh/login) task involving the account starts or ends
+     */
+    void accountActivityChanged(bool active);
 
 protected:
     /*!
@@ -101,13 +110,13 @@ protected:
 
     /*!
      * Called whenever the active account changes.
-     * Emits the activeAccountChanged() signal and autosaves the list if enabled.
+     * Emits the defaultAccountChanged() signal and autosaves the list if enabled.
      */
-    void onActiveChanged();
+    void onDefaultAccountChanged();
 
     QList<MinecraftAccountPtr> m_accounts;
 
-    MinecraftAccountPtr m_activeAccount;
+    MinecraftAccountPtr m_defaultAccount;
 
     //! Path to the account list file. Empty string if there isn't one.
     QString m_listFilePath;

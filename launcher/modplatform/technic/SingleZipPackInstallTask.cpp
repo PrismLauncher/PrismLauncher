@@ -41,7 +41,7 @@ void Technic::SingleZipPackInstallTask::executeTask()
     setStatus(tr("Downloading modpack:\n%1").arg(m_sourceUrl.toString()));
 
     const QString path = m_sourceUrl.host() + '/' + m_sourceUrl.path();
-    auto entry = ENV.metacache()->resolveEntry("general", path);
+    auto entry = ENV->metacache()->resolveEntry("general", path);
     entry->setStale(true);
     m_filesNetJob.reset(new NetJob(tr("Modpack download")));
     m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));

@@ -1,6 +1,10 @@
 #include "MojangLogin.h"
 
-MojangLogin::MojangLogin(AccountData* data, QString password, QObject* parent) : AuthContext(data, parent), m_password(password) {}
+MojangLogin::MojangLogin(
+    AccountData *data,
+    QString password,
+    QObject *parent
+): AuthContext(data, parent), m_password(password) {}
 
 void MojangLogin::executeTask() {
     m_requestsDone = 0;

@@ -28,11 +28,11 @@
 #include <QDebug>
 
 #include <QPainter>
-#include <minecraft/auth/flows/MSASilent.h>
-#include <minecraft/auth/flows/MSAInteractive.h>
+#include "flows/MSASilent.h"
+#include "flows/MSAInteractive.h"
 
-#include <minecraft/auth/flows/MojangRefresh.h>
-#include <minecraft/auth/flows/MojangLogin.h>
+#include "flows/MojangRefresh.h"
+#include "flows/MojangLogin.h"
 
 MinecraftAccountPtr MinecraftAccount::loadFromJsonV2(const QJsonObject& json) {
     MinecraftAccountPtr account(new MinecraftAccount());
@@ -104,7 +104,7 @@ QPixmap MinecraftAccount::getFace() const {
 }
 
 
-std::shared_ptr<AccountTask> MinecraftAccount::login(AuthSessionPtr session, QString password)
+shared_qobject_ptr<AccountTask> MinecraftAccount::login(AuthSessionPtr session, QString password)
 {
     Q_ASSERT(m_currentTask.get() == nullptr);
 
@@ -140,11 +140,12 @@ std::shared_ptr<AccountTask> MinecraftAccount::login(AuthSessionPtr session, QSt
 
         connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
         connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+        emit activityChanged(true);
     }
     return m_currentTask;
 }
 
-std::shared_ptr<AccountTask> MinecraftAccount::loginMSA(AuthSessionPtr session) {
+shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA(AuthSessionPtr session) {
     Q_ASSERT(m_currentTask.get() == nullptr);
 
     if(accountStatus() == Verified && !session->wants_online)
@@ -161,11 +162,12 @@ std::shared_ptr<AccountTask> MinecraftAccount::loginMSA(AuthSessionPtr session) 
 
         connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
         connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+        emit activityChanged(true);
     }
     return m_currentTask;
 }
 
-std::shared_ptr<AccountTask> MinecraftAccount::refresh(AuthSessionPtr session) {
+shared_qobject_ptr<AccountTask> MinecraftAccount::refresh(AuthSessionPtr session) {
     Q_ASSERT(m_currentTask.get() == nullptr);
 
     // take care of the true offline status
@@ -203,6 +205,7 @@ std::shared_ptr<AccountTask> MinecraftAccount::refresh(AuthSessionPtr session) {
 
         connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
         connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+        emit activityChanged(true);
     }
     return m_currentTask;
 }
@@ -233,6 +236,7 @@ void MinecraftAccount::authSucceeded()
     }
     m_currentTask.reset();
     emit changed();
+    emit activityChanged(false);
 }
 
 void MinecraftAccount::authFailed(QString reason)
@@ -297,6 +301,45 @@ void MinecraftAccount::authFailed(QString reason)
         }
     }
     m_currentTask.reset();
+    emit activityChanged(false);
+}
+
+bool MinecraftAccount::isActive() const {
+    return m_currentTask;
+}
+
+bool MinecraftAccount::shouldRefresh() const {
+    /*
+     * Never refresh accounts that are being used by the game, it breaks the game session.
+     * Always refresh accounts that have not been refreshed yet during this session.
+     * Don't refresh broken accounts.
+     * Refresh accounts that would expire in the next 12 hours (fresh token validity is 24 hours).
+     */
+    if(isInUse()) {
+        return false;
+    }
+    switch(data.validity_) {
+        case Katabasis::Validity::Certain: {
+            break;
+        }
+        case Katabasis::Validity::None: {
+            return false;
+        }
+        case Katabasis::Validity::Assumed: {
+            return true;
+        }
+    }
+    auto now = QDateTime::currentDateTimeUtc();
+    auto issuedTimestamp = data.yggdrasilToken.issueInstant;
+    auto expiresTimestamp = data.yggdrasilToken.notAfter;
+
+    if(!expiresTimestamp.isValid()) {
+        expiresTimestamp = issuedTimestamp.addSecs(24 * 3600);
+    }
+    if (now.secsTo(expiresTimestamp) < 12 * 3600) {
+        return true;
+    }
+    return false;
 }
 
 void MinecraftAccount::fillSession(AuthSessionPtr session)
@@ -322,7 +365,6 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     {
         session->session = "-";
     }
-    session->m_accountPtr = shared_from_this();
 }
 
 void MinecraftAccount::decrementUses()

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "minecraft/auth/AccountData.h"
+#include "../AccountData.h"
 
 namespace Parsers
 {

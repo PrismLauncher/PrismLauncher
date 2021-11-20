@@ -60,7 +60,7 @@ void FMLLibrariesTask::executeTask()
     // download missing libs to our place
     setStatus(tr("Downloading FML libraries..."));
     auto dljob = new NetJob("FML libraries");
-    auto metacache = ENV.metacache();
+    auto metacache = ENV->metacache();
     for (auto &lib : fmlLibsToProcess)
     {
         auto entry = metacache->resolveEntry("fmllibs", lib.filename);
@@ -87,7 +87,7 @@ void FMLLibrariesTask::fmllibsFinished()
     {
         setStatus(tr("Copying FML libraries into the instance..."));
         MinecraftInstance *inst = (MinecraftInstance *)m_inst;
-        auto metacache = ENV.metacache();
+        auto metacache = ENV->metacache();
         int index = 0;
         for (auto &lib : fmlLibsToProcess)
         {

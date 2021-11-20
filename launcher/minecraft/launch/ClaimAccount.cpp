@@ -1,11 +1,15 @@
 #include "ClaimAccount.h"
 #include <launch/LaunchTask.h>
 
+#include "Application.h"
+#include "minecraft/auth/AccountList.h"
+
 ClaimAccount::ClaimAccount(LaunchTask* parent, AuthSessionPtr session): LaunchStep(parent)
 {
     if(session->status == AuthSession::Status::PlayableOnline)
     {
-        m_account = session->m_accountPtr;
+        auto accounts = APPLICATION->accounts();
+        m_account = accounts->getAccountByProfileName(session->player_name);
     }
 }
 

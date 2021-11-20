@@ -4,7 +4,7 @@
 #include <QMap>
 #include <QByteArray>
 
-struct LauncherMessage {
+struct ApplicationMessage {
     QString command;
     QMap<QString, QString> args;
 

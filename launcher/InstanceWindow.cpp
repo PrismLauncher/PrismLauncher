@@ -14,7 +14,7 @@
  */
 
 #include "InstanceWindow.h"
-#include "Launcher.h"
+#include "Application.h"
 
 #include <QScrollBar>
 #include <QMessageBox>
@@ -35,7 +35,7 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
-    auto icon = LAUNCHER->icons()->getIcon(m_instance->iconKey());
+    auto icon = APPLICATION->icons()->getIcon(m_instance->iconKey());
     QString windowTitle = tr("Console window for ") + m_instance->name();
 
     // Set window properties
@@ -87,9 +87,9 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 
     // restore window state
     {
-        auto base64State = LAUNCHER->settings()->get("ConsoleWindowState").toByteArray();
+        auto base64State = APPLICATION->settings()->get("ConsoleWindowState").toByteArray();
         restoreState(QByteArray::fromBase64(base64State));
-        auto base64Geometry = LAUNCHER->settings()->get("ConsoleWindowGeometry").toByteArray();
+        auto base64Geometry = APPLICATION->settings()->get("ConsoleWindowGeometry").toByteArray();
         restoreGeometry(QByteArray::fromBase64(base64Geometry));
     }
 
@@ -148,7 +148,7 @@ void InstanceWindow::updateLaunchButtons()
 
 void InstanceWindow::on_btnLaunchMinecraftOffline_clicked()
 {
-    LAUNCHER->launch(m_instance, false, nullptr);
+    APPLICATION->launch(m_instance, false, nullptr);
 }
 
 void InstanceWindow::on_InstanceLaunchTask_changed(shared_qobject_ptr<LaunchTask> proc)
@@ -183,8 +183,8 @@ void InstanceWindow::closeEvent(QCloseEvent *event)
         return;
     }
 
-    LAUNCHER->settings()->set("ConsoleWindowState", saveState().toBase64());
-    LAUNCHER->settings()->set("ConsoleWindowGeometry", saveGeometry().toBase64());
+    APPLICATION->settings()->set("ConsoleWindowState", saveState().toBase64());
+    APPLICATION->settings()->set("ConsoleWindowGeometry", saveGeometry().toBase64());
     emit isClosing();
     event->accept();
 }
@@ -198,11 +198,11 @@ void InstanceWindow::on_btnKillMinecraft_clicked()
 {
     if(m_instance->isRunning())
     {
-        LAUNCHER->kill(m_instance);
+        APPLICATION->kill(m_instance);
     }
     else
     {
-        LAUNCHER->launch(m_instance, true, nullptr);
+        APPLICATION->launch(m_instance, true, nullptr);
     }
 }
 

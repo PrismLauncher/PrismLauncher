@@ -1,6 +1,9 @@
 #include "MSAInteractive.h"
 
-MSAInteractive::MSAInteractive(AccountData* data, QObject* parent) : AuthContext(data, parent) {}
+MSAInteractive::MSAInteractive(
+    AccountData* data,
+    QObject* parent
+) : AuthContext(data, parent) {}
 
 void MSAInteractive::executeTask() {
     m_requestsDone = 0;

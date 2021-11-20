@@ -21,7 +21,7 @@
 #include <QTabBar>
 
 #include "settings/SettingsObject.h"
-#include "Launcher.h"
+#include "Application.h"
 
 MinecraftPage::MinecraftPage(QWidget *parent) : QWidget(parent), ui(new Ui::MinecraftPage)
 {
@@ -56,7 +56,7 @@ void MinecraftPage::on_maximizedCheckBox_clicked(bool checked)
 
 void MinecraftPage::applySettings()
 {
-    auto s = LAUNCHER->settings();
+    auto s = APPLICATION->settings();
 
     // Window Size
     s->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
@@ -75,7 +75,7 @@ void MinecraftPage::applySettings()
 
 void MinecraftPage::loadSettings()
 {
-    auto s = LAUNCHER->settings();
+    auto s = APPLICATION->settings();
 
     // Window Size
     ui->maximizedCheckBox->setChecked(s->get("LaunchMaximized").toBool());

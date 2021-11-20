@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "Launcher.h"
+#include "Application.h"
 #include "NewInstanceDialog.h"
 #include "ui_NewInstanceDialog.h"
 
@@ -48,12 +48,12 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 {
     ui->setupUi(this);
 
-    setWindowIcon(LAUNCHER->getThemedIcon("new"));
+    setWindowIcon(APPLICATION->getThemedIcon("new"));
 
     InstIconKey = "default";
-    ui->iconButton->setIcon(LAUNCHER->icons()->getIcon(InstIconKey));
+    ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
 
-    auto groups = LAUNCHER->instances()->getGroups().toSet();
+    auto groups = APPLICATION->instances()->getGroups().toSet();
     auto groupList = QStringList(groups.toList());
     groupList.sort(Qt::CaseInsensitive);
     groupList.removeOne("");
@@ -105,18 +105,18 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 
     updateDialogState();
 
-    restoreGeometry(QByteArray::fromBase64(LAUNCHER->settings()->get("NewInstanceGeometry").toByteArray()));
+    restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("NewInstanceGeometry").toByteArray()));
 }
 
 void NewInstanceDialog::reject()
 {
-    LAUNCHER->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+    APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
     QDialog::reject();
 }
 
 void NewInstanceDialog::accept()
 {
-    LAUNCHER->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+    APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
     importIconNow();
     QDialog::accept();
 }
@@ -155,7 +155,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
 
     if(!task)
     {
-        ui->iconButton->setIcon(LAUNCHER->icons()->getIcon("default"));
+        ui->iconButton->setIcon(APPLICATION->icons()->getIcon("default"));
         importIcon = false;
     }
 
@@ -175,7 +175,7 @@ void NewInstanceDialog::setSuggestedIconFromFile(const QString &path, const QStr
 
 void NewInstanceDialog::setSuggestedIcon(const QString &key)
 {
-    auto icon = LAUNCHER->icons()->getIcon(key);
+    auto icon = APPLICATION->icons()->getIcon(key);
     importIcon = false;
 
     ui->iconButton->setIcon(icon);
@@ -234,7 +234,7 @@ void NewInstanceDialog::on_iconButton_clicked()
     if (dlg.result() == QDialog::Accepted)
     {
         InstIconKey = dlg.selectedIconKey;
-        ui->iconButton->setIcon(LAUNCHER->icons()->getIcon(InstIconKey));
+        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
         importIcon = false;
     }
 }
@@ -247,9 +247,9 @@ void NewInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
 void NewInstanceDialog::importIconNow()
 {
     if(importIcon) {
-        LAUNCHER->icons()->installIcon(importIconPath, importIconName);
+        APPLICATION->icons()->installIcon(importIconPath, importIconName);
         InstIconKey = importIconName;
         importIcon = false;
     }
-    LAUNCHER->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+    APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
 }

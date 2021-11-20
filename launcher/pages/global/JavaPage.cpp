@@ -29,7 +29,7 @@
 
 #include "settings/SettingsObject.h"
 #include <FileSystem.h>
-#include "Launcher.h"
+#include "Application.h"
 #include <sys.h>
 
 JavaPage::JavaPage(QWidget *parent) : QWidget(parent), ui(new Ui::JavaPage)
@@ -55,7 +55,7 @@ bool JavaPage::apply()
 
 void JavaPage::applySettings()
 {
-    auto s = LAUNCHER->settings();
+    auto s = APPLICATION->settings();
 
     // Memory
     int min = ui->minMemSpinBox->value();
@@ -79,7 +79,7 @@ void JavaPage::applySettings()
 }
 void JavaPage::loadSettings()
 {
-    auto s = LAUNCHER->settings();
+    auto s = APPLICATION->settings();
     // Memory
     int min = s->get("MinMemAlloc").toInt();
     int max = s->get("MaxMemAlloc").toInt();
@@ -104,7 +104,7 @@ void JavaPage::on_javaDetectBtn_clicked()
 {
     JavaInstallPtr java;
 
-    VersionSelectDialog vselect(LAUNCHER->javalist().get(), tr("Select a Java version"), this, true);
+    VersionSelectDialog vselect(APPLICATION->javalist().get(), tr("Select a Java version"), this, true);
     vselect.setResizeOn(2);
     vselect.exec();
 

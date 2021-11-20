@@ -72,7 +72,7 @@ void LauncherPartLaunch::executeTask()
     m_process.setDetachable(true);
 
     auto classPath = minecraftInstance->getClassPath();
-    classPath.prepend(FS::PathCombine(ENV.getJarsPath(), "NewLaunch.jar"));
+    classPath.prepend(FS::PathCombine(ENV->getJarsPath(), "NewLaunch.jar"));
 
     auto natPath = minecraftInstance->getNativePath();
 #ifdef Q_OS_WIN

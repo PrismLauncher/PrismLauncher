@@ -32,7 +32,7 @@
 #include "minecraft/auth/AccountTask.h"
 #include "minecraft/services/SkinDelete.h"
 
-#include "Launcher.h"
+#include "Application.h"
 
 #include "BuildConfig.h"
 #include <dialogs/MSALoginDialog.h>
@@ -50,7 +50,7 @@ AccountListPage::AccountListPage(QWidget *parent)
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    m_accounts = LAUNCHER->accounts();
+    m_accounts = APPLICATION->accounts();
 
     ui->listView->setModel(m_accounts.get());
     ui->listView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -68,7 +68,8 @@ AccountListPage::AccountListPage(QWidget *parent)
     connect(ui->listView, &VersionListView::customContextMenuRequested, this, &AccountListPage::ShowContextMenu);
 
     connect(m_accounts.get(), &AccountList::listChanged, this, &AccountListPage::listChanged);
-    connect(m_accounts.get(), &AccountList::activeAccountChanged, this, &AccountListPage::listChanged);
+    connect(m_accounts.get(), &AccountList::listActivityChanged, this, &AccountListPage::listChanged);
+    connect(m_accounts.get(), &AccountList::defaultAccountChanged, this, &AccountListPage::listChanged);
 
     updateButtonStates();
 
@@ -117,11 +118,11 @@ void AccountListPage::on_actionAddMojang_triggered()
         tr("Please enter your Mojang account email and password to add your account.")
     );
 
-    if (account != nullptr)
+    if (account)
     {
         m_accounts->addAccount(account);
         if (m_accounts->count() == 1) {
-            m_accounts->setActiveAccount(account);
+            m_accounts->setDefaultAccount(account);
         }
     }
 }
@@ -145,11 +146,11 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
         tr("Please enter your Mojang account email and password to add your account.")
     );
 
-    if (account != nullptr)
+    if (account)
     {
         m_accounts->addAccount(account);
         if (m_accounts->count() == 1) {
-            m_accounts->setActiveAccount(account);
+            m_accounts->setDefaultAccount(account);
         }
     }
 }
@@ -187,27 +188,34 @@ void AccountListPage::on_actionSetDefault_triggered()
     {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
-        m_accounts->setActiveAccount(account);
+        m_accounts->setDefaultAccount(account);
     }
 }
 
 void AccountListPage::on_actionNoDefault_triggered()
 {
-    m_accounts->setActiveAccount(nullptr);
+    m_accounts->setDefaultAccount(nullptr);
 }
 
 void AccountListPage::updateButtonStates()
 {
     // If there is no selection, disable buttons that require something selected.
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
+    bool hasSelection = selection.size() > 0;
+    bool accountIsReady = false;
+    if (hasSelection)
+    {
+        QModelIndex selected = selection.first();
+        MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
+        accountIsReady = !account->isActive();
+    }
+    ui->actionRemove->setEnabled(accountIsReady);
+    ui->actionSetDefault->setEnabled(accountIsReady);
+    ui->actionUploadSkin->setEnabled(accountIsReady);
+    ui->actionDeleteSkin->setEnabled(accountIsReady);
+    ui->actionRefresh->setEnabled(accountIsReady);
 
-    ui->actionRemove->setEnabled(selection.size() > 0);
-    ui->actionSetDefault->setEnabled(selection.size() > 0);
-    ui->actionUploadSkin->setEnabled(selection.size() > 0);
-    ui->actionDeleteSkin->setEnabled(selection.size() > 0);
-    ui->actionRefresh->setEnabled(selection.size() > 0);
-
-    if(m_accounts->activeAccount().get() == nullptr) {
+    if(m_accounts->defaultAccount().get() == nullptr) {
         ui->actionNoDefault->setEnabled(false);
         ui->actionNoDefault->setChecked(true);
     }
@@ -215,7 +223,6 @@ void AccountListPage::updateButtonStates()
         ui->actionNoDefault->setEnabled(true);
         ui->actionNoDefault->setChecked(false);
     }
-
 }
 
 void AccountListPage::on_actionUploadSkin_triggered()

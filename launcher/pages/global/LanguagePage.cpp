@@ -26,7 +26,7 @@ bool LanguagePage::apply()
 
 void LanguagePage::applySettings()
 {
-    auto settings = LAUNCHER->settings();
+    auto settings = APPLICATION->settings();
     QString key = mainWidget->getSelectedLanguageKey();
     settings->set("Language", key);
 }

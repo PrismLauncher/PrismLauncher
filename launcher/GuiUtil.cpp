@@ -8,7 +8,7 @@
 #include "net/PasteUpload.h"
 #include "dialogs/CustomMessageBox.h"
 
-#include "Launcher.h"
+#include "Application.h"
 #include <settings/SettingsObject.h>
 #include <DesktopServices.h>
 #include <BuildConfig.h>
@@ -16,7 +16,7 @@
 QString GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 {
     ProgressDialog dialog(parentWidget);
-    auto APIKeySetting = LAUNCHER->settings()->get("PasteEEAPIKey").toString();
+    auto APIKeySetting = APPLICATION->settings()->get("PasteEEAPIKey").toString();
     if(APIKeySetting == "multimc")
     {
         APIKeySetting = BuildConfig.PASTE_EE_KEY;

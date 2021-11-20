@@ -7,7 +7,8 @@
 
 #include "AuthRequest.h"
 #include "katabasis/Globals.h"
-#include "Env.h"
+
+#include <Env.h>
 
 AuthRequest::AuthRequest(QObject *parent): QObject(parent) {
 }
@@ -17,7 +18,7 @@ AuthRequest::~AuthRequest() {
 
 void AuthRequest::get(const QNetworkRequest &req, int timeout/* = 60*1000*/) {
     setup(req, QNetworkAccessManager::GetOperation);
-    reply_ = ENV.network().get(request_);
+    reply_ = ENV->network().get(request_);
     status_ = Requesting;
     timedReplies_.add(new Katabasis::Reply(reply_, timeout));
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)));
@@ -29,7 +30,7 @@ void AuthRequest::post(const QNetworkRequest &req, const QByteArray &data, int t
     setup(req, QNetworkAccessManager::PostOperation);
     data_ = data;
     status_ = Requesting;
-    reply_ = ENV.network().post(request_, data_);
+    reply_ = ENV->network().post(request_, data_);
     timedReplies_.add(new Katabasis::Reply(reply_, timeout));
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)));
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()));
@@ -89,13 +90,17 @@ void AuthRequest::onUploadProgress(qint64 uploaded, qint64 total) {
     emit uploadProgress(uploaded, total);
 }
 
-void AuthRequest::setup(const QNetworkRequest &req, QNetworkAccessManager::Operation operation) {
+void AuthRequest::setup(const QNetworkRequest &req, QNetworkAccessManager::Operation operation, const QByteArray &verb) {
     request_ = req;
     operation_ = operation;
     url_ = req.url();
 
     QUrl url = url_;
     request_.setUrl(url);
+
+    if (!verb.isEmpty()) {
+        request_.setRawHeader(Katabasis::HTTP_HTTP_HEADER, verb);
+    }
 
     status_ = Requesting;
     error_ = QNetworkReply::NoError;

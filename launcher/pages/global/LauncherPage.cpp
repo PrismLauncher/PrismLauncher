@@ -25,7 +25,7 @@
 
 #include "settings/SettingsObject.h"
 #include <FileSystem.h>
-#include "Launcher.h"
+#include "Application.h"
 #include "BuildConfig.h"
 #include "themes/ITheme.h"
 
@@ -53,20 +53,20 @@ LauncherPage::LauncherPage(QWidget *parent) : QWidget(parent), ui(new Ui::Launch
 
     defaultFormat = new QTextCharFormat(ui->fontPreview->currentCharFormat());
 
-    m_languageModel = LAUNCHER->translations();
+    m_languageModel = APPLICATION->translations();
     loadSettings();
 
     if(BuildConfig.UPDATER_ENABLED)
     {
-        QObject::connect(LAUNCHER->updateChecker().get(), &UpdateChecker::channelListLoaded, this, &LauncherPage::refreshUpdateChannelList);
+        QObject::connect(APPLICATION->updateChecker().get(), &UpdateChecker::channelListLoaded, this, &LauncherPage::refreshUpdateChannelList);
 
-        if (LAUNCHER->updateChecker()->hasChannels())
+        if (APPLICATION->updateChecker()->hasChannels())
         {
             refreshUpdateChannelList();
         }
         else
         {
-            LAUNCHER->updateChecker()->updateChanList(false);
+            APPLICATION->updateChecker()->updateChanList(false);
         }
     }
     else
@@ -171,7 +171,7 @@ void LauncherPage::refreshUpdateChannelList()
     QObject::disconnect(ui->updateChannelComboBox, SIGNAL(currentIndexChanged(int)), this,
                         SLOT(updateChannelSelectionChanged(int)));
 
-    QList<UpdateChecker::ChannelListEntry> channelList = LAUNCHER->updateChecker()->getChannelList();
+    QList<UpdateChecker::ChannelListEntry> channelList = APPLICATION->updateChecker()->getChannelList();
     ui->updateChannelComboBox->clear();
     int selection = -1;
     for (int i = 0; i < channelList.count(); i++)
@@ -216,7 +216,7 @@ void LauncherPage::updateChannelSelectionChanged(int index)
 void LauncherPage::refreshUpdateChannelDesc()
 {
     // Get the channel list.
-    QList<UpdateChecker::ChannelListEntry> channelList = LAUNCHER->updateChecker()->getChannelList();
+    QList<UpdateChecker::ChannelListEntry> channelList = APPLICATION->updateChecker()->getChannelList();
     int selectedIndex = ui->updateChannelComboBox->currentIndex();
     if (selectedIndex < 0)
     {
@@ -237,7 +237,7 @@ void LauncherPage::refreshUpdateChannelDesc()
 
 void LauncherPage::applySettings()
 {
-    auto s = LAUNCHER->settings();
+    auto s = APPLICATION->settings();
 
     if (ui->resetNotificationsBtn->isChecked())
     {
@@ -283,7 +283,7 @@ void LauncherPage::applySettings()
 
     if(original != s->get("IconTheme"))
     {
-        LAUNCHER->setIconTheme(s->get("IconTheme").toString());
+        APPLICATION->setIconTheme(s->get("IconTheme").toString());
     }
 
     auto originalAppTheme = s->get("ApplicationTheme").toString();
@@ -291,7 +291,7 @@ void LauncherPage::applySettings()
     if(originalAppTheme != newAppTheme)
     {
         s->set("ApplicationTheme", newAppTheme);
-        LAUNCHER->setApplicationTheme(newAppTheme, false);
+        APPLICATION->setApplicationTheme(newAppTheme, false);
     }
 
     // Console settings
@@ -330,7 +330,7 @@ void LauncherPage::applySettings()
 }
 void LauncherPage::loadSettings()
 {
-    auto s = LAUNCHER->settings();
+    auto s = APPLICATION->settings();
     // Updates
     ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
     m_currentUpdateChannel = s->get("UpdateChannel").toString();
@@ -375,7 +375,7 @@ void LauncherPage::loadSettings()
 
     {
         auto currentTheme = s->get("ApplicationTheme").toString();
-        auto themes = LAUNCHER->getValidApplicationThemes();
+        auto themes = APPLICATION->getValidApplicationThemes();
         int idx = 0;
         for(auto &theme: themes)
         {
@@ -392,12 +392,12 @@ void LauncherPage::loadSettings()
     ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
     ui->autoCloseConsoleCheck->setChecked(s->get("AutoCloseConsole").toBool());
     ui->showConsoleErrorCheck->setChecked(s->get("ShowConsoleOnError").toBool());
-    QString fontFamily = LAUNCHER->settings()->get("ConsoleFont").toString();
+    QString fontFamily = APPLICATION->settings()->get("ConsoleFont").toString();
     QFont consoleFont(fontFamily);
     ui->consoleFont->setCurrentFont(consoleFont);
 
     bool conversionOk = true;
-    int fontSize = LAUNCHER->settings()->get("ConsoleFontSize").toInt(&conversionOk);
+    int fontSize = APPLICATION->settings()->get("ConsoleFontSize").toInt(&conversionOk);
     if(!conversionOk)
     {
         fontSize = 11;

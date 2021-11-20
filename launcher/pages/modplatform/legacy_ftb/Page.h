@@ -20,7 +20,7 @@
 #include <QTextBrowser>
 
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 #include "tasks/Task.h"
 #include "modplatform/legacy_ftb/PackHelpers.h"
 #include "modplatform/legacy_ftb/PackFetchTask.h"
@@ -54,7 +54,7 @@ public:
     }
     QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("ftb_logo");
+        return APPLICATION->getThemedIcon("ftb_logo");
     }
     QString id() const override
     {

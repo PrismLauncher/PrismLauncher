@@ -166,7 +166,7 @@ private slots:
 
     void notificationsChanged();
 
-    void activeAccountChanged();
+    void defaultAccountChanged();
 
     void changeActiveAccount();
 

@@ -129,9 +129,9 @@ void OtherLogsPage::on_btnReload_clicked()
     {
         auto setPlainText = [&](const QString & text)
         {
-            QString fontFamily = LAUNCHER->settings()->get("ConsoleFont").toString();
+            QString fontFamily = APPLICATION->settings()->get("ConsoleFont").toString();
             bool conversionOk = false;
-            int fontSize = LAUNCHER->settings()->get("ConsoleFontSize").toInt(&conversionOk);
+            int fontSize = APPLICATION->settings()->get("ConsoleFontSize").toInt(&conversionOk);
             if(!conversionOk)
             {
                 fontSize = 11;

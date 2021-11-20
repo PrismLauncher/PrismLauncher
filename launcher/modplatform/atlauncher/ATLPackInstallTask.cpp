@@ -76,7 +76,7 @@ void PackInstallTask::onDownloadSucceeded()
     }
     m_version = version;
 
-    auto vlist = ENV.metadataIndex()->get("net.minecraft");
+    auto vlist = ENV->metadataIndex()->get("net.minecraft");
     if(!vlist)
     {
         emitFailed(tr("Failed to get local metadata index for %1").arg("net.minecraft"));
@@ -157,7 +157,7 @@ QString PackInstallTask::getDirForModType(ModType type, QString raw)
 QString PackInstallTask::getVersionForLoader(QString uid)
 {
     if(m_version.loader.recommended || m_version.loader.latest || m_version.loader.choose) {
-        auto vlist = ENV.metadataIndex()->get(uid);
+        auto vlist = ENV->metadataIndex()->get(uid);
         if(!vlist)
         {
             emitFailed(tr("Failed to get local metadata index for %1").arg(uid));
@@ -409,7 +409,7 @@ void PackInstallTask::installConfigs()
     auto path = QString("Configs/%1/%2.zip").arg(m_pack).arg(m_version_name);
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.zip")
             .arg(m_pack).arg(m_version_name);
-    auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", path);
+    auto entry = ENV->metacache()->resolveEntry("ATLauncherPacks", path);
     entry->setStale(true);
 
     auto dl = Net::Download::makeCached(url, entry);
@@ -516,7 +516,7 @@ void PackInstallTask::downloadMods()
         auto cacheName = fileName.completeBaseName() + "-" + mod.md5 + "." + fileName.suffix();
 
         if (mod.type == ModType::Extract || mod.type == ModType::TexturePackExtract || mod.type == ModType::ResourcePackExtract) {
-            auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", cacheName);
+            auto entry = ENV->metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
             modsToExtract.insert(entry->getFullPath(), mod);
 
@@ -528,7 +528,7 @@ void PackInstallTask::downloadMods()
             jobPtr->addNetAction(dl);
         }
         else if(mod.type == ModType::Decomp) {
-            auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", cacheName);
+            auto entry = ENV->metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
             modsToDecomp.insert(entry->getFullPath(), mod);
 
@@ -543,7 +543,7 @@ void PackInstallTask::downloadMods()
             auto relpath = getDirForModType(mod.type, mod.type_raw);
             if(relpath == Q_NULLPTR) continue;
 
-            auto entry = ENV.metacache()->resolveEntry("ATLauncherPacks", cacheName);
+            auto entry = ENV->metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
 
             auto dl = Net::Download::makeCached(url, entry);
@@ -558,7 +558,7 @@ void PackInstallTask::downloadMods()
             modsToCopy[entry->getFullPath()] = path;
 
             if(mod.type == ModType::Forge) {
-                auto vlist = ENV.metadataIndex()->get("net.minecraftforge");
+                auto vlist = ENV->metadataIndex()->get("net.minecraftforge");
                 if(vlist)
                 {
                     auto ver = vlist->getVersion(mod.version);

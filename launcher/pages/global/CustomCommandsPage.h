@@ -19,7 +19,7 @@
 #include <QDialog>
 
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 #include "widgets/CustomCommands.h"
 
 class CustomCommandsPage : public QWidget, public BasePage
@@ -36,7 +36,7 @@ public:
     }
     QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("custom-commands");
+        return APPLICATION->getThemedIcon("custom-commands");
     }
     QString id() const override
     {

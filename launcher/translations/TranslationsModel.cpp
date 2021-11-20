@@ -558,7 +558,7 @@ void TranslationsModel::downloadIndex()
     }
     qDebug() << "Downloading Translations Index...";
     d->m_index_job.reset(new NetJob("Translations Index"));
-    MetaEntryPtr entry = ENV.metacache()->resolveEntry("translations", "index_v2.json");
+    MetaEntryPtr entry = ENV->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
     d->m_index_task = Net::Download::makeCached(QUrl("https://files.multimc.org/translations/index_v2.json"), entry);
     d->m_index_job->addNetAction(d->m_index_task);
@@ -601,7 +601,7 @@ void TranslationsModel::downloadTranslation(QString key)
     }
 
     d->m_downloadingTranslation = key;
-    MetaEntryPtr entry = ENV.metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
+    MetaEntryPtr entry = ENV->metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
     entry->setStale(true);
 
     auto dl = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + lang->file_name), entry);

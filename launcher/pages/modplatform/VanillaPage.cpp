@@ -1,7 +1,7 @@
 #include "VanillaPage.h"
 #include "ui_VanillaPage.h"
 
-#include "Launcher.h"
+#include "Application.h"
 
 #include <meta/Index.h>
 #include <meta/VersionList.h>
@@ -31,7 +31,7 @@ void VanillaPage::openedImpl()
 {
     if(!initialized)
     {
-        auto vlist = ENV.metadataIndex()->get("net.minecraft");
+        auto vlist = ENV->metadataIndex()->get("net.minecraft");
         ui->versionList->initialize(vlist.get());
         initialized = true;
     }

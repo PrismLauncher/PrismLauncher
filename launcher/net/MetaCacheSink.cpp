@@ -53,7 +53,7 @@ JobStatus MetaCacheSink::finalizeCache(QNetworkReply & reply)
     }
     m_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
     m_entry->setStale(false);
-    ENV.metacache()->updateEntry(m_entry);
+    ENV->metacache()->updateEntry(m_entry);
     return Job_Finished;
 }
 

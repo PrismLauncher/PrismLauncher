@@ -16,7 +16,7 @@ JavaChecker::JavaChecker(QObject *parent) : QObject(parent)
 
 void JavaChecker::performCheck()
 {
-    QString checkerJar = FS::PathCombine(ENV.getJarsPath(), "JavaCheck.jar");
+    QString checkerJar = FS::PathCombine(ENV->getJarsPath(), "JavaCheck.jar");
 
     QStringList args;
 

@@ -12,7 +12,7 @@ void CapeChange::setCape(QString& cape) {
     QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active"));
     auto requestString = QString("{\"capeId\":\"%1\"}").arg(m_capeId);
     request.setRawHeader("Authorization", QString("Bearer %1").arg(m_session->access_token).toLocal8Bit());
-    QNetworkReply *rep = ENV.network().put(request, requestString.toUtf8());
+    QNetworkReply *rep = ENV->network().put(request, requestString.toUtf8());
 
     setStatus(tr("Equipping cape"));
 
@@ -26,7 +26,7 @@ void CapeChange::clearCape() {
     QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active"));
     auto requestString = QString("{\"capeId\":\"%1\"}").arg(m_capeId);
     request.setRawHeader("Authorization", QString("Bearer %1").arg(m_session->access_token).toLocal8Bit());
-    QNetworkReply *rep = ENV.network().deleteResource(request);
+    QNetworkReply *rep = ENV->network().deleteResource(request);
 
     setStatus(tr("Removing cape"));
 

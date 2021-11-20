@@ -27,12 +27,13 @@
 #include "AuthSession.h"
 #include "Usable.h"
 #include "AccountData.h"
+#include "QObjectPtr.h"
 
 class Task;
 class AccountTask;
 class MinecraftAccount;
 
-typedef std::shared_ptr<MinecraftAccount> MinecraftAccountPtr;
+typedef shared_qobject_ptr<MinecraftAccount> MinecraftAccountPtr;
 Q_DECLARE_METATYPE(MinecraftAccountPtr)
 
 /**
@@ -63,8 +64,7 @@ enum AccountStatus
  */
 class MinecraftAccount :
     public QObject,
-    public Usable,
-    public std::enable_shared_from_this<MinecraftAccount>
+    public Usable
 {
     Q_OBJECT
 public: /* construction */
@@ -90,11 +90,11 @@ public: /* manipulation */
      * Attempt to login. Empty password means we use the token.
      * If the attempt fails because we already are performing some task, it returns false.
      */
-    std::shared_ptr<AccountTask> login(AuthSessionPtr session, QString password = QString());
+    shared_qobject_ptr<AccountTask> login(AuthSessionPtr session, QString password);
 
-    std::shared_ptr<AccountTask> loginMSA(AuthSessionPtr session);
+    shared_qobject_ptr<AccountTask> loginMSA(AuthSessionPtr session);
 
-    std::shared_ptr<AccountTask> refresh(AuthSessionPtr session);
+    shared_qobject_ptr<AccountTask> refresh(AuthSessionPtr session);
 
 public: /* queries */
     QString accountDisplayString() const {
@@ -116,6 +116,8 @@ public: /* queries */
     QString profileName() const {
         return data.profileName();
     }
+
+    bool isActive() const;
 
     bool canMigrate() const {
         return data.canMigrateToMSA;
@@ -153,11 +155,15 @@ public: /* queries */
         return &data;
     }
 
+    bool shouldRefresh() const;
+
 signals:
     /**
      * This signal is emitted when the account changes
      */
     void changed();
+
+    void activityChanged(bool active);
 
     // TODO: better signalling for the various possible state changes - especially errors
 
@@ -165,7 +171,7 @@ protected: /* variables */
     AccountData data;
 
     // current task we are executing here
-    std::shared_ptr<AccountTask> m_currentTask;
+    shared_qobject_ptr<AccountTask> m_currentTask;
 
 protected: /* methods */
 

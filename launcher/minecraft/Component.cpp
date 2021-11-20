@@ -85,9 +85,9 @@ std::shared_ptr<class VersionFile> Component::getVersionFile() const
 std::shared_ptr<class Meta::VersionList> Component::getVersionList() const
 {
     // FIXME: what if the metadata index isn't loaded yet?
-    if(ENV.metadataIndex()->hasUid(m_uid))
+    if(ENV->metadataIndex()->hasUid(m_uid))
     {
-        return ENV.metadataIndex()->get(m_uid);
+        return ENV->metadataIndex()->get(m_uid);
     }
     return nullptr;
 }
@@ -192,7 +192,7 @@ bool Component::isRevertible()
 {
     if (isCustom())
     {
-        if(ENV.metadataIndex()->hasUid(m_uid))
+        if(ENV->metadataIndex()->hasUid(m_uid))
         {
             return true;
         }
@@ -266,7 +266,7 @@ void Component::setVersion(const QString& version)
             // we don't have a file, therefore we are loaded with metadata
             m_cachedVersion = version;
             // see if the meta version is loaded
-            auto metaVersion = ENV.metadataIndex()->get(m_uid, version);
+            auto metaVersion = ENV->metadataIndex()->get(m_uid, version);
             if(metaVersion->isLoaded())
             {
                 // if yes, we can continue with that.
@@ -350,7 +350,7 @@ bool Component::revert()
         m_file.reset();
 
         // check local cache for metadata...
-        auto version = ENV.metadataIndex()->get(m_uid, m_version);
+        auto version = ENV->metadataIndex()->get(m_uid, m_version);
         if(version->isLoaded())
         {
             m_metaVersion = version;

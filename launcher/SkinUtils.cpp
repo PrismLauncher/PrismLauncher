@@ -30,7 +30,7 @@ namespace SkinUtils
  */
 QPixmap getFaceFromCache(QString username, int height, int width)
 {
-    QFile fskin(ENV.metacache()->resolveEntry("skins", username + ".png")->getFullPath());
+    QFile fskin(ENV->metacache()->resolveEntry("skins", username + ".png")->getFullPath());
 
     if (fskin.exists())
     {

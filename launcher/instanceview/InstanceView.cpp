@@ -30,7 +30,7 @@
 #include "VisualGroup.h"
 #include <QDebug>
 
-#include <Launcher.h>
+#include <Application.h>
 #include <InstanceList.h>
 
 
@@ -628,7 +628,7 @@ void InstanceView::dropEvent(QDropEvent *event)
                 return;
             }
             auto instanceId = QString::fromUtf8(mimedata->data("application/x-instanceid"));
-            auto instanceList = LAUNCHER->instances().get();
+            auto instanceList = APPLICATION->instances().get();
             instanceList->setInstanceGroup(instanceId, group->text);
             event->setDropAction(Qt::MoveAction);
             event->accept();

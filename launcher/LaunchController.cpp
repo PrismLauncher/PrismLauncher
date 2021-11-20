@@ -1,7 +1,7 @@
 #include "LaunchController.h"
 #include "MainWindow.h"
 #include <minecraft/auth/AccountList.h>
-#include "Launcher.h"
+#include "Application.h"
 #include "dialogs/CustomMessageBox.h"
 #include "dialogs/ProfileSelectDialog.h"
 #include "dialogs/ProgressDialog.h"
@@ -42,7 +42,7 @@ void LaunchController::decideAccount()
     }
 
     // Find an account to use.
-    std::shared_ptr<AccountList> accounts = LAUNCHER->accounts();
+    auto accounts = APPLICATION->accounts();
     if (accounts->count() <= 0)
     {
         // Tell the user they need to log in at least one account in order to play.
@@ -59,12 +59,12 @@ void LaunchController::decideAccount()
         if (reply == QMessageBox::Yes)
         {
             // Open the account manager.
-            LAUNCHER->ShowGlobalSettings(m_parentWidget, "accounts");
+            APPLICATION->ShowGlobalSettings(m_parentWidget, "accounts");
         }
     }
 
-    m_accountToUse = accounts->activeAccount();
-    if (m_accountToUse == nullptr)
+    m_accountToUse = accounts->defaultAccount();
+    if (!m_accountToUse)
     {
         // If no default account is set, ask the user which one to use.
         ProfileSelectDialog selectDialog(
@@ -80,7 +80,7 @@ void LaunchController::decideAccount()
 
         // If the user said to use the account as default, do that.
         if (selectDialog.useAsGlobalDefault() && m_accountToUse) {
-            accounts->setActiveAccount(m_accountToUse);
+            accounts->setDefaultAccount(m_accountToUse);
         }
     }
 }
@@ -110,7 +110,7 @@ void LaunchController::login() {
     {
         m_session = std::make_shared<AuthSession>();
         m_session->wants_online = m_online;
-        std::shared_ptr<AccountTask> task;
+        shared_qobject_ptr<AccountTask> task;
         if(!password.isNull()) {
             task = m_accountToUse->login(m_session, password);
         }
@@ -294,7 +294,7 @@ void LaunchController::launchInstance()
     auto showConsole = m_instance->settings()->get("ShowConsole").toBool();
     if(!console && showConsole)
     {
-        LAUNCHER->showInstanceWindow(m_instance);
+        APPLICATION->showInstanceWindow(m_instance);
     }
     connect(m_launcher.get(), &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
     connect(m_launcher.get(), &LaunchTask::succeeded, this, &LaunchController::onSucceeded);
@@ -400,7 +400,7 @@ void LaunchController::onFailed(QString reason)
 {
     if(m_instance->settings()->get("ShowConsoleOnError").toBool())
     {
-        LAUNCHER->showInstanceWindow(m_instance, "console");
+        APPLICATION->showInstanceWindow(m_instance, "console");
     }
     emitFailed(reason);
 }

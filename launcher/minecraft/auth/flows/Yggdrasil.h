@@ -24,6 +24,7 @@
 
 #include "../MinecraftAccount.h"
 
+class QNetworkAccessManager;
 class QNetworkReply;
 
 /**
@@ -33,7 +34,10 @@ class Yggdrasil : public AccountTask
 {
     Q_OBJECT
 public:
-    explicit Yggdrasil(AccountData * data, QObject *parent = 0);
+    explicit Yggdrasil(
+        AccountData *data,
+        QObject *parent = 0
+    );
     virtual ~Yggdrasil() {};
 
     void refresh();

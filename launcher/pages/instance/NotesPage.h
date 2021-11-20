@@ -19,7 +19,7 @@
 
 #include "BaseInstance.h"
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 
 namespace Ui
 {
@@ -39,9 +39,9 @@ public:
     }
     virtual QIcon icon() const override
     {
-        auto icon = LAUNCHER->getThemedIcon("notes");
+        auto icon = APPLICATION->getThemedIcon("notes");
         if(icon.isNull())
-            icon = LAUNCHER->getThemedIcon("news");
+            icon = APPLICATION->getThemedIcon("news");
         return icon;
     }
     virtual QString id() const override

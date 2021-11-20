@@ -4,27 +4,20 @@
 #include <QDesktopServices>
 #include <QMetaEnum>
 #include <QDebug>
-
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-
 #include <QUuid>
-
 #include <QUrlQuery>
-
-#include <QPixmap>
-#include <QPainter>
 
 #include "AuthContext.h"
 #include "katabasis/Globals.h"
 #include "AuthRequest.h"
 
-#include "Secrets.h"
-
-#include "Env.h"
-
 #include "Parsers.h"
+
+#include <Application.h>
+#include <Env.h>
 
 using OAuth2 = Katabasis::OAuth2;
 using Activity = Katabasis::Activity;
@@ -58,19 +51,14 @@ void AuthContext::initMSA() {
         return;
     }
 
-    auto clientId = Secrets::getMSAClientID('-');
-    if(clientId.isEmpty()) {
-        return;
-    }
-
     Katabasis::OAuth2::Options opts;
     opts.scope = "XboxLive.signin offline_access";
-    opts.clientIdentifier = clientId;
+    opts.clientIdentifier = APPLICATION->msaClientId();
     opts.authorizationUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
     opts.accessTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     opts.listenerPorts = {28562, 28563, 28564, 28565, 28566};
 
-    m_oauth2 = new OAuth2(opts, m_data->msaToken, this, &ENV.network());
+    m_oauth2 = new OAuth2(opts, m_data->msaToken, this, &ENV->network());
     m_oauth2->setGrantFlow(Katabasis::OAuth2::GrantFlowDevice);
 
     connect(m_oauth2, &OAuth2::linkingFailed, this, &AuthContext::onOAuthLinkingFailed);

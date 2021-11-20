@@ -18,7 +18,7 @@
 #include <QWidget>
 
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 #include "tasks/Task.h"
 #include <modplatform/flame/FlamePackIndex.h>
 
@@ -46,7 +46,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("flame");
+        return APPLICATION->getThemedIcon("flame");
     }
     virtual QString id() const override
     {

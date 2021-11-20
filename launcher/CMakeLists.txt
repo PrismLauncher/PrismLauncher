@@ -564,12 +564,12 @@ set(LOGIC_SOURCES
 
 SET(LAUNCHER_SOURCES
     # Application base
-    Launcher.h
-    Launcher.cpp
+    Application.h
+    Application.cpp
     UpdateController.cpp
     UpdateController.h
-    LauncherMessage.h
-    LauncherMessage.cpp
+    ApplicationMessage.h
+    ApplicationMessage.cpp
 
     # GUI - general utilities
     DesktopServices.h

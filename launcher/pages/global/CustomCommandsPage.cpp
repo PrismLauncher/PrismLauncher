@@ -32,7 +32,7 @@ bool CustomCommandsPage::apply()
 
 void CustomCommandsPage::applySettings()
 {
-    auto s = LAUNCHER->settings();
+    auto s = APPLICATION->settings();
     s->set("PreLaunchCommand", commands->prelaunchCommand());
     s->set("WrapperCommand", commands->wrapperCommand());
     s->set("PostExitCommand", commands->postexitCommand());
@@ -40,7 +40,7 @@ void CustomCommandsPage::applySettings()
 
 void CustomCommandsPage::loadSettings()
 {
-    auto s = LAUNCHER->settings();
+    auto s = APPLICATION->settings();
     commands->initialize(
         false,
         true,

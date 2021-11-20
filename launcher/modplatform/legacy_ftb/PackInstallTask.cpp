@@ -31,7 +31,7 @@ void PackInstallTask::downloadPack()
     setStatus(tr("Downloading zip for %1").arg(m_pack.name));
 
     auto packoffset = QString("%1/%2/%3").arg(m_pack.dir, m_version.replace(".", "_"), m_pack.file);
-    auto entry = ENV.metacache()->resolveEntry("FTBPacks", packoffset);
+    auto entry = ENV->metacache()->resolveEntry("FTBPacks", packoffset);
     NetJob *job = new NetJob("Download FTB Pack");
 
     entry->setStale(true);

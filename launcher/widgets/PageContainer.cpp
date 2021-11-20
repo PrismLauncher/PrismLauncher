@@ -26,11 +26,11 @@
 #include <QDialogButtonBox>
 #include <QGridLayout>
 
-#include "Launcher.h"
+#include "Application.h"
 #include "settings/SettingsObject.h"
 #include "widgets/IconLabel.h"
 #include "PageContainer_p.h"
-#include <Launcher.h>
+#include <Application.h>
 #include <DesktopServices.h>
 
 class PageEntryFilterModel : public QSortFilterProxyModel
@@ -139,12 +139,12 @@ void PageContainer::createUI()
     m_header->setFont(headerLabelFont);
 
     QHBoxLayout *headerHLayout = new QHBoxLayout;
-    const int leftMargin = LAUNCHER->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
+    const int leftMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
     headerHLayout->addSpacerItem(new QSpacerItem(leftMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->addWidget(m_header);
     headerHLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Ignored));
     headerHLayout->addWidget(m_iconHeader);
-    const int rightMargin = LAUNCHER->style()->pixelMetric(QStyle::PM_LayoutRightMargin);
+    const int rightMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutRightMargin);
     headerHLayout->addSpacerItem(new QSpacerItem(rightMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->setContentsMargins(0, 6, 0, 0);
 
@@ -195,7 +195,7 @@ void PageContainer::showPage(int row)
     {
         m_pageStack->setCurrentIndex(0);
         m_header->setText(QString());
-        m_iconHeader->setIcon(LAUNCHER->getThemedIcon("bug"));
+        m_iconHeader->setIcon(APPLICATION->getThemedIcon("bug"));
     }
 }
 

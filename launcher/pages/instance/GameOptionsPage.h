@@ -19,7 +19,7 @@
 #include <QString>
 
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 
 namespace Ui
 {
@@ -46,7 +46,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("settings");
+        return APPLICATION->getThemedIcon("settings");
     }
     virtual QString id() const override
     {

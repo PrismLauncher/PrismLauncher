@@ -22,7 +22,7 @@
 #include <QObjectPtr.h>
 #include "pages/BasePage.h"
 #include "JavaCommon.h"
-#include "Launcher.h"
+#include "Application.h"
 
 class JavaChecker;
 namespace Ui
@@ -43,7 +43,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("instance-settings");
+        return APPLICATION->getThemedIcon("instance-settings");
     }
     virtual QString id() const override
     {

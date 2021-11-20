@@ -5,7 +5,11 @@ class MojangLogin : public AuthContext
 {
     Q_OBJECT
 public:
-    explicit MojangLogin(AccountData * data, QString password, QObject *parent = 0);
+    explicit MojangLogin(
+        AccountData *data,
+        QString password,
+        QObject *parent = 0
+    );
     void executeTask() override;
 
 private:

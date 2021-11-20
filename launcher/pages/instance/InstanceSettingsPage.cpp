@@ -7,7 +7,7 @@
 
 #include "dialogs/VersionSelectDialog.h"
 #include "JavaCommon.h"
-#include "Launcher.h"
+#include "Application.h"
 
 #include <java/JavaInstallList.h>
 #include <FileSystem.h>
@@ -22,8 +22,8 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
     auto sysMB = Sys::getSystemRam() / Sys::mebibyte;
     ui->maxMemSpinBox->setMaximum(sysMB);
     connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
-    connect(LAUNCHER, &Launcher::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
-    connect(LAUNCHER, &Launcher::globalSettingsClosed, this, &InstanceSettingsPage::loadSettings);
+    connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
+    connect(APPLICATION, &Application::globalSettingsClosed, this, &InstanceSettingsPage::loadSettings);
     loadSettings();
 }
 
@@ -41,13 +41,13 @@ void InstanceSettingsPage::globalSettingsButtonClicked(bool)
 {
     switch(ui->settingsTabs->currentIndex()) {
         case 0:
-            LAUNCHER->ShowGlobalSettings(this, "java-settings");
+            APPLICATION->ShowGlobalSettings(this, "java-settings");
             return;
         case 1:
-            LAUNCHER->ShowGlobalSettings(this, "minecraft-settings");
+            APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
             return;
         case 2:
-            LAUNCHER->ShowGlobalSettings(this, "custom-commands");
+            APPLICATION->ShowGlobalSettings(this, "custom-commands");
             return;
     }
 }
@@ -278,7 +278,7 @@ void InstanceSettingsPage::on_javaDetectBtn_clicked()
 {
     JavaInstallPtr java;
 
-    VersionSelectDialog vselect(LAUNCHER->javalist().get(), tr("Select a Java version"), this, true);
+    VersionSelectDialog vselect(APPLICATION->javalist().get(), tr("Select a Java version"), this, true);
     vselect.setResizeOn(2);
     vselect.exec();
 

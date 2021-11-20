@@ -17,7 +17,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 
-#include "Launcher.h"
+#include "Application.h"
 
 #include "IconPickerDialog.h"
 #include "ui_IconPickerDialog.h"
@@ -59,7 +59,7 @@ IconPickerDialog::IconPickerDialog(QWidget *parent)
 
     contentsWidget->installEventFilter(this);
 
-    contentsWidget->setModel(LAUNCHER->icons().get());
+    contentsWidget->setModel(APPLICATION->icons().get());
 
     // NOTE: ResetRole forces the button to be on the left, while the OK/Cancel ones are on the right. We win.
     auto buttonAdd = ui->buttonBox->addButton(tr("Add Icon"), QDialogButtonBox::ResetRole);
@@ -106,12 +106,12 @@ void IconPickerDialog::addNewIcon()
     //: The type of icon files
     auto filter = IconUtils::getIconFilter();
     QStringList fileNames = QFileDialog::getOpenFileNames(this, selectIcons, QString(), tr("Icons %1").arg(filter));
-    LAUNCHER->icons()->installIcons(fileNames);
+    APPLICATION->icons()->installIcons(fileNames);
 }
 
 void IconPickerDialog::removeSelectedIcon()
 {
-    LAUNCHER->icons()->deleteIcon(selectedIconKey);
+    APPLICATION->icons()->deleteIcon(selectedIconKey);
 }
 
 void IconPickerDialog::activated(QModelIndex index)
@@ -133,7 +133,7 @@ void IconPickerDialog::selectionChanged(QItemSelection selected, QItemSelection 
 
 int IconPickerDialog::execWithSelection(QString selection)
 {
-    auto list = LAUNCHER->icons();
+    auto list = APPLICATION->icons();
     auto contentsWidget = ui->iconView;
     selectedIconKey = selection;
 
@@ -159,5 +159,5 @@ IconPickerDialog::~IconPickerDialog()
 
 void IconPickerDialog::openFolder()
 {
-    DesktopServices::openDirectory(LAUNCHER->icons()->getDirectory(), true);
+    DesktopServices::openDirectory(APPLICATION->icons()->getDirectory(), true);
 }

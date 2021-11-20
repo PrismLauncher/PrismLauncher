@@ -1,5 +1,5 @@
 #include "ListModel.h"
-#include "Launcher.h"
+#include "Application.h"
 
 #include <MMCStrings.h>
 #include <Version.h>
@@ -130,7 +130,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
         {
             return (m_logoMap.value(pack.logo));
         }
-        QIcon icon = LAUNCHER->getThemedIcon("screenshot-placeholder");
+        QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
         ((ListModel *)this)->requestLogo(pack.logo);
         return icon;
     }
@@ -216,7 +216,7 @@ void ListModel::requestLogo(QString file)
         return;
     }
 
-    MetaEntryPtr entry = ENV.metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
+    MetaEntryPtr entry = ENV->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
     NetJob *job = new NetJob(QString("FTB Icon Download for %1").arg(file));
     job->addNetAction(Net::Download::makeCached(QUrl(QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
 
@@ -244,7 +244,7 @@ void ListModel::getLogo(const QString &logo, LogoCallback callback)
 {
     if(m_logoMap.contains(logo))
     {
-        callback(ENV.metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(ENV->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }
     else
     {

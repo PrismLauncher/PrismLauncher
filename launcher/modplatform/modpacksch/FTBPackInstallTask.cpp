@@ -102,7 +102,7 @@ void PackInstallTask::downloadPack()
         QFileInfo fileName(file.name);
         auto cacheName = fileName.completeBaseName() + "-" + file.sha1 + "." + fileName.suffix();
 
-        auto entry = ENV.metacache()->resolveEntry("ModpacksCHPacks", cacheName);
+        auto entry = ENV->metacache()->resolveEntry("ModpacksCHPacks", cacheName);
         entry->setStale(true);
 
         auto relpath = FS::PathCombine("minecraft", file.path, file.name);

@@ -5,7 +5,7 @@
 #include "AnalyticsWizardPage.h"
 
 #include "translations/TranslationsModel.h"
-#include <Launcher.h>
+#include <Application.h>
 #include <FileSystem.h>
 #include <ganalytics.h>
 

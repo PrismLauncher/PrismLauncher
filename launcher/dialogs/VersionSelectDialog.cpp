@@ -28,7 +28,7 @@
 #include <BaseVersionList.h>
 #include <tasks/Task.h>
 #include <QDebug>
-#include "Launcher.h"
+#include "Application.h"
 #include <VersionProxyModel.h>
 #include <widgets/VersionSelectWidget.h>
 

@@ -16,7 +16,7 @@
 #include <QLayout>
 #include <QPushButton>
 
-#include "Launcher.h"
+#include "Application.h"
 #include "CopyInstanceDialog.h"
 #include "ui_CopyInstanceDialog.h"
 
@@ -36,16 +36,16 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     layout()->setSizeConstraint(QLayout::SetFixedSize);
 
     InstIconKey = original->iconKey();
-    ui->iconButton->setIcon(LAUNCHER->icons()->getIcon(InstIconKey));
+    ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
     ui->instNameTextBox->setText(original->name());
     ui->instNameTextBox->setFocus();
-    auto groups = LAUNCHER->instances()->getGroups().toSet();
+    auto groups = APPLICATION->instances()->getGroups().toSet();
     auto groupList = QStringList(groups.toList());
     groupList.sort(Qt::CaseInsensitive);
     groupList.removeOne("");
     groupList.push_front("");
     ui->groupBox->addItems(groupList);
-    int index = groupList.indexOf(LAUNCHER->instances()->getInstanceGroup(m_original->id()));
+    int index = groupList.indexOf(APPLICATION->instances()->getInstanceGroup(m_original->id()));
     if(index == -1)
     {
         index = 0;
@@ -99,7 +99,7 @@ void CopyInstanceDialog::on_iconButton_clicked()
     if (dlg.result() == QDialog::Accepted)
     {
         InstIconKey = dlg.selectedIconKey;
-        ui->iconButton->setIcon(LAUNCHER->icons()->getIcon(InstIconKey));
+        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
     }
 }
 

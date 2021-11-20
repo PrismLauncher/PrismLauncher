@@ -2,7 +2,7 @@
 
 #include "BuildConfig.h"
 #include "Env.h"
-#include "Launcher.h"
+#include "Application.h"
 #include "Json.h"
 
 #include <QPainter>
@@ -46,7 +46,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
     }
     else if(role == Qt::DecorationRole)
     {
-        QIcon placeholder = LAUNCHER->getThemedIcon("screenshot-placeholder");
+        QIcon placeholder = APPLICATION->getThemedIcon("screenshot-placeholder");
 
         auto iter = m_logoMap.find(pack.name);
         if (iter != m_logoMap.end()) {
@@ -78,7 +78,7 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
 {
     if(m_logoMap.contains(logo))
     {
-        callback(ENV.metacache()->resolveEntry("ModpacksCHPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(ENV->metacache()->resolveEntry("ModpacksCHPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }
     else
     {
@@ -252,7 +252,7 @@ void ListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = ENV.metacache()->resolveEntry("ModpacksCHPacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
+    MetaEntryPtr entry = ENV->metacache()->resolveEntry("ModpacksCHPacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
 
     bool stale = entry->isStale();
 

@@ -1,6 +1,9 @@
 #include "MojangRefresh.h"
 
-MojangRefresh::MojangRefresh(AccountData* data, QObject* parent) : AuthContext(data, parent) {}
+MojangRefresh::MojangRefresh(
+    AccountData *data,
+    QObject *parent
+) : AuthContext(data, parent) {}
 
 void MojangRefresh::executeTask() {
     m_requestsDone = 0;

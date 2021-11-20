@@ -23,9 +23,11 @@
 
 #include <dialogs/ProgressDialog.h>
 
-#include <Launcher.h>
+#include <Application.h>
 #include <minecraft/auth/flows/AuthRequest.h>
 #include <minecraft/auth/flows/Parsers.h>
+
+#include <QJsonDocument>
 
 ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidget *parent)
     : QDialog(parent), m_accountToSetup(accountToSetup), ui(new Ui::ProfileSetupDialog)
@@ -33,9 +35,9 @@ ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidg
     ui->setupUi(this);
     ui->errorLabel->setVisible(false);
 
-    goodIcon = LAUNCHER->getThemedIcon("status-good");
-    yellowIcon = LAUNCHER->getThemedIcon("status-yellow");
-    badIcon = LAUNCHER->getThemedIcon("status-bad");
+    goodIcon = APPLICATION->getThemedIcon("status-good");
+    yellowIcon = APPLICATION->getThemedIcon("status-yellow");
+    badIcon = APPLICATION->getThemedIcon("status-bad");
 
     QRegExp permittedNames("[a-zA-Z0-9_]{3,16}");
     auto nameEdit = ui->nameEdit;

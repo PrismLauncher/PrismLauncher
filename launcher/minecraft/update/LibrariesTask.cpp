@@ -21,7 +21,7 @@ void LibrariesTask::executeTask()
     auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()));
     downloadJob.reset(job);
 
-    auto metacache = ENV.metacache();
+    auto metacache = ENV->metacache();
 
     auto processArtifactPool = [&](const QList<LibraryPtr> & pool, QStringList & errors, const QString & localPath)
     {

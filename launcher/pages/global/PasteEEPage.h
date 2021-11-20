@@ -18,7 +18,7 @@
 #include <QWidget>
 
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 
 namespace Ui {
 class PasteEEPage;
@@ -38,7 +38,7 @@ public:
     }
     QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("log");
+        return APPLICATION->getThemedIcon("log");
     }
     QString id() const override
     {

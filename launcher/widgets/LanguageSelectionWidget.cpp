@@ -4,7 +4,7 @@
 #include <QTreeView>
 #include <QHeaderView>
 #include <QLabel>
-#include "Launcher.h"
+#include "Application.h"
 #include "translations/TranslationsModel.h"
 
 LanguageSelectionWidget::LanguageSelectionWidget(QWidget *parent) :
@@ -29,7 +29,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget *parent) :
     helpUsLabel->setWordWrap(true);
     verticalLayout->addWidget(helpUsLabel);
 
-    auto translations = LAUNCHER->translations();
+    auto translations = APPLICATION->translations();
     auto index = translations->selectedIndex();
     languageView->setModel(translations.get());
     languageView->setCurrentIndex(index);
@@ -41,7 +41,7 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget *parent) :
 
 QString LanguageSelectionWidget::getSelectedLanguageKey() const
 {
-    auto translations = LAUNCHER->translations();
+    auto translations = APPLICATION->translations();
     return translations->data(languageView->currentIndex(), Qt::UserRole).toString();
 }
 
@@ -59,7 +59,7 @@ void LanguageSelectionWidget::languageRowChanged(const QModelIndex& current, con
     {
         return;
     }
-    auto translations = LAUNCHER->translations();
+    auto translations = APPLICATION->translations();
     QString key = translations->data(current, Qt::UserRole).toString();
     translations->selectLanguage(key);
     translations->updateLanguage(key);

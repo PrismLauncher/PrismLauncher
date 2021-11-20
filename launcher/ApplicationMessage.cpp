@@ -1,9 +1,9 @@
-#include "LauncherMessage.h"
+#include "ApplicationMessage.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
 
-void LauncherMessage::parse(const QByteArray & input) {
+void ApplicationMessage::parse(const QByteArray & input) {
     auto doc = QJsonDocument::fromBinaryData(input);
     auto root = doc.object();
 
@@ -16,7 +16,7 @@ void LauncherMessage::parse(const QByteArray & input) {
     }
 }
 
-QByteArray LauncherMessage::serialize() {
+QByteArray ApplicationMessage::serialize() {
     QJsonObject root;
     root.insert("command", command);
     QJsonObject outArgs;

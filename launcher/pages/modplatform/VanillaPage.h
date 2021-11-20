@@ -18,7 +18,7 @@
 #include <QWidget>
 
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 #include "tasks/Task.h"
 
 namespace Ui
@@ -41,7 +41,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("minecraft");
+        return APPLICATION->getThemedIcon("minecraft");
     }
     virtual QString id() const override
     {

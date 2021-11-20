@@ -1,4 +1,4 @@
-#include "Launcher.h"
+#include "Application.h"
 #include "MainWindow.h"
 #include "LaunchController.h"
 #include <InstanceList.h>
@@ -34,12 +34,12 @@ int main(int argc, char *argv[])
 #endif
 
     // initialize Qt
-    Launcher app(argc, argv);
+    Application app(argc, argv);
 
     switch (app.status())
     {
-    case Launcher::StartingUp:
-    case Launcher::Initialized:
+    case Application::StartingUp:
+    case Application::Initialized:
     {
         Q_INIT_RESOURCE(multimc);
         Q_INIT_RESOURCE(backgrounds);
@@ -55,9 +55,9 @@ int main(int argc, char *argv[])
         Q_INIT_RESOURCE(flat);
         return app.exec();
     }
-    case Launcher::Failed:
+    case Application::Failed:
         return 1;
-    case Launcher::Succeeded:
+    case Application::Succeeded:
         return 0;
     }
 }

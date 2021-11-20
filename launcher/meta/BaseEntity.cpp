@@ -122,7 +122,7 @@ void Meta::BaseEntity::load(Net::Mode loadType)
     }
     NetJob *job = new NetJob(QObject::tr("Download of meta file %1").arg(localFilename()));
     auto url = this->url();
-    auto entry = ENV.metacache()->resolveEntry("meta", localFilename());
+    auto entry = ENV->metacache()->resolveEntry("meta", localFilename());
     entry->setStale(true);
     auto dl = Net::Download::makeCached(url, entry);
     /*

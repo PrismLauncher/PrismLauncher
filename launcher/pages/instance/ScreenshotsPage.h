@@ -18,7 +18,7 @@
 #include <QMainWindow>
 
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 
 class QFileSystemModel;
 class QIdentityProxyModel;
@@ -53,7 +53,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("screenshots");
+        return APPLICATION->getThemedIcon("screenshots");
     }
     virtual QString id() const override
     {

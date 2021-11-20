@@ -12,8 +12,8 @@ private
 slots:
     void test_isProvidedByEnv()
     {
-        QVERIFY(ENV.metadataIndex());
-        QCOMPARE(ENV.metadataIndex(), ENV.metadataIndex());
+        QVERIFY(ENV->metadataIndex());
+        QCOMPARE(ENV->metadataIndex(), ENV->metadataIndex());
     }
 
     void test_hasUid_and_getList()

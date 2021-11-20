@@ -15,7 +15,7 @@
 #include <QKeyEvent>
 #include <QMenu>
 
-#include <Launcher.h>
+#include <Application.h>
 
 #include "dialogs/ProgressDialog.h"
 #include "dialogs/CustomMessageBox.h"
@@ -104,7 +104,7 @@ public:
     {
         m_thumbnailingPool.setMaxThreadCount(4);
         m_thumbnailCache = std::make_shared<SharedIconCache>();
-        m_thumbnailCache->add("placeholder", LAUNCHER->getThemedIcon("screenshot-placeholder"));
+        m_thumbnailCache->add("placeholder", APPLICATION->getThemedIcon("screenshot-placeholder"));
         connect(&watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
         // FIXME: the watched file set is not updated when files are removed
     }

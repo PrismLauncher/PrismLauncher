@@ -24,7 +24,7 @@ void AssetUpdateTask::executeTask()
     QString localPath = assets->id + ".json";
     auto job = new NetJob(tr("Asset index for %1").arg(m_inst->name()));
 
-    auto metacache = ENV.metacache();
+    auto metacache = ENV->metacache();
     auto entry = metacache->resolveEntry("asset_indexes", localPath);
     entry->setStale(true);
     auto hexSha1 = assets->sha1.toLatin1();
@@ -62,7 +62,7 @@ void AssetUpdateTask::assetIndexFinished()
     // FIXME: this looks like a job for a generic validator based on json schema?
     if (!AssetsUtils::loadAssetsIndexJson(assets->id, asset_fname, index))
     {
-        auto metacache = ENV.metacache();
+        auto metacache = ENV->metacache();
         auto entry = metacache->resolveEntry("asset_indexes", assets->id + ".json");
         metacache->evictEntry(entry);
         emitFailed(tr("Failed to read the assets index!"));

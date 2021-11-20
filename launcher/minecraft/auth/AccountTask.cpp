@@ -23,10 +23,6 @@
 #include <QNetworkReply>
 #include <QByteArray>
 
-#include <Env.h>
-
-#include <BuildConfig.h>
-
 #include <QDebug>
 
 AccountTask::AccountTask(AccountData *data, QObject *parent)

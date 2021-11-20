@@ -20,7 +20,7 @@
 #include "BaseInstance.h"
 #include "launch/LaunchTask.h"
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 
 namespace Ui
 {
@@ -42,7 +42,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("log");
+        return APPLICATION->getThemedIcon("log");
     }
     virtual QString id() const override
     {

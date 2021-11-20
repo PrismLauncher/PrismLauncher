@@ -21,7 +21,7 @@
 #include "pages/BasePage.h"
 
 #include "minecraft/auth/AccountList.h"
-#include "Launcher.h"
+#include "Application.h"
 
 namespace Ui
 {
@@ -43,10 +43,10 @@ public:
     }
     QIcon icon() const override
     {
-        auto icon = LAUNCHER->getThemedIcon("accounts");
+        auto icon = APPLICATION->getThemedIcon("accounts");
         if(icon.isNull())
         {
-            icon = LAUNCHER->getThemedIcon("noaccount");
+            icon = APPLICATION->getThemedIcon("noaccount");
         }
         return icon;
     }
@@ -80,6 +80,6 @@ protected slots:
 private:
     void changeEvent(QEvent * event) override;
     QMenu * createPopupMenu() override;
-    std::shared_ptr<AccountList> m_accounts;
+    shared_qobject_ptr<AccountList> m_accounts;
     Ui::AccountListPage *ui;
 };

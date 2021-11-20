@@ -2,7 +2,7 @@
 #include "rainbow.h"
 #include <QStyleFactory>
 #include <QDir>
-#include "Launcher.h"
+#include "Application.h"
 
 void ITheme::apply(bool)
 {
@@ -13,11 +13,11 @@ void ITheme::apply(bool)
     }
     if(hasStyleSheet())
     {
-        LAUNCHER->setStyleSheet(appStyleSheet());
+        APPLICATION->setStyleSheet(appStyleSheet());
     }
     else
     {
-        LAUNCHER->setStyleSheet(QString());
+        APPLICATION->setStyleSheet(QString());
     }
     QDir::setSearchPaths("theme", searchPaths());
 }

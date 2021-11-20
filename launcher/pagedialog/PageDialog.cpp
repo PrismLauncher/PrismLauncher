@@ -20,7 +20,7 @@
 #include <QVBoxLayout>
 #include <QKeyEvent>
 
-#include "Launcher.h"
+#include "Application.h"
 #include "settings/SettingsObject.h"
 #include "widgets/IconLabel.h"
 #include "widgets/PageContainer.h"
@@ -45,7 +45,7 @@ PageDialog::PageDialog(BasePageProvider *pageProvider, QString defaultId, QWidge
     connect(buttons->button(QDialogButtonBox::Close), SIGNAL(clicked()), this, SLOT(close()));
     connect(buttons->button(QDialogButtonBox::Help), SIGNAL(clicked()), m_container, SLOT(help()));
 
-    restoreGeometry(QByteArray::fromBase64(LAUNCHER->settings()->get("PagedGeometry").toByteArray()));
+    restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("PagedGeometry").toByteArray()));
 }
 
 void PageDialog::closeEvent(QCloseEvent *event)
@@ -54,7 +54,7 @@ void PageDialog::closeEvent(QCloseEvent *event)
     if (m_container->prepareToClose())
     {
         qDebug() << "Paged dialog close approved";
-        LAUNCHER->settings()->set("PagedGeometry", saveGeometry().toBase64());
+        APPLICATION->settings()->set("PagedGeometry", saveGeometry().toBase64());
         qDebug() << "Paged dialog geometry saved";
         QDialog::closeEvent(event);
     }

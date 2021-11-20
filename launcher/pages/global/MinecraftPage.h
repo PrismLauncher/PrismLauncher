@@ -20,7 +20,7 @@
 
 #include "java/JavaChecker.h"
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 
 class SettingsObject;
 
@@ -43,7 +43,7 @@ public:
     }
     QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("minecraft");
+        return APPLICATION->getThemedIcon("minecraft");
     }
     QString id() const override
     {

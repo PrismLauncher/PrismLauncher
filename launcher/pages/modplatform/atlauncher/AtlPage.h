@@ -21,7 +21,7 @@
 #include <QWidget>
 #include <modplatform/atlauncher/ATLPackInstallTask.h>
 
-#include "Launcher.h"
+#include "Application.h"
 #include "pages/BasePage.h"
 #include "tasks/Task.h"
 
@@ -45,7 +45,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("atlauncher");
+        return APPLICATION->getThemedIcon("atlauncher");
     }
     virtual QString id() const override
     {

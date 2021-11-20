@@ -54,5 +54,5 @@ slots:
 private:
     Ui::LoginDialog *ui;
     MinecraftAccountPtr m_account;
-    std::shared_ptr<Task> m_loginTask;
+    shared_qobject_ptr<Task> m_loginTask;
 };

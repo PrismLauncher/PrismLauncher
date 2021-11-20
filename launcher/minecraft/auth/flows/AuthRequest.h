@@ -5,7 +5,6 @@
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QByteArray>
-#include <QHttpMultiPart>
 
 #include "katabasis/Reply.h"
 
@@ -48,7 +47,7 @@ protected slots:
     void onUploadProgress(qint64 uploaded, qint64 total);
 
 protected:
-    void setup(const QNetworkRequest &request, QNetworkAccessManager::Operation operation);
+    void setup(const QNetworkRequest &request, QNetworkAccessManager::Operation operation, const QByteArray &verb = QByteArray());
 
     enum Status {
         Idle, Requesting, ReRequesting

@@ -3,14 +3,15 @@
 #include <QPainter>
 
 #include <FileSystem.h>
+
 #include <minecraft/services/SkinUpload.h>
+#include <minecraft/services/CapeChange.h>
 #include <tasks/SequentialTask.h>
 
 #include "SkinUploadDialog.h"
 #include "ui_SkinUploadDialog.h"
 #include "ProgressDialog.h"
 #include "CustomMessageBox.h"
-#include <minecraft/services/CapeChange.h>
 
 void SkinUploadDialog::on_buttonBox_rejected()
 {
@@ -91,10 +92,10 @@ void SkinUploadDialog::on_buttonBox_accepted()
         model = SkinUpload::ALEX;
     }
     SequentialTask skinUpload;
-    skinUpload.addTask(std::make_shared<SkinUpload>(this, session, FS::read(fileName), model));
+    skinUpload.addTask(shared_qobject_ptr<SkinUpload>(new SkinUpload(this, session, FS::read(fileName), model)));
     auto selectedCape = ui->capeCombo->currentData().toString();
-    if(selectedCape != session->m_accountPtr->accountData()->minecraftProfile.currentCape) {
-        skinUpload.addTask(std::make_shared<CapeChange>(this, session, selectedCape));
+    if(selectedCape != m_acct->accountData()->minecraftProfile.currentCape) {
+        skinUpload.addTask(shared_qobject_ptr<CapeChange>(new CapeChange(this, session, selectedCape)));
     }
     if (prog.execWithTask(&skinUpload) != QDialog::Accepted)
     {

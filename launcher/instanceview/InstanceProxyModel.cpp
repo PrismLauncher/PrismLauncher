@@ -16,7 +16,7 @@
 #include "InstanceProxyModel.h"
 
 #include "InstanceView.h"
-#include "Launcher.h"
+#include "Application.h"
 #include <BaseInstance.h>
 #include <icons/IconList.h>
 
@@ -34,7 +34,7 @@ QVariant InstanceProxyModel::data(const QModelIndex & index, int role) const
     QVariant data = QSortFilterProxyModel::data(index, role);
     if(role == Qt::DecorationRole)
     {
-        return QVariant(LAUNCHER->icons()->getIcon(data.toString()));
+        return QVariant(APPLICATION->icons()->getIcon(data.toString()));
     }
     return data;
 }
@@ -59,7 +59,7 @@ bool InstanceProxyModel::subSortLessThan(const QModelIndex &left, const QModelIn
 {
     BaseInstance *pdataLeft = static_cast<BaseInstance *>(left.internalPointer());
     BaseInstance *pdataRight = static_cast<BaseInstance *>(right.internalPointer());
-    QString sortMode = LAUNCHER->settings()->get("InstSortMode").toString();
+    QString sortMode = APPLICATION->settings()->get("InstSortMode").toString();
     if (sortMode == "LastLaunch")
     {
         return pdataLeft->lastLaunch() > pdataRight->lastLaunch();

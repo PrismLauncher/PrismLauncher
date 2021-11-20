@@ -55,7 +55,7 @@ slots:
 private:
     Ui::MSALoginDialog *ui;
     MinecraftAccountPtr m_account;
-    std::shared_ptr<AccountTask> m_loginTask;
+    shared_qobject_ptr<AccountTask> m_loginTask;
     QTimer m_externalLoginTimer;
     int m_externalLoginElapsed = 0;
     int m_externalLoginTimeout = 0;

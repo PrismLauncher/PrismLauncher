@@ -1,5 +1,5 @@
 #include "LanguageWizardPage.h"
-#include <Launcher.h>
+#include <Application.h>
 #include <translations/TranslationsModel.h>
 
 #include "widgets/LanguageSelectionWidget.h"
@@ -29,13 +29,13 @@ bool LanguageWizardPage::wantsRefreshButton()
 
 void LanguageWizardPage::refresh()
 {
-    auto translations = LAUNCHER->translations();
+    auto translations = APPLICATION->translations();
     translations->downloadIndex();
 }
 
 bool LanguageWizardPage::validatePage()
 {
-    auto settings = LAUNCHER->settings();
+    auto settings = APPLICATION->settings();
     QString key = mainWidget->getSelectedLanguageKey();
     settings->set("Language", key);
     return true;

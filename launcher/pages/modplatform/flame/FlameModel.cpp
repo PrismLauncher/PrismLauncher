@@ -1,5 +1,5 @@
 #include "FlameModel.h"
-#include "Launcher.h"
+#include "Application.h"
 #include <Json.h>
 
 #include <MMCStrings.h>
@@ -62,7 +62,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
         {
             return (m_logoMap.value(pack.logoName));
         }
-        QIcon icon = LAUNCHER->getThemedIcon("screenshot-placeholder");
+        QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
         ((ListModel *)this)->requestLogo(pack.logoName, pack.logoUrl);
         return icon;
     }
@@ -100,7 +100,7 @@ void ListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = ENV.metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
+    MetaEntryPtr entry = ENV->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
     NetJob *job = new NetJob(QString("Flame Icon Download %1").arg(logo));
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
@@ -128,7 +128,7 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
 {
     if(m_logoMap.contains(logo))
     {
-        callback(ENV.metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(ENV->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }
     else
     {

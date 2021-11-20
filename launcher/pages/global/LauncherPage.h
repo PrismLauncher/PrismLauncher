@@ -20,7 +20,7 @@
 
 #include "java/JavaChecker.h"
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 #include "ColorCache.h"
 #include <translations/TranslationsModel.h>
 
@@ -46,7 +46,7 @@ public:
     }
     QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("launcher");
+        return APPLICATION->getThemedIcon("launcher");
     }
     QString id() const override
     {

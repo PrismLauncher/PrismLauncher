@@ -18,7 +18,7 @@
 #include <QWidget>
 
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 #include "tasks/Task.h"
 #include "TechnicData.h"
 
@@ -46,7 +46,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("technic");
+        return APPLICATION->getThemedIcon("technic");
     }
     virtual QString id() const override
     {

@@ -19,7 +19,7 @@
 
 #include "minecraft/legacy/LegacyInstance.h"
 #include "pages/BasePage.h"
-#include <Launcher.h>
+#include <Application.h>
 #include "tasks/Task.h"
 
 namespace Ui
@@ -40,7 +40,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return LAUNCHER->getThemedIcon("checkupdate");
+        return APPLICATION->getThemedIcon("checkupdate");
     }
     virtual QString id() const override
     {

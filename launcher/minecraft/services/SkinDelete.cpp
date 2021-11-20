@@ -12,7 +12,7 @@ void SkinDelete::executeTask()
 {
     QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active"));
     request.setRawHeader("Authorization", QString("Bearer %1").arg(m_session->access_token).toLocal8Bit());
-    QNetworkReply *rep = ENV.network().deleteResource(request);
+    QNetworkReply *rep = ENV->network().deleteResource(request);
     m_reply = std::shared_ptr<QNetworkReply>(rep);
 
     setStatus(tr("Deleting skin"));

@@ -15,7 +15,7 @@
 
 #include "TechnicModel.h"
 #include "Env.h"
-#include "Launcher.h"
+#include "Application.h"
 #include "Json.h"
 
 #include <QIcon>
@@ -47,7 +47,7 @@ QVariant Technic::ListModel::data(const QModelIndex& index, int role) const
         {
             return (m_logoMap.value(pack.logoName));
         }
-        QIcon icon = LAUNCHER->getThemedIcon("screenshot-placeholder");
+        QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
         ((ListModel *)this)->requestLogo(pack.logoName, pack.logoUrl);
         return icon;
     }
@@ -163,7 +163,7 @@ void Technic::ListModel::getLogo(const QString& logo, const QString& logoUrl, Te
 {
     if(m_logoMap.contains(logo))
     {
-        callback(ENV.metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo))->getFullPath());
+        callback(ENV->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo))->getFullPath());
     }
     else
     {
@@ -216,7 +216,7 @@ void Technic::ListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = ENV.metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo));
+    MetaEntryPtr entry = ENV->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo));
     NetJob *job = new NetJob(QString("Technic Icon Download %1").arg(logo));
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 

@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <memory>
 
+#include "QObjectPtr.h"
+
 class Usable;
 
 /**
@@ -14,11 +16,11 @@ class Usable
 {
     friend class UseLock;
 public:
-    std::size_t useCount()
+    std::size_t useCount() const
     {
         return m_useCount;
     }
-    bool isInUse()
+    bool isInUse() const
     {
         return m_useCount > 0;
     }
@@ -43,7 +45,7 @@ private:
 class UseLock
 {
 public:
-    UseLock(std::shared_ptr<Usable> usable)
+    UseLock(shared_qobject_ptr<Usable> usable)
         : m_usable(usable)
     {
         // this doesn't use shared pointer use count, because that wouldn't be correct. this count is separate.
@@ -54,5 +56,5 @@ public:
         m_usable->decrementUses();
     }
 private:
-    std::shared_ptr<Usable> m_usable;
+    shared_qobject_ptr<Usable> m_usable;
 };

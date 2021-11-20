@@ -16,7 +16,7 @@
 #include "TechnicPage.h"
 #include "ui_TechnicPage.h"
 
-#include "Launcher.h"
+#include "Application.h"
 #include "dialogs/NewInstanceDialog.h"
 #include "TechnicModel.h"
 #include <QKeyEvent>

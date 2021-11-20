@@ -1,7 +1,7 @@
 #include "ImportPage.h"
 #include "ui_ImportPage.h"
 
-#include "Launcher.h"
+#include "Application.h"
 #include "dialogs/NewInstanceDialog.h"
 #include <QFileDialog>
 #include <QValidator>
