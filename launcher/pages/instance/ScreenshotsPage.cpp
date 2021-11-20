@@ -347,8 +347,8 @@ void ScreenshotsPage::on_actionUpload_triggered()
     auto albumTask = NetJobPtr(new NetJob("Imgur Album Creation"));
     auto imgurAlbum = ImgurAlbumCreation::make(uploaded);
     albumTask->addNetAction(imgurAlbum);
-    task.addTask(job.unwrap());
-    task.addTask(albumTask.unwrap());
+    task.addTask(job);
+    task.addTask(albumTask);
     m_uploadActive = true;
     ProgressDialog prog(this);
     if (prog.execWithTask(&task) != QDialog::Accepted)
