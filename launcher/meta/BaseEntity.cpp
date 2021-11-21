@@ -154,7 +154,7 @@ bool Meta::BaseEntity::shouldStartRemoteUpdate() const
     return m_updateStatus != UpdateStatus::InProgress;
 }
 
-shared_qobject_ptr<Task> Meta::BaseEntity::getCurrentTask()
+Task::Ptr Meta::BaseEntity::getCurrentTask()
 {
     if(m_updateStatus == UpdateStatus::InProgress)
     {

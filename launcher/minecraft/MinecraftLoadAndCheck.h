@@ -41,7 +41,7 @@ private slots:
 
 private:
     MinecraftInstance *m_inst = nullptr;
-    shared_qobject_ptr<Task> m_task;
+    Task::Ptr m_task;
     QString m_preFailure;
     QString m_fail_reason;
 };

@@ -39,7 +39,7 @@ private slots:
     void updateFinished();
 
 private:
-    shared_qobject_ptr<Task> m_updateTask;
+    Task::Ptr m_updateTask;
     bool m_aborted = false;
     Net::Mode m_mode = Net::Mode::Offline;
 };

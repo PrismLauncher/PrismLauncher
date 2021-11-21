@@ -798,17 +798,17 @@ QString MinecraftInstance::getStatusbarDescription()
     return description;
 }
 
-shared_qobject_ptr<Task> MinecraftInstance::createUpdateTask(Net::Mode mode)
+Task::Ptr MinecraftInstance::createUpdateTask(Net::Mode mode)
 {
     switch (mode)
     {
         case Net::Mode::Offline:
         {
-            return shared_qobject_ptr<Task>(new MinecraftLoadAndCheck(this));
+            return Task::Ptr(new MinecraftLoadAndCheck(this));
         }
         case Net::Mode::Online:
         {
-            return shared_qobject_ptr<Task>(new MinecraftUpdate(this));
+            return Task::Ptr(new MinecraftUpdate(this));
         }
     }
     return nullptr;

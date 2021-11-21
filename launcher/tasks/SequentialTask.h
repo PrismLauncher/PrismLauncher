@@ -12,7 +12,7 @@ public:
     explicit SequentialTask(QObject *parent = 0);
     virtual ~SequentialTask() {};
 
-    void addTask(shared_qobject_ptr<Task> task);
+    void addTask(Task::Ptr task);
 
 protected:
     void executeTask();
@@ -25,6 +25,6 @@ slots:
     void subTaskProgress(qint64 current, qint64 total);
 
 private:
-    QQueue<shared_qobject_ptr<Task> > m_queue;
+    QQueue<Task::Ptr > m_queue;
     int m_currentIndex;
 };

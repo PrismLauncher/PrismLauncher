@@ -35,7 +35,7 @@ struct PackProfileData
     ComponentIndex componentIndex;
     bool dirty = false;
     QTimer m_saveTimer;
-    shared_qobject_ptr<Task> m_updateTask;
+    Task::Ptr m_updateTask;
     bool loaded = false;
     bool interactionDisabled = true;
 };

@@ -29,7 +29,7 @@ VersionList::VersionList(const QString &uid, QObject *parent)
     setObjectName("Version list: " + uid);
 }
 
-shared_qobject_ptr<Task> VersionList::getLoadTask()
+Task::Ptr VersionList::getLoadTask()
 {
     load(Net::Mode::Online);
     return getCurrentTask();

@@ -19,6 +19,7 @@
 #include <QtCore/QEventLoop>
 
 #include "minecraft/auth/MinecraftAccount.h"
+#include "tasks/Task.h"
 
 namespace Ui
 {
@@ -54,5 +55,5 @@ slots:
 private:
     Ui::LoginDialog *ui;
     MinecraftAccountPtr m_account;
-    shared_qobject_ptr<Task> m_loginTask;
+    Task::Ptr m_loginTask;
 };

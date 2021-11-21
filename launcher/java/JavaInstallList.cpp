@@ -29,13 +29,13 @@ JavaInstallList::JavaInstallList(QObject *parent) : BaseVersionList(parent)
 {
 }
 
-shared_qobject_ptr<Task> JavaInstallList::getLoadTask()
+Task::Ptr JavaInstallList::getLoadTask()
 {
     load();
     return getCurrentTask();
 }
 
-shared_qobject_ptr<Task> JavaInstallList::getCurrentTask()
+Task::Ptr JavaInstallList::getCurrentTask()
 {
     if(m_status == Status::InProgress)
     {

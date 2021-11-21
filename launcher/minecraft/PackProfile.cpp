@@ -340,7 +340,7 @@ void PackProfile::reload(Net::Mode netmode)
     }
 }
 
-shared_qobject_ptr<Task> PackProfile::getCurrentTask()
+Task::Ptr PackProfile::getCurrentTask()
 {
     return d->m_updateTask;
 }

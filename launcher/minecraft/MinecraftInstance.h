@@ -77,7 +77,7 @@ public:
     std::shared_ptr<GameOptions> gameOptionsModel() const;
 
     //////  Launch stuff //////
-    shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) override;
+    Task::Ptr createUpdateTask(Net::Mode mode) override;
     shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) override;
     QStringList extraArguments() const override;
     QStringList verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) override;

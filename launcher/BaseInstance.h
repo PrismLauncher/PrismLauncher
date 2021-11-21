@@ -143,7 +143,7 @@ public:
     virtual SettingsObjectPtr settings() const;
 
     /// returns a valid update task
-    virtual shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) = 0;
+    virtual Task::Ptr createUpdateTask(Net::Mode mode) = 0;
 
     /// returns a valid launcher (task container)
     virtual shared_qobject_ptr<LaunchTask> createLaunchTask(

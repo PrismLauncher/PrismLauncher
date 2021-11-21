@@ -85,7 +85,7 @@ public:
     void resolve(Net::Mode netmode);
 
     /// get current running task...
-    shared_qobject_ptr<Task> getCurrentTask();
+    Task::Ptr getCurrentTask();
 
     std::shared_ptr<LaunchProfile> getProfile() const;
 

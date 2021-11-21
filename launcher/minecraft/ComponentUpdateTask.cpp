@@ -69,7 +69,7 @@ LoadResult composeLoadResult(LoadResult a, LoadResult b)
     return a;
 }
 
-static LoadResult loadComponent(ComponentPtr component, shared_qobject_ptr<Task>& loadTask, Net::Mode netmode)
+static LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net::Mode netmode)
 {
     if(component->m_loaded)
     {
@@ -127,7 +127,7 @@ static LoadResult loadComponent(ComponentPtr component, shared_qobject_ptr<Task>
 
 // FIXME: dead code. determine if this can still be useful?
 /*
-static LoadResult loadPackProfile(ComponentPtr component, shared_qobject_ptr<Task>& loadTask, Net::Mode netmode)
+static LoadResult loadPackProfile(ComponentPtr component, Task::Ptr& loadTask, Net::Mode netmode)
 {
     if(component->m_loaded)
     {
@@ -152,7 +152,7 @@ static LoadResult loadPackProfile(ComponentPtr component, shared_qobject_ptr<Tas
 }
 */
 
-static LoadResult loadIndex(shared_qobject_ptr<Task>& loadTask, Net::Mode netmode)
+static LoadResult loadIndex(Task::Ptr& loadTask, Net::Mode netmode)
 {
     // FIXME: DECIDE. do we want to run the update task anyway?
     if(APPLICATION->metadataIndex()->isLoaded())
@@ -180,7 +180,7 @@ void ComponentUpdateTask::loadComponents()
     // load the main index (it is needed to determine if components can revert)
     {
         // FIXME: tear out as a method? or lambda?
-        shared_qobject_ptr<Task> indexLoadTask;
+        Task::Ptr indexLoadTask;
         auto singleResult = loadIndex(indexLoadTask, d->netmode);
         result = composeLoadResult(result, singleResult);
         if(indexLoadTask)
@@ -203,7 +203,7 @@ void ComponentUpdateTask::loadComponents()
     // load all the components OR their lists...
     for (auto component: d->m_list->d->components)
     {
-        shared_qobject_ptr<Task> loadTask;
+        Task::Ptr loadTask;
         LoadResult singleResult;
         RemoteLoadStatus::Type loadType;
         // FIXME: to do this right, we need to load the lists and decide on which versions to use during dependency resolution. For now, ignore all that...

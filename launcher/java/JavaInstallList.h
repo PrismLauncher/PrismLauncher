@@ -40,7 +40,7 @@ class JavaInstallList : public BaseVersionList
 public:
     explicit JavaInstallList(QObject *parent = 0);
 
-    shared_qobject_ptr<Task> getLoadTask() override;
+    Task::Ptr getLoadTask() override;
     bool isLoaded() override;
     const BaseVersionPtr at(int i) const override;
     int count() const override;
@@ -54,7 +54,7 @@ public slots:
 
 protected:
     void load();
-    shared_qobject_ptr<Task> getCurrentTask();
+    Task::Ptr getCurrentTask();
 
 protected:
     Status m_status = Status::NotDone;

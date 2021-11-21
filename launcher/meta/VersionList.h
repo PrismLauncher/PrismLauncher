@@ -41,7 +41,7 @@ public:
         VersionPtrRole
     };
 
-    shared_qobject_ptr<Task> getLoadTask() override;
+    Task::Ptr getLoadTask() override;
     bool isLoaded() override;
     const BaseVersionPtr at(int i) const override;
     int count() const override;
