@@ -1,11 +1,12 @@
 #include "PasteUpload.h"
-#include "Env.h"
+#include "BuildConfig.h"
+#include "Application.h"
+
 #include <QDebug>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QFile>
-#include <BuildConfig.h>
 
 PasteUpload::PasteUpload(QWidget *window, QString text, QString key) : m_window(window)
 {
@@ -41,7 +42,7 @@ void PasteUpload::executeTask()
     request.setRawHeader("Content-Length", QByteArray::number(m_jsonContent.size()));
     request.setRawHeader("X-Auth-Token", m_key.toStdString().c_str());
 
-    QNetworkReply *rep = ENV->network().post(request, m_jsonContent);
+    QNetworkReply *rep = APPLICATION->network()->post(request, m_jsonContent);
 
     m_reply = std::shared_ptr<QNetworkReply>(rep);
     setStatus(tr("Uploading to paste.ee"));

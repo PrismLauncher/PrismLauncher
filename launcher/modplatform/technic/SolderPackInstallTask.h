@@ -27,7 +27,7 @@ namespace Technic
     {
         Q_OBJECT
     public:
-        explicit SolderPackInstallTask(const QUrl &sourceUrl, const QString &minecraftVersion);
+        explicit SolderPackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network, const QUrl &sourceUrl, const QString &minecraftVersion);
 
         bool canAbort() const override { return true; }
         bool abort() override;
@@ -48,7 +48,9 @@ namespace Technic
     private:
         bool m_abortable = false;
 
-        NetJobPtr m_filesNetJob;
+        shared_qobject_ptr<QNetworkAccessManager> m_network;
+
+        NetJob::Ptr m_filesNetJob;
         QUrl m_sourceUrl;
         QString m_minecraftVersion;
         QByteArray m_response;

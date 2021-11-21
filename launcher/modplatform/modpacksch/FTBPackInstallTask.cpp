@@ -1,13 +1,14 @@
 #include "FTBPackInstallTask.h"
 
-#include "BuildConfig.h"
-#include "Env.h"
 #include "FileSystem.h"
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "net/ChecksumValidator.h"
 #include "settings/INISettingsObject.h"
+
+#include "BuildConfig.h"
+#include "Application.h"
 
 namespace ModpacksCH {
 
@@ -50,7 +51,7 @@ void PackInstallTask::executeTask()
             .arg(m_pack.id).arg(version.id);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
-    jobPtr->start();
+    jobPtr->start(APPLICATION->network());
 
     QObject::connect(netJob, &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     QObject::connect(netJob, &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
@@ -95,14 +96,14 @@ void PackInstallTask::downloadPack()
 {
     setStatus(tr("Downloading mods..."));
 
-    jobPtr.reset(new NetJob(tr("Mod download")));
+    jobPtr = new NetJob(tr("Mod download"));
     for(auto file : m_version.files) {
         if(file.serverOnly) continue;
 
         QFileInfo fileName(file.name);
         auto cacheName = fileName.completeBaseName() + "-" + file.sha1 + "." + fileName.suffix();
 
-        auto entry = ENV->metacache()->resolveEntry("ModpacksCHPacks", cacheName);
+        auto entry = APPLICATION->metacache()->resolveEntry("ModpacksCHPacks", cacheName);
         entry->setStale(true);
 
         auto relpath = FS::PathCombine("minecraft", file.path, file.name);
@@ -141,7 +142,7 @@ void PackInstallTask::downloadPack()
         setProgress(current, total);
     });
 
-    jobPtr->start();
+    jobPtr->start(APPLICATION->network());
 }
 
 void PackInstallTask::install()

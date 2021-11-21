@@ -144,7 +144,7 @@ void NetJob::startMoreParts()
         connect(part.get(), SIGNAL(aborted(int)), SLOT(partAborted(int)));
         connect(part.get(), SIGNAL(netActionProgress(int, qint64, qint64)),
                 SLOT(partProgress(int, qint64, qint64)));
-        part->start();
+        part->start(m_network);
     }
 }
 
@@ -194,7 +194,7 @@ bool NetJob::abort()
     return fullyAborted;
 }
 
-bool NetJob::addNetAction(NetActionPtr action)
+bool NetJob::addNetAction(NetAction::Ptr action)
 {
     action->m_index_within_job = downloads.size();
     downloads.append(action);

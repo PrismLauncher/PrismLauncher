@@ -1,15 +1,15 @@
 #pragma once
+#include "QObjectPtr.h"
 #include "net/NetAction.h"
 #include "Screenshot.h"
 
-typedef std::shared_ptr<class ImgurUpload> ImgurUploadPtr;
-class ImgurUpload : public NetAction
-{
+class ImgurUpload : public NetAction {
 public:
-    explicit ImgurUpload(ScreenshotPtr shot);
-    static ImgurUploadPtr make(ScreenshotPtr shot)
-    {
-        return ImgurUploadPtr(new ImgurUpload(shot));
+    using Ptr = shared_qobject_ptr<ImgurUpload>;
+
+    explicit ImgurUpload(ScreenShot::Ptr shot);
+    static Ptr make(ScreenShot::Ptr shot) {
+        return Ptr(new ImgurUpload(shot));
     }
 
 protected
@@ -17,15 +17,13 @@ slots:
     virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     virtual void downloadError(QNetworkReply::NetworkError error);
     virtual void downloadFinished();
-    virtual void downloadReadyRead()
-    {
-    }
+    virtual void downloadReadyRead() {}
 
 public
 slots:
-    virtual void start();
+    void startImpl() override;
 
 private:
-    ScreenshotPtr m_shot;
+    ScreenShot::Ptr m_shot;
     bool finished = true;
 };

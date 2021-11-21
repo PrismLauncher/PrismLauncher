@@ -2,7 +2,8 @@
 #include "PrivatePackManager.h"
 
 #include <QDomDocument>
-#include <BuildConfig.h>
+#include "BuildConfig.h"
+#include "Application.h"
 
 namespace LegacyFTB {
 
@@ -11,21 +12,20 @@ void PackFetchTask::fetch()
     publicPacks.clear();
     thirdPartyPacks.clear();
 
-    NetJob *netJob = new NetJob("LegacyFTB::ModpackFetch");
+    jobPtr = new NetJob("LegacyFTB::ModpackFetch");
 
     QUrl publicPacksUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/modpacks.xml");
     qDebug() << "Downloading public version info from" << publicPacksUrl.toString();
-    netJob->addNetAction(Net::Download::makeByteArray(publicPacksUrl, &publicModpacksXmlFileData));
+    jobPtr->addNetAction(Net::Download::makeByteArray(publicPacksUrl, &publicModpacksXmlFileData));
 
     QUrl thirdPartyUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/thirdparty.xml");
     qDebug() << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
-    netJob->addNetAction(Net::Download::makeByteArray(thirdPartyUrl, &thirdPartyModpacksXmlFileData));
+    jobPtr->addNetAction(Net::Download::makeByteArray(thirdPartyUrl, &thirdPartyModpacksXmlFileData));
 
-    QObject::connect(netJob, &NetJob::succeeded, this, &PackFetchTask::fileDownloadFinished);
-    QObject::connect(netJob, &NetJob::failed, this, &PackFetchTask::fileDownloadFailed);
+    QObject::connect(jobPtr.get(), &NetJob::succeeded, this, &PackFetchTask::fileDownloadFinished);
+    QObject::connect(jobPtr.get(), &NetJob::failed, this, &PackFetchTask::fileDownloadFailed);
 
-    jobPtr.reset(netJob);
-    netJob->start();
+    jobPtr->start(m_network);
 }
 
 void PackFetchTask::fetchPrivate(const QStringList & toFetch)
@@ -63,7 +63,7 @@ void PackFetchTask::fetchPrivate(const QStringList & toFetch)
             delete data;
         });
 
-        job->start();
+        job->start(m_network);
     }
 }
 

@@ -1,24 +1,25 @@
 #include "PackInstallTask.h"
 
-#include "Env.h"
-#include "MMCZip.h"
+#include <QtConcurrent>
 
+#include "MMCZip.h"
 #include "BaseInstance.h"
 #include "FileSystem.h"
 #include "settings/INISettingsObject.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/GradleSpecifier.h"
-#include "BuildConfig.h"
 
-#include <QtConcurrent>
+#include "BuildConfig.h"
+#include "Application.h"
 
 namespace LegacyFTB {
 
-PackInstallTask::PackInstallTask(Modpack pack, QString version)
+PackInstallTask::PackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network, Modpack pack, QString version)
 {
     m_pack = pack;
     m_version = version;
+    m_network = network;
 }
 
 void PackInstallTask::executeTask()
@@ -31,8 +32,8 @@ void PackInstallTask::downloadPack()
     setStatus(tr("Downloading zip for %1").arg(m_pack.name));
 
     auto packoffset = QString("%1/%2/%3").arg(m_pack.dir, m_version.replace(".", "_"), m_pack.file);
-    auto entry = ENV->metacache()->resolveEntry("FTBPacks", packoffset);
-    NetJob *job = new NetJob("Download FTB Pack");
+    auto entry = APPLICATION->metacache()->resolveEntry("FTBPacks", packoffset);
+    netJobContainer = new NetJob("Download FTB Pack");
 
     entry->setStale(true);
     QString url;
@@ -44,14 +45,13 @@ void PackInstallTask::downloadPack()
     {
         url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "modpacks/%1").arg(packoffset);
     }
-    job->addNetAction(Net::Download::makeCached(url, entry));
+    netJobContainer->addNetAction(Net::Download::makeCached(url, entry));
     archivePath = entry->getFullPath();
 
-    netJobContainer.reset(job);
-    connect(job, &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
-    connect(job, &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
-    connect(job, &NetJob::progress, this, &PackInstallTask::onDownloadProgress);
-    job->start();
+    connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
+    connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
+    connect(netJobContainer.get(), &NetJob::progress, this, &PackInstallTask::onDownloadProgress);
+    netJobContainer->start(m_network);
 
     progress(1, 4);
 }

@@ -1,8 +1,8 @@
 #include "MetaCacheSink.h"
 #include <QFile>
 #include <QFileInfo>
-#include "Env.h"
 #include "FileSystem.h"
+#include "Application.h"
 
 namespace Net {
 
@@ -53,7 +53,7 @@ JobStatus MetaCacheSink::finalizeCache(QNetworkReply & reply)
     }
     m_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
     m_entry->setStale(false);
-    ENV->metacache()->updateEntry(m_entry);
+    APPLICATION->metacache()->updateEntry(m_entry);
     return Job_Finished;
 }
 

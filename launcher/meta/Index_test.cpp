@@ -3,19 +3,12 @@
 
 #include "meta/Index.h"
 #include "meta/VersionList.h"
-#include "Env.h"
 
 class IndexTest : public QObject
 {
     Q_OBJECT
 private
 slots:
-    void test_isProvidedByEnv()
-    {
-        QVERIFY(ENV->metadataIndex());
-        QCOMPARE(ENV->metadataIndex(), ENV->metadataIndex());
-    }
-
     void test_hasUid_and_getList()
     {
         Meta::Index windex({std::make_shared<Meta::VersionList>("list1"), std::make_shared<Meta::VersionList>("list2"), std::make_shared<Meta::VersionList>("list3")});

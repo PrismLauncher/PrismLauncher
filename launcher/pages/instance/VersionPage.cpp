@@ -420,7 +420,7 @@ void VersionPage::on_actionDownload_All_triggered()
 
 void VersionPage::on_actionInstall_Forge_triggered()
 {
-    auto vlist = ENV->metadataIndex()->get("net.minecraftforge");
+    auto vlist = APPLICATION->metadataIndex()->get("net.minecraftforge");
     if(!vlist)
     {
         return;
@@ -449,7 +449,7 @@ void VersionPage::on_actionInstall_Forge_triggered()
 
 void VersionPage::on_actionInstall_Fabric_triggered()
 {
-    auto vlist = ENV->metadataIndex()->get("net.fabricmc.fabric-loader");
+    auto vlist = APPLICATION->metadataIndex()->get("net.fabricmc.fabric-loader");
     if(!vlist)
     {
         return;
@@ -494,7 +494,7 @@ void VersionPage::on_actionAdd_Empty_triggered()
 
 void VersionPage::on_actionInstall_LiteLoader_triggered()
 {
-    auto vlist = ENV->metadataIndex()->get("com.mumfrey.liteloader");
+    auto vlist = APPLICATION->metadataIndex()->get("com.mumfrey.liteloader");
     if(!vlist)
     {
         return;

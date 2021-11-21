@@ -6,14 +6,16 @@
 #include <QDir>
 #include <QLibraryInfo>
 #include <QDebug>
-#include <FileSystem.h>
-#include <net/NetJob.h>
-#include <net/ChecksumValidator.h>
-#include <Env.h>
-#include <BuildConfig.h>
+
+#include "FileSystem.h"
+#include "net/NetJob.h"
+#include "net/ChecksumValidator.h"
+#include "BuildConfig.h"
 #include "Json.h"
 
 #include "POTranslator.h"
+
+#include "Application.h"
 
 const static QLatin1Literal defaultLangCode("en_US");
 
@@ -119,10 +121,10 @@ struct TranslationsModel::Private
     std::unique_ptr<QTranslator> m_qt_translator;
     std::unique_ptr<QTranslator> m_app_translator;
 
-    std::shared_ptr<Net::Download> m_index_task;
+    Net::Download::Ptr m_index_task;
     QString m_downloadingTranslation;
-    NetJobPtr m_dl_job;
-    NetJobPtr m_index_job;
+    NetJob::Ptr m_dl_job;
+    NetJob::Ptr m_index_job;
     QString m_nextDownload;
 
     std::unique_ptr<POTranslator> m_po_translator;
@@ -558,13 +560,13 @@ void TranslationsModel::downloadIndex()
     }
     qDebug() << "Downloading Translations Index...";
     d->m_index_job.reset(new NetJob("Translations Index"));
-    MetaEntryPtr entry = ENV->metacache()->resolveEntry("translations", "index_v2.json");
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
     d->m_index_task = Net::Download::makeCached(QUrl("https://files.multimc.org/translations/index_v2.json"), entry);
     d->m_index_job->addNetAction(d->m_index_task);
     connect(d->m_index_job.get(), &NetJob::failed, this, &TranslationsModel::indexFailed);
     connect(d->m_index_job.get(), &NetJob::succeeded, this, &TranslationsModel::indexReceived);
-    d->m_index_job->start();
+    d->m_index_job->start(APPLICATION->network());
 }
 
 void TranslationsModel::updateLanguage(QString key)
@@ -601,7 +603,7 @@ void TranslationsModel::downloadTranslation(QString key)
     }
 
     d->m_downloadingTranslation = key;
-    MetaEntryPtr entry = ENV->metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
     entry->setStale(true);
 
     auto dl = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + lang->file_name), entry);
@@ -615,7 +617,7 @@ void TranslationsModel::downloadTranslation(QString key)
     connect(d->m_dl_job.get(), &NetJob::succeeded, this, &TranslationsModel::dlGood);
     connect(d->m_dl_job.get(), &NetJob::failed, this, &TranslationsModel::dlFailed);
 
-    d->m_dl_job->start();
+    d->m_dl_job->start(APPLICATION->network());
 }
 
 void TranslationsModel::downloadNext()

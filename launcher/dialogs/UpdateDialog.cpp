@@ -49,7 +49,7 @@ void UpdateDialog::loadChangelog()
     dljob->addNetAction(Net::Download::makeByteArray(QUrl(url), &changelogData));
     connect(dljob.get(), &NetJob::succeeded, this, &UpdateDialog::changelogLoaded);
     connect(dljob.get(), &NetJob::failed, this, &UpdateDialog::changelogFailed);
-    dljob->start();
+    dljob->start(APPLICATION->network());
 }
 
 QString reprocessMarkdown(QByteArray markdown)

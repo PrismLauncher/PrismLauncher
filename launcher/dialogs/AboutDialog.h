@@ -42,6 +42,6 @@ slots:
 private:
     Ui::AboutDialog *ui;
 
-    NetJobPtr netJob;
+    NetJob::Ptr netJob;
     QByteArray dataSink;
 };

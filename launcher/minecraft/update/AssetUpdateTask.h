@@ -24,5 +24,5 @@ public slots:
 
 private:
     MinecraftInstance *m_inst;
-    NetJobPtr downloadJob;
+    NetJob::Ptr downloadJob;
 };

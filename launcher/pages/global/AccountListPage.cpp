@@ -22,7 +22,6 @@
 #include <QDebug>
 
 #include "net/NetJob.h"
-#include "Env.h"
 
 #include "dialogs/ProgressDialog.h"
 #include "dialogs/LoginDialog.h"

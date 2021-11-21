@@ -14,7 +14,6 @@
  */
 
 #include "TechnicModel.h"
-#include "Env.h"
 #include "Application.h"
 #include "Json.h"
 
@@ -105,7 +104,7 @@ void Technic::ListModel::performSearch()
     }
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
-    jobPtr->start();
+    jobPtr->start(APPLICATION->network());
     QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::searchRequestFinished);
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
 }
@@ -163,7 +162,7 @@ void Technic::ListModel::getLogo(const QString& logo, const QString& logoUrl, Te
 {
     if(m_logoMap.contains(logo))
     {
-        callback(ENV->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo))->getFullPath());
     }
     else
     {
@@ -216,7 +215,7 @@ void Technic::ListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = ENV->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo));
     NetJob *job = new NetJob(QString("Technic Icon Download %1").arg(logo));
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
@@ -232,7 +231,7 @@ void Technic::ListModel::requestLogo(QString logo, QString url)
         logoFailed(logo);
     });
 
-    job->start();
+    job->start(APPLICATION->network());
 
     m_loadingLogos.append(logo);
 }

@@ -32,7 +32,7 @@ private:
 private:
     bool abortable = false;
 
-    NetJobPtr jobPtr;
+    NetJob::Ptr jobPtr;
     QByteArray response;
 
     Modpack m_pack;

@@ -1,4 +1,5 @@
 #include "ImgurUpload.h"
+#include "BuildConfig.h"
 
 #include <QNetworkRequest>
 #include <QHttpMultiPart>
@@ -7,18 +8,15 @@
 #include <QHttpPart>
 #include <QFile>
 #include <QUrl>
-
-#include "BuildConfig.h"
-#include "Env.h"
 #include <QDebug>
 
-ImgurUpload::ImgurUpload(ScreenshotPtr shot) : NetAction(), m_shot(shot)
+ImgurUpload::ImgurUpload(ScreenShot::Ptr shot) : NetAction(), m_shot(shot)
 {
     m_url = BuildConfig.IMGUR_BASE_URL + "upload.json";
     m_status = Job_NotStarted;
 }
 
-void ImgurUpload::start()
+void ImgurUpload::startImpl()
 {
     finished = false;
     m_status = Job_InProgress;
@@ -49,7 +47,7 @@ void ImgurUpload::start()
     namePart.setBody(m_shot->m_file.baseName().toUtf8());
     multipart->append(namePart);
 
-    QNetworkReply *rep = ENV->network().post(request, multipart);
+    QNetworkReply *rep = m_network->post(request, multipart);
 
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &ImgurUpload::downloadProgress);

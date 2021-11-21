@@ -20,8 +20,8 @@
 #include "QObjectPtr.h"
 
 #include "net/Mode.h"
+#include "net/NetJob.h"
 
-class Task;
 namespace Meta
 {
 class BaseEntity
@@ -54,7 +54,7 @@ public:
     bool shouldStartRemoteUpdate() const;
 
     void load(Net::Mode loadType);
-    shared_qobject_ptr<Task> getCurrentTask();
+    Task::Ptr getCurrentTask();
 
 protected: /* methods */
     bool loadLocalFile();
@@ -62,6 +62,6 @@ protected: /* methods */
 private:
     LoadStatus m_loadStatus = LoadStatus::NotLoaded;
     UpdateStatus m_updateStatus = UpdateStatus::NotDone;
-    shared_qobject_ptr<Task> m_updateTask;
+    NetJob::Ptr m_updateTask;
 };
 }

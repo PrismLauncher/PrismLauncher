@@ -17,7 +17,15 @@
 #include <QString>
 #include <QDateTime>
 #include <QIcon>
-#include <icons/IIconList.h>
+
+enum IconType : unsigned
+{
+    Builtin,
+    Transient,
+    FileBased,
+    ICONS_TOTAL,
+    ToBeDeleted
+};
 
 struct MMCImage
 {

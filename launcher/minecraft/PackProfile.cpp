@@ -20,21 +20,22 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QDebug>
-
-#include "Exception.h"
-#include <minecraft/OneSixVersionFormat.h>
-#include <FileSystem.h>
 #include <QSaveFile>
-#include <Env.h>
-#include <meta/Index.h>
-#include <minecraft/MinecraftInstance.h>
 #include <QUuid>
 #include <QTimer>
-#include <Json.h>
+
+#include "Exception.h"
+#include "minecraft/OneSixVersionFormat.h"
+#include "FileSystem.h"
+#include "meta/Index.h"
+#include "minecraft/MinecraftInstance.h"
+#include "Json.h"
 
 #include "PackProfile.h"
 #include "PackProfile_p.h"
 #include "ComponentUpdateTask.h"
+
+#include "Application.h"
 
 PackProfile::PackProfile(MinecraftInstance * instance)
     : QAbstractListModel()
@@ -481,7 +482,7 @@ bool PackProfile::migratePreComponentConfig()
         }
         else if(!intendedVersion.isEmpty())
         {
-            auto metaVersion = ENV->metadataIndex()->get(uid, intendedVersion);
+            auto metaVersion = APPLICATION->metadataIndex()->get(uid, intendedVersion);
             component = new Component(this, metaVersion);
         }
         else
@@ -546,7 +547,7 @@ bool PackProfile::migratePreComponentConfig()
         auto patchVersion = d->getOldConfigVersion(uid);
         if(!patchVersion.isEmpty() && !loadedComponents.contains(uid))
         {
-            auto patch = new Component(this, ENV->metadataIndex()->get(uid, patchVersion));
+            auto patch = new Component(this, APPLICATION->metadataIndex()->get(uid, patchVersion));
             patch->setOrder(order);
             loadedComponents[uid] = patch;
         }

@@ -20,8 +20,9 @@
 
 #include <QDebug>
 
-NewsChecker::NewsChecker(const QString& feedUrl)
+NewsChecker::NewsChecker(shared_qobject_ptr<QNetworkAccessManager> network, const QString& feedUrl)
 {
+    m_network = network;
     m_feedUrl = feedUrl;
 }
 
@@ -41,7 +42,7 @@ void NewsChecker::reloadNews()
     QObject::connect(job, &NetJob::succeeded, this, &NewsChecker::rssDownloadFinished);
     QObject::connect(job, &NetJob::failed, this, &NewsChecker::rssDownloadFailed);
     m_newsNetJob.reset(job);
-    job->start();
+    job->start(m_network);
 }
 
 void NewsChecker::rssDownloadFinished()

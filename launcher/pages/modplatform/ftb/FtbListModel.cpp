@@ -1,7 +1,6 @@
 #include "FtbListModel.h"
 
 #include "BuildConfig.h"
-#include "Env.h"
 #include "Application.h"
 #include "Json.h"
 
@@ -78,7 +77,7 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
 {
     if(m_logoMap.contains(logo))
     {
-        callback(ENV->metacache()->resolveEntry("ModpacksCHPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry("ModpacksCHPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }
     else
     {
@@ -96,7 +95,7 @@ void ListModel::request()
     auto url = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/all");
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), &response));
     jobPtr = netJob;
-    jobPtr->start();
+    jobPtr->start(APPLICATION->network());
 
     QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::requestFinished);
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::requestFailed);
@@ -140,7 +139,7 @@ void ListModel::requestPack()
             .arg(currentPack);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
-    jobPtr->start();
+    jobPtr->start(APPLICATION->network());
 
     QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::packRequestFinished);
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::packRequestFailed);
@@ -252,7 +251,7 @@ void ListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = ENV->metacache()->resolveEntry("ModpacksCHPacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("ModpacksCHPacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
 
     bool stale = entry->isStale();
 
@@ -273,7 +272,7 @@ void ListModel::requestLogo(QString logo, QString url)
     auto &newLogoEntry = m_logoMap[logo];
     newLogoEntry.downloadJob = job;
     newLogoEntry.fullpath = fullPath;
-    job->start();
+    job->start(APPLICATION->network());
 }
 
 }

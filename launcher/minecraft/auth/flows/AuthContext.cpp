@@ -17,7 +17,6 @@
 #include "Parsers.h"
 
 #include <Application.h>
-#include <Env.h>
 
 using OAuth2 = Katabasis::OAuth2;
 using Activity = Katabasis::Activity;
@@ -58,7 +57,8 @@ void AuthContext::initMSA() {
     opts.accessTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     opts.listenerPorts = {28562, 28563, 28564, 28565, 28566};
 
-    m_oauth2 = new OAuth2(opts, m_data->msaToken, this, &ENV->network());
+    // FIXME: OAuth2 is not aware of our fancy shared pointers
+    m_oauth2 = new OAuth2(opts, m_data->msaToken, this, APPLICATION->network().get());
     m_oauth2->setGrantFlow(Katabasis::OAuth2::GrantFlowDevice);
 
     connect(m_oauth2, &OAuth2::linkingFailed, this, &AuthContext::onOAuthLinkingFailed);

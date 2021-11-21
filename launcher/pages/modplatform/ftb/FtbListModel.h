@@ -10,7 +10,7 @@ namespace Ftb {
 
 struct Logo {
     QString fullpath;
-    NetJobPtr downloadJob;
+    NetJob::Ptr downloadJob;
     QIcon result;
     bool failed = false;
 };
@@ -52,7 +52,7 @@ private:
     QList<ModpacksCH::Modpack> modpacks;
     LogoMap m_logoMap;
 
-    NetJobPtr jobPtr;
+    NetJob::Ptr jobPtr;
     int currentPack;
     QList<int> remainingPacks;
     QByteArray response;

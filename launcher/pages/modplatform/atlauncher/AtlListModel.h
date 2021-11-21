@@ -45,7 +45,7 @@ private:
     LogoMap m_logoMap;
     QMap<QString, LogoCallback> waitingCallbacks;
 
-    NetJobPtr jobPtr;
+    NetJob::Ptr jobPtr;
     QByteArray response;
 };
 

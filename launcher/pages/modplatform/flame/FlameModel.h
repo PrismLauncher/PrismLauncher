@@ -69,7 +69,7 @@ private:
         ResetRequested,
         Finished
     } searchState = None;
-    NetJobPtr jobPtr;
+    NetJob::Ptr jobPtr;
     QByteArray response;
 };
 

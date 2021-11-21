@@ -62,6 +62,6 @@ protected:
 private:
     Ui::UpdateDialog *ui;
     QByteArray changelogData;
-    NetJobPtr dljob;
+    NetJob::Ptr dljob;
     ChangelogType m_changelogType = CHANGELOG_MARKDOWN;
 };

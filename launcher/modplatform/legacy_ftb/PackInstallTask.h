@@ -8,6 +8,8 @@
 #include "meta/VersionList.h"
 #include "PackHelpers.h"
 
+#include "net/NetJob.h"
+
 #include <nonstd/optional>
 
 namespace LegacyFTB {
@@ -17,7 +19,7 @@ class PackInstallTask : public InstanceTask
     Q_OBJECT
 
 public:
-    explicit PackInstallTask(Modpack pack, QString version);
+    explicit PackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network, Modpack pack, QString version);
     virtual ~PackInstallTask(){}
 
     bool canAbort() const override { return true; }
@@ -41,11 +43,12 @@ private slots:
     void onUnzipCanceled();
 
 private: /* data */
+    shared_qobject_ptr<QNetworkAccessManager> m_network;
     bool abortable = false;
     std::unique_ptr<QuaZip> m_packZip;
     QFuture<nonstd::optional<QStringList>> m_extractFuture;
     QFutureWatcher<nonstd::optional<QStringList>> m_extractFutureWatcher;
-    NetJobPtr netJobContainer;
+    NetJob::Ptr netJobContainer;
     QString archivePath;
 
     Modpack m_pack;

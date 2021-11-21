@@ -284,7 +284,7 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
 
 }
 
-NetActionPtr AssetObject::getDownloadAction()
+NetAction::Ptr AssetObject::getDownloadAction()
 {
     QFileInfo objectFile(getLocalPath());
     if ((!objectFile.isFile()) || (objectFile.size() != size))
@@ -316,7 +316,7 @@ QString AssetObject::getRelPath()
     return hash.left(2) + "/" + hash;
 }
 
-NetJobPtr AssetsIndex::getDownloadJob()
+NetJob::Ptr AssetsIndex::getDownloadJob()
 {
     auto job = new NetJob(QObject::tr("Assets for %1").arg(id));
     for (auto &object : objects.values())

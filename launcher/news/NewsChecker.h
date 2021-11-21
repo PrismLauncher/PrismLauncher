@@ -30,7 +30,7 @@ public:
     /*!
      * Constructs a news reader to read from the given RSS feed URL.
      */
-    NewsChecker(const QString& feedUrl);
+    NewsChecker(shared_qobject_ptr<QNetworkAccessManager> network, const QString& feedUrl);
 
     /*!
      * Returns the error message for the last time the news was loaded.
@@ -80,7 +80,7 @@ protected: /* data */
     QList<NewsEntryPtr> m_newsEntries;
 
     //! The network job to use to load the news.
-    NetJobPtr m_newsNetJob;
+    NetJob::Ptr m_newsNetJob;
 
     //! True if news has been loaded.
     bool m_loadedNews;
@@ -92,6 +92,8 @@ protected: /* data */
      * If the last news load succeeded, this will be an empty string.
      */
     QString m_lastLoadError;
+
+    shared_qobject_ptr<QNetworkAccessManager> m_network;
 
 protected slots:
     /// Emits newsLoaded() and sets m_lastLoadError to empty string.

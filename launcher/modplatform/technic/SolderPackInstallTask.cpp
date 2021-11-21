@@ -21,10 +21,14 @@
 #include <MMCZip.h>
 #include "TechnicPackProcessor.h"
 
-Technic::SolderPackInstallTask::SolderPackInstallTask(const QUrl &sourceUrl, const QString &minecraftVersion)
-{
+Technic::SolderPackInstallTask::SolderPackInstallTask(
+    shared_qobject_ptr<QNetworkAccessManager> network,
+    const QUrl &sourceUrl,
+    const QString &minecraftVersion
+) {
     m_sourceUrl = sourceUrl;
     m_minecraftVersion = minecraftVersion;
+    m_network = network;
 }
 
 bool Technic::SolderPackInstallTask::abort() {
@@ -43,7 +47,7 @@ void Technic::SolderPackInstallTask::executeTask()
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SolderPackInstallTask::versionSucceeded);
     connect(job, &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
-    m_filesNetJob->start();
+    m_filesNetJob->start(m_network);
 }
 
 void Technic::SolderPackInstallTask::versionSucceeded()
@@ -68,7 +72,7 @@ void Technic::SolderPackInstallTask::versionSucceeded()
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SolderPackInstallTask::fileListSucceeded);
     connect(job, &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
-    m_filesNetJob->start();
+    m_filesNetJob->start(m_network);
 }
 
 void Technic::SolderPackInstallTask::fileListSucceeded()
@@ -109,7 +113,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &Technic::SolderPackInstallTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &Technic::SolderPackInstallTask::downloadProgressChanged);
     connect(m_filesNetJob.get(), &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
-    m_filesNetJob->start();
+    m_filesNetJob->start(m_network);
 }
 
 void Technic::SolderPackInstallTask::downloadSucceeded()

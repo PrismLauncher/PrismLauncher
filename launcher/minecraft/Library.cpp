@@ -3,7 +3,6 @@
 
 #include <net/Download.h>
 #include <net/ChecksumValidator.h>
-#include <Env.h>
 #include <FileSystem.h>
 #include <BuildConfig.h>
 
@@ -45,14 +44,14 @@ void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& na
     }
 }
 
-QList< std::shared_ptr< NetAction > > Library::getDownloads(
+QList<NetAction::Ptr> Library::getDownloads(
     OpSys system,
     class HttpMetaCache* cache,
     QStringList& failedLocalFiles,
     const QString & overridePath
 ) const
 {
-    QList<NetActionPtr> out;
+    QList<NetAction::Ptr> out;
     bool stale = isAlwaysStale();
     bool local = isLocal();
 

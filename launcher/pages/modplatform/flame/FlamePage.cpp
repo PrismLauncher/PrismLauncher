@@ -139,7 +139,7 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
             suggestCurrent();
         });
-        netJob->start();
+        netJob->start(APPLICATION->network());
     }
     else
     {

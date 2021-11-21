@@ -164,7 +164,7 @@ void TechnicPage::suggestCurrent()
         current.metadataLoaded = true;
         metadataLoaded();
     });
-    netJob->start();
+    netJob->start(APPLICATION->network());
 }
 
 // expects current.metadataLoaded to be true
@@ -193,6 +193,6 @@ void TechnicPage::metadataLoaded()
     else
     {
         while (current.url.endsWith('/')) current.url.chop(1);
-        dialog->setSuggestedPack(current.name, new Technic::SolderPackInstallTask(current.url + "/modpack/" + current.slug, current.minecraftVersion));
+        dialog->setSuggestedPack(current.name, new Technic::SolderPackInstallTask(APPLICATION->network(), current.url + "/modpack/" + current.slug, current.minecraftVersion));
     }
 }

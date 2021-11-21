@@ -8,7 +8,6 @@
 #include <QLabel>
 
 #include <RWStorage.h>
-#include <Env.h>
 
 #include <BuildConfig.h>
 
@@ -216,7 +215,7 @@ void ListModel::requestLogo(QString file)
         return;
     }
 
-    MetaEntryPtr entry = ENV->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
     NetJob *job = new NetJob(QString("FTB Icon Download for %1").arg(file));
     job->addNetAction(Net::Download::makeCached(QUrl(QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
 
@@ -235,7 +234,7 @@ void ListModel::requestLogo(QString file)
         emit logoFailed(file);
     });
 
-    job->start();
+    job->start(APPLICATION->network());
 
     m_loadingLogos.append(file);
 }
@@ -244,7 +243,7 @@ void ListModel::getLogo(const QString &logo, LogoCallback callback)
 {
     if(m_logoMap.contains(logo))
     {
-        callback(ENV->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }
     else
     {

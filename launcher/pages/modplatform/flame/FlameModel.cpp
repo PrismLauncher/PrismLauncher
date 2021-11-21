@@ -9,7 +9,6 @@
 #include <QLabel>
 
 #include <RWStorage.h>
-#include <Env.h>
 
 namespace Flame {
 
@@ -100,7 +99,7 @@ void ListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = ENV->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
     NetJob *job = new NetJob(QString("Flame Icon Download %1").arg(logo));
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
@@ -119,7 +118,7 @@ void ListModel::requestLogo(QString logo, QString url)
         emit logoFailed(logo);
     });
 
-    job->start();
+    job->start(APPLICATION->network());
 
     m_loadingLogos.append(logo);
 }
@@ -128,7 +127,7 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
 {
     if(m_logoMap.contains(logo))
     {
-        callback(ENV->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }
     else
     {
@@ -172,7 +171,7 @@ void ListModel::performPaginatedSearch()
     ).arg(nextSearchOffset).arg(currentSearchTerm).arg(currentSort);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
-    jobPtr->start();
+    jobPtr->start(APPLICATION->network());
     QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::searchRequestFinished);
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
 }

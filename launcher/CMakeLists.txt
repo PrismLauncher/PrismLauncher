@@ -43,10 +43,6 @@ set(CORE_SOURCES
     # Prefix tree where node names are strings between separators
     SeparatorPrefixTree.h
 
-    # WARNING: globals live here
-    Env.h
-    Env.cpp
-
     # String filters
     Filter.h
     Filter.cpp
@@ -191,8 +187,6 @@ set(NEWS_SOURCES
 # Icon interface
 set(ICONS_SOURCES
     # Icons System and related code
-    icons/IIconList.h
-    icons/IIconList.cpp
     icons/IconUtils.h
     icons/IconUtils.cpp
 )

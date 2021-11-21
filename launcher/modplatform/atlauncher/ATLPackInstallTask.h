@@ -74,7 +74,7 @@ private:
 
     bool abortable = false;
 
-    NetJobPtr jobPtr;
+    NetJob::Ptr jobPtr;
     QByteArray response;
 
     QString m_pack;

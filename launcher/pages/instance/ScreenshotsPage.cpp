@@ -302,8 +302,8 @@ void ScreenshotsPage::on_actionUpload_triggered()
     if (selection.isEmpty())
         return;
 
-    QList<ScreenshotPtr> uploaded;
-    auto job = NetJobPtr(new NetJob("Screenshot Upload"));
+    QList<ScreenShot::Ptr> uploaded;
+    auto job = NetJob::Ptr(new NetJob("Screenshot Upload"));
     if(selection.size() < 2)
     {
         auto item = selection.at(0);
@@ -344,7 +344,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
         job->addNetAction(ImgurUpload::make(screenshot));
     }
     SequentialTask task;
-    auto albumTask = NetJobPtr(new NetJob("Imgur Album Creation"));
+    auto albumTask = NetJob::Ptr(new NetJob("Imgur Album Creation"));
     auto imgurAlbum = ImgurAlbumCreation::make(uploaded);
     albumTask->addNetAction(imgurAlbum);
     task.addTask(job);

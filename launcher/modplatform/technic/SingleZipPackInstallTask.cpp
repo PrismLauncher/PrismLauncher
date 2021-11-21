@@ -15,12 +15,13 @@
 
 #include "SingleZipPackInstallTask.h"
 
-#include "Env.h"
+#include <QtConcurrent>
+
 #include "MMCZip.h"
 #include "TechnicPackProcessor.h"
+#include "FileSystem.h"
 
-#include <QtConcurrent>
-#include <FileSystem.h>
+#include "Application.h"
 
 Technic::SingleZipPackInstallTask::SingleZipPackInstallTask(const QUrl &sourceUrl, const QString &minecraftVersion)
 {
@@ -41,7 +42,7 @@ void Technic::SingleZipPackInstallTask::executeTask()
     setStatus(tr("Downloading modpack:\n%1").arg(m_sourceUrl.toString()));
 
     const QString path = m_sourceUrl.host() + '/' + m_sourceUrl.path();
-    auto entry = ENV->metacache()->resolveEntry("general", path);
+    auto entry = APPLICATION->metacache()->resolveEntry("general", path);
     entry->setStale(true);
     m_filesNetJob.reset(new NetJob(tr("Modpack download")));
     m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
@@ -50,7 +51,7 @@ void Technic::SingleZipPackInstallTask::executeTask()
     connect(job, &NetJob::succeeded, this, &Technic::SingleZipPackInstallTask::downloadSucceeded);
     connect(job, &NetJob::progress, this, &Technic::SingleZipPackInstallTask::downloadProgressChanged);
     connect(job, &NetJob::failed, this, &Technic::SingleZipPackInstallTask::downloadFailed);
-    m_filesNetJob->start();
+    m_filesNetJob->start(APPLICATION->network());
 }
 
 void Technic::SingleZipPackInstallTask::downloadSucceeded()

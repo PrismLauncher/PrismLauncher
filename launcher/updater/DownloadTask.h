@@ -35,7 +35,7 @@ public:
      *
      * target is a template - XXXXXX at the end will be replaced with a random generated string, ensuring uniqueness
      */
-    explicit DownloadTask(Status status, QString target, QObject* parent = 0);
+    explicit DownloadTask(shared_qobject_ptr<QNetworkAccessManager> network, Status status, QString target, QObject* parent = 0);
     virtual ~DownloadTask() {};
 
     /// Get the directory that will contain the update files.
@@ -62,13 +62,13 @@ protected:
      */
     void loadVersionInfo();
 
-    NetJobPtr m_vinfoNetJob;
+    NetJob::Ptr m_vinfoNetJob;
     QByteArray currentVersionFileListData;
     QByteArray newVersionFileListData;
     Net::Download::Ptr m_currentVersionFileListDownload;
     Net::Download::Ptr m_newVersionFileListDownload;
 
-    NetJobPtr m_filesNetJob;
+    NetJob::Ptr m_filesNetJob;
 
     Status m_status;
 
@@ -91,6 +91,9 @@ protected slots:
     void fileDownloadFinished();
     void fileDownloadFailed(QString reason);
     void fileDownloadProgressChanged(qint64 current, qint64 total);
+
+private:
+    shared_qobject_ptr<QNetworkAccessManager> m_network;
 };
 
 }

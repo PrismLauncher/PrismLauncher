@@ -19,8 +19,6 @@
 #include "pages/instance/ServersPage.h"
 #include "pages/instance/GameOptionsPage.h"
 
-#include "Env.h"
-
 class InstancePageProvider : public QObject, public BasePageProvider
 {
     Q_OBJECT

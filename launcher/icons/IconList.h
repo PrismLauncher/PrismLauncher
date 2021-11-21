@@ -21,14 +21,15 @@
 #include <QDir>
 #include <QtGui/QIcon>
 #include <memory>
+
 #include "MMCIcon.h"
 #include "settings/Setting.h"
-#include "Env.h" // there is a global icon list inside Env.
-#include <icons/IIconList.h>
+
+#include "QObjectPtr.h"
 
 class QFileSystemWatcher;
 
-class IconList : public QAbstractListModel, public IIconList
+class IconList : public QAbstractListModel
 {
     Q_OBJECT
 public:
@@ -42,19 +43,19 @@ public:
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
-    bool addThemeIcon(const QString &key);
-    bool addIcon(const QString &key, const QString &name, const QString &path, const IconType type) override;
-    void saveIcon(const QString &key, const QString &path, const char * format) const override;
-    bool deleteIcon(const QString &key) override;
-    bool iconFileExists(const QString &key) const override;
-
     virtual QStringList mimeTypes() const override;
     virtual Qt::DropActions supportedDropActions() const override;
     virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
     virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-    void installIcons(const QStringList &iconFiles) override;
-    void installIcon(const QString &file, const QString &name) override;
+    bool addThemeIcon(const QString &key);
+    bool addIcon(const QString &key, const QString &name, const QString &path, const IconType type);
+    void saveIcon(const QString &key, const QString &path, const char * format) const;
+    bool deleteIcon(const QString &key);
+    bool iconFileExists(const QString &key) const;
+
+    void installIcons(const QStringList &iconFiles);
+    void installIcon(const QString &file, const QString &name);
 
     const MMCIcon * icon(const QString &key) const;
 

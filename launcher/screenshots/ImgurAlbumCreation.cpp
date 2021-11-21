@@ -5,18 +5,18 @@
 #include <QJsonObject>
 #include <QUrl>
 #include <QStringList>
-
-#include "BuildConfig.h"
-#include "Env.h"
 #include <QDebug>
 
-ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenshotPtr> screenshots) : NetAction(), m_screenshots(screenshots)
+#include "BuildConfig.h"
+#include "Application.h"
+
+ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenShot::Ptr> screenshots) : NetAction(), m_screenshots(screenshots)
 {
     m_url = BuildConfig.IMGUR_BASE_URL + "album.json";
     m_status = Job_NotStarted;
 }
 
-void ImgurAlbumCreation::start()
+void ImgurAlbumCreation::startImpl()
 {
     m_status = Job_InProgress;
     QNetworkRequest request(m_url);
@@ -33,7 +33,7 @@ void ImgurAlbumCreation::start()
 
     const QByteArray data = "deletehashes=" + hashes.join(',').toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
 
-    QNetworkReply *rep = ENV->network().post(request, data);
+    QNetworkReply *rep = APPLICATION->network()->post(request, data);
 
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &ImgurAlbumCreation::downloadProgress);

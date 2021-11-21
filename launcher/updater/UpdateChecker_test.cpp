@@ -91,7 +91,8 @@ slots:
         QFETCH(bool, valid);
         QFETCH(QList<UpdateChecker::ChannelListEntry>, result);
 
-        UpdateChecker checker(channelUrl, channel, 0);
+        shared_qobject_ptr<QNetworkAccessManager> nam = new QNetworkAccessManager();
+        UpdateChecker checker(nam, channelUrl, channel, 0);
 
         QSignalSpy channelListLoadedSpy(&checker, SIGNAL(channelListLoaded()));
         QVERIFY(channelListLoadedSpy.isValid());
@@ -119,7 +120,8 @@ slots:
         QString channelUrl = findTestDataUrl("data/channels.json");
         int currentBuild = 2;
 
-        UpdateChecker checker(channelUrl, channel, currentBuild);
+        shared_qobject_ptr<QNetworkAccessManager> nam = new QNetworkAccessManager();
+        UpdateChecker checker(nam, channelUrl, channel, currentBuild);
 
         QSignalSpy updateAvailableSpy(&checker, SIGNAL(updateAvailable(GoUpdate::Status)));
         QVERIFY(updateAvailableSpy.isValid());

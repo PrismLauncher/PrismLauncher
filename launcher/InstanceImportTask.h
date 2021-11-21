@@ -55,7 +55,7 @@ private slots:
     void extractAborted();
 
 private: /* data */
-    NetJobPtr m_filesNetJob;
+    NetJob::Ptr m_filesNetJob;
     shared_qobject_ptr<Flame::FileResolvingTask> m_modIdResolver;
     QUrl m_sourceUrl;
     QString m_archivePath;

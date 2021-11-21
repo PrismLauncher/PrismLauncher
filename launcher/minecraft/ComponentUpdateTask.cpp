@@ -3,15 +3,16 @@
 #include "PackProfile_p.h"
 #include "PackProfile.h"
 #include "Component.h"
-#include <Env.h>
-#include <meta/Index.h>
-#include <meta/VersionList.h>
-#include <meta/Version.h>
+#include "meta/Index.h"
+#include "meta/VersionList.h"
+#include "meta/Version.h"
 #include "ComponentUpdateTask_p.h"
-#include <cassert>
-#include <Version.h>
+#include "cassert"
+#include "Version.h"
 #include "net/Mode.h"
 #include "OneSixVersionFormat.h"
+
+#include "Application.h"
 
 /*
  * This is responsible for loading the components of a component list AND resolving dependency issues between them
@@ -102,7 +103,7 @@ static LoadResult loadComponent(ComponentPtr component, shared_qobject_ptr<Task>
     }
     else
     {
-        auto metaVersion = ENV->metadataIndex()->get(component->m_uid, component->m_version);
+        auto metaVersion = APPLICATION->metadataIndex()->get(component->m_uid, component->m_version);
         component->m_metaVersion = metaVersion;
         if(metaVersion->isLoaded())
         {
@@ -135,7 +136,7 @@ static LoadResult loadPackProfile(ComponentPtr component, shared_qobject_ptr<Tas
     }
 
     LoadResult result = LoadResult::Failed;
-    auto metaList = ENV->metadataIndex()->get(component->m_uid);
+    auto metaList = APPLICATION->metadataIndex()->get(component->m_uid);
     if(metaList->isLoaded())
     {
         component->m_loaded = true;
@@ -154,13 +155,13 @@ static LoadResult loadPackProfile(ComponentPtr component, shared_qobject_ptr<Tas
 static LoadResult loadIndex(shared_qobject_ptr<Task>& loadTask, Net::Mode netmode)
 {
     // FIXME: DECIDE. do we want to run the update task anyway?
-    if(ENV->metadataIndex()->isLoaded())
+    if(APPLICATION->metadataIndex()->isLoaded())
     {
         qDebug() << "Index is already loaded";
         return LoadResult::LoadedLocal;
     }
-    ENV->metadataIndex()->load(netmode);
-    loadTask = ENV->metadataIndex()->getCurrentTask();
+    APPLICATION->metadataIndex()->load(netmode);
+    loadTask = APPLICATION->metadataIndex()->getCurrentTask();
     if(loadTask)
     {
         return LoadResult::RequiresRemote;

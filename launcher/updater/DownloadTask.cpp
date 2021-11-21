@@ -26,8 +26,12 @@
 namespace GoUpdate
 {
 
-DownloadTask::DownloadTask(Status status, QString target, QObject *parent)
-    : Task(parent), m_updateFilesDir(target)
+DownloadTask::DownloadTask(
+    shared_qobject_ptr<QNetworkAccessManager> network,
+    Status status,
+    QString target,
+    QObject *parent
+) : Task(parent), m_updateFilesDir(target), m_network(network)
 {
     m_status = status;
 
@@ -63,7 +67,7 @@ void DownloadTask::loadVersionInfo()
     connect(netJob, &NetJob::succeeded, this, &DownloadTask::processDownloadedVersionInfo);
     connect(netJob, &NetJob::failed, this, &DownloadTask::vinfoDownloadFailed);
     m_vinfoNetJob.reset(netJob);
-    netJob->start();
+    netJob->start(m_network);
 }
 
 void DownloadTask::vinfoDownloadFailed()
@@ -117,7 +121,7 @@ void DownloadTask::processDownloadedVersionInfo()
     setStatus(tr("Processing file lists - figuring out how to install the update..."));
 
     // make a new netjob for the actual update files
-    NetJobPtr netJob (new NetJob("Update Files"));
+    NetJob::Ptr netJob (new NetJob("Update Files"));
 
     // fill netJob and operationList
     if (!processFileLists(m_currentVersionFileList, m_newVersionFileList, m_status.rootPath, m_updateFilesDir.path(), netJob, m_operations))
@@ -141,7 +145,7 @@ void DownloadTask::processDownloadedVersionInfo()
     }
     qDebug() << "Begin downloading update files to" << m_updateFilesDir.path();
     m_filesNetJob = netJob;
-    m_filesNetJob->start();
+    m_filesNetJob->start(m_network);
 }
 
 void DownloadTask::fileDownloadFinished()

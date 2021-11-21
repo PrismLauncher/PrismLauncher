@@ -68,7 +68,7 @@ bool processFileLists
     const VersionFileList &newVersion,
     const QString &rootPath,
     const QString &tempPath,
-    NetJobPtr job,
+    NetJob::Ptr job,
     OperationList &ops
 )
 {

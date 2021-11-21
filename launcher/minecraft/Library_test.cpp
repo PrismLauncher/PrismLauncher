@@ -55,7 +55,7 @@ slots:
         auto downloads = test.getDownloads(currentSystem, cache.get(), failedFiles, QString());
         QCOMPARE(downloads.size(), 1);
         QCOMPARE(failedFiles, {});
-        NetActionPtr dl = downloads[0];
+        NetAction::Ptr dl = downloads[0];
         QCOMPARE(dl->m_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion.jar"));
     }
     void test_legacy_url_local_broken()

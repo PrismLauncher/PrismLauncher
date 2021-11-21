@@ -47,7 +47,6 @@
 #include <QtWidgets/QShortcut>
 
 #include <BaseInstance.h>
-#include <Env.h>
 #include <InstanceList.h>
 #include <MMCZip.h>
 #include <icons/IconList.h>
@@ -681,7 +680,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     // Add the news label to the news toolbar.
     {
-        m_newsChecker.reset(new NewsChecker(BuildConfig.NEWS_RSS_URL));
+        m_newsChecker.reset(new NewsChecker(APPLICATION->network(), BuildConfig.NEWS_RSS_URL));
         newsLabel = new QToolButton();
         newsLabel->setIcon(APPLICATION->getThemedIcon("news"));
         newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -876,7 +875,6 @@ QMenu * MainWindow::createPopupMenu()
 
 void MainWindow::konamiTriggered()
 {
-    // ENV->enableFeature("NewModsPage");
     qDebug() << "Super Secret Mode ACTIVATED!";
 }
 
@@ -1280,7 +1278,7 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
     {
         CustomMessageBox::selectable(this, tr("Error"), tr("Couldn't create folder for update downloads:\n%1").arg(dlPath), QMessageBox::Warning)->show();
     }
-    GoUpdate::DownloadTask updateTask(status, dlPath, &updateDlg);
+    GoUpdate::DownloadTask updateTask(APPLICATION->network(), status, dlPath, &updateDlg);
     // If the task succeeds, install the updates.
     if (updateDlg.execWithTask(&updateTask))
     {

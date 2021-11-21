@@ -1,15 +1,16 @@
 #include "MinecraftInstance.h"
-#include <minecraft/launch/CreateGameFolders.h>
-#include <minecraft/launch/ExtractNatives.h>
-#include <minecraft/launch/PrintInstanceInfo.h>
-#include <settings/Setting.h>
+#include "minecraft/launch/CreateGameFolders.h"
+#include "minecraft/launch/ExtractNatives.h"
+#include "minecraft/launch/PrintInstanceInfo.h"
+#include "settings/Setting.h"
 #include "settings/SettingsObject.h"
-#include "Env.h"
-#include <MMCStrings.h>
-#include <pathmatcher/RegexpMatcher.h>
-#include <pathmatcher/MultiMatcher.h>
-#include <FileSystem.h>
-#include <java/JavaVersion.h>
+#include "Application.h"
+
+#include "MMCStrings.h"
+#include "pathmatcher/RegexpMatcher.h"
+#include "pathmatcher/MultiMatcher.h"
+#include "FileSystem.h"
+#include "java/JavaVersion.h"
 #include "MMCTime.h"
 
 #include "launch/LaunchTask.h"
@@ -18,6 +19,7 @@
 #include "launch/steps/Update.h"
 #include "launch/steps/PreLaunchCommand.h"
 #include "launch/steps/TextPrint.h"
+
 #include "minecraft/launch/LauncherPartLaunch.h"
 #include "minecraft/launch/DirectJavaLaunch.h"
 #include "minecraft/launch/ModMinecraftJar.h"
@@ -25,25 +27,27 @@
 #include "minecraft/launch/ReconstructAssets.h"
 #include "minecraft/launch/ScanModFolders.h"
 #include "minecraft/launch/VerifyJavaInstall.h"
+
 #include "java/launch/CheckJava.h"
 #include "java/JavaUtils.h"
+
 #include "meta/Index.h"
 #include "meta/VersionList.h"
+
+#include "icons/IconList.h"
 
 #include "mod/ModFolderModel.h"
 #include "mod/ResourcePackFolderModel.h"
 #include "mod/TexturePackFolderModel.h"
+
 #include "WorldList.h"
 
-#include "icons/IIconList.h"
-
-#include <QCoreApplication>
 #include "PackProfile.h"
 #include "AssetsUtils.h"
 #include "MinecraftUpdate.h"
 #include "MinecraftLoadAndCheck.h"
-#include <minecraft/gameoptions/GameOptions.h>
-#include <minecraft/update/FoldersTask.h>
+#include "minecraft/gameoptions/GameOptions.h"
+#include "minecraft/update/FoldersTask.h"
 
 #define IBUS "@im=ibus"
 
@@ -816,7 +820,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(shared_from_this()));
     auto pptr = process.get();
 
-    ENV->icons()->saveIcon(iconKey(), FS::PathCombine(gameRoot(), "icon.png"), "PNG");
+    APPLICATION->icons()->saveIcon(iconKey(), FS::PathCombine(gameRoot(), "icon.png"), "PNG");
 
     // print a header
     {

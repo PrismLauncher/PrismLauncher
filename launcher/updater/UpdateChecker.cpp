@@ -26,8 +26,9 @@
 #include "BuildConfig.h"
 #include "sys.h"
 
-UpdateChecker::UpdateChecker(QString channelUrl, QString currentChannel, int currentBuild)
+UpdateChecker::UpdateChecker(shared_qobject_ptr<QNetworkAccessManager> nam, QString channelUrl, QString currentChannel, int currentBuild)
 {
+    m_network = nam;
     m_channelUrl = channelUrl;
     m_currentChannel = currentChannel;
     m_currentBuild = currentBuild;
@@ -103,12 +104,11 @@ void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
 
     QUrl indexUrl = QUrl(m_newRepoUrl).resolved(QUrl("index.json"));
 
-    auto job = new NetJob("GoUpdate Repository Index");
-    job->addNetAction(Net::Download::makeByteArray(indexUrl, &indexData));
-    connect(job, &NetJob::succeeded, [this, notifyNoUpdate](){ updateCheckFinished(notifyNoUpdate); });
-    connect(job, &NetJob::failed, this, &UpdateChecker::updateCheckFailed);
-    indexJob.reset(job);
-    job->start();
+    indexJob = new NetJob("GoUpdate Repository Index");
+    indexJob->addNetAction(Net::Download::makeByteArray(indexUrl, &indexData));
+    connect(indexJob.get(), &NetJob::succeeded, [this, notifyNoUpdate](){ updateCheckFinished(notifyNoUpdate); });
+    connect(indexJob.get(), &NetJob::failed, this, &UpdateChecker::updateCheckFailed);
+    indexJob->start(m_network);
 }
 
 void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
@@ -191,12 +191,11 @@ void UpdateChecker::updateChanList(bool notifyNoUpdate)
     }
 
     m_chanListLoading = true;
-    NetJob *job = new NetJob("Update System Channel List");
-    job->addNetAction(Net::Download::makeByteArray(QUrl(m_channelUrl), &chanlistData));
-    connect(job, &NetJob::succeeded, [this, notifyNoUpdate]() { chanListDownloadFinished(notifyNoUpdate); });
-    QObject::connect(job, &NetJob::failed, this, &UpdateChecker::chanListDownloadFailed);
-    chanListJob.reset(job);
-    job->start();
+    chanListJob = new NetJob("Update System Channel List");
+    chanListJob->addNetAction(Net::Download::makeByteArray(QUrl(m_channelUrl), &chanlistData));
+    connect(chanListJob.get(), &NetJob::succeeded, [this, notifyNoUpdate]() { chanListDownloadFinished(notifyNoUpdate); });
+    connect(chanListJob.get(), &NetJob::failed, this, &UpdateChecker::chanListDownloadFailed);
+    chanListJob->start(m_network);
 }
 
 void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
@@ -233,10 +232,12 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
     for (QJsonValue chanVal : channelArray)
     {
         QJsonObject channelObj = chanVal.toObject();
-        ChannelListEntry entry{channelObj.value("id").toVariant().toString(),
-                               channelObj.value("name").toVariant().toString(),
-                               channelObj.value("description").toVariant().toString(),
-                               channelObj.value("url").toVariant().toString()};
+        ChannelListEntry entry {
+            channelObj.value("id").toVariant().toString(),
+            channelObj.value("name").toVariant().toString(),
+            channelObj.value("description").toVariant().toString(),
+            channelObj.value("url").toVariant().toString()
+        };
         if (entry.id.isEmpty() || entry.name.isEmpty() || entry.url.isEmpty())
         {
             qCritical() << "Channel list entry with empty ID, name, or URL. Skipping.";
@@ -253,8 +254,9 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
     qDebug() << "Successfully loaded UpdateChecker channel list.";
 
     // If we're waiting to check for updates, do that now.
-    if (m_checkUpdateWaiting)
+    if (m_checkUpdateWaiting) {
         checkForUpdate(m_deferredUpdateChannel, notifyNoUpdate);
+    }
 
     emit channelListLoaded();
 }

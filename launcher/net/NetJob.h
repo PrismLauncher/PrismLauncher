@@ -22,33 +22,34 @@
 #include "QObjectPtr.h"
 
 class NetJob;
-typedef shared_qobject_ptr<NetJob> NetJobPtr;
 
 class NetJob : public Task
 {
     Q_OBJECT
 public:
+    using Ptr = shared_qobject_ptr<NetJob>;
+
     explicit NetJob(QString job_name) : Task()
     {
         setObjectName(job_name);
     }
     virtual ~NetJob();
 
-    bool addNetAction(NetActionPtr action);
+    bool addNetAction(NetAction::Ptr action);
 
-    NetActionPtr operator[](int index)
+    NetAction::Ptr operator[](int index)
     {
         return downloads[index];
     }
-    const NetActionPtr at(const int index)
+    const NetAction::Ptr at(const int index)
     {
         return downloads.at(index);
     }
-    NetActionPtr first()
+    NetAction::Ptr first()
     {
         if (downloads.size())
             return downloads[0];
-        return NetActionPtr();
+        return NetAction::Ptr();
     }
     int size() const
     {
@@ -64,6 +65,19 @@ private slots:
 public slots:
     virtual void executeTask() override;
     virtual bool abort() override;
+    virtual void start(shared_qobject_ptr<QNetworkAccessManager> network) {
+        m_network = network;
+        start();
+    }
+
+protected slots:
+    void start() override {
+        if(!m_network) {
+            throw "Missing network while trying to start " + objectName();
+            return;
+        }
+        Task::start();
+    }
 
 private slots:
     void partProgress(int index, qint64 bytesReceived, qint64 bytesTotal);
@@ -72,13 +86,15 @@ private slots:
     void partAborted(int index);
 
 private:
+    shared_qobject_ptr<QNetworkAccessManager> m_network;
+
     struct part_info
     {
         qint64 current_progress = 0;
         qint64 total_progress = 1;
         int failures = 0;
     };
-    QList<NetActionPtr> downloads;
+    QList<NetAction::Ptr> downloads;
     QList<part_info> parts_progress;
     QQueue<int> m_todo;
     QSet<int> m_doing;

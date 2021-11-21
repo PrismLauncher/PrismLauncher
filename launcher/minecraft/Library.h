@@ -152,7 +152,7 @@ public: /* methods */
     bool isForge() const;
 
     // Get a list of downloads for this library
-    QList<NetActionPtr> getDownloads(OpSys system, class HttpMetaCache * cache,
+    QList<NetAction::Ptr> getDownloads(OpSys system, class HttpMetaCache * cache,
                                      QStringList & failedLocalFiles, const QString & overridePath) const;
 
 private: /* methods */

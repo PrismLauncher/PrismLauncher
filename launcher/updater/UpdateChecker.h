@@ -23,7 +23,7 @@ class UpdateChecker : public QObject
     Q_OBJECT
 
 public:
-    UpdateChecker(QString channelUrl, QString currentChannel, int currentBuild);
+    UpdateChecker(shared_qobject_ptr<QNetworkAccessManager> nam, QString channelUrl, QString currentChannel, int currentBuild);
     void checkForUpdate(QString updateChannel, bool notifyNoUpdate);
 
     /*!
@@ -73,9 +73,11 @@ private slots:
 private:
     friend class UpdateCheckerTest;
 
-    NetJobPtr indexJob;
+    shared_qobject_ptr<QNetworkAccessManager> m_network;
+
+    NetJob::Ptr indexJob;
     QByteArray indexData;
-    NetJobPtr chanListJob;
+    NetJob::Ptr chanListJob;
     QByteArray chanlistData;
 
     QString m_channelUrl;

@@ -1,10 +1,12 @@
-#include "Env.h"
-#include <FileSystem.h>
-#include <minecraft/VersionFilterData.h>
 #include "FMLLibrariesTask.h"
+
+#include "FileSystem.h"
+#include "minecraft/VersionFilterData.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+
 #include "BuildConfig.h"
+#include "Application.h"
 
 FMLLibrariesTask::FMLLibrariesTask(MinecraftInstance * inst)
 {
@@ -60,7 +62,7 @@ void FMLLibrariesTask::executeTask()
     // download missing libs to our place
     setStatus(tr("Downloading FML libraries..."));
     auto dljob = new NetJob("FML libraries");
-    auto metacache = ENV->metacache();
+    auto metacache = APPLICATION->metacache();
     for (auto &lib : fmlLibsToProcess)
     {
         auto entry = metacache->resolveEntry("fmllibs", lib.filename);
@@ -72,7 +74,7 @@ void FMLLibrariesTask::executeTask()
     connect(dljob, &NetJob::failed, this, &FMLLibrariesTask::fmllibsFailed);
     connect(dljob, &NetJob::progress, this, &FMLLibrariesTask::progress);
     downloadJob.reset(dljob);
-    downloadJob->start();
+    downloadJob->start(APPLICATION->network());
 }
 
 bool FMLLibrariesTask::canAbort() const
@@ -87,7 +89,7 @@ void FMLLibrariesTask::fmllibsFinished()
     {
         setStatus(tr("Copying FML libraries into the instance..."));
         MinecraftInstance *inst = (MinecraftInstance *)m_inst;
-        auto metacache = ENV->metacache();
+        auto metacache = APPLICATION->metacache();
         int index = 0;
         for (auto &lib : fmlLibsToProcess)
         {

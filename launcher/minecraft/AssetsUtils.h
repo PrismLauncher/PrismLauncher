@@ -25,7 +25,7 @@ struct AssetObject
     QString getRelPath();
     QUrl getUrl();
     QString getLocalPath();
-    NetActionPtr getDownloadAction();
+    NetAction::Ptr getDownloadAction();
 
     QString hash;
     qint64 size;
@@ -33,7 +33,7 @@ struct AssetObject
 
 struct AssetsIndex
 {
-    NetJobPtr getDownloadJob();
+    NetJob::Ptr getDownloadJob();
 
     QString id;
     QMap<QString, AssetObject> objects;

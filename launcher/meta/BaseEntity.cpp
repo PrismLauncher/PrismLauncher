@@ -15,16 +15,13 @@
 
 #include "BaseEntity.h"
 
-#include "Json.h"
-
 #include "net/Download.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
-
-#include "Env.h"
 #include "Json.h"
 
 #include "BuildConfig.h"
+#include "Application.h"
 
 class ParsingValidator : public Net::Validator
 {
@@ -120,9 +117,9 @@ void Meta::BaseEntity::load(Net::Mode loadType)
     {
         return;
     }
-    NetJob *job = new NetJob(QObject::tr("Download of meta file %1").arg(localFilename()));
+    m_updateTask = new NetJob(QObject::tr("Download of meta file %1").arg(localFilename()));
     auto url = this->url();
-    auto entry = ENV->metacache()->resolveEntry("meta", localFilename());
+    auto entry = APPLICATION->metacache()->resolveEntry("meta", localFilename());
     entry->setStale(true);
     auto dl = Net::Download::makeCached(url, entry);
     /*
@@ -130,21 +127,20 @@ void Meta::BaseEntity::load(Net::Mode loadType)
      * If that fails, the file is not written to storage.
      */
     dl->addValidator(new ParsingValidator(this));
-    job->addNetAction(dl);
+    m_updateTask->addNetAction(dl);
     m_updateStatus = UpdateStatus::InProgress;
-    m_updateTask.reset(job);
-    QObject::connect(job, &NetJob::succeeded, [&]()
+    QObject::connect(m_updateTask.get(), &NetJob::succeeded, [&]()
     {
         m_loadStatus = LoadStatus::Remote;
         m_updateStatus = UpdateStatus::Succeeded;
         m_updateTask.reset();
     });
-    QObject::connect(job, &NetJob::failed, [&]()
+    QObject::connect(m_updateTask.get(), &NetJob::failed, [&]()
     {
         m_updateStatus = UpdateStatus::Failed;
         m_updateTask.reset();
     });
-    m_updateTask->start();
+    m_updateTask->start(APPLICATION->network());
 }
 
 bool Meta::BaseEntity::isLoaded() const

@@ -1,14 +1,14 @@
 #include "JavaChecker.h"
-#include "JavaUtils.h"
-#include <FileSystem.h>
-#include <Commandline.h>
+
 #include <QFile>
 #include <QProcess>
 #include <QMap>
-#include <QCoreApplication>
 #include <QDebug>
 
-#include "Env.h"
+#include "JavaUtils.h"
+#include "FileSystem.h"
+#include "Commandline.h"
+#include "Application.h"
 
 JavaChecker::JavaChecker(QObject *parent) : QObject(parent)
 {
@@ -16,7 +16,7 @@ JavaChecker::JavaChecker(QObject *parent) : QObject(parent)
 
 void JavaChecker::performCheck()
 {
-    QString checkerJar = FS::PathCombine(ENV->getJarsPath(), "JavaCheck.jar");
+    QString checkerJar = FS::PathCombine(APPLICATION->getJarsPath(), "JavaCheck.jar");
 
     QStringList args;
 

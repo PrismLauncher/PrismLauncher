@@ -14,13 +14,14 @@
  */
 
 #include "LauncherPartLaunch.h"
-#include <QCoreApplication>
-#include <launch/LaunchTask.h>
-#include <minecraft/MinecraftInstance.h>
-#include <FileSystem.h>
-#include <Commandline.h>
+
 #include <QStandardPaths>
-#include "Env.h"
+
+#include "launch/LaunchTask.h"
+#include "minecraft/MinecraftInstance.h"
+#include "FileSystem.h"
+#include "Commandline.h"
+#include "Application.h"
 
 LauncherPartLaunch::LauncherPartLaunch(LaunchTask *parent) : LaunchStep(parent)
 {
@@ -72,7 +73,7 @@ void LauncherPartLaunch::executeTask()
     m_process.setDetachable(true);
 
     auto classPath = minecraftInstance->getClassPath();
-    classPath.prepend(FS::PathCombine(ENV->getJarsPath(), "NewLaunch.jar"));
+    classPath.prepend(FS::PathCombine(APPLICATION->getJarsPath(), "NewLaunch.jar"));
 
     auto natPath = minecraftInstance->getNativePath();
 #ifdef Q_OS_WIN

@@ -20,7 +20,7 @@
 
 #include "settings/SettingsObject.h"
 #include "Application.h"
-#include "Env.h"
+#include "Application.h"
 
 ProxyPage::ProxyPage(QWidget *parent) : QWidget(parent), ui(new Ui::ProxyPage)
 {
@@ -77,8 +77,13 @@ void ProxyPage::applySettings()
     s->set("ProxyUser", ui->proxyUserEdit->text());
     s->set("ProxyPass", ui->proxyPassEdit->text());
 
-    ENV->updateProxySettings(proxyType, ui->proxyAddrEdit->text(), ui->proxyPortEdit->value(),
-            ui->proxyUserEdit->text(), ui->proxyPassEdit->text());
+    APPLICATION->updateProxySettings(
+        proxyType,
+        ui->proxyAddrEdit->text(),
+        ui->proxyPortEdit->value(),
+        ui->proxyUserEdit->text(),
+        ui->proxyPassEdit->text()
+    );
 }
 void ProxyPage::loadSettings()
 {

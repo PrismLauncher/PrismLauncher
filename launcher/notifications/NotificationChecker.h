@@ -52,7 +52,7 @@ private:
 private:
     QList<NotificationEntry> m_entries;
     QUrl m_notificationsUrl;
-    NetJobPtr m_checkJob;
+    NetJob::Ptr m_checkJob;
     Net::Download::Ptr m_download;
 
     QString m_appVersionChannel;

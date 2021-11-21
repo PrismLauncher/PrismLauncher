@@ -20,13 +20,15 @@
 #include "Validator.h"
 #include "Sink.h"
 
+#include "QObjectPtr.h"
+
 namespace Net {
 class Download : public NetAction
 {
     Q_OBJECT
 
 public: /* types */
-    typedef std::shared_ptr<class Download> Ptr;
+    typedef shared_qobject_ptr<class Download> Ptr;
     enum class Option
     {
         NoOptions = 0,
@@ -62,7 +64,7 @@ protected slots:
     void downloadReadyRead() override;
 
 public slots:
-    void start() override;
+    void startImpl() override;
 
 private: /* data */
     // FIXME: remove this, it has no business being here.

@@ -2,7 +2,6 @@
 
 #include <BuildConfig.h>
 #include <Application.h>
-#include <Env.h>
 #include <Json.h>
 
 namespace Atl {
@@ -75,7 +74,7 @@ void ListModel::request()
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/json/packsnew.json");
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), &response));
     jobPtr = netJob;
-    jobPtr->start();
+    jobPtr->start(APPLICATION->network());
 
     QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::requestFinished);
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::requestFailed);
@@ -134,7 +133,7 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
 {
     if(m_logoMap.contains(logo))
     {
-        callback(ENV->metacache()->resolveEntry("ATLauncherPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry("ATLauncherPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }
     else
     {
@@ -167,7 +166,7 @@ void ListModel::requestLogo(QString file, QString url)
         return;
     }
 
-    MetaEntryPtr entry = ENV->metacache()->resolveEntry("ATLauncherPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
     NetJob *job = new NetJob(QString("ATLauncher Icon Download %1").arg(file));
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
@@ -186,7 +185,7 @@ void ListModel::requestLogo(QString file, QString url)
         emit logoFailed(file);
     });
 
-    job->start();
+    job->start(APPLICATION->network());
 
     m_loadingLogos.append(file);
 }

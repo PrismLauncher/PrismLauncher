@@ -16,11 +16,10 @@
 #include "InstanceImportTask.h"
 #include "BaseInstance.h"
 #include "FileSystem.h"
-#include "Env.h"
+#include "Application.h"
 #include "MMCZip.h"
 #include "NullInstance.h"
 #include "settings/INISettingsObject.h"
-#include "icons/IIconList.h"
 #include "icons/IconUtils.h"
 #include <QtConcurrentRun>
 
@@ -32,6 +31,9 @@
 #include "Json.h"
 #include <quazipdir.h>
 #include "modplatform/technic/TechnicPackProcessor.h"
+
+#include "icons/IconList.h"
+#include "Application.h"
 
 InstanceImportTask::InstanceImportTask(const QUrl sourceUrl)
 {
@@ -51,7 +53,7 @@ void InstanceImportTask::executeTask()
         m_downloadRequired = true;
 
         const QString path = m_sourceUrl.host() + '/' + m_sourceUrl.path();
-        auto entry = ENV->metacache()->resolveEntry("general", path);
+        auto entry = APPLICATION->metacache()->resolveEntry("general", path);
         entry->setStale(true);
         m_filesNetJob.reset(new NetJob(tr("Modpack download")));
         m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
@@ -60,7 +62,7 @@ void InstanceImportTask::executeTask()
         connect(job, &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
         connect(job, &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);
         connect(job, &NetJob::failed, this, &InstanceImportTask::downloadFailed);
-        m_filesNetJob->start();
+        m_filesNetJob->start(APPLICATION->network());
     }
 }
 
@@ -331,7 +333,7 @@ void InstanceImportTask::processFlame()
         FS::deletePath(jarmodsPath);
     }
     instance.setName(m_instName);
-    m_modIdResolver.reset(new Flame::FileResolvingTask(pack));
+    m_modIdResolver = new Flame::FileResolvingTask(APPLICATION->network(), pack);
     connect(m_modIdResolver.get(), &Flame::FileResolvingTask::succeeded, [&]()
     {
         auto results = m_modIdResolver->getResults();
@@ -389,7 +391,7 @@ void InstanceImportTask::processFlame()
             setProgress(current, total);
         });
         setStatus(tr("Downloading mods..."));
-        m_filesNetJob->start();
+        m_filesNetJob->start(APPLICATION->network());
     }
     );
     connect(m_modIdResolver.get(), &Flame::FileResolvingTask::failed, [&](QString reason)
@@ -418,7 +420,6 @@ void InstanceImportTask::processTechnic()
 
 void InstanceImportTask::processMultiMC()
 {
-    // FIXME: copy from FolderInstanceProvider!!! FIX IT!!!
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
     instanceSettings->registerSetting("InstanceType", "Legacy");
@@ -444,7 +445,7 @@ void InstanceImportTask::processMultiMC()
         if (!importIconPath.isNull() && QFile::exists(importIconPath))
         {
             // import icon
-            auto iconList = ENV->icons();
+            auto iconList = APPLICATION->icons();
             if (iconList->iconFileExists(m_instIcon))
             {
                 iconList->deleteIcon(m_instIcon);

@@ -25,7 +25,7 @@ public slots:
 
 private:
     MinecraftInstance *m_inst;
-    NetJobPtr downloadJob;
+    NetJob::Ptr downloadJob;
     QList<FMLlib> fmlLibsToProcess;
 };
 

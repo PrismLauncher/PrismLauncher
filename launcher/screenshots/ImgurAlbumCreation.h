@@ -1,13 +1,14 @@
 #pragma once
 #include "net/NetAction.h"
 #include "Screenshot.h"
+#include "QObjectPtr.h"
 
-typedef std::shared_ptr<class ImgurAlbumCreation> ImgurAlbumCreationPtr;
+typedef shared_qobject_ptr<class ImgurAlbumCreation> ImgurAlbumCreationPtr;
 class ImgurAlbumCreation : public NetAction
 {
 public:
-    explicit ImgurAlbumCreation(QList<ScreenshotPtr> screenshots);
-    static ImgurAlbumCreationPtr make(QList<ScreenshotPtr> screenshots)
+    explicit ImgurAlbumCreation(QList<ScreenShot::Ptr> screenshots);
+    static ImgurAlbumCreationPtr make(QList<ScreenShot::Ptr> screenshots)
     {
         return ImgurAlbumCreationPtr(new ImgurAlbumCreation(screenshots));
     }
@@ -32,10 +33,10 @@ slots:
 
 public
 slots:
-    virtual void start();
+    virtual void startImpl();
 
 private:
-    QList<ScreenshotPtr> m_screenshots;
+    QList<ScreenShot::Ptr> m_screenshots;
 
     QString m_deleteHash;
     QString m_id;

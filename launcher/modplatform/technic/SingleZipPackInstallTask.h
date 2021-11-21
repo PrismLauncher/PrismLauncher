@@ -55,7 +55,7 @@ private:
     QUrl m_sourceUrl;
     QString m_minecraftVersion;
     QString m_archivePath;
-    NetJobPtr m_filesNetJob;
+    NetJob::Ptr m_filesNetJob;
     std::unique_ptr<QuaZip> m_packZip;
     QFuture<nonstd::optional<QStringList>> m_extractFuture;
     QFutureWatcher<nonstd::optional<QStringList>> m_extractFutureWatcher;

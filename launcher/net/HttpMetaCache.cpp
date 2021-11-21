@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "Env.h"
 #include "HttpMetaCache.h"
 #include "FileSystem.h"
 

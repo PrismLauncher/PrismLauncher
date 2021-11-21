@@ -5,8 +5,8 @@ namespace {
     const char * metabase = "https://cursemeta.dries007.net";
 }
 
-Flame::FileResolvingTask::FileResolvingTask(Flame::Manifest& toProcess)
-    : m_toProcess(toProcess)
+Flame::FileResolvingTask::FileResolvingTask(shared_qobject_ptr<QNetworkAccessManager> network, Flame::Manifest& toProcess)
+    : m_network(network), m_toProcess(toProcess)
 {
 }
 
@@ -14,7 +14,7 @@ void Flame::FileResolvingTask::executeTask()
 {
     setStatus(tr("Resolving mod IDs..."));
     setProgress(0, m_toProcess.files.size());
-    m_dljob.reset(new NetJob("Mod id resolver"));
+    m_dljob = new NetJob("Mod id resolver");
     results.resize(m_toProcess.files.size());
     int index = 0;
     for(auto & file: m_toProcess.files)
@@ -27,7 +27,7 @@ void Flame::FileResolvingTask::executeTask()
         index ++;
     }
     connect(m_dljob.get(), &NetJob::finished, this, &Flame::FileResolvingTask::netJobFinished);
-    m_dljob->start();
+    m_dljob->start(m_network);
 }
 
 void Flame::FileResolvingTask::netJobFinished()

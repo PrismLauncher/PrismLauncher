@@ -1,7 +1,9 @@
-#include "Env.h"
 #include "LibrariesTask.h"
+
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+
+#include "Application.h"
 
 LibrariesTask::LibrariesTask(MinecraftInstance * inst)
 {
@@ -21,7 +23,7 @@ void LibrariesTask::executeTask()
     auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()));
     downloadJob.reset(job);
 
-    auto metacache = ENV->metacache();
+    auto metacache = APPLICATION->metacache();
 
     auto processArtifactPool = [&](const QList<LibraryPtr> & pool, QStringList & errors, const QString & localPath)
     {
@@ -63,7 +65,7 @@ void LibrariesTask::executeTask()
     connect(downloadJob.get(), &NetJob::succeeded, this, &LibrariesTask::emitSucceeded);
     connect(downloadJob.get(), &NetJob::failed, this, &LibrariesTask::jarlibFailed);
     connect(downloadJob.get(), &NetJob::progress, this, &LibrariesTask::progress);
-    downloadJob->start();
+    downloadJob->start(APPLICATION->network());
 }
 
 bool LibrariesTask::canAbort() const

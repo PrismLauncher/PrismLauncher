@@ -19,10 +19,14 @@
 #include <QString>
 #include <QStringList>
 
+#include "QObjectPtr.h"
+
 class Task : public QObject
 {
     Q_OBJECT
 public:
+    using Ptr = shared_qobject_ptr<Task>;
+
     enum class State
     {
         Inactive,

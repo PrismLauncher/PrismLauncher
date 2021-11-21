@@ -15,15 +15,16 @@
 
 #include "Download.h"
 
-#include "BuildConfig.h"
 #include <QFileInfo>
 #include <QDateTime>
 #include <QDebug>
-#include "Env.h"
-#include <FileSystem.h>
+
+#include "FileSystem.h"
 #include "ChecksumValidator.h"
 #include "MetaCacheSink.h"
 #include "ByteArraySink.h"
+
+#include "BuildConfig.h"
 
 namespace Net {
 
@@ -41,7 +42,7 @@ Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry, Options options
     auto cachedNode = new MetaCacheSink(entry, md5Node);
     dl->m_sink.reset(cachedNode);
     dl->m_target_path = entry->getFullPath();
-    return std::shared_ptr<Download>(dl);
+    return dl;
 }
 
 Download::Ptr Download::makeByteArray(QUrl url, QByteArray *output, Options options)
@@ -50,7 +51,7 @@ Download::Ptr Download::makeByteArray(QUrl url, QByteArray *output, Options opti
     dl->m_url = url;
     dl->m_options = options;
     dl->m_sink.reset(new ByteArraySink(output));
-    return std::shared_ptr<Download>(dl);
+    return dl;
 }
 
 Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
@@ -59,7 +60,7 @@ Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
     dl->m_url = url;
     dl->m_options = options;
     dl->m_sink.reset(new FileSink(path));
-    return std::shared_ptr<Download>(dl);
+    return dl;
 }
 
 void Download::addValidator(Validator * v)
@@ -67,7 +68,7 @@ void Download::addValidator(Validator * v)
     m_sink->addValidator(v);
 }
 
-void Download::start()
+void Download::startImpl()
 {
     if(m_status == Job_Aborted)
     {
@@ -97,7 +98,7 @@ void Download::start()
 
     request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT);
 
-    QNetworkReply *rep =  ENV->network().get(request);
+    QNetworkReply *rep = m_network->get(request);
 
     m_reply.reset(rep);
     connect(rep, SIGNAL(downloadProgress(qint64, qint64)), SLOT(downloadProgress(qint64, qint64)));
@@ -207,7 +208,7 @@ bool Download::handleRedirect()
 
     m_url = QUrl(redirect.toString());
     qDebug() << "Following redirect to " << m_url.toString();
-    start();
+    start(m_network);
     return true;
 }
 

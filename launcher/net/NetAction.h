@@ -35,14 +35,15 @@ enum JobStatus
     Job_Failed_Proceed
 };
 
-typedef std::shared_ptr<class NetAction> NetActionPtr;
 class NetAction : public QObject
 {
     Q_OBJECT
 protected:
-    explicit NetAction() : QObject(0) {};
+    explicit NetAction() : QObject(nullptr) {};
 
 public:
+    using Ptr = shared_qobject_ptr<NetAction>;
+
     virtual ~NetAction() {};
 
     bool isRunning() const
@@ -93,9 +94,17 @@ protected slots:
     virtual void downloadReadyRead() = 0;
 
 public slots:
-    virtual void start() = 0;
+    void start(shared_qobject_ptr<QNetworkAccessManager> network) {
+        m_network = network;
+        startImpl();
+    }
+
+protected:
+    virtual void startImpl() = 0;
 
 public:
+    shared_qobject_ptr<QNetworkAccessManager> m_network;
+
     /// index within the parent job, FIXME: nuke
     int m_index_within_job = 0;
 

@@ -1,15 +1,14 @@
 #include "VanillaPage.h"
 #include "ui_VanillaPage.h"
 
-#include "Application.h"
-
-#include <meta/Index.h>
-#include <meta/VersionList.h>
-#include <dialogs/NewInstanceDialog.h>
-#include <Filter.h>
-#include <Env.h>
-#include <InstanceCreationTask.h>
 #include <QTabBar>
+
+#include "Application.h"
+#include "meta/Index.h"
+#include "meta/VersionList.h"
+#include "dialogs/NewInstanceDialog.h"
+#include "Filter.h"
+#include "InstanceCreationTask.h"
 
 VanillaPage::VanillaPage(NewInstanceDialog *dialog, QWidget *parent)
     : QWidget(parent), dialog(dialog), ui(new Ui::VanillaPage)
@@ -31,7 +30,7 @@ void VanillaPage::openedImpl()
 {
     if(!initialized)
     {
-        auto vlist = ENV->metadataIndex()->get("net.minecraft");
+        auto vlist = APPLICATION->metadataIndex()->get("net.minecraft");
         ui->versionList->initialize(vlist.get());
         initialized = true;
     }
