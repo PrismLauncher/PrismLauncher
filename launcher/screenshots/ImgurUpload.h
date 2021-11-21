@@ -14,10 +14,10 @@ public:
 
 protected
 slots:
-    virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
-    virtual void downloadError(QNetworkReply::NetworkError error);
-    virtual void downloadFinished();
-    virtual void downloadReadyRead() {}
+    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
+    void downloadError(QNetworkReply::NetworkError error) override;
+    void downloadFinished() override;
+    void downloadReadyRead() override {}
 
 public
 slots:
