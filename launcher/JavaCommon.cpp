@@ -1,5 +1,5 @@
 #include "JavaCommon.h"
-#include "dialogs/CustomMessageBox.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include <MMCStrings.h>
 
 bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget *parent)

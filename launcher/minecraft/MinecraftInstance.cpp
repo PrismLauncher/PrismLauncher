@@ -19,6 +19,7 @@
 #include "launch/steps/Update.h"
 #include "launch/steps/PreLaunchCommand.h"
 #include "launch/steps/TextPrint.h"
+#include "launch/steps/CheckJava.h"
 
 #include "minecraft/launch/LauncherPartLaunch.h"
 #include "minecraft/launch/DirectJavaLaunch.h"
@@ -28,7 +29,6 @@
 #include "minecraft/launch/ScanModFolders.h"
 #include "minecraft/launch/VerifyJavaInstall.h"
 
-#include "java/launch/CheckJava.h"
 #include "java/JavaUtils.h"
 
 #include "meta/Index.h"

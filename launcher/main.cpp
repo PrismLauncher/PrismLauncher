@@ -1,8 +1,4 @@
 #include "Application.h"
-#include "MainWindow.h"
-#include "LaunchController.h"
-#include <InstanceList.h>
-#include <QDebug>
 
 // #define BREAK_INFINITE_LOOP
 // #define BREAK_EXCEPTION

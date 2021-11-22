@@ -1,36 +1,42 @@
 #include "Application.h"
 #include "BuildConfig.h"
-#include "MainWindow.h"
-#include "InstanceWindow.h"
 
-#include "instanceview/AccessibleInstanceView.h"
-#include <QAccessible>
+#include "ui/MainWindow.h"
+#include "ui/InstanceWindow.h"
 
-#include "pages/BasePageProvider.h"
-#include "pages/global/LauncherPage.h"
-#include "pages/global/MinecraftPage.h"
-#include "pages/global/JavaPage.h"
-#include "pages/global/LanguagePage.h"
-#include "pages/global/ProxyPage.h"
-#include "pages/global/ExternalToolsPage.h"
-#include "pages/global/AccountListPage.h"
-#include "pages/global/PasteEEPage.h"
-#include "pages/global/CustomCommandsPage.h"
+#include "ui/instanceview/AccessibleInstanceView.h"
 
-#include "themes/ITheme.h"
-#include "themes/SystemTheme.h"
-#include "themes/DarkTheme.h"
-#include "themes/BrightTheme.h"
-#include "themes/CustomTheme.h"
+#include "ui/pages/BasePageProvider.h"
+#include "ui/pages/global/LauncherPage.h"
+#include "ui/pages/global/MinecraftPage.h"
+#include "ui/pages/global/JavaPage.h"
+#include "ui/pages/global/LanguagePage.h"
+#include "ui/pages/global/ProxyPage.h"
+#include "ui/pages/global/ExternalToolsPage.h"
+#include "ui/pages/global/AccountListPage.h"
+#include "ui/pages/global/PasteEEPage.h"
+#include "ui/pages/global/CustomCommandsPage.h"
+
+#include "ui/themes/ITheme.h"
+#include "ui/themes/SystemTheme.h"
+#include "ui/themes/DarkTheme.h"
+#include "ui/themes/BrightTheme.h"
+#include "ui/themes/CustomTheme.h"
+
+#include "ui/setupwizard/SetupWizard.h"
+#include "ui/setupwizard/LanguageWizardPage.h"
+#include "ui/setupwizard/JavaWizardPage.h"
+#include "ui/setupwizard/AnalyticsWizardPage.h"
+
+#include "ui/dialogs/CustomMessageBox.h"
+
+#include "ui/pagedialog/PageDialog.h"
 
 #include "ApplicationMessage.h"
 
-#include "setupwizard/SetupWizard.h"
-#include "setupwizard/LanguageWizardPage.h"
-#include "setupwizard/JavaWizardPage.h"
-#include "setupwizard/AnalyticsWizardPage.h"
-
 #include <iostream>
+
+#include <QAccessible>
 #include <QDir>
 #include <QFileInfo>
 #include <QNetworkAccessManager>
@@ -41,7 +47,6 @@
 #include <QDebug>
 #include <QStyleFactory>
 
-#include "dialogs/CustomMessageBox.h"
 #include "InstanceList.h"
 
 #include <minecraft/auth/AccountList.h>
@@ -71,7 +76,6 @@
 #include <ganalytics.h>
 #include <sys.h>
 
-#include "pagedialog/PageDialog.h"
 #include <Secrets.h>
 
 

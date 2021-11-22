@@ -128,6 +128,8 @@ set(NET_SOURCES
 
 # Game launch logic
 set(LAUNCH_SOURCES
+    launch/steps/CheckJava.cpp
+    launch/steps/CheckJava.h
     launch/steps/LookupServerAddress.cpp
     launch/steps/LookupServerAddress.h
     launch/steps/PostLaunchCommand.cpp
@@ -419,9 +421,6 @@ add_unit_test(INIFile
     )
 
 set(JAVA_SOURCES
-    # Java related code
-    java/launch/CheckJava.cpp
-    java/launch/CheckJava.h
     java/JavaChecker.h
     java/JavaChecker.cpp
     java/JavaCheckerJob.h
@@ -568,19 +567,26 @@ SET(LAUNCHER_SOURCES
     # GUI - general utilities
     DesktopServices.h
     DesktopServices.cpp
-    GuiUtil.h
-    GuiUtil.cpp
-    ColumnResizer.h
-    ColumnResizer.cpp
     VersionProxyModel.h
     VersionProxyModel.cpp
-    ColorCache.h
-    ColorCache.cpp
     HoeDown.h
 
     # Super secret!
     KonamiCode.h
     KonamiCode.cpp
+
+    # Bundled resources
+    resources/backgrounds/backgrounds.qrc
+    resources/multimc/multimc.qrc
+    resources/pe_dark/pe_dark.qrc
+    resources/pe_light/pe_light.qrc
+    resources/pe_colored/pe_colored.qrc
+    resources/pe_blue/pe_blue.qrc
+    resources/OSX/OSX.qrc
+    resources/iOS/iOS.qrc
+    resources/flat/flat.qrc
+    resources/documents/documents.qrc
+    ../${Launcher_Branding_LogoQRC}
 
     # Icons
     icons/MMCIcon.h
@@ -589,39 +595,43 @@ SET(LAUNCHER_SOURCES
     icons/IconList.cpp
 
     # GUI - windows
-    MainWindow.h
-    MainWindow.cpp
-    InstanceWindow.h
-    InstanceWindow.cpp
+    ui/GuiUtil.h
+    ui/GuiUtil.cpp
+    ui/ColorCache.h
+    ui/ColorCache.cpp
+    ui/MainWindow.h
+    ui/MainWindow.cpp
+    ui/InstanceWindow.h
+    ui/InstanceWindow.cpp
 
     # FIXME: maybe find a better home for this.
     SkinUtils.cpp
     SkinUtils.h
 
     # GUI - setup wizard
-    setupwizard/SetupWizard.h
-    setupwizard/SetupWizard.cpp
-    setupwizard/AnalyticsWizardPage.cpp
-    setupwizard/AnalyticsWizardPage.h
-    setupwizard/BaseWizardPage.h
-    setupwizard/JavaWizardPage.cpp
-    setupwizard/JavaWizardPage.h
-    setupwizard/LanguageWizardPage.cpp
-    setupwizard/LanguageWizardPage.h
+    ui/setupwizard/SetupWizard.h
+    ui/setupwizard/SetupWizard.cpp
+    ui/setupwizard/AnalyticsWizardPage.cpp
+    ui/setupwizard/AnalyticsWizardPage.h
+    ui/setupwizard/BaseWizardPage.h
+    ui/setupwizard/JavaWizardPage.cpp
+    ui/setupwizard/JavaWizardPage.h
+    ui/setupwizard/LanguageWizardPage.cpp
+    ui/setupwizard/LanguageWizardPage.h
 
     # GUI - themes
-    themes/FusionTheme.cpp
-    themes/FusionTheme.h
-    themes/BrightTheme.cpp
-    themes/BrightTheme.h
-    themes/CustomTheme.cpp
-    themes/CustomTheme.h
-    themes/DarkTheme.cpp
-    themes/DarkTheme.h
-    themes/ITheme.cpp
-    themes/ITheme.h
-    themes/SystemTheme.cpp
-    themes/SystemTheme.h
+    ui/themes/FusionTheme.cpp
+    ui/themes/FusionTheme.h
+    ui/themes/BrightTheme.cpp
+    ui/themes/BrightTheme.h
+    ui/themes/CustomTheme.cpp
+    ui/themes/CustomTheme.h
+    ui/themes/DarkTheme.cpp
+    ui/themes/DarkTheme.h
+    ui/themes/ITheme.cpp
+    ui/themes/ITheme.h
+    ui/themes/SystemTheme.cpp
+    ui/themes/SystemTheme.h
 
     # Processes
     LaunchController.h
@@ -635,255 +645,183 @@ SET(LAUNCHER_SOURCES
     JavaCommon.cpp
 
     # GUI - paged dialog base
-    pages/BasePage.h
-    pages/BasePageContainer.h
-    pages/BasePageProvider.h
+    ui/pages/BasePage.h
+    ui/pages/BasePageContainer.h
+    ui/pages/BasePageProvider.h
 
     # GUI - instance pages
-    pages/instance/GameOptionsPage.cpp
-    pages/instance/GameOptionsPage.h
-    pages/instance/VersionPage.cpp
-    pages/instance/VersionPage.h
-    pages/instance/TexturePackPage.h
-    pages/instance/ResourcePackPage.h
-    pages/instance/ShaderPackPage.h
-    pages/instance/ModFolderPage.cpp
-    pages/instance/ModFolderPage.h
-    pages/instance/NotesPage.cpp
-    pages/instance/NotesPage.h
-    pages/instance/LogPage.cpp
-    pages/instance/LogPage.h
-    pages/instance/InstanceSettingsPage.cpp
-    pages/instance/InstanceSettingsPage.h
-    pages/instance/ScreenshotsPage.cpp
-    pages/instance/ScreenshotsPage.h
-    pages/instance/OtherLogsPage.cpp
-    pages/instance/OtherLogsPage.h
-    pages/instance/ServersPage.cpp
-    pages/instance/ServersPage.h
-    pages/instance/LegacyUpgradePage.cpp
-    pages/instance/LegacyUpgradePage.h
-    pages/instance/WorldListPage.cpp
-    pages/instance/WorldListPage.h
+    ui/pages/instance/GameOptionsPage.cpp
+    ui/pages/instance/GameOptionsPage.h
+    ui/pages/instance/VersionPage.cpp
+    ui/pages/instance/VersionPage.h
+    ui/pages/instance/TexturePackPage.h
+    ui/pages/instance/ResourcePackPage.h
+    ui/pages/instance/ShaderPackPage.h
+    ui/pages/instance/ModFolderPage.cpp
+    ui/pages/instance/ModFolderPage.h
+    ui/pages/instance/NotesPage.cpp
+    ui/pages/instance/NotesPage.h
+    ui/pages/instance/LogPage.cpp
+    ui/pages/instance/LogPage.h
+    ui/pages/instance/InstanceSettingsPage.cpp
+    ui/pages/instance/InstanceSettingsPage.h
+    ui/pages/instance/ScreenshotsPage.cpp
+    ui/pages/instance/ScreenshotsPage.h
+    ui/pages/instance/OtherLogsPage.cpp
+    ui/pages/instance/OtherLogsPage.h
+    ui/pages/instance/ServersPage.cpp
+    ui/pages/instance/ServersPage.h
+    ui/pages/instance/LegacyUpgradePage.cpp
+    ui/pages/instance/LegacyUpgradePage.h
+    ui/pages/instance/WorldListPage.cpp
+    ui/pages/instance/WorldListPage.h
 
     # GUI - global settings pages
-    pages/global/AccountListPage.cpp
-    pages/global/AccountListPage.h
-    pages/global/CustomCommandsPage.cpp
-    pages/global/CustomCommandsPage.h
-    pages/global/ExternalToolsPage.cpp
-    pages/global/ExternalToolsPage.h
-    pages/global/JavaPage.cpp
-    pages/global/JavaPage.h
-    pages/global/LanguagePage.cpp
-    pages/global/LanguagePage.h
-    pages/global/MinecraftPage.cpp
-    pages/global/MinecraftPage.h
-    pages/global/LauncherPage.cpp
-    pages/global/LauncherPage.h
-    pages/global/ProxyPage.cpp
-    pages/global/ProxyPage.h
-    pages/global/PasteEEPage.cpp
-    pages/global/PasteEEPage.h
+    ui/pages/global/AccountListPage.cpp
+    ui/pages/global/AccountListPage.h
+    ui/pages/global/CustomCommandsPage.cpp
+    ui/pages/global/CustomCommandsPage.h
+    ui/pages/global/ExternalToolsPage.cpp
+    ui/pages/global/ExternalToolsPage.h
+    ui/pages/global/JavaPage.cpp
+    ui/pages/global/JavaPage.h
+    ui/pages/global/LanguagePage.cpp
+    ui/pages/global/LanguagePage.h
+    ui/pages/global/MinecraftPage.cpp
+    ui/pages/global/MinecraftPage.h
+    ui/pages/global/LauncherPage.cpp
+    ui/pages/global/LauncherPage.h
+    ui/pages/global/ProxyPage.cpp
+    ui/pages/global/ProxyPage.h
+    ui/pages/global/PasteEEPage.cpp
+    ui/pages/global/PasteEEPage.h
 
     # GUI - platform pages
-    pages/modplatform/VanillaPage.cpp
-    pages/modplatform/VanillaPage.h
+    ui/pages/modplatform/VanillaPage.cpp
+    ui/pages/modplatform/VanillaPage.h
 
-    pages/modplatform/atlauncher/AtlFilterModel.cpp
-    pages/modplatform/atlauncher/AtlFilterModel.h
-    pages/modplatform/atlauncher/AtlListModel.cpp
-    pages/modplatform/atlauncher/AtlListModel.h
-    pages/modplatform/atlauncher/AtlOptionalModDialog.cpp
-    pages/modplatform/atlauncher/AtlOptionalModDialog.h
-    pages/modplatform/atlauncher/AtlPage.cpp
-    pages/modplatform/atlauncher/AtlPage.h
+    ui/pages/modplatform/atlauncher/AtlFilterModel.cpp
+    ui/pages/modplatform/atlauncher/AtlFilterModel.h
+    ui/pages/modplatform/atlauncher/AtlListModel.cpp
+    ui/pages/modplatform/atlauncher/AtlListModel.h
+    ui/pages/modplatform/atlauncher/AtlOptionalModDialog.cpp
+    ui/pages/modplatform/atlauncher/AtlOptionalModDialog.h
+    ui/pages/modplatform/atlauncher/AtlPage.cpp
+    ui/pages/modplatform/atlauncher/AtlPage.h
 
-    pages/modplatform/ftb/FtbFilterModel.cpp
-    pages/modplatform/ftb/FtbFilterModel.h
-    pages/modplatform/ftb/FtbListModel.cpp
-    pages/modplatform/ftb/FtbListModel.h
-    pages/modplatform/ftb/FtbPage.cpp
-    pages/modplatform/ftb/FtbPage.h
+    ui/pages/modplatform/ftb/FtbFilterModel.cpp
+    ui/pages/modplatform/ftb/FtbFilterModel.h
+    ui/pages/modplatform/ftb/FtbListModel.cpp
+    ui/pages/modplatform/ftb/FtbListModel.h
+    ui/pages/modplatform/ftb/FtbPage.cpp
+    ui/pages/modplatform/ftb/FtbPage.h
 
-    pages/modplatform/legacy_ftb/Page.cpp
-    pages/modplatform/legacy_ftb/Page.h
-    pages/modplatform/legacy_ftb/ListModel.h
-    pages/modplatform/legacy_ftb/ListModel.cpp
+    ui/pages/modplatform/legacy_ftb/Page.cpp
+    ui/pages/modplatform/legacy_ftb/Page.h
+    ui/pages/modplatform/legacy_ftb/ListModel.h
+    ui/pages/modplatform/legacy_ftb/ListModel.cpp
 
-    pages/modplatform/flame/FlameModel.cpp
-    pages/modplatform/flame/FlameModel.h
-    pages/modplatform/flame/FlamePage.cpp
-    pages/modplatform/flame/FlamePage.h
+    ui/pages/modplatform/flame/FlameModel.cpp
+    ui/pages/modplatform/flame/FlameModel.h
+    ui/pages/modplatform/flame/FlamePage.cpp
+    ui/pages/modplatform/flame/FlamePage.h
 
-    pages/modplatform/technic/TechnicModel.cpp
-    pages/modplatform/technic/TechnicModel.h
-    pages/modplatform/technic/TechnicPage.cpp
-    pages/modplatform/technic/TechnicPage.h
+    ui/pages/modplatform/technic/TechnicModel.cpp
+    ui/pages/modplatform/technic/TechnicModel.h
+    ui/pages/modplatform/technic/TechnicPage.cpp
+    ui/pages/modplatform/technic/TechnicPage.h
 
-    pages/modplatform/ImportPage.cpp
-    pages/modplatform/ImportPage.h
+    ui/pages/modplatform/ImportPage.cpp
+    ui/pages/modplatform/ImportPage.h
 
     # GUI - dialogs
-    dialogs/AboutDialog.cpp
-    dialogs/AboutDialog.h
-    dialogs/ProfileSelectDialog.cpp
-    dialogs/ProfileSelectDialog.h
-    dialogs/ProfileSetupDialog.cpp
-    dialogs/ProfileSetupDialog.h
-    dialogs/CopyInstanceDialog.cpp
-    dialogs/CopyInstanceDialog.h
-    dialogs/CustomMessageBox.cpp
-    dialogs/CustomMessageBox.h
-    dialogs/EditAccountDialog.cpp
-    dialogs/EditAccountDialog.h
-    dialogs/ExportInstanceDialog.cpp
-    dialogs/ExportInstanceDialog.h
-    dialogs/IconPickerDialog.cpp
-    dialogs/IconPickerDialog.h
-    dialogs/LoginDialog.cpp
-    dialogs/LoginDialog.h
-    dialogs/MSALoginDialog.cpp
-    dialogs/MSALoginDialog.h
-    dialogs/NewComponentDialog.cpp
-    dialogs/NewComponentDialog.h
-    dialogs/NewInstanceDialog.cpp
-    dialogs/NewInstanceDialog.h
-    dialogs/NotificationDialog.cpp
-    dialogs/NotificationDialog.h
-    pagedialog/PageDialog.cpp
-    pagedialog/PageDialog.h
-    dialogs/ProgressDialog.cpp
-    dialogs/ProgressDialog.h
-    dialogs/UpdateDialog.cpp
-    dialogs/UpdateDialog.h
-    dialogs/VersionSelectDialog.cpp
-    dialogs/VersionSelectDialog.h
-    dialogs/SkinUploadDialog.cpp
-    dialogs/SkinUploadDialog.h
+    ui/dialogs/AboutDialog.cpp
+    ui/dialogs/AboutDialog.h
+    ui/dialogs/ProfileSelectDialog.cpp
+    ui/dialogs/ProfileSelectDialog.h
+    ui/dialogs/ProfileSetupDialog.cpp
+    ui/dialogs/ProfileSetupDialog.h
+    ui/dialogs/CopyInstanceDialog.cpp
+    ui/dialogs/CopyInstanceDialog.h
+    ui/dialogs/CustomMessageBox.cpp
+    ui/dialogs/CustomMessageBox.h
+    ui/dialogs/EditAccountDialog.cpp
+    ui/dialogs/EditAccountDialog.h
+    ui/dialogs/ExportInstanceDialog.cpp
+    ui/dialogs/ExportInstanceDialog.h
+    ui/dialogs/IconPickerDialog.cpp
+    ui/dialogs/IconPickerDialog.h
+    ui/dialogs/LoginDialog.cpp
+    ui/dialogs/LoginDialog.h
+    ui/dialogs/MSALoginDialog.cpp
+    ui/dialogs/MSALoginDialog.h
+    ui/dialogs/NewComponentDialog.cpp
+    ui/dialogs/NewComponentDialog.h
+    ui/dialogs/NewInstanceDialog.cpp
+    ui/dialogs/NewInstanceDialog.h
+    ui/dialogs/NotificationDialog.cpp
+    ui/dialogs/NotificationDialog.h
+    ui/pagedialog/PageDialog.cpp
+    ui/pagedialog/PageDialog.h
+    ui/dialogs/ProgressDialog.cpp
+    ui/dialogs/ProgressDialog.h
+    ui/dialogs/UpdateDialog.cpp
+    ui/dialogs/UpdateDialog.h
+    ui/dialogs/VersionSelectDialog.cpp
+    ui/dialogs/VersionSelectDialog.h
+    ui/dialogs/SkinUploadDialog.cpp
+    ui/dialogs/SkinUploadDialog.h
 
 
     # GUI - widgets
-    widgets/Common.cpp
-    widgets/Common.h
-    widgets/CustomCommands.cpp
-    widgets/CustomCommands.h
-    widgets/DropLabel.cpp
-    widgets/DropLabel.h
-    widgets/FocusLineEdit.cpp
-    widgets/FocusLineEdit.h
-    widgets/IconLabel.cpp
-    widgets/IconLabel.h
-    widgets/JavaSettingsWidget.cpp
-    widgets/JavaSettingsWidget.h
-    widgets/LabeledToolButton.cpp
-    widgets/LabeledToolButton.h
-    widgets/LanguageSelectionWidget.cpp
-    widgets/LanguageSelectionWidget.h
-    widgets/LineSeparator.cpp
-    widgets/LineSeparator.h
-    widgets/LogView.cpp
-    widgets/LogView.h
-    widgets/MCModInfoFrame.cpp
-    widgets/MCModInfoFrame.h
-    widgets/ModListView.cpp
-    widgets/ModListView.h
-    widgets/PageContainer.cpp
-    widgets/PageContainer.h
-    widgets/PageContainer_p.h
-    widgets/VersionListView.cpp
-    widgets/VersionListView.h
-    widgets/VersionSelectWidget.cpp
-    widgets/VersionSelectWidget.h
-    widgets/ProgressWidget.h
-    widgets/ProgressWidget.cpp
-    widgets/WideBar.h
-    widgets/WideBar.cpp
+    ui/widgets/Common.cpp
+    ui/widgets/Common.h
+    ui/widgets/CustomCommands.cpp
+    ui/widgets/CustomCommands.h
+    ui/widgets/DropLabel.cpp
+    ui/widgets/DropLabel.h
+    ui/widgets/FocusLineEdit.cpp
+    ui/widgets/FocusLineEdit.h
+    ui/widgets/IconLabel.cpp
+    ui/widgets/IconLabel.h
+    ui/widgets/JavaSettingsWidget.cpp
+    ui/widgets/JavaSettingsWidget.h
+    ui/widgets/LabeledToolButton.cpp
+    ui/widgets/LabeledToolButton.h
+    ui/widgets/LanguageSelectionWidget.cpp
+    ui/widgets/LanguageSelectionWidget.h
+    ui/widgets/LineSeparator.cpp
+    ui/widgets/LineSeparator.h
+    ui/widgets/LogView.cpp
+    ui/widgets/LogView.h
+    ui/widgets/MCModInfoFrame.cpp
+    ui/widgets/MCModInfoFrame.h
+    ui/widgets/ModListView.cpp
+    ui/widgets/ModListView.h
+    ui/widgets/PageContainer.cpp
+    ui/widgets/PageContainer.h
+    ui/widgets/PageContainer_p.h
+    ui/widgets/VersionListView.cpp
+    ui/widgets/VersionListView.h
+    ui/widgets/VersionSelectWidget.cpp
+    ui/widgets/VersionSelectWidget.h
+    ui/widgets/ProgressWidget.h
+    ui/widgets/ProgressWidget.cpp
+    ui/widgets/WideBar.h
+    ui/widgets/WideBar.cpp
 
     # GUI - instance group view
-    instanceview/InstanceProxyModel.cpp
-    instanceview/InstanceProxyModel.h
-    instanceview/AccessibleInstanceView.cpp
-    instanceview/AccessibleInstanceView.h
-    instanceview/AccessibleInstanceView_p.h
-    instanceview/InstanceView.cpp
-    instanceview/InstanceView.h
-    instanceview/InstanceDelegate.cpp
-    instanceview/InstanceDelegate.h
-    instanceview/VisualGroup.cpp
-    instanceview/VisualGroup.h
-    )
-
-######## UIs ########
-SET(LAUNCHER_UIS
-    # Instance pages
-    pages/instance/GameOptionsPage.ui
-    pages/instance/VersionPage.ui
-    pages/instance/ModFolderPage.ui
-    pages/instance/LogPage.ui
-    pages/instance/InstanceSettingsPage.ui
-    pages/instance/NotesPage.ui
-    pages/instance/ScreenshotsPage.ui
-    pages/instance/OtherLogsPage.ui
-    pages/instance/LegacyUpgradePage.ui
-    pages/instance/ServersPage.ui
-    pages/instance/WorldListPage.ui
-
-    # Global settings pages
-    pages/global/AccountListPage.ui
-    pages/global/ExternalToolsPage.ui
-    pages/global/JavaPage.ui
-    pages/global/MinecraftPage.ui
-    pages/global/LauncherPage.ui
-    pages/global/ProxyPage.ui
-    pages/global/PasteEEPage.ui
-
-    # Platform pages
-    pages/modplatform/VanillaPage.ui
-    pages/modplatform/atlauncher/AtlPage.ui
-    pages/modplatform/ftb/FtbPage.ui
-    pages/modplatform/legacy_ftb/Page.ui
-    pages/modplatform/flame/FlamePage.ui
-    pages/modplatform/technic/TechnicPage.ui
-    pages/modplatform/ImportPage.ui
-
-    # Platform Dialogs
-    pages/modplatform/atlauncher/AtlOptionalModDialog.ui
-
-    # Dialogs
-    dialogs/CopyInstanceDialog.ui
-    dialogs/NewComponentDialog.ui
-    dialogs/NewInstanceDialog.ui
-    dialogs/AboutDialog.ui
-    dialogs/ProgressDialog.ui
-    dialogs/IconPickerDialog.ui
-    dialogs/ProfileSelectDialog.ui
-    dialogs/ProfileSetupDialog.ui
-    dialogs/EditAccountDialog.ui
-    dialogs/ExportInstanceDialog.ui
-    dialogs/LoginDialog.ui
-    dialogs/MSALoginDialog.ui
-    dialogs/UpdateDialog.ui
-    dialogs/NotificationDialog.ui
-    dialogs/SkinUploadDialog.ui
-
-    # Widgets/other
-    widgets/CustomCommands.ui
-    widgets/MCModInfoFrame.ui
-)
-
-set(LAUNCHER_QRCS
-    resources/backgrounds/backgrounds.qrc
-    resources/multimc/multimc.qrc
-    resources/pe_dark/pe_dark.qrc
-    resources/pe_light/pe_light.qrc
-    resources/pe_colored/pe_colored.qrc
-    resources/pe_blue/pe_blue.qrc
-    resources/OSX/OSX.qrc
-    resources/iOS/iOS.qrc
-    resources/flat/flat.qrc
-    resources/documents/documents.qrc
-    ../${Launcher_Branding_LogoQRC}
+    ui/instanceview/InstanceProxyModel.cpp
+    ui/instanceview/InstanceProxyModel.h
+    ui/instanceview/AccessibleInstanceView.cpp
+    ui/instanceview/AccessibleInstanceView.h
+    ui/instanceview/AccessibleInstanceView_p.h
+    ui/instanceview/InstanceView.cpp
+    ui/instanceview/InstanceView.h
+    ui/instanceview/InstanceDelegate.cpp
+    ui/instanceview/InstanceDelegate.h
+    ui/instanceview/VisualGroup.cpp
+    ui/instanceview/VisualGroup.h
 )
 
 ######## Windows resource files ########
@@ -891,12 +829,8 @@ if(WIN32)
     set(LAUNCHER_RCS ../${Launcher_Branding_WindowsRC})
 endif()
 
-# Qt 5 stuff
-qt5_wrap_ui(LAUNCHER_UI ${LAUNCHER_UIS})
-qt5_add_resources(LAUNCHER_RESOURCES ${LAUNCHER_QRCS})
-
 # Add executable
-add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
+add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES})
 target_link_libraries(Launcher_logic
     systeminfo
     Launcher_quazip
