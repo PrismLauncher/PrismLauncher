@@ -871,13 +871,27 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/dialogs/EditAccountDialog.ui
 )
 
+qt5_add_resources(LAUNCHER_RESOURCES
+    resources/backgrounds/backgrounds.qrc
+    resources/multimc/multimc.qrc
+    resources/pe_dark/pe_dark.qrc
+    resources/pe_light/pe_light.qrc
+    resources/pe_colored/pe_colored.qrc
+    resources/pe_blue/pe_blue.qrc
+    resources/OSX/OSX.qrc
+    resources/iOS/iOS.qrc
+    resources/flat/flat.qrc
+    resources/documents/documents.qrc
+    ../${Launcher_Branding_LogoQRC}
+)
+
 ######## Windows resource files ########
 if(WIN32)
     set(LAUNCHER_RCS ../${Launcher_Branding_WindowsRC})
 endif()
 
 # Add executable
-add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI})
+add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
 target_link_libraries(Launcher_logic
     systeminfo
     Launcher_quazip
