@@ -6,7 +6,7 @@
 #include <minecraft/auth/AuthSession.h>
 #include "tasks/Task.h"
 
-typedef std::shared_ptr<class SkinUpload> SkinUploadPtr;
+typedef shared_qobject_ptr<class SkinUpload> SkinUploadPtr;
 
 class SkinUpload : public Task
 {
@@ -26,7 +26,7 @@ private:
     Model m_model;
     QByteArray m_skin;
     AuthSessionPtr m_session;
-    std::shared_ptr<QNetworkReply> m_reply;
+    shared_qobject_ptr<QNetworkReply> m_reply;
 protected:
     virtual void executeTask();
 

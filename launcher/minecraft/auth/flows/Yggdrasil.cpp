@@ -22,6 +22,7 @@
 #include <QJsonDocument>
 #include <QNetworkReply>
 #include <QByteArray>
+
 #include <QDebug>
 
 #include "Application.h"

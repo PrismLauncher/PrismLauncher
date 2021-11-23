@@ -5,6 +5,7 @@
 #include <memory>
 #include <minecraft/auth/AuthSession.h>
 #include "tasks/Task.h"
+#include "QObjectPtr.h"
 
 class CapeChange : public Task
 {
@@ -20,7 +21,7 @@ private:
 private:
     QString m_capeId;
     AuthSessionPtr m_session;
-    std::shared_ptr<QNetworkReply> m_reply;
+    shared_qobject_ptr<QNetworkReply> m_reply;
 
 protected:
     virtual void executeTask();

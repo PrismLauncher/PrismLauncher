@@ -77,6 +77,12 @@ public:
     {
         return m_ptr;
     }
+    bool operator==(const shared_qobject_ptr<T>& other) {
+        return m_ptr == other.m_ptr;
+    }
+    bool operator!=(const shared_qobject_ptr<T>& other) {
+        return m_ptr != other.m_ptr;
+    }
 
 private:
     std::shared_ptr <T> m_ptr;

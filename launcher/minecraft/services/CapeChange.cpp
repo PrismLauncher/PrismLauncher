@@ -18,7 +18,7 @@ void CapeChange::setCape(QString& cape) {
 
     setStatus(tr("Equipping cape"));
 
-    m_reply = std::shared_ptr<QNetworkReply>(rep);
+    m_reply = shared_qobject_ptr<QNetworkReply>(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &Task::setProgress);
     connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
     connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));
@@ -32,7 +32,7 @@ void CapeChange::clearCape() {
 
     setStatus(tr("Removing cape"));
 
-    m_reply = std::shared_ptr<QNetworkReply>(rep);
+    m_reply = shared_qobject_ptr<QNetworkReply>(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &Task::setProgress);
     connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
     connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));
