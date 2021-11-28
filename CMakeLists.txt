@@ -186,7 +186,7 @@ if(Launcher_LAYOUT_REAL STREQUAL "mac-bundle")
     set(INSTALL_BUNDLE "full")
 
     # Add the icon
-    install(FILES ${Launcher_Branding_ICNS} DESTINATION ${RESOURCES_DEST_DIR})
+    install(FILES ${Launcher_Branding_ICNS} DESTINATION ${RESOURCES_DEST_DIR} RENAME ${Launcher_Name}.icns)
 
 elseif(Launcher_LAYOUT_REAL STREQUAL "lin-nodeps")
     set(BINARY_DEST_DIR "bin")
