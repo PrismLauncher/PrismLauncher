@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(LocalPeer)
 
-find_package(Qt5Core REQUIRED QUIET)
-find_package(Qt5Network REQUIRED QUIET)
+find_package(Qt5 COMPONENTS Core Network REQUIRED)
 
 set(SINGLE_SOURCES
 src/LocalPeer.cpp

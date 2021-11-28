@@ -428,6 +428,7 @@ void DeviceFlow::onRefreshError(QNetworkReply::NetworkError error, QNetworkReply
     case QNetworkReply::AuthenticationRequiredError:
     case QNetworkReply::ContentAccessDenied:
     case QNetworkReply::ContentOperationNotPermittedError:
+    case QNetworkReply::ProtocolInvalidOperationError:
         updateActivity(Activity::FailedHard);
         break;
     case QNetworkReply::ContentGoneError: {
