@@ -9,12 +9,14 @@
 
 namespace Katabasis {
 
+constexpr int defaultTimeout = 30 * 1000;
+
 /// A network request/reply pair that can time out.
 class Reply: public QTimer {
     Q_OBJECT
 
 public:
-    Reply(QNetworkReply *reply, int timeOut = 60 * 1000, QObject *parent = 0);
+    Reply(QNetworkReply *reply, int timeOut = defaultTimeout, QObject *parent = 0);
 
 signals:
     void error(QNetworkReply::NetworkError);
@@ -25,6 +27,7 @@ public slots:
 
 public:
     QNetworkReply *reply;
+    bool timedOut = false;
 };
 
 /// List of O2Replies.
@@ -37,7 +40,7 @@ public:
     virtual ~ReplyList();
 
     /// Create a new O2Reply from a QNetworkReply, and add it to this list.
-    void add(QNetworkReply *reply);
+    void add(QNetworkReply *reply, int timeOut = defaultTimeout);
 
     /// Add an O2Reply to the list, while taking ownership of it.
     void add(Reply *reply);

@@ -34,6 +34,11 @@
 #include "flows/MojangRefresh.h"
 #include "flows/MojangLogin.h"
 
+MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent) {
+    m_internalId = QUuid::createUuid().toString().remove(QRegExp("[{}-]"));
+}
+
+
 MinecraftAccountPtr MinecraftAccount::loadFromJsonV2(const QJsonObject& json) {
     MinecraftAccountPtr account(new MinecraftAccount());
     if(account->data.resumeStateFromV2(json)) {
@@ -52,7 +57,7 @@ MinecraftAccountPtr MinecraftAccount::loadFromJsonV3(const QJsonObject& json) {
 
 MinecraftAccountPtr MinecraftAccount::createFromUsername(const QString &username)
 {
-    MinecraftAccountPtr account(new MinecraftAccount());
+    MinecraftAccountPtr account = new MinecraftAccount();
     account->data.type = AccountType::Mojang;
     account->data.yggdrasilToken.extra["userName"] = username;
     account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegExp("[{}-]"));
@@ -90,6 +95,23 @@ AccountStatus MinecraftAccount::accountStatus() const {
         return Verified;
     }
 }
+
+bool MinecraftAccount::isExpired() const {
+    switch(data.type) {
+        case AccountType::Mojang: {
+            return data.accessToken().isEmpty();
+        }
+        break;
+        case AccountType::MSA: {
+            return data.msaToken.validity == Katabasis::Validity::None;
+        }
+        break;
+        default: {
+            return true;
+        }
+    }
+}
+
 
 QPixmap MinecraftAccount::getFace() const {
     QPixmap skinTexture;

@@ -18,7 +18,7 @@
 
 #include <Application.h>
 
-using OAuth2 = Katabasis::OAuth2;
+using OAuth2 = Katabasis::DeviceFlow;
 using Activity = Katabasis::Activity;
 
 AuthContext::AuthContext(AccountData * data, QObject *parent) :
@@ -50,21 +50,17 @@ void AuthContext::initMSA() {
         return;
     }
 
-    Katabasis::OAuth2::Options opts;
+    OAuth2::Options opts;
     opts.scope = "XboxLive.signin offline_access";
     opts.clientIdentifier = APPLICATION->msaClientId();
     opts.authorizationUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
     opts.accessTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
-    opts.listenerPorts = {28562, 28563, 28564, 28565, 28566};
 
     // FIXME: OAuth2 is not aware of our fancy shared pointers
     m_oauth2 = new OAuth2(opts, m_data->msaToken, this, APPLICATION->network().get());
-    m_oauth2->setGrantFlow(Katabasis::OAuth2::GrantFlowDevice);
 
-    connect(m_oauth2, &OAuth2::linkingFailed, this, &AuthContext::onOAuthLinkingFailed);
-    connect(m_oauth2, &OAuth2::linkingSucceeded, this, &AuthContext::onOAuthLinkingSucceeded);
-    connect(m_oauth2, &OAuth2::showVerificationUriAndCode, this, &AuthContext::showVerificationUriAndCode);
     connect(m_oauth2, &OAuth2::activityChanged, this, &AuthContext::onOAuthActivityChanged);
+    connect(m_oauth2, &OAuth2::showVerificationUriAndCode, this, &AuthContext::showVerificationUriAndCode);
 }
 
 void AuthContext::initMojang() {
@@ -78,7 +74,7 @@ void AuthContext::initMojang() {
 }
 
 void AuthContext::onMojangSucceeded() {
-    doEntitlements();
+    doMinecraftProfile();
 }
 
 
@@ -89,50 +85,56 @@ void AuthContext::onMojangFailed() {
     changeState(m_yggdrasil->accountState(), tr("Mojang user authentication failed."));
 }
 
-/*
-bool AuthContext::signOut() {
-    if(isBusy()) {
-        return false;
-    }
-
-    start();
-
-    beginActivity(Activity::LoggingOut);
-    m_oauth2->unlink();
-    m_account = AccountData();
-    finishActivity();
-    return true;
-}
-*/
-
-void AuthContext::onOAuthLinkingFailed() {
-    emit hideVerificationUriAndCode();
-    finishActivity();
-    changeState(STATE_FAILED_HARD, tr("Microsoft user authentication failed."));
-}
-
-void AuthContext::onOAuthLinkingSucceeded() {
-    emit hideVerificationUriAndCode();
-    auto *o2t = qobject_cast<OAuth2 *>(sender());
-    if (!o2t->linked()) {
-        finishActivity();
-        changeState(STATE_FAILED_HARD, tr("Microsoft user authentication ended with an impossible state (succeeded, but not succeeded at the same time)."));
-        return;
-    }
-    QVariantMap extraTokens = o2t->extraTokens();
-#ifndef NDEBUG
-    if (!extraTokens.isEmpty()) {
-        qDebug() << "Extra tokens in response:";
-        foreach (QString key, extraTokens.keys()) {
-            qDebug() << "\t" << key << ":" << extraTokens.value(key);
-        }
-    }
-#endif
-    doUserAuth();
-}
-
 void AuthContext::onOAuthActivityChanged(Katabasis::Activity activity) {
-    // respond to activity change here
+    switch(activity) {
+        case Katabasis::Activity::Idle:
+        case Katabasis::Activity::LoggingIn:
+        case Katabasis::Activity::Refreshing:
+        case Katabasis::Activity::LoggingOut: {
+            // We asked it to do something, it's doing it. Nothing to act upon.
+            return;
+        }
+        case Katabasis::Activity::Succeeded: {
+            // Succeeded or did not invalidate tokens
+            emit hideVerificationUriAndCode();
+            if (!m_oauth2->linked()) {
+                finishActivity();
+                changeState(STATE_FAILED_HARD, tr("Microsoft user authentication ended with an impossible state (succeeded, but not succeeded at the same time)."));
+                return;
+            }
+            QVariantMap extraTokens = m_oauth2->extraTokens();
+#ifndef NDEBUG
+            if (!extraTokens.isEmpty()) {
+                qDebug() << "Extra tokens in response:";
+                foreach (QString key, extraTokens.keys()) {
+                    qDebug() << "\t" << key << ":" << extraTokens.value(key);
+                }
+            }
+#endif
+            doUserAuth();
+            return;
+        }
+        case Katabasis::Activity::FailedSoft: {
+            emit hideVerificationUriAndCode();
+            finishActivity();
+            changeState(STATE_FAILED_SOFT, tr("Microsoft user authentication failed with a soft error."));
+            return;
+        }
+        case Katabasis::Activity::FailedGone:
+        case Katabasis::Activity::FailedHard: {
+            emit hideVerificationUriAndCode();
+            finishActivity();
+            changeState(STATE_FAILED_HARD, tr("Microsoft user authentication failed."));
+            return;
+        }
+        default: {
+            emit hideVerificationUriAndCode();
+            finishActivity();
+            changeState(STATE_FAILED_HARD, tr("Microsoft user authentication completed with an unrecognized result."));
+            return;
+        }
+
+    }
 }
 
 void AuthContext::doUserAuth() {
@@ -226,7 +228,7 @@ void AuthContext::doSTSAuthMinecraft() {
 
 void AuthContext::processSTSError(QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers) {
     if(error == QNetworkReply::AuthenticationRequiredError) {
-    QJsonParseError jsonError;
+        QJsonParseError jsonError;
         QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
         if(jsonError.error) {
             qWarning() << "Cannot parse error XSTS response as JSON: " << jsonError.errorString();
@@ -543,6 +545,10 @@ void AuthContext::onMinecraftProfileDone(
 #endif
     if (error == QNetworkReply::ContentNotFoundError) {
         // NOTE: Succeed even if we do not have a profile. This is a valid account state.
+        if(m_data->type == AccountType::Mojang) {
+            m_data->minecraftEntitlement.canPlayMinecraft = false;
+            m_data->minecraftEntitlement.ownsMinecraft = false;
+        }
         m_data->minecraftProfile = MinecraftProfile();
         succeed();
         return;
@@ -560,6 +566,9 @@ void AuthContext::onMinecraftProfileDone(
     }
 
     if(m_data->type == AccountType::Mojang) {
+        auto validProfile = m_data->minecraftProfile.validity == Katabasis::Validity::Certain;
+        m_data->minecraftEntitlement.canPlayMinecraft = validProfile;
+        m_data->minecraftEntitlement.ownsMinecraft = validProfile;
         doMigrationEligibilityCheck();
     }
     else {

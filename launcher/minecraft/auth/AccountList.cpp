@@ -244,8 +244,13 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
             }
 
             case StatusColumn: {
-                auto isActive = account->isActive();
-                return isActive ? "Working" : "Ready";
+                if(account->isActive()) {
+                    return tr("Working", "Account status");
+                }
+                if(account->isExpired()) {
+                    return tr("Expired", "Account status");
+                }
+                return tr("Ready", "Account status");
             }
 
             case ProfileNameColumn: {

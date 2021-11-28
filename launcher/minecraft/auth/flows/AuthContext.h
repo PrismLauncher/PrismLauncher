@@ -7,7 +7,7 @@
 #include <QNetworkReply>
 #include <QImage>
 
-#include <katabasis/OAuth2.h>
+#include <katabasis/DeviceFlow.h>
 #include "Yggdrasil.h"
 #include "../AccountData.h"
 #include "../AccountTask.h"
@@ -35,9 +35,6 @@ signals:
 
 private slots:
 // OAuth-specific callbacks
-    void onOAuthLinkingSucceeded();
-    void onOAuthLinkingFailed();
-
     void onOAuthActivityChanged(Katabasis::Activity activity);
 
 // Yggdrasil specific callbacks
@@ -87,7 +84,7 @@ protected:
     void clearTokens();
 
 protected:
-    Katabasis::OAuth2 *m_oauth2 = nullptr;
+    Katabasis::DeviceFlow *m_oauth2 = nullptr;
     Yggdrasil *m_yggdrasil = nullptr;
 
     int m_requestsDone = 0;

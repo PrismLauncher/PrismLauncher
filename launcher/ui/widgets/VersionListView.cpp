@@ -19,7 +19,6 @@
 #include <QDrag>
 #include <QPainter>
 #include "VersionListView.h"
-#include "Common.h"
 
 VersionListView::VersionListView(QWidget *parent)
     :QTreeView ( parent )

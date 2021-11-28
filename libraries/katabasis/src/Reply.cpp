@@ -7,14 +7,16 @@ namespace Katabasis {
 
 Reply::Reply(QNetworkReply *r, int timeOut, QObject *parent): QTimer(parent), reply(r) {
     setSingleShot(true);
-    connect(this, SIGNAL(error(QNetworkReply::NetworkError)), reply, SIGNAL(error(QNetworkReply::NetworkError)), Qt::QueuedConnection);
-    connect(this, SIGNAL(timeout()), this, SLOT(onTimeOut()), Qt::QueuedConnection);
+    connect(this, &Reply::timeout, this, &Reply::onTimeOut, Qt::QueuedConnection);
     start(timeOut);
 }
 
 void Reply::onTimeOut() {
-    emit error(QNetworkReply::TimeoutError);
+    timedOut = true;
+    reply->abort();
 }
+
+// ----------------------------
 
 ReplyList::~ReplyList() {
     foreach (Reply *timedReply, replies_) {
@@ -22,10 +24,11 @@ ReplyList::~ReplyList() {
     }
 }
 
-void ReplyList::add(QNetworkReply *reply) {
-    if (reply && ignoreSslErrors())
-            reply->ignoreSslErrors();
-    add(new Reply(reply));
+void ReplyList::add(QNetworkReply *reply, int timeOut) {
+    if (reply && ignoreSslErrors()) {
+        reply->ignoreSslErrors();
+    }
+    add(new Reply(reply, timeOut));
 }
 
 void ReplyList::add(Reply *reply) {

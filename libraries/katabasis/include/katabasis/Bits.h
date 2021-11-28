@@ -10,7 +10,11 @@ enum class Activity {
     Idle,
     LoggingIn,
     LoggingOut,
-    Refreshing
+    Refreshing,
+    FailedSoft, //!< soft failure. this generally means the user auth details haven't been invalidated
+    FailedHard, //!< hard failure. auth is invalid
+    FailedGone, //!< hard failure. auth is invalid, and the account no longer exists
+    Succeeded
 };
 
 enum class Validity {

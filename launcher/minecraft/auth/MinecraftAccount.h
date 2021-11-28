@@ -72,7 +72,7 @@ public: /* construction */
     explicit MinecraftAccount(const MinecraftAccount &other, QObject *parent) = delete;
 
     //! Default constructor
-    explicit MinecraftAccount(QObject *parent = 0) : QObject(parent) {};
+    explicit MinecraftAccount(QObject *parent = 0);
 
     static MinecraftAccountPtr createFromUsername(const QString &username);
 
@@ -97,6 +97,10 @@ public: /* manipulation */
     shared_qobject_ptr<AccountTask> refresh(AuthSessionPtr session);
 
 public: /* queries */
+    QString internalId() const {
+        return m_internalId;
+    }
+
     QString accountDisplayString() const {
         return data.accountDisplayString();
     }
@@ -118,6 +122,8 @@ public: /* queries */
     }
 
     bool isActive() const;
+
+    bool isExpired() const;
 
     bool canMigrate() const {
         return data.canMigrateToMSA;
@@ -168,6 +174,7 @@ signals:
     // TODO: better signalling for the various possible state changes - especially errors
 
 protected: /* variables */
+    QString m_internalId;
     AccountData data;
 
     // current task we are executing here

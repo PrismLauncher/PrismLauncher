@@ -27,20 +27,18 @@ set(CMAKE_C_STANDARD 11)
 find_package(Qt5 COMPONENTS Core Network REQUIRED)
 
 set( katabasis_PRIVATE
-    src/OAuth2.cpp
+    src/DeviceFlow.cpp
     src/JsonResponse.cpp
     src/JsonResponse.h
     src/PollServer.cpp
     src/Reply.cpp
-    src/ReplyServer.cpp
 )
 
 set( katabasis_PUBLIC
-    include/katabasis/OAuth2.h
+    include/katabasis/DeviceFlow.h
     include/katabasis/Globals.h
     include/katabasis/PollServer.h
     include/katabasis/Reply.h
-    include/katabasis/ReplyServer.h
     include/katabasis/RequestParameter.h
 )
 
