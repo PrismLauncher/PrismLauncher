@@ -394,6 +394,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDir("/usr/java");
     // general locations used by distro packaging
     scanJavaDir("/usr/lib/jvm");
+    scanJavaDir("/usr/lib64/jvm");
     scanJavaDir("/usr/lib32/jvm");
     // javas stored in MultiMC's folder
     scanJavaDir("java");
