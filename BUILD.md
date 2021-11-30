@@ -194,7 +194,7 @@ cmake \
  -DCMAKE_C_COMPILER=/usr/bin/clang \
  -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
  -DCMAKE_BUILD_TYPE=Release \
- -DCMAKE_INSTALL_PREFIX:PATH="../dist/" \
+ -DCMAKE_INSTALL_PREFIX:PATH="$(dirname $PWD)/dist/" \
  -DCMAKE_PREFIX_PATH="/path/to/Qt5.6/" \
  -DQt5_DIR="/path/to/Qt5.6/" \
  -DLauncher_LAYOUT=mac-bundle \
@@ -202,3 +202,6 @@ cmake \
  ..
 make install
 ```
+
+**Note:** The final app bundle may not run due to code signing issues, which
+need to be fixed with `codesign -fs -`.
