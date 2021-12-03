@@ -250,6 +250,12 @@ bool ScreenshotsPage::eventFilter(QObject *obj, QEvent *evt)
         return QWidget::eventFilter(obj, evt);
     }
     QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evt);
+
+    if (keyEvent->matches(QKeySequence::Copy)) {
+        on_actionCopy_triggered();
+        return true;
+    }
+
     switch (keyEvent->key())
     {
     case Qt::Key_Delete:
@@ -370,6 +376,22 @@ void ScreenshotsPage::on_actionUpload_triggered()
         )->exec();
     }
     m_uploadActive = false;
+}
+
+void ScreenshotsPage::on_actionCopy_triggered()
+{
+    auto selection = ui->listView->selectionModel()->selectedRows();
+    if(selection.size() < 1)
+    {
+        return;
+    }
+
+    // You can only copy one image to the clipboard. In the case of multiple selected files, only the first one gets copied.
+    auto item = selection[0];
+    auto info = m_model->fileInfo(item);
+    QImage image(info.absoluteFilePath());
+    Q_ASSERT(!image.isNull());
+    QApplication::clipboard()->setImage(image, QClipboard::Clipboard);
 }
 
 void ScreenshotsPage::on_actionDelete_triggered()

@@ -50,6 +50,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionUpload"/>
+   <addaction name="actionCopy"/>
    <addaction name="actionDelete"/>
    <addaction name="actionRename"/>
    <addaction name="actionView_Folder"/>
@@ -72,6 +73,14 @@
   <action name="actionView_Folder">
    <property name="text">
     <string>View Folder</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy</string>
    </property>
   </action>
  </widget>
