@@ -73,7 +73,8 @@ protected:
 
 private slots:
     void on_actionUpload_triggered();
-    void on_actionCopy_triggered();
+    void on_actionCopy_Image_triggered();
+    void on_actionCopy_File_s_triggered();
     void on_actionDelete_triggered();
     void on_actionRename_triggered();
     void on_actionView_Folder_triggered();

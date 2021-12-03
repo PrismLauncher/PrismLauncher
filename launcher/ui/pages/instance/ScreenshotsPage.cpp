@@ -252,7 +252,7 @@ bool ScreenshotsPage::eventFilter(QObject *obj, QEvent *evt)
     QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evt);
 
     if (keyEvent->matches(QKeySequence::Copy)) {
-        on_actionCopy_triggered();
+        on_actionCopy_File_s_triggered();
         return true;
     }
 
@@ -378,7 +378,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
     m_uploadActive = false;
 }
 
-void ScreenshotsPage::on_actionCopy_triggered()
+void ScreenshotsPage::on_actionCopy_Image_triggered()
 {
     auto selection = ui->listView->selectionModel()->selectedRows();
     if(selection.size() < 1)
@@ -392,6 +392,26 @@ void ScreenshotsPage::on_actionCopy_triggered()
     QImage image(info.absoluteFilePath());
     Q_ASSERT(!image.isNull());
     QApplication::clipboard()->setImage(image, QClipboard::Clipboard);
+}
+
+void ScreenshotsPage::on_actionCopy_File_s_triggered()
+{
+    auto selection = ui->listView->selectionModel()->selectedRows();
+    if(selection.size() < 1)
+    {
+        // Don't do anything so we don't empty the users clipboard
+        return;
+    }
+
+    QString buf = "";
+    for (auto item : selection)
+    {
+        auto info = m_model->fileInfo(item);
+        buf += "file:///" + info.absoluteFilePath() + "\r\n";
+    }
+    QMimeData* mimeData = new QMimeData();
+    mimeData->setData("text/uri-list", buf.toLocal8Bit());
+    QApplication::clipboard()->setMimeData(mimeData);
 }
 
 void ScreenshotsPage::on_actionDelete_triggered()
