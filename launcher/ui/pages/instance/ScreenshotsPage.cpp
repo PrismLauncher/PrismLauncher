@@ -278,6 +278,11 @@ ScreenshotsPage::~ScreenshotsPage()
 void ScreenshotsPage::ShowContextMenu(const QPoint& pos)
 {
     auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
+
+    if (ui->listView->selectionModel()->selectedRows().size() > 1) {
+        menu->removeAction( ui->actionCopy_Image );
+    }
+
     menu->exec(ui->listView->mapToGlobal(pos));
     delete menu;
 }
