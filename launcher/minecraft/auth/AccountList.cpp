@@ -32,6 +32,8 @@
 #include <FileSystem.h>
 #include <QSaveFile>
 
+#include <chrono>
+
 enum AccountListVersion {
     MojangOnly = 2,
     MojangMSA = 3
