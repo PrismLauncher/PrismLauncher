@@ -211,7 +211,7 @@ bool MinecraftAccount::shouldRefresh() const {
     if(!expiresTimestamp.isValid()) {
         expiresTimestamp = issuedTimestamp.addSecs(24 * 3600);
     }
-    if (now.secsTo(expiresTimestamp) < 12 * 3600) {
+    if (now.secsTo(expiresTimestamp) < (12 * 3600)) {
         return true;
     }
     return false;

@@ -635,20 +635,32 @@ void AccountList::fillQueue() {
 
         if(account->shouldRefresh()) {
             auto idToRefresh = account->internalId();
-            m_refreshQueue.push_back(idToRefresh);
-            qDebug() << "AccountList: Queued account with internal ID " << idToRefresh << " to refresh";
+            queueRefresh(idToRefresh);
         }
     }
-    m_refreshQueue.removeDuplicates();
     tryNext();
 }
 
 void AccountList::requestRefresh(QString accountId) {
-    m_refreshQueue.push_back(accountId);
+    auto index = m_refreshQueue.indexOf(accountId);
+    if(index != -1) {
+        m_refreshQueue.removeAt(index);
+    }
+    m_refreshQueue.push_front(accountId);
+    qDebug() << "AccountList: Pushed account with internal ID " << accountId << " to the front of the queue";
     if(!isActive()) {
         tryNext();
     }
 }
+
+void AccountList::queueRefresh(QString accountId) {
+    if(m_refreshQueue.indexOf(accountId) != -1) {
+        return;
+    }
+    m_refreshQueue.push_back(accountId);
+    qDebug() << "AccountList: Queued account with internal ID " << accountId << " to refresh";
+}
+
 
 void AccountList::tryNext() {
     beginActivity();
@@ -672,21 +684,21 @@ void AccountList::tryNext() {
     }
     endActivity();
     // if we get here, no account needed refreshing. Schedule refresh in an hour.
-    m_refreshTimer->start(std::chrono::hours(1));
+    m_refreshTimer->start(1000 * 3600);
 }
 
 void AccountList::authSucceeded() {
     qDebug() << "RefreshSchedule: Background account refresh succeeded";
     m_currentTask.reset();
     endActivity();
-    m_nextTimer->start(std::chrono::seconds(20));
+    m_nextTimer->start(1000 * 20);
 }
 
 void AccountList::authFailed(QString reason) {
     qDebug() << "RefreshSchedule: Background account refresh failed: " << reason;
     m_currentTask.reset();
     endActivity();
-    m_nextTimer->start(std::chrono::seconds(20));
+    m_nextTimer->start(1000 * 20);
 }
 
 bool AccountList::isActive() const {

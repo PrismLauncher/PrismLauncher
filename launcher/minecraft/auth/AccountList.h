@@ -67,7 +67,10 @@ public:
     MinecraftAccountPtr getAccountByProfileName(const QString &profileName) const;
     QStringList profileNames() const;
 
+    // requesting a refresh pushes it to the front of the queue
     void requestRefresh(QString accountId);
+    // queuing a refresh will let it go to the back of the queue (unless it's somewhere inside the queue already)
+    void queueRefresh(QString accountId);
 
     /*!
      * Sets the path to load/save the list file from/to.
