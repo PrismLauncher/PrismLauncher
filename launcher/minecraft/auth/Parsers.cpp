@@ -72,7 +72,7 @@ bool getBool(QJsonValue value, bool & out) {
 // 2148916238 = child account not linked to a family
 */
 
-bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output, const char * name) {
+bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output, QString name) {
     qDebug() << "Parsing" << name <<":";
 #ifndef NDEBUG
     qDebug() << data;

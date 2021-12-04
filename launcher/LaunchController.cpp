@@ -35,6 +35,8 @@ void LaunchController::executeTask()
         return;
     }
 
+    JavaCommon::checkJVMArgs(m_instance->settings()->get("JvmArgs").toString(), m_parentWidget);
+
     login();
 }
 
@@ -90,8 +92,6 @@ void LaunchController::decideAccount()
 
 
 void LaunchController::login() {
-    JavaCommon::checkJVMArgs(m_instance->settings()->get("JvmArgs").toString(), m_parentWidget);
-
     decideAccount();
 
     // if no account is selected, we bail
@@ -113,133 +113,10 @@ void LaunchController::login() {
     {
         m_session = std::make_shared<AuthSession>();
         m_session->wants_online = m_online;
-        shared_qobject_ptr<AccountTask> task;
-        if(!password.isNull()) {
-            task = m_accountToUse->login(m_session, password);
-        }
-        else {
-            task = m_accountToUse->refresh(m_session);
-        }
-        if (task)
-        {
-            // We'll need to validate the access token to make sure the account
-            // is still logged in.
-            ProgressDialog progDialog(m_parentWidget);
-            if (m_online)
-            {
-                progDialog.setSkipButton(true, tr("Play Offline"));
-            }
-            progDialog.execWithTask(task.get());
-            if (!task->wasSuccessful())
-            {
-                auto failReasonNew = task->failReason();
-                if(failReasonNew == "Invalid token." || failReasonNew == "Invalid Signature")
-                {
-                    // account->invalidateClientToken();
-                    failReason = needLoginAgain;
-                }
-                else failReason = failReasonNew;
-            }
-        }
-        switch (m_session->status)
-        {
-            case AuthSession::Undetermined: {
-                qCritical() << "Received undetermined session status during login. Bye.";
-                tryagain = false;
-                emitFailed(tr("Received undetermined session status during login."));
-                return;
-            }
-            case AuthSession::RequiresPassword: {
-                // FIXME: this needs to understand MSA
-                EditAccountDialog passDialog(failReason, m_parentWidget, EditAccountDialog::PasswordField);
-                auto username = m_session->username;
-                auto chopN = [](QString toChop, int N) -> QString
-                {
-                    if(toChop.size() > N)
-                    {
-                        auto left = toChop.left(N);
-                        left += QString("\u25CF").repeated(toChop.size() - N);
-                        return left;
-                    }
-                    return toChop;
-                };
+        m_accountToUse->fillSession(m_session);
 
-                if(username.contains('@'))
-                {
-                    auto parts = username.split('@');
-                    auto mailbox = chopN(parts[0],3);
-                    QString domain = chopN(parts[1], 3);
-                    username = mailbox + '@' + domain;
-                }
-                passDialog.setUsername(username);
-                if (passDialog.exec() == QDialog::Accepted)
-                {
-                    password = passDialog.password();
-                }
-                else
-                {
-                    tryagain = false;
-                    emitFailed(tr("Received undetermined session status during login."));
-                }
-                break;
-            }
-            case AuthSession::RequiresProfileSetup: {
-                auto entitlement = m_accountToUse->accountData()->minecraftEntitlement;
-                QString errorString;
-                if(!entitlement.canPlayMinecraft) {
-                    errorString = tr("The account does not own Minecraft. You need to purchase the game first to play it.");
-                    QMessageBox::warning(
-                        nullptr,
-                        tr("Missing Minecraft profile"),
-                        errorString,
-                        QMessageBox::StandardButton::Ok,
-                        QMessageBox::StandardButton::Ok
-                    );
-                    tryagain = false;
-                    emitFailed(errorString);
-                    return;
-                }
-                // Now handle setting up a profile name here...
-                ProfileSetupDialog dialog(m_accountToUse, m_parentWidget);
-                if (dialog.exec() == QDialog::Accepted)
-                {
-                    tryagain = true;
-                    continue;
-                }
-                else
-                {
-                    tryagain = false;
-                    emitFailed(tr("Received undetermined session status during login."));
-                    return;
-                }
-            }
-            case AuthSession::RequiresOAuth: {
-                auto errorString = tr("Microsoft account has expired and needs to be logged into manually again.");
-                QMessageBox::warning(
-                    m_parentWidget,
-                    tr("Microsoft Account refresh failed"),
-                    errorString,
-                    QMessageBox::StandardButton::Ok,
-                    QMessageBox::StandardButton::Ok
-                );
-                tryagain = false;
-                emitFailed(errorString);
-                return;
-            }
-            case AuthSession::GoneOrMigrated: {
-                auto errorString = tr("The account no longer exists on the servers. It may have been migrated, in which case please add the new account you migrated this one to.");
-                QMessageBox::warning(
-                    m_parentWidget,
-                    tr("Account gone"),
-                    errorString,
-                    QMessageBox::StandardButton::Ok,
-                    QMessageBox::StandardButton::Ok
-                );
-                tryagain = false;
-                emitFailed(errorString);
-                return;
-            }
-            case AuthSession::PlayableOffline: {
+        switch(m_accountToUse->accountState()) {
+            case AccountState::Offline: {
                 // we ask the user for a player name
                 bool ok = false;
                 QString usedname = m_session->player_name;
@@ -262,11 +139,90 @@ void LaunchController::login() {
                 }
                 m_session->MakeOffline(usedname);
                 // offline flavored game from here :3
+                // NOTE: fallthrough is intentional
             }
-            case AuthSession::PlayableOnline:
-            {
-                launchInstance();
-                tryagain = false;
+            case AccountState::Online: {
+                if(m_accountToUse->ownsMinecraft() && !m_accountToUse->hasProfile()) {
+                    auto entitlement = m_accountToUse->accountData()->minecraftEntitlement;
+                    QString errorString;
+                    if(!entitlement.canPlayMinecraft) {
+                        errorString = tr("The account does not own Minecraft. You need to purchase the game first to play it.");
+                        QMessageBox::warning(
+                            nullptr,
+                            tr("Missing Minecraft profile"),
+                            errorString,
+                            QMessageBox::StandardButton::Ok,
+                            QMessageBox::StandardButton::Ok
+                        );
+                        emitFailed(errorString);
+                        return;
+                    }
+                    // Now handle setting up a profile name here...
+                    ProfileSetupDialog dialog(m_accountToUse, m_parentWidget);
+                    if (dialog.exec() == QDialog::Accepted)
+                    {
+                        tryagain = true;
+                        continue;
+                    }
+                    else
+                    {
+                        emitFailed(tr("Received undetermined session status during login."));
+                        return;
+                    }
+                }
+                else {
+                    launchInstance();
+                }
+                return;
+            }
+            case AccountState::Unchecked: {
+                m_accountToUse->refresh();
+                // NOTE: fallthrough intentional
+            }
+            case AccountState::Working: {
+                // refresh is in progress, we need to wait for it to finish to proceed.
+                ProgressDialog progDialog(m_parentWidget);
+                if (m_online)
+                {
+                    progDialog.setSkipButton(true, tr("Play Offline"));
+                }
+                auto task = m_accountToUse->currentTask();
+                progDialog.execWithTask(task.get());
+                continue;
+            }
+            // FIXME: this is missing - the meaning is that the account is queued for refresh and we should wait for that
+            /*
+            case AccountState::Queued: {
+                return;
+            }
+            */
+            case AccountState::Errored: {
+                // This means some sort of soft error that we can fix with a refresh ... so let's refresh.
+                // TODO: implement
+                return;
+            }
+            case AccountState::Expired: {
+                auto errorString = tr("The account has expired and needs to be logged into manually again.");
+                QMessageBox::warning(
+                    m_parentWidget,
+                    tr("Account refresh failed"),
+                    errorString,
+                    QMessageBox::StandardButton::Ok,
+                    QMessageBox::StandardButton::Ok
+                );
+                emitFailed(errorString);
+                return;
+            }
+            case AccountState::Gone: {
+                auto errorString = tr("The account no longer exists on the servers. It may have been migrated, in which case please add the new account you migrated this one to.");
+                QMessageBox::warning(
+                    m_parentWidget,
+                    tr("Account gone"),
+                    errorString,
+                    QMessageBox::StandardButton::Ok,
+                    QMessageBox::StandardButton::Ok
+                );
+                emitFailed(errorString);
                 return;
             }
         }
@@ -334,14 +290,7 @@ void LaunchController::launchInstance()
         online_mode = "offline";
     }
 
-    QString auth_server_status;
-    if(m_session->auth_server_online) {
-        auth_server_status = "online";
-    } else {
-        auth_server_status = "offline";
-    }
-
-    m_launcher->prependStep(new TextPrint(m_launcher.get(), "Launched instance in " + online_mode + " mode\nAuthentication server is " + auth_server_status + "\n", MessageLevel::Launcher));
+    m_launcher->prependStep(new TextPrint(m_launcher.get(), "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
 
     // Prepend Version
     m_launcher->prependStep(new TextPrint(m_launcher.get(), BuildConfig.LAUNCHER_NAME + " version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::Launcher));

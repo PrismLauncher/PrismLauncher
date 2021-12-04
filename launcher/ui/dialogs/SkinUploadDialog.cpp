@@ -20,16 +20,6 @@ void SkinUploadDialog::on_buttonBox_rejected()
 
 void SkinUploadDialog::on_buttonBox_accepted()
 {
-    AuthSessionPtr session = std::make_shared<AuthSession>();
-    auto login = m_acct->refresh(session);
-    ProgressDialog prog(this);
-    if (prog.execWithTask((Task*)login.get()) != QDialog::Accepted)
-    {
-        //FIXME: recover with password prompt
-        CustomMessageBox::selectable(this, tr("Skin Upload"), tr("Failed to login!"), QMessageBox::Warning)->exec();
-        close();
-        return;
-    }
     QString fileName;
     QString input = ui->skinPathTextBox->text();
     QRegExp urlPrefixMatcher("^([a-z]+)://.+$");
@@ -91,11 +81,12 @@ void SkinUploadDialog::on_buttonBox_accepted()
     {
         model = SkinUpload::ALEX;
     }
+    ProgressDialog prog(this);
     SequentialTask skinUpload;
-    skinUpload.addTask(shared_qobject_ptr<SkinUpload>(new SkinUpload(this, session, FS::read(fileName), model)));
+    skinUpload.addTask(shared_qobject_ptr<SkinUpload>(new SkinUpload(this, m_acct->accessToken(), FS::read(fileName), model)));
     auto selectedCape = ui->capeCombo->currentData().toString();
     if(selectedCape != m_acct->accountData()->minecraftProfile.currentCape) {
-        skinUpload.addTask(shared_qobject_ptr<CapeChange>(new CapeChange(this, session, selectedCape)));
+        skinUpload.addTask(shared_qobject_ptr<CapeChange>(new CapeChange(this, m_acct->accessToken(), selectedCape)));
     }
     if (prog.execWithTask(&skinUpload) != QDialog::Accepted)
     {

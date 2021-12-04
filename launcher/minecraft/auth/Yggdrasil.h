@@ -15,14 +15,14 @@
 
 #pragma once
 
-#include "../AccountTask.h"
+#include "AccountTask.h"
 
 #include <QString>
 #include <QJsonObject>
 #include <QTimer>
 #include <qsslerror.h>
 
-#include "../MinecraftAccount.h"
+#include "MinecraftAccount.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -38,10 +38,26 @@ public:
         AccountData *data,
         QObject *parent = 0
     );
-    virtual ~Yggdrasil() {};
+    virtual ~Yggdrasil() = default;
 
     void refresh();
     void login(QString password);
+
+    struct Error
+    {
+        QString m_errorMessageShort;
+        QString m_errorMessageVerbose;
+        QString m_cause;
+    };
+    std::shared_ptr<Error> m_error;
+
+    enum AbortedBy
+    {
+        BY_NOTHING,
+        BY_USER,
+        BY_TIMEOUT
+    } m_aborted = BY_NOTHING;
+
 protected:
     void executeTask() override;
 

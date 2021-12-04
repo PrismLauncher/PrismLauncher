@@ -43,7 +43,7 @@ void LoginDialog::accept()
 
     // Setup the login task and start it
     m_account = MinecraftAccount::createFromUsername(ui->userTextBox->text());
-    m_loginTask = m_account->login(nullptr, ui->passTextBox->text());
+    m_loginTask = m_account->login(ui->passTextBox->text());
     connect(m_loginTask.get(), &Task::failed, this, &LoginDialog::onTaskFailed);
     connect(m_loginTask.get(), &Task::succeeded, this, &LoginDialog::onTaskSucceeded);
     connect(m_loginTask.get(), &Task::status, this, &LoginDialog::onTaskStatus);

@@ -26,62 +26,32 @@
 
 class QNetworkReply;
 
+/**
+ * Enum for describing the state of the current task.
+ * Used by the getStateMessage function to determine what the status message should be.
+ */
+enum class AccountTaskState
+{
+    STATE_CREATED,
+    STATE_WORKING,
+    STATE_SUCCEEDED,
+    STATE_FAILED_SOFT, //!< soft failure. authentication went through partially
+    STATE_FAILED_HARD, //!< hard failure. main tokens are invalid
+    STATE_FAILED_GONE, //!< hard failure. main tokens are invalid, and the account no longer exists
+    STATE_OFFLINE //!< soft failure. authentication failed in the first step in a 'soft' way
+};
+
 class AccountTask : public Task
 {
-    friend class AuthContext;
     Q_OBJECT
 public:
     explicit AccountTask(AccountData * data, QObject *parent = 0);
     virtual ~AccountTask() {};
 
-    /**
-     * assign a session to this task. the session will be filled with required infomration
-     * upon completion
-     */
-    void assignSession(AuthSessionPtr session)
-    {
-        m_session = session;
-    }
+    AccountTaskState m_taskState = AccountTaskState::STATE_CREATED;
 
-    /// get the assigned session for filling with information.
-    AuthSessionPtr getAssignedSession()
-    {
-        return m_session;
-    }
-
-    /**
-     * Class describing a Account error response.
-     */
-    struct Error
-    {
-        QString m_errorMessageShort;
-        QString m_errorMessageVerbose;
-        QString m_cause;
-    };
-
-    enum AbortedBy
-    {
-        BY_NOTHING,
-        BY_USER,
-        BY_TIMEOUT
-    } m_aborted = BY_NOTHING;
-
-    /**
-     * Enum for describing the state of the current task.
-     * Used by the getStateMessage function to determine what the status message should be.
-     */
-    enum State
-    {
-        STATE_CREATED,
-        STATE_WORKING,
-        STATE_FAILED_SOFT, //!< soft failure. this generally means the user auth details haven't been invalidated
-        STATE_FAILED_HARD, //!< hard failure. auth is invalid
-        STATE_FAILED_GONE, //!< hard failure. auth is invalid, and the account no longer exists
-        STATE_SUCCEEDED
-    } m_accountState = STATE_CREATED;
-
-    State accountState() {
-        return m_accountState;
+    AccountTaskState taskState() {
+        return m_taskState;
     }
 
 signals:
@@ -98,11 +68,9 @@ protected:
     virtual QString getStateMessage() const;
 
 protected slots:
-    void changeState(State newState, QString reason=QString());
+    // NOTE: true -> non-terminal state, false -> terminal state
+    bool changeState(AccountTaskState newState, QString reason = QString());
 
 protected:
-    // FIXME: segfault disaster waiting to happen
     AccountData *m_data = nullptr;
-    std::shared_ptr<Error> m_error;
-    AuthSessionPtr m_session;
 };

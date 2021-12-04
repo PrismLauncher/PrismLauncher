@@ -46,6 +46,11 @@ protected slots:
     /// Handle upload progress.
     void onUploadProgress(qint64 uploaded, qint64 total);
 
+public:
+    QNetworkReply::NetworkError error_;
+    int httpStatus_ = 0;
+    QString errorString_;
+
 protected:
     void setup(const QNetworkRequest &request, QNetworkAccessManager::Operation operation, const QByteArray &verb = QByteArray());
 
@@ -60,5 +65,6 @@ protected:
     QNetworkAccessManager::Operation operation_;
     QUrl url_;
     Katabasis::ReplyList timedReplies_;
-    QNetworkReply::NetworkError error_;
+
+    QTimer *timer_;
 };

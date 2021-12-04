@@ -37,7 +37,7 @@ int MSALoginDialog::exec() {
 
     // Setup the login task and start it
     m_account = MinecraftAccount::createBlankMSA();
-    m_loginTask = m_account->loginMSA(nullptr);
+    m_loginTask = m_account->loginMSA();
     connect(m_loginTask.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
     connect(m_loginTask.get(), &Task::succeeded, this, &MSALoginDialog::onTaskSucceeded);
     connect(m_loginTask.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);

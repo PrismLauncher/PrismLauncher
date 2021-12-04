@@ -44,6 +44,7 @@ void AuthRequest::onRequestFinished() {
     if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
         return;
     }
+    httpStatus_ = 200;
     finish();
 }
 
@@ -55,10 +56,11 @@ void AuthRequest::onRequestError(QNetworkReply::NetworkError error) {
     if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
         return;
     }
-    qWarning() << "AuthRequest::onRequestError: Error string: " << reply_->errorString();
-    int httpStatus = reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    qWarning() << "AuthRequest::onRequestError: HTTP status" << httpStatus << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+    errorString_ = reply_->errorString();
+    httpStatus_ = reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     error_ = error;
+    qWarning() << "AuthRequest::onRequestError: Error string: " << errorString_;
+    qWarning() << "AuthRequest::onRequestError: HTTP status" << httpStatus_ << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
 
     // QTimer::singleShot(10, this, SLOT(finish()));
 }
@@ -103,6 +105,8 @@ void AuthRequest::setup(const QNetworkRequest &req, QNetworkAccessManager::Opera
 
     status_ = Requesting;
     error_ = QNetworkReply::NoError;
+    errorString_.clear();
+    httpStatus_ = 0;
 }
 
 void AuthRequest::finish() {

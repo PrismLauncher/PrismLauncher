@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../AccountData.h"
+#include "AccountData.h"
 
 namespace Parsers
 {
@@ -10,7 +10,7 @@ namespace Parsers
     bool getNumber(QJsonValue value, int64_t & out);
     bool getBool(QJsonValue value, bool & out);
 
-    bool parseXTokenResponse(QByteArray &data, Katabasis::Token &output, const char * name);
+    bool parseXTokenResponse(QByteArray &data, Katabasis::Token &output, QString name);
     bool parseMojangResponse(QByteArray &data, Katabasis::Token &output);
 
     bool parseMinecraftProfile(QByteArray &data, MinecraftProfile &output);

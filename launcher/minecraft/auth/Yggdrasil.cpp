@@ -14,7 +14,7 @@
  */
 
 #include "Yggdrasil.h"
-#include "../AccountData.h"
+#include "AccountData.h"
 
 #include <QObject>
 #include <QString>
@@ -30,11 +30,11 @@
 Yggdrasil::Yggdrasil(AccountData *data, QObject *parent)
     : AccountTask(data, parent)
 {
-    changeState(STATE_CREATED);
+    changeState(AccountTaskState::STATE_CREATED);
 }
 
 void Yggdrasil::sendRequest(QUrl endpoint, QByteArray content) {
-    changeState(STATE_WORKING);
+    changeState(AccountTaskState::STATE_WORKING);
 
     QNetworkRequest netRequest(endpoint);
     netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -185,14 +185,14 @@ void Yggdrasil::processResponse(QJsonObject responseData) {
     QString clientToken = responseData.value("clientToken").toString("");
     if (clientToken.isEmpty()) {
         // Fail if the server gave us an empty client token
-        changeState(STATE_FAILED_HARD, tr("Authentication server didn't send a client token."));
+        changeState(AccountTaskState::STATE_FAILED_HARD, tr("Authentication server didn't send a client token."));
         return;
     }
     if(m_data->clientToken().isEmpty()) {
         m_data->setClientToken(clientToken);
     }
     else if(clientToken != m_data->clientToken()) {
-        changeState(STATE_FAILED_HARD, tr("Authentication server attempted to change the client token. This isn't supported."));
+        changeState(AccountTaskState::STATE_FAILED_HARD, tr("Authentication server attempted to change the client token. This isn't supported."));
         return;
     }
 
@@ -201,7 +201,7 @@ void Yggdrasil::processResponse(QJsonObject responseData) {
     QString accessToken = responseData.value("accessToken").toString("");
     if (accessToken.isEmpty()) {
         // Fail if the server didn't give us an access token.
-        changeState(STATE_FAILED_HARD, tr("Authentication server didn't send an access token."));
+        changeState(AccountTaskState::STATE_FAILED_HARD, tr("Authentication server didn't send an access token."));
         return;
     }
     // Set the access token.
@@ -212,25 +212,25 @@ void Yggdrasil::processResponse(QJsonObject responseData) {
     // We've made it through the minefield of possible errors. Return true to indicate that
     // we've succeeded.
     qDebug() << "Finished reading authentication response.";
-    changeState(STATE_SUCCEEDED);
+    changeState(AccountTaskState::STATE_SUCCEEDED);
 }
 
 void Yggdrasil::processReply() {
-    changeState(STATE_WORKING);
+    changeState(AccountTaskState::STATE_WORKING);
 
     switch (m_netReply->error())
     {
     case QNetworkReply::NoError:
         break;
     case QNetworkReply::TimeoutError:
-        changeState(STATE_FAILED_SOFT, tr("Authentication operation timed out."));
+        changeState(AccountTaskState::STATE_FAILED_SOFT, tr("Authentication operation timed out."));
         return;
     case QNetworkReply::OperationCanceledError:
-        changeState(STATE_FAILED_SOFT, tr("Authentication operation cancelled."));
+        changeState(AccountTaskState::STATE_FAILED_SOFT, tr("Authentication operation cancelled."));
         return;
     case QNetworkReply::SslHandshakeFailedError:
         changeState(
-            STATE_FAILED_SOFT,
+            AccountTaskState::STATE_FAILED_SOFT,
             tr(
                 "<b>SSL Handshake failed.</b><br/>There might be a few causes for it:<br/>"
                 "<ul>"
@@ -248,13 +248,13 @@ void Yggdrasil::processReply() {
         break;
     case QNetworkReply::ContentGoneError: {
         changeState(
-            STATE_FAILED_GONE,
+            AccountTaskState::STATE_FAILED_GONE,
             tr("The Mojang account no longer exists. It may have been migrated to a Microsoft account.")
         );
     }
     default:
         changeState(
-            STATE_FAILED_SOFT,
+            AccountTaskState::STATE_FAILED_SOFT,
             tr("Authentication operation failed due to a network error: %1 (%2)").arg(m_netReply->errorString()).arg(m_netReply->error())
         );
         return;
@@ -279,7 +279,7 @@ void Yggdrasil::processReply() {
         }
         else {
             changeState(
-                STATE_FAILED_SOFT,
+                AccountTaskState::STATE_FAILED_SOFT,
                 tr("Failed to parse authentication server response JSON response: %1 at offset %2.").arg(jsonError.errorString()).arg(jsonError.offset)
             );
             qCritical() << replyData;
@@ -303,7 +303,7 @@ void Yggdrasil::processReply() {
         // error.
         qDebug() << "The request failed and the server gave no error message. Unknown error.";
         changeState(
-            STATE_FAILED_SOFT,
+            AccountTaskState::STATE_FAILED_SOFT,
             tr("An unknown error occurred when trying to communicate with the authentication server: %1").arg(m_netReply->errorString())
         );
     }
@@ -322,10 +322,10 @@ void Yggdrasil::processError(QJsonObject responseData) {
                 causeVal.toString("")
             }
         );
-        changeState(STATE_FAILED_HARD, m_error->m_errorMessageVerbose);
+        changeState(AccountTaskState::STATE_FAILED_HARD, m_error->m_errorMessageVerbose);
     }
     else {
         // Error is not in standard format. Don't set m_error and return unknown error.
-        changeState(STATE_FAILED_HARD, tr("An unknown Yggdrasil error occurred."));
+        changeState(AccountTaskState::STATE_FAILED_HARD, tr("An unknown Yggdrasil error occurred."));
     }
 }

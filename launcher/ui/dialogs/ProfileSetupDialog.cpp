@@ -25,8 +25,8 @@
 #include "ui/dialogs/ProgressDialog.h"
 
 #include <Application.h>
-#include "minecraft/auth/flows/AuthRequest.h"
-#include "minecraft/auth/flows/Parsers.h"
+#include "minecraft/auth/AuthRequest.h"
+#include "minecraft/auth/Parsers.h"
 
 
 ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidget *parent)
@@ -150,6 +150,9 @@ void ProfileSetupDialog::checkFinished(
     QByteArray data,
     QList<QNetworkReply::RawHeaderPair> headers
 ) {
+    auto requestor = qobject_cast<AuthRequest *>(QObject::sender());
+    requestor->deleteLater();
+
     if(error == QNetworkReply::NoError) {
         auto doc = QJsonDocument::fromJson(data);
         auto root = doc.object();
@@ -231,6 +234,9 @@ void ProfileSetupDialog::setupProfileFinished(
     QByteArray data,
     QList<QNetworkReply::RawHeaderPair> headers
 ) {
+    auto requestor = qobject_cast<AuthRequest *>(QObject::sender());
+    requestor->deleteLater();
+
     isWorking = false;
     if(error == QNetworkReply::NoError) {
         /*

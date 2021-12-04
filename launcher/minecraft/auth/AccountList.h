@@ -67,6 +67,8 @@ public:
     MinecraftAccountPtr getAccountByProfileName(const QString &profileName) const;
     QStringList profileNames() const;
 
+    void requestRefresh(QString accountId);
+
     /*!
      * Sets the path to load/save the list file from/to.
      * If autosave is true, this list will automatically save to the given path whenever it changes.
@@ -85,10 +87,20 @@ public:
     void setDefaultAccount(MinecraftAccountPtr profileId);
     bool anyAccountIsValid();
 
+    bool isActive() const;
+
+protected:
+    void beginActivity();
+    void endActivity();
+
+private:
+    const char* m_name;
+    uint32_t m_activityCount = 0;
 signals:
     void listChanged();
     void listActivityChanged();
     void defaultAccountChanged();
+    void activityChanged(bool active);
 
 public slots:
     /**
@@ -101,7 +113,23 @@ public slots:
      */
     void accountActivityChanged(bool active);
 
+    /**
+     * This is initially to run background account refresh tasks, or on a hourly timer
+     */
+    void fillQueue();
+
+private slots:
+    void tryNext();
+
+    void authSucceeded();
+    void authFailed(QString reason);
+
 protected:
+    QList<QString> m_refreshQueue;
+    QTimer *m_refreshTimer;
+    QTimer *m_nextTimer;
+    shared_qobject_ptr<AccountTask> m_currentTask;
+
     /*!
      * Called whenever the list changes.
      * This emits the listChanged() signal and autosaves the list (if autosave is enabled).

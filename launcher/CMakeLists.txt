@@ -196,36 +196,52 @@ set(ICONS_SOURCES
 # Support for Minecraft instances and launch
 set(MINECRAFT_SOURCES
     # Minecraft support
-    minecraft/auth/AccountData.h
     minecraft/auth/AccountData.cpp
-    minecraft/auth/AccountTask.h
-    minecraft/auth/AccountTask.cpp
-    minecraft/auth/AuthSession.h
-    minecraft/auth/AuthSession.cpp
-    minecraft/auth/AccountList.h
+    minecraft/auth/AccountData.h
     minecraft/auth/AccountList.cpp
-    minecraft/auth/MinecraftAccount.h
+    minecraft/auth/AccountList.h
+    minecraft/auth/AccountTask.cpp
+    minecraft/auth/AccountTask.h
+    minecraft/auth/AuthRequest.cpp
+    minecraft/auth/AuthRequest.h
+    minecraft/auth/AuthSession.cpp
+    minecraft/auth/AuthSession.h
+    minecraft/auth/AuthStep.cpp
+    minecraft/auth/AuthStep.h
     minecraft/auth/MinecraftAccount.cpp
-    minecraft/auth/flows/AuthContext.h
-    minecraft/auth/flows/AuthContext.cpp
-    minecraft/auth/flows/AuthRequest.h
-    minecraft/auth/flows/AuthRequest.cpp
+    minecraft/auth/MinecraftAccount.h
+    minecraft/auth/Parsers.cpp
+    minecraft/auth/Parsers.h
+    minecraft/auth/Yggdrasil.cpp
+    minecraft/auth/Yggdrasil.h
 
-    minecraft/auth/flows/MSAInteractive.h
-    minecraft/auth/flows/MSAInteractive.cpp
-    minecraft/auth/flows/MSASilent.h
-    minecraft/auth/flows/MSASilent.cpp
+    minecraft/auth/flows/AuthFlow.cpp
+    minecraft/auth/flows/AuthFlow.h
+    minecraft/auth/flows/Mojang.cpp
+    minecraft/auth/flows/Mojang.h
+    minecraft/auth/flows/MSA.cpp
+    minecraft/auth/flows/MSA.h
 
-    minecraft/auth/flows/MojangLogin.h
-    minecraft/auth/flows/MojangLogin.cpp
-    minecraft/auth/flows/MojangRefresh.h
-    minecraft/auth/flows/MojangRefresh.cpp
-
-    minecraft/auth/flows/Yggdrasil.h
-    minecraft/auth/flows/Yggdrasil.cpp
-
-    minecraft/auth/flows/Parsers.h
-    minecraft/auth/flows/Parsers.cpp
+    minecraft/auth/steps/EntitlementsStep.cpp
+    minecraft/auth/steps/EntitlementsStep.h
+    minecraft/auth/steps/GetSkinStep.cpp
+    minecraft/auth/steps/GetSkinStep.h
+    minecraft/auth/steps/LauncherLoginStep.cpp
+    minecraft/auth/steps/LauncherLoginStep.h
+    minecraft/auth/steps/MigrationEligibilityStep.cpp
+    minecraft/auth/steps/MigrationEligibilityStep.h
+    minecraft/auth/steps/MinecraftProfileStep.cpp
+    minecraft/auth/steps/MinecraftProfileStep.h
+    minecraft/auth/steps/MSAStep.cpp
+    minecraft/auth/steps/MSAStep.h
+    minecraft/auth/steps/XboxAuthorizationStep.cpp
+    minecraft/auth/steps/XboxAuthorizationStep.h
+    minecraft/auth/steps/XboxProfileStep.cpp
+    minecraft/auth/steps/XboxProfileStep.h
+    minecraft/auth/steps/XboxUserStep.cpp
+    minecraft/auth/steps/XboxUserStep.h
+    minecraft/auth/steps/YggdrasilStep.cpp
+    minecraft/auth/steps/YggdrasilStep.h
 
     minecraft/gameoptions/GameOptions.h
     minecraft/gameoptions/GameOptions.cpp

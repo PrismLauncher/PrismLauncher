@@ -16,7 +16,6 @@
  */
 
 #include "MinecraftAccount.h"
-#include "flows/AuthContext.h"
 
 #include <QUuid>
 #include <QJsonObject>
@@ -28,14 +27,12 @@
 #include <QDebug>
 
 #include <QPainter>
-#include "flows/MSASilent.h"
-#include "flows/MSAInteractive.h"
 
-#include "flows/MojangRefresh.h"
-#include "flows/MojangLogin.h"
+#include "flows/MSA.h"
+#include "flows/Mojang.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent) {
-    m_internalId = QUuid::createUuid().toString().remove(QRegExp("[{}-]"));
+    data.internalId = QUuid::createUuid().toString().remove(QRegExp("[{}-]"));
 }
 
 
@@ -77,41 +74,9 @@ QJsonObject MinecraftAccount::saveToJson() const
     return data.saveState();
 }
 
-AccountStatus MinecraftAccount::accountStatus() const {
-    if(data.type == AccountType::Mojang) {
-        if (data.accessToken().isEmpty()) {
-            return NotVerified;
-        }
-        else {
-            return Verified;
-        }
-    }
-    // MSA
-    // FIXME: this is extremely crude and probably wrong
-    if(data.msaToken.token.isEmpty()) {
-        return NotVerified;
-    }
-    else {
-        return Verified;
-    }
+AccountState MinecraftAccount::accountState() const {
+    return data.accountState;
 }
-
-bool MinecraftAccount::isExpired() const {
-    switch(data.type) {
-        case AccountType::Mojang: {
-            return data.accessToken().isEmpty();
-        }
-        break;
-        case AccountType::MSA: {
-            return data.msaToken.validity == Katabasis::Validity::None;
-        }
-        break;
-        default: {
-            return true;
-        }
-    }
-}
-
 
 QPixmap MinecraftAccount::getFace() const {
     QPixmap skinTexture;
@@ -126,136 +91,51 @@ QPixmap MinecraftAccount::getFace() const {
 }
 
 
-shared_qobject_ptr<AccountTask> MinecraftAccount::login(AuthSessionPtr session, QString password)
-{
+shared_qobject_ptr<AccountTask> MinecraftAccount::login(QString password) {
     Q_ASSERT(m_currentTask.get() == nullptr);
 
-    // take care of the true offline status
-    if (accountStatus() == NotVerified && password.isEmpty())
-    {
-        if (session)
-        {
-            session->status = AuthSession::RequiresPassword;
-            fillSession(session);
-        }
-        return nullptr;
-    }
-
-    if(accountStatus() == Verified && !session->wants_online)
-    {
-        session->status = AuthSession::PlayableOffline;
-        session->auth_server_online = false;
-        fillSession(session);
-        return nullptr;
-    }
-    else
-    {
-        if (password.isEmpty())
-        {
-            m_currentTask.reset(new MojangRefresh(&data));
-        }
-        else
-        {
-            m_currentTask.reset(new MojangLogin(&data, password));
-        }
-        m_currentTask->assignSession(session);
-
-        connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
-        connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
-        emit activityChanged(true);
-    }
+    m_currentTask.reset(new MojangLogin(&data, password));
+    connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
+    connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    emit activityChanged(true);
     return m_currentTask;
 }
 
-shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA(AuthSessionPtr session) {
+shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA() {
     Q_ASSERT(m_currentTask.get() == nullptr);
 
-    if(accountStatus() == Verified && !session->wants_online)
-    {
-        session->status = AuthSession::PlayableOffline;
-        session->auth_server_online = false;
-        fillSession(session);
-        return nullptr;
-    }
-    else
-    {
-        m_currentTask.reset(new MSAInteractive(&data));
-        m_currentTask->assignSession(session);
-
-        connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
-        connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
-        emit activityChanged(true);
-    }
+    m_currentTask.reset(new MSAInteractive(&data));
+    connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
+    connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    emit activityChanged(true);
     return m_currentTask;
 }
 
-shared_qobject_ptr<AccountTask> MinecraftAccount::refresh(AuthSessionPtr session) {
-    Q_ASSERT(m_currentTask.get() == nullptr);
-
-    // take care of the true offline status
-    if (accountStatus() == NotVerified)
-    {
-        if (session)
-        {
-            if(data.type == AccountType::MSA) {
-                session->status = AuthSession::RequiresOAuth;
-            }
-            else {
-                session->status = AuthSession::RequiresPassword;
-            }
-            fillSession(session);
-        }
-        return nullptr;
+shared_qobject_ptr<AccountTask> MinecraftAccount::refresh() {
+    if(m_currentTask) {
+        return m_currentTask;
     }
 
-    if(accountStatus() == Verified && !session->wants_online)
-    {
-        session->status = AuthSession::PlayableOffline;
-        session->auth_server_online = false;
-        fillSession(session);
-        return nullptr;
+    if(data.type == AccountType::MSA) {
+        m_currentTask.reset(new MSASilent(&data));
     }
-    else
-    {
-        if(data.type == AccountType::MSA) {
-            m_currentTask.reset(new MSASilent(&data));
-        }
-        else {
-            m_currentTask.reset(new MojangRefresh(&data));
-        }
-        m_currentTask->assignSession(session);
+    else {
+        m_currentTask.reset(new MojangRefresh(&data));
+    }
 
-        connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
-        connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
-        emit activityChanged(true);
-    }
+    connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
+    connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    emit activityChanged(true);
+    return m_currentTask;
+}
+
+shared_qobject_ptr<AccountTask> MinecraftAccount::currentTask() {
     return m_currentTask;
 }
 
 
 void MinecraftAccount::authSucceeded()
 {
-    auto session = m_currentTask->getAssignedSession();
-    if (session)
-    {
-        /*
-            session->status = AuthSession::RequiresProfileSetup;
-            session->auth_server_online = true;
-        */
-        if(data.profileId().size() == 0) {
-            session->status = AuthSession::RequiresProfileSetup;
-        }
-        else {
-            if(session->wants_online) {
-                session->status = AuthSession::PlayableOnline;
-            }
-            else {
-                session->status = AuthSession::PlayableOffline;
-            }
-        }
-        fillSession(session);
-        session->auth_server_online = true;
-    }
     m_currentTask.reset();
     emit changed();
     emit activityChanged(false);
@@ -263,62 +143,35 @@ void MinecraftAccount::authSucceeded()
 
 void MinecraftAccount::authFailed(QString reason)
 {
-    auto session = m_currentTask->getAssignedSession();
-    // This is emitted when the yggdrasil tasks time out or are cancelled.
-    // -> we treat the error as no-op
-    switch (m_currentTask->accountState()) {
-        case AccountTask::STATE_FAILED_SOFT: {
-            if (session)
-            {
-                if(accountStatus() == Verified) {
-                    session->status = AuthSession::PlayableOffline;
-                }
-                else {
-                    if(data.type == AccountType::MSA) {
-                        session->status = AuthSession::RequiresOAuth;
-                    }
-                    else {
-                        session->status = AuthSession::RequiresPassword;
-                    }
-                }
-                session->auth_server_online = false;
-                fillSession(session);
-            }
+    switch (m_currentTask->taskState()) {
+        case AccountTaskState::STATE_OFFLINE:
+        case AccountTaskState::STATE_FAILED_SOFT: {
+            // NOTE: this doesn't do much. There was an error of some sort.
         }
         break;
-        case AccountTask::STATE_FAILED_HARD: {
-            // FIXME: MSA data clearing
-            data.yggdrasilToken.token = QString();
-            data.yggdrasilToken.validity = Katabasis::Validity::None;
+        case AccountTaskState::STATE_FAILED_HARD: {
+            if(isMSA()) {
+                data.msaToken.token = QString();
+                data.msaToken.refresh_token = QString();
+                data.msaToken.validity = Katabasis::Validity::None;
+                data.validity_ = Katabasis::Validity::None;
+            }
+            else {
+                data.yggdrasilToken.token = QString();
+                data.yggdrasilToken.validity = Katabasis::Validity::None;
+                data.validity_ = Katabasis::Validity::None;
+            }
+            emit changed();
+        }
+        break;
+        case AccountTaskState::STATE_FAILED_GONE: {
             data.validity_ = Katabasis::Validity::None;
             emit changed();
-            if (session)
-            {
-                if(data.type == AccountType::MSA) {
-                    session->status = AuthSession::RequiresOAuth;
-                }
-                else {
-                    session->status = AuthSession::RequiresPassword;
-                }
-                session->auth_server_online = true;
-                fillSession(session);
-            }
         }
         break;
-        case AccountTask::STATE_FAILED_GONE: {
-            data.validity_ = Katabasis::Validity::None;
-            emit changed();
-            if (session)
-            {
-                session->status = AuthSession::GoneOrMigrated;
-                session->auth_server_online = true;
-                fillSession(session);
-            }
-        }
-        break;
-        case AccountTask::STATE_CREATED:
-        case AccountTask::STATE_WORKING:
-        case AccountTask::STATE_SUCCEEDED: {
+        case AccountTaskState::STATE_CREATED:
+        case AccountTaskState::STATE_WORKING:
+        case AccountTaskState::STATE_SUCCEEDED: {
             // Not reachable here, as they are not failures.
         }
     }
@@ -366,6 +219,18 @@ bool MinecraftAccount::shouldRefresh() const {
 
 void MinecraftAccount::fillSession(AuthSessionPtr session)
 {
+    if(ownsMinecraft() && !hasProfile()) {
+        session->status = AuthSession::RequiresProfileSetup;
+    }
+    else {
+        if(session->wants_online) {
+            session->status = AuthSession::PlayableOnline;
+        }
+        else {
+            session->status = AuthSession::PlayableOffline;
+        }
+    }
+
     // the user name. you have to have an user name
     // FIXME: not with MSA
     session->username = data.userName();
