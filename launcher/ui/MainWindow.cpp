@@ -1322,8 +1322,18 @@ void MainWindow::setCatBackground(bool enabled)
     if (enabled)
     {
         QDateTime now = QDateTime::currentDateTime();
+        QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
         QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
-        QString cat = (non_stupid_abs(now.daysTo(xmas)) <= 4) ? "catmas" : "kitteh";
+        QString cat;
+        if(non_stupid_abs(now.daysTo(xmas)) <= 4) {
+            cat = "catmas";
+        }
+        else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
+            cat = "cattiversary";
+        }
+        else {
+            cat = "kitteh";
+        }
         view->setStyleSheet(QString(R"(
 InstanceView
 {
