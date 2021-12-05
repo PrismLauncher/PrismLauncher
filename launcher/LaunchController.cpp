@@ -175,6 +175,8 @@ void LaunchController::login() {
                 }
                 return;
             }
+            case AccountState::Errored:
+                // This means some sort of soft error that we can fix with a refresh ... so let's refresh.
             case AccountState::Unchecked: {
                 m_accountToUse->refresh();
                 // NOTE: fallthrough intentional
@@ -196,11 +198,6 @@ void LaunchController::login() {
                 return;
             }
             */
-            case AccountState::Errored: {
-                // This means some sort of soft error that we can fix with a refresh ... so let's refresh.
-                // TODO: implement
-                return;
-            }
             case AccountState::Expired: {
                 auto errorString = tr("The account has expired and needs to be logged into manually again.");
                 QMessageBox::warning(

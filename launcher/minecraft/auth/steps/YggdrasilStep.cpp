@@ -47,5 +47,5 @@ void YggdrasilStep::onAuthFailed() {
         state = AccountTaskState::STATE_OFFLINE;
         errorMessage = tr("Mojang user authentication ended with a network error.");
     }
-    emit finished(AccountTaskState::STATE_OFFLINE, errorMessage);
+    emit finished(state, errorMessage);
 }
