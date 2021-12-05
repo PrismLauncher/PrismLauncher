@@ -55,7 +55,7 @@ set(Launcher_NEWS_RSS_URL "https://multimc.org/rss.xml" CACHE STRING "URL to fet
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR    0)
 set(Launcher_VERSION_MINOR    6)
-set(Launcher_VERSION_HOTFIX   13)
+set(Launcher_VERSION_HOTFIX   14)
 
 # Build number
 set(Launcher_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")

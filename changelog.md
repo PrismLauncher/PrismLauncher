@@ -1,4 +1,67 @@
-# MultiMC 0.6.13
+# MultiMC 0.6.14
+
+This further refines Microsoft account support, along with small fixes related to modpack platforms and Java runtime detection.
+
+### Microsoft accounts
+
+The account system now refreshes accounts in the background while the application is running.
+
+- GH-4071: Errors encountered while refreshing account tokens no longer always result in the tokens expiring:
+  - Network errors encountered when refreshing the main account tokens result in the account being **Offline**.
+  - **Hard** errors are produced by the main tokens becoming provably invalid.
+  - Errors encountered later are treated as **Soft** - they do make the account unusable, but still recoverable by trying again.
+  - **Soft** errors are treated as **Hard** errors when adding the account initially.
+
+In general, this should make MultiMC much more forgiving towards various temporary and non-fatal errors.
+
+- GH-4217: Added support for GamePass accounts and Minecraft profile setup:
+  - The new endpoint for logging in with Microsoft is now used (`/launcher/login`), enabling compatibility with GamePass.
+  - Game ownership is checked instead of only relying on Minecraft profile presence.
+  - Accounts can now be added even when they do not have a profile.
+  - The launcher should guide you through selecting a Minecraft name if you don't have one yet.
+
+### Modpack platform changes
+
+- GH-4055: MultiMC now tries to avoid downloading multiple files to the same path for FTB modpacks.
+
+- Search as you type is now used for FTB.
+
+- GH-4185: Version of the modpack is now included in the name of the instance by default.
+
+- The modpack platform UIs now include text field clear buttons.
+
+### Other changes
+
+- Adjusted warnings about Java runtime required for Minecraft 1.18 (it's not Java 16, it's Java 17).
+
+- GH-3490: Instance sorting is now aware of numbers (and sorts 99 before 100).
+
+- GH-4164: Reimplemented assigning instances to groups using drag & drop.
+
+- GH-1795: Added terminal launch option to use a specific Minecraft profile (in-game player name).
+
+    Used like this:
+    ```
+    ./MultiMC --launch 1.17.1 --profile MultiMCTest --server mc.hypixel.net
+    ```
+
+- GH-4227: Fix crash related to invalid Forge mod metadata.
+
+- GH-4200: Search for the *Eclipse Foundation* and *Adoptium* Java runtimes in the Windows Registry.
+
+- Added shader packs page to instances.
+
+- Removed Mojang services status information from the main window - the status is no longer provided by Mojang.
+
+- It is now possible to turn of global tracking of play time.
+
+### Technical changes
+
+- Debranding is mostly finished. You may see some changes in the logo being used in less places.
+
+# Previous releases
+
+## MultiMC 0.6.13
 
 This release brings initial support for Microsoft accounts, along with a nice pile of modpack platform support changes and improved Java runtime detection.
 
@@ -6,7 +69,7 @@ Java runtimes still need an overhaul, so we're staying on the 0.6 version for a 
 
 Next release should also tackle the current Forge 1.17.x issues in a systematic way.
 
-### Microsoft accounts
+#### Microsoft accounts
 
 This is the first release with Microsoft accounts in.
 
@@ -24,7 +87,7 @@ As part of this, the skin fetching no longer uses a third party service and inst
 
 Capes can also be selected in MultiMC now. With how many people will now get one for migrating their accounts, it only makes sense.
 
-### macOS update
+#### macOS update
 
 Because of issues with the Microsoft accounts, we now have two builds on macOS:
 
@@ -36,7 +99,7 @@ MultiMC will update to the 5.15.2 builds when it detects that this is possible. 
 
 Similar approach got attempted on Windows, aiming to fix various display scaling and theming issues, but it ran into too many problems and will be attempted later, with more caution.
 
-### Modpack platforms
+#### Modpack platforms
 
 In general, the modpack platform pages have been made more consistent with each other (GH-3118, GH-3720, GH-3731).
 
@@ -77,7 +140,7 @@ In general, the modpack platform pages have been made more consistent with each 
 
 - Fixed bugs in FTB platform search.
 
-### Other changes
+#### Other changes
 
 - Forge installation is disabled on Minecraft 1.17+ because of incompatible/unresolved changes on the Forge side.
 
@@ -117,11 +180,10 @@ In general, the modpack platform pages have been made more consistent with each 
 
 - Quick and dirty minimum Java runtime versions checks have been added. This needs to be expanded in the future.
 
-### Technical changes
+#### Technical changes
 
 - The codebase continues to move towards being debranded and harder to build as 'MultiMC' for third parties.
 
-# Previous releases
 
 ## MultiMC 0.6.12
 
