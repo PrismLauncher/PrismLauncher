@@ -89,9 +89,18 @@ QStringList AccountList::profileNames() const {
 
 void AccountList::addAccount(const MinecraftAccountPtr account)
 {
+    // NOTE: Do not allow adding something that's already there
+    if(m_accounts.contains(account)) {
+        return;
+    }
+
+    // hook up notifications for changes in the account
+    connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
+    connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
+
+    // override/replace existing account with the same profileId
     auto profileId = account->profileId();
     if(profileId.size()) {
-        // override/replace existing account with the same profileId
         auto existingAccount = findAccountByProfileId(profileId);
         if(existingAccount != -1) {
             MinecraftAccountPtr existingAccountPtr = m_accounts[existingAccount];
@@ -99,6 +108,8 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
             if(m_defaultAccount == existingAccountPtr) {
                 m_defaultAccount = account;
             }
+            // disconnect notifications for changes in the account being replaced
+            existingAccountPtr->disconnect(this);
             emit dataChanged(index(existingAccount), index(existingAccount, columnCount(QModelIndex()) - 1));
             onListChanged();
             return;
@@ -108,8 +119,6 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
     // if we don't have this profileId yet, add the account to the end
     int row = m_accounts.count();
     beginInsertRows(QModelIndex(), row, row);
-    connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
-    connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
     m_accounts.append(account);
     endInsertRows();
     onListChanged();
@@ -126,6 +135,8 @@ void AccountList::removeAccount(QModelIndex index)
             m_defaultAccount = nullptr;
             onDefaultAccountChanged();
         }
+        account->disconnect(this);
+
         beginRemoveRows(QModelIndex(), row, row);
         m_accounts.removeAt(index.row());
         endRemoveRows();
@@ -204,6 +215,12 @@ void AccountList::accountActivityChanged(bool active)
     }
     if(found) {
         emit listActivityChanged();
+        if(active) {
+            beginActivity();
+        }
+        else {
+            endActivity();
+        }
     }
 }
 
@@ -663,7 +680,6 @@ void AccountList::queueRefresh(QString accountId) {
 
 
 void AccountList::tryNext() {
-    beginActivity();
     while (m_refreshQueue.length()) {
         auto accountId = m_refreshQueue.front();
         m_refreshQueue.pop_front();
@@ -682,7 +698,6 @@ void AccountList::tryNext() {
         }
         qDebug() << "RefreshSchedule: Account with with internal ID " << accountId << " not found.";
     }
-    endActivity();
     // if we get here, no account needed refreshing. Schedule refresh in an hour.
     m_refreshTimer->start(1000 * 3600);
 }
@@ -690,14 +705,12 @@ void AccountList::tryNext() {
 void AccountList::authSucceeded() {
     qDebug() << "RefreshSchedule: Background account refresh succeeded";
     m_currentTask.reset();
-    endActivity();
     m_nextTimer->start(1000 * 20);
 }
 
 void AccountList::authFailed(QString reason) {
     qDebug() << "RefreshSchedule: Background account refresh failed: " << reason;
     m_currentTask.reset();
-    endActivity();
     m_nextTimer->start(1000 * 20);
 }
 
