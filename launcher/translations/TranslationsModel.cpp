@@ -39,6 +39,18 @@ struct Language
         updated = (key == defaultLangCode);
     }
 
+    QString languageName() const {
+        QString result;
+        if(key == "ja_KANJI") {
+            result = locale.nativeLanguageName() + u8" (漢字)";
+            qDebug() << result;
+        }
+        else {
+            result = locale.nativeLanguageName();
+        }
+        return result;
+    }
+
     float percentTranslated() const
     {
         if (total == 0)
@@ -340,7 +352,7 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
         {
             case Column::Language:
             {
-                return lang.locale.nativeLanguageName();
+                return lang.languageName();
             }
             case Column::Completeness:
             {
