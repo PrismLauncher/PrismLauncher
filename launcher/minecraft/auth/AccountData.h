@@ -74,6 +74,8 @@ struct AccountData {
     QString profileId() const;
     QString profileName() const;
 
+    QString lastError() const;
+
     AccountType type = AccountType::MSA;
     bool legacy = false;
     bool canMigrateToMSA = false;

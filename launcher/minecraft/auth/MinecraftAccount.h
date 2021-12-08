@@ -168,6 +168,10 @@ public: /* queries */
 
     void fillSession(AuthSessionPtr session);
 
+    QString lastError() const {
+        return data.lastError();
+    }
+
 signals:
     /**
      * This signal is emitted when the account changes

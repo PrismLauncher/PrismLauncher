@@ -438,3 +438,7 @@ QString AccountData::accountDisplayString() const {
         }
     }
 }
+
+QString AccountData::lastError() const {
+    return errorString;
+}
