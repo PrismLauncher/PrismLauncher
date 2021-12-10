@@ -21,6 +21,10 @@ Debug
 build
 /build-*
 
+# Install dirs
+install
+/install-*
+
 # Ctags File
 tags
 
