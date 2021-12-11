@@ -265,13 +265,17 @@ QList<QString> JavaUtils::FindJavaPaths()
     QList<JavaInstallPtr> ADOPTOPENJDK64s = this->FindJavaFromRegistryKey(
         KEY_WOW64_64KEY, "SOFTWARE\\AdoptOpenJDK\\JDK", "Path", "\\hotspot\\MSI");
 
-    // Foundation (Eclipse)
+    // Eclipse Foundation
     QList<JavaInstallPtr> FOUNDATIONJDK32s = this->FindJavaFromRegistryKey(
         KEY_WOW64_32KEY, "SOFTWARE\\Eclipse Foundation\\JDK", "Path", "\\hotspot\\MSI");
     QList<JavaInstallPtr> FOUNDATIONJDK64s = this->FindJavaFromRegistryKey(
         KEY_WOW64_64KEY, "SOFTWARE\\Eclipse Foundation\\JDK", "Path", "\\hotspot\\MSI");
 
-    // Adoptium (Eclipse)
+    // Eclipse Adoptium
+    QList<JavaInstallPtr> ADOPTIUMJRE32s = this->FindJavaFromRegistryKey(
+        KEY_WOW64_32KEY, "SOFTWARE\\Eclipse Adoptium\\JRE", "Path", "\\hotspot\\MSI");
+    QList<JavaInstallPtr> ADOPTIUMJRE64s = this->FindJavaFromRegistryKey(
+        KEY_WOW64_64KEY, "SOFTWARE\\Eclipse Adoptium\\JRE", "Path", "\\hotspot\\MSI");
     QList<JavaInstallPtr> ADOPTIUMJDK32s = this->FindJavaFromRegistryKey(
         KEY_WOW64_32KEY, "SOFTWARE\\Eclipse Adoptium\\JDK", "Path", "\\hotspot\\MSI");
     QList<JavaInstallPtr> ADOPTIUMJDK64s = this->FindJavaFromRegistryKey(
@@ -297,6 +301,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     java_candidates.append(JRE64s);
     java_candidates.append(NEWJRE64s);
     java_candidates.append(ADOPTOPENJRE64s);
+    java_candidates.append(ADOPTIUMJRE64s);
     java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre8/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre7/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre6/bin/javaw.exe"));
@@ -312,6 +317,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     java_candidates.append(JRE32s);
     java_candidates.append(NEWJRE32s);
     java_candidates.append(ADOPTOPENJRE32s);
+    java_candidates.append(ADOPTIUMJRE32s);
     java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre8/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre7/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre6/bin/javaw.exe"));
