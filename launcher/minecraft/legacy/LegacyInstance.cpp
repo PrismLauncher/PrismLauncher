@@ -122,6 +122,11 @@ QString LegacyInstance::binRoot() const
     return FS::PathCombine(gameRoot(), "bin");
 }
 
+QString LegacyInstance::modsRoot() const {
+    return FS::PathCombine(gameRoot(), "mods");
+}
+
+
 QString LegacyInstance::jarModsDir() const
 {
     return FS::PathCombine(instanceRoot(), "instMods");
@@ -135,11 +140,6 @@ QString LegacyInstance::libDir() const
 QString LegacyInstance::savesDir() const
 {
     return FS::PathCombine(gameRoot(), "saves");
-}
-
-QString LegacyInstance::loaderModsDir() const
-{
-    return FS::PathCombine(gameRoot(), "mods");
 }
 
 QString LegacyInstance::coreModsDir() const

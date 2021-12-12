@@ -45,11 +45,13 @@ public:
     QString savesDir() const;
     QString texturePacksDir() const;
     QString jarModsDir() const;
-    QString loaderModsDir() const;
     QString coreModsDir() const;
     QString resourceDir() const;
-    virtual QString instanceConfigFolder() const override;
+
+    QString instanceConfigFolder() const override;
+
     QString gameRoot() const override; // Path to the instance's minecraft directory.
+    QString modsRoot() const override; // Path to the instance's minecraft directory.
     QString binRoot() const; // Path to the instance's minecraft bin directory.
 
     /// Get the curent base jar of this instance. By default, it's the

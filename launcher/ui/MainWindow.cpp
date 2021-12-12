@@ -211,8 +211,10 @@ public:
     TranslatedAction actionEditInstNotes;
     TranslatedAction actionEditInstance;
     TranslatedAction actionWorlds;
+    TranslatedAction actionMods;
     TranslatedAction actionViewSelectedInstFolder;
     TranslatedAction actionViewSelectedMCFolder;
+    TranslatedAction actionViewSelectedModsFolder;
     TranslatedAction actionDeleteInstance;
     TranslatedAction actionConfig_Folder;
     TranslatedAction actionCAT;
@@ -530,6 +532,13 @@ public:
         all_actions.append(&actionEditInstNotes);
         instanceToolBar->addAction(actionEditInstNotes);
 
+        actionMods = TranslatedAction(MainWindow);
+        actionMods->setObjectName(QStringLiteral("actionMods"));
+        actionMods.setTextId(QT_TRANSLATE_NOOP("MainWindow", "View Mods"));
+        actionMods.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "View the mods of this instance."));
+        all_actions.append(&actionMods);
+        instanceToolBar->addAction(actionMods);
+
         actionWorlds = TranslatedAction(MainWindow);
         actionWorlds->setObjectName(QStringLiteral("actionWorlds"));
         actionWorlds.setTextId(QT_TRANSLATE_NOOP("MainWindow", "View Worlds"));
@@ -559,6 +568,15 @@ public:
         actionViewSelectedMCFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's minecraft folder in a file browser."));
         all_actions.append(&actionViewSelectedMCFolder);
         instanceToolBar->addAction(actionViewSelectedMCFolder);
+
+        /*
+        actionViewSelectedModsFolder = TranslatedAction(MainWindow);
+        actionViewSelectedModsFolder->setObjectName(QStringLiteral("actionViewSelectedModsFolder"));
+        actionViewSelectedModsFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Mods Folder"));
+        actionViewSelectedModsFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's mods folder in a file browser."));
+        all_actions.append(&actionViewSelectedModsFolder);
+        instanceToolBar->addAction(actionViewSelectedModsFolder);
+        */
 
         actionConfig_Folder = TranslatedAction(MainWindow);
         actionConfig_Folder->setObjectName(QStringLiteral("actionConfig_Folder"));
@@ -1651,6 +1669,11 @@ void MainWindow::on_actionWorlds_triggered()
     APPLICATION->showInstanceWindow(m_selectedInstance, "worlds");
 }
 
+void MainWindow::on_actionMods_triggered()
+{
+    APPLICATION->showInstanceWindow(m_selectedInstance, "mods");
+}
+
 void MainWindow::on_actionEditInstance_triggered()
 {
     APPLICATION->showInstanceWindow(m_selectedInstance);
@@ -1761,6 +1784,19 @@ void MainWindow::on_actionViewSelectedMCFolder_triggered()
     }
 }
 
+void MainWindow::on_actionViewSelectedModsFolder_triggered()
+{
+    if (m_selectedInstance)
+    {
+        QString str = m_selectedInstance->modsRoot();
+        if (!FS::ensureFilePathExists(str))
+        {
+            // TODO: report error
+            return;
+        }
+        DesktopServices::openDirectory(QDir(str).absolutePath());
+    }
+}
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {

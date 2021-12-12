@@ -73,4 +73,7 @@ public:
         out << "Null instance - placeholder.";
         return out;
     }
+    QString modsRoot() const override {
+        return QString();
+    }
 };

@@ -202,7 +202,7 @@ QString MinecraftInstance::jarModsDir() const
     return jarmods_dir.absolutePath();
 }
 
-QString MinecraftInstance::loaderModsDir() const
+QString MinecraftInstance::modsRoot() const
 {
     return FS::PathCombine(gameRoot(), "mods");
 }
@@ -961,7 +961,7 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::loaderModList() const
 {
     if (!m_loader_mod_list)
     {
-        m_loader_mod_list.reset(new ModFolderModel(loaderModsDir()));
+        m_loader_mod_list.reset(new ModFolderModel(modsRoot()));
         m_loader_mod_list->disableInteraction(isRunning());
         connect(this, &BaseInstance::runningStatusChanged, m_loader_mod_list.get(), &ModFolderModel::disableInteraction);
     }

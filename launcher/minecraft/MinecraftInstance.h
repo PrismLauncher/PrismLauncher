@@ -40,7 +40,7 @@ public:
     QString resourcePacksDir() const;
     QString texturePacksDir() const;
     QString shaderPacksDir() const;
-    QString loaderModsDir() const;
+    QString modsRoot() const override;
     QString coreModsDir() const;
     QString modsCacheLocation() const;
     QString libDir() const;

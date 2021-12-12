@@ -100,6 +100,9 @@ public:
         return instanceRoot();
     }
 
+    /// Path to the instance's mods directory.
+    virtual QString modsRoot() const = 0;
+
     QString name() const;
     void setName(QString val);
 
