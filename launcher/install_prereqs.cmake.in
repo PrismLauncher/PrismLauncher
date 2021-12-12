@@ -23,5 +23,5 @@ set(gp_cmd_paths ${gp_cmd_paths}
 )
 
 include(BundleUtilities)
-fixup_bundle("@APPS@" "${QTPLUGINS}" "@DIRS@")
+
 
