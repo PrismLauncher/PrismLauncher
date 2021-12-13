@@ -1,11 +1,26 @@
 <p align="center">
-  <img src="https://avatars2.githubusercontent.com/u/5411890" alt="MultiMC logo"/>
+  <img src="https://avatars.githubusercontent.com/u/96310119" alt="PolyMC logo"/>
 </p>
 
-MultiMC 5
+PolyMC 5
 =========
 
-MultiMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
+PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
+
+This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The PolyMC community felt that the maintainer was not acting in the spirit of Free Software so this fork was made. Read "[Why was this fork made?](https://github.com/PolyMC/PolyMC/wiki/FAQ)" on the wiki for more details.
+
+## todo
+- [ ] Get a permanent name + icon.
+- [ ] Style the logo for different icon styles.
+- [ ] Packaging for Linux--Any help packaging for your favorite distro is appreciated!
+- [ ] Packaging for MacOS/Windows
+- [ ] Stop relying on MultiMC-Hosted metadata services
+- [ ] Long-term solution for the MSA client ID issue
+- [ ] Remove references to MultiMC
+- [ ] Figure out a way to switch to GPL.
+
+## Packages
+We currently don't have any packages available yet as this project has just been started, but we expect this to change very soon.
 
 ## Development
 If you want to contribute, talk to us on [Discord](https://discord.gg/multimc) first.
@@ -15,7 +30,7 @@ While blindly submitting PRs is definitely possible, they're not necessarily goi
 We aren't looking for flashy features, but expanding upon the existing feature set without distruption or endangering future viability of the project is OK.
 
 ### Building
-If you want to build MultiMC yourself, check [BUILD.md](BUILD.md) for build instructions.
+If you want to build PolyMC yourself, check [BUILD.md](BUILD.md) for build instructions.
 
 ### Code formatting
 Just follow the existing formatting.
@@ -27,54 +42,12 @@ In general, in order of importance:
 * Indent with 4 space unless it's in a submodule.
 * Keep lists (of arguments, parameters, initializers...) as lists, not paragraphs. It should either read from top to bottom, or left to right. Not both.
 
-
 ## Translations
-Translations can be done [on crowdin](https://translate.multimc.org). Please avoid making direct pull requests to the translations repository.
+TODO
 
 ## Forking/Redistributing/Custom builds policy
-We keep MultiMC open source because we think it's important to be able to see the source code for a project like this, and we do so using the Apache license.
+Do whatever you want, we don't care. Just follow the license. If you have any questions about this feel free to ask in an issue.
 
-Part of the reason for using the Apache license is that we don't want people using the "MultiMC" name when redistributing the project. This means people must take the time to go through the source code and remove all references to "MultiMC", including but not limited to the project icon and the title of windows, (no *MultiMC-fork* in the title).
-
-Apache covers reasonable use for the name - a mention of the project's origins in the About dialog and the license is acceptable. However, it should be abundantly clear that the project is a fork *without* implying that you have our blessing.
-
-
-## License
-Copyright &copy; 2013-2021 MultiMC Contributors
-
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this program except in compliance with the License. You may obtain a copy of the License at [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0).
-
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-
-## Build status
-### Linux (Intel32)
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Linux32_Build&guest=1">
-Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Linux32_Build)/statusIcon"/>
-</a>
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Linux32_Deploy&guest=1">
-Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Linux32_Deploy)/statusIcon"/>
-</a>
-
-### Linux (AMD64)
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Linux64_Build&guest=1">
-Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Linux64_Build)/statusIcon"/>
-</a>
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Linux64_Deploy&guest=1">
-Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Linux64_Deploy)/statusIcon"/>
-</a>
-
-### macOS (AMD64)
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_MacOS_Build&guest=1">
-Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_MacOS_Build)/statusIcon"/>
-</a>
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_MacOS_Deploy&guest=1">
-Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_MacOS_Deploy)/statusIcon"/>
-</a>
-
-### Windows (Intel32)
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Windows_Build&guest=1">
-Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Windows_Build)/statusIcon"/>
-</a>
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Windows_Deploy&guest=1">
-Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Windows_Deploy)/statusIcon"/>
-</a>
+## Copyright
+Copyright 2013-2021 MultiMC contributors
+Copyright 2021 PolyMC contributors

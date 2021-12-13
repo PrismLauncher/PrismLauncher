@@ -312,7 +312,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         QString xdgDataHome = QFile::decodeName(qgetenv("XDG_DATA_HOME"));
         if (xdgDataHome.isEmpty())
             xdgDataHome = QDir::homePath() + QLatin1String("/.local/share");
-        dataPath = xdgDataHome + "/devlauncher";
+        dataPath = xdgDataHome + "/polymc";
         adjustedBy += "XDG standard " + dataPath;
 #elif defined(Q_OS_MAC)
         QDir foo(FS::PathCombine(applicationDirPath(), "../../Data"));

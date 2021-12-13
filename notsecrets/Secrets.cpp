@@ -23,8 +23,6 @@ namespace {
  * By putting one in here, you accept the terms and conditions for using the MS Identity Plaform and assume all responsibilities associated with it.
  * See: https://docs.microsoft.com/en-us/legal/microsoft-identity-platform/terms-of-use
  *
- * Above all else, do not impersonate other applications! This includes the Mojang Launcher and MultiMC - your builds are *NOT* MultiMC.
- *
  * If you intend to base your own launcher on this code, take care and customize this to obfuscate the client ID, so it cannot be trivially found by casual attackers.
  */
 

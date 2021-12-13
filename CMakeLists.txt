@@ -207,10 +207,10 @@ elseif(Launcher_LAYOUT_REAL STREQUAL "lin-nodeps")
     install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" DESTINATION ${BUNDLE_DEST_DIR} RENAME ${Launcher_Name})
 
 elseif(Launcher_LAYOUT_REAL STREQUAL "lin-system")
-	set(Launcher_APP_BINARY_NAME "devlauncher" CACHE STRING "Name of the Launcher binary")
+	set(Launcher_APP_BINARY_NAME "polymc" CACHE STRING "Name of the Launcher binary")
 	set(Launcher_BINARY_DEST_DIR "bin" CACHE STRING "Path to the binary directory")
 	set(Launcher_LIBRARY_DEST_DIR "lib${LIB_SUFFIX}" CACHE STRING "Path to the library directory")
-	set(Launcher_SHARE_DEST_DIR "share/devlauncher" CACHE STRING "Path to the shard data directory")
+	set(Launcher_SHARE_DEST_DIR "share/polymc" CACHE STRING "Path to the shard data directory")
 	set(JARS_DEST_DIR "${Launcher_SHARE_DEST_DIR}/jars")
 
 	set(BINARY_DEST_DIR ${Launcher_BINARY_DEST_DIR})
