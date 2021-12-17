@@ -308,7 +308,13 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
     else
     {
-#if defined(Q_OS_MAC)
+#ifdef LAUNCHER_LINUX_DATADIR
+        QString xdgDataHome = QFile::decodeName(qgetenv("XDG_DATA_HOME"));
+        if (xdgDataHome.isEmpty())
+            xdgDataHome = QDir::homePath() + QLatin1String("/.local/share");
+        dataPath = xdgDataHome + "/devlauncher";
+        adjustedBy += "XDG standard " + dataPath;
+#elif defined(Q_OS_MAC)
         QDir foo(FS::PathCombine(applicationDirPath(), "../../Data"));
         dataPath = foo.absolutePath();
         adjustedBy += "Fallback to special Mac location " + dataPath;
@@ -522,6 +528,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_rootPath = foo.absolutePath();
         // on macOS, touch the root to force Finder to reload the .app metadata (and fix any icon change issues)
         FS::updateTimestamp(m_rootPath);
+#endif
+
+#ifdef MULTIMC_JARS_LOCATION
+        m_jarsPath = TOSTRING(MULTIMC_JARS_LOCATION);
 #endif
 
         qDebug() << BuildConfig.LAUNCHER_DISPLAYNAME << ", (c) 2013-2021 " << BuildConfig.LAUNCHER_COPYRIGHT;
