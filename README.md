@@ -17,6 +17,7 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 - [ ] Stop relying on MultiMC-Hosted metadata services
 - [ ] Long-term solution for the MSA client ID issue
 - [ ] Remove references to MultiMC
+- [ ] Meson
 - [x] Figure out a way to switch to GPL.
 
 ## Packages
