@@ -5,12 +5,12 @@ body:
 - type: markdown
   attributes:
     value: |
-      If you need help with running Minecraft, please visit us [on our Discord](https://discord.gg/multimc) before making a bug report.
+      If you need help with running Minecraft, please visit us on our Discord before making a bug report.
 
       Before submitting a bug report, please make sure you have read this *entire* form, and that:
-      * You have read the [FAQ](https://github.com/MultiMC/Launcher/wiki/FAQ) and it has not answered your question
+      * You have read the [FAQ](https://github.com/PolyMC/PolyMC/wiki/FAQ) and it has not answered your question
       * Your bug is not caused by Minecraft or any mods you have installed.
-      * Your issue has not been reported before, [make sure to use the search function!](https://github.com/MultiMC/Launcher/issues)
+      * Your issue has not been reported before, [make sure to use the search function!](https://github.com/PolyMC/PolyMC/issues)
 
       **Do not forget to give your issue a descriptive title.** "Bug in the instance screen" makes it hard to distinguish issues at a glance.
 - type: dropdown
@@ -48,4 +48,4 @@ body:
     label: This issue is unique
     options:
     - label: I have searched the issue tracker and did not find an issue describing my bug.
-      required: true      
+      required: true
