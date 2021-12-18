@@ -17,17 +17,10 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 - [ ] Stop relying on MultiMC-Hosted metadata services
 - [ ] Long-term solution for the MSA client ID issue
 - [ ] Remove references to MultiMC
-- [ ] Figure out a way to switch to GPL.
+- [x] Figure out a way to switch to GPL.
 
 ## Packages
 We currently don't have any packages available yet as this project has just been started, but we expect this to change very soon.
-
-## Development
-If you want to contribute, talk to us on [Discord](https://discord.gg/multimc) first.
-
-While blindly submitting PRs is definitely possible, they're not necessarily going to get accepted.
-
-We aren't looking for flashy features, but expanding upon the existing feature set without distruption or endangering future viability of the project is OK.
 
 ### Building
 If you want to build PolyMC yourself, check [BUILD.md](BUILD.md) for build instructions.
