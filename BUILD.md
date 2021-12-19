@@ -102,7 +102,7 @@ Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt 
     - Microsoft Visual C++ 2008 Redist is required for this, there's a link on the OpenSSL download page above next to the main download.
     - We use a custom build of OpenSSL that doesn't have this dependency. For normal development, the custom build is not necessary though.
 * [zlib 1.2+](http://gnuwin32.sourceforge.net/packages/zlib.htm) - the Setup is fine
-* [Java JDK 8](https://adoptium.net/releases.html?variant=openjdk8&jvmVariant=hotspot) - Use the MSI installer.
+* [Java JDK 8](https://adoptium.net/releases.html?variant=openjdk8) - Use the MSI installer.
 * [CMake](http://www.cmake.org/cmake/resources/software.html) -- Windows (Win32 Installer)
 
 Ensure that OpenSSL, zlib, Java and CMake are on `PATH`.
