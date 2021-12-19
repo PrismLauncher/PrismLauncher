@@ -332,7 +332,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 "(%1)\n"
                 "\n"
                 "The launcher cannot continue until you fix this problem."
-            ).arg(dataPath);
+            ).arg(dataPath)
         );
         return;
     }
@@ -350,7 +350,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 "(%1)\n"
                 "\n"
                 "The launcher cannot continue until you fix this problem."
-            ).arg(dataPath);
+            ).arg(dataPath)
         );
         return;
     }
@@ -510,7 +510,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                     "(%1)\n"
                     "\n"
                     "The launcher cannot continue until you fix this problem."
-                ).arg(dataPath);
+                ).arg(dataPath)
             );
             return;
         }
