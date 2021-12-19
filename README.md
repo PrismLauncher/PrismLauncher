@@ -32,7 +32,7 @@ In general, in order of importance:
 Translations can be done [on crowdin](https://translate.multimc.org). Please avoid making direct pull requests to the translations repository.
 
 ## Forking/Redistributing/Custom builds policy
-We keep MultiMC open source because we think it's important to be able to see the source code for a project like this, and we do so using the Apache license.
+We keep Launcher open source because we think it's important to be able to see the source code for a project like this, and we do so using the Apache license.
 
 Part of the reason for using the Apache license is that we don't want people using the "MultiMC" name when redistributing the project. This means people must take the time to go through the source code and remove all references to "MultiMC", including but not limited to the project icon and the title of windows, (no *MultiMC-fork* in the title).
 
