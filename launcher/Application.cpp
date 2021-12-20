@@ -326,14 +326,17 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     {
         showFatalErrorMessage(
             "The launcher data folder could not be created.",
-            "The launcher data folder could not be created.\n"
-            "\n"
+            QString(
+                "The launcher data folder could not be created.\n"
+                "\n"
 #if defined(Q_OS_MAC)
-            MACOS_HINT
+                MACOS_HINT
 #endif
-            "Make sure you have the right permissions to the launcher data folder and any folder needed to access it.\n"
-            "\n"
-            "The launcher cannot continue until you fix this problem."
+                "Make sure you have the right permissions to the launcher data folder and any folder needed to access it.\n"
+                "(%1)\n"
+                "\n"
+                "The launcher cannot continue until you fix this problem."
+            ).arg(dataPath)
         );
         return;
     }
@@ -341,14 +344,17 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     {
         showFatalErrorMessage(
             "The launcher data folder could not be opened.",
-            "The launcher data folder could not be opened.\n"
-            "\n"
+            QString(
+                "The launcher data folder could not be opened.\n"
+                "\n"
 #if defined(Q_OS_MAC)
-            MACOS_HINT
+                MACOS_HINT
 #endif
-            "Make sure you have the right permissions to the launcher data folder.\n"
-            "\n"
-            "The launcher cannot continue until you fix this problem."
+                "Make sure you have the right permissions to the launcher data folder.\n"
+                "(%1)\n"
+                "\n"
+                "The launcher cannot continue until you fix this problem."
+            ).arg(dataPath)
         );
         return;
     }
@@ -498,14 +504,17 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         {
             showFatalErrorMessage(
                 "The launcher data folder is not writable!",
-                "The launcher couldn't create a log file - the data folder is not writable.\n"
-                "\n"
+                QString(
+                    "The launcher couldn't create a log file - the data folder is not writable.\n"
+                    "\n"
     #if defined(Q_OS_MAC)
-                MACOS_HINT
+                    MACOS_HINT
     #endif
-                "Make sure you have write permissions to the data folder.\n"
-                "\n"
-                "The launcher cannot continue until you fix this problem."
+                    "Make sure you have write permissions to the data folder.\n"
+                    "(%1)\n"
+                    "\n"
+                    "The launcher cannot continue until you fix this problem."
+                ).arg(dataPath)
             );
             return;
         }

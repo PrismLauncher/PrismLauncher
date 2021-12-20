@@ -1,4 +1,5 @@
-/* Copyright 2013-2019 MultiMC Contributors
+/*
+ * Copyright 2020-2021 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
