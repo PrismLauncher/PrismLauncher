@@ -37,8 +37,6 @@
 
 #include "BuildConfig.h"
 
-#include "Secrets.h"
-
 AccountListPage::AccountListPage(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::AccountListPage)
 {
@@ -74,7 +72,7 @@ AccountListPage::AccountListPage(QWidget *parent)
     updateButtonStates();
 
     // Xbox authentication won't work without a client identifier, so disable the button if it is missing
-    ui->actionAddMicrosoft->setVisible(Secrets::hasMSAClientID());
+    ui->actionAddMicrosoft->setVisible(BuildConfig.MSA_CLIENT_ID.size() != 0);
 }
 
 AccountListPage::~AccountListPage()

@@ -935,7 +935,7 @@ target_link_libraries(Launcher_logic
     ganalytics
 )
 
-target_link_libraries(Launcher_logic secrets)
+target_link_libraries(Launcher_logic)
 
 add_executable(${Launcher_Name} MACOSX_BUNDLE WIN32 main.cpp ${LAUNCHER_RCS})
 target_link_libraries(${Launcher_Name} Launcher_logic)

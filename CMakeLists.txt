@@ -79,19 +79,19 @@ set(Launcher_PASTE_EE_API_KEY "utLvciUouSURFzfjPxLBf5W4ISsUX4pwBDF7N1AfZ" CACHE 
 set(Launcher_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can get from Imgur when you register an application")
 
 # Google analytics ID
-set(Launcher_ANALYTICS_ID "UA-87731965-2" CACHE STRING "ID you can get from Google analytics")
+set(Launcher_ANALYTICS_ID "" CACHE STRING "ID you can get from Google analytics")
+
+# MSA Client ID
+set(Launcher_MSA_CLIENT_ID "17b47edd-c884-4997-926d-9e7f9a6b4647" CACHE STRING "Client ID you can get from Microsoft Identity Platform when you register an application")
 
 # Bug tracker URL
-set(Launcher_BUG_TRACKER_URL "" CACHE STRING "URL for the bug tracker.")
+set(Launcher_BUG_TRACKER_URL "https://github.com/PolyMC/PolyMC/issues" CACHE STRING "URL for the bug tracker.")
 
 # Discord URL
 set(Launcher_DISCORD_URL "" CACHE STRING "URL for the Discord guild.")
 
 # Subreddit URL
 set(Launcher_SUBREDDIT_URL "" CACHE STRING "URL for the subreddit.")
-
-# Use the secrets library or a public stub?
-option(Launcher_EMBED_SECRETS "Determines whether to embed secrets. Secrets are separate and non-public." OFF)
 
 #### Check the current Git commit and branch
 include(GetGitRevisionDescription)
@@ -131,11 +131,7 @@ endif()
 
 ####################################### Secrets #######################################
 
-if(Launcher_EMBED_SECRETS)
-    add_subdirectory(secrets)
-else()
-    add_subdirectory(notsecrets)
-endif()
+add_subdirectory(program_info)
 
 ####################################### Install layout #######################################
 

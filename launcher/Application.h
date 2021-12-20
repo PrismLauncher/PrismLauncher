@@ -104,8 +104,6 @@ public:
         return m_accounts;
     }
 
-    QString msaClientId() const;
-
     Status status() const {
         return m_status;
     }
