@@ -21,7 +21,10 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 - [x] Figure out a way to switch to GPL.
 
 ## Packages
-We currently don't have any packages available yet as this project has just been started, but we expect this to change very soon.
+Experimental packages are available for Linux (non-portable) and Windows (portable). The Linux version is confirmed to work, but the Windows version needs testing. Please volunteer to help us if you use Windows!
+
+- [Linux (AMD64)](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/lin64-system.tar.zst) - this is a SYSTEM package and is NOT intended to be portable!
+- [Windows (64-bit)](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/win64.zip) - this is a PORTABLE package. This package needs testing.
 
 ### Building
 If you want to build PolyMC yourself, check [BUILD.md](BUILD.md) for build instructions.
