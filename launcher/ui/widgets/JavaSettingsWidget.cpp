@@ -319,7 +319,7 @@ void JavaSettingsWidget::on_javaStatusBtn_clicked()
     }
     CustomMessageBox::selectable(
         this,
-        failed ? QObject::tr("Java test success") : QObject::tr("Java test failure"),
+        failed ? QObject::tr("Java test failure") : QObject::tr("Java test success"),
         text,
         failed ? QMessageBox::Critical : QMessageBox::Information
     )->show();
