@@ -21,10 +21,13 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 - [x] Figure out a way to switch to GPL.
 
 ## Packages
-Experimental packages are available for Linux (non-portable) and Windows (portable). The Linux version is confirmed to work, but the Windows version needs testing. Please volunteer to help us if you use Windows!
+Experimental packages are available for Linux (non-portable) and Windows (portable). Both versions are confirmed to work but the Windows version needs more testing--please volunteer if you use Windows!
 
-- [Linux (AMD64)](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/lin64-system.tar.zst) - this is a SYSTEM package and is NOT intended to be portable!
-- [Windows (64-bit)](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/win64.zip) - this is a PORTABLE package. This package needs testing.
+- A full list of packages is available [here](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/).
+- Last build status: https://jenkins.swurl.xyz/job/PolyMC/lastBuild/
+- [Linux (AMD64) System](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/lin64-system.tar.zst) - this is a SYSTEM package that is intended to be installed via a package manager. This CAN NOT be used as a portable application!
+- [Windows (32-bit)](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/win32.zip) - this is a PORTABLE package. This package needs testing.
+- MacOS currently does not have any packages. We are still working on setting up MacOS packaging.
 
 ### Building
 If you want to build PolyMC yourself, check [BUILD.md](BUILD.md) for build instructions.
