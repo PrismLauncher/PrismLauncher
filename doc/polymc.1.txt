@@ -1,35 +1,35 @@
-MULTIMC(1)
+POLYMC(1)
 ==========
 :doctype: manpage
 
 
 NAME
 ----
-multimc - a launcher and instance manager for Minecraft.
+polymc - a launcher and instance manager for Minecraft.
 
 
 SYNOPSIS
 --------
-*multimc* ['OPTIONS']
+*polymc* ['OPTIONS']
 
 
 DESCRIPTION
 -----------
-MultiMC is a custom launcher for Minecraft that allows you to easily manage
+PolyMC is a custom launcher for Minecraft that allows you to easily manage
 multiple installations of Minecraft at once. It also allows you to easily
 install and remove mods by simply dragging and dropping.
-Here are the current features of MultiMC.
+Here are the current features of PolyMC.
 
 OPTIONS
 -------
 *-d, --dir*='DIRECTORY'::
-    Use 'DIRECTORY' as the MultiMC root.
+    Use 'DIRECTORY' as the PolyMC root.
 
 *-l, --launch*='INSTANCE_ID'::
     Launch the instance specified by 'INSTANCE_ID'.
 
 *--alive*::
-    Write a small 'live.check' file after MultiMC starts.
+    Write a small 'live.check' file after PolyMC starts.
 
 *-h, --help*::
     Display help text and exit.
@@ -49,16 +49,18 @@ EXIT STATUS
 
 BUGS
 ----
-<https://github.com/MultiMC/Launcher/issues>
+<https://github.com/PolyMC/PolyMC/issues>
 
 RESOURCES
 ---------
-GitHub: <https://github.com/MultiMC/Launcher>
+GitHub: <https://github.com/PolyMC/PolyMC>
 
-Main website: <https://multimc.org>
+Main website: <https://polymc.org>
 
 AUTHORS
 -------
 peterix <peterix@gmail.com>
+
+swurl <swurl@swurl.xyz>
 
 // vim: syntax=asciidoc

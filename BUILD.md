@@ -9,21 +9,13 @@ Build Instructions
 * [Windows](#windows)
 * [macOS](#macos)
 
-# Note
-
-MultiMC is a portable application and is not supposed to be installed into any system folders.
-That would be anything outside your home folder. Before running `make install`, make sure
-you set the install path to something you have write access to. Never build this under
-an administrator/root level account. Don't use `sudo`. It won't work and it's not supposed to work.
-Also note that this guide is for development purposes only. No support is given for building your own fork or special build for any reason whatsoever.
-
 
 # Getting the source
 
 Clone the source code using git and grab all the submodules:
 
 ```
-git clone https://github.com/MultiMC/Launcher.git
+git clone https://github.com/PolyMC/PolyMC.git
 git submodule init
 git submodule update
 ```
@@ -43,23 +35,35 @@ Getting the project to build and run on Linux is easy if you use any modern and 
 ### Building from command line
 You need a source folder, a build folder and an install folder.
 
-Let's say you want everything in `~/MultiMC/`:
-
 ```
 # make all the folders
-mkdir ~/MultiMC && cd ~/MultiMC
+mkdir ~/PolyMC && cd ~/PolyMC
 mkdir build
 mkdir install
 # clone the complete source
-git clone --recursive https://github.com/MultiMC/Launcher.git src
+git clone --recursive https://github.com/PolyMC/PolyMC.git src
 # configure the project
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=../install ../src
-# build & install (use -j with the number of cores your CPU has)
-make -j8 install
+make -j$(nproc) install
 ```
 
 You can use IDEs like KDevelop or QtCreator to open the CMake project if you want to work on the code.
+
+### Building & Installing to the System
+This is the preferred method for installation, and is suitable for packages.
+
+```
+git clone --recursive https://github.com/PolyMC/PolyMC.git && cd PolyMC
+
+# configure everything
+cmake -S . -B build \
+	-DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX="/usr" \ # Use "/usr" for packages, otherwise, leave it at the default "/usr/local".
+    -DLauncher_LAYOUT=lin-system
+
+make -j$(nproc) install # Optionally specify DESTDIR for packages (i.e. DESTDIR=${pkgdir})
+```
 
 ### Installing Qt using the installer (optional)
 1. Run the Qt installer.
@@ -85,7 +89,7 @@ You can use IDEs like KDevelop or QtCreator to open the CMake project if you wan
 6. Cross your fingers and press the Run button (bottom left of Qt Creator).
     - If the project builds successfully it will run and the Launcher window will pop up.
 
-**If this doesn't work for you, let us know on IRC ([Esper/#MultiMC](http://webchat.esper.net/?nick=&channels=MultiMC))!**
+**If this doesn't work for you, let us know on our Discord.**
 
 # Windows
 
@@ -163,15 +167,15 @@ ssleay32.dll
 zlib1.dll
 ```
 
-**These build instructions worked for me (Drayshak) on a fresh Windows 8 x64 Professional install. If they don't work for you, let us know on IRC ([Esper/#MultiMC](http://webchat.esper.net/?nick=&channels=MultiMC))!**
+**These build instructions worked for me (Drayshak) on a fresh Windows 8 x64 Professional install. If they don't work for you, let us know on our Discord.**
 ### Compile from command line on Windows
 1. If you installed Qt with the web installer, there should be a shortcut called `Qt 5.4 for Desktop (MinGW 4.9 32-bit)` in the Start menu on Windows 7 and 10. Best way to find it is to search for it. Do note you cannot just use cmd.exe, you have to use the shortcut, otherwise the proper MinGW software will not be on the PATH.
-2. Once that is open, change into your user directory, and clone MultiMC by doing `git clone --recursive https://github.com/MultiMC/Launcher.git`, and change directory to the folder you cloned to.
+2. Once that is open, change into your user directory, and clone PolyMC by doing `git clone --recursive https://github.com/PolyMC/PolyMC.git`, and change directory to the folder you cloned to.
 3. Make a build directory, and change directory to the directory and do `cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=C:\Path\that\makes\sense\for\you`. By default, it will install to C:\Program Files (x86), which you might not want, if you want a local installation. If you want to install it to that directory, make sure to run the command window as administrator.
 3. Do `mingw32-make -jX`, where X is the number of cores your CPU has plus one.
 4. Now to wait for it to compile. This could take some time. Hopefully it compiles properly.
-5. Run the command `mingw32-make install`, and it should install MultiMC, to whatever the `-DCMAKE_INSTALL_PREFIX` was.
-6. In most cases, whenever compiling, the OpenSSL dll's aren't put into the directory to where MultiMC installs, meaning you cannot log in. The best way to fix this is just to do `copy C:\OpenSSL-Win32\*.dll C:\Where\you\installed\MultiMC\to`. This should copy the required OpenSSL dll's to log in.
+5. Run the command `mingw32-make install`, and it should install PolyMC, to whatever the `-DCMAKE_INSTALL_PREFIX` was.
+6. In most cases, whenever compiling, the OpenSSL dll's aren't put into the directory to where PolyMC installs, meaning you cannot log in. The best way to fix this is just to do `copy C:\OpenSSL-Win32\*.dll C:\Where\you\installed\PolyMC\to`. This should copy the required OpenSSL dll's to log in.
 
 # macOS
 
@@ -186,7 +190,7 @@ zlib1.dll
 Pick an installation path - this is where the final `.app` will be constructed when you run `make install`. Supply it as the `CMAKE_INSTALL_PREFIX` argument during CMake configuration.
 
 ```
-git clone --recursive https://github.com/MultiMC/Launcher.git
+git clone --recursive https://github.com/PolyMC/PolyMC.git
 cd Launcher
 mkdir build
 cd build
