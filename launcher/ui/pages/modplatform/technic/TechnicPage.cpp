@@ -202,14 +202,12 @@ void TechnicPage::metadataLoaded()
     QString name = current.name;
 
     if (current.websiteUrl.isEmpty())
-        // This allows injecting HTML here.
-        text = name;
+        text = name.toHtmlEscaped();
     else
-        // URL not properly escaped for inclusion in HTML. The name allows for injecting HTML.
-        text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
+        text = "<a href=\"" + current.websiteUrl.toHtmlEscaped() + "\">" + name.toHtmlEscaped() + "</a>";
+
     if (!current.author.isEmpty()) {
-        // This allows injecting HTML here
-        text += tr(" by ") + current.author;
+        text += tr(" by ") + current.author.toHtmlEscaped();
     }
 
     ui->frame->setModText(text);
