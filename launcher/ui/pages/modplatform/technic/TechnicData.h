@@ -36,6 +36,7 @@ struct Modpack {
     QString websiteUrl;
     QString author;
     QString description;
+    QString currentVersion;
 };
 }
 

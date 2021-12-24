@@ -189,6 +189,7 @@ void TechnicPage::suggestCurrent()
         current.websiteUrl = Json::ensureString(obj, "platformUrl", QString(), "__placeholder__");
         current.author = Json::ensureString(obj, "user", QString(), "__placeholder__");
         current.description = Json::ensureString(obj, "description", QString(), "__placeholder__");
+        current.currentVersion = Json::ensureString(obj, "version", QString(), "__placeholder__");
         current.metadataLoaded = true;
         metadataLoaded();
     });
@@ -214,11 +215,11 @@ void TechnicPage::metadataLoaded()
     ui->frame->setModDescription(current.description);
     if (!current.isSolder)
     {
-        dialog->setSuggestedPack(current.name, new Technic::SingleZipPackInstallTask(current.url, current.minecraftVersion));
+        dialog->setSuggestedPack(current.name + " " + current.currentVersion, new Technic::SingleZipPackInstallTask(current.url, current.minecraftVersion));
     }
     else
     {
         while (current.url.endsWith('/')) current.url.chop(1);
-        dialog->setSuggestedPack(current.name, new Technic::SolderPackInstallTask(APPLICATION->network(), current.url + "/modpack/" + current.slug, current.minecraftVersion));
+        dialog->setSuggestedPack(current.name + " " + current.currentVersion, new Technic::SolderPackInstallTask(APPLICATION->network(), current.url + "/modpack/" + current.slug, current.minecraftVersion));
     }
 }
