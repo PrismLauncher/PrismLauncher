@@ -1,4 +1,4 @@
-Package: multimc
+Package: polymc
 Version: 1.6-2
 Architecture: all
 Maintainer: Petr Mrázek <peterix@gmail.com>
@@ -7,6 +7,5 @@ Priority: optional
 Installed-Size: 75
 Depends: zenity, desktop-file-utils, libqt5widgets5, libqt5gui5, libqt5network5, libqt5core5a, libqt5xml5, libqt5concurrent5, wget
 Recommends: openjdk-8-jre
-Homepage: http://multimc.org
-Description: A local install wrapper for MultiMC
-
+Homepage: http://polymc.org
+Description: A local install wrapper for PolyMC

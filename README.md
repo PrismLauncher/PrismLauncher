@@ -16,6 +16,8 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 - [ ] Packaging for MacOS/Windows
 - [ ] Stop relying on MultiMC-Hosted metadata services
 - [ ] Remove references to MultiMC
+- [ ] Change up packaging, remove the install script junk
+- [ ] AppImage, Flatpak, .deb, ebuild, and AUR packages
 - [ ] Meson
 - [x] Long-term solution for the MSA client ID issue
 - [x] Figure out a way to switch to GPL.
@@ -47,6 +49,17 @@ TODO
 
 ## Forking/Redistributing/Custom builds policy
 Do whatever you want, we don't care. Just follow the license. If you have any questions about this feel free to ask in an issue.
+
+## Help & Support
+Feel free to create an issue if you need help. However, you should always ask the Matrix room. Be sure to enable spaces first (Settings -> Labs -> Spaces), and then you may join the space:
+
+<a href="https://matrix.to/#/#polymc:polymc.org" alt="PolyMC Matrix Space"><img src="https://img.shields.io/badge/matrix-%23polymc:polymc.org-brightgreen.svg"></a>
+
+If this doesn't work for you, then you may simply join the support room:
+
+<a href="https://matrix.to/#/#support:polymc.org" alt="Matrix Room"><img src="https://img.shields.io/badge/matrix-%23support:polymc.org-brightgreen.svg"></a>
+
+Discord will be made soon.
 
 ## Copyright
 Copyright 2013-2021 MultiMC contributors

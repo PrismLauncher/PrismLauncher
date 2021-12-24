@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INSTDIR="${XDG_DATA_HOME-$HOME/.local/share}/multimc"
+INSTDIR="${XDG_DATA_HOME-$HOME/.local/share}/polymc"
 
 if [ `getconf LONG_BIT` = "64" ]
 then

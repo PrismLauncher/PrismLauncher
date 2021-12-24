@@ -1,17 +1,17 @@
-Name:           MultiMC5
+Name:           PolyMC
 Version:        1.4
 Release:        3%{?dist}
-Summary:        A local install wrapper for MultiMC
+Summary:        A local install wrapper for PolyMC
 
 License:        ASL 2.0
-URL:            https://multimc.org
+URL:            https://polymc.org
 BuildArch:      x86_64
 
 Requires:       zenity qt5-qtbase wget xrandr
-Provides:       multimc MultiMC multimc5
+Provides:       polymc PolyMC polymc5
 
 %description
-A local install wrapper for MultiMC
+A local install wrapper for PolyMC
 
 %prep
 
@@ -19,24 +19,24 @@ A local install wrapper for MultiMC
 %build
 
 %install
-mkdir -p %{buildroot}/opt/multimc
-install -m 0644 ../ubuntu/multimc/opt/multimc/icon.svg %{buildroot}/opt/multimc/icon.svg
-install -m 0755 ../ubuntu/multimc/opt/multimc/run.sh %{buildroot}/opt/multimc/run.sh
+mkdir -p %{buildroot}/opt/polymc
+install -m 0644 ../ubuntu/polymc/opt/polymc/icon.svg %{buildroot}/opt/polymc/icon.svg
+install -m 0755 ../ubuntu/polymc/opt/polymc/run.sh %{buildroot}/opt/polymc/run.sh
 mkdir -p %{buildroot}/%{_datadir}/applications
-install -m 0644 ../ubuntu/multimc/usr/share/applications/multimc.desktop %{buildroot}/%{_datadir}/applications/multimc.desktop
+install -m 0644 ../ubuntu/polymc/usr/share/applications/polymc.desktop %{buildroot}/%{_datadir}/applications/polymc.desktop
 mkdir -p %{buildroot}/%{_datadir}/metainfo
-install -m 0644 ../ubuntu/multimc/usr/share/metainfo/multimc.metainfo.xml %{buildroot}/%{_datadir}/metainfo/multimc.metainfo.xml
+install -m 0644 ../ubuntu/polymc/usr/share/metainfo/polymc.metainfo.xml %{buildroot}/%{_datadir}/metainfo/polymc.metainfo.xml
 mkdir -p %{buildroot}/%{_mandir}/man1
-install -m 0644 ../ubuntu/multimc/usr/share/man/man1/multimc.1 %{buildroot}/%{_mandir}/man1/multimc.1
+install -m 0644 ../ubuntu/polymc/usr/share/man/man1/polymc.1 %{buildroot}/%{_mandir}/man1/polymc.1
 
 %files
-%dir /opt/multimc
-/opt/multimc/icon.svg
-/opt/multimc/run.sh
-%{_datadir}/applications/multimc.desktop
-%{_datadir}/metainfo/multimc.metainfo.xml
+%dir /opt/polymc
+/opt/polymc/icon.svg
+/opt/polymc/run.sh
+%{_datadir}/applications/polymc.desktop
+%{_datadir}/metainfo/polymc.metainfo.xml
 %dir /usr/share/man/man1
-%{_mandir}/man1/multimc.1.gz
+%{_mandir}/man1/polymc.1.gz
 
 %changelog
 * Sun Oct 03 2021 imperatorstorm <30777770+ImperatorStorm@users.noreply.github.com>
