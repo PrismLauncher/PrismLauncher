@@ -1,16 +1,36 @@
-/* Copyright 2020-2021 MultiMC Contributors
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2021 Jamie Mansfield <jmansfield@cadixdev.org>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2020-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 #include "TechnicModel.h"
@@ -95,12 +115,21 @@ void Technic::ListModel::performSearch()
     QString searchUrl = "";
     if (currentSearchTerm.isEmpty()) {
         searchUrl = "https://api.technicpack.net/trending?build=multimc";
+        searchMode = List;
     }
-    else
-    {
+    else if (currentSearchTerm.startsWith("http://api.technicpack.net/modpack/")) {
+        searchUrl = QString("https://%1?build=multimc").arg(currentSearchTerm.mid(7));
+        searchMode = Single;
+    }
+    else if (currentSearchTerm.startsWith("https://api.technicpack.net/modpack/")) {
+        searchUrl = QString("%1?build=multimc").arg(currentSearchTerm);
+        searchMode = Single;
+    }
+    else {
         searchUrl = QString(
             "https://api.technicpack.net/search?build=multimc&q=%1"
         ).arg(currentSearchTerm);
+        searchMode = List;
     }
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
@@ -125,26 +154,58 @@ void Technic::ListModel::searchRequestFinished()
     QList<Modpack> newList;
     try {
         auto root = Json::requireObject(doc);
-        auto objs = Json::requireArray(root, "modpacks");
-        for (auto technicPack: objs) {
-            Modpack pack;
-            auto technicPackObject = Json::requireObject(technicPack);
-            pack.name = Json::requireString(technicPackObject, "name");
-            pack.slug = Json::requireString(technicPackObject, "slug");
-            if (pack.slug == "vanilla")
-                continue;
 
-            auto rawURL = Json::ensureString(technicPackObject, "iconUrl", "null");
-            if(rawURL == "null") {
-                pack.logoUrl = "null";
-                pack.logoName = "null";
+        switch (searchMode) {
+            case List: {
+                auto objs = Json::requireArray(root, "modpacks");
+                for (auto technicPack: objs) {
+                    Modpack pack;
+                    auto technicPackObject = Json::requireObject(technicPack);
+                    pack.name = Json::requireString(technicPackObject, "name");
+                    pack.slug = Json::requireString(technicPackObject, "slug");
+                    if (pack.slug == "vanilla")
+                        continue;
+
+                    auto rawURL = Json::ensureString(technicPackObject, "iconUrl", "null");
+                    if(rawURL == "null") {
+                        pack.logoUrl = "null";
+                        pack.logoName = "null";
+                    }
+                    else {
+                        pack.logoUrl = rawURL;
+                        pack.logoName = rawURL.section(QLatin1Char('/'), -1).section(QLatin1Char('.'), 0, 0);
+                    }
+                    pack.broken = false;
+                    newList.append(pack);
+                }
+                break;
             }
-            else {
-                pack.logoUrl = rawURL;
-                pack.logoName = rawURL.section(QLatin1Char('/'), -1).section(QLatin1Char('.'), 0, 0);
+            case Single: {
+                if (root.contains("error")) {
+                    // Invalid API url
+                    break;
+                }
+
+                Modpack pack;
+                pack.name = Json::requireString(root, "displayName");
+                pack.slug = Json::requireString(root, "name");
+
+                if (root.contains("icon")) {
+                    auto iconObj = Json::requireObject(root, "icon");
+                    auto iconUrl = Json::requireString(iconObj, "url");
+
+                    pack.logoUrl = iconUrl;
+                    pack.logoName = iconUrl.section(QLatin1Char('/'), -1).section(QLatin1Char('.'), 0, 0);
+                }
+                else {
+                    pack.logoUrl = "null";
+                    pack.logoName = "null";
+                }
+
+                pack.broken = false;
+                newList.append(pack);
+                break;
             }
-            pack.broken = false;
-            newList.append(pack);
         }
     }
     catch (const JSONValidationError &err)
