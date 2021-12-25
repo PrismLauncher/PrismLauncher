@@ -31,6 +31,9 @@ Experimental packages are available for Linux (non-portable) and Windows (portab
 - [Windows (32-bit)](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/win32.zip) - this is a portable package, you can extract it anywhere and run it. This package needs testing.
 - MacOS currently does not have any packages. We are still working on setting up MacOS packaging.
 
+## Development
+If you want to contribute to PolyMC you might find it useful to join [#development:polymc.org on Matrix](https://matrix.to/#/#development:polymc.org) or join [our Discord server](https://discord.gg/xq7fxrgtMP), which is bridged with the PolyMC Matrix rooms. Thank you!
+
 ### Building
 If you want to build PolyMC yourself, check [BUILD.md](BUILD.md) for build instructions.
 
