@@ -27,8 +27,8 @@ Experimental packages are available for Linux (non-portable) and Windows (portab
 
 - A full list of packages is available [here](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/).
 - Last build status: https://jenkins.swurl.xyz/job/PolyMC/lastBuild/
-- [Linux (AMD64) System](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/lin64-system.tar.zst) - this is a SYSTEM package that is intended to be installed via a package manager. This CAN NOT be used as a portable application!
-- [Windows (32-bit)](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/win32.zip) - this is a PORTABLE package. This package needs testing.
+- [Linux (AMD64) System](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/lin64-system.tar.zst) - this is a generic system package intended to be used as a base for making distro-specific packages.
+- [Windows (32-bit)](https://jenkins.swurl.xyz/job/PolyMC/lastSuccessfulBuild/artifact/win32.zip) - this is a portable package, you can extract it anywhere and run it. This package needs testing.
 - MacOS currently does not have any packages. We are still working on setting up MacOS packaging.
 
 ### Building
@@ -51,16 +51,17 @@ TODO
 Do whatever you want, we don't care. Just follow the license. If you have any questions about this feel free to ask in an issue.
 
 ## Help & Support
-Feel free to create an issue if you need help. However, you should always ask the Matrix room. Be sure to enable spaces first (Settings -> Labs -> Spaces), and then you may join the space:
+Feel free to create an issue if you need help. However, you might find it easier to ask in the Discord server.
 
-<a href="https://matrix.to/#/#polymc:polymc.org" alt="PolyMC Matrix Space"><img src="https://img.shields.io/badge/matrix-%23polymc:polymc.org-brightgreen.svg"></a>
+[![PolyMC Discord](https://img.shields.io/discord/923671181020766230?label=PolyMC%20Discord)](https://discord.gg/xq7fxrgtMP)
 
-If this doesn't work for you, then you may simply join the support room:
+For people who don't want to use Discord, we have a Matrix Space which is bridged to the discord server. Be sure to enable spaces first (Settings -> Labs -> Spaces), and then you may join the space:
 
-<a href="https://matrix.to/#/#support:polymc.org" alt="Matrix Room"><img src="https://img.shields.io/badge/matrix-%23support:polymc.org-brightgreen.svg"></a>
+[![PolyMC Space](https://img.shields.io/matrix/polymc:polymc.org?label=PolyMC%20Space&server_fqdn=matrix.polymc.org)](https://matrix.to/#/#polymc:polymc.org)
 
-Discord will be made soon.
+Matrix's support for spaces is still in development, so if you have issues accessing rooms via the space, then you can join the rooms directly:
 
-## Copyright
-Copyright 2013-2021 MultiMC contributors
-Copyright 2021 PolyMC contributors
+[![Support](https://img.shields.io/matrix/support:polymc.org?label=%23support&server_fqdn=matrix.polymc.org)](https://matrix.to/#/#support:polymc.org)
+[![Discussion](https://img.shields.io/matrix/discussion:polymc.org?label=%23discussion&server_fqdn=matrix.polymc.org)](https://matrix.to/#/#discussion:polymc.org)
+[![Development](https://img.shields.io/matrix/development:polymc.org?label=%23development&server_fqdn=matrix.polymc.org)](https://matrix.to/#/#development:polymc.org)
+[![News](https://img.shields.io/matrix/news:polymc.org?label=%23news&server_fqdn=matrix.polymc.org)](https://matrix.to/#/#news:polymc.org)
