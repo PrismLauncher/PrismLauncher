@@ -208,7 +208,7 @@ void TechnicPage::metadataLoaded()
         text = "<a href=\"" + current.websiteUrl.toHtmlEscaped() + "\">" + name.toHtmlEscaped() + "</a>";
 
     if (!current.author.isEmpty()) {
-        text += tr(" by ") + current.author.toHtmlEscaped();
+        text += "<br>" + tr(" by ") + current.author.toHtmlEscaped();
     }
 
     ui->frame->setModText(text);
