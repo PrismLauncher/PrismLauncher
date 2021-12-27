@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
- *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2021-2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,12 +45,16 @@
 
 Technic::SolderPackInstallTask::SolderPackInstallTask(
     shared_qobject_ptr<QNetworkAccessManager> network,
-    const QUrl &sourceUrl,
+    const QUrl &solderUrl,
+    const QString &pack,
+    const QString &version,
     const QString &minecraftVersion
 ) {
-    m_sourceUrl = sourceUrl;
-    m_minecraftVersion = minecraftVersion;
+    m_solderUrl = solderUrl;
+    m_pack = pack;
+    m_version = version;
     m_network = network;
+    m_minecraftVersion = minecraftVersion;
 }
 
 bool Technic::SolderPackInstallTask::abort() {
@@ -63,44 +67,12 @@ bool Technic::SolderPackInstallTask::abort() {
 
 void Technic::SolderPackInstallTask::executeTask()
 {
-    setStatus(tr("Finding recommended version"));
-
-    m_filesNetJob = new NetJob(tr("Finding recommended version"), m_network);
-    m_filesNetJob->addNetAction(Net::Download::makeByteArray(m_sourceUrl, &m_response));
-
-    auto job = m_filesNetJob.get();
-    connect(job, &NetJob::succeeded, this, &Technic::SolderPackInstallTask::versionSucceeded);
-    connect(job, &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
-    m_filesNetJob->start();
-}
-
-void Technic::SolderPackInstallTask::versionSucceeded()
-{
     setStatus(tr("Resolving modpack files"));
 
-    QJsonParseError parse_error {};
-    QJsonDocument doc = QJsonDocument::fromJson(m_response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Solder at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << m_response;
-        return;
-    }
-    auto obj = doc.object();
-
-    TechnicSolder::Pack pack;
-    try {
-        TechnicSolder::loadPack(pack, obj);
-    }
-    catch (const JSONValidationError& e) {
-        emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
-        m_filesNetJob.reset();
-        return;
-    }
-
-    m_sourceUrl = m_sourceUrl.toString() + '/' + pack.recommended;
-
     m_filesNetJob = new NetJob(tr("Resolving modpack files"), m_network);
-    m_filesNetJob->addNetAction(Net::Download::makeByteArray(m_sourceUrl, &m_response));
+    auto sourceUrl = QString("%1/modpack/%2/%3").arg(m_solderUrl.toString(), m_pack, m_version);
+    m_filesNetJob->addNetAction(Net::Download::makeByteArray(sourceUrl, &m_response));
+
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SolderPackInstallTask::fileListSucceeded);
     connect(job, &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
@@ -136,8 +108,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     m_filesNetJob = new NetJob(tr("Downloading modpack"), m_network);
 
     int i = 0;
-    for (const auto &mod : build.mods)
-    {
+    for (const auto &mod : build.mods) {
         auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
         m_filesNetJob->addNetAction(Net::Download::makeFile(mod.url, path));
         i++;
