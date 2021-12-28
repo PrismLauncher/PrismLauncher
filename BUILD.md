@@ -15,8 +15,14 @@ MultiMC is a portable application and is not supposed to be installed into any s
 That would be anything outside your home folder. Before running `make install`, make sure
 you set the install path to something you have write access to. Never build this under
 an administrator/root level account. Don't use `sudo`. It won't work and it's not supposed to work.
-Also note that this guide is for development purposes only. No support is given for building your own fork or special build for any reason whatsoever.
+Also note that this guide is for development purposes only.  
+**No support is given for building your own fork or special build for any reason whatsoever**.
 
+# Branding, identifying marks and API keys
+
+The logo and related assets are All Rights Reserved and may only be used in official builds of MultiMC hosted on multimc.org, and as such, are not, and will not be included in this repository. The source is only provided for the purpose of collaboration. 
+
+API keys are necessary for Microsoft account functionality. More info in [(Not) Secrets](https://github.com/MultiMC/Launcher/tree/develop/notsecrets)
 
 # Getting the source
 
