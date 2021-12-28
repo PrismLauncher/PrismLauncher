@@ -407,6 +407,8 @@ QList<QString> JavaUtils::FindJavaPaths()
     // manually installed JDKs in /opt
     scanJavaDir("/opt/jdk");
     scanJavaDir("/opt/jdks");
+    // flatpak
+    scanJavaDir("/app/jdk");
     return javas;
 }
 #else

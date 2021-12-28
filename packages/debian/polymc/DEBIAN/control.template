@@ -1,0 +1,9 @@
+Package: polymc
+Version:
+Section: games
+Priority: optional
+Architecture: amd64
+Depends: libqt5core5a, libqt5network5, libqt5gui5
+Maintainer: PolyMC Team
+Description: PolyMC
+  A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once

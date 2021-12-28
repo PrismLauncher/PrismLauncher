@@ -1,0 +1,74 @@
+app-id: org.polymc.PolyMC
+runtime: org.kde.Platform
+runtime-version: "5.15"
+sdk: org.kde.Sdk
+command: polymc
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --device=dri
+  - --share=network
+    # for Discord RPC mods
+  - --filesystem=xdg-run/app/com.discordapp.Discord:create
+
+modules:
+  - name: compile
+    buildsystem: simple
+    build-commands:
+      - mkdir build
+      - mkdir -p /app/bin
+      - cd build && JAVA_HOME=/run/build/compile/jdk PATH=$JAVA_HOME:$PATH JAVA_COMPILER=../jdk/bin/javac cmake -DLauncher_LAYOUT=lin-system -DCMAKE_INSTALL_PREFIX=/app/ .. && make -j$(nproc) install
+    sources:
+      - type: git
+        url: https://github.com/PolyMC/PolyMC.git
+        tag: 1.0.0
+      - type: archive
+        url: https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17%2B35/OpenJDK17-jdk_x64_linux_hotspot_17_35.tar.gz
+        sha256: 6f1335d9a7855159f982dac557420397be9aa85f3f7bc84e111d25871c02c0c7
+        archive-type: tar-gzip
+        dest: jdk
+  # old MC versions depend on Xrandr
+  - name: xrandr
+    buildsystem: simple
+    build-commands:
+      - ./configure --prefix=/app
+      - make
+      - make install
+    sources:
+      - type: archive
+        url: https://xorg.freedesktop.org/archive/individual/app/xrandr-1.5.1.tar.xz
+        sha256: 7bc76daf9d72f8aff885efad04ce06b90488a1a169d118dea8a2b661832e8762
+  - name: java
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/jdk
+      - mv ./* /app/jdk
+    sources:
+      # JDK 17 for MC 1.18
+      - type: archive
+        url: https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jre_x64_linux_hotspot_17.0.1_12.tar.gz
+        sha256: 9d58cb741509a88e0ae33eb022334fb900b409b198eca6fe76246f0677b392ad
+        strip-components: 0
+      # JDK for Minecraft 1.17 - 1.18
+      - type: archive
+        url: https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_x64_linux_hotspot_16.0.2_7.tar.gz
+        sha256: 323d6d7474a359a28eff7ddd0df8e65bd61554a8ed12ef42fd9365349e573c2c
+        strip-components: 0
+      # JDK 11 for 1.9 - 1.15.2
+      - type: archive
+        url: https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.13%2B8/OpenJDK11U-jre_x64_linux_hotspot_11.0.13_8.tar.gz
+        sha256: fb0a27e6e1f26a1ee79daa92e4cfe3ec0d676acfe114d99dd84b3414f056e8a0
+        strip-components: 0
+      # JDK 8 for pre1.9
+      - type: archive
+        url: https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u312-b07/OpenJDK8U-jre_x64_linux_hotspot_8u312b07.tar.gz
+        sha256: 18fd13e77621f712326bfcf79c3e3cc08c880e3e4b8f63a1e5da619f3054b063
+        strip-components: 0
+  - name: desktopfiles
+    buildsystem: simple
+    build-commands:
+      - install -Dm644 org.polymc.PolyMC.desktop /app/share/applications/org.polymc.PolyMC.desktop
+    sources:
+      - type: file
+        path: org.polymc.PolyMC.desktop
