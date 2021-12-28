@@ -26,7 +26,7 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 Experimental packages are available for Linux (non-portable) and Windows (portable). Both versions are confirmed to work but the Windows version needs more testing--please volunteer if you use Windows!
 
 - An [AUR package](https://aur.archlinux.org/packages/polymc-git/) is also available.
-- A Gentoo ebuild will be made soon.
+- A Gentoo ebuild is available in the [swirl](https://github.com/binex-dsk/ebuilds) overlay, available as `games-action/polymc`. Check the README for instructions on how to add the overlay.
 - A full list of generic, pre-built packages is available [here](https://jenkins.polymc.org/job/PolyMC/lastSuccessfulBuild/artifact/).
 - Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
 - [Linux (AMD64) System](https://jenkins.polymc.org/job/PolyMC/lastSuccessfulBuild/artifact/lin64-system.tar.zst) - this is a generic system package intended to be used as a base for making distro-specific packages.
