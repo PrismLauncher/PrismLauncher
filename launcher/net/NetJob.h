@@ -35,6 +35,11 @@ public:
     }
     virtual ~NetJob();
 
+    void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network)
+    {
+        m_network = network;
+    }
+
     bool addNetAction(NetAction::Ptr action);
 
     NetAction::Ptr operator[](int index)
