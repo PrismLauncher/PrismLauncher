@@ -9,28 +9,17 @@ PolyMC is a custom launcher for Minecraft that focuses on predictability, long t
 
 This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The PolyMC community felt that the maintainer was not acting in the spirit of Free Software so this fork was made. Read "[Why was this fork made?](https://github.com/PolyMC/PolyMC/wiki/FAQ)" on the wiki for more details.
 
-## todo
-- [ ] Get a permanent name + icon.
-- [ ] Style the logo for different icon styles.
-- [ ] Packaging for Linux--Any help packaging for your favorite distro is appreciated!
-- [ ] Packaging for MacOS/Windows
-- [ ] Stop relying on MultiMC-Hosted metadata services
-- [ ] Remove references to MultiMC
-- [ ] Change up packaging, remove the install script junk
-- [ ] AppImage, Flatpak, .deb, ebuild, and AUR packages
-- [ ] Meson
-- [x] Long-term solution for the MSA client ID issue
-- [x] Figure out a way to switch to GPL.
-
 ## Packages
-Experimental packages are available for Linux (non-portable) and Windows (portable). Both versions are confirmed to work but the Windows version needs more testing--please volunteer if you use Windows!
+Several source build packages are available, along with experimental pre-built generic packages.
 
-- An [AUR package](https://aur.archlinux.org/packages/polymc-git/) is also available.
-- A Gentoo ebuild is available in the [swirl](https://github.com/binex-dsk/ebuilds) overlay, available as `games-action/polymc`. Check the README for instructions on how to add the overlay.
-- A full list of generic, pre-built packages is available [here](https://jenkins.polymc.org/job/PolyMC/lastSuccessfulBuild/artifact/).
+- An [AUR package](https://aur.archlinux.org/packages/polymc-git/) is available.
+- A Gentoo ebuild is available in the [swirl](https://git.swurl.xyz/binex-dsk/ebuilds) overlay, named `games-action/polymc`. Check the README for instructions on how to add the overlay.
+- A Flatpak is available. Instructions on building it can be found in `[packages/flatpak/BUILDING.md](packages/flatpak/BUILDING.md)`.
+- Generic, prebuilt packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest))
 - Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
-- [Linux (AMD64) System](https://jenkins.polymc.org/job/PolyMC/lastSuccessfulBuild/artifact/lin64-system.tar.zst) - this is a generic system package intended to be used as a base for making distro-specific packages.
-- [Windows (32-bit)](https://jenkins.polymc.org/job/PolyMC/lastSuccessfulBuild/artifact/win32.zip) - this is a portable package, you can extract it anywhere and run it. This package needs testing.
+- [Linux (AMD64) System](https://packages.polymc.org/latest/lin64-system/lin64-system.tar.zst) ([SHA256](https://packages.polymc.org/latest/lin64-system/lin64-system.tar.zst.sha256)) - this is a generic system package intended to be used as a base for making distro-specific packages.
+- [Windows (32-bit)](https://packages.polymc.org/latest/win32/win32.zip) ([SHA256](https://packages.polymc.org/latest/win32/win32.zip.sha256)) - this is a portable package, you can extract it anywhere and run it. This package needs testing.
+- [Debian (AMD64](https://packages.polymc.org/latest/deb/polymc-amd64.deb) ([SHA256](https://packages.polymc.org/latest/deb/polymc-amd64.deb.sha256)) - this is intended to be installed with `dpkg -i`. Alternatively, you may build the `.deb` yourself, by going to `packages/debian` and running `./makedeb.sh`.
 - MacOS currently does not have any packages. We are still working on setting up MacOS packaging.
 
 ## Development
