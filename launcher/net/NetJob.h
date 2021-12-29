@@ -67,15 +67,6 @@ public slots:
     virtual bool abort() override;
     virtual void start(shared_qobject_ptr<QNetworkAccessManager> network) {
         m_network = network;
-        start();
-    }
-
-protected slots:
-    void start() override {
-        if(!m_network) {
-            throw "Missing network while trying to start " + objectName();
-            return;
-        }
         Task::start();
     }
 

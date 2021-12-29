@@ -98,6 +98,12 @@ void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
 
 void NetJob::executeTask()
 {
+    if(!m_network) {
+        qCritical() << "Attempted to start NetJob" << objectName() << "without the network set!";
+        emitFailed(tr("Internal error: NetJob '%1' has been started without a network pointer!").arg(objectName()));
+        return;
+    }
+
     // hack that delays early failures so they can be caught easier
     QMetaObject::invokeMethod(this, "startMoreParts", Qt::QueuedConnection);
 }
