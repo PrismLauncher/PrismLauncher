@@ -26,11 +26,24 @@ Getting the project to build and run on Linux is easy if you use any modern and 
 
 ## Build dependencies
 * A C++ compiler capable of building C++11 code.
-* Qt 5.6+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)") or the equivalent from your package manager. It is always better to use the Qt from your distribution, as long as it has a new enough version.
-* cmake 3.1 or newer
-* zlib (for example, `zlib1g-dev`)
-* Java JDK 8 (for example, `openjdk-8-jdk`)
-* GL headers (for example, `libgl1-mesa-dev`)
+* Qt Development tools 5.6 or newer  (`qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5` on Debian-based system)
+* cmake 3.1 or newer (`cmake` on Debian-based system)
+* zlib (`zlib1g-dev` on Debian-based system)
+* Java JDK (`openjdk-17-jdk`on Debian-based system)
+* GL headers (`libgl1-mesa-dev` on Debian-based system)
+
+### Building a .deb
+
+You need to install the build dependencies first
+
+```
+git clone https://github.com/PolyMC/PolyMC.git
+git submodule init && git submodule update
+cd packages/debian
+./makedeb.sh
+```
+
+If everything works correctly, the .deb will be next to the build script, in `PolyMC/packages/debian`
 
 ### Building from command line
 You need a source folder, a build folder and an install folder.
