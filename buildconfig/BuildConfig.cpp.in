@@ -24,7 +24,6 @@ Config::Config()
 
     BUILD_PLATFORM = "@Launcher_BUILD_PLATFORM@";
     UPDATER_BASE = "@Launcher_UPDATER_BASE@";
-    ANALYTICS_ID = "@Launcher_ANALYTICS_ID@";
     NOTIFICATION_URL = "@Launcher_NOTIFICATION_URL@";
     FULL_VERSION_STR = "@Launcher_VERSION_MAJOR@.@Launcher_VERSION_MINOR@.@Launcher_VERSION_BUILD@";
 

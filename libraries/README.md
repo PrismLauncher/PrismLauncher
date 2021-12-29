@@ -9,13 +9,6 @@ This library has served as a base for some (much more full-featured and advanced
 
 Copyright belongs to Petr Mrázek, unless explicitly stated otherwise in the source files. Available under the Apache 2.0 license.
 
-## ganalytics
-A Google Analytics library for Qt.
-
-BSD licensed, derived from [qt-google-analytics](https://github.com/HSAnet/qt-google-analytics).
-
-Modifications include better handling of IP anonymization (can be enabled) and general improvements of the API (application handles persistence and ID generation instead of the library).
-
 ## hoedown
 Hoedown is a revived fork of Sundown, the Markdown parser based on the original code of the Upskirt library by Natacha Porté.
 

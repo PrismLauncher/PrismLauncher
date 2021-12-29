@@ -46,9 +46,6 @@ public:
     QString USER_AGENT_UNCACHED;
 
 
-    /// Google analytics ID
-    QString ANALYTICS_ID;
-
     /// URL for notifications
     QString NOTIFICATION_URL;
 
@@ -79,7 +76,7 @@ public:
      * Client ID you can get from Imgur when you register an application
      */
     QString IMGUR_CLIENT_ID;
-    
+
     /**
      * Client ID you can get from Microsoft Identity Platform when you register an application
      */
@@ -115,3 +112,4 @@ public:
 };
 
 extern const Config BuildConfig;
+

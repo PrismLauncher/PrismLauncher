@@ -2,12 +2,10 @@
 
 #include "LanguageWizardPage.h"
 #include "JavaWizardPage.h"
-#include "AnalyticsWizardPage.h"
 
 #include "translations/TranslationsModel.h"
 #include <Application.h>
 #include <FileSystem.h>
-#include <ganalytics.h>
 
 #include <QAbstractButton>
 #include <BuildConfig.h>
