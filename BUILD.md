@@ -182,10 +182,18 @@ zlib1.dll
 # macOS
 
 ### Install prerequisites:
-- Install XCode and set it up to the point where you can build things from a terminal
+- Install XCode Command Line tools
 - Install the official build of CMake (https://cmake.org/download/)
 - Install JDK 8 (https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html)
 - Get Qt 5.6 and install it (https://download.qt.io/new_archive/qt/5.6/5.6.3/)
+
+### XCode Command Line tools
+
+If you don't have XCode CommandLine tools installed, you can install them by using this command in the Terminal App
+
+```bash
+xcode-select --install
+```
 
 ### Build
 
