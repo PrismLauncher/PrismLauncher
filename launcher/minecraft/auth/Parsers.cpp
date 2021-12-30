@@ -226,6 +226,8 @@ bool parseMinecraftEntitlements(QByteArray & data, MinecraftEntitlement &output)
     }
 
     auto obj = doc.object();
+    output.canPlayMinecraft = false;
+    output.ownsMinecraft = true;
 
     auto itemsArray = obj.value("items").toArray();
     for(auto item: itemsArray) {
