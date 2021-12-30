@@ -200,20 +200,23 @@ elseif(Launcher_LAYOUT_REAL STREQUAL "lin-nodeps")
     install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" DESTINATION ${BUNDLE_DEST_DIR} RENAME ${Launcher_Name})
 
 elseif(Launcher_LAYOUT_REAL STREQUAL "lin-system")
-	set(Launcher_APP_BINARY_NAME "polymc" CACHE STRING "Name of the Launcher binary")
-	set(Launcher_BINARY_DEST_DIR "bin" CACHE STRING "Path to the binary directory")
-	set(Launcher_LIBRARY_DEST_DIR "lib${LIB_SUFFIX}" CACHE STRING "Path to the library directory")
-	set(Launcher_SHARE_DEST_DIR "share/polymc" CACHE STRING "Path to the shard data directory")
-	set(JARS_DEST_DIR "${Launcher_SHARE_DEST_DIR}/jars")
+    set(Launcher_APP_BINARY_NAME "polymc" CACHE STRING "Name of the Launcher binary")
+    set(Launcher_BINARY_DEST_DIR "bin" CACHE STRING "Path to the binary directory")
+    set(Launcher_LIBRARY_DEST_DIR "lib${LIB_SUFFIX}" CACHE STRING "Path to the library directory")
+    set(Launcher_SHARE_DEST_DIR "share/polymc" CACHE STRING "Path to the shared data directory")
+    set(JARS_DEST_DIR "${Launcher_SHARE_DEST_DIR}/jars")
+    set(Launcher_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
 
-	set(BINARY_DEST_DIR ${Launcher_BINARY_DEST_DIR})
-	set(LIBRARY_DEST_DIR ${Launcher_LIBRARY_DEST_DIR})
+    set(BINARY_DEST_DIR ${Launcher_BINARY_DEST_DIR})
+    set(LIBRARY_DEST_DIR ${Launcher_LIBRARY_DEST_DIR})
 
-	MESSAGE(STATUS "Compiling for linux system with ${Launcher_SHARE_DEST_DIR} and LAUNCHER_LINUX_DATADIR")
-	SET(Launcher_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DLAUNCHER_LINUX_DATADIR")
+    MESSAGE(STATUS "Compiling for linux system with ${Launcher_SHARE_DEST_DIR} and LAUNCHER_LINUX_DATADIR")
+    SET(Launcher_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DLAUNCHER_LINUX_DATADIR")
 
-	# install as bundle with no dependencies included
-	set(INSTALL_BUNDLE "nodeps")
+    install(FILES ${Launcher_Desktop} DESTINATION ${Launcher_DESKTOP_DEST_DIR})
+
+    # install as bundle with no dependencies included
+    set(INSTALL_BUNDLE "nodeps")
 
 elseif(Launcher_LAYOUT_REAL STREQUAL "win-bundle")
     set(BINARY_DEST_DIR ".")
