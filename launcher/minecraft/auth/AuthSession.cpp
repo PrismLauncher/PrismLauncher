@@ -30,3 +30,8 @@ bool AuthSession::MakeOffline(QString offline_playername)
     status = PlayableOffline;
     return true;
 }
+
+void AuthSession::MakeDemo() {
+    player_name = "Player";
+    demo = true;
+}
