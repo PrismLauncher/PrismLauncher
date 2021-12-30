@@ -403,7 +403,7 @@ QString getDesktopDir()
 bool createShortCut(QString location, QString dest, QStringList args, QString name,
                           QString icon)
 {
-#if defined Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
     location = PathCombine(location, name + ".desktop");
 
     QFile f(location);

@@ -31,7 +31,7 @@ JavaUtils::JavaUtils()
 {
 }
 
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
 static QString processLD_LIBRARY_PATH(const QString & LD_LIBRARY_PATH)
 {
     QDir mmcBin(QCoreApplication::applicationDirPath());
@@ -83,7 +83,7 @@ QProcessEnvironment CleanEnviroment()
             qDebug() << "Env: ignoring" << key << value;
             continue;
         }
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
         // Do not pass LD_* variables to java. They were intended for MultiMC
         if(key.startsWith("LD_"))
         {

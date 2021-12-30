@@ -5,6 +5,13 @@
 #include <minecraft/PackProfile.h>
 #include <minecraft/VersionFilterData.h>
 
+#ifdef major
+    #undef major
+#endif
+#ifdef minor
+    #undef minor
+#endif
+
 void VerifyJavaInstall::executeTask() {
     auto m_inst = std::dynamic_pointer_cast<MinecraftInstance>(m_parent->instance());
 

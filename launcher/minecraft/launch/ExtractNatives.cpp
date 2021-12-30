@@ -23,6 +23,13 @@
 #include "FileSystem.h"
 #include <QDir>
 
+#ifdef major
+    #undef major
+#endif
+#ifdef minor
+    #undef minor
+#endif
+
 static QString replaceSuffix (QString target, const QString &suffix, const QString &replacement)
 {
     if (!target.endsWith(suffix))
