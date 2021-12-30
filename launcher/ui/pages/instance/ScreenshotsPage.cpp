@@ -314,6 +314,8 @@ void ScreenshotsPage::on_actionUpload_triggered()
 
         m_uploadActive = true;
         ProgressDialog dialog(this);
+
+        job->setNetwork(APPLICATION->network());
         if(dialog.execWithTask(job.get()) != QDialog::Accepted)
         {
             CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"),
@@ -348,7 +350,9 @@ void ScreenshotsPage::on_actionUpload_triggered()
     auto albumTask = NetJob::Ptr(new NetJob("Imgur Album Creation"));
     auto imgurAlbum = ImgurAlbumCreation::make(uploaded);
     albumTask->addNetAction(imgurAlbum);
+    job->setNetwork(APPLICATION->network());
     task.addTask(job);
+    albumTask->setNetwork(APPLICATION->network());
     task.addTask(albumTask);
     m_uploadActive = true;
     ProgressDialog prog(this);
