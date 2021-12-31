@@ -47,7 +47,7 @@ void DownloadTask::loadVersionInfo()
 {
     setStatus(tr("Loading version information..."));
 
-    NetJob *netJob = new NetJob("Version Info");
+    NetJob *netJob = new NetJob("Version Info", m_network);
 
     // Find the index URL.
     QUrl newIndexUrl = QUrl(m_status.newRepoUrl).resolved(QString::number(m_status.newVersionId) + ".json");
@@ -67,7 +67,7 @@ void DownloadTask::loadVersionInfo()
     connect(netJob, &NetJob::succeeded, this, &DownloadTask::processDownloadedVersionInfo);
     connect(netJob, &NetJob::failed, this, &DownloadTask::vinfoDownloadFailed);
     m_vinfoNetJob.reset(netJob);
-    netJob->start(m_network);
+    netJob->start();
 }
 
 void DownloadTask::vinfoDownloadFailed()
@@ -121,7 +121,7 @@ void DownloadTask::processDownloadedVersionInfo()
     setStatus(tr("Processing file lists - figuring out how to install the update..."));
 
     // make a new netjob for the actual update files
-    NetJob::Ptr netJob (new NetJob("Update Files"));
+    NetJob::Ptr netJob = new NetJob("Update Files", m_network);
 
     // fill netJob and operationList
     if (!processFileLists(m_currentVersionFileList, m_newVersionFileList, m_status.rootPath, m_updateFilesDir.path(), netJob, m_operations))
@@ -145,7 +145,7 @@ void DownloadTask::processDownloadedVersionInfo()
     }
     qDebug() << "Begin downloading update files to" << m_updateFilesDir.path();
     m_filesNetJob = netJob;
-    m_filesNetJob->start(m_network);
+    m_filesNetJob->start();
 }
 
 void DownloadTask::fileDownloadFinished()

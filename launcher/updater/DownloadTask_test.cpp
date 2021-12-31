@@ -179,7 +179,8 @@ slots:
 
         OperationList operations;
 
-        processFileLists(currentVersion, newVersion, QDir::currentPath(), tempFolder, new NetJob("Dummy"), operations);
+        shared_qobject_ptr<QNetworkAccessManager> network = new QNetworkAccessManager();
+        processFileLists(currentVersion, newVersion, QDir::currentPath(), tempFolder, new NetJob("Dummy", network), operations);
         qDebug() << (operations == expectedOperations);
         qDebug() << operations;
         qDebug() << expectedOperations;

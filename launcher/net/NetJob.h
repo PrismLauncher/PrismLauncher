@@ -29,16 +29,11 @@ class NetJob : public Task
 public:
     using Ptr = shared_qobject_ptr<NetJob>;
 
-    explicit NetJob(QString job_name) : Task()
+    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network) : Task(), m_network(network)
     {
         setObjectName(job_name);
     }
     virtual ~NetJob();
-
-    void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network)
-    {
-        m_network = network;
-    }
 
     bool addNetAction(NetAction::Ptr action);
 
@@ -70,10 +65,6 @@ private slots:
 public slots:
     virtual void executeTask() override;
     virtual bool abort() override;
-    virtual void start(shared_qobject_ptr<QNetworkAccessManager> network) {
-        m_network = network;
-        Task::start();
-    }
 
 private slots:
     void partProgress(int index, qint64 bytesReceived, qint64 bytesTotal);

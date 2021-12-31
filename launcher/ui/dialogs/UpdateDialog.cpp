@@ -34,7 +34,7 @@ UpdateDialog::~UpdateDialog()
 void UpdateDialog::loadChangelog()
 {
     auto channel = APPLICATION->settings()->get("UpdateChannel").toString();
-    dljob.reset(new NetJob("Changelog"));
+    dljob = new NetJob("Changelog", APPLICATION->network());
     QString url;
     if(channel == "stable")
     {
@@ -49,7 +49,7 @@ void UpdateDialog::loadChangelog()
     dljob->addNetAction(Net::Download::makeByteArray(QUrl(url), &changelogData));
     connect(dljob.get(), &NetJob::succeeded, this, &UpdateDialog::changelogLoaded);
     connect(dljob.get(), &NetJob::failed, this, &UpdateDialog::changelogFailed);
-    dljob->start(APPLICATION->network());
+    dljob->start();
 }
 
 QString reprocessMarkdown(QByteArray markdown)

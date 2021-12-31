@@ -107,11 +107,11 @@ void ListModel::request()
     modpacks.clear();
     endResetModel();
 
-    auto *netJob = new NetJob("Ftb::Request");
+    auto *netJob = new NetJob("Ftb::Request", APPLICATION->network());
     auto url = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/all");
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), &response));
     jobPtr = netJob;
-    jobPtr->start(APPLICATION->network());
+    jobPtr->start();
 
     QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::requestFinished);
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::requestFailed);
@@ -150,12 +150,11 @@ void ListModel::requestFailed(QString reason)
 
 void ListModel::requestPack()
 {
-    auto *netJob = new NetJob("Ftb::Search");
-    auto searchUrl = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/%1")
-            .arg(currentPack);
+    auto *netJob = new NetJob("Ftb::Search", APPLICATION->network());
+    auto searchUrl = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/%1").arg(currentPack);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
-    jobPtr->start(APPLICATION->network());
+    jobPtr->start();
 
     QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::packRequestFinished);
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::packRequestFailed);
@@ -271,7 +270,7 @@ void ListModel::requestLogo(QString logo, QString url)
 
     bool stale = entry->isStale();
 
-    NetJob *job = new NetJob(QString("FTB Icon Download %1").arg(logo));
+    NetJob *job = new NetJob(QString("FTB Icon Download %1").arg(logo), APPLICATION->network());
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
@@ -288,7 +287,7 @@ void ListModel::requestLogo(QString logo, QString url)
     auto &newLogoEntry = m_logoMap[logo];
     newLogoEntry.downloadJob = job;
     newLogoEntry.fullpath = fullPath;
-    job->start(APPLICATION->network());
+    job->start();
 }
 
 }

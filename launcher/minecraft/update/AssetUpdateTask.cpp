@@ -24,7 +24,10 @@ void AssetUpdateTask::executeTask()
     auto assets = profile->getMinecraftAssets();
     QUrl indexUrl = assets->url;
     QString localPath = assets->id + ".json";
-    auto job = new NetJob(tr("Asset index for %1").arg(m_inst->name()));
+    auto job = new NetJob(
+        tr("Asset index for %1").arg(m_inst->name()),
+        APPLICATION->network()
+    );
 
     auto metacache = APPLICATION->metacache();
     auto entry = metacache->resolveEntry("asset_indexes", localPath);
@@ -43,7 +46,7 @@ void AssetUpdateTask::executeTask()
     connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
 
     qDebug() << m_inst->name() << ": Starting asset index download";
-    downloadJob->start(APPLICATION->network());
+    downloadJob->start();
 }
 
 bool AssetUpdateTask::canAbort() const
@@ -78,7 +81,7 @@ void AssetUpdateTask::assetIndexFinished()
         connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::emitSucceeded);
         connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetsFailed);
         connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
-        downloadJob->start(APPLICATION->network());
+        downloadJob->start();
         return;
     }
     emitSucceeded();
