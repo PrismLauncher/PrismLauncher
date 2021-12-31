@@ -133,10 +133,10 @@ AboutDialog::~AboutDialog()
 
 void AboutDialog::loadPatronList()
 {
-    netJob = new NetJob("Patreon Patron List");
+    netJob = new NetJob("Patreon Patron List", APPLICATION->network());
     netJob->addNetAction(Net::Download::makeByteArray(QUrl("https://files.multimc.org/patrons.txt"), &dataSink));
     connect(netJob.get(), &NetJob::succeeded, this, &AboutDialog::patronListLoaded);
-    netJob->start(APPLICATION->network());
+    netJob->start();
 }
 
 void AboutDialog::patronListLoaded()

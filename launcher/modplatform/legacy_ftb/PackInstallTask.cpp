@@ -33,7 +33,7 @@ void PackInstallTask::downloadPack()
 
     auto packoffset = QString("%1/%2/%3").arg(m_pack.dir, m_version.replace(".", "_"), m_pack.file);
     auto entry = APPLICATION->metacache()->resolveEntry("FTBPacks", packoffset);
-    netJobContainer = new NetJob("Download FTB Pack");
+    netJobContainer = new NetJob("Download FTB Pack", m_network);
 
     entry->setStale(true);
     QString url;
@@ -51,7 +51,7 @@ void PackInstallTask::downloadPack()
     connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
     connect(netJobContainer.get(), &NetJob::progress, this, &PackInstallTask::onDownloadProgress);
-    netJobContainer->start(m_network);
+    netJobContainer->start();
 
     progress(1, 4);
 }

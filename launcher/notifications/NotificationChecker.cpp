@@ -52,12 +52,12 @@ void NotificationChecker::checkForNotifications()
     {
         return;
     }
-    m_checkJob.reset(new NetJob("Checking for notifications"));
+    m_checkJob = new NetJob("Checking for notifications", APPLICATION->network());
     auto entry = APPLICATION->metacache()->resolveEntry("root", "notifications.json");
     entry->setStale(true);
     m_checkJob->addNetAction(m_download = Net::Download::makeCached(m_notificationsUrl, entry));
     connect(m_download.get(), &Net::Download::succeeded, this, &NotificationChecker::downloadSucceeded);
-    m_checkJob->start(APPLICATION->network());
+    m_checkJob->start();
 }
 
 void NotificationChecker::downloadSucceeded(int)

@@ -47,6 +47,9 @@ if(UNIX AND APPLE)
 endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 
+# Fix build with Qt 5.13
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
+
 ##################################### Set Application options #####################################
 
 ######## Set URLs ########

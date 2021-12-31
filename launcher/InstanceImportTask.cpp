@@ -55,14 +55,14 @@ void InstanceImportTask::executeTask()
         const QString path = m_sourceUrl.host() + '/' + m_sourceUrl.path();
         auto entry = APPLICATION->metacache()->resolveEntry("general", path);
         entry->setStale(true);
-        m_filesNetJob.reset(new NetJob(tr("Modpack download")));
+        m_filesNetJob = new NetJob(tr("Modpack download"), APPLICATION->network());
         m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
         m_archivePath = entry->getFullPath();
         auto job = m_filesNetJob.get();
         connect(job, &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
         connect(job, &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);
         connect(job, &NetJob::failed, this, &InstanceImportTask::downloadFailed);
-        m_filesNetJob->start(APPLICATION->network());
+        m_filesNetJob->start();
     }
 }
 
@@ -337,7 +337,7 @@ void InstanceImportTask::processFlame()
     connect(m_modIdResolver.get(), &Flame::FileResolvingTask::succeeded, [&]()
     {
         auto results = m_modIdResolver->getResults();
-        m_filesNetJob.reset(new NetJob(tr("Mod download")));
+        m_filesNetJob = new NetJob(tr("Mod download"), APPLICATION->network());
         for(auto result: results.files)
         {
             QString filename = result.fileName;
@@ -391,7 +391,7 @@ void InstanceImportTask::processFlame()
             setProgress(current, total);
         });
         setStatus(tr("Downloading mods..."));
-        m_filesNetJob->start(APPLICATION->network());
+        m_filesNetJob->start();
     }
     );
     connect(m_modIdResolver.get(), &Flame::FileResolvingTask::failed, [&](QString reason)

@@ -63,12 +63,11 @@ void PackInstallTask::executeTask()
         return;
     }
 
-    auto *netJob = new NetJob("ModpacksCH::VersionFetch");
-    auto searchUrl = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/%1/%2")
-            .arg(m_pack.id).arg(version.id);
+    auto *netJob = new NetJob("ModpacksCH::VersionFetch", APPLICATION->network());
+    auto searchUrl = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/%1/%2").arg(m_pack.id).arg(version.id);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
-    jobPtr->start(APPLICATION->network());
+    jobPtr->start();
 
     QObject::connect(netJob, &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     QObject::connect(netJob, &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
@@ -113,7 +112,7 @@ void PackInstallTask::downloadPack()
 {
     setStatus(tr("Downloading mods..."));
 
-    jobPtr = new NetJob(tr("Mod download"));
+    jobPtr = new NetJob(tr("Mod download"), APPLICATION->network());
     for(auto file : m_version.files) {
         if(file.serverOnly) continue;
 
@@ -159,7 +158,7 @@ void PackInstallTask::downloadPack()
         setProgress(current, total);
     });
 
-    jobPtr->start(APPLICATION->network());
+    jobPtr->start();
 }
 
 void PackInstallTask::install()

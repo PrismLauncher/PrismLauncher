@@ -18,6 +18,7 @@
 enum OpSys
 {
     Os_Windows,
+    Os_FreeBSD,
     Os_Linux,
     Os_OSX,
     Os_Other
@@ -27,11 +28,11 @@ OpSys OpSys_fromString(QString);
 QString OpSys_toString(OpSys);
 
 #ifdef Q_OS_WIN32
-#define currentSystem Os_Windows
+    #define currentSystem Os_Windows
+#elif defined Q_OS_MAC
+    #define currentSystem Os_OSX
+#elif defined Q_OS_FREEBSD
+    #define currentSystem Os_FreeBSD
 #else
-#ifdef Q_OS_MAC
-#define currentSystem Os_OSX
-#else
-#define currentSystem Os_Linux
-#endif
+    #define currentSystem Os_Linux
 #endif

@@ -16,6 +16,7 @@
 #include <QHostInfo>
 #include <QList>
 #include <QHostAddress>
+#include <QPushButton>
 
 #include "BuildConfig.h"
 #include "JavaCommon.h"
@@ -145,36 +146,44 @@ void LaunchController::login() {
                     m_session->MakeOffline(usedname);
                     // offline flavored game from here :3
                 }
-                if(m_accountToUse->ownsMinecraft() && !m_accountToUse->hasProfile()) {
-                    auto entitlement = m_accountToUse->accountData()->minecraftEntitlement;
-                    QString errorString;
-                    if(!entitlement.canPlayMinecraft) {
-                        errorString = tr("The account does not own Minecraft. You need to purchase the game first to play it.");
-                        QMessageBox::warning(
-                            nullptr,
-                            tr("Missing Minecraft profile"),
-                            errorString,
-                            QMessageBox::StandardButton::Ok,
-                            QMessageBox::StandardButton::Ok
-                        );
-                        emitFailed(errorString);
-                        return;
+                if(m_accountToUse->ownsMinecraft()) {
+                    if(!m_accountToUse->hasProfile()) {
+                        // Now handle setting up a profile name here...
+                        ProfileSetupDialog dialog(m_accountToUse, m_parentWidget);
+                        if (dialog.exec() == QDialog::Accepted)
+                        {
+                            tryagain = true;
+                            continue;
+                        }
+                        else
+                        {
+                            emitFailed(tr("Received undetermined session status during login."));
+                            return;
+                        }
                     }
-                    // Now handle setting up a profile name here...
-                    ProfileSetupDialog dialog(m_accountToUse, m_parentWidget);
-                    if (dialog.exec() == QDialog::Accepted)
-                    {
-                        tryagain = true;
-                        continue;
-                    }
-                    else
-                    {
-                        emitFailed(tr("Received undetermined session status during login."));
-                        return;
-                    }
+                    // we own Minecraft, there is a profile, it's all ready to go!
+                    launchInstance();
+                    return;
                 }
                 else {
-                    launchInstance();
+                    // play demo ?
+                    QMessageBox box(m_parentWidget);
+                    box.setWindowTitle(tr("Play demo?"));
+                    box.setText(tr("This account does not own Minecraft.\nYou need to purchase the game first to play it.\n\nDo you want to play the demo?"));
+                    box.setIcon(QMessageBox::Warning);
+                    auto demoButton = box.addButton(tr("Play Demo"), QMessageBox::ButtonRole::YesRole);
+                    auto cancelButton = box.addButton(tr("Cancel"), QMessageBox::ButtonRole::NoRole);
+                    box.setDefaultButton(cancelButton);
+
+                    box.exec();
+                    if(box.clickedButton() == demoButton) {
+                        // play demo here
+                        m_session->MakeDemo();
+                        launchInstance();
+                    }
+                    else {
+                        emitFailed(tr("Launch cancelled - account does not own Minecraft."));
+                    }
                 }
                 return;
             }
