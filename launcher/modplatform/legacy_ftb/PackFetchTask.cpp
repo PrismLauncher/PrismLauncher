@@ -12,7 +12,7 @@ void PackFetchTask::fetch()
     publicPacks.clear();
     thirdPartyPacks.clear();
 
-    jobPtr = new NetJob("LegacyFTB::ModpackFetch");
+    jobPtr = new NetJob("LegacyFTB::ModpackFetch", m_network);
 
     QUrl publicPacksUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/modpacks.xml");
     qDebug() << "Downloading public version info from" << publicPacksUrl.toString();
@@ -25,7 +25,7 @@ void PackFetchTask::fetch()
     QObject::connect(jobPtr.get(), &NetJob::succeeded, this, &PackFetchTask::fileDownloadFinished);
     QObject::connect(jobPtr.get(), &NetJob::failed, this, &PackFetchTask::fileDownloadFailed);
 
-    jobPtr->start(m_network);
+    jobPtr->start();
 }
 
 void PackFetchTask::fetchPrivate(const QStringList & toFetch)
@@ -35,7 +35,7 @@ void PackFetchTask::fetchPrivate(const QStringList & toFetch)
     for (auto &packCode: toFetch)
     {
         QByteArray *data = new QByteArray();
-        NetJob *job = new NetJob("Fetching private pack");
+        NetJob *job = new NetJob("Fetching private pack", m_network);
         job->addNetAction(Net::Download::makeByteArray(privatePackBaseUrl.arg(packCode), data));
 
         QObject::connect(job, &NetJob::succeeded, this, [this, job, data, packCode]
@@ -63,7 +63,7 @@ void PackFetchTask::fetchPrivate(const QStringList & toFetch)
             delete data;
         });
 
-        job->start(m_network);
+        job->start();
     }
 }
 

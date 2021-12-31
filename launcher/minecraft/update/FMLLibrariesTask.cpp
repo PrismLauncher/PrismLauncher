@@ -61,7 +61,7 @@ void FMLLibrariesTask::executeTask()
 
     // download missing libs to our place
     setStatus(tr("Downloading FML libraries..."));
-    auto dljob = new NetJob("FML libraries");
+    auto dljob = new NetJob("FML libraries", APPLICATION->network());
     auto metacache = APPLICATION->metacache();
     for (auto &lib : fmlLibsToProcess)
     {
@@ -74,7 +74,7 @@ void FMLLibrariesTask::executeTask()
     connect(dljob, &NetJob::failed, this, &FMLLibrariesTask::fmllibsFailed);
     connect(dljob, &NetJob::progress, this, &FMLLibrariesTask::progress);
     downloadJob.reset(dljob);
-    downloadJob->start(APPLICATION->network());
+    downloadJob->start();
 }
 
 bool FMLLibrariesTask::canAbort() const

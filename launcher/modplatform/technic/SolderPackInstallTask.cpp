@@ -42,12 +42,12 @@ bool Technic::SolderPackInstallTask::abort() {
 void Technic::SolderPackInstallTask::executeTask()
 {
     setStatus(tr("Finding recommended version:\n%1").arg(m_sourceUrl.toString()));
-    m_filesNetJob.reset(new NetJob(tr("Finding recommended version")));
+    m_filesNetJob = new NetJob(tr("Finding recommended version"), m_network);
     m_filesNetJob->addNetAction(Net::Download::makeByteArray(m_sourceUrl, &m_response));
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SolderPackInstallTask::versionSucceeded);
     connect(job, &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
-    m_filesNetJob->start(m_network);
+    m_filesNetJob->start();
 }
 
 void Technic::SolderPackInstallTask::versionSucceeded()
@@ -67,12 +67,12 @@ void Technic::SolderPackInstallTask::versionSucceeded()
     }
 
     setStatus(tr("Resolving modpack files:\n%1").arg(m_sourceUrl.toString()));
-    m_filesNetJob.reset(new NetJob(tr("Resolving modpack files")));
+    m_filesNetJob = new NetJob(tr("Resolving modpack files"), m_network);
     m_filesNetJob->addNetAction(Net::Download::makeByteArray(m_sourceUrl, &m_response));
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SolderPackInstallTask::fileListSucceeded);
     connect(job, &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
-    m_filesNetJob->start(m_network);
+    m_filesNetJob->start();
 }
 
 void Technic::SolderPackInstallTask::fileListSucceeded()
@@ -99,7 +99,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
         m_filesNetJob.reset();
         return;
     }
-    m_filesNetJob.reset(new NetJob(tr("Downloading modpack")));
+    m_filesNetJob = new NetJob(tr("Downloading modpack"), m_network);
     int i = 0;
     for (auto &modUrl: modUrls)
     {
@@ -113,7 +113,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &Technic::SolderPackInstallTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &Technic::SolderPackInstallTask::downloadProgressChanged);
     connect(m_filesNetJob.get(), &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
-    m_filesNetJob->start(m_network);
+    m_filesNetJob->start();
 }
 
 void Technic::SolderPackInstallTask::downloadSucceeded()

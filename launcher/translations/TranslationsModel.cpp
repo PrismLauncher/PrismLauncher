@@ -573,14 +573,14 @@ void TranslationsModel::downloadIndex()
         return;
     }
     qDebug() << "Downloading Translations Index...";
-    d->m_index_job.reset(new NetJob("Translations Index"));
+    d->m_index_job = new NetJob("Translations Index", APPLICATION->network());
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
     d->m_index_task = Net::Download::makeCached(QUrl("https://files.multimc.org/translations/index_v2.json"), entry);
     d->m_index_job->addNetAction(d->m_index_task);
     connect(d->m_index_job.get(), &NetJob::failed, this, &TranslationsModel::indexFailed);
     connect(d->m_index_job.get(), &NetJob::succeeded, this, &TranslationsModel::indexReceived);
-    d->m_index_job->start(APPLICATION->network());
+    d->m_index_job->start();
 }
 
 void TranslationsModel::updateLanguage(QString key)
@@ -625,13 +625,13 @@ void TranslationsModel::downloadTranslation(QString key)
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
     dl->m_total_progress = lang->file_size;
 
-    d->m_dl_job.reset(new NetJob("Translation for " + key));
+    d->m_dl_job = new NetJob("Translation for " + key, APPLICATION->network());
     d->m_dl_job->addNetAction(dl);
 
     connect(d->m_dl_job.get(), &NetJob::succeeded, this, &TranslationsModel::dlGood);
     connect(d->m_dl_job.get(), &NetJob::failed, this, &TranslationsModel::dlFailed);
 
-    d->m_dl_job->start(APPLICATION->network());
+    d->m_dl_job->start();
 }
 
 void TranslationsModel::downloadNext()

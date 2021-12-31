@@ -304,7 +304,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
         return;
 
     QList<ScreenShot::Ptr> uploaded;
-    auto job = NetJob::Ptr(new NetJob("Screenshot Upload"));
+    auto job = NetJob::Ptr(new NetJob("Screenshot Upload", APPLICATION->network()));
     if(selection.size() < 2)
     {
         auto item = selection.at(0);
@@ -314,6 +314,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
 
         m_uploadActive = true;
         ProgressDialog dialog(this);
+
         if(dialog.execWithTask(job.get()) != QDialog::Accepted)
         {
             CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"),
@@ -345,7 +346,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
         job->addNetAction(ImgurUpload::make(screenshot));
     }
     SequentialTask task;
-    auto albumTask = NetJob::Ptr(new NetJob("Imgur Album Creation"));
+    auto albumTask = NetJob::Ptr(new NetJob("Imgur Album Creation", APPLICATION->network()));
     auto imgurAlbum = ImgurAlbumCreation::make(uploaded);
     albumTask->addNetAction(imgurAlbum);
     task.addTask(job);
@@ -354,8 +355,12 @@ void ScreenshotsPage::on_actionUpload_triggered()
     ProgressDialog prog(this);
     if (prog.execWithTask(&task) != QDialog::Accepted)
     {
-        CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"),
-                                     tr("Unknown error"), QMessageBox::Warning)->exec();
+        CustomMessageBox::selectable(
+            this,
+            tr("Failed to upload screenshots!"),
+            tr("Unknown error"),
+            QMessageBox::Warning
+        )->exec();
     }
     else
     {

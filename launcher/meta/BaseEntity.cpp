@@ -117,7 +117,7 @@ void Meta::BaseEntity::load(Net::Mode loadType)
     {
         return;
     }
-    m_updateTask = new NetJob(QObject::tr("Download of meta file %1").arg(localFilename()));
+    m_updateTask = new NetJob(QObject::tr("Download of meta file %1").arg(localFilename()), APPLICATION->network());
     auto url = this->url();
     auto entry = APPLICATION->metacache()->resolveEntry("meta", localFilename());
     entry->setStale(true);
@@ -140,7 +140,7 @@ void Meta::BaseEntity::load(Net::Mode loadType)
         m_updateStatus = UpdateStatus::Failed;
         m_updateTask.reset();
     });
-    m_updateTask->start(APPLICATION->network());
+    m_updateTask->start();
 }
 
 bool Meta::BaseEntity::isLoaded() const

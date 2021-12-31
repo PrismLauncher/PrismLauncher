@@ -91,7 +91,7 @@ void Technic::ListModel::searchWithTerm(const QString& term)
 
 void Technic::ListModel::performSearch()
 {
-    NetJob *netJob = new NetJob("Technic::Search");
+    NetJob *netJob = new NetJob("Technic::Search", APPLICATION->network());
     QString searchUrl = "";
     if (currentSearchTerm.isEmpty()) {
         searchUrl = "https://api.technicpack.net/trending?build=multimc";
@@ -104,7 +104,7 @@ void Technic::ListModel::performSearch()
     }
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
-    jobPtr->start(APPLICATION->network());
+    jobPtr->start();
     QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::searchRequestFinished);
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
 }
@@ -216,7 +216,7 @@ void Technic::ListModel::requestLogo(QString logo, QString url)
     }
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo));
-    NetJob *job = new NetJob(QString("Technic Icon Download %1").arg(logo));
+    NetJob *job = new NetJob(QString("Technic Icon Download %1").arg(logo), APPLICATION->network());
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
@@ -231,7 +231,7 @@ void Technic::ListModel::requestLogo(QString logo, QString url)
         logoFailed(logo);
     });
 
-    job->start(APPLICATION->network());
+    job->start();
 
     m_loadingLogos.append(logo);
 }

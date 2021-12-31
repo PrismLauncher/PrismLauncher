@@ -100,7 +100,7 @@ void ListModel::requestLogo(QString logo, QString url)
     }
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
-    NetJob *job = new NetJob(QString("Flame Icon Download %1").arg(logo));
+    NetJob *job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
@@ -118,7 +118,7 @@ void ListModel::requestLogo(QString logo, QString url)
         emit logoFailed(logo);
     });
 
-    job->start(APPLICATION->network());
+    job->start();
 
     m_loadingLogos.append(logo);
 }
@@ -158,7 +158,7 @@ void ListModel::fetchMore(const QModelIndex& parent)
 
 void ListModel::performPaginatedSearch()
 {
-    NetJob *netJob = new NetJob("Flame::Search");
+    NetJob *netJob = new NetJob("Flame::Search", APPLICATION->network());
     auto searchUrl = QString(
         "https://addons-ecs.forgesvc.net/api/v2/addon/search?"
         "categoryId=0&"
@@ -171,7 +171,7 @@ void ListModel::performPaginatedSearch()
     ).arg(nextSearchOffset).arg(currentSearchTerm).arg(currentSort);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
-    jobPtr->start(APPLICATION->network());
+    jobPtr->start();
     QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::searchRequestFinished);
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
 }

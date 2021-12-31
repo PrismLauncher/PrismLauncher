@@ -109,7 +109,7 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
     if (current.versionsLoaded == false)
     {
         qDebug() << "Loading flame modpack versions";
-        NetJob *netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name));
+        NetJob *netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name), APPLICATION->network());
         std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
         int addonId = current.addonId;
         netJob->addNetAction(Net::Download::makeByteArray(QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files").arg(addonId), response.get()));
@@ -140,7 +140,7 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
             suggestCurrent();
         });
-        netJob->start(APPLICATION->network());
+        netJob->start();
     }
     else
     {

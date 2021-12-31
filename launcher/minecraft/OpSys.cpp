@@ -17,6 +17,8 @@
 
 OpSys OpSys_fromString(QString name)
 {
+    if (name == "freebsd")
+        return Os_FreeBSD;
     if (name == "linux")
         return Os_Linux;
     if (name == "windows")
@@ -30,6 +32,8 @@ QString OpSys_toString(OpSys name)
 {
     switch (name)
     {
+    case Os_FreeBSD:
+	return "freebsd";
     case Os_Linux:
         return "linux";
     case Os_OSX:

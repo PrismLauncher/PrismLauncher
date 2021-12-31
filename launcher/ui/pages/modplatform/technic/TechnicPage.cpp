@@ -110,8 +110,8 @@ void TechnicPage::suggestCurrent()
         metadataLoaded();
         return;
     }
-    
-    NetJob *netJob = new NetJob(QString("Technic::PackMeta(%1)").arg(current.name));
+
+    NetJob *netJob = new NetJob(QString("Technic::PackMeta(%1)").arg(current.name), APPLICATION->network());
     std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
     QString slug = current.slug;
     netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.technicpack.net/modpack/%1?build=multimc").arg(slug), response.get()));
@@ -167,7 +167,7 @@ void TechnicPage::suggestCurrent()
         current.metadataLoaded = true;
         metadataLoaded();
     });
-    netJob->start(APPLICATION->network());
+    netJob->start();
 }
 
 // expects current.metadataLoaded to be true

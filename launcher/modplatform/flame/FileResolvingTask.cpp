@@ -14,7 +14,7 @@ void Flame::FileResolvingTask::executeTask()
 {
     setStatus(tr("Resolving mod IDs..."));
     setProgress(0, m_toProcess.files.size());
-    m_dljob = new NetJob("Mod id resolver");
+    m_dljob = new NetJob("Mod id resolver", m_network);
     results.resize(m_toProcess.files.size());
     int index = 0;
     for(auto & file: m_toProcess.files)
@@ -27,7 +27,7 @@ void Flame::FileResolvingTask::executeTask()
         index ++;
     }
     connect(m_dljob.get(), &NetJob::finished, this, &Flame::FileResolvingTask::netJobFinished);
-    m_dljob->start(m_network);
+    m_dljob->start();
 }
 
 void Flame::FileResolvingTask::netJobFinished()

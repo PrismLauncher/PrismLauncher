@@ -58,12 +58,12 @@ bool PackInstallTask::abort()
 void PackInstallTask::executeTask()
 {
     qDebug() << "PackInstallTask::executeTask: " << QThread::currentThreadId();
-    auto *netJob = new NetJob("ATLauncher::VersionFetch");
+    auto *netJob = new NetJob("ATLauncher::VersionFetch", APPLICATION->network());
     auto searchUrl = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json")
             .arg(m_pack).arg(m_version_name);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
-    jobPtr->start(APPLICATION->network());
+    jobPtr->start();
 
     QObject::connect(netJob, &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     QObject::connect(netJob, &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
@@ -424,7 +424,7 @@ void PackInstallTask::installConfigs()
 {
     qDebug() << "PackInstallTask::installConfigs: " << QThread::currentThreadId();
     setStatus(tr("Downloading configs..."));
-    jobPtr.reset(new NetJob(tr("Config download")));
+    jobPtr = new NetJob(tr("Config download"), APPLICATION->network());
 
     auto path = QString("Configs/%1/%2.zip").arg(m_pack).arg(m_version_name);
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.zip")
@@ -458,7 +458,7 @@ void PackInstallTask::installConfigs()
         setProgress(current, total);
     });
 
-    jobPtr->start(APPLICATION->network());
+    jobPtr->start();
 }
 
 void PackInstallTask::extractConfigs()
@@ -508,7 +508,7 @@ void PackInstallTask::downloadMods()
     setStatus(tr("Downloading mods..."));
 
     jarmods.clear();
-    jobPtr.reset(new NetJob(tr("Mod download")));
+    jobPtr = new NetJob(tr("Mod download"), APPLICATION->network());
     for(const auto& mod : m_version.mods) {
         // skip non-client mods
         if(!mod.client) continue;
@@ -613,7 +613,7 @@ void PackInstallTask::downloadMods()
         setProgress(current, total);
     });
 
-    jobPtr->start(APPLICATION->network());
+    jobPtr->start();
 }
 
 void PackInstallTask::onModsDownloaded() {

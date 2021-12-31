@@ -11,6 +11,7 @@ class QNetworkAccessManager;
 struct AuthSession
 {
     bool MakeOffline(QString offline_playername);
+    void MakeDemo();
 
     QString serializeUserProperties();
 
@@ -43,6 +44,9 @@ struct AuthSession
     bool auth_server_online = false;
     // Did the user request online mode?
     bool wants_online = true;
+
+    //Is this a demo session?
+    bool demo = false;
 };
 
 typedef std::shared_ptr<AuthSession> AuthSessionPtr;

@@ -104,11 +104,11 @@ void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
 
     QUrl indexUrl = QUrl(m_newRepoUrl).resolved(QUrl("index.json"));
 
-    indexJob = new NetJob("GoUpdate Repository Index");
+    indexJob = new NetJob("GoUpdate Repository Index", m_network);
     indexJob->addNetAction(Net::Download::makeByteArray(indexUrl, &indexData));
     connect(indexJob.get(), &NetJob::succeeded, [this, notifyNoUpdate](){ updateCheckFinished(notifyNoUpdate); });
     connect(indexJob.get(), &NetJob::failed, this, &UpdateChecker::updateCheckFailed);
-    indexJob->start(m_network);
+    indexJob->start();
 }
 
 void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
@@ -191,11 +191,11 @@ void UpdateChecker::updateChanList(bool notifyNoUpdate)
     }
 
     m_chanListLoading = true;
-    chanListJob = new NetJob("Update System Channel List");
+    chanListJob = new NetJob("Update System Channel List", m_network);
     chanListJob->addNetAction(Net::Download::makeByteArray(QUrl(m_channelUrl), &chanlistData));
     connect(chanListJob.get(), &NetJob::succeeded, [this, notifyNoUpdate]() { chanListDownloadFinished(notifyNoUpdate); });
     connect(chanListJob.get(), &NetJob::failed, this, &UpdateChecker::chanListDownloadFailed);
-    chanListJob->start(m_network);
+    chanListJob->start();
 }
 
 void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
