@@ -1,8 +1,6 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/">
-        <file>logo.svg</file>
+        <file>polymc.svg</file>
     </qresource>
 </RCC>
-
-

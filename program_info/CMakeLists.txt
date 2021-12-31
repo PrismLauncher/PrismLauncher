@@ -9,6 +9,8 @@ set(Launcher_ConfigFile "polymc.cfg" PARENT_SCOPE)
 set(Launcher_Git "https://github.com/PolyMC/PolyMC" PARENT_SCOPE)
 
 set(Launcher_Desktop "program_info/polymc.desktop" PARENT_SCOPE)
-set(Launcher_Branding_ICNS "program_info/Launcher.icns" PARENT_SCOPE)
-set(Launcher_Branding_WindowsRC "program_info/launcher.rc" PARENT_SCOPE)
-set(Launcher_Branding_LogoQRC "program_info/logo.qrc" PARENT_SCOPE)
+set(Launcher_Branding_ICNS "program_info/polymc.icns" PARENT_SCOPE)
+set(Launcher_Branding_WindowsRC "program_info/polymc.rc" PARENT_SCOPE)
+set(Launcher_Branding_LogoQRC "program_info/polymc.qrc" PARENT_SCOPE)
+
+configure_file(polymc.desktop.in polymc.desktop)
