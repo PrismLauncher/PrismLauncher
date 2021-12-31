@@ -217,7 +217,7 @@ elseif(Launcher_LAYOUT_REAL STREQUAL "lin-system")
     MESSAGE(STATUS "Compiling for linux system with ${Launcher_SHARE_DEST_DIR} and LAUNCHER_LINUX_DATADIR")
     SET(Launcher_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DLAUNCHER_LINUX_DATADIR")
 
-    install(FILES ${Launcher_Desktop} DESTINATION ${Launcher_DESKTOP_DEST_DIR})
+    install(FILES ${CMAKE_BUILD_DIR}/${Launcher_Desktop} DESTINATION ${Launcher_DESKTOP_DEST_DIR})
 
     # install as bundle with no dependencies included
     set(INSTALL_BUNDLE "nodeps")
