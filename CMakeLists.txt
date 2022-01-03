@@ -210,6 +210,7 @@ elseif(Launcher_LAYOUT_REAL STREQUAL "lin-system")
     set(Launcher_SHARE_DEST_DIR "share/polymc" CACHE STRING "Path to the shared data directory")
     set(JARS_DEST_DIR "${Launcher_SHARE_DEST_DIR}/jars")
     set(Launcher_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
+    set(Launcher_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
 
     set(BINARY_DEST_DIR ${Launcher_BINARY_DEST_DIR})
     set(LIBRARY_DEST_DIR ${Launcher_LIBRARY_DEST_DIR})
@@ -218,6 +219,7 @@ elseif(Launcher_LAYOUT_REAL STREQUAL "lin-system")
     SET(Launcher_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DLAUNCHER_LINUX_DATADIR")
 
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${Launcher_DESKTOP_DEST_DIR})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_MetaInfo} DESTINATION ${Launcher_METAINFO_DEST_DIR})
 
     # install as bundle with no dependencies included
     set(INSTALL_BUNDLE "nodeps")

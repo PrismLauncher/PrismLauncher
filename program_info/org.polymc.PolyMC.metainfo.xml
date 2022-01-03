@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>org.polymc.PolyMC</id>
+  <provides><id>org.polymc.PolyMC</id></provides>
+  <launchable type="desktop-id">org.polymc.PolyMC.desktop</launchable>
+  <name>PolyMC</name>
+  <developer_name>PolyMC Team</developer_name>
+  <summary>A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <url type="homepage">https://polymc.org/</url>
+  <url type="help">https://github.com/PolyMC/PolyMC#help--support</url>
+  <description>
+    <p>
+      PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
+      Features:
+      - Easily install game modifications, such as Fabric or Forge
+      - Control your java settings
+      - Manage worlds and resource packs from the launcher
+      - See logs and other details easily
+      - Kill Minecraft in case of a crash/freeze
+      - Isolate minecraft instances to keep everything clean
+
+      This flatpak includes Wayland support without XWayland: to enable, tick Use system installation of GLFW... in the settings of a Minecraft instance.
+      All java versions that are required by Minecraft are included.
+      If using a Hybrid-Graphics device, you can use the prime-run script as a wrapper command to run Minecraft using the dedicated graphics card.
+    </p>
+  </description>
+  <screenshots>
+    <screenshot type="default">
+      <caption>The main PolyMC window</caption>
+      <image type="source" width="802" height="639">https://i.imgur.com/q2GcDo4.png</image>
+    </screenshot>
+  </screenshots>
+  <releases>
+    <release version="1.0.2" date="2022-01-01"/>
+  </releases>
+  <content_rating type="oars-1.0">
+    <content_attribute id="violence-cartoon">moderate</content_attribute>
+    <content_attribute id="violence-fantasy">none</content_attribute>
+    <content_attribute id="violence-realistic">none</content_attribute>
+    <content_attribute id="violence-bloodshed">none</content_attribute>
+    <content_attribute id="violence-sexual">none</content_attribute>
+    <content_attribute id="drugs-alcohol">none</content_attribute>
+    <content_attribute id="drugs-narcotics">none</content_attribute>
+    <content_attribute id="drugs-tobacco">none</content_attribute>
+    <content_attribute id="sex-nudity">none</content_attribute>
+    <content_attribute id="sex-themes">none</content_attribute>
+    <content_attribute id="language-profanity">none</content_attribute>
+    <content_attribute id="language-humor">none</content_attribute>
+    <content_attribute id="language-discrimination">none</content_attribute>
+    <content_attribute id="social-chat">intense</content_attribute>
+    <content_attribute id="social-info">none</content_attribute>
+    <content_attribute id="social-audio">none</content_attribute>
+    <content_attribute id="social-location">none</content_attribute>
+    <content_attribute id="social-contacts">none</content_attribute>
+    <content_attribute id="money-purchasing">none</content_attribute>
+    <content_attribute id="money-gambling">none</content_attribute>
+  </content_rating>
+</component>
