@@ -1,11 +1,11 @@
 #/bin/bash
 
-inkscape -w 16 -h 16 -o polymc_16.png polymc.svg
-inkscape -w 24 -h 24 -o polymc_24.png polymc.svg
-inkscape -w 32 -h 32 -o polymc_32.png polymc.svg
-inkscape -w 48 -h 48 -o polymc_48.png polymc.svg
-inkscape -w 64 -h 64 -o polymc_64.png polymc.svg
-inkscape -w 128 -h 128 -o polymc_128.png org.polymc.PolyMC.svg
+inkscape -w 16 -h 16 -o polymc_16.png org.polymc.PolyMC.svg
+inkscape -w 24 -h 24 -o polymc_24.png org.polymc.PolyMC.svg
+inkscape -w 32 -h 32 -o polymc_32.png org.polymc.PolyMC.svg
+inkscape -w 48 -h 48 -o polymc_48.png org.polymc.PolyMC.svg
+inkscape -w 64 -h 64 -o polymc_64.png org.polymc.PolyMC.svg
+inkscape -w 128 -h 128 -o polymc_128.png org.polymc.org.polymc.PolyMC.svg
 
 convert polymc_128.png polymc_64.png polymc_48.png polymc_32.png polymc_24.png polymc_16.png polymc.ico
 
