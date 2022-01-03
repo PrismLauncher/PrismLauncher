@@ -14,13 +14,13 @@ Several source build packages are available, along with experimental pre-built g
 
 - An [AUR package](https://aur.archlinux.org/packages/polymc-git/) is available.
 - A Gentoo ebuild is available in the [swirl](https://git.swurl.xyz/swirl/ebuilds) overlay, named `games-action/polymc`. Check the README for instructions on how to add the overlay.
-- A Flatpak is available in [Flathub](https://flathub.org/apps/details/org.polymc.PolyMC). You can install it from there or build it yourself using [this source](https://github.com/flathub/org.polymc.PolyMC)
-- Generic, prebuilt packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest))
+- A Flatpak is available in [Flathub](https://flathub.org/apps/details/org.polymc.PolyMC). You can install it from there or build it yourself using [this source](https://github.com/flathub/org.polymc.PolyMC).
+- Generic, prebuilt packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest)).
 - Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
 - [Linux (AMD64) System](https://packages.polymc.org/latest/lin64-system/lin64-system.tar.zst) ([SHA256](https://packages.polymc.org/latest/lin64-system/lin64-system.tar.zst.sha256)) - this is a generic system package intended to be used as a base for making distro-specific packages.
 - [Windows (32-bit)](https://packages.polymc.org/latest/win32/win32.zip) ([SHA256](https://packages.polymc.org/latest/win32/win32.zip.sha256)) - this is a portable package, you can extract it anywhere and run it. This package needs testing.
 - [Debian (AMD64)](https://packages.polymc.org/latest/deb/polymc-amd64.deb) ([SHA256](https://packages.polymc.org/latest/deb/polymc-amd64.deb.sha256)) - this is intended to be installed with `dpkg -i`. Alternatively, you may build the `.deb` yourself, by going to `packages/debian` and running `./makedeb.sh`.
-- [AppImage (AMD64)](https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage) ([SHA256](https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage.sha256)) - `chmod +x` must be run on this file before usage. This should work on any distribution
+- [AppImage (AMD64)](https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage) ([SHA256](https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage.sha256)) - `chmod +x` must be run on this file before usage. This should work on any distribution.
 - MacOS currently does not have any packages. We are still working on setting up MacOS packaging.
 
 ## Development
@@ -50,7 +50,7 @@ Feel free to create an issue if you need help. However, you might find it easier
 
 [![PolyMC Discord](https://img.shields.io/discord/923671181020766230?label=PolyMC%20Discord)](https://discord.gg/xq7fxrgtMP)
 
-For people who don't want to use Discord, we have a Matrix Space which is bridged to the discord server. Be sure to enable spaces first (Settings -> Labs -> Spaces), and then you may join the space:
+For people who don't want to use Discord, we have a Matrix Space which is bridged to the Discord server. Be sure to enable spaces first (Settings -> Labs -> Spaces), and then you may join the space:
 
 [![PolyMC Space](https://img.shields.io/matrix/polymc:polymc.org?label=PolyMC%20Space&server_fqdn=matrix.polymc.org)](https://matrix.to/#/#polymc:polymc.org)
 
