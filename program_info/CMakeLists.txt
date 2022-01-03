@@ -10,6 +10,7 @@ set(Launcher_Git "https://github.com/PolyMC/PolyMC" PARENT_SCOPE)
 
 set(Launcher_Desktop "program_info/org.polymc.PolyMC.desktop" PARENT_SCOPE)
 set(Launcher_MetaInfo "program_info/org.polymc.PolyMC.metainfo.xml" PARENT_SCOPE)
+set(Launcher_SVG "program_info/org.polymc.PolyMC.svg" PARENT_SCOPE)
 set(Launcher_Branding_ICNS "program_info/polymc.icns" PARENT_SCOPE)
 set(Launcher_Branding_WindowsRC "program_info/polymc.rc" PARENT_SCOPE)
 set(Launcher_Branding_LogoQRC "program_info/polymc.qrc" PARENT_SCOPE)

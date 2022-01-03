@@ -57,9 +57,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 set(Launcher_NEWS_RSS_URL "https://multimc.org/rss.xml" CACHE STRING "URL to fetch Launcher's news RSS feed from.")
 
 ######## Set version numbers ########
-set(Launcher_VERSION_MAJOR    0)
-set(Launcher_VERSION_MINOR    6)
-set(Launcher_VERSION_HOTFIX   14)
+set(Launcher_VERSION_MAJOR    1)
+set(Launcher_VERSION_MINOR    0)
+set(Launcher_VERSION_HOTFIX   3)
 
 # Build number
 set(Launcher_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
@@ -211,6 +211,7 @@ elseif(Launcher_LAYOUT_REAL STREQUAL "lin-system")
     set(JARS_DEST_DIR "${Launcher_SHARE_DEST_DIR}/jars")
     set(Launcher_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
     set(Launcher_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
+    set(Launcher_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
 
     set(BINARY_DEST_DIR ${Launcher_BINARY_DEST_DIR})
     set(LIBRARY_DEST_DIR ${Launcher_LIBRARY_DEST_DIR})
@@ -220,6 +221,7 @@ elseif(Launcher_LAYOUT_REAL STREQUAL "lin-system")
 
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${Launcher_DESKTOP_DEST_DIR})
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_MetaInfo} DESTINATION ${Launcher_METAINFO_DEST_DIR})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${Launcher_ICON_DEST_DIR})
 
     # install as bundle with no dependencies included
     set(INSTALL_BUNDLE "nodeps")
