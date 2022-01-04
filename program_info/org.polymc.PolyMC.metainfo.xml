@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
   <id>org.polymc.PolyMC</id>
-  <provides><id>org.polymc.PolyMC</id></provides>
+  <provides>
+    <id>org.polymc.PolyMC</id>
+  </provides>
   <launchable type="desktop-id">org.polymc.PolyMC.desktop</launchable>
   <name>PolyMC</name>
   <developer_name>PolyMC Team</developer_name>
@@ -11,19 +13,22 @@
   <url type="homepage">https://polymc.org/</url>
   <url type="help">https://github.com/PolyMC/PolyMC#help--support</url>
   <description>
+    <p>PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.</p>
+    <p>Features:</p>
+    <ul>
+      <li>Easily install game modifications, such as Fabric or Forge</li>
+      <li>Control your java settings</li>
+      <li>Manage worlds and resource packs from the launcher</li>
+      <li>See logs and other details easily</li>
+      <li>Kill Minecraft in case of a crash/freeze</li>
+      <li>Isolate minecraft instances to keep everything clean</li>
+    </ul>
+    <p>This flatpak includes Wayland support without XWayland: to enable, tick Use system installation of GLFW... in the settings of a Minecraft instance.</p>
+    <p>All java versions that are required by Minecraft are included.</p>
     <p>
-      PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
-      Features:
-      - Easily install game modifications, such as Fabric or Forge
-      - Control your java settings
-      - Manage worlds and resource packs from the launcher
-      - See logs and other details easily
-      - Kill Minecraft in case of a crash/freeze
-      - Isolate minecraft instances to keep everything clean
-
-      This flatpak includes Wayland support without XWayland: to enable, tick Use system installation of GLFW... in the settings of a Minecraft instance.
-      All java versions that are required by Minecraft are included.
-      If using a Hybrid-Graphics device, you can use the prime-run script as a wrapper command to run Minecraft using the dedicated graphics card.
+      If using a Hybrid-Graphics device, you can use the
+      prime-run
+      script as a wrapper command to run Minecraft using the dedicated graphics card.
     </p>
   </description>
   <screenshots>
@@ -33,7 +38,7 @@
     </screenshot>
   </screenshots>
   <releases>
-    <release version="1.0.2" date="2022-01-01"/>
+    <release version="1.0.2" date="2022-01-01" />
   </releases>
   <content_rating type="oars-1.0">
     <content_attribute id="violence-cartoon">moderate</content_attribute>
