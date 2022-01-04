@@ -23,8 +23,8 @@
       <li>Kill Minecraft in case of a crash/freeze</li>
       <li>Isolate minecraft instances to keep everything clean</li>
     </ul>
-    <p>This flatpak includes Wayland support without XWayland: to enable, tick Use system installation of GLFW... in the settings of a Minecraft instance.</p>
-    <p>All java versions that are required by Minecraft are included.</p>
+    <p>For flatpak users:</p>
+    <p>In flatpak, all java versions that are required by Minecraft are included.</p>
     <p>
       If using a Hybrid-Graphics device, you can use the
       prime-run
