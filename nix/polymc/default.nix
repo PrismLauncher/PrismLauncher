@@ -2,6 +2,11 @@
 
 let
   libpath = with xorg; lib.makeLibraryPath [ libX11 libXext libXcursor libXrandr libXxf86vm libpulseaudio libGL ];
+  desktopFile = makeDesktopItem {
+    name = "PolyMC";
+    desktopName = "PolyMC";
+    exec = "polymc";
+  };
 in 
 mkDerivation rec {
   pname = "polymc";
@@ -29,6 +34,7 @@ mkDerivation rec {
 
   postInstall = ''
     # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
+    cp ${desktopFile} $out/share/applications/
     wrapProgram $out/bin/polymc \
       --set GAME_LIBRARY_PATH /run/opengl-driver/lib:${libpath} \
       --prefix PATH : ${lib.makeBinPath [ xorg.xrandr ]}
