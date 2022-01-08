@@ -48,3 +48,5 @@ builddir
 packages/debian/polymc/usr/
 packages/debian/polymc.deb
 packages/debian/polymc/DEBIAN/control
+# Nix/NixOS
+result/
