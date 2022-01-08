@@ -36,7 +36,7 @@
 
         apps = {
           polymc = flake-utils.lib.mkApp {
-            name = "PolyMC";
+            name = "polymc";
             drv = packages.polymc;
           };
         };
