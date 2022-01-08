@@ -2,8 +2,8 @@
   <img src="https://avatars2.githubusercontent.com/u/5411890" alt="MultiMC logo"/>
 </p>
 
-MultiMC 5
-=========
+MultiMC
+=======
 
 MultiMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
 
@@ -15,7 +15,7 @@ While blindly submitting PRs is definitely possible, they're not necessarily goi
 We aren't looking for flashy features, but expanding upon the existing feature set without distruption or endangering future viability of the project is OK.
 
 ### Building
-If you want to build MultiMC yourself, check [BUILD.md](BUILD.md) for build instructions.
+If you want to build the launcher yourself, check [BUILD.md](BUILD.md) for build instructions.
 
 ### Code formatting
 Just follow the existing formatting.
@@ -27,17 +27,8 @@ In general, in order of importance:
 * Indent with 4 space unless it's in a submodule.
 * Keep lists (of arguments, parameters, initializers...) as lists, not paragraphs. It should either read from top to bottom, or left to right. Not both.
 
-
 ## Translations
 Translations can be done [on crowdin](https://translate.multimc.org). Please avoid making direct pull requests to the translations repository.
-
-## Forking/Redistributing/Custom builds policy
-We keep Launcher open source because we think it's important to be able to see the source code for a project like this, and we do so using the Apache license.
-
-Part of the reason for using the Apache license is that we don't want people using the "MultiMC" name when redistributing the project. This means people must take the time to go through the source code and remove all references to "MultiMC", including but not limited to the project icon and the title of windows, (no *MultiMC-fork* in the title).
-
-Apache covers reasonable use for the name - a mention of the project's origins in the About dialog and the license is acceptable. However, it should be abundantly clear that the project is a fork *without* implying that you have our blessing.
-
 
 ## License
 Copyright &copy; 2013-2021 MultiMC Contributors
@@ -46,35 +37,17 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-## Build status
-### Linux (Intel32)
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Linux32_Build&guest=1">
-Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Linux32_Build)/statusIcon"/>
-</a>
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Linux32_Deploy&guest=1">
-Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Linux32_Deploy)/statusIcon"/>
-</a>
+## Forking/Redistributing/Custom builds policy
+We keep Launcher open source because we think it's important to be able to see the source code for a project like this, and we do so using the Apache license.
 
-### Linux (AMD64)
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Linux64_Build&guest=1">
-Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Linux64_Build)/statusIcon"/>
-</a>
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Linux64_Deploy&guest=1">
-Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Linux64_Deploy)/statusIcon"/>
-</a>
+The license gives you access to the source MultiMC is build from, but:
+- Not the name, logo and other branding.
+- Not the API tokens required to talk to services the launcher depends on.
 
-### macOS (AMD64)
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_MacOS_Build&guest=1">
-Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_MacOS_Build)/statusIcon"/>
-</a>
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_MacOS_Deploy&guest=1">
-Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_MacOS_Deploy)/statusIcon"/>
-</a>
+Because of the nature of the agreements required to interact with the Microsoft identity platform, it's impossible for us to continue allowing everyone to build the code as 'MultiMC'. The source code has been debranded and now builds as `DevLauncher` by default.
 
-### Windows (Intel32)
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Windows_Build&guest=1">
-Build: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Windows_Build)/statusIcon"/>
-</a>
-<a href="https://teamcity.multimc.org/viewType.html?buildTypeId=Launcher_Launcher_Windows_Deploy&guest=1">
-Deploy: <img src="https://teamcity.multimc.org/app/rest/builds/buildType:(id:Launcher_Launcher_Windows_Deploy)/statusIcon"/>
-</a>
+You must provide your own branding if you want to distribute your own builds.
+
+You will also have to register your own app on Azure to be able to handle Microsoft account logins.
+
+If you decide to fork the project, a mention of its origins in the About dialog and the license is acceptable. However, it should be abundantly clear that the project is a fork *without* implying that you have our blessing.
