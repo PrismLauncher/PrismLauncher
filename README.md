@@ -13,6 +13,7 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 Several source build packages are available, along with experimental pre-built generic packages.
 
 - An [AUR package](https://aur.archlinux.org/packages/polymc-git/) is available.
+- A Nix derivation is available in repo [Nix](https://github.com/PolyMC/PolyMC/blob/develop/packages/nix/NIX.md)
 - A Gentoo ebuild is available in the [swirl](https://git.swurl.xyz/swirl/ebuilds) overlay, named `games-action/polymc`. Check the README for instructions on how to add the overlay.
 - A Flatpak is available in [Flathub](https://flathub.org/apps/details/org.polymc.PolyMC). You can install it from there or build it yourself using [this source](https://github.com/flathub/org.polymc.PolyMC).
 - Generic, prebuilt packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest)).
