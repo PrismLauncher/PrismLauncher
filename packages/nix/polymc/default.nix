@@ -1,12 +1,7 @@
-{ lib, mkDerivation, makeDesktopItem, fetchFromGitHub, cmake, jdk8, jdk, zlib, file, makeWrapper, xorg, libpulseaudio, qtbase, libGL, msaClientID ? "" }:
+{ lib, mkDerivation, fetchFromGitHub, cmake, jdk8, jdk, zlib, file, makeWrapper, xorg, libpulseaudio, qtbase, libGL, msaClientID ? "" }:
 
 let
   libpath = with xorg; lib.makeLibraryPath [ libX11 libXext libXcursor libXrandr libXxf86vm libpulseaudio libGL ];
-  desktopFile = makeDesktopItem {
-    name = "PolyMC";
-    desktopName = "PolyMC";
-    exec = "polymc";
-  };
 in 
 mkDerivation rec {
   pname = "polymc";
@@ -34,11 +29,11 @@ mkDerivation rec {
 
   postInstall = ''
     # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
-    rm $out/share/applications/*
-    cp ${desktopFile}/share/applications/* $out/share/applications/
     wrapProgram $out/bin/polymc \
       --set GAME_LIBRARY_PATH /run/opengl-driver/lib:${libpath} \
       --prefix PATH : ${lib.makeBinPath [ xorg.xrandr ]}
+
+    substituteInPlace $out/share/applications/org.polymc.PolyMC.desktop --replace 'Exec=' 'Exec=${placeholder "out"}/bin/polymc'
   '';
 
   meta = with lib; {

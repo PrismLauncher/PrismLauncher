@@ -2,6 +2,6 @@
   description = "PolyMC";
 
   outputs = inputs: {
-    overlay = import ./overlay.nix;
+    overlay = import ./packages/nix/overlay.nix;
   };
 }
