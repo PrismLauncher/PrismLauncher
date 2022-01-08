@@ -34,6 +34,7 @@ mkDerivation rec {
 
   postInstall = ''
     # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
+    rm $out/share/applications/*
     cp ${desktopFile}/share/applications/* $out/share/applications/
     wrapProgram $out/bin/polymc \
       --set GAME_LIBRARY_PATH /run/opengl-driver/lib:${libpath} \
