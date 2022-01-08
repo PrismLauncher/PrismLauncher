@@ -15,6 +15,22 @@
         "type": "github"
       }
     },
+    "libnbtplusplus": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1591558203,
+        "narHash": "sha256-QgvNvaoFflCXEPCCFBCeZvYTpuiwScBG7EosUgFwFNQ=",
+        "owner": "multimc",
+        "repo": "libnbtplusplus",
+        "rev": "dc72a20b7efd304d12af2025223fad07b4b78464",
+        "type": "github"
+      },
+      "original": {
+        "owner": "multimc",
+        "repo": "libnbtplusplus",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1641528457,
@@ -31,10 +47,28 @@
         "type": "github"
       }
     },
+    "quazip": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1633895098,
+        "narHash": "sha256-+Of0M2IAoTf1CyC0teCpsyurv6xfqiBo84V49dSeNTA=",
+        "owner": "multimc",
+        "repo": "quazip",
+        "rev": "b1a72ac0bb5a732bf887a535ab75c6f9bedb6b6b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "multimc",
+        "repo": "quazip",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "libnbtplusplus": "libnbtplusplus",
+        "nixpkgs": "nixpkgs",
+        "quazip": "quazip"
       }
     }
   },

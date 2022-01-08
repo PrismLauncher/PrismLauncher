@@ -14,7 +14,10 @@
 , libpulseaudio
 , qtbase
 , libGL
+# submodules
 , self
+, submoduleNbt
+, submoduleQuazip
 , msaClientID ? ""
 }:
 
@@ -39,6 +42,12 @@ mkDerivation rec {
   nativeBuildInputs = [ cmake file makeWrapper ];
   buildInputs = [ qtbase jdk8 zlib ];
 
+  postUnpack = ''
+    mkdir libraries/{libnbtplusplus,quazip}
+    cp -a ${submoduleNbt}/* libraries/libnbtplusplus
+    cp -a ${submoduleQuazip}/* libraries/quazip
+  '';
+  
   postPatch = ''
     # add client ID
     substituteInPlace notsecrets/Secrets.cpp \
