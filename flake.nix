@@ -26,9 +26,9 @@
           };
         };
 
-        overlay = import ./packages/nix/overlay.nix {
-          inherit self quazip libnbtplusplus;
-        };
+        overlay = (final: prev: rec { 
+          polymc = packages.polymc;
+        });
 
         apps = {
           polymc = flake-utils.lib.mkApp {

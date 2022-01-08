@@ -42,6 +42,7 @@ mkDerivation rec {
   buildInputs = [ qtbase jdk8 zlib ];
 
   postUnpack = ''
+    rm -rf source/libraries/{libnbtplusplus,quazip}
     mkdir source/libraries/{libnbtplusplus,quazip}
     cp -a ${submoduleNbt}/* source/libraries/libnbtplusplus
     cp -a ${submoduleQuazip}/* source/libraries/quazip
