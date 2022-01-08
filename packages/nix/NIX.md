@@ -21,6 +21,6 @@ add `<polymc>` to imports in your `configuration.nix`
 
 ```nix
 imports = [
-  "<polymc>/packages/nix/overlay.nix
+  "<polymc>/packages/nix/overlay.nix"
 ];
 ```
