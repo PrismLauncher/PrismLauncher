@@ -61,6 +61,10 @@ void JavaChecker::stdoutReady()
     QByteArray data = process->readAllStandardOutput();
     QString added = QString::fromLocal8Bit(data);
     added.remove('\r');
+    // NOTE: workaround for GH-4125, where garbage is getting printed into stdout on bedrock linux
+    if (added.contains("/bedrock/strata")) {
+        return;
+    }
     m_stdout += added;
 }
 
