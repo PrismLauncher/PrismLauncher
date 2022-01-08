@@ -21,13 +21,14 @@
         packages = {
           polymc = pkgs.libsForQt5.callPackage ./packages/nix/polymc {
             inherit self;
-            isFlakeBuild = true;
             submoduleQuazip = quazip;
             submoduleNbt = libnbtplusplus;
           };
         };
 
-        overlay = import ./packages/nix/overlay.nix {};
+        overlay = import ./packages/nix/overlay.nix {
+          inherit self quazip libnbtplusplus;
+        };
 
         apps = {
           polymc = flake-utils.lib.mkApp {
