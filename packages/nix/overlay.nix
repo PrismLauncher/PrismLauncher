@@ -1,3 +1,5 @@
-self: super: rec {
-  polymc = super.libsForQt5.callPackage ./polymc {};
+{ self }:
+
+final: prev: rec {
+  polymc = prev.libsForQt5.callPackage ./polymc { inherit self; };
 }
