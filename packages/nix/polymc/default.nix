@@ -5,6 +5,7 @@
 , substituteAll
 , fetchpatch
 , cmake
+, ninja
 , jdk8
 , jdk
 , zlib
@@ -38,7 +39,7 @@ mkDerivation rec {
 
   src = lib.cleanSource self;
 
-  nativeBuildInputs = [ cmake file makeWrapper ];
+  nativeBuildInputs = [ cmake ninja file makeWrapper ];
   buildInputs = [ qtbase jdk8 zlib ];
 
   postUnpack = ''
@@ -50,6 +51,7 @@ mkDerivation rec {
   '';
 
   cmakeFlags = [
+    "-GNinja"
     "-DLauncher_LAYOUT=lin-system"
   ];
 

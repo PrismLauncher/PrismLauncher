@@ -27,7 +27,11 @@
         };
 
         overlay = (final: prev: rec { 
-          polymc = packages.polymc;
+          polymc = prev.libsForQt5.callPackage ./packages/nix/polymc {
+            inherit self;
+            submoduleQuazip = quazip;
+            submoduleNbt = libnbtplusplus;
+          };
         });
 
         apps = {
