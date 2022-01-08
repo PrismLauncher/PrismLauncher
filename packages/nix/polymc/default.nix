@@ -18,7 +18,6 @@
 , self
 , submoduleNbt
 , submoduleQuazip
-, msaClientID ? ""
 }:
 
 let
@@ -43,15 +42,10 @@ mkDerivation rec {
   buildInputs = [ qtbase jdk8 zlib ];
 
   postUnpack = ''
-    mkdir libraries/{libnbtplusplus,quazip}
-    cp -a ${submoduleNbt}/* libraries/libnbtplusplus
-    cp -a ${submoduleQuazip}/* libraries/quazip
-  '';
-  
-  postPatch = ''
-    # add client ID
-    substituteInPlace notsecrets/Secrets.cpp \
-      --replace 'QString MSAClientID = "";' 'QString MSAClientID = "${msaClientID}";'
+    mkdir source/libraries/{libnbtplusplus,quazip}
+    cp -a ${submoduleNbt}/* source/libraries/libnbtplusplus
+    cp -a ${submoduleQuazip}/* source/libraries/quazip
+    chmod a+r+w source/libraries/{libnbtplusplus,quazip}/*
   '';
 
   cmakeFlags = [
