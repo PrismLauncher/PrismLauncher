@@ -11,7 +11,7 @@
         };
  
         packages = {
-          polymc = pkgs.libsForQt5.callPackage ./package/nix {};
+          polymc = pkgs.libsForQt5.callPackage ./packages/nix/polymc { inherit self; };
         };
         
         apps = {
@@ -26,7 +26,7 @@
 
         defaultPackage = packages.polymc;
         defaultApp = apps.polymc;
-        overlay = import ./packages/nix/overlay.nix;
+        overlay = import ./packages/nix/overlay.nix { inherit self; };
       }
     );
 }
