@@ -15,9 +15,10 @@
 , qtbase
 , libGL
 # submodules
-, self
-, submoduleNbt
-, submoduleQuazip
+, isFlakeBuild ? false
+, self ? ""
+, submoduleNbt ? ""
+, submoduleQuazip ? ""
 }:
 
 let
@@ -34,19 +35,26 @@ in
 
 mkDerivation rec {
   pname = "polymc";
-  version = "nightly";
+  version = if isFlakeBuild then "nightly" else "1.0.4";
 
-  src = lib.cleanSource self;
+  src = if isFlakeBuild then lib.cleanSource self
+    else fetchFromGitHub {
+    owner = "PolyMC";
+    repo = "PolyMC";
+    rev = "${version}";
+    sha256 = "sha256-8aya0KfV9F+i2qBpweWcR9hwyTSQkqn2wHdtkCEeNvk=";
+    fetchSubmodules = true;
+  };
 
   nativeBuildInputs = [ cmake file makeWrapper ];
   buildInputs = [ qtbase jdk8 zlib ];
 
-  postUnpack = ''
+  postUnpack = if isFlakeBuild then ''
     mkdir source/libraries/{libnbtplusplus,quazip}
     cp -a ${submoduleNbt}/* source/libraries/libnbtplusplus
     cp -a ${submoduleQuazip}/* source/libraries/quazip
     chmod a+r+w source/libraries/{libnbtplusplus,quazip}/*
-  '';
+  '' else "";
 
   cmakeFlags = [
     "-DLauncher_LAYOUT=lin-system"
