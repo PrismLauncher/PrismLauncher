@@ -40,6 +40,7 @@
 
 #include "ui/dialogs/NewInstanceDialog.h"
 
+#include "BuildConfig.h"
 #include "TechnicModel.h"
 #include "modplatform/technic/SingleZipPackInstallTask.h"
 #include "modplatform/technic/SolderPackInstallTask.h"
@@ -142,7 +143,7 @@ void TechnicPage::suggestCurrent()
 
     NetJob *netJob = new NetJob(QString("Technic::PackMeta(%1)").arg(current.name), APPLICATION->network());
     QString slug = current.slug;
-    netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.technicpack.net/modpack/%1?build=multimc").arg(slug), &response));
+    netJob->addNetAction(Net::Download::makeByteArray(QString("%1modpack/%2?build=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, slug, BuildConfig.TECHNIC_API_BUILD), &response));
     QObject::connect(netJob, &NetJob::succeeded, this, [this, slug]
     {
         jobPtr.reset();

@@ -35,6 +35,7 @@
 
 #include "TechnicModel.h"
 #include "Application.h"
+#include "BuildConfig.h"
 #include "Json.h"
 
 #include <QIcon>
@@ -114,21 +115,23 @@ void Technic::ListModel::performSearch()
     NetJob *netJob = new NetJob("Technic::Search", APPLICATION->network());
     QString searchUrl = "";
     if (currentSearchTerm.isEmpty()) {
-        searchUrl = "https://api.technicpack.net/trending?build=multimc";
+        searchUrl = QString("%1trending?build=%2")
+                .arg(BuildConfig.TECHNIC_API_BASE_URL, BuildConfig.TECHNIC_API_BUILD);
         searchMode = List;
     }
     else if (currentSearchTerm.startsWith("http://api.technicpack.net/modpack/")) {
-        searchUrl = QString("https://%1?build=multimc").arg(currentSearchTerm.mid(7));
+        searchUrl = QString("https://%1?build=%2")
+                .arg(currentSearchTerm.mid(7), BuildConfig.TECHNIC_API_BUILD);
         searchMode = Single;
     }
     else if (currentSearchTerm.startsWith("https://api.technicpack.net/modpack/")) {
-        searchUrl = QString("%1?build=multimc").arg(currentSearchTerm);
+        searchUrl = QString("%1?build=%2").arg(currentSearchTerm, BuildConfig.TECHNIC_API_BUILD);
         searchMode = Single;
     }
     else {
         searchUrl = QString(
-            "https://api.technicpack.net/search?build=multimc&q=%1"
-        ).arg(currentSearchTerm);
+            "%1search?build=%2&q=%3"
+        ).arg(BuildConfig.TECHNIC_API_BASE_URL, BuildConfig.TECHNIC_API_BUILD, currentSearchTerm);
         searchMode = List;
     }
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
