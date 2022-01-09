@@ -2,6 +2,10 @@
   description = "PolyMC flake";
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.flake-compat = { 
+    url = "github:edolstra/flake-compat";
+    flake = false;
+  };
   inputs.libnbtplusplus = {
     url = "github:multimc/libnbtplusplus";
     flake = false;
@@ -17,7 +21,7 @@
         pkgs = import nixpkgs {
           inherit system;
         };
- 
+
         packages = {
           polymc = pkgs.libsForQt5.callPackage ./packages/nix/polymc {
             inherit self;
@@ -25,7 +29,8 @@
             submoduleNbt = libnbtplusplus;
           };
         };
-
+        
+        # 'nix flake check' fails
         overlay = (final: prev: rec { 
           polymc = prev.libsForQt5.callPackage ./packages/nix/polymc {
             inherit self;

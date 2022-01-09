@@ -2,8 +2,6 @@
 , mkDerivation
 , fetchFromGitHub
 , makeDesktopItem
-, substituteAll
-, fetchpatch
 , cmake
 , ninja
 , jdk8
@@ -15,14 +13,16 @@
 , libpulseaudio
 , qtbase
 , libGL
-# submodules
+
+# flake
 , self
 , submoduleNbt
 , submoduleQuazip
 }:
 
 let
-  gameLibraryPath = with xorg; lib.makeLibraryPath [
+  # Libraries required to run Minecraft
+  libpath = with xorg; lib.makeLibraryPath [
     libX11
     libXext
     libXcursor
@@ -30,7 +30,10 @@ let
     libXxf86vm
     libpulseaudio
     libGL
-  ];
+  ]; 
+
+  # This variable will be passed to Minecraft by PolyMC
+  gameLibraryPath = libpath + ":/run/opengl-driver/lib";
 in
 
 mkDerivation rec {
@@ -42,7 +45,10 @@ mkDerivation rec {
   nativeBuildInputs = [ cmake ninja file makeWrapper ];
   buildInputs = [ qtbase jdk8 zlib ];
 
+  dontWrapQtApps = true;
+
   postUnpack = ''
+    # Copy submodules inputs
     rm -rf source/libraries/{libnbtplusplus,quazip}
     mkdir source/libraries/{libnbtplusplus,quazip}
     cp -a ${submoduleNbt}/* source/libraries/libnbtplusplus
@@ -69,11 +75,13 @@ mkDerivation rec {
   };
 
   postInstall = ''
-    install -Dm644 ../launcher/resources/multimc/scalable/launcher.svg $out/share/pixmaps/multimc.svg
-    install -Dm755 ${desktopItem}/share/applications/polymc.desktop -t $out/share/applications
+    install -Dm644 ../launcher/resources/multimc/scalable/launcher.svg $out/share/pixmaps/polymc.svg
+    install -Dm644 ${desktopItem}/share/applications/polymc.desktop $out/share/applications/org.polymc.PolyMC.desktop
+
     # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
     wrapProgram $out/bin/polymc \
-      --set GAME_LIBRARY_PATH /run/opengl-driver/lib:${gameLibraryPath} \
+      "''${qtWrapperArgs[@]}" \
+      --set GAME_LIBRARY_PATH ${gameLibraryPath} \
       --prefix PATH : ${lib.makeBinPath [ xorg.xrandr jdk ]}
   '';
 }
