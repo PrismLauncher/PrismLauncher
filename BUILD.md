@@ -45,6 +45,18 @@ cd packages/debian
 
 If everything works correctly, the .deb will be next to the build script, in `PolyMC/packages/debian`
 
+### Building a .rpm
+
+You don't need to install the build dependencies, as the script will use `dnf` to install them for you.
+
+```
+git clone https://github.com/PolyMC/PolyMC.git
+cd packages/rpm
+./makerpm.sh
+```
+
+If everything works correctly, the .rpm will be next to the build script, in `PolyMC/packages/rpm`
+
 ### Building from command line
 You need a source folder, a build folder and an install folder.
 
