@@ -8,7 +8,7 @@ inputs = {
 
 ...
 
-nixpkgs.overlays = [ inputs.polymc.overlay ]; ## Within configuration.nix
+nixpkgs.overlays = [ inputs.polymc.overlay.${system} ]; ## Within configuration.nix
 ```
 
 To import without flakes use channels:
