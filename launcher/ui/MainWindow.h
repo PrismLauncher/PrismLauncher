@@ -109,8 +109,6 @@ private slots:
 
     void on_actionReportBug_triggered();
 
-    void on_actionPatreon_triggered();
-
     void on_actionMoreNews_triggered();
 
     void newsButtonClicked();
@@ -223,3 +221,4 @@ private:
     // managed by the application object
     Task *m_versionLoadTask = nullptr;
 };
+

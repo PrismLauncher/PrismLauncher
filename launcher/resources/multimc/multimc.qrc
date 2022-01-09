@@ -77,14 +77,6 @@
         <!-- Custom commands. -->
         <file>scalable/custom-commands.svg</file>
 
-        <!-- Patron logo. (C) 2014 Patreon, Inc., http://www.patreon.com/toolbox?ftyp=media -->
-        <file>16x16/patreon.png</file>
-        <file>22x22/patreon.png</file>
-        <file>24x24/patreon.png</file>
-        <file>32x32/patreon.png</file>
-        <file>48x48/patreon.png</file>
-        <file>64x64/patreon.png</file>
-
         <!-- The cat button. Freeware, http://findicons.com/icon/73096/black_cat -->
         <file>16x16/cat.png</file>
         <file>22x22/cat.png</file>

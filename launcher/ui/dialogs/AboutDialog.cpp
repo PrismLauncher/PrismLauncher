@@ -26,9 +26,8 @@
 namespace {
 // Credits
 // This is a hack, but I can't think of a better way to do this easily without screwing with QTextDocument...
-QString getCreditsHtml(QStringList patrons)
+QString getCreditsHtml()
 {
-    QString patronsHeading = QObject::tr("Patrons", "About Credits");
     QString output;
     QTextStream stream(&output);
     stream.setCodec(QTextCodec::codecForName("UTF-8"));
@@ -50,13 +49,6 @@ QString getCreditsHtml(QStringList patrons)
     stream << "<p>Zeker Zhayard &lt;<a href='https://twitter.com/zeker_zhayard'>@Zeker_Zhayard</a>&gt;</p>\n";
     stream << "<br />\n";
 
-    if(!patrons.isEmpty()) {
-        stream << "<h3>" << QObject::tr("Patrons", "About Credits") << "</h3>\n";
-        for (QString patron : patrons)
-        {
-            stream << "<p>" << patron << "</p>\n";
-        }
-    }
     stream << "</center>\n";
     return output;
 }
@@ -80,7 +72,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
 
     setWindowTitle(tr("About %1").arg(launcherName));
 
-    QString chtml = getCreditsHtml(QStringList());
+    QString chtml = getCreditsHtml();
     ui->creditsText->setHtml(chtml);
 
     QString lhtml = getLicenseHtml();
@@ -104,15 +96,6 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
     else
         ui->channelLabel->setVisible(false);
 
-    ui->redistributionText->setHtml(tr(
-"<p>We keep MultiMC open source because we think it's important to be able to see the source code for a project like this, and we do so using the Apache license.</p>\n"
-"<p>Part of the reason for using the Apache license is we don't want people using the &quot;MultiMC&quot; name when redistributing the project. "
-"This means people must take the time to go through the source code and remove all references to &quot;MultiMC&quot;, including but not limited to the project "
-"icon and the title of windows, (no <b>MultiMC-fork</b> in the title).</p>\n"
-"<p>The Apache license covers reasonable use for the name - a mention of the project's origins in the About dialog and the license is acceptable. "
-"However, it should be abundantly clear that the project is a fork <b>without</b> implying that you have our blessing.</p>"
-    ));
-
     QString urlText("<html><head/><body><p><a href=\"%1\">%1</a></p></body></html>");
     ui->urlLabel->setText(urlText.arg(BuildConfig.LAUNCHER_GIT));
 
@@ -122,28 +105,9 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
     connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
 
     connect(ui->aboutQt, &QPushButton::clicked, &QApplication::aboutQt);
-
-    loadPatronList();
 }
 
 AboutDialog::~AboutDialog()
 {
     delete ui;
 }
-
-void AboutDialog::loadPatronList()
-{
-    netJob = new NetJob("Patreon Patron List", APPLICATION->network());
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl("https://files.multimc.org/patrons.txt"), &dataSink));
-    connect(netJob.get(), &NetJob::succeeded, this, &AboutDialog::patronListLoaded);
-    netJob->start();
-}
-
-void AboutDialog::patronListLoaded()
-{
-    QString patronListStr(dataSink);
-    dataSink.clear();
-    QString html = getCreditsHtml(patronListStr.split("\n", QString::SkipEmptyParts));
-    ui->creditsText->setHtml(html);
-}
-

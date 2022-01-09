@@ -38,7 +38,7 @@
     </screenshot>
   </screenshots>
   <releases>
-    <release version="1.0.2" date="2022-01-01" />
+    <release version="@Launcher_RELEASE_VERSION_NAME@" date="2022-01-01" />
   </releases>
   <content_rating type="oars-1.0">
     <content_attribute id="violence-cartoon">moderate</content_attribute>

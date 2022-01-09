@@ -51,7 +51,7 @@ set(Launcher_NEWS_RSS_URL "https://multimc.org/rss.xml" CACHE STRING "URL to fet
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR    1)
 set(Launcher_VERSION_MINOR    0)
-set(Launcher_VERSION_HOTFIX   3)
+set(Launcher_VERSION_HOTFIX   5)
 
 # Build number
 set(Launcher_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
@@ -81,7 +81,7 @@ set(Launcher_MSA_CLIENT_ID "17b47edd-c884-4997-926d-9e7f9a6b4647" CACHE STRING "
 set(Launcher_BUG_TRACKER_URL "https://github.com/PolyMC/PolyMC/issues" CACHE STRING "URL for the bug tracker.")
 
 # Discord URL
-set(Launcher_DISCORD_URL "" CACHE STRING "URL for the Discord guild.")
+set(Launcher_DISCORD_URL "https://discord.gg/Z52pwxWCHP" CACHE STRING "URL for the Discord guild.")
 
 # Subreddit URL
 set(Launcher_SUBREDDIT_URL "" CACHE STRING "URL for the subreddit.")
@@ -212,7 +212,7 @@ elseif(Launcher_LAYOUT_REAL STREQUAL "lin-system")
     SET(Launcher_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DLAUNCHER_LINUX_DATADIR")
 
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${Launcher_DESKTOP_DEST_DIR})
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_MetaInfo} DESTINATION ${Launcher_METAINFO_DEST_DIR})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${Launcher_METAINFO_DEST_DIR})
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${Launcher_ICON_DEST_DIR})
 
     # install as bundle with no dependencies included

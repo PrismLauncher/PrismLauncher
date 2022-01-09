@@ -31,17 +31,10 @@ public:
     explicit AboutDialog(QWidget *parent = 0);
     ~AboutDialog();
 
-public
-slots:
-    /// Starts loading a list of Patreon patrons.
-    void loadPatronList();
-    
-    /// Slot for when the patron list loads successfully.
-    void patronListLoaded();
-
 private:
     Ui::AboutDialog *ui;
 
     NetJob::Ptr netJob;
     QByteArray dataSink;
 };
+

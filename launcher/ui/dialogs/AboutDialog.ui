@@ -251,20 +251,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="forkingTab">
-      <attribute name="title">
-       <string>Forking/Redistribution</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
-        <widget class="QTextEdit" name="redistributionText">
-         <property name="textInteractionFlags">
-          <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
     </widget>
    </item>
    <item>
@@ -307,7 +293,6 @@
   <tabstop>tabWidget</tabstop>
   <tabstop>creditsText</tabstop>
   <tabstop>licenseText</tabstop>
-  <tabstop>redistributionText</tabstop>
   <tabstop>aboutQt</tabstop>
   <tabstop>closeButton</tabstop>
  </tabstops>

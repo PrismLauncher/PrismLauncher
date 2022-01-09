@@ -23,7 +23,6 @@
         <file>scalable/new.svg</file>
         <file>scalable/news.svg</file>
         <file>scalable/notes.svg</file>
-        <file>scalable/patreon.svg</file>
         <file>scalable/proxy.svg</file>
         <file>scalable/refresh.svg</file>
         <file>scalable/resourcepacks.svg</file>
@@ -37,4 +36,3 @@
         <file>scalable/worlds.svg</file>
     </qresource>
 </RCC>
-
