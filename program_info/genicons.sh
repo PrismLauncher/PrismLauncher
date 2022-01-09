@@ -17,3 +17,8 @@ png2icns polymc.icns polymc_1024.png polymc_512.png polymc_256.png polymc_128.pn
 
 rm -f polymc_*.png
 rm -rf polymc.iconset
+
+for dir in ../launcher/resources/*/scalable
+do
+    cp -v org.polymc.PolyMC.svg $dir/launcher.svg
+done
