@@ -15,8 +15,8 @@ environment.systemPackages = with pkgs; [ polymc ]; ##
 To import without flakes use channels:
 
 ```
-sudo -i nix-channel --add https://github.com/PolyMC/PolyMC/archive/master.tar.gz polymc
-sudo -i nix-channel --update polymc
+nix-channel --add https://github.com/PolyMC/PolyMC/archive/master.tar.gz polymc
+nix-channel --update polymc
 nix-env -iA polymc
 ```
 
