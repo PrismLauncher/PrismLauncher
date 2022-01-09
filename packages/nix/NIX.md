@@ -9,6 +9,7 @@ inputs = {
 ...
 
 nixpkgs.overlays = [ inputs.polymc.overlay.${system} ]; ## Within configuration.nix
+environment.systemPackages = with pkgs; [ polymc ]; ##
 ```
 
 To import without flakes use channels:
@@ -24,5 +25,7 @@ or alternatively you can use
 ```
 nixpkgs.overlays = [
   (import (builtins.fetchTarball "https://github.com/lourkeur/PolyMC/archive/develop.tar.gz")).overlay
-]
+];
+
+environment.systemPackages = with pkgs; [ polymc ];
 ```
