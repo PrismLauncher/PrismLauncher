@@ -13,6 +13,7 @@
 , libpulseaudio
 , qtbase
 , libGL
+, msaClientID ? ""
 
 # flake
 , self
@@ -46,6 +47,19 @@ mkDerivation rec {
   buildInputs = [ qtbase jdk8 zlib ];
 
   dontWrapQtApps = true;
+
+  patches = [ ./0001-pick-latest-java-first.patch ];
+
+  postPatch = ''
+    # hardcode jdk paths
+    substituteInPlace launcher/java/JavaUtils.cpp \
+      --replace 'scanJavaDir("/usr/lib/jvm")' 'javas.append("${jdk}/lib/openjdk/bin/java")' \
+      --replace 'scanJavaDir("/usr/lib32/jvm")' 'javas.append("${jdk8}/lib/openjdk/bin/java")'
+  '' + lib.optionalString (msaClientID != "") ''
+    # add client ID
+    substituteInPlace CMakeLists.txt \
+      --replace '17b47edd-c884-4997-926d-9e7f9a6b4647' '${msaClientID}'
+  '';
 
   postUnpack = ''
     # Copy submodules inputs
