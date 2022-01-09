@@ -13,6 +13,7 @@ Several source build packages are available, along with experimental pre-built g
 <a href='https://flathub.org/apps/details/org.polymc.PolyMC'><img width='240' alt='Download on Flathub' src='https://flathub.org/assets/badges/flathub-badge-en.png'/></a>
 <br>
 [![AUR package](https://img.shields.io/aur/version/polymc-git)](https://aur.archlinux.org/packages/polymc-git/)
+- A [Nix](packages/nix/NIX.md) derivation is available in repo.
 - A Gentoo ebuild is available in the [swirl](https://git.swurl.xyz/swirl/ebuilds) overlay, named `games-action/polymc`. Check the README for instructions on how to add the overlay.
 - The Flatpak can be built using [this source](https://github.com/flathub/org.polymc.PolyMC).
 - An RPM package is available, by going to the `packages/rpm` directory and running `./makerpm.sh`.
