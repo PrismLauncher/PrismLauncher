@@ -5,8 +5,8 @@
 %global quazip_shortcommit          %(c=%{quazip_commit}; echo ${c:0:7})
 
 Name:           polymc
-Version:        1.0.4
-Release:        2%{?dist}
+Version:        1.0.5
+Release:        1%{?dist}
 Summary:        Minecraft launcher with ability to manage multiple instances
 
 #
@@ -132,6 +132,9 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/org.polymc.PolyMC.des
 
 
 %changelog
+* Sun Jan 09 2022 Jan Drögehoff <sentrycraft123@gmail.com> - 1.0.5-1
+- Update to 1.0.5
+
 * Sun Jan 09 2022 Jan Drögehoff <sentrycraft123@gmail.com> - 1.0.4-2
 - rework spec
 

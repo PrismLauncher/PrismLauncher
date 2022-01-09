@@ -52,10 +52,11 @@ You don't need to install the build dependencies, as the script will use `dnf` t
 ```
 git clone https://github.com/PolyMC/PolyMC.git
 cd packages/rpm
-./makerpm.sh
+sudo dnf builddep ./polymec.spec
+rpmbuild -bb ./polymec.spec
 ```
 
-If everything works correctly, the .rpm will be next to the build script, in `PolyMC/packages/rpm`
+The path to the rpm packages will be printed at the end of building
 
 ### Building from command line
 You need a source folder, a build folder and an install folder.
