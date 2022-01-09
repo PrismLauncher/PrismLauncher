@@ -16,11 +16,13 @@ To import without flakes use channels:
 ```
 sudo -i nix-channel --add https://github.com/PolyMC/PolyMC/archive/master.tar.gz polymc
 sudo -i nix-channel --update polymc
+nix-env -iA polymc
 ```
-add `<polymc>` to imports in your `configuration.nix`
 
-```nix
-imports = [
-  "<polymc>/packages/nix/overlay.nix"
-];
+or alternatively you can use
+
+```
+nixpkgs.overlays = [
+  (import (builtins.fetchTarball "https://github.com/lourkeur/PolyMC/archive/develop.tar.gz")).overlay
+]
 ```
