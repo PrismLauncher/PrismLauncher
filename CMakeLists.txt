@@ -13,14 +13,6 @@ if(IS_IN_SOURCE_BUILD)
     message(FATAL_ERROR "You are building the Launcher in-source. Please separate the build tree from the source tree.")
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    if(CMAKE_HOST_SYSTEM_VERSION MATCHES ".*[Mm]icrosoft.*" OR
-        CMAKE_HOST_SYSTEM_VERSION MATCHES ".*WSL.*"
-    )
-        message(FATAL_ERROR "Building the Launcher is not supported in Linux-on-Windows distributions.")
-    endif()
-endif()
-
 
 ##################################### Set CMake options #####################################
 set(CMAKE_AUTOMOC ON)
