@@ -1,0 +1,77 @@
+{
+  "nodes": {
+    "flake-utils": {
+      "locked": {
+        "lastModified": 1638122382,
+        "narHash": "sha256-sQzZzAbvKEqN9s0bzWuYmRaA03v40gaJ4+iL1LXjaeI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "74f7e4319258e287b0f9cb95426c9853b282730b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "libnbtplusplus": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1591558203,
+        "narHash": "sha256-QgvNvaoFflCXEPCCFBCeZvYTpuiwScBG7EosUgFwFNQ=",
+        "owner": "multimc",
+        "repo": "libnbtplusplus",
+        "rev": "dc72a20b7efd304d12af2025223fad07b4b78464",
+        "type": "github"
+      },
+      "original": {
+        "owner": "multimc",
+        "repo": "libnbtplusplus",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1641528457,
+        "narHash": "sha256-FyU9E63n1W7Ql4pMnhW2/rO9OftWZ37pLppn/c1aisY=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "ff377a78794d412a35245e05428c8f95fef3951f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "quazip": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1633895098,
+        "narHash": "sha256-+Of0M2IAoTf1CyC0teCpsyurv6xfqiBo84V49dSeNTA=",
+        "owner": "multimc",
+        "repo": "quazip",
+        "rev": "b1a72ac0bb5a732bf887a535ab75c6f9bedb6b6b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "multimc",
+        "repo": "quazip",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "libnbtplusplus": "libnbtplusplus",
+        "nixpkgs": "nixpkgs",
+        "quazip": "quazip"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

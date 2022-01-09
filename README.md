@@ -1,10 +1,8 @@
 <p align="center">
-  <img src="https://avatars.githubusercontent.com/u/96310119" alt="PolyMC logo"/>
+  <img src="/program_info/polymc_light.png#gh-light-mode-only" alt="PolyMC logo"/>
+  <img src="/program_info/polymc_dark.png#gh-dark-mode-only" alt="PolyMC logo"/>
 </p>
-
-PolyMC 5
-=========
-
+<br>
 PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
 
 This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The PolyMC community felt that the maintainer was not acting in the spirit of Free Software so this fork was made. Read "[Why was this fork made?](https://github.com/PolyMC/PolyMC/wiki/FAQ)" on the wiki for more details.
@@ -12,10 +10,13 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 ## Packages
 Several source build packages are available, along with experimental pre-built generic packages.
 
-- An [AUR package](https://aur.archlinux.org/packages/polymc-git/) is available.
+<a href='https://flathub.org/apps/details/org.polymc.PolyMC'><img width='240' alt='Download on Flathub' src='https://flathub.org/assets/badges/flathub-badge-en.png'/></a>
+<br>
+[![AUR package](https://img.shields.io/aur/version/polymc-git)](https://aur.archlinux.org/packages/polymc-git/)
 - A [Nix](packages/nix/NIX.md) derivation is available in repo.
 - A Gentoo ebuild is available in the [swirl](https://git.swurl.xyz/swirl/ebuilds) overlay, named `games-action/polymc`. Check the README for instructions on how to add the overlay.
-- A Flatpak is available in [Flathub](https://flathub.org/apps/details/org.polymc.PolyMC). You can install it from there or build it yourself using [this source](https://github.com/flathub/org.polymc.PolyMC).
+- The Flatpak can be built using [this source](https://github.com/flathub/org.polymc.PolyMC).
+- An RPM package is available, by going to the `packages/rpm` directory and running `./makerpm.sh`.
 - Generic, prebuilt packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest)).
 - Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
 - [Linux (AMD64) System](https://packages.polymc.org/latest/lin64-system/lin64-system.tar.zst) ([SHA256](https://packages.polymc.org/latest/lin64-system/lin64-system.tar.zst.sha256)) - this is a generic system package intended to be used as a base for making distro-specific packages.
@@ -29,6 +30,8 @@ If you want to contribute to PolyMC you might find it useful to join [#developme
 
 ### Building
 If you want to build PolyMC yourself, check [BUILD.md](BUILD.md) for build instructions.
+
+You can build the flatpak using [this source](https://github.com/flathub/org.polymc.PolyMC).
 
 ### Code formatting
 Just follow the existing formatting.
@@ -51,11 +54,11 @@ Feel free to create an issue if you need help. However, you might find it easier
 
 [![PolyMC Discord](https://img.shields.io/discord/923671181020766230?label=PolyMC%20Discord)](https://discord.gg/xq7fxrgtMP)
 
-For people who don't want to use Discord, we have a Matrix Space which is bridged to the Discord server. Be sure to enable spaces first (Settings -> Labs -> Spaces), and then you may join the space:
+For people who don't want to use Discord, we have a Matrix Space which is bridged to the Discord server:
 
 [![PolyMC Space](https://img.shields.io/matrix/polymc:polymc.org?label=PolyMC%20Space&server_fqdn=matrix.polymc.org)](https://matrix.to/#/#polymc:polymc.org)
 
-Matrix's support for spaces is still in development, so if you have issues accessing rooms via the space, then you can join the rooms directly:
+If there are any issues with the space or you are using a client that does not support the feature here are the individual rooms:
 
 [![Support](https://img.shields.io/matrix/support:polymc.org?label=%23support&server_fqdn=matrix.polymc.org)](https://matrix.to/#/#support:polymc.org)
 [![Discussion](https://img.shields.io/matrix/discussion:polymc.org?label=%23discussion&server_fqdn=matrix.polymc.org)](https://matrix.to/#/#discussion:polymc.org)
