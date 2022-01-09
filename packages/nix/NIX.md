@@ -24,7 +24,7 @@ or alternatively you can use
 
 ```
 nixpkgs.overlays = [
-  (import (builtins.fetchTarball "https://github.com/lourkeur/PolyMC/archive/develop.tar.gz")).overlay
+  (import (builtins.fetchTarball "https://github.com/PolyMC/PolyMC/archive/develop.tar.gz")).overlay
 ];
 
 environment.systemPackages = with pkgs; [ polymc ];
