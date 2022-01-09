@@ -16,7 +16,7 @@ Several source build packages are available, along with experimental pre-built g
 - A [Nix](packages/nix/NIX.md) derivation is available in repo.
 - A Gentoo ebuild is available in the [swirl](https://git.swurl.xyz/swirl/ebuilds) overlay, named `games-action/polymc`. Check the README for instructions on how to add the overlay.
 - The Flatpak can be built using [this source](https://github.com/flathub/org.polymc.PolyMC).
-- An RPM package is available, by going to the `packages/rpm` directory and running `./makerpm.sh`.
+- An RPM package is available on [COPR](https://copr.fedorainfracloud.org/coprs/sentry/polymc/), or can be built by going to the `packages/rpm` directory and running `rpmbuild -bb polymc.spec`.
 - Generic, prebuilt packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest)).
 - Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
 - [Linux (AMD64) System](https://packages.polymc.org/latest/lin64-system/lin64-system.tar.zst) ([SHA256](https://packages.polymc.org/latest/lin64-system/lin64-system.tar.zst.sha256)) - this is a generic system package intended to be used as a base for making distro-specific packages.
