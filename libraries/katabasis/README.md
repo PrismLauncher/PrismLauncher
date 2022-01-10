@@ -1,4 +1,4 @@
-# Katabasis - MS-flavoerd OAuth for Qt, derived from the O2 library
+# Katabasis - MS-flavored OAuth for Qt, derived from the O2 library
 
 This library's sole purpose is to make interacting with MSA and various MSA and XBox authenticated services less painful.
 
@@ -10,7 +10,7 @@ Notes to contributors:
 
    * Please follow the coding style of the existing source, where reasonable
    * Code contributions are released under Simplified BSD License, as specified in LICENSE. Do not contribute if this license does not suit your code
-   * If you are interested in working on this, come to the MultiMC Discord server and talk first
+   * If you are interested in working on this, come to the PolyMC Discord server and talk first
 
 ## Installation
 

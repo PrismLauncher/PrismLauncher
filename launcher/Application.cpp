@@ -435,7 +435,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 #endif
 
     /*
-     * Establish the mechanism for communication with an already running MultiMC that uses the same data path.
+     * Establish the mechanism for communication with an already running PolyMC that uses the same data path.
      * If there is one, tell it what the user actually wanted to do and exit.
      * We want to initialize this before logging to avoid messing with the log of a potential already running copy.
      */

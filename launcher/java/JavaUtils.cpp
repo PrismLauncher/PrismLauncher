@@ -77,14 +77,14 @@ QProcessEnvironment CleanEnviroment()
             qDebug() << "Env: ignoring" << key << value;
             continue;
         }
-        // filter MultiMC-related things
+        // filter PolyMC-related things
         if(key.startsWith("QT_"))
         {
             qDebug() << "Env: ignoring" << key << value;
             continue;
         }
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-        // Do not pass LD_* variables to java. They were intended for MultiMC
+        // Do not pass LD_* variables to java. They were intended for PolyMC
         if(key.startsWith("LD_"))
         {
             qDebug() << "Env: ignoring" << key << value;
@@ -290,7 +290,7 @@ QList<QString> JavaUtils::FindJavaPaths()
         KEY_WOW64_64KEY, "SOFTWARE\\Azul Systems\\Zulu", "InstallationPath");
     QList<JavaInstallPtr> ZULU32s = this->FindJavaFromRegistryKey(
         KEY_WOW64_32KEY, "SOFTWARE\\Azul Systems\\Zulu", "InstallationPath");
-    
+
     // BellSoft Liberica
     QList<JavaInstallPtr> LIBERICA64s = this->FindJavaFromRegistryKey(
         KEY_WOW64_64KEY, "SOFTWARE\\BellSoft\\Liberica", "InstallationPath");
@@ -328,7 +328,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     java_candidates.append(ADOPTIUMJDK32s);
     java_candidates.append(ZULU32s);
     java_candidates.append(LIBERICA32s);
-    
+
     java_candidates.append(MakeJavaPtr(this->GetDefaultJava()->path));
 
     QList<QString> candidates;
@@ -402,7 +402,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDir("/usr/lib/jvm");
     scanJavaDir("/usr/lib64/jvm");
     scanJavaDir("/usr/lib32/jvm");
-    // javas stored in MultiMC's folder
+    // javas stored in PolyMC's folder
     scanJavaDir("java");
     // manually installed JDKs in /opt
     scanJavaDir("/opt/jdk");

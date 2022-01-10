@@ -104,7 +104,7 @@ bool processFileLists
         }
     }
 
-    // Next, check each file in MultiMC's folder and see if we need to update them.
+    // Next, check each file in PolyMC's folder and see if we need to update them.
     for (VersionFileEntry entry : newVersion)
     {
         // TODO: Let's not MD5sum a ton of files on the GUI thread. We should probably find a

@@ -44,7 +44,7 @@ void NotificationChecker::checkForNotifications()
     if (!m_notificationsUrl.isValid())
     {
         qCritical() << "Failed to check for notifications. No notifications URL set."
-                     << "If you'd like to use MultiMC's notification system, please pass the "
+                     << "If you'd like to use PolyMC's notification system, please pass the "
                         "URL to CMake at compile time.";
         return;
     }

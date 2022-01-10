@@ -6,8 +6,8 @@
    <mode>0777</mode>
   </file>
   <file>
-   <source>MultiMC.exe</source>
-   <dest>M/u/l/t/i/M/C/e/x/e</dest>
+   <source>PolyMC.exe</source>
+   <dest>P/o/l/y/M/C/e/x/e</dest>
    <mode>0644</mode>
   </file>
  </install>

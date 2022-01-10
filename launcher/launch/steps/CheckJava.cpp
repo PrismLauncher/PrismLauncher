@@ -87,14 +87,14 @@ void CheckJava::checkJavaFinished(JavaCheckResult result)
             // Error message displayed if java can't start
             emit logLine(QString("Could not start java:"), MessageLevel::Error);
             emit logLines(result.errorLog.split('\n'), MessageLevel::Error);
-            emit logLine("\nCheck your MultiMC Java settings.", MessageLevel::Launcher);
+            emit logLine("\nCheck your PolyMC Java settings.", MessageLevel::Launcher);
             printSystemInfo(false, false);
             emitFailed(QString("Could not start java!"));
             return;
         }
         case JavaCheckResult::Validity::ReturnedInvalidData:
         {
-            emit logLine(QString("Java checker returned some invalid data MultiMC doesn't understand:"), MessageLevel::Error);
+            emit logLine(QString("Java checker returned some invalid data PolyMC doesn't understand:"), MessageLevel::Error);
             emit logLines(result.outLog.split('\n'), MessageLevel::Warning);
             emit logLine("\nMinecraft might not start properly.", MessageLevel::Launcher);
             printSystemInfo(false, false);

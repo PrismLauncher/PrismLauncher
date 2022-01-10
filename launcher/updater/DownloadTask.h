@@ -54,7 +54,7 @@ protected:
     /*!
      * Downloads the version info files from the repository.
      * The files for both the current build, and the build that we're updating to need to be downloaded.
-     * If the current version's info file can't be found, MultiMC will not delete files that
+     * If the current version's info file can't be found, PolyMC will not delete files that
      * were removed between versions. It will still replace files that have changed, however.
      * Note that although the repository URL for the current version is not given to the update task,
      * the task will attempt to look it up in the UpdateChecker's channel list.
@@ -97,3 +97,4 @@ private:
 };
 
 }
+

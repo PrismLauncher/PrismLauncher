@@ -132,8 +132,8 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
             this,
             tr("Microsoft Accounts not available"),
             tr(
-                "Microsoft accounts are only usable on macOS 10.13 or newer, with fully updated MultiMC.\n\n"
-                "Please update both your operating system and MultiMC."
+                "Microsoft accounts are only usable on macOS 10.13 or newer, with fully updated PolyMC.\n\n"
+                "Please update both your operating system and PolyMC."
             ),
             QMessageBox::Warning
         )->exec();

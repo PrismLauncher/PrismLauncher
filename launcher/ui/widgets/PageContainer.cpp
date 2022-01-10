@@ -207,7 +207,7 @@ void PageContainer::help()
         QString pageId = m_currentPage->helpPage();
         if (pageId.isEmpty())
             return;
-        DesktopServices::openUrl(QUrl("https://github.com/MultiMC/Launcher/wiki/" + pageId));
+        DesktopServices::openUrl(QUrl("https://github.com/PolyMC/PolyMC/wiki/" + pageId));
     }
 }
 

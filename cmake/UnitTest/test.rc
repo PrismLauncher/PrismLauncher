@@ -14,7 +14,7 @@ BEGIN
         BEGIN
                 BLOCK "000004b0"
                 BEGIN
-                        VALUE "CompanyName", "MultiMC Contributors"
+                        VALUE "CompanyName", "MultiMC & PolyMC Contributors"
                         VALUE "FileDescription", "Testcase"
                         VALUE "FileVersion", "1.0.0.0"
                         VALUE "ProductName", "Launcher Testcase"
