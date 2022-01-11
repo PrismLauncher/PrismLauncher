@@ -48,8 +48,6 @@ mkDerivation rec {
 
   dontWrapQtApps = true;
 
-  patches = [ ./0001-pick-latest-java-first.patch ];
-
   postPatch = ''
     # hardcode jdk paths
     substituteInPlace launcher/java/JavaUtils.cpp \
