@@ -149,6 +149,21 @@ JavaInstallPtr JavaUtils::GetDefaultJava()
     return javaVersion;
 }
 
+QStringList addJavasFromEnv(QList<QString> javas)
+{
+    QByteArray env = qgetenv("POLYMC_JAVA_PATHS");
+#if defined(Q_OS_WIN32)
+    QList<QString> javaPaths = QString::fromLocal8Bit(env).split(QLatin1String(";"));
+#else
+    QList<QString> javaPaths = QString::fromLocal8Bit(env).split(QLatin1String(":"));
+#endif
+    for(QString i : javaPaths)
+    {
+        javas.append(i);
+    };
+    return javas;
+}
+
 #if defined(Q_OS_WIN32)
 QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString keyName, QString keyJavaDir, QString subkeySuffix)
 {
@@ -363,7 +378,7 @@ QList<QString> JavaUtils::FindJavaPaths()
         javas.append(systemLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Home/bin/java");
         javas.append(systemLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Commands/java");
     }
-    return javas;
+    return addJavasFromEnv(javas);
 }
 
 #elif defined(Q_OS_LINUX)
@@ -409,7 +424,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDir("/opt/jdks");
     // flatpak
     scanJavaDir("/app/jdk");
-    return javas;
+    return addJavasFromEnv(javas);
 }
 #else
 QList<QString> JavaUtils::FindJavaPaths()
@@ -419,6 +434,6 @@ QList<QString> JavaUtils::FindJavaPaths()
     QList<QString> javas;
     javas.append(this->GetDefaultJava()->path);
 
-    return javas;
+    return addJavasFromEnv(javas);
 }
 #endif

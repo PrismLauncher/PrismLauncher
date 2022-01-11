@@ -120,8 +120,8 @@ void JavaInstallList::updateListData(QList<BaseVersionPtr> versions)
 
 bool sortJavas(BaseVersionPtr left, BaseVersionPtr right)
 {
-    auto rleft = std::dynamic_pointer_cast<JavaInstall>(left);
-    auto rright = std::dynamic_pointer_cast<JavaInstall>(right);
+    auto rleft = std::dynamic_pointer_cast<JavaInstall>(right);
+    auto rright = std::dynamic_pointer_cast<JavaInstall>(left);
     return (*rleft) > (*rright);
 }
 
