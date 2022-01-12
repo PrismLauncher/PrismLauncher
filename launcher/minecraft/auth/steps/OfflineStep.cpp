@@ -2,7 +2,7 @@
 
 #include "Application.h"
 
-OfflineStep::OfflineStep(AccountData* data) : AuthStep(data) {};
+OfflineStep::OfflineStep(AccountData* data) : AuthStep(data) {}
 OfflineStep::~OfflineStep() noexcept = default;
 
 QString OfflineStep::describe() {
