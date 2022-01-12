@@ -30,6 +30,7 @@
 
 #include "flows/MSA.h"
 #include "flows/Mojang.h"
+#include "flows/Offline.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent) {
     data.internalId = QUuid::createUuid().toString().remove(QRegExp("[{}-]"));
@@ -65,6 +66,23 @@ MinecraftAccountPtr MinecraftAccount::createBlankMSA()
 {
     MinecraftAccountPtr account(new MinecraftAccount());
     account->data.type = AccountType::MSA;
+    return account;
+}
+
+MinecraftAccountPtr MinecraftAccount::createOffline(const QString &username)
+{
+    MinecraftAccountPtr account = new MinecraftAccount();
+    account->data.type = AccountType::Offline;
+    account->data.yggdrasilToken.token = "offline";
+    account->data.yggdrasilToken.validity = Katabasis::Validity::Certain;
+    account->data.yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
+    account->data.yggdrasilToken.extra["userName"] = username;
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegExp("[{}-]"));
+    account->data.minecraftEntitlement.ownsMinecraft = true;
+    account->data.minecraftEntitlement.canPlayMinecraft = true;
+    account->data.minecraftProfile.id = QUuid::createUuid().toString().remove(QRegExp("[{}-]"));
+    account->data.minecraftProfile.name = username;
+    account->data.minecraftProfile.validity = Katabasis::Validity::Certain;
     return account;
 }
 
@@ -111,6 +129,16 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA() {
     return m_currentTask;
 }
 
+shared_qobject_ptr<AccountTask> MinecraftAccount::loginOffline() {
+    Q_ASSERT(m_currentTask.get() == nullptr);
+
+    m_currentTask.reset(new OfflineLogin(&data));
+    connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
+    connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    emit activityChanged(true);
+    return m_currentTask;
+}
+
 shared_qobject_ptr<AccountTask> MinecraftAccount::refresh() {
     if(m_currentTask) {
         return m_currentTask;
@@ -118,6 +146,9 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::refresh() {
 
     if(data.type == AccountType::MSA) {
         m_currentTask.reset(new MSASilent(&data));
+    }
+    if(data.type == AccountType::Offline) {
+        m_currentTask.reset(new OfflineRefresh(&data));
     }
     else {
         m_currentTask.reset(new MojangRefresh(&data));

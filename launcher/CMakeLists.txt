@@ -221,7 +221,11 @@ set(MINECRAFT_SOURCES
     minecraft/auth/flows/Mojang.h
     minecraft/auth/flows/MSA.cpp
     minecraft/auth/flows/MSA.h
+    minecraft/auth/flows/Offline.cpp
+    minecraft/auth/flows/Offline.h
 
+    minecraft/auth/steps/OfflineStep.cpp
+    minecraft/auth/steps/OfflineStep.h
     minecraft/auth/steps/EntitlementsStep.cpp
     minecraft/auth/steps/EntitlementsStep.h
     minecraft/auth/steps/GetSkinStep.cpp

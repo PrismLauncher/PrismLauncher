@@ -42,8 +42,8 @@ void OfflineLoginDialog::accept()
     ui->progressBar->setVisible(true);
 
     // Setup the login task and start it
-    m_account = MinecraftAccount::createFromUsername(ui->userTextBox->text());
-    m_loginTask = m_account->login("TODO: create offline mode account flow");
+    m_account = MinecraftAccount::createOffline(ui->userTextBox->text());
+    m_loginTask = m_account->loginOffline();
     connect(m_loginTask.get(), &Task::failed, this, &OfflineLoginDialog::onTaskFailed);
     connect(m_loginTask.get(), &Task::succeeded, this, &OfflineLoginDialog::onTaskSucceeded);
     connect(m_loginTask.get(), &Task::status, this, &OfflineLoginDialog::onTaskStatus);
