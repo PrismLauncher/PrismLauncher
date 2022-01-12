@@ -143,6 +143,8 @@ struct TranslationsModel::Private
 
     std::unique_ptr<POTranslator> m_po_translator;
     QFileSystemWatcher *watcher;
+
+    bool no_language_set = false;
 };
 
 TranslationsModel::TranslationsModel(QString path, QObject* parent): QAbstractListModel(parent)
@@ -165,7 +167,26 @@ void TranslationsModel::translationDirChanged(const QString& path)
 {
     qDebug() << "Dir changed:" << path;
     reloadLocalFiles();
-    selectLanguage(selectedLanguage());
+
+    if (d->no_language_set)
+    {
+        auto bcp47Name = QLocale::system().name();
+        if (!findLanguage(bcp47Name))
+        {
+            bcp47Name = bcp47Name.split('_').front();
+        }
+        selectLanguage(bcp47Name);
+        if (selectedLanguage() != defaultLangCode)
+        {
+            updateLanguage(selectedLanguage());
+            APPLICATION->settings()->set("Language", selectedLanguage());
+        }
+        d->no_language_set = false;
+    }
+    else
+    {
+        selectLanguage(selectedLanguage());
+    }
 }
 
 void TranslationsModel::indexReceived()
@@ -439,6 +460,12 @@ bool TranslationsModel::selectLanguage(QString key)
 {
     QString &langCode = key;
     auto langPtr = findLanguage(key);
+
+    if (langCode.length() == 0)
+    {
+        d->no_language_set = true;
+    }
+
     if(!langPtr)
     {
         qWarning() << "Selected invalid language" << key << ", defaulting to" << defaultLangCode;
