@@ -20,6 +20,7 @@
 class QVBoxLayout;
 class QTreeView;
 class QLabel;
+class Setting;
 
 class LanguageSelectionWidget: public QWidget
 {
@@ -33,6 +34,7 @@ public:
 
 protected slots:
     void languageRowChanged(const QModelIndex &current, const QModelIndex &previous);
+    void languageSettingChanged(const Setting &, const QVariant);
 
 private:
     QVBoxLayout *verticalLayout = nullptr;

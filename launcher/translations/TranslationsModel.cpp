@@ -179,8 +179,8 @@ void TranslationsModel::translationDirChanged(const QString& path)
         if (selectedLanguage() != defaultLangCode)
         {
             updateLanguage(selectedLanguage());
-            APPLICATION->settings()->set("Language", selectedLanguage());
         }
+        APPLICATION->settings()->set("Language", selectedLanguage());
         d->no_language_set = false;
     }
     else
