@@ -461,7 +461,7 @@ bool TranslationsModel::selectLanguage(QString key)
     QString &langCode = key;
     auto langPtr = findLanguage(key);
 
-    if (langCode.length() == 0)
+    if (langCode.isEmpty())
     {
         d->no_language_set = true;
     }
