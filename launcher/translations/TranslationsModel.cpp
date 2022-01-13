@@ -144,6 +144,9 @@ struct TranslationsModel::Private
     std::unique_ptr<POTranslator> m_po_translator;
     QFileSystemWatcher *watcher;
 
+    const QString m_system_locale = QLocale::system().name();
+    const QString m_system_language = m_system_locale.split('_').front();
+
     bool no_language_set = false;
 };
 
@@ -170,12 +173,12 @@ void TranslationsModel::translationDirChanged(const QString& path)
 
     if (d->no_language_set)
     {
-        auto bcp47Name = QLocale::system().name();
-        if (!findLanguage(bcp47Name))
+        auto language = d->m_system_locale;
+        if (!findLanguage(language))
         {
-            bcp47Name = bcp47Name.split('_').front();
+            language = d->m_system_language;
         }
-        selectLanguage(bcp47Name);
+        selectLanguage(language);
         if (selectedLanguage() != defaultLangCode)
         {
             updateLanguage(selectedLanguage());
@@ -340,8 +343,19 @@ void TranslationsModel::reloadLocalFiles()
     {
         d->m_languages.append(language);
     }
-    std::sort(d->m_languages.begin(), d->m_languages.end(), [](const Language& a, const Language& b) {
-        return a.key.compare(b.key) < 0;
+    std::sort(d->m_languages.begin(), d->m_languages.end(), [this](const Language& a, const Language& b) {
+        if (a.key != b.key)
+        {
+            if (a.key == d->m_system_locale || a.key == d->m_system_language)
+            {
+                return true;
+            }
+            if (b.key == d->m_system_locale || b.key == d->m_system_language)
+            {
+                return false;
+            }
+        }
+        return a.key < b.key;
     });
     endInsertRows();
 }
