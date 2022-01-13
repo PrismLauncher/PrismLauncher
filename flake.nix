@@ -15,41 +15,30 @@
     flake = false;
   };
 
-  outputs = inputs@{ self, nixpkgs, flake-utils, libnbtplusplus, quazip, ... }:
-    flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-        };
-
-        packages = {
-          polymc = pkgs.libsForQt5.callPackage ./packages/nix/polymc {
-            inherit self;
-            submoduleQuazip = quazip;
-            submoduleNbt = libnbtplusplus;
-          };
-        };
-        
-        # 'nix flake check' fails
-        overlay = (final: prev: rec { 
-          polymc = prev.libsForQt5.callPackage ./packages/nix/polymc {
-            inherit self;
-            submoduleQuazip = quazip;
-            submoduleNbt = libnbtplusplus;
-          };
-        });
-
-        apps = {
-          polymc = flake-utils.lib.mkApp {
-            name = "polymc";
-            drv = packages.polymc;
-          };
-        };
-      in
-      {
-        inherit packages overlay apps;
-        defaultPackage = packages.polymc;
-        defaultApp = apps.polymc;
-      }
-    );
+  outputs = args@{ self, nixpkgs, flake-utils, libnbtplusplus, quazip, ... }:
+  {
+    overlay = final: prev: {
+      inherit (self.packages.${final.system})
+      polymc;
+    };
+  } // flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux"] (system:
+    let pkgs = import nixpkgs {
+      inherit system;
+    };
+    in {
+      defaultPackage = self.packages.${system}.polymc;
+      packages = rec {
+        polymc = pkgs.libsForQt5.callPackage ./packages/nix/polymc {
+	  inherit self;
+	  submoduleQuazip = quazip;
+	  submoduleNbt = libnbtplusplus;
+	};
+      };
+      apps = rec {
+	polymc = flake-utils.lib.mkApp {
+	  name = "polymc";
+	  drv = self.packages.${system}.polymc;
+	};
+      };
+    });
 }
