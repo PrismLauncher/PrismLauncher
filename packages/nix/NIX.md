@@ -8,7 +8,7 @@ inputs = {
 
 ...
 
-nixpkgs.overlays = [ inputs.polymc.overlay.${system} ]; ## Within configuration.nix
+nixpkgs.overlays = [ inputs.polymc.overlay ]; ## Within configuration.nix
 environment.systemPackages = with pkgs; [ polymc ]; ##
 ```
 
