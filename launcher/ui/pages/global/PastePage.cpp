@@ -1,4 +1,4 @@
-/* Copyright 2013-2021 MultiMC Contributors
+/* Copyright 2013-2021 MultiMC & PolyMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "PasteEEPage.h"
-#include "ui_PasteEEPage.h"
+#include "PastePage.h"
+#include "ui_PastePage.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -25,22 +25,22 @@
 #include "tools/BaseProfiler.h"
 #include "Application.h"
 
-PasteEEPage::PasteEEPage(QWidget *parent) :
+PastePage::PastePage(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PasteEEPage)
+    ui(new Ui::PastePage)
 {
     ui->setupUi(this);
     ui->tabWidget->tabBar()->hide();\
-    connect(ui->customAPIkeyEdit, &QLineEdit::textEdited, this, &PasteEEPage::textEdited);
+    connect(ui->customAPIkeyEdit, &QLineEdit::textEdited, this, &PastePage::textEdited);
     loadSettings();
 }
 
-PasteEEPage::~PasteEEPage()
+PastePage::~PastePage()
 {
     delete ui;
 }
 
-void PasteEEPage::loadSettings()
+void PastePage::loadSettings()
 {
     auto s = APPLICATION->settings();
     QString keyToUse = s->get("PasteEEAPIKey").toString();
@@ -55,7 +55,7 @@ void PasteEEPage::loadSettings()
     }
 }
 
-void PasteEEPage::applySettings()
+void PastePage::applySettings()
 {
     auto s = APPLICATION->settings();
 
@@ -69,13 +69,13 @@ void PasteEEPage::applySettings()
     s->set("PasteEEAPIKey", pasteKeyToUse);
 }
 
-bool PasteEEPage::apply()
+bool PastePage::apply()
 {
     applySettings();
     return true;
 }
 
-void PasteEEPage::textEdited(const QString& text)
+void PastePage::textEdited(const QString& text)
 {
     ui->customButton->setChecked(true);
 }

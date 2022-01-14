@@ -21,16 +21,16 @@
 #include <Application.h>
 
 namespace Ui {
-class PasteEEPage;
+class PastePage;
 }
 
-class PasteEEPage : public QWidget, public BasePage
+class PastePage : public QWidget, public BasePage
 {
     Q_OBJECT
 
 public:
-    explicit PasteEEPage(QWidget *parent = 0);
-    ~PasteEEPage();
+    explicit PastePage(QWidget *parent = 0);
+    ~PastePage();
 
     QString displayName() const override
     {
@@ -58,5 +58,6 @@ private slots:
     void textEdited(const QString &text);
 
 private:
-    Ui::PasteEEPage *ui;
+    Ui::PastePage *ui;
 };
+

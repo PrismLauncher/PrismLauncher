@@ -14,7 +14,7 @@
 #include "ui/pages/global/ProxyPage.h"
 #include "ui/pages/global/ExternalToolsPage.h"
 #include "ui/pages/global/AccountListPage.h"
-#include "ui/pages/global/PasteEEPage.h"
+#include "ui/pages/global/PastePage.h"
 #include "ui/pages/global/CustomCommandsPage.h"
 
 #include "ui/themes/ITheme.h"
@@ -728,7 +728,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<ProxyPage>();
             m_globalSettingsProvider->addPage<ExternalToolsPage>();
             m_globalSettingsProvider->addPage<AccountListPage>();
-            m_globalSettingsProvider->addPage<PasteEEPage>();
+            m_globalSettingsProvider->addPage<PastePage>();
         }
         qDebug() << "<> Settings loaded.";
     }
