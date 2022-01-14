@@ -714,8 +714,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("UpdateDialogGeometry", "");
 
-        // paste.ee API key
-        m_settings->registerSetting("PasteEEAPIKey", "multimc");
+        // pastebin URL
+        m_settings->registerSetting("PastebinURL", "0x0.st");
 
         // Init page provider
         {

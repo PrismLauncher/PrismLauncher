@@ -47,7 +47,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox">
+           <widget class="QComboBox" name="urlChoices">
             <item>
              <property name="text">
               <string>0x0.st</string>

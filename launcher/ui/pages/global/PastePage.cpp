@@ -43,16 +43,9 @@ PastePage::~PastePage()
 void PastePage::loadSettings()
 {
     auto s = APPLICATION->settings();
-    QString keyToUse = s->get("PasteEEAPIKey").toString();
-    if(keyToUse == "multimc")
-    {
-        ui->multimcButton->setChecked(true);
-    }
-    else
-    {
-        ui->customButton->setChecked(true);
-        ui->customAPIkeyEdit->setText(keyToUse);
-    }
+    QString pastebin = s->get("PastebinURL");
+    int index = ui->urlChoices->findText(pastebin);
+    ui->urlChoices->setCurrentIndex(index);
 }
 
 void PastePage::applySettings()
