@@ -12,7 +12,7 @@ void Modrinth::loadIndexedPack(Modrinth::IndexedPack & pack, QJsonObject & obj)
     pack.description = Json::ensureString(obj, "description", "");
 
     pack.logoUrl = Json::requireString(obj, "icon_url");
-    pack.logoName = "logoName";
+    pack.logoName = pack.addonId;
 
     Modrinth::ModpackAuthor packAuthor;
     packAuthor.name = Json::requireString(obj, "author");

@@ -31,8 +31,9 @@
 #include "ModDownloadTask.h"
 
 
-ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel>& mods, QWidget *parent)
-    : QDialog(parent), mods(mods)
+ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel> &mods, QWidget *parent,
+                                     BaseInstance *instance)
+    : QDialog(parent), mods(mods), m_instance(instance)
 {
     setObjectName(QStringLiteral("ModDownloadDialog"));
     resize(400, 347);
@@ -88,7 +89,7 @@ void ModDownloadDialog::accept()
 
 QList<BasePage *> ModDownloadDialog::getPages()
 {
-    modrinthPage = new ModrinthPage(this);
+    modrinthPage = new ModrinthPage(this, m_instance);
     return
     {
         modrinthPage

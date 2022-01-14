@@ -100,7 +100,7 @@ void ListModel::requestLogo(QString logo, QString url)
     }
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("ModrinthPacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
-    NetJob *job = new NetJob(QString("Modrinth Icon Download %1").arg(logo), APPLICATION->network());
+    auto job = new NetJob(QString("Modrinth Icon Download %1").arg(logo), APPLICATION->network());
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
@@ -119,7 +119,6 @@ void ListModel::requestLogo(QString logo, QString url)
     });
 
     job->start();
-
     m_loadingLogos.append(logo);
 }
 

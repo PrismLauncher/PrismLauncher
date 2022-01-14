@@ -9,9 +9,11 @@
 #include "InstanceImportTask.h"
 #include "ModrinthModel.h"
 #include "ModDownloadTask.h"
+#include "ui/pages/instance/ModFolderPage.h"
+#include "minecraft/PackProfile.h"
 
-ModrinthPage::ModrinthPage(ModDownloadDialog* dialog, QWidget *parent)
-    : QWidget(parent), ui(new Ui::ModrinthPage), dialog(dialog)
+ModrinthPage::ModrinthPage(ModDownloadDialog *dialog, BaseInstance *instance)
+    : QWidget(dialog), ui(new Ui::ModrinthPage), dialog(dialog), m_instance(instance)
 {
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &ModrinthPage::triggerSearch);

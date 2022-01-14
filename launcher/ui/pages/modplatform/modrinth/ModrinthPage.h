@@ -38,7 +38,7 @@ class ModrinthPage : public QWidget, public BasePage
     Q_OBJECT
 
 public:
-    explicit ModrinthPage(ModDownloadDialog* dialog, QWidget *parent = 0);
+    explicit ModrinthPage(ModDownloadDialog *dialog, BaseInstance *instance);
     virtual ~ModrinthPage();
     virtual QString displayName() const override
     {
@@ -77,4 +77,5 @@ private:
     Modrinth::IndexedPack current;
 
     QString selectedVersion;
+    BaseInstance *m_instance;
 };

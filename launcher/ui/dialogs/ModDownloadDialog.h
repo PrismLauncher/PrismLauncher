@@ -37,7 +37,7 @@ class ModDownloadDialog : public QDialog, public BasePageProvider
     Q_OBJECT
 
 public:
-    explicit ModDownloadDialog(const std::shared_ptr<ModFolderModel>& mods, QWidget *parent = nullptr);
+    explicit ModDownloadDialog(const std::shared_ptr<ModFolderModel> &mods, QWidget *parent, BaseInstance *instance);
     ~ModDownloadDialog();
 
     QString dialogTitle() override;
@@ -63,4 +63,5 @@ private:
 
     ModrinthPage *modrinthPage = nullptr;
     std::unique_ptr<ModDownloadTask> modTask;
+    BaseInstance *m_instance;
 };

@@ -34,7 +34,7 @@ protected:
 
 private:
     QUrl m_sourceUrl;
-    std::shared_ptr<NetJob> m_filesNetJob;
+    NetJob::Ptr m_filesNetJob;
     const std::shared_ptr<ModFolderModel> mods;
     const QString filename;
 
