@@ -24,6 +24,7 @@
 #include "net/NetJob.h"
 
 #include "ui/dialogs/ProgressDialog.h"
+#include "ui/dialogs/OfflineLoginDialog.h"
 #include "ui/dialogs/LoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -142,6 +143,28 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
     MinecraftAccountPtr account = MSALoginDialog::newAccount(
         this,
         tr("Please enter your Mojang account email and password to add your account.")
+    );
+
+    if (account)
+    {
+        m_accounts->addAccount(account);
+        if (m_accounts->count() == 1) {
+            m_accounts->setDefaultAccount(account);
+        }
+    }
+}
+
+void AccountListPage::on_actionAddOffline_triggered()
+{
+    MinecraftAccountPtr account = OfflineLoginDialog::newAccount(
+        this,
+        tr("Please enter your desired username to add your offline account. <br>"
+           "<br>"
+           "It is required by Mojang that you own Minecraft BEFORE you may use offline mode. <br>"
+           "The PolyMC developers denounce piracy and take NO LIABILITY WHATSOEVER for <br>"
+           "any illegal activity that may occur in usage of the offline mode feature. <br>"
+           "<br>"
+           "By continuing you promise that you own a Minecraft account.")
     );
 
     if (account)

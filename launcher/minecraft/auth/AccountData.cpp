@@ -314,6 +314,8 @@ bool AccountData::resumeStateFromV3(QJsonObject data) {
         type = AccountType::MSA;
     } else if (typeS == "Mojang") {
         type = AccountType::Mojang;
+    } else if (typeS == "Offline") {
+        type = AccountType::Offline;
     } else {
         qWarning() << "Failed to parse account data: type is not recognized.";
         return false;
@@ -363,6 +365,9 @@ QJsonObject AccountData::saveState() const {
         tokenToJSONV3(output, xboxApiToken, "xrp-main");
         tokenToJSONV3(output, mojangservicesToken, "xrp-mc");
     }
+    else if (type == AccountType::Offline) {
+        output["type"] = "Offline";
+    }
 
     tokenToJSONV3(output, yggdrasilToken, "ygg");
     profileToJSONV3(output, minecraftProfile, "profile");
@@ -371,7 +376,7 @@ QJsonObject AccountData::saveState() const {
 }
 
 QString AccountData::userName() const {
-    if(type != AccountType::Mojang) {
+    if(type == AccountType::MSA) {
         return QString();
     }
     return yggdrasilToken.extra["userName"].toString();
@@ -425,6 +430,9 @@ QString AccountData::profileName() const {
 QString AccountData::accountDisplayString() const {
     switch(type) {
         case AccountType::Mojang: {
+            return userName();
+        }
+        case AccountType::Offline: {
             return userName();
         }
         case AccountType::MSA: {
