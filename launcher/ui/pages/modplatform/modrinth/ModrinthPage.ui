@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+  <class>ModrinthPage</class>
+  <widget class="QWidget" name="ModrinthPage">
+    <property name="geometry">
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>837</width>
+        <height>685</height>
+      </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0" colspan="2">
+        <layout class="QGridLayout" name="gridLayout_3">
+          <item row="1" column="0">
+            <widget class="QListView" name="packView">
+              <property name="iconSize">
+                <size>
+                  <width>48</width>
+                  <height>48</height>
+                </size>
+              </property>
+              <property name="horizontalScrollBarPolicy">
+                <enum>Qt::ScrollBarAlwaysOff</enum>
+              </property>
+              <property name="alternatingRowColors">
+                <bool>true</bool>
+              </property>
+            </widget>
+          </item>
+          <item row="1" column="1">
+            <widget class="QTextBrowser" name="packDescription">
+              <property name="openExternalLinks">
+                <bool>true</bool>
+              </property>
+              <property name="openLinks">
+                <bool>true</bool>
+              </property>
+            </widget>
+          </item>
+        </layout>
+      </item>
+      <item row="2" column="0" colspan="2">
+        <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0" rowminimumheight="0" columnminimumwidth="0,0,0">
+          <item row="0" column="2">
+            <widget class="QComboBox" name="versionSelectionBox"/>
+          </item>
+          <item row="0" column="1">
+            <widget class="QLabel" name="label">
+              <property name="text">
+                <string>Version selected:</string>
+              </property>
+              <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+            </widget>
+          </item>
+          <item row="0" column="0">
+            <widget class="QComboBox" name="sortByBox"/>
+          </item>
+        </layout>
+      </item>
+      <item row="0" column="1">
+        <widget class="QPushButton" name="searchButton">
+          <property name="text">
+            <string>Search</string>
+          </property>
+        </widget>
+      </item>
+      <item row="0" column="0">
+        <widget class="QLineEdit" name="searchEdit">
+          <property name="placeholderText">
+            <string>Search and filter ...</string>
+          </property>
+        </widget>
+      </item>
+    </layout>
+  </widget>
+  <tabstops>
+    <tabstop>searchEdit</tabstop>
+    <tabstop>searchButton</tabstop>
+    <tabstop>packView</tabstop>
+    <tabstop>packDescription</tabstop>
+    <tabstop>sortByBox</tabstop>
+    <tabstop>versionSelectionBox</tabstop>
+  </tabstops>
+  <resources/>
+  <connections/>
+</ui>

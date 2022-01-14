@@ -102,6 +102,7 @@ slots:
     void on_actionRemove_triggered();
     void on_actionEnable_triggered();
     void on_actionDisable_triggered();
+    void on_actionInstall_mods_triggered();
     void on_actionView_Folder_triggered();
     void on_actionView_configs_triggered();
     void ShowContextMenu(const QPoint &pos);

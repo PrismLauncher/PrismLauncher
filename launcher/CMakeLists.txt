@@ -37,6 +37,10 @@ set(CORE_SOURCES
     InstanceImportTask.h
     InstanceImportTask.cpp
 
+    # Mod downloading task
+    ModDownloadTask.h
+    ModDownloadTask.cpp
+
     # Use tracking separate from memory management
     Usable.h
 
@@ -512,6 +516,11 @@ set(FLAME_SOURCES
     modplatform/flame/FileResolvingTask.cpp
 )
 
+set(MODRINTH_SOURCES
+    modplatform/modrinth/ModrinthPackIndex.cpp
+    modplatform/modrinth/ModrinthPackIndex.h
+)
+
 set(MODPACKSCH_SOURCES
     modplatform/modpacksch/FTBPackInstallTask.h
     modplatform/modpacksch/FTBPackInstallTask.cpp
@@ -566,6 +575,7 @@ set(LOGIC_SOURCES
     ${ICONS_SOURCES}
     ${FTB_SOURCES}
     ${FLAME_SOURCES}
+    ${MODRINTH_SOURCES}
     ${MODPACKSCH_SOURCES}
     ${TECHNIC_SOURCES}
     ${ATLAUNCHER_SOURCES}
@@ -748,6 +758,11 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/ImportPage.cpp
     ui/pages/modplatform/ImportPage.h
 
+    ui/pages/modplatform/modrinth/ModrinthModel.cpp
+    ui/pages/modplatform/modrinth/ModrinthModel.h
+    ui/pages/modplatform/modrinth/ModrinthPage.cpp
+    ui/pages/modplatform/modrinth/ModrinthPage.h
+
     # GUI - dialogs
     ui/dialogs/AboutDialog.cpp
     ui/dialogs/AboutDialog.h
@@ -785,6 +800,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/VersionSelectDialog.h
     ui/dialogs/SkinUploadDialog.cpp
     ui/dialogs/SkinUploadDialog.h
+    ui/dialogs/ModDownloadDialog.cpp
+    ui/dialogs/ModDownloadDialog.h
 
 
     # GUI - widgets
@@ -865,6 +882,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/ImportPage.ui
     ui/pages/modplatform/ftb/FtbPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
+    ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
     ui/widgets/MCModInfoFrame.ui

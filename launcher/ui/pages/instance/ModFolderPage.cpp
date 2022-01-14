@@ -26,6 +26,7 @@
 #include "Application.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ModDownloadDialog.h"
 #include "ui/GuiUtil.h"
 
 #include "DesktopServices.h"
@@ -36,6 +37,7 @@
 #include "minecraft/PackProfile.h"
 
 #include "Version.h"
+#include "ui/dialogs/ProgressDialog.h"
 
 namespace {
     // FIXME: wasteful
@@ -340,6 +342,33 @@ void ModFolderPage::on_actionRemove_triggered()
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->modTreeView->selectionModel()->selection());
     m_mods->deleteMods(selection.indexes());
+}
+
+void ModFolderPage::on_actionInstall_mods_triggered()
+{
+    if(!m_controlsEnabled) {
+        return;
+    }
+    ModDownloadDialog mdownload(m_mods, this);
+    mdownload.exec();
+    ModDownloadTask * task = mdownload.getTask();
+    if(task){
+        connect(task, &Task::failed, [this](QString reason)
+        {
+            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+        });
+        connect(task, &Task::succeeded, [this, task]()
+        {
+            QStringList warnings = task->warnings();
+            if(warnings.count())
+            {
+                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+            }
+        });
+        ProgressDialog loadDialog(this);
+        loadDialog.setSkipButton(true, tr("Abort"));
+        loadDialog.execWithTask(task);
+    }
 }
 
 void ModFolderPage::on_actionView_configs_triggered()
