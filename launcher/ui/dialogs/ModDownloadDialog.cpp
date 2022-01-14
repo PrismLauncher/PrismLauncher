@@ -32,7 +32,7 @@
 
 
 ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel>& mods, QWidget *parent)
-    : QDialog(parent)
+    : QDialog(parent), mods(mods)
 {
     setObjectName(QStringLiteral("ModDownloadDialog"));
     resize(400, 347);

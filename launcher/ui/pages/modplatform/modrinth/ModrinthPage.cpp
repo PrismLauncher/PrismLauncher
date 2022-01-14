@@ -165,7 +165,7 @@ void ModrinthPage::suggestCurrent()
         return;
     }
 
-    dialog->setSuggestedMod(current.name, new ModDownloadTask(selectedVersion));
+    dialog->setSuggestedMod(current.name, new ModDownloadTask(selectedVersion, current.versions.at(0).fileName ,dialog->mods));
 }
 
 void ModrinthPage::onVersionSelectionChanged(QString data)

@@ -22,6 +22,7 @@ struct IndexedVersion {
     QString mcVersion;
     QString downloadUrl;
     QString date;
+    QString fileName;
 };
 
 struct IndexedPack

@@ -46,6 +46,7 @@ public:
     void setSuggestedMod(const QString & name = QString(), ModDownloadTask * task = nullptr);
 
     ModDownloadTask * getTask();
+    const std::shared_ptr<ModFolderModel> &mods;
 
 public slots:
     void accept() override;

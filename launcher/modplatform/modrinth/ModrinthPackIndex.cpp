@@ -37,7 +37,9 @@ void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray 
         file.mcVersion = versionArray[0].toString();
         file.version = Json::requireString(obj, "name");
         //TODO show all the files ?
-        file.downloadUrl = Json::requireString(Json::requireArray(obj, "files")[0].toObject(),"url");
+        auto parent = Json::requireArray(obj, "files")[0].toObject();
+        file.downloadUrl = Json::requireString(parent, "url");
+        file.fileName = Json::requireString(parent, "filename");
         unsortedVersions.append(file);
     }
     auto orderSortPredicate = [](const IndexedVersion & a, const IndexedVersion & b) -> bool
