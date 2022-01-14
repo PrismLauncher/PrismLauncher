@@ -161,8 +161,8 @@ void AccountListPage::on_actionAddOffline_triggered()
         tr("Please enter your desired username to add your offline account. <br>"
            "<br>"
            "It is required by Mojang that you own Minecraft BEFORE you may use offline mode. <br>"
-           "The PolyMC organization denounces piracy and takes NO LIABILITY WHATSOEVER <br>"
-           "for any illegal activity that may occur in usage of the offline mode feature. <br></b>"
+           "The PolyMC developers denounce piracy and take NO LIABILITY WHATSOEVER for <br>"
+           "any illegal activity that may occur in usage of the offline mode feature. <br>"
            "<br>"
            "By continuing you promise that you own a Minecraft account.")
     );
