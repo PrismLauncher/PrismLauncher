@@ -46,7 +46,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return APPLICATION->getThemedIcon("flame");
+        return APPLICATION->getThemedIcon("modrinth");
     }
     virtual QString id() const override
     {
