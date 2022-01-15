@@ -47,6 +47,8 @@ public:
 
     bool eventFilter(QObject * watched, QEvent * event) override;
 
+    BaseInstance *m_instance;
+
 private:
     void suggestCurrent();
 
@@ -62,5 +64,4 @@ private:
     Modrinth::IndexedPack current;
 
     QString selectedVersion;
-    BaseInstance *m_instance;
 };

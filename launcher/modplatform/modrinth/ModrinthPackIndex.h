@@ -19,10 +19,11 @@ struct IndexedVersion {
     QString addonId;
     QString fileId;
     QString version;
-    QString mcVersion;
+    QVector<QString> mcVersion;
     QString downloadUrl;
     QString date;
     QString fileName;
+    QVector<QString> loaders;
 };
 
 struct IndexedPack

@@ -1,18 +1,19 @@
 #include "ModrinthModel.h"
 #include "Application.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
+#include "ModrinthPage.h"
 #include <Json.h>
 
 #include <MMCStrings.h>
 #include <Version.h>
 
 #include <QtMath>
-#include <QLabel>
 
-#include <RWStorage.h>
 
 namespace Modrinth {
 
-ListModel::ListModel(QObject *parent) : QAbstractListModel(parent)
+ListModel::ListModel(ModrinthPage *parent) : QAbstractListModel(parent)
 {
 }
 
@@ -158,14 +159,18 @@ const char* sorts[4]{"relevance","downloads","updated","newest"};
 
 void ListModel::performPaginatedSearch()
 {
-    NetJob *netJob = new NetJob("Modrinth::Search", APPLICATION->network());
+
+    QString mcVersion =  ((MinecraftInstance *)((ModrinthPage *)parent())->m_instance)->getPackProfile()->getComponentVersion("net.minecraft");
+    bool hasFabric = !((MinecraftInstance *)((ModrinthPage *)parent())->m_instance)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
+    auto netJob = new NetJob("Modrinth::Search", APPLICATION->network());
     auto searchUrl = QString(
         "https://api.modrinth.com/api/v1/mod?"
         "offset=%1&"
         "limit=25&"
         "query=%2&"
-        "index=%3"
-    ).arg(nextSearchOffset).arg(currentSearchTerm).arg(sorts[currentSort]);
+        "index=%3&"
+        "filters=categories=\"%4\" AND versions=\"%5\""
+    ).arg(nextSearchOffset).arg(currentSearchTerm).arg(sorts[currentSort]).arg(hasFabric ? "fabric" : "forge").arg(mcVersion);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();
@@ -173,7 +178,7 @@ void ListModel::performPaginatedSearch()
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
 }
 
-void ListModel::searchWithTerm(const QString& term, int sort)
+void ListModel::searchWithTerm(const QString &term, const int sort)
 {
     if(currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort) {
         return;

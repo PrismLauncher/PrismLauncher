@@ -34,12 +34,19 @@ void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray 
             continue;
         }
         // pick the latest version supported
-        file.mcVersion = versionArray[0].toString();
+        for(auto mcVer : versionArray){
+            file.mcVersion.append(mcVer.toString());
+        }
+        auto loaders = Json::requireArray(obj,"loaders");
+        for(auto loader : loaders){
+            file.loaders.append(loader.toString());
+        }
         file.version = Json::requireString(obj, "name");
         //TODO show all the files ?
         auto parent = Json::requireArray(obj, "files")[0].toObject();
         file.downloadUrl = Json::requireString(parent, "url");
         file.fileName = Json::requireString(parent, "filename");
+
         unsortedVersions.append(file);
     }
     auto orderSortPredicate = [](const IndexedVersion & a, const IndexedVersion & b) -> bool

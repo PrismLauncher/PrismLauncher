@@ -17,6 +17,8 @@
 
 #include <modplatform/flame/FlamePackIndex.h>
 #include "modplatform/modrinth/ModrinthPackIndex.h"
+#include "BaseInstance.h"
+#include "ModrinthPage.h"
 
 namespace Modrinth {
 
@@ -29,7 +31,7 @@ class ListModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    ListModel(QObject *parent);
+    ListModel(ModrinthPage *parent);
     virtual ~ListModel();
 
     int rowCount(const QModelIndex &parent) const override;
@@ -40,7 +42,7 @@ public:
     void fetchMore(const QModelIndex & parent) override;
 
     void getLogo(const QString &logo, const QString &logoUrl, LogoCallback callback);
-    void searchWithTerm(const QString & term, const int sort);
+    void searchWithTerm(const QString &term, const int sort);
 
 private slots:
     void performPaginatedSearch();

@@ -9,11 +9,11 @@
 #include "InstanceImportTask.h"
 #include "ModrinthModel.h"
 #include "ModDownloadTask.h"
-#include "ui/pages/instance/ModFolderPage.h"
+#include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
 ModrinthPage::ModrinthPage(ModDownloadDialog *dialog, BaseInstance *instance)
-    : QWidget(dialog), ui(new Ui::ModrinthPage), dialog(dialog), m_instance(instance)
+    : QWidget(dialog), m_instance(instance), ui(new Ui::ModrinthPage), dialog(dialog)
 {
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &ModrinthPage::triggerSearch);
@@ -135,8 +135,13 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
                 qDebug() << *response;
                 qWarning() << "Error while reading Modrinth mod version: " << e.cause();
             }
-
-            for(auto version : current.versions) {
+            auto packProfile = ((MinecraftInstance *)m_instance)->getPackProfile();
+            QString mcVersion =  packProfile->getComponentVersion("net.minecraft");
+            QString loaderString = (packProfile->getComponentVersion("net.minecraftforge").isEmpty()) ? "fabric" : "forge";
+            for(const auto& version : current.versions) {
+                if(!version.mcVersion.contains(mcVersion) || !version.loaders.contains(loaderString)){
+                    continue;
+                }
                 ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
             }
 
