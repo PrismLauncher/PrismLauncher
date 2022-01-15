@@ -8,7 +8,7 @@ ModDownloadTask::ModDownloadTask(const QUrl sourceUrl,const QString filename, co
 void ModDownloadTask::executeTask() {
     setStatus(tr("Downloading mod:\n%1").arg(m_sourceUrl.toString()));
 
-    m_filesNetJob.reset(new NetJob(tr("Modpack download"), APPLICATION->network()));
+    m_filesNetJob.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
     m_filesNetJob->addNetAction(Net::Download::makeFile(m_sourceUrl, mods->dir().absoluteFilePath(filename)));
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &ModDownloadTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &ModDownloadTask::downloadProgressChanged);

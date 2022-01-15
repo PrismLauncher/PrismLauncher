@@ -3,6 +3,10 @@
 
 #include "Json.h"
 #include "net/NetJob.h"
+#include "BaseInstance.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
+
 
 void Modrinth::loadIndexedPack(Modrinth::IndexedPack & pack, QJsonObject & obj)
 {
@@ -20,9 +24,12 @@ void Modrinth::loadIndexedPack(Modrinth::IndexedPack & pack, QJsonObject & obj)
     pack.authors.append(packAuthor); //TODO delete this ? only one author ever exists
 }
 
-void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray & arr, const shared_qobject_ptr<QNetworkAccessManager>& network)
+void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray & arr, const shared_qobject_ptr<QNetworkAccessManager>& network, BaseInstance * inst)
 {
     QVector<Modrinth::IndexedVersion> unsortedVersions;
+    bool hasFabric = !((MinecraftInstance *)inst)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
+    QString mcVersion = ((MinecraftInstance *)inst)->getPackProfile()->getComponentVersion("net.minecraft");
+
     for(auto versionIter: arr) {
         auto obj = versionIter.toObject();
         Modrinth::IndexedVersion file;
@@ -33,7 +40,6 @@ void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray 
         if (versionArray.empty()) {
             continue;
         }
-        // pick the latest version supported
         for(auto mcVer : versionArray){
             file.mcVersion.append(mcVer.toString());
         }
@@ -42,8 +48,35 @@ void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray 
             file.loaders.append(loader.toString());
         }
         file.version = Json::requireString(obj, "name");
-        //TODO show all the files ?
-        auto parent = Json::requireArray(obj, "files")[0].toObject();
+
+        auto files = Json::requireArray(obj, "files");
+        int i = 0;
+        while (files.count() > 1 && i < files.count()){
+            //try to resolve the correct file
+            auto parent = files[i].toObject();
+            auto fileName = Json::requireString(parent, "filename");
+            //avoid grabbing "dev" files
+            if(fileName.contains("javadocs",Qt::CaseInsensitive) || fileName.contains("sources",Qt::CaseInsensitive)){
+                i++;
+                continue;
+            }
+            //grab the correct mod loader
+            if(fileName.contains("forge",Qt::CaseInsensitive) || fileName.contains("fabric",Qt::CaseInsensitive)  ){
+                if(hasFabric){
+                    if(fileName.contains("forge",Qt::CaseInsensitive)){
+                        i++;
+                        continue;
+                    }
+                }else{
+                    if(fileName.contains("fabric",Qt::CaseInsensitive)){
+                        i++;
+                        continue;
+                    }
+                }
+            }
+            break;
+        }
+        auto parent = files[i].toObject();
         file.downloadUrl = Json::requireString(parent, "url");
         file.fileName = Json::requireString(parent, "filename");
 

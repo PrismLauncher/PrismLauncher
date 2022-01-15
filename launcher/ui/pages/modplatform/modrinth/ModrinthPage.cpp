@@ -128,7 +128,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
             QJsonArray arr = doc.array();
             try
             {
-                Modrinth::loadIndexedPackVersions(current, arr, APPLICATION->network());
+                Modrinth::loadIndexedPackVersions(current, arr, APPLICATION->network(), m_instance);
             }
             catch(const JSONValidationError &e)
             {
@@ -145,7 +145,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
                 ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
             }
             if(ui->versionSelectionBox->count() == 0){
-                ui->versionSelectionBox->addItem("No Valid Version found !", QVariant(""));
+                ui->versionSelectionBox->addItem(tr("No Valid Version found !"), QVariant(""));
             }
 
             suggestCurrent();
@@ -158,7 +158,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
             ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
         }
         if(ui->versionSelectionBox->count() == 0){
-            ui->versionSelectionBox->addItem("No Valid Version found !", QVariant(""));
+            ui->versionSelectionBox->addItem(tr("No Valid Version found !"), QVariant(""));
         }
         suggestCurrent();
     }

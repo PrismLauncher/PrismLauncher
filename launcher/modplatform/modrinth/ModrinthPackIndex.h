@@ -7,6 +7,7 @@
 #include <QNetworkAccessManager>
 #include <QObjectPtr.h>
 #include "net/NetJob.h"
+#include "BaseInstance.h"
 
 namespace Modrinth {
 
@@ -41,8 +42,7 @@ struct IndexedPack
 };
 
 void loadIndexedPack(IndexedPack & m, QJsonObject & obj);
-void loadIndexedPackVersions(IndexedPack & m, QJsonArray & arr, const shared_qobject_ptr<QNetworkAccessManager>& network);
-void versionJobFinished();
+void loadIndexedPackVersions(IndexedPack &pack, QJsonArray &arr, const shared_qobject_ptr<QNetworkAccessManager> &network, BaseInstance *inst);
 }
 
 Q_DECLARE_METATYPE(Modrinth::IndexedPack)
