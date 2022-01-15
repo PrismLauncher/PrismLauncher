@@ -144,6 +144,9 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
                 }
                 ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
             }
+            if(ui->versionSelectionBox->count() == 0){
+                ui->versionSelectionBox->addItem("No Valid Version found !", QVariant(""));
+            }
 
             suggestCurrent();
         });
@@ -154,7 +157,9 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         for(auto version : current.versions) {
             ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
         }
-
+        if(ui->versionSelectionBox->count() == 0){
+            ui->versionSelectionBox->addItem("No Valid Version found !", QVariant(""));
+        }
         suggestCurrent();
     }
 }
