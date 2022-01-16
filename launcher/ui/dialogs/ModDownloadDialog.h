@@ -7,6 +7,7 @@
 #include "ui/pages/BasePageProvider.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "ModDownloadTask.h"
+#include "ui/pages/modplatform/flame/FlameModPage.h"
 
 namespace Ui
 {
@@ -47,6 +48,7 @@ private:
 
 
     ModrinthPage *modrinthPage = nullptr;
+    FlameModPage *flameModPage = nullptr;
     std::unique_ptr<ModDownloadTask> modTask;
     BaseInstance *m_instance;
 };

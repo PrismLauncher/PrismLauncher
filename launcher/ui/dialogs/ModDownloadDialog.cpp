@@ -75,9 +75,11 @@ void ModDownloadDialog::accept()
 QList<BasePage *> ModDownloadDialog::getPages()
 {
     modrinthPage = new ModrinthPage(this, m_instance);
+    flameModPage = new FlameModPage(this, m_instance);
     return
     {
-        modrinthPage
+        modrinthPage,
+        flameModPage
     };
 }
 

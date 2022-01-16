@@ -510,6 +510,8 @@ set(FLAME_SOURCES
     # Flame
     modplatform/flame/FlamePackIndex.cpp
     modplatform/flame/FlamePackIndex.h
+    modplatform/flame/FlameModIndex.cpp
+    modplatform/flame/FlameModIndex.h
     modplatform/flame/PackManifest.h
     modplatform/flame/PackManifest.cpp
     modplatform/flame/FileResolvingTask.h
@@ -749,6 +751,10 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/flame/FlameModel.h
     ui/pages/modplatform/flame/FlamePage.cpp
     ui/pages/modplatform/flame/FlamePage.h
+    ui/pages/modplatform/flame/FlameModModel.cpp
+    ui/pages/modplatform/flame/FlameModModel.h
+    ui/pages/modplatform/flame/FlameModPage.cpp
+    ui/pages/modplatform/flame/FlameModPage.h
 
     ui/pages/modplatform/technic/TechnicModel.cpp
     ui/pages/modplatform/technic/TechnicModel.h
@@ -878,6 +884,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/atlauncher/AtlPage.ui
     ui/pages/modplatform/VanillaPage.ui
     ui/pages/modplatform/flame/FlamePage.ui
+    ui/pages/modplatform/flame/FlameModPage.ui
     ui/pages/modplatform/legacy_ftb/Page.ui
     ui/pages/modplatform/ImportPage.ui
     ui/pages/modplatform/ftb/FtbPage.ui
