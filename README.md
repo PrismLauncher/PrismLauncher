@@ -1,6 +1,5 @@
 <p align="center">
-  <img src="/program_info/polymc-light.png#gh-light-mode-only" alt="PolyMC logo"/>
-  <img src="/program_info/polymc-dark.png#gh-dark-mode-only" alt="PolyMC logo"/>
+  <img src="./program_info/polymc-header.svg" alt="PolyMC logo"/>
 </p>
 <br>
 
