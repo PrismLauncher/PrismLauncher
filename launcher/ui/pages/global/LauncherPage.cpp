@@ -256,7 +256,7 @@ void LauncherPage::applySettings()
         s->set("IconTheme", "pe_blue");
         break;
     case 4:
-        s->set("IconTheme", "pe_colored");
+        s->set("IconTheme", "multimc");
         break;
     case 5:
         s->set("IconTheme", "OSX");
@@ -272,7 +272,7 @@ void LauncherPage::applySettings()
         break;
     case 0:
     default:
-        s->set("IconTheme", "multimc");
+        s->set("IconTheme", "pe_colored");
         break;
     }
 

@@ -595,7 +595,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("AutoUpdate", true);
 
         // Theming
-        m_settings->registerSetting("IconTheme", QString("multimc"));
+        m_settings->registerSetting("IconTheme", QString("pe_colored"));
         m_settings->registerSetting("ApplicationTheme", QString("system"));
 
         // Notifications
