@@ -61,6 +61,9 @@ void MinecraftProfileStep::onRequestDone(
         qWarning() << " Internal error no.: " << error;
         qWarning() << " Error string:       " << requestor->errorString_;
 
+        qWarning() << " Response:";
+        qWarning() << QString::fromUtf8(data);
+
         emit finished(
             AccountTaskState::STATE_FAILED_SOFT,
             tr("Minecraft Java profile acquisition failed.")
