@@ -169,10 +169,22 @@ TranslationsModel::~TranslationsModel()
 void TranslationsModel::translationDirChanged(const QString& path)
 {
     qDebug() << "Dir changed:" << path;
-    reloadLocalFiles();
+    if (!d->no_language_set)
+    {
+        reloadLocalFiles();
+    }
+    selectLanguage(selectedLanguage());
+}
+
+void TranslationsModel::indexReceived()
+{
+    qDebug() << "Got translations index!";
+    d->m_index_job.reset();
 
     if (d->no_language_set)
     {
+        reloadLocalFiles();
+
         auto language = d->m_system_locale;
         if (!findLanguage(language))
         {
@@ -186,17 +198,8 @@ void TranslationsModel::translationDirChanged(const QString& path)
         APPLICATION->settings()->set("Language", selectedLanguage());
         d->no_language_set = false;
     }
-    else
-    {
-        selectLanguage(selectedLanguage());
-    }
-}
 
-void TranslationsModel::indexReceived()
-{
-    qDebug() << "Got translations index!";
-    d->m_index_job.reset();
-    if(d->m_selectedLanguage != defaultLangCode)
+    else if(d->m_selectedLanguage != defaultLangCode)
     {
         downloadTranslation(d->m_selectedLanguage);
     }
