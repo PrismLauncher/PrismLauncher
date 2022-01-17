@@ -38,8 +38,7 @@ struct MinecraftProfile {
 
 enum class AccountType {
     MSA,
-    Mojang,
-    Offline
+    Mojang
 };
 
 enum class AccountState {
