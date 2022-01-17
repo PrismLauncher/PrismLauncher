@@ -54,7 +54,6 @@
    </attribute>
    <addaction name="actionAddMicrosoft"/>
    <addaction name="actionAddMojang"/>
-   <addaction name="actionAddOffline"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionRemove"/>
    <addaction name="actionSetDefault"/>
@@ -102,11 +101,6 @@
   <action name="actionAddMicrosoft">
    <property name="text">
     <string>Add Microsoft</string>
-   </property>
-  </action>
-  <action name="actionAddOffline">
-   <property name="text">
-    <string>Add Offline</string>
    </property>
   </action>
   <action name="actionRefresh">
