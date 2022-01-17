@@ -147,7 +147,7 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::refresh() {
     if(data.type == AccountType::MSA) {
         m_currentTask.reset(new MSASilent(&data));
     }
-    else if(data.type == AccountType::Offline) {
+    if(data.type == AccountType::Offline) {
         m_currentTask.reset(new OfflineRefresh(&data));
     }
     else {
