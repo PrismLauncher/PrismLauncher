@@ -6,9 +6,6 @@
 #include <Version.h>
 
 #include <QtMath>
-#include <QLabel>
-
-#include <RWStorage.h>
 
 namespace Flame {
 
@@ -100,12 +97,13 @@ void ListModel::requestLogo(QString logo, QString url)
     }
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
-    NetJob *job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
+    auto job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
-    QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath]
+    QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job]
     {
+        job->deleteLater();
         emit logoLoaded(logo, QIcon(fullPath));
         if(waitingCallbacks.contains(logo))
         {
@@ -113,8 +111,9 @@ void ListModel::requestLogo(QString logo, QString url)
         }
     });
 
-    QObject::connect(job, &NetJob::failed, this, [this, logo]
+    QObject::connect(job, &NetJob::failed, this, [this, logo, job]
     {
+        job->deleteLater();
         emit logoFailed(logo);
     });
 

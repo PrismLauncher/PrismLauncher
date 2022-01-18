@@ -105,8 +105,9 @@ void ListModel::requestLogo(QString logo, QString url)
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
-    QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath]
+    QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job]
     {
+        job->deleteLater();
         emit logoLoaded(logo, QIcon(fullPath));
         if(waitingCallbacks.contains(logo))
         {
@@ -114,8 +115,9 @@ void ListModel::requestLogo(QString logo, QString url)
         }
     });
 
-    QObject::connect(job, &NetJob::failed, this, [this, logo]
+    QObject::connect(job, &NetJob::failed, this, [this, logo, job]
     {
+        job->deleteLater();
         emit logoFailed(logo);
     });
 

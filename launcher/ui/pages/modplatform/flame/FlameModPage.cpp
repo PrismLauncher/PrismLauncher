@@ -112,13 +112,14 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
     if (!current.versionsLoaded)
     {
         qDebug() << "Loading flame mod versions";
-        NetJob *netJob = new NetJob(QString("Flame::ModVersions(%1)").arg(current.name), APPLICATION->network());
+        auto netJob = new NetJob(QString("Flame::ModVersions(%1)").arg(current.name), APPLICATION->network());
         std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
         int addonId = current.addonId;
         netJob->addNetAction(Net::Download::makeByteArray(QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files").arg(addonId), response.get()));
 
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response]
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, netJob]
         {
+            netJob->deleteLater();
             QJsonParseError parse_error;
             QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
             if(parse_error.error != QJsonParseError::NoError) {

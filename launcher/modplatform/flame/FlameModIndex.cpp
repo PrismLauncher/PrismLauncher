@@ -76,13 +76,14 @@ void FlameMod::loadIndexedPackVersions(FlameMod::IndexedPack & pack, QJsonArray 
                     break;
                 }
             }else{
+                //this cannot check for the recent mcmod.toml formats
                 if(fname == "mcmod.info"){
                     valid = true;
                     break;
                 }
             }
         }
-        if(!valid){
+        if(!valid || !hasFabric){
             continue;
         }
 

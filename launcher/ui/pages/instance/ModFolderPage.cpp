@@ -362,7 +362,8 @@ void ModFolderPage::on_actionInstall_mods_triggered()
     if(mdownload.exec()) {
         ModDownloadTask *task = mdownload.getTask();
         if (task) {
-            connect(task, &Task::failed, [this](QString reason) {
+            connect(task, &Task::failed, [this, task](QString reason) {
+                task->deleteLater();
                 CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             });
             connect(task, &Task::succeeded, [this, task]() {
@@ -371,6 +372,7 @@ void ModFolderPage::on_actionInstall_mods_triggered()
                     CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'),
                                                  QMessageBox::Warning)->show();
                 }
+                task->deleteLater();
             });
             ProgressDialog loadDialog(this);
             loadDialog.setSkipButton(true, tr("Abort"));
