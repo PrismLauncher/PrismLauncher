@@ -16,21 +16,8 @@
 QString GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 {
     ProgressDialog dialog(parentWidget);
-    auto APIKeySetting = APPLICATION->settings()->get("PasteEEAPIKey").toString();
-    if(APIKeySetting == "multimc")
-    {
-        APIKeySetting = BuildConfig.PASTE_EE_KEY;
-    }
-    std::unique_ptr<PasteUpload> paste(new PasteUpload(parentWidget, text, APIKeySetting));
-
-    if (!paste->validateText())
-    {
-        CustomMessageBox::selectable(
-            parentWidget, QObject::tr("Upload failed"),
-            QObject::tr("The log file is too big. You'll have to upload it manually."),
-            QMessageBox::Warning)->exec();
-        return QString();
-    }
+    auto pasteUrlSetting = APPLICATION->settings()->get("PastebinURL").toString();
+    std::unique_ptr<PasteUpload> paste(new PasteUpload(parentWidget, text, pasteUrlSetting));
 
     dialog.execWithTask(paste.get());
     if (!paste->wasSuccessful())

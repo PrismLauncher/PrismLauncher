@@ -54,9 +54,6 @@ private:
     void loadSettings();
     void applySettings();
 
-private slots:
-    void textEdited(const QString &text);
-
 private:
     Ui::PastePage *ui;
 };

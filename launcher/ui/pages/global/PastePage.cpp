@@ -20,6 +20,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QTabBar>
+#include <QVariant>
 
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
@@ -31,7 +32,6 @@ PastePage::PastePage(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->tabWidget->tabBar()->hide();\
-    connect(ui->customAPIkeyEdit, &QLineEdit::textEdited, this, &PastePage::textEdited);
     loadSettings();
 }
 
@@ -43,32 +43,19 @@ PastePage::~PastePage()
 void PastePage::loadSettings()
 {
     auto s = APPLICATION->settings();
-    QString pastebin = s->get("PastebinURL");
-    int index = ui->urlChoices->findText(pastebin);
-    ui->urlChoices->setCurrentIndex(index);
+    QString pastebinURL = s->get("PastebinURL").toString();
+    ui->urlChoices->setCurrentText(pastebinURL);
 }
 
 void PastePage::applySettings()
 {
     auto s = APPLICATION->settings();
-
-    QString pasteKeyToUse;
-    if (ui->customButton->isChecked())
-        pasteKeyToUse = ui->customAPIkeyEdit->text();
-    else
-    {
-        pasteKeyToUse =  "multimc";
-    }
-    s->set("PasteEEAPIKey", pasteKeyToUse);
+    QString pastebinURL = ui->urlChoices->currentText();
+    s->set("PastebinURL", pastebinURL);
 }
 
 bool PastePage::apply()
 {
     applySettings();
     return true;
-}
-
-void PastePage::textEdited(const QString& text)
-{
-    ui->customButton->setChecked(true);
 }

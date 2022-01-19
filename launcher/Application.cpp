@@ -715,7 +715,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("UpdateDialogGeometry", "");
 
         // pastebin URL
-        m_settings->registerSetting("PastebinURL", "0x0.st");
+        m_settings->registerSetting("PastebinURL", "https://0x0.st");
 
         // Init page provider
         {

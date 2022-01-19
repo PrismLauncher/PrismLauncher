@@ -36,7 +36,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
-          <string>Pastebin Site</string>
+          <string>Pastebin URL</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item>
@@ -48,14 +48,20 @@
           </item>
           <item>
            <widget class="QComboBox" name="urlChoices">
+            <property name="editable">
+             <bool>true</bool>
+            </property>
+            <property name="insertPolicy">
+             <enum>QComboBox::NoInsert</enum>
+            </property>
             <item>
              <property name="text">
-              <string>0x0.st</string>
+              <string>https://0x0.st</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>paste.polymc.org</string>
+              <string>https://paste.polymc.org</string>
              </property>
             </item>
            </widget>
@@ -63,7 +69,7 @@
           <item>
            <widget class="QLabel" name="label">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;paste.polymc.org is a pastebin managed by PolyMC's lead maintainer. Something something trust&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Here you can choose from a predefined list, or input the URL of a different paste service, provided that it supports the same protocol as 0x0.st, that is POST a file to the URL and return a link in the response body.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
@@ -103,7 +109,4 @@
  </tabstops>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="pasteButtonGroup"/>
- </buttongroups>
 </ui>
