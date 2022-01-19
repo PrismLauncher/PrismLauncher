@@ -172,7 +172,13 @@ void ListModel::performPaginatedSearch()
         "query=%2&"
         "index=%3&"
         "filters=categories=\"%4\" AND versions=\"%5\""
-    ).arg(nextSearchOffset).arg(currentSearchTerm).arg(sorts[currentSort]).arg(hasFabric ? "fabric" : "forge").arg(mcVersion);
+    )
+        .arg(nextSearchOffset)
+        .arg(currentSearchTerm)
+        .arg(sorts[currentSort])
+        .arg(hasFabric ? "fabric" : "forge")
+        .arg(mcVersion);
+
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();

@@ -177,7 +177,13 @@ void ListModel::performPaginatedSearch()
         "sort=%3&"
         "%4"
         "gameVersion=%5"
-    ).arg(nextSearchOffset).arg(currentSearchTerm).arg(sorts[currentSort]).arg(hasFabric ? "modLoaderType=4&" : "").arg(mcVersion);
+    )
+        .arg(nextSearchOffset)
+        .arg(currentSearchTerm)
+        .arg(sorts[currentSort])
+        .arg(hasFabric ? "modLoaderType=4&" : "")
+        .arg(mcVersion);
+
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();
