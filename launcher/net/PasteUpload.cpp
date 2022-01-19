@@ -68,6 +68,6 @@ void PasteUpload::downloadFinished()
         return;
     }
 
-    m_pasteLink = QString::fromUtf8(data);
+    m_pasteLink = QString::fromUtf8(data).trimmed();
     emitSucceeded();
 }
