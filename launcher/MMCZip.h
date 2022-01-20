@@ -21,17 +21,21 @@
 #include "minecraft/mod/Mod.h"
 #include <functional>
 
-#include <JlCompress.h>
+//#include <QuaZip-Qt5-1.2/quazip/JlCompress.h>
+// TODO: Blocked by https://github.com/stachenov/quazip/pull/141
+// For now, checkout https://github.com/Scrumplex/quazip/tree/expose-jlcompress-fns at ../../quazip
+#include <../../quazip/quazip/JlCompress.h>
 #include <nonstd/optional>
 
 namespace MMCZip
 {
+    using FilterFunction = std::function<bool(const QString &)>;
 
     /**
      * Merge two zip files, using a filter function
      */
     bool mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
-                                            const JlCompress::FilterFunction filter = nullptr);
+                                            const FilterFunction filter = nullptr);
 
     /**
      * take a source jar, add mods to it, resulting in target jar

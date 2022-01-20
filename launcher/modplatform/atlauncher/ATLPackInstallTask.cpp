@@ -19,7 +19,7 @@
 
 #include <QtConcurrent/QtConcurrent>
 
-#include <quazip.h>
+#include <QuaZip-Qt5-1.2/quazip/quazip.h>
 
 #include "MMCZip.h"
 #include "minecraft/OneSixVersionFormat.h"

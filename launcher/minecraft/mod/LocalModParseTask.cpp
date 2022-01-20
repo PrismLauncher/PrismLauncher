@@ -4,8 +4,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonValue>
-#include <quazip.h>
-#include <quazipfile.h>
+#include <QuaZip-Qt5-1.2/quazip/quazip.h>
+#include <QuaZip-Qt5-1.2/quazip/quazipfile.h>
 #include <toml.h>
 
 #include "settings/INIFile.h"

@@ -22,7 +22,7 @@
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 #include "minecraft/VersionFilterData.h"
-#include <quazip.h>
+#include <QuaZip-Qt5-1.2/quazip/quazip.h>
 
 class MinecraftVersion;
 class MinecraftInstance;

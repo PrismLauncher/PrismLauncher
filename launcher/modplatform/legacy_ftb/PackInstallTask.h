@@ -1,8 +1,8 @@
 #pragma once
 #include "InstanceTask.h"
 #include "net/NetJob.h"
-#include "quazip.h"
-#include "quazipdir.h"
+#include "QuaZip-Qt5-1.2/quazip/quazip.h"
+#include "QuaZip-Qt5-1.2/quazip/quazipdir.h"
 #include "meta/Index.h"
 #include "meta/Version.h"
 #include "meta/VersionList.h"
