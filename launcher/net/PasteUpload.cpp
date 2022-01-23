@@ -59,7 +59,7 @@ void PasteUpload::downloadFinished()
         m_reply.reset();
         return;
     }
-    else if (statusCode != 200)
+    else if (statusCode != 200 && statusCode != 201)
     {
         QString reasonPhrase = m_reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
         emitFailed(tr("Error: %1 returned unexpected status code %2 %3").arg(m_uploadUrl).arg(statusCode).arg(reasonPhrase));
