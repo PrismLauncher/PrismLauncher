@@ -17,8 +17,14 @@
 #include <minecraft/MinecraftInstance.h>
 #include <launch/LaunchTask.h>
 
+#ifdef QUAZIP_USE_SUBMODULE
+#include <quazip/quazip.h>
+#include <quazip/quazipdir.h>
+#else
 #include <QuaZip-Qt5-1.2/quazip/quazip.h>
 #include <QuaZip-Qt5-1.2/quazip/quazipdir.h>
+#endif
+
 #include "MMCZip.h"
 #include "FileSystem.h"
 #include <QDir>

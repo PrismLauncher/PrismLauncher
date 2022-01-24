@@ -19,13 +19,14 @@
 #include <QFileInfo>
 #include <QSet>
 #include "minecraft/mod/Mod.h"
+#include "nonstd/optional"
 #include <functional>
 
-//#include <QuaZip-Qt5-1.2/quazip/JlCompress.h>
-// TODO: Blocked by https://github.com/stachenov/quazip/pull/141
-// For now, checkout https://github.com/Scrumplex/quazip/tree/expose-jlcompress-fns at ../../quazip
-#include <../../quazip/quazip/JlCompress.h>
-#include <nonstd/optional>
+#ifdef QUAZIP_USE_SUBMODULE
+#include <quazip/JlCompress.h>
+#else
+#include <QuaZip-Qt5-1.2/quazip/JlCompress.h>
+#endif
 
 namespace MMCZip
 {

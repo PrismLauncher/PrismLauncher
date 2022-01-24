@@ -19,7 +19,11 @@
 
 #include <QtConcurrent/QtConcurrent>
 
+#ifdef QUAZIP_USE_SUBMODULE
+#include <quazip/quazip.h>
+#else
 #include <QuaZip-Qt5-1.2/quazip/quazip.h>
+#endif
 
 #include "MMCZip.h"
 #include "minecraft/OneSixVersionFormat.h"

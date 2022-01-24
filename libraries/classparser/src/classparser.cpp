@@ -18,7 +18,13 @@
 #include "classparser.h"
 
 #include <QFile>
+
+#ifdef QUAZIP_USE_SUBMODULE
+#include <quazip/quazipfile.h>
+#else
 #include <QuaZip-Qt5-1.2/quazip/quazipfile.h>
+#endif
+
 #include <QDebug>
 
 namespace classparser

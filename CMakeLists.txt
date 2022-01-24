@@ -80,6 +80,11 @@ set(Launcher_DISCORD_URL "https://discord.gg/Z52pwxWCHP" CACHE STRING "URL for t
 # Subreddit URL
 set(Launcher_SUBREDDIT_URL "" CACHE STRING "URL for the subreddit.")
 
+# Builds
+set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
+set(Launcher_QT_VERSION_MAJOR "5" CACHE STRING "Major Qt version to build against")
+
+
 #### Check the current Git commit and branch
 include(GetGitRevisionDescription)
 get_git_head_revision(Launcher_GIT_REFSPEC Launcher_GIT_COMMIT)
@@ -96,14 +101,19 @@ add_custom_target(tcversion echo "\\#\\#teamcity[setParameter name=\\'env.LAUNCH
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Concurrent REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5Test REQUIRED)
-find_package(Qt5Xml REQUIRED)
+set(QT_VERSION_MAJOR ${Launcher_QT_VERSION_MAJOR})
+find_package(Qt${QT_VERSION_MAJOR}Core REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR}Widgets REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR}Concurrent REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR}Network REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR}Test REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR}Xml REQUIRED)
 
-find_package(QuaZip-Qt5 REQUIRED)
+if (NOT Launcher_FORCE_BUNDLED_LIBS)
+    find_package(QuaZip-Qt${QT_VERSION_MAJOR} REQUIRED)
+else()
+    MESSAGE(STATUS "Not looking for QuaZip via find_package")
+endif()
 
 # The Qt5 cmake files don't provide its install paths, so ask qmake.
 include(QMakeQuery)
@@ -251,6 +261,12 @@ add_subdirectory(libraries/hoedown) # markdown parser
 add_subdirectory(libraries/launcher) # java based launcher part for Minecraft
 add_subdirectory(libraries/javacheck) # java compatibility checker
 add_subdirectory(libraries/xz-embedded) # xz compression
+if (NOT QuaZip-Qt${QT_VERSION_MAJOR}_FOUND)
+    set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR})
+    add_compile_definitions(QUAZIP_USE_SUBMODULE)
+    MESSAGE(STATUS "Adding QuaZip submodule, with QT_VERSION_MAJOR ${QUAZIP_QT_MAJOR_VERSION}")
+    add_subdirectory(libraries/quazip) # zip manipulation library
+endif()
 add_subdirectory(libraries/rainbow) # Qt extension for colors
 add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader
 add_subdirectory(libraries/LocalPeer) # fork of a library from Qt solutions

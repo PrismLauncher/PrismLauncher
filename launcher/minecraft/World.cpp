@@ -26,9 +26,16 @@
 #include <io/stream_reader.h>
 #include <tag_string.h>
 #include <tag_primitive.h>
+
+#ifdef QUAZIP_USE_SUBMODULE
+#include <quazip/quazip.h>
+#include <quazip/quazipfile.h>
+#include <quazip/quazipdir.h>
+#else
 #include <QuaZip-Qt5-1.2/quazip/quazip.h>
 #include <QuaZip-Qt5-1.2/quazip/quazipfile.h>
 #include <QuaZip-Qt5-1.2/quazip/quazipdir.h>
+#endif
 
 #include <QCoreApplication>
 

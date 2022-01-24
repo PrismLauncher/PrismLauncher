@@ -1,8 +1,15 @@
 #pragma once
 #include "InstanceTask.h"
 #include "net/NetJob.h"
+
+#ifdef QUAZIP_USE_SUBMODULE
+#include <quazip/quazip.h>
+#include <quazip/quazipdir.h>
+#else
 #include "QuaZip-Qt5-1.2/quazip/quazip.h"
 #include "QuaZip-Qt5-1.2/quazip/quazipdir.h"
+#endif
+
 #include "meta/Index.h"
 #include "meta/Version.h"
 #include "meta/VersionList.h"
