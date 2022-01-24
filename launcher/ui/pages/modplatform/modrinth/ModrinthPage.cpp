@@ -90,21 +90,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         text = name;
     else
         text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
-    if (!current.authors.empty()) {
-        auto authorToStr = [](Modrinth::ModpackAuthor & author) {
-            if(author.url.isEmpty()) {
-                return author.name;
-            }
-            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
-        };
-        QStringList authorStrs;
-        for(auto & author: current.authors) {
-            authorStrs.push_back(authorToStr(author));
-        }
-        text += "<br>" + tr(" by ") + authorStrs.join(", ");
-    }
-    text += "<br><br>";
-
+    text += "<br>"+ tr(" by ") + "<a href=\""+current.author.url+"\">"+current.author.name+"</a><br><br>";
     ui->packDescription->setHtml(text + current.description);
 
     if (!current.versionsLoaded)

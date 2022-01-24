@@ -18,10 +18,10 @@ void Modrinth::loadIndexedPack(Modrinth::IndexedPack & pack, QJsonObject & obj)
     pack.logoUrl = Json::requireString(obj, "icon_url");
     pack.logoName = pack.addonId;
 
-    Modrinth::ModpackAuthor packAuthor;
-    packAuthor.name = Json::requireString(obj, "author");
-    packAuthor.url = Json::requireString(obj, "author_url");
-    pack.authors.append(packAuthor); //TODO delete this ? only one author ever exists
+    Modrinth::ModpackAuthor modAuthor;
+    modAuthor.name = Json::requireString(obj, "author");
+    modAuthor.url = Json::requireString(obj, "author_url");
+    pack.author = modAuthor;
 }
 
 void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray & arr, const shared_qobject_ptr<QNetworkAccessManager>& network, BaseInstance * inst)

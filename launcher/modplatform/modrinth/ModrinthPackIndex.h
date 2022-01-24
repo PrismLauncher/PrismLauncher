@@ -32,7 +32,7 @@ struct IndexedPack
     QString addonId;
     QString name;
     QString description;
-    QList<ModpackAuthor> authors;
+    ModpackAuthor author;
     QString logoName;
     QString logoUrl;
     QString websiteUrl;
