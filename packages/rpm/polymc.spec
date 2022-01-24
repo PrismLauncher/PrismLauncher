@@ -6,7 +6,7 @@
 
 Name:           polymc
 Version:        1.0.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Minecraft launcher with ability to manage multiple instances
 
 #
@@ -61,23 +61,18 @@ Source0:        https://github.com/PolyMC/PolyMC/archive/%{version}/%{name}-%{ve
 Source1:        https://github.com/MultiMC/libnbtplusplus/archive/%{libnbtplusplus_commit}/libnbtplusplus-%{libnbtplusplus_shortcommit}.tar.gz
 Source2:        https://github.com/PolyMC/quazip/archive/%{quazip_commit}/quazip-%{quazip_shortcommit}.tar.gz
 
-BuildRequires:  cmake3
+BuildRequires:  cmake
 BuildRequires:  desktop-file-utils
 BuildRequires:  gcc-c++
 
-# Fix warning: Could not complete Guile gdb module initialization from:
-# /usr/share/gdb/guile/gdb/boot.scm
-BuildRequires:  gdb-headless
-
 BuildRequires:  java-devel
-BuildRequires:  pkgconfig(gl)
-BuildRequires:  pkgconfig(Qt5)
-BuildRequires:  pkgconfig(zlib)
+BuildRequires:  %{?suse_version:lib}qt5-qtbase-devel
+BuildRequires:  zlib-devel
 
-Requires: java-headless
-Requires: pkgconfig(gl)
-Requires: pkgconfig(Qt5)
-Requires: pkgconfig(zlib)
+# Minecraft <  1.17
+Recommends:     java-1.8.0-openjdk-headless
+# Minecraft >= 1.17
+Recommends:     java-17-openjdk-headless
 
 %description
 PolyMC is a free, open source launcher for Minecraft. It allows you to have
@@ -105,7 +100,6 @@ mv -f libraries/libnbtplusplus-%{libnbtplusplus_commit} libraries/libnbtplusplus
 
 %cmake_build
 
-
 %install
 %cmake_install
 
@@ -115,8 +109,11 @@ echo "%{_libdir}/%{name}" > "%{buildroot}%{_sysconfdir}/ld.so.conf.d/%{name}-%{_
 
 
 %check
+# skip tests on systems that aren't officially supported
+%if ! 0%{?suse_version}
 %ctest
 desktop-file-validate %{buildroot}%{_datadir}/applications/org.polymc.PolyMC.desktop
+%endif
 
 
 %files
@@ -132,6 +129,9 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/org.polymc.PolyMC.des
 
 
 %changelog
+* Mon Jan 24 2022 Jan Drögehoff <sentrycraft123@gmail.com> - 1.0.5-2
+- remove explicit dependencies, correct dependencies to work on OpenSuse
+
 * Sun Jan 09 2022 Jan Drögehoff <sentrycraft123@gmail.com> - 1.0.5-1
 - Update to 1.0.5
 
