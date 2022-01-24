@@ -378,7 +378,6 @@ void SaveIcon(InstancePtr m_instance)
 
 bool ExportInstanceDialog::doExport()
 {
-    /*
     auto name = FS::RemoveInvalidFilenameChars(m_instance->name());
 
     const QString output = QFileDialog::getSaveFileName(
@@ -404,12 +403,15 @@ bool ExportInstanceDialog::doExport()
 
     auto & blocked = proxyModel->blockedPaths();
     using std::placeholders::_1;
+    QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
+    return false;
+    // TODO Reimplement custom compressDir:
     if (!JlCompress::compressDir(output, m_instance->instanceRoot(), name, std::bind(&SeparatorPrefixTree<'/'>::covers, blocked, _1)))
-    { */
+    {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
         return false;
-    /*}
-    return true;*/
+    }
+    return true;
 }
 
 void ExportInstanceDialog::done(int result)

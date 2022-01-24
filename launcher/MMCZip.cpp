@@ -79,6 +79,101 @@ bool MMCZip::mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &containe
 }
 
 // ours
+bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod>& mods)
+{
+    QuaZip zipOut(targetJarPath);
+    if (!zipOut.open(QuaZip::mdCreate))
+    {
+        QFile::remove(targetJarPath);
+        qCritical() << "Failed to open the minecraft.jar for modding";
+        return false;
+    }
+    // Files already added to the jar.
+    // These files will be skipped.
+    QSet<QString> addedFiles;
+
+    // Modify the jar
+    QListIterator<Mod> i(mods);
+    i.toBack();
+    while (i.hasPrevious())
+    {
+        const Mod &mod = i.previous();
+        // do not merge disabled mods.
+        if (!mod.enabled())
+            continue;
+        if (mod.type() == Mod::MOD_ZIPFILE)
+        {
+            if (!mergeZipFiles(&zipOut, mod.filename(), addedFiles))
+            {
+                zipOut.close();
+                QFile::remove(targetJarPath);
+                qCritical() << "Failed to add" << mod.filename().fileName() << "to the jar.";
+                return false;
+            }
+        }
+        else if (mod.type() == Mod::MOD_SINGLEFILE)
+        {
+            // FIXME: buggy - does not work with addedFiles
+            auto filename = mod.filename();
+            if (!JlCompress::compressFile(&zipOut, filename.absoluteFilePath(), filename.fileName()))
+            {
+                zipOut.close();
+                QFile::remove(targetJarPath);
+                qCritical() << "Failed to add" << mod.filename().fileName() << "to the jar.";
+                return false;
+            }
+            addedFiles.insert(filename.fileName());
+        }
+        else if (mod.type() == Mod::MOD_FOLDER)
+        {
+            // FIXME: buggy - does not work with addedFiles
+            auto filename = mod.filename();
+            QString what_to_zip = filename.absoluteFilePath();
+            QDir dir(what_to_zip);
+            dir.cdUp();
+            QString parent_dir = dir.absolutePath();
+            return false;
+            // TODO: implement custom compressSubDir:
+            if (!JlCompress::compressSubDir(&zipOut, what_to_zip, parent_dir, addedFiles))
+            {
+                zipOut.close();
+                QFile::remove(targetJarPath);
+                qCritical() << "Failed to add" << mod.filename().fileName() << "to the jar.";
+                return false;
+            }
+            qDebug() << "Adding folder " << filename.fileName() << " from "
+                     << filename.absoluteFilePath();
+        }
+        else
+        {
+            // Make sure we do not continue launching when something is missing or undefined...
+            zipOut.close();
+            QFile::remove(targetJarPath);
+            qCritical() << "Failed to add unknown mod type" << mod.filename().fileName() << "to the jar.";
+            return false;
+        }
+    }
+
+    if (!mergeZipFiles(&zipOut, QFileInfo(sourceJarPath), addedFiles, [](const QString key){return !key.contains("META-INF");}))
+    {
+        zipOut.close();
+        QFile::remove(targetJarPath);
+        qCritical() << "Failed to insert minecraft.jar contents.";
+        return false;
+    }
+
+    // Recompress the jar
+    zipOut.close();
+    if (zipOut.getZipError() != 0)
+    {
+        QFile::remove(targetJarPath);
+        qCritical() << "Failed to finalize minecraft.jar!";
+        return false;
+    }
+    return true;
+}
+
+// ours
 QString MMCZip::findFolderOfFileInZip(QuaZip * zip, const QString & what, const QString &root)
 {
     QuaZipDir rootDir(zip, root);

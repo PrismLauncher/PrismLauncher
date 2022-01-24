@@ -42,7 +42,6 @@ void ModMinecraftJar::executeTask()
         emitFailed(tr("Couldn't remove stale jar file: %1").arg(finalJarPath));
     }
 
-    /*
     // create temporary modded jar, if needed
     auto components = m_inst->getPackProfile();
     auto profile = components->getProfile();
@@ -54,13 +53,12 @@ void ModMinecraftJar::executeTask()
         mainJar->getApplicableFiles(currentSystem, jars, temp1, temp2, temp3, m_inst->getLocalLibraryPath());
         auto sourceJarPath = jars[0];
         if(!MMCZip::createModdedJar(sourceJarPath, finalJarPath, jarMods))
-        { */
-            // TODO: add back support for modded jar
+        {
             emitFailed(tr("Failed to create the custom Minecraft jar file."));
             return;
-        /*}
+        }
     }
-    emitSucceeded();*/
+    emitSucceeded();
 }
 
 void ModMinecraftJar::finalize()
