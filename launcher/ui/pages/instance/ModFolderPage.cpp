@@ -355,7 +355,7 @@ void ModFolderPage::on_actionInstall_mods_triggered()
     bool hasFabric = !((MinecraftInstance *)m_inst)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
     bool hasForge = !((MinecraftInstance *)m_inst)->getPackProfile()->getComponentVersion("net.minecraftforge").isEmpty();
     if (!hasFabric && !hasForge) {
-        QMessageBox::critical(this,tr("Error"),tr("Please install a mod loader first !"));
+        QMessageBox::critical(this,tr("Error"),tr("Please install a mod loader first!"));
         return;
     }
     ModDownloadDialog mdownload(m_mods, this, m_inst);

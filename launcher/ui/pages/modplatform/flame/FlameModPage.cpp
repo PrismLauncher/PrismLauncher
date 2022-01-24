@@ -147,7 +147,7 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
                 ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
             }
             if(ui->versionSelectionBox->count() == 0){
-                ui->versionSelectionBox->addItem(tr("No Valid Version found !"), QVariant(""));
+                ui->versionSelectionBox->addItem(tr("No Valid Version found!"), QVariant(""));
             }
 
             suggestCurrent();
@@ -160,7 +160,7 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
             ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
         }
         if(ui->versionSelectionBox->count() == 0){
-            ui->versionSelectionBox->addItem(tr("No Valid Version found !"), QVariant(""));
+            ui->versionSelectionBox->addItem(tr("No Valid Version found!"), QVariant(""));
         }
         suggestCurrent();
     }
