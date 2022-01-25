@@ -19,17 +19,9 @@
 #include <Json.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/PackProfile.h>
-
-#ifdef QUAZIP_USE_SUBMODULE
 #include <quazip/quazip.h>
 #include <quazip/quazipdir.h>
 #include <quazip/quazipfile.h>
-#else
-#include <QuaZip-Qt5-1.2/quazip/quazip.h>
-#include <QuaZip-Qt5-1.2/quazip/quazipdir.h>
-#include <QuaZip-Qt5-1.2/quazip/quazipfile.h>
-#endif
-
 #include <settings/INISettingsObject.h>
 
 #include <memory>

@@ -29,12 +29,7 @@
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/PackManifest.h"
 #include "Json.h"
-
-#ifdef QUAZIP_USE_SUBMODULE
 #include <quazip/quazipdir.h>
-#else
-#include <QuaZip-Qt5-1.2/quazip/quazipdir.h>
-#endif
 #include "modplatform/technic/TechnicPackProcessor.h"
 
 #include "icons/IconList.h"

@@ -263,7 +263,6 @@ add_subdirectory(libraries/javacheck) # java compatibility checker
 add_subdirectory(libraries/xz-embedded) # xz compression
 if (NOT QuaZip-Qt${QT_VERSION_MAJOR}_FOUND)
     set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR})
-    add_compile_definitions(QUAZIP_USE_SUBMODULE)
     MESSAGE(STATUS "Adding QuaZip submodule, with QT_VERSION_MAJOR ${QUAZIP_QT_MAJOR_VERSION}")
     add_subdirectory(libraries/quazip) # zip manipulation library
 endif()

@@ -18,11 +18,7 @@
 #include "InstanceTask.h"
 #include "net/NetJob.h"
 
-#ifdef QUAZIP_USE_SUBMODULE
 #include <quazip/quazip.h>
-#else
-#include "QuaZip-Qt5-1.2/quazip/quazip.h"
-#endif
 
 #include <QFutureWatcher>
 #include <QStringList>

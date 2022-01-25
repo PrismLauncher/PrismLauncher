@@ -19,14 +19,10 @@
 #include <QFileInfo>
 #include <QSet>
 #include "minecraft/mod/Mod.h"
-#include "nonstd/optional"
 #include <functional>
 
-#ifdef QUAZIP_USE_SUBMODULE
 #include <quazip/JlCompress.h>
-#else
-#include <QuaZip-Qt5-1.2/quazip/JlCompress.h>
-#endif
+#include <nonstd/optional>
 
 namespace MMCZip
 {
