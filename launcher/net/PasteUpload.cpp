@@ -8,44 +8,34 @@
 #include <QJsonDocument>
 #include <QFile>
 
-PasteUpload::PasteUpload(QWidget *window, QString text, QString key) : m_window(window)
+PasteUpload::PasteUpload(QWidget *window, QString text, QString url) : m_window(window), m_uploadUrl(url), m_text(text.toUtf8())
 {
-    m_key = key;
-    QByteArray temp;
-    QJsonObject topLevelObj;
-    QJsonObject sectionObject;
-    sectionObject.insert("contents", text);
-    QJsonArray sectionArray;
-    sectionArray.append(sectionObject);
-    topLevelObj.insert("description", "Log Upload");
-    topLevelObj.insert("sections", sectionArray);
-    QJsonDocument docOut;
-    docOut.setObject(topLevelObj);
-    m_jsonContent = docOut.toJson();
 }
 
 PasteUpload::~PasteUpload()
 {
 }
 
-bool PasteUpload::validateText()
-{
-    return m_jsonContent.size() <= maxSize();
-}
-
 void PasteUpload::executeTask()
 {
-    QNetworkRequest request(QUrl("https://api.paste.ee/v1/pastes"));
+    QNetworkRequest request{QUrl(m_uploadUrl)};
     request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
 
-    request.setRawHeader("Content-Type", "application/json");
-    request.setRawHeader("Content-Length", QByteArray::number(m_jsonContent.size()));
-    request.setRawHeader("X-Auth-Token", m_key.toStdString().c_str());
+    QHttpMultiPart *multiPart = new QHttpMultiPart{QHttpMultiPart::FormDataType};
 
-    QNetworkReply *rep = APPLICATION->network()->post(request, m_jsonContent);
+    QHttpPart filePart;
+    filePart.setBody(m_text);
+    filePart.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
+    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"file\"; filename=\"log.txt\"");
+
+    multiPart->append(filePart);
+
+    QNetworkReply *rep = APPLICATION->network()->post(request, multiPart);
+    multiPart->setParent(rep);
 
     m_reply = std::shared_ptr<QNetworkReply>(rep);
-    setStatus(tr("Uploading to paste.ee"));
+    setStatus(tr("Uploading to %1").arg(m_uploadUrl));
+
     connect(rep, &QNetworkReply::uploadProgress, this, &Task::setProgress);
     connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
     connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));
@@ -61,45 +51,23 @@ void PasteUpload::downloadError(QNetworkReply::NetworkError error)
 void PasteUpload::downloadFinished()
 {
     QByteArray data = m_reply->readAll();
-    // if the download succeeded
-    if (m_reply->error() == QNetworkReply::NetworkError::NoError)
+    int statusCode = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+    if (m_reply->error() != QNetworkReply::NetworkError::NoError)
     {
-        m_reply.reset();
-        QJsonParseError jsonError;
-        QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
-        if (jsonError.error != QJsonParseError::NoError)
-        {
-            emitFailed(jsonError.errorString());
-            return;
-        }
-        if (!parseResult(doc))
-        {
-            emitFailed(tr("paste.ee returned an error. Please consult the logs for more information"));
-            return;
-        }
-    }
-    // else the download failed
-    else
-    {
-        emitFailed(QString("Network error: %1").arg(m_reply->errorString()));
+        emitFailed(tr("Network error: %1").arg(m_reply->errorString()));
         m_reply.reset();
         return;
     }
+    else if (statusCode != 200 && statusCode != 201)
+    {
+        QString reasonPhrase = m_reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+        emitFailed(tr("Error: %1 returned unexpected status code %2 %3").arg(m_uploadUrl).arg(statusCode).arg(reasonPhrase));
+        qCritical() << m_uploadUrl << " returned unexpected status code " << statusCode << " with body: " << data;
+        m_reply.reset();
+        return;
+    }
+
+    m_pasteLink = QString::fromUtf8(data).trimmed();
     emitSucceeded();
 }
-
-bool PasteUpload::parseResult(QJsonDocument doc)
-{
-    auto object = doc.object();
-    auto status = object.value("success").toBool();
-    if (!status)
-    {
-        qCritical() << "paste.ee reported error:" << QString(object.value("error").toString());
-        return false;
-    }
-    m_pasteLink = object.value("link").toString();
-    m_pasteID = object.value("id").toString();
-    qDebug() << m_pasteLink;
-    return true;
-}
-

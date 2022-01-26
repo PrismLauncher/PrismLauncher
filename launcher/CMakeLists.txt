@@ -707,8 +707,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/global/LauncherPage.h
     ui/pages/global/ProxyPage.cpp
     ui/pages/global/ProxyPage.h
-    ui/pages/global/PasteEEPage.cpp
-    ui/pages/global/PasteEEPage.h
+    ui/pages/global/PastePage.cpp
+    ui/pages/global/PastePage.h
 
     # GUI - platform pages
     ui/pages/modplatform/VanillaPage.cpp
@@ -842,7 +842,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/pages/global/AccountListPage.ui
     ui/pages/global/JavaPage.ui
     ui/pages/global/LauncherPage.ui
-    ui/pages/global/PasteEEPage.ui
+    ui/pages/global/PastePage.ui
     ui/pages/global/ProxyPage.ui
     ui/pages/global/MinecraftPage.ui
     ui/pages/global/ExternalToolsPage.ui

@@ -100,7 +100,7 @@
          <item>
           <widget class="QPushButton" name="btnPaste">
            <property name="toolTip">
-            <string>Upload the log to paste.ee - it will stay online for a month</string>
+            <string>Upload the log to the paste service configured in preferences</string>
            </property>
            <property name="text">
             <string>Upload</string>
