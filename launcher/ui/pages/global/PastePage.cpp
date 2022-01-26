@@ -30,7 +30,9 @@ PastePage::PastePage(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PastePage)
 {
+    static QRegularExpression validUrlRegExp("https?://.+");
     ui->setupUi(this);
+    ui->urlChoices->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->urlChoices));
     ui->tabWidget->tabBar()->hide();\
     loadSettings();
 }
