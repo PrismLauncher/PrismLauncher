@@ -10,4 +10,3 @@ Icon=org.polymc.PolyMC
 PrefersNonDefaultGPU=true
 Categories=Game;
 Keywords=game;minecraft;launcher;
-StartupWMClass=PolyMC
