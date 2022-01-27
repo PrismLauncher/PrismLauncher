@@ -47,16 +47,25 @@ If everything works correctly, the .deb will be next to the build script, in `Po
 
 ### Building a .rpm
 
-You don't need to install the build dependencies, as the script will use `dnf` to install them for you.
+Build dependencies are automatically installed using `dnf`, but you do need the `rpmdevtools` package (on Fedora)
+in order to fetch sources and setup your tree.
 
 ```
+cd ~
+# setup your ~/rpmbuild directory, required for rpmbuild to work.
+rpmdev-setuptree
+# note: submodules are not needed here, as the spec file will download the tarball instead
 git clone https://github.com/PolyMC/PolyMC.git
-cd packages/rpm
-sudo dnf builddep ./polymec.spec
-rpmbuild -bb ./polymec.spec
+cd PolyMC/packages/rpm
+# install build dependencies
+sudo dnf builddep polymc.spec
+# download build sources
+spectool -g -R polymc.spec
+# now build!
+rpmbuild -bb polymc.spec
 ```
 
-The path to the rpm packages will be printed at the end of building
+The path to the rpm packages will be printed when the build is complete.
 
 ### Building from command line
 You need a source folder, a build folder and an install folder.
