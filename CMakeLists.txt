@@ -101,18 +101,19 @@ add_custom_target(tcversion echo "\\#\\#teamcity[setParameter name=\\'env.LAUNCH
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
-set(QT_VERSION_MAJOR ${Launcher_QT_VERSION_MAJOR})
-find_package(Qt${QT_VERSION_MAJOR}Core REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR}Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR}Concurrent REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR}Network REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR}Test REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR}Xml REQUIRED)
+if(Launcher_QT_VERSION_MAJOR EQUAL 5)
+    set(QT_VERSION_MAJOR 5)
+    find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml)
 
-if (NOT Launcher_FORCE_BUNDLED_LIBS)
-    find_package(QuaZip-Qt${QT_VERSION_MAJOR} REQUIRED)
+    if(NOT Launcher_FORCE_BUNDLED_LIBS)
+        find_package(QuaZip-Qt5 REQUIRED)
+    endif()
+    if (NOT QuaZip-Qt5_FOUND)
+        set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
+        set(FORCE_BUNDLED_QUAZIP 1)
+    endif()
 else()
-    MESSAGE(STATUS "Not looking for QuaZip via find_package")
+    message(FATAL_ERROR "Qt version ${Launcher_QT_VERSION_MAJOR} is not supported")
 endif()
 
 # The Qt5 cmake files don't provide its install paths, so ask qmake.
@@ -261,9 +262,8 @@ add_subdirectory(libraries/hoedown) # markdown parser
 add_subdirectory(libraries/launcher) # java based launcher part for Minecraft
 add_subdirectory(libraries/javacheck) # java compatibility checker
 add_subdirectory(libraries/xz-embedded) # xz compression
-if (NOT QuaZip-Qt${QT_VERSION_MAJOR}_FOUND)
-    set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR})
-    MESSAGE(STATUS "Adding QuaZip submodule, with QT_VERSION_MAJOR ${QUAZIP_QT_MAJOR_VERSION}")
+if (FORCE_BUNDLED_QUAZIP)
+    message(STATUS "Using bundled QuaZip")
     add_subdirectory(libraries/quazip) # zip manipulation library
 endif()
 add_subdirectory(libraries/rainbow) # Qt extension for colors
