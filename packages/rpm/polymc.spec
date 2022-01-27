@@ -112,7 +112,7 @@ echo "%{_libdir}/%{name}" > "%{buildroot}%{_sysconfdir}/ld.so.conf.d/%{name}-%{_
 # skip tests on systems that aren't officially supported
 %if ! 0%{?suse_version}
 %ctest
-desktop-file-validate %{buildroot}%{_datadir}/applications/org.polymc.PolyMC.desktop
+desktop-file-validate %{buildroot}%{_datadir}/applications/org.polymc.polymc.desktop
 %endif
 
 
@@ -123,7 +123,7 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/org.polymc.PolyMC.des
 %{_libdir}/%{name}/*
 %{_datadir}/%{name}/*
 %{_datadir}/metainfo/org.polymc.PolyMC.metainfo.xml
-%{_datadir}/icons/hicolor/scalable/apps/org.polymc.PolyMC.svg
+%{_datadir}/icons/hicolor/scalable/apps/org.polymc.polymC.svg
 %{_datadir}/applications/org.polymc.PolyMC.desktop
 %config %{_sysconfdir}/ld.so.conf.d/*
 
