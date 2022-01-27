@@ -94,6 +94,25 @@ rpmbuild -bb polymc.spec
 
 The path to the rpm packages will be printed when the build is complete.
 
+### Building from command line
+
+You need a source folder, a build folder and an install folder.
+
+```
+# make all the folders
+mkdir ~/PolyMC && cd ~/PolyMC
+mkdir build
+mkdir install
+# clone the complete source
+git clone --recursive https://github.com/PolyMC/PolyMC.git src
+# configure the project
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=../install ../src
+make -j$(nproc) install
+```
+
+The path to the rpm packages will be printed when the build is complete.
+
 ### Building a flatpak
 
 You only need to clone the flatpak sources  
