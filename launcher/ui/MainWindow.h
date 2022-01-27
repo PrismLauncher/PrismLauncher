@@ -27,7 +27,6 @@
 #include "updater/GoUpdate.h"
 
 class LaunchController;
-class NewsChecker;
 class NotificationChecker;
 class QToolButton;
 class InstanceProxyModel;
@@ -109,10 +108,6 @@ private slots:
 
     void on_actionReportBug_triggered();
 
-    void on_actionMoreNews_triggered();
-
-    void newsButtonClicked();
-
     void on_actionLaunchInstance_triggered();
 
     void on_actionLaunchInstanceOffline_triggered();
@@ -174,8 +169,6 @@ private slots:
 
     void repopulateAccountsMenu();
 
-    void updateNewsLabel();
-
     /*!
      * Runs the DownloadTask and installs updates.
      */
@@ -205,14 +198,12 @@ private:
     // these are managed by Qt's memory management model!
     InstanceView *view = nullptr;
     InstanceProxyModel *proxymodel = nullptr;
-    QToolButton *newsLabel = nullptr;
     QLabel *m_statusLeft = nullptr;
     QLabel *m_statusCenter = nullptr;
     QMenu *accountMenu = nullptr;
     QToolButton *accountMenuButton = nullptr;
     KonamiCode * secretEventFilter = nullptr;
 
-    unique_qobject_ptr<NewsChecker> m_newsChecker;
     unique_qobject_ptr<NotificationChecker> m_notificationChecker;
 
     InstancePtr m_selectedInstance;
