@@ -123,8 +123,8 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/org.polymc.polymc.des
 %{_libdir}/%{name}/*
 %{_datadir}/%{name}/*
 %{_datadir}/metainfo/org.polymc.PolyMC.metainfo.xml
-%{_datadir}/icons/hicolor/scalable/apps/org.polymc.polymC.svg
-%{_datadir}/applications/org.polymc.PolyMC.desktop
+%{_datadir}/icons/hicolor/scalable/apps/org.polymc.PolyMC.svg
+%{_datadir}/applications/org.polymc.polymc.desktop
 %config %{_sysconfdir}/ld.so.conf.d/*
 
 
