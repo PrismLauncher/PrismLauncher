@@ -66,7 +66,7 @@ set(Launcher_UPDATER_BASE "" CACHE STRING "Base URL for the updater.")
 set(Launcher_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
 
 # The metadata server
-set(Launcher_META_URL "https://meta.multimc.org/v1/" CACHE STRING "URL to fetch Launcher's meta files from.")
+set(Launcher_META_URL "https://meta.polymc.org/v1/" CACHE STRING "URL to fetch PolyMC's meta files from.")
 
 # paste.ee API key
 set(Launcher_PASTE_EE_API_KEY "utLvciUouSURFzfjPxLBf5W4ISsUX4pwBDF7N1AfZ" CACHE STRING "API key you can get from paste.ee when you register an account")
