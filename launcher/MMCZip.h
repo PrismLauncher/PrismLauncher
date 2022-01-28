@@ -35,6 +35,24 @@ namespace MMCZip
                                             const FilterFunction filter = nullptr);
 
     /**
+     * Compress directory, by providing a list of files to compress
+     * \param zip target archive
+     * \param dir directory that will be compressed (to compress with relative paths)
+     * \param files list of files to compress
+     * \return true for success or false for failure
+     */
+    bool compressDirFiles(QuaZip *zip, QString dir, QFileInfoList files);
+
+    /**
+     * Compress directory, by providing a list of files to compress
+     * \param fileCompressed target archive file
+     * \param dir directory that will be compressed (to compress with relative paths)
+     * \param files list of files to compress
+     * \return true for success or false for failure
+     */
+    bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files);
+
+    /**
      * take a source jar, add mods to it, resulting in target jar
      */
     bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod>& mods);
@@ -99,13 +117,4 @@ namespace MMCZip
      * \return true for success or false for failure
      */
     bool collectFileListRecursively(const QString &rootDir, const QString &subDir, QFileInfoList *files, FilterFunction excludeFilter);
-
-    /**
-     * Compress directory, by providing a list of files to compress
-     * \param fileCompressed target archive file
-     * \param dir directory that will be compressed (to compress with relative paths)
-     * \param files list of files to compress
-     * \return true for success or false for failure
-     */
-    bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files);
 }
