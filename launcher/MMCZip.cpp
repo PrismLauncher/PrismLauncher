@@ -311,3 +311,63 @@ bool MMCZip::extractFile(QString fileCompressed, QString file, QString target)
     }
     return MMCZip::extractRelFile(&zip, file, target);
 }
+
+bool MMCZip::collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList *files,
+                                        MMCZip::FilterFunction excludeFilter) {
+    QDir rootDirectory(rootDir);
+    if (!rootDirectory.exists()) return false;
+
+    QDir directory;
+    if (subDir == nullptr)
+        directory = rootDirectory;
+    else
+        directory = QDir(subDir);
+
+    if (!directory.exists()) return false;  // shouldn't ever happen
+
+    // recurse directories
+    QFileInfoList entries = directory.entryInfoList(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Hidden);
+    for (const auto& e: entries) {
+        if (!collectFileListRecursively(rootDir, e.filePath(), files, excludeFilter))
+            return false;
+    }
+
+    // collect files
+    entries = directory.entryInfoList(QDir::Files);
+    for (const auto& e: entries) {
+        QString relativeFilePath = rootDirectory.relativeFilePath(e.absoluteFilePath());
+        if (excludeFilter && excludeFilter(relativeFilePath)) {
+            qDebug() << "Skipping file " << relativeFilePath;
+            continue;
+        }
+
+        files->append(e.filePath());  // we want the original paths for MMCZip::compressDirFiles
+    }
+    return true;
+}
+
+bool MMCZip::compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files)
+{
+    QuaZip zip(fileCompressed);
+    QDir().mkpath(QFileInfo(fileCompressed).absolutePath());
+    if(!zip.open(QuaZip::mdCreate)) {
+        QFile::remove(fileCompressed);
+        return false;
+    }
+
+    QDir directory(dir);
+    if (!directory.exists()) return false;
+
+    for (auto e : files) {
+        auto filePath = directory.relativeFilePath(e.absoluteFilePath());
+        if( !JlCompress::compressFile(&zip, e.absoluteFilePath(), filePath)) return false;
+    }
+
+    zip.close();
+    if(zip.getZipError()!=0) {
+        QFile::remove(fileCompressed);
+        return false;
+    }
+
+    return true;
+}
