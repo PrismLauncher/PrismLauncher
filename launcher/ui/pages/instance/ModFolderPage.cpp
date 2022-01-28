@@ -143,6 +143,11 @@ ModFolderPage::ModFolderPage(
     ui(new Ui::ModFolderPage)
 {
     ui->setupUi(this);
+    if(id == "mods") {
+        auto act = new QAction(tr("Install Mods"), this);
+        ui->actionsToolbar->insertActionBefore(ui->actionView_configs,act);
+        connect(act, &QAction::triggered, this, &ModFolderPage::on_actionInstall_mods_triggered);
+    }
     ui->actionsToolbar->insertSpacer(ui->actionView_configs);
 
     m_inst = inst;

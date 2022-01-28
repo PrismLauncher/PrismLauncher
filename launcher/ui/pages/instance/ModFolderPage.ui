@@ -88,7 +88,6 @@
    <addaction name="actionRemove"/>
    <addaction name="actionEnable"/>
    <addaction name="actionDisable"/>
-   <addaction name="actionInstall_mods"/>
    <addaction name="actionView_configs"/>
    <addaction name="actionView_Folder"/>
   </widget>
@@ -135,14 +134,6 @@
   <action name="actionView_Folder">
    <property name="text">
     <string>View &amp;Folder</string>
-   </property>
-  </action>
-  <action name="actionInstall_mods">
-   <property name="text">
-    <string>Install mods</string>
-   </property>
-   <property name="toolTip">
-    <string>Install mods from Modrinth or Curseforge</string>
    </property>
   </action>
  </widget>
