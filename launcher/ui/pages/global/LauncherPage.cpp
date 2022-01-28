@@ -246,33 +246,32 @@ void LauncherPage::applySettings()
     //FIXME: make generic
     switch (ui->themeComboBox->currentIndex())
     {
-    case 1:
+    case 0:
         s->set("IconTheme", "pe_dark");
         break;
-    case 2:
+    case 1:
         s->set("IconTheme", "pe_light");
         break;
-    case 3:
+    case 2:
         s->set("IconTheme", "pe_blue");
         break;
-    case 4:
-        s->set("IconTheme", "multimc");
+    case 3:
+        s->set("IconTheme", "pe_colored");
         break;
-    case 5:
+    case 4:
         s->set("IconTheme", "OSX");
         break;
-    case 6:
+    case 5:
         s->set("IconTheme", "iOS");
         break;
-    case 7:
+    case 6:
         s->set("IconTheme", "flat");
         break;
-    case 8:
+    case 7:
         s->set("IconTheme", "custom");
         break;
-    case 0:
-    default:
-        s->set("IconTheme", "pe_colored");
+    case 8:
+        s->set("IconTheme", "multimc");
         break;
     }
 
@@ -327,39 +326,39 @@ void LauncherPage::loadSettings()
     auto theme = s->get("IconTheme").toString();
     if (theme == "pe_dark")
     {
-        ui->themeComboBox->setCurrentIndex(1);
+        ui->themeComboBox->setCurrentIndex(0);
     }
     else if (theme == "pe_light")
     {
-        ui->themeComboBox->setCurrentIndex(2);
+        ui->themeComboBox->setCurrentIndex(1);
     }
     else if (theme == "pe_blue")
     {
-        ui->themeComboBox->setCurrentIndex(3);
+        ui->themeComboBox->setCurrentIndex(2);
     }
     else if (theme == "pe_colored")
     {
-        ui->themeComboBox->setCurrentIndex(4);
+        ui->themeComboBox->setCurrentIndex(3);
     }
     else if (theme == "OSX")
     {
-        ui->themeComboBox->setCurrentIndex(5);
+        ui->themeComboBox->setCurrentIndex(4);
     }
     else if (theme == "iOS")
     {
-        ui->themeComboBox->setCurrentIndex(6);
+        ui->themeComboBox->setCurrentIndex(5);
     }
     else if (theme == "flat")
+    {
+        ui->themeComboBox->setCurrentIndex(6);
+    }
+    else if (theme == "multimc")
     {
         ui->themeComboBox->setCurrentIndex(7);
     }
     else if (theme == "custom")
     {
         ui->themeComboBox->setCurrentIndex(8);
-    }
-    else
-    {
-        ui->themeComboBox->setCurrentIndex(0);
     }
 
     {
