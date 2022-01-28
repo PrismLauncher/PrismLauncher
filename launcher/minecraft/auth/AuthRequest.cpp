@@ -44,7 +44,7 @@ void AuthRequest::onRequestFinished() {
     if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
         return;
     }
-    httpStatus_ = 200;
+    httpStatus_ = reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     finish();
 }
 

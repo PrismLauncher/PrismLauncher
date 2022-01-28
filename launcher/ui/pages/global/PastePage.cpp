@@ -1,4 +1,4 @@
-/* Copyright 2013-2021 MultiMC Contributors
+/* Copyright 2013-2021 MultiMC & PolyMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,69 +13,51 @@
  * limitations under the License.
  */
 
-#include "PasteEEPage.h"
-#include "ui_PasteEEPage.h"
+#include "PastePage.h"
+#include "ui_PastePage.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QTabBar>
+#include <QVariant>
 
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
 #include "Application.h"
 
-PasteEEPage::PasteEEPage(QWidget *parent) :
+PastePage::PastePage(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PasteEEPage)
+    ui(new Ui::PastePage)
 {
+    static QRegularExpression validUrlRegExp("https?://.+");
     ui->setupUi(this);
+    ui->urlChoices->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->urlChoices));
     ui->tabWidget->tabBar()->hide();\
-    connect(ui->customAPIkeyEdit, &QLineEdit::textEdited, this, &PasteEEPage::textEdited);
     loadSettings();
 }
 
-PasteEEPage::~PasteEEPage()
+PastePage::~PastePage()
 {
     delete ui;
 }
 
-void PasteEEPage::loadSettings()
+void PastePage::loadSettings()
 {
     auto s = APPLICATION->settings();
-    QString keyToUse = s->get("PasteEEAPIKey").toString();
-    if(keyToUse == "multimc")
-    {
-        ui->multimcButton->setChecked(true);
-    }
-    else
-    {
-        ui->customButton->setChecked(true);
-        ui->customAPIkeyEdit->setText(keyToUse);
-    }
+    QString pastebinURL = s->get("PastebinURL").toString();
+    ui->urlChoices->setCurrentText(pastebinURL);
 }
 
-void PasteEEPage::applySettings()
+void PastePage::applySettings()
 {
     auto s = APPLICATION->settings();
-
-    QString pasteKeyToUse;
-    if (ui->customButton->isChecked())
-        pasteKeyToUse = ui->customAPIkeyEdit->text();
-    else
-    {
-        pasteKeyToUse =  "multimc";
-    }
-    s->set("PasteEEAPIKey", pasteKeyToUse);
+    QString pastebinURL = ui->urlChoices->currentText();
+    s->set("PastebinURL", pastebinURL);
 }
 
-bool PasteEEPage::apply()
+bool PastePage::apply()
 {
     applySettings();
     return true;
-}
-
-void PasteEEPage::textEdited(const QString& text)
-{
-    ui->customButton->setChecked(true);
 }

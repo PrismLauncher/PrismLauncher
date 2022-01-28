@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PasteEEPage</class>
- <widget class="QWidget" name="PasteEEPage">
+ <class>PastePage</class>
+ <widget class="QWidget" name="PastePage">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -36,39 +36,9 @@
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
-          <string>paste.ee API key</string>
+          <string>Pastebin URL</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_10">
-          <item>
-           <widget class="QRadioButton" name="multimcButton">
-            <property name="text">
-             <string>MultiMC key - 12MB &amp;upload limit</string>
-            </property>
-            <attribute name="buttonGroup">
-             <string notr="true">pasteButtonGroup</string>
-            </attribute>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="customButton">
-            <property name="text">
-             <string>&amp;Your own key - 12MB upload limit:</string>
-            </property>
-            <attribute name="buttonGroup">
-             <string notr="true">pasteButtonGroup</string>
-            </attribute>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="customAPIkeyEdit">
-            <property name="echoMode">
-             <enum>QLineEdit::Password</enum>
-            </property>
-            <property name="placeholderText">
-             <string>Paste your API key here!</string>
-            </property>
-           </widget>
-          </item>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
            <widget class="Line" name="line">
             <property name="orientation">
@@ -77,9 +47,44 @@
            </widget>
           </item>
           <item>
+           <widget class="QLabel" name="label_2">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: only input that starts with &lt;span style=&quot; font-weight:600;&quot;&gt;http://&lt;/span&gt; or &lt;span style=&quot; font-weight:600;&quot;&gt;https://&lt;/span&gt; will be accepted.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="scaledContents">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="urlChoices">
+            <property name="editable">
+             <bool>true</bool>
+            </property>
+            <property name="insertPolicy">
+             <enum>QComboBox::NoInsert</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>https://0x0.st</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>https://paste.polymc.org</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="label">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://paste.ee&quot;&gt;paste.ee&lt;/a&gt; is used by MultiMC for log uploads. If you have a &lt;a href=&quot;https://paste.ee&quot;&gt;paste.ee&lt;/a&gt; account, you can add your API key here and have your uploaded logs paired with your account.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Here you can choose from a predefined list of paste services, or input the URL of a different paste service of your choice, provided it supports the same protocol as 0x0.st, that is POST a file parameter to the URL and return a link in the response body.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
@@ -116,13 +121,7 @@
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>multimcButton</tabstop>
-  <tabstop>customButton</tabstop>
-  <tabstop>customAPIkeyEdit</tabstop>
  </tabstops>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="pasteButtonGroup"/>
- </buttongroups>
 </ui>

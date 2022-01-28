@@ -16,15 +16,19 @@
 #include "MSALoginDialog.h"
 #include "ui_MSALoginDialog.h"
 
+#include "DesktopServices.h"
 #include "minecraft/auth/AccountTask.h"
 
 #include <QtWidgets/QPushButton>
 #include <QUrl>
+#include <QApplication>
+#include <QClipboard>
 
 MSALoginDialog::MSALoginDialog(QWidget *parent) : QDialog(parent), ui(new Ui::MSALoginDialog)
 {
     ui->setupUi(this);
     ui->progressBar->setVisible(false);
+    ui->actionButton->setVisible(false);
     // ui->buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
@@ -81,10 +85,17 @@ void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& 
     QString urlString = uri.toString();
     QString linkString = QString("<a href=\"%1\">%2</a>").arg(urlString, urlString);
     ui->label->setText(tr("<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>").arg(linkString, code));
+    ui->actionButton->setVisible(true);
+    connect(ui->actionButton, &QPushButton::clicked, [=]() {
+        DesktopServices::openUrl(uri);
+        QClipboard* cb = QApplication::clipboard();
+        cb->setText(code);
+    });
 }
 
 void MSALoginDialog::hideVerificationUriAndCode() {
     m_externalLoginTimer.stop();
+    ui->actionButton->setVisible(false);
 }
 
 void MSALoginDialog::setUserInputsEnabled(bool enable)
@@ -110,6 +121,7 @@ void MSALoginDialog::onTaskFailed(const QString &reason)
     // Re-enable user-interaction
     setUserInputsEnabled(true);
     ui->progressBar->setVisible(false);
+    ui->actionButton->setVisible(false);
 }
 
 void MSALoginDialog::onTaskSucceeded()

@@ -1,7 +1,7 @@
 # PolyMC
 
     Copyright (C) 2012-2021 MultiMC Contributors
-    Copyright (C) 2021 PolyMC Contributors
+    Copyright (C) 2021-2022 PolyMC Contributors
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-    
+
 # Launcher (https://github.com/MultiMC/Launcher)
     Copyright 2012-2021 MultiMC Contributors
     Licensed under the Apache License, Version 2.0 (the "License");

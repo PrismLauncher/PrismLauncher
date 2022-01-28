@@ -264,11 +264,6 @@
             </property>
             <item>
              <property name="text">
-              <string>Default</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
               <string>Simple (Dark Icons)</string>
              </property>
             </item>
@@ -305,6 +300,11 @@
             <item>
              <property name="text">
               <string>Custom</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>MultiMC</string>
              </property>
             </item>
            </widget>

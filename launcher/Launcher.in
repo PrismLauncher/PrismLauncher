@@ -14,7 +14,7 @@ if [[ $EUID -eq 0 ]]; then
 fi
 
 
-LAUNCHER_NAME=@Launcher_Name@
+LAUNCHER_NAME=@Launcher_APP_BINARY_NAME@
 LAUNCHER_DIR="$(dirname "$(readlink -f "$0")")"
 echo "Launcher Dir: ${LAUNCHER_DIR}"
 

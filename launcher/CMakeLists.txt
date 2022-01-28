@@ -181,15 +181,6 @@ set(NOTIFICATIONS_SOURCES
     notifications/NotificationChecker.cpp
 )
 
-# Backend for the news bar... there's usually no news.
-set(NEWS_SOURCES
-    # News System
-    news/NewsChecker.h
-    news/NewsChecker.cpp
-    news/NewsEntry.h
-    news/NewsEntry.cpp
-)
-
 # Icon interface
 set(ICONS_SOURCES
     # Icons System and related code
@@ -719,8 +710,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/global/LauncherPage.h
     ui/pages/global/ProxyPage.cpp
     ui/pages/global/ProxyPage.h
-    ui/pages/global/PasteEEPage.cpp
-    ui/pages/global/PasteEEPage.h
+    ui/pages/global/PastePage.cpp
+    ui/pages/global/PastePage.h
 
     # GUI - platform pages
     ui/pages/modplatform/VanillaPage.cpp
@@ -865,7 +856,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/pages/global/AccountListPage.ui
     ui/pages/global/JavaPage.ui
     ui/pages/global/LauncherPage.ui
-    ui/pages/global/PasteEEPage.ui
+    ui/pages/global/PastePage.ui
     ui/pages/global/ProxyPage.ui
     ui/pages/global/MinecraftPage.ui
     ui/pages/global/ExternalToolsPage.ui

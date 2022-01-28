@@ -68,11 +68,6 @@ public:
     QString NEWS_RSS_URL;
 
     /**
-     * API key you can get from paste.ee when you register an account
-     */
-    QString PASTE_EE_KEY;
-
-    /**
      * Client ID you can get from Imgur when you register an application
      */
     QString IMGUR_CLIENT_ID;

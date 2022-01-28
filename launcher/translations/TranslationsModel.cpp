@@ -143,6 +143,11 @@ struct TranslationsModel::Private
 
     std::unique_ptr<POTranslator> m_po_translator;
     QFileSystemWatcher *watcher;
+
+    const QString m_system_locale = QLocale::system().name();
+    const QString m_system_language = m_system_locale.split('_').front();
+
+    bool no_language_set = false;
 };
 
 TranslationsModel::TranslationsModel(QString path, QObject* parent): QAbstractListModel(parent)
@@ -164,7 +169,10 @@ TranslationsModel::~TranslationsModel()
 void TranslationsModel::translationDirChanged(const QString& path)
 {
     qDebug() << "Dir changed:" << path;
-    reloadLocalFiles();
+    if (!d->no_language_set)
+    {
+        reloadLocalFiles();
+    }
     selectLanguage(selectedLanguage());
 }
 
@@ -172,7 +180,26 @@ void TranslationsModel::indexReceived()
 {
     qDebug() << "Got translations index!";
     d->m_index_job.reset();
-    if(d->m_selectedLanguage != defaultLangCode)
+
+    if (d->no_language_set)
+    {
+        reloadLocalFiles();
+
+        auto language = d->m_system_locale;
+        if (!findLanguage(language))
+        {
+            language = d->m_system_language;
+        }
+        selectLanguage(language);
+        if (selectedLanguage() != defaultLangCode)
+        {
+            updateLanguage(selectedLanguage());
+        }
+        APPLICATION->settings()->set("Language", selectedLanguage());
+        d->no_language_set = false;
+    }
+
+    else if(d->m_selectedLanguage != defaultLangCode)
     {
         downloadTranslation(d->m_selectedLanguage);
     }
@@ -319,8 +346,19 @@ void TranslationsModel::reloadLocalFiles()
     {
         d->m_languages.append(language);
     }
-    std::sort(d->m_languages.begin(), d->m_languages.end(), [](const Language& a, const Language& b) {
-        return a.key.compare(b.key) < 0;
+    std::sort(d->m_languages.begin(), d->m_languages.end(), [this](const Language& a, const Language& b) {
+        if (a.key != b.key)
+        {
+            if (a.key == d->m_system_locale || a.key == d->m_system_language)
+            {
+                return true;
+            }
+            if (b.key == d->m_system_locale || b.key == d->m_system_language)
+            {
+                return false;
+            }
+        }
+        return a.key < b.key;
     });
     endInsertRows();
 }
@@ -439,6 +477,12 @@ bool TranslationsModel::selectLanguage(QString key)
 {
     QString &langCode = key;
     auto langPtr = findLanguage(key);
+
+    if (langCode.isEmpty())
+    {
+        d->no_language_set = true;
+    }
+
     if(!langPtr)
     {
         qWarning() << "Selected invalid language" << key << ", defaulting to" << defaultLangCode;

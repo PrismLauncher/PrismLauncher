@@ -103,11 +103,15 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     for(QString line : lines)
     {
         line = line.trimmed();
+        // NOTE: workaround for GH-4125, where garbage is getting printed into stdout on bedrock linux
+        if (line.contains("/bedrock/strata")) {
+            continue;
+        }
 
         auto parts = line.split('=', QString::SkipEmptyParts);
         if(parts.size() != 2 || parts[0].isEmpty() || parts[1].isEmpty())
         {
-            success = false;
+            continue;
         }
         else
         {

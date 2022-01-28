@@ -1,8 +1,9 @@
 <p align="center">
-  <img src="/program_info/polymc-light.png#gh-light-mode-only" alt="PolyMC logo"/>
-  <img src="/program_info/polymc-dark.png#gh-dark-mode-only" alt="PolyMC logo"/>
+  <img src="./program_info/polymc-header-black.svg#gh-light-mode-only" alt="PolyMC logo"/>
+  <img src="./program_info/polymc-header.svg#gh-dark-mode-only" alt="PolyMC logo"/>
 </p>
 <br>
+
 PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
 
 This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The PolyMC community felt that the maintainer was not acting in the spirit of Free Software so this fork was made. Read "[Why was this fork made?](https://github.com/PolyMC/PolyMC/wiki/FAQ)" on the wiki for more details.
@@ -23,6 +24,7 @@ Several source build packages are available, along with experimental pre-built g
 - [Windows (32-bit)](https://packages.polymc.org/latest/win32/win32.zip) ([SHA256](https://packages.polymc.org/latest/win32/win32.zip.sha256)) - this is a portable package, you can extract it anywhere and run it. This package needs testing.
 - [Debian (AMD64)](https://packages.polymc.org/latest/deb/polymc-amd64.deb) ([SHA256](https://packages.polymc.org/latest/deb/polymc-amd64.deb.sha256)) - this is intended to be installed with `dpkg -i`. Alternatively, you may build the `.deb` yourself, by going to `packages/debian` and running `./makedeb.sh`.
 - [AppImage (AMD64)](https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage) ([SHA256](https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage.sha256)) - `chmod +x` must be run on this file before usage. This should work on any distribution.
+- [Arch Linux (AMD64)](https://packages.polymc.org/latest/arch/polymc-bin-latest-1-x86_64.pkg.tar.zst) ([SHA256](https://packages.polymc.org/latest/arch/polymc-bin-latest-1-x86_64.pkg.tar.zst.sha256)) - this is intended to be installed with `pacman -U`. This is an alternative if building the AUR package is not desired.
 - MacOS currently does not have any packages. We are still working on setting up MacOS packaging.
 
 ## Development

@@ -6,6 +6,7 @@
 #include <QLabel>
 #include "Application.h"
 #include "translations/TranslationsModel.h"
+#include "settings/Setting.h"
 
 LanguageSelectionWidget::LanguageSelectionWidget(QWidget *parent) :
     QWidget(parent)
@@ -37,6 +38,9 @@ LanguageSelectionWidget::LanguageSelectionWidget(QWidget *parent) :
     languageView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     connect(languageView->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &LanguageSelectionWidget::languageRowChanged);
     verticalLayout->setContentsMargins(0,0,0,0);
+
+    auto language_setting = APPLICATION->settings()->getSetting("Language");
+    connect(language_setting.get(), &Setting::SettingChanged, this, &LanguageSelectionWidget::languageSettingChanged);
 }
 
 QString LanguageSelectionWidget::getSelectedLanguageKey() const
@@ -63,4 +67,11 @@ void LanguageSelectionWidget::languageRowChanged(const QModelIndex& current, con
     QString key = translations->data(current, Qt::UserRole).toString();
     translations->selectLanguage(key);
     translations->updateLanguage(key);
+}
+
+void LanguageSelectionWidget::languageSettingChanged(const Setting &, const QVariant)
+{
+    auto translations = APPLICATION->translations();
+    auto index = translations->selectedIndex();
+    languageView->setCurrentIndex(index);
 }
