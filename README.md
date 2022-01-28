@@ -64,7 +64,16 @@ A [Nix derivation](packages/nix/NIX.md) is available.
 
 ### <img src="https://www.gentoo.org/assets/img/logo/gentoo-signet.svg" height="20" /> Gentoo
 
-A Gentoo ebuild is available in the [swirl](https://git.swurl.xyz/swirl/ebuilds) overlay, named `games-action/polymc`. Check the README for instructions on how to add the overlay.
+A Gentoo ebuild is available in the [swirl](https://git.swurl.xyz/swirl/ebuilds) overlay, named `games-action/polymc`.
+
+```sh
+emerge --oneshot eselect-repository
+eselect-repository enable swirl
+emaint sync -r swirl
+emerge polymc
+# to use latest git version:
+sudo tee -a /etc/portage/package.accept_keywords <<< "=games-action/polymc-9999 ~amd64"
+```
 
 ### <img src="https://www.vectorlogo.zone/logos/getfedora/getfedora-icon.svg" height="20"> Fedora
 
