@@ -87,6 +87,13 @@
      </property>
     </widget>
    </item>
+      <item>
+    <widget class="QLabel" name="versionLabel">
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
@@ -148,16 +155,6 @@
         <widget class="Line" name="line">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="versionLabel">
-         <property name="text">
-          <string>Version:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
