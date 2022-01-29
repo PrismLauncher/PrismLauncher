@@ -217,7 +217,7 @@ zlib1.dll
 ### Install prerequisites:
 - Install XCode Command Line tools
 - Install the official build of CMake (https://cmake.org/download/)
-- Install JDK 8 (https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html)
+- Install JDK 8 (https://adoptium.net/releases.html?variant=openjdk8&jvmVariant=hotspot)
 - Get Qt 5.6 and install it (https://download.qt.io/new_archive/qt/5.6/5.6.3/)
 
 ### XCode Command Line tools
