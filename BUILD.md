@@ -257,7 +257,7 @@ zlib1.dll
 - Install XCode Command Line tools
 - Install the official build of CMake (https://cmake.org/download/)
 - Install JDK 8 (https://adoptium.net/releases.html?variant=openjdk8&jvmVariant=hotspot)
-- Get Qt 5.6 and install it (https://download.qt.io/new_archive/qt/5.6/5.6.3/)
+- Get Qt 5.6 and install it (https://download.qt.io/new_archive/qt/5.6/5.6.3/) or higher (tested) (https://www.qt.io/download-qt-installer?utm_referrer=https%3A%2F%2Fwww.qt.io%2Fdownload-open-source)
 
 You can use `homebrew` to simplify the installation of build dependencies
 
@@ -281,15 +281,15 @@ cmake \
  -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
  -DCMAKE_BUILD_TYPE=Release \
  -DCMAKE_INSTALL_PREFIX:PATH="$(dirname $PWD)/dist/" \
- -DCMAKE_PREFIX_PATH="/path/to/Qt5.6/" \
- -DQt5_DIR="/path/to/Qt5.6/" \
+ -DCMAKE_PREFIX_PATH="/path/to/Qt/" \
+ -DQt5_DIR="/path/to/Qt/" \
  -DLauncher_LAYOUT=mac-bundle \
  -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
  ..
 make install
 ```
 
-Remember to replace `/path/to/Qt5.6/` with the actual path. For newer Qt installations, it is often in your home directory.
+Remember to replace `/path/to/Qt/` with the actual path. For newer Qt installations, it is often in your home directory.
 
 **Note:** The final app bundle may not run due to code signing issues, which
 need to be fixed with `codesign -fs -`.
