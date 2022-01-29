@@ -46,13 +46,16 @@ We use [makedeb](https://docs.makedeb.org/) for our Debian packages.
 Several MPR packages are available:
 
 [![polymc](https://img.shields.io/badge/mpr-polymc-orange)](https://mpr.makedeb.org/packages/polymc)  
-[![polymc-bin](https://img.shields.io/badge/mpr-polymc--bin-orange)](https://mpr.makedeb.org/packages/polymc-bin)
+[![polymc-bin](https://img.shields.io/badge/mpr-polymc--bin-orange)](https://mpr.makedeb.org/packages/polymc-bin)  
+[![polymc-git](https://img.shields.io/badge/mpr-polymc--git-orange)](https://mpr.makedeb.org/packages/polymc-git)
 
 ```sh
 # stable source package:
 sudo tap install polymc
 # stable binary package:
 sudo tap install polymc-bin
+# latest git package:
+sudo tap install polymc-git
 ```
 
 ### <img src="https://www.vectorlogo.zone/logos/nixos/nixos-icon.svg" height="20" /> Nix
