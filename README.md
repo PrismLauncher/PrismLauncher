@@ -25,7 +25,7 @@ Several source build packages are available, along with experimental pre-built g
 - [Debian (AMD64)](https://packages.polymc.org/latest/deb/polymc-amd64.deb) ([SHA256](https://packages.polymc.org/latest/deb/polymc-amd64.deb.sha256)) - this is intended to be installed with `dpkg -i`. Alternatively, you may build the `.deb` yourself, by going to `packages/debian` and running `./makedeb.sh`.
 - [AppImage (AMD64)](https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage) ([SHA256](https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage.sha256)) - `chmod +x` must be run on this file before usage. This should work on any distribution.
 - [Arch Linux (AMD64)](https://packages.polymc.org/latest/arch/polymc-bin-latest-1-x86_64.pkg.tar.zst) ([SHA256](https://packages.polymc.org/latest/arch/polymc-bin-latest-1-x86_64.pkg.tar.zst.sha256)) - this is intended to be installed with `pacman -U`. This is an alternative if building the AUR package is not desired.
-- MacOS currently does not have any packages. We are still working on setting up MacOS packaging.
+- MacOS currently does not have any packages. We are still working on setting up MacOS packaging. Meanwhile, you can [build](https://github.com/PolyMC/PolyMC/blob/develop/BUILD.md#macos) it for yourself.
 
 ## Development
 If you want to contribute to PolyMC you might find it useful to join [#development:polymc.org on Matrix](https://matrix.to/#/#development:polymc.org) or join [our Discord server](https://discord.gg/xq7fxrgtMP), which is bridged with the PolyMC Matrix rooms. Thank you!
