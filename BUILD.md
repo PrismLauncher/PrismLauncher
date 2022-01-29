@@ -230,7 +230,7 @@ xcode-select --install
 
 ### Build
 
-Pick an installation path - this is where the final `.app` will be constructed when you run `make install`. Supply it as the `CMAKE_INSTALL_PREFIX` argument during CMake configuration.
+Pick an installation path - this is where the final `polymc.app` will be constructed when you run `make install`. Supply it as the `CMAKE_INSTALL_PREFIX` argument during CMake configuration.
 
 ```
 git clone --recursive https://github.com/PolyMC/PolyMC.git
