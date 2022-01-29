@@ -234,7 +234,7 @@ Pick an installation path - this is where the final `.app` will be constructed w
 
 ```
 git clone --recursive https://github.com/PolyMC/PolyMC.git
-cd Launcher
+cd PolyMC
 mkdir build
 cd build
 cmake \
@@ -248,6 +248,7 @@ cmake \
  -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
  ..
 make install
+mv jars/ polymc.app/Contents/MacOS
 ```
 
 **Note:** The final app bundle may not run due to code signing issues, which
