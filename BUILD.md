@@ -248,7 +248,6 @@ cmake \
  -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
  ..
 make install
-mv jars/ dist/polymc.app/Contents/MacOS
 ```
 
 **Note:** The final app bundle may not run due to code signing issues, which
