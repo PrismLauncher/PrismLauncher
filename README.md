@@ -27,12 +27,12 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 ### <img src="https://www.vectorlogo.zone/logos/archlinux/archlinux-icon.svg" height="20"/> Arch Linux
 
 There are several AUR packages available:  
-[![polymc](https://img.shields.io/aur/version/polymc?label=aur/polymc)](https://aur.archlinux.org/packages/polymc/)  
-[![polymc-bin](https://img.shields.io/aur/version/polymc-bin?label=aur/polymc-bin)](https://aur.archlinux.org/packages/polymc-bin/)  
-[![polymc-git](https://img.shields.io/aur/version/polymc-git?label=aur/polymc-git)](https://aur.archlinux.org/packages/polymc-git/)
+[![polymc](https://img.shields.io/badge/aur-polymc-blue)](https://aur.archlinux.org/packages/polymc/)  
+[![polymc-bin](https://img.shields.io/badge/aur-polymc--bin-blue)](https://aur.archlinux.org/packages/polymc-bin/)  
+[![polymc-git](https://img.shields.io/badge/aur-polymc--git-blue)](https://aur.archlinux.org/packages/polymc-git/)
 
 ```sh
-# stable source package
+# stable source package:
 yay -S polymc
 # stable binary package:
 yay -S polymc-bin
@@ -40,22 +40,19 @@ yay -S polymc-bin
 yay -S polymc-git
 ```
 
-A prebuilt Arch package is available:  
-[Arch Linux (AMD64)](https://packages.polymc.org/latest/arch/polymc-bin-latest-1-x86_64.pkg.tar.zst) ([SHA256](https://packages.polymc.org/latest/arch/polymc-bin-latest-1-x86_64.pkg.tar.zst.sha256))
-
-```
-wget https://packages.polymc.org/latest/arch/polymc-bin-latest-1-x86_64.pkg.tar.zst
-sudo pacman -U polymc-bin-latest-1-x86_64.pkg.tar.zst
-```
-
 ### <img src="https://www.vectorlogo.zone/logos/debian/debian-icon.svg" height="20" /> Debian
 
-A prebuilt deb package is available:  
-[Debian (AMD64)](https://packages.polymc.org/latest/deb/polymc-amd64.deb) ([SHA256](https://packages.polymc.org/latest/deb/polymc-amd64.deb.sha256))
+We use [makedeb](https://docs.makedeb.org/) for our Debian packages.  
+Several MPR packages are available:
+
+[![polymc](https://img.shields.io/badge/mpr-polymc-orange)](https://mpr.makedeb.org/packages/polymc)  
+[![polymc-bin](https://img.shields.io/badge/mpr-polymc--bin-orange)](https://mpr.makedeb.org/packages/polymc-bin)
 
 ```sh
-wget https://packages.polymc.org/latest/deb/polymc-amd64.deb
-sudo apt install ./polymc-amd64.deb
+# stable source package:
+sudo tap install polymc
+# stable binary package:
+sudo tap install polymc-bin
 ```
 
 ### <img src="https://www.vectorlogo.zone/logos/nixos/nixos-icon.svg" height="20" /> Nix
@@ -67,12 +64,13 @@ A [Nix derivation](packages/nix/NIX.md) is available.
 A Gentoo ebuild is available in the [swirl](https://git.swurl.xyz/swirl/ebuilds) overlay, named `games-action/polymc`.
 
 ```sh
+# as root:
 emerge --oneshot eselect-repository
 eselect-repository enable swirl
 emaint sync -r swirl
 emerge polymc
 # to use latest git version:
-sudo tee -a /etc/portage/package.accept_keywords <<< "=games-action/polymc-9999 ~amd64"
+sudo tee -a /etc/portage/package.accept_keywords <<< "=games-action/polymc-9999 **"
 ```
 
 ### <img src="https://www.vectorlogo.zone/logos/getfedora/getfedora-icon.svg" height="20"> Fedora

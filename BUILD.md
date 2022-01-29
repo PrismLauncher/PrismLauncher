@@ -63,14 +63,15 @@ make -j$(nproc) install # Optionally specify DESTDIR for packages (i.e. DESTDIR=
 
 ### Building a .deb
 
-You need to install the build dependencies first
+Requirements: [makedeb](https://docs.makedeb.org/) installed on your system.
 
-```sh
-cd packages/debian
-./makedeb.sh
+```
+git clone https://mpr.makedeb.org/polymc.git
+cd polymc
+makedeb -s
 ```
 
-If everything works correctly, the .deb will be next to the build script, in `PolyMC/packages/debian`
+The deb will be located in the directory the repo was cloned in.
 
 ### Building a .rpm
 
