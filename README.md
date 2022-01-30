@@ -22,8 +22,7 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 - [AppImage SHA256](https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage.sha256)
 - All packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest)).
 - Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
-- [System Package (AMD64)](https://packages.polymc.org/latest/lin64-system/lin64-system.tar.zst) ([SHA256](https://packages.polymc.org/latest/lin64-system/lin64-system.tar.zst.sha256)) - a generic system package intended to be used as a base for making distro-specific packages
-
+- 
 ### <img src="https://www.vectorlogo.zone/logos/archlinux/archlinux-icon.svg" height="20"/> Arch Linux
 
 There are several AUR packages available:  
@@ -91,7 +90,7 @@ sudo dnf install polymc
 
 ## <img src="https://www.vectorlogo.zone/logos/apple/apple-tile.svg" height="20" /> MacOS
 
-MacOS currently does not have any packages. We are still working on setting up MacOS packaging.
+MacOS currently does not have any packages. We are still working on setting up MacOS packaging. Meanwhile, you can [build](https://github.com/PolyMC/PolyMC/blob/develop/BUILD.md#macos) it for yourself.
 
 # Help & Support
 
