@@ -292,6 +292,7 @@ void LauncherPage::applySettings()
     s->set("ShowConsole", ui->showConsoleCheck->isChecked());
     s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
     s->set("ShowConsoleOnError", ui->showConsoleErrorCheck->isChecked());
+    s->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
     QString consoleFontFamily = ui->consoleFont->currentFont().family();
     s->set("ConsoleFont", consoleFontFamily);
     s->set("ConsoleFontSize", ui->fontSizeBox->value());
@@ -380,6 +381,7 @@ void LauncherPage::loadSettings()
     ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
     ui->autoCloseConsoleCheck->setChecked(s->get("AutoCloseConsole").toBool());
     ui->showConsoleErrorCheck->setChecked(s->get("ShowConsoleOnError").toBool());
+    ui->closeAfterLaunchCheck->setChecked(s->get("CloseAfterLaunch").toBool());
     QString fontFamily = APPLICATION->settings()->get("ConsoleFont").toString();
     QFont consoleFont(fontFamily);
     ui->consoleFont->setCurrentFont(consoleFont);
