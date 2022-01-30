@@ -25,12 +25,12 @@
 
 LauncherPartLaunch::LauncherPartLaunch(LaunchTask *parent) : LaunchStep(parent)
 {
-    if (APPLICATION->settings()->get("CloseAfterLaunch").toBoolean())
+    if (APPLICATION->settings()->get("CloseAfterLaunch").toBool())
     {
         std::shared_ptr<QMetaObject::Connection> connection{new QMetaObject::Connection};
         *connection = connect(&m_process, &LoggedProcess::log, this, [=](QStringList lines, MessageLevel::Enum level) {
             qDebug() << lines;
-            if (lines.filter(QRegularExpression(".+Backend library: LWJGL version.+")).length() != 0)
+            if (lines.filter(QRegularExpression(".*Setting user.+", QRegularExpression::CaseInsensitiveOption)).length() != 0)
             {
                 APPLICATION->closeAllWindows();
                 disconnect(*connection);
@@ -168,7 +168,7 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
         }
         case LoggedProcess::Finished:
         {
-            if (APPLICATION->settings()->get("CloseAfterLaunch").toBoolean())
+            if (APPLICATION->settings()->get("CloseAfterLaunch").toBool())
                 APPLICATION->showMainWindow();
             m_parent->setPid(-1);
             // if the exit code wasn't 0, report this as a crash

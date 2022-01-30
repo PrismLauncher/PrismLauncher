@@ -382,13 +382,6 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QCheckBox" name="closeAfterLaunchCheck">
-            <property name="text">
-             <string>Hide console when game window opens?</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
