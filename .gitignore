@@ -40,13 +40,5 @@ run/
 
 .cache/
 
-# Flatpak builds
-.flatpak-builder
-flatbuild
-builddir
-# Deb
-packages/debian/polymc/usr/
-packages/debian/polymc.deb
-packages/debian/polymc/DEBIAN/control
 # Nix/NixOS
 result/
