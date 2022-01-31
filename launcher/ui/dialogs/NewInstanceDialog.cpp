@@ -39,6 +39,7 @@
 #include "ui/pages/modplatform/legacy_ftb/Page.h"
 #include "ui/pages/modplatform/flame/FlamePage.h"
 #include "ui/pages/modplatform/ImportPage.h"
+#include "ui/pages/modplatform/modrinth/ModrinthPage.h"
 #include "ui/pages/modplatform/technic/TechnicPage.h"
 
 
@@ -134,6 +135,7 @@ QList<BasePage *> NewInstanceDialog::getPages()
         flamePage,
         new FtbPage(this),
         new LegacyFTB::Page(this),
+        new ModrinthPage(this),
         technicPage
     };
 }

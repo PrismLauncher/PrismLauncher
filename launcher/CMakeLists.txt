@@ -563,6 +563,11 @@ set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLShareCode.h
 )
 
+set(MODRINTH_SOURCES
+    modplatform/modrinth/ModrinthPackManifest.cpp
+    modplatform/modrinth/ModrinthPackManifest.h
+)
+
 add_unit_test(Index
     SOURCES meta/Index_test.cpp
     LIBS Launcher_logic
@@ -596,6 +601,7 @@ set(LOGIC_SOURCES
     ${MODPACKSCH_SOURCES}
     ${TECHNIC_SOURCES}
     ${ATLAUNCHER_SOURCES}
+    ${MODRINTH_SOURCES}
 )
 
 SET(LAUNCHER_SOURCES
@@ -774,6 +780,9 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/flame/FlameModPage.cpp
     ui/pages/modplatform/flame/FlameModPage.h
 
+    ui/pages/modplatform/modrinth/ModrinthPage.cpp
+    ui/pages/modplatform/modrinth/ModrinthPage.h
+
     ui/pages/modplatform/technic/TechnicModel.cpp
     ui/pages/modplatform/technic/TechnicModel.h
     ui/pages/modplatform/technic/TechnicPage.cpp
@@ -908,6 +917,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/legacy_ftb/Page.ui
     ui/pages/modplatform/ImportPage.ui
     ui/pages/modplatform/ftb/FtbPage.ui
+    ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui

@@ -30,10 +30,15 @@
 #include "modplatform/flame/PackManifest.h"
 #include "Json.h"
 #include <quazip/quazipdir.h>
+#include "modplatform/modrinth/ModrinthPackManifest.h"
 #include "modplatform/technic/TechnicPackProcessor.h"
 
 #include "icons/IconList.h"
 #include "Application.h"
+#include "net/ChecksumValidator.h"
+
+#include <algorithm>
+#include <iterator>
 
 InstanceImportTask::InstanceImportTask(const QUrl sourceUrl)
 {
@@ -109,6 +114,7 @@ void InstanceImportTask::processZipPack()
     QString mmcFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "instance.cfg");
     bool technicFound = QuaZipDir(m_packZip.get()).exists("/bin/modpack.jar") || QuaZipDir(m_packZip.get()).exists("/bin/version.json");
     QString flameFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "manifest.json");
+    QString modrinthFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "modrinth.index.json");
     QString root;
     if(!mmcFound.isNull())
     {
@@ -131,6 +137,13 @@ void InstanceImportTask::processZipPack()
         qDebug() << "Flame:" << flameFound;
         root = flameFound;
         m_modpackType = ModpackType::Flame;
+    }
+    else if(!modrinthFound.isNull())
+    {
+        // process as Modrinth pack
+        qDebug() << "Modrinth:" << modrinthFound;
+        root = modrinthFound;
+        m_modpackType = ModpackType::Modrinth;
     }
     if(m_modpackType == ModpackType::Unknown)
     {
@@ -188,14 +201,17 @@ void InstanceImportTask::extractFinished()
 
     switch(m_modpackType)
     {
-        case ModpackType::Flame:
-            processFlame();
-            return;
         case ModpackType::MultiMC:
             processMultiMC();
             return;
         case ModpackType::Technic:
             processTechnic();
+            return;
+        case ModpackType::Flame:
+            processFlame();
+            return;
+        case ModpackType::Modrinth:
+            processModrinth();
             return;
         case ModpackType::Unknown:
             emitFailed(tr("Archive does not contain a recognized modpack type."));
@@ -460,4 +476,152 @@ void InstanceImportTask::processMultiMC()
         }
     }
     emitSucceeded();
+}
+
+void InstanceImportTask::processModrinth() {
+    std::vector<Modrinth::File> files;
+    QString minecraftVersion, fabricVersion, forgeVersion;
+    try
+    {
+        QString indexPath = FS::PathCombine(m_stagingPath, "modrinth.index.json");
+        auto doc = Json::requireDocument(indexPath);
+        auto obj = Json::requireObject(doc, "modrinth.index.json");
+        int formatVersion = Json::requireInteger(obj, "formatVersion", "modrinth.index.json");
+        if (formatVersion == 1)
+        {
+            auto game = Json::requireString(obj, "game", "modrinth.index.json");
+            if (game != "minecraft")
+            {
+                throw JSONValidationError("Unknown game: " + game);
+            }
+
+            auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
+            std::transform(jsonFiles.begin(), jsonFiles.end(), std::back_inserter(files), [](const QJsonObject& obj)
+                {
+                    Modrinth::File file;
+                    file.path = Json::requireString(obj, "path");
+                    QString supported = Json::ensureString(Json::ensureObject(obj, "env"));
+                    QJsonObject hashes = Json::requireObject(obj, "hashes");
+                    QString hash;
+                    QCryptographicHash::Algorithm hashAlgorithm;
+                    hash = Json::ensureString(hashes, "sha256");
+                    hashAlgorithm = QCryptographicHash::Sha256;
+                    if (hash.isEmpty())
+                    {
+                        hash = Json::ensureString(hashes, "sha512");
+                        hashAlgorithm = QCryptographicHash::Sha512;
+                        if (hash.isEmpty())
+                        {
+                            hash = Json::ensureString(hashes, "sha1");
+                            hashAlgorithm = QCryptographicHash::Sha1;
+                            if (hash.isEmpty())
+                            {
+                                throw JSONValidationError("No hash found for: " + file.path);
+                            }
+                        }
+                    }
+                    file.hash = QByteArray::fromHex(hash.toLatin1());
+                    file.hashAlgorithm = hashAlgorithm;
+                    // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode (as Modrinth seems to incorrectly handle spaces)
+                    file.download = Json::requireString(Json::ensureArray(obj, "downloads").first(), "Download URL for " + file.path);
+                    if (!file.download.isValid())
+                    {
+                        throw JSONValidationError("Download URL for " + file.path + " is not a correctly formatted URL");
+                    }
+                    return file;
+                });
+
+            auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
+            for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it)
+            {
+                QString name = it.key();
+                if (name == "minecraft")
+                {
+                    if (!minecraftVersion.isEmpty())
+                        throw JSONValidationError("Duplicate Minecraft version");
+                    minecraftVersion = Json::requireString(*it, "Minecraft version");
+                }
+                else if (name == "fabric-loader")
+                {
+                    if (!fabricVersion.isEmpty())
+                        throw JSONValidationError("Duplicate Fabric Loader version");
+                    fabricVersion = Json::requireString(*it, "Fabric Loader version");
+                }
+                else if (name == "forge")
+                {
+                    if (!forgeVersion.isEmpty())
+                        throw JSONValidationError("Duplicate Forge version");
+                    forgeVersion = Json::requireString(*it, "Forge version");
+                }
+                else
+                {
+                    throw JSONValidationError("Unknown dependency type: " + name);
+                }
+            }
+        }
+        else
+        {
+            throw JSONValidationError(QStringLiteral("Unknown format version: %s").arg(formatVersion));
+        }
+        QFile::remove(indexPath);
+    }
+    catch (const JSONValidationError &e)
+    {
+        emitFailed(tr("Could not understand pack index:\n") + e.cause());
+        return;
+    }
+    QString overridePath = FS::PathCombine(m_stagingPath, "overrides");
+    if (QFile::exists(overridePath)) {
+        QString mcPath = FS::PathCombine(m_stagingPath, ".minecraft");
+        if (!QFile::rename(overridePath, mcPath)) {
+            emitFailed(tr("Could not rename the overrides folder:\n") + "overrides");
+            return;
+        }
+    }
+
+    QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
+    auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
+    instanceSettings->registerSetting("InstanceType", "Legacy");
+    instanceSettings->set("InstanceType", "OneSix");
+    MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
+    auto components = instance.getPackProfile();
+    components->buildingFromScratch();
+    components->setComponentVersion("net.minecraft", minecraftVersion, true);
+    if (!fabricVersion.isEmpty())
+        components->setComponentVersion("net.fabricmc.fabric-loader", fabricVersion, true);
+    if (!forgeVersion.isEmpty())
+        components->setComponentVersion("net.minecraftforge", forgeVersion, true);
+    if (m_instIcon != "default")
+    {
+        instance.setIconKey(m_instIcon);
+    }
+    instance.setName(m_instName);
+    instance.saveNow();
+
+    m_filesNetJob = new NetJob(tr("Mod download"), APPLICATION->network());
+    for (auto &file : files)
+    {
+        auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path);
+        qDebug() << "Will download" << file.download << "to" << path;
+        auto dl = Net::Download::makeFile(file.download, path);
+        dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
+        m_filesNetJob->addNetAction(dl);
+    }
+    connect(m_filesNetJob.get(), &NetJob::succeeded, this, [&]()
+            {
+                m_filesNetJob.reset();
+                emitSucceeded();
+            }
+    );
+    connect(m_filesNetJob.get(), &NetJob::failed, [&](const QString &reason)
+    {
+        m_filesNetJob.reset();
+        emitFailed(reason);
+    });
+    connect(m_filesNetJob.get(), &NetJob::progress, [&](qint64 current, qint64 total)
+    {
+        setProgress(current, total);
+    });
+    setStatus(tr("Downloading mods..."));
+    m_filesNetJob->start();
 }
