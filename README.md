@@ -77,7 +77,14 @@ sudo tee -a /etc/portage/package.accept_keywords <<< "=games-action/polymc-9999 
 
 ### <img src="https://www.vectorlogo.zone/logos/getfedora/getfedora-icon.svg" height="20"> Fedora
 
-An RPM package is available on [COPR](https://copr.fedorainfracloud.org/coprs/sentry/polymc/)
+An RPM package is available on [COPR](https://copr.fedorainfracloud.org/coprs/polymc/polymc/).
+
+```sh
+sudo dnf copr enable polymc/polymc
+sudo dnf install polymc
+```
+
+Alternatively, a COPR maintained by a PolyMC user (instead of Jenkins' automated builds) is available [here](https://copr.fedorainfracloud.org/coprs/sentry/polymc).
 
 ```sh
 sudo dnf copr enable sentry/polymc
