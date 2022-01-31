@@ -157,7 +157,7 @@ void ListModel::fetchMore(const QModelIndex& parent)
     }
     performPaginatedSearch();
 }
-const char* sorts[4]{"relevance","downloads","updated","newest"};
+const char* sorts[5]{"relevance","downloads","follows","updated","newest"};
 
 void ListModel::performPaginatedSearch()
 {
@@ -166,12 +166,12 @@ void ListModel::performPaginatedSearch()
     bool hasFabric = !((MinecraftInstance *)((ModrinthPage *)parent())->m_instance)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
     auto netJob = new NetJob("Modrinth::Search", APPLICATION->network());
     auto searchUrl = QString(
-        "https://api.modrinth.com/api/v1/mod?"
+        "https://api.modrinth.com/v2/search?"
         "offset=%1&"
         "limit=25&"
         "query=%2&"
         "index=%3&"
-        "filters=categories=\"%4\" AND versions=\"%5\""
+        "facets=[[\"categories:%4\"],[\"versions:%5\"],[\"project_type:mod\"]]"
     )
         .arg(nextSearchOffset)
         .arg(currentSearchTerm)

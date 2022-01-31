@@ -10,7 +10,7 @@
 
 void Modrinth::loadIndexedPack(Modrinth::IndexedPack & pack, QJsonObject & obj)
 {
-    pack.addonId = Json::requireString(obj, "mod_id");
+    pack.addonId = Json::requireString(obj, "project_id");
     pack.name = Json::requireString(obj, "title");
     pack.websiteUrl = Json::ensureString(obj, "page_url", "");
     pack.description = Json::ensureString(obj, "description", "");
@@ -20,7 +20,7 @@ void Modrinth::loadIndexedPack(Modrinth::IndexedPack & pack, QJsonObject & obj)
 
     Modrinth::ModpackAuthor modAuthor;
     modAuthor.name = Json::requireString(obj, "author");
-    modAuthor.url = Json::requireString(obj, "author_url");
+    modAuthor.url = "https://modrinth.com/user/"+modAuthor.name;
     pack.author = modAuthor;
 }
 
@@ -33,7 +33,7 @@ void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray 
     for(auto versionIter: arr) {
         auto obj = versionIter.toObject();
         Modrinth::IndexedVersion file;
-        file.addonId = Json::requireString(obj,"mod_id") ;
+        file.addonId = Json::requireString(obj,"project_id") ;
         file.fileId = Json::requireString(obj, "id");
         file.date = Json::requireString(obj, "date_published");
         auto versionArray = Json::requireArray(obj, "game_versions");

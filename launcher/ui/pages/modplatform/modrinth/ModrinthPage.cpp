@@ -27,6 +27,7 @@ ModrinthPage::ModrinthPage(ModDownloadDialog *dialog, BaseInstance *instance)
     // index is used to set the sorting with the modrinth api
     ui->sortByBox->addItem(tr("Sort by Relevence"));
     ui->sortByBox->addItem(tr("Sort by Downloads"));
+    ui->sortByBox->addItem(tr("Sort by Follows"));
     ui->sortByBox->addItem(tr("Sort by last updated"));
     ui->sortByBox->addItem(tr("Sort by newest"));
 
@@ -99,8 +100,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         auto netJob = new NetJob(QString("Modrinth::ModVersions(%1)").arg(current.name), APPLICATION->network());
         std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
         QString addonId = current.addonId;
-        addonId.remove(0,6);
-        netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.modrinth.com/api/v1/mod/%1/version").arg(addonId), response.get()));
+        netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.modrinth.com/v2/project/%1/version").arg(addonId), response.get()));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, netJob]
         {
