@@ -10,6 +10,8 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 <br>
 
 # Installation
+- All packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest)).
+- Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
 
 ## 🐧 Linux
 
@@ -20,14 +22,12 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 <a href="https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage"><img src="https://docs.appimage.org/_images/download-appimage-banner.svg" width="240" alt="Download as AppImage" /></a>
 
 - [AppImage SHA256](https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage.sha256)
-- All packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest)).
-- Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
-- 
+
 ### <img src="https://www.vectorlogo.zone/logos/archlinux/archlinux-icon.svg" height="20"/> Arch Linux
 
-There are several AUR packages available:  
-[![polymc](https://img.shields.io/badge/aur-polymc-blue)](https://aur.archlinux.org/packages/polymc/)  
-[![polymc-bin](https://img.shields.io/badge/aur-polymc--bin-blue)](https://aur.archlinux.org/packages/polymc-bin/)  
+There are several AUR packages available:
+[![polymc](https://img.shields.io/badge/aur-polymc-blue)](https://aur.archlinux.org/packages/polymc/)
+[![polymc-bin](https://img.shields.io/badge/aur-polymc--bin-blue)](https://aur.archlinux.org/packages/polymc-bin/)
 [![polymc-git](https://img.shields.io/badge/aur-polymc--git-blue)](https://aur.archlinux.org/packages/polymc-git/)
 
 ```sh
@@ -41,11 +41,11 @@ yay -S polymc-git
 
 ### <img src="https://www.vectorlogo.zone/logos/debian/debian-icon.svg" height="20" /> Debian
 
-We use [makedeb](https://docs.makedeb.org/) for our Debian packages.  
+We use [makedeb](https://docs.makedeb.org/) for our Debian packages.
 Several MPR packages are available:
 
-[![polymc](https://img.shields.io/badge/mpr-polymc-orange)](https://mpr.makedeb.org/packages/polymc)  
-[![polymc-bin](https://img.shields.io/badge/mpr-polymc--bin-orange)](https://mpr.makedeb.org/packages/polymc-bin)  
+[![polymc](https://img.shields.io/badge/mpr-polymc-orange)](https://mpr.makedeb.org/packages/polymc)
+[![polymc-bin](https://img.shields.io/badge/mpr-polymc--bin-orange)](https://mpr.makedeb.org/packages/polymc-bin)
 [![polymc-git](https://img.shields.io/badge/mpr-polymc--git-orange)](https://mpr.makedeb.org/packages/polymc-git)
 
 ```sh
