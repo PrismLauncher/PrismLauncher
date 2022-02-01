@@ -40,7 +40,7 @@ Getting the project to build and run on Linux is easy if you use any modern and 
 
 ## Build dependencies
 * A C++ compiler capable of building C++11 code.
-* Qt 5.6+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)") or the equivalent from your package manager. It is always better to use the Qt from your distribution, as long as it has a new enough version.
+* Qt 5.6+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)") or the equivalent from your package manager. It is always better to use the Qt from your distribution, as long as it has a new enough version. (for example, `qttools5-dev`)
 * cmake 3.1 or newer
 * zlib (for example, `zlib1g-dev`)
 * Java JDK 8 (for example, `openjdk-8-jdk`)
