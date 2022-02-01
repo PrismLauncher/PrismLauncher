@@ -77,10 +77,12 @@ void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray 
             break;
         }
         auto parent = files[i].toObject();
-        file.downloadUrl = Json::requireString(parent, "url");
-        file.fileName = Json::requireString(parent, "filename");
+        if(parent.contains("url")) {
+            file.downloadUrl = Json::requireString(parent, "url");
+            file.fileName = Json::requireString(parent, "filename");
 
-        unsortedVersions.append(file);
+            unsortedVersions.append(file);
+        }
     }
     auto orderSortPredicate = [](const IndexedVersion & a, const IndexedVersion & b) -> bool
     {
