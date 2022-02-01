@@ -83,7 +83,7 @@ void FlameMod::loadIndexedPackVersions(FlameMod::IndexedPack & pack, QJsonArray 
                 }
             }
         }
-        if(!valid && !hasFabric){
+        if(!valid && hasFabric){
             continue;
         }
 
