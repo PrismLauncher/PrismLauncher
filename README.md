@@ -125,7 +125,6 @@ If you want to contribute to PolyMC you might find it useful to join our Discord
 If you want to build PolyMC yourself, check [BUILD.md](BUILD.md) for build instructions.
 
 ## Code formatting
-
 Just follow the existing formatting.
 
 In general, in order of importance:
