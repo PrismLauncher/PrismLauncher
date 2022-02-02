@@ -16,10 +16,10 @@ BEGIN
                 BLOCK "000004b0"
                 BEGIN
                         VALUE "CompanyName", "MultiMC & PolyMC Contributors"
-                        VALUE "FileDescription", "A Minecraft Launcher"
+                        VALUE "FileDescription", "PolyMC"
                         VALUE "FileVersion", "1.0.0.0"
                         VALUE "ProductName", "PolyMC"
-                        VALUE "ProductVersion", "5"
+                        VALUE "ProductVersion", "1"
                 END
         END
         BLOCK "VarFileInfo"
