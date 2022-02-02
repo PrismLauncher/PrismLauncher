@@ -68,7 +68,7 @@ A Gentoo ebuild is available in the [swirl](https://git.swurl.xyz/swirl/ebuilds)
 ```sh
 # as root:
 emerge --oneshot eselect-repository
-eselect-repository enable swirl
+eselect repository enable swirl
 emaint sync -r swirl
 emerge polymc
 # to use latest git version:
