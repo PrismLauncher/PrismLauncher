@@ -1,0 +1,107 @@
+name: build_portable
+
+on:
+  [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+
+          - os: ubuntu-20.04
+            qt_version: 5.12.8
+            qt_host: linux
+
+          - os: windows-2022
+            qt_version: 5.15.2
+            qt_host: windows
+            qt_arch: win64_mingw81
+
+          - os: macos-11
+            qt_version: 5.12.12
+            qt_host: mac
+            macosx_deployment_target: 10.12
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{matrix.macosx_deployment_target}}
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
+      - name: Install OpenJDK
+        uses: AdoptOpenJDK/install-jdk@v1
+        with:
+          version: '17'
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v2
+        with:
+          path: "${{ github.workspace }}/Qt/"
+          key: ${{ runner.os }}-${{ matrix.qt_version }}-qt_cache
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: ${{ matrix.qt_version }}
+          host: ${{ matrix.qt_host }}
+          arch: ${{ matrix.qt_arch }}
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          dir: "${{ github.workspace }}/Qt/"
+
+      - name: Install Ninja
+        uses: urkle/action-get-ninja@v1
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Debug -G Ninja
+
+      - name: Build
+        run: |
+          cmake --build build
+
+      - name: Install
+        run: |
+          cmake --install build
+
+      - name: Install OpenSSL libs
+        if: runner.os == 'Windows'
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install aqtinstall==2.0.5
+          python -m aqt install-tool -O "${{ github.workspace }}\Qt\" windows desktop tools_openssl_x64
+          copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x64\bin\libssl-1_1-x64.dll" "${{ github.workspace }}\install\"
+          copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x64\bin\libcrypto-1_1-x64.dll" "${{ github.workspace }}\install\"
+
+      - name: chmod binary on macOS
+        if: runner.os == 'macOS'
+        run: |
+          chmod +x "${{ github.workspace }}/install/PolyMC.app/Contents/MacOS/polymc"
+
+      - name: tar bundle on macOS
+        if: runner.os == 'macOS'
+        run: |
+          cd install
+          tar -czf ../polymc.tar.gz *
+
+      - name: Upload package for Linux and Windows
+        if: runner.os != 'macOS'
+        uses: actions/upload-artifact@v2
+        with:
+          name: polymc-${{ matrix.os }}-portable
+          path: install/**
+
+      - name: Upload package for macOS
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v2
+        with:
+          name: polymc-${{ matrix.os }}-portable
+          path: polymc.tar.gz
