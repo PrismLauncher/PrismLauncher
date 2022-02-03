@@ -116,6 +116,12 @@ void LaunchController::login() {
         m_session->wants_online = m_online;
         m_accountToUse->fillSession(m_session);
 
+        // Launch immediately in true offline mode
+        if(m_accountToUse->isOffline()) {
+            launchInstance();
+            return;
+        }
+
         switch(m_accountToUse->accountState()) {
             case AccountState::Offline: {
                 m_session->wants_online = false;
