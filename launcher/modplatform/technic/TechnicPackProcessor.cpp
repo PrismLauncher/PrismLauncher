@@ -19,9 +19,9 @@
 #include <Json.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/PackProfile.h>
-#include <quazip.h>
-#include <quazipdir.h>
-#include <quazipfile.h>
+#include <quazip/quazip.h>
+#include <quazip/quazipdir.h>
+#include <quazip/quazipfile.h>
 #include <settings/INISettingsObject.h>
 
 #include <memory>

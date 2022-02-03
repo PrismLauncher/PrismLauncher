@@ -20,7 +20,7 @@
 #include <QUrl>
 
 #include "tasks/Task.h"
-#include <quazip.h>
+#include <quazip/quazip.h>
 
 #include "QObjectPtr.h"
 

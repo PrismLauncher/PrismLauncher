@@ -38,4 +38,4 @@ add_definitions(-DCLASSPARSER_LIBRARY)
 
 add_library(Launcher_classparser STATIC ${CLASSPARSER_SOURCES} ${CLASSPARSER_HEADERS})
 target_include_directories(Launcher_classparser PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(Launcher_classparser Launcher_quazip Qt5::Core)
+target_link_libraries(Launcher_classparser QuaZip::QuaZip Qt5::Core)

@@ -21,17 +21,36 @@
 #include "minecraft/mod/Mod.h"
 #include <functional>
 
-#include <JlCompress.h>
+#include <quazip/JlCompress.h>
 #include <nonstd/optional>
 
 namespace MMCZip
 {
+    using FilterFunction = std::function<bool(const QString &)>;
 
     /**
      * Merge two zip files, using a filter function
      */
     bool mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained,
-                                            const JlCompress::FilterFunction filter = nullptr);
+                                            const FilterFunction filter = nullptr);
+
+    /**
+     * Compress directory, by providing a list of files to compress
+     * \param zip target archive
+     * \param dir directory that will be compressed (to compress with relative paths)
+     * \param files list of files to compress
+     * \return true for success or false for failure
+     */
+    bool compressDirFiles(QuaZip *zip, QString dir, QFileInfoList files);
+
+    /**
+     * Compress directory, by providing a list of files to compress
+     * \param fileCompressed target archive file
+     * \param dir directory that will be compressed (to compress with relative paths)
+     * \param files list of files to compress
+     * \return true for success or false for failure
+     */
+    bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files);
 
     /**
      * take a source jar, add mods to it, resulting in target jar
@@ -89,4 +108,13 @@ namespace MMCZip
      */
     bool extractFile(QString fileCompressed, QString file, QString dir);
 
+    /**
+     * Populate a QFileInfoList with a directory tree recursively, while allowing to excludeFilter what shouldn't be included.
+     * \param rootDir directory to start off
+     * \param subDir subdirectory, should be nullptr for first invocation
+     * \param files resulting list of QFileInfo
+     * \param excludeFilter function to excludeFilter which files shouldn't be included (returning true means to excude)
+     * \return true for success or false for failure
+     */
+    bool collectFileListRecursively(const QString &rootDir, const QString &subDir, QFileInfoList *files, FilterFunction excludeFilter);
 }

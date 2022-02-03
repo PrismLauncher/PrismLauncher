@@ -18,7 +18,7 @@
 #include "InstanceTask.h"
 #include "net/NetJob.h"
 
-#include "quazip.h"
+#include <quazip/quazip.h>
 
 #include <QFutureWatcher>
 #include <QStringList>

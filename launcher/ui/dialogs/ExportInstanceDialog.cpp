@@ -403,7 +403,13 @@ bool ExportInstanceDialog::doExport()
 
     auto & blocked = proxyModel->blockedPaths();
     using std::placeholders::_1;
-    if (!JlCompress::compressDir(output, m_instance->instanceRoot(), name, std::bind(&SeparatorPrefixTree<'/'>::covers, blocked, _1)))
+    auto files = QFileInfoList();
+    if (!MMCZip::collectFileListRecursively(m_instance->instanceRoot(), nullptr, &files,
+                                    std::bind(&SeparatorPrefixTree<'/'>::covers, blocked, _1))) {
+        QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
+        return false;
+    }
+    if (!MMCZip::compressDirFiles(output, m_instance->instanceRoot(), files))
     {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
         return false;

@@ -17,8 +17,8 @@
 #include <minecraft/MinecraftInstance.h>
 #include <launch/LaunchTask.h>
 
-#include <quazip.h>
-#include <quazipdir.h>
+#include <quazip/quazip.h>
+#include <quazip/quazipdir.h>
 #include "MMCZip.h"
 #include "FileSystem.h"
 #include <QDir>

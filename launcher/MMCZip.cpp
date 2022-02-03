@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-#include <quazip.h>
-#include <quazipdir.h>
-#include <quazipfile.h>
-#include <JlCompress.h>
+#include <quazip/quazip.h>
+#include <quazip/quazipdir.h>
+#include <quazip/quazipfile.h>
 #include "MMCZip.h"
 #include "FileSystem.h"
 
 #include <QDebug>
 
 // ours
-bool MMCZip::mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained, const JlCompress::FilterFunction filter)
+bool MMCZip::mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &contained, const FilterFunction filter)
 {
     QuaZip modZip(from.filePath());
     modZip.open(QuaZip::mdUnzip);
@@ -74,6 +73,39 @@ bool MMCZip::mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &containe
     return true;
 }
 
+bool MMCZip::compressDirFiles(QuaZip *zip, QString dir, QFileInfoList files)
+{
+    QDir directory(dir);
+    if (!directory.exists()) return false;
+
+    for (auto e : files) {
+        auto filePath = directory.relativeFilePath(e.absoluteFilePath());
+        if( !JlCompress::compressFile(zip, e.absoluteFilePath(), filePath)) return false;
+    }
+
+    return true;
+}
+
+bool MMCZip::compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files)
+{
+    QuaZip zip(fileCompressed);
+    QDir().mkpath(QFileInfo(fileCompressed).absolutePath());
+    if(!zip.open(QuaZip::mdCreate)) {
+        QFile::remove(fileCompressed);
+        return false;
+    }
+
+    auto result = compressDirFiles(&zip, dir, files);
+
+    zip.close();
+    if(zip.getZipError()!=0) {
+        QFile::remove(fileCompressed);
+        return false;
+    }
+
+    return result;
+}
+
 // ours
 bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod>& mods)
 {
@@ -122,13 +154,22 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
         }
         else if (mod.type() == Mod::MOD_FOLDER)
         {
+            // untested, but seems to be unused / not possible to reach
             // FIXME: buggy - does not work with addedFiles
             auto filename = mod.filename();
             QString what_to_zip = filename.absoluteFilePath();
             QDir dir(what_to_zip);
             dir.cdUp();
             QString parent_dir = dir.absolutePath();
-            if (!JlCompress::compressSubDir(&zipOut, what_to_zip, parent_dir, addedFiles))
+            auto files = QFileInfoList();
+            MMCZip::collectFileListRecursively(what_to_zip, nullptr, &files, nullptr);
+
+            for (auto e : files) {
+                if (addedFiles.contains(e.filePath()))
+                    files.removeAll(e);
+            }
+
+            if (!MMCZip::compressDirFiles(&zipOut, parent_dir, files))
             {
                 zipOut.close();
                 QFile::remove(targetJarPath);
@@ -136,7 +177,7 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
                 return false;
             }
             qDebug() << "Adding folder " << filename.fileName() << " from "
-                        << filename.absoluteFilePath();
+                     << filename.absoluteFilePath();
         }
         else
         {
@@ -309,4 +350,38 @@ bool MMCZip::extractFile(QString fileCompressed, QString file, QString target)
         return false;
     }
     return MMCZip::extractRelFile(&zip, file, target);
+}
+
+bool MMCZip::collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList *files,
+                                        MMCZip::FilterFunction excludeFilter) {
+    QDir rootDirectory(rootDir);
+    if (!rootDirectory.exists()) return false;
+
+    QDir directory;
+    if (subDir == nullptr)
+        directory = rootDirectory;
+    else
+        directory = QDir(subDir);
+
+    if (!directory.exists()) return false;  // shouldn't ever happen
+
+    // recurse directories
+    QFileInfoList entries = directory.entryInfoList(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Hidden);
+    for (const auto& e: entries) {
+        if (!collectFileListRecursively(rootDir, e.filePath(), files, excludeFilter))
+            return false;
+    }
+
+    // collect files
+    entries = directory.entryInfoList(QDir::Files);
+    for (const auto& e: entries) {
+        QString relativeFilePath = rootDirectory.relativeFilePath(e.absoluteFilePath());
+        if (excludeFilter && excludeFilter(relativeFilePath)) {
+            qDebug() << "Skipping file " << relativeFilePath;
+            continue;
+        }
+
+        files->append(e.filePath());  // we want the original paths for MMCZip::compressDirFiles
+    }
+    return true;
 }
