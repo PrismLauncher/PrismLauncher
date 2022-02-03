@@ -10,6 +10,8 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 <br>
 
 # Installation
+- All packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest)).
+- Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
 
 ## 🐧 Linux
 
@@ -20,15 +22,13 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 <a href="https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage"><img src="https://docs.appimage.org/_images/download-appimage-banner.svg" width="240" alt="Download as AppImage" /></a>
 
 - [AppImage SHA256](https://packages.polymc.org/latest/appimage/PolyMC-latest-x86_64.AppImage.sha256)
-- All packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest)).
-- Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
-- [System Package (AMD64)](https://packages.polymc.org/latest/lin64-system/lin64-system.tar.zst) ([SHA256](https://packages.polymc.org/latest/lin64-system/lin64-system.tar.zst.sha256)) - a generic system package intended to be used as a base for making distro-specific packages
 
 ### <img src="https://www.vectorlogo.zone/logos/archlinux/archlinux-icon.svg" height="20"/> Arch Linux
 
-There are several AUR packages available:  
-[![polymc](https://img.shields.io/badge/aur-polymc-blue)](https://aur.archlinux.org/packages/polymc/)  
-[![polymc-bin](https://img.shields.io/badge/aur-polymc--bin-blue)](https://aur.archlinux.org/packages/polymc-bin/)  
+There are several AUR packages available:
+
+[![polymc](https://img.shields.io/badge/aur-polymc-blue)](https://aur.archlinux.org/packages/polymc/)
+[![polymc-bin](https://img.shields.io/badge/aur-polymc--bin-blue)](https://aur.archlinux.org/packages/polymc-bin/)
 [![polymc-git](https://img.shields.io/badge/aur-polymc--git-blue)](https://aur.archlinux.org/packages/polymc-git/)
 
 ```sh
@@ -42,11 +42,11 @@ yay -S polymc-git
 
 ### <img src="https://www.vectorlogo.zone/logos/debian/debian-icon.svg" height="20" /> Debian
 
-We use [makedeb](https://docs.makedeb.org/) for our Debian packages.  
+We use [makedeb](https://docs.makedeb.org/) for our Debian packages.
 Several MPR packages are available:
 
-[![polymc](https://img.shields.io/badge/mpr-polymc-orange)](https://mpr.makedeb.org/packages/polymc)  
-[![polymc-bin](https://img.shields.io/badge/mpr-polymc--bin-orange)](https://mpr.makedeb.org/packages/polymc-bin)  
+[![polymc](https://img.shields.io/badge/mpr-polymc-orange)](https://mpr.makedeb.org/packages/polymc)
+[![polymc-bin](https://img.shields.io/badge/mpr-polymc--bin-orange)](https://mpr.makedeb.org/packages/polymc-bin)
 [![polymc-git](https://img.shields.io/badge/mpr-polymc--git-orange)](https://mpr.makedeb.org/packages/polymc-git)
 
 ```sh
@@ -69,7 +69,7 @@ A Gentoo ebuild is available in the [swirl](https://git.swurl.xyz/swirl/ebuilds)
 ```sh
 # as root:
 emerge --oneshot eselect-repository
-eselect-repository enable swirl
+eselect repository enable swirl
 emaint sync -r swirl
 emerge polymc
 # to use latest git version:
@@ -78,7 +78,14 @@ sudo tee -a /etc/portage/package.accept_keywords <<< "=games-action/polymc-9999 
 
 ### <img src="https://www.vectorlogo.zone/logos/getfedora/getfedora-icon.svg" height="20"> Fedora
 
-An RPM package is available on [COPR](https://copr.fedorainfracloud.org/coprs/sentry/polymc/)
+An RPM package is available on [COPR](https://copr.fedorainfracloud.org/coprs/polymc/polymc/).
+
+```sh
+sudo dnf copr enable polymc/polymc
+sudo dnf install polymc
+```
+
+Alternatively, a COPR maintained by a PolyMC user (instead of Jenkins' automated builds) is available [here](https://copr.fedorainfracloud.org/coprs/sentry/polymc).
 
 ```sh
 sudo dnf copr enable sentry/polymc
@@ -91,7 +98,7 @@ sudo dnf install polymc
 
 ## <img src="https://www.vectorlogo.zone/logos/apple/apple-tile.svg" height="20" /> MacOS
 
-MacOS currently does not have any packages. We are still working on setting up MacOS packaging.
+MacOS currently does not have any packages. We are still working on setting up MacOS packaging. Meanwhile, you can [build](https://github.com/PolyMC/PolyMC/blob/develop/BUILD.md#macos) it for yourself.
 
 # Help & Support
 
@@ -119,7 +126,6 @@ If you want to contribute to PolyMC you might find it useful to join our Discord
 If you want to build PolyMC yourself, check [BUILD.md](BUILD.md) for build instructions.
 
 ## Code formatting
-
 Just follow the existing formatting.
 
 In general, in order of importance:

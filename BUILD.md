@@ -25,7 +25,6 @@ The rest of the documentation assumes you have already cloned the repository.
 Getting the project to build and run on Linux is easy if you use any modern and up-to-date linux distribution.
 
 ## Build dependencies
-
 - A C++ compiler capable of building C++11 code.
 - Qt Development tools 5.6 or newer (`qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5` on Debian-based system)
 - cmake 3.1 or newer (`cmake` on Debian-based system)
@@ -116,7 +115,7 @@ The path to the rpm packages will be printed when the build is complete.
 
 ### Building a flatpak
 
-You only need to clone the flatpak sources  
+You only need to clone the flatpak sources
 `flatpak` and `flatpak-builder` need to be installed on your system
 
 ```sh
@@ -256,8 +255,8 @@ zlib1.dll
 
 - Install XCode Command Line tools
 - Install the official build of CMake (https://cmake.org/download/)
-- Install JDK 8 (https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html)
-- Get Qt 5.6 and install it (https://download.qt.io/new_archive/qt/5.6/5.6.3/)
+- Install JDK 8 (https://adoptium.net/releases.html?variant=openjdk8&jvmVariant=hotspot)
+- Get Qt 5.6 and install it (https://download.qt.io/new_archive/qt/5.6/5.6.3/) or higher (tested) (https://www.qt.io/download-qt-installer?utm_referrer=https%3A%2F%2Fwww.qt.io%2Fdownload-open-source)
 
 You can use `homebrew` to simplify the installation of build dependencies
 
@@ -271,7 +270,7 @@ xcode-select --install
 
 ### Build
 
-Pick an installation path - this is where the final `.app` will be constructed when you run `make install`. Supply it as the `CMAKE_INSTALL_PREFIX` argument during CMake configuration.
+Pick an installation path - this is where the final `PolyMC.app` will be constructed when you run `make install`. Supply it as the `CMAKE_INSTALL_PREFIX` argument during CMake configuration. By default, it's in the dist folder under PolyMC
 
 ```
 mkdir build
@@ -281,15 +280,15 @@ cmake \
  -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
  -DCMAKE_BUILD_TYPE=Release \
  -DCMAKE_INSTALL_PREFIX:PATH="$(dirname $PWD)/dist/" \
- -DCMAKE_PREFIX_PATH="/path/to/Qt5.6/" \
- -DQt5_DIR="/path/to/Qt5.6/" \
+ -DCMAKE_PREFIX_PATH="/path/to/Qt/" \
+ -DQt5_DIR="/path/to/Qt/" \
  -DLauncher_LAYOUT=mac-bundle \
  -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
  ..
 make install
 ```
 
-Remember to replace `/path/to/Qt5.6/` with the actual path. For newer Qt installations, it is often in your home directory.
+Remember to replace `/path/to/Qt/` with the actual path. For newer Qt installations, it is often in your home directory.
 
 **Note:** The final app bundle may not run due to code signing issues, which
 need to be fixed with `codesign -fs -`.

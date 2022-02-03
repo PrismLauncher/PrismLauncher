@@ -32,8 +32,14 @@ QString getCreditsHtml()
     QTextStream stream(&output);
     stream.setCodec(QTextCodec::codecForName("UTF-8"));
     stream << "<center>\n";
+
+    stream << "<h3>" << QObject::tr("PolyMC Developers", "About Credits") << "</h3>\n";
+    stream << "<p>swirl &lt;<a href='mailto:swurl@swurl.xyz'>swurl@swurl.xyz </a>&gt;</p>\n";
+    stream << "<p>LennyMcLennington &lt;<a href='mailto:lenny@sneed.church'>lenny@sneed.church</a>&gt;</p>\n";
+    stream << "<br />\n";
+
     // TODO: possibly retrieve from git history at build time?
-    stream << "<h3>" << QObject::tr("Developers", "About Credits") << "</h3>\n";
+    stream << "<h3>" << QObject::tr("MultiMC Developers", "About Credits") << "</h3>\n";
     stream << "<p>Andrew Okin &lt;<a href='mailto:forkk@forkk.net'>forkk@forkk.net</a>&gt;</p>\n";
     stream << "<p>Petr Mrázek &lt;<a href='mailto:peterix@gmail.com'>peterix@gmail.com</a>&gt;</p>\n";
     stream << "<p>Sky Welch &lt;<a href='mailto:multimc@bunnies.io'>multimc@bunnies.io</a>&gt;</p>\n";
@@ -47,6 +53,7 @@ QString getCreditsHtml()
     stream << "<p>Kilobyte &lt;<a href='mailto:stiepen22@gmx.de'>stiepen22@gmx.de</a>&gt;</p>\n";
     stream << "<p>Rootbear75 &lt;<a href='https://twitter.com/rootbear75'>@rootbear75</a>&gt;</p>\n";
     stream << "<p>Zeker Zhayard &lt;<a href='https://twitter.com/zeker_zhayard'>@Zeker_Zhayard</a>&gt;</p>\n";
+    stream << "<p>Everyone else who <a href='https://github.com/PolyMC/PolyMC/graphs/contributors'>contributed</a>!</p>\n";
     stream << "<br />\n";
 
     stream << "</center>\n";
@@ -83,8 +90,12 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
     ui->icon->setPixmap(APPLICATION->getThemedIcon("logo").pixmap(64));
     ui->title->setText(launcherName);
 
-    ui->versionLabel->setText(tr("Version") +": " + BuildConfig.printableVersionString());
-    ui->platformLabel->setText(tr("Platform") +": " + BuildConfig.BUILD_PLATFORM);
+    ui->versionLabel->setText(BuildConfig.printableVersionString());
+
+    if (!BuildConfig.BUILD_PLATFORM.isEmpty())
+        ui->platformLabel->setText(tr("Platform") +": " + BuildConfig.BUILD_PLATFORM);
+    else
+        ui->platformLabel->setVisible(false);
 
     if (BuildConfig.VERSION_BUILD >= 0)
         ui->buildNumLabel->setText(tr("Build Number") +": " + QString::number(BuildConfig.VERSION_BUILD));
