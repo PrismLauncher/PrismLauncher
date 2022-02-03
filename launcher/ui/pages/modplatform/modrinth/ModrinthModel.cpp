@@ -1,5 +1,8 @@
-#include "FlameModel.h"
+#include "ModrinthModel.h"
 #include "Application.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
+#include "ModrinthPage.h"
 #include <Json.h>
 
 #include <MMCStrings.h>
@@ -7,9 +10,10 @@
 
 #include <QtMath>
 
-namespace Flame {
 
-ListModel::ListModel(QObject *parent) : QAbstractListModel(parent)
+namespace Modrinth {
+
+ListModel::ListModel(ModrinthPage *parent) : QAbstractListModel(parent)
 {
 }
 
@@ -96,8 +100,8 @@ void ListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
-    auto job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("ModrinthPacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
+    auto job = new NetJob(QString("Modrinth Icon Download %1").arg(logo), APPLICATION->network());
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
@@ -118,7 +122,6 @@ void ListModel::requestLogo(QString logo, QString url)
     });
 
     job->start();
-
     m_loadingLogos.append(logo);
 }
 
@@ -126,7 +129,7 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
 {
     if(m_logoMap.contains(logo))
     {
-        callback(APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry("ModrinthPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }
     else
     {
@@ -154,20 +157,28 @@ void ListModel::fetchMore(const QModelIndex& parent)
     }
     performPaginatedSearch();
 }
+const char* sorts[5]{"relevance","downloads","follows","updated","newest"};
 
 void ListModel::performPaginatedSearch()
 {
-    NetJob *netJob = new NetJob("Flame::Search", APPLICATION->network());
+
+    QString mcVersion =  ((MinecraftInstance *)((ModrinthPage *)parent())->m_instance)->getPackProfile()->getComponentVersion("net.minecraft");
+    bool hasFabric = !((MinecraftInstance *)((ModrinthPage *)parent())->m_instance)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
+    auto netJob = new NetJob("Modrinth::Search", APPLICATION->network());
     auto searchUrl = QString(
-        "https://addons-ecs.forgesvc.net/api/v2/addon/search?"
-        "categoryId=0&"
-        "gameId=432&"
-        "index=%1&"
-        "pageSize=25&"
-        "searchFilter=%2&"
-        "sectionId=4471&"
-        "sort=%3"
-    ).arg(nextSearchOffset).arg(currentSearchTerm).arg(currentSort);
+        "https://api.modrinth.com/v2/search?"
+        "offset=%1&"
+        "limit=25&"
+        "query=%2&"
+        "index=%3&"
+        "facets=[[\"categories:%4\"],[\"versions:%5\"],[\"project_type:mod\"]]"
+    )
+        .arg(nextSearchOffset)
+        .arg(currentSearchTerm)
+        .arg(sorts[currentSort])
+        .arg(hasFabric ? "fabric" : "forge")
+        .arg(mcVersion);
+
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();
@@ -175,7 +186,7 @@ void ListModel::performPaginatedSearch()
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
 }
 
-void ListModel::searchWithTerm(const QString& term, int sort)
+void ListModel::searchWithTerm(const QString &term, const int sort)
 {
     if(currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort) {
         return;
@@ -197,32 +208,32 @@ void ListModel::searchWithTerm(const QString& term, int sort)
     performPaginatedSearch();
 }
 
-void Flame::ListModel::searchRequestFinished()
+void Modrinth::ListModel::searchRequestFinished()
 {
     jobPtr.reset();
 
     QJsonParseError parse_error;
     QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if(parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from CurseForge at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qWarning() << "Error while parsing JSON response from Modrinth at " << parse_error.offset << " reason: " << parse_error.errorString();
         qWarning() << response;
         return;
     }
 
-    QList<Flame::IndexedPack> newList;
-    auto packs = doc.array();
+    QList<Modrinth::IndexedPack> newList;
+    auto packs = doc.object().value("hits").toArray();
     for(auto packRaw : packs) {
         auto packObj = packRaw.toObject();
 
-        Flame::IndexedPack pack;
+        Modrinth::IndexedPack pack;
         try
         {
-            Flame::loadIndexedPack(pack, packObj);
+            Modrinth::loadIndexedPack(pack, packObj);
             newList.append(pack);
         }
         catch(const JSONValidationError &e)
         {
-            qWarning() << "Error while loading pack from CurseForge: " << e.cause();
+            qWarning() << "Error while loading mod from Modrinth: " << e.cause();
             continue;
         }
     }
@@ -237,7 +248,7 @@ void Flame::ListModel::searchRequestFinished()
     endInsertRows();
 }
 
-void Flame::ListModel::searchRequestFailed(QString reason)
+void Modrinth::ListModel::searchRequestFailed(QString reason)
 {
     jobPtr.reset();
 

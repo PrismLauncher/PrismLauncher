@@ -26,6 +26,7 @@
 #include "Application.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ModDownloadDialog.h"
 #include "ui/GuiUtil.h"
 
 #include "DesktopServices.h"
@@ -36,6 +37,7 @@
 #include "minecraft/PackProfile.h"
 
 #include "Version.h"
+#include "ui/dialogs/ProgressDialog.h"
 
 namespace {
     // FIXME: wasteful
@@ -141,6 +143,11 @@ ModFolderPage::ModFolderPage(
     ui(new Ui::ModFolderPage)
 {
     ui->setupUi(this);
+    if(id == "mods") {
+        auto act = new QAction(tr("Install Mods"), this);
+        ui->actionsToolbar->insertActionBefore(ui->actionView_configs,act);
+        connect(act, &QAction::triggered, this, &ModFolderPage::on_actionInstall_mods_triggered);
+    }
     ui->actionsToolbar->insertSpacer(ui->actionView_configs);
 
     m_inst = inst;
@@ -340,6 +347,44 @@ void ModFolderPage::on_actionRemove_triggered()
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->modTreeView->selectionModel()->selection());
     m_mods->deleteMods(selection.indexes());
+}
+
+void ModFolderPage::on_actionInstall_mods_triggered()
+{
+    if(!m_controlsEnabled) {
+        return;
+    }
+    if(m_inst->typeName() != "Minecraft"){
+        return; //this is a null instance or a legacy instance
+    }
+    bool hasFabric = !((MinecraftInstance *)m_inst)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
+    bool hasForge = !((MinecraftInstance *)m_inst)->getPackProfile()->getComponentVersion("net.minecraftforge").isEmpty();
+    if (!hasFabric && !hasForge) {
+        QMessageBox::critical(this,tr("Error"),tr("Please install a mod loader first!"));
+        return;
+    }
+    ModDownloadDialog mdownload(m_mods, this, m_inst);
+    if(mdownload.exec()) {
+        ModDownloadTask *task = mdownload.getTask();
+        if (task) {
+            connect(task, &Task::failed, [this, task](QString reason) {
+                task->deleteLater();
+                CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+            });
+            connect(task, &Task::succeeded, [this, task]() {
+                QStringList warnings = task->warnings();
+                if (warnings.count()) {
+                    CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'),
+                                                 QMessageBox::Warning)->show();
+                }
+                task->deleteLater();
+            });
+            ProgressDialog loadDialog(this);
+            loadDialog.setSkipButton(true, tr("Abort"));
+            loadDialog.execWithTask(task);
+            m_mods->update();
+        }
+    }
 }
 
 void ModFolderPage::on_actionView_configs_triggered()

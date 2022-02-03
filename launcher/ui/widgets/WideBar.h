@@ -18,6 +18,7 @@ public:
     void addAction(QAction *action);
     void addSeparator();
     void insertSpacer(QAction *action);
+    void insertActionBefore(QAction *before, QAction *action);
     QMenu *createContextMenu(QWidget *parent = nullptr, const QString & title = QString());
 
 private:

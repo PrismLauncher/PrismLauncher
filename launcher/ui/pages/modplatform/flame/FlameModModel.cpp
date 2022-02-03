@@ -1,5 +1,8 @@
-#include "FlameModel.h"
+#include "FlameModModel.h"
 #include "Application.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
+#include "FlameModPage.h"
 #include <Json.h>
 
 #include <MMCStrings.h>
@@ -7,9 +10,10 @@
 
 #include <QtMath>
 
-namespace Flame {
 
-ListModel::ListModel(QObject *parent) : QAbstractListModel(parent)
+namespace FlameMod {
+
+ListModel::ListModel(FlameModPage *parent) : QAbstractListModel(parent)
 {
 }
 
@@ -96,7 +100,7 @@ void ListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlameMods", QString("logos/%1").arg(logo.section(".", 0, 0)));
     auto job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
@@ -118,7 +122,6 @@ void ListModel::requestLogo(QString logo, QString url)
     });
 
     job->start();
-
     m_loadingLogos.append(logo);
 }
 
@@ -126,7 +129,7 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
 {
     if(m_logoMap.contains(logo))
     {
-        callback(APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry("FlameMods", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }
     else
     {
@@ -154,20 +157,33 @@ void ListModel::fetchMore(const QModelIndex& parent)
     }
     performPaginatedSearch();
 }
+const char* sorts[6]{"Featured","Popularity","LastUpdated","Name","Author","TotalDownloads"};
 
 void ListModel::performPaginatedSearch()
 {
-    NetJob *netJob = new NetJob("Flame::Search", APPLICATION->network());
+
+    QString mcVersion =  ((MinecraftInstance *)((FlameModPage *)parent())->m_instance)->getPackProfile()->getComponentVersion("net.minecraft");
+    bool hasFabric = !((MinecraftInstance *)((FlameModPage *)parent())->m_instance)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
+    auto netJob = new NetJob("Flame::Search", APPLICATION->network());
     auto searchUrl = QString(
         "https://addons-ecs.forgesvc.net/api/v2/addon/search?"
-        "categoryId=0&"
         "gameId=432&"
+        "categoryId=0&"
+        "sectionId=6&"
+
         "index=%1&"
         "pageSize=25&"
         "searchFilter=%2&"
-        "sectionId=4471&"
-        "sort=%3"
-    ).arg(nextSearchOffset).arg(currentSearchTerm).arg(currentSort);
+        "sort=%3&"
+        "%4"
+        "gameVersion=%5"
+    )
+        .arg(nextSearchOffset)
+        .arg(currentSearchTerm)
+        .arg(sorts[currentSort])
+        .arg(hasFabric ? "modLoaderType=4&" : "")
+        .arg(mcVersion);
+
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();
@@ -175,7 +191,7 @@ void ListModel::performPaginatedSearch()
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
 }
 
-void ListModel::searchWithTerm(const QString& term, int sort)
+void ListModel::searchWithTerm(const QString &term, const int sort)
 {
     if(currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort) {
         return;
@@ -197,32 +213,32 @@ void ListModel::searchWithTerm(const QString& term, int sort)
     performPaginatedSearch();
 }
 
-void Flame::ListModel::searchRequestFinished()
+void ListModel::searchRequestFinished()
 {
     jobPtr.reset();
 
     QJsonParseError parse_error;
     QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if(parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from CurseForge at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qWarning() << "Error while parsing JSON response from Flame at " << parse_error.offset << " reason: " << parse_error.errorString();
         qWarning() << response;
         return;
     }
 
-    QList<Flame::IndexedPack> newList;
+    QList<FlameMod::IndexedPack> newList;
     auto packs = doc.array();
     for(auto packRaw : packs) {
         auto packObj = packRaw.toObject();
 
-        Flame::IndexedPack pack;
+        FlameMod::IndexedPack pack;
         try
         {
-            Flame::loadIndexedPack(pack, packObj);
+            FlameMod::loadIndexedPack(pack, packObj);
             newList.append(pack);
         }
         catch(const JSONValidationError &e)
         {
-            qWarning() << "Error while loading pack from CurseForge: " << e.cause();
+            qWarning() << "Error while loading mod from Flame: " << e.cause();
             continue;
         }
     }
@@ -237,7 +253,7 @@ void Flame::ListModel::searchRequestFinished()
     endInsertRows();
 }
 
-void Flame::ListModel::searchRequestFailed(QString reason)
+void ListModel::searchRequestFailed(QString reason)
 {
     jobPtr.reset();
 
