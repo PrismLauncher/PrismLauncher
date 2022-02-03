@@ -76,6 +76,20 @@ void WideBar::addSeparator()
     m_entries.push_back(entry);
 }
 
+void WideBar::insertActionBefore(QAction* before, QAction* action){
+    auto iter = std::find_if(m_entries.begin(), m_entries.end(), [before](BarEntry * entry) {
+        return entry->wideAction == before;
+    });
+    if(iter == m_entries.end()) {
+        return;
+    }
+    auto entry = new BarEntry();
+    entry->qAction = insertWidget((*iter)->qAction, new ActionButton(action, this));
+    entry->wideAction = action;
+    entry->type = BarEntry::Action;
+    m_entries.insert(iter, entry);
+}
+
 void WideBar::insertSpacer(QAction* action)
 {
     auto iter = std::find_if(m_entries.begin(), m_entries.end(), [action](BarEntry * entry) {
