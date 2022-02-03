@@ -717,6 +717,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // pastebin URL
         m_settings->registerSetting("PastebinURL", "https://0x0.st");
 
+        m_settings->registerSetting("CloseAfterLaunch", false);
+
         // Init page provider
         {
             m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));

@@ -71,6 +71,9 @@ void MinecraftPage::applySettings()
     s->set("ShowGameTime", ui->showGameTime->isChecked());
     s->set("ShowGlobalGameTime", ui->showGlobalGameTime->isChecked());
     s->set("RecordGameTime", ui->recordGameTime->isChecked());
+
+    // Miscellaneous
+    s->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
 }
 
 void MinecraftPage::loadSettings()
@@ -88,4 +91,6 @@ void MinecraftPage::loadSettings()
     ui->showGameTime->setChecked(s->get("ShowGameTime").toBool());
     ui->showGlobalGameTime->setChecked(s->get("ShowGlobalGameTime").toBool());
     ui->recordGameTime->setChecked(s->get("RecordGameTime").toBool());
+
+    ui->closeAfterLaunchCheck->setChecked(s->get("CloseAfterLaunch").toBool());
 }
