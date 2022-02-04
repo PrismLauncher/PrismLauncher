@@ -3,12 +3,14 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "ModrinthPage.h"
+#include "ui/dialogs/ModDownloadDialog.h"
 #include <Json.h>
 
 #include <MMCStrings.h>
 #include <Version.h>
 
 #include <QtMath>
+#include <QMessageBox>
 
 
 namespace Modrinth {
@@ -250,6 +252,12 @@ void Modrinth::ListModel::searchRequestFinished()
 
 void Modrinth::ListModel::searchRequestFailed(QString reason)
 {
+    if(jobPtr->first()->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409){
+        //409 Gone, notify user to update
+        QMessageBox::critical(nullptr, tr("Error"), tr("Modrinth API version too old!\nPlease update PolyMC!"));
+        //self-destruct
+        ((ModDownloadDialog *)((ModrinthPage *)parent())->parentWidget())->reject();
+    }
     jobPtr.reset();
 
     if(searchState == ResetRequested) {

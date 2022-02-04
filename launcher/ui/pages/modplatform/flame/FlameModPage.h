@@ -63,5 +63,5 @@ private:
     FlameMod::ListModel* listModel = nullptr;
     FlameMod::IndexedPack current;
 
-    QString selectedVersion;
+    int selectedVersion = -1;
 };
