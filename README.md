@@ -100,6 +100,12 @@ sudo dnf install polymc
 
 MacOS currently does not have any packages. We are still working on setting up MacOS packaging. Meanwhile, you can [build](https://github.com/PolyMC/PolyMC/blob/develop/BUILD.md#macos) it for yourself.
 
+## <img src="https://lotar.altervista.org/wiki/_media/news/slackware-logo.png" height="20" /> Slackware
+
+[A SlackBuild](https://codeberg.org/glowiak/SlackBuilds/src/branch/master/repository/polymc.md) is available. You will need [qt5](http://slackbuilds.org/repository/14.2/libraries/qt5/) (on 15.0 installed by default), [a JDK](https://codeberg.org/glowiak/SlackBuilds/src/branch/master/repository/adoptium-jdk8.md), and if you're on 14.2, you need to compile newer CMake version manually.
+
+If you are too lazy to do all these steps, you can just download [a prebuild x86_64 package](https://codeberg.org/attachments/0547129b-3910-4b46-89fb-50b3221576b1) and install it with /sbin/installpkg.
+
 # Help & Support
 
 Feel free to create an issue if you need help. However, you might find it easier to ask in the Discord server.
