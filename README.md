@@ -106,7 +106,7 @@ MacOS currently does not have any packages. We are still working on setting up M
 
 If you are too lazy to do all these steps, you can just download [a prebuild x86_64 package](https://codeberg.org/attachments/0547129b-3910-4b46-89fb-50b3221576b1) and install it with /sbin/installpkg.
 
-## <img src="https://kaworu.ch/images/freebsd-logo.png" height="20" /> FreeBSD
+## <img src="https://www.vectorlogo.zone/logos/freebsd/freebsd-icon.svg" height="20" /> FreeBSD
 
 For FreeBSD available are:
 
