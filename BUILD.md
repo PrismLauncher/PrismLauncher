@@ -53,7 +53,7 @@ This is the preferred method for installation, and is suitable for packages.
 ```sh
 # configure everything
 cmake -S . -B build \
-	-DCMAKE_BUILD_TYPE=Release \
+   -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX="/usr" \ # Use "/usr" for packages, otherwise, leave it at the default "/usr/local".
    -DLauncher_LAYOUT=lin-system
 cd build
@@ -75,15 +75,15 @@ The deb will be located in the directory the repo was cloned in.
 ### Building a .rpm
 
 Build dependencies are automatically installed using `dnf`, but you do need the `rpmdevtools` package (on Fedora)
-in order to fetch sources and setup your tree.
+in order to fetch sources and setup your tree.  
+You don't need to clone the repo for this; the spec file handles that
 
 ```
 cd ~
 # setup your ~/rpmbuild directory, required for rpmbuild to work.
 rpmdev-setuptree
-# note: submodules are not needed here, as the spec file will download the tarball instead
-git clone https://github.com/PolyMC/PolyMC.git
-cd PolyMC/packages/rpm
+# get the rpm spec file from the polymc-misc repo
+wget https://raw.githubusercontent.com/PolyMC/polymc-misc/master/rpm/polymc.spec
 # install build dependencies
 sudo dnf builddep polymc.spec
 # download build sources
@@ -94,34 +94,15 @@ rpmbuild -bb polymc.spec
 
 The path to the rpm packages will be printed when the build is complete.
 
-### Building from command line
-
-You need a source folder, a build folder and an install folder.
-
-```
-# make all the folders
-mkdir ~/PolyMC && cd ~/PolyMC
-mkdir build
-mkdir install
-# clone the complete source
-git clone --recursive https://github.com/PolyMC/PolyMC.git src
-# configure the project
-cd build
-cmake -DCMAKE_INSTALL_PREFIX=../install ../src
-make -j$(nproc) install
-```
-
-The path to the rpm packages will be printed when the build is complete.
-
 ### Building a flatpak
 
-You only need to clone the flatpak sources
+You don't need to clone the entire PolyMC repo for this; the flatpak file handles that.  
 `flatpak` and `flatpak-builder` need to be installed on your system
 
 ```sh
 git clone https://github.com/flathub/org.polymc.PolyMC
 cd org.polymc.PolyMC
-# remove --user and --install if you want to build without installing
+# remove --user --install if you want to build without installing
 flatpak-builder --user --install flatbuild org.polymc.PolyMC.yml
 ```
 
