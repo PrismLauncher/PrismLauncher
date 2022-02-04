@@ -11,7 +11,7 @@
     flake = false;
   };
   inputs.quazip = {
-    url = "github:multimc/quazip";
+    url = "github:stachenov/quazip";
     flake = false;
   };
 

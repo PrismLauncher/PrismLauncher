@@ -66,15 +66,15 @@
     "quazip": {
       "flake": false,
       "locked": {
-        "lastModified": 1633895098,
-        "narHash": "sha256-+Of0M2IAoTf1CyC0teCpsyurv6xfqiBo84V49dSeNTA=",
-        "owner": "multimc",
+        "lastModified": 1643049383,
+        "narHash": "sha256-LcJY6yd6GyeL7X5MP4L94diceM1TYespWByliBsjK98=",
+        "owner": "stachenov",
         "repo": "quazip",
-        "rev": "b1a72ac0bb5a732bf887a535ab75c6f9bedb6b6b",
+        "rev": "09ec1d10c6d627f895109b21728dda000cbfa7d1",
         "type": "github"
       },
       "original": {
-        "owner": "multimc",
+        "owner": "stachenov",
         "repo": "quazip",
         "type": "github"
       }
