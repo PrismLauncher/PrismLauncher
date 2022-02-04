@@ -265,6 +265,8 @@ add_subdirectory(libraries/javacheck) # java compatibility checker
 add_subdirectory(libraries/xz-embedded) # xz compression
 if (FORCE_BUNDLED_QUAZIP)
     message(STATUS "Using bundled QuaZip")
+    set(BUILD_SHARED_LIBS 0)  # link statically to avoid conflicts.
+    set(QUAZIP_INSTALL 0)
     add_subdirectory(libraries/quazip) # zip manipulation library
 endif()
 add_subdirectory(libraries/rainbow) # Qt extension for colors
