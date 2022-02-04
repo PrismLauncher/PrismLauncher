@@ -92,7 +92,7 @@ sudo dnf copr enable sentry/polymc
 sudo dnf install polymc
 ```
 
-## <img src="https://lotar.altervista.org/wiki/_media/news/slackware-logo.png" height="20" /> Slackware
+### <img src="https://lotar.altervista.org/wiki/_media/news/slackware-logo.png" height="20" /> Slackware
 
 [A SlackBuild](https://codeberg.org/glowiak/SlackBuilds/src/branch/master/repository/polymc.md) is available. You will need [qt5](http://slackbuilds.org/repository/14.2/libraries/qt5/) (on 15.0 installed by default), [a JDK](https://codeberg.org/glowiak/SlackBuilds/src/branch/master/repository/adoptium-jdk8.md), and if you're on 14.2, you need to compile newer CMake version manually. To build, type in extracted directory with all dependiences met:
 
