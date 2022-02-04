@@ -110,9 +110,9 @@ If you are too lazy to do all these steps, you can just download [a prebuild x86
 
 For FreeBSD available are:
 
--[AppBSD Image](https://drive.google.com/file/d/1QLYWGkLSjVb8-lhICivozZQDwYEWBack/view?usp=sharing) - a portable application, requires [AppBSD](https://codeberg.org/glowiak/appbsd/) to be installed.
+- [AppBSD Image](https://drive.google.com/file/d/1QLYWGkLSjVb8-lhICivozZQDwYEWBack/view?usp=sharing) - a portable application, requires [AppBSD](https://codeberg.org/glowiak/appbsd/) to be installed.
 
--[Gzipped binaries](https://codeberg.org/attachments/7aa74368-1f55-49be-abd8-0b8258e63e38) - traditional way to distribute, unpack and run.
+- [Gzipped binaries](https://codeberg.org/attachments/7aa74368-1f55-49be-abd8-0b8258e63e38) - traditional way to distribute, unpack and run.
 
 In both cases you need X11, Qt5 and Java installed
 
