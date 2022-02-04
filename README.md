@@ -106,6 +106,16 @@ MacOS currently does not have any packages. We are still working on setting up M
 
 If you are too lazy to do all these steps, you can just download [a prebuild x86_64 package](https://codeberg.org/attachments/0547129b-3910-4b46-89fb-50b3221576b1) and install it with /sbin/installpkg.
 
+## <img src="https://kaworu.ch/images/freebsd-logo.png" height="20" /> FreeBSD
+
+For FreeBSD available are:
+
+-[AppBSD Image](https://drive.google.com/file/d/1QLYWGkLSjVb8-lhICivozZQDwYEWBack/view?usp=sharing) - a portable application, requires [AppBSD](https://codeberg.org/glowiak/appbsd/) to be installed.
+
+-[Gzipped binaries](https://codeberg.org/attachments/7aa74368-1f55-49be-abd8-0b8258e63e38) - traditional way to distribute, unpack and run.
+
+In both cases you need X11, Qt5 and Java installed
+
 # Help & Support
 
 Feel free to create an issue if you need help. However, you might find it easier to ask in the Discord server.
