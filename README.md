@@ -121,11 +121,13 @@ For FreeBSD available are:
 
 - [Gzipped binaries](http://glowiak.github.io/file/polymc-latest-fbsd64-raw) - traditional way to distribute, unpack and run.
 
-In both cases you need X11, Qt5 and Java installed
+In both cases you need X11, Qt5 and Java installed. Both files are 64bit only.
 
 ## <img src="https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/drivers/webextension/images/icons/OpenBSD%20httpd.svg" height="20" /> OpenBSD
 
-For OpenBSD available are [gzipped binaries](http://glowiak.github.io/file/polymc-latest-obsd32-raw), download, unpack and run. Easy.
+For OpenBSD available are [gzipped 32-bit binaries](http://glowiak.github.io/file/polymc-latest-obsd32-raw), download, unpack and run.
+
+You need X11, Qt5 and Java installed.
 
 # Help & Support
 
