@@ -123,6 +123,10 @@ For FreeBSD available are:
 
 In both cases you need X11, Qt5 and Java installed
 
+## <img src="https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/drivers/webextension/images/icons/OpenBSD%20httpd.svg" height="20" /> OpenBSD
+
+For OpenBSD available are [gzipped binaries](glowiak.github.io/file/polymc-latest-obsd32-raw), download, unpack and run. Easy.
+
 # Help & Support
 
 Feel free to create an issue if you need help. However, you might find it easier to ask in the Discord server.
