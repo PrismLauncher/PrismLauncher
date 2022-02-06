@@ -55,7 +55,7 @@ This is the preferred method for installation, and is suitable for packages.
 # configure everything
 cmake -S . -B build \
    -DCMAKE_BUILD_TYPE=Release \
-   -DCMAKE_INSTALL_PREFIX="/usr" \ # Use "/usr" for packages, otherwise, leave it at the default "/usr/local".
+   -DCMAKE_INSTALL_PREFIX="/usr" \ # Replace /usr with /usr/local when building on FreeBSD
    -DLauncher_LAYOUT=lin-system
 cd build
 make -j$(nproc) install # Optionally specify DESTDIR for packages (i.e. DESTDIR=${pkgdir})
@@ -73,7 +73,7 @@ makedeb -s
 
 The deb will be located in the directory the repo was cloned in.
 
-### Building a .rpm
+### Building an .rpm
 
 Build dependencies are automatically installed using `dnf`, but you do need the `rpmdevtools` package (on Fedora)
 in order to fetch sources and setup your tree.  
@@ -310,8 +310,8 @@ This is the preferred method for installation, and is suitable for packages.
 # configure everything
 cmake -S . -B build \
    -DCMAKE_BUILD_TYPE=Release \
-   -DCMAKE_INSTALL_PREFIX="/usr" \ # Use "/usr" for packages, otherwise, leave it at the default "/usr/local".
-   -DLauncher_LAYOUT=lin-system -DCMAKE_PREFIX_PATH=/usr/local/lib/qt5/cmake
+   -DCMAKE_INSTALL_PREFIX="/usr/local" \ # /usr/local is default in OpenBSD and FreeBSD
+   -DLauncher_LAYOUT=lin-system -DCMAKE_PREFIX_PATH=/usr/local/lib/qt5/cmake # use linux layout and point to qt5 libs
 cd build
 make -j$(nproc) install # Optionally specify DESTDIR for packages (i.e. DESTDIR=${pkgdir})
 ```
