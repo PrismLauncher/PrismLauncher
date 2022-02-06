@@ -276,7 +276,7 @@ need to be fixed with `codesign -fs -`.
 
 # OpenBSD
 
-Getting the project to build and run on Linux is easy if you use any modern and up-to-date linux distribution.
+Tested on OpenBSD 7.0-alpha i386, on older should work too
 
 ## Build dependencies
 - A C++ compiler capable of building C++11 code.
