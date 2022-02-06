@@ -280,12 +280,13 @@ need to be fixed with `codesign -fs -`.
 Tested on OpenBSD 7.0-alpha i386, on older should work too
 
 ## Build dependencies
-- A C++ compiler capable of building C++11 code.
-- Qt Development tools 5.6 or newer (`qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5` on Debian-based system)
-- cmake 3.1 or newer (`cmake` on Debian-based system)
-- zlib (`zlib1g-dev` on Debian-based system)
-- Java JDK (`openjdk-17-jdk`on Debian-based system)
-- GL headers (`libgl1-mesa-dev` on Debian-based system)
+- A C++ compiler capable of building C++11 code (included in base system)
+- Qt Development tools 5.6 or newer ([meta/qt5](https://openports.se/meta/qt5))
+- cmake 3.1 or newer ([devel/cmake](https://openports.se/devel/cmake))
+- zlib (included in base system)
+- Java JDK ([devel/jdk-1.8](https://openports.se/devel/jdk/1.8))
+- GL headers (included in base system)
+- lwjgl ([games/lwjgl](https://openports.se/games/lwjgl) and [games/lwjgl3](https://openports.se/games/lwjgl3))
 
 You can use IDEs like KDevelop or QtCreator to open the CMake project if you want to work on the code.
 
