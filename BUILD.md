@@ -22,7 +22,7 @@ The rest of the documentation assumes you have already cloned the repository.
 
 # Linux and FreeBSD
 
-Getting the project to build and run on Linux is easy if you use any modern and up-to-date linux distribution.
+Getting the project to build and run on Linux is easy if you use any modern and up-to-date linux distribution. If you're using FreeBSD you should use 13.0-RELEASE or newer.
 
 ## Build dependencies
 - A C++ compiler capable of building C++11 code.
@@ -31,6 +31,7 @@ Getting the project to build and run on Linux is easy if you use any modern and 
 - zlib (`zlib1g-dev` on Debian-based system)
 - Java JDK (`openjdk-17-jdk`on Debian-based system)
 - GL headers (`libgl1-mesa-dev` on Debian-based system)
+- games/lwjgl port if using FreeBSD
 
 You can use IDEs like KDevelop or QtCreator to open the CMake project if you want to work on the code.
 
