@@ -14,6 +14,11 @@ jobs:
             qt_version: 5.12.8
             qt_host: linux
 
+          - os: ubuntu-20.04
+            qt_version: 5.15.2
+            qt_host: linux
+            app_image: true
+
           - os: windows-2022
             qt_version: 5.15.2
             qt_host: windows
@@ -27,7 +32,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
-      MACOSX_DEPLOYMENT_TARGET: ${{matrix.macosx_deployment_target}}
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macosx_deployment_target }}
+      INSTALL_DIR: "install"
+      BUILD_DIR: "build"
 
     steps:
 
@@ -35,6 +42,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: 'true'
+
+      - name: Install OpenJDK
+        uses: AdoptOpenJDK/install-jdk@v1
+        with:
+          version: '8'
 
       - name: Install OpenJDK
         uses: AdoptOpenJDK/install-jdk@v1
@@ -61,16 +73,52 @@ jobs:
         uses: urkle/action-get-ninja@v1
 
       - name: Configure CMake
+        if: matrix.app_image != true
         run: |
-          cmake -S . -B build -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Debug -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=Debug -G Ninja
+
+      - name: Configure CMake for AppImage
+        if: matrix.app_image == true
+        run: |
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug -DLauncher_LAYOUT=lin-system -G Ninja
 
       - name: Build
         run: |
-          cmake --build build
+          cmake --build ${{ env.BUILD_DIR }}
 
       - name: Install
+        if: matrix.app_image != true
         run: |
-          cmake --install build
+          cmake --install ${{ env.BUILD_DIR }}
+
+      - name: Install for AppImage
+        if: matrix.app_image == true
+        run: |
+          DESTDIR=${{ env.INSTALL_DIR }} cmake --install ${{ env.BUILD_DIR }}
+
+      - name: Download linuxdeploy family
+        if: matrix.app_image == true
+        run: |
+          wget "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+          wget "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage"
+          wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
+
+      - name: AppImage magic
+        if: matrix.app_image == true
+        shell: bash
+        run: |
+          export OUTPUT="PolyMC-${{ github.sha }}-x86_64.AppImage"
+          chmod +x linuxdeploy-*.AppImage
+          mkdir -p ${{ env.INSTALL_DIR }}/usr/lib/jvm/java-{8,17}-openjdk
+          cp -r /opt/hostedtoolcache/jdk-8-hotspot/1.0.0/x64/* ${{ env.INSTALL_DIR }}/usr/lib/jvm/java-8-openjdk
+          cp -r /opt/hostedtoolcache/jdk-17-hotspot/1.0.0/x64/* ${{ env.INSTALL_DIR }}/usr/lib/jvm/java-17-openjdk
+          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_DIR }}/usr/lib:${{ env.INSTALL_DIR }}/usr/lib/jvm/java-8-openjdk/jre/lib/amd64/server:${{ env.INSTALL_DIR }}/usr/lib/jvm/java-8-openjdk/jre/lib/amd64:${{ env.INSTALL_DIR }}/usr/lib/jvm/java-17-openjdk/lib/server:${{ env.INSTALL_DIR }}/usr/lib/jvm/java-17-openjdk/lib" \
+          ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_DIR }} --output appimage --plugin qt -d ${{ env.INSTALL_DIR }}/usr/share/applications/org.polymc.polymc.desktop -i ${{ env.INSTALL_DIR }}/usr/share/icons/hicolor/scalable/apps/org.polymc.PolyMC.svg
+
+      - name: Run windeployqt
+        if: runner.os == 'Windows'
+        run: |
+          windeployqt "${{ env.INSTALL_DIR }}/polymc.exe"
 
       - name: Install OpenSSL libs
         if: runner.os == 'Windows'
@@ -78,30 +126,43 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install aqtinstall==2.0.5
           python -m aqt install-tool -O "${{ github.workspace }}\Qt\" windows desktop tools_openssl_x64
-          copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x64\bin\libssl-1_1-x64.dll" "${{ github.workspace }}\install\"
-          copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x64\bin\libcrypto-1_1-x64.dll" "${{ github.workspace }}\install\"
+          copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x64\bin\libssl-1_1-x64.dll" "${{ github.workspace }}\${{ env.INSTALL_DIR }}\"
+          copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x64\bin\libcrypto-1_1-x64.dll" "${{ github.workspace }}\${{ env.INSTALL_DIR }}\"
+
+      - name: Run macdeployqt
+        if: runner.os == 'macOS'
+        run: |
+          cd ${{ env.INSTALL_DIR }}
+          macdeployqt "PolyMC.app" -executable="PolyMC.app/Contents/MacOS/polymc" -always-overwrite
 
       - name: chmod binary on macOS
         if: runner.os == 'macOS'
         run: |
-          chmod +x "${{ github.workspace }}/install/PolyMC.app/Contents/MacOS/polymc"
+          chmod +x "${{ github.workspace }}/${{ env.INSTALL_DIR }}/PolyMC.app/Contents/MacOS/polymc"
 
       - name: tar bundle on macOS
         if: runner.os == 'macOS'
         run: |
-          cd install
+          cd ${{ env.INSTALL_DIR }}
           tar -czf ../polymc.tar.gz *
 
-      - name: Upload package for Linux and Windows
-        if: runner.os != 'macOS'
+      - name: Upload AppImage
+        if: matrix.app_image == true
         uses: actions/upload-artifact@v2
         with:
-          name: polymc-${{ matrix.os }}-portable
-          path: install/**
+          name: PolyMC-${{ github.sha }}-x86_64.AppImage
+          path: PolyMC-${{ github.sha }}-x86_64.AppImage
+
+      - name: Upload package for Linux and Windows
+        if: runner.os != 'macOS' && matrix.app_image != true
+        uses: actions/upload-artifact@v2
+        with:
+          name: polymc-${{ runner.os }}-${{ github.sha }}-portable
+          path: ${{ env.INSTALL_DIR }}/**
 
       - name: Upload package for macOS
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v2
         with:
-          name: polymc-${{ matrix.os }}-portable
+          name: polymc-${{ runner.os }}-${{ github.sha }}-portable
           path: polymc.tar.gz
