@@ -95,6 +95,15 @@ rpmbuild -bb polymc.spec
 
 The path to the rpm packages will be printed when the build is complete.
 
+### Building a Slackware package
+
+To build a Slackware package, first install [qt5 SlackBuild](http://slackbuilds.org/repository/14.2/libraries/qt5/) (on 15.0 and newer installed by defualt), then set up a [JDK](https://codeberg.org/glowiak/SlackBuilds/raw/branch/master/tgz/adoptium-jdk8.tar.gz). Next, download the [SlackBuild](https://codeberg.org/glowiak/SlackBuilds/raw/branch/master/tgz/polymc.tar.gz), unpack it and type in extracted directory:
+
+```
+sudo ./polymc.SlackBuild # script will do everything, just sit up and wait
+sudo /sbin/installpkg /tmp/polymc-version-arch-1_SBo.tgz # install the created package
+```
+
 ### Building a flatpak
 
 You don't need to clone the entire PolyMC repo for this; the flatpak file handles that.  
