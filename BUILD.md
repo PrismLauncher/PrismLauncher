@@ -20,7 +20,7 @@ git submodule update
 
 The rest of the documentation assumes you have already cloned the repository.
 
-# Linux
+# Linux and FreeBSD
 
 Getting the project to build and run on Linux is easy if you use any modern and up-to-date linux distribution.
 
@@ -273,3 +273,43 @@ Remember to replace `/path/to/Qt/` with the actual path. For newer Qt installati
 
 **Note:** The final app bundle may not run due to code signing issues, which
 need to be fixed with `codesign -fs -`.
+
+# OpenBSD
+
+Getting the project to build and run on Linux is easy if you use any modern and up-to-date linux distribution.
+
+## Build dependencies
+- A C++ compiler capable of building C++11 code.
+- Qt Development tools 5.6 or newer (`qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5` on Debian-based system)
+- cmake 3.1 or newer (`cmake` on Debian-based system)
+- zlib (`zlib1g-dev` on Debian-based system)
+- Java JDK (`openjdk-17-jdk`on Debian-based system)
+- GL headers (`libgl1-mesa-dev` on Debian-based system)
+
+You can use IDEs like KDevelop or QtCreator to open the CMake project if you want to work on the code.
+
+### Building a portable binary
+
+```sh
+mkdir install
+# configure the project
+cmake -S . -B build \
+   -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_PREFIX_PATH=/usr/local/lib/qt5/cmake
+# build
+cd build
+make -j$(nproc) install
+```
+
+### Building & Installing to the System
+
+This is the preferred method for installation, and is suitable for packages.
+
+```sh
+# configure everything
+cmake -S . -B build \
+   -DCMAKE_BUILD_TYPE=Release \
+   -DCMAKE_INSTALL_PREFIX="/usr" \ # Use "/usr" for packages, otherwise, leave it at the default "/usr/local".
+   -DLauncher_LAYOUT=lin-system -DCMAKE_PREFIX_PATH=/usr/local/lib/qt5/cmake
+cd build
+make -j$(nproc) install # Optionally specify DESTDIR for packages (i.e. DESTDIR=${pkgdir})
+```
