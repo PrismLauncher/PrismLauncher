@@ -67,6 +67,19 @@ jobs:
       - name: Install Ninja
         uses: urkle/action-get-ninja@v1
 
+      - name: Download linuxdeploy family
+        if: matrix.app_image == true
+        run: |
+          wget "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+          wget "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage"
+          wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
+
+      - name: Download JREs for AppImage
+        if: matrix.app_image == true
+        shell: bash
+        run: |
+          ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
+
       - name: Configure CMake
         if: matrix.app_image != true
         run: |
@@ -91,20 +104,7 @@ jobs:
         run: |
           DESTDIR=${{ env.INSTALL_DIR }} cmake --install ${{ env.BUILD_DIR }}
 
-      - name: Download linuxdeploy family
-        if: matrix.app_image == true
-        run: |
-          wget "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
-          wget "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage"
-          wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
-
-      - name: Download JREs for AppImage
-        if: matrix.app_image == true
-        shell: bash
-        run: |
-          ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
-
-      - name: AppImage magic
+      - name: Bundle AppImage
         if: matrix.app_image == true
         shell: bash
         run: |
