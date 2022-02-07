@@ -46,11 +46,6 @@ jobs:
       - name: Install OpenJDK
         uses: AdoptOpenJDK/install-jdk@v1
         with:
-          version: '8'
-
-      - name: Install OpenJDK
-        uses: AdoptOpenJDK/install-jdk@v1
-        with:
           version: '17'
 
       - name: Cache Qt
@@ -103,6 +98,12 @@ jobs:
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
 
+      - name: Download JREs for AppImage
+        if: matrix.app_image == true
+        shell: bash
+        run: |
+          ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
+
       - name: AppImage magic
         if: matrix.app_image == true
         shell: bash
@@ -110,8 +111,8 @@ jobs:
           export OUTPUT="PolyMC-${{ github.sha }}-x86_64.AppImage"
           chmod +x linuxdeploy-*.AppImage
           mkdir -p ${{ env.INSTALL_DIR }}/usr/lib/jvm/java-{8,17}-openjdk
-          cp -r /opt/hostedtoolcache/jdk-8-hotspot/1.0.0/x64/* ${{ env.INSTALL_DIR }}/usr/lib/jvm/java-8-openjdk
-          cp -r /opt/hostedtoolcache/jdk-17-hotspot/1.0.0/x64/* ${{ env.INSTALL_DIR }}/usr/lib/jvm/java-17-openjdk
+          cp -r ${{ github.workspace }}/JREs/jre8/* ${{ env.INSTALL_DIR }}/usr/lib/jvm/java-8-openjdk
+          cp -r ${{ github.workspace }}/JREs/jre17/* ${{ env.INSTALL_DIR }}/usr/lib/jvm/java-17-openjdk
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_DIR }}/usr/lib:${{ env.INSTALL_DIR }}/usr/lib/jvm/java-8-openjdk/jre/lib/amd64/server:${{ env.INSTALL_DIR }}/usr/lib/jvm/java-8-openjdk/jre/lib/amd64:${{ env.INSTALL_DIR }}/usr/lib/jvm/java-17-openjdk/lib/server:${{ env.INSTALL_DIR }}/usr/lib/jvm/java-17-openjdk/lib" \
           ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_DIR }} --output appimage --plugin qt -d ${{ env.INSTALL_DIR }}/usr/share/applications/org.polymc.polymc.desktop -i ${{ env.INSTALL_DIR }}/usr/share/icons/hicolor/scalable/apps/org.polymc.PolyMC.svg
 
