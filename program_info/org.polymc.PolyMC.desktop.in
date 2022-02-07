@@ -7,7 +7,6 @@ Terminal=false
 Exec=@Launcher_APP_BINARY_NAME@
 StartupNotify=true
 Icon=org.polymc.PolyMC
-PrefersNonDefaultGPU=true
 Categories=Game;
 Keywords=game;minecraft;launcher;
 StartupWMClass=PolyMC
