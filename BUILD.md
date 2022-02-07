@@ -55,7 +55,7 @@ This is the preferred method for installation, and is suitable for packages.
 # configure everything
 cmake -S . -B build \
    -DCMAKE_BUILD_TYPE=Release \
-   -DCMAKE_INSTALL_PREFIX="/usr" \ # Replace /usr with /usr/local when building on FreeBSD
+   -DCMAKE_INSTALL_PREFIX="/usr" \ # Use "/usr" when building Linux packages. If building on FreeBSD or not for package, use "/usr/local"
    -DLauncher_LAYOUT=lin-system
 cd build
 make -j$(nproc) install # Optionally specify DESTDIR for packages (i.e. DESTDIR=${pkgdir})
