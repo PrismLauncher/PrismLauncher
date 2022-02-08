@@ -13,33 +13,25 @@ for file in *;
 do
     mkdir temp
 
-    # Handle OpenJDK17 archive
-    re='(OpenJDK17U-jre_x64_linux_hotspot_17.(.*).tar.gz)'
+    re='(OpenJDK([[:digit:]]+)U-jre_x64_linux_hotspot_([[:digit:]]+)(.*).tar.gz)'
     if [[ $file =~ $re ]];
     then
-        version=${BASH_REMATCH[2]}
-        version_edit=$(echo $version | sed -e 's/_/+/g')
-        dir_name=jdk-17.$version_edit-jre
-        echo $dir_name
-        mkdir jre17
+        version_major=${BASH_REMATCH[2]}
+        version_trailing=${BASH_REMATCH[4]}
+
+        if [ $version_major = 17 ];
+        then
+            hyphen='-'
+        else
+            hyphen=''
+        fi
+
+        version_edit=$(echo $version_trailing | sed -e 's/_/+/g' | sed -e 's/b/-b/g')
+        dir_name=jdk$hyphen$version_major$version_edit-jre
+        mkdir jre$version_major
         tar -xzf $file -C temp
         pushd temp/$dir_name
-        cp -r . ../../jre17
-        popd
-
-    fi
-
-    # Handle OpenJDK8 archive
-    re='(OpenJDK8U-jre_x64_linux_hotspot_8(.*).tar.gz)'
-    if [[ $file =~ $re ]];
-    then
-        version=${BASH_REMATCH[2]}
-        version_edit=$(echo $version | sed -e 's/b/-b/g')
-        dir_name=jdk8$version_edit-jre
-        mkdir jre8
-        tar -xzf $file -C temp
-        pushd temp/$dir_name
-        cp -r . ../../jre8
+        cp -r . ../../jre$version_major
         popd
     fi
 
