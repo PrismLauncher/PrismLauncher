@@ -30,11 +30,11 @@
       <caption>The main PolyMC window</caption>
       <image type="source" width="1011" height="994">https://polymc.github.io/polymc.org/assets/img/screenshots/LauncherDark.png</image>
     </screenshot>
-    <screenshot type="">
+    <screenshot>
       <caption>Modpack installation</caption>
       <image type="source" width="911" height="682">https://polymc.github.io/polymc.org/assets/img/screenshots/ModpackInstallDark.png</image>
     </screenshot>
-    <screenshot type="">
+    <screenshot>
       <caption>Mod installation</caption>
       <image type="source" width="987" height="723">https://polymc.github.io/polymc.org/assets/img/screenshots/ModInstallDark.png</image>
     </screenshot>
