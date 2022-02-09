@@ -138,7 +138,7 @@ In general, in order of importance:
 
 ## Translations
 
-TODO
+The translation effort for PolyMC is hosted on [Weblate](https://hosted.weblate.org/polymc/polymc and information about translating PolyMC is available at https://github.com/PolyMC/Translations
 
 ## Forking/Redistributing/Custom builds policy
 
