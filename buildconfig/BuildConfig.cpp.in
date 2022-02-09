@@ -12,6 +12,7 @@ Config::Config()
     LAUNCHER_DOMAIN = "@Launcher_Domain@";
     LAUNCHER_CONFIGFILE = "@Launcher_ConfigFile@";
     LAUNCHER_GIT = "@Launcher_Git@";
+    LAUNCHER_DESKTOPNAME = "@Launcher_DesktopName@";
 
     USER_AGENT = "@Launcher_UserAgent@";
     USER_AGENT_UNCACHED = USER_AGENT + " (Uncached)";
