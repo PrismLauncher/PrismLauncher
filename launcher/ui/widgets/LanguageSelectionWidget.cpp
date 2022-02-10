@@ -5,6 +5,7 @@
 #include <QHeaderView>
 #include <QLabel>
 #include "Application.h"
+#include "BuildConfig.h"
 #include "translations/TranslationsModel.h"
 #include "settings/Setting.h"
 
@@ -52,7 +53,7 @@ QString LanguageSelectionWidget::getSelectedLanguageKey() const
 void LanguageSelectionWidget::retranslate()
 {
     QString text = tr("Don't see your language or the quality is poor?<br/><a href=\"%1\">Help us with translations!</a>")
-        .arg("https://github.com/MultiMC/Launcher/wiki/Translating-MultiMC");
+        .arg(BuildConfig.TRANSLATIONS_URL);
     helpUsLabel->setText(text);
 
 }

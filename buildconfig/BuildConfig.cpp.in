@@ -47,6 +47,7 @@ Config::Config()
     META_URL = "@Launcher_META_URL@";
 
     BUG_TRACKER_URL = "@Launcher_BUG_TRACKER_URL@";
+    TRANSLATIONS_URL = "@Launcher_TRANSLATIONS_URL@";
     DISCORD_URL = "@Launcher_DISCORD_URL@";
     SUBREDDIT_URL = "@Launcher_SUBREDDIT_URL@";
 }
