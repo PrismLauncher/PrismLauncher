@@ -46,12 +46,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 ##################################### Set Application options #####################################
 
 ######## Set URLs ########
-set(Launcher_NEWS_RSS_URL "https://multimc.org/rss.xml" CACHE STRING "URL to fetch Launcher's news RSS feed from.")
+set(Launcher_NEWS_RSS_URL "https://polymc.github.io/feed/feed.xml" CACHE STRING "URL to fetch PolyMC's news RSS feed from.")
+set(Launcher_NEWS_OPEN_URL "https://polymc.github.io/news/" CACHE STRING "URL that gets opened when the user clicks 'More News'")
 
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR    1)
 set(Launcher_VERSION_MINOR    0)
-set(Launcher_VERSION_HOTFIX   5)
+set(Launcher_VERSION_HOTFIX   6)
 
 # Build number
 set(Launcher_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")

@@ -68,6 +68,11 @@ public:
     QString NEWS_RSS_URL;
 
     /**
+     * URL that gets opened when the user clicks "More News"
+     */
+    QString NEWS_OPEN_URL;
+
+    /**
      * Client ID you can get from Imgur when you register an application
      */
     QString IMGUR_CLIENT_ID;

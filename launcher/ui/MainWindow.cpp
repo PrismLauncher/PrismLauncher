@@ -1687,7 +1687,7 @@ void MainWindow::on_actionReportBug_triggered()
 
 void MainWindow::on_actionMoreNews_triggered()
 {
-    DesktopServices::openUrl(QUrl("https://multimc.org/posts.html"));
+    DesktopServices::openUrl(QUrl(BuildConfig.NEWS_OPEN_URL));
 }
 
 void MainWindow::newsButtonClicked()
@@ -1699,7 +1699,7 @@ void MainWindow::newsButtonClicked()
     }
     else
     {
-        DesktopServices::openUrl(QUrl("https://multimc.org/posts.html"));
+        DesktopServices::openUrl(QUrl(BuildConfig.NEWS_OPEN_URL));
     }
 }
 
