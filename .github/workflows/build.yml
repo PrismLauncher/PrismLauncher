@@ -13,7 +13,6 @@ jobs:
           - os: ubuntu-20.04
             qt_version: 5.15.2
             qt_host: linux
-            app_image: true
 
           - os: windows-2022
             qt_version: 5.15.2
@@ -108,7 +107,7 @@ jobs:
           cmake --build ${{ env.BUILD_DIR }}
 
       - name: Install
-        if: matrix.app_image != true
+        if: runner.os != 'Linux'
         run: |
           cmake --install ${{ env.BUILD_DIR }}
 
