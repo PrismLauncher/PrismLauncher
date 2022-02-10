@@ -11,10 +11,6 @@ jobs:
         include:
 
           - os: ubuntu-20.04
-            qt_version: 5.12.8
-            qt_host: linux
-
-          - os: ubuntu-20.04
             qt_version: 5.15.2
             qt_host: linux
             app_image: true
@@ -85,25 +81,25 @@ jobs:
         uses: urkle/action-get-ninja@v1
 
       - name: Download linuxdeploy family
-        if: matrix.app_image == true
+        if: runner.os == 'Linux'
         run: |
           wget "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
 
-      - name: Download JREs for AppImage
-        if: matrix.app_image == true
+      - name: Download JREs for AppImage on Linux
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
 
       - name: Configure CMake
-        if: matrix.app_image != true
+        if: runner.os != 'Linux'
         run: |
           cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=Debug -G Ninja
 
-      - name: Configure CMake for AppImage
-        if: matrix.app_image == true
+      - name: Configure CMake on Linux
+        if: runner.os == 'Linux'
         run: |
           cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug -DLauncher_LAYOUT=lin-system -G Ninja
 
@@ -116,13 +112,13 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }}
 
-      - name: Install for AppImage
-        if: matrix.app_image == true
+      - name: Install for AppImage on Linux
+        if: runner.os == 'Linux'
         run: |
           DESTDIR=${{ env.INSTALL_DIR }} cmake --install ${{ env.BUILD_DIR }}
 
       - name: Bundle AppImage
-        if: matrix.app_image == true
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           export OUTPUT="PolyMC-${{ github.sha }}-x86_64.AppImage"
@@ -171,15 +167,15 @@ jobs:
           cd ${{ env.INSTALL_DIR }}
           tar -czf ../polymc.tar.gz *
 
-      - name: Upload AppImage
-        if: matrix.app_image == true
+      - name: Upload AppImage for Linux
+        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v2
         with:
           name: PolyMC-${{ github.sha }}-x86_64.AppImage
           path: PolyMC-${{ github.sha }}-x86_64.AppImage
 
-      - name: Upload package for Linux and Windows
-        if: runner.os != 'macOS' && matrix.app_image != true
+      - name: Upload package for Windows
+        if: runner.os == 'Windows'
         uses: actions/upload-artifact@v2
         with:
           name: polymc-${{ runner.os }}-${{ github.sha }}-portable
