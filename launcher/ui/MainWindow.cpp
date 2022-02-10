@@ -58,6 +58,7 @@
 #include <BuildConfig.h>
 #include <net/NetJob.h>
 #include <net/Download.h>
+#include <news/NewsChecker.h>
 #include <notifications/NotificationChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/DownloadTask.h>
@@ -200,6 +201,7 @@ public:
     //TranslatedAction actionRefresh;
     TranslatedAction actionCheckUpdate;
     TranslatedAction actionSettings;
+    TranslatedAction actionMoreNews;
     TranslatedAction actionManageAccounts;
     TranslatedAction actionLaunchInstance;
     TranslatedAction actionRenameInstance;
@@ -244,6 +246,7 @@ public:
 
     TranslatedToolbar mainToolBar;
     TranslatedToolbar instanceToolBar;
+    TranslatedToolbar newsToolBar;
     QVector<TranslatedToolbar *> all_toolbars;
     bool m_kill = false;
 
@@ -424,6 +427,29 @@ public:
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QStringLiteral("statusBar"));
         MainWindow->setStatusBar(statusBar);
+    }
+
+    void createNewsToolbar(QMainWindow *MainWindow)
+    {
+        newsToolBar = TranslatedToolbar(MainWindow);
+        newsToolBar->setObjectName(QStringLiteral("newsToolBar"));
+        newsToolBar->setMovable(false);
+        newsToolBar->setAllowedAreas(Qt::BottomToolBarArea);
+        newsToolBar->setIconSize(QSize(16, 16));
+        newsToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        newsToolBar->setFloatable(false);
+        newsToolBar->setWindowTitle(QT_TRANSLATE_NOOP("MainWindow", "News Toolbar"));
+
+        actionMoreNews = TranslatedAction(MainWindow);
+        actionMoreNews->setObjectName(QStringLiteral("actionMoreNews"));
+        actionMoreNews->setIcon(APPLICATION->getThemedIcon("news"));
+        actionMoreNews.setTextId(QT_TRANSLATE_NOOP("MainWindow", "More news..."));
+        actionMoreNews.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the development blog to read more news about %1."));
+        all_actions.append(&actionMoreNews);
+        newsToolBar->addAction(actionMoreNews);
+
+        all_toolbars.append(&newsToolBar);
+        MainWindow->addToolBar(Qt::BottomToolBarArea, newsToolBar);
     }
 
     void createInstanceToolbar(QMainWindow *MainWindow)
@@ -610,6 +636,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
 
         createStatusBar(MainWindow);
+        createNewsToolbar(MainWindow);
         createInstanceToolbar(MainWindow);
 
         retranslateUi(MainWindow);
@@ -662,6 +689,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     {
         secretEventFilter = new KonamiCode(this);
         connect(secretEventFilter, &KonamiCode::triggered, this, &MainWindow::konamiTriggered);
+    }
+
+    // Add the news label to the news toolbar.
+    {
+        m_newsChecker.reset(new NewsChecker(APPLICATION->network(), BuildConfig.NEWS_RSS_URL));
+        newsLabel = new QToolButton();
+        newsLabel->setIcon(APPLICATION->getThemedIcon("news"));
+        newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        newsLabel->setFocusPolicy(Qt::NoFocus);
+        ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
+        QObject::connect(newsLabel, &QAbstractButton::clicked, this, &MainWindow::newsButtonClicked);
+        QObject::connect(m_newsChecker.get(), &NewsChecker::newsLoaded, this, &MainWindow::updateNewsLabel);
+        updateNewsLabel();
     }
 
     // Create the instance list widget
@@ -767,6 +808,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     // TODO: refresh accounts here?
     // auto accounts = APPLICATION->accounts();
+
+    // load the news
+    {
+        m_newsChecker->reloadNews();
+        updateNewsLabel();
+    }
+
 
     if(BuildConfig.UPDATER_ENABLED)
     {
@@ -1139,6 +1187,29 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
         }
     }
     return QMainWindow::eventFilter(obj, ev);
+}
+
+void MainWindow::updateNewsLabel()
+{
+    if (m_newsChecker->isLoadingNews())
+    {
+        newsLabel->setText(tr("Loading news..."));
+        newsLabel->setEnabled(false);
+    }
+    else
+    {
+        QList<NewsEntryPtr> entries = m_newsChecker->getNewsEntries();
+        if (entries.length() > 0)
+        {
+            newsLabel->setText(entries[0]->title);
+            newsLabel->setEnabled(true);
+        }
+        else
+        {
+            newsLabel->setText(tr("No news available."));
+            newsLabel->setEnabled(false);
+        }
+    }
 }
 
 void MainWindow::updateAvailable(GoUpdate::Status status)
@@ -1612,6 +1683,24 @@ void MainWindow::on_actionManageAccounts_triggered()
 void MainWindow::on_actionReportBug_triggered()
 {
     DesktopServices::openUrl(QUrl(BuildConfig.BUG_TRACKER_URL));
+}
+
+void MainWindow::on_actionMoreNews_triggered()
+{
+    DesktopServices::openUrl(QUrl("https://multimc.org/posts.html"));
+}
+
+void MainWindow::newsButtonClicked()
+{
+    QList<NewsEntryPtr> entries = m_newsChecker->getNewsEntries();
+    if (entries.count() > 0)
+    {
+        DesktopServices::openUrl(QUrl(entries[0]->link));
+    }
+    else
+    {
+        DesktopServices::openUrl(QUrl("https://multimc.org/posts.html"));
+    }
 }
 
 void MainWindow::on_actionAbout_triggered()
