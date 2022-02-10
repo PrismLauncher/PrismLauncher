@@ -6,7 +6,7 @@
 
 PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
 
-This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The PolyMC community felt that the maintainer was not acting in the spirit of Free Software so this fork was made. Read "[Why was this fork made?](https://github.com/PolyMC/PolyMC/wiki/FAQ)" on the wiki for more details.
+This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The PolyMC community felt that the maintainer was not acting in the spirit of Free Software so this fork was made.
 <br>
 
 # Installation
@@ -138,7 +138,7 @@ In general, in order of importance:
 
 ## Translations
 
-TODO
+The translation effort for PolyMC is hosted on [Weblate](https://hosted.weblate.org/polymc/polymc) and information about translating PolyMC is available at https://github.com/PolyMC/Translations
 
 ## Forking/Redistributing/Custom builds policy
 
