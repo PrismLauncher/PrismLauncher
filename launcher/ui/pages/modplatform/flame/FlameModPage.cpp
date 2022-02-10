@@ -140,14 +140,15 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
             auto packProfile = ((MinecraftInstance *)m_instance)->getPackProfile();
             QString mcVersion =  packProfile->getComponentVersion("net.minecraft");
             QString loaderString = (packProfile->getComponentVersion("net.minecraftforge").isEmpty()) ? "fabric" : "forge";
-            for(const auto& version : current.versions) {
+            for(int i = 0; i < current.versions.size(); i++) {
+                auto version = current.versions[i];
                 if(!version.mcVersion.contains(mcVersion)){
                     continue;
                 }
-                ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
+                ui->versionSelectionBox->addItem(version.version, QVariant(i));
             }
             if(ui->versionSelectionBox->count() == 0){
-                ui->versionSelectionBox->addItem(tr("No Valid Version found!"), QVariant(""));
+                ui->versionSelectionBox->addItem(tr("No Valid Version found!"), QVariant(-1));
             }
 
             suggestCurrent();
@@ -156,11 +157,11 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
     }
     else
     {
-        for(auto version : current.versions) {
-            ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
+        for(int i = 0; i < current.versions.size(); i++) {
+            ui->versionSelectionBox->addItem(current.versions[i].version, QVariant(i));
         }
         if(ui->versionSelectionBox->count() == 0){
-            ui->versionSelectionBox->addItem(tr("No Valid Version found!"), QVariant(""));
+            ui->versionSelectionBox->addItem(tr("No Valid Version found!"), QVariant(-1));
         }
         suggestCurrent();
     }
@@ -173,22 +174,23 @@ void FlameModPage::suggestCurrent()
         return;
     }
 
-    if (selectedVersion.isEmpty())
+    if (selectedVersion == -1)
     {
         dialog->setSuggestedMod();
         return;
     }
 
-    dialog->setSuggestedMod(current.name, new ModDownloadTask(selectedVersion, current.versions.at(0).fileName ,dialog->mods));
+    auto version = current.versions[selectedVersion];
+    dialog->setSuggestedMod(current.name, new ModDownloadTask(version.downloadUrl, version.fileName , dialog->mods));
 }
 
 void FlameModPage::onVersionSelectionChanged(QString data)
 {
     if(data.isNull() || data.isEmpty())
     {
-        selectedVersion = "";
+        selectedVersion = -1;
         return;
     }
-    selectedVersion = ui->versionSelectionBox->currentData().toString();
+    selectedVersion = ui->versionSelectionBox->currentData().toInt();
     suggestCurrent();
 }

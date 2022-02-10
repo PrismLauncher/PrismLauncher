@@ -63,5 +63,5 @@ private:
     Modrinth::ListModel* listModel = nullptr;
     Modrinth::IndexedPack current;
 
-    QString selectedVersion;
+    int selectedVersion = -1;
 };
