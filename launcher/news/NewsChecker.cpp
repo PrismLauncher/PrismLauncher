@@ -70,7 +70,7 @@ void NewsChecker::rssDownloadFinished()
     }
 
     // If the parsing succeeded, read it.
-    QDomNodeList items = doc.elementsByTagName("item");
+    QDomNodeList items = doc.elementsByTagName("entry");
     m_newsEntries.clear();
     for (int i = 0; i < items.length(); i++)
     {
