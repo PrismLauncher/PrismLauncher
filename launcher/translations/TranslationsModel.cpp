@@ -620,7 +620,7 @@ void TranslationsModel::downloadIndex()
     d->m_index_job = new NetJob("Translations Index", APPLICATION->network());
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
-    d->m_index_task = Net::Download::makeCached(QUrl("https://files.multimc.org/translations/index_v2.json"), entry);
+    d->m_index_task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + "index_v2.json"), entry);
     d->m_index_job->addNetAction(d->m_index_task);
     connect(d->m_index_job.get(), &NetJob::failed, this, &TranslationsModel::indexFailed);
     connect(d->m_index_job.get(), &NetJob::succeeded, this, &TranslationsModel::indexReceived);
