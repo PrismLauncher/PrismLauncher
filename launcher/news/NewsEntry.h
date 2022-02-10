@@ -18,8 +18,6 @@
 #include <QObject>
 #include <QString>
 #include <QDomElement>
-#include <QDateTime>
-
 #include <memory>
 
 class NewsEntry : public QObject
@@ -36,7 +34,7 @@ public:
      * Constructs a new news entry.
      * Note that content may contain HTML.
      */
-    NewsEntry(const QString& title, const QString& content, const QString& link, const QString& author, const QDateTime& pubDate, QObject* parent=0);
+    NewsEntry(const QString& title, const QString& content, const QString& link, QObject* parent=0);
 
     /*!
      * Attempts to load information from the given XML element into the given news entry pointer.
@@ -53,12 +51,6 @@ public:
 
     //! URL to the post.
     QString link;
-
-    //! The post's author.
-    QString author;
-    
-    //! The date and time that this post was published.
-    QDateTime pubDate;
 };
 
 typedef std::shared_ptr<NewsEntry> NewsEntryPtr;
