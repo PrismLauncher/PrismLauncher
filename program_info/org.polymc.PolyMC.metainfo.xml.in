@@ -4,7 +4,7 @@
   <provides>
     <id>org.polymc.PolyMC</id>
   </provides>
-  <launchable type="desktop-id">org.polymc.polymc.desktop</launchable>
+  <launchable type="desktop-id">org.polymc.PolyMC.desktop</launchable>
   <name>PolyMC</name>
   <developer_name>PolyMC Team</developer_name>
   <summary>A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once</summary>
