@@ -7,7 +7,7 @@ set(Launcher_DisplayName "${Launcher_CommonName}" PARENT_SCOPE)
 set(Launcher_UserAgent "${Launcher_CommonName}/${Launcher_RELEASE_VERSION_NAME}" PARENT_SCOPE)
 set(Launcher_ConfigFile "polymc.cfg" PARENT_SCOPE)
 set(Launcher_Git "https://github.com/PolyMC/PolyMC" PARENT_SCOPE)
-set(Launcher_DesktopName "org.polymc.PolyMC.desktop" PARENT_SCOPE)
+set(Launcher_DesktopFileName "org.polymc.PolyMC.desktop" PARENT_SCOPE)
 
 set(Launcher_Desktop "program_info/org.polymc.PolyMC.desktop" PARENT_SCOPE)
 set(Launcher_MetaInfo "program_info/org.polymc.PolyMC.metainfo.xml" PARENT_SCOPE)

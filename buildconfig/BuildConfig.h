@@ -14,7 +14,7 @@ public:
     QString LAUNCHER_DOMAIN;
     QString LAUNCHER_CONFIGFILE;
     QString LAUNCHER_GIT;
-    QString LAUNCHER_DESKTOPNAME;
+    QString LAUNCHER_DESKTOPFILENAME;
 
     /// The major version number.
     int VERSION_MAJOR;
