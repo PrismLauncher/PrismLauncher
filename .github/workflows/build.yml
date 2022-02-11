@@ -43,12 +43,16 @@ jobs:
         run: |
           choco install strawberryperl -y --force --x86
 
-      - name: Download OpenSSL libs on Windows
+      # We need to do this here because it inexplicably fails if we split the step
+      - name: Download and install OpenSSL libs on Windows
         if: runner.os == 'Windows'
         run: |
           python -m pip install --upgrade pip
           python -m pip install aqtinstall==2.0.5
           python -m aqt install-tool -O "${{ github.workspace }}\Qt\" windows desktop tools_openssl_x86
+          mkdir ${{ env.INSTALL_DIR }}
+          copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x86\bin\libssl-1_1.dll" "${{ github.workspace }}\${{ env.INSTALL_DIR }}\"
+          copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x86\bin\libcrypto-1_1.dll" "${{ github.workspace }}\${{ env.INSTALL_DIR }}\"
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -142,12 +146,6 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           windeployqt --no-translations "${{ env.INSTALL_DIR }}/polymc.exe"
-
-      - name: Install OpenSSL libs on Windows
-        if: runner.os == 'Windows'
-        run: |
-          copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x86\bin\libssl-1_1.dll" "${{ github.workspace }}\${{ env.INSTALL_DIR }}\"
-          copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x86\bin\libcrypto-1_1.dll" "${{ github.workspace }}\${{ env.INSTALL_DIR }}\"
 
       - name: Run macdeployqt
         if: runner.os == 'macOS'
