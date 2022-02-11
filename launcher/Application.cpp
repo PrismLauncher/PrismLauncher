@@ -313,7 +313,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         dataPath = xdgDataHome + "/polymc";
         adjustedBy += "XDG standard " + dataPath;
 #elif defined(Q_OS_MAC)
-        QDir foo(FS::PathCombine(applicationDirPath(), "../../Data"));
+        QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
         dataPath = foo.absolutePath();
         adjustedBy += "Fallback to special Mac location " + dataPath;
 #else
@@ -531,10 +531,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 #elif defined(Q_OS_WIN32)
         m_rootPath = binPath;
 #elif defined(Q_OS_MAC)
-        QDir foo(FS::PathCombine(binPath, "../.."));
+        QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
         m_rootPath = foo.absolutePath();
-        // on macOS, touch the root to force Finder to reload the .app metadata (and fix any icon change issues)
-        FS::updateTimestamp(m_rootPath);
 #endif
 
 #ifdef MULTIMC_JARS_LOCATION
