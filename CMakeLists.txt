@@ -101,6 +101,8 @@ message(STATUS "Git commit: ${Launcher_GIT_COMMIT}")
 message(STATUS "Git refspec: ${Launcher_GIT_REFSPEC}")
 
 set(Launcher_RELEASE_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}")
+string(TIMESTAMP TODAY "%Y-%m-%d")
+set(Launcher_RELEASE_TIMESTAMP "${TODAY}")
 
 #### Custom target to just print the version.
 add_custom_target(version echo "Version: ${Launcher_RELEASE_VERSION_NAME}")

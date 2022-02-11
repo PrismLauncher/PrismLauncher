@@ -22,44 +22,36 @@
       <li>See logs and other details easily</li>
       <li>Kill Minecraft in case of a crash/freeze</li>
       <li>Isolate minecraft instances to keep everything clean</li>
+      <li>Install mods directly from the launcher</li>
     </ul>
-    <p>For flatpak users:</p>
-    <p>In flatpak, all java versions that are required by Minecraft are included.</p>
-    <p>
-      If using a Hybrid-Graphics device, you can use the
-      prime-run
-      script as a wrapper command to run Minecraft using the dedicated graphics card.
-    </p>
   </description>
   <screenshots>
     <screenshot type="default">
       <caption>The main PolyMC window</caption>
-      <image type="source" width="802" height="639">https://i.imgur.com/q2GcDo4.png</image>
+      <image type="source" width="1011" height="994">https://polymc.github.io/assets/img/screenshots/LauncherDark.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Modpack installation</caption>
+      <image type="source" width="911" height="682">https://polymc.github.io/assets/img/screenshots/ModpackInstallDark.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Mod installation</caption>
+      <image type="source" width="987" height="723">https://polymc.github.io/assets/img/screenshots/ModInstallDark.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Instance management</caption>
+      <image type="source" width="902" height="920">https://polymc.github.io/assets/img/screenshots/PropertiesDark.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Cat :)</caption>
+      <image type="source" width="1011" height="994">https://polymc.github.io/assets/img/screenshots/LauncherCatDark.png</image>
     </screenshot>
   </screenshots>
   <releases>
-    <release version="@Launcher_RELEASE_VERSION_NAME@" date="2022-01-01" />
+    <release version="@Launcher_RELEASE_VERSION_NAME@" date="@Launcher_RELEASE_TIMESTAMP@"></release>
   </releases>
-  <content_rating type="oars-1.0">
-    <content_attribute id="violence-cartoon">moderate</content_attribute>
-    <content_attribute id="violence-fantasy">none</content_attribute>
-    <content_attribute id="violence-realistic">none</content_attribute>
-    <content_attribute id="violence-bloodshed">none</content_attribute>
-    <content_attribute id="violence-sexual">none</content_attribute>
-    <content_attribute id="drugs-alcohol">none</content_attribute>
-    <content_attribute id="drugs-narcotics">none</content_attribute>
-    <content_attribute id="drugs-tobacco">none</content_attribute>
-    <content_attribute id="sex-nudity">none</content_attribute>
-    <content_attribute id="sex-themes">none</content_attribute>
-    <content_attribute id="language-profanity">none</content_attribute>
-    <content_attribute id="language-humor">none</content_attribute>
-    <content_attribute id="language-discrimination">none</content_attribute>
+  <content_rating type="oars-1.1">
+    <content_attribute id="violence-fantasy">moderate</content_attribute>
     <content_attribute id="social-chat">intense</content_attribute>
-    <content_attribute id="social-info">none</content_attribute>
-    <content_attribute id="social-audio">none</content_attribute>
-    <content_attribute id="social-location">none</content_attribute>
-    <content_attribute id="social-contacts">none</content_attribute>
-    <content_attribute id="money-purchasing">none</content_attribute>
-    <content_attribute id="money-gambling">none</content_attribute>
   </content_rating>
 </component>
