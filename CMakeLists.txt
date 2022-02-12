@@ -146,25 +146,11 @@ add_subdirectory(program_info)
 
 ####################################### Install layout #######################################
 
-# How to install the build results
-set(Launcher_LAYOUT "auto" CACHE STRING "The layout for the launcher installation (auto, win-bundle, lin-nodeps, lin-system, mac-bundle)")
-set_property(CACHE Launcher_LAYOUT PROPERTY STRINGS auto win-bundle lin-nodeps lin-system mac-bundle)
+# Install the build results according to platform
+set(LAUNCHER_PORTABLE 1 CACHE BOOL "The type of installation (Portable or System)")
 
-if(Launcher_LAYOUT STREQUAL "auto")
-    if(UNIX AND APPLE)
-        set(Launcher_LAYOUT_REAL "mac-bundle")
-    elseif(UNIX)
-        set(Launcher_LAYOUT_REAL "lin-nodeps")
-    elseif(WIN32)
-        set(Launcher_LAYOUT_REAL "win-bundle")
-    else()
-        message(FATAL_ERROR "Cannot choose a sensible install layout for your platform.")
-    endif()
-else()
-    set(Launcher_LAYOUT_REAL ${Launcher_LAYOUT})
-endif()
 
-if(Launcher_LAYOUT_REAL STREQUAL "mac-bundle")
+if(UNIX AND APPLE)
     set(BINARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
     set(LIBRARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
     set(PLUGIN_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
@@ -195,13 +181,32 @@ if(Launcher_LAYOUT_REAL STREQUAL "mac-bundle")
     # Add the icon
     install(FILES ${Launcher_Branding_ICNS} DESTINATION ${RESOURCES_DEST_DIR} RENAME ${Launcher_Name}.icns)
 
-elseif(Launcher_LAYOUT_REAL STREQUAL "lin-nodeps")
+elseif(UNIX)
     set(BINARY_DEST_DIR "bin")
-    set(LIBRARY_DEST_DIR "bin")
-    set(PLUGIN_DEST_DIR "plugins")
-    set(BUNDLE_DEST_DIR ".")
-    set(RESOURCES_DEST_DIR ".")
-    set(JARS_DEST_DIR "bin/jars")
+    if(LAUNCHER_PORTABLE)
+        set(LIBRARY_DEST_DIR "bin")
+        set(BUNDLE_DEST_DIR ".")
+        set(JARS_DEST_DIR "bin/jars")
+
+        # launcher/Application.cpp will use this value
+        set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_PORTABLE=1")
+
+        # Install basic runner script
+        configure_file(launcher/Launcher.in "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" @ONLY)
+        install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" DESTINATION ${BUNDLE_DEST_DIR} RENAME ${Launcher_Name})
+    else()
+        set(LIBRARY_DEST_DIR "lib${LIB_SUFFIX}")
+        set(JARS_DEST_DIR "share/jars")
+        set(LAUNCHER_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
+        set(LAUNCHER_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
+        set(LAUNCHER_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
+
+        set(Launcher_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DLAUNCHER_PORTABLE=0")
+
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
+        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${LAUNCHER_ICON_DEST_DIR})
+    endif()
 
     # install as bundle with no dependencies included
     set(INSTALL_BUNDLE "nodeps")
@@ -209,33 +214,7 @@ elseif(Launcher_LAYOUT_REAL STREQUAL "lin-nodeps")
     # Set RPATH
     SET(Launcher_BINARY_RPATH "$ORIGIN/")
 
-    # Install basic runner script
-    configure_file(launcher/Launcher.in "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" @ONLY)
-    install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" DESTINATION ${BUNDLE_DEST_DIR} RENAME ${Launcher_Name})
-
-elseif(Launcher_LAYOUT_REAL STREQUAL "lin-system")
-    set(Launcher_BINARY_DEST_DIR "bin" CACHE STRING "Path to the binary directory")
-    set(Launcher_LIBRARY_DEST_DIR "lib${LIB_SUFFIX}" CACHE STRING "Path to the library directory")
-    set(Launcher_SHARE_DEST_DIR "share/polymc" CACHE STRING "Path to the shared data directory")
-    set(JARS_DEST_DIR "${Launcher_SHARE_DEST_DIR}/jars")
-    set(Launcher_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
-    set(Launcher_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
-    set(Launcher_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
-
-    set(BINARY_DEST_DIR ${Launcher_BINARY_DEST_DIR})
-    set(LIBRARY_DEST_DIR ${Launcher_LIBRARY_DEST_DIR})
-
-    MESSAGE(STATUS "Compiling for linux system with ${Launcher_SHARE_DEST_DIR} and LAUNCHER_LINUX_DATADIR")
-    SET(Launcher_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DLAUNCHER_LINUX_DATADIR")
-
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${Launcher_DESKTOP_DEST_DIR})
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${Launcher_METAINFO_DEST_DIR})
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${Launcher_ICON_DEST_DIR})
-
-    # install as bundle with no dependencies included
-    set(INSTALL_BUNDLE "nodeps")
-
-elseif(Launcher_LAYOUT_REAL STREQUAL "win-bundle")
+elseif(WIN32)
     set(BINARY_DEST_DIR ".")
     set(LIBRARY_DEST_DIR ".")
     set(PLUGIN_DEST_DIR ".")
@@ -252,7 +231,7 @@ elseif(Launcher_LAYOUT_REAL STREQUAL "win-bundle")
     # install as bundle
     set(INSTALL_BUNDLE "full")
 else()
-    message(FATAL_ERROR "No sensible install layout set.")
+    message(FATAL_ERROR "Platform not supported")
 endif()
 
 ################################ Included Libs ################################

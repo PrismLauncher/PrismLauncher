@@ -56,7 +56,7 @@ This is the preferred method for installation, and is suitable for packages.
 cmake -S . -B build \
    -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX="/usr" \ # Use "/usr" when building Linux packages. If building on FreeBSD or not for package, use "/usr/local"
-   -DLauncher_LAYOUT=lin-system
+   -DLAUNCHER_PORTABLE=OFF
 cd build
 make -j$(nproc) install # Optionally specify DESTDIR for packages (i.e. DESTDIR=${pkgdir})
 ```
@@ -250,10 +250,11 @@ zlib1.dll
 1. If you installed Qt with the web installer, there should be a shortcut called `Qt 5.4 for Desktop (MinGW 4.9 32-bit)` in the Start menu on Windows 7 and 10. Best way to find it is to search for it. Do note you cannot just use cmd.exe, you have to use the shortcut, otherwise the proper MinGW software will not be on the PATH.
 2. Once that is open, change into your user directory, and clone PolyMC by doing `git clone --recursive https://github.com/PolyMC/PolyMC.git`, and change directory to the folder you cloned to.
 3. Make a build directory, and change directory to the directory and do `cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=C:\Path\that\makes\sense\for\you`. By default, it will install to C:\Program Files (x86), which you might not want, if you want a local installation. If you want to install it to that directory, make sure to run the command window as administrator.
-4. Do `mingw32-make -jX`, where X is the number of cores your CPU has plus one.
-5. Now to wait for it to compile. This could take some time. Hopefully it compiles properly.
-6. Run the command `mingw32-make install`, and it should install PolyMC, to whatever the `-DCMAKE_INSTALL_PREFIX` was.
-7. In most cases, whenever compiling, the OpenSSL dll's aren't put into the directory to where PolyMC installs, meaning you cannot log in. The best way to fix this is just to do `copy C:\OpenSSL-Win32\*.dll C:\Where\you\installed\PolyMC\to`. This should copy the required OpenSSL dll's to log in.
+4. If you want PolyMC to store its data in `%APPDATA%`, append `-DLAUNCHER_PORTABLE=OFF` to the previous command.
+5. Do `mingw32-make -jX`, where X is the number of cores your CPU has plus one.
+6. Now to wait for it to compile. This could take some time. Hopefully it compiles properly.
+7. Run the command `mingw32-make install`, and it should install PolyMC, to whatever the `-DCMAKE_INSTALL_PREFIX` was.
+8. In most cases, whenever compiling, the OpenSSL dll's aren't put into the directory to where PolyMC installs, meaning you cannot log in. The best way to fix this is just to do `copy C:\OpenSSL-Win32\*.dll C:\Where\you\installed\PolyMC\to`. This should copy the required OpenSSL dll's to log in.
 
 # macOS
 
@@ -288,7 +289,6 @@ cmake \
  -DCMAKE_INSTALL_PREFIX:PATH="$(dirname $PWD)/dist/" \
  -DCMAKE_PREFIX_PATH="/path/to/Qt/" \
  -DQt5_DIR="/path/to/Qt/" \
- -DLauncher_LAYOUT=mac-bundle \
  -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
  ..
 make install
@@ -335,7 +335,7 @@ This is the preferred method for installation, and is suitable for packages.
 cmake -S . -B build \
    -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX="/usr/local" \ # /usr/local is default in OpenBSD and FreeBSD
-   -DLauncher_LAYOUT=lin-system -DCMAKE_PREFIX_PATH=/usr/local/lib/qt5/cmake # use linux layout and point to qt5 libs
+   -DLAUNCHER_PORTABLE=OFF -DCMAKE_PREFIX_PATH=/usr/local/lib/qt5/cmake # use linux layout and point to qt5 libs
 cd build
 make -j$(nproc) install # Optionally specify DESTDIR for packages (i.e. DESTDIR=${pkgdir})
 ```
