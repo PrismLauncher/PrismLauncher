@@ -43,6 +43,11 @@ jobs:
         run: |
           choco install strawberryperl -y --force --x86
 
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+
       # We need to do this here because it inexplicably fails if we split the step
       - name: Download and install OpenSSL libs on Windows
         if: runner.os == 'Windows'
@@ -53,11 +58,6 @@ jobs:
           mkdir ${{ env.INSTALL_DIR }}
           copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x86\bin\libssl-1_1.dll" "${{ github.workspace }}\${{ env.INSTALL_DIR }}\"
           copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x86\bin\libcrypto-1_1.dll" "${{ github.workspace }}\${{ env.INSTALL_DIR }}\"
-
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: 'true'
 
       - name: Install OpenJDK
         uses: AdoptOpenJDK/install-jdk@v1
