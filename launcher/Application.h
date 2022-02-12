@@ -117,6 +117,8 @@ public:
 
     QString getJarsPath();
 
+    QString getMSAClientID();
+
     /// this is the root of the 'installation'. Used for automatic updates
     const QString &root() {
         return m_rootPath;

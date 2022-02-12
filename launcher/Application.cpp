@@ -1519,3 +1519,13 @@ QString Application::getJarsPath()
     }
     return m_jarsPath;
 }
+
+QString Application::getMSAClientID() 
+{
+    QString clientIDOverride = m_settings->get("MSAClientIDOverride").toString();
+    if (!clientIDOverride.isEmpty()) {
+        return clientIDOverride;
+    }
+
+    return BuildConfig.MSA_CLIENT_ID;
+}

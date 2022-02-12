@@ -14,7 +14,7 @@ using Activity = Katabasis::Activity;
 MSAStep::MSAStep(AccountData* data, Action action) : AuthStep(data), m_action(action) {
     OAuth2::Options opts;
     opts.scope = "XboxLive.signin offline_access";
-    opts.clientIdentifier = BuildConfig.MSA_CLIENT_ID;
+    opts.clientIdentifier = APPLICATION->getMSAClientID();
     opts.authorizationUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
     opts.accessTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
 
