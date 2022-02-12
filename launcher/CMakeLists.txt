@@ -941,7 +941,7 @@ add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHE
 target_link_libraries(Launcher_logic
     systeminfo
     Launcher_classparser
-    ${NBT_NAME}
+    nbt++
     ${ZLIB_LIBRARIES}
     optional-bare
     tomlc99
@@ -959,7 +959,7 @@ target_link_libraries(Launcher_logic
     Launcher_iconfix
     QuaZip::QuaZip
     hoedown
-    Launcher_rainbow
+    PolyMC_rainbow
     LocalPeer
 )
 
