@@ -75,7 +75,7 @@ AccountListPage::AccountListPage(QWidget *parent)
     // Xbox authentication won't work without a client identifier, so disable the button if it is missing
     if (APPLICATION->getMSAClientID().isEmpty()) {
         ui->actionAddMicrosoft->setVisible(false);
-        ui->actionAddMicrosoft->setToolTip(tr("No Microsoft Secured Account client ID was set."));
+        ui->actionAddMicrosoft->setToolTip(tr("No Microsoft Authentication client ID was set."));
     }
 }
 

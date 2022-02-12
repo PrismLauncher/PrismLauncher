@@ -103,7 +103,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_msa">
          <property name="title">
-          <string>Microsoft Secured Account</string>
+          <string>Microsoft Authentication</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
@@ -116,7 +116,7 @@
           <item>
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Note: you probably don't need to set this if logging in via Microsoft Secured Account already works.</string>
+             <string>Note: you probably don't need to set this if logging in via Microsoft Authentication already works.</string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
@@ -136,7 +136,7 @@
           <item>
            <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Enter a custom client ID for Microsoft Secured Account here. </string>
+             <string>Enter a custom client ID for Microsoft Authentication here. </string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
