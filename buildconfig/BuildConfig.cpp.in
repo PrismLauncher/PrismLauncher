@@ -38,6 +38,10 @@ Config::Config()
             UPDATER_ENABLED = true;
         }
     }
+    else if (!GIT_COMMIT.isEmpty())
+    {
+        VERSION_CHANNEL = GIT_COMMIT.mid(0, 8);
+    }
     else
     {
         VERSION_CHANNEL = QObject::tr("unknown");
