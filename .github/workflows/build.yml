@@ -1,7 +1,12 @@
-name: build_portable
+name: Build
 
 on:
-  [push, pull_request, workflow_dispatch]
+  workflow_call:
+    inputs:
+      build_type:
+        description: Type of build (Debug, Release, RelWithDebInfo, MinSizeRel)
+        type: string
+        default: Debug
 
 jobs:
   build:
@@ -59,6 +64,12 @@ jobs:
           copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x86\bin\libssl-1_1.dll" "${{ github.workspace }}\${{ env.INSTALL_DIR }}\"
           copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x86\bin\libcrypto-1_1.dll" "${{ github.workspace }}\${{ env.INSTALL_DIR }}\"
 
+      - name: Set short version
+        shell: bash
+        run: |
+          ver_short=`git rev-parse --short HEAD`
+          echo "VERSION=$ver_short" >> $GITHUB_ENV
+
       - name: Install OpenJDK
         uses: AdoptOpenJDK/install-jdk@v1
         with:
@@ -99,12 +110,12 @@ jobs:
       - name: Configure CMake
         if: runner.os != 'Linux'
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=Debug -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -G Ninja
 
       - name: Configure CMake on Linux
         if: runner.os == 'Linux'
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug -DLauncher_LAYOUT=lin-system -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DLauncher_LAYOUT=lin-system -G Ninja
 
       - name: Build
         run: |
@@ -124,7 +135,7 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          export OUTPUT="PolyMC-${{ github.sha }}-x86_64.AppImage"
+          export OUTPUT="PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage"
 
           chmod +x linuxdeploy-*.AppImage
 
@@ -145,13 +156,13 @@ jobs:
       - name: Run windeployqt
         if: runner.os == 'Windows'
         run: |
-          windeployqt --no-translations "${{ env.INSTALL_DIR }}/polymc.exe"
+          windeployqt --no-translations --no-system-d3d-compiler --no-opengl-sw "${{ env.INSTALL_DIR }}/polymc.exe"
 
       - name: Run macdeployqt
         if: runner.os == 'macOS'
         run: |
           cd ${{ env.INSTALL_DIR }}
-          macdeployqt "PolyMC.app" -executable="PolyMC.app/Contents/MacOS/polymc" -always-overwrite -use-debug-libs
+          macdeployqt "PolyMC.app" -executable="PolyMC.app/Contents/MacOS/polymc" -always-overwrite
 
       - name: chmod binary on macOS
         if: runner.os == 'macOS'
@@ -162,25 +173,25 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           cd ${{ env.INSTALL_DIR }}
-          tar -czf ../polymc.tar.gz *
+          tar -czf ../PolyMC.tar.gz *
 
       - name: Upload AppImage for Linux
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v2
         with:
-          name: PolyMC-${{ github.sha }}-x86_64.AppImage
-          path: PolyMC-${{ github.sha }}-x86_64.AppImage
+          name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
+          path: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
 
       - name: Upload package for Windows
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v2
         with:
-          name: polymc-${{ runner.os }}-${{ github.sha }}-portable
+          name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: ${{ env.INSTALL_DIR }}/**
 
       - name: Upload package for macOS
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v2
         with:
-          name: polymc-${{ runner.os }}-${{ github.sha }}-portable
-          path: polymc.tar.gz
+          name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PolyMC.tar.gz
