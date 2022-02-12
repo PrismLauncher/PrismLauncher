@@ -959,7 +959,7 @@ target_link_libraries(Launcher_logic
     Launcher_iconfix
     QuaZip::QuaZip
     hoedown
-    Launcher_rainbow
+    PolyMC_rainbow
     LocalPeer
 )
 
