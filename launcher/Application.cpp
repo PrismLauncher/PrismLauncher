@@ -223,9 +223,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     setApplicationName(BuildConfig.LAUNCHER_NAME);
     setApplicationDisplayName(BuildConfig.LAUNCHER_DISPLAYNAME);
     setApplicationVersion(BuildConfig.printableVersionString());
-    #if (QT_VERSION >= QT_VERSION_CHECK(5,7,0))
-        setDesktopFileName(BuildConfig.LAUNCHER_DESKTOPFILENAME);
-    #endif
+    setDesktopFileName(BuildConfig.LAUNCHER_DESKTOPFILENAME);
     startTime = QDateTime::currentDateTime();
 
     // Don't quit on hiding the last window
