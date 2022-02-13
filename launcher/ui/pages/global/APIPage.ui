@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PastePage</class>
- <widget class="QWidget" name="PastePage">
+ <class>APIPage</class>
+ <widget class="QWidget" name="APIPage">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -34,7 +34,7 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="groupBox_paste">
          <property name="title">
           <string>Pastebin URL</string>
          </property>
@@ -101,6 +101,58 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_msa">
+         <property name="title">
+          <string>Microsoft Authentication</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Note: you probably don't need to set this if logging in via Microsoft Authentication already works.</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="msaClientID">
+            <property name="placeholderText">
+             <string>(Default)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Enter a custom client ID for Microsoft Authentication here. </string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+            <property name="openExternalLinks">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -108,7 +160,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>216</height>
+           <height>40</height>
           </size>
          </property>
         </spacer>

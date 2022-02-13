@@ -21,32 +21,32 @@
 #include <Application.h>
 
 namespace Ui {
-class PastePage;
+class APIPage;
 }
 
-class PastePage : public QWidget, public BasePage
+class APIPage : public QWidget, public BasePage
 {
     Q_OBJECT
 
 public:
-    explicit PastePage(QWidget *parent = 0);
-    ~PastePage();
+    explicit APIPage(QWidget *parent = 0);
+    ~APIPage();
 
     QString displayName() const override
     {
-        return tr("Log Upload");
+        return tr("APIs");
     }
     QIcon icon() const override
     {
-        return APPLICATION->getThemedIcon("log");
+        return APPLICATION->getThemedIcon("worlds");
     }
     QString id() const override
     {
-        return "log-upload";
+        return "apis";
     }
     QString helpPage() const override
     {
-        return "Log-Upload";
+        return "APIs";
     }
     virtual bool apply() override;
 
@@ -55,6 +55,6 @@ private:
     void applySettings();
 
 private:
-    Ui::PastePage *ui;
+    Ui::APIPage *ui;
 };
 
