@@ -298,6 +298,16 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
         dataPath = foo.absolutePath();
         adjustedBy += dataPath;
+
+#ifdef Q_OS_LINUX
+        // TODO: this should be removed in a future version
+        // TODO: provide a migration path similar to macOS migration
+        QDir bar(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation), "polymc"));
+        if (bar.exists()) {
+            dataPath = bar.absolutePath();
+            adjustedBy += "Legacy data path " + dataPath;
+        }
+#endif
 #else
         dataPath = applicationDirPath();
         adjustedBy += "Fallback to binary path " + dataPath;
