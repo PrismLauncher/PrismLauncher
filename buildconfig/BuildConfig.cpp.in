@@ -30,15 +30,21 @@ Config::Config()
 
     GIT_COMMIT = "@Launcher_GIT_COMMIT@";
     GIT_REFSPEC = "@Launcher_GIT_REFSPEC@";
-    if(GIT_REFSPEC.startsWith("refs/heads/") && !UPDATER_BASE.isEmpty() && !BUILD_PLATFORM.isEmpty() && VERSION_BUILD >= 0)
+    if(GIT_REFSPEC.startsWith("refs/heads/"))
     {
         VERSION_CHANNEL = GIT_REFSPEC;
         VERSION_CHANNEL.remove("refs/heads/");
-        UPDATER_ENABLED = true;
+        if(!UPDATER_BASE.isEmpty() && !BUILD_PLATFORM.isEmpty() && VERSION_BUILD >= 0) {
+            UPDATER_ENABLED = true;
+        }
+    }
+    else if (!GIT_COMMIT.isEmpty())
+    {
+        VERSION_CHANNEL = GIT_COMMIT.mid(0, 8);
     }
     else
     {
-        VERSION_CHANNEL = QObject::tr("custom");
+        VERSION_CHANNEL = QObject::tr("unknown");
     }
 
     VERSION_STR = "@Launcher_VERSION_STRING@";
