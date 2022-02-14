@@ -294,8 +294,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
     else
     {
-        // qDebug() << LAUNCHER_PORTABLE;
-#if !LAUNCHER_PORTABLE || defined(Q_OS_MAC)
+#if !Launcher_PORTABLE || defined(Q_OS_MAC)
         QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
         dataPath = foo.absolutePath();
         adjustedBy += dataPath;

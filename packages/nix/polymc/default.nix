@@ -69,7 +69,7 @@ mkDerivation rec {
 
   cmakeFlags = [
     "-GNinja"
-    "-DLAUNCHER_PORTABLE=OFF"
+    "-DLauncher_PORTABLE=OFF"
   ];
 
   postInstall = ''
