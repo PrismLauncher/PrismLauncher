@@ -16,11 +16,19 @@
   };
 
   outputs = args@{ self, nixpkgs, flake-utils, libnbtplusplus, quazip, ... }:
-    {
+    let
+      systems = [
+        "aarch64-linux"
+        # "aarch64-darwin" # qtbase is currently broken
+        "i686-linux"
+        "x86_64-darwin"
+        "x86_64-linux"
+      ];
+    in {
       overlay = final: prev: {
         inherit (self.packages.${final.system}) polymc;
       };
-    } // flake-utils.lib.eachDefaultSystem (system:
+    } // flake-utils.lib.eachSystem systems (system:
       let pkgs = import nixpkgs { inherit system; };
       in {
         packages = {
