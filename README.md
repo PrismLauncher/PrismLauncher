@@ -129,6 +129,11 @@ For OpenBSD available are [gzipped 32-bit binaries](http://glowiak.github.io/fil
 
 You need X11, Qt5 and Java installed.
 
+## Development Builds
+
+There are per-commit development builds available [here](https://github.com/PolyMC/PolyMC/actions). These have debug information in the binaries, so their file sizes are relatively larger.
+Builds are provided for Linux, AppImage on Linux, Windows, and macOS.
+
 # Help & Support
 
 Feel free to create an issue if you need help. However, you might find it easier to ask in the Discord server.
