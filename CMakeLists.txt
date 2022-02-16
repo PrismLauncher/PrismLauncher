@@ -45,10 +45,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 
 ##################################### Set Application options #####################################
 
+######## Set URLs ########
+set(Launcher_NEWS_RSS_URL "https://polymc.github.io/feed/feed.xml" CACHE STRING "URL to fetch PolyMC's news RSS feed from.")
+set(Launcher_NEWS_OPEN_URL "https://polymc.github.io/news/" CACHE STRING "URL that gets opened when the user clicks 'More News'")
+
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR    1)
 set(Launcher_VERSION_MINOR    0)
-set(Launcher_VERSION_HOTFIX   5)
+set(Launcher_VERSION_HOTFIX   6)
 
 # Build number
 set(Launcher_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
@@ -74,6 +78,9 @@ set(Launcher_MSA_CLIENT_ID "17b47edd-c884-4997-926d-9e7f9a6b4647" CACHE STRING "
 # Bug tracker URL
 set(Launcher_BUG_TRACKER_URL "https://github.com/PolyMC/PolyMC/issues" CACHE STRING "URL for the bug tracker.")
 
+# Translations Platform URL
+set(Launcher_TRANSLATIONS_URL "https://hosted.weblate.org/projects/polymc/polymc/" CACHE STRING "URL for the translations platform.")
+
 # Discord URL
 set(Launcher_DISCORD_URL "https://discord.gg/Z52pwxWCHP" CACHE STRING "URL for the Discord guild.")
 
@@ -94,6 +101,8 @@ message(STATUS "Git commit: ${Launcher_GIT_COMMIT}")
 message(STATUS "Git refspec: ${Launcher_GIT_REFSPEC}")
 
 set(Launcher_RELEASE_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}")
+string(TIMESTAMP TODAY "%Y-%m-%d")
+set(Launcher_RELEASE_TIMESTAMP "${TODAY}")
 
 #### Custom target to just print the version.
 add_custom_target(version echo "Version: ${Launcher_RELEASE_VERSION_NAME}")
@@ -251,11 +260,9 @@ endif()
 include(ExternalProject)
 set_directory_properties(PROPERTIES EP_BASE External)
 
-option(NBT_BUILD_SHARED "Build NBT shared library" ON)
+option(NBT_BUILD_SHARED "Build NBT shared library" OFF)
 option(NBT_USE_ZLIB "Build NBT library with zlib support" OFF)
 option(NBT_BUILD_TESTS "Build NBT library tests" OFF) #FIXME: fix unit tests.
-set(NBT_NAME Launcher_nbt++)
-set(NBT_DEST_DIR ${LIBRARY_DEST_DIR})
 add_subdirectory(libraries/libnbtplusplus)
 
 add_subdirectory(libraries/systeminfo) # system information library

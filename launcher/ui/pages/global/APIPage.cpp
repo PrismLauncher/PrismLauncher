@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "PastePage.h"
-#include "ui_PastePage.h"
+#include "APIPage.h"
+#include "ui_APIPage.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -26,9 +26,9 @@
 #include "tools/BaseProfiler.h"
 #include "Application.h"
 
-PastePage::PastePage(QWidget *parent) :
+APIPage::APIPage(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PastePage)
+    ui(new Ui::APIPage)
 {
     static QRegularExpression validUrlRegExp("https?://.+");
     ui->setupUi(this);
@@ -37,26 +37,30 @@ PastePage::PastePage(QWidget *parent) :
     loadSettings();
 }
 
-PastePage::~PastePage()
+APIPage::~APIPage()
 {
     delete ui;
 }
 
-void PastePage::loadSettings()
+void APIPage::loadSettings()
 {
     auto s = APPLICATION->settings();
     QString pastebinURL = s->get("PastebinURL").toString();
     ui->urlChoices->setCurrentText(pastebinURL);
+    QString msaClientID = s->get("MSAClientIDOverride").toString();
+    ui->msaClientID->setText(msaClientID);
 }
 
-void PastePage::applySettings()
+void APIPage::applySettings()
 {
     auto s = APPLICATION->settings();
     QString pastebinURL = ui->urlChoices->currentText();
     s->set("PastebinURL", pastebinURL);
+    QString msaClientID = ui->msaClientID->text();
+    s->set("MSAClientIDOverride", msaClientID);
 }
 
-bool PastePage::apply()
+bool APIPage::apply()
 {
     applySettings();
     return true;

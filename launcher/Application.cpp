@@ -14,7 +14,7 @@
 #include "ui/pages/global/ProxyPage.h"
 #include "ui/pages/global/ExternalToolsPage.h"
 #include "ui/pages/global/AccountListPage.h"
-#include "ui/pages/global/PastePage.h"
+#include "ui/pages/global/APIPage.h"
 #include "ui/pages/global/CustomCommandsPage.h"
 
 #include "ui/themes/ITheme.h"
@@ -187,7 +187,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     setApplicationName(BuildConfig.LAUNCHER_NAME);
     setApplicationDisplayName(BuildConfig.LAUNCHER_DISPLAYNAME);
     setApplicationVersion(BuildConfig.printableVersionString());
-
+    #if (QT_VERSION >= QT_VERSION_CHECK(5,7,0))
+        setDesktopFileName(BuildConfig.LAUNCHER_DESKTOPFILENAME);
+    #endif
     startTime = QDateTime::currentDateTime();
 
 #ifdef Q_OS_LINUX
@@ -311,7 +313,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         dataPath = xdgDataHome + "/polymc";
         adjustedBy += "XDG standard " + dataPath;
 #elif defined(Q_OS_MAC)
-        QDir foo(FS::PathCombine(applicationDirPath(), "../../Data"));
+        QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
         dataPath = foo.absolutePath();
         adjustedBy += "Fallback to special Mac location " + dataPath;
 #else
@@ -529,10 +531,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 #elif defined(Q_OS_WIN32)
         m_rootPath = binPath;
 #elif defined(Q_OS_MAC)
-        QDir foo(FS::PathCombine(binPath, "../.."));
+        QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
         m_rootPath = foo.absolutePath();
-        // on macOS, touch the root to force Finder to reload the .app metadata (and fix any icon change issues)
-        FS::updateTimestamp(m_rootPath);
 #endif
 
 #ifdef MULTIMC_JARS_LOCATION
@@ -719,6 +719,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("CloseAfterLaunch", false);
 
+        // Custom MSA credentials
+        m_settings->registerSetting("MSAClientIDOverride", "");
+
         // Init page provider
         {
             m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
@@ -730,7 +733,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<ProxyPage>();
             m_globalSettingsProvider->addPage<ExternalToolsPage>();
             m_globalSettingsProvider->addPage<AccountListPage>();
-            m_globalSettingsProvider->addPage<PastePage>();
+            m_globalSettingsProvider->addPage<APIPage>();
         }
         qDebug() << "<> Settings loaded.";
     }
@@ -1515,4 +1518,14 @@ QString Application::getJarsPath()
         return FS::PathCombine(QCoreApplication::applicationDirPath(), "jars");
     }
     return m_jarsPath;
+}
+
+QString Application::getMSAClientID() 
+{
+    QString clientIDOverride = m_settings->get("MSAClientIDOverride").toString();
+    if (!clientIDOverride.isEmpty()) {
+        return clientIDOverride;
+    }
+
+    return BuildConfig.MSA_CLIENT_ID;
 }

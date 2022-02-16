@@ -181,6 +181,15 @@ set(NOTIFICATIONS_SOURCES
     notifications/NotificationChecker.cpp
 )
 
+# Backend for the news bar... there's usually no news.
+set(NEWS_SOURCES
+    # News System
+    news/NewsChecker.h
+    news/NewsChecker.cpp
+    news/NewsEntry.h
+    news/NewsEntry.cpp
+)
+
 # Icon interface
 set(ICONS_SOURCES
     # Icons System and related code
@@ -714,8 +723,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/global/LauncherPage.h
     ui/pages/global/ProxyPage.cpp
     ui/pages/global/ProxyPage.h
-    ui/pages/global/PastePage.cpp
-    ui/pages/global/PastePage.h
+    ui/pages/global/APIPage.cpp
+    ui/pages/global/APIPage.h
 
     # GUI - platform pages
     ui/pages/modplatform/VanillaPage.cpp
@@ -862,7 +871,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/pages/global/AccountListPage.ui
     ui/pages/global/JavaPage.ui
     ui/pages/global/LauncherPage.ui
-    ui/pages/global/PastePage.ui
+    ui/pages/global/APIPage.ui
     ui/pages/global/ProxyPage.ui
     ui/pages/global/MinecraftPage.ui
     ui/pages/global/ExternalToolsPage.ui
@@ -932,7 +941,7 @@ add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHE
 target_link_libraries(Launcher_logic
     systeminfo
     Launcher_classparser
-    ${NBT_NAME}
+    nbt++
     ${ZLIB_LIBRARIES}
     optional-bare
     tomlc99
@@ -950,7 +959,7 @@ target_link_libraries(Launcher_logic
     Launcher_iconfix
     QuaZip::QuaZip
     hoedown
-    Launcher_rainbow
+    PolyMC_rainbow
     LocalPeer
 )
 

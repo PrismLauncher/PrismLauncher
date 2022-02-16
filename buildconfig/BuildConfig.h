@@ -14,6 +14,7 @@ public:
     QString LAUNCHER_DOMAIN;
     QString LAUNCHER_CONFIGFILE;
     QString LAUNCHER_GIT;
+    QString LAUNCHER_DESKTOPFILENAME;
 
     /// The major version number.
     int VERSION_MAJOR;
@@ -68,6 +69,11 @@ public:
     QString NEWS_RSS_URL;
 
     /**
+     * URL that gets opened when the user clicks "More News"
+     */
+    QString NEWS_OPEN_URL;
+
+    /**
      * Client ID you can get from Imgur when you register an application
      */
     QString IMGUR_CLIENT_ID;
@@ -83,6 +89,7 @@ public:
     QString META_URL;
 
     QString BUG_TRACKER_URL;
+    QString TRANSLATIONS_URL;
     QString DISCORD_URL;
     QString SUBREDDIT_URL;
 
@@ -91,7 +98,7 @@ public:
     QString AUTH_BASE = "https://authserver.mojang.com/";
     QString IMGUR_BASE_URL = "https://api.imgur.com/3/";
     QString FMLLIBS_BASE_URL = "https://files.multimc.org/fmllibs/";
-    QString TRANSLATIONS_BASE_URL = "https://files.multimc.org/translations/";
+    QString TRANSLATIONS_BASE_URL = "https://meta.polymc.org/translations/";
 
     QString MODPACKSCH_API_BASE_URL = "https://api.modpacks.ch/";
 

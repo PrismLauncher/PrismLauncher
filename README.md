@@ -6,7 +6,7 @@
 
 PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
 
-This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The PolyMC community felt that the maintainer was not acting in the spirit of Free Software so this fork was made. Read "[Why was this fork made?](https://github.com/PolyMC/PolyMC/wiki/FAQ)" on the wiki for more details.
+This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The PolyMC community felt that the maintainer was not acting in the spirit of Free Software so this fork was made.
 <br>
 
 # Installation
@@ -111,8 +111,6 @@ If you are too lazy to do all these steps, you can just download [a prebuild x86
 
 MacOS currently does not have any packages. We are still working on setting up MacOS packaging. Meanwhile, you can [build](https://github.com/PolyMC/PolyMC/blob/develop/BUILD.md#macos) it for yourself.
 
-
-
 ## <img src="https://www.vectorlogo.zone/logos/freebsd/freebsd-icon.svg" height="20" /> FreeBSD
 
 For FreeBSD available are:
@@ -172,7 +170,7 @@ In general, in order of importance:
 
 ## Translations
 
-TODO
+The translation effort for PolyMC is hosted on [Weblate](https://hosted.weblate.org/projects/polymc/polymc/) and information about translating PolyMC is available at https://github.com/PolyMC/Translations
 
 ## Forking/Redistributing/Custom builds policy
 

@@ -20,9 +20,9 @@ git submodule update
 
 The rest of the documentation assumes you have already cloned the repository.
 
-# Linux
+# Linux and FreeBSD
 
-Getting the project to build and run on Linux is easy if you use any modern and up-to-date linux distribution.
+Getting the project to build and run on Linux is easy if you use any modern and up-to-date linux distribution. If you're using FreeBSD you should use 13.0-RELEASE or newer.
 
 ## Build dependencies
 - A C++ compiler capable of building C++11 code.
@@ -31,6 +31,7 @@ Getting the project to build and run on Linux is easy if you use any modern and 
 - zlib (`zlib1g-dev` on Debian-based system)
 - Java JDK (`openjdk-17-jdk`on Debian-based system)
 - GL headers (`libgl1-mesa-dev` on Debian-based system)
+- games/lwjgl port if using FreeBSD
 
 You can use IDEs like KDevelop or QtCreator to open the CMake project if you want to work on the code.
 
@@ -54,7 +55,7 @@ This is the preferred method for installation, and is suitable for packages.
 # configure everything
 cmake -S . -B build \
    -DCMAKE_BUILD_TYPE=Release \
-   -DCMAKE_INSTALL_PREFIX="/usr" \ # Use "/usr" for packages, otherwise, leave it at the default "/usr/local".
+   -DCMAKE_INSTALL_PREFIX="/usr" \ # Use "/usr" when building Linux packages. If building on FreeBSD or not for package, use "/usr/local"
    -DLauncher_LAYOUT=lin-system
 cd build
 make -j$(nproc) install # Optionally specify DESTDIR for packages (i.e. DESTDIR=${pkgdir})
@@ -72,7 +73,7 @@ makedeb -s
 
 The deb will be located in the directory the repo was cloned in.
 
-### Building a .rpm
+### Building an .rpm
 
 Build dependencies are automatically installed using `dnf`, but you do need the `rpmdevtools` package (on Fedora)
 in order to fetch sources and setup your tree.  
@@ -93,6 +94,30 @@ rpmbuild -bb polymc.spec
 ```
 
 The path to the rpm packages will be printed when the build is complete.
+
+### Building a Slackware package
+
+To build a Slackware package, first install [qt5 SlackBuild](http://slackbuilds.org/repository/14.2/libraries/qt5/) (on 15.0 and newer installed by defualt), then set up a [JDK](https://codeberg.org/glowiak/SlackBuilds/raw/branch/master/tgz/adoptium-jdk8.tar.gz).
+
+If you're using Slackware 14.2, update cmake with these commands:
+
+```
+mkdir -p /tmp/SBo
+cd /tmp/SBo
+wget -c https://github.com/Kitware/CMake/releases/download/v3.22.2/cmake-3.22.2.tar.gz
+tar xzvf cmake-3.22.2.tar.gz
+cd cmake-3.22.2
+./configure --prefix=/usr
+make
+sudo make install
+```
+
+Next, download the [SlackBuild](https://codeberg.org/glowiak/SlackBuilds/raw/branch/master/tgz/polymc.tar.gz), unpack it and type in extracted directory:
+
+```
+sudo ./polymc.SlackBuild # script will do everything, just sit up and wait
+sudo /sbin/installpkg /tmp/polymc-version-arch-1_SBo.tgz # install the created package
+```
 
 ### Building a flatpak
 
@@ -273,3 +298,44 @@ Remember to replace `/path/to/Qt/` with the actual path. For newer Qt installati
 
 **Note:** The final app bundle may not run due to code signing issues, which
 need to be fixed with `codesign -fs -`.
+
+# OpenBSD
+
+Tested on OpenBSD 7.0-alpha i386, on older should work too
+
+## Build dependencies
+- A C++ compiler capable of building C++11 code (included in base system)
+- Qt Development tools 5.6 or newer ([meta/qt5](https://openports.se/meta/qt5))
+- cmake 3.1 or newer ([devel/cmake](https://openports.se/devel/cmake))
+- zlib (included in base system)
+- Java JDK ([devel/jdk-1.8](https://openports.se/devel/jdk/1.8))
+- GL headers (included in base system)
+- lwjgl ([games/lwjgl](https://openports.se/games/lwjgl) and [games/lwjgl3](https://openports.se/games/lwjgl3))
+
+You can use IDEs like KDevelop or QtCreator to open the CMake project if you want to work on the code.
+
+### Building a portable binary
+
+```sh
+mkdir install
+# configure the project
+cmake -S . -B build \
+   -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_PREFIX_PATH=/usr/local/lib/qt5/cmake
+# build
+cd build
+make -j$(nproc) install
+```
+
+### Building & Installing to the System
+
+This is the preferred method for installation, and is suitable for packages.
+
+```sh
+# configure everything
+cmake -S . -B build \
+   -DCMAKE_BUILD_TYPE=Release \
+   -DCMAKE_INSTALL_PREFIX="/usr/local" \ # /usr/local is default in OpenBSD and FreeBSD
+   -DLauncher_LAYOUT=lin-system -DCMAKE_PREFIX_PATH=/usr/local/lib/qt5/cmake # use linux layout and point to qt5 libs
+cd build
+make -j$(nproc) install # Optionally specify DESTDIR for packages (i.e. DESTDIR=${pkgdir})
+```
