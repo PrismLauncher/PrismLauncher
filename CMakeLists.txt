@@ -73,7 +73,7 @@ set(Launcher_META_URL "https://meta.polymc.org/v1/" CACHE STRING "URL to fetch L
 set(Launcher_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can get from Imgur when you register an application")
 
 # MSA Client ID
-set(Launcher_MSA_CLIENT_ID "17b47edd-c884-4997-926d-9e7f9a6b4647" CACHE STRING "Client ID you can get from Microsoft Identity Platform when you register an application")
+set(Launcher_MSA_CLIENT_ID "549033b2-1532-4d4e-ae77-1bbaa46f9d74" CACHE STRING "Client ID you can get from Microsoft Identity Platform when you register an application")
 
 # Bug tracker URL
 set(Launcher_BUG_TRACKER_URL "https://github.com/PolyMC/PolyMC/issues" CACHE STRING "URL for the bug tracker.")
