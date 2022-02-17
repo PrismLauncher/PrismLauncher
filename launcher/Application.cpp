@@ -285,11 +285,20 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             return;
         }
     }
+
     m_instanceIdToLaunch = args["launch"].toString();
     m_serverToJoin = args["server"].toString();
     m_profileToUse = args["profile"].toString();
     m_liveCheck = args["alive"].toBool();
     m_zipToImport = args["import"].toUrl();
+
+    // error if --launch is missing with --server or --profile
+    if((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty())
+    {
+        std::cerr << "--server and --profile can only be used in combination with --launch!" << std::endl;
+        m_status = Application::Failed;
+        return;
+    }
 
     QString origcwdPath = QDir::currentPath();
     QString binPath = applicationDirPath();
@@ -356,20 +365,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 "The launcher cannot continue until you fix this problem."
             ).arg(dataPath)
         );
-        return;
-    }
-
-    if(m_instanceIdToLaunch.isEmpty() && !m_serverToJoin.isEmpty())
-    {
-        std::cerr << "--server can only be used in combination with --launch!" << std::endl;
-        m_status = Application::Failed;
-        return;
-    }
-
-    if(m_instanceIdToLaunch.isEmpty() && !m_profileToUse.isEmpty())
-    {
-        std::cerr << "--account can only be used in combination with --launch!" << std::endl;
-        m_status = Application::Failed;
         return;
     }
 
@@ -566,26 +561,23 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         qDebug() << "<> Paths set.";
     }
 
-    do // once
+    if(m_liveCheck)
     {
-        if(m_liveCheck)
+        QFile check(liveCheckFile);
+        if(check.open(QIODevice::WriteOnly | QIODevice::Truncate))
         {
-            QFile check(liveCheckFile);
-            if(!check.open(QIODevice::WriteOnly | QIODevice::Truncate))
-            {
-                qWarning() << "Could not open" << liveCheckFile << "for writing!";
-                break;
-            }
             auto payload = appID.toString().toUtf8();
-            if(check.write(payload) != payload.size())
+            if(check.write(payload) == payload.size())
             {
+                check.close();
+            } else {
                 qWarning() << "Could not write into" << liveCheckFile << "!";
-                check.remove();
-                break;
+                check.remove();  // also closes file!
             }
-            check.close();
+        } else {
+            qWarning() << "Could not open" << liveCheckFile << "for writing!";
         }
-    } while(false);
+    }
 
     // Initialize application settings
     {
