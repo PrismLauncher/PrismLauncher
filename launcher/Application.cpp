@@ -292,18 +292,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_liveCheck = args["alive"].toBool();
     m_zipToImport = args["import"].toUrl();
 
-    // error if --launch is missing with --server
-    if(m_instanceIdToLaunch.isEmpty() && !m_serverToJoin.isEmpty())
+    // error if --launch is missing with --server or --profile
+    if((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty())
     {
-        std::cerr << "--server can only be used in combination with --launch!" << std::endl;
-        m_status = Application::Failed;
-        return;
-    }
-
-    // error if --launch is missing with --account
-    if(m_instanceIdToLaunch.isEmpty() && !m_profileToUse.isEmpty())
-    {
-        std::cerr << "--account can only be used in combination with --launch!" << std::endl;
+        std::cerr << "--server and --profile can only be used in combination with --launch!" << std::endl;
         m_status = Application::Failed;
         return;
     }
