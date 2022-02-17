@@ -84,7 +84,7 @@ sudo dnf install polymc
     sudo ./polymc.SlackBuild
     sudo installpkg /tmp/polymc-version-arch-1_SBo.tgz
 
-You can also download an unofficial [prebuilt x86_64 package](http://glowiak.github.io/file/polymc-latest-slackware) and install it with /sbin/installpkg:
+You can also download a community-maintained [prebuilt x86_64 package](http://glowiak.github.io/file/polymc-latest-slackware) and install it with /sbin/installpkg:
 
     sudo /sbin/installpkg ~/Downloads/polymc-version-x86_64-1_SBo.tgz
 
@@ -98,7 +98,7 @@ MacOS has experimental development builds available [here](https://github.com/Po
 
 ## <img src="https://www.vectorlogo.zone/logos/freebsd/freebsd-icon.svg" height="20" /> FreeBSD
 
-There are unofficial binary packages available:
+There are community-maintained binary packages available:
 
 - [AppBSD Image](http://glowiak.github.io/file/polymc-latest-fbsd64-appbsd) - a portable application, requires [AppBSD](https://codeberg.org/glowiak/appbsd/) to be installed.
 
@@ -109,7 +109,7 @@ You can build from source - see [BUILD.md](./BUILD.md)
 
 ## <img src="https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/drivers/webextension/images/icons/OpenBSD%20httpd.svg" height="20" /> OpenBSD
 
-There are unofficial binary packages available:
+There are community-maintained packages available:
 
 - [gzipped 32-bit binaries](http://glowiak.github.io/file/polymc-latest-obsd32-raw), download, unpack and run.
 
