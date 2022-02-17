@@ -588,7 +588,7 @@ public:
         actionExportInstance = TranslatedAction(MainWindow);
         actionExportInstance->setObjectName(QStringLiteral("actionExportInstance"));
         actionExportInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Export Instance"));
-        // FIXME: missing tooltip
+        actionExportInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Export the selected instance as a zip file."));
         all_actions.append(&actionExportInstance);
         instanceToolBar->addAction(actionExportInstance);
 
