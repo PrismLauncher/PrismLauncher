@@ -109,7 +109,7 @@ You can build from source - see [BUILD.md](./BUILD.md)
 
 ## <img src="https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/drivers/webextension/images/icons/OpenBSD%20httpd.svg" height="20" /> OpenBSD
 
-There are community-maintained packages available:
+There are community-maintained binary packages available:
 
 - [gzipped 32-bit binaries](http://glowiak.github.io/file/polymc-latest-obsd32-raw), download, unpack and run.
 
