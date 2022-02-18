@@ -29,4 +29,5 @@ private slots:
 private:
     Katabasis::DeviceFlow *m_oauth2 = nullptr;
     Action m_action;
+    QString m_clientId;
 };
