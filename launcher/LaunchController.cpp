@@ -229,7 +229,7 @@ void LaunchController::login() {
                 return;
             }
             case AccountState::Disabled: {
-                auto errorString = tr("The launcher's client identification changed. Please remove this account and add it again.");
+                auto errorString = tr("The launcher's client identification has changed. Please remove this account and add it again.");
                 QMessageBox::warning(
                         m_parentWidget,
                         tr("Client identification changed"),
