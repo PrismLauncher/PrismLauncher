@@ -81,6 +81,7 @@ struct AccountData {
     bool legacy = false;
     bool canMigrateToMSA = false;
 
+    QString msaClientID;
     Katabasis::Token msaToken;
     Katabasis::Token userToken;
     Katabasis::Token xboxApiToken;
