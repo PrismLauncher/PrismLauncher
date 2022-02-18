@@ -47,6 +47,7 @@ enum class AccountState {
     Offline,
     Working,
     Online,
+    Disabled,
     Errored,
     Expired,
     Gone

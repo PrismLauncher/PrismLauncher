@@ -228,6 +228,18 @@ void LaunchController::login() {
                 emitFailed(errorString);
                 return;
             }
+            case AccountState::Disabled: {
+                auto errorString = tr("The launcher's client identification changed. Please remove this account and add it again.");
+                QMessageBox::warning(
+                        m_parentWidget,
+                        tr("Client identification changed"),
+                        errorString,
+                        QMessageBox::StandardButton::Ok,
+                        QMessageBox::StandardButton::Ok
+                );
+                emitFailed(errorString);
+                return;
+            }
             case AccountState::Gone: {
                 auto errorString = tr("The account no longer exists on the servers. It may have been migrated, in which case please add the new account you migrated this one to.");
                 QMessageBox::warning(

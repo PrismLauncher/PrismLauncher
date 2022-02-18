@@ -35,6 +35,7 @@ enum class AccountTaskState
     STATE_CREATED,
     STATE_WORKING,
     STATE_SUCCEEDED,
+    STATE_DISABLED, //!< MSA Client ID has changed. Tell user to reloginn
     STATE_FAILED_SOFT, //!< soft failure. authentication went through partially
     STATE_FAILED_HARD, //!< hard failure. main tokens are invalid
     STATE_FAILED_GONE, //!< hard failure. main tokens are invalid, and the account no longer exists
