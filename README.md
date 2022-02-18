@@ -11,6 +11,9 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 
 # Installation
 
+- All packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest))
+- Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
+
 ## 🐧 Linux
 
 ### <img src="https://www.vectorlogo.zone/logos/linuxfoundation/linuxfoundation-icon.svg" height="20" alt=""/> Cross-distro packages
