@@ -183,7 +183,7 @@ void JavaListLoadTask::javaCheckerFinished()
             JavaInstallPtr javaVersion(new JavaInstall());
 
             javaVersion->id = result.javaVersion;
-            javaVersion->arch = result.mojangPlatform;
+            javaVersion->arch = result.realPlatform;
             javaVersion->path = result.path;
             candidates.append(javaVersion);
 
