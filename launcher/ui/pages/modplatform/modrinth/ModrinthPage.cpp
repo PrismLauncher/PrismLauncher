@@ -98,13 +98,12 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
     {
         qDebug() << "Loading Modrinth mod versions";
         auto netJob = new NetJob(QString("Modrinth::ModVersions(%1)").arg(current.name), APPLICATION->network());
-        std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
+        auto response = new QByteArray();
         QString addonId = current.addonId;
-        netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.modrinth.com/v2/project/%1/version").arg(addonId), response.get()));
+        netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.modrinth.com/v2/project/%1/version").arg(addonId), response));
 
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, netJob]
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response]
         {
-            netJob->deleteLater();
             QJsonParseError parse_error;
             QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
             if(parse_error.error != QJsonParseError::NoError) {
@@ -137,6 +136,10 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
             }
 
             suggestCurrent();
+        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob]{
+            netJob->deleteLater();
+            delete response;
         });
         netJob->start();
     }
