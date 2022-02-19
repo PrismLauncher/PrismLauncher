@@ -16,8 +16,13 @@ jobs:
         include:
 
           - os: ubuntu-20.04
+            qt_version: 5.12.8
+            qt_host: linux
+
+          - os: ubuntu-20.04
             qt_version: 5.15.2
             qt_host: linux
+            app_image: true
 
           - os: windows-2022
             qt_version: 5.15.2
@@ -94,15 +99,15 @@ jobs:
       - name: Install Ninja
         uses: urkle/action-get-ninja@v1
 
-      - name: Download linuxdeploy family
-        if: runner.os == 'Linux'
+      - name: Download linuxdeploy family for AppImage on Linux
+        if: matrix.app_image == true
         run: |
           wget "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
 
       - name: Download JREs for AppImage on Linux
-        if: runner.os == 'Linux'
+        if: matrix.app_image == true
         shell: bash
         run: |
           ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
@@ -126,13 +131,13 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }}
 
-      - name: Install for AppImage on Linux
+      - name: Install on Linux
         if: runner.os == 'Linux'
         run: |
           DESTDIR=${{ env.INSTALL_DIR }} cmake --install ${{ env.BUILD_DIR }}
 
       - name: Bundle AppImage
-        if: runner.os == 'Linux'
+        if: matrix.app_image == true
         shell: bash
         run: |
           export OUTPUT="PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage"
@@ -175,8 +180,21 @@ jobs:
           cd ${{ env.INSTALL_DIR }}
           tar -czf ../PolyMC.tar.gz *
 
+      - name: tar on Linux
+        if: runner.os == 'Linux' && matrix.app_image != true
+        run: |
+          cd ${{ env.INSTALL_DIR }}
+          tar -czf ../PolyMC.tar.gz *
+
+      - name: Upload Linux tar.gz
+        if: runner.os == 'Linux' && matrix.app_image != true
+        uses: actions/upload-artifact@v2
+        with:
+          name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PolyMC.tar.gz
+
       - name: Upload AppImage for Linux
-        if: runner.os == 'Linux'
+        if: matrix.app_image == true
         uses: actions/upload-artifact@v2
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage

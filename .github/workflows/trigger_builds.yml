@@ -56,6 +56,7 @@ jobs:
         run: |
           rm -rf *Debug*
 
+          mv PolyMC-Linux*/PolyMC.tar.gz PolyMC-Linux-${{ env.VERSION }}.tar.gz
           mv PolyMC-*.AppImage/PolyMC-*.AppImage PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
           mv PolyMC-Windows* PolyMC-Windows-${{ env.VERSION }}
           mv PolyMC-macOS*/PolyMC.tar.gz PolyMC-macOS-${{ env.VERSION }}.tar.gz
@@ -63,6 +64,16 @@ jobs:
           cd PolyMC-Windows-${{ env.VERSION }}
           zip -r -9 ../PolyMC-Windows-${{ env.VERSION }}.zip *
           cd ..
+
+      - name: Upload Linux asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_name: PolyMC-Linux-${{ env.VERSION }}.tar.gz
+          asset_path: PolyMC-Linux-${{ env.VERSION }}.tar.gz
+          asset_content_type: application/gzip
 
       - name: Upload Linux AppImage asset
         uses: actions/upload-release-asset@v1
