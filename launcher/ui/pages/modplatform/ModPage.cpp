@@ -136,7 +136,21 @@ void ModPage::updateModVersions()
     auto packProfile = (dynamic_cast<MinecraftInstance*>(m_instance))->getPackProfile();
 
     QString mcVersion = packProfile->getComponentVersion("net.minecraft");
-    QString loaderString = (packProfile->getComponentVersion("net.minecraftforge").isEmpty()) ? "fabric" : "forge";
+
+    QString loaderString;
+    switch (packProfile->getModLoader()) {
+        case ModAPI::Forge:
+            loaderString = "forge";
+            break;
+        case ModAPI::Fabric:
+            loaderString = "fabric";
+            break;
+        case ModAPI::Quilt:
+            loaderString = "quilt";
+            break;
+        default:
+            break;
+    }
 
     for (int i = 0; i < current.versions.size(); i++) {
         auto version = current.versions[i];

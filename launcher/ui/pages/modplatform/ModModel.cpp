@@ -61,14 +61,18 @@ auto ListModel::data(const QModelIndex& index, int role) const -> QVariant
 
 void ListModel::requestModVersions(ModPlatform::IndexedPack const& current)
 {
+    auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
+
     m_parent->apiProvider()->getVersions(this,
-            { current.addonId.toString(), getMineVersions(), hasFabric() ? ModAPI::ModLoaderType::Fabric : ModAPI::ModLoaderType::Forge });
+            { current.addonId.toString(), getMineVersions(), profile->getModLoader() });
 }
 
 void ListModel::performPaginatedSearch()
 {
+    auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
+
     m_parent->apiProvider()->searchMods(this,
-            { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], hasFabric() ? ModAPI::Fabric : ModAPI::Forge, getMineVersions().at(0) });
+            { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], profile->getModLoader(), getMineVersions().at(0) });
 }
 
 void ListModel::searchWithTerm(const QString& term, const int sort)
@@ -218,13 +222,6 @@ void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId)
 }  // namespace ModPlatform
 
 /******** Helpers ********/
-auto ModPlatform::ListModel::hasFabric() const -> bool
-{
-    return !(dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))
-                ->getPackProfile()
-                ->getComponentVersion("net.fabricmc.fabric-loader")
-                .isEmpty();
-}
 
 auto ModPlatform::ListModel::getMineVersions() const -> QList<QString>
 {

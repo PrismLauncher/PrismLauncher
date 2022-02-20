@@ -55,11 +55,13 @@ class ModrinthAPI : public NetworkModAPI {
     {
         switch (modLoader) {
             case Any:
-                return "fabric, forge";
+                return "fabric, forge, quilt";
             case Forge:
                 return "forge";
             case Fabric:
                 return "fabric";
+            case Quilt:
+                return "quilt";
             default:
                 return "";
         }
@@ -67,7 +69,7 @@ class ModrinthAPI : public NetworkModAPI {
 
     inline auto validateModLoader(ModLoaderType modLoader) const -> bool
     {
-        return modLoader == Any || modLoader == Forge || modLoader == Fabric;
+        return modLoader == Any || modLoader == Forge || modLoader == Fabric || modLoader == Quilt;
     }
 
 };

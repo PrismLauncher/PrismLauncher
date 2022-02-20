@@ -56,6 +56,8 @@
 #include "minecraft/VersionFilterData.h"
 #include "minecraft/PackProfile.h"
 
+#include "modplatform/ModAPI.h"
+
 #include "Version.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "tasks/SequentialTask.h"
@@ -388,9 +390,9 @@ void ModFolderPage::on_actionInstall_mods_triggered()
     if(m_inst->typeName() != "Minecraft"){
         return; //this is a null instance or a legacy instance
     }
-    bool hasFabric = !((MinecraftInstance *)m_inst)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
-    bool hasForge = !((MinecraftInstance *)m_inst)->getPackProfile()->getComponentVersion("net.minecraftforge").isEmpty();
-    if (!hasFabric && !hasForge) {
+    QStringList modLoaders = {"net.minecraftforge", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader"};
+    auto profile = ((MinecraftInstance *)m_inst)->getPackProfile();
+    if (profile->getModLoader() == ModAPI::Any) {
         QMessageBox::critical(this,tr("Error"),tr("Please install a mod loader first!"));
         return;
     }

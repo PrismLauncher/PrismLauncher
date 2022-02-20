@@ -15,7 +15,7 @@ class ModAPI {
     virtual ~ModAPI() = default;
 
     // https://docs.curseforge.com/?http#tocS_ModLoaderType
-    enum ModLoaderType { Any = 0, Forge = 1, Cauldron = 2, LiteLoader = 3, Fabric = 4 };
+    enum ModLoaderType { Any = 0, Forge = 1, Cauldron = 2, LiteLoader = 3, Fabric = 4, Quilt = 5 };
 
     struct SearchArgs {
         int offset;

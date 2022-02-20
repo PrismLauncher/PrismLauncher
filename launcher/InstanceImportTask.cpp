@@ -241,6 +241,7 @@ void InstanceImportTask::processFlame()
 
     QString forgeVersion;
     QString fabricVersion;
+    // TODO: is Quilt relevant here?
     for(auto &loader: pack.minecraft.modLoaders)
     {
         auto id = loader.id;
