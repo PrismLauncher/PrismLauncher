@@ -2,6 +2,7 @@
 
 #include "tasks/Task.h"
 #include "net/Mode.h"
+#include "Component.h"
 
 #include <memory>
 class PackProfile;
@@ -26,6 +27,7 @@ protected:
 
 private:
     void loadComponents();
+    QString findBestComponentVersion(ComponentPtr component);
     void resolveDependencies(bool checkOnly);
 
     void remoteLoadSucceeded(size_t index);
