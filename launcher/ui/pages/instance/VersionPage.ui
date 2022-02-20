@@ -107,6 +107,7 @@
    <addaction name="separator"/>
    <addaction name="actionInstall_Forge"/>
    <addaction name="actionInstall_Fabric"/>
+   <addaction name="actionInstall_Quilt"/>
    <addaction name="actionInstall_LiteLoader"/>
    <addaction name="actionInstall_mods"/>
    <addaction name="separator"/>
@@ -190,6 +191,14 @@
    </property>
    <property name="toolTip">
     <string>Install the Fabric Loader package.</string>
+   </property>
+  </action>
+  <action name="actionInstall_Quilt">
+   <property name="text">
+    <string>Install Quilt</string>
+   </property>
+   <property name="toolTip">
+    <string>Install the Quilt Loader package.</string>
    </property>
   </action>
   <action name="actionInstall_LiteLoader">

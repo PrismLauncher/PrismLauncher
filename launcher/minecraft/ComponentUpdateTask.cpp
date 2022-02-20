@@ -600,6 +600,15 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
                             component->m_version = (*minecraft)->getVersion();
                         }
                     }
+                    else if (add.uid == "org.quiltmc.quilt-mappings")
+                    {
+                        auto minecraft = std::find_if(components.begin(), components.end(), [](ComponentPtr & cmp){
+                            return cmp->getID() == "net.minecraft";
+                        });
+                        if(minecraft != components.end()) {
+                            component->m_version = (*minecraft)->getVersion() + "+build.1";
+                        }
+                    }
                 }
 // HACK HACK HACK HACK FIXME: this is a placeholder for deciding what version to use. For now, it is hardcoded.
 // ############################################################################################################
