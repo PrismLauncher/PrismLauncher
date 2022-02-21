@@ -32,7 +32,6 @@
 #include "BaseInstance.h"
 #include "InstanceTask.h"
 #include "settings/INISettingsObject.h"
-#include "minecraft/legacy/LegacyInstance.h"
 #include "NullInstance.h"
 #include "minecraft/MinecraftInstance.h"
 #include "FileSystem.h"
@@ -552,10 +551,6 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
     if (inst_type == "OneSix" || inst_type == "Nostalgia")
     {
         inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
-    }
-    else if (inst_type == "Legacy")
-    {
-        inst.reset(new LegacyInstance(m_globalSettings, instanceSettings, instanceRoot));
     }
     else
     {

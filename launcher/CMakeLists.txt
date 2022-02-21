@@ -286,13 +286,6 @@ set(MINECRAFT_SOURCES
     minecraft/launch/VerifyJavaInstall.cpp
     minecraft/launch/VerifyJavaInstall.h
 
-    minecraft/legacy/LegacyModList.h
-    minecraft/legacy/LegacyModList.cpp
-    minecraft/legacy/LegacyInstance.h
-    minecraft/legacy/LegacyInstance.cpp
-    minecraft/legacy/LegacyUpgradeTask.h
-    minecraft/legacy/LegacyUpgradeTask.cpp
-
     minecraft/GradleSpecifier.h
     minecraft/MinecraftInstance.cpp
     minecraft/MinecraftInstance.h
@@ -701,8 +694,6 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/OtherLogsPage.h
     ui/pages/instance/ServersPage.cpp
     ui/pages/instance/ServersPage.h
-    ui/pages/instance/LegacyUpgradePage.cpp
-    ui/pages/instance/LegacyUpgradePage.h
     ui/pages/instance/WorldListPage.cpp
     ui/pages/instance/WorldListPage.h
 
@@ -884,7 +875,6 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/pages/instance/InstanceSettingsPage.ui
     ui/pages/instance/VersionPage.ui
     ui/pages/instance/WorldListPage.ui
-    ui/pages/instance/LegacyUpgradePage.ui
     ui/pages/instance/ScreenshotsPage.ui
     ui/pages/modplatform/atlauncher/AtlOptionalModDialog.ui
     ui/pages/modplatform/atlauncher/AtlPage.ui

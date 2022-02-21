@@ -1,6 +1,5 @@
 #pragma once
 #include "minecraft/MinecraftInstance.h"
-#include "minecraft/legacy/LegacyInstance.h"
 #include <FileSystem.h>
 #include "ui/pages/BasePage.h"
 #include "ui/pages/BasePageProvider.h"
@@ -14,7 +13,6 @@
 #include "ui/pages/instance/ScreenshotsPage.h"
 #include "ui/pages/instance/InstanceSettingsPage.h"
 #include "ui/pages/instance/OtherLogsPage.h"
-#include "ui/pages/instance/LegacyUpgradePage.h"
 #include "ui/pages/instance/WorldListPage.h"
 #include "ui/pages/instance/ServersPage.h"
 #include "ui/pages/instance/GameOptionsPage.h"
@@ -34,31 +32,20 @@ public:
         QList<BasePage *> values;
         values.append(new LogPage(inst));
         std::shared_ptr<MinecraftInstance> onesix = std::dynamic_pointer_cast<MinecraftInstance>(inst);
-        if(onesix)
-        {
-            values.append(new VersionPage(onesix.get()));
-            auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList(), "mods", "loadermods", tr("Mods"), "Loader-mods");
-            modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
-            values.append(modsPage);
-            values.append(new CoreModFolderPage(onesix.get(), onesix->coreModList(), "coremods", "coremods", tr("Core mods"), "Core-mods"));
-            values.append(new ResourcePackPage(onesix.get()));
-            values.append(new TexturePackPage(onesix.get()));
-            values.append(new ShaderPackPage(onesix.get()));
-            values.append(new NotesPage(onesix.get()));
-            values.append(new WorldListPage(onesix.get(), onesix->worldList()));
-            values.append(new ServersPage(onesix));
-            // values.append(new GameOptionsPage(onesix.get()));
-            values.append(new ScreenshotsPage(FS::PathCombine(onesix->gameRoot(), "screenshots")));
-            values.append(new InstanceSettingsPage(onesix.get()));
-        }
-        std::shared_ptr<LegacyInstance> legacy = std::dynamic_pointer_cast<LegacyInstance>(inst);
-        if(legacy)
-        {
-            values.append(new LegacyUpgradePage(legacy));
-            values.append(new NotesPage(legacy.get()));
-            values.append(new WorldListPage(legacy.get(), legacy->worldList()));
-            values.append(new ScreenshotsPage(FS::PathCombine(legacy->gameRoot(), "screenshots")));
-        }
+        values.append(new VersionPage(onesix.get()));
+        auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList(), "mods", "loadermods", tr("Mods"), "Loader-mods");
+        modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
+        values.append(modsPage);
+        values.append(new CoreModFolderPage(onesix.get(), onesix->coreModList(), "coremods", "coremods", tr("Core mods"), "Core-mods"));
+        values.append(new ResourcePackPage(onesix.get()));
+        values.append(new TexturePackPage(onesix.get()));
+        values.append(new ShaderPackPage(onesix.get()));
+        values.append(new NotesPage(onesix.get()));
+        values.append(new WorldListPage(onesix.get(), onesix->worldList()));
+        values.append(new ServersPage(onesix));
+        // values.append(new GameOptionsPage(onesix.get()));
+        values.append(new ScreenshotsPage(FS::PathCombine(onesix->gameRoot(), "screenshots")));
+        values.append(new InstanceSettingsPage(onesix.get()));
         auto logMatcher = inst->getLogFileMatcher();
         if(logMatcher)
         {
