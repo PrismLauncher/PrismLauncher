@@ -18,18 +18,6 @@ struct PackProfileData
     // the launch profile (volatile, temporary thing created on demand)
     std::shared_ptr<LaunchProfile> m_profile;
 
-    // version information migrated from instance.cfg file. Single use on migration!
-    std::map<QString, QString> m_oldConfigVersions;
-    QString getOldConfigVersion(const QString& uid) const
-    {
-        const auto iter = m_oldConfigVersions.find(uid);
-        if(iter != m_oldConfigVersions.cend())
-        {
-            return (*iter).second;
-        }
-        return QString();
-    }
-
     // persistent list of components and related machinery
     ComponentContainer components;
     ComponentIndex componentIndex;
