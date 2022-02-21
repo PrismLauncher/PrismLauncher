@@ -38,7 +38,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="featuresTab">
       <attribute name="title">
@@ -184,25 +184,6 @@
        <string>User Interface</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
-       <item>
-        <widget class="QGroupBox" name="groupBox_3">
-         <property name="title">
-          <string>Launcher notifications</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <widget class="QPushButton" name="resetNotificationsBtn">
-            <property name="text">
-             <string>Reset hidden notifications</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item>
         <widget class="QGroupBox" name="sortingModeBox">
          <property name="enabled">
@@ -499,7 +480,6 @@
   <tabstop>modsDirBrowseBtn</tabstop>
   <tabstop>iconsDirTextBox</tabstop>
   <tabstop>iconsDirBrowseBtn</tabstop>
-  <tabstop>resetNotificationsBtn</tabstop>
   <tabstop>sortLastLaunchedBtn</tabstop>
   <tabstop>sortByNameBtn</tabstop>
   <tabstop>themeComboBox</tabstop>

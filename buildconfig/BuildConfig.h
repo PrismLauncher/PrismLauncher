@@ -46,13 +46,6 @@ public:
     /// User-Agent to use for uncached requests.
     QString USER_AGENT_UNCACHED;
 
-
-    /// URL for notifications
-    QString NOTIFICATION_URL;
-
-    /// Used for matching notifications
-    QString FULL_VERSION_STR;
-
     /// The git commit hash of this build
     QString GIT_COMMIT;
 

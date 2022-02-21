@@ -234,11 +234,6 @@ void LauncherPage::applySettings()
 {
     auto s = APPLICATION->settings();
 
-    if (ui->resetNotificationsBtn->isChecked())
-    {
-        s->set("ShownNotifications", QString());
-    }
-
     // Updates
     s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
     s->set("UpdateChannel", m_currentUpdateChannel);
