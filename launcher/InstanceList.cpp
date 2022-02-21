@@ -544,7 +544,7 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
     auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(instanceRoot, "instance.cfg"));
     InstancePtr inst;
 
-    instanceSettings->registerSetting("InstanceType", "Legacy");
+    instanceSettings->registerSetting("InstanceType", "Legacy");  // intentionally Legacy. We don't support it.
 
     QString inst_type = instanceSettings->get("InstanceType").toString();
 

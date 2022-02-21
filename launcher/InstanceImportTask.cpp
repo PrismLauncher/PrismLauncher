@@ -261,8 +261,6 @@ void InstanceImportTask::processFlame()
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
-    instanceSettings->registerSetting("InstanceType", "Legacy");
-    instanceSettings->set("InstanceType", "OneSix");
     MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
     auto mcVersion = pack.minecraft.version;
     // Hack to correct some 'special sauce'...
@@ -422,7 +420,6 @@ void InstanceImportTask::processMultiMC()
 {
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
-    instanceSettings->registerSetting("InstanceType", "Legacy");
 
     NullInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
 
