@@ -37,6 +37,7 @@ public:
     const std::shared_ptr<ModFolderModel> &mods;
 
 public slots:
+    void confirm();
     void accept() override;
     void reject() override;
 

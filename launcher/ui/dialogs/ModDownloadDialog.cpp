@@ -5,6 +5,7 @@
 #include <InstanceList.h>
 
 #include "ProgressDialog.h"
+#include "CustomMessageBox.h"
 
 #include <QLayout>
 #include <QPushButton>
@@ -41,7 +42,7 @@ ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel> &mods
     auto OkButton = m_buttons->button(QDialogButtonBox::Ok);
     OkButton->setDefault(true);
     OkButton->setAutoDefault(true);
-    connect(OkButton, &QPushButton::clicked, this, &ModDownloadDialog::accept);
+    connect(OkButton, &QPushButton::clicked, this, &ModDownloadDialog::confirm);
 
     auto CancelButton = m_buttons->button(QDialogButtonBox::Cancel);
     CancelButton->setDefault(false);
@@ -66,6 +67,31 @@ QString ModDownloadDialog::dialogTitle()
 void ModDownloadDialog::reject()
 {
     QDialog::reject();
+}
+
+void ModDownloadDialog::confirm()
+{
+    auto info = QString("You're about to download the following mods:\n\n");
+    for(auto task : modTask.keys()){
+        info.append(task);
+        info.append("\n    --> File name: ");
+        info.append(modTask.find(task).value()->getFilename());
+        info.append('\n');
+    }
+
+    auto confirm_dialog = CustomMessageBox::selectable(
+        this,
+        tr("Confirm mods to download"),
+        info,
+        QMessageBox::NoIcon,
+        {QMessageBox::Cancel, QMessageBox::Ok},
+        QMessageBox::Ok
+    );
+
+    auto AcceptButton = confirm_dialog->button(QMessageBox::Ok);
+    connect(AcceptButton, &QPushButton::clicked, this, &ModDownloadDialog::accept);
+
+    confirm_dialog->open();
 }
 
 void ModDownloadDialog::accept()
