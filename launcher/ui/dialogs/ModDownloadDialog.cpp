@@ -71,8 +71,11 @@ void ModDownloadDialog::reject()
 
 void ModDownloadDialog::confirm()
 {
+    auto keys = modTask.keys();
+    keys.sort(Qt::CaseInsensitive);
+
     auto info = QString("You're about to download the following mods:\n\n");
-    for(auto task : modTask.keys()){
+    for(auto task : keys){
         info.append(task);
         info.append("\n    --> File name: ");
         info.append(modTask.find(task).value()->getFilename());
