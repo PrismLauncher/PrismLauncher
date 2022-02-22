@@ -291,6 +291,9 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
                     case AccountState::Expired: {
                         return tr("Expired", "Account status");
                     }
+                    case AccountState::Disabled: {
+                        return tr("Disabled", "Account status");
+                    }
                     case AccountState::Gone: {
                         return tr("Gone", "Account status");
                     }
