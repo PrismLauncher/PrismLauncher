@@ -162,6 +162,12 @@ void PageContainer::createUI()
     setLayout(m_layout);
 }
 
+void PageContainer::retranslate()
+{
+    if (m_currentPage)
+        m_header->setText(m_currentPage->displayName());
+}
+
 void PageContainer::addButtons(QWidget *buttons)
 {
     m_layout->addWidget(buttons, 2, 0, 1, 2);
@@ -238,4 +244,12 @@ bool PageContainer::saveAll()
             return false;
     }
     return true;
+}
+
+void PageContainer::changeEvent(QEvent* event)
+{
+    if (event->type() == QEvent::LanguageChange) {
+        retranslate();
+    }
+    QWidget::changeEvent(event);
 }

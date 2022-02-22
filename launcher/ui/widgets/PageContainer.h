@@ -66,8 +66,11 @@ public:
         m_container = container;
     };
 
+    void changeEvent(QEvent*) override;
+
 private:
     void createUI();
+    void retranslate();
 
 public slots:
     void help();
