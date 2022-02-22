@@ -35,6 +35,7 @@ FlameModPage::FlameModPage(ModDownloadDialog *dialog, BaseInstance *instance)
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameModPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameModPage::onVersionSelectionChanged);
+    connect(ui->modSelectionButton, &QPushButton::clicked, this, &FlameModPage::onModSelected);
 }
 
 FlameModPage::~FlameModPage()
@@ -62,7 +63,7 @@ bool FlameModPage::shouldDisplay() const
 
 void FlameModPage::openedImpl()
 {
-    suggestCurrent();
+    updateSelectionButton();
     triggerSearch();
 }
 
@@ -77,10 +78,6 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
     if(!first.isValid())
     {
-        if(isOpened)
-        {
-            dialog->setSuggestedMod();
-        }
         return;
     }
 
@@ -112,6 +109,10 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
     if (!current.versionsLoaded)
     {
         qDebug() << "Loading flame mod versions";
+
+        ui->modSelectionButton->setText(tr("Loading versions..."));
+        ui->modSelectionButton->setEnabled(false);
+
         auto netJob = new NetJob(QString("Flame::ModVersions(%1)").arg(current.name), APPLICATION->network());
         std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
         int addonId = current.addonId;
@@ -151,7 +152,7 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
                 ui->versionSelectionBox->addItem(tr("No Valid Version found!"), QVariant(-1));
             }
 
-            suggestCurrent();
+            updateSelectionButton();
         });
         netJob->start();
     }
@@ -163,25 +164,26 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         if(ui->versionSelectionBox->count() == 0){
             ui->versionSelectionBox->addItem(tr("No Valid Version found!"), QVariant(-1));
         }
-        suggestCurrent();
+
+        updateSelectionButton();
     }
 }
 
-void FlameModPage::suggestCurrent()
+void FlameModPage::updateSelectionButton()
 {
-    if(!isOpened)
-    {
+    if(!isOpened || selectedVersion < 0){
+        ui->modSelectionButton->setEnabled(false);
         return;
     }
 
-    if (selectedVersion == -1)
-    {
-        dialog->setSuggestedMod();
-        return;
+    ui->modSelectionButton->setEnabled(true);
+    auto& version = current.versions[selectedVersion];
+    if(!dialog->isModSelected(current.name, version.fileName)){
+        ui->modSelectionButton->setText(tr("Select mod for download"));
     }
-
-    auto version = current.versions[selectedVersion];
-    dialog->setSuggestedMod(current.name, new ModDownloadTask(version.downloadUrl, version.fileName , dialog->mods));
+    else{
+        ui->modSelectionButton->setText(tr("Deselect mod for download"));
+    }
 }
 
 void FlameModPage::onVersionSelectionChanged(QString data)
@@ -192,5 +194,18 @@ void FlameModPage::onVersionSelectionChanged(QString data)
         return;
     }
     selectedVersion = ui->versionSelectionBox->currentData().toInt();
-    suggestCurrent();
+    updateSelectionButton();
+}
+
+void FlameModPage::onModSelected()
+{
+    auto& version = current.versions[selectedVersion];
+    if (dialog->isModSelected(current.name, version.fileName)){
+        dialog->removeSelectedMod(current.name);
+    }
+    else{
+        dialog->addSelectedMod(current.name, new ModDownloadTask(version.downloadUrl, version.fileName , dialog->mods));
+    }
+
+    updateSelectionButton();
 }
