@@ -10,6 +10,7 @@ class ModDownloadTask : public Task {
     Q_OBJECT
 public:
     explicit ModDownloadTask(const QUrl sourceUrl, const QString filename, const std::shared_ptr<ModFolderModel> mods);
+    const QString& getFilename() const { return filename; }
 
 public slots:
     bool abort() override;

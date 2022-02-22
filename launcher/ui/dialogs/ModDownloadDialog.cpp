@@ -52,6 +52,7 @@ ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel> &mods
     HelpButton->setDefault(false);
     HelpButton->setAutoDefault(false);
     connect(HelpButton, &QPushButton::clicked, m_container, &PageContainer::help);
+
     QMetaObject::connectSlotsByName(this);
     setWindowModality(Qt::WindowModal);
     setWindowTitle("Download mods");
@@ -83,16 +84,38 @@ QList<BasePage *> ModDownloadDialog::getPages()
     };
 }
 
-void ModDownloadDialog::setSuggestedMod(const QString& name, ModDownloadTask* task)
+void ModDownloadDialog::addSelectedMod(const QString& name, ModDownloadTask* task)
 {
-    modTask.reset(task);
-    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(task);
+    if(modTask.contains(name))
+        delete modTask.find(name).value();
+
+    if(task)
+        modTask.insert(name, task);
+    else
+        modTask.remove(name);
+
+    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(!modTask.isEmpty());
+}
+
+void ModDownloadDialog::removeSelectedMod(const QString &name)
+{
+    if(modTask.contains(name))
+        delete modTask.find(name).value();
+    modTask.remove(name);
+}
+
+bool ModDownloadDialog::isModSelected(const QString &name, const QString& filename) const
+{
+    // FIXME: Is there a way to check for versions without checking the filename
+    //        as a heuristic, other than adding such info to ModDownloadTask itself?
+    auto iter = modTask.find(name);
+    return iter != modTask.end() && (iter.value()->getFilename() == filename);
 }
 
 ModDownloadDialog::~ModDownloadDialog()
 {
 }
 
-ModDownloadTask *ModDownloadDialog::getTask() {
-    return modTask.release();
+const QList<ModDownloadTask*> ModDownloadDialog::getTasks() {
+    return modTask.values();
 }
