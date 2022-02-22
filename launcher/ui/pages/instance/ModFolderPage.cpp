@@ -252,6 +252,11 @@ bool ModFolderPage::shouldDisplay() const
     return true;
 }
 
+void ModFolderPage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 bool CoreModFolderPage::shouldDisplay() const
 {
     if (ModFolderPage::shouldDisplay())

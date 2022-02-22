@@ -54,6 +54,7 @@ public:
         return "Tools";
     }
     virtual bool apply() override;
+    void retranslate() override;
 
 private:
     void loadSettings();

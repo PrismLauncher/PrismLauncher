@@ -600,6 +600,11 @@ ServersPage::~ServersPage()
     delete ui;
 }
 
+void ServersPage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 void ServersPage::ShowContextMenu(const QPoint& pos)
 {
     auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));

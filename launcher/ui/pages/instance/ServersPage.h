@@ -57,6 +57,7 @@ public:
     {
         return "Servers-management";
     }
+    void retranslate() override;
 
 protected:
     QMenu * createPopupMenu() override;

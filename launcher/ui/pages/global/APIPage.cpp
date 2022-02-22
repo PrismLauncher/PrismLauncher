@@ -85,3 +85,8 @@ bool APIPage::apply()
     applySettings();
     return true;
 }
+
+void APIPage::retranslate()
+{
+    ui->retranslateUi(this);
+}

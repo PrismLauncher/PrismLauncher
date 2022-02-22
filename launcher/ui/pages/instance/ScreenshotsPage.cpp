@@ -270,6 +270,11 @@ bool ScreenshotsPage::eventFilter(QObject *obj, QEvent *evt)
     return QWidget::eventFilter(obj, evt);
 }
 
+void ScreenshotsPage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 ScreenshotsPage::~ScreenshotsPage()
 {
     delete ui;

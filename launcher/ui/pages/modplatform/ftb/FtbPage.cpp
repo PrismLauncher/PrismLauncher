@@ -78,6 +78,11 @@ bool FtbPage::shouldDisplay() const
     return true;
 }
 
+void FtbPage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 void FtbPage::openedImpl()
 {
     if(!initialised)

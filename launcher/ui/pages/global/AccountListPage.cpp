@@ -104,6 +104,11 @@ AccountListPage::~AccountListPage()
     delete ui;
 }
 
+void AccountListPage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 void AccountListPage::ShowContextMenu(const QPoint& pos)
 {
     auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));

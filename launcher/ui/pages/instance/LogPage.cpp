@@ -328,3 +328,8 @@ void LogPage::findActivated()
         ui->searchBar->selectAll();
     }
 }
+
+void LogPage::retranslate()
+{
+    ui->retranslateUi(this);
+}

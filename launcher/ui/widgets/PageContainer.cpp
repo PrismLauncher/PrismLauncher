@@ -166,6 +166,9 @@ void PageContainer::retranslate()
 {
     if (m_currentPage)
         m_header->setText(m_currentPage->displayName());
+
+    for (auto page : m_model->pages())
+        page->retranslate();
 }
 
 void PageContainer::addButtons(QWidget *buttons)

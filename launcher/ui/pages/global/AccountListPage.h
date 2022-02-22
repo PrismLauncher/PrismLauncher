@@ -78,6 +78,7 @@ public:
     {
         return "Getting-Started#adding-an-account";
     }
+    void retranslate() override;
 
 public slots:
     void on_actionAddMojang_triggered();

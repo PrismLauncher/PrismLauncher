@@ -231,3 +231,8 @@ bool ExternalToolsPage::apply()
     applySettings();
     return true;
 }
+
+void ExternalToolsPage::retranslate()
+{
+    ui->retranslateUi(this);
+}

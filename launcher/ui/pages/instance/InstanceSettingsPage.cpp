@@ -339,3 +339,8 @@ void InstanceSettingsPage::checkerFinished()
 {
     checker.reset();
 }
+
+void InstanceSettingsPage::retranslate()
+{
+    ui->retranslateUi(this);
+}

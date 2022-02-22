@@ -47,6 +47,8 @@ public:
     {
         m_container = container;
     };
+    virtual void retranslate() { }
+
 public:
     int stackIndex = -1;
     int listIndex = -1;

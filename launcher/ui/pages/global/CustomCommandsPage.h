@@ -47,6 +47,7 @@ public:
         return "Custom-commands";
     }
     bool apply() override;
+    void retranslate() override;
 
 private:
     void applySettings();

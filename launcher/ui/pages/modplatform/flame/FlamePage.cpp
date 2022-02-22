@@ -57,6 +57,11 @@ bool FlamePage::shouldDisplay() const
     return true;
 }
 
+void FlamePage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 void FlamePage::openedImpl()
 {
     suggestCurrent();

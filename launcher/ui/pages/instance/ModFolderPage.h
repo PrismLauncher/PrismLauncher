@@ -66,6 +66,7 @@ public:
         return m_helpName;
     }
     virtual bool shouldDisplay() const override;
+    void retranslate() override;
 
     virtual void openedImpl() override;
     virtual void closedImpl() override;

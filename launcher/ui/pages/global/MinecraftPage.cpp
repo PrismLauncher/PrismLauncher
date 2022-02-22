@@ -94,3 +94,8 @@ void MinecraftPage::loadSettings()
 
     ui->closeAfterLaunchCheck->setChecked(s->get("CloseAfterLaunch").toBool());
 }
+
+void MinecraftPage::retranslate()
+{
+    ui->retranslateUi(this);
+}

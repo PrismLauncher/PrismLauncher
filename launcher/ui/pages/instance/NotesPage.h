@@ -53,6 +53,7 @@ public:
     {
         return "Notes";
     }
+    void retranslate() override;
 
 private:
     Ui::NotesPage *ui;

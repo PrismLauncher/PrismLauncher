@@ -66,6 +66,7 @@ public:
     }
     bool shouldDisplay() const override;
     void openedImpl() override;
+    void retranslate() override;
 
 private:
     void suggestCurrent();

@@ -441,3 +441,8 @@ void LauncherPage::refreshFontPreview()
         workCursor.insertBlock();
     }
 }
+
+void LauncherPage::retranslate()
+{
+    ui->retranslateUi(this);
+}

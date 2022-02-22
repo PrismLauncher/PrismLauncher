@@ -122,6 +122,11 @@ void Page::openedImpl()
     suggestCurrent();
 }
 
+void Page::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 void Page::suggestCurrent()
 {
     if(!isOpened)

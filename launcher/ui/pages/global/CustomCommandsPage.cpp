@@ -49,3 +49,8 @@ void CustomCommandsPage::loadSettings()
         s->get("PostExitCommand").toString()
     );
 }
+
+void CustomCommandsPage::retranslate()
+{
+    // fixme: implement
+}

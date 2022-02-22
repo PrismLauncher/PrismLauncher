@@ -104,3 +104,8 @@ void ProxyPage::loadSettings()
     ui->proxyUserEdit->setText(s->get("ProxyUser").toString());
     ui->proxyPassEdit->setText(s->get("ProxyPass").toString());
 }
+
+void ProxyPage::retranslate()
+{
+    ui->retranslateUi(this);
+}

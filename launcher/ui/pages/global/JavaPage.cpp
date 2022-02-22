@@ -151,3 +151,8 @@ void JavaPage::checkerFinished()
 {
     checker.reset();
 }
+
+void JavaPage::retranslate()
+{
+    ui->retranslateUi(this);
+}

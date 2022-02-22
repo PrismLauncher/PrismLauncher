@@ -54,6 +54,7 @@ public:
         return "Minecraft-settings";
     }
     bool apply() override;
+    void retranslate() override;
 
 private:
     void updateCheckboxStuff();

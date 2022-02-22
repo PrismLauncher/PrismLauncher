@@ -51,6 +51,7 @@ public:
         return "Proxy-settings";
     }
     bool apply() override;
+    void retranslate() override;
 
 private:
     void updateCheckboxStuff();

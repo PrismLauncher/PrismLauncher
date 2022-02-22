@@ -48,12 +48,11 @@ public:
     }
     bool apply() override;
 
-    void changeEvent(QEvent * ) override;
+    void retranslate() override;
 
 private:
     void applySettings();
     void loadSettings();
-    void retranslate();
 
 private:
     LanguageSelectionWidget *mainWidget;

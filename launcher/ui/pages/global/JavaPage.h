@@ -54,6 +54,7 @@ public:
         return "Java-settings";
     }
     bool apply() override;
+    void retranslate() override;
 
 private:
     void applySettings();

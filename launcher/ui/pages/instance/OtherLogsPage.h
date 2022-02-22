@@ -52,6 +52,8 @@ public:
     {
         return "Minecraft-Logs";
     }
+    void retranslate() override;
+
     void openedImpl() override;
     void closedImpl() override;
 

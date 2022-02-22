@@ -54,6 +54,7 @@ public:
         return "Minecraft-Logs";
     }
     virtual bool shouldDisplay() const override;
+    void retranslate() override;
 
 private slots:
     void on_btnPaste_clicked();

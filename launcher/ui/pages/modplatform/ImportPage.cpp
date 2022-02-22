@@ -50,6 +50,11 @@ bool ImportPage::shouldDisplay() const
     return true;
 }
 
+void ImportPage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 void ImportPage::openedImpl()
 {
     updateState();

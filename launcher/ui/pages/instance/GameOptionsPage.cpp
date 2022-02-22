@@ -35,3 +35,8 @@ void GameOptionsPage::closedImpl()
 {
     // m_model->unobserve();
 }
+
+void GameOptionsPage::retranslate()
+{
+    ui->retranslateUi(this);
+}

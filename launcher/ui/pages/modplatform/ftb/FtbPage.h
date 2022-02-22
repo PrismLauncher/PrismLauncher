@@ -55,6 +55,7 @@ public:
         return "FTB-platform";
     }
     virtual bool shouldDisplay() const override;
+    void retranslate() override;
 
     void openedImpl() override;
 

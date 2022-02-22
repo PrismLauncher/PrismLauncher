@@ -56,6 +56,7 @@ public:
     {
         return "Game-Options-management";
     }
+    void retranslate() override;
 
 private: // data
     Ui::GameOptionsPage *ui = nullptr;

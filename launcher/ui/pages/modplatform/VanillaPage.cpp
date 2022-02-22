@@ -74,6 +74,11 @@ bool VanillaPage::shouldDisplay() const
     return true;
 }
 
+void VanillaPage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 BaseVersionPtr VanillaPage::selectedVersion() const
 {
     return m_selectedVersion;

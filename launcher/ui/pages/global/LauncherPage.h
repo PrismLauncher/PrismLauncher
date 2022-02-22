@@ -57,6 +57,7 @@ public:
         return "Launcher-settings";
     }
     bool apply() override;
+    void retranslate() override;
 
 private:
     void applySettings();

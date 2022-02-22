@@ -69,6 +69,7 @@ public:
         return "APIs";
     }
     virtual bool apply() override;
+    void retranslate() override;
 
 private:
     void loadSettings();

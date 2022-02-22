@@ -122,6 +122,11 @@ bool WorldListPage::shouldDisplay() const
     return true;
 }
 
+void WorldListPage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 bool WorldListPage::worldListFilter(QKeyEvent *keyEvent)
 {
     switch (keyEvent->key())

@@ -99,6 +99,11 @@ bool VersionPage::shouldDisplay() const
     return true;
 }
 
+void VersionPage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 QMenu * VersionPage::createPopupMenu()
 {
     QMenu* filteredMenu = QMainWindow::createPopupMenu();

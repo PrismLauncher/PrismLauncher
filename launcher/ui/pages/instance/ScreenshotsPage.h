@@ -67,6 +67,7 @@ public:
     {
         return !m_uploadActive;
     }
+    void retranslate() override;
 
 protected:
     QMenu * createPopupMenu() override;

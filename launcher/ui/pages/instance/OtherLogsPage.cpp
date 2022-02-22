@@ -55,6 +55,11 @@ OtherLogsPage::~OtherLogsPage()
     delete ui;
 }
 
+void OtherLogsPage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 void OtherLogsPage::openedImpl()
 {
     m_watcher->enable();

@@ -19,3 +19,8 @@ bool NotesPage::apply()
     m_inst->setNotes(ui->noteEditor->toPlainText());
     return true;
 }
+
+void NotesPage::retranslate()
+{
+    ui->retranslateUi(this);
+}

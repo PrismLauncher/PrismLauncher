@@ -65,6 +65,11 @@ bool AtlPage::shouldDisplay() const
     return true;
 }
 
+void AtlPage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 void AtlPage::openedImpl()
 {
     if(!initialized)

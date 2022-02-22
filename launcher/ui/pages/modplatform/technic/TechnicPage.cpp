@@ -61,6 +61,11 @@ bool TechnicPage::shouldDisplay() const
     return true;
 }
 
+void TechnicPage::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 void TechnicPage::openedImpl()
 {
     suggestCurrent();

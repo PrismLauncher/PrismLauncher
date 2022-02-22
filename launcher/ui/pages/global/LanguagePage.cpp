@@ -40,12 +40,3 @@ void LanguagePage::retranslate()
 {
     mainWidget->retranslate();
 }
-
-void LanguagePage::changeEvent(QEvent* event)
-{
-    if (event->type() == QEvent::LanguageChange)
-    {
-        retranslate();
-    }
-    QWidget::changeEvent(event);
-}

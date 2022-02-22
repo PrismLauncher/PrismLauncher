@@ -52,6 +52,7 @@ public:
         return "Zip-import";
     }
     virtual bool shouldDisplay() const override;
+    void retranslate() override;
 
     void setUrl(const QString & url);
     void openedImpl() override;
