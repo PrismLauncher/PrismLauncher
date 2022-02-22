@@ -34,6 +34,7 @@ ModrinthPage::ModrinthPage(ModDownloadDialog *dialog, BaseInstance *instance)
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthPage::onVersionSelectionChanged);
+    connect(ui->modSelectionButton, &QPushButton::clicked, this, &ModrinthPage::onModSelected);
 }
 
 ModrinthPage::~ModrinthPage()
@@ -61,7 +62,7 @@ bool ModrinthPage::shouldDisplay() const
 
 void ModrinthPage::openedImpl()
 {
-    suggestCurrent();
+    updateSelectionButton();
     triggerSearch();
 }
 
@@ -76,10 +77,6 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
     if(!first.isValid())
     {
-        if(isOpened)
-        {
-            dialog->setSuggestedMod();
-        }
         return;
     }
 
@@ -97,6 +94,10 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
     if (!current.versionsLoaded)
     {
         qDebug() << "Loading Modrinth mod versions";
+
+        ui->modSelectionButton->setText(tr("Loading versions..."));
+        ui->modSelectionButton->setEnabled(false);
+
         auto netJob = new NetJob(QString("Modrinth::ModVersions(%1)").arg(current.name), APPLICATION->network());
         std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
         QString addonId = current.addonId;
@@ -136,8 +137,9 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
                 ui->versionSelectionBox->addItem(tr("No Valid Version found !"), QVariant(-1));
             }
 
-            suggestCurrent();
+            updateSelectionButton();
         });
+
         netJob->start();
     }
     else
@@ -148,33 +150,47 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         if(ui->versionSelectionBox->count() == 0){
             ui->versionSelectionBox->addItem(tr("No Valid Version found !"), QVariant(-1));
         }
-        suggestCurrent();
+
+        updateSelectionButton();
     }
 }
 
-void ModrinthPage::suggestCurrent()
+void ModrinthPage::updateSelectionButton()
 {
-    if(!isOpened)
-    {
+    if(!isOpened || selectedVersion < 0){
+        ui->modSelectionButton->setEnabled(false);
         return;
     }
 
-    if (selectedVersion == -1)
-    {
-        dialog->setSuggestedMod();
-        return;
+    ui->modSelectionButton->setEnabled(true);
+    auto& version = current.versions[selectedVersion];
+    if(!dialog->isModSelected(current.name, version.fileName)){
+        ui->modSelectionButton->setText(tr("Select mod for download"));
     }
-    auto version = current.versions[selectedVersion];
-    dialog->setSuggestedMod(current.name, new ModDownloadTask(version.downloadUrl, version.fileName , dialog->mods));
+    else{
+        ui->modSelectionButton->setText(tr("Deselect mod for download"));
+    }
 }
 
 void ModrinthPage::onVersionSelectionChanged(QString data)
 {
-    if(data.isNull() || data.isEmpty())
-    {
+    if (data.isNull() || data.isEmpty()){
         selectedVersion = -1;
         return;
     }
     selectedVersion = ui->versionSelectionBox->currentData().toInt();
-    suggestCurrent();
+    updateSelectionButton();
+}
+
+void ModrinthPage::onModSelected()
+{
+    auto& version = current.versions[selectedVersion];
+    if (dialog->isModSelected(current.name, version.fileName)){
+        dialog->removeSelectedMod(current.name);
+    }
+    else{
+        dialog->addSelectedMod(current.name, new ModDownloadTask(version.downloadUrl, version.fileName , dialog->mods));
+    }
+
+    updateSelectionButton();
 }
