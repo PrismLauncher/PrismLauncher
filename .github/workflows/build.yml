@@ -88,6 +88,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.qt_version }}-${{ matrix.qt_arch }}-qt_cache
 
       - name: Install Qt
+        if: runner.os != 'Linux' || matrix.app_image == true
         uses: jurplel/install-qt-action@v2
         with:
           version: ${{ matrix.qt_version }}
@@ -95,6 +96,11 @@ jobs:
           arch: ${{ matrix.qt_arch }}
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           dir: "${{ github.workspace }}/Qt/"
+
+      - name: Install System Qt on Linux
+        if: runner.os == 'Linux' && matrix.app_image != true
+        run: |
+          sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
 
       - name: Install Ninja
         uses: urkle/action-get-ninja@v1
