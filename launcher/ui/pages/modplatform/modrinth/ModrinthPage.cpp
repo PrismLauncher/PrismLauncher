@@ -137,6 +137,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
                 ui->versionSelectionBox->addItem(tr("No Valid Version found !"), QVariant(-1));
             }
 
+            ui->modSelectionButton->setText(tr("Cannot select invalid version :("));
             updateSelectionButton();
         });
 
