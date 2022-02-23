@@ -1,0 +1,69 @@
+# Template based on https://gitlab.archlinux.org/archlinux/rfcs/-/blob/0ba3b61e987e197f8d1901709409b8564958f78a/rfcs/0000-template.rst
+name: Request for Comment (RFC)
+description: Propose a larger change and start a discussion.
+labels: [RFC]
+body:
+- type: markdown
+  attributes:
+    value: |
+      ### Use this form to suggest a larger change for PolyMC.
+- type: textarea
+  attributes:
+    label: Goal
+    description: Short description, 1-2 sentences.
+    placeholder: Remove the cat from the launcher.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Motivation
+    description: |
+      Introduce the topic. If this is a not-well-known section of PolyMC, a detailed explanation of the background is recommended.
+      Some example points of discussion:
+       - What specific problems are you facing right now that you're trying to address?
+       - Are there any previous discussions? Link to them and summarize them (don't
+       - force your readers to read them though!).
+       - Is there any precedent set by other software? If so, link to resources.
+    placeholder: I don't like cats. I think many users also don't like cats.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Specification
+    description: A concrete, thorough explanation of what is being planned.
+    placeholder: Remove the cat button and all references to the cat from the codebase. Including resource files.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Drawbacks
+    description: Carefully consider every possible objection and issue with your proposal. This section should be updated as feedback comes in from discussion.
+    placeholder: Some users might like cats.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Unresolved Questions
+    description: |
+      Are there any portions of your proposal which need to be discussed with the community before the RFC can proceed? 
+      Be careful here -- an RFC with a lot of remaining questions is likely to be stalled. 
+      If your RFC is mostly unresolved questions and not too much substance, it may not be ready.
+    placeholder: Do a lot of users care about the cat?
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Alternatives Considered
+    description: A list of alternatives, that have been considered and offer equal or similar features to the proposed change.
+    placeholder: Maybe the cat could be replaced with an axolotl?
+  validations:
+    required: true
+- type: checkboxes
+  attributes:
+    label: This suggestion is unique
+    options:
+    - label: I have searched the issue tracker and did not find an issue describing my suggestion, especially not one that has been rejected.
+      required: true
+- type: textarea
+  attributes:
+    label: You may use the editor below to elaborate further.

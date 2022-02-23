@@ -47,6 +47,7 @@ enum class AccountState {
     Offline,
     Working,
     Online,
+    Disabled,
     Errored,
     Expired,
     Gone
@@ -81,6 +82,7 @@ struct AccountData {
     bool legacy = false;
     bool canMigrateToMSA = false;
 
+    QString msaClientID;
     Katabasis::Token msaToken;
     Katabasis::Token userToken;
     Katabasis::Token xboxApiToken;

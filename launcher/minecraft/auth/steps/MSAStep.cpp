@@ -12,9 +12,10 @@ using OAuth2 = Katabasis::DeviceFlow;
 using Activity = Katabasis::Activity;
 
 MSAStep::MSAStep(AccountData* data, Action action) : AuthStep(data), m_action(action) {
+    m_clientId = APPLICATION->getMSAClientID();
     OAuth2::Options opts;
     opts.scope = "XboxLive.signin offline_access";
-    opts.clientIdentifier = APPLICATION->getMSAClientID();
+    opts.clientIdentifier = m_clientId;
     opts.authorizationUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
     opts.accessTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
 
@@ -48,6 +49,10 @@ void MSAStep::rehydrate() {
 void MSAStep::perform() {
     switch(m_action) {
         case Refresh: {
+            if (m_data->msaClientID != m_clientId) {
+                emit hideVerificationUriAndCode();
+                emit finished(AccountTaskState::STATE_DISABLED, tr("Microsoft user authentication failed - client identification has changed."));
+            }
             m_oauth2->refresh();
             return;
         }
@@ -57,6 +62,7 @@ void MSAStep::perform() {
             m_oauth2->setExtraRequestParams(extraOpts);
 
             *m_data = AccountData();
+            m_data->msaClientID = m_clientId;
             m_oauth2->login();
             return;
         }

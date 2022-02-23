@@ -43,6 +43,8 @@ QString AccountTask::getStateMessage() const
         return tr("Authentication task succeeded.");
     case AccountTaskState::STATE_OFFLINE:
         return tr("Failed to contact the authentication server.");
+    case AccountTaskState::STATE_DISABLED:
+        return tr("Client ID has changed. New session needs to be created.");
     case AccountTaskState::STATE_FAILED_SOFT:
         return tr("Encountered an error during authentication.");
     case AccountTaskState::STATE_FAILED_HARD:
@@ -75,6 +77,12 @@ bool AccountTask::changeState(AccountTaskState newState, QString reason)
         case AccountTaskState::STATE_OFFLINE: {
             m_data->errorString = reason;
             m_data->accountState = AccountState::Offline;
+            emitFailed(reason);
+            return false;
+        }
+        case AccountTaskState::STATE_DISABLED: {
+            m_data->errorString = reason;
+            m_data->accountState = AccountState::Disabled;
             emitFailed(reason);
             return false;
         }

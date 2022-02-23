@@ -327,6 +327,10 @@ bool AccountData::resumeStateFromV3(QJsonObject data) {
     }
 
     if(type == AccountType::MSA) {
+        auto clientIDV = data.value("msa-client-id");
+        if (clientIDV.isString()) {
+            msaClientID = clientIDV.toString();
+        } // leave msaClientID empty if it doesn't exist or isn't a string
         msaToken = tokenFromJSONV3(data, "msa");
         userToken = tokenFromJSONV3(data, "utoken");
         xboxApiToken = tokenFromJSONV3(data, "xrp-main");
@@ -360,6 +364,7 @@ QJsonObject AccountData::saveState() const {
     }
     else if (type == AccountType::MSA) {
         output["type"] = "MSA";
+        output["msa-client-id"] = msaClientID;
         tokenToJSONV3(output, msaToken, "msa");
         tokenToJSONV3(output, userToken, "utoken");
         tokenToJSONV3(output, xboxApiToken, "xrp-main");

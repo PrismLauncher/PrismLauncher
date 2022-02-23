@@ -1,0 +1,22 @@
+name: Build Application
+
+on:
+  push:
+    branches-ignore:
+      - 'stable'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+
+  build_debug:
+    name: Build Debug
+    uses: ./.github/workflows/build.yml
+    with:
+      build_type: Debug
+
+  build_release:
+    name: Build Release
+    uses: ./.github/workflows/build.yml
+    with:
+      build_type: Release

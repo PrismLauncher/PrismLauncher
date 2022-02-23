@@ -10,7 +10,8 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 <br>
 
 # Installation
-- All packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest)).
+
+- All packages (archived by version) can be found [here](https://packages.polymc.org/) ([latest](https://packages.polymc.org/latest))
 - Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
 
 ## 🐧 Linux
@@ -29,33 +30,27 @@ There are several AUR packages available:
 
 [![polymc](https://img.shields.io/badge/aur-polymc-blue)](https://aur.archlinux.org/packages/polymc/)
 [![polymc-bin](https://img.shields.io/badge/aur-polymc--bin-blue)](https://aur.archlinux.org/packages/polymc-bin/)
-[![polymc-git](https://img.shields.io/badge/aur-polymc--git-blue)](https://aur.archlinux.org/packages/polymc-git/)
 
 ```sh
-# stable source package:
+# source package:
 yay -S polymc
-# stable binary package:
+# binary package:
 yay -S polymc-bin
-# latest git package:
-yay -S polymc-git
 ```
 
-### <img src="https://www.vectorlogo.zone/logos/debian/debian-icon.svg" height="20" /> Debian
+### <img src="https://www.vectorlogo.zone/logos/debian/debian-icon.svg" height="20" /> Debian and <img src="https://www.vectorlogo.zone/logos/ubuntu/ubuntu-icon.svg" height="20" /> Ubuntu
 
 We use [makedeb](https://docs.makedeb.org/) for our Debian packages.
 Several MPR packages are available:
 
 [![polymc](https://img.shields.io/badge/mpr-polymc-orange)](https://mpr.makedeb.org/packages/polymc)
 [![polymc-bin](https://img.shields.io/badge/mpr-polymc--bin-orange)](https://mpr.makedeb.org/packages/polymc-bin)
-[![polymc-git](https://img.shields.io/badge/mpr-polymc--git-orange)](https://mpr.makedeb.org/packages/polymc-git)
 
 ```sh
-# stable source package:
+# source package:
 sudo tap install polymc
-# stable binary package:
+# binary package:
 sudo tap install polymc-bin
-# latest git package:
-sudo tap install polymc-git
 ```
 
 ### <img src="https://www.vectorlogo.zone/logos/nixos/nixos-icon.svg" height="20" /> Nix
@@ -85,13 +80,6 @@ sudo dnf copr enable polymc/polymc
 sudo dnf install polymc
 ```
 
-Alternatively, a COPR maintained by a PolyMC user (instead of Jenkins' automated builds) is available [here](https://copr.fedorainfracloud.org/coprs/sentry/polymc).
-
-```sh
-sudo dnf copr enable sentry/polymc
-sudo dnf install polymc
-```
-
 ### <img src="https://lotar.altervista.org/wiki/_media/news/slackware-logo.png" height="20" /> Slackware
 
 [A SlackBuild](https://codeberg.org/glowiak/SlackBuilds/src/branch/master/repository/polymc.md) is available. You will need [qt5](http://slackbuilds.org/repository/14.2/libraries/qt5/) (on 15.0 installed by default), [a JDK](https://codeberg.org/glowiak/SlackBuilds/src/branch/master/repository/adoptium-jdk8.md), and if you're on 14.2, you need to compile newer CMake version manually. To build, type in extracted directory with all dependiences met:
@@ -99,7 +87,7 @@ sudo dnf install polymc
     sudo ./polymc.SlackBuild
     sudo installpkg /tmp/polymc-version-arch-1_SBo.tgz
 
-If you are too lazy to do all these steps, you can just download [a prebuild x86_64 package](http://glowiak.github.io/file/polymc-latest-slackware) and install it with /sbin/installpkg:
+You can also download a community-maintained [prebuilt x86_64 package](http://glowiak.github.io/file/polymc-latest-slackware) and install it with /sbin/installpkg:
 
     sudo /sbin/installpkg ~/Downloads/polymc-version-x86_64-1_SBo.tgz
 
@@ -109,28 +97,37 @@ If you are too lazy to do all these steps, you can just download [a prebuild x86
 
 ## <img src="https://www.vectorlogo.zone/logos/apple/apple-tile.svg" height="20" /> MacOS
 
-MacOS currently does not have any packages. We are still working on setting up MacOS packaging. Meanwhile, you can [build](https://github.com/PolyMC/PolyMC/blob/develop/BUILD.md#macos) it for yourself.
+MacOS has experimental development builds available [here](https://github.com/PolyMC/PolyMC/actions)
 
 ## <img src="https://www.vectorlogo.zone/logos/freebsd/freebsd-icon.svg" height="20" /> FreeBSD
 
-For FreeBSD available are:
+There are community-maintained binary packages available:
 
 - [AppBSD Image](http://glowiak.github.io/file/polymc-latest-fbsd64-appbsd) - a portable application, requires [AppBSD](https://codeberg.org/glowiak/appbsd/) to be installed.
 
 - [Gzipped binaries](http://glowiak.github.io/file/polymc-latest-fbsd64-raw) - traditional way to distribute, unpack and run.
 
-In both cases you need X11, Qt5 and Java installed. Both files are 64bit only.
+In both cases you need X11, Qt5 and Java installed. Both files are 64bit only.  
+You can build from source - see [BUILD.md](./BUILD.md)
 
 ## <img src="https://raw.githubusercontent.com/AliasIO/wappalyzer/master/src/drivers/webextension/images/icons/OpenBSD%20httpd.svg" height="20" /> OpenBSD
 
-For OpenBSD available are [gzipped 32-bit binaries](http://glowiak.github.io/file/polymc-latest-obsd32-raw), download, unpack and run.
+There are community-maintained binary packages available:
 
-You need X11, Qt5 and Java installed.
+- [gzipped 32-bit binaries](http://glowiak.github.io/file/polymc-latest-obsd32-raw), download, unpack and run.
+
+You need X11, Qt5 and Java installed.  
+You can build from source - see [BUILD.md](./BUILD.md)
 
 ## Development Builds
 
 There are per-commit development builds available [here](https://github.com/PolyMC/PolyMC/actions). These have debug information in the binaries, so their file sizes are relatively larger.
-Builds are provided for Linux, AppImage on Linux, Windows, and macOS.
+Portable builds are provided for AppImage on Linux, Windows, and macOS.
+
+For Debian and Arch, you can use these packages for the latest development versions:  
+[![polymc-git](https://img.shields.io/badge/aur-polymc--git-blue)](https://aur.archlinux.org/packages/polymc-git/)
+[![polymc-git](https://img.shields.io/badge/mpr-polymc--git-orange)](https://mpr.makedeb.org/packages/polymc-git)  
+For flatpak, you can use [flathub-beta](https://discourse.flathub.org/t/how-to-use-flathub-beta/2111)
 
 # Help & Support
 
@@ -158,6 +155,7 @@ If you want to contribute to PolyMC you might find it useful to join our Discord
 If you want to build PolyMC yourself, check [BUILD.md](BUILD.md) for build instructions.
 
 ## Code formatting
+
 Just follow the existing formatting.
 
 In general, in order of importance:
