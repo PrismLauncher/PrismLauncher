@@ -40,6 +40,7 @@ ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel> &mods
     // Bonk Qt over its stupid head and make sure it understands which button is the default one...
     // See: https://stackoverflow.com/questions/24556831/qbuttonbox-set-default-button
     auto OkButton = m_buttons->button(QDialogButtonBox::Ok);
+    OkButton->setEnabled(false);
     OkButton->setDefault(true);
     OkButton->setAutoDefault(true);
     connect(OkButton, &QPushButton::clicked, this, &ModDownloadDialog::confirm);
@@ -89,7 +90,7 @@ void ModDownloadDialog::confirm()
         tr("Confirm mods to download"),
         info,
         QMessageBox::NoIcon,
-        {QMessageBox::Cancel, QMessageBox::Ok},
+        QMessageBox::Cancel | QMessageBox::Ok,
         QMessageBox::Ok
     );
 
@@ -117,13 +118,8 @@ QList<BasePage *> ModDownloadDialog::getPages()
 
 void ModDownloadDialog::addSelectedMod(const QString& name, ModDownloadTask* task)
 {
-    if(modTask.contains(name))
-        delete modTask.find(name).value();
-
-    if(task)
-        modTask.insert(name, task);
-    else
-        modTask.remove(name);
+    removeSelectedMod(name);
+    modTask.insert(name, task);
 
     m_buttons->button(QDialogButtonBox::Ok)->setEnabled(!modTask.isEmpty());
 }
@@ -133,6 +129,8 @@ void ModDownloadDialog::removeSelectedMod(const QString &name)
     if(modTask.contains(name))
         delete modTask.find(name).value();
     modTask.remove(name);
+
+    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(!modTask.isEmpty());
 }
 
 bool ModDownloadDialog::isModSelected(const QString &name, const QString& filename) const
