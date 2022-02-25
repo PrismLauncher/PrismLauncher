@@ -543,19 +543,8 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
     auto instanceRoot = FS::PathCombine(m_instDir, id);
     auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(instanceRoot, "instance.cfg"));
     InstancePtr inst;
-
-    instanceSettings->registerSetting("InstanceType", "Legacy");  // intentionally Legacy. We don't support it.
-
-    QString inst_type = instanceSettings->get("InstanceType").toString();
-
-    if (inst_type == "OneSix" || inst_type == "Nostalgia")
-    {
-        inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
-    }
-    else
-    {
-        inst.reset(new NullInstance(m_globalSettings, instanceSettings, instanceRoot));
-    }
+    // TODO: Handle incompatible instances
+    inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
     qDebug() << "Loaded instance " << inst->name() << " from " << inst->instanceRoot();
     return inst;
 }
