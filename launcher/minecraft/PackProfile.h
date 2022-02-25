@@ -143,8 +143,6 @@ private:
     bool installCustomJar_internal(QString filepath);
     bool removeComponent_internal(ComponentPtr patch);
 
-    bool migratePreComponentConfig();
-
 private: /* data */
 
     std::unique_ptr<PackProfileData> d;
