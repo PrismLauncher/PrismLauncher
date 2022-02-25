@@ -42,7 +42,6 @@ void InstanceCopyTask::copyFinished()
     }
     // FIXME: shouldn't this be able to report errors?
     auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
-    instanceSettings->registerSetting("InstanceType", "Legacy");
 
     InstancePtr inst(new NullInstance(m_globalSettings, instanceSettings, m_stagingPath));
     inst->setName(m_instName);

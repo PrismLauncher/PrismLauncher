@@ -32,7 +32,6 @@
 #include "BaseInstance.h"
 #include "InstanceTask.h"
 #include "settings/INISettingsObject.h"
-#include "minecraft/legacy/LegacyInstance.h"
 #include "NullInstance.h"
 #include "minecraft/MinecraftInstance.h"
 #include "FileSystem.h"
@@ -545,17 +544,13 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
     auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(instanceRoot, "instance.cfg"));
     InstancePtr inst;
 
-    instanceSettings->registerSetting("InstanceType", "Legacy");
+    instanceSettings->registerSetting("InstanceType", "Legacy");  // intentionally Legacy. We don't support it.
 
     QString inst_type = instanceSettings->get("InstanceType").toString();
 
     if (inst_type == "OneSix" || inst_type == "Nostalgia")
     {
         inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
-    }
-    else if (inst_type == "Legacy")
-    {
-        inst.reset(new LegacyInstance(m_globalSettings, instanceSettings, instanceRoot));
     }
     else
     {

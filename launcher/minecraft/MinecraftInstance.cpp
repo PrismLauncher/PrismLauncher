@@ -124,18 +124,7 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
     m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
 
-    // DEPRECATED: Read what versions the user configuration thinks should be used
-    m_settings->registerSetting({"IntendedVersion", "MinecraftVersion"}, "");
-    m_settings->registerSetting("LWJGLVersion", "");
-    m_settings->registerSetting("ForgeVersion", "");
-    m_settings->registerSetting("LiteloaderVersion", "");
-
     m_components.reset(new PackProfile(this));
-    m_components->setOldConfigVersion("net.minecraft", m_settings->get("IntendedVersion").toString());
-    auto setting = m_settings->getSetting("LWJGLVersion");
-    m_components->setOldConfigVersion("org.lwjgl", m_settings->get("LWJGLVersion").toString());
-    m_components->setOldConfigVersion("net.minecraftforge", m_settings->get("ForgeVersion").toString());
-    m_components->setOldConfigVersion("com.mumfrey.liteloader", m_settings->get("LiteloaderVersion").toString());
 }
 
 void MinecraftInstance::saveNow()

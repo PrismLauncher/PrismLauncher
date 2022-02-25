@@ -17,8 +17,6 @@ void InstanceCreationTask::executeTask()
     {
         auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
         instanceSettings->suspendSave();
-        instanceSettings->registerSetting("InstanceType", "Legacy");
-        instanceSettings->set("InstanceType", "OneSix");
         MinecraftInstance inst(m_globalSettings, instanceSettings, m_stagingPath);
         auto components = inst.getPackProfile();
         components->buildingFromScratch();
