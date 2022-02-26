@@ -47,12 +47,7 @@ mkDerivation rec {
 
   dontWrapQtApps = true;
 
-  postPatch = ''
-    # hardcode jdk paths
-    substituteInPlace launcher/java/JavaUtils.cpp \
-      --replace 'scanJavaDir("/usr/lib/jvm")' 'javas.append("${jdk}/lib/openjdk/bin/java")' \
-      --replace 'scanJavaDir("/usr/lib32/jvm")' 'javas.append("${jdk8}/lib/openjdk/bin/java")'
-  '' + lib.optionalString (msaClientID != "") ''
+  postPatch = lib.optionalString (msaClientID != "") ''
     # add client ID
     substituteInPlace CMakeLists.txt \
       --replace '17b47edd-c884-4997-926d-9e7f9a6b4647' '${msaClientID}'
@@ -77,6 +72,7 @@ mkDerivation rec {
     wrapProgram $out/bin/polymc \
       "''${qtWrapperArgs[@]}" \
       --set GAME_LIBRARY_PATH ${gameLibraryPath} \
+      --prefix POLYMC_JAVA_PATHS : ${jdk}/lib/openjdk/bin/java:${jdk8}/lib/openjdk/bin/java \
       --prefix PATH : ${lib.makeBinPath [ xorg.xrandr ]}
   '';
 
