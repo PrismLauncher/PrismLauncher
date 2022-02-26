@@ -365,8 +365,7 @@ void ModFolderPage::on_actionInstall_mods_triggered()
     }
     ModDownloadDialog mdownload(m_mods, this, m_inst);
     if(mdownload.exec()) {
-        ModDownloadTask *task = mdownload.getTask();
-        if (task) {
+        for(auto task : mdownload.getTasks()){
             connect(task, &Task::failed, [this, task](QString reason) {
                 task->deleteLater();
                 CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();

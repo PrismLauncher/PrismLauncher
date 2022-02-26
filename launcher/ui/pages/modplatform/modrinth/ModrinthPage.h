@@ -50,12 +50,13 @@ public:
     BaseInstance *m_instance;
 
 private:
-    void suggestCurrent();
+    void updateSelectionButton();
 
 private slots:
     void triggerSearch();
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);
+    void onModSelected();
 
 private:
     Ui::ModrinthPage *ui = nullptr;

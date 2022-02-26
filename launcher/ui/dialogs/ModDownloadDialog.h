@@ -29,12 +29,15 @@ public:
     QString dialogTitle() override;
     QList<BasePage *> getPages() override;
 
-    void setSuggestedMod(const QString & name = QString(), ModDownloadTask * task = nullptr);
+    void addSelectedMod(const QString & name = QString(), ModDownloadTask * task = nullptr);
+    void removeSelectedMod(const QString & name = QString());
+    bool isModSelected(const QString & name, const QString & filename) const;
 
-    ModDownloadTask * getTask();
+    const QList<ModDownloadTask*> getTasks();
     const std::shared_ptr<ModFolderModel> &mods;
 
 public slots:
+    void confirm();
     void accept() override;
     void reject() override;
 
@@ -49,6 +52,6 @@ private:
 
     ModrinthPage *modrinthPage = nullptr;
     FlameModPage *flameModPage = nullptr;
-    std::unique_ptr<ModDownloadTask> modTask;
+    QHash<QString, ModDownloadTask*> modTask;
     BaseInstance *m_instance;
 };
