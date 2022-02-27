@@ -103,7 +103,7 @@ MacOS has experimental development builds available [here](https://github.com/Po
 
 There are community-maintained binary packages available:
 
-- [AppBSD Image](http://glowiak.github.io/file/polymc-latest-fbsd64-appbsd) - a portable application, requires [AppBSD](https://codeberg.org/glowiak/appbsd/) to be installed.
+- [AppBSD Image](http://glowiak.github.io/file/polymc-latest-fbsd64-appbsd) - a portable application, requires [AppBSD](https://codeberg.org/glowiak/appbsd/) (0.4.9 or newer) to be installed.
 
 - [Gzipped binaries](http://glowiak.github.io/file/polymc-latest-fbsd64-raw) - traditional way to distribute, unpack and run.
 
