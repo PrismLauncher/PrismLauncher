@@ -189,7 +189,7 @@ elseif(UNIX)
         set(JARS_DEST_DIR "bin/jars")
 
         # launcher/Application.cpp will use this value
-        set(Launcher_APP_BINARY_DEFS "-DLauncher_PORTABLE=1")
+        set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_PORTABLE")
 
         # Install basic runner script
         configure_file(launcher/Launcher.in "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" @ONLY)
@@ -201,7 +201,7 @@ elseif(UNIX)
         set(LAUNCHER_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
         set(LAUNCHER_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
 
-        set(Launcher_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}" "-DLauncher_PORTABLE=0")
+        set(Launcher_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}")
 
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
