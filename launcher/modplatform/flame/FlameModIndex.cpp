@@ -50,42 +50,44 @@ void FlameMod::loadIndexedPackVersions(FlameMod::IndexedPack & pack, QJsonArray 
 
     for(auto versionIter: arr) {
         auto obj = versionIter.toObject();
-        FlameMod::IndexedVersion file;
-        file.addonId = pack.addonId;
-        file.fileId = Json::requireInteger(obj, "id");
-        file.date = Json::requireString(obj, "fileDate");
+
         auto versionArray = Json::requireArray(obj, "gameVersion");
-        if (versionArray.empty()) {
+        if (versionArray.isEmpty()) {
             continue;
         }
+
+        FlameMod::IndexedVersion file;
         for(auto mcVer : versionArray){
             file.mcVersion.append(mcVer.toString());
         }
 
+        file.addonId = pack.addonId;
+        file.fileId = Json::requireInteger(obj, "id");
+        file.date = Json::requireString(obj, "fileDate");
         file.version = Json::requireString(obj, "displayName");
         file.downloadUrl = Json::requireString(obj, "downloadUrl");
         file.fileName = Json::requireString(obj, "fileName");
 
         auto modules = Json::requireArray(obj, "modules");
-        bool valid = false;
+        bool is_valid_fabric_version = false;
         for(auto m : modules){
             auto fname = Json::requireString(m.toObject(),"foldername");
+            // FIXME: This does not work properly when a mod supports more than one mod loader, since
+            // they bundle the meta files for all of them in the same arquive, even when that version
+            // doesn't support the given mod loader.
             if(hasFabric){
                 if(fname == "fabric.mod.json"){
-                    valid = true;
-                    break;
-                }
-            }else{
-                //this cannot check for the recent mcmod.toml formats
-                if(fname == "mcmod.info"){
-                    valid = true;
+                    is_valid_fabric_version = true;
                     break;
                 }
             }
+            else if(fname == "mcmod.info"){ //this cannot check for the recent mcmod.toml formats
+                break;
+            }
         }
-        if(!valid && hasFabric){
+
+        if(hasFabric && !is_valid_fabric_version)
             continue;
-        }
 
         unsortedVersions.append(file);
     }

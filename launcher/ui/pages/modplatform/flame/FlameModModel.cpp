@@ -175,13 +175,13 @@ void ListModel::performPaginatedSearch()
         "pageSize=25&"
         "searchFilter=%2&"
         "sort=%3&"
-        "%4"
+        "modLoaderType=%4&"
         "gameVersion=%5"
     )
         .arg(nextSearchOffset)
         .arg(currentSearchTerm)
         .arg(sorts[currentSort])
-        .arg(hasFabric ? "modLoaderType=4&" : "")
+        .arg(hasFabric ? 4 : 1) // Enum: https://docs.curseforge.com/?http#tocS_ModLoaderType
         .arg(mcVersion);
 
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
