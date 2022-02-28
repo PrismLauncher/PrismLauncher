@@ -81,9 +81,8 @@ void FlameMod::loadIndexedPackVersions(FlameMod::IndexedPack & pack, QJsonArray 
                     break;
                 }
             }
-            else if(fname == "mcmod.info"){ //this cannot check for the recent mcmod.toml formats
-                break;
-            }
+            else break;
+            // NOTE: Since we're not validating forge versions, we can just skip this loop.
         }
 
         if(hasFabric && !is_valid_fabric_version)
