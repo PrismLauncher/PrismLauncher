@@ -109,13 +109,16 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
     if (current.versionsLoaded == false)
     {
         qDebug() << "Loading flame modpack versions";
-        NetJob *netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name), APPLICATION->network());
-        std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
+        auto netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name), APPLICATION->network());
+        auto response = new QByteArray();
         int addonId = current.addonId;
-        netJob->addNetAction(Net::Download::makeByteArray(QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files").arg(addonId), response.get()));
+        netJob->addNetAction(Net::Download::makeByteArray(QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files").arg(addonId), response));
 
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response]
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId]
         {
+            if(addonId != current.addonId){
+                return; //wrong request
+            }
             QJsonParseError parse_error;
             QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
             if(parse_error.error != QJsonParseError::NoError) {
@@ -139,6 +142,11 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
             }
 
             suggestCurrent();
+        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob]
+        {
+            netJob->deleteLater();
+            delete response;
         });
         netJob->start();
     }

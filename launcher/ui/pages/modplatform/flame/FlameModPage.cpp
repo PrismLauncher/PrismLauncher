@@ -118,7 +118,10 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second) {
             .arg(addonId),
         response));
 
-    QObject::connect(netJob, &NetJob::succeeded, this, [this, response] {
+    QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId] {
+        if(addonId != current.addonId){
+            return; //wrong request
+        }
       QJsonParseError parse_error;
       QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
       if (parse_error.error != QJsonParseError::NoError) {

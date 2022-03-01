@@ -103,7 +103,10 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second) {
         QString("https://api.modrinth.com/v2/project/%1/version").arg(addonId),
         response));
 
-    QObject::connect(netJob, &NetJob::succeeded, this, [this, response] {
+    QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId] {
+        if(addonId != current.addonId){
+            return;
+        }
       QJsonParseError parse_error;
       QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
       if (parse_error.error != QJsonParseError::NoError) {
