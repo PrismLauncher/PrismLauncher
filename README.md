@@ -11,8 +11,8 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The Poly
 
 # Installation
 
-- all downloads and instructions for polymc can be found [here](https://polymc.org/download/)
-- Last build status: https://jenkins.polymc.org/job/PolyMC/lastBuild/
+- All downloads and instructions for PolyMC can be found [here](https://polymc.org/download/)
+- Last build status: https://github.com/PolyMC/PolyMC/actions
 
 
 ## Development Builds
