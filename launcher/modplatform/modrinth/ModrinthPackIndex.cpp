@@ -1,14 +1,11 @@
-#include <QObject>
 #include "ModrinthPackIndex.h"
 
 #include "Json.h"
-#include "net/NetJob.h"
-#include "BaseInstance.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "net/NetJob.h"
 
-
-void Modrinth::loadIndexedPack(Modrinth::IndexedPack & pack, QJsonObject & obj)
+void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireString(obj, "project_id");
     pack.name = Json::requireString(obj, "title");
@@ -16,59 +13,60 @@ void Modrinth::loadIndexedPack(Modrinth::IndexedPack & pack, QJsonObject & obj)
     pack.description = Json::ensureString(obj, "description", "");
 
     pack.logoUrl = Json::requireString(obj, "icon_url");
-    pack.logoName = pack.addonId;
+    pack.logoName = pack.addonId.toString();
 
-    Modrinth::ModpackAuthor modAuthor;
+    ModPlatform::ModpackAuthor modAuthor;
     modAuthor.name = Json::requireString(obj, "author");
-    modAuthor.url = "https://modrinth.com/user/"+modAuthor.name;
-    pack.author = modAuthor;
+    modAuthor.url = "https://modrinth.com/user/" + modAuthor.name;
+    pack.authors.append(modAuthor);
 }
 
-void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray & arr, const shared_qobject_ptr<QNetworkAccessManager>& network, BaseInstance * inst)
+void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
+                                       QJsonArray& arr,
+                                       const shared_qobject_ptr<QNetworkAccessManager>& network,
+                                       BaseInstance* inst)
 {
-    QVector<Modrinth::IndexedVersion> unsortedVersions;
-    bool hasFabric = !((MinecraftInstance *)inst)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
-    QString mcVersion = ((MinecraftInstance *)inst)->getPackProfile()->getComponentVersion("net.minecraft");
+    QVector<ModPlatform::IndexedVersion> unsortedVersions;
+    bool hasFabric = !((MinecraftInstance*)inst)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
+    QString mcVersion = ((MinecraftInstance*)inst)->getPackProfile()->getComponentVersion("net.minecraft");
 
-    for(auto versionIter: arr) {
+    for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
-        Modrinth::IndexedVersion file;
-        file.addonId = Json::requireString(obj,"project_id") ;
+        ModPlatform::IndexedVersion file;
+        file.addonId = Json::requireString(obj, "project_id");
         file.fileId = Json::requireString(obj, "id");
         file.date = Json::requireString(obj, "date_published");
         auto versionArray = Json::requireArray(obj, "game_versions");
-        if (versionArray.empty()) {
-            continue;
-        }
-        for(auto mcVer : versionArray){
+        if (versionArray.empty()) { continue; }
+        for (auto mcVer : versionArray) {
             file.mcVersion.append(mcVer.toString());
         }
-        auto loaders = Json::requireArray(obj,"loaders");
-        for(auto loader : loaders){
+        auto loaders = Json::requireArray(obj, "loaders");
+        for (auto loader : loaders) {
             file.loaders.append(loader.toString());
         }
         file.version = Json::requireString(obj, "name");
 
         auto files = Json::requireArray(obj, "files");
         int i = 0;
-        while (files.count() > 1 && i < files.count()){
-            //try to resolve the correct file
+        while (files.count() > 1 && i < files.count()) {
+            // try to resolve the correct file
             auto parent = files[i].toObject();
             auto fileName = Json::requireString(parent, "filename");
-            //avoid grabbing "dev" files
-            if(fileName.contains("javadocs",Qt::CaseInsensitive) || fileName.contains("sources",Qt::CaseInsensitive)){
+            // avoid grabbing "dev" files
+            if (fileName.contains("javadocs", Qt::CaseInsensitive) || fileName.contains("sources", Qt::CaseInsensitive)) {
                 i++;
                 continue;
             }
-            //grab the correct mod loader
-            if(fileName.contains("forge",Qt::CaseInsensitive) || fileName.contains("fabric",Qt::CaseInsensitive)  ){
-                if(hasFabric){
-                    if(fileName.contains("forge",Qt::CaseInsensitive)){
+            // grab the correct mod loader
+            if (fileName.contains("forge", Qt::CaseInsensitive) || fileName.contains("fabric", Qt::CaseInsensitive)) {
+                if (hasFabric) {
+                    if (fileName.contains("forge", Qt::CaseInsensitive)) {
                         i++;
                         continue;
                     }
-                }else{
-                    if(fileName.contains("fabric",Qt::CaseInsensitive)){
+                } else {
+                    if (fileName.contains("fabric", Qt::CaseInsensitive)) {
                         i++;
                         continue;
                     }
@@ -77,16 +75,15 @@ void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray 
             break;
         }
         auto parent = files[i].toObject();
-        if(parent.contains("url")) {
+        if (parent.contains("url")) {
             file.downloadUrl = Json::requireString(parent, "url");
             file.fileName = Json::requireString(parent, "filename");
 
             unsortedVersions.append(file);
         }
     }
-    auto orderSortPredicate = [](const IndexedVersion & a, const IndexedVersion & b) -> bool
-    {
-        //dates are in RFC 3339 format
+    auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+        // dates are in RFC 3339 format
         return a.date > b.date;
     };
     std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);

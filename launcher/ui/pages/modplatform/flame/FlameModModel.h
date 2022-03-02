@@ -57,7 +57,7 @@ private:
     void requestLogo(QString file, QString url);
 
 private:
-    QList<IndexedPack> modpacks;
+    QList<ModPlatform::IndexedPack> modpacks;
     QStringList m_failedLogos;
     QStringList m_loadingLogos;
     LogoMap m_logoMap;

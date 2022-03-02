@@ -62,7 +62,7 @@ private:
     Ui::ModrinthPage *ui = nullptr;
     ModDownloadDialog* dialog = nullptr;
     Modrinth::ListModel* listModel = nullptr;
-    Modrinth::IndexedPack current;
+    ModPlatform::IndexedPack current;
 
     int selectedVersion = -1;
 };

@@ -62,7 +62,7 @@ private:
     Ui::FlameModPage *ui = nullptr;
     ModDownloadDialog* dialog = nullptr;
     FlameMod::ListModel* listModel = nullptr;
-    FlameMod::IndexedPack current;
+    ModPlatform::IndexedPack current;
 
     int selectedVersion = -1;
 };

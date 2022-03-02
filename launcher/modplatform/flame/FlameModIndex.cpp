@@ -1,13 +1,11 @@
-#include <QObject>
 #include "FlameModIndex.h"
+
 #include "Json.h"
-#include "net/NetJob.h"
-#include "BaseInstance.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "net/NetJob.h"
 
-
-void FlameMod::loadIndexedPack(FlameMod::IndexedPack & pack, QJsonObject & obj)
+void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireInteger(obj, "id");
     pack.name = Json::requireString(obj, "name");
@@ -16,10 +14,10 @@ void FlameMod::loadIndexedPack(FlameMod::IndexedPack & pack, QJsonObject & obj)
 
     bool thumbnailFound = false;
     auto attachments = Json::requireArray(obj, "attachments");
-    for(auto attachmentRaw: attachments) {
+    for (auto attachmentRaw : attachments) {
         auto attachmentObj = Json::requireObject(attachmentRaw);
         bool isDefault = attachmentObj.value("isDefault").toBool(false);
-        if(isDefault) {
+        if (isDefault) {
             thumbnailFound = true;
             pack.logoName = Json::requireString(attachmentObj, "title");
             pack.logoUrl = Json::requireString(attachmentObj, "thumbnailUrl");
@@ -27,37 +25,35 @@ void FlameMod::loadIndexedPack(FlameMod::IndexedPack & pack, QJsonObject & obj)
         }
     }
 
-    if(!thumbnailFound) {
-        throw JSONValidationError(QString("Pack without an icon, skipping: %1").arg(pack.name));
-    }
-
+    if (!thumbnailFound) { throw JSONValidationError(QString("Pack without an icon, skipping: %1").arg(pack.name)); }
 
     auto authors = Json::requireArray(obj, "authors");
-    for(auto authorIter: authors) {
+    for (auto authorIter : authors) {
         auto author = Json::requireObject(authorIter);
-        FlameMod::ModpackAuthor packAuthor;
+        ModPlatform::ModpackAuthor packAuthor;
         packAuthor.name = Json::requireString(author, "name");
         packAuthor.url = Json::requireString(author, "url");
         pack.authors.append(packAuthor);
     }
 }
 
-void FlameMod::loadIndexedPackVersions(FlameMod::IndexedPack & pack, QJsonArray & arr, const shared_qobject_ptr<QNetworkAccessManager>& network, BaseInstance * inst)
+void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
+                                       QJsonArray& arr,
+                                       const shared_qobject_ptr<QNetworkAccessManager>& network,
+                                       BaseInstance* inst)
 {
-    QVector<FlameMod::IndexedVersion> unsortedVersions;
-    bool hasFabric = !((MinecraftInstance *)inst)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
-    QString mcVersion = ((MinecraftInstance *)inst)->getPackProfile()->getComponentVersion("net.minecraft");
+    QVector<ModPlatform::IndexedVersion> unsortedVersions;
+    bool hasFabric = !((MinecraftInstance*)inst)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
+    QString mcVersion = ((MinecraftInstance*)inst)->getPackProfile()->getComponentVersion("net.minecraft");
 
-    for(auto versionIter: arr) {
+    for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
 
         auto versionArray = Json::requireArray(obj, "gameVersion");
-        if (versionArray.isEmpty()) {
-            continue;
-        }
+        if (versionArray.isEmpty()) { continue; }
 
-        FlameMod::IndexedVersion file;
-        for(auto mcVer : versionArray){
+        ModPlatform::IndexedVersion file;
+        for (auto mcVer : versionArray) {
             file.mcVersion.append(mcVer.toString());
         }
 
@@ -70,29 +66,27 @@ void FlameMod::loadIndexedPackVersions(FlameMod::IndexedPack & pack, QJsonArray 
 
         auto modules = Json::requireArray(obj, "modules");
         bool is_valid_fabric_version = false;
-        for(auto m : modules){
-            auto fname = Json::requireString(m.toObject(),"foldername");
+        for (auto m : modules) {
+            auto fname = Json::requireString(m.toObject(), "foldername");
             // FIXME: This does not work properly when a mod supports more than one mod loader, since
             // they bundle the meta files for all of them in the same arquive, even when that version
             // doesn't support the given mod loader.
-            if(hasFabric){
-                if(fname == "fabric.mod.json"){
+            if (hasFabric) {
+                if (fname == "fabric.mod.json") {
                     is_valid_fabric_version = true;
                     break;
                 }
-            }
-            else break;
+            } else
+                break;
             // NOTE: Since we're not validating forge versions, we can just skip this loop.
         }
 
-        if(hasFabric && !is_valid_fabric_version)
-            continue;
+        if (hasFabric && !is_valid_fabric_version) continue;
 
         unsortedVersions.append(file);
     }
-    auto orderSortPredicate = [](const IndexedVersion & a, const IndexedVersion & b) -> bool
-    {
-        //dates are in RFC 3339 format
+    auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+        // dates are in RFC 3339 format
         return a.date > b.date;
     };
     std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);

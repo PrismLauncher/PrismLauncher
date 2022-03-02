@@ -39,7 +39,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
         return QString("INVALID INDEX %1").arg(pos);
     }
 
-    IndexedPack pack = modpacks.at(pos);
+    ModPlatform::IndexedPack pack = modpacks.at(pos);
     if(role == Qt::DisplayRole)
     {
         return pack.name;
@@ -225,12 +225,12 @@ void ListModel::searchRequestFinished()
         return;
     }
 
-    QList<FlameMod::IndexedPack> newList;
+    QList<ModPlatform::IndexedPack> newList;
     auto packs = doc.array();
     for(auto packRaw : packs) {
         auto packObj = packRaw.toObject();
 
-        FlameMod::IndexedPack pack;
+        ModPlatform::IndexedPack pack;
         try
         {
             FlameMod::loadIndexedPack(pack, packObj);

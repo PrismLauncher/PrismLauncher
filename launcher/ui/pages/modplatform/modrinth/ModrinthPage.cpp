@@ -76,7 +76,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second) {
     return;
   }
 
-  current = listModel->data(first, Qt::UserRole).value<Modrinth::IndexedPack>();
+  current = listModel->data(first, Qt::UserRole).value<ModPlatform::IndexedPack>();
   QString text = "";
   QString name = current.name;
 
@@ -84,8 +84,8 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second) {
     text = name;
   else
     text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
-  text += "<br>" + tr(" by ") + "<a href=\"" + current.author.url + "\">" +
-          current.author.name + "</a><br><br>";
+  text += "<br>" + tr(" by ") + "<a href=\"" + current.authors[0].url + "\">" +
+          current.authors[0].name + "</a><br><br>";
   ui->packDescription->setHtml(text + current.description);
 
   if (!current.versionsLoaded) {
@@ -98,7 +98,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second) {
         new NetJob(QString("Modrinth::ModVersions(%1)").arg(current.name),
                    APPLICATION->network());
     auto response = new QByteArray();
-    QString addonId = current.addonId;
+    QString addonId = current.addonId.toString();
     netJob->addNetAction(Net::Download::makeByteArray(
         QString("https://api.modrinth.com/v2/project/%1/version").arg(addonId),
         response));

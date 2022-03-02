@@ -77,7 +77,7 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second) {
     return;
   }
 
-  current = listModel->data(first, Qt::UserRole).value<FlameMod::IndexedPack>();
+  current = listModel->data(first, Qt::UserRole).value<ModPlatform::IndexedPack>();
   QString text = "";
   QString name = current.name;
 
@@ -86,7 +86,7 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second) {
   else
     text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
   if (!current.authors.empty()) {
-    auto authorToStr = [](FlameMod::ModpackAuthor &author) {
+    auto authorToStr = [](ModPlatform::ModpackAuthor &author) {
       if (author.url.isEmpty()) {
         return author.name;
       }
@@ -112,7 +112,7 @@ void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second) {
         new NetJob(QString("Flame::ModVersions(%1)").arg(current.name),
                    APPLICATION->network());
     auto response = new QByteArray();
-    int addonId = current.addonId;
+    int addonId = current.addonId.toInt();
     netJob->addNetAction(Net::Download::makeByteArray(
         QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files")
             .arg(addonId),

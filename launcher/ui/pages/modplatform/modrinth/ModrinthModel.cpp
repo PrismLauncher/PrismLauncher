@@ -41,7 +41,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
         return QString("INVALID INDEX %1").arg(pos);
     }
 
-    IndexedPack pack = modpacks.at(pos);
+    ModPlatform::IndexedPack pack = modpacks.at(pos);
     if(role == Qt::DisplayRole)
     {
         return pack.name;
@@ -222,12 +222,12 @@ void Modrinth::ListModel::searchRequestFinished()
         return;
     }
 
-    QList<Modrinth::IndexedPack> newList;
+    QList<ModPlatform::IndexedPack> newList;
     auto packs = doc.object().value("hits").toArray();
     for(auto packRaw : packs) {
         auto packObj = packRaw.toObject();
 
-        Modrinth::IndexedPack pack;
+        ModPlatform::IndexedPack pack;
         try
         {
             Modrinth::loadIndexedPack(pack, packObj);
