@@ -143,17 +143,19 @@ ModFolderPage::ModFolderPage(
     ui(new Ui::ModFolderPage)
 {
     ui->setupUi(this);
-    auto act = ui->actionDownload;
+
+    // This is structured like that so that these changes
+    // do not affect the Resouce pack and Shader pack tabs
     if(id == "mods") {
+        auto act = new QAction(tr("Download mods"), this);
+        act->setToolTip(tr("Download mods from online mod platforms"));
+        ui->actionsToolbar->insertActionBefore(ui->actionAdd, act);
         connect(act, &QAction::triggered, this, &ModFolderPage::on_actionInstall_mods_triggered);
+
+        ui->actionAdd->setText("Add .jar");
+        ui->actionAdd->setToolTip("Add mods via local file");
     }
-    else{
-        // HACK: Prevent the download button from showing in the shaders / resource packs tab
-        // This whole thing needs some cleaning up anyway, no next time we can do it properly...
-        act->setVisible(false);
-        act->setText("");
-        act->setToolTip("");
-    }
+
     ui->actionsToolbar->insertSpacer(ui->actionView_configs);
 
     m_inst = inst;

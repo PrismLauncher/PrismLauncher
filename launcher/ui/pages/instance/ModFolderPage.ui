@@ -84,7 +84,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAdd"/>
-   <addaction name="actionDownload"/>
    <addaction name="separator"/>
    <addaction name="actionRemove"/>
    <addaction name="actionEnable"/>
@@ -97,15 +96,7 @@
     <string>&amp;Add</string>
    </property>
    <property name="toolTip">
-    <string>Add mods</string>
-   </property>
-  </action>
-  <action name="actionDownload">
-   <property name="text">
-    <string>&amp;Download Mods</string>
-   </property>
-   <property name="toolTip">
-    <string>Download Mods</string>
+    <string>Add</string>
    </property>
   </action>
   <action name="actionRemove">
