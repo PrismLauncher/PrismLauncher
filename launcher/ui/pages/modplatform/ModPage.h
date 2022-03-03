@@ -22,13 +22,13 @@ class ModPage : public QWidget, public BasePage {
     explicit ModPage(ModDownloadDialog* dialog, BaseInstance* instance);
     virtual ~ModPage();
 
-    inline virtual QString displayName() const override = 0;
-    inline virtual QIcon icon() const override = 0;
-    inline virtual QString id() const override = 0;
-    inline virtual QString helpPage() const override = 0;
+    virtual QString displayName() const override = 0;
+    virtual QIcon icon() const override = 0;
+    virtual QString id() const override = 0;
+    virtual QString helpPage() const override = 0;
 
-    inline virtual QString debugName() const = 0;
-    inline virtual QString metaEntryBase() const = 0;
+    virtual QString debugName() const = 0;
+    virtual QString metaEntryBase() const = 0;
 
     virtual bool shouldDisplay() const override = 0;
     virtual const ModAPI* apiProvider() const = 0;
