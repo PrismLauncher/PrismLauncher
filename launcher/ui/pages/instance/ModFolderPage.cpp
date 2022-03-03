@@ -143,9 +143,16 @@ ModFolderPage::ModFolderPage(
     ui(new Ui::ModFolderPage)
 {
     ui->setupUi(this);
+    auto act = ui->actionDownload;
     if(id == "mods") {
-        auto act = ui->actionDownload;
         connect(act, &QAction::triggered, this, &ModFolderPage::on_actionInstall_mods_triggered);
+    }
+    else{
+        // HACK: Prevent the download button from showing in the shaders / resource packs tab
+        // This whole thing needs some cleaning up anyway, no next time we can do it properly...
+        act->setVisible(false);
+        act->setText("");
+        act->setToolTip("");
     }
     ui->actionsToolbar->insertSpacer(ui->actionView_configs);
 
