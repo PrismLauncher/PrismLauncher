@@ -2,6 +2,8 @@
 
 #include "ui/pages/modplatform/ModPage.h"
 
+#include "modplatform/modrinth/ModrinthAPI.h"
+
 class ModrinthPage : public ModPage {
     Q_OBJECT
 
@@ -18,7 +20,11 @@ class ModrinthPage : public ModPage {
     inline QString metaEntryBase() const override { return "ModrinthPacks"; };
 
     bool shouldDisplay() const override;
+    const ModAPI* apiProvider() const override { return &api; };
 
    private:
     void onModVersionSucceed(ModPage*, QByteArray*, QString) override;
+
+   private:
+    ModrinthAPI api;
 };

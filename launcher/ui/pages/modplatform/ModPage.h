@@ -3,6 +3,7 @@
 #include <Application.h>
 #include <QWidget>
 
+#include "modplatform/ModAPI.h"
 #include "modplatform/ModIndex.h"
 #include "tasks/Task.h"
 #include "ui/pages/BasePage.h"
@@ -30,6 +31,7 @@ class ModPage : public QWidget, public BasePage {
     inline virtual QString metaEntryBase() const = 0;
 
     virtual bool shouldDisplay() const override = 0;
+    virtual const ModAPI* apiProvider() const = 0;
 
     void openedImpl() override;
     bool eventFilter(QObject* watched, QEvent* event) override;

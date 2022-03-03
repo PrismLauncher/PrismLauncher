@@ -1,9 +1,12 @@
 #include "ModrinthPackIndex.h"
+#include "ModrinthAPI.h"
 
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "net/NetJob.h"
+
+static ModrinthAPI api;
 
 void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
@@ -17,7 +20,7 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 
     ModPlatform::ModpackAuthor modAuthor;
     modAuthor.name = Json::requireString(obj, "author");
-    modAuthor.url = "https://modrinth.com/user/" + modAuthor.name;
+    modAuthor.url = api.getAuthorURL(modAuthor.name);
     pack.authors.append(modAuthor);
 }
 

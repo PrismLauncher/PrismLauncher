@@ -1,6 +1,8 @@
 #include "ModModel.h"
 #include "ModPage.h"
 
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
 #include <QMessageBox>
@@ -93,6 +95,24 @@ void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallbac
     } else {
         requestLogo(logo, logoUrl);
     }
+}
+
+void ListModel::performPaginatedSearch()
+{
+    QString mcVersion = ((MinecraftInstance*)((ModPage*)parent())->m_instance)->getPackProfile()->getComponentVersion("net.minecraft");
+    bool hasFabric = !((MinecraftInstance*)((ModPage*)parent())->m_instance)
+                          ->getPackProfile()
+                          ->getComponentVersion("net.fabricmc.fabric-loader")
+                          .isEmpty();
+    auto netJob = new NetJob(QString("%1::Search").arg(m_parent->debugName()), APPLICATION->network());
+    auto searchUrl = m_parent->apiProvider()->getModSearchURL(nextSearchOffset, currentSearchTerm, getSorts()[currentSort], hasFabric, mcVersion);
+
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
+    jobPtr = netJob;
+    jobPtr->start();
+
+    QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::searchRequestFinished);
+    QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
 }
 
 void ListModel::searchWithTerm(const QString& term, const int sort)

@@ -101,13 +101,8 @@ void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         auto netJob = new NetJob(QString("%1::ModVersions(%2)").arg(debugName()).arg(current.name), APPLICATION->network());
         auto response = new QByteArray();
         QString addonId = current.addonId.toString();
-        //FIXME
-        if(debugName() == "Modrinth")
-            netJob->addNetAction(
-                Net::Download::makeByteArray(QString("https://api.modrinth.com/v2/project/%1/version").arg(addonId), response));
-        else
-            netJob->addNetAction(
-                Net::Download::makeByteArray(QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files").arg(addonId), response));
+
+        netJob->addNetAction(Net::Download::makeByteArray(apiProvider()->getVersionsURL(addonId), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId]{
             onModVersionSucceed(this, response, addonId);

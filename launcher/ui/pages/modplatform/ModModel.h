@@ -3,6 +3,7 @@
 #include <QAbstractListModel>
 
 #include "modplatform/ModIndex.h"
+#include "modplatform/ModAPI.h"
 #include "net/NetJob.h"
 
 class ModPage;
@@ -30,8 +31,9 @@ class ListModel : public QAbstractListModel {
     void searchWithTerm(const QString& term, const int sort);
 
    protected slots:
-    virtual void performPaginatedSearch() = 0;
     virtual void searchRequestFinished() = 0;
+
+    void performPaginatedSearch();
 
     void logoFailed(QString logo);
     void logoLoaded(QString logo, QIcon out);
@@ -39,6 +41,8 @@ class ListModel : public QAbstractListModel {
     void searchRequestFailed(QString reason);
 
    protected:
+    virtual const char** getSorts() const = 0;
+
     void requestLogo(QString file, QString url);
 
    protected:
@@ -56,5 +60,6 @@ class ListModel : public QAbstractListModel {
     enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } searchState = None;
     NetJob::Ptr jobPtr;
     QByteArray response;
+
 };
 }  // namespace ModPlatform

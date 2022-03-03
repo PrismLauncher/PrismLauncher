@@ -30,8 +30,10 @@ class ListModel : public ModPlatform::ListModel {
     virtual ~ListModel();
 
    private slots:
-    void performPaginatedSearch() override;
     void searchRequestFinished() override;
+
+   private:
+    const char** getSorts() const override;
 };
 
 }  // namespace Modrinth
