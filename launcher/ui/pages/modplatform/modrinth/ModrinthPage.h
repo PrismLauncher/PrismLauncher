@@ -1,68 +1,24 @@
 #pragma once
 
-#include <QWidget>
+#include "ui/pages/modplatform/ModPage.h"
 
-#include "ui/pages/BasePage.h"
-#include <Application.h>
-#include "tasks/Task.h"
-#include "modplatform/modrinth/ModrinthPackIndex.h"
-
-namespace Ui
-{
-class ModrinthPage;
-}
-
-class ModDownloadDialog;
-
-namespace Modrinth {
-    class ListModel;
-}
-
-class ModrinthPage : public QWidget, public BasePage
-{
+class ModrinthPage : public ModPage {
     Q_OBJECT
 
-public:
-    explicit ModrinthPage(ModDownloadDialog *dialog, BaseInstance *instance);
-    virtual ~ModrinthPage();
-    virtual QString displayName() const override
-    {
-        return tr("Modrinth");
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("modrinth");
-    }
-    virtual QString id() const override
-    {
-        return "modrinth";
-    }
-    virtual QString helpPage() const override
-    {
-        return "Modrinth-platform";
-    }
-    virtual bool shouldDisplay() const override;
+   public:
+    explicit ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance);
+    virtual ~ModrinthPage() = default;
 
-    void openedImpl() override;
+    inline QString displayName() const override { return tr("Modrinth"); }
+    inline QIcon icon() const override { return APPLICATION->getThemedIcon("modrinth"); }
+    inline QString id() const override { return "modrinth"; }
+    inline QString helpPage() const override { return "Modrinth-platform"; }
 
-    bool eventFilter(QObject * watched, QEvent * event) override;
+    inline QString debugName() const override { return tr("Modrinth"); }
+    inline QString metaEntryBase() const override { return "ModrinthPacks"; };
 
-    BaseInstance *m_instance;
+    bool shouldDisplay() const override;
 
-private:
-    void updateSelectionButton();
-
-private slots:
-    void triggerSearch();
-    void onSelectionChanged(QModelIndex first, QModelIndex second);
-    void onVersionSelectionChanged(QString data);
-    void onModSelected();
-
-private:
-    Ui::ModrinthPage *ui = nullptr;
-    ModDownloadDialog* dialog = nullptr;
-    Modrinth::ListModel* listModel = nullptr;
-    ModPlatform::IndexedPack current;
-
-    int selectedVersion = -1;
+   private:
+    void onModVersionSucceed(ModPage*, QByteArray*, QString) override;
 };

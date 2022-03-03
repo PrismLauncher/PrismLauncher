@@ -721,6 +721,11 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/VanillaPage.cpp
     ui/pages/modplatform/VanillaPage.h
 
+    ui/pages/modplatform/ModPage.cpp
+    ui/pages/modplatform/ModPage.h
+    ui/pages/modplatform/ModModel.cpp
+    ui/pages/modplatform/ModModel.h
+
     ui/pages/modplatform/atlauncher/AtlFilterModel.cpp
     ui/pages/modplatform/atlauncher/AtlFilterModel.h
     ui/pages/modplatform/atlauncher/AtlListModel.cpp
@@ -879,13 +884,12 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/atlauncher/AtlOptionalModDialog.ui
     ui/pages/modplatform/atlauncher/AtlPage.ui
     ui/pages/modplatform/VanillaPage.ui
+    ui/pages/modplatform/ModPage.ui
     ui/pages/modplatform/flame/FlamePage.ui
-    ui/pages/modplatform/flame/FlameModPage.ui
     ui/pages/modplatform/legacy_ftb/Page.ui
     ui/pages/modplatform/ImportPage.ui
     ui/pages/modplatform/ftb/FtbPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
-    ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
     ui/widgets/MCModInfoFrame.ui

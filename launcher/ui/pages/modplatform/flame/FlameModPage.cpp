@@ -1,5 +1,5 @@
 #include "FlameModPage.h"
-#include "ui_FlameModPage.h"
+#include "ui_ModPage.h"
 
 #include <QKeyEvent>
 
@@ -12,206 +12,59 @@
 #include "minecraft/PackProfile.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
-FlameModPage::FlameModPage(ModDownloadDialog *dialog, BaseInstance *instance)
-    : QWidget(dialog), m_instance(instance), ui(new Ui::FlameModPage),
-      dialog(dialog) {
-  ui->setupUi(this);
-  connect(ui->searchButton, &QPushButton::clicked, this,
-          &FlameModPage::triggerSearch);
-  ui->searchEdit->installEventFilter(this);
-  listModel = new FlameMod::ListModel(this);
-  ui->packView->setModel(listModel);
+FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance) 
+    : ModPage(dialog, instance)
+{
+    listModel = new FlameMod::ListModel(this);
+    ui->packView->setModel(listModel);
 
-  ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(
-      Qt::ScrollBarAsNeeded);
-  ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
+    // index is used to set the sorting with the flame api
+    ui->sortByBox->addItem(tr("Sort by Featured"));
+    ui->sortByBox->addItem(tr("Sort by Popularity"));
+    ui->sortByBox->addItem(tr("Sort by last updated"));
+    ui->sortByBox->addItem(tr("Sort by Name"));
+    ui->sortByBox->addItem(tr("Sort by Author"));
+    ui->sortByBox->addItem(tr("Sort by Downloads"));
 
-  // index is used to set the sorting with the flame api
-  ui->sortByBox->addItem(tr("Sort by Featured"));
-  ui->sortByBox->addItem(tr("Sort by Popularity"));
-  ui->sortByBox->addItem(tr("Sort by last updated"));
-  ui->sortByBox->addItem(tr("Sort by Name"));
-  ui->sortByBox->addItem(tr("Sort by Author"));
-  ui->sortByBox->addItem(tr("Sort by Downloads"));
-
-  connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(triggerSearch()));
-  connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged,
-          this, &FlameModPage::onSelectionChanged);
-  connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this,
-          &FlameModPage::onVersionSelectionChanged);
-  connect(ui->modSelectionButton, &QPushButton::clicked, this,
-          &FlameModPage::onModSelected);
-}
-
-FlameModPage::~FlameModPage() { delete ui; }
-
-bool FlameModPage::eventFilter(QObject *watched, QEvent *event) {
-  if (watched == ui->searchEdit && event->type() == QEvent::KeyPress) {
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-    if (keyEvent->key() == Qt::Key_Return) {
-      triggerSearch();
-      keyEvent->accept();
-      return true;
-    }
-  }
-  return QWidget::eventFilter(watched, event);
+    // sometimes Qt just ignores virtual slots and doesn't work as intended it seems, 
+    // so it's best not to connect them in the parent's contructor...
+    connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameModPage::onSelectionChanged);
+    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameModPage::onVersionSelectionChanged);
+    connect(ui->modSelectionButton, &QPushButton::clicked, this, &FlameModPage::onModSelected);
 }
 
 bool FlameModPage::shouldDisplay() const { return true; }
 
-void FlameModPage::openedImpl() {
-  updateSelectionButton();
-  triggerSearch();
-}
-
-void FlameModPage::triggerSearch() {
-  listModel->searchWithTerm(ui->searchEdit->text(),
-                            ui->sortByBox->currentIndex());
-}
-
-void FlameModPage::onSelectionChanged(QModelIndex first, QModelIndex second) {
-  ui->versionSelectionBox->clear();
-
-  if (!first.isValid()) {
-    return;
-  }
-
-  current = listModel->data(first, Qt::UserRole).value<ModPlatform::IndexedPack>();
-  QString text = "";
-  QString name = current.name;
-
-  if (current.websiteUrl.isEmpty())
-    text = name;
-  else
-    text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
-  if (!current.authors.empty()) {
-    auto authorToStr = [](ModPlatform::ModpackAuthor &author) {
-      if (author.url.isEmpty()) {
-        return author.name;
-      }
-      return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
-    };
-    QStringList authorStrs;
-    for (auto &author : current.authors) {
-      authorStrs.push_back(authorToStr(author));
+void FlameModPage::onModVersionSucceed(ModPage* instance, QByteArray* response, QString addonId)
+{
+    if (addonId != current.addonId) {
+        return;  // wrong request
     }
-    text += "<br>" + tr(" by ") + authorStrs.join(", ");
-  }
-  text += "<br><br>";
-
-  ui->packDescription->setHtml(text + current.description);
-
-  if (!current.versionsLoaded) {
-    qDebug() << "Loading flame mod versions";
-
-    ui->modSelectionButton->setText(tr("Loading versions..."));
-    ui->modSelectionButton->setEnabled(false);
-
-    auto netJob =
-        new NetJob(QString("Flame::ModVersions(%1)").arg(current.name),
-                   APPLICATION->network());
-    auto response = new QByteArray();
-    int addonId = current.addonId.toInt();
-    netJob->addNetAction(Net::Download::makeByteArray(
-        QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files")
-            .arg(addonId),
-        response));
-
-    QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId] {
-        if(addonId != current.addonId){
-            return; //wrong request
-        }
-      QJsonParseError parse_error;
-      QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-      if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Flame at "
-                   << parse_error.offset
-                   << " reason: " << parse_error.errorString();
+    QJsonParseError parse_error;
+    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+    if (parse_error.error != QJsonParseError::NoError) {
+        qWarning() << "Error while parsing JSON response from Flame at " << parse_error.offset << " reason: " << parse_error.errorString();
         qWarning() << *response;
         return;
-      }
-      QJsonArray arr = doc.array();
-      try {
-        FlameMod::loadIndexedPackVersions(current, arr, APPLICATION->network(),
-                                          m_instance);
-      } catch (const JSONValidationError &e) {
+    }
+    QJsonArray arr = doc.array();
+    try {
+        FlameMod::loadIndexedPackVersions(current, arr, APPLICATION->network(), m_instance);
+    } catch (const JSONValidationError& e) {
         qDebug() << *response;
         qWarning() << "Error while reading Flame mod version: " << e.cause();
-      }
-      auto packProfile = ((MinecraftInstance *)m_instance)->getPackProfile();
-      QString mcVersion = packProfile->getComponentVersion("net.minecraft");
-      QString loaderString =
-          (packProfile->getComponentVersion("net.minecraftforge").isEmpty())
-              ? "fabric"
-              : "forge";
-      for (int i = 0; i < current.versions.size(); i++) {
-        auto version = current.versions[i];
-        if (!version.mcVersion.contains(mcVersion)) {
-          continue;
-        }
-        ui->versionSelectionBox->addItem(version.version, QVariant(i));
-      }
-      if (ui->versionSelectionBox->count() == 0) {
-        ui->versionSelectionBox->addItem(tr("No Valid Version found!"),
-                                         QVariant(-1));
-      }
-
-      ui->modSelectionButton->setText(tr("Cannot select invalid version :("));
-      updateSelectionButton();
-    });
-    QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-      netJob->deleteLater();
-      delete response;
-    });
-    netJob->start();
-  } else {
+    }
+    auto packProfile = ((MinecraftInstance*)m_instance)->getPackProfile();
+    QString mcVersion = packProfile->getComponentVersion("net.minecraft");
+    QString loaderString = (packProfile->getComponentVersion("net.minecraftforge").isEmpty()) ? "fabric" : "forge";
     for (int i = 0; i < current.versions.size(); i++) {
-      ui->versionSelectionBox->addItem(current.versions[i].version,
-                                       QVariant(i));
+        auto version = current.versions[i];
+        if (!version.mcVersion.contains(mcVersion)) { continue; }
+        ui->versionSelectionBox->addItem(version.version, QVariant(i));
     }
-    if (ui->versionSelectionBox->count() == 0) {
-      ui->versionSelectionBox->addItem(tr("No Valid Version found!"),
-                                       QVariant(-1));
-    }
+    if (ui->versionSelectionBox->count() == 0) { ui->versionSelectionBox->addItem(tr("No Valid Version found!"), QVariant(-1)); }
 
+    ui->modSelectionButton->setText(tr("Cannot select invalid version :("));
     updateSelectionButton();
-  }
-}
-
-void FlameModPage::updateSelectionButton() {
-  if (!isOpened || selectedVersion < 0) {
-    ui->modSelectionButton->setEnabled(false);
-    return;
-  }
-
-  ui->modSelectionButton->setEnabled(true);
-  auto &version = current.versions[selectedVersion];
-  if (!dialog->isModSelected(current.name, version.fileName)) {
-    ui->modSelectionButton->setText(tr("Select mod for download"));
-  } else {
-    ui->modSelectionButton->setText(tr("Deselect mod for download"));
-  }
-}
-
-void FlameModPage::onVersionSelectionChanged(QString data) {
-  if (data.isNull() || data.isEmpty()) {
-    selectedVersion = -1;
-    return;
-  }
-  selectedVersion = ui->versionSelectionBox->currentData().toInt();
-  updateSelectionButton();
-}
-
-void FlameModPage::onModSelected() {
-  auto &version = current.versions[selectedVersion];
-  if (dialog->isModSelected(current.name, version.fileName)) {
-    dialog->removeSelectedMod(current.name);
-  } else {
-    dialog->addSelectedMod(current.name,
-                           new ModDownloadTask(version.downloadUrl,
-                                               version.fileName, dialog->mods));
-  }
-
-  updateSelectionButton();
 }

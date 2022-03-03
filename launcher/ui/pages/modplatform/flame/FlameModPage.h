@@ -1,68 +1,24 @@
 #pragma once
 
-#include <QWidget>
+#include "ui/pages/modplatform/ModPage.h"
 
-#include "ui/pages/BasePage.h"
-#include <Application.h>
-#include "tasks/Task.h"
-#include "modplatform/flame/FlameModIndex.h"
-
-namespace Ui
-{
-class FlameModPage;
-}
-
-class ModDownloadDialog;
-
-namespace FlameMod {
-    class ListModel;
-}
-
-class FlameModPage : public QWidget, public BasePage
-{
+class FlameModPage : public ModPage {
     Q_OBJECT
 
-public:
-    explicit FlameModPage(ModDownloadDialog *dialog, BaseInstance *instance);
-    virtual ~FlameModPage();
-    virtual QString displayName() const override
-    {
-        return tr("CurseForge");
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("flame");
-    }
-    virtual QString id() const override
-    {
-        return "curseforge";
-    }
-    virtual QString helpPage() const override
-    {
-        return "Flame-platform";
-    }
-    virtual bool shouldDisplay() const override;
+   public:
+    explicit FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance);
+    virtual ~FlameModPage() = default;
 
-    void openedImpl() override;
+    inline QString displayName() const override { return tr("CurseForge"); }
+    inline QIcon icon() const override { return APPLICATION->getThemedIcon("flame"); }
+    inline QString id() const override { return "curseforge"; }
+    inline QString helpPage() const override { return "Flame-platform"; }
 
-    bool eventFilter(QObject * watched, QEvent * event) override;
+    inline QString debugName() const override { return tr("Flame"); }
+    inline QString metaEntryBase() const override { return "FlameMods"; };
 
-    BaseInstance *m_instance;
+    bool shouldDisplay() const override;
 
-private:
-    void updateSelectionButton();
-
-private slots:
-    void triggerSearch();
-    void onSelectionChanged(QModelIndex first, QModelIndex second);
-    void onVersionSelectionChanged(QString data);
-    void onModSelected();
-
-private:
-    Ui::FlameModPage *ui = nullptr;
-    ModDownloadDialog* dialog = nullptr;
-    FlameMod::ListModel* listModel = nullptr;
-    ModPlatform::IndexedPack current;
-
-    int selectedVersion = -1;
+   private:
+    void onModVersionSucceed(ModPage*, QByteArray*, QString) override;
 };
