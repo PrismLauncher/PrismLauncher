@@ -4,7 +4,8 @@
 
 class FlameAPI : public ModAPI {
    public:
-    inline QString getModSearchURL(int index, QString searchFilter, QString sort, bool fabricCompatible, QString version) const override 
+    
+    inline QString getModSearchURL(int index, QString searchFilter, QString sort, ModLoaderType modLoader, QString version) const override 
     {
         return QString("https://addons-ecs.forgesvc.net/api/v2/addon/search?"
             "gameId=432&" "categoryId=0&" "sectionId=6&"
@@ -14,7 +15,7 @@ class FlameAPI : public ModAPI {
                 .arg(index)
                 .arg(searchFilter)
                 .arg(sort)
-                .arg(fabricCompatible ? 4 : 1)  // Enum: https://docs.curseforge.com/?http#tocS_ModLoaderType
+                .arg(modLoader)  
                 .arg(version);
     };
 

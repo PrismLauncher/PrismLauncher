@@ -125,7 +125,8 @@ void ListModel::performPaginatedSearch()
                           ->getComponentVersion("net.fabricmc.fabric-loader")
                           .isEmpty();
     auto netJob = new NetJob(QString("%1::Search").arg(m_parent->debugName()), APPLICATION->network());
-    auto searchUrl = m_parent->apiProvider()->getModSearchURL(nextSearchOffset, currentSearchTerm, getSorts()[currentSort], hasFabric, mcVersion);
+    auto searchUrl = m_parent->apiProvider()->getModSearchURL(
+        nextSearchOffset, currentSearchTerm, getSorts()[currentSort], hasFabric ? ModAPI::Fabric : ModAPI::Forge, mcVersion);
 
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
