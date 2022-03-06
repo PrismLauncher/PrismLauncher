@@ -36,7 +36,7 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance)
 
 bool FlameModPage::shouldDisplay() const { return true; }
 
-void FlameModPage::onGetVersionsSucceeded(ModPage* instance, QByteArray* response, QString addonId)
+void FlameModPage::onRequestVersionsSucceeded(ModPage* instance, QByteArray* response, QString addonId)
 {
     if (addonId != current.addonId) {
         return;  // wrong request

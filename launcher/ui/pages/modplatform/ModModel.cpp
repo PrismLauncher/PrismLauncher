@@ -97,7 +97,7 @@ void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallbac
     }
 }
 
-void ListModel::populateVersions(ModPlatform::IndexedPack const& current)
+void ListModel::requestModVersions(ModPlatform::IndexedPack const& current)
 {
     auto netJob = new NetJob(QString("%1::ModVersions(%2)").arg(m_parent->debugName()).arg(current.name), APPLICATION->network());
     auto response = new QByteArray();
@@ -106,7 +106,7 @@ void ListModel::populateVersions(ModPlatform::IndexedPack const& current)
     netJob->addNetAction(Net::Download::makeByteArray(m_parent->apiProvider()->getVersionsURL(addonId), response));
 
     QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId]{
-        m_parent->onGetVersionsSucceeded(m_parent, response, addonId);
+        m_parent->onRequestVersionsSucceeded(m_parent, response, addonId);
     });
 
     QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {

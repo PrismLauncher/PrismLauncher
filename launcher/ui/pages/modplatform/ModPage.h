@@ -23,20 +23,21 @@ class ModPage : public QWidget, public BasePage {
     explicit ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api);
     virtual ~ModPage();
 
-    /* The name visible to the user */
+    /* Affects what the user sees */
     virtual QString displayName() const override = 0;
     virtual QIcon icon() const override = 0;
     virtual QString id() const override = 0;
     virtual QString helpPage() const override = 0;
 
+    /* Used internally */
     virtual QString metaEntryBase() const = 0;
-    /* This only appears in the debug console */
     virtual QString debugName() const = 0;
+
 
     virtual bool shouldDisplay() const override = 0;
     const ModAPI* apiProvider() const { return api.get(); };
 
-    virtual void onGetVersionsSucceeded(ModPage*, QByteArray*, QString) = 0;
+    virtual void onRequestVersionsSucceeded(ModPage*, QByteArray*, QString) = 0;
 
     void openedImpl() override;
     bool eventFilter(QObject* watched, QEvent* event) override;

@@ -35,7 +35,7 @@ ModrinthPage::ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance)
 
 bool ModrinthPage::shouldDisplay() const { return true; }
 
-void ModrinthPage::onGetVersionsSucceeded(ModPage* instance, QByteArray* response, QString addonId)
+void ModrinthPage::onRequestVersionsSucceeded(ModPage* instance, QByteArray* response, QString addonId)
 {
     if (addonId != current.addonId) { return; }
     QJsonParseError parse_error;
