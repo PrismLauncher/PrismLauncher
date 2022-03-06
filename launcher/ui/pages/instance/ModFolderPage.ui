@@ -96,7 +96,7 @@
     <string>&amp;Add</string>
    </property>
    <property name="toolTip">
-    <string>Add mods</string>
+    <string>Add</string>
    </property>
   </action>
   <action name="actionRemove">
