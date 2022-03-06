@@ -74,6 +74,11 @@ public:
     QString NEWS_OPEN_URL;
 
     /**
+     * URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help
+     */
+    QString HELP_URL;
+
+    /**
      * Client ID you can get from Imgur when you register an application
      */
     QString IMGUR_CLIENT_ID;
