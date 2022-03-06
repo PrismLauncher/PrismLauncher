@@ -13,7 +13,7 @@
 #include "ui/dialogs/ModDownloadDialog.h"
 
 FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance) 
-    : ModPage(dialog, instance)
+    : ModPage(dialog, instance, new FlameAPI())
 {
     listModel = new FlameMod::ListModel(this);
     ui->packView->setModel(listModel);

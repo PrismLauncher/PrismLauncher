@@ -20,11 +20,7 @@ class FlameModPage : public ModPage {
     inline QString metaEntryBase() const override { return "FlameMods"; };
 
     bool shouldDisplay() const override;
-    const ModAPI* apiProvider() const override { return &api; };
 
    private:
     void onModVersionSucceed(ModPage*, QByteArray*, QString) override;
-
-   private:
-    FlameAPI api;
 };

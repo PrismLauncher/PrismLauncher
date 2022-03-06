@@ -5,8 +5,8 @@
 
 #include "ui/dialogs/ModDownloadDialog.h"
 
-ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance)
-    : QWidget(dialog), m_instance(instance), ui(new Ui::ModPage), dialog(dialog)
+ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
+    : QWidget(dialog), m_instance(instance), ui(new Ui::ModPage), dialog(dialog), api(api)
 {
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &ModPage::triggerSearch);

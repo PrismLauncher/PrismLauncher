@@ -13,7 +13,7 @@
 #include "ui/dialogs/ModDownloadDialog.h"
 
 ModrinthPage::ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance)
-    : ModPage(dialog, instance)
+    : ModPage(dialog, instance, new ModrinthAPI())
 {
     listModel = new Modrinth::ListModel(this);
     ui->packView->setModel(listModel);
