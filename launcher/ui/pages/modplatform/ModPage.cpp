@@ -98,22 +98,7 @@ void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         ui->modSelectionButton->setText(tr("Loading versions..."));
         ui->modSelectionButton->setEnabled(false);
 
-        auto netJob = new NetJob(QString("%1::ModVersions(%2)").arg(debugName()).arg(current.name), APPLICATION->network());
-        auto response = new QByteArray();
-        QString addonId = current.addonId.toString();
-
-        netJob->addNetAction(Net::Download::makeByteArray(apiProvider()->getVersionsURL(addonId), response));
-
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId]{
-            onModVersionSucceed(this, response, addonId);
-        });
-
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-            netJob->deleteLater();
-            delete response;
-        });
-
-        netJob->start();
+        listModel->populateVersions(current);
     } else {
         for (int i = 0; i < current.versions.size(); i++) {
             ui->versionSelectionBox->addItem(current.versions[i].version, QVariant(i));

@@ -22,5 +22,5 @@ class FlameModPage : public ModPage {
     bool shouldDisplay() const override;
 
    private:
-    void onModVersionSucceed(ModPage*, QByteArray*, QString) override;
+    void onGetVersionsSucceeded(ModPage*, QByteArray*, QString) override;
 };

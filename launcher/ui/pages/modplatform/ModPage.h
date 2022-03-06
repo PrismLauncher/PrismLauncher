@@ -1,11 +1,10 @@
 #pragma once
 
-#include <Application.h>
 #include <QWidget>
 
+#include "Application.h"
 #include "modplatform/ModAPI.h"
 #include "modplatform/ModIndex.h"
-#include "tasks/Task.h"
 #include "ui/pages/BasePage.h"
 #include "ui/pages/modplatform/ModModel.h"
 
@@ -37,13 +36,14 @@ class ModPage : public QWidget, public BasePage {
     virtual bool shouldDisplay() const override = 0;
     const ModAPI* apiProvider() const { return api.get(); };
 
+    virtual void onGetVersionsSucceeded(ModPage*, QByteArray*, QString) = 0;
+
     void openedImpl() override;
     bool eventFilter(QObject* watched, QEvent* event) override;
 
     BaseInstance* m_instance;
 
    protected:
-    virtual void onModVersionSucceed(ModPage*, QByteArray*, QString) = 0;
 
     void updateSelectionButton();
 

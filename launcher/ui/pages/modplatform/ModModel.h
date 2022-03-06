@@ -30,6 +30,8 @@ class ListModel : public QAbstractListModel {
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
     void searchWithTerm(const QString& term, const int sort);
 
+    virtual void populateVersions(const ModPlatform::IndexedPack& current);
+
    protected slots:
     virtual void searchRequestFinished() = 0;
 
