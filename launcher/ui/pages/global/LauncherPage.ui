@@ -264,7 +264,7 @@
             </property>
             <item>
              <property name="text">
-              <string>Simple (Dark Icons)</string>
+              <string>Simple (Colored Icons)</string>
              </property>
             </item>
             <item>
@@ -274,12 +274,12 @@
             </item>
             <item>
              <property name="text">
-              <string>Simple (Blue Icons)</string>
+              <string>Simple (Dark Icons)</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Simple (Colored Icons)</string>
+              <string>Simple (Blue Icons)</string>
              </property>
             </item>
             <item>
@@ -294,17 +294,17 @@
             </item>
             <item>
              <property name="text">
-              <string notr="true">Flat</string>
+              <string>Flat</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Legacy</string>
              </property>
             </item>
             <item>
              <property name="text">
               <string>Custom</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>MultiMC</string>
              </property>
             </item>
            </widget>
