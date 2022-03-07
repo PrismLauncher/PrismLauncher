@@ -11,17 +11,9 @@ ListModel::ListModel(FlameModPage* parent) : ModPlatform::ListModel(parent) {}
 ListModel::~ListModel() {}
 
 
-void FlameMod::ListModel::searchRequestFinished()
+void FlameMod::ListModel::searchRequestFinished(QJsonDocument& doc)
 {
     jobPtr.reset();
-
-    QJsonParseError parse_error;
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
-    if(parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Flame at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << response;
-        return;
-    }
 
     QList<ModPlatform::IndexedPack> newList;
     auto packs = doc.array();

@@ -29,8 +29,8 @@ class ListModel : public ModPlatform::ListModel {
     ListModel(ModrinthPage* parent);
     virtual ~ListModel();
 
-   private slots:
-    void searchRequestFinished() override;
+   public slots:
+    void searchRequestFinished(QJsonDocument& doc) override;
 
    private:
     const char** getSorts() const override;

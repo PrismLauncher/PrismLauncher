@@ -36,23 +36,17 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance)
 
 bool FlameModPage::shouldDisplay() const { return true; }
 
-void FlameModPage::onRequestVersionsSucceeded(ModPage* instance, QByteArray* response, QString addonId)
+void FlameModPage::onRequestVersionsSucceeded(QJsonDocument& doc, QString addonId)
 {
     if (addonId != current.addonId) {
         return;  // wrong request
     }
-    QJsonParseError parse_error;
-    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Flame at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << *response;
-        return;
-    }
+
     QJsonArray arr = doc.array();
     try {
         FlameMod::loadIndexedPackVersions(current, arr, APPLICATION->network(), m_instance);
     } catch (const JSONValidationError& e) {
-        qDebug() << *response;
+        qDebug() << doc;
         qWarning() << "Error while reading Flame mod version: " << e.cause();
     }
     auto packProfile = ((MinecraftInstance*)m_instance)->getPackProfile();

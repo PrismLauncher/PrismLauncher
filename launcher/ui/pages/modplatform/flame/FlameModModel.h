@@ -30,7 +30,7 @@ class ListModel : public ModPlatform::ListModel {
     virtual ~ListModel();
 
    private slots:
-    void searchRequestFinished() override;
+    void searchRequestFinished(QJsonDocument& doc) override;
 
    private:
     const char** getSorts() const override;

@@ -91,30 +91,16 @@ void ListModel::fetchMore(const QModelIndex& parent)
 void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
 {
     if (m_logoMap.contains(logo)) {
-        callback(APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(APPLICATION->metacache()
+                     ->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)))
+                     ->getFullPath());
     } else {
         requestLogo(logo, logoUrl);
     }
 }
 
-void ListModel::requestModVersions(ModPlatform::IndexedPack const& current)
-{
-    auto netJob = new NetJob(QString("%1::ModVersions(%2)").arg(m_parent->debugName()).arg(current.name), APPLICATION->network());
-    auto response = new QByteArray();
-    QString addonId = current.addonId.toString();
-
-    netJob->addNetAction(Net::Download::makeByteArray(m_parent->apiProvider()->getVersionsURL(addonId), response));
-
-    QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId]{
-        m_parent->onRequestVersionsSucceeded(m_parent, response, addonId);
-    });
-
-    QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-        netJob->deleteLater();
-        delete response;
-    });
-
-    netJob->start();
+void ListModel::requestModVersions(ModPlatform::IndexedPack const& current) {
+    m_parent->apiProvider()->getVersions(this, current.addonId.toString(), m_parent->debugName());
 }
 
 void ListModel::performPaginatedSearch()
@@ -124,16 +110,9 @@ void ListModel::performPaginatedSearch()
                           ->getPackProfile()
                           ->getComponentVersion("net.fabricmc.fabric-loader")
                           .isEmpty();
-    auto netJob = new NetJob(QString("%1::Search").arg(m_parent->debugName()), APPLICATION->network());
-    auto searchUrl = m_parent->apiProvider()->getModSearchURL(
-        nextSearchOffset, currentSearchTerm, getSorts()[currentSort], hasFabric ? ModAPI::Fabric : ModAPI::Forge, mcVersion);
 
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
-    jobPtr = netJob;
-    jobPtr->start();
-
-    QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::searchRequestFinished);
-    QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
+    m_parent->apiProvider()->searchMods(
+        this, { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], hasFabric ? ModAPI::Fabric : ModAPI::Forge, mcVersion });
 }
 
 void ListModel::searchWithTerm(const QString& term, const int sort)
@@ -160,9 +139,7 @@ void ListModel::searchRequestFailed(QString reason)
     if (jobPtr->first()->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
         // 409 Gone, notify user to update
         QMessageBox::critical(nullptr, tr("Error"),
-                              QString("%1 %2")
-                                .arg(m_parent->displayName())
-                                .arg(tr("API version too old!\nPlease update PolyMC!")));
+                              QString("%1 %2").arg(m_parent->displayName()).arg(tr("API version too old!\nPlease update PolyMC!")));
         // self-destruct
         ((ModDownloadDialog*)((ModPage*)parent())->parentWidget())->reject();
     }
@@ -180,11 +157,17 @@ void ListModel::searchRequestFailed(QString reason)
     }
 }
 
+void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId)
+{
+    m_parent->onRequestVersionsSucceeded(doc, addonId);
+}
+
 void ListModel::requestLogo(QString logo, QString url)
 {
     if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo)) { return; }
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)));
+    MetaEntryPtr entry =
+        APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)));
     auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 

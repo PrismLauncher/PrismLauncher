@@ -1,9 +1,10 @@
 #pragma once
 
+#include <qjsondocument.h>
 #include <QAbstractListModel>
 
-#include "modplatform/ModIndex.h"
 #include "modplatform/ModAPI.h"
+#include "modplatform/ModIndex.h"
 #include "net/NetJob.h"
 
 class ModPage;
@@ -26,6 +27,8 @@ class ListModel : public QAbstractListModel {
     QVariant data(const QModelIndex& index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
+    void setActiveJob(NetJob::Ptr ptr) { jobPtr = ptr; }
+
     bool canFetchMore(const QModelIndex& parent) const override;
     void fetchMore(const QModelIndex& parent) override;
 
@@ -34,9 +37,13 @@ class ListModel : public QAbstractListModel {
 
     virtual void requestModVersions(const ModPlatform::IndexedPack& current);
 
-   protected slots:
-    virtual void searchRequestFinished() = 0;
+   public slots:
+    virtual void searchRequestFinished(QJsonDocument& doc) = 0;
     void searchRequestFailed(QString reason);
+
+    void versionRequestSucceeded(QJsonDocument doc, QString addonId);
+
+   protected slots:
 
     void logoFailed(QString logo);
     void logoLoaded(QString logo, QIcon out);

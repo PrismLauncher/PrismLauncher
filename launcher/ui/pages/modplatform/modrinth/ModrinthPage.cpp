@@ -35,22 +35,15 @@ ModrinthPage::ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance)
 
 bool ModrinthPage::shouldDisplay() const { return true; }
 
-void ModrinthPage::onRequestVersionsSucceeded(ModPage* instance, QByteArray* response, QString addonId)
+void ModrinthPage::onRequestVersionsSucceeded(QJsonDocument& response, QString addonId)
 {
     if (addonId != current.addonId) { return; }
-    QJsonParseError parse_error;
-    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Modrinth at " << parse_error.offset
-                   << " reason: " << parse_error.errorString();
-        qWarning() << *response;
-        return;
-    }
-    QJsonArray arr = doc.array();
+    
+    QJsonArray arr = response.array();
     try {
         Modrinth::loadIndexedPackVersions(current, arr, APPLICATION->network(), m_instance);
     } catch (const JSONValidationError& e) {
-        qDebug() << *response;
+        qDebug() << response;
         qWarning() << "Error while reading Modrinth mod version: " << e.cause();
     }
     auto packProfile = ((MinecraftInstance*)m_instance)->getPackProfile();

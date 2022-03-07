@@ -37,7 +37,7 @@ class ModPage : public QWidget, public BasePage {
     virtual bool shouldDisplay() const override = 0;
     const ModAPI* apiProvider() const { return api.get(); };
 
-    virtual void onRequestVersionsSucceeded(ModPage*, QByteArray*, QString) = 0;
+    virtual void onRequestVersionsSucceeded(QJsonDocument&, QString) = 0;
 
     void openedImpl() override;
     bool eventFilter(QObject* watched, QEvent* event) override;
