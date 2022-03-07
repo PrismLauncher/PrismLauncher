@@ -14,7 +14,7 @@ void ListModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
 void ListModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
     Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), m_parent->m_instance);
-};
+}
 
 QJsonArray ListModel::documentToArray(QJsonDocument& obj) const
 {

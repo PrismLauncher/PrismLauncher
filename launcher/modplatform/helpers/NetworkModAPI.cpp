@@ -29,7 +29,7 @@ void NetworkModAPI::searchMods(CallerType* caller, SearchArgs&& args) const
     });
 
     netJob->start();
-};
+}
 
 void NetworkModAPI::getVersions(CallerType* caller, const QString& addonId) const
 {
@@ -57,4 +57,4 @@ void NetworkModAPI::getVersions(CallerType* caller, const QString& addonId) cons
     });
 
     netJob->start();
-};
+}
