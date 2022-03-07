@@ -492,6 +492,16 @@ set(META_SOURCES
     meta/Index.h
 )
 
+set(API_SOURCES
+    modplatform/ModAPI.h
+
+    modplatform/flame/FlameAPI.h
+    modplatform/modrinth/ModrinthAPI.h
+    
+    modplatform/helpers/NetworkModAPI.h
+    modplatform/helpers/NetworkModAPI.cpp
+)
+
 set(FTB_SOURCES
     modplatform/legacy_ftb/PackFetchTask.h
     modplatform/legacy_ftb/PackFetchTask.cpp
@@ -572,6 +582,7 @@ set(LOGIC_SOURCES
     ${TOOLS_SOURCES}
     ${META_SOURCES}
     ${ICONS_SOURCES}
+    ${API_SOURCES}
     ${FTB_SOURCES}
     ${FLAME_SOURCES}
     ${MODRINTH_SOURCES}

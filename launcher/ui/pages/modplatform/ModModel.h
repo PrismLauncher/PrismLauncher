@@ -1,6 +1,5 @@
 #pragma once
 
-#include <qjsondocument.h>
 #include <QAbstractListModel>
 
 #include "modplatform/ModAPI.h"
@@ -24,6 +23,9 @@ class ListModel : public QAbstractListModel {
     int rowCount(const QModelIndex& parent) const override;
     int columnCount(const QModelIndex& parent) const override;
 
+    QString debugName() const;
+
+    /* Retrieve information from the model at a given index with the given role */
     QVariant data(const QModelIndex& index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 

@@ -53,6 +53,11 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
+QString ListModel::debugName() const
+{
+    return m_parent->debugName();
+}
+
 void ListModel::logoLoaded(QString logo, QIcon out)
 {
     m_loadingLogos.removeAll(logo);
@@ -99,8 +104,9 @@ void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallbac
     }
 }
 
-void ListModel::requestModVersions(ModPlatform::IndexedPack const& current) {
-    m_parent->apiProvider()->getVersions(this, current.addonId.toString(), m_parent->debugName());
+void ListModel::requestModVersions(ModPlatform::IndexedPack const& current)
+{
+    m_parent->apiProvider()->getVersions(this, current.addonId.toString());
 }
 
 void ListModel::performPaginatedSearch()

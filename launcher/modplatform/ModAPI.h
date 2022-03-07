@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QJsonDocument>
 #include <QString>
 
 namespace ModPlatform {
@@ -25,6 +24,6 @@ class ModAPI {
         QString version;
     };
 
-    inline virtual void searchMods(CallerType* caller, SearchArgs&& args) const {};
-    inline virtual void getVersions(CallerType* caller, const QString& addonId, const QString& debugName = "") const {};
+    virtual void searchMods(CallerType* caller, SearchArgs&& args) const = 0;
+    virtual void getVersions(CallerType* caller, const QString& addonId) const = 0;
 };
