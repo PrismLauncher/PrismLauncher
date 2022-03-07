@@ -1,15 +1,7 @@
 #include "FlameModPage.h"
 #include "ui_ModPage.h"
 
-#include <QKeyEvent>
-
-#include "Application.h"
 #include "FlameModModel.h"
-#include "InstanceImportTask.h"
-#include "Json.h"
-#include "ModDownloadTask.h"
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
 FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance) 
@@ -34,31 +26,13 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance)
     connect(ui->modSelectionButton, &QPushButton::clicked, this, &FlameModPage::onModSelected);
 }
 
-bool FlameModPage::shouldDisplay() const { return true; }
-
-void FlameModPage::onRequestVersionsSucceeded(QJsonDocument& doc, QString addonId)
+bool FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer) const
 {
-    if (addonId != current.addonId) {
-        return;  // wrong request
-    }
-
-    QJsonArray arr = doc.array();
-    try {
-        FlameMod::loadIndexedPackVersions(current, arr, APPLICATION->network(), m_instance);
-    } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading Flame mod version: " << e.cause();
-    }
-    auto packProfile = ((MinecraftInstance*)m_instance)->getPackProfile();
-    QString mcVersion = packProfile->getComponentVersion("net.minecraft");
-    QString loaderString = (packProfile->getComponentVersion("net.minecraftforge").isEmpty()) ? "fabric" : "forge";
-    for (int i = 0; i < current.versions.size(); i++) {
-        auto version = current.versions[i];
-        if (!version.mcVersion.contains(mcVersion)) { continue; }
-        ui->versionSelectionBox->addItem(version.version, QVariant(i));
-    }
-    if (ui->versionSelectionBox->count() == 0) { ui->versionSelectionBox->addItem(tr("No Valid Version found!"), QVariant(-1)); }
-
-    ui->modSelectionButton->setText(tr("Cannot select invalid version :("));
-    updateSelectionButton();
+    (void) loaderVer;
+    return ver.mcVersion.contains(mineVer);
 }
+
+// I don't know why, but doing this on the parent class makes it so that
+// other mod providers start loading before being selected, at least with
+// my Qt, so we need to implement this in every derived class...
+bool FlameModPage::shouldDisplay() const { return true; }

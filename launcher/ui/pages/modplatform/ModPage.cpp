@@ -3,6 +3,8 @@
 
 #include <QKeyEvent>
 
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
@@ -21,6 +23,9 @@ ModPage::~ModPage()
 {
     delete ui;
 }
+
+
+/******** Qt things ********/
 
 void ModPage::openedImpl()
 {
@@ -41,21 +46,8 @@ bool ModPage::eventFilter(QObject* watched, QEvent* event)
     return QWidget::eventFilter(watched, event);
 }
 
-void ModPage::updateSelectionButton()
-{
-    if (!isOpened || selectedVersion < 0) {
-        ui->modSelectionButton->setEnabled(false);
-        return;
-    }
 
-    ui->modSelectionButton->setEnabled(true);
-    auto& version = current.versions[selectedVersion];
-    if (!dialog->isModSelected(current.name, version.fileName)) {
-        ui->modSelectionButton->setText(tr("Select mod for download"));
-    } else {
-        ui->modSelectionButton->setText(tr("Deselect mod for download"));
-    }
-}
+/******** Callbacks to events in the UI (set up in the derived classes) ********/
 
 void ModPage::triggerSearch()
 {
@@ -129,4 +121,45 @@ void ModPage::onModSelected()
     }
 
     updateSelectionButton();
+}
+
+
+/******** Make changes to the UI ********/
+
+void ModPage::updateModVersions()
+{
+    auto packProfile = (static_cast<MinecraftInstance*>(m_instance))->getPackProfile();
+
+    QString mcVersion = packProfile->getComponentVersion("net.minecraft");
+    QString loaderString = (packProfile->getComponentVersion("net.minecraftforge").isEmpty()) ? "fabric" : "forge";
+
+    for (int i = 0; i < current.versions.size(); i++) {
+        auto version = current.versions[i];
+        //NOTE: Flame doesn't care about loaderString, so passing it changes nothing.
+        if (!validateVersion(version, mcVersion, loaderString)) { 
+            continue; 
+        }
+        ui->versionSelectionBox->addItem(version.version, QVariant(i));
+    }
+    if (ui->versionSelectionBox->count() == 0) { ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1)); }
+
+    ui->modSelectionButton->setText(tr("Cannot select invalid version :("));
+    updateSelectionButton();
+}
+
+
+void ModPage::updateSelectionButton()
+{
+    if (!isOpened || selectedVersion < 0) {
+        ui->modSelectionButton->setEnabled(false);
+        return;
+    }
+
+    ui->modSelectionButton->setEnabled(true);
+    auto& version = current.versions[selectedVersion];
+    if (!dialog->isModSelected(current.name, version.fileName)) {
+        ui->modSelectionButton->setText(tr("Select mod for download"));
+    } else {
+        ui->modSelectionButton->setText(tr("Deselect mod for download"));
+    }
 }

@@ -19,8 +19,7 @@ class ModrinthPage : public ModPage {
     inline QString debugName() const override { return tr("Modrinth"); }
     inline QString metaEntryBase() const override { return "ModrinthPacks"; };
 
-    bool shouldDisplay() const override;
+    bool validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const override;
 
-   private:
-    void onRequestVersionsSucceeded(QJsonDocument&, QString) override;
+    bool shouldDisplay() const override;
 };

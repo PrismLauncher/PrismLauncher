@@ -11,6 +11,24 @@ namespace ModPlatform {
 
 ListModel::ListModel(ModPage* parent) : QAbstractListModel(parent), m_parent(parent) {}
 
+QString ListModel::debugName() const
+{
+    return m_parent->debugName();
+}
+
+
+/******** Make data requests ********/
+
+void ListModel::fetchMore(const QModelIndex& parent)
+{
+    if (parent.isValid()) return;
+    if (nextSearchOffset == 0) {
+        qWarning() << "fetchMore with 0 offset is wrong...";
+        return;
+    }
+    performPaginatedSearch();
+}
+
 QVariant ListModel::data(const QModelIndex& index, int role) const
 {
     int pos = index.row();
@@ -39,47 +57,6 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     }
 
     return QVariant();
-}
-
-QString ListModel::debugName() const
-{
-    return m_parent->debugName();
-}
-
-void ListModel::logoLoaded(QString logo, QIcon out)
-{
-    m_loadingLogos.removeAll(logo);
-    m_logoMap.insert(logo, out);
-    for (int i = 0; i < modpacks.size(); i++) {
-        if (modpacks[i].logoName == logo) { emit dataChanged(createIndex(i, 0), createIndex(i, 0), { Qt::DecorationRole }); }
-    }
-}
-
-void ListModel::logoFailed(QString logo)
-{
-    m_failedLogos.append(logo);
-    m_loadingLogos.removeAll(logo);
-}
-
-void ListModel::fetchMore(const QModelIndex& parent)
-{
-    if (parent.isValid()) return;
-    if (nextSearchOffset == 0) {
-        qWarning() << "fetchMore with 0 offset is wrong...";
-        return;
-    }
-    performPaginatedSearch();
-}
-
-void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
-{
-    if (m_logoMap.contains(logo)) {
-        callback(APPLICATION->metacache()
-                     ->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)))
-                     ->getFullPath());
-    } else {
-        requestLogo(logo, logoUrl);
-    }
 }
 
 void ListModel::requestModVersions(ModPlatform::IndexedPack const& current)
@@ -116,6 +93,60 @@ void ListModel::searchWithTerm(const QString& term, const int sort)
     }
     nextSearchOffset = 0;
     performPaginatedSearch();
+}
+
+void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
+{
+    if (m_logoMap.contains(logo)) {
+        callback(APPLICATION->metacache()
+                     ->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)))
+                     ->getFullPath());
+    } else {
+        requestLogo(logo, logoUrl);
+    }
+}
+
+void ListModel::requestLogo(QString logo, QString url)
+{
+    if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo)) { return; }
+
+    MetaEntryPtr entry =
+        APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)));
+    auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
+    job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
+
+    auto fullPath = entry->getFullPath();
+    QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {
+        job->deleteLater();
+        emit logoLoaded(logo, QIcon(fullPath));
+        if (waitingCallbacks.contains(logo)) { waitingCallbacks.value(logo)(fullPath); }
+    });
+
+    QObject::connect(job, &NetJob::failed, this, [this, logo, job] {
+        job->deleteLater();
+        emit logoFailed(logo);
+    });
+
+    job->start();
+    m_loadingLogos.append(logo);
+}
+
+
+/******** Request callbacks ********/
+
+void ListModel::logoLoaded(QString logo, QIcon out)
+{
+    m_loadingLogos.removeAll(logo);
+    m_logoMap.insert(logo, out);
+    for (int i = 0; i < modpacks.size(); i++) {
+        if (modpacks[i].logoName == logo) { emit dataChanged(createIndex(i, 0), createIndex(i, 0), { Qt::DecorationRole }); }
+    }
+}
+
+void ListModel::logoFailed(QString logo)
+{
+    m_failedLogos.append(logo);
+    m_loadingLogos.removeAll(logo);
 }
 
 void ListModel::searchRequestFinished(QJsonDocument& doc)
@@ -175,32 +206,18 @@ void ListModel::searchRequestFailed(QString reason)
 
 void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId)
 {
-    m_parent->onRequestVersionsSucceeded(doc, addonId);
-}
+    auto& current = m_parent->getCurrent();
+    if (addonId != current.addonId) { return; }
+    
+    QJsonArray arr = doc.array();
+    try {
+        loadIndexedPackVersions(current, arr);
+    } catch (const JSONValidationError& e) {
+        qDebug() << doc;
+        qWarning() << "Error while reading " << debugName() << " mod version: " << e.cause();
+    }
 
-void ListModel::requestLogo(QString logo, QString url)
-{
-    if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo)) { return; }
-
-    MetaEntryPtr entry =
-        APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)));
-    auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
-    job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
-
-    auto fullPath = entry->getFullPath();
-    QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {
-        job->deleteLater();
-        emit logoLoaded(logo, QIcon(fullPath));
-        if (waitingCallbacks.contains(logo)) { waitingCallbacks.value(logo)(fullPath); }
-    });
-
-    QObject::connect(job, &NetJob::failed, this, [this, logo, job] {
-        job->deleteLater();
-        emit logoFailed(logo);
-    });
-
-    job->start();
-    m_loadingLogos.append(logo);
+    m_parent->updateModVersions();
 }
 
 }  // namespace ModPlatform

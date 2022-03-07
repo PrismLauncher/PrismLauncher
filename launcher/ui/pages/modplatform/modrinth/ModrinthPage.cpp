@@ -1,15 +1,7 @@
 #include "ModrinthPage.h"
 #include "ui_ModPage.h"
 
-#include <QKeyEvent>
-
-#include "Application.h"
-#include "InstanceImportTask.h"
-#include "Json.h"
-#include "ModDownloadTask.h"
 #include "ModrinthModel.h"
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
 ModrinthPage::ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance)
@@ -33,29 +25,12 @@ ModrinthPage::ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance)
     connect(ui->modSelectionButton, &QPushButton::clicked, this, &ModrinthPage::onModSelected);
 }
 
-bool ModrinthPage::shouldDisplay() const { return true; }
-
-void ModrinthPage::onRequestVersionsSucceeded(QJsonDocument& response, QString addonId)
+bool ModrinthPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer) const
 {
-    if (addonId != current.addonId) { return; }
-    
-    QJsonArray arr = response.array();
-    try {
-        Modrinth::loadIndexedPackVersions(current, arr, APPLICATION->network(), m_instance);
-    } catch (const JSONValidationError& e) {
-        qDebug() << response;
-        qWarning() << "Error while reading Modrinth mod version: " << e.cause();
-    }
-    auto packProfile = ((MinecraftInstance*)m_instance)->getPackProfile();
-    QString mcVersion = packProfile->getComponentVersion("net.minecraft");
-    QString loaderString = (packProfile->getComponentVersion("net.minecraftforge").isEmpty()) ? "fabric" : "forge";
-    for (int i = 0; i < current.versions.size(); i++) {
-        auto version = current.versions[i];
-        if (!version.mcVersion.contains(mcVersion) || !version.loaders.contains(loaderString)) { continue; }
-        ui->versionSelectionBox->addItem(version.version, QVariant(i));
-    }
-    if (ui->versionSelectionBox->count() == 0) { ui->versionSelectionBox->addItem(tr("No Valid Version found !"), QVariant(-1)); }
-
-    ui->modSelectionButton->setText(tr("Cannot select invalid version :("));
-    updateSelectionButton();
+    return ver.mcVersion.contains(mineVer) && ver.loaders.contains(loaderVer);
 }
+
+// I don't know why, but doing this on the parent class makes it so that
+// other mod providers start loading before being selected, at least with
+// my Qt, so we need to implement this in every derived class...
+bool ModrinthPage::shouldDisplay() const { return true; }

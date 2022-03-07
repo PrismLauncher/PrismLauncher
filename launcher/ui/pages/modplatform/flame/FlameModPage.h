@@ -19,8 +19,7 @@ class FlameModPage : public ModPage {
     inline QString debugName() const override { return tr("Flame"); }
     inline QString metaEntryBase() const override { return "FlameMods"; };
 
-    bool shouldDisplay() const override;
+    bool validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const override;
 
-   private:
-    void onRequestVersionsSucceeded(QJsonDocument&, QString) override;
+    bool shouldDisplay() const override;
 };

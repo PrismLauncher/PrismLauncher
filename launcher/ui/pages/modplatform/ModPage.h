@@ -35,9 +35,12 @@ class ModPage : public QWidget, public BasePage {
 
 
     virtual bool shouldDisplay() const override = 0;
+    virtual bool validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const = 0;
+
     const ModAPI* apiProvider() const { return api.get(); };
 
-    virtual void onRequestVersionsSucceeded(QJsonDocument&, QString) = 0;
+    ModPlatform::IndexedPack& getCurrent() { return current; }
+    void updateModVersions();
 
     void openedImpl() override;
     bool eventFilter(QObject* watched, QEvent* event) override;
@@ -45,7 +48,6 @@ class ModPage : public QWidget, public BasePage {
     BaseInstance* m_instance;
 
    protected:
-
     void updateSelectionButton();
 
    protected slots:

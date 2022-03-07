@@ -36,6 +36,9 @@ class ListModel : public QAbstractListModel {
     void searchWithTerm(const QString& term, const int sort);
     void requestModVersions(const ModPlatform::IndexedPack& current);
 
+    virtual void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
+    virtual void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) = 0;
+
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
 
     inline bool canFetchMore(const QModelIndex& parent) const override { return searchState == CanPossiblyFetchMore; };
@@ -54,7 +57,6 @@ class ListModel : public QAbstractListModel {
     void performPaginatedSearch();
 
    protected:
-    virtual void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
     virtual QJsonArray documentToArray(QJsonDocument& obj) const = 0;
     virtual const char** getSorts() const = 0;
 
