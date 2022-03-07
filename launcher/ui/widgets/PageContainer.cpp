@@ -14,6 +14,7 @@
  */
 
 #include "PageContainer.h"
+#include "BuildConfig.h"
 #include "PageContainer_p.h"
 
 #include <QStackedLayout>
@@ -207,7 +208,7 @@ void PageContainer::help()
         QString pageId = m_currentPage->helpPage();
         if (pageId.isEmpty())
             return;
-        DesktopServices::openUrl(QUrl("https://github.com/PolyMC/PolyMC/wiki/" + pageId));
+        DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg(pageId)));
     }
 }
 
