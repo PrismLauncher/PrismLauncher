@@ -18,29 +18,30 @@ class ListModel : public QAbstractListModel {
 
    public:
     ListModel(ModPage* parent);
-    virtual ~ListModel();
+    virtual ~ListModel() = default;
 
-    int rowCount(const QModelIndex& parent) const override;
-    int columnCount(const QModelIndex& parent) const override;
+    inline int rowCount(const QModelIndex& parent) const override { return modpacks.size(); };
+    inline int columnCount(const QModelIndex& parent) const override { return 1; };
+    inline Qt::ItemFlags flags(const QModelIndex& index) const override { return QAbstractListModel::flags(index); };
 
     QString debugName() const;
 
     /* Retrieve information from the model at a given index with the given role */
     QVariant data(const QModelIndex& index, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    void setActiveJob(NetJob::Ptr ptr) { jobPtr = ptr; }
+    inline void setActiveJob(NetJob::Ptr ptr) { jobPtr = ptr; }
 
-    bool canFetchMore(const QModelIndex& parent) const override;
+    /* Ask the API for more information */
     void fetchMore(const QModelIndex& parent) override;
+    void searchWithTerm(const QString& term, const int sort);
+    void requestModVersions(const ModPlatform::IndexedPack& current);
 
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
-    void searchWithTerm(const QString& term, const int sort);
 
-    virtual void requestModVersions(const ModPlatform::IndexedPack& current);
+    inline bool canFetchMore(const QModelIndex& parent) const override { return searchState == CanPossiblyFetchMore; };
 
    public slots:
-    virtual void searchRequestFinished(QJsonDocument& doc) = 0;
+    void searchRequestFinished(QJsonDocument& doc);
     void searchRequestFailed(QString reason);
 
     void versionRequestSucceeded(QJsonDocument doc, QString addonId);
@@ -53,6 +54,8 @@ class ListModel : public QAbstractListModel {
     void performPaginatedSearch();
 
    protected:
+    virtual void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
+    virtual QJsonArray documentToArray(QJsonDocument& obj) const = 0;
     virtual const char** getSorts() const = 0;
 
     void requestLogo(QString file, QString url);
@@ -73,6 +76,5 @@ class ListModel : public QAbstractListModel {
     enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } searchState = None;
 
     NetJob::Ptr jobPtr;
-    QByteArray response;
 };
 }  // namespace ModPlatform

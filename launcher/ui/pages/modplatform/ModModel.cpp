@@ -1,6 +1,6 @@
 #include "ModModel.h"
-#include "ModPage.h"
 
+#include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "ui/dialogs/ModDownloadDialog.h"
@@ -10,18 +10,6 @@
 namespace ModPlatform {
 
 ListModel::ListModel(ModPage* parent) : QAbstractListModel(parent), m_parent(parent) {}
-
-ListModel::~ListModel() {}
-
-int ListModel::rowCount(const QModelIndex& parent) const
-{
-    return modpacks.size();
-}
-
-int ListModel::columnCount(const QModelIndex& parent) const
-{
-    return 1;
-}
 
 QVariant ListModel::data(const QModelIndex& index, int role) const
 {
@@ -71,16 +59,6 @@ void ListModel::logoFailed(QString logo)
 {
     m_failedLogos.append(logo);
     m_loadingLogos.removeAll(logo);
-}
-
-Qt::ItemFlags ListModel::flags(const QModelIndex& index) const
-{
-    return QAbstractListModel::flags(index);
-}
-
-bool ListModel::canFetchMore(const QModelIndex& parent) const
-{
-    return searchState == CanPossiblyFetchMore;
 }
 
 void ListModel::fetchMore(const QModelIndex& parent)
@@ -138,6 +116,38 @@ void ListModel::searchWithTerm(const QString& term, const int sort)
     }
     nextSearchOffset = 0;
     performPaginatedSearch();
+}
+
+void ListModel::searchRequestFinished(QJsonDocument& doc)
+{
+    jobPtr.reset();
+
+    QList<ModPlatform::IndexedPack> newList;
+    auto packs = documentToArray(doc);
+
+    for (auto packRaw : packs) {
+        auto packObj = packRaw.toObject();
+
+        ModPlatform::IndexedPack pack;
+        try {
+            loadIndexedPack(pack, packObj);
+            newList.append(pack);
+        } catch (const JSONValidationError& e) {
+            qWarning() << "Error while loading mod from " << m_parent->debugName() << ": " << e.cause();
+            continue;
+        }
+    }
+
+    if (packs.size() < 25) {
+        searchState = Finished;
+    } else {
+        nextSearchOffset += 25;
+        searchState = CanPossiblyFetchMore;
+    }
+
+    beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);
+    modpacks.append(newList);
+    endInsertRows();
 }
 
 void ListModel::searchRequestFailed(QString reason)
