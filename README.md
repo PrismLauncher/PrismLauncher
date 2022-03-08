@@ -48,7 +48,7 @@ If you want to contribute to PolyMC you might find it useful to join our Discord
 
 ## Building
 
-If you want to build PolyMC yourself, check [BUILD.md](BUILD.md) for build instructions.
+If you want to build PolyMC yourself, check [Build Instructions](https://polymc.org/wiki/development/build-instructions/) for build instructions.
 
 ## Code formatting
 
@@ -72,3 +72,9 @@ To modify download infomation or change packaging infomation send a pull request
 ## Forking/Redistributing/Custom builds policy
 
 Do whatever you want, we don't care. Just follow the license. If you have any questions about this feel free to ask in an issue.
+
+All launcher code is available under the GPL-3 license.
+  
+[Source for the website](https://github.com/PolyMC/polymc.github.io) is hosted under the AGPL-3 License.
+
+The logo and related assets are under the CC BY-NC-SA 4.0 license.
