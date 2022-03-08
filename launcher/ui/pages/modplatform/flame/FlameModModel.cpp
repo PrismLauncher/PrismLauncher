@@ -4,6 +4,7 @@
 
 namespace FlameMod {
 
+// NOLINTNEXTLINE(modernize-avoid-c-arrays)
 const char* ListModel::sorts[6]{ "Featured", "Popularity", "LastUpdated", "Name", "Author", "TotalDownloads" };
 
 void ListModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
@@ -16,7 +17,7 @@ void ListModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray&
     FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), m_parent->m_instance);
 }
 
-QJsonArray ListModel::documentToArray(QJsonDocument& obj) const
+auto ListModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
     return obj.array();
 }

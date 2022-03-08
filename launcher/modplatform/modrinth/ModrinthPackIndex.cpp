@@ -30,8 +30,8 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    bool hasFabric = !((MinecraftInstance*)inst)->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
-    QString mcVersion = ((MinecraftInstance*)inst)->getPackProfile()->getComponentVersion("net.minecraft");
+    bool hasFabric = !(static_cast<MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
+    QString mcVersion = (static_cast<MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.minecraft");
 
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();

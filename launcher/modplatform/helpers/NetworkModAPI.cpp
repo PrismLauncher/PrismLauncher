@@ -7,7 +7,7 @@
 
 void NetworkModAPI::searchMods(CallerType* caller, SearchArgs&& args) const
 {
-    auto netJob = new NetJob(QString("Modrinth::Search"), APPLICATION->network());
+    auto netJob = new NetJob(QString("%1::Search").arg(caller->debugName()), APPLICATION->network());
     auto searchUrl = getModSearchURL(args);
 
     auto response = new QByteArray();
@@ -16,7 +16,7 @@ void NetworkModAPI::searchMods(CallerType* caller, SearchArgs&& args) const
     QObject::connect(netJob, &NetJob::started, caller, [caller, netJob] { caller->setActiveJob(netJob); });
     QObject::connect(netJob, &NetJob::failed, caller, &CallerType::searchRequestFailed);
     QObject::connect(netJob, &NetJob::succeeded, caller, [caller, response] {
-        QJsonParseError parse_error;
+        QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
             qWarning() << "Error while parsing JSON response from " << caller->debugName() << " at " << parse_error.offset
@@ -39,7 +39,7 @@ void NetworkModAPI::getVersions(CallerType* caller, const QString& addonId) cons
     netJob->addNetAction(Net::Download::makeByteArray(getVersionsURL(addonId), response));
 
     QObject::connect(netJob, &NetJob::succeeded, caller, [response, caller, addonId] {
-        QJsonParseError parse_error;
+        QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
             qWarning() << "Error while parsing JSON response from " << caller->debugName() << " at " << parse_error.offset

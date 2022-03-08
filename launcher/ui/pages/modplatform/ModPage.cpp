@@ -33,10 +33,10 @@ void ModPage::openedImpl()
     triggerSearch();
 }
 
-bool ModPage::eventFilter(QObject* watched, QEvent* event)
+auto ModPage::eventFilter(QObject* watched, QEvent* event) -> bool
 {
     if (watched == ui->searchEdit && event->type() == QEvent::KeyPress) {
-        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        auto* keyEvent = dynamic_cast<QKeyEvent*>(event);
         if (keyEvent->key() == Qt::Key_Return) {
             triggerSearch();
             keyEvent->accept();
@@ -70,7 +70,7 @@ void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
     
     if (!current.authors.empty()) {
-        auto authorToStr = [](ModPlatform::ModpackAuthor& author) {
+        auto authorToStr = [](ModPlatform::ModpackAuthor& author) -> QString {
             if (author.url.isEmpty()) { return author.name; }
             return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
         };
@@ -128,7 +128,7 @@ void ModPage::onModSelected()
 
 void ModPage::updateModVersions()
 {
-    auto packProfile = (static_cast<MinecraftInstance*>(m_instance))->getPackProfile();
+    auto packProfile = (dynamic_cast<MinecraftInstance*>(m_instance))->getPackProfile();
 
     QString mcVersion = packProfile->getComponentVersion("net.minecraft");
     QString loaderString = (packProfile->getComponentVersion("net.minecraftforge").isEmpty()) ? "fabric" : "forge";

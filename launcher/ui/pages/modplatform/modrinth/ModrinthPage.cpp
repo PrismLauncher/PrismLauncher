@@ -25,7 +25,7 @@ ModrinthPage::ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance)
     connect(ui->modSelectionButton, &QPushButton::clicked, this, &ModrinthPage::onModSelected);
 }
 
-bool ModrinthPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer) const
+auto ModrinthPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer) const -> bool
 {
     return ver.mcVersion.contains(mineVer) && ver.loaders.contains(loaderVer);
 }
@@ -33,4 +33,4 @@ bool ModrinthPage::validateVersion(ModPlatform::IndexedVersion& ver, QString min
 // I don't know why, but doing this on the parent class makes it so that
 // other mod providers start loading before being selected, at least with
 // my Qt, so we need to implement this in every derived class...
-bool ModrinthPage::shouldDisplay() const { return true; }
+auto ModrinthPage::shouldDisplay() const -> bool { return true; }

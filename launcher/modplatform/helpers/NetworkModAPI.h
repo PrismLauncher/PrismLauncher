@@ -8,6 +8,6 @@ class NetworkModAPI : public ModAPI {
     void getVersions(CallerType* caller, const QString& addonId) const override;
 
    protected:
-    virtual QString getModSearchURL(SearchArgs& args) const = 0;
-    virtual QString getVersionsURL(const QString& addonId) const = 0;
+    virtual auto getModSearchURL(SearchArgs& args) const -> QString = 0;
+    virtual auto getVersionsURL(const QString& addonId) const -> QString = 0;
 };

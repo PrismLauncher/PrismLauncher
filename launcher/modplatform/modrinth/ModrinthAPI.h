@@ -6,10 +6,10 @@
 
 class ModrinthAPI : public NetworkModAPI {
    public:
-    inline QString getAuthorURL(const QString& name) const { return "https://modrinth.com/user/" + name; };
+    inline auto getAuthorURL(const QString& name) const -> QString { return "https://modrinth.com/user/" + name; };
 
    private:
-    inline QString getModSearchURL(SearchArgs& args) const override
+    inline auto getModSearchURL(SearchArgs& args) const -> QString override
     {
         if (!validateModLoader(args.mod_loader)) {
             qWarning() << "Modrinth only have Forge and Fabric-compatible mods!";
@@ -30,12 +30,12 @@ class ModrinthAPI : public NetworkModAPI {
             .arg(args.version);
     };
 
-    inline QString getVersionsURL(const QString& addonId) const override
+    inline auto getVersionsURL(const QString& addonId) const -> QString override
     {
         return QString("https://api.modrinth.com/v2/project/%1/version").arg(addonId);
     };
 
-    inline QString getModLoaderString(ModLoaderType modLoader) const
+    inline auto getModLoaderString(ModLoaderType modLoader) const -> QString
     {
         switch (modLoader) {
             case Any:
@@ -49,7 +49,7 @@ class ModrinthAPI : public NetworkModAPI {
         }
     }
 
-    inline bool validateModLoader(ModLoaderType modLoader) const
+    inline auto validateModLoader(ModLoaderType modLoader) const -> bool
     {
         return modLoader == Any || modLoader == Forge || modLoader == Fabric;
     }

@@ -11,7 +11,7 @@ namespace ModPlatform {
 
 ListModel::ListModel(ModPage* parent) : QAbstractListModel(parent), m_parent(parent) {}
 
-QString ListModel::debugName() const
+auto ListModel::debugName() const -> QString
 {
     return m_parent->debugName();
 }
@@ -29,7 +29,7 @@ void ListModel::fetchMore(const QModelIndex& parent)
     performPaginatedSearch();
 }
 
-QVariant ListModel::data(const QModelIndex& index, int role) const
+auto ListModel::data(const QModelIndex& index, int role) const -> QVariant
 {
     int pos = index.row();
     if (pos >= modpacks.size() || pos < 0 || !index.isValid()) { return QString("INVALID INDEX %1").arg(pos); }
@@ -56,7 +56,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
         return v;
     }
 
-    return QVariant();
+    return {};
 }
 
 void ListModel::requestModVersions(ModPlatform::IndexedPack const& current)
@@ -66,8 +66,8 @@ void ListModel::requestModVersions(ModPlatform::IndexedPack const& current)
 
 void ListModel::performPaginatedSearch()
 {
-    QString mcVersion = ((MinecraftInstance*)((ModPage*)parent())->m_instance)->getPackProfile()->getComponentVersion("net.minecraft");
-    bool hasFabric = !((MinecraftInstance*)((ModPage*)parent())->m_instance)
+    QString mcVersion = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile()->getComponentVersion("net.minecraft");
+    bool hasFabric = !(dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))
                           ->getPackProfile()
                           ->getComponentVersion("net.fabricmc.fabric-loader")
                           .isEmpty();
@@ -188,7 +188,7 @@ void ListModel::searchRequestFailed(QString reason)
         QMessageBox::critical(nullptr, tr("Error"),
                               QString("%1 %2").arg(m_parent->displayName()).arg(tr("API version too old!\nPlease update PolyMC!")));
         // self-destruct
-        ((ModDownloadDialog*)((ModPage*)parent())->parentWidget())->reject();
+        (dynamic_cast<ModDownloadDialog*>((dynamic_cast<ModPage*>(parent()))->parentWidget()))->reject();
     }
     jobPtr.reset();
 

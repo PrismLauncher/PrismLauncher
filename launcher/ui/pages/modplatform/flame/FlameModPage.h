@@ -9,17 +9,17 @@ class FlameModPage : public ModPage {
 
    public:
     explicit FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance);
-    virtual ~FlameModPage() = default;
+    ~FlameModPage() override = default;
 
-    inline QString displayName() const override { return tr("CurseForge"); }
-    inline QIcon icon() const override { return APPLICATION->getThemedIcon("flame"); }
-    inline QString id() const override { return "curseforge"; }
-    inline QString helpPage() const override { return "Flame-platform"; }
+    inline auto displayName() const -> QString override { return tr("CurseForge"); }
+    inline auto icon() const -> QIcon override { return APPLICATION->getThemedIcon("flame"); }
+    inline auto id() const -> QString override { return "curseforge"; }
+    inline auto helpPage() const -> QString override { return "Flame-platform"; }
 
-    inline QString debugName() const override { return tr("Flame"); }
-    inline QString metaEntryBase() const override { return "FlameMods"; };
+    inline auto debugName() const -> QString override { return tr("Flame"); }
+    inline auto metaEntryBase() const -> QString override { return "FlameMods"; };
 
-    bool validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const override;
+    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const -> bool override;
 
-    bool shouldDisplay() const override;
+    auto shouldDisplay() const -> bool override;
 };

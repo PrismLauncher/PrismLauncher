@@ -9,17 +9,17 @@ class ListModel : public ModPlatform::ListModel {
 
    public:
     ListModel(FlameModPage* parent) : ModPlatform::ListModel(parent) {}
-;
-    virtual ~ListModel() = default;
+    ~ListModel() override = default;
 
    private:
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
 
-    QJsonArray documentToArray(QJsonDocument& obj) const override;
+    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     static const char* sorts[6]; 
-    inline const char** getSorts() const override { return sorts; };
+    inline auto getSorts() const -> const char** override { return sorts; };
 };
 
 }  // namespace FlameMod

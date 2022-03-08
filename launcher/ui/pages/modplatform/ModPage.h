@@ -14,36 +14,35 @@ namespace Ui {
 class ModPage;
 }
 
-/* This page handles most logic related to browsing and selecting mods to download.
- * By default, the methods provided work with net requests, to fetch data from remote APIs. */
+/* This page handles most logic related to browsing and selecting mods to download. */
 class ModPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
     explicit ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api);
-    virtual ~ModPage();
+    ~ModPage() override;
 
     /* Affects what the user sees */
-    virtual QString displayName() const override = 0;
-    virtual QIcon icon() const override = 0;
-    virtual QString id() const override = 0;
-    virtual QString helpPage() const override = 0;
+    auto displayName() const -> QString override = 0;
+    auto icon() const -> QIcon override = 0;
+    auto id() const -> QString override = 0;
+    auto helpPage() const -> QString override = 0;
 
     /* Used internally */
-    virtual QString metaEntryBase() const = 0;
-    virtual QString debugName() const = 0;
+    virtual auto metaEntryBase() const -> QString = 0;
+    virtual auto debugName() const -> QString = 0;
 
 
-    virtual bool shouldDisplay() const override = 0;
-    virtual bool validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const = 0;
+    auto shouldDisplay() const -> bool override = 0;
+    virtual auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const -> bool = 0;
 
-    const ModAPI* apiProvider() const { return api.get(); };
+    auto apiProvider() const -> const ModAPI* { return api.get(); };
 
-    ModPlatform::IndexedPack& getCurrent() { return current; }
+    auto getCurrent() -> ModPlatform::IndexedPack& { return current; }
     void updateModVersions();
 
     void openedImpl() override;
-    bool eventFilter(QObject* watched, QEvent* event) override;
+    auto eventFilter(QObject* watched, QEvent* event) -> bool override;
 
     BaseInstance* m_instance;
 

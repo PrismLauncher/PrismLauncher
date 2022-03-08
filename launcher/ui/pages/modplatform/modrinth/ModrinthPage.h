@@ -9,17 +9,17 @@ class ModrinthPage : public ModPage {
 
    public:
     explicit ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance);
-    virtual ~ModrinthPage() = default;
+    ~ModrinthPage() override = default;
 
-    inline QString displayName() const override { return tr("Modrinth"); }
-    inline QIcon icon() const override { return APPLICATION->getThemedIcon("modrinth"); }
-    inline QString id() const override { return "modrinth"; }
-    inline QString helpPage() const override { return "Modrinth-platform"; }
+    inline auto displayName() const -> QString override { return tr("Modrinth"); }
+    inline auto icon() const -> QIcon override { return APPLICATION->getThemedIcon("modrinth"); }
+    inline auto id() const -> QString override { return "modrinth"; }
+    inline auto helpPage() const -> QString override { return "Modrinth-platform"; }
 
-    inline QString debugName() const override { return tr("Modrinth"); }
-    inline QString metaEntryBase() const override { return "ModrinthPacks"; };
+    inline auto debugName() const -> QString override { return tr("Modrinth"); }
+    inline auto metaEntryBase() const -> QString override { return "ModrinthPacks"; };
 
-    bool validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const override;
+    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const -> bool override;
 
-    bool shouldDisplay() const override;
+    auto shouldDisplay() const -> bool override;
 };

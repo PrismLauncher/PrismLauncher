@@ -26,7 +26,7 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance)
     connect(ui->modSelectionButton, &QPushButton::clicked, this, &FlameModPage::onModSelected);
 }
 
-bool FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer) const
+auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer) const -> bool
 {
     (void) loaderVer;
     return ver.mcVersion.contains(mineVer);
@@ -35,4 +35,4 @@ bool FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString min
 // I don't know why, but doing this on the parent class makes it so that
 // other mod providers start loading before being selected, at least with
 // my Qt, so we need to implement this in every derived class...
-bool FlameModPage::shouldDisplay() const { return true; }
+auto FlameModPage::shouldDisplay() const -> bool { return true; }

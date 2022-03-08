@@ -4,7 +4,7 @@
 
 class FlameAPI : public NetworkModAPI {
    private:
-    inline QString getModSearchURL(SearchArgs& args) const
+    inline auto getModSearchURL(SearchArgs& args) const -> QString override
     {
         return QString(
                    "https://addons-ecs.forgesvc.net/api/v2/addon/search?"
@@ -25,7 +25,7 @@ class FlameAPI : public NetworkModAPI {
             .arg(args.version);
     };
 
-    inline QString getVersionsURL(const QString& addonId) const
+    inline auto getVersionsURL(const QString& addonId) const -> QString override
     {
         return QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files").arg(addonId);
     };
