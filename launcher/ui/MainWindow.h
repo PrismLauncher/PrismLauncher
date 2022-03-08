@@ -73,6 +73,8 @@ private slots:
 
     void on_actionREDDIT_triggered();
 
+    void on_actionMATRIX_triggered();
+
     void on_actionDISCORD_triggered();
 
     void on_actionCopyInstance_triggered();
