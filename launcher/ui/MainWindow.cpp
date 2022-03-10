@@ -235,6 +235,7 @@ public:
     TranslatedToolButton helpMenuButton;
     TranslatedAction actionReportBug;
     TranslatedAction actionDISCORD;
+    TranslatedAction actionMATRIX;
     TranslatedAction actionREDDIT;
     TranslatedAction actionAbout;
 
@@ -343,13 +344,23 @@ public:
             all_actions.append(&actionReportBug);
             helpMenu->addAction(actionReportBug);
         }
+        
+        if(!BuildConfig.MATRIX_URL.isEmpty()) {
+            actionMATRIX = TranslatedAction(MainWindow);
+            actionMATRIX->setObjectName(QStringLiteral("actionMATRIX"));
+            actionMATRIX->setIcon(APPLICATION->getThemedIcon("matrix"));
+            actionMATRIX.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Matrix"));
+            actionMATRIX.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open %1 Matrix space"));
+            all_actions.append(&actionMATRIX);
+            helpMenu->addAction(actionMATRIX);
+        }
 
         if (!BuildConfig.DISCORD_URL.isEmpty()) {
             actionDISCORD = TranslatedAction(MainWindow);
             actionDISCORD->setObjectName(QStringLiteral("actionDISCORD"));
             actionDISCORD->setIcon(APPLICATION->getThemedIcon("discord"));
             actionDISCORD.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Discord"));
-            actionDISCORD.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open %1 discord voice chat."));
+            actionDISCORD.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open %1 Discord guild."));
             all_actions.append(&actionDISCORD);
             helpMenu->addAction(actionDISCORD);
         }
@@ -1498,6 +1509,11 @@ void MainWindow::on_actionREDDIT_triggered()
 void MainWindow::on_actionDISCORD_triggered()
 {
     DesktopServices::openUrl(QUrl(BuildConfig.DISCORD_URL));
+}
+
+void MainWindow::on_actionMATRIX_triggered()
+{
+    DesktopServices::openUrl(QUrl(BuildConfig.MATRIX_URL));
 }
 
 void MainWindow::on_actionChangeInstIcon_triggered()
