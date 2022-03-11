@@ -152,8 +152,8 @@ ModFolderPage::ModFolderPage(
         ui->actionsToolbar->insertActionBefore(ui->actionAdd, act);
         connect(act, &QAction::triggered, this, &ModFolderPage::on_actionInstall_mods_triggered);
 
-        ui->actionAdd->setText("Add .jar");
-        ui->actionAdd->setToolTip("Add mods via local file");
+        ui->actionAdd->setText(tr("Add .jar"));
+        ui->actionAdd->setToolTip(tr("Add mods via local file"));
     }
 
     ui->actionsToolbar->insertSpacer(ui->actionView_configs);
