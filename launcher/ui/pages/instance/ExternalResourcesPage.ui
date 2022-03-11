@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ModFolderPage</class>
- <widget class="QMainWindow" name="ModFolderPage">
+ <class>ExternalResourcesPage</class>
+ <widget class="QMainWindow" name="ExternalResourcesPage">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -53,7 +53,7 @@
      </widget>
     </item>
     <item row="1" column="1" colspan="3">
-     <widget class="ModListView" name="modTreeView">
+     <widget class="ModListView" name="treeView">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -83,15 +83,15 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionAdd"/>
+   <addaction name="actionAddItem"/>
    <addaction name="separator"/>
-   <addaction name="actionRemove"/>
-   <addaction name="actionEnable"/>
-   <addaction name="actionDisable"/>
-   <addaction name="actionView_configs"/>
-   <addaction name="actionView_Folder"/>
+   <addaction name="actionRemoveItem"/>
+   <addaction name="actionEnableItem"/>
+   <addaction name="actionDisableItem"/>
+   <addaction name="actionViewConfigs"/>
+   <addaction name="actionViewFolder"/>
   </widget>
-  <action name="actionAdd">
+  <action name="actionAddItem">
    <property name="text">
     <string>&amp;Add</string>
    </property>
@@ -99,31 +99,31 @@
     <string>Add</string>
    </property>
   </action>
-  <action name="actionRemove">
+  <action name="actionRemoveItem">
    <property name="text">
     <string>&amp;Remove</string>
    </property>
    <property name="toolTip">
-    <string>Remove selected mods</string>
+    <string>Remove selected item</string>
    </property>
   </action>
-  <action name="actionEnable">
+  <action name="actionEnableItem">
    <property name="text">
     <string>&amp;Enable</string>
    </property>
    <property name="toolTip">
-    <string>Enable selected mods</string>
+    <string>Enable selected item</string>
    </property>
   </action>
-  <action name="actionDisable">
+  <action name="actionDisableItem">
    <property name="text">
     <string>&amp;Disable</string>
    </property>
    <property name="toolTip">
-    <string>Disable selected mods</string>
+    <string>Disable selected item</string>
    </property>
   </action>
-  <action name="actionView_configs">
+  <action name="actionViewConfigs">
    <property name="text">
     <string>View &amp;Configs</string>
    </property>
@@ -131,7 +131,7 @@
     <string>Open the 'config' folder in the system file manager.</string>
    </property>
   </action>
-  <action name="actionView_Folder">
+  <action name="actionViewFolder">
    <property name="text">
     <string>View &amp;Folder</string>
    </property>
@@ -156,7 +156,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>modTreeView</tabstop>
+  <tabstop>treeView</tabstop>
   <tabstop>filterEdit</tabstop>
  </tabstops>
  <resources/>
