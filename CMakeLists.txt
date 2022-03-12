@@ -52,8 +52,8 @@ set(Launcher_HELP_URL "https://polymc.org/wiki/%1" CACHE STRING "URL (with arg %
 
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR    1)
-set(Launcher_VERSION_MINOR    0)
-set(Launcher_VERSION_HOTFIX   6)
+set(Launcher_VERSION_MINOR    1)
+set(Launcher_VERSION_HOTFIX   0)
 
 # Build number
 set(Launcher_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
