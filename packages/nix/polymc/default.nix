@@ -44,7 +44,7 @@ mkDerivation rec {
   src = lib.cleanSource self;
 
   nativeBuildInputs = [ cmake ninja file makeWrapper ];
-  buildInputs = [ qtbase jdk8 zlib ];
+  buildInputs = [ qtbase jdk zlib ];
 
   dontWrapQtApps = true;
 
