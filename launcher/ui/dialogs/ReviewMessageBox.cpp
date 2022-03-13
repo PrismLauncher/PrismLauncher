@@ -23,7 +23,7 @@ void ReviewMessageBox::appendMod(const QString& name, const QString& filename)
     itemTop->setText(0, name);
 
     auto filenameItem = new QTreeWidgetItem(itemTop);
-    filenameItem->setText(0, QString("Filename: %1").arg(filename));
+    filenameItem->setText(0, tr("Filename: %1").arg(filename));
 
     itemTop->insertChildren(0, { filenameItem });
 
