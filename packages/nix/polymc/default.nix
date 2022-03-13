@@ -14,10 +14,11 @@
 , libGL
 , msaClientID ? ""
 
-# flake
+  # flake
 , self
-, submoduleNbt
-, submoduleQuazip
+, version
+, libnbtplusplus
+, quazip
 }:
 
 let
@@ -30,7 +31,7 @@ let
     libXxf86vm
     libpulseaudio
     libGL
-  ]; 
+  ];
 
   # This variable will be passed to Minecraft by PolyMC
   gameLibraryPath = libpath + ":/run/opengl-driver/lib";
@@ -38,7 +39,7 @@ in
 
 mkDerivation rec {
   pname = "polymc";
-  version = "nightly";
+  inherit version;
 
   src = lib.cleanSource self;
 
@@ -57,8 +58,8 @@ mkDerivation rec {
     # Copy submodules inputs
     rm -rf source/libraries/{libnbtplusplus,quazip}
     mkdir source/libraries/{libnbtplusplus,quazip}
-    cp -a ${submoduleNbt}/* source/libraries/libnbtplusplus
-    cp -a ${submoduleQuazip}/* source/libraries/quazip
+    cp -a ${libnbtplusplus}/* source/libraries/libnbtplusplus
+    cp -a ${quazip}/* source/libraries/quazip
     chmod a+r+w source/libraries/{libnbtplusplus,quazip}/*
   '';
 
