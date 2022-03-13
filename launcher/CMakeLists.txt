@@ -797,6 +797,8 @@ SET(LAUNCHER_SOURCES
     ui/pagedialog/PageDialog.h
     ui/dialogs/ProgressDialog.cpp
     ui/dialogs/ProgressDialog.h
+    ui/dialogs/ReviewMessageBox.cpp
+    ui/dialogs/ReviewMessageBox.h
     ui/dialogs/UpdateDialog.cpp
     ui/dialogs/UpdateDialog.h
     ui/dialogs/VersionSelectDialog.cpp
@@ -905,6 +907,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/dialogs/AboutDialog.ui
     ui/dialogs/LoginDialog.ui
     ui/dialogs/EditAccountDialog.ui
+    ui/dialogs/ReviewMessageBox.ui
 )
 
 qt5_add_resources(LAUNCHER_RESOURCES
