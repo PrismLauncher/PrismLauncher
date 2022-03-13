@@ -11,7 +11,7 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <url type="homepage">https://polymc.org/</url>
-  <url type="help">https://github.com/PolyMC/PolyMC#help--support</url>
+  <url type="help">https://polymc.org/wiki/</url>
   <description>
     <p>PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.</p>
     <p>Features:</p>
@@ -28,23 +28,23 @@
   <screenshots>
     <screenshot type="default">
       <caption>The main PolyMC window</caption>
-      <image type="source" width="1011" height="994">https://polymc.github.io/assets/img/screenshots/LauncherDark.png</image>
+      <image type="source" width="1011" height="994">https://polymc.org/img/screenshots/LauncherDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Modpack installation</caption>
-      <image type="source" width="911" height="682">https://polymc.github.io/assets/img/screenshots/ModpackInstallDark.png</image>
+      <image type="source" width="911" height="682">https://polymc.org/img/screenshots/ModpackInstallDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Mod installation</caption>
-      <image type="source" width="987" height="723">https://polymc.github.io/assets/img/screenshots/ModInstallDark.png</image>
+      <image type="source" width="987" height="723">https://polymc.org/img/screenshots/ModInstallDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Instance management</caption>
-      <image type="source" width="902" height="920">https://polymc.github.io/assets/img/screenshots/PropertiesDark.png</image>
+      <image type="source" width="902" height="920">https://polymc.org/img/screenshots/PropertiesDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Cat :)</caption>
-      <image type="source" width="1011" height="994">https://polymc.github.io/assets/img/screenshots/LauncherCatDark.png</image>
+      <image type="source" width="1011" height="994">https://polymc.org/img/screenshots/LauncherCatDark.png</image>
     </screenshot>
   </screenshots>
   <releases>
