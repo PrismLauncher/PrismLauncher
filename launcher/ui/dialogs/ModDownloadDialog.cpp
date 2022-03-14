@@ -5,7 +5,7 @@
 #include <InstanceList.h>
 
 #include "ProgressDialog.h"
-#include "CustomMessageBox.h"
+#include "ReviewMessageBox.h"
 
 #include <QLayout>
 #include <QPushButton>
@@ -75,27 +75,16 @@ void ModDownloadDialog::confirm()
     auto keys = modTask.keys();
     keys.sort(Qt::CaseInsensitive);
 
-    auto info = QString(tr("You're about to download the following mods:"));
-    info.append("\n\n");
-    for(auto task : keys){
-        info.append(task);
-        info.append("\n    --> ");
-        info.append(tr("File name: "));
-        info.append(modTask.find(task).value()->getFilename());
-        info.append('\n');
-    }
-
-    auto confirm_dialog = CustomMessageBox::selectable(
+    auto confirm_dialog = ReviewMessageBox::create(
         this,
-        tr("Confirm mods to download"),
-        info,
-        QMessageBox::NoIcon,
-        QMessageBox::Cancel | QMessageBox::Ok,
-        QMessageBox::Ok
+        tr("Confirm mods to download")
     );
 
-    auto AcceptButton = confirm_dialog->button(QMessageBox::Ok);
-    connect(AcceptButton, &QPushButton::clicked, this, &ModDownloadDialog::accept);
+    for(auto task : keys){
+        confirm_dialog->appendMod(task, modTask.find(task).value()->getFilename());
+    }
+
+    connect(confirm_dialog, &QDialog::accepted, this, &ModDownloadDialog::accept);
 
     confirm_dialog->open();
 }
