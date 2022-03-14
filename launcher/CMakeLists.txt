@@ -174,13 +174,6 @@ add_unit_test(DownloadTask
     DATA updater/testdata
     )
 
-# Rarely used notifications
-set(NOTIFICATIONS_SOURCES
-    # Notifications - short warning messages
-    notifications/NotificationChecker.h
-    notifications/NotificationChecker.cpp
-)
-
 # Backend for the news bar... there's usually no news.
 set(NEWS_SOURCES
     # News System
@@ -561,7 +554,6 @@ set(LOGIC_SOURCES
     ${NET_SOURCES}
     ${LAUNCH_SOURCES}
     ${UPDATE_SOURCES}
-    ${NOTIFICATIONS_SOURCES}
     ${NEWS_SOURCES}
     ${MINECRAFT_SOURCES}
     ${SCREENSHOTS_SOURCES}
@@ -791,8 +783,6 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/NewComponentDialog.h
     ui/dialogs/NewInstanceDialog.cpp
     ui/dialogs/NewInstanceDialog.h
-    ui/dialogs/NotificationDialog.cpp
-    ui/dialogs/NotificationDialog.h
     ui/pagedialog/PageDialog.cpp
     ui/pagedialog/PageDialog.h
     ui/dialogs/ProgressDialog.cpp
@@ -895,7 +885,6 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/dialogs/ProfileSetupDialog.ui
     ui/dialogs/ProgressDialog.ui
     ui/dialogs/NewInstanceDialog.ui
-    ui/dialogs/NotificationDialog.ui
     ui/dialogs/UpdateDialog.ui
     ui/dialogs/NewComponentDialog.ui
     ui/dialogs/ProfileSelectDialog.ui

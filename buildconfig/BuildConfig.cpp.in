@@ -25,8 +25,6 @@ Config::Config()
 
     BUILD_PLATFORM = "@Launcher_BUILD_PLATFORM@";
     UPDATER_BASE = "@Launcher_UPDATER_BASE@";
-    NOTIFICATION_URL = "@Launcher_NOTIFICATION_URL@";
-    FULL_VERSION_STR = "@Launcher_VERSION_MAJOR@.@Launcher_VERSION_MINOR@.@Launcher_VERSION_BUILD@";
 
     GIT_COMMIT = "@Launcher_GIT_COMMIT@";
     GIT_REFSPEC = "@Launcher_GIT_REFSPEC@";
