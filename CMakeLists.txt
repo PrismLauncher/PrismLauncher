@@ -204,7 +204,8 @@ elseif(UNIX)
         set(LAUNCHER_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
         set(LAUNCHER_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
 
-        set(Launcher_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}")
+        # jars path is determined on runtime, relative to "Application root path", generally /usr for Launcher_PORTABLE=0
+        set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_JARS_LOCATION=${JARS_DEST_DIR}")
 
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
