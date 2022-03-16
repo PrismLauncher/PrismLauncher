@@ -30,7 +30,11 @@ Config::Config()
 
     GIT_COMMIT = "@Launcher_GIT_COMMIT@";
     GIT_REFSPEC = "@Launcher_GIT_REFSPEC@";
-    if(GIT_REFSPEC.startsWith("refs/heads/"))
+    if (GIT_REFSPEC == QStringLiteral("GITDIR-NOTFOUND"))
+    {
+        VERSION_CHANNEL = QStringLiteral("stable");
+    }
+    else if(GIT_REFSPEC.startsWith("refs/heads/"))
     {
         VERSION_CHANNEL = GIT_REFSPEC;
         VERSION_CHANNEL.remove("refs/heads/");
