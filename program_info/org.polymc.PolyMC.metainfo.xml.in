@@ -9,7 +9,7 @@
   <developer_name>PolyMC Team</developer_name>
   <summary>A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once</summary>
   <metadata_license>CC0-1.0</metadata_license>
-  <project_license>GPL-3.0-or-later</project_license>
+  <project_license>GPL-3.0-only</project_license>
   <url type="homepage">https://polymc.org/</url>
   <url type="help">https://polymc.org/wiki/</url>
   <description>
