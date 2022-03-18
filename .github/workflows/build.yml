@@ -100,6 +100,7 @@ jobs:
       - name: Install System Qt on Linux
         if: runner.os == 'Linux' && matrix.app_image != true
         run: |
+          sudo apt-get -y update
           sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
 
       - name: Install Ninja

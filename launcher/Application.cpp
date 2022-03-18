@@ -515,8 +515,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         FS::updateTimestamp(m_rootPath);
 #endif
 
-#ifdef MULTIMC_JARS_LOCATION
-        m_jarsPath = TOSTRING(MULTIMC_JARS_LOCATION);
+#ifdef LAUNCHER_JARS_LOCATION
+        m_jarsPath = TOSTRING(LAUNCHER_JARS_LOCATION);
 #endif
 
         qDebug() << BuildConfig.LAUNCHER_DISPLAYNAME << ", (c) 2013-2021 " << BuildConfig.LAUNCHER_COPYRIGHT;
@@ -574,9 +574,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // Theming
         m_settings->registerSetting("IconTheme", QString("pe_colored"));
         m_settings->registerSetting("ApplicationTheme", QString("system"));
-
-        // Notifications
-        m_settings->registerSetting("ShownNotifications", QString());
 
         // Remembered state
         m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
@@ -1494,10 +1491,10 @@ QString Application::getJarsPath()
     {
         return FS::PathCombine(QCoreApplication::applicationDirPath(), "jars");
     }
-    return m_jarsPath;
+    return FS::PathCombine(m_rootPath, m_jarsPath);
 }
 
-QString Application::getMSAClientID() 
+QString Application::getMSAClientID()
 {
     QString clientIDOverride = m_settings->get("MSAClientIDOverride").toString();
     if (!clientIDOverride.isEmpty()) {

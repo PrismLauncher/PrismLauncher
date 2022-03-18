@@ -46,25 +46,23 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 ##################################### Set Application options #####################################
 
 ######## Set URLs ########
-set(Launcher_NEWS_RSS_URL "https://polymc.github.io/feed/feed.xml" CACHE STRING "URL to fetch PolyMC's news RSS feed from.")
-set(Launcher_NEWS_OPEN_URL "https://polymc.github.io/news/" CACHE STRING "URL that gets opened when the user clicks 'More News'")
+set(Launcher_NEWS_RSS_URL "https://polymc.org/feed/feed.xml" CACHE STRING "URL to fetch PolyMC's news RSS feed from.")
+set(Launcher_NEWS_OPEN_URL "https://polymc.org/news" CACHE STRING "URL that gets opened when the user clicks 'More News'")
+set(Launcher_HELP_URL "https://polymc.org/wiki/%1" CACHE STRING "URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help")
 
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR    1)
-set(Launcher_VERSION_MINOR    0)
-set(Launcher_VERSION_HOTFIX   6)
+set(Launcher_VERSION_MINOR    1)
+set(Launcher_VERSION_HOTFIX   0)
 
 # Build number
 set(Launcher_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
 
 # Build platform.
-set(Launcher_BUILD_PLATFORM "" CACHE STRING "A short string identifying the platform that this build was built for. Only used by the notification system and to display in the about dialog.")
+set(Launcher_BUILD_PLATFORM "" CACHE STRING "A short string identifying the platform that this build was built for. Only used to display in the about dialog.")
 
 # Channel list URL
 set(Launcher_UPDATER_BASE "" CACHE STRING "Base URL for the updater.")
-
-# Notification URL
-set(Launcher_NOTIFICATION_URL "" CACHE STRING "URL for checking for notifications.")
 
 # The metadata server
 set(Launcher_META_URL "https://meta.polymc.org/v1/" CACHE STRING "URL to fetch Launcher's meta files from.")
@@ -81,8 +79,13 @@ set(Launcher_BUG_TRACKER_URL "https://github.com/PolyMC/PolyMC/issues" CACHE STR
 # Translations Platform URL
 set(Launcher_TRANSLATIONS_URL "https://hosted.weblate.org/projects/polymc/polymc/" CACHE STRING "URL for the translations platform.")
 
+# Matrix Space
+set(Launcher_MATRIX_URL "https://matrix.to/#/#polymc:polymc.org" CACHE STRING "URL to the Matrix Space")
+
 # Discord URL
 set(Launcher_DISCORD_URL "https://discord.gg/Z52pwxWCHP" CACHE STRING "URL for the Discord guild.")
+
+
 
 # Subreddit URL
 set(Launcher_SUBREDDIT_URL "" CACHE STRING "URL for the subreddit.")
@@ -164,13 +167,13 @@ if(UNIX AND APPLE)
 
     # Mac bundle settings
     set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_Name}")
-    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_Name}:  Minecraft launcher and management utility.")
+    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_Name}: A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.")
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.polymc.${Launcher_Name}")
     set(MACOSX_BUNDLE_BUNDLE_VERSION "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}.${Launcher_VERSION_BUILD}")
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}.${Launcher_VERSION_BUILD}")
     set(MACOSX_BUNDLE_LONG_VERSION_STRING "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}.${Launcher_VERSION_BUILD}")
     set(MACOSX_BUNDLE_ICON_FILE ${Launcher_Name}.icns)
-    set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2015-2021 ${Launcher_Copyright}")
+    set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2021-2022 ${Launcher_Copyright}")
 
     # directories to look for dependencies
     set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -201,7 +204,8 @@ elseif(UNIX)
         set(LAUNCHER_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
         set(LAUNCHER_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
 
-        set(Launcher_APP_BINARY_DEFS "-DMULTIMC_JARS_LOCATION=${CMAKE_INSTALL_PREFIX}/${JARS_DEST_DIR}")
+        # jars path is determined on runtime, relative to "Application root path", generally /usr for Launcher_PORTABLE=0
+        set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_JARS_LOCATION=${JARS_DEST_DIR}")
 
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})

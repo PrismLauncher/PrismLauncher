@@ -234,11 +234,6 @@ void LauncherPage::applySettings()
 {
     auto s = APPLICATION->settings();
 
-    if (ui->resetNotificationsBtn->isChecked())
-    {
-        s->set("ShownNotifications", QString());
-    }
-
     // Updates
     s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
     s->set("UpdateChannel", m_currentUpdateChannel);
@@ -247,16 +242,16 @@ void LauncherPage::applySettings()
     switch (ui->themeComboBox->currentIndex())
     {
     case 0:
-        s->set("IconTheme", "pe_dark");
+        s->set("IconTheme", "pe_colored");
         break;
     case 1:
         s->set("IconTheme", "pe_light");
         break;
     case 2:
-        s->set("IconTheme", "pe_blue");
+        s->set("IconTheme", "pe_dark");
         break;
     case 3:
-        s->set("IconTheme", "pe_colored");
+        s->set("IconTheme", "pe_blue");
         break;
     case 4:
         s->set("IconTheme", "OSX");
@@ -268,10 +263,10 @@ void LauncherPage::applySettings()
         s->set("IconTheme", "flat");
         break;
     case 7:
-        s->set("IconTheme", "custom");
+        s->set("IconTheme", "multimc");
         break;
     case 8:
-        s->set("IconTheme", "multimc");
+        s->set("IconTheme", "custom");
         break;
     }
 
@@ -324,7 +319,7 @@ void LauncherPage::loadSettings()
     m_currentUpdateChannel = s->get("UpdateChannel").toString();
     //FIXME: make generic
     auto theme = s->get("IconTheme").toString();
-    if (theme == "pe_dark")
+    if (theme == "pe_colored")
     {
         ui->themeComboBox->setCurrentIndex(0);
     }
@@ -332,11 +327,11 @@ void LauncherPage::loadSettings()
     {
         ui->themeComboBox->setCurrentIndex(1);
     }
-    else if (theme == "pe_blue")
+    else if (theme == "pe_dark")
     {
         ui->themeComboBox->setCurrentIndex(2);
     }
-    else if (theme == "pe_colored")
+    else if (theme == "pe_blue")
     {
         ui->themeComboBox->setCurrentIndex(3);
     }

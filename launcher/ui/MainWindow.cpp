@@ -59,7 +59,6 @@
 #include <net/NetJob.h>
 #include <net/Download.h>
 #include <news/NewsChecker.h>
-#include <notifications/NotificationChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/DownloadTask.h>
 #include <updater/UpdateChecker.h>
@@ -82,7 +81,6 @@
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/UpdateDialog.h"
 #include "ui/dialogs/EditAccountDialog.h"
-#include "ui/dialogs/NotificationDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 
 #include "UpdateController.h"
@@ -235,6 +233,7 @@ public:
     TranslatedToolButton helpMenuButton;
     TranslatedAction actionReportBug;
     TranslatedAction actionDISCORD;
+    TranslatedAction actionMATRIX;
     TranslatedAction actionREDDIT;
     TranslatedAction actionAbout;
 
@@ -343,13 +342,23 @@ public:
             all_actions.append(&actionReportBug);
             helpMenu->addAction(actionReportBug);
         }
+        
+        if(!BuildConfig.MATRIX_URL.isEmpty()) {
+            actionMATRIX = TranslatedAction(MainWindow);
+            actionMATRIX->setObjectName(QStringLiteral("actionMATRIX"));
+            actionMATRIX->setIcon(APPLICATION->getThemedIcon("matrix"));
+            actionMATRIX.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Matrix"));
+            actionMATRIX.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open %1 Matrix space"));
+            all_actions.append(&actionMATRIX);
+            helpMenu->addAction(actionMATRIX);
+        }
 
         if (!BuildConfig.DISCORD_URL.isEmpty()) {
             actionDISCORD = TranslatedAction(MainWindow);
             actionDISCORD->setObjectName(QStringLiteral("actionDISCORD"));
             actionDISCORD->setIcon(APPLICATION->getThemedIcon("discord"));
             actionDISCORD.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Discord"));
-            actionDISCORD.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open %1 discord voice chat."));
+            actionDISCORD.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open %1 Discord guild."));
             all_actions.append(&actionDISCORD);
             helpMenu->addAction(actionDISCORD);
         }
@@ -835,17 +844,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         }
     }
 
-    {
-        auto checker = new NotificationChecker();
-        checker->setNotificationsUrl(QUrl(BuildConfig.NOTIFICATION_URL));
-        checker->setApplicationChannel(BuildConfig.VERSION_CHANNEL);
-        checker->setApplicationPlatform(BuildConfig.BUILD_PLATFORM);
-        checker->setApplicationFullVersion(BuildConfig.FULL_VERSION_STR);
-        m_notificationChecker.reset(checker);
-        connect(m_notificationChecker.get(), &NotificationChecker::notificationCheckFinished, this, &MainWindow::notificationsChanged);
-        checker->checkForNotifications();
-    }
-
     setSelectedInstanceById(APPLICATION->settings()->get("SelectedInstance").toString());
 
     // removing this looks stupid
@@ -1257,24 +1255,6 @@ QString intListToString(const QList<int> &list)
     }
     return slist.join(',');
 }
-void MainWindow::notificationsChanged()
-{
-    QList<NotificationChecker::NotificationEntry> entries = m_notificationChecker->notificationEntries();
-    QList<int> shownNotifications = stringToIntList(APPLICATION->settings()->get("ShownNotifications").toString());
-    for (auto it = entries.begin(); it != entries.end(); ++it)
-    {
-        NotificationChecker::NotificationEntry entry = *it;
-        if (!shownNotifications.contains(entry.id))
-        {
-            NotificationDialog dialog(entry, this);
-            if (dialog.exec() == NotificationDialog::DontShowAgain)
-            {
-                shownNotifications.append(entry.id);
-            }
-        }
-    }
-    APPLICATION->settings()->set("ShownNotifications", intListToString(shownNotifications));
-}
 
 void MainWindow::downloadUpdates(GoUpdate::Status status)
 {
@@ -1498,6 +1478,11 @@ void MainWindow::on_actionREDDIT_triggered()
 void MainWindow::on_actionDISCORD_triggered()
 {
     DesktopServices::openUrl(QUrl(BuildConfig.DISCORD_URL));
+}
+
+void MainWindow::on_actionMATRIX_triggered()
+{
+    DesktopServices::openUrl(QUrl(BuildConfig.MATRIX_URL));
 }
 
 void MainWindow::on_actionChangeInstIcon_triggered()

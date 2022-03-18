@@ -46,13 +46,6 @@ public:
     /// User-Agent to use for uncached requests.
     QString USER_AGENT_UNCACHED;
 
-
-    /// URL for notifications
-    QString NOTIFICATION_URL;
-
-    /// Used for matching notifications
-    QString FULL_VERSION_STR;
-
     /// The git commit hash of this build
     QString GIT_COMMIT;
 
@@ -74,6 +67,11 @@ public:
     QString NEWS_OPEN_URL;
 
     /**
+     * URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help
+     */
+    QString HELP_URL;
+
+    /**
      * Client ID you can get from Imgur when you register an application
      */
     QString IMGUR_CLIENT_ID;
@@ -90,6 +88,7 @@ public:
 
     QString BUG_TRACKER_URL;
     QString TRANSLATIONS_URL;
+    QString MATRIX_URL;
     QString DISCORD_URL;
     QString SUBREDDIT_URL;
 

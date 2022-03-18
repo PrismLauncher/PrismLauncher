@@ -25,12 +25,14 @@ Config::Config()
 
     BUILD_PLATFORM = "@Launcher_BUILD_PLATFORM@";
     UPDATER_BASE = "@Launcher_UPDATER_BASE@";
-    NOTIFICATION_URL = "@Launcher_NOTIFICATION_URL@";
-    FULL_VERSION_STR = "@Launcher_VERSION_MAJOR@.@Launcher_VERSION_MINOR@.@Launcher_VERSION_BUILD@";
 
     GIT_COMMIT = "@Launcher_GIT_COMMIT@";
     GIT_REFSPEC = "@Launcher_GIT_REFSPEC@";
-    if(GIT_REFSPEC.startsWith("refs/heads/"))
+    if (GIT_REFSPEC == QStringLiteral("GITDIR-NOTFOUND"))
+    {
+        VERSION_CHANNEL = QStringLiteral("stable");
+    }
+    else if(GIT_REFSPEC.startsWith("refs/heads/"))
     {
         VERSION_CHANNEL = GIT_REFSPEC;
         VERSION_CHANNEL.remove("refs/heads/");
@@ -50,12 +52,14 @@ Config::Config()
     VERSION_STR = "@Launcher_VERSION_STRING@";
     NEWS_RSS_URL = "@Launcher_NEWS_RSS_URL@";
     NEWS_OPEN_URL = "@Launcher_NEWS_OPEN_URL@";
+    HELP_URL = "@Launcher_HELP_URL@";
     IMGUR_CLIENT_ID = "@Launcher_IMGUR_CLIENT_ID@";
     MSA_CLIENT_ID = "@Launcher_MSA_CLIENT_ID@";
     META_URL = "@Launcher_META_URL@";
 
     BUG_TRACKER_URL = "@Launcher_BUG_TRACKER_URL@";
     TRANSLATIONS_URL = "@Launcher_TRANSLATIONS_URL@";
+    MATRIX_URL = "@Launcher_MATRIX_URL@";
     DISCORD_URL = "@Launcher_DISCORD_URL@";
     SUBREDDIT_URL = "@Launcher_SUBREDDIT_URL@";
 }

@@ -185,25 +185,6 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <widget class="QGroupBox" name="groupBox_3">
-         <property name="title">
-          <string>Launcher notifications</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
-          <item>
-           <widget class="QPushButton" name="resetNotificationsBtn">
-            <property name="text">
-             <string>Reset hidden notifications</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
         <widget class="QGroupBox" name="sortingModeBox">
          <property name="enabled">
           <bool>true</bool>
@@ -264,7 +245,7 @@
             </property>
             <item>
              <property name="text">
-              <string>Simple (Dark Icons)</string>
+              <string>Simple (Colored Icons)</string>
              </property>
             </item>
             <item>
@@ -274,12 +255,12 @@
             </item>
             <item>
              <property name="text">
-              <string>Simple (Blue Icons)</string>
+              <string>Simple (Dark Icons)</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Simple (Colored Icons)</string>
+              <string>Simple (Blue Icons)</string>
              </property>
             </item>
             <item>
@@ -294,17 +275,17 @@
             </item>
             <item>
              <property name="text">
-              <string notr="true">Flat</string>
+              <string>Flat</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Legacy</string>
              </property>
             </item>
             <item>
              <property name="text">
               <string>Custom</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>MultiMC</string>
              </property>
             </item>
            </widget>
@@ -499,7 +480,6 @@
   <tabstop>modsDirBrowseBtn</tabstop>
   <tabstop>iconsDirTextBox</tabstop>
   <tabstop>iconsDirBrowseBtn</tabstop>
-  <tabstop>resetNotificationsBtn</tabstop>
   <tabstop>sortLastLaunchedBtn</tabstop>
   <tabstop>sortByNameBtn</tabstop>
   <tabstop>themeComboBox</tabstop>
