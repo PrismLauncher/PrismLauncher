@@ -42,6 +42,15 @@ void OfflineLoginDialog::setUserInputsEnabled(bool enable)
     ui->buttonBox->setEnabled(enable);
 }
 
+void OfflineLoginDialog::on_allowLongUsernames_stateChanged(int value)
+{
+    if (value == Qt::Checked) {
+        ui->userTextBox->setMaxLength(INT_MAX);
+    } else {
+        ui->userTextBox->setMaxLength(16);
+    }
+}
+
 // Enable the OK button only when the textbox contains something.
 void OfflineLoginDialog::on_userTextBox_textEdited(const QString &newText)
 {
