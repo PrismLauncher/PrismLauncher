@@ -64,6 +64,12 @@ jobs:
             ninja:p
             qt5:p
 
+      - name: Set short version
+        shell: bash
+        run: |
+          ver_short=`git rev-parse --short HEAD`
+          echo "VERSION=$ver_short" >> $GITHUB_ENV
+
       - name: Install OpenJDK
         uses: actions/setup-java@v3
         with:
@@ -231,7 +237,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v2
         with:
-          name: PolyMC-${{ matrix.name }}-${{ inputs.build_type }}
+          name: PolyMC-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: ${{ env.INSTALL_DIR }}/**
 
       - name: Upload package for macOS
