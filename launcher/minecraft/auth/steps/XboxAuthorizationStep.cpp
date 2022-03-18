@@ -65,7 +65,7 @@ void XboxAuthorizationStep::onRequestDone(
         if(!processSTSError(error, data, headers)) {
             emit finished(
                 AccountTaskState::STATE_FAILED_SOFT,
-                tr("Failed to get authorization for %1 services. Error %1.").arg(m_authorizationKind, error)
+                tr("Failed to get authorization for %1 services. Error %2.").arg(m_authorizationKind, error)
             );
         }
         return;
