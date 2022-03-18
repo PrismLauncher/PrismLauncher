@@ -283,7 +283,7 @@ void InstanceImportTask::processFlame()
             }
             else
             {
-                logWarning(tr("Could not map recommended forge version for Minecraft %1").arg(mcVersion));
+                logWarning(tr("Could not map recommended Forge version for Minecraft %1").arg(mcVersion));
             }
         }
         components->setComponentVersion("net.minecraftforge", forgeVersion);

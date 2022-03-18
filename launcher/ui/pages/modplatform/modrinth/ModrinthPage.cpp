@@ -27,7 +27,7 @@ ModrinthPage::ModrinthPage(ModDownloadDialog *dialog, BaseInstance *instance)
   ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
   // index is used to set the sorting with the modrinth api
-  ui->sortByBox->addItem(tr("Sort by Relevence"));
+  ui->sortByBox->addItem(tr("Sort by Relevance"));
   ui->sortByBox->addItem(tr("Sort by Downloads"));
   ui->sortByBox->addItem(tr("Sort by Follows"));
   ui->sortByBox->addItem(tr("Sort by last updated"));
@@ -139,7 +139,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second) {
         ui->versionSelectionBox->addItem(version.version, QVariant(i));
       }
       if (ui->versionSelectionBox->count() == 0) {
-        ui->versionSelectionBox->addItem(tr("No Valid Version found !"),
+        ui->versionSelectionBox->addItem(tr("No valid version found."),
                                          QVariant(-1));
       }
 
@@ -159,7 +159,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second) {
                                        QVariant(i));
     }
     if (ui->versionSelectionBox->count() == 0) {
-      ui->versionSelectionBox->addItem(tr("No Valid Version found !"),
+      ui->versionSelectionBox->addItem(tr("No valid version found."),
                                        QVariant(-1));
     }
 

@@ -565,7 +565,7 @@ public:
         actionViewSelectedMCFolder = TranslatedAction(MainWindow);
         actionViewSelectedMCFolder->setObjectName(QStringLiteral("actionViewSelectedMCFolder"));
         actionViewSelectedMCFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Minecraft Folder"));
-        actionViewSelectedMCFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's minecraft folder in a file browser."));
+        actionViewSelectedMCFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's Minecraft folder in a file browser."));
         all_actions.append(&actionViewSelectedMCFolder);
         instanceToolBar->addAction(actionViewSelectedMCFolder);
 
@@ -603,7 +603,7 @@ public:
 
         actionDeleteInstance = TranslatedAction(MainWindow);
         actionDeleteInstance->setObjectName(QStringLiteral("actionDeleteInstance"));
-        actionDeleteInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Delete"));
+        actionDeleteInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Delete Instance"));
         actionDeleteInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Delete the selected instance."));
         all_actions.append(&actionDeleteInstance);
         instanceToolBar->addAction(actionDeleteInstance);
@@ -1567,7 +1567,7 @@ void MainWindow::deleteGroup()
     QString groupName = map["group"].toString();
     if(!groupName.isEmpty())
     {
-        auto reply = QMessageBox::question(this, tr("Delete group"), tr("Are you sure you want to delete the group %1")
+        auto reply = QMessageBox::question(this, tr("Delete group"), tr("Are you sure you want to delete the group %1?")
             .arg(groupName), QMessageBox::Yes | QMessageBox::No);
         if(reply == QMessageBox::Yes)
         {
