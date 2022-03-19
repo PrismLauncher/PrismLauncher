@@ -40,7 +40,7 @@ public:
     virtual ~FtbPage();
     virtual QString displayName() const override
     {
-        return tr("FTB");
+        return "FTB";
     }
     virtual QIcon icon() const override
     {

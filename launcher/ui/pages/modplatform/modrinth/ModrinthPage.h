@@ -27,7 +27,7 @@ public:
     virtual ~ModrinthPage();
     virtual QString displayName() const override
     {
-        return tr("Modrinth");
+        return "Modrinth";
     }
     virtual QIcon icon() const override
     {

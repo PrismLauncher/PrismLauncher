@@ -42,7 +42,7 @@ public:
     virtual ~FlamePage();
     virtual QString displayName() const override
     {
-        return tr("CurseForge");
+        return "CurseForge";
     }
     virtual QIcon icon() const override
     {
