@@ -155,6 +155,10 @@ add_subdirectory(program_info)
 # Install the build results according to platform
 set(Launcher_PORTABLE 1 CACHE BOOL "The type of installation (Portable or System)")
 
+if (Launcher_PORTABLE)
+    # launcher/Application.cpp will use this value
+    set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_PORTABLE")
+endif()
 
 if(UNIX AND APPLE)
     set(BINARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
@@ -193,9 +197,6 @@ elseif(UNIX)
         set(LIBRARY_DEST_DIR "bin")
         set(BUNDLE_DEST_DIR ".")
         set(JARS_DEST_DIR "bin/jars")
-
-        # launcher/Application.cpp will use this value
-        set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_PORTABLE")
 
         # Install basic runner script
         configure_file(launcher/Launcher.in "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" @ONLY)
