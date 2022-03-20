@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -378,4 +379,5 @@ void InstanceSettingsPage::checkerFinished()
 void InstanceSettingsPage::retranslate()
 {
     ui->retranslateUi(this);
+    ui->customCommands->retranslate();  // TODO: why is this seperate from the others?
 }
