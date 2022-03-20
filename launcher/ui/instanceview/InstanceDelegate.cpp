@@ -405,6 +405,8 @@ void ListViewDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, 
     QString text = realeditor->toPlainText();
     text.replace(QChar('\n'), QChar(' '));
     text = text.trimmed();
+    // Prevent instance names longer than 128 chars
+    text.truncate(128);
     if(text.size() != 0)
     {
         model->setData(index, text);
