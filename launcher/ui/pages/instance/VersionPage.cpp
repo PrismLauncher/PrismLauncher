@@ -212,6 +212,8 @@ void VersionPage::updateVersionControls()
     // FIXME: this is a dirty hack
     auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
 
+    ui->actionInstall_Forge->setEnabled(controlsEnabled);
+
     bool supportsFabric = minecraftVersion >= Version("1.14");
     ui->actionInstall_Fabric->setEnabled(controlsEnabled && supportsFabric);
 
