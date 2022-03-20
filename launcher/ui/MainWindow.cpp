@@ -273,8 +273,8 @@ public:
     {
         mainToolBar = TranslatedToolbar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
-        mainToolBar->setMovable(false);
-        mainToolBar->setAllowedAreas(Qt::TopToolBarArea);
+        mainToolBar->setMovable(true);
+        mainToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         mainToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         mainToolBar->setFloatable(false);
         mainToolBar.setWindowTitleId(QT_TRANSLATE_NOOP("MainWindow", "Main Toolbar"));
@@ -442,8 +442,8 @@ public:
     {
         newsToolBar = TranslatedToolbar(MainWindow);
         newsToolBar->setObjectName(QStringLiteral("newsToolBar"));
-        newsToolBar->setMovable(false);
-        newsToolBar->setAllowedAreas(Qt::BottomToolBarArea);
+        newsToolBar->setMovable(true);
+        newsToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         newsToolBar->setIconSize(QSize(16, 16));
         newsToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         newsToolBar->setFloatable(false);
@@ -467,6 +467,7 @@ public:
         instanceToolBar->setObjectName(QStringLiteral("instanceToolBar"));
         // disabled until we have an instance selected
         instanceToolBar->setEnabled(false);
+        instanceToolBar->setMovable(true);
         instanceToolBar->setAllowedAreas(Qt::LeftToolBarArea | Qt::RightToolBarArea);
         instanceToolBar->setToolButtonStyle(Qt::ToolButtonTextOnly);
         instanceToolBar->setFloatable(false);
