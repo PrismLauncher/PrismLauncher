@@ -244,10 +244,7 @@ void ModFolderPage::on_RunningState_changed(bool running)
         return;
     }
     m_controlsEnabled = !running;
-    ui->actionAdd->setEnabled(m_controlsEnabled);
-    ui->actionDisable->setEnabled(m_controlsEnabled);
-    ui->actionEnable->setEnabled(m_controlsEnabled);
-    ui->actionRemove->setEnabled(m_controlsEnabled);
+    ui->actionsToolbar->setEnabled(m_controlsEnabled);
 }
 
 bool ModFolderPage::shouldDisplay() const
