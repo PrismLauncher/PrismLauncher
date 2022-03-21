@@ -287,7 +287,7 @@ void JavaSettingsWidget::on_javaStatusBtn_clicked()
             break;
         case JavaStatus::DoesNotStart:
         {
-            text += QObject::tr("The specified java binary didn't start properly.<br />");
+            text += QObject::tr("The specified Java binary didn't start properly.<br />");
             auto htmlError = m_result.errorLog;
             if(!htmlError.isEmpty())
             {
@@ -299,7 +299,7 @@ void JavaSettingsWidget::on_javaStatusBtn_clicked()
         }
         case JavaStatus::ReturnedInvalidData:
         {
-            text += QObject::tr("The specified java binary returned unexpected results:<br />");
+            text += QObject::tr("The specified Java binary returned unexpected results:<br />");
             auto htmlOut = m_result.outLog;
             if(!htmlOut.isEmpty())
             {

@@ -62,7 +62,7 @@ public:
     virtual ~TechnicPage();
     virtual QString displayName() const override
     {
-        return tr("Technic");
+        return "Technic";
     }
     virtual QIcon icon() const override
     {

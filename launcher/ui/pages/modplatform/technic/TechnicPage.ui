@@ -29,7 +29,7 @@
       <item>
        <widget class="QLineEdit" name="searchEdit">
         <property name="placeholderText">
-         <string>Search and filter ...</string>
+         <string>Search and filter...</string>
         </property>
        </widget>
       </item>

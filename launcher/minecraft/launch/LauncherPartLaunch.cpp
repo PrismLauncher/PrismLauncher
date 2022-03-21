@@ -154,7 +154,7 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
         case LoggedProcess::FailedToStart:
         {
             //: Error message displayed if instace can't start
-            const char *reason = QT_TR_NOOP("Could not launch minecraft!");
+            const char *reason = QT_TR_NOOP("Could not launch Minecraft!");
             emit logLine(reason, MessageLevel::Fatal);
             emitFailed(tr(reason));
             return;

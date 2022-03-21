@@ -70,7 +70,7 @@ public:
     virtual ~Page();
     QString displayName() const override
     {
-        return tr("FTB Legacy");
+        return "FTB Legacy";
     }
     QIcon icon() const override
     {
