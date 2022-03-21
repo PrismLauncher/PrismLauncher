@@ -161,7 +161,7 @@ jobs:
         if: runner.os == 'Windows' && matrix.portable != true
         shell: msys2 {0}
         run: |
-          cmake --build ${{ env.BUILD_DIR }} _DLauncher_PORTABLE=OFF
+          cmake --build ${{ env.BUILD_DIR }} -DLauncher_PORTABLE=OFF
 
       - name: Install
         if: runner.os != 'Linux' && runner.os != 'Windows'
