@@ -93,6 +93,6 @@ void JavaWizardPage::retranslate()
 {
     setTitle(tr("Java"));
     setSubTitle(tr("You do not have a working Java set up yet or it went missing.\n"
-        "Please select one of the following or browse for a java executable."));
+        "Please select one of the following or browse for a Java executable."));
     m_java_widget->retranslate();
 }

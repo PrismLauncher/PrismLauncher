@@ -61,7 +61,7 @@ public:
     virtual ~AtlPage();
     virtual QString displayName() const override
     {
-        return tr("ATLauncher");
+        return "ATLauncher";
     }
     virtual QIcon icon() const override
     {
