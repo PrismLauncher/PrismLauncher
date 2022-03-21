@@ -941,8 +941,8 @@ target_link_libraries(Launcher_logic
     Launcher_iconfix
     QuaZip::QuaZip
     hoedown
-    PolyMC_rainbow
     LocalPeer
+    Launcher_rainbow
 )
 
 target_link_libraries(Launcher_logic)
