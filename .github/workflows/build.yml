@@ -27,10 +27,23 @@ jobs:
           - os: windows-2022
             name: "Windows-i686"
             msystem: mingw32
+            portable: false 
 
           - os: windows-2022
             name: "Windows-x86_64"
             msystem: mingw64
+            portable: false 
+
+          - os: windows-2022
+            name: "Windows-i686-portable"
+            msystem: mingw32
+            portable: true 
+
+          - os: windows-2022
+            name: "Windows-x86_64-portable"
+            msystem: mingw64
+            portable: true 
+
 
           - os: macos-11
             qt_version: 5.12.12
@@ -138,11 +151,17 @@ jobs:
         run: |
           cmake --build ${{ env.BUILD_DIR }}
 
-      - name: Build on Windows
-        if: runner.os == 'Windows'
+      - name: Build on Windows portable
+        if: runner.os == 'Windows' && matrix.portable == true
         shell: msys2 {0}
         run: |
           cmake --build ${{ env.BUILD_DIR }}
+          
+      - name: Build on Windows
+        if: runner.os == 'Windows' && matrix.portable != true
+        shell: msys2 {0}
+        run: |
+          cmake --build ${{ env.BUILD_DIR }} _DLauncher_PORTABLE=OFF
 
       - name: Install
         if: runner.os != 'Linux' && runner.os != 'Windows'
