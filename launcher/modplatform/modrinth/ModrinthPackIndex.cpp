@@ -55,7 +55,8 @@ void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray 
         // Find correct file (needed in cases where one version may have multiple files)
         // Will default to the last one if there's no primary (though I think Modrinth requires that
         // at least one file is primary, idk)
-        while (i < files.count()){
+        // NOTE: files.count() is 1-indexed, so we need to subtract 1 to become 0-indexed
+        while (i < files.count() - 1){ 
             auto parent = files[i].toObject();
             auto fileName = Json::requireString(parent, "filename");
 
@@ -76,6 +77,7 @@ void Modrinth::loadIndexedPackVersions(Modrinth::IndexedPack & pack, QJsonArray 
 
             i++;
         }
+
 
         auto parent = files[i].toObject();
         if(parent.contains("url")) {
