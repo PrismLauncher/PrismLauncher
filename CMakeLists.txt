@@ -43,16 +43,20 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 # Fix build with Qt 5.13
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 
-include(CheckIPOSupported)
-check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
+option(ENABLE_LTO "Enable Link Time Optimization" off)
 
-if(ipo_supported AND (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel"))
-    message(STATUS "IPO / LTO enabled")
-    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-elseif(ipo_supported)
-    message(STATUS "Not enabling IPO / LTO on debug builds")
-else()
-    message(STATUS "IPO / LTO not supported: <${ipo_error}>")
+if(ENABLE_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
+
+    if(ipo_supported AND (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel"))
+        message(STATUS "IPO / LTO enabled")
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+    elseif(ipo_supported)
+        message(STATUS "Not enabling IPO / LTO on debug builds")
+    else()
+        message(STATUS "IPO / LTO not supported: <${ipo_error}>")
+    endif()
 endif()
 
 ##################################### Set Application options #####################################
