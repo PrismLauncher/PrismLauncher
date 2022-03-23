@@ -170,6 +170,7 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
         {
             if (APPLICATION->settings()->get("CloseAfterLaunch").toBool())
                 APPLICATION->showMainWindow();
+
             m_parent->setPid(-1);
             // if the exit code wasn't 0, report this as a crash
             auto exitCode = m_process.exitCode();

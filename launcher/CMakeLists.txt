@@ -144,6 +144,8 @@ set(LAUNCH_SOURCES
     launch/steps/TextPrint.h
     launch/steps/Update.cpp
     launch/steps/Update.h
+    launch/steps/QuitAfterGameStop.cpp
+    launch/steps/QuitAfterGameStop.h
     launch/LaunchStep.cpp
     launch/LaunchStep.h
     launch/LaunchTask.cpp

@@ -180,6 +180,16 @@
             </property>
            </widget>
           </item>
+          <item>
+            <widget class="QCheckBox" name="quitAfterGameStopCheck">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;PolyMC will automatically exit if the game crashes or exists.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="text">
+              <string>Quit PolyMC after game window stops</string>
+             </property>
+            </widget>
+           </item>
          </layout>
         </widget>
        </item>
