@@ -19,10 +19,36 @@ jobs:
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+          path: 'PolyMC-source'
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
       - name: Grab and store version
         run: |
           tag_name=$(echo ${{ github.ref }} | grep -oE "[^/]+$")
           echo "VERSION=$tag_name" >> $GITHUB_ENV
+      - name: Package artifacts properly
+        run: |
+          mv ${{ github.workspace }}/PolyMC-source PolyMC-${{ env.VERSION }}
+          mv PolyMC-Linux*/PolyMC.tar.gz PolyMC-Linux-${{ env.VERSION }}.tar.gz
+          mv PolyMC-*.AppImage/PolyMC-*.AppImage PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
+          mv PolyMC-macOS*/PolyMC.tar.gz PolyMC-macOS-${{ env.VERSION }}.tar.gz
+
+          tar -czf PolyMC-${{ env.VERSION }}.tar.gz PolyMC-${{ env.VERSION }}
+
+          for d in PolyMC-Windows-*; do
+            cd "${d}" || continue
+            ARCH="$(echo -n ${d} | cut -d '-' -f 3)"
+            PORT="$(echo -n ${d} | grep -o portable || true)"
+            NAME="PolyMC-Windows-${ARCH}"
+            test -z "${PORT}" || NAME="${NAME}-portable"
+            zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *
+            cd ..
+          done
+
       - name: Create release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -33,86 +59,12 @@ jobs:
           name: PolyMC ${{ env.VERSION }}
           draft: true
           prerelease: false
-
-  upload_release:
-    needs: create_release
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: 'true'
-          path: 'PolyMC-source'
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
-
-      - name: Grab and store version
-        run: |
-          tag_name=$(echo ${{ github.ref }} | grep -oE "[^/]+$")
-          echo "VERSION=$tag_name" >> $GITHUB_ENV
-
-      - name: Package artifacts properly
-        run: |
-          mv ${{ github.workspace }}/PolyMC-source PolyMC-${{ env.VERSION }}
-          mv PolyMC-Linux*/PolyMC.tar.gz PolyMC-Linux-${{ env.VERSION }}.tar.gz
-          mv PolyMC-*.AppImage/PolyMC-*.AppImage PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
-          mv PolyMC-Windows* PolyMC-Windows-${{ env.VERSION }}
-          mv PolyMC-macOS*/PolyMC.tar.gz PolyMC-macOS-${{ env.VERSION }}.tar.gz
-
-          tar -czf PolyMC-${{ env.VERSION }}.tar.gz PolyMC-${{ env.VERSION }}
-
-          cd PolyMC-Windows-${{ env.VERSION }}
-          zip -r -9 ../PolyMC-Windows-${{ env.VERSION }}.zip *
-          cd ..
-
-      - name: Upload Linux asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_name: PolyMC-Linux-${{ env.VERSION }}.tar.gz
-          asset_path: PolyMC-Linux-${{ env.VERSION }}.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload Linux AppImage asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_name: PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
-          asset_path: PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
-          asset_content_type: application/x-executable
-
-      - name: Upload Windows asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_name: PolyMC-Windows-${{ env.VERSION }}.zip
-          asset_path: PolyMC-Windows-${{ env.VERSION }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload macOS asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_name: PolyMC-macOS-${{ env.VERSION }}.tar.gz
-          asset_path: PolyMC-macOS-${{ env.VERSION }}.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload vendored source tarball
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_name: PolyMC-${{ env.VERSION }}.tar.gz
-          asset_path: PolyMC-${{ env.VERSION }}.tar.gz
-          asset_content_type: application/gzip
+          files: |
+            PolyMC-Linux-${{ env.VERSION }}.tar.gz
+            PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
+            PolyMC-Windows-i686-${{ env.VERSION }}.zip
+            PolyMC-Windows-i686-portable-${{ env.VERSION }}.zip
+            PolyMC-Windows-x86_64-${{ env.VERSION }}.zip
+            PolyMC-Windows-x86_64-portable-${{ env.VERSION }}.zip
+            PolyMC-macOS-${{ env.VERSION }}.tar.gz
+            PolyMC-${{ env.VERSION }}.tar.gz

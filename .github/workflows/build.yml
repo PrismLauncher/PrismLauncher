@@ -58,7 +58,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: 'true'
 
@@ -91,7 +91,7 @@ jobs:
       - name: Cache Qt
         if: runner.os != 'Windows'
         id: cache-qt
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: "${{ github.workspace }}/Qt/"
           key: ${{ runner.os }}-${{ matrix.qt_version }}-${{ matrix.qt_arch }}-qt_cache
@@ -226,14 +226,14 @@ jobs:
 
       - name: Upload Linux tar.gz
         if: runner.os == 'Linux' && matrix.app_image != true
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC.tar.gz
 
       - name: Upload AppImage for Linux
         if: matrix.app_image == true
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
           path: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
@@ -254,14 +254,14 @@ jobs:
 
       - name: Upload package for Windows
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: ${{ env.INSTALL_DIR }}/**
 
       - name: Upload package for macOS
         if: runner.os == 'macOS'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC.tar.gz
