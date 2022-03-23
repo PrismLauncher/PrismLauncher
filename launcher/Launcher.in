@@ -21,7 +21,7 @@ echo "Launcher Dir: ${LAUNCHER_DIR}"
 # Set up env - filter out input LD_ variables but pass them in under different names
 export GAME_LIBRARY_PATH=${GAME_LIBRARY_PATH-${LD_LIBRARY_PATH}}
 export GAME_PRELOAD=${GAME_PRELOAD-${LD_PRELOAD}}
-export LD_LIBRARY_PATH="${LAUNCHER_DIR}/bin":$LAUNCHER_LIBRARY_PATH
+export LD_LIBRARY_PATH="${LAUNCHER_DIR}/lib@LIB_SUFFIX@":$LAUNCHER_LIBRARY_PATH
 export LD_PRELOAD=$LAUNCHER_PRELOAD
 export QT_PLUGIN_PATH="${LAUNCHER_DIR}/plugins"
 export QT_FONTPATH="${LAUNCHER_DIR}/fonts"

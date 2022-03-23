@@ -165,13 +165,12 @@ add_subdirectory(program_info)
 
 ####################################### Install layout #######################################
 
-# Install the build results according to platform
-set(Launcher_PORTABLE 1 CACHE BOOL "The type of installation (Portable or System)")
+# TODO: drop this?
+# Target install directory, relative to CMAKE_INSTALL_PREFIx
+set(BUNDLE_DEST_DIR ".")
 
-if (Launcher_PORTABLE)
-    # launcher/Application.cpp will use this value
-    set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_PORTABLE")
-endif()
+# Install "portable.txt" if selected component is "portable"
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_Portable_File}" DESTINATION ${BUNDLE_DEST_DIR} COMPONENT portable EXCLUDE_FROM_ALL)
 
 if(UNIX AND APPLE)
     set(BINARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
@@ -179,8 +178,6 @@ if(UNIX AND APPLE)
     set(PLUGIN_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
     set(RESOURCES_DEST_DIR "${Launcher_Name}.app/Contents/Resources")
     set(JARS_DEST_DIR "${Launcher_Name}.app/Contents/MacOS/jars")
-
-    set(BUNDLE_DEST_DIR ".")
 
     # Apps to bundle
     set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_Name}.app")
@@ -206,30 +203,12 @@ if(UNIX AND APPLE)
 
 elseif(UNIX)
     set(BINARY_DEST_DIR "bin")
-    if(Launcher_PORTABLE)
-        set(LIBRARY_DEST_DIR "bin")
-        set(BUNDLE_DEST_DIR ".")
-        set(JARS_DEST_DIR "bin/jars")
-
-        # Install basic runner script
-        configure_file(launcher/Launcher.in "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" @ONLY)
-        install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" DESTINATION ${BUNDLE_DEST_DIR} RENAME ${Launcher_Name})
-    else()
-        set(LIBRARY_DEST_DIR "lib${LIB_SUFFIX}")
-        set(JARS_DEST_DIR "share/jars")
-        set(LAUNCHER_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
-        set(LAUNCHER_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
-        set(LAUNCHER_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
-        set(LAUNCHER_MAN_DEST_DIR "share/man/man6" CACHE STRING "Path to the man page directory")
-
-        # jars path is determined on runtime, relative to "Application root path", generally /usr for Launcher_PORTABLE=0
-        set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_JARS_LOCATION=${JARS_DEST_DIR}")
-
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
-        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${LAUNCHER_ICON_DEST_DIR})
-        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_ManPage} DESTINATION ${LAUNCHER_MAN_DEST_DIR} RENAME "${Launcher_APP_BINARY_NAME}.6")
-    endif()
+    set(LIBRARY_DEST_DIR "lib${LIB_SUFFIX}")
+    set(JARS_DEST_DIR "share/jars")
+    set(LAUNCHER_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
+    set(LAUNCHER_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
+    set(LAUNCHER_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
+    set(LAUNCHER_MAN_DEST_DIR "share/man/man6" CACHE STRING "Path to the man page directory")
 
     # install as bundle with no dependencies included
     set(INSTALL_BUNDLE "nodeps")
@@ -237,11 +216,22 @@ elseif(UNIX)
     # Set RPATH
     SET(Launcher_BINARY_RPATH "$ORIGIN/")
 
+    # jars path is determined on runtime, relative to "Application root path", generally /usr or the root of the portable bundle
+    set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_JARS_LOCATION=${JARS_DEST_DIR}")
+
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${LAUNCHER_ICON_DEST_DIR})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_ManPage} DESTINATION ${LAUNCHER_MAN_DEST_DIR} RENAME "${Launcher_APP_BINARY_NAME}.6")
+
+    # Install basic runner script if component "portable" is selected
+    configure_file(launcher/Launcher.in "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" @ONLY)
+    install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" DESTINATION ${BUNDLE_DEST_DIR} RENAME ${Launcher_Name} COMPONENT portable EXCLUDE_FROM_ALL)
+
 elseif(WIN32)
     set(BINARY_DEST_DIR ".")
     set(LIBRARY_DEST_DIR ".")
     set(PLUGIN_DEST_DIR ".")
-    set(BUNDLE_DEST_DIR ".")
     set(RESOURCES_DEST_DIR ".")
     set(JARS_DEST_DIR "jars")
 
