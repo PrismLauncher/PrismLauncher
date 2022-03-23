@@ -39,6 +39,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+          path: 'PolyMC-source'
+
       - name: Download artifacts
         uses: actions/download-artifact@v2
 
@@ -49,10 +55,13 @@ jobs:
 
       - name: Package artifacts properly
         run: |
+          mv ${{ github.workspace }}/PolyMC-source PolyMC-${{ env.VERSION }}
           mv PolyMC-Linux*/PolyMC.tar.gz PolyMC-Linux-${{ env.VERSION }}.tar.gz
           mv PolyMC-*.AppImage/PolyMC-*.AppImage PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
           mv PolyMC-Windows* PolyMC-Windows-${{ env.VERSION }}
           mv PolyMC-macOS*/PolyMC.tar.gz PolyMC-macOS-${{ env.VERSION }}.tar.gz
+
+          tar -czf PolyMC-${{ env.VERSION }}.tar.gz PolyMC-${{ env.VERSION }}
 
           cd PolyMC-Windows-${{ env.VERSION }}
           zip -r -9 ../PolyMC-Windows-${{ env.VERSION }}.zip *
@@ -96,4 +105,14 @@ jobs:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
           asset_name: PolyMC-macOS-${{ env.VERSION }}.tar.gz
           asset_path: PolyMC-macOS-${{ env.VERSION }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload vendored source tarball
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_name: PolyMC-${{ env.VERSION }}.tar.gz
+          asset_path: PolyMC-${{ env.VERSION }}.tar.gz
           asset_content_type: application/gzip
