@@ -363,10 +363,12 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         }
 #endif
 
+#ifndef Q_OS_MACOS
         if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
             dataPath = m_rootPath;
             adjustedBy = "Portable data path";
         }
+#endif
     }
 
     if (!FS::ensureFolderPathExists(dataPath))

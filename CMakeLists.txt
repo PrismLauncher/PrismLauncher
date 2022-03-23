@@ -169,8 +169,10 @@ add_subdirectory(program_info)
 # Target install directory, relative to CMAKE_INSTALL_PREFIx
 set(BUNDLE_DEST_DIR ".")
 
-# Install "portable.txt" if selected component is "portable"
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_Portable_File}" DESTINATION ${BUNDLE_DEST_DIR} COMPONENT portable EXCLUDE_FROM_ALL)
+if(NOT (UNIX AND APPLE))
+    # Install "portable.txt" if selected component is "portable"
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_Portable_File}" DESTINATION ${BUNDLE_DEST_DIR} COMPONENT portable EXCLUDE_FROM_ALL)
+endif()
 
 if(UNIX AND APPLE)
     set(BINARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
