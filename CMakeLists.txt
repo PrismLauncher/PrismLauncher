@@ -165,13 +165,9 @@ add_subdirectory(program_info)
 
 ####################################### Install layout #######################################
 
-# TODO: drop this?
-# Target install directory, relative to CMAKE_INSTALL_PREFIx
-set(BUNDLE_DEST_DIR ".")
-
 if(NOT (UNIX AND APPLE))
     # Install "portable.txt" if selected component is "portable"
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_Portable_File}" DESTINATION ${BUNDLE_DEST_DIR} COMPONENT portable EXCLUDE_FROM_ALL)
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_Portable_File}" DESTINATION "." COMPONENT portable EXCLUDE_FROM_ALL)
 endif()
 
 if(UNIX AND APPLE)
@@ -228,7 +224,7 @@ elseif(UNIX)
 
     # Install basic runner script if component "portable" is selected
     configure_file(launcher/Launcher.in "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" @ONLY)
-    install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" DESTINATION ${BUNDLE_DEST_DIR} RENAME ${Launcher_Name} COMPONENT portable EXCLUDE_FROM_ALL)
+    install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/LauncherScript" DESTINATION "." RENAME ${Launcher_Name} COMPONENT portable EXCLUDE_FROM_ALL)
 
 elseif(WIN32)
     set(BINARY_DEST_DIR ".")
