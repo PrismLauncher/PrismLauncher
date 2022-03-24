@@ -35,8 +35,21 @@
    </item>
    <item>
     <widget class="QLineEdit" name="userTextBox">
+     <property name="maxLength">
+      <number>16</number>
+     </property>
      <property name="placeholderText">
       <string>Username</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="allowLongUsernames">
+     <property name="toolTip">
+      <string>Usernames longer than 16 characters cannot be used for LAN games or offline-mode servers.</string>
+     </property>
+     <property name="text">
+      <string>Allow long usernames</string>
      </property>
     </widget>
    </item>

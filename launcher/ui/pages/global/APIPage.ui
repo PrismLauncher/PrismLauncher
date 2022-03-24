@@ -71,12 +71,7 @@
             </property>
             <item>
              <property name="text">
-              <string>https://0x0.st</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>https://paste.polymc.org</string>
+              <string notr="true">https://0x0.st</string>
              </property>
             </item>
            </widget>

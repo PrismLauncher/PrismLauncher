@@ -95,7 +95,7 @@ void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         for (int i = 0; i < current.versions.size(); i++) {
             ui->versionSelectionBox->addItem(current.versions[i].version, QVariant(i));
         }
-        if (ui->versionSelectionBox->count() == 0) { ui->versionSelectionBox->addItem(tr("No Valid Version found !"), QVariant(-1)); }
+        if (ui->versionSelectionBox->count() == 0) { ui->versionSelectionBox->addItem(tr("No valid version found."), QVariant(-1)); }
 
         updateSelectionButton();
     }
@@ -125,6 +125,11 @@ void ModPage::onModSelected()
 
 
 /******** Make changes to the UI ********/
+
+void ModPage::retranslate()
+{
+   ui->retranslateUi(this); 
+}
 
 void ModPage::updateModVersions()
 {

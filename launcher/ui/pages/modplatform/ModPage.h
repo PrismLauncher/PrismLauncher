@@ -33,6 +33,8 @@ class ModPage : public QWidget, public BasePage {
     virtual auto debugName() const -> QString = 0;
 
 
+    void retranslate() override;
+
     auto shouldDisplay() const -> bool override = 0;
     virtual auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const -> bool = 0;
 

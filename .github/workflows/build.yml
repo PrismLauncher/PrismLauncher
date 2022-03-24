@@ -25,9 +25,24 @@ jobs:
             app_image: true
 
           - os: windows-2022
-            qt_version: 5.15.2
-            qt_host: windows
-            qt_arch: win32_mingw81
+            name: "Windows-i686"
+            msystem: mingw32
+            portable: false 
+
+          - os: windows-2022
+            name: "Windows-x86_64"
+            msystem: mingw64
+            portable: false 
+
+          - os: windows-2022
+            name: "Windows-i686-portable"
+            msystem: mingw32
+            portable: true 
+
+          - os: windows-2022
+            name: "Windows-x86_64-portable"
+            msystem: mingw64
+            portable: true 
 
           - os: macos-11
             qt_version: 5.12.12
@@ -42,32 +57,24 @@ jobs:
       BUILD_DIR: "build"
 
     steps:
-      - name: Install 32bit mingw on Windows
-        if: runner.os == 'Windows'
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x86
-
-      - name: Install 32bit zlib via Strawberry on Windows
-        if: runner.os == 'Windows'
-        run: |
-          choco install strawberryperl -y --force --x86
-
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: 'true'
 
-      # We need to do this here because it inexplicably fails if we split the step
-      - name: Download and install OpenSSL libs on Windows
+      - name: 'Setup MSYS2'
         if: runner.os == 'Windows'
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install aqtinstall==2.0.5
-          python -m aqt install-tool -O "${{ github.workspace }}\Qt\" windows desktop tools_openssl_x86
-          mkdir ${{ env.INSTALL_DIR }}
-          copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x86\bin\libssl-1_1.dll" "${{ github.workspace }}\${{ env.INSTALL_DIR }}\"
-          copy "${{ github.workspace }}\Qt\Tools\OpenSSL\Win_x86\bin\libcrypto-1_1.dll" "${{ github.workspace }}\${{ env.INSTALL_DIR }}\"
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          update: true
+          install: >-
+            git
+          pacboy: >-
+            toolchain:p
+            cmake:p
+            ninja:p
+            qt5:p
 
       - name: Set short version
         shell: bash
@@ -76,19 +83,21 @@ jobs:
           echo "VERSION=$ver_short" >> $GITHUB_ENV
 
       - name: Install OpenJDK
-        uses: AdoptOpenJDK/install-jdk@v1
+        uses: actions/setup-java@v3
         with:
-          version: '17'
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Cache Qt
+        if: runner.os != 'Windows'
         id: cache-qt
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: "${{ github.workspace }}/Qt/"
           key: ${{ runner.os }}-${{ matrix.qt_version }}-${{ matrix.qt_arch }}-qt_cache
 
       - name: Install Qt
-        if: runner.os != 'Linux' || matrix.app_image == true
+        if: runner.os != 'Linux' && runner.os != 'Windows' || matrix.app_image == true
         uses: jurplel/install-qt-action@v2
         with:
           version: ${{ matrix.qt_version }}
@@ -104,6 +113,7 @@ jobs:
           sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
 
       - name: Install Ninja
+        if: runner.os != 'Windows'
         uses: urkle/action-get-ninja@v1
 
       - name: Download linuxdeploy family for AppImage on Linux
@@ -120,9 +130,22 @@ jobs:
           ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
 
       - name: Configure CMake
-        if: runner.os != 'Linux'
+        if: runner.os != 'Linux' && runner.os != 'Windows'
         run: |
           cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -G Ninja
+
+      - name: Configure CMake on Windows 
+        if: runner.os == 'Windows' && matrix.portable != true
+        shell: msys2 {0}
+        run: |
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DLauncher_PORTABLE=OFF -G Ninja
+
+
+      - name: Configure CMake on Windows portable 
+        if: runner.os == 'Windows' && matrix.portable == true
+        shell: msys2 {0}
+        run: |
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -G Ninja 
 
       - name: Configure CMake on Linux
         if: runner.os == 'Linux'
@@ -130,11 +153,24 @@ jobs:
           cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DLauncher_PORTABLE=OFF -G Ninja
 
       - name: Build
+        if: runner.os != 'Windows'
+        run: |
+          cmake --build ${{ env.BUILD_DIR }}
+
+      - name: Build on Windows
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
         run: |
           cmake --build ${{ env.BUILD_DIR }}
 
       - name: Install
-        if: runner.os != 'Linux'
+        if: runner.os != 'Linux' && runner.os != 'Windows'
+        run: |
+          cmake --install ${{ env.BUILD_DIR }}
+
+      - name: Install on Windows
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
         run: |
           cmake --install ${{ env.BUILD_DIR }}
 
@@ -165,11 +201,6 @@ jobs:
 
           ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_DIR }}/usr/share/icons/hicolor/scalable/apps/org.polymc.PolyMC.svg
 
-      - name: Run windeployqt
-        if: runner.os == 'Windows'
-        run: |
-          windeployqt --no-translations --no-system-d3d-compiler --no-opengl-sw "${{ env.INSTALL_DIR }}/polymc.exe"
-
       - name: Run macdeployqt
         if: runner.os == 'macOS'
         run: |
@@ -195,28 +226,42 @@ jobs:
 
       - name: Upload Linux tar.gz
         if: runner.os == 'Linux' && matrix.app_image != true
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC.tar.gz
 
       - name: Upload AppImage for Linux
         if: matrix.app_image == true
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
           path: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
 
+      - name: Copy OpenSSL libs on Windows x86
+        if: runner.os == 'Windows' && matrix.msystem == 'mingw32'
+        shell: msys2 {0}
+        run: |
+          cp /mingw32/bin/libcrypto-1_1.dll ${{ env.INSTALL_DIR }}/
+          cp /mingw32/bin/libssl-1_1.dll ${{ env.INSTALL_DIR }}/
+
+      - name: Copy OpenSSL libs on Windows x86_64
+        if: runner.os == 'Windows' && matrix.msystem == 'mingw64'
+        shell: msys2 {0}
+        run: |
+          cp /mingw64/bin/libcrypto-1_1-x64.dll ${{ env.INSTALL_DIR }}/
+          cp /mingw64/bin/libssl-1_1-x64.dll ${{ env.INSTALL_DIR }}/
+
       - name: Upload package for Windows
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
+          name: PolyMC-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: ${{ env.INSTALL_DIR }}/**
 
       - name: Upload package for macOS
         if: runner.os == 'macOS'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC.tar.gz

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-URL_JDK8="https://api.adoptium.net/v3/binary/latest/8/ga/linux/x64/jre/hotspot/normal/eclipse"
+URL_JDK8="https://api.adoptium.net/v3/binary/version/jdk8u312-b07/linux/x64/jre/hotspot/normal/eclipse"
 URL_JDK17="https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jre/hotspot/normal/eclipse"
 
 mkdir -p JREs

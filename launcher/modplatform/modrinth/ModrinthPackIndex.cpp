@@ -52,31 +52,33 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
 
         auto files = Json::requireArray(obj, "files");
         int i = 0;
-        while (files.count() > 1 && i < files.count()) {
-            // try to resolve the correct file
+        
+        // Find correct file (needed in cases where one version may have multiple files)
+        // Will default to the last one if there's no primary (though I think Modrinth requires that
+        // at least one file is primary, idk)
+        // NOTE: files.count() is 1-indexed, so we need to subtract 1 to become 0-indexed
+        while (i < files.count() - 1){ 
             auto parent = files[i].toObject();
             auto fileName = Json::requireString(parent, "filename");
-            // avoid grabbing "dev" files
-            if (fileName.contains("javadocs", Qt::CaseInsensitive) || fileName.contains("sources", Qt::CaseInsensitive)) {
+
+            // Grab the correct mod loader
+            if(hasFabric){
+                if(fileName.contains("forge",Qt::CaseInsensitive)){
+                    i++;
+                    continue;
+                }
+            } else if(fileName.contains("fabric", Qt::CaseInsensitive)){
                 i++;
                 continue;
             }
-            // grab the correct mod loader
-            if (fileName.contains("forge", Qt::CaseInsensitive) || fileName.contains("fabric", Qt::CaseInsensitive)) {
-                if (hasFabric) {
-                    if (fileName.contains("forge", Qt::CaseInsensitive)) {
-                        i++;
-                        continue;
-                    }
-                } else {
-                    if (fileName.contains("fabric", Qt::CaseInsensitive)) {
-                        i++;
-                        continue;
-                    }
-                }
-            }
-            break;
+
+            // Grab the primary file, if available
+            if(Json::requireBoolean(parent, "primary"))
+                break;
+
+            i++;
         }
+
         auto parent = files[i].toObject();
         if (parent.contains("url")) {
             file.downloadUrl = Json::requireString(parent, "url");

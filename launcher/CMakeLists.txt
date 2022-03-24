@@ -956,8 +956,8 @@ target_link_libraries(Launcher_logic
     Launcher_iconfix
     QuaZip::QuaZip
     hoedown
-    PolyMC_rainbow
     LocalPeer
+    Launcher_rainbow
 )
 
 target_link_libraries(Launcher_logic)
@@ -999,7 +999,7 @@ if(INSTALL_BUNDLE STREQUAL "full")
             DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            REGEX "tga|tiff|mng|webp" EXCLUDE
+            REGEX "tga|tiff|mng" EXCLUDE
         )
         # Icon engines
         install(
@@ -1029,7 +1029,7 @@ if(INSTALL_BUNDLE STREQUAL "full")
             DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            REGEX "tga|tiff|mng|webp" EXCLUDE
+            REGEX "tga|tiff|mng" EXCLUDE
             REGEX "d\\." EXCLUDE
             REGEX "_debug\\." EXCLUDE
             REGEX "\\.dSYM" EXCLUDE

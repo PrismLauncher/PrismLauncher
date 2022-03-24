@@ -1,0 +1,19 @@
+name: Backport PR to stable
+on:
+  pull_request:
+    branches: [ develop ]
+    types: [ closed ]
+jobs:
+  release_pull_request:
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'backport')
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Backport PR by cherry-pick-ing
+      uses: Nathanmalnoury/gh-backport-action@master
+      with:
+        pr_branch: 'stable'
+        github_token: ${{ secrets.GITHUB_TOKEN }}
