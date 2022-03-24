@@ -1,50 +1,40 @@
 #include "VerifyJavaInstall.h"
 
-#include <launch/LaunchTask.h>
-#include <minecraft/MinecraftInstance.h>
-#include <minecraft/PackProfile.h>
-#include <minecraft/VersionFilterData.h>
-
-#ifdef major
-    #undef major
-#endif
-#ifdef minor
-    #undef minor
-#endif
+#include "java/JavaVersion.h"
+#include "minecraft/PackProfile.h"
+#include "minecraft/MinecraftInstance.h"
 
 void VerifyJavaInstall::executeTask() {
-    auto m_inst = std::dynamic_pointer_cast<MinecraftInstance>(m_parent->instance());
+    auto instance = std::dynamic_pointer_cast<MinecraftInstance>(m_parent->instance());
+    auto packProfile = instance->getPackProfile();
+    auto settings = instance->settings();
+    auto storedVersion = settings->get("JavaVersion").toString();
+    auto ignoreCompatibility = settings->get("IgnoreJavaCompatibility").toBool();
 
-    auto javaVersion = m_inst->getJavaVersion();
-    auto minecraftComponent = m_inst->getPackProfile()->getComponent("net.minecraft");
+    auto compatibleMajors = packProfile->getProfile()->getCompatibleJavaMajors();
 
-    // Java 17 requirement
-    if (minecraftComponent->getReleaseDateTime() >= g_VersionFilterData.java17BeginsDate) {
-        if (javaVersion.major() < 17) {
-            emit logLine("Minecraft 1.18 Pre Release 2 and above require the use of Java 17",
-                         MessageLevel::Fatal);
-            emitFailed(tr("Minecraft 1.18 Pre Release 2 and above require the use of Java 17"));
-            return;
-        }
-    }
-    // Java 16 requirement
-    else if (minecraftComponent->getReleaseDateTime() >= g_VersionFilterData.java16BeginsDate) {
-        if (javaVersion.major() < 16) {
-            emit logLine("Minecraft 21w19a and above require the use of Java 16",
-                         MessageLevel::Fatal);
-            emitFailed(tr("Minecraft 21w19a and above require the use of Java 16"));
-            return;
-        }
-    }
-    // Java 8 requirement
-    else if (minecraftComponent->getReleaseDateTime() >= g_VersionFilterData.java8BeginsDate) {
-        if (javaVersion.major() < 8) {
-            emit logLine("Minecraft 17w13a and above require the use of Java 8",
-                         MessageLevel::Fatal);
-            emitFailed(tr("Minecraft 17w13a and above require the use of Java 8"));
-            return;
-        }
+    JavaVersion javaVersion(storedVersion);
+
+    if (compatibleMajors.isEmpty() || compatibleMajors.contains(javaVersion.major()))
+    {
+        emitSucceeded();
+        return;
     }
 
-    emitSucceeded();
+
+    if (ignoreCompatibility)
+    {
+        emit logLine(tr("Java major version is incompatible. Things might break."), MessageLevel::Warning);
+        emitSucceeded();
+        return;
+    }
+
+    emit logLine(tr("Instance not compatible with Java major version %1.\n"
+                    "Switch the Java version of this instance to one of the following:").arg(javaVersion.major()),
+                 MessageLevel::Error);
+    for (auto major: compatibleMajors)
+    {
+        emit logLine(tr("Java %1").arg(major), MessageLevel::Error);
+    }
+    emitFailed(QString("Incompatible Java major version"));
 }

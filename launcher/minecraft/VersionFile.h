@@ -57,6 +57,9 @@ public: /* data */
     /// Mojang: Minecraft launch arguments (may contain placeholders for variable substitution)
     QString minecraftArguments;
 
+    /// Mojang: list of compatible java majors
+    QList<int> compatibleJavaMajors;
+
     /// Mojang: type of the Minecraft version
     QString type;
 

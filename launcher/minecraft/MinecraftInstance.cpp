@@ -88,6 +88,7 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
 
     m_settings->registerOverride(globalSettings->getSetting("JavaPath"), javaOrLocation);
     m_settings->registerOverride(globalSettings->getSetting("JvmArgs"), javaOrArgs);
+    m_settings->registerOverride(globalSettings->getSetting("IgnoreJavaCompatibility"), javaOrLocation);
 
     // special!
     m_settings->registerPassthrough(globalSettings->getSetting("JavaTimestamp"), javaOrLocation);

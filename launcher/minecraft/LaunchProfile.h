@@ -21,6 +21,7 @@ public: /* application of profile variables from patches */
     void applyMods(const QList<LibraryPtr> &jarMods);
     void applyLibrary(LibraryPtr library);
     void applyMavenFile(LibraryPtr library);
+    void applyCompatibleJavaMajors(QList<int>& javaMajor);
     void applyMainJar(LibraryPtr jar);
     void applyProblemSeverity(ProblemSeverity severity);
     /// clear the profile
@@ -39,6 +40,7 @@ public: /* getters for profile variables */
     const QList<LibraryPtr> & getLibraries() const;
     const QList<LibraryPtr> & getNativeLibraries() const;
     const QList<LibraryPtr> & getMavenFiles() const;
+    const QList<int> & getCompatibleJavaMajors() const;
     const LibraryPtr getMainJar() const;
     void getLibraryFiles(
         const QString & architecture,
@@ -98,6 +100,9 @@ private:
 
     /// the list of mods
     QList<LibraryPtr> m_mods;
+
+    /// compatible java major versions
+    QList<int> m_compatibleJavaMajors;
 
     ProblemSeverity m_problemSeverity = ProblemSeverity::None;
 

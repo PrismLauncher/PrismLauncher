@@ -682,6 +682,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("JavaVendor", "");
         m_settings->registerSetting("LastHostname", "");
         m_settings->registerSetting("JvmArgs", "");
+        m_settings->registerSetting("IgnoreJavaCompatibility", false);
 
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);

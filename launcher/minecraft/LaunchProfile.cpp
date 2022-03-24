@@ -126,6 +126,11 @@ void LaunchProfile::applyMods(const QList<LibraryPtr>& mods)
     }
 }
 
+void LaunchProfile::applyCompatibleJavaMajors(QList<int>& javaMajor)
+{
+    m_compatibleJavaMajors.append(javaMajor);
+}
+
 void LaunchProfile::applyLibrary(LibraryPtr library)
 {
     if(!library->isActive())
@@ -273,6 +278,11 @@ const QList<LibraryPtr> & LaunchProfile::getNativeLibraries() const
 const QList<LibraryPtr> & LaunchProfile::getMavenFiles() const
 {
     return m_mavenFiles;
+}
+
+const QList<int> & LaunchProfile::getCompatibleJavaMajors() const
+{
+    return m_compatibleJavaMajors;
 }
 
 void LaunchProfile::getLibraryFiles(

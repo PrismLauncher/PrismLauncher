@@ -183,6 +183,15 @@ void MojangVersionFormat::readVersionProperties(const QJsonObject &in, VersionFi
             );
         }
     }
+
+    if (in.contains("compatibleJavaMajors"))
+    {
+        for (auto compatible : requireArray(in.value("compatibleJavaMajors")))
+        {
+            out->compatibleJavaMajors.append(requireInteger(compatible));
+        }
+    }
+
     if(in.contains("downloads"))
     {
         auto downloadsObj = requireObject(in, "downloads");

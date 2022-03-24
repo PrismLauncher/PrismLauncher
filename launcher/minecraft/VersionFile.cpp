@@ -36,6 +36,7 @@ void VersionFile::applyTo(LaunchProfile *profile)
     profile->applyJarMods(jarMods);
     profile->applyMods(mods);
     profile->applyTraits(traits);
+    profile->applyCompatibleJavaMajors(compatibleJavaMajors);
 
     for (auto library : libraries)
     {
