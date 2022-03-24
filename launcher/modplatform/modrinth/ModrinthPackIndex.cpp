@@ -30,7 +30,6 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    bool hasFabric = !(static_cast<MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
     QString mcVersion = (static_cast<MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.minecraft");
 
     for (auto versionIter : arr) {
@@ -60,17 +59,6 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         while (i < files.count() - 1){ 
             auto parent = files[i].toObject();
             auto fileName = Json::requireString(parent, "filename");
-
-            // Grab the correct mod loader
-            if(hasFabric){
-                if(fileName.contains("forge",Qt::CaseInsensitive)){
-                    i++;
-                    continue;
-                }
-            } else if(fileName.contains("fabric", Qt::CaseInsensitive)){
-                i++;
-                continue;
-            }
 
             // Grab the primary file, if available
             if(Json::requireBoolean(parent, "primary"))

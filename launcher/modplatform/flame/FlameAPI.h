@@ -25,8 +25,8 @@ class FlameAPI : public NetworkModAPI {
             .arg(args.version);
     };
 
-    inline auto getVersionsURL(const QString& addonId) const -> QString override
+    inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
     {
-        return QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files").arg(addonId);
+        return QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files").arg(args.addonId);
     };
 };
