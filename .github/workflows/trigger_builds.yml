@@ -9,12 +9,16 @@ on:
       - '**/LICENSE'
       - 'flake.lock'
       - '**.nix'
+      - 'packages/**'
+      - '.github/ISSUE_TEMPLATE/**'
   pull_request:
     paths-ignore:
       - '**.md'
       - '**/LICENSE'
       - 'flake.lock'
       - '**.nix'
+      - 'packages/**'
+      - '.github/ISSUE_TEMPLATE/**'
   workflow_dispatch:
 
 jobs:
