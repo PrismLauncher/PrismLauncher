@@ -1,7 +1,7 @@
 # Template based on https://gitlab.archlinux.org/archlinux/rfcs/-/blob/0ba3b61e987e197f8d1901709409b8564958f78a/rfcs/0000-template.rst
 name: Request for Comment (RFC)
 description: Propose a larger change and start a discussion.
-labels: [RFC]
+labels: [rfc]
 body:
 - type: markdown
   attributes:
