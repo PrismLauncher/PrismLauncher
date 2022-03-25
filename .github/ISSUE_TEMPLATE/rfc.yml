@@ -21,8 +21,7 @@ body:
       Introduce the topic. If this is a not-well-known section of PolyMC, a detailed explanation of the background is recommended.
       Some example points of discussion:
        - What specific problems are you facing right now that you're trying to address?
-       - Are there any previous discussions? Link to them and summarize them (don't
-       - force your readers to read them though!).
+       - Are there any previous discussions? Link to them and summarize them (don't force your readers to read them though!).
        - Is there any precedent set by other software? If so, link to resources.
     placeholder: I don't like cats. I think many users also don't like cats.
   validations:
