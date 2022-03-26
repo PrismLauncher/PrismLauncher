@@ -21,10 +21,23 @@
 #include "BuildConfig.h"
 
 #include <net/NetJob.h>
+#include <qobject.h>
 
 #include "HoeDown.h"
 
 namespace {
+QString getLink(QString link, QString name) {
+    return QString("&lt;<a href='%1'>%2</a>&gt;").arg(link).arg(name);
+}
+
+QString getWebsite(QString link) {
+    return getLink(link, QObject::tr("Website"));
+}
+
+QString getGitHub(QString username) {
+    return getLink("https://github.com/" + username, "GitHub");
+}
+
 // Credits
 // This is a hack, but I can't think of a better way to do this easily without screwing with QTextDocument...
 QString getCreditsHtml()
@@ -36,8 +49,20 @@ QString getCreditsHtml()
 
     //: %1 is the name of the launcher, determined at build time, e.g. "PolyMC Developers"
     stream << "<h3>" << QObject::tr("%1 Developers", "About Credits").arg(BuildConfig.LAUNCHER_NAME) << "</h3>\n";
-    stream << "<p>swirl &lt;<a href='mailto:swurl@swurl.xyz'>swurl@swurl.xyz </a>&gt;</p>\n";
-    stream << "<p>LennyMcLennington &lt;<a href='mailto:lenny@sneed.church'>lenny@sneed.church</a>&gt;</p>\n";
+    stream << QString("<p>LennyMcLennington %1</p>\n")          .arg(getGitHub("LennyMcLennington"));
+    stream << QString("<p>Sefa Eyeoglu (Scrumplex) %1</p>\n")   .arg(getWebsite("https://scrumplex.net"));
+    stream << QString("<p>dada513 %1</p>\n")                    .arg(getGitHub("dada513"));
+    stream << QString("<p>txtsd %1</p>\n")                      .arg(getGitHub("txtsd"));
+    stream << QString("<p>timoreo %1</p>\n")                    .arg(getGitHub("timoreo22"));
+    stream << QString("<p>Ezekiel Smith (ZekeSmith) %1</p>\n")  .arg(getGitHub("ZekeSmith"));
+    stream << QString("<p>cozyGalvinism %1</p>\n")              .arg(getGitHub("cozyGalvinism"));
+    stream << "<br />\n";
+
+    //: %1 is the name of the launcher, determined at build time, e.g. "PolyMC Contributors"
+    stream << "<h3>" << QObject::tr("%1 Contributors", "About Credits").arg(BuildConfig.LAUNCHER_NAME) << "</h3>\n";
+    stream << QString("<p>DioEgizio %1</p>\n")                      .arg(getGitHub("DioEgizio"));
+    stream << QString("<p>flowln %1</p>\n")                      .arg(getGitHub("flowln"));
+    stream << QString("<p>swirl %1</p>\n")                      .arg(getWebsite("https://swurl.xyz/"));
     stream << "<br />\n";
 
     // TODO: possibly retrieve from git history at build time?

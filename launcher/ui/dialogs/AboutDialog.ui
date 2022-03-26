@@ -87,7 +87,7 @@
      </property>
     </widget>
    </item>
-      <item>
+   <item>
     <widget class="QLabel" name="versionLabel">
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -209,12 +209,9 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QTextEdit" name="creditsText">
-         <property name="readOnly">
+        <widget class="QTextBrowser" name="creditsText">
+         <property name="openExternalLinks">
           <bool>true</bool>
-         </property>
-         <property name="textInteractionFlags">
-          <set>Qt::TextBrowserInteraction</set>
          </property>
         </widget>
        </item>
