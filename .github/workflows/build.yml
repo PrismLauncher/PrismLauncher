@@ -20,6 +20,12 @@ jobs:
             qt_host: linux
 
           - os: ubuntu-20.04
+            name: Linux-Portable
+            qt_version: 5.12.8
+            qt_host: linux
+            portable: true
+
+          - os: ubuntu-20.04
             qt_version: 5.15.2
             qt_host: linux
             app_image: true
@@ -140,7 +146,6 @@ jobs:
         run: |
           cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DLauncher_PORTABLE=OFF -G Ninja
 
-
       - name: Configure CMake on Windows portable 
         if: runner.os == 'Windows' && matrix.portable == true
         shell: msys2 {0}
@@ -148,9 +153,14 @@ jobs:
           cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -G Ninja 
 
       - name: Configure CMake on Linux
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.portable != true
         run: |
           cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DLauncher_PORTABLE=OFF -G Ninja
+
+      - name: Configure CMake on Linux Portable 
+        if: runner.os == 'Linux' && matrix.portable == true
+        run: |
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -G Ninja
 
       - name: Build
         if: runner.os != 'Windows'
@@ -175,9 +185,14 @@ jobs:
           cmake --install ${{ env.BUILD_DIR }}
 
       - name: Install on Linux
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.portable != true
         run: |
           DESTDIR=${{ env.INSTALL_DIR }} cmake --install ${{ env.BUILD_DIR }}
+
+      - name: Install on Linux portable
+        if: runner.os == 'Linux' && matrix.portable == true
+        run: |
+          cmake --install ${{ env.BUILD_DIR }}
 
       - name: Bundle AppImage
         if: matrix.app_image == true
@@ -219,17 +234,30 @@ jobs:
           tar -czf ../PolyMC.tar.gz *
 
       - name: tar on Linux
-        if: runner.os == 'Linux' && matrix.app_image != true
+        if: runner.os == 'Linux' && matrix.app_image != true && matrix.portable != true
         run: |
           cd ${{ env.INSTALL_DIR }}
           tar -czf ../PolyMC.tar.gz *
 
+      - name: tar on Linux portable 
+        if: runner.os == 'Linux' && matrix.app_image != true && matrix.portable == true
+        run: |
+          cd ${{ env.INSTALL_DIR }}
+          tar -czf ../PolyMC-portable.tar.gz *
+
       - name: Upload Linux tar.gz
-        if: runner.os == 'Linux' && matrix.app_image != true
+        if: runner.os == 'Linux' && matrix.app_image != true && matrix.portable != true
         uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC.tar.gz
+
+      - name: Upload Linux Portable tar.gz 
+        if: runner.os == 'Linux' && matrix.app_image != true && matrix.portable == true
+        uses: actions/upload-artifact@v3
+        with:
+          name: PolyMC-${{ runner.os }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PolyMC-portable.tar.gz
 
       - name: Upload AppImage for Linux
         if: matrix.app_image == true
