@@ -14,6 +14,7 @@
  */
 
 #include "AboutDialog.h"
+#include "BuildConfig.h"
 #include "ui_AboutDialog.h"
 #include <QIcon>
 #include "Application.h"
@@ -33,13 +34,15 @@ QString getCreditsHtml()
     stream.setCodec(QTextCodec::codecForName("UTF-8"));
     stream << "<center>\n";
 
-    stream << "<h3>" << QObject::tr("PolyMC Developers", "About Credits") << "</h3>\n";
+    //: %1 is the name of the launcher, determined at build time, e.g. "PolyMC Developers"
+    stream << "<h3>" << QObject::tr("%1 Developers", "About Credits").arg(BuildConfig.LAUNCHER_NAME) << "</h3>\n";
     stream << "<p>swirl &lt;<a href='mailto:swurl@swurl.xyz'>swurl@swurl.xyz </a>&gt;</p>\n";
     stream << "<p>LennyMcLennington &lt;<a href='mailto:lenny@sneed.church'>lenny@sneed.church</a>&gt;</p>\n";
     stream << "<br />\n";
 
     // TODO: possibly retrieve from git history at build time?
-    stream << "<h3>" << QObject::tr("MultiMC Developers", "About Credits") << "</h3>\n";
+    //: %1 is the name of the launcher, determined at build time, e.g. "PolyMC Developers"
+    stream << "<h3>" << QObject::tr("%1 Developers", "About Credits").arg("MultiMC") << "</h3>\n";
     stream << "<p>Andrew Okin &lt;<a href='mailto:forkk@forkk.net'>forkk@forkk.net</a>&gt;</p>\n";
     stream << "<p>Petr Mrázek &lt;<a href='mailto:peterix@gmail.com'>peterix@gmail.com</a>&gt;</p>\n";
     stream << "<p>Sky Welch &lt;<a href='mailto:multimc@bunnies.io'>multimc@bunnies.io</a>&gt;</p>\n";

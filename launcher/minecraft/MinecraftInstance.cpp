@@ -1,4 +1,5 @@
 #include "MinecraftInstance.h"
+#include "BuildConfig.h"
 #include "minecraft/launch/CreateGameFolders.h"
 #include "minecraft/launch/ExtractNatives.h"
 #include "minecraft/launch/PrintInstanceInfo.h"
@@ -435,7 +436,7 @@ QStringList MinecraftInstance::processMinecraftArgs(
     }
 
     // blatant self-promotion.
-    token_mapping["profile_name"] = token_mapping["version_name"] = "PolyMC";
+    token_mapping["profile_name"] = token_mapping["version_name"] = BuildConfig.LAUNCHER_NAME;
 
     token_mapping["version_type"] = profile->getMinecraftVersionType();
 

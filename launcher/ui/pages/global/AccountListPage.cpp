@@ -161,10 +161,11 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
         CustomMessageBox::selectable(
             this,
             tr("Microsoft Accounts not available"),
+            //: %1 refers to the launcher itself
             tr(
-                "Microsoft accounts are only usable on macOS 10.13 or newer, with fully updated PolyMC.\n\n"
-                "Please update both your operating system and PolyMC."
-            ),
+                "Microsoft accounts are only usable on macOS 10.13 or newer, with fully updated %1.\n\n"
+                "Please update both your operating system and %1."
+            ).arg(BuildConfig.LAUNCHER_NAME),
             QMessageBox::Warning
         )->exec();
         return;

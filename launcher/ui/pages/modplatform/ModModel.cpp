@@ -1,5 +1,6 @@
 #include "ModModel.h"
 
+#include "BuildConfig.h"
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
@@ -186,7 +187,8 @@ void ListModel::searchRequestFailed(QString reason)
     if (jobPtr->first()->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
         // 409 Gone, notify user to update
         QMessageBox::critical(nullptr, tr("Error"),
-                              QString("%1 %2").arg(m_parent->displayName()).arg(tr("API version too old!\nPlease update PolyMC!")));
+                              //: %1 refers to the launcher itself
+                              QString("%1 %2").arg(m_parent->displayName()).arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_NAME)));
         // self-destruct
         (dynamic_cast<ModDownloadDialog*>((dynamic_cast<ModPage*>(parent()))->parentWidget()))->reject();
     }

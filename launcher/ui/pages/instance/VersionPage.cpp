@@ -422,7 +422,7 @@ void VersionPage::on_actionDownload_All_triggered()
     {
         CustomMessageBox::selectable(
             this, tr("Error"),
-            tr("PolyMC cannot download Minecraft or update instances unless you have at least "
+            tr("Cannot download Minecraft or update instances unless you have at least "
                "one account added.\nPlease add your Mojang or Minecraft account."),
             QMessageBox::Warning)->show();
         return;
