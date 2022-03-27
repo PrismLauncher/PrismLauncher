@@ -20,6 +20,7 @@
 #include "launch/steps/PreLaunchCommand.h"
 #include "launch/steps/TextPrint.h"
 #include "launch/steps/CheckJava.h"
+#include "launch/steps/QuitAfterGameStop.h"
 
 #include "minecraft/launch/LauncherPartLaunch.h"
 #include "minecraft/launch/DirectJavaLaunch.h"
@@ -934,6 +935,11 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     if (session)
     {
         process->setCensorFilter(createCensorFilterFromSession(session));
+    }
+    if(APPLICATION->settings()->get("QuitAfterGameStop").toBool())
+    {
+        auto step = new QuitAfterGameStop(pptr);
+        process->appendStep(step);
     }
     m_launchProcess = process;
     emit launchTaskChanged(m_launchProcess);

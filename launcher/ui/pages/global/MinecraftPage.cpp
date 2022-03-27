@@ -94,6 +94,7 @@ void MinecraftPage::applySettings()
 
     // Miscellaneous
     s->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
+    s->set("QuitAfterGameStop", ui->quitAfterGameStopCheck->isChecked());
 }
 
 void MinecraftPage::loadSettings()
@@ -113,6 +114,7 @@ void MinecraftPage::loadSettings()
     ui->recordGameTime->setChecked(s->get("RecordGameTime").toBool());
 
     ui->closeAfterLaunchCheck->setChecked(s->get("CloseAfterLaunch").toBool());
+    ui->quitAfterGameStopCheck->setChecked(s->get("QuitAfterGameStop").toBool());
 }
 
 void MinecraftPage::retranslate()
