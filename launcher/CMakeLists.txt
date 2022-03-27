@@ -582,6 +582,8 @@ SET(LAUNCHER_SOURCES
     ApplicationMessage.cpp
 
     # GUI - general utilities
+    Flatpak.h
+    Flatpak.cpp
     DesktopServices.h
     DesktopServices.cpp
     VersionProxyModel.h

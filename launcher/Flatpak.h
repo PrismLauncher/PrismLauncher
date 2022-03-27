@@ -1,0 +1,4 @@
+namespace Flatpak
+{
+    bool IsFlatpak();
+}

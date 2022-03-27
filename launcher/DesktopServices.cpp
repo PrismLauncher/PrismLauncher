@@ -3,6 +3,7 @@
 #include <QDesktopServices>
 #include <QProcess>
 #include <QDebug>
+#include "Flatpak.h"
 
 /**
  * This shouldn't exist, but until QTBUG-9328 and other unreported bugs are fixed, it needs to be a thing.
@@ -84,7 +85,14 @@ bool openDirectory(const QString &path, bool ensureExists)
         return QDesktopServices::openUrl(QUrl::fromLocalFile(dir.absolutePath()));
     };
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-    return IndirectOpen(f);
+    if(!Flatpak::IsFlatpak())
+    {
+        return IndirectOpen(f);
+    }
+    else
+    {
+        return f();
+    }
 #else
     return f();
 #endif
@@ -98,7 +106,14 @@ bool openFile(const QString &path)
         return QDesktopServices::openUrl(QUrl::fromLocalFile(path));
     };
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-    return IndirectOpen(f);
+    if(!Flatpak::IsFlatpak())
+    {
+        return IndirectOpen(f);
+    }
+    else
+    {
+        return f();
+    }
 #else
     return f();
 #endif
@@ -109,10 +124,17 @@ bool openFile(const QString &application, const QString &path, const QString &wo
     qDebug() << "Opening file" << path << "using" << application;
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
     // FIXME: the pid here is fake. So if something depends on it, it will likely misbehave
-    return IndirectOpen([&]()
+    if(!Flatpak::IsFlatpak())
     {
-        return QProcess::startDetached(application, QStringList() << path, workingDirectory);
-    }, pid);
+        return IndirectOpen([&]()
+        {
+            return QProcess::startDetached(application, QStringList() << path, workingDirectory);
+        }, pid);
+    }
+    else
+    {
+      return QProcess::startDetached(application, QStringList() << path, workingDirectory, pid);  
+    }
 #else
     return QProcess::startDetached(application, QStringList() << path, workingDirectory, pid);
 #endif
@@ -122,11 +144,18 @@ bool run(const QString &application, const QStringList &args, const QString &wor
 {
     qDebug() << "Running" << application << "with args" << args.join(' ');
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
+    if(!Flatpak::IsFlatpak())
+    {
     // FIXME: the pid here is fake. So if something depends on it, it will likely misbehave
     return IndirectOpen([&]()
     {
         return QProcess::startDetached(application, args, workingDirectory);
     }, pid);
+    }
+    else
+    {
+        return QProcess::startDetached(application, args, workingDirectory, pid);
+    }
 #else
     return QProcess::startDetached(application, args, workingDirectory, pid);
 #endif
@@ -140,7 +169,14 @@ bool openUrl(const QUrl &url)
         return QDesktopServices::openUrl(url);
     };
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-    return IndirectOpen(f);
+    if(!Flatpak::IsFlatpak())
+    {
+        return IndirectOpen(f);
+    }
+    else
+    {
+        return f();
+    }
 #else
     return f();
 #endif
