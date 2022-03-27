@@ -35,70 +35,26 @@
 
 #pragma once
 
-#include <QWidget>
+#include "ui/pages/modplatform/ModPage.h"
 
-#include "ui/pages/BasePage.h"
-#include <Application.h>
-#include "tasks/Task.h"
-#include "modplatform/flame/FlameModIndex.h"
+#include "modplatform/flame/FlameAPI.h"
 
-namespace Ui
-{
-class FlameModPage;
-}
-
-class ModDownloadDialog;
-
-namespace FlameMod {
-    class ListModel;
-}
-
-class FlameModPage : public QWidget, public BasePage
-{
+class FlameModPage : public ModPage {
     Q_OBJECT
 
-public:
-    explicit FlameModPage(ModDownloadDialog *dialog, BaseInstance *instance);
-    virtual ~FlameModPage();
-    virtual QString displayName() const override
-    {
-        return "CurseForge";
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("flame");
-    }
-    virtual QString id() const override
-    {
-        return "curseforge";
-    }
-    virtual QString helpPage() const override
-    {
-        return "Flame-platform";
-    }
-    virtual bool shouldDisplay() const override;
-    void retranslate() override;
+   public:
+    explicit FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance);
+    ~FlameModPage() override = default;
 
-    void openedImpl() override;
+    inline auto displayName() const -> QString override { return "CurseForge"; }
+    inline auto icon() const -> QIcon override { return APPLICATION->getThemedIcon("flame"); }
+    inline auto id() const -> QString override { return "curseforge"; }
+    inline auto helpPage() const -> QString override { return "Flame-platform"; }
 
-    bool eventFilter(QObject * watched, QEvent * event) override;
+    inline auto debugName() const -> QString override { return "Flame"; }
+    inline auto metaEntryBase() const -> QString override { return "FlameMods"; };
 
-    BaseInstance *m_instance;
+    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const -> bool override;
 
-private:
-    void updateSelectionButton();
-
-private slots:
-    void triggerSearch();
-    void onSelectionChanged(QModelIndex first, QModelIndex second);
-    void onVersionSelectionChanged(QString data);
-    void onModSelected();
-
-private:
-    Ui::FlameModPage *ui = nullptr;
-    ModDownloadDialog* dialog = nullptr;
-    FlameMod::ListModel* listModel = nullptr;
-    FlameMod::IndexedPack current;
-
-    int selectedVersion = -1;
+    auto shouldDisplay() const -> bool override;
 };

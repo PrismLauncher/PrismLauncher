@@ -1,79 +1,25 @@
 #pragma once
 
-#include <RWStorage.h>
-
-#include <QAbstractListModel>
-#include <QSortFilterProxyModel>
-#include <QThreadPool>
-#include <QIcon>
-#include <QStyledItemDelegate>
-#include <QList>
-#include <QString>
-#include <QStringList>
-#include <QMetaType>
-
-#include <functional>
-#include <net/NetJob.h>
-
-#include <modplatform/flame/FlamePackIndex.h>
-#include "modplatform/flame/FlameModIndex.h"
-#include "BaseInstance.h"
 #include "FlameModPage.h"
 
 namespace FlameMod {
 
-
-typedef QMap<QString, QIcon> LogoMap;
-typedef std::function<void(QString)> LogoCallback;
-
-class ListModel : public QAbstractListModel
-{
+class ListModel : public ModPlatform::ListModel {
     Q_OBJECT
 
-public:
-    ListModel(FlameModPage *parent);
-    virtual ~ListModel();
+   public:
+    ListModel(FlameModPage* parent) : ModPlatform::ListModel(parent) {}
+    ~ListModel() override = default;
 
-    int rowCount(const QModelIndex &parent) const override;
-    int columnCount(const QModelIndex &parent) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-    bool canFetchMore(const QModelIndex & parent) const override;
-    void fetchMore(const QModelIndex & parent) override;
+   private:
+    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
+    void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
 
-    void getLogo(const QString &logo, const QString &logoUrl, LogoCallback callback);
-    void searchWithTerm(const QString &term, const int sort);
+    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 
-private slots:
-    void performPaginatedSearch();
-
-    void logoFailed(QString logo);
-    void logoLoaded(QString logo, QIcon out);
-
-    void searchRequestFinished();
-    void searchRequestFailed(QString reason);
-
-private:
-    void requestLogo(QString file, QString url);
-
-private:
-    QList<IndexedPack> modpacks;
-    QStringList m_failedLogos;
-    QStringList m_loadingLogos;
-    LogoMap m_logoMap;
-    QMap<QString, LogoCallback> waitingCallbacks;
-
-    QString currentSearchTerm;
-    int currentSort = 0;
-    int nextSearchOffset = 0;
-    enum SearchState {
-        None,
-        CanPossiblyFetchMore,
-        ResetRequested,
-        Finished
-    } searchState = None;
-    NetJob::Ptr jobPtr;
-    QByteArray response;
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+    static const char* sorts[6]; 
+    inline auto getSorts() const -> const char** override { return sorts; };
 };
 
-}
+}  // namespace FlameMod

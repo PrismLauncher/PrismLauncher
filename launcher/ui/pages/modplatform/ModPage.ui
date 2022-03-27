@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ModrinthPage</class>
- <widget class="QWidget" name="ModrinthPage">
+ <class>ModPage</class>
+ <widget class="QWidget" name="ModPage">
   <property name="geometry">
    <rect>
     <x>0</x>
