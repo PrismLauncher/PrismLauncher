@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2022 dada513 <dada513@protonmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,6 +49,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "ui/themes/ITheme.h"
+#include "Flatpak.h"
 
 #include <QApplication>
 #include <QProcess>
@@ -141,6 +143,25 @@ void LauncherPage::on_instDirBrowseBtn_clicked()
                 ui->instDirTextBox->setText(cooked_dir);
             }
         }
+        else if(Flatpak::IsFlatpak() && raw_dir.startsWith("/run/user"))
+        {
+            QMessageBox warning;
+            warning.setText(tr("You're trying to specify an instance folder "
+                            "which was granted temporaily via Flatpak.\n"
+                            "This is known to cause problems, "
+                            "after a restart the launcher might break, "
+                            "because it will no longer have access to that directory.\n\n"
+                            "Granting PolyMC access to it via Flatseal is recommended."));
+            warning.setInformativeText(
+             tr("Do you really want to use this path?\n"
+             "Selecting \"No\" will close this and not alter your instance path."));
+            warning.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            int result = warning.exec();
+            if (result == QMessageBox::Yes)
+            {
+                ui->instDirTextBox->setText(cooked_dir);
+            } 
+        } 
         else
         {
             ui->instDirTextBox->setText(cooked_dir);
