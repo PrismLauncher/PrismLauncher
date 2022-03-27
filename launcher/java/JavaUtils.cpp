@@ -355,7 +355,7 @@ QList<QString> JavaUtils::FindJavaPaths()
         }
     }
 
-    return candidates;
+    return addJavasFromEnv(candidates);
 }
 
 #elif defined(Q_OS_MAC)
