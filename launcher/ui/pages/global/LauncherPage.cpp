@@ -49,7 +49,6 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "ui/themes/ITheme.h"
-#include "Flatpak.h"
 
 #include <QApplication>
 #include <QProcess>
@@ -136,28 +135,27 @@ void LauncherPage::on_instDirBrowseBtn_clicked()
             warning.setInformativeText(
                 tr("Do you really want to use this path? "
                    "Selecting \"No\" will close this and not alter your instance path."));
-            warning.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             int result = warning.exec();
-            if (result == QMessageBox::Yes)
+            if (result == QMessageBox::Ok)
             {
                 ui->instDirTextBox->setText(cooked_dir);
             }
         }
-        else if(Flatpak::IsFlatpak() && raw_dir.startsWith("/run/user"))
+        else if(APPLICATION->isFlatpak() && raw_dir.startsWith("/run/user"))
         {
             QMessageBox warning;
             warning.setText(tr("You're trying to specify an instance folder "
                             "which was granted temporaily via Flatpak.\n"
-                            "This is known to cause problems, "
-                            "after a restart the launcher might break, "
+                            "This is known to cause problems. "
+                            "After a restart the launcher might break, "
                             "because it will no longer have access to that directory.\n\n"
                             "Granting PolyMC access to it via Flatseal is recommended."));
             warning.setInformativeText(
-             tr("Do you really want to use this path?\n"
-             "Selecting \"No\" will close this and not alter your instance path."));
-            warning.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+             tr("Do you want to proceed anyway?"));
+            warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             int result = warning.exec();
-            if (result == QMessageBox::Yes)
+            if (result == QMessageBox::Ok)
             {
                 ui->instDirTextBox->setText(cooked_dir);
             } 
