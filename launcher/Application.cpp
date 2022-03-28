@@ -727,6 +727,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("PastebinURL", "https://0x0.st");
 
         m_settings->registerSetting("CloseAfterLaunch", false);
+        m_settings->registerSetting("QuitAfterGameStop", false);
 
         // Custom MSA credentials
         m_settings->registerSetting("MSAClientIDOverride", "");
