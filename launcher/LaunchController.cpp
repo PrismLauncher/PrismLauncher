@@ -169,13 +169,14 @@ void LaunchController::login() {
                 if(!m_session->wants_online) {
                     // we ask the user for a player name
                     bool ok = false;
-                    QString usedname = m_session->player_name;
+                    QString lastOfflinePlayerName = APPLICATION->settings()->get("LastOfflinePlayerName").toString();
+                    QString usedname = lastOfflinePlayerName.isEmpty() ? m_session->player_name : lastOfflinePlayerName;
                     QString name = QInputDialog::getText(
                         m_parentWidget,
                         tr("Player name"),
                         tr("Choose your offline mode player name."),
                         QLineEdit::Normal,
-                        m_session->player_name,
+                        usedname,
                         &ok
                     );
                     if (!ok)
@@ -186,6 +187,7 @@ void LaunchController::login() {
                     if (name.length())
                     {
                         usedname = name;
+                        APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
                     }
                     m_session->MakeOffline(usedname);
                     // offline flavored game from here :3

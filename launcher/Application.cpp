@@ -696,6 +696,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // Minecraft launch method
         m_settings->registerSetting("MCLaunchMethod", "LauncherPart");
 
+        // Minecraft offline player name
+        m_settings->registerSetting("LastOfflinePlayerName", "");
+
         // Wrapper command for launch
         m_settings->registerSetting("WrapperCommand", "");
 
