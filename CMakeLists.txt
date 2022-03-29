@@ -6,7 +6,7 @@ if(WIN32)
 endif()
 
 project(Launcher)
-enable_testing()
+include(CTest)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
 if(IS_IN_SOURCE_BUILD)

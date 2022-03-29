@@ -355,21 +355,23 @@ add_unit_test(GradleSpecifier
     LIBS Launcher_logic
     )
 
-add_executable(PackageManifest
-    mojang/PackageManifest_test.cpp
-)
-target_link_libraries(PackageManifest
-    Launcher_logic
-    Qt5::Test
-)
-target_include_directories(PackageManifest
-    PRIVATE ../cmake/UnitTest/
-)
-add_test(
-    NAME PackageManifest
-    COMMAND PackageManifest
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
+if(BUILD_TESTING)
+    add_executable(PackageManifest
+        mojang/PackageManifest_test.cpp
+    )
+    target_link_libraries(PackageManifest
+        Launcher_logic
+        Qt5::Test
+    )
+    target_include_directories(PackageManifest
+        PRIVATE ../cmake/UnitTest/
+    )
+    add_test(
+        NAME PackageManifest
+        COMMAND PackageManifest
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+endif()
 
 add_unit_test(MojangVersionFormat
     SOURCES minecraft/MojangVersionFormat_test.cpp
