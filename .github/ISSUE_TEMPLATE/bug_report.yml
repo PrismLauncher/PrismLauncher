@@ -1,6 +1,6 @@
 name: Bug Report
 description: File a bug report
-labels: [bug, needs-triage]
+labels: [bug]
 body:
 - type: markdown
   attributes:
@@ -8,7 +8,7 @@ body:
       If you need help with running Minecraft, please visit us on our Discord before making a bug report.
 
       Before submitting a bug report, please make sure you have read this *entire* form, and that:
-      * You have read the [FAQ](https://github.com/PolyMC/PolyMC/wiki/FAQ) and it has not answered your question
+      * You have read the [PolyMC wiki](https://polymc.org/wiki/) and it has not answered your question.
       * Your bug is not caused by Minecraft or any mods you have installed.
       * Your issue has not been reported before, [make sure to use the search function!](https://github.com/PolyMC/PolyMC/issues)
 
