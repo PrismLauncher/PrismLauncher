@@ -153,7 +153,7 @@ QStringList addJavasFromEnv(QList<QString> javas)
 {
     QByteArray env = qgetenv("POLYMC_JAVA_PATHS");
 #if defined(Q_OS_WIN32)
-    QList<QString> javaPaths = QString::fromLocal8Bit(env).split(QLatin1String(";"));
+    QList<QString> javaPaths = QString::fromLocal8Bit(env).replace("\\", "/").split(QLatin1String(";"));
 #else
     QList<QString> javaPaths = QString::fromLocal8Bit(env).split(QLatin1String(":"));
 #endif
