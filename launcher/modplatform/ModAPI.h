@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <QList>
 
 namespace ModPlatform {
 class ListModel;
@@ -25,5 +26,13 @@ class ModAPI {
     };
 
     virtual void searchMods(CallerType* caller, SearchArgs&& args) const = 0;
-    virtual void getVersions(CallerType* caller, const QString& addonId) const = 0;
+
+
+    struct VersionSearchArgs {
+        QString addonId;
+        QList<QString> mcVersions;
+        ModLoaderType loader;
+    };
+
+    virtual void getVersions(CallerType* caller, VersionSearchArgs&& args) const = 0;
 };

@@ -31,14 +31,14 @@ void NetworkModAPI::searchMods(CallerType* caller, SearchArgs&& args) const
     netJob->start();
 }
 
-void NetworkModAPI::getVersions(CallerType* caller, const QString& addonId) const
+void NetworkModAPI::getVersions(CallerType* caller, VersionSearchArgs&& args) const
 {
-    auto netJob = new NetJob(QString("%1::ModVersions(%2)").arg(caller->debugName()).arg(addonId), APPLICATION->network());
+    auto netJob = new NetJob(QString("%1::ModVersions(%2)").arg(caller->debugName()).arg(args.addonId), APPLICATION->network());
     auto response = new QByteArray();
 
-    netJob->addNetAction(Net::Download::makeByteArray(getVersionsURL(addonId), response));
+    netJob->addNetAction(Net::Download::makeByteArray(getVersionsURL(args), response));
 
-    QObject::connect(netJob, &NetJob::succeeded, caller, [response, caller, addonId] {
+    QObject::connect(netJob, &NetJob::succeeded, caller, [response, caller, args] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -48,7 +48,7 @@ void NetworkModAPI::getVersions(CallerType* caller, const QString& addonId) cons
             return;
         }
 
-        caller->versionRequestSucceeded(doc, addonId);
+        caller->versionRequestSucceeded(doc, args.addonId);
     });
 
     QObject::connect(netJob, &NetJob::finished, caller, [response, netJob] {

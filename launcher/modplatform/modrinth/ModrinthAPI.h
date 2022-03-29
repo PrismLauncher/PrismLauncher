@@ -30,10 +30,26 @@ class ModrinthAPI : public NetworkModAPI {
             .arg(args.version);
     };
 
-    inline auto getVersionsURL(const QString& addonId) const -> QString override
+    inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
     {
-        return QString("https://api.modrinth.com/v2/project/%1/version").arg(addonId);
+        return QString("https://api.modrinth.com/v2/project/%1/version?"
+                "game_versions=[%2]"
+                "loaders=[%3]")
+            .arg(args.addonId)
+            .arg(getGameVersionsString(args.mcVersions))
+            .arg(getModLoaderString(args.loader));
     };
+
+    inline auto getGameVersionsString(QList<QString> mcVersions) const -> QString
+    {
+        QString s;
+        for(int i = 0; i < mcVersions.count(); i++){
+            s += mcVersions.at(i);
+            if(i < mcVersions.count() - 1)
+                s += ",";
+        }
+        return s;
+    }
 
     inline auto getModLoaderString(ModLoaderType modLoader) const -> QString
     {
