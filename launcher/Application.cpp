@@ -1143,8 +1143,7 @@ std::vector<ITheme *> Application::getValidApplicationThemes()
 bool Application::isFlatpak()
 {
     #ifdef Q_OS_LINUX
-    QFileInfo check_file("/.flatpak-info");
-    return check_file.exists();
+    return QFile::exists("/.flatpak-info");
     #else
     return false;
     #endif
