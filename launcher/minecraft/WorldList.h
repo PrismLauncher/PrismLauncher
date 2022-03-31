@@ -32,7 +32,8 @@ public:
     {
         NameColumn,
         GameModeColumn,
-        LastPlayedColumn
+        LastPlayedColumn,
+        SizeColumn
     };
 
     enum Roles
@@ -43,6 +44,7 @@ public:
         NameRole,
         GameModeRole,
         LastPlayedRole,
+        SizeRole,
         IconFileRole
     };
 

@@ -17,6 +17,7 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <nonstd/optional>
+#include <qfileinfo.h>
 
 struct GameType {
     GameType() = default;
@@ -51,6 +52,10 @@ public:
     QString iconFile() const
     {
         return m_iconFile;
+    }
+    int64_t bytes() const
+    {
+        return m_size;
     }
     QDateTime lastPlayed() const
     {
@@ -105,6 +110,7 @@ protected:
     QString m_iconFile;
     QDateTime levelDatTime;
     QDateTime m_lastPlayed;
+    int64_t m_size;
     int64_t m_randomSeed = 0;
     GameType m_gameType;
     bool is_valid = false;

@@ -17,6 +17,7 @@
 #include <QString>
 #include <QDebug>
 #include <QSaveFile>
+#include <QDirIterator>
 #include "World.h"
 
 #include "GZip.h"
@@ -187,6 +188,25 @@ bool putLevelDatDataToFS(const QFileInfo &file, QByteArray & data)
     return f.commit();
 }
 
+int64_t calculateWorldSize(const QFileInfo &file)
+{
+    if (file.isFile() && file.suffix() == "zip")
+    {
+        return file.size();
+    }
+    else if(file.isDir())
+    {
+        QDirIterator it(file.absolutePath(), QDirIterator::Subdirectories);
+        int64_t total = 0;
+        while (it.hasNext()) {        
+            total += it.fileInfo().size();
+            it.next();
+        }
+        return total;
+    }
+    return -1;
+}
+
 World::World(const QFileInfo &file)
 {
     repath(file);
@@ -196,6 +216,7 @@ void World::repath(const QFileInfo &file)
 {
     m_containerFile = file;
     m_folderName = file.fileName();
+    m_size = calculateWorldSize(file);
     if(file.isFile() && file.suffix() == "zip")
     {
         m_iconFile = QString();
@@ -482,6 +503,7 @@ void World::loadFromLevelDat(QByteArray data)
     if(randomSeed) {
         qDebug() << "Seed:" << *randomSeed;
     }
+    qDebug() << "Size:" << m_size;
     qDebug() << "GameType:" << m_gameType.toLogString();
 }
 
