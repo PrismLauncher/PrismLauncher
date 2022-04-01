@@ -12,7 +12,7 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireString(obj, "project_id");
     pack.name = Json::requireString(obj, "title");
-    pack.websiteUrl = Json::ensureString(obj, "page_url", "");
+    pack.websiteUrl = "https://modrinth.com/mod/" + Json::ensureString(obj, "slug", "");
     pack.description = Json::ensureString(obj, "description", "");
 
     pack.logoUrl = Json::requireString(obj, "icon_url");
