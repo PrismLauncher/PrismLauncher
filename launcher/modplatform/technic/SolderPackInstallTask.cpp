@@ -42,6 +42,7 @@
 
 #include "TechnicPackProcessor.h"
 #include "SolderPackManifest.h"
+#include "net/ChecksumValidator.h"
 
 Technic::SolderPackInstallTask::SolderPackInstallTask(
     shared_qobject_ptr<QNetworkAccessManager> network,
@@ -110,7 +111,14 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     int i = 0;
     for (const auto &mod : build.mods) {
         auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
-        m_filesNetJob->addNetAction(Net::Download::makeFile(mod.url, path));
+
+        auto dl = Net::Download::makeFile(mod.url, path);
+        if (!mod.md5.isEmpty()) {
+            auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
+            dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+        }
+        m_filesNetJob->addNetAction(dl);
+
         i++;
     }
 
