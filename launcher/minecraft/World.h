@@ -17,7 +17,6 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <nonstd/optional>
-#include <qfileinfo.h>
 
 struct GameType {
     GameType() = default;
