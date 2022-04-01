@@ -1140,6 +1140,15 @@ std::vector<ITheme *> Application::getValidApplicationThemes()
     return ret;
 }
 
+bool Application::isFlatpak()
+{
+    #ifdef Q_OS_LINUX
+    return QFile::exists("/.flatpak-info");
+    #else
+    return false;
+    #endif
+}
+
 void Application::setApplicationTheme(const QString& name, bool initial)
 {
     auto systemPalette = qApp->palette();

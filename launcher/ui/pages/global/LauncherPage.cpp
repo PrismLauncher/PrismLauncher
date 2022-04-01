@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2022 dada513 <dada513@protonmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -134,13 +135,31 @@ void LauncherPage::on_instDirBrowseBtn_clicked()
             warning.setInformativeText(
                 tr("Do you really want to use this path? "
                    "Selecting \"No\" will close this and not alter your instance path."));
-            warning.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             int result = warning.exec();
-            if (result == QMessageBox::Yes)
+            if (result == QMessageBox::Ok)
             {
                 ui->instDirTextBox->setText(cooked_dir);
             }
         }
+        else if(APPLICATION->isFlatpak() && raw_dir.startsWith("/run/user"))
+        {
+            QMessageBox warning;
+            warning.setText(tr("You're trying to specify an instance folder "
+                            "which was granted temporaily via Flatpak.\n"
+                            "This is known to cause problems. "
+                            "After a restart the launcher might break, "
+                            "because it will no longer have access to that directory.\n\n"
+                            "Granting PolyMC access to it via Flatseal is recommended."));
+            warning.setInformativeText(
+             tr("Do you want to proceed anyway?"));
+            warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            int result = warning.exec();
+            if (result == QMessageBox::Ok)
+            {
+                ui->instDirTextBox->setText(cooked_dir);
+            } 
+        } 
         else
         {
             ui->instDirTextBox->setText(cooked_dir);

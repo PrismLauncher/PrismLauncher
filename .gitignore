@@ -42,3 +42,7 @@ run/
 
 # Nix/NixOS
 result/
+
+# Flatpak
+.flatpak-builder
+flatbuild
