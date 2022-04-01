@@ -81,6 +81,12 @@ int ProgressDialog::execWithTask(Task *task)
     connect(task, SIGNAL(status(QString)), SLOT(changeStatus(const QString &)));
     connect(task, SIGNAL(progress(qint64, qint64)), SLOT(changeProgress(qint64, qint64)));
 
+    m_is_multi_step = task->isMultiStep();
+    if(!m_is_multi_step){
+        ui->globalStatusLabel->setHidden(true);
+        ui->globalProgressBar->setHidden(true);
+    }
+
     // if this didn't connect to an already running task, invoke start
     if(!task->isRunning())
     {
@@ -152,14 +158,24 @@ void ProgressDialog::onTaskSucceeded()
 
 void ProgressDialog::changeStatus(const QString &status)
 {
-    ui->statusLabel->setText(status);
+    ui->statusLabel->setText(task->getStepStatus());
+    ui->globalStatusLabel->setText(status);
     updateSize();
 }
 
 void ProgressDialog::changeProgress(qint64 current, qint64 total)
 {
-    ui->taskProgressBar->setMaximum(total);
-    ui->taskProgressBar->setValue(current);
+    ui->globalProgressBar->setMaximum(total);
+    ui->globalProgressBar->setValue(current);
+
+    if(!m_is_multi_step){
+        ui->taskProgressBar->setMaximum(total);
+        ui->taskProgressBar->setValue(current);
+    }
+    else{
+        ui->taskProgressBar->setMaximum(task->getStepProgress());
+        ui->taskProgressBar->setValue(task->getStepTotalProgress());
+    }
 }
 
 void ProgressDialog::keyPressEvent(QKeyEvent *e)
