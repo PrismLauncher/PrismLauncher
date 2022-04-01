@@ -64,12 +64,12 @@ void VerifyJavaInstall::executeTask() {
         return;
     }
 
-    emit logLine(tr("Instance not compatible with Java major version %1.\n"
-                    "Switch the Java version of this instance to one of the following:").arg(javaVersion.major()),
+    emit logLine(tr("This instance is not compatible with Java version %1.\n"
+                    "Please switch to one of the following Java versions for this instance:").arg(javaVersion.major()),
                  MessageLevel::Error);
-    for (auto major: compatibleMajors)
+    for (auto major : compatibleMajors)
     {
-        emit logLine(tr("Java %1").arg(major), MessageLevel::Error);
+        emit logLine(tr("Java version %1").arg(major), MessageLevel::Error);
     }
     emitFailed(QString("Incompatible Java major version"));
 }
