@@ -14,6 +14,8 @@
  */
 
 #include "WorldList.h"
+
+#include "Application.h"
 #include <FileSystem.h>
 #include <QMimeData>
 #include <QUrl>
@@ -150,7 +152,7 @@ bool WorldList::resetIcon(int row)
 
 int WorldList::columnCount(const QModelIndex &parent) const
 {
-    return 3;
+    return 4;
 }
 
 QVariant WorldList::data(const QModelIndex &index, int role) const
@@ -163,6 +165,8 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
 
     if (row < 0 || row >= worlds.size())
         return QVariant();
+
+    QLocale locale;
 
     auto & world = worlds[row];
     switch (role)
@@ -178,6 +182,9 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
 
         case LastPlayedColumn:
             return world.lastPlayed();
+
+        case SizeColumn:
+            return locale.formattedDataSize(world.bytes());
 
         default:
             return QVariant();
@@ -207,6 +214,10 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
     {
         return world.lastPlayed();
     }
+    case SizeRole:
+    {
+        return locale.formattedDataSize(world.bytes());
+    }
     case IconFileRole:
     {
         return world.iconFile();
@@ -229,6 +240,9 @@ QVariant WorldList::headerData(int section, Qt::Orientation orientation, int rol
             return tr("Game Mode");
         case LastPlayedColumn:
             return tr("Last Played");
+        case SizeColumn:
+            //: World size on disk
+            return tr("Size");
         default:
             return QVariant();
         }
@@ -242,6 +256,8 @@ QVariant WorldList::headerData(int section, Qt::Orientation orientation, int rol
             return tr("Game mode of the world.");
         case LastPlayedColumn:
             return tr("Date and time the world was last played.");
+        case SizeColumn:
+            return tr("Size of the world on disk.");
         default:
             return QVariant();
         }

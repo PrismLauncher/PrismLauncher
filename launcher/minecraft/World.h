@@ -52,6 +52,10 @@ public:
     {
         return m_iconFile;
     }
+    int64_t bytes() const
+    {
+        return m_size;
+    }
     QDateTime lastPlayed() const
     {
         return m_lastPlayed;
@@ -105,6 +109,7 @@ protected:
     QString m_iconFile;
     QDateTime levelDatTime;
     QDateTime m_lastPlayed;
+    int64_t m_size;
     int64_t m_randomSeed = 0;
     GameType m_gameType;
     bool is_valid = false;
