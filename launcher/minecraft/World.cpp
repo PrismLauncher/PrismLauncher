@@ -198,7 +198,8 @@ int64_t calculateWorldSize(const QFileInfo &file)
     {
         QDirIterator it(file.absolutePath(), QDirIterator::Subdirectories);
         int64_t total = 0;
-        while (it.hasNext()) {        
+        while (it.hasNext())
+        {
             total += it.fileInfo().size();
             it.next();
         }
