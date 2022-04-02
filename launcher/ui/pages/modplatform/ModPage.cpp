@@ -64,7 +64,6 @@ void ModPage::filterMods()
     m_filter = filter_dialog.getFilter();
 
     listModel->refresh();
-
     if(ui->versionSelectionBox->count() > 0){
         ui->versionSelectionBox->clear();
         updateModVersions();
@@ -164,14 +163,14 @@ void ModPage::updateModVersions()
     for (int i = 0; i < current.versions.size(); i++) {
         auto version = current.versions[i];
         bool valid = false;
-        //NOTE: Flame doesn't care about loaderString, so passing it changes nothing.
         for(auto& mcVer : m_filter->versions){
+            //NOTE: Flame doesn't care about loaderString, so passing it changes nothing.
             if (validateVersion(version, mcVer.toString(), loaderString)) {
                 valid = true;
                 break;
             }
         }
-        if(valid)
+        if(valid || m_filter->versions.size() == 0)
             ui->versionSelectionBox->addItem(version.version, QVariant(i));
     }
     if (ui->versionSelectionBox->count() == 0) { ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1)); }

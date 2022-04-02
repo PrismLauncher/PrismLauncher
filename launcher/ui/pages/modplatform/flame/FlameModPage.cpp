@@ -67,6 +67,25 @@ auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString min
     return ver.mcVersion.contains(mineVer);
 }
 
+// We override this so that it refreshes correctly, otherwise it wouldn't show
+// any mod on the mod list, because the CF API does not support it :(
+void FlameModPage::filterMods()
+{
+    filter_dialog.execWithInstance(static_cast<MinecraftInstance*>(m_instance));
+
+    int prev_size = m_filter->versions.size();
+    m_filter = filter_dialog.getFilter();
+    int new_size = m_filter->versions.size();
+
+    if(new_size <= 1 && new_size != prev_size)
+        listModel->refresh();
+
+    if(ui->versionSelectionBox->count() > 0){
+        ui->versionSelectionBox->clear();
+        updateModVersions();
+    }
+}
+
 // I don't know why, but doing this on the parent class makes it so that
 // other mod providers start loading before being selected, at least with
 // my Qt, so we need to implement this in every derived class...

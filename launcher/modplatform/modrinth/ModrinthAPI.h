@@ -22,7 +22,7 @@ class ModrinthAPI : public NetworkModAPI {
                    "limit=25&"
                    "query=%2&"
                    "index=%3&"
-                   "facets=[[\"categories:%4\"],[%5],[\"project_type:mod\"]]")
+                   "facets=[[\"categories:%4\"],%5[\"project_type:mod\"]]")
             .arg(args.offset)
             .arg(args.search)
             .arg(args.sorting)
@@ -47,7 +47,7 @@ class ModrinthAPI : public NetworkModAPI {
             s += QString("\"versions:%1\",").arg(ver.toString());
         }
         s.remove(s.length() - 1, 1); //remove last comma
-        return s;
+        return s.isEmpty() ? QString() : QString("[%1],").arg(s);
     }
 
     static auto getModLoaderString(ModLoaderType type) -> const QString

@@ -54,7 +54,7 @@ class ModPage : public QWidget, public BasePage {
     void updateSelectionButton();
 
    protected slots:
-    void filterMods();
+    virtual void filterMods();
     void triggerSearch();
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);

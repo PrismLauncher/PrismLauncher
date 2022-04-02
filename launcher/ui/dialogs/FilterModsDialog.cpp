@@ -9,7 +9,7 @@ FilterModsDialog::FilterModsDialog(Version def, QWidget* parent)
     m_mcVersion_buttons.addButton(ui->strictVersionButton,   VersionButtonID::Strict);
     m_mcVersion_buttons.addButton(ui->majorVersionButton,    VersionButtonID::Major);
     m_mcVersion_buttons.addButton(ui->allVersionsButton,     VersionButtonID::All);
-    m_mcVersion_buttons.addButton(ui->betweenVersionsButton, VersionButtonID::Between);
+    //m_mcVersion_buttons.addButton(ui->betweenVersionsButton, VersionButtonID::Between);
 
     connect(&m_mcVersion_buttons, SIGNAL(idClicked(int)), this, SLOT(onVersionFilterChanged(int)));
 
@@ -31,18 +31,38 @@ int FilterModsDialog::execWithInstance(MinecraftInstance* instance)
         tr("Major varsion match (= %1.%2.x)").arg(mcVersionSplit[0], mcVersionSplit[1]));
     ui->allVersionsButton->setText(
         tr("Any version match"));
-    ui->betweenVersionsButton->setText(
-        tr("Between two versions"));
+    //ui->betweenVersionsButton->setText(
+    //    tr("Between two versions"));
 
     int ret = QDialog::exec();
     m_instance = nullptr;
     return ret;
 }
 
+void FilterModsDialog::disableVersionButton(VersionButtonID id)
+{
+    switch(id){
+    case(VersionButtonID::Strict):
+        ui->strictVersionButton->setEnabled(false);
+        break;
+    case(VersionButtonID::Major):
+        ui->majorVersionButton->setEnabled(false);
+        break;
+    case(VersionButtonID::All):
+        ui->allVersionsButton->setEnabled(false);
+        break;
+    case(VersionButtonID::Between):
+    //    ui->betweenVersionsButton->setEnabled(false);
+        break;
+    default:
+        break;
+    }
+}
+
 void FilterModsDialog::onVersionFilterChanged(int id)
 {
-    ui->lowerVersionComboBox->setEnabled(id == VersionButtonID::Between);
-    ui->upperVersionComboBox->setEnabled(id == VersionButtonID::Between);
+    //ui->lowerVersionComboBox->setEnabled(id == VersionButtonID::Between);
+    //ui->upperVersionComboBox->setEnabled(id == VersionButtonID::Between);
 
     auto versionSplit = mcVersionStr().split(".");
     int index = 0;
@@ -60,6 +80,7 @@ void FilterModsDialog::onVersionFilterChanged(int id)
         }
         break;
     case(VersionButtonID::All):
+        // Empty list to avoid enumerating all versions :P
         break;
     case(VersionButtonID::Between):
         // TODO

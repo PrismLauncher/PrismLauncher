@@ -6,6 +6,8 @@ class FlameAPI : public NetworkModAPI {
    private:
     inline auto getModSearchURL(SearchArgs& args) const -> QString override
     {
+        auto gameVersionStr = args.versions.size() != 0 ? QString("gameVersion=%1").arg(args.versions.front().toString()) : QString();
+
         return QString(
                    "https://addons-ecs.forgesvc.net/api/v2/addon/search?"
                    "gameId=432&"
@@ -17,12 +19,12 @@ class FlameAPI : public NetworkModAPI {
                    "searchFilter=%2&"
                    "sort=%3&"
                    "modLoaderType=%4&"
-                   "gameVersion=%5")
+                   "%5")
             .arg(args.offset)
             .arg(args.search)
             .arg(args.sorting)
             .arg(args.mod_loader)
-            .arg(getGameVersionsString(args.versions));
+            .arg(gameVersionStr);
     };
 
     inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
