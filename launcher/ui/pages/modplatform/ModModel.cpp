@@ -75,11 +75,8 @@ void ListModel::performPaginatedSearch()
             { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], profile->getModLoader(), getMineVersions() });
 }
 
-void ListModel::searchWithTerm(const QString& term, const int sort)
+void ListModel::refresh()
 {
-    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort) { return; }
-    currentSearchTerm = term;
-    currentSort = sort;
     if (jobPtr) {
         jobPtr->abort();
         searchState = ResetRequested;
@@ -92,6 +89,15 @@ void ListModel::searchWithTerm(const QString& term, const int sort)
     }
     nextSearchOffset = 0;
     performPaginatedSearch();
+}
+
+void ListModel::searchWithTerm(const QString& term, const int sort)
+{
+    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort) { return; }
+    currentSearchTerm = term;
+    currentSort = sort;
+
+    refresh();
 }
 
 void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)

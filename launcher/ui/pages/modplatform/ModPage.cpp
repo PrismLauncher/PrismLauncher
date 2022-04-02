@@ -62,6 +62,13 @@ void ModPage::filterMods()
     filter_dialog.execWithInstance(static_cast<MinecraftInstance*>(m_instance));
 
     m_filter = filter_dialog.getFilter();
+
+    listModel->refresh();
+
+    if(ui->versionSelectionBox->count() > 0){
+        ui->versionSelectionBox->clear();
+        updateModVersions();
+    }
 }
 
 void ModPage::triggerSearch()
