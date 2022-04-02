@@ -2,21 +2,29 @@
 #include "ui_ModPage.h"
 
 #include <QKeyEvent>
+#include <memory>
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
-    : QWidget(dialog), m_instance(instance), ui(new Ui::ModPage), dialog(dialog), api(api)
+    : QWidget(dialog)
+    , m_instance(instance)
+    , ui(new Ui::ModPage)
+    , dialog(dialog)
+    , filter_dialog(static_cast<MinecraftInstance*>(instance)->getPackProfile()->getComponentVersion("net.minecraft"), this)
+    , api(api)
 {
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &ModPage::triggerSearch);
+    connect(ui->modFilterButton, &QPushButton::clicked, this, &ModPage::filterMods);
     ui->searchEdit->installEventFilter(this);
 
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
+    m_filter = filter_dialog.getFilter();
 }
 
 ModPage::~ModPage()
@@ -48,6 +56,13 @@ auto ModPage::eventFilter(QObject* watched, QEvent* event) -> bool
 
 
 /******** Callbacks to events in the UI (set up in the derived classes) ********/
+
+void ModPage::filterMods()
+{
+    filter_dialog.execWithInstance(static_cast<MinecraftInstance*>(m_instance));
+
+    m_filter = filter_dialog.getFilter();
+}
 
 void ModPage::triggerSearch()
 {
@@ -141,11 +156,16 @@ void ModPage::updateModVersions()
 
     for (int i = 0; i < current.versions.size(); i++) {
         auto version = current.versions[i];
+        bool valid = false;
         //NOTE: Flame doesn't care about loaderString, so passing it changes nothing.
-        if (!validateVersion(version, mcVersion, loaderString)) {
-            continue;
+        for(auto& mcVer : m_filter->versions){
+            if (validateVersion(version, mcVer.toString(), loaderString)) {
+                valid = true;
+                break;
+            }
         }
-        ui->versionSelectionBox->addItem(version.version, QVariant(i));
+        if(valid)
+            ui->versionSelectionBox->addItem(version.version, QVariant(i));
     }
     if (ui->versionSelectionBox->count() == 0) { ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1)); }
 

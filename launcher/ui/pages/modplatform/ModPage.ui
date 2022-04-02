@@ -51,12 +51,12 @@
    <item row="0" column="0">
     <widget class="QLineEdit" name="searchEdit">
      <property name="placeholderText">
-      <string>Search and filter...</string>
+      <string>Search for mods...</string>
      </property>
     </widget>
    </item>
    <item row="2" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0,0">
+    <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0">
      <item row="0" column="2">
       <widget class="QComboBox" name="versionSelectionBox"/>
      </item>
@@ -77,6 +77,13 @@
       <widget class="QPushButton" name="modSelectionButton">
        <property name="text">
         <string>Select mod for download</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="modFilterButton">
+       <property name="text">
+        <string>Filter options</string>
        </property>
       </widget>
      </item>

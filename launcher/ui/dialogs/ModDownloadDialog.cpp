@@ -80,7 +80,7 @@ void ModDownloadDialog::confirm()
         tr("Confirm mods to download")
     );
 
-    for(auto task : keys){
+    for(auto& task : keys){
         confirm_dialog->appendMod(task, modTask.find(task).value()->getFilename());
     }
 
