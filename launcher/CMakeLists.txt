@@ -824,6 +824,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/SkinUploadDialog.h
     ui/dialogs/ModDownloadDialog.cpp
     ui/dialogs/ModDownloadDialog.h
+    ui/dialogs/FilterModsDialog.cpp
+    ui/dialogs/FilterModsDialog.h
 
 
     # GUI - widgets
@@ -923,6 +925,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/dialogs/LoginDialog.ui
     ui/dialogs/EditAccountDialog.ui
     ui/dialogs/ReviewMessageBox.ui
+    ui/dialogs/FilterModsDialog.ui
 )
 
 qt5_add_resources(LAUNCHER_RESOURCES
