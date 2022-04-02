@@ -22,7 +22,7 @@ class FlameAPI : public NetworkModAPI {
             .arg(args.search)
             .arg(args.sorting)
             .arg(args.mod_loader)
-            .arg(args.version);
+            .arg(getGameVersionsString(args.versions));
     };
 
     inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override

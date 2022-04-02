@@ -27,7 +27,7 @@ class ModrinthAPI : public NetworkModAPI {
             .arg(args.search)
             .arg(args.sorting)
             .arg(getModLoaderString(args.mod_loader))
-            .arg(args.version);
+            .arg(getGameVersionsString(args.versions));
     };
 
     inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
@@ -39,17 +39,6 @@ class ModrinthAPI : public NetworkModAPI {
             .arg(getGameVersionsString(args.mcVersions))
             .arg(getModLoaderString(args.loader));
     };
-
-    inline auto getGameVersionsString(QList<QString> mcVersions) const -> QString
-    {
-        QString s;
-        for(int i = 0; i < mcVersions.count(); i++){
-            s += mcVersions.at(i);
-            if(i < mcVersions.count() - 1)
-                s += ",";
-        }
-        return s;
-    }
 
     static auto getModLoaderString(ModLoaderType type) -> const QString
     {

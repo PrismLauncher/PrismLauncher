@@ -7,6 +7,7 @@
 #include "net/NetJob.h"
 
 class ModPage;
+class Version;
 
 namespace ModPlatform {
 
@@ -62,7 +63,7 @@ class ListModel : public QAbstractListModel {
 
     void requestLogo(QString file, QString url);
 
-    inline auto getMineVersions() const -> QList<QString>;
+    inline auto getMineVersions() const -> std::list<Version>;
 
    protected:
     ModPage* m_parent;
