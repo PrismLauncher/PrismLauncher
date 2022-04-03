@@ -59,14 +59,15 @@ auto ModPage::eventFilter(QObject* watched, QEvent* event) -> bool
 
 void ModPage::filterMods()
 {
-    filter_dialog.execWithInstance(static_cast<MinecraftInstance*>(m_instance));
-
+    auto ret = filter_dialog.execWithInstance(static_cast<MinecraftInstance*>(m_instance));
     m_filter = filter_dialog.getFilter();
 
-    listModel->refresh();
-    if(ui->versionSelectionBox->count() > 0){
+    if(ret == QDialog::DialogCode::Accepted){
+        listModel->refresh();
+
+        int prev_count = ui->versionSelectionBox->count();
         ui->versionSelectionBox->clear();
-        updateModVersions();
+        updateModVersions(prev_count);
     }
 }
 
@@ -152,7 +153,7 @@ void ModPage::retranslate()
    ui->retranslateUi(this);
 }
 
-void ModPage::updateModVersions()
+void ModPage::updateModVersions(int prev_count)
 {
     auto packProfile = (dynamic_cast<MinecraftInstance*>(m_instance))->getPackProfile();
 
@@ -173,9 +174,11 @@ void ModPage::updateModVersions()
         if(valid || m_filter->versions.size() == 0)
             ui->versionSelectionBox->addItem(version.version, QVariant(i));
     }
-    if (ui->versionSelectionBox->count() == 0) { ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1)); }
+    if (ui->versionSelectionBox->count() == 0 && prev_count != 0) { 
+        ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1)); 
+        ui->modSelectionButton->setText(tr("Cannot select invalid version :("));
+    }
 
-    ui->modSelectionButton->setText(tr("Cannot select invalid version :("));
     updateSelectionButton();
 }
 

@@ -43,7 +43,7 @@ class ModPage : public QWidget, public BasePage {
     auto getFilter() const -> const std::shared_ptr<FilterModsDialog::Filter> { return m_filter; }
 
     auto getCurrent() -> ModPlatform::IndexedPack& { return current; }
-    void updateModVersions();
+    void updateModVersions(int prev_count = -1);
 
     void openedImpl() override;
     auto eventFilter(QObject* watched, QEvent* event) -> bool override;

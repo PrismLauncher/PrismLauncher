@@ -67,22 +67,22 @@ auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString min
     return ver.mcVersion.contains(mineVer);
 }
 
-// We override this so that it refreshes correctly, otherwise it wouldn't show
-// any mod on the mod list, because the CF API does not support it :(
+// We override this so that it refreshes correctly, otherwise it would show
+// invalid mods on the mod list, because the API would return mods for the
+// wrong mod loader :(
 void FlameModPage::filterMods()
 {
-    filter_dialog.execWithInstance(static_cast<MinecraftInstance*>(m_instance));
-
-    int prev_size = m_filter->versions.size();
+    auto ret = filter_dialog.execWithInstance(static_cast<MinecraftInstance*>(m_instance));
     m_filter = filter_dialog.getFilter();
-    int new_size = m_filter->versions.size();
 
-    if(new_size <= 1 && new_size != prev_size)
-        listModel->refresh();
+    if(ret == QDialog::DialogCode::Accepted){
+        // CF API can't handle well this
+        if(!m_filter->versions.empty())
+            listModel->refresh();
 
-    if(ui->versionSelectionBox->count() > 0){
+        int prev_count = ui->versionSelectionBox->count();
         ui->versionSelectionBox->clear();
-        updateModVersions();
+        updateModVersions(prev_count);
     }
 }
 

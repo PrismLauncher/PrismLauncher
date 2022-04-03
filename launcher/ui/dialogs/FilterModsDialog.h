@@ -26,9 +26,13 @@ public:
 
     struct Filter {
         std::list<Version> versions;
+
+        bool operator==(const Filter& other) const { return versions == other.versions; }
+        bool operator!=(const Filter& other) const { return !(*this == other); }
     };
 
     std::shared_ptr<Filter> m_filter;
+    std::shared_ptr<Filter> m_internal_filter;
 
 public:
     explicit FilterModsDialog(Version def, QWidget* parent = nullptr);
@@ -45,6 +49,9 @@ private:
     inline auto mcVersionStr() const -> QString { return m_instance ? m_instance->getPackProfile()->getComponentVersion("net.minecraft") : ""; }
     inline auto mcVersion() const -> Version { return { mcVersionStr() }; }
 
+    void commitChanges();
+    void revertChanges();
+
 private slots:
     void onVersionFilterChanged(int id);
 
@@ -54,4 +61,5 @@ private:
     MinecraftInstance* m_instance = nullptr;
 
     QButtonGroup m_mcVersion_buttons;
+    VersionButtonID m_previous_mcVersion_id = VersionButtonID::Strict;
 };
