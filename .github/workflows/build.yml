@@ -16,13 +16,8 @@ jobs:
         include:
 
           - os: ubuntu-20.04
-            qt_version: 5.12.8
-            qt_host: linux
 
           - os: ubuntu-20.04
-            name: Linux-Portable
-            qt_version: 5.12.8
-            qt_host: linux
             portable: true
 
           - os: ubuntu-20.04
@@ -33,12 +28,10 @@ jobs:
           - os: windows-2022
             name: "Windows-i686"
             msystem: mingw32
-            portable: false 
 
           - os: windows-2022
             name: "Windows-x86_64"
             msystem: mingw64
-            portable: false 
 
           - os: windows-2022
             name: "Windows-i686-portable"
