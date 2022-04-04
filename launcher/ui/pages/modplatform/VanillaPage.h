@@ -77,15 +77,20 @@ public:
     void openedImpl() override;
 
     BaseVersionPtr selectedVersion() const;
+    BaseVersionPtr selectedLoaderVersion() const;
+    QString selectedLoader() const;
 
 public slots:
     void setSelectedVersion(BaseVersionPtr version);
+    void setSelectedLoaderVersion(BaseVersionPtr version);
 
 private slots:
     void filterChanged();
+    void loaderFilterChanged();
 
 private:
     void refresh();
+    void loaderRefresh();
     void suggestCurrent();
 
 private:
@@ -94,4 +99,6 @@ private:
     Ui::VanillaPage *ui = nullptr;
     bool m_versionSetByUser = false;
     BaseVersionPtr m_selectedVersion;
+    BaseVersionPtr m_selectedLoaderVersion;
+    QString m_selectedLoader;
 };

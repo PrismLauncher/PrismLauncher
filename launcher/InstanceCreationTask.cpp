@@ -9,6 +9,15 @@
 InstanceCreationTask::InstanceCreationTask(BaseVersionPtr version)
 {
     m_version = version;
+    m_usingLoader = false;
+}
+
+InstanceCreationTask::InstanceCreationTask(BaseVersionPtr version, QString loader, BaseVersionPtr loaderVersion)
+{
+    m_version = version;
+    m_usingLoader = true;
+    m_loader = loader;
+    m_loaderVersion = loaderVersion;
 }
 
 void InstanceCreationTask::executeTask()
@@ -21,6 +30,8 @@ void InstanceCreationTask::executeTask()
         auto components = inst.getPackProfile();
         components->buildingFromScratch();
         components->setComponentVersion("net.minecraft", m_version->descriptor(), true);
+        if(m_usingLoader)
+            components->setComponentVersion(m_loader, m_loaderVersion->descriptor(), true);
         inst.setName(m_instName);
         inst.setIconKey(m_instIcon);
         instanceSettings->resumeSave();
