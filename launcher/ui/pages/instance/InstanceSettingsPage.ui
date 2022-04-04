@@ -85,6 +85,16 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="skipCompatibilityCheckbox">
+            <property name="toolTip">
+             <string>If enabled, the launcher will not check if an instance is compatible with the selected Java version.</string>
+            </property>
+            <property name="text">
+             <string>Skip Java compatibility checks</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

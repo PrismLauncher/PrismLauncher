@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -95,6 +96,7 @@ void JavaPage::applySettings()
     // Java Settings
     s->set("JavaPath", ui->javaPathTextBox->text());
     s->set("JvmArgs", ui->jvmArgsTextBox->text());
+    s->set("IgnoreJavaCompatibility", ui->skipCompatibilityCheckbox->isChecked());
     JavaCommon::checkJVMArgs(s->get("JvmArgs").toString(), this->parentWidget());
 }
 void JavaPage::loadSettings()
@@ -118,6 +120,7 @@ void JavaPage::loadSettings()
     // Java Settings
     ui->javaPathTextBox->setText(s->get("JavaPath").toString());
     ui->jvmArgsTextBox->setText(s->get("JvmArgs").toString());
+    ui->skipCompatibilityCheckbox->setChecked(s->get("IgnoreJavaCompatibility").toBool());
 }
 
 void JavaPage::on_javaDetectBtn_clicked()
