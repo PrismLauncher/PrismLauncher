@@ -61,7 +61,10 @@ VanillaPage::VanillaPage(NewInstanceDialog *dialog, QWidget *parent)
     connect(ui->refreshBtn, &QPushButton::clicked, this, &VanillaPage::refresh);
 
     connect(ui->loaderVersionList, &VersionSelectWidget::selectedVersionChanged, this, &VanillaPage::setSelectedLoaderVersion);
-    connect(ui->loaderBtnGroup, &QButtonGroup::idToggled, this, &VanillaPage::loaderFilterChanged);
+    connect(ui->noneFilter, &QRadioButton::toggled, this, &VanillaPage::loaderFilterChanged);
+    connect(ui->forgeFilter, &QRadioButton::toggled, this, &VanillaPage::loaderFilterChanged);
+    connect(ui->fabricFilter, &QRadioButton::toggled, this, &VanillaPage::loaderFilterChanged);
+    connect(ui->liteLoaderFilter, &QRadioButton::toggled, this, &VanillaPage::loaderFilterChanged);
     connect(ui->loaderRefreshBtn, &QPushButton::clicked, this, &VanillaPage::loaderRefresh);
 
 }
