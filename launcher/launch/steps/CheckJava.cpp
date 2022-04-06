@@ -124,7 +124,8 @@ void CheckJava::checkJavaFinished(JavaCheckResult result)
         case JavaCheckResult::Validity::Valid:
         {
             auto instance = m_parent->instance();
-            printJavaInfo(result.javaVersion.toString(), result.mojangPlatform, result.javaVendor);
+            printJavaInfo(result.javaVersion.toString(), result.realPlatform, result.javaVendor);
+            printSystemInfo(true, result.is_64bit);
             instance->settings()->set("JavaVersion", result.javaVersion.toString());
             instance->settings()->set("JavaArchitecture", result.mojangPlatform);
             instance->settings()->set("JavaVendor", result.javaVendor);
@@ -137,8 +138,7 @@ void CheckJava::checkJavaFinished(JavaCheckResult result)
 
 void CheckJava::printJavaInfo(const QString& version, const QString& architecture, const QString & vendor)
 {
-    emit logLine(QString("Java is version %1, using %2-bit architecture, from %3.\n\n").arg(version, architecture, vendor), MessageLevel::Launcher);
-    printSystemInfo(true, architecture == "64");
+    emit logLine(QString("Java is version %1, using %2 architecture, from %3.\n\n").arg(version, architecture, vendor), MessageLevel::Launcher);
 }
 
 void CheckJava::printSystemInfo(bool javaIsKnown, bool javaIs64bit)
