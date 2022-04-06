@@ -44,6 +44,7 @@
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "Filter.h"
 #include "InstanceCreationTask.h"
+#include "Version.h"
 
 VanillaPage::VanillaPage(NewInstanceDialog *dialog, QWidget *parent)
     : QWidget(parent), dialog(dialog), ui(new Ui::VanillaPage)
@@ -116,27 +117,31 @@ void VanillaPage::filterChanged()
 
 void VanillaPage::loaderFilterChanged()
 {
+    auto minecraftVersion = m_selectedVersion->descriptor();
     if(ui->noneFilter->isChecked())
     {
         ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA"); // empty list
-        // TODO: The below message does not show when the add instance window is first opened. This should be fixed.
         ui->loaderVersionList->setEmptyString(tr("No mod loader is selected."));
         ui->loaderVersionList->setEmptyMode(VersionListView::String);
         return;
     }
     else if(ui->forgeFilter->isChecked())
     {
-        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, m_selectedVersion->descriptor());
+        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
         m_selectedLoader = "net.minecraftforge";
     }
     else if(ui->fabricFilter->isChecked())
     {
-        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "");
+        // FIXME: dirty hack because the launcher is unaware of Fabric's dependencies
+        if (Version(minecraftVersion) >= Version("1.14")) // Fabric supported
+            ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "");
+        else // Fabric unsupported
+            ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA"); // clear list
         m_selectedLoader = "net.fabricmc.fabric-loader";
     }
     else if(ui->liteLoaderFilter->isChecked())
     {
-        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, m_selectedVersion->descriptor());
+        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
         m_selectedLoader = "com.mumfrey.liteloader";
     }
 
@@ -144,7 +149,7 @@ void VanillaPage::loaderFilterChanged()
     ui->loaderVersionList->initialize(vlist.get());
     ui->loaderVersionList->selectRecommended();
     suggestCurrent();
-    ui->loaderVersionList->setEmptyString(tr("No versions are currently available for Minecraft %1").arg(m_selectedVersion->descriptor()));
+    ui->loaderVersionList->setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
 }
 
 VanillaPage::~VanillaPage()
