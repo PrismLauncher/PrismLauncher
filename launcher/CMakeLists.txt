@@ -348,7 +348,7 @@ set(MINECRAFT_SOURCES
 
     mojang/PackageManifest.h
     mojang/PackageManifest.cpp
-    )
+    minecraft/Agent.h)
 
 add_unit_test(GradleSpecifier
     SOURCES minecraft/GradleSpecifier_test.cpp

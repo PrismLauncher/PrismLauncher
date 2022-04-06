@@ -45,6 +45,7 @@
 #include "minecraft/Rule.h"
 #include "ProblemProvider.h"
 #include "Library.h"
+#include "Agent.h"
 #include <meta/JsonFormat.h>
 
 class PackProfile;
@@ -92,6 +93,9 @@ public: /* data */
     /// Mojang: Minecraft launch arguments (may contain placeholders for variable substitution)
     QString minecraftArguments;
 
+    /// PolyMC: Additional JVM launch arguments
+    QStringList addnJvmArguments;
+
     /// Mojang: list of compatible java majors
     QList<int> compatibleJavaMajors;
 
@@ -115,6 +119,9 @@ public: /* data */
 
     /// PolyMC: list of maven files to put in the libraries folder, but not in classpath
     QList<LibraryPtr> mavenFiles;
+
+    /// PolyMC: list of agents to add to JVM arguments
+    QList<AgentPtr> agents;
 
     /// The main jar (Minecraft version library, normally)
     LibraryPtr mainJar;

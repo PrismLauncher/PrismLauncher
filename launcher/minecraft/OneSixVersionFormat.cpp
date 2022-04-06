@@ -1,5 +1,6 @@
 #include "OneSixVersionFormat.h"
 #include <Json.h>
+#include "minecraft/Agent.h"
 #include "minecraft/ParseUtils.h"
 #include <minecraft/MojangVersionFormat.h>
 
@@ -108,6 +109,14 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
         }
     }
 
+    if (root.contains("+jvmArgs"))
+    {
+        for (auto arg : requireArray(root.value("+jvmArgs")))
+        {
+            out->addnJvmArguments.append(requireString(arg));
+        }
+    }
+
 
     if (root.contains("jarMods"))
     {
@@ -174,6 +183,21 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 
     if(root.contains("mavenFiles")) {
         readLibs("mavenFiles", out->mavenFiles);
+    }
+
+    if(root.contains("+agents")) {
+        for (auto agentVal : requireArray(root.value("+agents")))
+        {
+            QJsonObject agentObj = requireObject(agentVal);
+            auto lib = libraryFromJson(*out, agentObj, filename);
+            QString arg = "";
+            if (agentObj.contains("argument"))
+            {
+                readString(agentObj, "argument", arg);
+            }
+            AgentPtr agent(new Agent(lib, arg));
+            out->agents.append(agent);
+        }
     }
 
     // if we have mainJar, just use it

@@ -36,6 +36,7 @@
 #pragma once
 #include <QString>
 #include "Library.h"
+#include "Agent.h"
 #include <ProblemProvider.h>
 
 class LaunchProfile: public ProblemProvider
@@ -48,6 +49,7 @@ public: /* application of profile variables from patches */
     void applyMainClass(const QString& mainClass);
     void applyAppletClass(const QString& appletClass);
     void applyMinecraftArguments(const QString& minecraftArguments);
+    void applyAddnJvmArguments(const QStringList& minecraftArguments);
     void applyMinecraftVersionType(const QString& type);
     void applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets);
     void applyTraits(const QSet<QString> &traits);
@@ -56,6 +58,7 @@ public: /* application of profile variables from patches */
     void applyMods(const QList<LibraryPtr> &jarMods);
     void applyLibrary(LibraryPtr library);
     void applyMavenFile(LibraryPtr library);
+    void applyAgent(AgentPtr agent);
     void applyCompatibleJavaMajors(QList<int>& javaMajor);
     void applyMainJar(LibraryPtr jar);
     void applyProblemSeverity(ProblemSeverity severity);
@@ -69,12 +72,14 @@ public: /* getters for profile variables */
     QString getMinecraftVersionType() const;
     MojangAssetIndexInfo::Ptr getMinecraftAssets() const;
     QString getMinecraftArguments() const;
+    const QStringList & getAddnJvmArguments() const;
     const QSet<QString> & getTraits() const;
     const QStringList & getTweakers() const;
     const QList<LibraryPtr> & getJarMods() const;
     const QList<LibraryPtr> & getLibraries() const;
     const QList<LibraryPtr> & getNativeLibraries() const;
     const QList<LibraryPtr> & getMavenFiles() const;
+    const QList<AgentPtr> & getAgents() const;
     const QList<int> & getCompatibleJavaMajors() const;
     const LibraryPtr getMainJar() const;
     void getLibraryFiles(
@@ -106,6 +111,12 @@ private:
      */
     QString m_minecraftArguments;
 
+    /**
+     * Additional arguments to pass to the JVM in addition to those the user has configured,
+     * memory settings, etc.
+     */
+    QStringList m_addnJvmArguments;
+
     /// A list of all tweaker classes
     QStringList m_tweakers;
 
@@ -120,6 +131,9 @@ private:
 
     /// the list of maven files to be placed in the libraries folder, but not acted upon
     QList<LibraryPtr> m_mavenFiles;
+
+    /// the list of java agents to add to JVM arguments
+    QList<AgentPtr> m_agents;
 
     /// the main jar
     LibraryPtr m_mainJar;

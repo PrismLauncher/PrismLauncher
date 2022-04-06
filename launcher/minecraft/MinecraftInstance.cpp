@@ -330,6 +330,17 @@ QStringList MinecraftInstance::extraArguments() const
         list.append({"-Dfml.ignoreInvalidMinecraftCertificates=true",
                      "-Dfml.ignorePatchDiscrepancies=true"});
     }
+    auto addn = m_components->getProfile()->getAddnJvmArguments();
+    if (!addn.isEmpty()) {
+        list.append(addn);
+    }
+    auto agents = m_components->getProfile()->getAgents();
+    for (auto agent : agents)
+    {
+        QStringList jar, temp1, temp2, temp3;
+        agent->library()->getApplicableFiles(currentSystem, jar, temp1, temp2, temp3, getLocalLibraryPath());
+        list.append("-javaagent:"+jar[0]+(agent->argument().isEmpty() ? "" : "="+agent->argument()));
+    }
     return list;
 }
 
