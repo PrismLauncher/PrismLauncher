@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
- *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2021-2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@
 
 #include "ui/pages/BasePage.h"
 #include <Application.h>
+#include "net/NetJob.h"
 #include "tasks/Task.h"
 #include "TechnicData.h"
 
@@ -86,14 +87,22 @@ public:
 private:
     void suggestCurrent();
     void metadataLoaded();
+    void selectVersion();
 
 private slots:
     void triggerSearch();
     void onSelectionChanged(QModelIndex first, QModelIndex second);
+    void onSolderLoaded();
+    void onVersionSelectionChanged(QString data);
 
 private:
     Ui::TechnicPage *ui = nullptr;
     NewInstanceDialog* dialog = nullptr;
     Technic::ListModel* model = nullptr;
+
     Technic::Modpack current;
+    QString selectedVersion;
+
+    NetJob::Ptr jobPtr;
+    QByteArray response;
 };

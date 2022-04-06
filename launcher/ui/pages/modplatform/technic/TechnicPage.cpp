@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
- *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2021-2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,12 +40,14 @@
 
 #include "ui/dialogs/NewInstanceDialog.h"
 
+#include "BuildConfig.h"
 #include "TechnicModel.h"
 #include "modplatform/technic/SingleZipPackInstallTask.h"
 #include "modplatform/technic/SolderPackInstallTask.h"
 #include "Json.h"
 
 #include "Application.h"
+#include "modplatform/technic/SolderPackManifest.h"
 
 TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget *parent)
     : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog)
@@ -55,7 +57,9 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget *parent)
     ui->searchEdit->installEventFilter(this);
     model = new Technic::ListModel(this);
     ui->packView->setModel(model);
+
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &TechnicPage::onSelectionChanged);
+    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &TechnicPage::onVersionSelectionChanged);
 }
 
 bool TechnicPage::eventFilter(QObject* watched, QEvent* event)
@@ -98,13 +102,14 @@ void TechnicPage::triggerSearch() {
 
 void TechnicPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 {
+    ui->versionSelectionBox->clear();
+
     if(!first.isValid())
     {
         if(isOpened)
         {
             dialog->setSuggestedPack();
         }
-        //ui->frame->clear();
         return;
     }
 
@@ -137,17 +142,19 @@ void TechnicPage::suggestCurrent()
     }
 
     NetJob *netJob = new NetJob(QString("Technic::PackMeta(%1)").arg(current.name), APPLICATION->network());
-    std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
     QString slug = current.slug;
-    netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.technicpack.net/modpack/%1?build=multimc").arg(slug), response.get()));
-    QObject::connect(netJob, &NetJob::succeeded, this, [this, response, slug]
+    netJob->addNetAction(Net::Download::makeByteArray(QString("%1modpack/%2?build=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, slug, BuildConfig.TECHNIC_API_BUILD), &response));
+    QObject::connect(netJob, &NetJob::succeeded, this, [this, slug]
     {
+        jobPtr.reset();
+
         if (current.slug != slug)
         {
             return;
         }
-        QJsonParseError parse_error;
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+
+        QJsonParseError parse_error {};
+        QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
         QJsonObject obj = doc.object();
         if(parse_error.error != QJsonParseError::NoError)
         {
@@ -189,10 +196,14 @@ void TechnicPage::suggestCurrent()
         current.websiteUrl = Json::ensureString(obj, "platformUrl", QString(), "__placeholder__");
         current.author = Json::ensureString(obj, "user", QString(), "__placeholder__");
         current.description = Json::ensureString(obj, "description", QString(), "__placeholder__");
+        current.currentVersion = Json::ensureString(obj, "version", QString(), "__placeholder__");
         current.metadataLoaded = true;
+
         metadataLoaded();
     });
-    netJob->start();
+
+    jobPtr = netJob;
+    jobPtr->start();
 }
 
 // expects current.metadataLoaded to be true
@@ -202,25 +213,119 @@ void TechnicPage::metadataLoaded()
     QString name = current.name;
 
     if (current.websiteUrl.isEmpty())
-        // This allows injecting HTML here.
-        text = name;
+        text = name.toHtmlEscaped();
     else
-        // URL not properly escaped for inclusion in HTML. The name allows for injecting HTML.
-        text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
+        text = "<a href=\"" + current.websiteUrl.toHtmlEscaped() + "\">" + name.toHtmlEscaped() + "</a>";
+
     if (!current.author.isEmpty()) {
-        // This allows injecting HTML here
-        text += tr(" by ") + current.author;
+        text += "<br>" + tr(" by ") + current.author.toHtmlEscaped();
     }
 
-    ui->frame->setModText(text);
-    ui->frame->setModDescription(current.description);
+    text += "<br><br>";
+
+    ui->packDescription->setHtml(text + current.description);
+
+    // Strip trailing forward-slashes from Solder URL's
+    if (current.isSolder) {
+        while (current.url.endsWith('/')) current.url.chop(1);
+    }
+
+    // Display versions from Solder
+    if (!current.isSolder) {
+        // If the pack isn't a Solder pack, it only has the single version
+        ui->versionSelectionBox->addItem(current.currentVersion);
+    }
+    else if (current.versionsLoaded) {
+        // reverse foreach, so that the newest versions are first
+        for (auto i = current.versions.size(); i--;) {
+            ui->versionSelectionBox->addItem(current.versions.at(i));
+        }
+        ui->versionSelectionBox->setCurrentText(current.recommended);
+    }
+    else {
+        // For now, until the versions are pulled from the Solder instance, display the current
+        // version so we can display something quicker
+        ui->versionSelectionBox->addItem(current.currentVersion);
+
+        auto* netJob = new NetJob(QString("Technic::SolderMeta(%1)").arg(current.name), APPLICATION->network());
+        auto url = QString("%1/modpack/%2").arg(current.url, current.slug);
+        netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), &response));
+
+        QObject::connect(netJob, &NetJob::succeeded, this, &TechnicPage::onSolderLoaded);
+
+        jobPtr = netJob;
+        jobPtr->start();
+    }
+
+    selectVersion();
+}
+
+void TechnicPage::selectVersion() {
+    if (!isOpened) {
+        return;
+    }
+    if (current.broken) {
+        dialog->setSuggestedPack();
+        return;
+    }
+
     if (!current.isSolder)
     {
-        dialog->setSuggestedPack(current.name, new Technic::SingleZipPackInstallTask(current.url, current.minecraftVersion));
+        dialog->setSuggestedPack(current.name + " " + selectedVersion, new Technic::SingleZipPackInstallTask(current.url, current.minecraftVersion));
     }
     else
     {
-        while (current.url.endsWith('/')) current.url.chop(1);
-        dialog->setSuggestedPack(current.name, new Technic::SolderPackInstallTask(APPLICATION->network(), current.url + "/modpack/" + current.slug, current.minecraftVersion));
+        dialog->setSuggestedPack(current.name + " " + selectedVersion, new Technic::SolderPackInstallTask(APPLICATION->network(), current.url, current.slug, selectedVersion, current.minecraftVersion));
     }
+}
+
+void TechnicPage::onSolderLoaded() {
+    jobPtr.reset();
+
+    auto fallback = [this]() {
+        current.versionsLoaded = true;
+
+        current.versions.clear();
+        current.versions.append(current.currentVersion);
+    };
+
+    current.versions.clear();
+
+    QJsonParseError parse_error {};
+    auto doc = QJsonDocument::fromJson(response, &parse_error);
+    if (parse_error.error != QJsonParseError::NoError) {
+        qWarning() << "Error while parsing JSON response from Solder at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qWarning() << response;
+        fallback();
+        return;
+    }
+    auto obj = doc.object();
+
+    TechnicSolder::Pack pack;
+    try {
+        TechnicSolder::loadPack(pack, obj);
+    }
+    catch (const JSONValidationError& err) {
+        qCritical() << "Couldn't parse Solder pack metadata:" << err.cause();
+        fallback();
+        return;
+    }
+
+    current.versionsLoaded = true;
+    current.recommended = pack.recommended;
+    current.versions.append(pack.builds);
+
+    // Finally, let's reload :)
+    ui->versionSelectionBox->clear();
+    metadataLoaded();
+}
+
+void TechnicPage::onVersionSelectionChanged(QString data) {
+    if (data.isNull() || data.isEmpty()) {
+        selectedVersion = "";
+        return;
+    }
+
+    selectedVersion = data;
+    selectVersion();
 }
