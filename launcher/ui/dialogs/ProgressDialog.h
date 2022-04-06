@@ -19,6 +19,7 @@
 #include <memory>
 
 class Task;
+class SequentialTask;
 
 namespace Ui
 {
@@ -35,7 +36,7 @@ public:
 
     void updateSize();
 
-    int execWithTask(Task *task);
+    int execWithTask(Task* task);
     int execWithTask(std::unique_ptr<Task> &&task);
     int execWithTask(std::unique_ptr<Task> &task);
 
@@ -68,4 +69,6 @@ private:
     Ui::ProgressDialog *ui;
 
     Task *task;
+
+    bool m_is_multi_step = false;
 };

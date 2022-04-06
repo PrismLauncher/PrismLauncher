@@ -21,28 +21,26 @@
 
 #include "QObjectPtr.h"
 
-class Task : public QObject
-{
+class Task : public QObject {
     Q_OBJECT
-public:
+   public:
     using Ptr = shared_qobject_ptr<Task>;
 
-    enum class State
-    {
-        Inactive,
-        Running,
-        Succeeded,
-        Failed,
-        AbortedByUser
-    };
+    enum class State { Inactive, Running, Succeeded, Failed, AbortedByUser };
 
-public:
-    explicit Task(QObject *parent = 0);
-    virtual ~Task() {};
+   public:
+    explicit Task(QObject* parent = 0);
+    virtual ~Task() = default;
 
     bool isRunning() const;
     bool isFinished() const;
     bool wasSuccessful() const;
+
+    /*! 
+     * MultiStep tasks are combinations of multiple tasks into a single logical task. 
+     * The main usage of this is in SequencialTask.
+     */
+    virtual auto isMultiStep() const -> bool { return false; }
 
     /*!
      * Returns the string that was passed to emitFailed as the error message when the task failed.
@@ -54,52 +52,45 @@ public:
 
     virtual bool canAbort() const { return false; }
 
-    QString getStatus()
-    {
-        return m_status;
-    }
+    QString getStatus() { return m_status; }
+    virtual auto getStepStatus() const -> QString { return {}; }
 
-    qint64 getProgress()
-    {
-        return m_progress;
-    }
+    qint64 getProgress() { return m_progress; }
+    qint64 getTotalProgress() { return m_progressTotal; }
+    virtual auto getStepProgress() const -> qint64 { return 0; }
+    virtual auto getStepTotalProgress() const -> qint64 { return 100; }
 
-    qint64 getTotalProgress()
-    {
-        return m_progressTotal;
-    }
+   protected:
+    void logWarning(const QString& line);
 
-protected:
-    void logWarning(const QString & line);
-
-private:
+   private:
     QString describe();
 
-signals:
+   signals:
     void started();
-    void progress(qint64 current, qint64 total);
+    virtual void progress(qint64 current, qint64 total);
     void finished();
     void succeeded();
     void failed(QString reason);
     void status(QString status);
 
-public slots:
+   public slots:
     virtual void start();
     virtual bool abort() { return false; };
 
-protected:
+   protected:
     virtual void executeTask() = 0;
 
-protected slots:
+   protected slots:
     virtual void emitSucceeded();
     virtual void emitAborted();
     virtual void emitFailed(QString reason);
 
-public slots:
-    void setStatus(const QString &status);
+   public slots:
+    void setStatus(const QString& status);
     void setProgress(qint64 current, qint64 total);
 
-private:
+   private:
     State m_state = State::Inactive;
     QStringList m_Warnings;
     QString m_failReason = "";
@@ -107,4 +98,3 @@ private:
     int m_progress = 0;
     int m_progressTotal = 100;
 };
-
