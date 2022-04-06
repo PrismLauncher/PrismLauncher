@@ -4,7 +4,6 @@
 #include <QVBoxLayout>
 #include <QHeaderView>
 
-#include "VersionListView.h"
 #include "VersionProxyModel.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
@@ -55,6 +54,11 @@ void VersionSelectWidget::setEmptyString(QString emptyString)
 void VersionSelectWidget::setEmptyErrorString(QString emptyErrorString)
 {
     listView->setEmptyErrorString(emptyErrorString);
+}
+
+void VersionSelectWidget::setEmptyMode(VersionListView::EmptyMode mode)
+{
+    listView->setEmptyMode(mode);
 }
 
 VersionSelectWidget::~VersionSelectWidget()

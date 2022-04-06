@@ -121,6 +121,7 @@ void VanillaPage::loaderFilterChanged()
         ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA"); // empty list
         // TODO: The below message does not show when the add instance window is first opened. This should be fixed.
         ui->loaderVersionList->setEmptyString(tr("No mod loader is selected."));
+        ui->loaderVersionList->setEmptyMode(VersionListView::String);
         return;
     }
     else if(ui->forgeFilter->isChecked())
