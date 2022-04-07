@@ -1,17 +1,36 @@
+// SPDX-License-Identifier: GPL-3.0-only
 /*
- * Copyright 2021 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2021 Jamie Mansfield <jmansfield@cadixdev.org>
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 #pragma once
@@ -20,6 +39,7 @@
 #include <QAbstractListModel>
 
 #include "modplatform/atlauncher/ATLPackIndex.h"
+#include "net/NetJob.h"
 
 namespace Ui {
 class AtlOptionalModDialog;
@@ -49,7 +69,12 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+    void useShareCode(const QString& code);
+
 public slots:
+    void shareCodeSuccess();
+    void shareCodeFailure(const QString& reason);
+
     void selectRecommended();
     void clearAll();
 
@@ -58,6 +83,9 @@ private:
     void setMod(ATLauncher::VersionMod mod, int index, bool enable, bool shouldEmit = true);
 
 private:
+    NetJob::Ptr m_jobPtr;
+    QByteArray m_response;
+
     QVector<ATLauncher::VersionMod> m_mods;
     QMap<QString, bool> m_selection;
     QMap<QString, int> m_index;
@@ -74,6 +102,8 @@ public:
     QVector<QString> getResult() {
         return listModel->getResult();
     }
+
+    void useShareCode();
 
 private:
     Ui::AtlOptionalModDialog *ui;
