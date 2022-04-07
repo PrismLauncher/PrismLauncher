@@ -53,7 +53,7 @@ class Task : public QObject {
     virtual bool canAbort() const { return false; }
 
     QString getStatus() { return m_status; }
-    virtual auto getStepStatus() const -> QString { return {}; }
+    virtual auto getStepStatus() const -> QString { return m_status; }
 
     qint64 getProgress() { return m_progress; }
     qint64 getTotalProgress() { return m_progressTotal; }
