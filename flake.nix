@@ -1,50 +1,34 @@
 {
-  description = "PolyMC flake";
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.flake-compat = {
-    url = "github:edolstra/flake-compat";
-    flake = false;
-  };
-  inputs.libnbtplusplus = {
-    url = "github:multimc/libnbtplusplus";
-    flake = false;
-  };
-  inputs.quazip = {
-    url = "github:stachenov/quazip";
-    flake = false;
+  description = "A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once (Fork of MultiMC)";
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
+    libnbtplusplus = { url = "github:multimc/libnbtplusplus"; flake = false; };
+    quazip = { url = "github:stachenov/quazip"; flake = false; };
   };
 
-  outputs = args@{ self, nixpkgs, flake-utils, libnbtplusplus, quazip, ... }:
+  outputs = { self, nixpkgs, libnbtplusplus, quazip, ... }:
     let
-      systems = [
-        "aarch64-linux"
-        # "aarch64-darwin" # qtbase is currently broken
-        "i686-linux"
-        "x86_64-darwin"
-        "x86_64-linux"
-      ];
-    in {
-      overlay = final: prev: {
-        inherit (self.packages.${final.system}) polymc;
-      };
-    } // flake-utils.lib.eachSystem systems (system:
-      let pkgs = import nixpkgs { inherit system; };
-      in {
-        packages = {
-          polymc = pkgs.libsForQt5.callPackage ./packages/nix/polymc {
-            inherit self;
-            submoduleQuazip = quazip;
-            submoduleNbt = libnbtplusplus;
-          };
-        };
-        apps = {
-          polymc = flake-utils.lib.mkApp {
-            name = "polymc";
-            drv = self.packages.${system}.polymc;
-          };
-        };
-        defaultPackage = self.packages.${system}.polymc;
-        defaultApp = self.apps.${system}.polymc;
-      });
+      # Generate a user-friendly version number.
+      version = builtins.substring 0 8 self.lastModifiedDate;
+
+      # System types to support (qtbase is currently broken for "aarch64-darwin")
+      supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" ];
+
+      # Helper function to generate an attrset '{ x86_64-linux = f "x86_64-linux"; ... }'.
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+
+      # Nixpkgs instantiated for supported system types.
+      pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
+    in
+    {
+      packages = forAllSystems (system: { polymc = pkgs.${system}.libsForQt5.callPackage ./packages/nix/polymc { inherit version self quazip libnbtplusplus; }; });
+      defaultPackage = forAllSystems (system: self.packages.${system}.polymc);
+
+      apps = forAllSystems (system: { polymc = { type = "app"; program = "${self.defaultPackage.${system}}/bin/polymc"; }; });
+      defaultApp = forAllSystems (system: self.apps.${system}.polymc);
+
+      overlay = final: prev: { polymc = self.defaultPackage.${final.system}; };
+    };
 }
