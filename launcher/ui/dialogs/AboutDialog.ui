@@ -80,7 +80,7 @@
       </font>
      </property>
      <property name="text">
-      <string notr="true">PolyMC</string>
+      <string notr="true">Launcher</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
