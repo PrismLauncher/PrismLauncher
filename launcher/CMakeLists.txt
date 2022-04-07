@@ -413,6 +413,11 @@ set(TASKS_SOURCES
     tasks/SequentialTask.cpp
 )
 
+add_unit_test(Task
+    SOURCES tasks/Task_test.cpp
+    LIBS Launcher_logic
+    )
+
 set(SETTINGS_SOURCES
     # Settings
     settings/INIFile.cpp
