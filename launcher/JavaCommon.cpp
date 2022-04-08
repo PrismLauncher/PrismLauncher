@@ -17,6 +17,17 @@ bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget *parent)
             QMessageBox::Warning)->exec();
         return false;
     }
+    // block lunacy with passing required version to the JVM
+    if (jvmargs.contains(QRegExp("-version:.*"))) {
+        auto warnStr = QObject::tr(
+            "You tried to pass required Java version argument to the JVM (using \"-version:xxx\"). This is not safe and will not be allowed.\n"
+            "This message will be displayed until you remove this from the JVM arguments.");
+        CustomMessageBox::selectable(
+            parent, QObject::tr("JVM arguments warning"),
+            warnStr,
+            QMessageBox::Warning)->exec();
+        return false;
+    }
     return true;
 }
 

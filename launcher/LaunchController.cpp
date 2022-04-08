@@ -71,7 +71,10 @@ void LaunchController::executeTask()
         return;
     }
 
-    JavaCommon::checkJVMArgs(m_instance->settings()->get("JvmArgs").toString(), m_parentWidget);
+    if(!JavaCommon::checkJVMArgs(m_instance->settings()->get("JvmArgs").toString(), m_parentWidget)) {
+        emitFailed(tr("Invalid Java arguments specified. Please fix this first."));
+        return;
+    }
 
     login();
 }
@@ -166,13 +169,14 @@ void LaunchController::login() {
                 if(!m_session->wants_online) {
                     // we ask the user for a player name
                     bool ok = false;
-                    QString usedname = m_session->player_name;
+                    QString lastOfflinePlayerName = APPLICATION->settings()->get("LastOfflinePlayerName").toString();
+                    QString usedname = lastOfflinePlayerName.isEmpty() ? m_session->player_name : lastOfflinePlayerName;
                     QString name = QInputDialog::getText(
                         m_parentWidget,
                         tr("Player name"),
                         tr("Choose your offline mode player name."),
                         QLineEdit::Normal,
-                        m_session->player_name,
+                        usedname,
                         &ok
                     );
                     if (!ok)
@@ -183,6 +187,7 @@ void LaunchController::login() {
                     if (name.length())
                     {
                         usedname = name;
+                        APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
                     }
                     m_session->MakeOffline(usedname);
                     // offline flavored game from here :3
