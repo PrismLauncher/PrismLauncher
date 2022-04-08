@@ -527,6 +527,7 @@ public:
         MainWindow->setMenuBar(menuBar);
     }
 
+    // If a keyboard shortcut is changed here, it must be changed below in keyPressEvent as well
     void createMenuActions(MainWindow *MainWindow)
     {
         newAct = new QAction(tr("&New Instance..."), MainWindow);
@@ -1095,6 +1096,64 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     retranslateUi();
 }
+
+// macOS always has a native menu bar, so these fixes are not applicable
+// Other systems may or may not have a native menu bar (most do not - it seems like only Ubuntu Unity does)
+#ifdef Q_OS_MAC
+void MainWindow::keyReleaseEvent(QKeyEvent *event)
+{
+    if(event->key()==Qt::Key_Alt)
+        ui->menuBar->setVisible(!ui->menuBar->isVisible());
+}
+
+// FIXME: This is a hack because keyboard shortcuts do nothing while menu bar is hidden on systems without native menu bar
+// If a keyboard shortcut is changed above in `createMenuActions`, it must be changed here as well
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if(ui->menuBar->isVisible() || ui->menuBar->isNativeMenuBar())
+        return; // let the menu bar handle the keyboard shortcuts
+
+    if(event->modifiers().testFlag(Qt::ControlModifier))
+    {
+        switch(event->key())
+        {
+            case Qt::Key_N:
+                on_actionAddInstance_triggered();
+                return;
+            case Qt::Key_O:
+                if(event->modifiers().testFlag(Qt::ShiftModifier))
+                    on_actionLaunchInstanceOffline_triggered();
+                else
+                    on_actionLaunchInstance_triggered();
+                return;
+            case Qt::Key_I:
+                on_actionEditInstance_triggered();
+                return;
+            case Qt::Key_G:
+                on_actionChangeInstGroup_triggered();
+                return;
+            case Qt::Key_M:
+                on_actionViewSelectedMCFolder_triggered();
+                return;
+            case Qt::Key_E:
+                on_actionExportInstance_triggered();
+                return;
+            case Qt::Key_Delete:
+                on_actionDeleteInstance_triggered();
+                return;
+            case Qt::Key_D:
+                on_actionCopyInstance_triggered();
+                return;
+            case Qt::Key_W:
+                close();
+                return;
+            // Text editing shortcuts are handled by the OS, so they do not need to be implemented here again
+            default:
+                return;
+        }
+    }
+}
+#endif
 
 void MainWindow::retranslateUi()
 {
