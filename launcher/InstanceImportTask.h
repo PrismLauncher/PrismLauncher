@@ -37,6 +37,9 @@ class InstanceImportTask : public InstanceTask
 public:
     explicit InstanceImportTask(const QUrl sourceUrl);
 
+    bool canAbort() const override { return true; }
+    bool abort() override;
+
 protected:
     //! Entry point for tasks.
     virtual void executeTask() override;

@@ -40,6 +40,14 @@ InstanceImportTask::InstanceImportTask(const QUrl sourceUrl)
     m_sourceUrl = sourceUrl;
 }
 
+bool InstanceImportTask::abort()
+{
+    m_filesNetJob->abort();
+    m_extractFuture.cancel();
+
+    return false;
+}
+
 void InstanceImportTask::executeTask()
 {
     if (m_sourceUrl.isLocalFile())
