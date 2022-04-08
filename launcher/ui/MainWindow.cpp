@@ -38,6 +38,7 @@
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QMenu>
+#include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QInputDialog>
 #include <QtWidgets/QLabel>
@@ -243,6 +244,42 @@ public:
     QHBoxLayout *horizontalLayout = nullptr;
     QStatusBar *statusBar = nullptr;
 
+    QMenuBar *menuBar = nullptr;
+    QMenu *fileMenu;
+    QMenu *editMenu;
+    QMenu *profileMenu;
+    QAction *newAct;
+    QAction *openAct;
+    QAction *openOfflineAct;
+    QAction *editInstanceAct;
+    QAction *editNotesAct;
+    QAction *editModsAct;
+    QAction *editWorldsAct;
+    QAction *manageScreenshotsAct;
+    QAction *changeGroupAct;
+    QAction *openMCFolderAct;
+    QAction *openConfigFolderAct;
+    QAction *openInstanceFolderAct;
+    QAction *exportInstanceAct;
+    QAction *deleteInstanceAct;
+    QAction *duplicateInstanceAct;
+    QAction *closeAct;
+    QAction *undoAct;
+    QAction *redoAct;
+    QAction *cutAct;
+    QAction *copyAct;
+    QAction *pasteAct;
+    QAction *selectAllAct;
+    QAction *manageAccountAct;
+    QAction *aboutAct;
+    QAction *settingsAct;
+    QAction *wikiAct;
+    QAction *newsAct;
+    QAction *reportBugAct;
+    QAction *matrixAct;
+    QAction *discordAct;
+    QAction *redditAct;
+
     TranslatedToolbar mainToolBar;
     TranslatedToolbar instanceToolBar;
     TranslatedToolbar newsToolBar;
@@ -429,6 +466,210 @@ public:
 
         all_toolbars.append(&mainToolBar);
         MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
+    }
+
+    void createMenuBar(MainWindow *MainWindow)
+    {
+        menuBar = new QMenuBar(MainWindow);
+        // There's already a toolbar, so hide this menu bar by default unless 'alt' is pressed on systems without native menu bar
+        menuBar->setVisible(false);
+        createMenuActions(MainWindow);
+
+        // TODO: only enable options while an instance is selected (if applicable)
+        fileMenu = menuBar->addMenu(tr("&File"));
+        fileMenu->addAction(newAct);
+        fileMenu->addAction(openAct);
+        fileMenu->addAction(openOfflineAct);
+        fileMenu->addAction(closeAct);
+        fileMenu->addSeparator();
+        fileMenu->addAction(editInstanceAct);
+        fileMenu->addAction(editNotesAct);
+        fileMenu->addAction(editModsAct);
+        fileMenu->addAction(editWorldsAct);
+        fileMenu->addAction(manageScreenshotsAct);
+        fileMenu->addAction(changeGroupAct);
+        fileMenu->addSeparator();
+        fileMenu->addAction(openMCFolderAct);
+        fileMenu->addAction(openConfigFolderAct);
+        fileMenu->addAction(openInstanceFolderAct);
+        fileMenu->addSeparator();
+        fileMenu->addAction(exportInstanceAct);
+        fileMenu->addAction(deleteInstanceAct);
+        fileMenu->addAction(duplicateInstanceAct);
+        fileMenu->addSeparator();
+
+        // TODO: functionality for edit actions. They're intended to be used where you can type text, e.g. notes.
+        editMenu = menuBar->addMenu(tr("&Edit"));
+        editMenu->addAction(undoAct);
+        editMenu->addAction(redoAct);
+        editMenu->addSeparator();
+        editMenu->addAction(cutAct);
+        editMenu->addAction(copyAct);
+        editMenu->addAction(pasteAct);
+        editMenu->addAction(selectAllAct);
+        editMenu->addSeparator();
+
+        profileMenu = menuBar->addMenu(tr("&Profiles"));
+        // TODO: add a list of logged in accounts here
+        profileMenu->addAction(manageAccountAct);
+
+        helpMenu = menuBar->addMenu(tr("&Help"));
+        helpMenu->addAction(aboutAct);
+        helpMenu->addAction(settingsAct);
+        helpMenu->addAction(wikiAct);
+        helpMenu->addAction(newsAct);
+        helpMenu->addSeparator();
+        helpMenu->addAction(reportBugAct);
+        helpMenu->addAction(matrixAct);
+        helpMenu->addAction(discordAct);
+        helpMenu->addAction(redditAct);
+
+        MainWindow->setMenuBar(menuBar);
+    }
+
+    void createMenuActions(MainWindow *MainWindow)
+    {
+        newAct = new QAction(tr("&New Instance..."), MainWindow);
+        newAct->setShortcuts(QKeySequence::New);
+        newAct->setStatusTip(tr("Create a new instance"));
+        connect(newAct, &QAction::triggered, MainWindow, &MainWindow::on_actionAddInstance_triggered);
+
+        openAct = new QAction(tr("&Launch"), MainWindow);
+        openAct->setShortcuts(QKeySequence::Open);
+        openAct->setStatusTip(tr("Launch the selected instance"));
+        connect(openAct, &QAction::triggered, MainWindow, &MainWindow::on_actionLaunchInstance_triggered);
+
+        openOfflineAct = new QAction(tr("&Launch Offline"), MainWindow);
+        openOfflineAct->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
+        openOfflineAct->setStatusTip(tr("Launch the selected instance in offline mode"));
+        connect(openOfflineAct, &QAction::triggered, MainWindow, &MainWindow::on_actionLaunchInstanceOffline_triggered);
+
+        editInstanceAct = new QAction(tr("&Edit Instance..."), MainWindow);
+        editInstanceAct->setShortcut(QKeySequence(tr("Ctrl+I")));
+        editInstanceAct->setStatusTip(tr("Edit the selected instance"));
+        connect(editInstanceAct, &QAction::triggered, MainWindow, &MainWindow::on_actionEditInstance_triggered);
+
+        editNotesAct = new QAction(tr("&Edit Notes..."), MainWindow);
+        editNotesAct->setStatusTip(tr("Edit the selected instance's notes"));
+        connect(editNotesAct, &QAction::triggered, MainWindow, &MainWindow::on_actionEditInstNotes_triggered);
+
+        editModsAct = new QAction(tr("&View Mods"), MainWindow);
+        editModsAct->setStatusTip(tr("View the selected instance's mods"));
+        connect(editModsAct, &QAction::triggered, MainWindow, &MainWindow::on_actionMods_triggered);
+
+        editWorldsAct = new QAction(tr("&View Worlds"), MainWindow);
+        editWorldsAct->setStatusTip(tr("View the selected instance's worlds"));
+        connect(editWorldsAct, &QAction::triggered, MainWindow, &MainWindow::on_actionWorlds_triggered);
+
+        manageScreenshotsAct = new QAction(tr("&Manage Screenshots"), MainWindow);
+        manageScreenshotsAct->setStatusTip(tr("Manage the selected instance's screenshots"));
+        connect(manageScreenshotsAct, &QAction::triggered, MainWindow, &MainWindow::on_actionScreenshots_triggered);
+
+        changeGroupAct = new QAction(tr("&Change Group..."), MainWindow);
+        changeGroupAct->setShortcut(QKeySequence(tr("Ctrl+G")));
+        changeGroupAct->setStatusTip(tr("Change the selected instance's group"));
+        connect(changeGroupAct, &QAction::triggered, MainWindow, &MainWindow::on_actionChangeInstGroup_triggered);
+
+        openMCFolderAct = new QAction(tr("&Open Minecraft Folder"), MainWindow);
+        openMCFolderAct->setShortcut(QKeySequence(tr("Ctrl+M")));
+        openMCFolderAct->setStatusTip(tr("Open the selected instance's Minecraft folder"));
+        connect(openMCFolderAct, &QAction::triggered, MainWindow, &MainWindow::on_actionViewSelectedMCFolder_triggered);
+
+        openConfigFolderAct = new QAction(tr("&Open Config Folder"), MainWindow);
+        openConfigFolderAct->setStatusTip(tr("Open the selected instance's config folder"));
+        connect(openConfigFolderAct, &QAction::triggered, MainWindow, &MainWindow::on_actionConfig_Folder_triggered);
+
+        openInstanceFolderAct = new QAction(tr("&Open Instance Folder"), MainWindow);
+        openInstanceFolderAct->setStatusTip(tr("Open the selected instance's main folder"));
+        connect(openInstanceFolderAct, &QAction::triggered, MainWindow, &MainWindow::on_actionViewInstanceFolder_triggered);
+
+        exportInstanceAct = new QAction(tr("&Export Instance..."), MainWindow);
+        exportInstanceAct->setShortcut(QKeySequence(tr("Ctrl+E")));
+        exportInstanceAct->setStatusTip(tr("Export the selected instance"));
+        connect(exportInstanceAct, &QAction::triggered, MainWindow, &MainWindow::on_actionExportInstance_triggered);
+
+        deleteInstanceAct = new QAction(tr("&Delete Instance..."), MainWindow);
+        deleteInstanceAct->setShortcut(QKeySequence::Delete);
+        deleteInstanceAct->setStatusTip(tr("Delete the selected instance"));
+        connect(deleteInstanceAct, &QAction::triggered, MainWindow, &MainWindow::on_actionDeleteInstance_triggered);
+
+        duplicateInstanceAct = new QAction(tr("&Copy Instance..."), MainWindow);
+        duplicateInstanceAct->setShortcut(QKeySequence(tr("Ctrl+D")));
+        duplicateInstanceAct->setStatusTip(tr("Duplicate the selected instance"));
+        connect(duplicateInstanceAct, &QAction::triggered, MainWindow, &MainWindow::on_actionCopyInstance_triggered);
+
+        closeAct = new QAction(tr("&Close Window"), MainWindow);
+        closeAct->setShortcut(QKeySequence::Close);
+        closeAct->setStatusTip(tr("Close the current window"));
+        // FIXME: currently this always closes the main window, even if it is not currently the window in focus
+        connect(closeAct, &QAction::triggered, MainWindow, &MainWindow::close);
+
+        undoAct = new QAction(tr("&Undo"), MainWindow);
+        undoAct->setShortcuts(QKeySequence::Undo);
+        undoAct->setStatusTip(tr("Undo"));
+        undoAct->setEnabled(false);
+
+        redoAct = new QAction(tr("&Redo"), MainWindow);
+        redoAct->setShortcuts(QKeySequence::Redo);
+        redoAct->setStatusTip(tr("Redo"));
+        redoAct->setEnabled(false);
+
+        cutAct = new QAction(tr("&Cut"), MainWindow);
+        cutAct->setShortcuts(QKeySequence::Cut);
+        cutAct->setStatusTip(tr("Cut"));
+        cutAct->setEnabled(false);
+
+        copyAct = new QAction(tr("&Copy"), MainWindow);
+        copyAct->setShortcuts(QKeySequence::Copy);
+        copyAct->setStatusTip(tr("Copy"));
+        copyAct->setEnabled(false);
+
+        pasteAct = new QAction(tr("&Paste"), MainWindow);
+        pasteAct->setShortcuts(QKeySequence::Paste);
+        pasteAct->setStatusTip(tr("Paste"));
+        pasteAct->setEnabled(false);
+
+        selectAllAct = new QAction(tr("&Select All"), MainWindow);
+        selectAllAct->setShortcuts(QKeySequence::SelectAll);
+        selectAllAct->setStatusTip(tr("Select all"));
+        selectAllAct->setEnabled(false);
+
+        manageAccountAct = new QAction(tr("&Manage Accounts..."), MainWindow);
+        manageAccountAct->setStatusTip(tr("Open account manager"));
+        connect(manageAccountAct, &QAction::triggered, MainWindow, &MainWindow::on_actionManageAccounts_triggered);
+
+        aboutAct = new QAction(tr("&About"), MainWindow);
+        aboutAct->setStatusTip(tr("About %1").arg(BuildConfig.LAUNCHER_NAME));
+        connect(aboutAct, &QAction::triggered, MainWindow, &MainWindow::on_actionAbout_triggered);
+
+        settingsAct = new QAction(tr("&Settings..."), MainWindow);
+        settingsAct->setShortcut(QKeySequence::Preferences);
+        settingsAct->setStatusTip(tr("Change %1 settings").arg(BuildConfig.LAUNCHER_NAME));
+        connect(settingsAct, &QAction::triggered, MainWindow, &MainWindow::on_actionSettings_triggered);
+
+        wikiAct = new QAction(tr("&%1 Help").arg(BuildConfig.LAUNCHER_NAME), MainWindow);
+        wikiAct->setStatusTip(tr("Open %1's wiki").arg(BuildConfig.LAUNCHER_NAME));
+        connect(wikiAct, &QAction::triggered, MainWindow, &MainWindow::on_actionOpenWiki_triggered);
+
+        newsAct = new QAction(tr("&%1 News").arg(BuildConfig.LAUNCHER_NAME), MainWindow);
+        newsAct->setStatusTip(tr("Open %1's news").arg(BuildConfig.LAUNCHER_NAME));
+        connect(newsAct, &QAction::triggered, MainWindow, &MainWindow::on_actionMoreNews_triggered);
+
+        reportBugAct = new QAction(tr("&Report Bugs..."), MainWindow);
+        reportBugAct->setStatusTip(tr("Report bugs to the developers"));
+        connect(reportBugAct, &QAction::triggered, MainWindow, &MainWindow::on_actionReportBug_triggered);
+
+        matrixAct = new QAction(tr("&Matrix"), MainWindow);
+        matrixAct->setStatusTip(tr("Open %1's Matrix space").arg(BuildConfig.LAUNCHER_NAME));
+        connect(matrixAct, &QAction::triggered, MainWindow, &MainWindow::on_actionMATRIX_triggered);
+
+        discordAct = new QAction(tr("&Discord"), MainWindow);
+        discordAct->setStatusTip(tr("Open %1's Discord guild").arg(BuildConfig.LAUNCHER_NAME));
+        connect(discordAct, &QAction::triggered, MainWindow, &MainWindow::on_actionDISCORD_triggered);
+
+        redditAct = new QAction(tr("&Reddit"), MainWindow);
+        redditAct->setStatusTip(tr("Open %1's subreddit").arg(BuildConfig.LAUNCHER_NAME));
+        connect(redditAct, &QAction::triggered, MainWindow, &MainWindow::on_actionREDDIT_triggered);
     }
 
     void createStatusBar(QMainWindow *MainWindow)
@@ -635,6 +876,8 @@ public:
 #endif
 
         createMainToolbar(MainWindow);
+
+        createMenuBar(dynamic_cast<class MainWindow *>(MainWindow));
 
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -1669,6 +1912,12 @@ void MainWindow::on_actionManageAccounts_triggered()
 void MainWindow::on_actionReportBug_triggered()
 {
     DesktopServices::openUrl(QUrl(BuildConfig.BUG_TRACKER_URL));
+}
+
+void MainWindow::on_actionOpenWiki_triggered()
+{
+    // TODO: add functionality
+//    DesktopServices::openUrl(QUrl(BuildConfig.WIKI_URL));
 }
 
 void MainWindow::on_actionMoreNews_triggered()

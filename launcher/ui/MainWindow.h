@@ -110,6 +110,8 @@ private slots:
 
     void on_actionReportBug_triggered();
 
+    void on_actionOpenWiki_triggered();
+
     void on_actionMoreNews_triggered();
 
     void newsButtonClicked();
