@@ -1099,11 +1099,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
 // macOS always has a native menu bar, so these fixes are not applicable
 // Other systems may or may not have a native menu bar (most do not - it seems like only Ubuntu Unity does)
-#ifdef Q_OS_MAC
+#ifndef Q_OS_MAC
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
     if(event->key()==Qt::Key_Alt)
         ui->menuBar->setVisible(!ui->menuBar->isVisible());
+    else
+        QMainWindow::keyReleaseEvent(event);
 }
 
 // FIXME: This is a hack because keyboard shortcuts do nothing while menu bar is hidden on systems without native menu bar
@@ -1111,7 +1113,10 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if(ui->menuBar->isVisible() || ui->menuBar->isNativeMenuBar())
+    {
+        QMainWindow::keyPressEvent(event);
         return; // let the menu bar handle the keyboard shortcuts
+    }
 
     if(event->modifiers().testFlag(Qt::ControlModifier))
     {
