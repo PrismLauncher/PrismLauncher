@@ -494,31 +494,6 @@ static bool getTrivialComponentChanges(const ComponentIndex & index, const Requi
     return succeeded;
 }
 
-QString ComponentUpdateTask::findBestComponentVersion(const ComponentPtr component)
-{
-    auto & components = d->m_list->d->components;
-    auto versions = component->getVersionList();
-    versions->load(d->netmode);
-
-    for (auto & version : versions->versions()) {
-        if (version->isRecommended()) {  // only look at recommended versions
-            bool requirementsMet = true;
-            for (auto req : version->requires()) {
-                auto requirementMet = std::any_of(components.begin(), components.end(), [&req](ComponentPtr & cmp){
-                    return cmp->getID() == req.uid && cmp->getVersion() == req.equalsVersion;
-                });
-                if (!requirementMet) {
-                    requirementsMet = false;
-                }
-            }
-
-            if (requirementsMet)  // return first recommended version that meets all requirements
-                return version->version();
-        }
-    }
-    return nullptr;
-}
-
 // FIXME, TODO: decouple dependency resolution from loading
 // FIXME: This works directly with the PackProfile internals. It shouldn't! It needs richer data types than PackProfile uses.
 // FIXME: throw all this away and use a graph
@@ -615,13 +590,17 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
                     {
                         component->m_version = "3.1.2";
                     }
+                    else if (add.uid == "net.fabricmc.intermediary" || add.uid == "org.quiltmc.hashed")
+                    {
+                        auto minecraft = std::find_if(components.begin(), components.end(), [](ComponentPtr & cmp){
+                            return cmp->getID() == "net.minecraft";
+                        });
+                        if(minecraft != components.end()) {
+                            component->m_version = (*minecraft)->getVersion();
+                        }
+                    }
 // HACK HACK HACK HACK FIXME: this is a placeholder for deciding what version to use. For now, it is hardcoded.
 // ############################################################################################################
-// below is not ugly anymore
-                    else if (add.uid == "net.fabricmc.intermediary" || add.uid == "org.quiltmc.quilt-mappings")
-                    {
-                        component->m_version = findBestComponentVersion(component);
-                    }
                 }
             }
             component->m_dependencyOnly = true;
