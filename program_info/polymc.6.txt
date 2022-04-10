@@ -59,8 +59,6 @@ Main website: <https://polymc.org>
 
 AUTHORS
 -------
-peterix <peterix@gmail.com>
-
-swurl <swurl@swurl.xyz>
+PolyMC Contributors
 
 // vim: syntax=asciidoc
