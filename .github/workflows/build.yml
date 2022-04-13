@@ -156,7 +156,6 @@ jobs:
           cmake --install ${{ env.BUILD_DIR }}
 
           cd ${{ env.INSTALL_DIR }}
-          macdeployqt "PolyMC.app" -executable="PolyMC.app/Contents/MacOS/polymc" -always-overwrite
           chmod +x "PolyMC.app/Contents/MacOS/polymc"
           tar -czf ../PolyMC.tar.gz *
 
