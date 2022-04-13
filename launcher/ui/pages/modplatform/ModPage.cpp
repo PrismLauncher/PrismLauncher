@@ -150,7 +150,7 @@ void ModPage::onModSelected()
     if (dialog->isModSelected(current.name, version.fileName)) {
         dialog->removeSelectedMod(current.name);
     } else {
-        dialog->addSelectedMod(current.name, new ModDownloadTask(version.downloadUrl, version.fileName, dialog->mods));
+        dialog->addSelectedMod(current.name, new ModDownloadTask(current, version, dialog->mods));
     }
 
     updateSelectionButton();
