@@ -9,6 +9,7 @@
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireInteger(obj, "id");
+    pack.provider = ModPlatform::Provider::FLAME;
     pack.name = Json::requireString(obj, "name");
     pack.websiteUrl = Json::ensureString(Json::ensureObject(obj, "links"), "websiteUrl", "");
     pack.description = Json::ensureString(obj, "summary", "");

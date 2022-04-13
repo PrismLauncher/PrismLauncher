@@ -28,6 +28,7 @@ static ModrinthAPI api;
 void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireString(obj, "project_id");
+    pack.provider = ModPlatform::Provider::MODRINTH;
     pack.name = Json::requireString(obj, "title");
     
     QString slug = Json::ensureString(obj, "slug", "");

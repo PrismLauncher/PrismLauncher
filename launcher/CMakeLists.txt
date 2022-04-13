@@ -331,6 +331,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ModFolderLoadTask.cpp
     minecraft/mod/LocalModParseTask.h
     minecraft/mod/LocalModParseTask.cpp
+    minecraft/mod/LocalModUpdateTask.h
+    minecraft/mod/LocalModUpdateTask.cpp
     minecraft/mod/ResourcePackFolderModel.h
     minecraft/mod/ResourcePackFolderModel.cpp
     minecraft/mod/TexturePackFolderModel.h
@@ -543,6 +545,11 @@ set(MODPACKSCH_SOURCES
     modplatform/modpacksch/FTBPackManifest.cpp
 )
 
+set(PACKWIZ_SOURCES
+    modplatform/packwiz/Packwiz.h
+    modplatform/packwiz/Packwiz.cpp
+)
+
 set(TECHNIC_SOURCES
     modplatform/technic/SingleZipPackInstallTask.h
     modplatform/technic/SingleZipPackInstallTask.cpp
@@ -596,6 +603,7 @@ set(LOGIC_SOURCES
     ${FLAME_SOURCES}
     ${MODRINTH_SOURCES}
     ${MODPACKSCH_SOURCES}
+    ${PACKWIZ_SOURCES}
     ${TECHNIC_SOURCES}
     ${ATLAUNCHER_SOURCES}
 )
