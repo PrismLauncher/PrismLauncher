@@ -1,13 +1,12 @@
 #pragma once
 
+#include "modplatform/ModIndex.h"
+
 #include <QString>
 #include <QUrl>
 #include <QVariant>
 
 namespace ModPlatform {
-enum class Provider;
-class IndexedPack;
-class IndexedVersion;
 }  // namespace ModPlatform
 
 class QDir;
