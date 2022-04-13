@@ -75,7 +75,16 @@ Meta::BaseEntity::~BaseEntity()
 
 QUrl Meta::BaseEntity::url() const
 {
-    return QUrl(BuildConfig.META_URL).resolved(localFilename());
+    auto s = APPLICATION->settings();
+    QString metaOverride = s->get("MetaURLOverride").toString();
+    if(metaOverride.isEmpty())
+    {
+        return QUrl(BuildConfig.META_URL).resolved(localFilename());
+    }
+    else
+    {
+        return QUrl(metaOverride).resolved(localFilename());
+    }
 }
 
 bool Meta::BaseEntity::loadLocalFile()

@@ -132,6 +132,8 @@ void APIPage::loadSettings()
 
     QString msaClientID = s->get("MSAClientIDOverride").toString();
     ui->msaClientID->setText(msaClientID);
+    QString metaURL = s->get("MetaURLOverride").toString();
+    ui->metaURL->setText(metaURL);
     QString curseKey = s->get("CFKeyOverride").toString();
     ui->curseKey->setText(curseKey);
 }
@@ -145,6 +147,14 @@ void APIPage::applySettings()
 
     QString msaClientID = ui->msaClientID->text();
     s->set("MSAClientIDOverride", msaClientID);
+    QUrl metaURL = ui->metaURL->text();
+    // Don't allow HTTP, since meta is basically RCE with all the jar files.
+    if(!metaURL.isEmpty() && metaURL.scheme() == "http")
+    {
+        metaURL.setScheme("https");
+    }
+
+    s->set("MetaURLOverride", metaURL);
     QString curseKey = ui->curseKey->text();
     s->set("CFKeyOverride", curseKey);
 }
