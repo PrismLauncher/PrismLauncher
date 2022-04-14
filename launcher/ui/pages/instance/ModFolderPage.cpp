@@ -391,7 +391,7 @@ void ModFolderPage::on_actionInstall_mods_triggered()
         return; //this is a null instance or a legacy instance
     }
     auto profile = ((MinecraftInstance *)m_inst)->getPackProfile();
-    if (profile->getModLoader() == ModAPI::Any) {
+    if (profile->getModLoader() == ModAPI::Unspecified) {
         QMessageBox::critical(this,tr("Error"),tr("Please install a mod loader first!"));
         return;
     }

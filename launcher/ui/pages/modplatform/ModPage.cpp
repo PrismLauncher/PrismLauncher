@@ -68,7 +68,7 @@ void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         text = name;
     else
         text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
-    
+
     if (!current.authors.empty()) {
         auto authorToStr = [](ModPlatform::ModpackAuthor& author) -> QString {
             if (author.url.isEmpty()) { return author.name; }
@@ -128,7 +128,7 @@ void ModPage::onModSelected()
 
 void ModPage::retranslate()
 {
-   ui->retranslateUi(this); 
+   ui->retranslateUi(this);
 }
 
 void ModPage::updateModVersions()
@@ -137,26 +137,13 @@ void ModPage::updateModVersions()
 
     QString mcVersion = packProfile->getComponentVersion("net.minecraft");
 
-    QString loaderString;
-    switch (packProfile->getModLoader()) {
-        case ModAPI::Forge:
-            loaderString = "forge";
-            break;
-        case ModAPI::Fabric:
-            loaderString = "fabric";
-            break;
-        case ModAPI::Quilt:
-            loaderString = "quilt";
-            break;
-        default:
-            break;
-    }
+    QString loaderString = ModAPI::getModLoaderString(packProfile->getModLoader());
 
     for (int i = 0; i < current.versions.size(); i++) {
         auto version = current.versions[i];
         //NOTE: Flame doesn't care about loaderString, so passing it changes nothing.
-        if (!validateVersion(version, mcVersion, loaderString)) { 
-            continue; 
+        if (!validateVersion(version, mcVersion, loaderString)) {
+            continue;
         }
         ui->versionSelectionBox->addItem(version.version, QVariant(i));
     }

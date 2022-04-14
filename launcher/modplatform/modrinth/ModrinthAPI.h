@@ -51,25 +51,16 @@ class ModrinthAPI : public NetworkModAPI {
         return s;
     }
 
-    inline auto getModLoaderString(ModLoaderType modLoader) const -> QString
+    static auto getModLoaderString(ModLoaderType type) -> const QString
     {
-        switch (modLoader) {
-            case Any:
-                return "fabric, forge, quilt";
-            case Forge:
-                return "forge";
-            case Fabric:
-                return "fabric";
-            case Quilt:
-                return "quilt";
-            default:
-                return "";
-        }
+        if (type == Unspecified)
+            return "fabric, forge, quilt";
+        return ModAPI::getModLoaderString(type);
     }
 
     inline auto validateModLoader(ModLoaderType modLoader) const -> bool
     {
-        return modLoader == Any || modLoader == Forge || modLoader == Fabric || modLoader == Quilt;
+        return modLoader == Unspecified || modLoader == Forge || modLoader == Fabric || modLoader == Quilt;
     }
 
 };

@@ -985,5 +985,5 @@ ModAPI::ModLoaderType PackProfile::getModLoader()
     {
         return ModAPI::Quilt;
     }
-    return ModAPI::Any;
+    return ModAPI::Unspecified;
 }
