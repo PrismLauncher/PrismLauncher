@@ -213,7 +213,7 @@ QString MinecraftInstance::binRoot() const
 
 QString MinecraftInstance::getNativePath() const
 {
-#if defined(Q_OS_FREEBSD)
+#if defined(Os_FreeBSD)
     QDir natives_dir("/usr/local/lib/lwjgl/");
 #else
     QDir natives_dir(FS::PathCombine(instanceRoot(), "natives/"));
