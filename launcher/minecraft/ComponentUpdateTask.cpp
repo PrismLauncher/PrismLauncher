@@ -2,6 +2,7 @@
 
 #include "PackProfile_p.h"
 #include "PackProfile.h"
+#include "Component.h"
 #include "meta/Index.h"
 #include "meta/VersionList.h"
 #include "meta/Version.h"
@@ -599,9 +600,9 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
                             component->m_version = (*minecraft)->getVersion();
                         }
                     }
+                }
 // HACK HACK HACK HACK FIXME: this is a placeholder for deciding what version to use. For now, it is hardcoded.
 // ############################################################################################################
-                }
             }
             component->m_dependencyOnly = true;
             // FIXME: this should not work directly with the component list

@@ -390,7 +390,6 @@ void ModFolderPage::on_actionInstall_mods_triggered()
     if(m_inst->typeName() != "Minecraft"){
         return; //this is a null instance or a legacy instance
     }
-    QStringList modLoaders = {"net.minecraftforge", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader"};
     auto profile = ((MinecraftInstance *)m_inst)->getPackProfile();
     if (profile->getModLoader() == ModAPI::Any) {
         QMessageBox::critical(this,tr("Error"),tr("Please install a mod loader first!"));
