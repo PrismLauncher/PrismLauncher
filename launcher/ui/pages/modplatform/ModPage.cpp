@@ -28,6 +28,13 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
 
     filter_widget.setInstance(static_cast<MinecraftInstance*>(m_instance));
     m_filter = filter_widget.getFilter();
+
+    connect(&filter_widget, &ModFilterWidget::filterChanged, this, [&]{
+        ui->searchButton->setStyleSheet("text-decoration: underline");
+    });
+    connect(&filter_widget, &ModFilterWidget::filterUnchanged, this, [&]{
+        ui->searchButton->setStyleSheet("text-decoration: none");
+    });
 }
 
 ModPage::~ModPage()

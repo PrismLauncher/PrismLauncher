@@ -52,6 +52,10 @@ private:
 private slots:
     void onVersionFilterChanged(int id);
 
+public: signals:
+    void filterChanged();
+    void filterUnchanged();
+
 private:
     Ui::ModFilterWidget* ui;
 

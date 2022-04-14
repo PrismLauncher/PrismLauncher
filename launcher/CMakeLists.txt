@@ -824,9 +824,6 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/SkinUploadDialog.h
     ui/dialogs/ModDownloadDialog.cpp
     ui/dialogs/ModDownloadDialog.h
-    ui/dialogs/FilterModsDialog.cpp
-    ui/dialogs/FilterModsDialog.h
-
 
     # GUI - widgets
     ui/widgets/Common.cpp
@@ -851,6 +848,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/LogView.h
     ui/widgets/MCModInfoFrame.cpp
     ui/widgets/MCModInfoFrame.h
+    ui/widgets/ModFilterWidget.cpp
+    ui/widgets/ModFilterWidget.h
     ui/widgets/ModListView.cpp
     ui/widgets/ModListView.h
     ui/widgets/PageContainer.cpp
@@ -909,6 +908,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
     ui/widgets/MCModInfoFrame.ui
+    ui/widgets/ModFilterWidget.ui
     ui/dialogs/CopyInstanceDialog.ui
     ui/dialogs/ProfileSetupDialog.ui
     ui/dialogs/ProgressDialog.ui
@@ -925,7 +925,6 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/dialogs/LoginDialog.ui
     ui/dialogs/EditAccountDialog.ui
     ui/dialogs/ReviewMessageBox.ui
-    ui/dialogs/FilterModsDialog.ui
 )
 
 qt5_add_resources(LAUNCHER_RESOURCES

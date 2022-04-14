@@ -38,6 +38,7 @@ void ModFilterWidget::setInstance(MinecraftInstance* instance)
 auto ModFilterWidget::getFilter() -> std::shared_ptr<Filter>
 {
     m_last_version_id = m_version_id;
+    emit filterUnchanged();
     return m_filter;
 }
 
@@ -70,7 +71,11 @@ void ModFilterWidget::onVersionFilterChanged(int id)
     int index = 0;
 
     auto cast_id = (VersionButtonID) id;
-    m_version_id = cast_id;
+    if (cast_id != m_version_id) {
+        m_version_id = cast_id;
+    } else {
+        return;
+    }
 
     m_filter->versions.clear();
 
@@ -91,6 +96,11 @@ void ModFilterWidget::onVersionFilterChanged(int id)
         // TODO
         break;
     }
+
+    if(changed())
+        emit filterChanged();
+    else
+        emit filterUnchanged();
 }
 
 ModFilterWidget::~ModFilterWidget()
