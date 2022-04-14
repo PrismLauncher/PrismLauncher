@@ -243,7 +243,7 @@ void VersionPage::updateVersionControls()
     bool supportsFabric = minecraftVersion >= Version("1.14");
     ui->actionInstall_Fabric->setEnabled(controlsEnabled && supportsFabric);
 
-    bool supportsQuilt = minecraftVersion >= Version("1.17.1");
+    bool supportsQuilt = minecraftVersion >= Version("1.14");
     ui->actionInstall_Quilt->setEnabled(controlsEnabled && supportsQuilt);
 
     bool supportsLiteLoader = minecraftVersion <= Version("1.12.2");
