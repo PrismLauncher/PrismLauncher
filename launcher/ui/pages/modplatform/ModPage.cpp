@@ -13,7 +13,7 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     , m_instance(instance)
     , ui(new Ui::ModPage)
     , dialog(dialog)
-    , filter_dialog(static_cast<MinecraftInstance*>(instance)->getPackProfile()->getComponentVersion("net.minecraft"), this)
+    , filter_widget(static_cast<MinecraftInstance*>(instance)->getPackProfile()->getComponentVersion("net.minecraft"), this)
     , api(api)
 {
     ui->setupUi(this);
@@ -24,7 +24,10 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
-    m_filter = filter_dialog.getFilter();
+    ui->gridLayout_3->addWidget(&filter_widget, 0, 0, 1, ui->gridLayout_3->columnCount());
+
+    filter_widget.setInstance(static_cast<MinecraftInstance*>(m_instance));
+    m_filter = filter_widget.getFilter();
 }
 
 ModPage::~ModPage()
@@ -59,21 +62,22 @@ auto ModPage::eventFilter(QObject* watched, QEvent* event) -> bool
 
 void ModPage::filterMods()
 {
-    auto ret = filter_dialog.execWithInstance(static_cast<MinecraftInstance*>(m_instance));
-    m_filter = filter_dialog.getFilter();
-
-    if(ret == QDialog::DialogCode::Accepted){
-        listModel->refresh();
-
-        int prev_count = ui->versionSelectionBox->count();
-        ui->versionSelectionBox->clear();
-        updateModVersions(prev_count);
-    }
+    filter_widget.setHidden(!filter_widget.isHidden());
 }
 
 void ModPage::triggerSearch()
 {
-    listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
+    auto changed = filter_widget.changed();
+    m_filter = filter_widget.getFilter();
+    
+    if(changed){
+        ui->packView->clearSelection();
+        ui->packDescription->clear();
+        ui->versionSelectionBox->clear();
+        updateSelectionButton();
+    }
+
+    listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex(), changed);
 }
 
 void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)

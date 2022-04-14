@@ -56,7 +56,5 @@ class FlameModPage : public ModPage {
 
     auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const -> bool override;
 
-    void filterMods() override;
-
     auto shouldDisplay() const -> bool override;
 };

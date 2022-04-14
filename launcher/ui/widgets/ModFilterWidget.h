@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QDialog>
+#include <QTabWidget>
 #include <QButtonGroup>
 
 #include "Version.h"
@@ -10,10 +10,10 @@
 class MinecraftInstance;
 
 namespace Ui {
-class FilterModsDialog;
+class ModFilterWidget;
 }
 
-class FilterModsDialog : public QDialog
+class ModFilterWidget : public QTabWidget
 {
     Q_OBJECT
 public:
@@ -32,34 +32,34 @@ public:
     };
 
     std::shared_ptr<Filter> m_filter;
-    std::shared_ptr<Filter> m_internal_filter;
 
 public:
-    explicit FilterModsDialog(Version def, QWidget* parent = nullptr);
-    ~FilterModsDialog();
+    explicit ModFilterWidget(Version def, QWidget* parent = nullptr);
+    ~ModFilterWidget();
 
-    int execWithInstance(MinecraftInstance* instance);
+    void setInstance(MinecraftInstance* instance);
 
     /// By default all buttons are enabled
     void disableVersionButton(VersionButtonID);
 
-    auto getFilter() -> std::shared_ptr<Filter> { return m_filter; }
+    auto getFilter() -> std::shared_ptr<Filter>;
+    auto changed() const -> bool { return m_last_version_id != m_version_id; }
 
 private:
     inline auto mcVersionStr() const -> QString { return m_instance ? m_instance->getPackProfile()->getComponentVersion("net.minecraft") : ""; }
     inline auto mcVersion() const -> Version { return { mcVersionStr() }; }
 
-    void commitChanges();
-    void revertChanges();
-
 private slots:
     void onVersionFilterChanged(int id);
 
 private:
-    Ui::FilterModsDialog* ui;
+    Ui::ModFilterWidget* ui;
 
     MinecraftInstance* m_instance = nullptr;
 
     QButtonGroup m_mcVersion_buttons;
-    VersionButtonID m_previous_mcVersion_id = VersionButtonID::Strict;
+
+    /* Used to tell if the filter was changed since the last getFilter() call */
+    VersionButtonID m_last_version_id = VersionButtonID::Strict;
+    VersionButtonID m_version_id = VersionButtonID::Strict;
 };

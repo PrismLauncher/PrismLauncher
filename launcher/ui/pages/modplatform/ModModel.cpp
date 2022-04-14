@@ -91,9 +91,14 @@ void ListModel::refresh()
     performPaginatedSearch();
 }
 
-void ListModel::searchWithTerm(const QString& term, const int sort)
+void ListModel::searchWithTerm(const QString& term, const int sort, const bool filter_changed)
 {
-    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort) { return; }
+    if (currentSearchTerm == term 
+            && currentSearchTerm.isNull() == term.isNull() 
+            && currentSort == sort 
+            && !filter_changed) 
+        { return; }
+
     currentSearchTerm = term;
     currentSort = sort;
 
