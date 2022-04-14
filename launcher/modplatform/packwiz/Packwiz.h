@@ -39,4 +39,9 @@ class Packwiz {
      * TODO: Ask the user if they want to override, and delete the old mod's files, or keep the old one.
      * */
     static void updateModIndex(QDir& index_dir, Mod& mod);
+
+    /* Gets the metadata for a mod with a particular name.
+     * If the mod doesn't have a metadata, it simply returns an empty Mod object.
+     * */
+    static auto getIndexForMod(QDir& index_dir, QString mod_name) -> Mod;
 };

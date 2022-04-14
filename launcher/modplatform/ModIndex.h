@@ -25,7 +25,7 @@ class ProviderCapabilities {
         }
         return "";
     }
-    static QString providerName(Provider p) 
+    static const char* providerName(Provider p) 
     {
         switch(p){
         case Provider::MODRINTH:

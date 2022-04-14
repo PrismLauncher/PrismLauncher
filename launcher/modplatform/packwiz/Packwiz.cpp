@@ -1,6 +1,7 @@
 #include "Packwiz.h"
 
 #include "modplatform/ModIndex.h"
+#include "toml.h"
 
 #include <QDebug>
 #include <QDir>
@@ -57,4 +58,93 @@ void Packwiz::updateModIndex(QDir& index_dir, Mod& mod)
         addToStream("file-id", mod.file_id.toString());
         addToStream("project-id", mod.project_id.toString());
     }
+}
+
+auto Packwiz::getIndexForMod(QDir& index_dir, QString mod_name) -> Mod
+{
+    Mod mod;
+
+    auto index_file_name = QString("%1.toml").arg(mod_name);
+    QFile index_file(index_dir.absoluteFilePath(index_file_name));
+
+    if (!index_file.exists()) { return mod; }
+    if (!index_file.open(QIODevice::ReadOnly)) { return mod; }
+
+    toml_table_t* table;
+
+    char errbuf[200];
+    table = toml_parse(index_file.readAll().data(), errbuf, sizeof(errbuf));
+
+    index_file.close();
+
+    if (!table) {
+        qCritical() << QString("Could not open file %1").arg(index_file_name);
+        return mod;
+    }
+
+    // Helper function for extracting data from the TOML file
+    auto stringEntry = [&](toml_table_t* parent, const char* entry_name) -> QString {
+        toml_datum_t var = toml_string_in(parent, entry_name);
+        if (!var.ok) {
+            qCritical() << QString("Failed to read property '%1' in mod metadata.").arg(entry_name);
+            return {};
+        }
+
+        QString tmp = var.u.s;
+        free(var.u.s);
+
+        return tmp;
+    };
+
+    { // Basic info
+        mod.name = stringEntry(table, "name");
+        // Basic sanity check
+        if (mod.name != mod_name) {
+            qCritical() << QString("Name mismatch in mod metadata:\nExpected:%1\nGot:%2").arg(mod_name, mod.name);
+            return {};
+        }
+
+        mod.filename = stringEntry(table, "filename");
+        mod.side = stringEntry(table, "side");
+    }
+
+    { // [download] info
+        toml_table_t* download_table = toml_table_in(table, "download");
+        if (!download_table) {
+            qCritical() << QString("No [download] section found on mod metadata!");
+            return {};
+        }
+
+        mod.url = stringEntry(download_table, "url");
+        mod.hash_format = stringEntry(download_table, "hash-format");
+        mod.hash = stringEntry(download_table, "hash");
+    }
+
+    { // [update] info
+        using ProviderCaps = ModPlatform::ProviderCapabilities;
+        using Provider = ModPlatform::Provider;
+
+        toml_table_t* update_table = toml_table_in(table, "update");
+        if (!update_table) {
+            qCritical() << QString("No [update] section found on mod metadata!");
+            return {};
+        }
+
+        toml_table_t* mod_provider_table;
+        if ((mod_provider_table = toml_table_in(update_table, ProviderCaps::providerName(Provider::FLAME)))) {
+            mod.provider = Provider::FLAME;
+        } else if ((mod_provider_table = toml_table_in(update_table, ProviderCaps::providerName(Provider::MODRINTH)))) {
+            mod.provider = Provider::MODRINTH;
+        } else {
+            qCritical() << "No mod provider on mod metadata!";
+            return {};
+        }
+        
+        mod.file_id = stringEntry(mod_provider_table, "file-id");
+        mod.project_id = stringEntry(mod_provider_table, "project-id");
+    }
+
+    toml_free(table);
+
+    return mod;
 }
