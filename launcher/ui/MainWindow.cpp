@@ -309,6 +309,7 @@ public:
     void createMainToolbar(QMainWindow *MainWindow)
     {
         mainToolBar = TranslatedToolbar(MainWindow);
+        mainToolBar->setVisible(menuBar->isNativeMenuBar() || !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
         mainToolBar->setMovable(true);
         mainToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
@@ -471,8 +472,7 @@ public:
     void createMenuBar(MainWindow *MainWindow)
     {
         menuBar = new QMenuBar(MainWindow);
-        // There's already a toolbar, so hide this menu bar by default unless 'alt' is pressed on systems without native menu bar
-        menuBar->setVisible(false);
+        menuBar->setVisible(APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
         createMenuActions(MainWindow);
 
         // TODO: only enable options while an instance is selected (if applicable)
@@ -909,9 +909,9 @@ public:
         MainWindow->setAccessibleName(BuildConfig.LAUNCHER_NAME);
 #endif
 
-        createMainToolbar(MainWindow);
-
         createMenuBar(dynamic_cast<class MainWindow *>(MainWindow));
+
+        createMainToolbar(MainWindow);
 
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -1135,7 +1135,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 #ifndef Q_OS_MAC
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
-    if(event->key()==Qt::Key_Alt)
+    if(event->key()==Qt::Key_Alt && !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool())
         ui->menuBar->setVisible(!ui->menuBar->isVisible());
     else
         QMainWindow::keyReleaseEvent(event);
@@ -1292,6 +1292,12 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
         myMenu.setEnabled(m_selectedInstance->canLaunch());
     */
     myMenu.exec(view->mapToGlobal(pos));
+}
+
+void MainWindow::updateMainToolBar()
+{
+    ui->menuBar->setVisible(APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
+    ui->mainToolBar->setVisible(ui->menuBar->isNativeMenuBar() || !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
 }
 
 void MainWindow::updateToolsMenu()
@@ -1966,6 +1972,7 @@ void MainWindow::globalSettingsClosed()
     APPLICATION->instances()->loadList();
     proxymodel->invalidate();
     proxymodel->sort(0);
+    updateMainToolBar();
     updateToolsMenu();
     updateStatusCenter();
     update();

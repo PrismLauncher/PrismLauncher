@@ -151,6 +151,8 @@ private slots:
 
     void showInstanceContextMenu(const QPoint &);
 
+    void updateMainToolBar();
+
     void updateToolsMenu();
 
     void instanceActivated(QModelIndex);
