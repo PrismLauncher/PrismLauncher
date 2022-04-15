@@ -243,6 +243,9 @@ void VersionPage::updateVersionControls()
     bool supportsFabric = minecraftVersion >= Version("1.14");
     ui->actionInstall_Fabric->setEnabled(controlsEnabled && supportsFabric);
 
+    bool supportsQuilt = minecraftVersion >= Version("1.14");
+    ui->actionInstall_Quilt->setEnabled(controlsEnabled && supportsQuilt);
+
     bool supportsLiteLoader = minecraftVersion <= Version("1.12.2");
     ui->actionInstall_LiteLoader->setEnabled(controlsEnabled && supportsLiteLoader);
 
@@ -392,7 +395,7 @@ void VersionPage::on_actionChange_version_triggered()
         return;
     }
     VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
-    if (uid == "net.fabricmc.intermediary")
+    if (uid == "net.fabricmc.intermediary" || uid == "org.quiltmc.hashed")
     {
         vselect.setEmptyString(tr("No intermediary mappings versions are currently available."));
         vselect.setEmptyErrorString(tr("Couldn't load or download the intermediary mappings version lists!"));
@@ -492,6 +495,33 @@ void VersionPage::on_actionInstall_Fabric_triggered()
     {
         auto vsn = vselect.selectedVersion();
         m_profile->setComponentVersion("net.fabricmc.fabric-loader", vsn->descriptor());
+        m_profile->resolve(Net::Mode::Online);
+        preselect(m_profile->rowCount(QModelIndex())-1);
+        m_container->refreshContainer();
+    }
+}
+
+void VersionPage::on_actionInstall_Quilt_triggered()
+{
+    auto vlist = APPLICATION->metadataIndex()->get("org.quiltmc.quilt-loader");
+    if(!vlist)
+    {
+        return;
+    }
+    VersionSelectDialog vselect(vlist.get(), tr("Select Quilt Loader version"), this);
+    vselect.setEmptyString(tr("No Quilt Loader versions are currently available."));
+    vselect.setEmptyErrorString(tr("Couldn't load or download the Quilt Loader version lists!"));
+
+    auto currentVersion = m_profile->getComponentVersion("org.quiltmc.quilt-loader");
+    if(!currentVersion.isEmpty())
+    {
+        vselect.setCurrentVersion(currentVersion);
+    }
+
+    if (vselect.exec() && vselect.selectedVersion())
+    {
+        auto vsn = vselect.selectedVersion();
+        m_profile->setComponentVersion("org.quiltmc.quilt-loader", vsn->descriptor());
         m_profile->resolve(Net::Mode::Online);
         preselect(m_profile->rowCount(QModelIndex())-1);
         m_container->refreshContainer();

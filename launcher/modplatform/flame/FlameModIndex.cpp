@@ -69,6 +69,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         for (auto m : modules) {
             auto fname = Json::requireString(m.toObject(), "foldername");
             // FIXME: This does not work properly when a mod supports more than one mod loader, since
+            // FIXME: This also doesn't deal with Quilt mods at the moment
             // they bundle the meta files for all of them in the same arquive, even when that version
             // doesn't support the given mod loader.
             if (hasFabric) {

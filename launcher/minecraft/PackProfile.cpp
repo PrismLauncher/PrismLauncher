@@ -970,3 +970,20 @@ void PackProfile::disableInteraction(bool disable)
         }
     }
 }
+
+ModAPI::ModLoaderType PackProfile::getModLoader()
+{
+    if (!getComponentVersion("net.minecraftforge").isEmpty())
+    {
+        return ModAPI::Forge;
+    }
+    else if (!getComponentVersion("net.fabricmc.fabric-loader").isEmpty())
+    {
+        return ModAPI::Fabric;
+    }
+    else if (!getComponentVersion("org.quiltmc.quilt-loader").isEmpty())
+    {
+        return ModAPI::Quilt;
+    }
+    return ModAPI::Unspecified;
+}

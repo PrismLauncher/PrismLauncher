@@ -62,7 +62,6 @@ class ListModel : public QAbstractListModel {
 
     void requestLogo(QString file, QString url);
 
-    inline auto hasFabric() const -> bool;
     inline auto getMineVersions() const -> QList<QString>;
 
    protected:

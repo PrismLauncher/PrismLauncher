@@ -15,7 +15,7 @@ class ModAPI {
     virtual ~ModAPI() = default;
 
     // https://docs.curseforge.com/?http#tocS_ModLoaderType
-    enum ModLoaderType { Any = 0, Forge = 1, Cauldron = 2, LiteLoader = 3, Fabric = 4 };
+    enum ModLoaderType { Unspecified = 0, Forge = 1, Cauldron = 2, LiteLoader = 3, Fabric = 4, Quilt = 5 };
 
     struct SearchArgs {
         int offset;
@@ -35,4 +35,22 @@ class ModAPI {
     };
 
     virtual void getVersions(CallerType* caller, VersionSearchArgs&& args) const = 0;
+
+    static auto getModLoaderString(ModLoaderType type) -> const QString {
+        switch (type) {
+            case Unspecified:
+                break;
+            case Forge:
+                return "forge";
+            case Cauldron:
+                return "cauldron";
+            case LiteLoader:
+                return "liteloader";
+            case Fabric:
+                return "fabric";
+            case Quilt:
+                return "quilt";
+        }
+        return "";
+    }
 };
