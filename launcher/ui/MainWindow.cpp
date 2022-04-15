@@ -602,7 +602,7 @@ public:
         connect(exportInstanceAct, &QAction::triggered, MainWindow, &MainWindow::on_actionExportInstance_triggered);
 
         deleteInstanceAct = new QAction(tr("Dele&te Instance..."), MainWindow);
-        deleteInstanceAct->setShortcut(QKeySequence::Delete);
+        deleteInstanceAct->setShortcuts({QKeySequence(tr("Backspace")), QKeySequence::Delete});
         deleteInstanceAct->setStatusTip(tr("Delete the selected instance"));
         deleteInstanceAct->setEnabled(false);
         connect(deleteInstanceAct, &QAction::triggered, MainWindow, &MainWindow::on_actionDeleteInstance_triggered);
