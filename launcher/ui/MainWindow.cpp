@@ -511,7 +511,6 @@ public:
         editMenu->addAction(settingsAct);
 
         profileMenu = menuBar->addMenu(tr("&Profiles"));
-        // TODO: add a list of logged in accounts here
         profileMenu->addAction(manageAccountAct);
 
         helpMenu = menuBar->addMenu(tr("&Help"));
@@ -1379,6 +1378,7 @@ void MainWindow::updateToolsMenu()
 void MainWindow::repopulateAccountsMenu()
 {
     accountMenu->clear();
+    ui->profileMenu->clear();
 
     auto accounts = APPLICATION->accounts();
     MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
@@ -1399,6 +1399,7 @@ void MainWindow::repopulateAccountsMenu()
         QAction *action = new QAction(tr("No accounts added!"), this);
         action->setEnabled(false);
         accountMenu->addAction(action);
+        ui->profileMenu->addAction(action);
     }
     else
     {
@@ -1422,26 +1423,39 @@ void MainWindow::repopulateAccountsMenu()
             else {
                 action->setIcon(APPLICATION->getThemedIcon("noaccount"));
             }
+
+            const int highestNumberKey = 9;
+            if(i<highestNumberKey)
+            {
+                action->setShortcut(QKeySequence(tr("Ctrl+%1").arg(i + 1)));
+            }
+
             accountMenu->addAction(action);
+            ui->profileMenu->addAction(action);
             connect(action, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
         }
     }
 
     accountMenu->addSeparator();
+    ui->profileMenu->addSeparator();
 
     QAction *action = new QAction(tr("No Default Account"), this);
     action->setCheckable(true);
     action->setIcon(APPLICATION->getThemedIcon("noaccount"));
     action->setData(-1);
+    action->setShortcut(QKeySequence(tr("Ctrl+0")));
     if (!defaultAccount) {
         action->setChecked(true);
     }
 
     accountMenu->addAction(action);
+    ui->profileMenu->addAction(action);
     connect(action, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
 
     accountMenu->addSeparator();
+    ui->profileMenu->addSeparator();
     accountMenu->addAction(ui->actionManageAccounts);
+    ui->profileMenu->addAction(ui->manageAccountAct);
 }
 
 void MainWindow::updatesAllowedChanged(bool allowed)
