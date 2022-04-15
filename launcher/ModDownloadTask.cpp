@@ -5,7 +5,7 @@
 ModDownloadTask::ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods)
     : m_mod(mod), m_mod_version(version), mods(mods)
 {
-    m_update_task.reset(new LocalModUpdateTask(mods->dir(), m_mod, m_mod_version));
+    m_update_task.reset(new LocalModUpdateTask(mods->indexDir(), m_mod, m_mod_version));
 
     addTask(m_update_task);
 

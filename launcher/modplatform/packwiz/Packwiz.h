@@ -40,8 +40,11 @@ class Packwiz {
      * */
     static void updateModIndex(QDir& index_dir, Mod& mod);
 
+    /* Deletes the metadata for the mod with the given name. If the metadata doesn't exist, it does nothing. */
+    static void deleteModIndex(QDir& index_dir, QString& mod_name);
+
     /* Gets the metadata for a mod with a particular name.
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.
      * */
-    static auto getIndexForMod(QDir& index_dir, QString mod_name) -> Mod;
+    static auto getIndexForMod(QDir& index_dir, QString& mod_name) -> Mod;
 };

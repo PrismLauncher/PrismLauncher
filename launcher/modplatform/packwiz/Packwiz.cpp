@@ -7,6 +7,12 @@
 #include <QDir>
 #include <QObject>
 
+// Helpers
+static inline QString indexFileName(QString const& mod_name)
+{
+    return QString("%1.toml").arg(mod_name);
+}
+
 auto Packwiz::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod
 {
     Mod mod;
@@ -28,14 +34,13 @@ auto Packwiz::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pac
 void Packwiz::updateModIndex(QDir& index_dir, Mod& mod)
 {
     // Ensure the corresponding mod's info exists, and create it if not
-    auto index_file_name = QString("%1.toml").arg(mod.name);
-    QFile index_file(index_dir.absoluteFilePath(index_file_name));
+    QFile index_file(index_dir.absoluteFilePath(indexFileName(mod.name)));
 
     // There's already data on there!
     if (index_file.exists()) { index_file.remove(); }
 
     if (!index_file.open(QIODevice::ReadWrite)) {
-        qCritical() << "Could not open file " << index_file_name << "!";
+        qCritical() << QString("Could not open file %1!").arg(indexFileName(mod.name));
         return;
     }
 
@@ -60,15 +65,34 @@ void Packwiz::updateModIndex(QDir& index_dir, Mod& mod)
     }
 }
 
-auto Packwiz::getIndexForMod(QDir& index_dir, QString mod_name) -> Mod
+void Packwiz::deleteModIndex(QDir& index_dir, QString& mod_name)
+{
+    QFile index_file(index_dir.absoluteFilePath(indexFileName(mod_name)));
+
+    if(!index_file.exists()){
+        qWarning() << QString("Tried to delete non-existent mod metadata for %1!").arg(mod_name);
+        return;
+    }
+
+    if(!index_file.remove()){
+        qWarning() << QString("Failed to remove metadata for mod %1!").arg(mod_name);
+    }
+}
+
+auto Packwiz::getIndexForMod(QDir& index_dir, QString& mod_name) -> Mod
 {
     Mod mod;
 
-    auto index_file_name = QString("%1.toml").arg(mod_name);
-    QFile index_file(index_dir.absoluteFilePath(index_file_name));
+    QFile index_file(index_dir.absoluteFilePath(indexFileName(mod_name)));
 
-    if (!index_file.exists()) { return mod; }
-    if (!index_file.open(QIODevice::ReadOnly)) { return mod; }
+    if (!index_file.exists()) {
+        qWarning() << QString("Tried to get a non-existent mod metadata for %1").arg(mod_name);
+        return mod;
+    }
+    if (!index_file.open(QIODevice::ReadOnly)) {
+        qWarning() << QString("Failed to open mod metadata for %1").arg(mod_name);
+        return mod;
+    }
 
     toml_table_t* table;
 
@@ -78,7 +102,7 @@ auto Packwiz::getIndexForMod(QDir& index_dir, QString mod_name) -> Mod
     index_file.close();
 
     if (!table) {
-        qCritical() << QString("Could not open file %1").arg(index_file_name);
+        qCritical() << QString("Could not open file %1!").arg(indexFileName(mod.name));
         return mod;
     }
 
@@ -136,7 +160,7 @@ auto Packwiz::getIndexForMod(QDir& index_dir, QString mod_name) -> Mod
         } else if ((mod_provider_table = toml_table_in(update_table, ProviderCaps::providerName(Provider::MODRINTH)))) {
             mod.provider = Provider::MODRINTH;
         } else {
-            qCritical() << "No mod provider on mod metadata!";
+            qCritical() << QString("No mod provider on mod metadata!");
             return {};
         }
         

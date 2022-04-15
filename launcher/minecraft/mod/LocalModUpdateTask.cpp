@@ -5,12 +5,11 @@
 #include "FileSystem.h"
 #include "modplatform/packwiz/Packwiz.h"
 
-LocalModUpdateTask::LocalModUpdateTask(QDir mods_dir, ModPlatform::IndexedPack& mod, ModPlatform::IndexedVersion& mod_version)
-    : m_mod(mod), m_mod_version(mod_version)
+LocalModUpdateTask::LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack& mod, ModPlatform::IndexedVersion& mod_version)
+    : m_index_dir(index_dir), m_mod(mod), m_mod_version(mod_version)
 {
     // Ensure a '.index' folder exists in the mods folder, and create it if it does not
-    m_index_dir = { QString("%1/.index").arg(mods_dir.absolutePath()) };
-    if (!FS::ensureFolderPathExists(m_index_dir.path())) {
+    if (!FS::ensureFolderPathExists(index_dir.path())) {
         emitFailed(QString("Unable to create index for mod %1!").arg(m_mod.name));
     }
 }

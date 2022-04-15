@@ -108,9 +108,14 @@ public:
 
     bool isValid();
 
-    QDir dir()
+    QDir& dir()
     {
         return m_dir;
+    }
+
+    QDir indexDir()
+    {
+        return { QString("%1/.index").arg(dir().absolutePath()) };
     }
 
     const QList<Mod> & allMods()
