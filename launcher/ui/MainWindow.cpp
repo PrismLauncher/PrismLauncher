@@ -2013,8 +2013,7 @@ void MainWindow::on_actionReportBug_triggered()
 
 void MainWindow::on_actionOpenWiki_triggered()
 {
-    // TODO: add functionality
-//    DesktopServices::openUrl(QUrl(BuildConfig.WIKI_URL));
+    DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg("")));
 }
 
 void MainWindow::on_actionMoreNews_triggered()
