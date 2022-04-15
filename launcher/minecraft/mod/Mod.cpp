@@ -33,6 +33,30 @@ Mod::Mod(const QFileInfo &file)
     m_changedDateTime = file.lastModified();
 }
 
+Mod::Mod(const QDir& mods_dir, const Packwiz::Mod& metadata)
+    : m_file(mods_dir.absoluteFilePath(metadata.filename))
+    // It is weird, but name is not reliable for comparing with the JAR files name
+    // FIXME: Maybe use hash when implemented?
+    , m_mmc_id(metadata.filename)
+    , m_name(metadata.name)
+{
+    if(m_file.isDir()){
+        m_type = MOD_FOLDER;
+    }
+    else{
+        if (metadata.filename.endsWith(".zip") || metadata.filename.endsWith(".jar"))
+            m_type = MOD_ZIPFILE;
+        else if (metadata.filename.endsWith(".litemod"))
+            m_type = MOD_LITEMOD;
+        else
+            m_type = MOD_SINGLEFILE;
+    }
+
+    m_from_metadata = true;
+    m_enabled = true;
+    m_changedDateTime = m_file.lastModified();
+}
+
 void Mod::repath(const QFileInfo &file)
 {
     m_file = file;
@@ -101,13 +125,18 @@ bool Mod::enable(bool value)
         if (!foo.rename(path))
             return false;
     }
-    repath(QFileInfo(path));
+    if(!fromMetadata())
+        repath(QFileInfo(path));
+
     m_enabled = value;
     return true;
 }
 
-bool Mod::destroy()
+bool Mod::destroy(QDir& index_dir)
 {
+    // Delete metadata
+    Packwiz::deleteModIndex(index_dir, m_name);
+
     m_type = MOD_UNKNOWN;
     return FS::deletePath(m_file.filePath());
 }

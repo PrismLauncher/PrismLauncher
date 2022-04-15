@@ -79,10 +79,14 @@ bool ModFolderModel::update()
         return true;
     }
 
-    auto task = new ModFolderLoadTask(m_dir);
+    auto index_dir = indexDir();
+    auto task = new ModFolderLoadTask(dir(), index_dir);
+
     m_update = task->result();
+
     QThreadPool *threadPool = QThreadPool::globalInstance();
     connect(task, &ModFolderLoadTask::succeeded, this, &ModFolderModel::finishUpdate);
+    
     threadPool->start(task);
     return true;
 }
@@ -334,7 +338,8 @@ bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
     for (auto i: indexes)
     {
         Mod &m = mods[i.row()];
-        m.destroy();
+        auto index_dir = indexDir();
+        m.destroy(index_dir);
     }
     return true;
 }
