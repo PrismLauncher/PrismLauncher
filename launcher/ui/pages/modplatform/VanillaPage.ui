@@ -215,6 +215,16 @@
             </widget>
            </item>
            <item>
+            <widget class="QRadioButton" name="quiltFilter">
+             <property name="text">
+              <string>Quilt</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">loaderBtnGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item>
             <widget class="QRadioButton" name="liteLoaderFilter">
              <property name="text">
               <string>LiteLoader</string>
