@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.9.4)
 project(iconfix)
 
 find_package(Qt5Core REQUIRED QUIET)
