@@ -28,6 +28,7 @@
 #include "BaseVersion.h"
 #include "MojangDownloadInfo.h"
 #include "net/Mode.h"
+#include "modplatform/ModAPI.h"
 
 class MinecraftInstance;
 struct PackProfileData;
@@ -116,6 +117,8 @@ public:
     /// Add the component to the internal list of patches
     // todo(merged): is this the best approach
     void appendComponent(ComponentPtr component);
+
+    ModAPI::ModLoaderType getModLoader();
 
 private:
     void scheduleSave();

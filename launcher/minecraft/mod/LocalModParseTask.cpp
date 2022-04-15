@@ -391,7 +391,7 @@ void LocalModParseTask::processAsZip()
         zip.close();
         return;
     }
-    else if (zip.setCurrentFile("fabric.mod.json"))
+    else if (zip.setCurrentFile("fabric.mod.json"))  // TODO: Support quilt.mod.json
     {
         if (!file.open(QIODevice::ReadOnly))
         {
