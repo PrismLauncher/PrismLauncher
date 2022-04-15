@@ -23,7 +23,7 @@ class FlameAPI : public NetworkModAPI {
             .arg(args.offset)
             .arg(args.search)
             .arg(args.sorting)
-            .arg(args.mod_loader)
+            .arg(getMappedModLoader(args.mod_loader))
             .arg(gameVersionStr);
     };
 
@@ -31,4 +31,13 @@ class FlameAPI : public NetworkModAPI {
     {
         return QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files").arg(args.addonId);
     };
+
+   public:
+    static auto getMappedModLoader(const ModLoaderType type) -> const ModLoaderType
+    {
+        // TODO: remove this once Quilt drops official Fabric support
+        if (type == Quilt)  // NOTE: Most if not all Fabric mods should work *currently*
+            return Fabric;
+        return type;
+    }
 };
