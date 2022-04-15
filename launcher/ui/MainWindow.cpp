@@ -538,65 +538,79 @@ public:
         openAct = new QAction(tr("&Launch"), MainWindow);
         openAct->setShortcuts(QKeySequence::Open);
         openAct->setStatusTip(tr("Launch the selected instance"));
+        openAct->setEnabled(false);
         connect(openAct, &QAction::triggered, MainWindow, &MainWindow::on_actionLaunchInstance_triggered);
 
-        openOfflineAct = new QAction(tr("&Launch Offline"), MainWindow);
+        openOfflineAct = new QAction(tr("Launch &Offline"), MainWindow);
         openOfflineAct->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
         openOfflineAct->setStatusTip(tr("Launch the selected instance in offline mode"));
+        openOfflineAct->setEnabled(false);
         connect(openOfflineAct, &QAction::triggered, MainWindow, &MainWindow::on_actionLaunchInstanceOffline_triggered);
 
         editInstanceAct = new QAction(tr("&Edit Instance..."), MainWindow);
         editInstanceAct->setShortcut(QKeySequence(tr("Ctrl+I")));
         editInstanceAct->setStatusTip(tr("Edit the selected instance"));
+        editInstanceAct->setEnabled(false);
         connect(editInstanceAct, &QAction::triggered, MainWindow, &MainWindow::on_actionEditInstance_triggered);
 
         editNotesAct = new QAction(tr("&Edit Notes..."), MainWindow);
         editNotesAct->setStatusTip(tr("Edit the selected instance's notes"));
+        editNotesAct->setEnabled(false);
         connect(editNotesAct, &QAction::triggered, MainWindow, &MainWindow::on_actionEditInstNotes_triggered);
 
         editModsAct = new QAction(tr("&View Mods"), MainWindow);
         editModsAct->setStatusTip(tr("View the selected instance's mods"));
+        editModsAct->setEnabled(false);
         connect(editModsAct, &QAction::triggered, MainWindow, &MainWindow::on_actionMods_triggered);
 
         editWorldsAct = new QAction(tr("&View Worlds"), MainWindow);
         editWorldsAct->setStatusTip(tr("View the selected instance's worlds"));
+        editWorldsAct->setEnabled(false);
         connect(editWorldsAct, &QAction::triggered, MainWindow, &MainWindow::on_actionWorlds_triggered);
 
         manageScreenshotsAct = new QAction(tr("&Manage Screenshots"), MainWindow);
         manageScreenshotsAct->setStatusTip(tr("Manage the selected instance's screenshots"));
+        manageScreenshotsAct->setEnabled(false);
         connect(manageScreenshotsAct, &QAction::triggered, MainWindow, &MainWindow::on_actionScreenshots_triggered);
 
         changeGroupAct = new QAction(tr("&Change Group..."), MainWindow);
         changeGroupAct->setShortcut(QKeySequence(tr("Ctrl+G")));
         changeGroupAct->setStatusTip(tr("Change the selected instance's group"));
+        changeGroupAct->setEnabled(false);
         connect(changeGroupAct, &QAction::triggered, MainWindow, &MainWindow::on_actionChangeInstGroup_triggered);
 
         openMCFolderAct = new QAction(tr("&Open Minecraft Folder"), MainWindow);
         openMCFolderAct->setShortcut(QKeySequence(tr("Ctrl+M")));
         openMCFolderAct->setStatusTip(tr("Open the selected instance's Minecraft folder"));
+        openMCFolderAct->setEnabled(false);
         connect(openMCFolderAct, &QAction::triggered, MainWindow, &MainWindow::on_actionViewSelectedMCFolder_triggered);
 
         openConfigFolderAct = new QAction(tr("&Open Config Folder"), MainWindow);
         openConfigFolderAct->setStatusTip(tr("Open the selected instance's config folder"));
+        openConfigFolderAct->setEnabled(false);
         connect(openConfigFolderAct, &QAction::triggered, MainWindow, &MainWindow::on_actionConfig_Folder_triggered);
 
         openInstanceFolderAct = new QAction(tr("&Open Instance Folder"), MainWindow);
         openInstanceFolderAct->setStatusTip(tr("Open the selected instance's main folder"));
+        openInstanceFolderAct->setEnabled(false);
         connect(openInstanceFolderAct, &QAction::triggered, MainWindow, &MainWindow::on_actionViewInstanceFolder_triggered);
 
         exportInstanceAct = new QAction(tr("&Export Instance..."), MainWindow);
         exportInstanceAct->setShortcut(QKeySequence(tr("Ctrl+E")));
         exportInstanceAct->setStatusTip(tr("Export the selected instance"));
+        exportInstanceAct->setEnabled(false);
         connect(exportInstanceAct, &QAction::triggered, MainWindow, &MainWindow::on_actionExportInstance_triggered);
 
         deleteInstanceAct = new QAction(tr("&Delete Instance..."), MainWindow);
         deleteInstanceAct->setShortcut(QKeySequence::Delete);
         deleteInstanceAct->setStatusTip(tr("Delete the selected instance"));
+        deleteInstanceAct->setEnabled(false);
         connect(deleteInstanceAct, &QAction::triggered, MainWindow, &MainWindow::on_actionDeleteInstance_triggered);
 
         duplicateInstanceAct = new QAction(tr("&Copy Instance..."), MainWindow);
         duplicateInstanceAct->setShortcut(QKeySequence(tr("Ctrl+D")));
         duplicateInstanceAct->setStatusTip(tr("Duplicate the selected instance"));
+        duplicateInstanceAct->setEnabled(false);
         connect(duplicateInstanceAct, &QAction::triggered, MainWindow, &MainWindow::on_actionCopyInstance_triggered);
 
         closeAct = new QAction(tr("&Close Window"), MainWindow);
@@ -671,6 +685,25 @@ public:
         redditAct = new QAction(tr("&Reddit"), MainWindow);
         redditAct->setStatusTip(tr("Open %1's subreddit").arg(BuildConfig.LAUNCHER_NAME));
         connect(redditAct, &QAction::triggered, MainWindow, &MainWindow::on_actionREDDIT_triggered);
+    }
+
+    // "Instance actions" are actions that require an instance to be selected (i.e. "new instance" is not here)
+    void setInstanceActionsEnabled(bool enabled) const
+    {
+        openAct->setEnabled(enabled);
+        openOfflineAct->setEnabled(enabled);
+        editInstanceAct->setEnabled(enabled);
+        editNotesAct->setEnabled(enabled);
+        editModsAct->setEnabled(enabled);
+        editWorldsAct->setEnabled(enabled);
+        manageScreenshotsAct->setEnabled(enabled);
+        changeGroupAct->setEnabled(enabled);
+        openMCFolderAct->setEnabled(enabled);
+        openConfigFolderAct->setEnabled(enabled);
+        openInstanceFolderAct->setEnabled(enabled);
+        exportInstanceAct->setEnabled(enabled);
+        deleteInstanceAct->setEnabled(enabled);
+        duplicateInstanceAct->setEnabled(enabled);
     }
 
     void createStatusBar(QMainWindow *MainWindow)
@@ -2171,6 +2204,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
     if (m_selectedInstance)
     {
         ui->instanceToolBar->setEnabled(true);
+        ui->setInstanceActionsEnabled(true);
         if(m_selectedInstance->isRunning())
         {
             ui->actionLaunchInstance->setEnabled(true);
@@ -2195,6 +2229,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
     else
     {
         ui->instanceToolBar->setEnabled(false);
+        ui->setInstanceActionsEnabled(false);
         APPLICATION->settings()->set("SelectedInstance", QString());
         selectionBad();
         return;
@@ -2223,6 +2258,7 @@ void MainWindow::selectionBad()
 
     statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
+    ui->setInstanceActionsEnabled(false);
     ui->renameButton->setText(tr("Rename Instance"));
     updateInstanceToolIcon("grass");
 
