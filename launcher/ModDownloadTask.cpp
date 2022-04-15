@@ -1,6 +1,7 @@
 #include "ModDownloadTask.h"
+
 #include "Application.h"
-#include "minecraft/mod/LocalModUpdateTask.h"
+#include "minecraft/mod/tasks/LocalModUpdateTask.h"
 
 ModDownloadTask::ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods)
     : m_mod(mod), m_mod_version(version), mods(mods)

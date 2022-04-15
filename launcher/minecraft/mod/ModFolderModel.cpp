@@ -14,17 +14,19 @@
  */
 
 #include "ModFolderModel.h"
+
 #include <FileSystem.h>
+#include <QDebug>
+#include <QFileSystemWatcher>
 #include <QMimeData>
+#include <QString>
+#include <QThreadPool>
 #include <QUrl>
 #include <QUuid>
-#include <QString>
-#include <QFileSystemWatcher>
-#include <QDebug>
-#include "ModFolderLoadTask.h"
-#include <QThreadPool>
 #include <algorithm>
-#include "LocalModParseTask.h"
+
+#include "minecraft/mod/tasks/LocalModParseTask.h"
+#include "minecraft/mod/tasks/ModFolderLoadTask.h"
 
 ModFolderModel::ModFolderModel(const QString &dir) : QAbstractListModel(), m_dir(dir)
 {

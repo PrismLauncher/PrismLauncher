@@ -24,8 +24,8 @@
 
 #include "Mod.h"
 
-#include "ModFolderLoadTask.h"
-#include "LocalModParseTask.h"
+#include "minecraft/mod/tasks/ModFolderLoadTask.h"
+#include "minecraft/mod/tasks/LocalModParseTask.h"
 
 class LegacyInstance;
 class BaseInstance;

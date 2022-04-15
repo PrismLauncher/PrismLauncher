@@ -1,12 +1,13 @@
 #pragma once
 
-#include "QObjectPtr.h"
-#include "minecraft/mod/LocalModUpdateTask.h"
-#include "modplatform/ModIndex.h"
-#include "tasks/SequentialTask.h"
-#include "minecraft/mod/ModFolderModel.h"
-#include "net/NetJob.h"
 #include <QUrl>
+#include "QObjectPtr.h"
+#include "minecraft/mod/ModFolderModel.h"
+#include "modplatform/ModIndex.h"
+#include "net/NetJob.h"
+
+#include "tasks/SequentialTask.h"
+#include "minecraft/mod/tasks/LocalModUpdateTask.h"
 
 class ModDownloadTask : public SequentialTask {
     Q_OBJECT

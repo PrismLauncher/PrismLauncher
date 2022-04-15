@@ -1,10 +1,11 @@
 #pragma once
-#include <QRunnable>
-#include <QObject>
+
 #include <QDir>
 #include <QMap>
-#include "Mod.h"
+#include <QObject>
+#include <QRunnable>
 #include <memory>
+#include "minecraft/mod/Mod.h"
 
 class ModFolderLoadTask : public QObject, public QRunnable
 {
