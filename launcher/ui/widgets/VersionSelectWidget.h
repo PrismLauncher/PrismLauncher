@@ -18,6 +18,7 @@
 #include <QWidget>
 #include <QSortFilterProxyModel>
 #include "BaseVersionList.h"
+#include "VersionListView.h"
 
 class VersionProxyModel;
 class VersionListView;
@@ -49,6 +50,7 @@ public:
     void setFilter(BaseVersionList::ModelRoles role, Filter *filter);
     void setEmptyString(QString emptyString);
     void setEmptyErrorString(QString emptyErrorString);
+    void setEmptyMode(VersionListView::EmptyMode mode);
     void setResizeOn(int column);
 
 signals:

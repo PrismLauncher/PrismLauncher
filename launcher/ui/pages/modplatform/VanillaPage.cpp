@@ -44,6 +44,7 @@
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "Filter.h"
 #include "InstanceCreationTask.h"
+#include "Version.h"
 
 VanillaPage::VanillaPage(NewInstanceDialog *dialog, QWidget *parent)
     : QWidget(parent), dialog(dialog), ui(new Ui::VanillaPage)
@@ -59,6 +60,15 @@ VanillaPage::VanillaPage(NewInstanceDialog *dialog, QWidget *parent)
     connect(ui->releaseFilter, &QCheckBox::stateChanged, this, &VanillaPage::filterChanged);
     connect(ui->experimentsFilter, &QCheckBox::stateChanged, this, &VanillaPage::filterChanged);
     connect(ui->refreshBtn, &QPushButton::clicked, this, &VanillaPage::refresh);
+
+    connect(ui->loaderVersionList, &VersionSelectWidget::selectedVersionChanged, this, &VanillaPage::setSelectedLoaderVersion);
+    connect(ui->noneFilter, &QRadioButton::toggled, this, &VanillaPage::loaderFilterChanged);
+    connect(ui->forgeFilter, &QRadioButton::toggled, this, &VanillaPage::loaderFilterChanged);
+    connect(ui->fabricFilter, &QRadioButton::toggled, this, &VanillaPage::loaderFilterChanged);
+    connect(ui->quiltFilter, &QRadioButton::toggled, this, &VanillaPage::loaderFilterChanged);
+    connect(ui->liteLoaderFilter, &QRadioButton::toggled, this, &VanillaPage::loaderFilterChanged);
+    connect(ui->loaderRefreshBtn, &QPushButton::clicked, this, &VanillaPage::loaderRefresh);
+
 }
 
 void VanillaPage::openedImpl()
@@ -80,6 +90,13 @@ void VanillaPage::refresh()
     ui->versionList->loadList();
 }
 
+void VanillaPage::loaderRefresh()
+{
+    if(ui->noneFilter->isChecked())
+        return;
+    ui->loaderVersionList->loadList();
+}
+
 void VanillaPage::filterChanged()
 {
     QStringList out;
@@ -97,6 +114,52 @@ void VanillaPage::filterChanged()
         out << "(experiment)";
     auto regexp = out.join('|');
     ui->versionList->setFilter(BaseVersionList::TypeRole, new RegexpFilter(regexp, false));
+}
+
+void VanillaPage::loaderFilterChanged()
+{
+    auto minecraftVersion = m_selectedVersion->descriptor();
+    if(ui->noneFilter->isChecked())
+    {
+        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA"); // empty list
+        ui->loaderVersionList->setEmptyString(tr("No mod loader is selected."));
+        ui->loaderVersionList->setEmptyMode(VersionListView::String);
+        return;
+    }
+    else if(ui->forgeFilter->isChecked())
+    {
+        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
+        m_selectedLoader = "net.minecraftforge";
+    }
+    else if(ui->fabricFilter->isChecked())
+    {
+        // FIXME: dirty hack because the launcher is unaware of Fabric's dependencies
+        if (Version(minecraftVersion) >= Version("1.14")) // Fabric/Quilt supported
+            ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "");
+        else // Fabric/Quilt unsupported
+            ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA"); // clear list
+        m_selectedLoader = "net.fabricmc.fabric-loader";
+    }
+    else if(ui->quiltFilter->isChecked())
+    {
+        // FIXME: dirty hack because the launcher is unaware of Quilt's dependencies (same as Fabric)
+        if (Version(minecraftVersion) >= Version("1.14")) // Fabric/Quilt supported
+            ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "");
+        else // Fabric/Quilt unsupported
+            ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA"); // clear list
+        m_selectedLoader = "org.quiltmc.quilt-loader";
+    }
+    else if(ui->liteLoaderFilter->isChecked())
+    {
+        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
+        m_selectedLoader = "com.mumfrey.liteloader";
+    }
+
+    auto vlist = APPLICATION->metadataIndex()->get(m_selectedLoader);
+    ui->loaderVersionList->initialize(vlist.get());
+    ui->loaderVersionList->selectRecommended();
+    suggestCurrent();
+    ui->loaderVersionList->setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
 }
 
 VanillaPage::~VanillaPage()
@@ -119,6 +182,16 @@ BaseVersionPtr VanillaPage::selectedVersion() const
     return m_selectedVersion;
 }
 
+BaseVersionPtr VanillaPage::selectedLoaderVersion() const
+{
+    return m_selectedLoaderVersion;
+}
+
+QString VanillaPage::selectedLoader() const
+{
+    return m_selectedLoader;
+}
+
 void VanillaPage::suggestCurrent()
 {
     if (!isOpened)
@@ -132,12 +205,27 @@ void VanillaPage::suggestCurrent()
         return;
     }
 
-    dialog->setSuggestedPack(m_selectedVersion->descriptor(), new InstanceCreationTask(m_selectedVersion));
+    // List is empty if either no mod loader is selected, or no versions are available
+    if(!ui->loaderVersionList->hasVersions())
+        dialog->setSuggestedPack(m_selectedVersion->descriptor(), new InstanceCreationTask(m_selectedVersion));
+    else
+    {
+        dialog->setSuggestedPack(m_selectedVersion->descriptor(),
+                                 new InstanceCreationTask(m_selectedVersion, m_selectedLoader,
+                                                          m_selectedLoaderVersion));
+    }
     dialog->setSuggestedIcon("default");
 }
 
 void VanillaPage::setSelectedVersion(BaseVersionPtr version)
 {
     m_selectedVersion = version;
+    suggestCurrent();
+    loaderFilterChanged();
+}
+
+void VanillaPage::setSelectedLoaderVersion(BaseVersionPtr version)
+{
+    m_selectedLoaderVersion = version;
     suggestCurrent();
 }
