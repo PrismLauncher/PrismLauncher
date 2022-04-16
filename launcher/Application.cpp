@@ -80,6 +80,7 @@
 #include <QStringList>
 #include <QDebug>
 #include <QStyleFactory>
+#include <QWindow>
 
 #include "InstanceList.h"
 
@@ -1265,6 +1266,12 @@ bool Application::kill(InstancePtr instance)
         return controller->abort();
     }
     return true;
+}
+
+void Application::closeCurrentWindow()
+{
+    if (focusWindow())
+        focusWindow()->close();
 }
 
 void Application::addRunningInstance()

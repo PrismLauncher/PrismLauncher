@@ -615,8 +615,7 @@ public:
         closeAct = new QAction(tr("Close &Window"), MainWindow);
         closeAct->setShortcut(QKeySequence::Close);
         closeAct->setStatusTip(tr("Close the current window"));
-        // FIXME: currently this always closes the main window, even if it is not currently the window in focus
-        connect(closeAct, &QAction::triggered, MainWindow, &MainWindow::close);
+        connect(closeAct, &QAction::triggered, APPLICATION, &Application::closeCurrentWindow);
 
         undoAct = new QAction(tr("&Undo"), MainWindow);
         undoAct->setShortcuts(QKeySequence::Undo);
