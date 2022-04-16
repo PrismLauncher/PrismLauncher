@@ -134,7 +134,7 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml)
 
     if(NOT Launcher_FORCE_BUNDLED_LIBS)
-        find_package(QuaZip-Qt5 REQUIRED)
+        find_package(QuaZip-Qt5 1.3)
     endif()
     if (NOT QuaZip-Qt5_FOUND)
         set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
@@ -276,6 +276,8 @@ if (FORCE_BUNDLED_QUAZIP)
     set(BUILD_SHARED_LIBS 0)  # link statically to avoid conflicts.
     set(QUAZIP_INSTALL 0)
     add_subdirectory(libraries/quazip) # zip manipulation library
+else()
+    message(STATUS "Using system QuaZip")
 endif()
 add_subdirectory(libraries/rainbow) # Qt extension for colors
 add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader
