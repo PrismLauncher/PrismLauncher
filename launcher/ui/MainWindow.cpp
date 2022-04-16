@@ -246,20 +246,12 @@ public:
 
     QMenuBar *menuBar = nullptr;
     QMenu *fileMenu;
-    QMenu *editMenu;
     QMenu *viewMenu;
     QMenu *profileMenu;
 
     QAction *actionCloseWindow;
 
-    QAction *actionUndo;
-    QAction *actionRedo;
-    QAction *actionCut;
-    QAction *actionCopy;
-    QAction *actionPaste;
-    QAction *actionSelectAll;
-    
-    QAction *actionWiki;
+    QAction *actionOpenWiki;
     QAction *actionNewsMenuBar;
 
     TranslatedToolbar mainToolBar;
@@ -508,18 +500,7 @@ public:
         fileMenu->addAction(actionDeleteInstance);
         fileMenu->addAction(actionCopyInstance);
         fileMenu->addSeparator();
-
-        // TODO: functionality for edit actions. They're intended to be used where you can type text, e.g. notes.
-        editMenu = menuBar->addMenu(tr("&Edit"));
-        editMenu->addAction(actionUndo);
-        editMenu->addAction(actionRedo);
-        editMenu->addSeparator();
-        editMenu->addAction(actionCut);
-        editMenu->addAction(actionCopy);
-        editMenu->addAction(actionPaste);
-        editMenu->addAction(actionSelectAll);
-        editMenu->addSeparator();
-        editMenu->addAction(actionSettings);
+        fileMenu->addAction(actionSettings);
 
         viewMenu = menuBar->addMenu(tr("&View"));
         viewMenu->addAction(actionCAT);
@@ -532,7 +513,7 @@ public:
 
         helpMenu = menuBar->addMenu(tr("&Help"));
         helpMenu->addAction(actionAbout);
-        helpMenu->addAction(actionWiki);
+        helpMenu->addAction(actionOpenWiki);
         helpMenu->addAction(actionNewsMenuBar);
         helpMenu->addSeparator();
         if (!BuildConfig.BUG_TRACKER_URL.isEmpty())
@@ -557,39 +538,9 @@ public:
         actionCloseWindow->setStatusTip(tr("Close the current window"));
         connect(actionCloseWindow, &QAction::triggered, APPLICATION, &Application::closeCurrentWindow);
 
-        actionUndo = new QAction(tr("&Undo"), MainWindow);
-        actionUndo->setShortcuts(QKeySequence::Undo);
-        actionUndo->setStatusTip(tr("Undo"));
-        actionUndo->setEnabled(false);
-
-        actionRedo = new QAction(tr("&Redo"), MainWindow);
-        actionRedo->setShortcuts(QKeySequence::Redo);
-        actionRedo->setStatusTip(tr("Redo"));
-        actionRedo->setEnabled(false);
-
-        actionCut = new QAction(tr("Cu&t"), MainWindow);
-        actionCut->setShortcuts(QKeySequence::Cut);
-        actionCut->setStatusTip(tr("Cut"));
-        actionCut->setEnabled(false);
-
-        actionCopy = new QAction(tr("&Copy"), MainWindow);
-        actionCopy->setShortcuts(QKeySequence::Copy);
-        actionCopy->setStatusTip(tr("Copy"));
-        actionCopy->setEnabled(false);
-
-        actionPaste = new QAction(tr("&Paste"), MainWindow);
-        actionPaste->setShortcuts(QKeySequence::Paste);
-        actionPaste->setStatusTip(tr("Paste"));
-        actionPaste->setEnabled(false);
-
-        actionSelectAll = new QAction(tr("Select &All"), MainWindow);
-        actionSelectAll->setShortcuts(QKeySequence::SelectAll);
-        actionSelectAll->setStatusTip(tr("Select all"));
-        actionSelectAll->setEnabled(false);
-
-        actionWiki = new QAction(tr("%1 He&lp").arg(BuildConfig.LAUNCHER_NAME), MainWindow);
-        actionWiki->setStatusTip(tr("Open the %1 wiki").arg(BuildConfig.LAUNCHER_NAME));
-        connect(actionWiki, &QAction::triggered, MainWindow, &MainWindow::on_actionOpenWiki_triggered);
+        actionOpenWiki = new QAction(tr("%1 He&lp").arg(BuildConfig.LAUNCHER_NAME), MainWindow);
+        actionOpenWiki->setStatusTip(tr("Open the %1 wiki").arg(BuildConfig.LAUNCHER_NAME));
+        connect(actionOpenWiki, &QAction::triggered, MainWindow, &MainWindow::on_actionOpenWiki_triggered);
 
         actionNewsMenuBar = new QAction(tr("&%1 &News").arg(BuildConfig.LAUNCHER_NAME), MainWindow);
         actionNewsMenuBar->setStatusTip(tr("Open the development blog to read more news about %1.").arg(BuildConfig.LAUNCHER_NAME));
