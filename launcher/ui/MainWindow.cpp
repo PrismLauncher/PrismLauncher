@@ -249,10 +249,10 @@ public:
     QMenu *viewMenu;
     QMenu *profileMenu;
 
-    QAction *actionCloseWindow;
+    TranslatedAction actionCloseWindow;
 
-    QAction *actionOpenWiki;
-    QAction *actionNewsMenuBar;
+    TranslatedAction actionOpenWiki;
+    TranslatedAction actionNewsMenuBar;
 
     TranslatedToolbar mainToolBar;
     TranslatedToolbar instanceToolBar;
@@ -473,11 +473,10 @@ public:
         MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
     }
 
-    void createMenuBar(MainWindow *MainWindow)
+    void createMenuBar(QMainWindow *MainWindow)
     {
         menuBar = new QMenuBar(MainWindow);
         menuBar->setVisible(APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
-        createMenuActions(MainWindow);
 
         fileMenu = menuBar->addMenu(tr("&File"));
         fileMenu->addAction(actionAddInstance);
@@ -533,18 +532,27 @@ public:
 
     void createMenuActions(MainWindow *MainWindow)
     {
-        actionCloseWindow = new QAction(tr("Close &Window"), MainWindow);
+        actionCloseWindow = TranslatedAction(MainWindow);
+        actionCloseWindow->setObjectName(QStringLiteral("actionCloseWindow"));
+        actionCloseWindow.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Close &Window"));
+        actionCloseWindow.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Close the current window"));
         actionCloseWindow->setShortcut(QKeySequence::Close);
-        actionCloseWindow->setStatusTip(tr("Close the current window"));
         connect(actionCloseWindow, &QAction::triggered, APPLICATION, &Application::closeCurrentWindow);
+        all_actions.append(&actionCloseWindow);
 
-        actionOpenWiki = new QAction(tr("%1 He&lp").arg(BuildConfig.LAUNCHER_NAME), MainWindow);
-        actionOpenWiki->setStatusTip(tr("Open the %1 wiki").arg(BuildConfig.LAUNCHER_NAME));
+        actionOpenWiki = TranslatedAction(MainWindow);
+        actionOpenWiki->setObjectName(QStringLiteral("actionOpenWiki"));
+        actionOpenWiki.setTextId(QT_TRANSLATE_NOOP("MainWindow", "%1 He&lp"));
+        actionOpenWiki.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the %1 wiki"));
         connect(actionOpenWiki, &QAction::triggered, MainWindow, &MainWindow::on_actionOpenWiki_triggered);
+        all_actions.append(&actionOpenWiki);
 
-        actionNewsMenuBar = new QAction(tr("&%1 &News").arg(BuildConfig.LAUNCHER_NAME), MainWindow);
-        actionNewsMenuBar->setStatusTip(tr("Open the development blog to read more news about %1.").arg(BuildConfig.LAUNCHER_NAME));
+        actionNewsMenuBar = TranslatedAction(MainWindow);
+        actionNewsMenuBar->setObjectName(QStringLiteral("actionNewsMenuBar"));
+        actionNewsMenuBar.setTextId(QT_TRANSLATE_NOOP("MainWindow", "%1 &News"));
+        actionNewsMenuBar.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the %1 wiki"));
         connect(actionNewsMenuBar, &QAction::triggered, MainWindow, &MainWindow::on_actionMoreNews_triggered);
+        all_actions.append(&actionNewsMenuBar);
     }
 
     // "Instance actions" are actions that require an instance to be selected (i.e. "new instance" is not here)
@@ -790,9 +798,10 @@ public:
 #endif
 
         createMainToolbarActions(MainWindow);
+        createMenuActions(dynamic_cast<class MainWindow *>(MainWindow));
         createInstanceActions(MainWindow);
 
-        createMenuBar(dynamic_cast<class MainWindow *>(MainWindow));
+        createMenuBar(MainWindow);
 
         createMainToolbar(MainWindow);
 
