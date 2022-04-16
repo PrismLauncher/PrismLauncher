@@ -49,7 +49,7 @@ class FlameModPage : public ModPage {
     inline auto displayName() const -> QString override { return "CurseForge"; }
     inline auto icon() const -> QIcon override { return APPLICATION->getThemedIcon("flame"); }
     inline auto id() const -> QString override { return "curseforge"; }
-    inline auto helpPage() const -> QString override { return "Flame-platform"; }
+    inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
     inline auto debugName() const -> QString override { return "Flame"; }
     inline auto metaEntryBase() const -> QString override { return "FlameMods"; };

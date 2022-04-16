@@ -49,7 +49,7 @@ class ModrinthPage : public ModPage {
     inline auto displayName() const -> QString override { return "Modrinth"; }
     inline auto icon() const -> QIcon override { return APPLICATION->getThemedIcon("modrinth"); }
     inline auto id() const -> QString override { return "modrinth"; }
-    inline auto helpPage() const -> QString override { return "Modrinth-platform"; }
+    inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
     inline auto debugName() const -> QString override { return "Modrinth"; }
     inline auto metaEntryBase() const -> QString override { return "ModrinthPacks"; };
