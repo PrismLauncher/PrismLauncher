@@ -7,6 +7,7 @@
 #include "modplatform/ModIndex.h"
 #include "ui/pages/BasePage.h"
 #include "ui/pages/modplatform/ModModel.h"
+#include "ui/widgets/ModFilterWidget.h"
 
 class ModDownloadDialog;
 
@@ -39,9 +40,10 @@ class ModPage : public QWidget, public BasePage {
     virtual auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const -> bool = 0;
 
     auto apiProvider() const -> const ModAPI* { return api.get(); };
+    auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
 
     auto getCurrent() -> ModPlatform::IndexedPack& { return current; }
-    void updateModVersions();
+    void updateModVersions(int prev_count = -1);
 
     void openedImpl() override;
     auto eventFilter(QObject* watched, QEvent* event) -> bool override;
@@ -52,6 +54,7 @@ class ModPage : public QWidget, public BasePage {
     void updateSelectionButton();
 
    protected slots:
+    virtual void filterMods();
     void triggerSearch();
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);
@@ -60,6 +63,10 @@ class ModPage : public QWidget, public BasePage {
    protected:
     Ui::ModPage* ui = nullptr;
     ModDownloadDialog* dialog = nullptr;
+
+    ModFilterWidget filter_widget;
+    std::shared_ptr<ModFilterWidget::Filter> m_filter;
+
     ModPlatform::ListModel* listModel = nullptr;
     ModPlatform::IndexedPack current;
 

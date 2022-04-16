@@ -2,21 +2,39 @@
 #include "ui_ModPage.h"
 
 #include <QKeyEvent>
+#include <memory>
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
-    : QWidget(dialog), m_instance(instance), ui(new Ui::ModPage), dialog(dialog), api(api)
+    : QWidget(dialog)
+    , m_instance(instance)
+    , ui(new Ui::ModPage)
+    , dialog(dialog)
+    , filter_widget(static_cast<MinecraftInstance*>(instance)->getPackProfile()->getComponentVersion("net.minecraft"), this)
+    , api(api)
 {
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &ModPage::triggerSearch);
+    connect(ui->modFilterButton, &QPushButton::clicked, this, &ModPage::filterMods);
     ui->searchEdit->installEventFilter(this);
 
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
+    ui->gridLayout_3->addWidget(&filter_widget, 0, 0, 1, ui->gridLayout_3->columnCount());
+
+    filter_widget.setInstance(static_cast<MinecraftInstance*>(m_instance));
+    m_filter = filter_widget.getFilter();
+
+    connect(&filter_widget, &ModFilterWidget::filterChanged, this, [&]{
+        ui->searchButton->setStyleSheet("text-decoration: underline");
+    });
+    connect(&filter_widget, &ModFilterWidget::filterUnchanged, this, [&]{
+        ui->searchButton->setStyleSheet("text-decoration: none");
+    });
 }
 
 ModPage::~ModPage()
@@ -49,9 +67,24 @@ auto ModPage::eventFilter(QObject* watched, QEvent* event) -> bool
 
 /******** Callbacks to events in the UI (set up in the derived classes) ********/
 
+void ModPage::filterMods()
+{
+    filter_widget.setHidden(!filter_widget.isHidden());
+}
+
 void ModPage::triggerSearch()
 {
-    listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
+    auto changed = filter_widget.changed();
+    m_filter = filter_widget.getFilter();
+    
+    if(changed){
+        ui->packView->clearSelection();
+        ui->packDescription->clear();
+        ui->versionSelectionBox->clear();
+        updateSelectionButton();
+    }
+
+    listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex(), changed);
 }
 
 void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
@@ -131,7 +164,7 @@ void ModPage::retranslate()
    ui->retranslateUi(this);
 }
 
-void ModPage::updateModVersions()
+void ModPage::updateModVersions(int prev_count)
 {
     auto packProfile = (dynamic_cast<MinecraftInstance*>(m_instance))->getPackProfile();
 
@@ -141,15 +174,22 @@ void ModPage::updateModVersions()
 
     for (int i = 0; i < current.versions.size(); i++) {
         auto version = current.versions[i];
-        //NOTE: Flame doesn't care about loaderString, so passing it changes nothing.
-        if (!validateVersion(version, mcVersion, loaderString)) {
-            continue;
+        bool valid = false;
+        for(auto& mcVer : m_filter->versions){
+            //NOTE: Flame doesn't care about loaderString, so passing it changes nothing.
+            if (validateVersion(version, mcVer.toString(), loaderString)) {
+                valid = true;
+                break;
+            }
         }
-        ui->versionSelectionBox->addItem(version.version, QVariant(i));
+        if(valid || m_filter->versions.size() == 0)
+            ui->versionSelectionBox->addItem(version.version, QVariant(i));
     }
-    if (ui->versionSelectionBox->count() == 0) { ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1)); }
+    if (ui->versionSelectionBox->count() == 0 && prev_count != 0) { 
+        ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1)); 
+        ui->modSelectionButton->setText(tr("Cannot select invalid version :("));
+    }
 
-    ui->modSelectionButton->setText(tr("Cannot select invalid version :("));
     updateSelectionButton();
 }
 

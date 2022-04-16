@@ -7,6 +7,7 @@
 #include "net/NetJob.h"
 
 class ModPage;
+class Version;
 
 namespace ModPlatform {
 
@@ -33,7 +34,8 @@ class ListModel : public QAbstractListModel {
 
     /* Ask the API for more information */
     void fetchMore(const QModelIndex& parent) override;
-    void searchWithTerm(const QString& term, const int sort);
+    void refresh();
+    void searchWithTerm(const QString& term, const int sort, const bool filter_changed);
     void requestModVersions(const ModPlatform::IndexedPack& current);
 
     virtual void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
@@ -62,7 +64,7 @@ class ListModel : public QAbstractListModel {
 
     void requestLogo(QString file, QString url);
 
-    inline auto getMineVersions() const -> QList<QString>;
+    inline auto getMineVersions() const -> std::list<Version>;
 
    protected:
     ModPage* m_parent;

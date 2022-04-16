@@ -3,6 +3,8 @@
 #include <QString>
 #include <QList>
 
+#include "Version.h"
+
 namespace ModPlatform {
 class ListModel;
 }
@@ -22,7 +24,7 @@ class ModAPI {
         QString search;
         QString sorting;
         ModLoaderType mod_loader;
-        QString version;
+        std::list<Version> versions;
     };
 
     virtual void searchMods(CallerType* caller, SearchArgs&& args) const = 0;
@@ -30,7 +32,7 @@ class ModAPI {
 
     struct VersionSearchArgs {
         QString addonId;
-        QList<QString> mcVersions;
+        std::list<Version> mcVersions;
         ModLoaderType loader;
     };
 
@@ -52,5 +54,16 @@ class ModAPI {
                 return "quilt";
         }
         return "";
+    }
+
+   protected:
+    inline auto getGameVersionsString(std::list<Version> mcVersions) const -> QString
+    {
+        QString s;
+        for(auto& ver : mcVersions){
+            s += QString("%1,").arg(ver.toString());
+        }
+        s.remove(s.length() - 1, 1); //remove last comma
+        return s;
     }
 };

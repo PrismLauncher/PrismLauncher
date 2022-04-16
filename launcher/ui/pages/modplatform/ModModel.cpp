@@ -72,14 +72,11 @@ void ListModel::performPaginatedSearch()
     auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
 
     m_parent->apiProvider()->searchMods(this,
-            { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], profile->getModLoader(), getMineVersions().at(0) });
+            { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], profile->getModLoader(), getMineVersions() });
 }
 
-void ListModel::searchWithTerm(const QString& term, const int sort)
+void ListModel::refresh()
 {
-    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort) { return; }
-    currentSearchTerm = term;
-    currentSort = sort;
     if (jobPtr) {
         jobPtr->abort();
         searchState = ResetRequested;
@@ -92,6 +89,20 @@ void ListModel::searchWithTerm(const QString& term, const int sort)
     }
     nextSearchOffset = 0;
     performPaginatedSearch();
+}
+
+void ListModel::searchWithTerm(const QString& term, const int sort, const bool filter_changed)
+{
+    if (currentSearchTerm == term 
+            && currentSearchTerm.isNull() == term.isNull() 
+            && currentSort == sort 
+            && !filter_changed) 
+        { return; }
+
+    currentSearchTerm = term;
+    currentSort = sort;
+
+    refresh();
 }
 
 void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
@@ -223,9 +234,7 @@ void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId)
 
 /******** Helpers ********/
 
-auto ModPlatform::ListModel::getMineVersions() const -> QList<QString>
+auto ModPlatform::ListModel::getMineVersions() const -> std::list<Version>
 {
-    return { (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))
-                 ->getPackProfile()
-                 ->getComponentVersion("net.minecraft") };
+    return m_parent->getFilter()->versions;
 }

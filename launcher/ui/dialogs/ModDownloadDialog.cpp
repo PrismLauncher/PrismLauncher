@@ -22,7 +22,9 @@ ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel> &mods
     : QDialog(parent), mods(mods), m_instance(instance)
 {
     setObjectName(QStringLiteral("ModDownloadDialog"));
-    resize(400, 347);
+
+    resize(std::max(0.5*parent->width(), 400.0), std::max(0.75*parent->height(), 400.0));
+
     m_verticalLayout = new QVBoxLayout(this);
     m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
@@ -80,7 +82,7 @@ void ModDownloadDialog::confirm()
         tr("Confirm mods to download")
     );
 
-    for(auto task : keys){
+    for(auto& task : keys){
         confirm_dialog->appendMod(task, modTask.find(task).value()->getFilename());
     }
 
