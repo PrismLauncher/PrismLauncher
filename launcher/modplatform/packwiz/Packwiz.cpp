@@ -9,13 +9,15 @@
 #include "modplatform/ModIndex.h"
 #include "minecraft/mod/Mod.h"
 
+namespace Packwiz {
+
 // Helpers
 static inline QString indexFileName(QString const& mod_name)
 {
     return QString("%1.toml").arg(mod_name);
 }
 
-auto Packwiz::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod
+auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod
 {
     Mod mod;
 
@@ -33,7 +35,7 @@ auto Packwiz::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pac
     return mod;
 }
 
-auto Packwiz::createModFormat(QDir& index_dir, ::Mod& internal_mod) -> Mod
+auto V1::createModFormat(QDir& index_dir, ::Mod& internal_mod) -> Mod
 {
     auto mod_name = internal_mod.name();
 
@@ -44,7 +46,7 @@ auto Packwiz::createModFormat(QDir& index_dir, ::Mod& internal_mod) -> Mod
 
     // Manually construct packwiz mod
     mod.name = internal_mod.name();
-    mod.filename = internal_mod.filename().fileName();
+    mod.filename = internal_mod.fileinfo().fileName();
 
     // TODO: Have a mechanism for telling the UI subsystem that we want to gather user information
     // (i.e. which mod provider we want to use). Maybe an object parameter with a signal for that?
@@ -52,7 +54,7 @@ auto Packwiz::createModFormat(QDir& index_dir, ::Mod& internal_mod) -> Mod
     return mod;
 }
 
-void Packwiz::updateModIndex(QDir& index_dir, Mod& mod)
+void V1::updateModIndex(QDir& index_dir, Mod& mod)
 {
     if(!mod.isValid()){
         qCritical() << QString("Tried to update metadata of an invalid mod!");
@@ -94,7 +96,7 @@ void Packwiz::updateModIndex(QDir& index_dir, Mod& mod)
     }
 }
 
-void Packwiz::deleteModIndex(QDir& index_dir, QString& mod_name)
+void V1::deleteModIndex(QDir& index_dir, QString& mod_name)
 {
     QFile index_file(index_dir.absoluteFilePath(indexFileName(mod_name)));
 
@@ -108,7 +110,7 @@ void Packwiz::deleteModIndex(QDir& index_dir, QString& mod_name)
     }
 }
 
-auto Packwiz::getIndexForMod(QDir& index_dir, QString& mod_name) -> Mod
+auto V1::getIndexForMod(QDir& index_dir, QString& mod_name) -> Mod
 {
     Mod mod;
 
@@ -201,3 +203,5 @@ auto Packwiz::getIndexForMod(QDir& index_dir, QString& mod_name) -> Mod
 
     return mod;
 }
+
+} // namespace Packwiz

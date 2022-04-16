@@ -180,7 +180,7 @@ void ModFolderModel::resolveMod(Mod& m)
         return;
     }
 
-    auto task = new LocalModParseTask(nextResolutionTicket, m.type(), m.filename());
+    auto task = new LocalModParseTask(nextResolutionTicket, m.type(), m.fileinfo());
     auto result = task->result();
     result->id = m.internal_id();
     activeTickets.insert(nextResolutionTicket, result);

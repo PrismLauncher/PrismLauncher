@@ -3,7 +3,7 @@
 #include <toml.h>
 
 #include "FileSystem.h"
-#include "modplatform/packwiz/Packwiz.h"
+#include "minecraft/mod/MetadataHandler.h"
 
 LocalModUpdateTask::LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack& mod, ModPlatform::IndexedVersion& mod_version)
     : m_index_dir(index_dir), m_mod(mod), m_mod_version(mod_version)
@@ -18,8 +18,8 @@ void LocalModUpdateTask::executeTask()
 {
     setStatus(tr("Updating index for mod:\n%1").arg(m_mod.name));
 
-    auto pw_mod = Packwiz::createModFormat(m_index_dir, m_mod, m_mod_version);
-    Packwiz::updateModIndex(m_index_dir, pw_mod);
+    auto pw_mod = Metadata::create(m_index_dir, m_mod, m_mod_version);
+    Metadata::update(m_index_dir, pw_mod);
 
     emitSucceeded();
 }

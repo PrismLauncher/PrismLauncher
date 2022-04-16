@@ -21,7 +21,7 @@
 #include <memory>
 
 #include "ModDetails.h"
-#include "modplatform/packwiz/Packwiz.h"
+#include "minecraft/mod/MetadataHandler.h"
 
 class Mod
 {
@@ -37,9 +37,9 @@ public:
 
     Mod() = default;
     Mod(const QFileInfo &file);
-    explicit Mod(const QDir& mods_dir, const Packwiz::Mod& metadata);
+    explicit Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata);
 
-    QFileInfo filename()        const { return m_file; }
+    QFileInfo fileinfo()        const { return m_file; }
     QDateTime dateTimeChanged() const { return m_changedDateTime; }
     QString   internal_id()     const { return m_internal_id; }
     ModType   type()            const { return m_type; }
@@ -82,6 +82,7 @@ protected:
     QDateTime m_changedDateTime;
 
     QString m_internal_id;
+    /* Name as reported via the file name */
     QString m_name;
     ModType m_type = MOD_UNKNOWN;
     bool m_from_metadata = false;

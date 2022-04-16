@@ -20,6 +20,7 @@
 
 #include <FileSystem.h>
 #include <QDebug>
+#include "MetadataHandler.h"
 
 namespace {
 
@@ -33,7 +34,7 @@ Mod::Mod(const QFileInfo& file)
     m_changedDateTime = file.lastModified();
 }
 
-Mod::Mod(const QDir& mods_dir, const Packwiz::Mod& metadata)
+Mod::Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata)
     : m_file(mods_dir.absoluteFilePath(metadata.filename))
     // It is weird, but name is not reliable for comparing with the JAR files name
     // FIXME: Maybe use hash when implemented?
@@ -121,8 +122,7 @@ bool Mod::enable(bool value)
 
 bool Mod::destroy(QDir& index_dir)
 {
-    // Delete metadata
-    Packwiz::deleteModIndex(index_dir, m_name);
+    Metadata::remove(index_dir, m_name);
 
     m_type = MOD_UNKNOWN;
     return FS::deletePath(m_file.filePath());

@@ -11,7 +11,9 @@ class QDir;
 // Mod from launcher/minecraft/mod/Mod.h
 class Mod;
 
-class Packwiz {
+namespace Packwiz {
+
+class V1 {
    public:
     struct Mod {
         QString name {};
@@ -58,3 +60,5 @@ class Packwiz {
      * */
     static auto getIndexForMod(QDir& index_dir, QString& mod_name) -> Mod;
 };
+
+} // namespace Packwiz

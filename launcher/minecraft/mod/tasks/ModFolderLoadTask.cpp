@@ -1,7 +1,7 @@
 #include "ModFolderLoadTask.h"
 #include <QDebug>
 
-#include "modplatform/packwiz/Packwiz.h"
+#include "minecraft/mod/MetadataHandler.h"
 
 ModFolderLoadTask::ModFolderLoadTask(QDir& mods_dir, QDir& index_dir) 
     : m_mods_dir(mods_dir), m_index_dir(index_dir), m_result(new Result())
@@ -17,7 +17,7 @@ void ModFolderLoadTask::run()
             continue;
 
         entry.chop(5);  // Remove .toml at the end
-        Mod mod(m_mods_dir, Packwiz::getIndexForMod(m_index_dir, entry));
+        Mod mod(m_mods_dir, Metadata::get(m_index_dir, entry));
         m_result->mods[mod.internal_id()] = mod;
     }
 
