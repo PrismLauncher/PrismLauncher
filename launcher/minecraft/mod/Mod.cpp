@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "Mod.h"
+
 #include <QDir>
 #include <QString>
 
-#include "Mod.h"
-#include <QDebug>
 #include <FileSystem.h>
+#include <QDebug>
 
 namespace {
 
@@ -26,8 +27,7 @@ ModDetails invalidDetails;
 
 }
 
-
-Mod::Mod(const QFileInfo &file)
+Mod::Mod(const QFileInfo& file)
 {
     repath(file);
     m_changedDateTime = file.lastModified();
@@ -37,13 +37,12 @@ Mod::Mod(const QDir& mods_dir, const Packwiz::Mod& metadata)
     : m_file(mods_dir.absoluteFilePath(metadata.filename))
     // It is weird, but name is not reliable for comparing with the JAR files name
     // FIXME: Maybe use hash when implemented?
-    , m_mmc_id(metadata.filename)
+    , m_internal_id(metadata.filename)
     , m_name(metadata.name)
 {
-    if(m_file.isDir()){
+    if (m_file.isDir()) {
         m_type = MOD_FOLDER;
-    }
-    else{
+    } else {
         if (metadata.filename.endsWith(".zip") || metadata.filename.endsWith(".jar"))
             m_type = MOD_ZIPFILE;
         else if (metadata.filename.endsWith(".litemod"))
@@ -57,43 +56,32 @@ Mod::Mod(const QDir& mods_dir, const Packwiz::Mod& metadata)
     m_changedDateTime = m_file.lastModified();
 }
 
-void Mod::repath(const QFileInfo &file)
+void Mod::repath(const QFileInfo& file)
 {
     m_file = file;
     QString name_base = file.fileName();
 
     m_type = Mod::MOD_UNKNOWN;
 
-    m_mmc_id = name_base;
+    m_internal_id = name_base;
 
-    if (m_file.isDir())
-    {
+    if (m_file.isDir()) {
         m_type = MOD_FOLDER;
         m_name = name_base;
-    }
-    else if (m_file.isFile())
-    {
-        if (name_base.endsWith(".disabled"))
-        {
+    } else if (m_file.isFile()) {
+        if (name_base.endsWith(".disabled")) {
             m_enabled = false;
             name_base.chop(9);
-        }
-        else
-        {
+        } else {
             m_enabled = true;
         }
-        if (name_base.endsWith(".zip") || name_base.endsWith(".jar"))
-        {
+        if (name_base.endsWith(".zip") || name_base.endsWith(".jar")) {
             m_type = MOD_ZIPFILE;
             name_base.chop(4);
-        }
-        else if (name_base.endsWith(".litemod"))
-        {
+        } else if (name_base.endsWith(".litemod")) {
             m_type = MOD_LITEMOD;
             name_base.chop(8);
-        }
-        else
-        {
+        } else {
             m_type = MOD_SINGLEFILE;
         }
         m_name = name_base;
@@ -109,23 +97,22 @@ bool Mod::enable(bool value)
         return false;
 
     QString path = m_file.absoluteFilePath();
-    if (value)
-    {
-        QFile foo(path);
+    QFile file(path);
+    if (value) {
         if (!path.endsWith(".disabled"))
             return false;
         path.chop(9);
-        if (!foo.rename(path))
+
+        if (!file.rename(path))
             return false;
-    }
-    else
-    {
-        QFile foo(path);
+    } else {
         path += ".disabled";
-        if (!foo.rename(path))
+        
+        if (!file.rename(path))
             return false;
     }
-    if(!fromMetadata())
+
+    if (!fromMetadata())
         repath(QFileInfo(path));
 
     m_enabled = value;
@@ -141,27 +128,23 @@ bool Mod::destroy(QDir& index_dir)
     return FS::deletePath(m_file.filePath());
 }
 
-
-const ModDetails & Mod::details() const
+const ModDetails& Mod::details() const
 {
-    if(!m_localDetails)
-        return invalidDetails;
-    return *m_localDetails;
-}
-
-
-QString Mod::version() const
-{
-    return details().version;
+    return m_localDetails ? *m_localDetails : invalidDetails;
 }
 
 QString Mod::name() const
 {
-    auto & d = details();
-    if(!d.name.isEmpty()) {
-        return d.name;
+    auto d_name = details().name;
+    if (!d_name.isEmpty()) {
+        return d_name;
     }
     return m_name;
+}
+
+QString Mod::version() const
+{
+    return details().version;
 }
 
 QString Mod::homeurl() const

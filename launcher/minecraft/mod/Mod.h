@@ -41,7 +41,7 @@ public:
 
     QFileInfo filename()        const { return m_file; }
     QDateTime dateTimeChanged() const { return m_changedDateTime; }
-    QString   mmc_id()          const { return m_mmc_id; }
+    QString   internal_id()     const { return m_internal_id; }
     ModType   type()            const { return m_type; }
     bool      fromMetadata()    const { return m_from_metadata; }
     bool      enabled()         const { return m_enabled; }
@@ -81,7 +81,7 @@ protected:
     QFileInfo m_file;
     QDateTime m_changedDateTime;
 
-    QString m_mmc_id;
+    QString m_internal_id;
     QString m_name;
     ModType m_type = MOD_UNKNOWN;
     bool m_from_metadata = false;

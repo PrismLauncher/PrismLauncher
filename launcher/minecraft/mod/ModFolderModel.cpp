@@ -159,7 +159,7 @@ void ModFolderModel::finishUpdate()
         modsIndex.clear();
         int idx = 0;
         for(auto & mod: mods) {
-            modsIndex[mod.mmc_id()] = idx;
+            modsIndex[mod.internal_id()] = idx;
             idx++;
         }
     }
@@ -182,7 +182,7 @@ void ModFolderModel::resolveMod(Mod& m)
 
     auto task = new LocalModParseTask(nextResolutionTicket, m.type(), m.filename());
     auto result = task->result();
-    result->id = m.mmc_id();
+    result->id = m.internal_id();
     activeTickets.insert(nextResolutionTicket, result);
     m.setResolving(true, nextResolutionTicket);
     nextResolutionTicket++;
@@ -388,7 +388,7 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
         }
 
     case Qt::ToolTipRole:
-        return mods[row].mmc_id();
+        return mods[row].internal_id();
 
     case Qt::CheckStateRole:
         switch (column)
@@ -443,11 +443,11 @@ bool ModFolderModel::setModStatus(int row, ModFolderModel::ModStatusAction actio
     }
 
     // preserve the row, but change its ID
-    auto oldId = mod.mmc_id();
+    auto oldId = mod.internal_id();
     if(!mod.enable(!mod.enabled())) {
         return false;
     }
-    auto newId = mod.mmc_id();
+    auto newId = mod.internal_id();
     if(modsIndex.contains(newId)) {
         // NOTE: this could handle a corner case, where we are overwriting a file, because the same 'mod' exists both enabled and disabled
         // But is it necessary?
