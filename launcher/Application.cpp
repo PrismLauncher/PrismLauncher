@@ -316,6 +316,26 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     QString origcwdPath = QDir::currentPath();
     QString binPath = applicationDirPath();
+
+    {
+        // Root path is used for updates and portable data
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
+        QDir foo(FS::PathCombine(binPath, "..")); // typically portable-root or /usr
+        m_rootPath = foo.absolutePath();
+#elif defined(Q_OS_WIN32)
+        m_rootPath = binPath;
+#elif defined(Q_OS_MAC)
+        QDir foo(FS::PathCombine(binPath, "../.."));
+        m_rootPath = foo.absolutePath();
+        // on macOS, touch the root to force Finder to reload the .app metadata (and fix any icon change issues)
+        FS::updateTimestamp(m_rootPath);
+#endif
+
+#ifdef LAUNCHER_JARS_LOCATION
+        m_jarsPath = TOSTRING(LAUNCHER_JARS_LOCATION);
+#endif
+    }
+
     QString adjustedBy;
     QString dataPath;
     // change folder
@@ -324,15 +344,14 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     {
         // the dir param. it makes multimc data path point to whatever the user specified
         // on command line
-        adjustedBy += "Command line " + dirParam;
+        adjustedBy = "Command line";
         dataPath = dirParam;
     }
     else
     {
-#if !defined(LAUNCHER_PORTABLE) || defined(Q_OS_MAC)
         QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
         dataPath = foo.absolutePath();
-        adjustedBy += dataPath;
+        adjustedBy = "Persistent data path";
 
 #ifdef Q_OS_LINUX
         // TODO: this should be removed in a future version
@@ -340,12 +359,15 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         QDir bar(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation), "polymc"));
         if (bar.exists()) {
             dataPath = bar.absolutePath();
-            adjustedBy += "Legacy data path " + dataPath;
+            adjustedBy = "Legacy data path";
         }
 #endif
-#else
-        dataPath = applicationDirPath();
-        adjustedBy += "Fallback to binary path " + dataPath;
+
+#ifndef Q_OS_MACOS
+        if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
+            dataPath = m_rootPath;
+            adjustedBy = "Portable data path";
+        }
 #endif
     }
 
@@ -535,24 +557,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         qDebug() << "<> Log initialized.";
     }
 
-    // Set up paths
     {
-        // Root path is used for updates.
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-        QDir foo(FS::PathCombine(binPath, ".."));
-        m_rootPath = foo.absolutePath();
-#elif defined(Q_OS_WIN32)
-        m_rootPath = binPath;
-#elif defined(Q_OS_MAC)
-        QDir foo(FS::PathCombine(binPath, "../.."));
-        m_rootPath = foo.absolutePath();
-        // on macOS, touch the root to force Finder to reload the .app metadata (and fix any icon change issues)
-        FS::updateTimestamp(m_rootPath);
-#endif
-
-#ifdef LAUNCHER_JARS_LOCATION
-        m_jarsPath = TOSTRING(LAUNCHER_JARS_LOCATION);
-#endif
 
         qDebug() << BuildConfig.LAUNCHER_DISPLAYNAME << ", (c) 2013-2021 " << BuildConfig.LAUNCHER_COPYRIGHT;
         qDebug() << "Version                    : " << BuildConfig.printableVersionString();

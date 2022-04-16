@@ -17,14 +17,6 @@ jobs:
 
           - os: ubuntu-20.04
 
-          - os: ubuntu-20.04
-            portable: true
-
-          - os: ubuntu-20.04
-            qt_version: 5.15.2
-            qt_host: linux
-            app_image: true
-
           - os: windows-2022
             name: "Windows-i686"
             msystem: mingw32
@@ -32,16 +24,6 @@ jobs:
           - os: windows-2022
             name: "Windows-x86_64"
             msystem: mingw64
-
-          - os: windows-2022
-            name: "Windows-i686-portable"
-            msystem: mingw32
-            portable: true 
-
-          - os: windows-2022
-            name: "Windows-x86_64-portable"
-            msystem: mingw64
-            portable: true 
 
           - os: macos-11
             qt_version: 5.12.12
@@ -53,9 +35,14 @@ jobs:
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macosx_deployment_target }}
       INSTALL_DIR: "install"
+      INSTALL_PORTABLE_DIR: "install-portable"
+      INSTALL_APPIMAGE_DIR: "install-appdir"
       BUILD_DIR: "build"
 
     steps:
+      ##
+      # PREPARE
+      ##
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -87,16 +74,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Cache Qt
-        if: runner.os != 'Windows'
+      - name: Cache Qt (macOS)
+        if: runner.os == 'macOS'
         id: cache-qt
         uses: actions/cache@v3
         with:
           path: "${{ github.workspace }}/Qt/"
           key: ${{ runner.os }}-${{ matrix.qt_version }}-${{ matrix.qt_arch }}-qt_cache
 
-      - name: Install Qt
-        if: runner.os != 'Linux' && runner.os != 'Windows' || matrix.app_image == true
+      - name: Install Qt (macOS)
+        if: runner.os == 'macOS'
         uses: jurplel/install-qt-action@v2
         with:
           version: ${{ matrix.qt_version }}
@@ -105,8 +92,8 @@ jobs:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           dir: "${{ github.workspace }}/Qt/"
 
-      - name: Install System Qt on Linux
-        if: runner.os == 'Linux' && matrix.app_image != true
+      - name: Install Qt (Linux)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get -y update
           sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
@@ -115,174 +102,169 @@ jobs:
         if: runner.os != 'Windows'
         uses: urkle/action-get-ninja@v1
 
-      - name: Download linuxdeploy family for AppImage on Linux
-        if: matrix.app_image == true
+      - name: Prepare AppImage (Linux)
+        if: runner.os == 'Linux'
         run: |
           wget "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
 
-      - name: Download JREs for AppImage on Linux
-        if: matrix.app_image == true
-        shell: bash
-        run: |
           ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
 
-      - name: Configure CMake
-        if: runner.os != 'Linux' && runner.os != 'Windows'
+      ##
+      # CONFIGURE
+      ##
+
+      - name: Configure CMake (macOS)
+        if: runner.os == 'macOS'
         run: |
           cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -G Ninja
 
-      - name: Configure CMake on Windows 
-        if: runner.os == 'Windows' && matrix.portable != true
+      - name: Configure CMake (Windows)
+        if: runner.os == 'Windows'
         shell: msys2 {0}
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_PORTABLE=OFF -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -G Ninja
 
-      - name: Configure CMake on Windows portable 
-        if: runner.os == 'Windows' && matrix.portable == true
-        shell: msys2 {0}
+      - name: Configure CMake (Linux)
+        if: runner.os == 'Linux'
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -G Ninja 
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -G Ninja 
 
-      - name: Configure CMake on Linux
-        if: runner.os == 'Linux' && matrix.portable != true
-        run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DLauncher_PORTABLE=OFF -DENABLE_LTO=ON -G Ninja
-
-      - name: Configure CMake on Linux Portable 
-        if: runner.os == 'Linux' && matrix.portable == true
-        run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -G Ninja
+      ##
+      # BUILD
+      ##
 
       - name: Build
         if: runner.os != 'Windows'
         run: |
           cmake --build ${{ env.BUILD_DIR }}
 
-      - name: Build on Windows
+      - name: Build (Windows)
         if: runner.os == 'Windows'
         shell: msys2 {0}
         run: |
           cmake --build ${{ env.BUILD_DIR }}
 
-      - name: Install
-        if: runner.os != 'Linux' && runner.os != 'Windows'
+      ##
+      # PACKAGE BUILDS
+      ##
+
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
         run: |
           cmake --install ${{ env.BUILD_DIR }}
 
-      - name: Install on Windows
+          cd ${{ env.INSTALL_DIR }}
+          chmod +x "PolyMC.app/Contents/MacOS/polymc"
+          tar -czf ../PolyMC.tar.gz *
+
+      - name: Package (Windows)
         if: runner.os == 'Windows'
         shell: msys2 {0}
         run: |
           cmake --install ${{ env.BUILD_DIR }}
 
-      - name: Install on Linux
-        if: runner.os == 'Linux' && matrix.portable != true
-        run: |
-          DESTDIR=${{ env.INSTALL_DIR }} cmake --install ${{ env.BUILD_DIR }}
+          cd ${{ env.INSTALL_DIR }}
+          if [ "${{ matrix.msystem }}" == "mingw32" ]; then
+            cp /mingw32/bin/libcrypto-1_1.dll /mingw32/bin/libssl-1_1.dll ./
+          elif [ "${{ matrix.msystem }}" == "mingw64" ]; then
+            cp /mingw64/bin/libcrypto-1_1-x64.dll /mingw64/bin/libssl-1_1-x64.dll ./
+          fi
 
-      - name: Install on Linux portable
-        if: runner.os == 'Linux' && matrix.portable == true
+      - name: Package (Windows, portable)
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
         run: |
-          cmake --install ${{ env.BUILD_DIR }}
+          cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
+          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
 
-      - name: Bundle AppImage
-        if: matrix.app_image == true
+      - name: Package (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR }}
+
+          cd ${{ env.INSTALL_DIR }}
+          tar -czf ../PolyMC.tar.gz *
+
+      - name: Package (Linux, portable)
+        if: runner.os == 'Linux'
+        run: |
+          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
+          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+
+          cd ${{ env.INSTALL_PORTABLE_DIR }}
+          tar -czf ../PolyMC-portable.tar.gz *
+
+      - name: Package AppImage (Linux)
+        if: runner.os == 'Linux'
         shell: bash
         run: |
+          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
+
           export OUTPUT="PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage"
 
           chmod +x linuxdeploy-*.AppImage
 
-          mkdir -p ${{ env.INSTALL_DIR }}/usr/lib/jvm/java-{8,17}-openjdk
+          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-{8,17}-openjdk
 
-          cp -r ${{ github.workspace }}/JREs/jre8/* ${{ env.INSTALL_DIR }}/usr/lib/jvm/java-8-openjdk
+          cp -r ${{ github.workspace }}/JREs/jre8/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-8-openjdk
 
-          cp -r ${{ github.workspace }}/JREs/jre17/* ${{ env.INSTALL_DIR }}/usr/lib/jvm/java-17-openjdk
+          cp -r ${{ github.workspace }}/JREs/jre17/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk
 
-          export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_DIR }}/usr/lib"
-          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_DIR }}/usr/lib/jvm/java-8-openjdk/lib/amd64/server"
-          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_DIR }}/usr/lib/jvm/java-8-openjdk/lib/amd64"
-          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_DIR }}/usr/lib/jvm/java-17-openjdk/lib/server"
-          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_DIR }}/usr/lib/jvm/java-17-openjdk/lib"
+          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib"
+          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-8-openjdk/lib/amd64/server"
+          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-8-openjdk/lib/amd64"
+          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib/server"
+          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib"
+          export LD_LIBRARY_PATH
 
-          ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_DIR }}/usr/share/icons/hicolor/scalable/apps/org.polymc.PolyMC.svg
+          ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.polymc.PolyMC.svg
 
-      - name: Run macdeployqt
+      ##
+      # UPLOAD BUILDS
+      ##
+
+      - name: Upload binary tarball (macOS)
         if: runner.os == 'macOS'
-        run: |
-          cd ${{ env.INSTALL_DIR }}
-          macdeployqt "PolyMC.app" -executable="PolyMC.app/Contents/MacOS/polymc" -always-overwrite
-
-      - name: chmod binary on macOS
-        if: runner.os == 'macOS'
-        run: |
-          chmod +x "${{ github.workspace }}/${{ env.INSTALL_DIR }}/PolyMC.app/Contents/MacOS/polymc"
-
-      - name: tar bundle on macOS
-        if: runner.os == 'macOS'
-        run: |
-          cd ${{ env.INSTALL_DIR }}
-          tar -czf ../PolyMC.tar.gz *
-
-      - name: tar on Linux
-        if: runner.os == 'Linux' && matrix.app_image != true && matrix.portable != true
-        run: |
-          cd ${{ env.INSTALL_DIR }}
-          tar -czf ../PolyMC.tar.gz *
-
-      - name: tar on Linux portable 
-        if: runner.os == 'Linux' && matrix.app_image != true && matrix.portable == true
-        run: |
-          cd ${{ env.INSTALL_DIR }}
-          tar -czf ../PolyMC-portable.tar.gz *
-
-      - name: Upload Linux tar.gz
-        if: runner.os == 'Linux' && matrix.app_image != true && matrix.portable != true
         uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC.tar.gz
 
-      - name: Upload Linux Portable tar.gz 
-        if: runner.os == 'Linux' && matrix.app_image != true && matrix.portable == true
-        uses: actions/upload-artifact@v3
-        with:
-          name: PolyMC-${{ runner.os }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PolyMC-portable.tar.gz
-
-      - name: Upload AppImage for Linux
-        if: matrix.app_image == true
-        uses: actions/upload-artifact@v3
-        with:
-          name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
-          path: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
-
-      - name: Copy OpenSSL libs on Windows x86
-        if: runner.os == 'Windows' && matrix.msystem == 'mingw32'
-        shell: msys2 {0}
-        run: |
-          cp /mingw32/bin/libcrypto-1_1.dll ${{ env.INSTALL_DIR }}/
-          cp /mingw32/bin/libssl-1_1.dll ${{ env.INSTALL_DIR }}/
-
-      - name: Copy OpenSSL libs on Windows x86_64
-        if: runner.os == 'Windows' && matrix.msystem == 'mingw64'
-        shell: msys2 {0}
-        run: |
-          cp /mingw64/bin/libcrypto-1_1-x64.dll ${{ env.INSTALL_DIR }}/
-          cp /mingw64/bin/libssl-1_1-x64.dll ${{ env.INSTALL_DIR }}/
-
-      - name: Upload package for Windows
+      - name: Upload binary zip (Windows)
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: ${{ env.INSTALL_DIR }}/**
 
-      - name: Upload package for macOS
-        if: runner.os == 'macOS'
+      - name: Upload binary zip (Windows, portable)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v3
+        with:
+          name: PolyMC-${{ matrix.name }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: ${{ env.INSTALL_PORTABLE_DIR }}/**
+
+      - name: Upload binary tarball (Linux)
+        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC.tar.gz
+
+      - name: Upload binary tarball (Linux, portable)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v3
+        with:
+          name: PolyMC-${{ runner.os }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PolyMC-portable.tar.gz
+
+      - name: Upload AppImage (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v3
+        with:
+          name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
+          path: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
+
+
