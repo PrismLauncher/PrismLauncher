@@ -1,11 +1,13 @@
 #include "Packwiz.h"
 
-#include "modplatform/ModIndex.h"
-#include "toml.h"
-
 #include <QDebug>
 #include <QDir>
 #include <QObject>
+
+#include "toml.h"
+
+#include "modplatform/ModIndex.h"
+#include "minecraft/mod/Mod.h"
 
 // Helpers
 static inline QString indexFileName(QString const& mod_name)
@@ -31,12 +33,39 @@ auto Packwiz::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pac
     return mod;
 }
 
+auto Packwiz::createModFormat(QDir& index_dir, ::Mod& internal_mod) -> Mod
+{
+    auto mod_name = internal_mod.name();
+
+    // Try getting metadata if it exists
+    Mod mod { getIndexForMod(index_dir, mod_name) };
+    if(mod.isValid())
+        return mod;
+
+    // Manually construct packwiz mod
+    mod.name = internal_mod.name();
+    mod.filename = internal_mod.filename().fileName();
+
+    // TODO: Have a mechanism for telling the UI subsystem that we want to gather user information
+    // (i.e. which mod provider we want to use). Maybe an object parameter with a signal for that?
+
+    return mod;
+}
+
 void Packwiz::updateModIndex(QDir& index_dir, Mod& mod)
 {
+    if(!mod.isValid()){
+        qCritical() << QString("Tried to update metadata of an invalid mod!");
+        return;
+    }
+
     // Ensure the corresponding mod's info exists, and create it if not
     QFile index_file(index_dir.absoluteFilePath(indexFileName(mod.name)));
 
     // There's already data on there!
+    // TODO: We should do more stuff here, as the user is likely trying to
+    // override a file. In this case, check versions and ask the user what
+    // they want to do!
     if (index_file.exists()) { index_file.remove(); }
 
     if (!index_file.open(QIODevice::ReadWrite)) {
@@ -87,11 +116,11 @@ auto Packwiz::getIndexForMod(QDir& index_dir, QString& mod_name) -> Mod
 
     if (!index_file.exists()) {
         qWarning() << QString("Tried to get a non-existent mod metadata for %1").arg(mod_name);
-        return mod;
+        return {};
     }
     if (!index_file.open(QIODevice::ReadOnly)) {
         qWarning() << QString("Failed to open mod metadata for %1").arg(mod_name);
-        return mod;
+        return {};
     }
 
     toml_table_t* table;
@@ -103,7 +132,7 @@ auto Packwiz::getIndexForMod(QDir& index_dir, QString& mod_name) -> Mod
 
     if (!table) {
         qCritical() << QString("Could not open file %1!").arg(indexFileName(mod.name));
-        return mod;
+        return {};
     }
 
     // Helper function for extracting data from the TOML file

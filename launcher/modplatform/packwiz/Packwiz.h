@@ -6,33 +6,43 @@
 #include <QUrl>
 #include <QVariant>
 
-namespace ModPlatform {
-}  // namespace ModPlatform
-
 class QDir;
+
+// Mod from launcher/minecraft/mod/Mod.h
+class Mod;
 
 class Packwiz {
    public:
     struct Mod {
-        QString name;
-        QString filename;
+        QString name {};
+        QString filename {};
         // FIXME: make side an enum
-        QString side = "both";
+        QString side {"both"};
 
         // [download]
-        QUrl url;
+        QUrl url {};
         // FIXME: make hash-format an enum
-        QString hash_format;
-        QString hash;
+        QString hash_format {};
+        QString hash {};
 
         // [update]
-        ModPlatform::Provider provider;
-        QVariant file_id;
-        QVariant project_id;
+        ModPlatform::Provider provider {};
+        QVariant file_id {};
+        QVariant project_id {};
+
+       public:
+        // This is a heuristic, but should work for now.
+        auto isValid() const -> bool { return !name.isEmpty(); }
     };
 
-    /* Generates the object representing the information in a mod.toml file via its common representation in the launcher */
+    /* Generates the object representing the information in a mod.toml file via
+     * its common representation in the launcher, when downloading mods.
+     * */
     static auto createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod;
+    /* Generates the object representing the information in a mod.toml file via
+     * its common representation in the launcher.
+     * */
+    static auto createModFormat(QDir& index_dir, ::Mod& internal_mod) -> Mod;
 
     /* Updates the mod index for the provided mod.
      * This creates a new index if one does not exist already
