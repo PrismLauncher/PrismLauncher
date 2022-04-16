@@ -190,8 +190,6 @@ private slots:
 
 #ifndef Q_OS_MAC
     void keyReleaseEvent(QKeyEvent *event) override;
-
-    void keyPressEvent(QKeyEvent *event) override;
 #endif
 
 private:
