@@ -1,7 +1,11 @@
 #pragma once
 
+#include <memory>
+
 #include <QString>
 #include <QStringList>
+
+#include "minecraft/mod/MetadataHandler.h"
 
 struct ModDetails
 {
@@ -25,4 +29,7 @@ struct ModDetails
 
     /* List of the author's names */
     QStringList authors;
+
+    /* Metadata information, if any */
+    std::shared_ptr<Metadata::ModStruct> metadata;
 };

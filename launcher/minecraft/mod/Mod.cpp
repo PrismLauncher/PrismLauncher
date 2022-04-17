@@ -55,6 +55,8 @@ Mod::Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata)
     m_from_metadata = true;
     m_enabled = true;
     m_changedDateTime = m_file.lastModified();
+
+    m_temp_metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
 }
 
 void Mod::repath(const QFileInfo& file)
@@ -160,4 +162,16 @@ QString Mod::description() const
 QStringList Mod::authors() const
 {
     return details().authors;
+}
+
+void Mod::finishResolvingWithDetails(std::shared_ptr<ModDetails> details)
+{
+    m_resolving = false;
+    m_resolved = true;
+    m_localDetails = details;
+
+    if (fromMetadata() && m_temp_metadata->isValid()) {
+        m_localDetails->metadata = m_temp_metadata;
+        m_temp_metadata.reset();
+    }
 }

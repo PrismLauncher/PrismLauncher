@@ -18,7 +18,6 @@
 #include <QDateTime>
 #include <QFileInfo>
 #include <QList>
-#include <memory>
 
 #include "ModDetails.h"
 #include "minecraft/mod/MetadataHandler.h"
@@ -55,6 +54,9 @@ public:
     QString description() const;
     QStringList authors() const;
 
+    const std::shared_ptr<Metadata::ModStruct> metadata() const { return details().metadata; };
+    std::shared_ptr<Metadata::ModStruct> metadata() { return m_localDetails->metadata; };
+
     bool enable(bool value);
 
     // delete all the files of this mod
@@ -71,11 +73,7 @@ public:
         m_resolving = resolving;
         m_resolutionTicket = resolutionTicket;
     }
-    void finishResolvingWithDetails(std::shared_ptr<ModDetails> details){
-        m_resolving = false;
-        m_resolved = true;
-        m_localDetails = details;
-    }
+    void finishResolvingWithDetails(std::shared_ptr<ModDetails> details);
 
 protected:
     QFileInfo m_file;
@@ -86,6 +84,10 @@ protected:
     QString m_name;
     ModType m_type = MOD_UNKNOWN;
     bool m_from_metadata = false;
+
+    /* If the mod has metadata, this will be filled in the constructor, and passed to 
+     * the ModDetails when calling finishResolvingWithDetails */
+    std::shared_ptr<Metadata::ModStruct> m_temp_metadata;
     std::shared_ptr<ModDetails> m_localDetails;
 
     bool m_enabled = true;
