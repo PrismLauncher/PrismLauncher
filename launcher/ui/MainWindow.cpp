@@ -636,6 +636,8 @@ public:
 
         actionLaunchInstance = TranslatedAction(MainWindow);
         actionLaunchInstance->setObjectName(QStringLiteral("actionLaunchInstance"));
+        actionLaunchInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Launch"));
+        actionLaunchInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Launch the selected instance."));
         all_actions.append(&actionLaunchInstance);
 
         actionLaunchInstanceOffline = TranslatedAction(MainWindow);
@@ -734,6 +736,7 @@ public:
         actionCopyInstance->setShortcut(QKeySequence(tr("Ctrl+D")));
         all_actions.append(&actionCopyInstance);
 
+        setInstanceActionsEnabled(false);
     }
 
     void createInstanceToolbar(QMainWindow *MainWindow)
@@ -784,7 +787,7 @@ public:
         MainWindow->addToolBar(Qt::RightToolBarArea, instanceToolBar);
     }
 
-    void setupUi(QMainWindow *MainWindow)
+    void setupUi(MainWindow *MainWindow)
     {
         if (MainWindow->objectName().isEmpty())
         {
@@ -798,7 +801,7 @@ public:
 #endif
 
         createMainToolbarActions(MainWindow);
-        createMenuActions(dynamic_cast<class MainWindow *>(MainWindow));
+        createMenuActions(MainWindow);
         createInstanceActions(MainWindow);
 
         createMenuBar(MainWindow);
@@ -817,6 +820,8 @@ public:
         createStatusBar(MainWindow);
         createNewsToolbar(MainWindow);
         createInstanceToolbar(MainWindow);
+
+        MainWindow->updateToolsMenu();
 
         retranslateUi(MainWindow);
 
@@ -1146,7 +1151,7 @@ void MainWindow::updateToolsMenu()
     QToolButton *launchButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstance));
     QToolButton *launchOfflineButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstanceOffline));
 
-    if(!m_selectedInstance || m_selectedInstance->isRunning())
+    if(m_selectedInstance && m_selectedInstance->isRunning())
     {
         ui->actionLaunchInstance->setMenu(nullptr);
         ui->actionLaunchInstanceOffline->setMenu(nullptr);
@@ -1179,14 +1184,20 @@ void MainWindow::updateToolsMenu()
     normalLaunch->setShortcut(QKeySequence::Open);
     QAction *normalLaunchOffline = launchOfflineMenu->addAction(tr("Launch Offline"));
     normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
-    connect(normalLaunch, &QAction::triggered, [this]()
-            {
-                APPLICATION->launch(m_selectedInstance, true);
-            });
-    connect(normalLaunchOffline, &QAction::triggered, [this]()
-            {
-                APPLICATION->launch(m_selectedInstance, false);
-            });
+    if (m_selectedInstance)
+    {
+        connect(normalLaunch, &QAction::triggered, [this]() {
+            APPLICATION->launch(m_selectedInstance, true);
+        });
+        connect(normalLaunchOffline, &QAction::triggered, [this]() {
+            APPLICATION->launch(m_selectedInstance, false);
+        });
+    }
+    else
+    {
+        normalLaunch->setDisabled(true);
+        normalLaunchOffline->setDisabled(true);
+    }
     QString profilersTitle = tr("Profilers");
     launchMenu->addSeparator()->setText(profilersTitle);
     launchOfflineMenu->addSeparator()->setText(profilersTitle);
@@ -1203,7 +1214,7 @@ void MainWindow::updateToolsMenu()
             profilerAction->setToolTip(profilerToolTip);
             profilerOfflineAction->setToolTip(profilerToolTip);
         }
-        else
+        else if (m_selectedInstance)
         {
             connect(profilerAction, &QAction::triggered, [this, profiler]()
                     {
@@ -1213,6 +1224,11 @@ void MainWindow::updateToolsMenu()
                     {
                         APPLICATION->launch(m_selectedInstance, false, profiler.get());
                     });
+        }
+        else
+        {
+            profilerAction->setDisabled(true);
+            profilerOfflineAction->setDisabled(true);
         }
     }
     ui->actionLaunchInstance->setMenu(launchMenu);
