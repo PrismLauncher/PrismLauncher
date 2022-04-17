@@ -27,9 +27,9 @@ namespace Atl {
 FilterModel::FilterModel(QObject *parent) : QSortFilterProxyModel(parent)
 {
     currentSorting = Sorting::ByPopularity;
-    sortings.insert(tr("Sort by popularity"), Sorting::ByPopularity);
-    sortings.insert(tr("Sort by name"), Sorting::ByName);
-    sortings.insert(tr("Sort by game version"), Sorting::ByGameVersion);
+    sortings.insert(tr("Sort by Popularity"), Sorting::ByPopularity);
+    sortings.insert(tr("Sort by Name"), Sorting::ByName);
+    sortings.insert(tr("Sort by Game Version"), Sorting::ByGameVersion);
 
     searchTerm = "";
 }
