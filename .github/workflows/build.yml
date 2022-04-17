@@ -26,9 +26,7 @@ jobs:
             msystem: mingw64
 
           - os: macos-11
-            qt_version: 5.12.12
-            qt_host: mac
-            macosx_deployment_target: 10.12
+            macosx_deployment_target: 10.13
 
     runs-on: ${{ matrix.os }}
 
@@ -74,23 +72,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Cache Qt (macOS)
-        if: runner.os == 'macOS'
-        id: cache-qt
-        uses: actions/cache@v3
-        with:
-          path: "${{ github.workspace }}/Qt/"
-          key: ${{ runner.os }}-${{ matrix.qt_version }}-${{ matrix.qt_arch }}-qt_cache
-
       - name: Install Qt (macOS)
         if: runner.os == 'macOS'
-        uses: jurplel/install-qt-action@v2
-        with:
-          version: ${{ matrix.qt_version }}
-          host: ${{ matrix.qt_host }}
-          arch: ${{ matrix.qt_arch }}
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          dir: "${{ github.workspace }}/Qt/"
+        run: |
+         brew update
+         brew install qt@5
 
       - name: Install Qt (Linux)
         if: runner.os == 'Linux'
@@ -118,7 +104,7 @@ jobs:
       - name: Configure CMake (macOS)
         if: runner.os == 'macOS'
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DQt5_DIR=/usr/local/opt/qt@5 -DCMAKE_PREFIX_PATH=/usr/local/opt/qt@5 -G Ninja
 
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
