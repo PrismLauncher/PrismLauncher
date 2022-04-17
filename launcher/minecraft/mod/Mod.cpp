@@ -20,6 +20,8 @@
 
 #include <FileSystem.h>
 #include <QDebug>
+
+#include "Application.h"
 #include "MetadataHandler.h"
 
 namespace {
@@ -174,8 +176,7 @@ void Mod::finishResolvingWithDetails(std::shared_ptr<ModDetails> details)
     m_resolved = true;
     m_localDetails = details;
 
-    if (fromMetadata() && m_temp_metadata->isValid()) {
-        m_localDetails->metadata = m_temp_metadata;
-        m_temp_metadata.reset();
+    if (fromMetadata() && m_temp_metadata->isValid() && m_localDetails.get()) {
+        m_localDetails->metadata.swap(m_temp_metadata);
     }
 }

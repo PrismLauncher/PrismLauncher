@@ -19,7 +19,7 @@ class ProviderCapabilities {
     {
         switch(p){
         case Provider::MODRINTH:
-            return "sha256";
+            return "sha512";
         case Provider::FLAME:
             return "murmur2";
         }

@@ -551,6 +551,12 @@ set(PACKWIZ_SOURCES
     modplatform/packwiz/Packwiz.cpp
 )
 
+add_unit_test(Packwiz
+    SOURCES modplatform/packwiz/Packwiz_test.cpp
+    DATA modplatform/packwiz/testdata
+    LIBS Launcher_logic
+    )
+
 set(TECHNIC_SOURCES
     modplatform/technic/SingleZipPackInstallTask.h
     modplatform/technic/SingleZipPackInstallTask.cpp

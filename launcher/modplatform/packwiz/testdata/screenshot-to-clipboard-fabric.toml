@@ -1,0 +1,13 @@
+name = "Screenshot to Clipboard (Fabric)"
+filename = "screenshot-to-clipboard-1.0.7-fabric.jar"
+side = "both"
+
+[download]
+url = "https://edge.forgecdn.net/files/3509/43/screenshot-to-clipboard-1.0.7-fabric.jar"
+hash-format = "murmur2"
+hash = "1781245820"
+
+[update]
+[update.curseforge]
+file-id = 3509043
+project-id = 327154

@@ -20,7 +20,6 @@
 #include <QList>
 
 #include "ModDetails.h"
-#include "minecraft/mod/MetadataHandler.h"
 
 class Mod
 {

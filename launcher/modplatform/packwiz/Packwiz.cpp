@@ -14,6 +14,8 @@ namespace Packwiz {
 // Helpers
 static inline QString indexFileName(QString const& mod_name)
 {
+    if(mod_name.endsWith(".toml"))
+        return mod_name;
     return QString("%1.toml").arg(mod_name);
 }
 
@@ -91,8 +93,16 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
 
         in_stream << QString("\n[update]\n");
         in_stream << QString("[update.%1]\n").arg(ModPlatform::ProviderCapabilities::providerName(mod.provider));
-        addToStream("file-id", mod.file_id.toString());
-        addToStream("project-id", mod.project_id.toString());
+        switch(mod.provider){
+        case(ModPlatform::Provider::FLAME):
+            in_stream << QString("file-id = %1\n").arg(mod.file_id.toString());
+            in_stream << QString("project-id = %1\n").arg(mod.project_id.toString());
+            break;
+        case(ModPlatform::Provider::MODRINTH):
+            addToStream("mod-id", mod.mod_id().toString());
+            addToStream("version", mod.version().toString());
+            break;
+        }
     }
 }
 
@@ -110,18 +120,44 @@ void V1::deleteModIndex(QDir& index_dir, QString& mod_name)
     }
 }
 
-auto V1::getIndexForMod(QDir& index_dir, QString& mod_name) -> Mod
+// Helper functions for extracting data from the TOML file
+static auto stringEntry(toml_table_t* parent, const char* entry_name) -> QString
+{
+    toml_datum_t var = toml_string_in(parent, entry_name);
+    if (!var.ok) {
+        qCritical() << QString("Failed to read str property '%1' in mod metadata.").arg(entry_name);
+        return {};
+    }
+
+    QString tmp = var.u.s;
+    free(var.u.s);
+
+    return tmp;
+}
+
+static auto intEntry(toml_table_t* parent, const char* entry_name) -> int
+{
+    toml_datum_t var = toml_int_in(parent, entry_name);
+    if (!var.ok) {
+        qCritical() << QString("Failed to read int property '%1' in mod metadata.").arg(entry_name);
+        return {};
+    }
+
+    return var.u.i;
+}
+
+auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
 {
     Mod mod;
 
-    QFile index_file(index_dir.absoluteFilePath(indexFileName(mod_name)));
+    QFile index_file(index_dir.absoluteFilePath(indexFileName(index_file_name)));
 
     if (!index_file.exists()) {
-        qWarning() << QString("Tried to get a non-existent mod metadata for %1").arg(mod_name);
+        qWarning() << QString("Tried to get a non-existent mod metadata for %1").arg(index_file_name);
         return {};
     }
     if (!index_file.open(QIODevice::ReadOnly)) {
-        qWarning() << QString("Failed to open mod metadata for %1").arg(mod_name);
+        qWarning() << QString("Failed to open mod metadata for %1").arg(index_file_name);
         return {};
     }
 
@@ -136,29 +172,9 @@ auto V1::getIndexForMod(QDir& index_dir, QString& mod_name) -> Mod
         qCritical() << QString("Could not open file %1!").arg(indexFileName(mod.name));
         return {};
     }
-
-    // Helper function for extracting data from the TOML file
-    auto stringEntry = [&](toml_table_t* parent, const char* entry_name) -> QString {
-        toml_datum_t var = toml_string_in(parent, entry_name);
-        if (!var.ok) {
-            qCritical() << QString("Failed to read property '%1' in mod metadata.").arg(entry_name);
-            return {};
-        }
-
-        QString tmp = var.u.s;
-        free(var.u.s);
-
-        return tmp;
-    };
-
+    
     { // Basic info
         mod.name = stringEntry(table, "name");
-        // Basic sanity check
-        if (mod.name != mod_name) {
-            qCritical() << QString("Name mismatch in mod metadata:\nExpected:%1\nGot:%2").arg(mod_name, mod.name);
-            return {};
-        }
-
         mod.filename = stringEntry(table, "filename");
         mod.side = stringEntry(table, "side");
     }
@@ -188,15 +204,17 @@ auto V1::getIndexForMod(QDir& index_dir, QString& mod_name) -> Mod
         toml_table_t* mod_provider_table;
         if ((mod_provider_table = toml_table_in(update_table, ProviderCaps::providerName(Provider::FLAME)))) {
             mod.provider = Provider::FLAME;
+            mod.file_id = intEntry(mod_provider_table, "file-id");
+            mod.project_id = intEntry(mod_provider_table, "project-id");
         } else if ((mod_provider_table = toml_table_in(update_table, ProviderCaps::providerName(Provider::MODRINTH)))) {
             mod.provider = Provider::MODRINTH;
+            mod.mod_id() = stringEntry(mod_provider_table, "mod-id");
+            mod.version() = stringEntry(mod_provider_table, "version");
         } else {
             qCritical() << QString("No mod provider on mod metadata!");
             return {};
         }
         
-        mod.file_id = stringEntry(mod_provider_table, "file-id");
-        mod.project_id = stringEntry(mod_provider_table, "project-id");
     }
 
     toml_free(table);

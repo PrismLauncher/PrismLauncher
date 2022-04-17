@@ -34,8 +34,14 @@ void ModFolderLoadTask::getFromMetadata()
         if (entry == "." || entry == "..")
             continue;
 
-        entry.chop(5);  // Remove .toml at the end
-        Mod mod(m_mods_dir, Metadata::get(m_index_dir, entry));
+        auto metadata = Metadata::get(m_index_dir, entry);
+        // TODO: Don't simply return. Instead, show to the user that the metadata is there, but
+        // it's not currently 'installed' (i.e. there's no JAR file yet).
+        if(!metadata.isValid()){
+            return;
+        }
+
+        Mod mod(m_mods_dir, metadata);
         m_result->mods[mod.internal_id()] = mod;
     }
 }

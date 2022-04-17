@@ -33,8 +33,13 @@ class V1 {
         QVariant project_id {};
 
        public:
-        // This is a heuristic, but should work for now.
-        auto isValid() const -> bool { return !name.isEmpty(); }
+        // This is a totally heuristic, but should work for now.
+        auto isValid() const -> bool { return !name.isEmpty() && !project_id.isNull(); }
+
+        // Different providers can use different names for the same thing
+        // Modrinth-specific
+        auto mod_id() -> QVariant& { return project_id; }
+        auto version() -> QVariant& { return file_id; }
     };
 
     /* Generates the object representing the information in a mod.toml file via
@@ -58,7 +63,7 @@ class V1 {
     /* Gets the metadata for a mod with a particular name.
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.
      * */
-    static auto getIndexForMod(QDir& index_dir, QString& mod_name) -> Mod;
+    static auto getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod;
 };
 
 } // namespace Packwiz
