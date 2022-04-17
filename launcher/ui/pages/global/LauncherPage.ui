@@ -330,8 +330,11 @@
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <widget class="QCheckBox" name="preferMenuBarCheckBox">
+            <property name="toolTip">
+             <string>The menubar is more friendly for keyboard-driven interaction.</string>
+            </property>
             <property name="text">
-             <string>Always show menu bar instead of tool bar (more keyboard friendly, less pretty)</string>
+             <string>Replace toolbar with menubar</string>
             </property>
            </widget>
           </item>
