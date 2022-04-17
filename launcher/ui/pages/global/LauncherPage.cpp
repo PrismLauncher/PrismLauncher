@@ -414,7 +414,10 @@ void LauncherPage::loadSettings()
     }
 
     // Toolbar/menu bar settings (not applicable if native menu bar is present)
+    ui->toolsBox->setEnabled(!QMenuBar().isNativeMenuBar());
+#ifdef Q_OS_MACOS
     ui->toolsBox->setVisible(!QMenuBar().isNativeMenuBar());
+#endif
     ui->preferMenuBarCheckBox->setChecked(s->get("MenuBarInsteadOfToolBar").toBool());
 
     // Console settings
