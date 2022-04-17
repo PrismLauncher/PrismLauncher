@@ -3,6 +3,7 @@
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "net/NetJob.h"
 
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
@@ -43,8 +44,9 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    bool hasFabric = !(dynamic_cast<MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.fabricmc.fabric-loader").isEmpty();
-    QString mcVersion = (dynamic_cast<MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.minecraft");
+    auto profile = (dynamic_cast<MinecraftInstance*>(inst))->getPackProfile();
+    bool hasFabric = FlameAPI::getMappedModLoader(profile->getModLoader()) == ModAPI::Fabric;
+    QString mcVersion = profile->getComponentVersion("net.minecraft");
 
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();

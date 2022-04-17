@@ -54,6 +54,9 @@ class ModrinthAPI : public NetworkModAPI {
     {
         if (type == Unspecified)
             return "fabric, forge, quilt";
+        // TODO: remove this once Quilt drops official Fabric support
+        if (type == Quilt)  // NOTE: Most if not all Fabric mods should work *currently*
+            return "fabric, quilt";
         return ModAPI::getModLoaderString(type);
     }
 
