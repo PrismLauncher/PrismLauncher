@@ -124,7 +124,11 @@ bool Mod::enable(bool value)
 
 bool Mod::destroy(QDir& index_dir)
 {
-    Metadata::remove(index_dir, m_name);
+    auto n = name();
+    // FIXME: This can fail to remove the metadata if the
+    // "DontUseModMetadata" setting is on, since there could
+    // be a name mismatch!
+    Metadata::remove(index_dir, n);
 
     m_type = MOD_UNKNOWN;
     return FS::deletePath(m_file.filePath());

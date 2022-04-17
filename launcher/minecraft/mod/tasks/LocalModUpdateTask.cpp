@@ -2,6 +2,7 @@
 
 #include <toml.h>
 
+#include "Application.h"
 #include "FileSystem.h"
 #include "minecraft/mod/MetadataHandler.h"
 
@@ -17,6 +18,11 @@ LocalModUpdateTask::LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack&
 void LocalModUpdateTask::executeTask()
 {
     setStatus(tr("Updating index for mod:\n%1").arg(m_mod.name));
+
+    if(APPLICATION->settings()->get("DontUseModMetadata").toBool()){
+        emitSucceeded();
+        return;
+    }
 
     auto pw_mod = Metadata::create(m_index_dir, m_mod, m_mod_version);
     Metadata::update(m_index_dir, pw_mod);
