@@ -41,6 +41,7 @@
 #include <QMessageBox>
 #include <QDir>
 #include <QTextCharFormat>
+#include <QMenuBar>
 
 #include "updater/UpdateChecker.h"
 
@@ -322,6 +323,8 @@ void LauncherPage::applySettings()
         APPLICATION->setApplicationTheme(newAppTheme, false);
     }
 
+    s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
+
     // Console settings
     s->set("ShowConsole", ui->showConsoleCheck->isChecked());
     s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
@@ -409,6 +412,13 @@ void LauncherPage::loadSettings()
             idx++;
         }
     }
+
+    // Toolbar/menu bar settings (not applicable if native menu bar is present)
+    ui->toolsBox->setEnabled(!QMenuBar().isNativeMenuBar());
+#ifdef Q_OS_MACOS
+    ui->toolsBox->setVisible(!QMenuBar().isNativeMenuBar());
+#endif
+    ui->preferMenuBarCheckBox->setChecked(s->get("MenuBarInsteadOfToolBar").toBool());
 
     // Console settings
     ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());

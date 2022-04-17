@@ -80,6 +80,7 @@
 #include <QStringList>
 #include <QDebug>
 #include <QStyleFactory>
+#include <QWindow>
 
 #include "InstanceList.h"
 
@@ -617,6 +618,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Remembered state
         m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
+
+        m_settings->registerSetting("MenuBarInsteadOfToolBar", false);
 
         QString defaultMonospace;
         int defaultSize = 11;
@@ -1271,6 +1274,12 @@ bool Application::kill(InstancePtr instance)
         return controller->abort();
     }
     return true;
+}
+
+void Application::closeCurrentWindow()
+{
+    if (focusWindow())
+        focusWindow()->close();
 }
 
 void Application::addRunningInstance()

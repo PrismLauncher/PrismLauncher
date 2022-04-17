@@ -110,6 +110,8 @@ private slots:
 
     void on_actionReportBug_triggered();
 
+    void on_actionOpenWiki_triggered();
+
     void on_actionMoreNews_triggered();
 
     void newsButtonClicked();
@@ -149,6 +151,8 @@ private slots:
 
     void showInstanceContextMenu(const QPoint &);
 
+    void updateMainToolBar();
+
     void updateToolsMenu();
 
     void instanceActivated(QModelIndex);
@@ -183,6 +187,10 @@ private slots:
     void konamiTriggered();
 
     void globalSettingsClosed();
+
+#ifndef Q_OS_MAC
+    void keyReleaseEvent(QKeyEvent *event) override;
+#endif
 
 private:
     void retranslateUi();

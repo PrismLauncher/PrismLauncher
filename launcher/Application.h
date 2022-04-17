@@ -189,6 +189,7 @@ public slots:
         MinecraftAccountPtr accountToUse = nullptr
     );
     bool kill(InstancePtr instance);
+    void closeCurrentWindow();
 
 private slots:
     void on_windowClose();
