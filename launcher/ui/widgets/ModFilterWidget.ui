@@ -26,21 +26,21 @@
       <item row="2" column="0">
        <widget class="QRadioButton" name="allVersionsButton">
         <property name="text">
-         <string>allVersions</string>
+         <string notr="true">allVersions</string>
         </property>
        </widget>
       </item>
       <item row="0" column="0">
        <widget class="QRadioButton" name="strictVersionButton">
         <property name="text">
-         <string>strictVersion</string>
+         <string notr="true">strictVersion</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
        <widget class="QRadioButton" name="majorVersionButton">
         <property name="text">
-         <string>majorVersion</string>
+         <string notr="true">majorVersion</string>
         </property>
        </widget>
       </item>
