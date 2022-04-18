@@ -171,7 +171,7 @@ jobs:
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR }}
 
           cd ${{ env.INSTALL_DIR }}
-          tar -czf ../PolyMC.tar.gz *
+          tar --owner root --group root -czf ../PolyMC.tar.gz *
 
       - name: Package (Linux, portable)
         if: runner.os == 'Linux'
