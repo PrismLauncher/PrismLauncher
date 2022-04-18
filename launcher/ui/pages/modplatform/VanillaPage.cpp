@@ -158,7 +158,6 @@ void VanillaPage::loaderFilterChanged()
     auto vlist = APPLICATION->metadataIndex()->get(m_selectedLoader);
     ui->loaderVersionList->initialize(vlist.get());
     ui->loaderVersionList->selectRecommended();
-    suggestCurrent();
     ui->loaderVersionList->setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
 }
 
@@ -205,8 +204,8 @@ void VanillaPage::suggestCurrent()
         return;
     }
 
-    // List is empty if either no mod loader is selected, or no versions are available
-    if(!ui->loaderVersionList->hasVersions())
+    // There isn't a selected version if the version list is empty
+    if(ui->loaderVersionList->selectedVersion() == nullptr)
         dialog->setSuggestedPack(m_selectedVersion->descriptor(), new InstanceCreationTask(m_selectedVersion));
     else
     {
