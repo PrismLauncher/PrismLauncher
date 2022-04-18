@@ -48,7 +48,7 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance)
     // index is used to set the sorting with the flame api
     ui->sortByBox->addItem(tr("Sort by Featured"));
     ui->sortByBox->addItem(tr("Sort by Popularity"));
-    ui->sortByBox->addItem(tr("Sort by last updated"));
+    ui->sortByBox->addItem(tr("Sort by Last Updated"));
     ui->sortByBox->addItem(tr("Sort by Name"));
     ui->sortByBox->addItem(tr("Sort by Author"));
     ui->sortByBox->addItem(tr("Sort by Downloads"));

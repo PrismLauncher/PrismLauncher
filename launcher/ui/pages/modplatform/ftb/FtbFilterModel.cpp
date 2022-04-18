@@ -26,9 +26,9 @@ namespace Ftb {
 FilterModel::FilterModel(QObject *parent) : QSortFilterProxyModel(parent)
 {
     currentSorting = Sorting::ByPlays;
-    sortings.insert(tr("Sort by plays"), Sorting::ByPlays);
-    sortings.insert(tr("Sort by installs"), Sorting::ByInstalls);
-    sortings.insert(tr("Sort by name"), Sorting::ByName);
+    sortings.insert(tr("Sort by Plays"), Sorting::ByPlays);
+    sortings.insert(tr("Sort by Installs"), Sorting::ByInstalls);
+    sortings.insert(tr("Sort by Name"), Sorting::ByName);
 }
 
 const QMap<QString, FilterModel::Sorting> FilterModel::getAvailableSortings()
