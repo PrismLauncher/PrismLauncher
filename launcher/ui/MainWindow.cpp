@@ -831,10 +831,6 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         QString winTitle = tr("%1 - Version %2", "Launcher - Version X").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString());
-        if (!BuildConfig.BUILD_PLATFORM.isEmpty())
-        {
-            winTitle += tr(" on %1", "on platform, as in operating system").arg(BuildConfig.BUILD_PLATFORM);
-        }
         MainWindow->setWindowTitle(winTitle);
         // all the actions
         for(auto * item: all_actions)
