@@ -37,7 +37,7 @@ class ModPage : public QWidget, public BasePage {
     void retranslate() override;
 
     auto shouldDisplay() const -> bool override = 0;
-    virtual auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const -> bool = 0;
+    virtual auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderType loader = ModAPI::Unspecified) const -> bool = 0;
 
     auto apiProvider() const -> const ModAPI* { return api.get(); };
     auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }

@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include "modplatform/ModAPI.h"
 #include "ui/pages/modplatform/ModPage.h"
 
 #include "modplatform/modrinth/ModrinthAPI.h"
@@ -54,7 +55,7 @@ class ModrinthPage : public ModPage {
     inline auto debugName() const -> QString override { return "Modrinth"; }
     inline auto metaEntryBase() const -> QString override { return "ModrinthPacks"; };
 
-    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer = "") const -> bool override;
+    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderType loader = ModAPI::Unspecified) const -> bool override;
 
     auto shouldDisplay() const -> bool override;
 };

@@ -34,6 +34,7 @@
  */
 
 #include "ModrinthPage.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui_ModPage.h"
 
 #include "ModrinthModel.h"
@@ -60,9 +61,19 @@ ModrinthPage::ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance)
     connect(ui->modSelectionButton, &QPushButton::clicked, this, &ModrinthPage::onModSelected);
 }
 
-auto ModrinthPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, QString loaderVer) const -> bool
+auto ModrinthPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderType loader) const -> bool
 {
-    return ver.mcVersion.contains(mineVer) && ver.loaders.contains(loaderVer);
+    auto loaderStrings = ModrinthAPI::getModLoaderStrings(loader);
+
+    auto loaderCompatible = false;
+    for (auto remoteLoader : ver.loaders)
+    {
+        if (loaderStrings.contains(remoteLoader)) {
+            loaderCompatible = true;
+            break;
+        }
+    }
+    return ver.mcVersion.contains(mineVer) && loaderCompatible;
 }
 
 // I don't know why, but doing this on the parent class makes it so that
