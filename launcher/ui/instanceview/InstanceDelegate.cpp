@@ -364,7 +364,7 @@ public:
         {
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
             auto key = keyEvent->key();
-            if (key == Qt::Key_Return || key == Qt::Key_Enter)
+            if ((key == Qt::Key_Return || key == Qt::Key_Enter) && eventType == QEvent::KeyPress)
             {
                 emit editingDone();
                 return true;
