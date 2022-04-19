@@ -31,7 +31,7 @@ void InstanceCreationTask::executeTask()
         components->buildingFromScratch();
         components->setComponentVersion("net.minecraft", m_version->descriptor(), true);
         if(m_usingLoader)
-            components->setComponentVersion(m_loader, m_loaderVersion->descriptor(), true);
+            components->setComponentVersion(m_loader, m_loaderVersion->descriptor());
         inst.setName(m_instName);
         inst.setIconKey(m_instIcon);
         instanceSettings->resumeSave();
