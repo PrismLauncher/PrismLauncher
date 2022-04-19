@@ -17,6 +17,7 @@
 
 #include "Application.h"
 #include <FileSystem.h>
+#include <Qt>
 #include <QMimeData>
 #include <QUrl>
 #include <QUuid>
@@ -190,6 +191,16 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
             return QVariant();
         }
 
+    case Qt::UserRole:
+        switch (column)
+        {
+            case SizeColumn:
+                return qVariantFromValue<qlonglong>(world.bytes());
+
+            default:
+                return data(index, Qt::DisplayRole);
+        }
+
     case Qt::ToolTipRole:
     {
         return world.folderName();
@@ -216,7 +227,7 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
     }
     case SizeRole:
     {
-        return locale.formattedDataSize(world.bytes());
+        return qVariantFromValue<qlonglong>(world.bytes());
     }
     case IconFileRole:
     {
