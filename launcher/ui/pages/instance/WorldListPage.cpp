@@ -45,6 +45,7 @@
 #include <QTreeView>
 #include <QInputDialog>
 #include <QProcess>
+#include <Qt>
 
 #include "tools/MCEditTool.h"
 #include "FileSystem.h"
@@ -92,6 +93,7 @@ WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worl
     WorldListProxyModel * proxy = new WorldListProxyModel(this);
     proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
     proxy->setSourceModel(m_worlds.get());
+    proxy->setSortRole(Qt::UserRole);
     ui->worldTreeView->setSortingEnabled(true);
     ui->worldTreeView->setModel(proxy);
     ui->worldTreeView->installEventFilter(this);
