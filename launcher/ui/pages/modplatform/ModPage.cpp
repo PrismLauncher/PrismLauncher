@@ -170,14 +170,12 @@ void ModPage::updateModVersions(int prev_count)
 
     QString mcVersion = packProfile->getComponentVersion("net.minecraft");
 
-    QString loaderString = ModAPI::getModLoaderString(packProfile->getModLoader());
-
     for (int i = 0; i < current.versions.size(); i++) {
         auto version = current.versions[i];
         bool valid = false;
         for(auto& mcVer : m_filter->versions){
-            //NOTE: Flame doesn't care about loaderString, so passing it changes nothing.
-            if (validateVersion(version, mcVer.toString(), loaderString)) {
+            //NOTE: Flame doesn't care about loader, so passing it changes nothing.
+            if (validateVersion(version, mcVer.toString(), packProfile->getModLoader())) {
                 valid = true;
                 break;
             }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "modplatform/ModAPI.h"
 #include "modplatform/helpers/NetworkModAPI.h"
 
 #include <QDebug>
@@ -7,6 +8,36 @@
 class ModrinthAPI : public NetworkModAPI {
    public:
     inline auto getAuthorURL(const QString& name) const -> QString { return "https://modrinth.com/user/" + name; };
+
+    static auto getModLoaderStrings(ModLoaderType type) -> const QStringList
+    {
+        QStringList l;
+        switch (type)
+        {
+            case Unspecified:
+                for (auto loader : {Forge, Fabric, Quilt})
+                {
+                    l << ModAPI::getModLoaderString(loader);
+                }
+                break;
+
+            case Quilt:
+                l << ModAPI::getModLoaderString(Fabric);
+            default:
+                l << ModAPI::getModLoaderString(type);
+        }
+        return l;
+    }
+
+    static auto getModLoaderFilters(ModLoaderType type) -> const QString
+    {
+        QStringList l;
+        for (auto loader : getModLoaderStrings(type))
+        {
+            l << QString("\"categories:%1\"").arg(loader);
+        }
+        return l.join(',');
+    }
 
    private:
     inline auto getModSearchURL(SearchArgs& args) const -> QString override
@@ -22,11 +53,11 @@ class ModrinthAPI : public NetworkModAPI {
                    "limit=25&"
                    "query=%2&"
                    "index=%3&"
-                   "facets=[[\"categories:%4\"],%5[\"project_type:mod\"]]")
+                   "facets=[[%4],%5[\"project_type:mod\"]]")
             .arg(args.offset)
             .arg(args.search)
             .arg(args.sorting)
-            .arg(getModLoaderString(args.mod_loader))
+            .arg(getModLoaderFilters(args.mod_loader))
             .arg(getGameVersionsArray(args.versions));
     };
 
@@ -34,10 +65,10 @@ class ModrinthAPI : public NetworkModAPI {
     {
         return QString("https://api.modrinth.com/v2/project/%1/version?"
                 "game_versions=[%2]"
-                "loaders=[%3]")
+                "loaders=[\"%3\"]")
             .arg(args.addonId)
             .arg(getGameVersionsString(args.mcVersions))
-            .arg(getModLoaderString(args.loader));
+            .arg(getModLoaderStrings(args.loader).join("\",\""));
     };
 
     auto getGameVersionsArray(std::list<Version> mcVersions) const -> QString
@@ -48,16 +79,6 @@ class ModrinthAPI : public NetworkModAPI {
         }
         s.remove(s.length() - 1, 1); //remove last comma
         return s.isEmpty() ? QString() : QString("[%1],").arg(s);
-    }
-
-    static auto getModLoaderString(ModLoaderType type) -> const QString
-    {
-        if (type == Unspecified)
-            return "fabric, forge, quilt";
-        // TODO: remove this once Quilt drops official Fabric support
-        if (type == Quilt)  // NOTE: Most if not all Fabric mods should work *currently*
-            return "fabric, quilt";
-        return ModAPI::getModLoaderString(type);
     }
 
     inline auto validateModLoader(ModLoaderType modLoader) const -> bool
