@@ -192,13 +192,14 @@ void ListModel::searchRequestFinished(QJsonDocument& doc)
 
 void ListModel::searchRequestFailed(QString reason)
 {
-    if (jobPtr->first()->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
+    if (!jobPtr->first()->m_reply) {
+        // Network error
+        QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load mods."));
+    } else if (jobPtr->first()->m_reply && jobPtr->first()->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
         // 409 Gone, notify user to update
         QMessageBox::critical(nullptr, tr("Error"),
                               //: %1 refers to the launcher itself
                               QString("%1 %2").arg(m_parent->displayName()).arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_NAME)));
-        // self-destruct
-        (dynamic_cast<ModDownloadDialog*>((dynamic_cast<ModPage*>(parent()))->parentWidget()))->reject();
     }
     jobPtr.reset();
 
