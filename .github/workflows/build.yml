@@ -115,7 +115,7 @@ jobs:
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=Linux -G Ninja 
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=Linux -G Ninja
 
       ##
       # BUILD
@@ -143,6 +143,7 @@ jobs:
 
           cd ${{ env.INSTALL_DIR }}
           chmod +x "PolyMC.app/Contents/MacOS/polymc"
+          sudo codesign --sign - --deep --force --entitlements "../program_info/App.entitlements" --options runtime "PolyMC.app/Contents/MacOS/polymc"
           tar -czf ../PolyMC.tar.gz *
 
       - name: Package (Windows)
