@@ -30,7 +30,7 @@ void LocalModUpdateTask::executeTask()
     emitSucceeded();
 }
 
-bool LocalModUpdateTask::abort()
+auto LocalModUpdateTask::abort() -> bool
 {
     emitAborted();
     return true;

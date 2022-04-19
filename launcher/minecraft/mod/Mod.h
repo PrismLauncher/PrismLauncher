@@ -37,36 +37,36 @@ public:
     Mod(const QFileInfo &file);
     explicit Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata);
 
-    QFileInfo fileinfo()        const { return m_file; }
-    QDateTime dateTimeChanged() const { return m_changedDateTime; }
-    QString   internal_id()     const { return m_internal_id; }
-    ModType   type()            const { return m_type; }
-    bool      fromMetadata()    const { return m_from_metadata; }
-    bool      enabled()         const { return m_enabled; }
+    auto fileinfo()        const -> QFileInfo { return m_file; }
+    auto dateTimeChanged() const -> QDateTime { return m_changedDateTime; }
+    auto internal_id()     const -> QString { return m_internal_id; }
+    auto type()            const -> ModType { return m_type; }
+    auto fromMetadata()    const -> bool { return m_from_metadata; }
+    auto enabled()         const -> bool { return m_enabled; }
 
-    bool valid() const { return m_type != MOD_UNKNOWN; }
+    auto valid() const -> bool { return m_type != MOD_UNKNOWN; }
 
-    const ModDetails& details() const;
-    QString name()        const;
-    QString version()     const;
-    QString homeurl()     const;
-    QString description() const;
-    QStringList authors() const;
+    auto details()     const -> const ModDetails&;
+    auto name()        const -> QString;
+    auto version()     const -> QString;
+    auto homeurl()     const -> QString;
+    auto description() const -> QString;
+    auto authors()     const -> QStringList;
 
-    const std::shared_ptr<Metadata::ModStruct> metadata() const { return details().metadata; };
-    std::shared_ptr<Metadata::ModStruct> metadata() { return m_localDetails->metadata; };
+    auto metadata() const -> const std::shared_ptr<Metadata::ModStruct> { return details().metadata; };
+    auto metadata() -> std::shared_ptr<Metadata::ModStruct> { return m_localDetails->metadata; };
 
-    bool enable(bool value);
+    auto enable(bool value) -> bool;
 
     // delete all the files of this mod
-    bool destroy(QDir& index_dir);
+    auto destroy(QDir& index_dir) -> bool;
 
     // change the mod's filesystem path (used by mod lists for *MAGIC* purposes)
     void repath(const QFileInfo &file);
 
-    bool shouldResolve()    const { return !m_resolving && !m_resolved; }
-    bool isResolving()      const { return m_resolving; }
-    int  resolutionTicket() const { return m_resolutionTicket; }
+    auto shouldResolve()    const -> bool { return !m_resolving && !m_resolved; }
+    auto isResolving()      const -> bool { return m_resolving; }
+    auto resolutionTicket() const -> int  { return m_resolutionTicket; }
 
     void setResolving(bool resolving, int resolutionTicket) {
         m_resolving = resolving;

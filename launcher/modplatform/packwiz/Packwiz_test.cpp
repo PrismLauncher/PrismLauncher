@@ -1,8 +1,8 @@
 #include <QTemporaryDir>
 #include <QTest>
 
-#include "TestUtil.h"
 #include "Packwiz.h"
+#include "TestUtil.h"
 
 class PackwizTest : public QObject {
     Q_OBJECT

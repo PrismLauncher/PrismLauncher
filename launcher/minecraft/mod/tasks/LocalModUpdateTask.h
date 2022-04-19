@@ -2,8 +2,8 @@
 
 #include <QDir>
 
-#include "tasks/Task.h"
 #include "modplatform/ModIndex.h"
+#include "tasks/Task.h"
 
 class LocalModUpdateTask : public Task {
     Q_OBJECT
@@ -12,8 +12,8 @@ class LocalModUpdateTask : public Task {
 
     explicit LocalModUpdateTask(QDir mods_dir, ModPlatform::IndexedPack& mod, ModPlatform::IndexedVersion& mod_version);
 
-    bool canAbort() const override { return true; }
-    bool abort() override;
+    auto canAbort() const -> bool override { return true; }
+    auto abort() -> bool override;
 
    protected slots:
     //! Entry point for tasks.

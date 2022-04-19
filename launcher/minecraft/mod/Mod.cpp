@@ -93,7 +93,7 @@ void Mod::repath(const QFileInfo& file)
     }
 }
 
-bool Mod::enable(bool value)
+auto Mod::enable(bool value) -> bool
 {
     if (m_type == Mod::MOD_UNKNOWN || m_type == Mod::MOD_FOLDER)
         return false;
@@ -124,7 +124,7 @@ bool Mod::enable(bool value)
     return true;
 }
 
-bool Mod::destroy(QDir& index_dir)
+auto Mod::destroy(QDir& index_dir) -> bool
 {
     auto n = name();
     // FIXME: This can fail to remove the metadata if the
@@ -136,12 +136,12 @@ bool Mod::destroy(QDir& index_dir)
     return FS::deletePath(m_file.filePath());
 }
 
-const ModDetails& Mod::details() const
+auto Mod::details() const -> const ModDetails&
 {
     return m_localDetails ? *m_localDetails : invalidDetails;
 }
 
-QString Mod::name() const
+auto Mod::name() const -> QString
 {
     auto d_name = details().name;
     if (!d_name.isEmpty()) {
@@ -150,22 +150,22 @@ QString Mod::name() const
     return m_name;
 }
 
-QString Mod::version() const
+auto Mod::version() const -> QString
 {
     return details().version;
 }
 
-QString Mod::homeurl() const
+auto Mod::homeurl() const -> QString
 {
     return details().homeurl;
 }
 
-QString Mod::description() const
+auto Mod::description() const -> QString
 {
     return details().description;
 }
 
-QStringList Mod::authors() const
+auto Mod::authors() const -> QStringList
 {
     return details().authors;
 }

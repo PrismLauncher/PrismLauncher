@@ -6,13 +6,13 @@
 
 #include "toml.h"
 
-#include "modplatform/ModIndex.h"
 #include "minecraft/mod/Mod.h"
+#include "modplatform/ModIndex.h"
 
 namespace Packwiz {
 
 // Helpers
-static inline QString indexFileName(QString const& mod_name)
+static inline auto indexFileName(QString const& mod_name) -> QString
 {
     if(mod_name.endsWith(".toml"))
         return mod_name;
@@ -161,8 +161,9 @@ auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
         return {};
     }
 
-    toml_table_t* table;
+    toml_table_t* table = nullptr;
 
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     char errbuf[200];
     table = toml_parse(index_file.readAll().data(), errbuf, sizeof(errbuf));
 
@@ -201,7 +202,7 @@ auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
             return {};
         }
 
-        toml_table_t* mod_provider_table;
+        toml_table_t* mod_provider_table = nullptr;
         if ((mod_provider_table = toml_table_in(update_table, ProviderCaps::providerName(Provider::FLAME)))) {
             mod.provider = Provider::FLAME;
             mod.file_id = intEntry(mod_provider_table, "file-id");
