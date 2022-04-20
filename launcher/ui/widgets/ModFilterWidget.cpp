@@ -23,12 +23,21 @@ void ModFilterWidget::setInstance(MinecraftInstance* instance)
 {
     m_instance = instance;
 
-    auto mcVersionSplit = mcVersionStr().split(".");
-
     ui->strictVersionButton->setText(
         tr("Strict match (= %1)").arg(mcVersionStr()));
-    ui->majorVersionButton->setText(
-        tr("Major version match (= %1.%2.x)").arg(mcVersionSplit[0], mcVersionSplit[1]));
+
+    // we can't do this for snapshots sadly
+    if(mcVersionStr().contains('.'))
+    {
+        auto mcVersionSplit = mcVersionStr().split(".");
+        ui->majorVersionButton->setText(
+            tr("Major version match (= %1.%2.x)").arg(mcVersionSplit[0], mcVersionSplit[1]));
+    }
+    else
+    {
+        ui->majorVersionButton->setText(tr("Major version match (unsupported)"));
+        disableVersionButton(Major);
+    }
     ui->allVersionsButton->setText(
         tr("Any version"));
     //ui->betweenVersionsButton->setText(
@@ -67,7 +76,6 @@ void ModFilterWidget::onVersionFilterChanged(int id)
     //ui->lowerVersionComboBox->setEnabled(id == VersionButtonID::Between);
     //ui->upperVersionComboBox->setEnabled(id == VersionButtonID::Between);
 
-    auto versionSplit = mcVersionStr().split(".");
     int index = 0;
 
     auto cast_id = (VersionButtonID) id;
@@ -83,12 +91,14 @@ void ModFilterWidget::onVersionFilterChanged(int id)
     case(VersionButtonID::Strict):
         m_filter->versions.push_front(mcVersion());
         break;
-    case(VersionButtonID::Major):
+    case(VersionButtonID::Major): {
+        auto versionSplit = mcVersionStr().split(".");
         for(auto i = Version(QString("%1.%2").arg(versionSplit[0], versionSplit[1])); i <= mcVersion(); index++){
             m_filter->versions.push_front(i);
             i = Version(QString("%1.%2.%3").arg(versionSplit[0], versionSplit[1], QString("%1").arg(index)));
         }
         break;
+    }
     case(VersionButtonID::All):
         // Empty list to avoid enumerating all versions :P
         break;
