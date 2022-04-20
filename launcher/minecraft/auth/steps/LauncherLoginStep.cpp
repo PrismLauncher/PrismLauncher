@@ -50,7 +50,9 @@ void LauncherLoginStep::onRequestDone(
     auto requestor = qobject_cast<AuthRequest *>(QObject::sender());
     requestor->deleteLater();
 
+#ifndef NDEBUG
     qDebug() << data;
+#endif
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
 #ifndef NDEBUG
