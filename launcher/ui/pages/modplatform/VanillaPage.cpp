@@ -118,7 +118,18 @@ void VanillaPage::filterChanged()
 
 void VanillaPage::loaderFilterChanged()
 {
-    auto minecraftVersion = m_selectedVersion->descriptor();
+    QString minecraftVersion;
+    if (m_selectedVersion)
+    {
+        minecraftVersion = m_selectedVersion->descriptor();
+    }
+    else
+    {
+        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA"); // empty list
+        ui->loaderVersionList->setEmptyString(tr("No Minecraft version is selected."));
+        ui->loaderVersionList->setEmptyMode(VersionListView::String);
+        return;
+    }
     if(ui->noneFilter->isChecked())
     {
         ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA"); // empty list
