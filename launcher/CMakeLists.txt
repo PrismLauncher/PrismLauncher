@@ -500,6 +500,9 @@ set(META_SOURCES
 )
 
 set(API_SOURCES
+    modplatform/ModIndex.h
+    modplatform/ModIndex.cpp
+
     modplatform/ModAPI.h
 
     modplatform/flame/FlameAPI.h

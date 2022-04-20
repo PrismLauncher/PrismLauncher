@@ -19,6 +19,8 @@ static inline auto indexFileName(QString const& mod_name) -> QString
     return QString("%1.toml").arg(mod_name);
 }
 
+static ModPlatform::ProviderCapabilities ProviderCaps;
+
 auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod
 {
     Mod mod;
@@ -27,7 +29,7 @@ auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Mo
     mod.filename = mod_version.fileName;
 
     mod.url = mod_version.downloadUrl;
-    mod.hash_format = ModPlatform::ProviderCapabilities::hashType(mod_pack.provider);
+    mod.hash_format = ProviderCaps.hashType(mod_pack.provider);
     mod.hash = "";  // FIXME
 
     mod.provider = mod_pack.provider;
@@ -92,7 +94,7 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
         addToStream("hash", mod.hash);
 
         in_stream << QString("\n[update]\n");
-        in_stream << QString("[update.%1]\n").arg(ModPlatform::ProviderCapabilities::providerName(mod.provider));
+        in_stream << QString("[update.%1]\n").arg(ProviderCaps.name(mod.provider));
         switch(mod.provider){
         case(ModPlatform::Provider::FLAME):
             in_stream << QString("file-id = %1\n").arg(mod.file_id.toString());
@@ -193,7 +195,6 @@ auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
     }
 
     { // [update] info
-        using ProviderCaps = ModPlatform::ProviderCapabilities;
         using Provider = ModPlatform::Provider;
 
         toml_table_t* update_table = toml_table_in(table, "update");
@@ -203,11 +204,11 @@ auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
         }
 
         toml_table_t* mod_provider_table = nullptr;
-        if ((mod_provider_table = toml_table_in(update_table, ProviderCaps::providerName(Provider::FLAME)))) {
+        if ((mod_provider_table = toml_table_in(update_table, ProviderCaps.name(Provider::FLAME)))) {
             mod.provider = Provider::FLAME;
             mod.file_id = intEntry(mod_provider_table, "file-id");
             mod.project_id = intEntry(mod_provider_table, "project-id");
-        } else if ((mod_provider_table = toml_table_in(update_table, ProviderCaps::providerName(Provider::MODRINTH)))) {
+        } else if ((mod_provider_table = toml_table_in(update_table, ProviderCaps.name(Provider::MODRINTH)))) {
             mod.provider = Provider::MODRINTH;
             mod.mod_id() = stringEntry(mod_provider_table, "mod-id");
             mod.version() = stringEntry(mod_provider_table, "version");

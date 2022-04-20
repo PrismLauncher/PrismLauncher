@@ -15,26 +15,8 @@ enum class Provider{
 
 class ProviderCapabilities {
    public:
-    static QString hashType(Provider p) 
-    {
-        switch(p){
-        case Provider::MODRINTH:
-            return "sha512";
-        case Provider::FLAME:
-            return "murmur2";
-        }
-        return "";
-    }
-    static const char* providerName(Provider p) 
-    {
-        switch(p){
-        case Provider::MODRINTH:
-            return "modrinth";
-        case Provider::FLAME:
-            return "curseforge";
-        }
-        return "";
-    }
+    auto name(Provider) -> const char*;
+    auto hashType(Provider) -> QString;
 };
 
 struct ModpackAuthor {

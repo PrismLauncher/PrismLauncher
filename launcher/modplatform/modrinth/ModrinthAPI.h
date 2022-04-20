@@ -20,6 +20,7 @@
 
 #include "BuildConfig.h"
 #include "modplatform/ModAPI.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/helpers/NetworkModAPI.h"
 
 #include <QDebug>
