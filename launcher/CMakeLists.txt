@@ -164,6 +164,11 @@ set(UPDATE_SOURCES
     updater/DownloadTask.cpp
 )
 
+set(MAC_UPDATE_SOURCES
+    updater/macsparkle/SparkleUpdater.h
+    updater/macsparkle/SparkleUpdater.mm
+)
+
 add_unit_test(UpdateChecker
     SOURCES updater/UpdateChecker_test.cpp
     LIBS Launcher_logic
@@ -599,6 +604,10 @@ set(LOGIC_SOURCES
     ${TECHNIC_SOURCES}
     ${ATLAUNCHER_SOURCES}
 )
+
+if(APPLE)
+    set (LOGIC_SOURCES ${LOGIC_SOURCES} ${MAC_UPDATE_SOURCES})
+endif()
 
 SET(LAUNCHER_SOURCES
     # Application base
