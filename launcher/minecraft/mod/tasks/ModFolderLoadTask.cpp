@@ -19,8 +19,13 @@ void ModFolderLoadTask::run()
     m_mods_dir.refresh();
     for (auto entry : m_mods_dir.entryInfoList()) {
         Mod mod(entry);
-        if (!m_result->mods.contains(mod.internal_id()))
+        if(m_result->mods.contains(mod.internal_id())){
+            m_result->mods[mod.internal_id()].setStatus(ModStatus::Installed);
+        }
+        else {
             m_result->mods[mod.internal_id()] = mod;
+            m_result->mods[mod.internal_id()].setStatus(ModStatus::NoMetadata);
+        }
     }
 
     emit succeeded();
@@ -42,6 +47,7 @@ void ModFolderLoadTask::getFromMetadata()
         }
 
         Mod mod(m_mods_dir, metadata);
+        mod.setStatus(ModStatus::NotInstalled);
         m_result->mods[mod.internal_id()] = mod;
     }
 }

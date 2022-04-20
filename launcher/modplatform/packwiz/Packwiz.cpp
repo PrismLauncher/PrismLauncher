@@ -48,14 +48,9 @@ auto V1::createModFormat(QDir& index_dir, ::Mod& internal_mod) -> Mod
     if(mod.isValid())
         return mod;
 
-    // Manually construct packwiz mod
-    mod.name = internal_mod.name();
-    mod.filename = internal_mod.fileinfo().fileName();
+    qWarning() << QString("Tried to create mod metadata with a Mod without metadata!");
 
-    // TODO: Have a mechanism for telling the UI subsystem that we want to gather user information
-    // (i.e. which mod provider we want to use). Maybe an object parameter with a signal for that?
-
-    return mod;
+    return {};
 }
 
 void V1::updateModIndex(QDir& index_dir, Mod& mod)

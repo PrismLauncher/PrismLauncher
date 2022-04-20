@@ -54,7 +54,6 @@ Mod::Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata)
             m_type = MOD_SINGLEFILE;
     }
 
-    m_from_metadata = true;
     m_enabled = true;
     m_changedDateTime = m_file.lastModified();
 
@@ -117,11 +116,25 @@ auto Mod::enable(bool value) -> bool
             return false;
     }
 
-    if (!fromMetadata())
+    if (status() == ModStatus::NoMetadata)
         repath(QFileInfo(path));
 
     m_enabled = value;
     return true;
+}
+
+void Mod::setStatus(ModStatus status)
+{
+    if(m_localDetails.get())
+        m_localDetails->status = status;
+}
+void Mod::setMetadata(Metadata::ModStruct* metadata)
+{
+    if(status() == ModStatus::NoMetadata)
+        setStatus(ModStatus::Installed);
+
+    if(m_localDetails.get())
+        m_localDetails->metadata.reset(metadata);
 }
 
 auto Mod::destroy(QDir& index_dir) -> bool
@@ -170,13 +183,22 @@ auto Mod::authors() const -> QStringList
     return details().authors;
 }
 
+auto Mod::status() const -> ModStatus
+{
+    return details().status;
+}
+
 void Mod::finishResolvingWithDetails(std::shared_ptr<ModDetails> details)
 {
     m_resolving = false;
     m_resolved = true;
     m_localDetails = details;
 
-    if (fromMetadata() && m_temp_metadata->isValid() && m_localDetails.get()) {
+    if (status() != ModStatus::NoMetadata 
+            && m_temp_metadata.get()
+            && m_temp_metadata->isValid() && 
+            m_localDetails.get()) {
+        
         m_localDetails->metadata.swap(m_temp_metadata);
     }
 }

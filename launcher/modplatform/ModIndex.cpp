@@ -10,6 +10,7 @@ auto ProviderCapabilities::name(Provider p) -> const char*
     case Provider::FLAME:
         return "curseforge";
     }
+    return {};
 }
 auto ProviderCapabilities::hashType(Provider p) -> QString
 {
@@ -19,6 +20,7 @@ auto ProviderCapabilities::hashType(Provider p) -> QString
     case Provider::FLAME:
         return "murmur2";
     }
+    return {};
 }
 
 } // namespace ModPlatform

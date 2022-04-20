@@ -41,7 +41,6 @@ public:
     auto dateTimeChanged() const -> QDateTime { return m_changedDateTime; }
     auto internal_id()     const -> QString { return m_internal_id; }
     auto type()            const -> ModType { return m_type; }
-    auto fromMetadata()    const -> bool { return m_from_metadata; }
     auto enabled()         const -> bool { return m_enabled; }
 
     auto valid() const -> bool { return m_type != MOD_UNKNOWN; }
@@ -52,9 +51,13 @@ public:
     auto homeurl()     const -> QString;
     auto description() const -> QString;
     auto authors()     const -> QStringList;
+    auto status()      const -> ModStatus;
 
     auto metadata() const -> const std::shared_ptr<Metadata::ModStruct> { return details().metadata; };
     auto metadata() -> std::shared_ptr<Metadata::ModStruct> { return m_localDetails->metadata; };
+
+    void setStatus(ModStatus status);
+    void setMetadata(Metadata::ModStruct* metadata);
 
     auto enable(bool value) -> bool;
 
@@ -82,7 +85,6 @@ protected:
     /* Name as reported via the file name */
     QString m_name;
     ModType m_type = MOD_UNKNOWN;
-    bool m_from_metadata = false;
 
     /* If the mod has metadata, this will be filled in the constructor, and passed to 
      * the ModDetails when calling finishResolvingWithDetails */
