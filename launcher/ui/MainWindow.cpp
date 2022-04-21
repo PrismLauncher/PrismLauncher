@@ -294,14 +294,14 @@ public:
         actionViewInstanceFolder = TranslatedAction(MainWindow);
         actionViewInstanceFolder->setObjectName(QStringLiteral("actionViewInstanceFolder"));
         actionViewInstanceFolder->setIcon(APPLICATION->getThemedIcon("viewfolder"));
-        actionViewInstanceFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "View Instance Folder"));
+        actionViewInstanceFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&View Instance Folder"));
         actionViewInstanceFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the instance folder in a file browser."));
         all_actions.append(&actionViewInstanceFolder);
 
         actionViewCentralModsFolder = TranslatedAction(MainWindow);
         actionViewCentralModsFolder->setObjectName(QStringLiteral("actionViewCentralModsFolder"));
         actionViewCentralModsFolder->setIcon(APPLICATION->getThemedIcon("centralmods"));
-        actionViewCentralModsFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "View Central Mods Folder"));
+        actionViewCentralModsFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "View &Central Mods Folder"));
         actionViewCentralModsFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the central mods folder in a file browser."));
         all_actions.append(&actionViewCentralModsFolder);
 
@@ -326,7 +326,7 @@ public:
         actionSettings->setObjectName(QStringLiteral("actionSettings"));
         actionSettings->setIcon(APPLICATION->getThemedIcon("settings"));
         actionSettings->setMenuRole(QAction::PreferencesRole);
-        actionSettings.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Settings..."));
+        actionSettings.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Setti&ngs..."));
         actionSettings.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change settings."));
         actionSettings->setShortcut(QKeySequence::Preferences);
         all_actions.append(&actionSettings);
@@ -542,7 +542,7 @@ public:
 
         actionOpenWiki = TranslatedAction(MainWindow);
         actionOpenWiki->setObjectName(QStringLiteral("actionOpenWiki"));
-        actionOpenWiki.setTextId(QT_TRANSLATE_NOOP("MainWindow", "%1 He&lp"));
+        actionOpenWiki.setTextId(QT_TRANSLATE_NOOP("MainWindow", "%1 &Help"));
         actionOpenWiki.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the %1 wiki"));
         connect(actionOpenWiki, &QAction::triggered, MainWindow, &MainWindow::on_actionOpenWiki_triggered);
         all_actions.append(&actionOpenWiki);
