@@ -36,7 +36,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
-          <string notr="true">JProfiler</string>
+          <string notr="true">J&amp;Profiler</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item>
@@ -73,7 +73,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string notr="true">JVisualVM</string>
+          <string notr="true">J&amp;VisualVM</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_11">
           <item>
@@ -110,7 +110,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
-          <string notr="true">MCEdit</string>
+          <string notr="true">&amp;MCEdit</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_12">
           <item>
@@ -156,7 +156,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="labelJsonEditor">
             <property name="text">
-             <string>Text Editor:</string>
+             <string>&amp;Text Editor:</string>
             </property>
            </widget>
           </item>
