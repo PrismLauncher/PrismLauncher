@@ -14,6 +14,7 @@ namespace Parsers
     bool parseMojangResponse(QByteArray &data, Katabasis::Token &output);
 
     bool parseMinecraftProfile(QByteArray &data, MinecraftProfile &output);
+    bool parseMinecraftProfileMojang(QByteArray &data, MinecraftProfile &output);
     bool parseMinecraftEntitlements(QByteArray &data, MinecraftEntitlement &output);
     bool parseRolloutResponse(QByteArray &data, bool& result);
 }
