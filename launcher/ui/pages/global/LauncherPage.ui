@@ -196,7 +196,7 @@
           <item>
            <widget class="QRadioButton" name="sortLastLaunchedBtn">
             <property name="text">
-             <string>By &amp;last launched</string>
+             <string>&amp;By last launched</string>
             </property>
             <attribute name="buttonGroup">
              <string notr="true">sortingModeGroup</string>
@@ -293,7 +293,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Colors</string>
+             <string>&amp;Colors</string>
             </property>
             <property name="buddy">
              <cstring>themeComboBoxColors</cstring>
@@ -334,7 +334,7 @@
              <string>The menubar is more friendly for keyboard-driven interaction.</string>
             </property>
             <property name="text">
-             <string>Replace toolbar with menubar</string>
+             <string>&amp;Replace toolbar with menubar</string>
             </property>
            </widget>
           </item>
@@ -370,21 +370,21 @@
           <item>
            <widget class="QCheckBox" name="showConsoleCheck">
             <property name="text">
-             <string>Show console while the game is running?</string>
+             <string>Show console while the game is &amp;running?</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="autoCloseConsoleCheck">
             <property name="text">
-             <string>Automatically close console when the game quits?</string>
+             <string>&amp;Automatically close console when the game quits?</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="showConsoleErrorCheck">
             <property name="text">
-             <string>Show console when the game crashes?</string>
+             <string>Show console when the game &amp;crashes?</string>
             </property>
            </widget>
           </item>
@@ -394,13 +394,13 @@
        <item>
         <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
-          <string>History limit</string>
+          <string>&amp;History limit</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="1" column="0">
            <widget class="QCheckBox" name="checkStopLogging">
             <property name="text">
-             <string>Stop logging when log overflows</string>
+             <string>&amp;Stop logging when log overflows</string>
             </property>
            </widget>
           </item>
@@ -441,7 +441,7 @@
           </sizepolicy>
          </property>
          <property name="title">
-          <string>Console font</string>
+          <string>Console &amp;font</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="1" column="0" colspan="2">
