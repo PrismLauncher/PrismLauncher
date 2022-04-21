@@ -24,6 +24,7 @@
 #include "net/NetJob.h"
 
 static ModrinthAPI api;
+static ModPlatform::ProviderCapabilities ProviderCaps;
 
 void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
@@ -95,6 +96,9 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         if (parent.contains("url")) {
             file.downloadUrl = Json::requireString(parent, "url");
             file.fileName = Json::requireString(parent, "filename");
+            auto hash_list = Json::requireObject(parent, "hashes");
+            if(hash_list.contains(ProviderCaps.hashType(ModPlatform::Provider::MODRINTH)))
+                file.hash = Json::requireString(hash_list, ProviderCaps.hashType(ModPlatform::Provider::MODRINTH));
 
             unsortedVersions.append(file);
         }

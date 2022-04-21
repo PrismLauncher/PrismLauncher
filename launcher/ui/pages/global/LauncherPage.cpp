@@ -345,7 +345,7 @@ void LauncherPage::applySettings()
     }
 
     // Mods
-    s->set("DontUseModMetadata", ui->metadataDisableBtn->isChecked());
+    s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {

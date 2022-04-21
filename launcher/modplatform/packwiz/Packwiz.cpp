@@ -30,7 +30,7 @@ auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Mo
 
     mod.url = mod_version.downloadUrl;
     mod.hash_format = ProviderCaps.hashType(mod_pack.provider);
-    mod.hash = "";  // FIXME
+    mod.hash = mod_version.hash;
 
     mod.provider = mod_pack.provider;
     mod.file_id = mod_pack.addonId;

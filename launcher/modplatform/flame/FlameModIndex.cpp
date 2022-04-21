@@ -6,6 +6,8 @@
 #include "modplatform/flame/FlameAPI.h"
 #include "net/NetJob.h"
 
+static ModPlatform::ProviderCapabilities ProviderCaps;
+
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireInteger(obj, "id");
@@ -59,6 +61,12 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         file.version = Json::requireString(obj, "displayName");
         file.downloadUrl = Json::requireString(obj, "downloadUrl");
         file.fileName = Json::requireString(obj, "fileName");
+
+        auto hash_list = Json::ensureArray(obj, "hashes");
+        if(!hash_list.isEmpty()){
+            if(hash_list.contains(ProviderCaps.hashType(ModPlatform::Provider::FLAME)))
+                file.hash = Json::requireString(hash_list, "value");
+        }
 
         unsortedVersions.append(file);
     }

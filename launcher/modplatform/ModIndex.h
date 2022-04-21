@@ -8,7 +8,7 @@
 
 namespace ModPlatform {
 
-enum class Provider{
+enum class Provider {
     MODRINTH,
     FLAME
 };
@@ -33,6 +33,7 @@ struct IndexedVersion {
     QString date;
     QString fileName;
     QVector<QString> loaders = {};
+    QString hash;
 };
 
 struct IndexedPack {
