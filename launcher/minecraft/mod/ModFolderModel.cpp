@@ -339,6 +339,9 @@ bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
 
     for (auto i: indexes)
     {
+        if(i.column() != 0) {
+            continue;
+        }
         Mod &m = mods[i.row()];
         auto index_dir = indexDir();
         m.destroy(index_dir);

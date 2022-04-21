@@ -162,12 +162,14 @@ auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     char errbuf[200];
-    table = toml_parse(index_file.readAll().data(), errbuf, sizeof(errbuf));
+    auto file_bytearray = index_file.readAll();
+    table = toml_parse(file_bytearray.data(), errbuf, sizeof(errbuf));
 
     index_file.close();
 
     if (!table) {
-        qCritical() << QString("Could not open file %1!").arg(indexFileName(mod.name));
+        qWarning() << QString("Could not open file %1!").arg(indexFileName(index_file_name));
+        qWarning() << "Reason: " << QString(errbuf);
         return {};
     }
     
