@@ -44,8 +44,28 @@ bool UpdateChecker::hasChannels() const
     return !m_channels.isEmpty();
 }
 
+#ifdef Q_OS_MAC
+SparkleUpdater* UpdateChecker::getSparkleUpdater()
+{
+    return m_sparkleUpdater;
+}
+#endif
+
 void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
 {
+#ifdef Q_OS_MAC
+    m_sparkleUpdater->setAllowedChannel(updateChannel);
+    if (notifyNoUpdate)
+    {
+        qDebug() << "Checking for updates.";
+        m_sparkleUpdater->checkForUpdates();
+    }
+    else
+    {
+        // Sparkle already handles automatic update checks.
+        return;
+    }
+#else
     qDebug() << "Checking for updates.";
 
     // If the channel list hasn't loaded yet, load it and defer checking for updates until
@@ -109,6 +129,7 @@ void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
     connect(indexJob.get(), &NetJob::succeeded, [this, notifyNoUpdate](){ updateCheckFinished(notifyNoUpdate); });
     connect(indexJob.get(), &NetJob::failed, this, &UpdateChecker::updateCheckFailed);
     indexJob->start();
+#endif
 }
 
 void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)

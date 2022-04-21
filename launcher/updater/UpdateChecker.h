@@ -18,6 +18,10 @@
 #include "net/NetJob.h"
 #include "GoUpdate.h"
 
+#ifdef Q_OS_MAC
+#include "updater/macsparkle/SparkleUpdater.h"
+#endif
+
 class UpdateChecker : public QObject
 {
     Q_OBJECT
@@ -53,6 +57,13 @@ public:
      * Returns false if the channel list is empty.
      */
     bool hasChannels() const;
+
+#ifdef Q_OS_MAC
+    /*!
+     * Returns a pointer to the Sparkle updater.
+     */
+    SparkleUpdater *getSparkleUpdater();
+#endif
 
 signals:
     //! Signal emitted when an update is available. Passes the URL for the repo and the ID and name for the version.
@@ -117,5 +128,9 @@ private:
     QString m_currentRepoUrl;
 
     QString m_newRepoUrl;
+
+#ifdef Q_OS_MAC
+    SparkleUpdater *m_sparkleUpdater = new SparkleUpdater();
+#endif
 };
 

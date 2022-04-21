@@ -283,7 +283,7 @@ public:
         updateLaunchAction();
     }
 
-    void createMainToolbarActions(QMainWindow *MainWindow)
+    void createMainToolbarActions(MainWindow *MainWindow)
     {
         actionAddInstance = TranslatedAction(MainWindow);
         actionAddInstance->setObjectName(QStringLiteral("actionAddInstance"));
@@ -1027,6 +1027,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         {
             updater->checkForUpdate(APPLICATION->settings()->get("UpdateChannel").toString(), false);
         }
+
+#ifdef Q_OS_MAC
+        connect(APPLICATION->updateChecker()->getSparkleUpdater(),
+                &SparkleUpdater::canCheckForUpdatesChanged,
+                this,
+                &MainWindow::updatesAllowedChanged);
+#endif
     }
 
     setSelectedInstanceById(APPLICATION->settings()->get("SelectedInstance").toString());
