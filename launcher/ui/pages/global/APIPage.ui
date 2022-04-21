@@ -36,7 +36,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_paste">
          <property name="title">
-          <string>Pastebin URL</string>
+          <string>&amp;Pastebin URL</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
@@ -98,7 +98,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_msa">
          <property name="title">
-          <string>Microsoft Authentication</string>
+          <string>&amp;Microsoft Authentication</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
