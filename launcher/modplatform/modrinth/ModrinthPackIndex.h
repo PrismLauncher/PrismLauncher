@@ -29,5 +29,6 @@ void loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                              QJsonArray& arr,
                              const shared_qobject_ptr<QNetworkAccessManager>& network,
                              BaseInstance* inst);
+auto loadIndexedPackVersion(QJsonObject& obj) -> ModPlatform::IndexedVersion;
 
 }  // namespace Modrinth

@@ -59,49 +59,10 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
 
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
-        ModPlatform::IndexedVersion file;
-        file.addonId = Json::requireString(obj, "project_id");
-        file.fileId = Json::requireString(obj, "id");
-        file.date = Json::requireString(obj, "date_published");
-        auto versionArray = Json::requireArray(obj, "game_versions");
-        if (versionArray.empty()) { continue; }
-        for (auto mcVer : versionArray) {
-            file.mcVersion.append(mcVer.toString());
-        }
-        auto loaders = Json::requireArray(obj, "loaders");
-        for (auto loader : loaders) {
-            file.loaders.append(loader.toString());
-        }
-        file.version = Json::requireString(obj, "name");
+        auto file = loadIndexedPackVersion(obj);
 
-        auto files = Json::requireArray(obj, "files");
-        int i = 0;
-        
-        // Find correct file (needed in cases where one version may have multiple files)
-        // Will default to the last one if there's no primary (though I think Modrinth requires that
-        // at least one file is primary, idk)
-        // NOTE: files.count() is 1-indexed, so we need to subtract 1 to become 0-indexed
-        while (i < files.count() - 1){ 
-            auto parent = files[i].toObject();
-            auto fileName = Json::requireString(parent, "filename");
-
-            // Grab the primary file, if available
-            if(Json::requireBoolean(parent, "primary"))
-                break;
-
-            i++;
-        }
-
-        auto parent = files[i].toObject();
-        if (parent.contains("url")) {
-            file.downloadUrl = Json::requireString(parent, "url");
-            file.fileName = Json::requireString(parent, "filename");
-            auto hash_list = Json::requireObject(parent, "hashes");
-            if(hash_list.contains(ProviderCaps.hashType(ModPlatform::Provider::MODRINTH)))
-                file.hash = Json::requireString(hash_list, ProviderCaps.hashType(ModPlatform::Provider::MODRINTH));
-
+        if(file.fileId.isValid()) // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
-        }
     }
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
         // dates are in RFC 3339 format
@@ -110,4 +71,56 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
     std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
     pack.versions = unsortedVersions;
     pack.versionsLoaded = true;
+}
+
+auto Modrinth::loadIndexedPackVersion(QJsonObject &obj) -> ModPlatform::IndexedVersion
+{
+    ModPlatform::IndexedVersion file;
+
+    file.addonId = Json::requireString(obj, "project_id");
+    file.fileId = Json::requireString(obj, "id");
+    file.date = Json::requireString(obj, "date_published");
+    auto versionArray = Json::requireArray(obj, "game_versions");
+    if (versionArray.empty()) {
+        return {};
+    }
+    for (auto mcVer : versionArray) {
+        file.mcVersion.append(mcVer.toString());
+    }
+    auto loaders = Json::requireArray(obj, "loaders");
+    for (auto loader : loaders) {
+        file.loaders.append(loader.toString());
+    }
+    file.version = Json::requireString(obj, "name");
+
+    auto files = Json::requireArray(obj, "files");
+    int i = 0;
+
+    // Find correct file (needed in cases where one version may have multiple files)
+    // Will default to the last one if there's no primary (though I think Modrinth requires that
+    // at least one file is primary, idk)
+    // NOTE: files.count() is 1-indexed, so we need to subtract 1 to become 0-indexed
+    while (i < files.count() - 1) {
+        auto parent = files[i].toObject();
+        auto fileName = Json::requireString(parent, "filename");
+
+        // Grab the primary file, if available
+        if (Json::requireBoolean(parent, "primary"))
+            break;
+
+        i++;
+    }
+
+    auto parent = files[i].toObject();
+    if (parent.contains("url")) {
+        file.downloadUrl = Json::requireString(parent, "url");
+        file.fileName = Json::requireString(parent, "filename");
+        auto hash_list = Json::requireObject(parent, "hashes");
+        if (hash_list.contains(ProviderCaps.hashType(ModPlatform::Provider::MODRINTH)))
+            file.hash = Json::requireString(hash_list, ProviderCaps.hashType(ModPlatform::Provider::MODRINTH));
+
+        return file;
+    }
+
+    return {};
 }
