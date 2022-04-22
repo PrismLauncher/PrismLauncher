@@ -301,13 +301,13 @@ AtlOptionalModDialog::AtlOptionalModDialog(QWidget *parent, QVector<ATLauncher::
     ui->treeView->header()->setSectionResizeMode(
             AtlOptionalModListModel::DescriptionColumn, QHeaderView::Stretch);
 
-    connect(ui->shareCodeButton, &QPushButton::pressed,
+    connect(ui->shareCodeButton, &QPushButton::clicked,
             this, &AtlOptionalModDialog::useShareCode);
-    connect(ui->selectRecommendedButton, &QPushButton::pressed,
+    connect(ui->selectRecommendedButton, &QPushButton::clicked,
             listModel, &AtlOptionalModListModel::selectRecommended);
-    connect(ui->clearAllButton, &QPushButton::pressed,
+    connect(ui->clearAllButton, &QPushButton::clicked,
             listModel, &AtlOptionalModListModel::clearAll);
-    connect(ui->installButton, &QPushButton::pressed,
+    connect(ui->installButton, &QPushButton::clicked,
             this, &QDialog::close);
 }
 
