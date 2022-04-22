@@ -77,18 +77,20 @@ void ModDownloadDialog::confirm()
     auto keys = modTask.keys();
     keys.sort(Qt::CaseInsensitive);
 
-    auto confirm_dialog = ReviewMessageBox::create(
-        this,
-        tr("Confirm mods to download")
-    );
+    auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm mods to download"));
 
-    for(auto& task : keys){
-        confirm_dialog->appendMod(task, modTask.find(task).value()->getFilename());
+    for (auto& task : keys) {
+        confirm_dialog->appendMod({ task, modTask.find(task).value()->getFilename() });
     }
 
-    connect(confirm_dialog, &QDialog::accepted, this, &ModDownloadDialog::accept);
+    if (confirm_dialog->exec()) {
+        auto deselected = confirm_dialog->deselectedMods();
+        for (auto name : deselected) {
+            modTask.remove(name);
+        }
 
-    confirm_dialog->open();
+        this->accept();
+    }
 }
 
 void ModDownloadDialog::accept()
