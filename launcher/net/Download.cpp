@@ -30,7 +30,7 @@ namespace Net {
 
 Download::Download() : NetAction()
 {
-    m_status = Job_NotStarted;
+    m_state = State::Inactive;
 }
 
 Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry, Options options)
@@ -68,29 +68,29 @@ void Download::addValidator(Validator* v)
     m_sink->addValidator(v);
 }
 
-void Download::startImpl()
+void Download::executeTask()
 {
-    if (m_status == Job_Aborted) {
+    if (getState() == Task::State::AbortedByUser) {
         qWarning() << "Attempt to start an aborted Download:" << m_url.toString();
         emit aborted(m_index_within_job);
         return;
     }
+
     QNetworkRequest request(m_url);
-    m_status = m_sink->init(request);
-    switch (m_status) {
-        case Job_Finished:
+    m_state = m_sink->init(request);
+    switch (m_state) {
+        case State::Succeeded:
             emit succeeded(m_index_within_job);
             qDebug() << "Download cache hit " << m_url.toString();
             return;
-        case Job_InProgress:
+        case State::Running:
             qDebug() << "Downloading " << m_url.toString();
             break;
-        case Job_Failed_Proceed:  // this is meaningless in this context. We do need a sink.
-        case Job_NotStarted:
-        case Job_Failed:
+        case State::Inactive:
+        case State::Failed:
             emit failed(m_index_within_job);
             return;
-        case Job_Aborted:
+        case State::AbortedByUser:
             return;
     }
 
@@ -111,8 +111,7 @@ void Download::startImpl()
 
 void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-    m_total_progress = bytesTotal;
-    m_progress = bytesReceived;
+    setProgress(bytesReceived, bytesTotal);
     emit netActionProgress(m_index_within_job, bytesReceived, bytesTotal);
 }
 
@@ -120,17 +119,17 @@ void Download::downloadError(QNetworkReply::NetworkError error)
 {
     if (error == QNetworkReply::OperationCanceledError) {
         qCritical() << "Aborted " << m_url.toString();
-        m_status = Job_Aborted;
+        m_state = State::AbortedByUser;
     } else {
         if (m_options & Option::AcceptLocalFiles) {
             if (m_sink->hasLocalData()) {
-                m_status = Job_Failed_Proceed;
+                m_state = State::Succeeded;
                 return;
             }
         }
         // error happened during download.
         qCritical() << "Failed " << m_url.toString() << " with reason " << error;
-        m_status = Job_Failed;
+        m_state = State::Failed;
     }
 }
 
@@ -194,7 +193,8 @@ bool Download::handleRedirect()
 
     m_url = QUrl(redirect.toString());
     qDebug() << "Following redirect to " << m_url.toString();
-    start(m_network);
+    startAction(m_network);
+
     return true;
 }
 
@@ -207,19 +207,20 @@ void Download::downloadFinished()
     }
 
     // if the download failed before this point ...
-    if (m_status == Job_Failed_Proceed) {
+    if (m_state == State::Succeeded)  // pretend to succeed so we continue processing :)
+    {
         qDebug() << "Download failed but we are allowed to proceed:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit succeeded(m_index_within_job);
         return;
-    } else if (m_status == Job_Failed) {
+    } else if (m_state == State::Failed) {
         qDebug() << "Download failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit failed(m_index_within_job);
         return;
-    } else if (m_status == Job_Aborted) {
+    } else if (m_state == State::AbortedByUser) {
         qDebug() << "Download aborted in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
@@ -231,12 +232,12 @@ void Download::downloadFinished()
     auto data = m_reply->readAll();
     if (data.size()) {
         qDebug() << "Writing extra" << data.size() << "bytes to" << m_target_path;
-        m_status = m_sink->write(data);
+        m_state = m_sink->write(data);
     }
 
     // otherwise, finalize the whole graph
-    m_status = m_sink->finalize(*m_reply.get());
-    if (m_status != Job_Finished) {
+    m_state = m_sink->finalize(*m_reply.get());
+    if (m_state != State::Succeeded) {
         qDebug() << "Download failed to finalize:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
@@ -250,10 +251,10 @@ void Download::downloadFinished()
 
 void Download::downloadReadyRead()
 {
-    if (m_status == Job_InProgress) {
+    if (m_state == State::Running) {
         auto data = m_reply->readAll();
-        m_status = m_sink->write(data);
-        if (m_status == Job_Failed) {
+        m_state = m_sink->write(data);
+        if (m_state == State::Failed) {
             qCritical() << "Failed to process response chunk for " << m_target_path;
         }
         // qDebug() << "Download" << m_url.toString() << "gained" << data.size() << "bytes";
@@ -269,12 +270,7 @@ bool Net::Download::abort()
     if (m_reply) {
         m_reply->abort();
     } else {
-        m_status = Job_Aborted;
+        m_state = State::AbortedByUser;
     }
-    return true;
-}
-
-bool Net::Download::canAbort()
-{
     return true;
 }

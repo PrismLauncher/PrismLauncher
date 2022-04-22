@@ -21,7 +21,7 @@ slots:
 
 public
 slots:
-    void startImpl() override;
+    void executeTask() override;
 
 private:
     ScreenShot::Ptr m_shot;

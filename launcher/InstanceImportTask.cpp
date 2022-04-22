@@ -14,26 +14,24 @@
  */
 
 #include "InstanceImportTask.h"
+#include <QtConcurrentRun>
+#include "Application.h"
 #include "BaseInstance.h"
 #include "FileSystem.h"
-#include "Application.h"
 #include "MMCZip.h"
 #include "NullInstance.h"
-#include "settings/INISettingsObject.h"
+#include "icons/IconList.h"
 #include "icons/IconUtils.h"
-#include <QtConcurrentRun>
+#include "settings/INISettingsObject.h"
 
 // FIXME: this does not belong here, it's Minecraft/Flame specific
+#include <quazip/quazipdir.h>
+#include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/PackManifest.h"
-#include "Json.h"
-#include <quazip/quazipdir.h>
 #include "modplatform/technic/TechnicPackProcessor.h"
-
-#include "icons/IconList.h"
-#include "Application.h"
 
 InstanceImportTask::InstanceImportTask(const QUrl sourceUrl)
 {

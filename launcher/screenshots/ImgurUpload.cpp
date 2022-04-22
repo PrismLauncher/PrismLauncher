@@ -13,13 +13,13 @@
 ImgurUpload::ImgurUpload(ScreenShot::Ptr shot) : NetAction(), m_shot(shot)
 {
     m_url = BuildConfig.IMGUR_BASE_URL + "upload.json";
-    m_status = Job_NotStarted;
+    m_state = State::Inactive;
 }
 
-void ImgurUpload::startImpl()
+void ImgurUpload::executeTask()
 {
     finished = false;
-    m_status = Job_InProgress;
+    m_state = Task::State::Running;
     QNetworkRequest request(m_url);
     request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
     request.setRawHeader("Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toStdString().c_str());
@@ -63,7 +63,7 @@ void ImgurUpload::downloadError(QNetworkReply::NetworkError error)
         qCritical() << "Double finished ImgurUpload!";
         return;
     }
-    m_status = Job_Failed;
+    m_state = Task::State::Failed;
     finished = true;
     m_reply.reset();
     emit failed(m_index_within_job);
@@ -99,14 +99,13 @@ void ImgurUpload::downloadFinished()
     m_shot->m_imgurId = object.value("data").toObject().value("id").toString();
     m_shot->m_url = object.value("data").toObject().value("link").toString();
     m_shot->m_imgurDeleteHash = object.value("data").toObject().value("deletehash").toString();
-    m_status = Job_Finished;
+    m_state = Task::State::Succeeded;
     finished = true;
     emit succeeded(m_index_within_job);
     return;
 }
 void ImgurUpload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-    m_total_progress = bytesTotal;
-    m_progress = bytesReceived;
+    setProgress(bytesReceived, bytesTotal);
     emit netActionProgress(m_index_within_job, bytesReceived, bytesTotal);
 }

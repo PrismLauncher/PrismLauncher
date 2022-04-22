@@ -12,17 +12,13 @@ MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator * md5sum)
     addValidator(md5sum);
 }
 
-MetaCacheSink::~MetaCacheSink()
-{
-    // nil
-}
-
-JobStatus MetaCacheSink::initCache(QNetworkRequest& request)
+Task::State MetaCacheSink::initCache(QNetworkRequest& request)
 {
     if (!m_entry->isStale())
     {
-        return Job_Finished;
+        return Task::State::Succeeded;
     }
+
     // check if file exists, if it does, use its information for the request
     QFile current(m_filename);
     if(current.exists() && current.size() != 0)
@@ -36,25 +32,31 @@ JobStatus MetaCacheSink::initCache(QNetworkRequest& request)
             request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->getETag().toLatin1());
         }
     }
-    return Job_InProgress;
+
+    return Task::State::Running;
 }
 
-JobStatus MetaCacheSink::finalizeCache(QNetworkReply & reply)
+Task::State MetaCacheSink::finalizeCache(QNetworkReply & reply)
 {
     QFileInfo output_file_info(m_filename);
+
     if(wroteAnyData)
     {
         m_entry->setMD5Sum(m_md5Node->hash().toHex().constData());
     }
+
     m_entry->setETag(reply.rawHeader("ETag").constData());
+
     if (reply.hasRawHeader("Last-Modified"))
     {
         m_entry->setRemoteChangedTimestamp(reply.rawHeader("Last-Modified").constData());
     }
+
     m_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
     m_entry->setStale(false);
     APPLICATION->metacache()->updateEntry(m_entry);
-    return Job_Finished;
+
+    return Task::State::Succeeded;
 }
 
 bool MetaCacheSink::hasLocalData()

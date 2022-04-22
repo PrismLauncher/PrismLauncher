@@ -667,7 +667,7 @@ void TranslationsModel::downloadTranslation(QString key)
     auto dl = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + lang->file_name), entry);
     auto rawHash = QByteArray::fromHex(lang->file_sha1.toLatin1());
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
-    dl->m_total_progress = lang->file_size;
+    dl->setProgress(dl->getProgress(), lang->file_size);
 
     d->m_dl_job = new NetJob("Translation for " + key, APPLICATION->network());
     d->m_dl_job->addNetAction(dl);

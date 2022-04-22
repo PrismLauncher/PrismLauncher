@@ -297,7 +297,7 @@ NetAction::Ptr AssetObject::getDownloadAction()
             auto rawHash = QByteArray::fromHex(hash.toLatin1());
             objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
         }
-        objectDL->m_total_progress = size;
+        objectDL->setProgress(objectDL->getProgress(), size);
         return objectDL;
     }
     return nullptr;

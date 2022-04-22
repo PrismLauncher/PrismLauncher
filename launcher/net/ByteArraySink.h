@@ -3,60 +3,59 @@
 #include "Sink.h"
 
 namespace Net {
+
 /*
  * Sink object for downloads that uses an external QByteArray it doesn't own as a target.
  */
-class ByteArraySink : public Sink
-{
-public:
-    ByteArraySink(QByteArray *output)
-        :m_output(output)
-    {
-        // nil
-    };
+class ByteArraySink : public Sink {
+   public:
+    ByteArraySink(QByteArray* output) : m_output(output){};
 
-    virtual ~ByteArraySink()
-    {
-        // nil
-    }
+    virtual ~ByteArraySink() = default;
 
-public:
-    JobStatus init(QNetworkRequest & request) override
+   public:
+    auto init(QNetworkRequest& request) -> Task::State override
     {
+        if(!m_output)
+            return Task::State::Failed;
+
         m_output->clear();
-        if(initAllValidators(request))
-            return Job_InProgress;
-        return Job_Failed;
+        if (initAllValidators(request))
+            return Task::State::Running;
+        return Task::State::Failed;
     };
 
-    JobStatus write(QByteArray & data) override
+    auto write(QByteArray& data) -> Task::State override
     {
+        if(!m_output)
+            return Task::State::Failed;
+
         m_output->append(data);
-        if(writeAllValidators(data))
-            return Job_InProgress;
-        return Job_Failed;
+        if (writeAllValidators(data))
+            return Task::State::Running;
+        return Task::State::Failed;
     }
 
-    JobStatus abort() override
+    auto abort() -> Task::State override
     {
+        if(!m_output)
+            return Task::State::Failed;
+
         m_output->clear();
         failAllValidators();
-        return Job_Failed;
+        return Task::State::Failed;
     }
 
-    JobStatus finalize(QNetworkReply &reply) override
+    auto finalize(QNetworkReply& reply) -> Task::State override
     {
-        if(finalizeAllValidators(reply))
-            return Job_Finished;
-        return Job_Failed;
+        if (finalizeAllValidators(reply))
+            return Task::State::Succeeded;
+        return Task::State::Failed;
     }
 
-    bool hasLocalData() override
-    {
-        return false;
-    }
+    auto hasLocalData() -> bool override { return false; }
 
-private:
-    QByteArray * m_output;
+   private:
+    QByteArray* m_output;
 };
-}
+}  // namespace Net

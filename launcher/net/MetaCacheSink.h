@@ -1,22 +1,23 @@
 #pragma once
-#include "FileSink.h"
+
 #include "ChecksumValidator.h"
+#include "FileSink.h"
 #include "net/HttpMetaCache.h"
 
 namespace Net {
-class MetaCacheSink : public FileSink
-{
-public: /* con/des */
-    MetaCacheSink(MetaEntryPtr entry, ChecksumValidator * md5sum);
-    virtual ~MetaCacheSink();
-    bool hasLocalData() override;
+class MetaCacheSink : public FileSink {
+   public:
+    MetaCacheSink(MetaEntryPtr entry, ChecksumValidator* md5sum);
+    virtual ~MetaCacheSink() = default;
 
-protected: /* methods */
-    JobStatus initCache(QNetworkRequest & request) override;
-    JobStatus finalizeCache(QNetworkReply & reply) override;
+    auto hasLocalData() -> bool override;
 
-private: /* data */
+   protected:
+    auto initCache(QNetworkRequest& request) -> Task::State override;
+    auto finalizeCache(QNetworkReply& reply) -> Task::State override;
+
+   private:
     MetaEntryPtr m_entry;
-    ChecksumValidator * m_md5Node;
+    ChecksumValidator* m_md5Node;
 };
-}
+}  // namespace Net

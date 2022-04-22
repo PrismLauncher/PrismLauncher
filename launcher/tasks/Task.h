@@ -52,6 +52,8 @@ class Task : public QObject {
 
     virtual bool canAbort() const { return false; }
 
+    auto getState() const -> State { return m_state; }
+
     QString getStatus() { return m_status; }
     virtual auto getStepStatus() const -> QString { return m_status; }
 
@@ -90,7 +92,7 @@ class Task : public QObject {
     void setStatus(const QString& status);
     void setProgress(qint64 current, qint64 total);
 
-   private:
+   protected:
     State m_state = State::Inactive;
     QStringList m_Warnings;
     QString m_failReason = "";

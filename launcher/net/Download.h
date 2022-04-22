@@ -27,7 +27,7 @@ class Download : public NetAction
 {
     Q_OBJECT
 
-public: /* types */
+public:
     typedef shared_qobject_ptr<class Download> Ptr;
     enum class Option
     {
@@ -36,7 +36,7 @@ public: /* types */
     };
     Q_DECLARE_FLAGS(Options, Option)
 
-protected: /* con/des */
+protected:
     explicit Download();
 public:
     virtual ~Download(){};
@@ -44,16 +44,16 @@ public:
     static Download::Ptr makeByteArray(QUrl url, QByteArray *output, Options options = Option::NoOptions);
     static Download::Ptr makeFile(QUrl url, QString path, Options options = Option::NoOptions);
 
-public: /* methods */
+public:
     QString getTargetFilepath()
     {
         return m_target_path;
     }
     void addValidator(Validator * v);
     bool abort() override;
-    bool canAbort() override;
+    bool canAbort() const override { return true; };
 
-private: /* methods */
+private:
     bool handleRedirect();
 
 protected slots:
@@ -64,9 +64,9 @@ protected slots:
     void downloadReadyRead() override;
 
 public slots:
-    void startImpl() override;
+    void executeTask() override;
 
-private: /* data */
+private:
     // FIXME: remove this, it has no business being here.
     QString m_target_path;
     std::unique_ptr<Sink> m_sink;

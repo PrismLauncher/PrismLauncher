@@ -13,12 +13,12 @@
 ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenShot::Ptr> screenshots) : NetAction(), m_screenshots(screenshots)
 {
     m_url = BuildConfig.IMGUR_BASE_URL + "album.json";
-    m_status = Job_NotStarted;
+    m_state = State::Inactive;
 }
 
-void ImgurAlbumCreation::startImpl()
+void ImgurAlbumCreation::executeTask()
 {
-    m_status = Job_InProgress;
+    m_state = State::Running;
     QNetworkRequest request(m_url);
     request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -43,11 +43,11 @@ void ImgurAlbumCreation::startImpl()
 void ImgurAlbumCreation::downloadError(QNetworkReply::NetworkError error)
 {
     qDebug() << m_reply->errorString();
-    m_status = Job_Failed;
+    m_state = State::Failed;
 }
 void ImgurAlbumCreation::downloadFinished()
 {
-    if (m_status != Job_Failed)
+    if (m_state != State::Failed)
     {
         QByteArray data = m_reply->readAll();
         m_reply.reset();
@@ -68,7 +68,7 @@ void ImgurAlbumCreation::downloadFinished()
         }
         m_deleteHash = object.value("data").toObject().value("deletehash").toString();
         m_id = object.value("data").toObject().value("id").toString();
-        m_status = Job_Finished;
+        m_state = State::Succeeded;
         emit succeeded(m_index_within_job);
         return;
     }
@@ -82,7 +82,6 @@ void ImgurAlbumCreation::downloadFinished()
 }
 void ImgurAlbumCreation::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-    m_total_progress = bytesTotal;
-    m_progress = bytesReceived;
+    setProgress(bytesReceived, bytesTotal);
     emit netActionProgress(m_index_within_job, bytesReceived, bytesTotal);
 }
