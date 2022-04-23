@@ -173,7 +173,6 @@ void SparkleUpdater::setAllowedChannel(const QString &channel)
 
     NSSet<NSString *> *nsChannels = [NSSet setWithObject:channel.toNSString()];
     priv->updaterDelegate.allowedChannels = nsChannels;
-    qDebug() << channel;
     APPLICATION->settings()->set("UpdateChannel", channel);
 }
 

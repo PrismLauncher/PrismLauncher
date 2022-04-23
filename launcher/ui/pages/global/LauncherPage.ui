@@ -54,7 +54,7 @@
           <item>
            <widget class="QCheckBox" name="autoUpdateCheckBox">
             <property name="text">
-             <string>Check for updates on start?</string>
+             <string>Check for updates automatically</string>
             </property>
            </widget>
           </item>
