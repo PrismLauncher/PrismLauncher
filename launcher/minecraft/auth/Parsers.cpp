@@ -307,7 +307,7 @@ bool parseMinecraftProfileMojang(QByteArray & data, MinecraftProfile &output) {
 
         auto value = pObj.value("value");
         if (value.isString()) {
-            texturePayload = QByteArray::fromBase64(value.toString().toUtf8(), QByteArray::AbortOnBase64DecodingErrors);
+            texturePayload = QByteArray::fromBase64(value.toString().toUtf8());
         }
 
         if (!texturePayload.isEmpty()) {
