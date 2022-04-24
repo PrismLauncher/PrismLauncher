@@ -19,62 +19,62 @@ package org.multimc;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ParamBucket
 {
+
+    private final Map<String, List<String>> paramsMap = new HashMap<>();
+
     public void add(String key, String value)
     {
-        List<String> coll = null;
-        if(!m_params.containsKey(key))
-        {
-            coll = new ArrayList<String>();
-            m_params.put(key, coll);
-        }
-        else
-        {
-            coll = m_params.get(key);
-        }
-        coll.add(value);
+        paramsMap.computeIfAbsent(key, k -> new ArrayList<>())
+                .add(value);
     }
 
     public List<String> all(String key) throws NotFoundException
     {
-        if(!m_params.containsKey(key))
+        List<String> params = paramsMap.get(key);
+
+        if (params == null)
             throw new NotFoundException();
-        return m_params.get(key);
+
+        return params;
     }
 
     public List<String> allSafe(String key, List<String> def)
     {
-        if(!m_params.containsKey(key) || m_params.get(key).size() < 1)
-        {
+        List<String> params = paramsMap.get(key);
+
+        if (params == null || params.isEmpty())
             return def;
-        }
-        return m_params.get(key);
+
+        return params;
     }
 
     public List<String> allSafe(String key)
     {
-        return allSafe(key, new ArrayList<String>());
+        return allSafe(key, new ArrayList<>());
     }
 
     public String first(String key) throws NotFoundException
     {
         List<String> list = all(key);
-        if(list.size() < 1)
-        {
+
+        if (list.isEmpty())
             throw new NotFoundException();
-        }
+
         return list.get(0);
     }
 
     public String firstSafe(String key, String def)
     {
-        if(!m_params.containsKey(key) || m_params.get(key).size() < 1)
-        {
+        List<String> params = paramsMap.get(key);
+
+        if (params == null || params.isEmpty())
             return def;
-        }
-        return m_params.get(key).get(0);
+
+        return params.get(0);
     }
 
     public String firstSafe(String key)
@@ -82,5 +82,4 @@ public class ParamBucket
         return firstSafe(key, "");
     }
 
-    private HashMap<String, List<String>> m_params = new HashMap<String, List<String>>();
 }
