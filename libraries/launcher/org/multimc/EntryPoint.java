@@ -20,9 +20,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class EntryPoint
 {
+
+    private static final Logger LOGGER = Logger.getLogger("EntryPoint");
 
     private final ParamBucket params = new ParamBucket();
 
@@ -36,7 +40,8 @@ public class EntryPoint
 
         if (retCode != 0)
         {
-            System.out.println("Exiting with " + retCode);
+            LOGGER.info("Exiting with " + retCode);
+
             System.exit(retCode);
         }
     }
@@ -64,7 +69,7 @@ public class EntryPoint
                 if (pair[1].equals("onesix")) {
                     launcher = new OneSixLauncher();
 
-                    Utils.log("Using onesix launcher.");
+                    LOGGER.info("Using onesix launcher.");
 
                     return Action.Proceed;
                 } else {
@@ -101,9 +106,7 @@ public class EntryPoint
                 }
             }
         } catch (IOException | ParseException e) {
-            Utils.log("Launcher ABORT due to exception:");
-
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Launcher ABORT due to exception:", e);
 
             return 1;
         }
@@ -111,7 +114,8 @@ public class EntryPoint
         // Main loop
         if (action == Action.Abort)
         {
-            System.err.println("Launch aborted by the launcher.");
+            LOGGER.info("Launch aborted by the launcher.");
+
             return 1;
         }
 
@@ -120,7 +124,7 @@ public class EntryPoint
             return launcher.launch(params);
         }
 
-        System.err.println("No valid launcher implementation specified.");
+        LOGGER.log(Level.SEVERE, "No valid launcher implementation specified.");
 
         return 1;
     }
