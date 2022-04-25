@@ -557,6 +557,8 @@ set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLPackInstallTask.h
     modplatform/atlauncher/ATLPackManifest.cpp
     modplatform/atlauncher/ATLPackManifest.h
+    modplatform/atlauncher/ATLShareCode.cpp
+    modplatform/atlauncher/ATLShareCode.h
 )
 
 add_unit_test(Index

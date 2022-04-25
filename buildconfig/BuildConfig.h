@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -139,6 +140,7 @@ public:
     QString LEGACY_FTB_CDN_BASE_URL = "https://dist.creeper.host/FTB2/";
 
     QString ATL_DOWNLOAD_SERVER_URL = "https://download.nodecdn.net/containers/atl/";
+    QString ATL_API_BASE_URL = "https://api.atlauncher.com/v1/";
 
     QString TECHNIC_API_BASE_URL = "https://api.technicpack.net/";
     /**
