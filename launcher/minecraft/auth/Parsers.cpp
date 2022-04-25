@@ -1,4 +1,5 @@
 #include "Parsers.h"
+#include "Json.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -285,7 +286,7 @@ bool parseMinecraftProfileMojang(QByteArray & data, MinecraftProfile &output) {
         return false;
     }
 
-    auto obj = doc.object();
+    auto obj = Json::requireObject(doc, "mojang minecraft profile");
     if(!getString(obj.value("id"), output.id)) {
         qWarning() << "Minecraft profile id is not a string";
         return false;
@@ -330,7 +331,7 @@ bool parseMinecraftProfileMojang(QByteArray & data, MinecraftProfile &output) {
         return false;
     }
 
-    obj = doc.object();
+    obj = Json::requireObject(doc, "session texture payload");
     auto textures = obj.value("textures");
     if (!textures.isObject()) {
         qWarning() << "No textures array in response";
