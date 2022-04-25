@@ -6,7 +6,8 @@
 
 PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
 
-This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC. The PolyMC community felt that the maintainer was not acting in the spirit of Free Software so this fork was made.
+This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC.
+If you want to read about why this fork was created, check out [our FAQ page](https://polymc.org/wiki/overview/faq/).
 <br>
 
 # Installation
@@ -81,8 +82,8 @@ To modify download information or change packaging information send a pull reque
 
 Do whatever you want, we don't care. Just follow the license. If you have any questions about this feel free to ask in an issue.
 
-All launcher code is available under the GPL-3 license.
+All launcher code is available under the GPL-3.0-only license.
   
-[Source for the website](https://github.com/PolyMC/polymc.github.io) is hosted under the AGPL-3 License.
+[Source for the website](https://github.com/PolyMC/polymc.github.io) is hosted under the AGPL-3.0-or-later License.
 
 The logo and related assets are under the CC BY-SA 4.0 license.
