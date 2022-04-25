@@ -65,17 +65,17 @@
   </widget>
   <action name="actionAddMojang">
    <property name="text">
-    <string>Add Mojang</string>
+    <string>Add &amp;Mojang</string>
    </property>
   </action>
   <action name="actionRemove">
    <property name="text">
-    <string>Remove</string>
+    <string>Remo&amp;ve</string>
    </property>
   </action>
   <action name="actionSetDefault">
    <property name="text">
-    <string>Set Default</string>
+    <string>&amp;Set Default</string>
    </property>
   </action>
   <action name="actionNoDefault">
@@ -83,17 +83,17 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>No Default</string>
+    <string>&amp;No Default</string>
    </property>
   </action>
   <action name="actionUploadSkin">
    <property name="text">
-    <string>Upload Skin</string>
+    <string>&amp;Upload Skin</string>
    </property>
   </action>
   <action name="actionDeleteSkin">
    <property name="text">
-    <string>Delete Skin</string>
+    <string>&amp;Delete Skin</string>
    </property>
    <property name="toolTip">
     <string>Delete the currently active skin and go back to the default one</string>
@@ -101,17 +101,17 @@
   </action>
   <action name="actionAddMicrosoft">
    <property name="text">
-    <string>Add Microsoft</string>
+    <string>&amp;Add Microsoft</string>
    </property>
   </action>
   <action name="actionAddOffline">
    <property name="text">
-    <string>Add Offline</string>
+    <string>Add &amp;Offline</string>
    </property>
   </action>
   <action name="actionRefresh">
    <property name="text">
-    <string>Refresh</string>
+    <string>&amp;Refresh</string>
    </property>
    <property name="toolTip">
     <string>Refresh the account tokens</string>

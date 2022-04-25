@@ -29,7 +29,7 @@
       <bool>true</bool>
      </property>
      <property name="title">
-      <string>Cus&amp;tom Commands</string>
+      <string>&amp;Custom Commands</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -41,7 +41,7 @@
       <item row="2" column="0">
        <widget class="QLabel" name="labelPostExitCmd">
         <property name="text">
-         <string>Post-exit command:</string>
+         <string>P&amp;ost-exit command:</string>
         </property>
        </widget>
       </item>
@@ -51,7 +51,7 @@
       <item row="0" column="0">
        <widget class="QLabel" name="labelPreLaunchCmd">
         <property name="text">
-         <string>Pre-launch command:</string>
+         <string>&amp;Pre-launch command:</string>
         </property>
        </widget>
       </item>
@@ -61,7 +61,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="labelWrapperCmd">
         <property name="text">
-         <string>Wrapper command:</string>
+         <string>&amp;Wrapper command:</string>
         </property>
        </widget>
       </item>

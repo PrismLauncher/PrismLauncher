@@ -70,14 +70,14 @@
           <item row="0" column="0">
            <widget class="QLabel" name="labelMinMem">
             <property name="text">
-             <string>Minimum memory allocation:</string>
+             <string>&amp;Minimum memory allocation:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="labelMaxMem">
             <property name="text">
-             <string>Maximum memory allocation:</string>
+             <string>Ma&amp;ximum memory allocation:</string>
             </property>
            </widget>
           </item>
@@ -106,7 +106,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="labelPermGen">
             <property name="text">
-             <string notr="true">PermGen:</string>
+             <string notr="true">&amp;PermGen:</string>
             </property>
            </widget>
           </item>
@@ -150,7 +150,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Java path:</string>
+             <string>&amp;Java path:</string>
             </property>
            </widget>
           </item>
@@ -192,7 +192,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>JVM arguments:</string>
+             <string>J&amp;VM arguments:</string>
             </property>
            </widget>
           </item>
@@ -205,7 +205,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Auto-detect...</string>
+             <string>&amp;Auto-detect...</string>
             </property>
            </widget>
           </item>
@@ -218,7 +218,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Test</string>
+             <string>&amp;Test</string>
             </property>
            </widget>
           </item>
@@ -234,7 +234,7 @@
              <string>If enabled, the launcher will not check if an instance is compatible with the selected Java version.</string>
             </property>
             <property name="text">
-             <string>Skip Java compatibility checks</string>
+             <string>&amp;Skip Java compatibility checks</string>
             </property>
            </widget>
           </item>
