@@ -209,6 +209,28 @@ void Yggdrasil::processResponse(QJsonObject responseData) {
     m_data->yggdrasilToken.validity = Katabasis::Validity::Certain;
     m_data->yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
 
+    // Get UUID here since we need it for later
+    auto profile = responseData.value("selectedProfile");
+    if (!profile.isObject()) {
+        changeState(AccountTaskState::STATE_FAILED_HARD, tr("Authentication server didn't send a selected profile."));
+        return;
+    }
+
+    auto profileObj = profile.toObject();
+    for (auto i = profileObj.constBegin(); i != profileObj.constEnd(); ++i) {
+        if (i.key() == "name" && i.value().isString()) {
+            m_data->minecraftProfile.name = i->toString();
+        }
+        else if (i.key() == "id" && i.value().isString()) {
+            m_data->minecraftProfile.id = i->toString();
+        }
+    }
+
+    if (m_data->minecraftProfile.id.isEmpty()) {
+        changeState(AccountTaskState::STATE_FAILED_HARD, tr("Authentication server didn't send a UUID in selected profile."));
+        return;
+    }
+
     // We've made it through the minefield of possible errors. Return true to indicate that
     // we've succeeded.
     qDebug() << "Finished reading authentication response.";
