@@ -162,11 +162,12 @@ set(UPDATE_SOURCES
     updater/UpdateChecker.cpp
     updater/DownloadTask.h
     updater/DownloadTask.cpp
+    updater/ExternalUpdater.h
 )
 
 set(MAC_UPDATE_SOURCES
-    updater/macsparkle/SparkleUpdater.h
-    updater/macsparkle/SparkleUpdater.mm
+    updater/MacSparkleUpdater.h
+    updater/MacSparkleUpdater.mm
 )
 
 add_unit_test(UpdateChecker

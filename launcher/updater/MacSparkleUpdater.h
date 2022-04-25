@@ -16,13 +16,17 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LAUNCHER_SPARKLEUPDATER_H
-#define LAUNCHER_SPARKLEUPDATER_H
+#ifndef LAUNCHER_MACSPARKLEUPDATER_H
+#define LAUNCHER_MACSPARKLEUPDATER_H
 
 #include <QObject>
 #include <QSet>
+#include "ExternalUpdater.h"
 
-class SparkleUpdater : public QObject
+/*!
+ * An implementation for the updater on macOS that uses the Sparkle framework.
+ */
+class MacSparkleUpdater : public ExternalUpdater
 {
     Q_OBJECT
 
@@ -30,28 +34,33 @@ public:
     /*!
      * Start the Sparkle updater, which automatically checks for updates if necessary.
      */
-    SparkleUpdater();
-    ~SparkleUpdater();
+    MacSparkleUpdater();
+    ~MacSparkleUpdater() override;
 
     /*!
      * Check for updates manually, showing the user a progress bar and an alert if no updates are found.
      */
-    void checkForUpdates();
+    void checkForUpdates() override;
 
     /*!
      * Indicates whether or not to check for updates automatically.
      */
-    bool getAutomaticallyChecksForUpdates();
+    bool getAutomaticallyChecksForUpdates() override;
 
     /*!
      * Indicates the current automatic update check interval in seconds.
      */
-    double getUpdateCheckInterval();
+    double getUpdateCheckInterval() override;
 
     /*!
      * Indicates the set of Sparkle channels the updater is allowed to find new updates from.
      */
     QSet<QString> getAllowedChannels();
+
+    /*!
+     * Indicates whether or not beta updates should be checked for in addition to regular releases.
+     */
+    bool getBetaAllowed() override;
 
     /*!
      * Set whether or not to check for updates automatically.
@@ -66,7 +75,7 @@ public:
      * The update schedule cycle will be reset in a short delay after the property’s new value is set. This is to allow
      * reverting this property without kicking off a schedule change immediately."
      */
-    void setAutomaticallyChecksForUpdates(bool check);
+    void setAutomaticallyChecksForUpdates(bool check) override;
 
     /*!
      * Set the current automatic update check interval in seconds.
@@ -78,7 +87,7 @@ public:
      * The update schedule cycle will be reset in a short delay after the property’s new value is set. This is to allow
      * reverting this property without kicking off a schedule change immediately."
      */
-    void setUpdateCheckInterval(double seconds);
+    void setUpdateCheckInterval(double seconds) override;
 
     /*!
      * Clears all allowed Sparkle channels, returning to the default updater channel behavior.
@@ -101,24 +110,17 @@ public:
      */
     void setAllowedChannels(const QSet<QString>& channels);
 
-signals:
     /*!
-     * Emits whenever the user's ability to check for updates changes.
-     *
-     * As per Sparkle documentation, "An update check can be made by the user when an update session isn’t in progress,
-     * or when an update or its progress is being shown to the user. A user cannot check for updates when data (such
-     * as the feed or an update) is still being downloaded automatically in the background.
-     *
-     * This property is suitable to use for menu item validation for seeing if checkForUpdates can be invoked."
+     * Set whether or not beta updates should be checked for in addition to regular releases.
      */
-    void canCheckForUpdatesChanged(bool canCheck);
+    void setBetaAllowed(bool allowed) override;
 
 private:
     class Private;
 
-    Private* priv;
+    Private *priv;
 
     void loadChannelsFromSettings();
 };
 
-#endif //LAUNCHER_SPARKLEUPDATER_H
+#endif //LAUNCHER_MACSPARKLEUPDATER_H

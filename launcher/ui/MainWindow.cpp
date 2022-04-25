@@ -1028,12 +1028,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
             updater->checkForUpdate(APPLICATION->settings()->get("UpdateChannel").toString(), false);
         }
 
-#ifdef Q_OS_MAC
-        connect(APPLICATION->updateChecker()->getSparkleUpdater(),
-                &SparkleUpdater::canCheckForUpdatesChanged,
-                this,
-                &MainWindow::updatesAllowedChanged);
-#endif
+        if (APPLICATION->updateChecker()->getExternalUpdater())
+        {
+            connect(APPLICATION->updateChecker()->getExternalUpdater(),
+                    &ExternalUpdater::canCheckForUpdatesChanged,
+                    this,
+                    &MainWindow::updatesAllowedChanged);
+        }
     }
 
     setSelectedInstanceById(APPLICATION->settings()->get("SelectedInstance").toString());

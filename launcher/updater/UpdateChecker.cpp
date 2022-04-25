@@ -24,7 +24,6 @@
 #define CHANLIST_FORMAT 0
 
 #include "BuildConfig.h"
-#include "sys.h"
 
 UpdateChecker::UpdateChecker(shared_qobject_ptr<QNetworkAccessManager> nam, QString channelUrl, QString currentChannel, int currentBuild)
 {
@@ -32,6 +31,10 @@ UpdateChecker::UpdateChecker(shared_qobject_ptr<QNetworkAccessManager> nam, QStr
     m_channelUrl = channelUrl;
     m_currentChannel = currentChannel;
     m_currentBuild = currentBuild;
+
+#ifdef Q_OS_MAC
+    m_externalUpdater = new MacSparkleUpdater();
+#endif
 }
 
 QList<UpdateChecker::ChannelListEntry> UpdateChecker::getChannelList() const
@@ -44,92 +47,95 @@ bool UpdateChecker::hasChannels() const
     return !m_channels.isEmpty();
 }
 
-#ifdef Q_OS_MAC
-SparkleUpdater* UpdateChecker::getSparkleUpdater()
+ExternalUpdater* UpdateChecker::getExternalUpdater()
 {
-    return m_sparkleUpdater;
+    return m_externalUpdater;
 }
-#endif
 
-void UpdateChecker::checkForUpdate(QString updateChannel, bool notifyNoUpdate)
+void UpdateChecker::checkForUpdate(const QString& updateChannel, bool notifyNoUpdate)
 {
-#ifdef Q_OS_MAC
-    m_sparkleUpdater->setAllowedChannel(updateChannel);
-    if (notifyNoUpdate)
+    if (m_externalUpdater)
     {
-        qDebug() << "Checking for updates.";
-        m_sparkleUpdater->checkForUpdates();
+        m_externalUpdater->setBetaAllowed(updateChannel == "beta");
+        if (notifyNoUpdate)
+        {
+            qDebug() << "Checking for updates.";
+            m_externalUpdater->checkForUpdates();
+        } else
+        {
+            // The updater library already handles automatic update checks.
+            return;
+        }
     }
     else
     {
-        // Sparkle already handles automatic update checks.
-        return;
-    }
-#else
-    qDebug() << "Checking for updates.";
-
-    // If the channel list hasn't loaded yet, load it and defer checking for updates until
-    // later.
-    if (!m_chanListLoaded)
-    {
-        qDebug() << "Channel list isn't loaded yet. Loading channel list and deferring update check.";
-        m_checkUpdateWaiting = true;
-        m_deferredUpdateChannel = updateChannel;
-        updateChanList(notifyNoUpdate);
-        return;
-    }
-
-    if (m_updateChecking)
-    {
-        qDebug() << "Ignoring update check request. Already checking for updates.";
-        return;
-    }
-
-    // Find the desired channel within the channel list and get its repo URL. If if cannot be
-    // found, error.
-    QString stableUrl;
-    m_newRepoUrl = "";
-    for (ChannelListEntry entry : m_channels)
-    {
-        qDebug() << "channelEntry = " << entry.id;
-        if(entry.id == "stable") {
-            stableUrl = entry.url;
+        qDebug() << "Checking for updates.";
+        // If the channel list hasn't loaded yet, load it and defer checking for updates until
+        // later.
+        if (!m_chanListLoaded)
+        {
+            qDebug() << "Channel list isn't loaded yet. Loading channel list and deferring update check.";
+            m_checkUpdateWaiting = true;
+            m_deferredUpdateChannel = updateChannel;
+            updateChanList(notifyNoUpdate);
+            return;
         }
-        if (entry.id == updateChannel) {
-            m_newRepoUrl = entry.url;
-            qDebug() << "is intended update channel: " << entry.id;
+
+        if (m_updateChecking)
+        {
+            qDebug() << "Ignoring update check request. Already checking for updates.";
+            return;
         }
-        if (entry.id == m_currentChannel) {
-            m_currentRepoUrl = entry.url;
-            qDebug() << "is current update channel: " << entry.id;
+
+        // Find the desired channel within the channel list and get its repo URL. If if cannot be
+        // found, error.
+        QString stableUrl;
+        m_newRepoUrl = "";
+        for (ChannelListEntry entry: m_channels)
+        {
+            qDebug() << "channelEntry = " << entry.id;
+            if (entry.id == "stable")
+            {
+                stableUrl = entry.url;
+            }
+            if (entry.id == updateChannel)
+            {
+                m_newRepoUrl = entry.url;
+                qDebug() << "is intended update channel: " << entry.id;
+            }
+            if (entry.id == m_currentChannel)
+            {
+                m_currentRepoUrl = entry.url;
+                qDebug() << "is current update channel: " << entry.id;
+            }
         }
+
+        qDebug() << "m_repoUrl = " << m_newRepoUrl;
+
+        if (m_newRepoUrl.isEmpty())
+        {
+            qWarning() << "m_repoUrl was empty. defaulting to 'stable': " << stableUrl;
+            m_newRepoUrl = stableUrl;
+        }
+
+        // If nothing applies, error
+        if (m_newRepoUrl.isEmpty())
+        {
+            qCritical() << "failed to select any update repository for: " << updateChannel;
+            emit updateCheckFailed();
+            return;
+        }
+
+        m_updateChecking = true;
+
+        QUrl indexUrl = QUrl(m_newRepoUrl).resolved(QUrl("index.json"));
+
+        indexJob = new NetJob("GoUpdate Repository Index", m_network);
+        indexJob->addNetAction(Net::Download::makeByteArray(indexUrl, &indexData));
+        connect(indexJob.get(), &NetJob::succeeded, [this, notifyNoUpdate]() { updateCheckFinished(notifyNoUpdate); });
+        connect(indexJob.get(), &NetJob::failed, this, &UpdateChecker::updateCheckFailed);
+        indexJob->start();
     }
-
-    qDebug() << "m_repoUrl = " << m_newRepoUrl;
-
-    if (m_newRepoUrl.isEmpty()) {
-        qWarning() << "m_repoUrl was empty. defaulting to 'stable': " << stableUrl;
-        m_newRepoUrl = stableUrl;
-    }
-
-    // If nothing applies, error
-    if (m_newRepoUrl.isEmpty())
-    {
-        qCritical() << "failed to select any update repository for: " << updateChannel;
-        emit updateCheckFailed();
-        return;
-    }
-
-    m_updateChecking = true;
-
-    QUrl indexUrl = QUrl(m_newRepoUrl).resolved(QUrl("index.json"));
-
-    indexJob = new NetJob("GoUpdate Repository Index", m_network);
-    indexJob->addNetAction(Net::Download::makeByteArray(indexUrl, &indexData));
-    connect(indexJob.get(), &NetJob::succeeded, [this, notifyNoUpdate](){ updateCheckFinished(notifyNoUpdate); });
-    connect(indexJob.get(), &NetJob::failed, this, &UpdateChecker::updateCheckFailed);
-    indexJob->start();
-#endif
 }
 
 void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)

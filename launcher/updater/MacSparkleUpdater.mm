@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "SparkleUpdater.h"
+#include "MacSparkleUpdater.h"
 
 #include "Application.h"
 
@@ -76,7 +76,7 @@
 @end
 
 
-class SparkleUpdater::Private
+class MacSparkleUpdater::Private
 {
 public:
     SPUStandardUpdaterController *updaterController;
@@ -85,9 +85,9 @@ public:
     NSAutoreleasePool *autoReleasePool;
 };
 
-SparkleUpdater::SparkleUpdater()
+MacSparkleUpdater::MacSparkleUpdater()
 {
-    priv = new SparkleUpdater::Private();
+    priv = new MacSparkleUpdater::Private();
 
     // Enable Cocoa's memory management.
     NSApplicationLoad();
@@ -110,7 +110,7 @@ SparkleUpdater::SparkleUpdater()
     loadChannelsFromSettings();
 }
 
-SparkleUpdater::~SparkleUpdater()
+MacSparkleUpdater::~MacSparkleUpdater()
 {
     [priv->updaterObserver removeObserver:priv->updaterObserver forKeyPath:@"updater.canCheckForUpdates"];
 
@@ -121,22 +121,22 @@ SparkleUpdater::~SparkleUpdater()
     delete priv;
 }
 
-void SparkleUpdater::checkForUpdates()
+void MacSparkleUpdater::checkForUpdates()
 {
     [priv->updaterController checkForUpdates:nil];
 }
 
-bool SparkleUpdater::getAutomaticallyChecksForUpdates()
+bool MacSparkleUpdater::getAutomaticallyChecksForUpdates()
 {
     return priv->updaterController.updater.automaticallyChecksForUpdates;
 }
 
-double SparkleUpdater::getUpdateCheckInterval()
+double MacSparkleUpdater::getUpdateCheckInterval()
 {
     return priv->updaterController.updater.updateCheckInterval;
 }
 
-QSet<QString> SparkleUpdater::getAllowedChannels()
+QSet<QString> MacSparkleUpdater::getAllowedChannels()
 {
     // Convert NSSet<NSString> -> QSet<QString>
     __block QSet<QString> channels;
@@ -147,23 +147,28 @@ QSet<QString> SparkleUpdater::getAllowedChannels()
     return channels;
 }
 
-void SparkleUpdater::setAutomaticallyChecksForUpdates(bool check)
+bool MacSparkleUpdater::getBetaAllowed()
+{
+    return getAllowedChannels().contains("beta");
+}
+
+void MacSparkleUpdater::setAutomaticallyChecksForUpdates(bool check)
 {
     priv->updaterController.updater.automaticallyChecksForUpdates = check ? YES : NO; // make clang-tidy happy
 }
 
-void SparkleUpdater::setUpdateCheckInterval(double seconds)
+void MacSparkleUpdater::setUpdateCheckInterval(double seconds)
 {
     priv->updaterController.updater.updateCheckInterval = seconds;
 }
 
-void SparkleUpdater::clearAllowedChannels()
+void MacSparkleUpdater::clearAllowedChannels()
 {
     priv->updaterDelegate.allowedChannels = [NSSet set];
     APPLICATION->settings()->set("UpdateChannel", "");
 }
 
-void SparkleUpdater::setAllowedChannel(const QString &channel)
+void MacSparkleUpdater::setAllowedChannel(const QString &channel)
 {
     if (channel.isEmpty())
     {
@@ -176,7 +181,7 @@ void SparkleUpdater::setAllowedChannel(const QString &channel)
     APPLICATION->settings()->set("UpdateChannel", channel);
 }
 
-void SparkleUpdater::setAllowedChannels(const QSet<QString> &channels)
+void MacSparkleUpdater::setAllowedChannels(const QSet<QString> &channels)
 {
     if (channels.isEmpty())
     {
@@ -197,7 +202,19 @@ void SparkleUpdater::setAllowedChannels(const QSet<QString> &channels)
     APPLICATION->settings()->set("UpdateChannel", channelsConfig.trimmed());
 }
 
-void SparkleUpdater::loadChannelsFromSettings()
+void MacSparkleUpdater::setBetaAllowed(bool allowed)
+{
+    if (allowed)
+    {
+        setAllowedChannel("beta");
+    }
+    else
+    {
+        clearAllowedChannels();
+    }
+}
+
+void MacSparkleUpdater::loadChannelsFromSettings()
 {
     QStringList channelList = APPLICATION->settings()->get("UpdateChannel").toString().split(" ");
     auto channels = QSet<QString>::fromList(channelList);
