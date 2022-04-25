@@ -48,12 +48,12 @@ public class EntryPoint
 
     private Action parseLine(String inData) throws ParseException
     {
-        String[] pair = inData.split("\\s+", 2);
+        String[] tokens = inData.split("\\s+", 2);
 
-        if (pair.length == 0)
+        if (tokens.length == 0)
             throw new ParseException("Unexpected empty string!");
 
-        switch (pair[0]) {
+        switch (tokens[0]) {
             case "launch": {
                 return Action.Launch;
             }
@@ -63,25 +63,25 @@ public class EntryPoint
             }
 
             case "launcher": {
-                if (pair.length != 2)
-                    throw new ParseException("Expected 2 tokens, got 1!");
+                if (tokens.length != 2)
+                    throw new ParseException("Expected 2 tokens, got " + tokens.length);
 
-                if (pair[1].equals("onesix")) {
+                if (tokens[1].equals("onesix")) {
                     launcher = new OneSixLauncher();
 
                     LOGGER.info("Using onesix launcher.");
 
                     return Action.Proceed;
                 } else {
-                    throw new ParseException("Invalid launcher type: " + pair[1]);
+                    throw new ParseException("Invalid launcher type: " + tokens[1]);
                 }
             }
 
             default: {
-                if (pair.length != 2)
-                    throw new ParseException("Error while parsing:" + pair[0]);
+                if (tokens.length != 2)
+                    throw new ParseException("Error while parsing:" + inData);
 
-                params.add(pair[0], pair[1]);
+                params.add(tokens[0], tokens[1]);
 
                 return Action.Proceed;
             }
