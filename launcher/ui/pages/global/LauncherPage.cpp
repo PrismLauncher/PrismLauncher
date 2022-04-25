@@ -97,13 +97,6 @@ LauncherPage::LauncherPage(QWidget *parent) : QWidget(parent), ui(new Ui::Launch
     }
     connect(ui->fontSizeBox, SIGNAL(valueChanged(int)), SLOT(refreshFontPreview()));
     connect(ui->consoleFont, SIGNAL(currentFontChanged(QFont)), SLOT(refreshFontPreview()));
-
-    //move mac data button
-    QFile file(QDir::current().absolutePath() + "/dontmovemacdata");
-    if (!file.exists())
-    {
-        ui->migrateDataFolderMacBtn->setVisible(false);
-    }
 }
 
 LauncherPage::~LauncherPage()
@@ -189,13 +182,6 @@ void LauncherPage::on_modsDirBrowseBtn_clicked()
         QString cooked_dir = FS::NormalizePath(raw_dir);
         ui->modsDirTextBox->setText(cooked_dir);
     }
-}
-void LauncherPage::on_migrateDataFolderMacBtn_clicked()
-{
-    QFile file(QDir::current().absolutePath() + "/dontmovemacdata");
-    file.remove();
-    QProcess::startDetached(qApp->arguments()[0]);
-    qApp->quit();
 }
 
 void LauncherPage::refreshUpdateChannelList()
