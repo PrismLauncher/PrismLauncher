@@ -6,6 +6,8 @@ namespace Net {
 
 /*
  * Sink object for downloads that uses an external QByteArray it doesn't own as a target.
+ * FIXME: It is possible that the QByteArray is freed while we're doing some operation on it,
+ * causing a segmentation fault.
  */
 class ByteArraySink : public Sink {
    public:
@@ -16,9 +18,6 @@ class ByteArraySink : public Sink {
    public:
     auto init(QNetworkRequest& request) -> Task::State override
     {
-        if(!m_output)
-            return Task::State::Failed;
-
         m_output->clear();
         if (initAllValidators(request))
             return Task::State::Running;
@@ -27,9 +26,6 @@ class ByteArraySink : public Sink {
 
     auto write(QByteArray& data) -> Task::State override
     {
-        if(!m_output)
-            return Task::State::Failed;
-
         m_output->append(data);
         if (writeAllValidators(data))
             return Task::State::Running;
@@ -38,9 +34,6 @@ class ByteArraySink : public Sink {
 
     auto abort() -> Task::State override
     {
-        if(!m_output)
-            return Task::State::Failed;
-
         m_output->clear();
         failAllValidators();
         return Task::State::Failed;

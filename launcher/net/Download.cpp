@@ -33,30 +33,29 @@ Download::Download() : NetAction()
     m_state = State::Inactive;
 }
 
-Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry, Options options)
+auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
 {
-    Download* dl = new Download();
+    auto* dl = new Download();
     dl->m_url = url;
     dl->m_options = options;
     auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
     auto cachedNode = new MetaCacheSink(entry, md5Node);
     dl->m_sink.reset(cachedNode);
-    dl->m_target_path = entry->getFullPath();
     return dl;
 }
 
-Download::Ptr Download::makeByteArray(QUrl url, QByteArray* output, Options options)
+auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> Download::Ptr
 {
-    Download* dl = new Download();
+    auto* dl = new Download();
     dl->m_url = url;
     dl->m_options = options;
     dl->m_sink.reset(new ByteArraySink(output));
     return dl;
 }
 
-Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
+auto Download::makeFile(QUrl url, QString path, Options options) -> Download::Ptr
 {
-    Download* dl = new Download();
+    auto* dl = new Download();
     dl->m_url = url;
     dl->m_options = options;
     dl->m_sink.reset(new FileSink(path));
@@ -143,7 +142,7 @@ void Download::sslErrors(const QList<QSslError>& errors)
     }
 }
 
-bool Download::handleRedirect()
+auto Download::handleRedirect() -> bool
 {
     QUrl redirect = m_reply->header(QNetworkRequest::LocationHeader).toUrl();
     if (!redirect.isValid()) {
@@ -230,7 +229,7 @@ void Download::downloadFinished()
     // make sure we got all the remaining data, if any
     auto data = m_reply->readAll();
     if (data.size()) {
-        qDebug() << "Writing extra" << data.size() << "bytes to" << m_target_path;
+        qDebug() << "Writing extra" << data.size() << "bytes";
         m_state = m_sink->write(data);
     }
 
@@ -243,6 +242,7 @@ void Download::downloadFinished()
         emitFailed();
         return;
     }
+
     m_reply.reset();
     qDebug() << "Download succeeded:" << m_url.toString();
     emit succeeded();
@@ -254,17 +254,17 @@ void Download::downloadReadyRead()
         auto data = m_reply->readAll();
         m_state = m_sink->write(data);
         if (m_state == State::Failed) {
-            qCritical() << "Failed to process response chunk for " << m_target_path;
+            qCritical() << "Failed to process response chunk";
         }
         // qDebug() << "Download" << m_url.toString() << "gained" << data.size() << "bytes";
     } else {
-        qCritical() << "Cannot write to " << m_target_path << ", illegal status" << m_status;
+        qCritical() << "Cannot write download data! illegal status " << m_status;
     }
 }
 
 }  // namespace Net
 
-bool Net::Download::abort()
+auto Net::Download::abort() -> bool
 {
     if (m_reply) {
         m_reply->abort();

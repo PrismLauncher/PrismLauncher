@@ -8,14 +8,15 @@ namespace Net {
 class Sink {
    public:
     Sink() = default;
-    virtual ~Sink(){};
+    virtual ~Sink() = default;
 
    public:
-    virtual Task::State init(QNetworkRequest& request) = 0;
-    virtual Task::State write(QByteArray& data) = 0;
-    virtual Task::State abort() = 0;
-    virtual Task::State finalize(QNetworkReply& reply) = 0;
-    virtual bool hasLocalData() = 0;
+    virtual auto init(QNetworkRequest& request) -> Task::State = 0;
+    virtual auto write(QByteArray& data) -> Task::State = 0;
+    virtual auto abort() -> Task::State = 0;
+    virtual auto finalize(QNetworkReply& reply) -> Task::State = 0;
+
+    virtual auto hasLocalData() -> bool = 0;
 
     void addValidator(Validator* validator)
     {
@@ -24,7 +25,15 @@ class Sink {
         }
     }
 
-   protected: /* methods */
+   protected:
+    bool initAllValidators(QNetworkRequest& request)
+    {
+        for (auto& validator : validators) {
+            if (!validator->init(request))
+                return false;
+        }
+        return true;
+    }
     bool finalizeAllValidators(QNetworkReply& reply)
     {
         for (auto& validator : validators) {
@@ -41,14 +50,6 @@ class Sink {
         }
         return success;
     }
-    bool initAllValidators(QNetworkRequest& request)
-    {
-        for (auto& validator : validators) {
-            if (!validator->init(request))
-                return false;
-        }
-        return true;
-    }
     bool writeAllValidators(QByteArray& data)
     {
         for (auto& validator : validators) {
@@ -58,7 +59,7 @@ class Sink {
         return true;
     }
 
-   protected: /* data */
+   protected:
     std::vector<std::shared_ptr<Validator>> validators;
 };
 }  // namespace Net
