@@ -28,7 +28,7 @@ void ImgurUpload::executeTask()
     QFile f(m_shot->m_file.absoluteFilePath());
     if (!f.open(QFile::ReadOnly))
     {
-        emit failed(m_index_within_job);
+        emitFailed();
         return;
     }
 
@@ -66,7 +66,7 @@ void ImgurUpload::downloadError(QNetworkReply::NetworkError error)
     m_state = Task::State::Failed;
     finished = true;
     m_reply.reset();
-    emit failed(m_index_within_job);
+    emitFailed();
 }
 void ImgurUpload::downloadFinished()
 {
@@ -84,7 +84,7 @@ void ImgurUpload::downloadFinished()
         qDebug() << "imgur server did not reply with JSON" << jsonError.errorString();
         finished = true;
         m_reply.reset();
-        emit failed(m_index_within_job);
+        emitFailed();
         return;
     }
     auto object = doc.object();
@@ -93,7 +93,7 @@ void ImgurUpload::downloadFinished()
         qDebug() << "Screenshot upload not successful:" << doc.toJson();
         finished = true;
         m_reply.reset();
-        emit failed(m_index_within_job);
+        emitFailed();
         return;
     }
     m_shot->m_imgurId = object.value("data").toObject().value("id").toString();
@@ -101,11 +101,11 @@ void ImgurUpload::downloadFinished()
     m_shot->m_imgurDeleteHash = object.value("data").toObject().value("deletehash").toString();
     m_state = Task::State::Succeeded;
     finished = true;
-    emit succeeded(m_index_within_job);
+    emit succeeded();
     return;
 }
 void ImgurUpload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     setProgress(bytesReceived, bytesTotal);
-    emit netActionProgress(m_index_within_job, bytesReceived, bytesTotal);
+    emit progress(bytesReceived, bytesTotal);
 }

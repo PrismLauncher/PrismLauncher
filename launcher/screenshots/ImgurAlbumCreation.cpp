@@ -56,32 +56,32 @@ void ImgurAlbumCreation::downloadFinished()
         if (jsonError.error != QJsonParseError::NoError)
         {
             qDebug() << jsonError.errorString();
-            emit failed(m_index_within_job);
+            emitFailed();
             return;
         }
         auto object = doc.object();
         if (!object.value("success").toBool())
         {
             qDebug() << doc.toJson();
-            emit failed(m_index_within_job);
+            emitFailed();
             return;
         }
         m_deleteHash = object.value("data").toObject().value("deletehash").toString();
         m_id = object.value("data").toObject().value("id").toString();
         m_state = State::Succeeded;
-        emit succeeded(m_index_within_job);
+        emit succeeded();
         return;
     }
     else
     {
         qDebug() << m_reply->readAll();
         m_reply.reset();
-        emit failed(m_index_within_job);
+        emitFailed();
         return;
     }
 }
 void ImgurAlbumCreation::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     setProgress(bytesReceived, bytesTotal);
-    emit netActionProgress(m_index_within_job, bytesReceived, bytesTotal);
+    emit progress(bytesReceived, bytesTotal);
 }

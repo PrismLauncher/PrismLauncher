@@ -45,9 +45,9 @@ auto NetJob::addNetAction(NetAction::Ptr action) -> bool
     partProgress(m_parts_progress.count() - 1, action->getProgress(), action->getTotalProgress());
 
     if (action->isRunning()) {
-        connect(action.get(), &NetAction::succeeded, this, &NetJob::partSucceeded);
-        connect(action.get(), &NetAction::failed, this, &NetJob::partFailed);
-        connect(action.get(), &NetAction::netActionProgress, this, &NetJob::partProgress);
+        connect(action.get(), &NetAction::succeeded, [this, action]{ partSucceeded(action->index()); });
+        connect(action.get(), &NetAction::failed, [this, action](QString){ partFailed(action->index()); });
+        connect(action.get(), &NetAction::progress, [this, action](qint64 done, qint64 total) { partProgress(action->index(), done, total); });
     } else {
         m_todo.append(m_parts_progress.size() - 1);
     }
@@ -218,10 +218,10 @@ void NetJob::startMoreParts()
         auto part = m_downloads[doThis];
 
         // connect signals :D
-        connect(part.get(), &NetAction::succeeded, this, &NetJob::partSucceeded);
-        connect(part.get(), &NetAction::failed, this, &NetJob::partFailed);
-        connect(part.get(), &NetAction::aborted, this, &NetJob::partAborted);
-        connect(part.get(), &NetAction::netActionProgress, this, &NetJob::partProgress);
+        connect(part.get(), &NetAction::succeeded, this, [this, part]{ partSucceeded(part->index()); });
+        connect(part.get(), &NetAction::failed, this, [this, part](QString){ partFailed(part->index()); });
+        connect(part.get(), &NetAction::aborted, this, [this, part]{ partAborted(part->index()); });
+        connect(part.get(), &NetAction::progress, this, [this, part](qint64 done, qint64 total) { partProgress(part->index(), done, total); });
 
         part->startAction(m_network);
     }

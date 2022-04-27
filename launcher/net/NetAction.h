@@ -43,7 +43,7 @@
 class NetAction : public Task {
     Q_OBJECT
    protected:
-    explicit NetAction() : Task(nullptr) {};
+    explicit NetAction() : Task() {};
 
    public:
     using Ptr = shared_qobject_ptr<NetAction>;
@@ -51,13 +51,7 @@ class NetAction : public Task {
     virtual ~NetAction() = default;
 
     QUrl url() { return m_url; }
-
-   signals:
-    void started(int index);
-    void netActionProgress(int index, qint64 current, qint64 total);
-    void succeeded(int index);
-    void failed(int index);
-    void aborted(int index);
+    auto index() -> int { return m_index_within_job; }
 
    protected slots:
     virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) = 0;

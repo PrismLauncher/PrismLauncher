@@ -73,6 +73,7 @@ class Task : public QObject {
     virtual void progress(qint64 current, qint64 total);
     void finished();
     void succeeded();
+    void aborted();
     void failed(QString reason);
     void status(QString status);
 
@@ -86,7 +87,7 @@ class Task : public QObject {
    protected slots:
     virtual void emitSucceeded();
     virtual void emitAborted();
-    virtual void emitFailed(QString reason);
+    virtual void emitFailed(QString reason = "");
 
    public slots:
     void setStatus(const QString& status);

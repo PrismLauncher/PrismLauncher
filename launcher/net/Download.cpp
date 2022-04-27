@@ -72,7 +72,7 @@ void Download::executeTask()
 {
     if (getState() == Task::State::AbortedByUser) {
         qWarning() << "Attempt to start an aborted Download:" << m_url.toString();
-        emit aborted(m_index_within_job);
+        emitAborted();
         return;
     }
 
@@ -80,7 +80,7 @@ void Download::executeTask()
     m_state = m_sink->init(request);
     switch (m_state) {
         case State::Succeeded:
-            emit succeeded(m_index_within_job);
+            emit succeeded();
             qDebug() << "Download cache hit " << m_url.toString();
             return;
         case State::Running:
@@ -88,7 +88,7 @@ void Download::executeTask()
             break;
         case State::Inactive:
         case State::Failed:
-            emit failed(m_index_within_job);
+            emitFailed();
             return;
         case State::AbortedByUser:
             return;
@@ -102,8 +102,8 @@ void Download::executeTask()
     QNetworkReply* rep = m_network->get(request);
 
     m_reply.reset(rep);
-    connect(rep, SIGNAL(downloadProgress(qint64, qint64)), SLOT(downloadProgress(qint64, qint64)));
-    connect(rep, SIGNAL(finished()), SLOT(downloadFinished()));
+    connect(rep, &QNetworkReply::downloadProgress, this, &Download::downloadProgress);
+    connect(rep, &QNetworkReply::finished, this, &Download::downloadFinished);
     connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
     connect(rep, &QNetworkReply::sslErrors, this, &Download::sslErrors);
     connect(rep, &QNetworkReply::readyRead, this, &Download::downloadReadyRead);
@@ -112,7 +112,6 @@ void Download::executeTask()
 void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     setProgress(bytesReceived, bytesTotal);
-    emit netActionProgress(m_index_within_job, bytesReceived, bytesTotal);
 }
 
 void Download::downloadError(QNetworkReply::NetworkError error)
@@ -212,19 +211,19 @@ void Download::downloadFinished()
         qDebug() << "Download failed but we are allowed to proceed:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emit succeeded(m_index_within_job);
+        emit succeeded();
         return;
     } else if (m_state == State::Failed) {
         qDebug() << "Download failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emit failed(m_index_within_job);
+        emitFailed();
         return;
     } else if (m_state == State::AbortedByUser) {
         qDebug() << "Download aborted in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emit aborted(m_index_within_job);
+        emitAborted();
         return;
     }
 
@@ -241,12 +240,12 @@ void Download::downloadFinished()
         qDebug() << "Download failed to finalize:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emit failed(m_index_within_job);
+        emitFailed();
         return;
     }
     m_reply.reset();
     qDebug() << "Download succeeded:" << m_url.toString();
-    emit succeeded(m_index_within_job);
+    emit succeeded();
 }
 
 void Download::downloadReadyRead()
