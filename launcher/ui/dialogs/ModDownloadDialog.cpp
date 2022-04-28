@@ -134,6 +134,12 @@ bool ModDownloadDialog::isModSelected(const QString &name, const QString& filena
     return iter != modTask.end() && (iter.value()->getFilename() == filename);
 }
 
+bool ModDownloadDialog::isModSelected(const QString &name) const
+{
+    auto iter = modTask.find(name);
+    return iter != modTask.end();
+}
+
 ModDownloadDialog::~ModDownloadDialog()
 {
 }
