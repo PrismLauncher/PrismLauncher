@@ -16,21 +16,10 @@
 
 package org.multimc;
 
-import java.io.*;
 import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 public class Utils
 {
@@ -93,27 +82,5 @@ public class Utils
         return null;
     }
 
-    /**
-     * Log to the launcher console
-     *
-     * @param message A String containing the message
-     * @param level   A String containing the level name. See MinecraftLauncher::getLevel()
-     */
-    public static void log(String message, String level)
-    {
-        // Kinda dirty
-        String tag = "!![" + level + "]!";
-        System.out.println(tag + message.replace("\n", "\n" + tag));
-    }
-
-    public static void log(String message)
-    {
-        log(message, "Launcher");
-    }
-
-    public static void log()
-    {
-        System.out.println();
-    }
 }
 

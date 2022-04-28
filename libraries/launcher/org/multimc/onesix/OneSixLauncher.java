@@ -19,14 +19,18 @@ import org.multimc.*;
 
 import java.applet.Applet;
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class OneSixLauncher implements Launcher
 {
+
+    private static final Logger LOGGER = Logger.getLogger("OneSixLauncher");
+
     // parameters, separated from ParamBucket
     private List<String> libraries;
     private List<String> mcparams;
@@ -104,7 +108,7 @@ public class OneSixLauncher implements Launcher
 
             if (f == null)
             {
-                System.err.println("Could not find Minecraft path field.");
+                LOGGER.warning("Could not find Minecraft path field.");
             }
             else
             {
@@ -113,8 +117,12 @@ public class OneSixLauncher implements Launcher
             }
         } catch (Exception e)
         {
-            System.err.println("Could not set base folder. Failed to find/access Minecraft main class:");
-            e.printStackTrace(System.err);
+            LOGGER.log(
+                    Level.SEVERE,
+                    "Could not set base folder. Failed to find/access Minecraft main class:",
+                    e
+            );
+
             return -1;
         }
 
@@ -122,7 +130,7 @@ public class OneSixLauncher implements Launcher
 
         if(!traits.contains("noapplet"))
         {
-            Utils.log("Launching with applet wrapper...");
+            LOGGER.info("Launching with applet wrapper...");
             try
             {
                 Class<?> MCAppletClass = cl.loadClass(appletClass);
@@ -132,10 +140,9 @@ public class OneSixLauncher implements Launcher
                 return 0;
             } catch (Exception e)
             {
-                Utils.log("Applet wrapper failed:", "Error");
-                e.printStackTrace(System.err);
-                Utils.log();
-                Utils.log("Falling back to using main class.");
+                LOGGER.log(Level.SEVERE, "Applet wrapper failed:", e);
+
+                LOGGER.warning("Falling back to using main class.");
             }
         }
 
@@ -147,8 +154,8 @@ public class OneSixLauncher implements Launcher
             return 0;
         } catch (Exception e)
         {
-            Utils.log("Failed to invoke the Minecraft main class:", "Fatal");
-            e.printStackTrace(System.err);
+            LOGGER.log(Level.SEVERE, "Failed to invoke the Minecraft main class:", e);
+
             return -1;
         }
     }
@@ -185,8 +192,8 @@ public class OneSixLauncher implements Launcher
             mc = cl.loadClass(mainClass);
         } catch (ClassNotFoundException e)
         {
-            System.err.println("Failed to find Minecraft main class:");
-            e.printStackTrace(System.err);
+            LOGGER.log(Level.SEVERE, "Failed to find Minecraft main class:", e);
+
             return -1;
         }
 
@@ -197,8 +204,8 @@ public class OneSixLauncher implements Launcher
             meth = mc.getMethod("main", String[].class);
         } catch (NoSuchMethodException e)
         {
-            System.err.println("Failed to acquire the main method:");
-            e.printStackTrace(System.err);
+            LOGGER.log(Level.SEVERE, "Failed to acquire the main method:", e);
+
             return -1;
         }
 
@@ -210,8 +217,8 @@ public class OneSixLauncher implements Launcher
             meth.invoke(null, (Object) paramsArray);
         } catch (Exception e)
         {
-            System.err.println("Failed to start Minecraft:");
-            e.printStackTrace(System.err);
+            LOGGER.log(Level.SEVERE, "Failed to start Minecraft:", e);
+
             return -1;
         }
         return 0;
@@ -226,8 +233,8 @@ public class OneSixLauncher implements Launcher
             processParams(params);
         } catch (NotFoundException e)
         {
-            System.err.println("Not enough arguments.");
-            e.printStackTrace(System.err);
+            LOGGER.log(Level.SEVERE, "Not enough arguments!");
+
             return -1;
         }
 
@@ -245,4 +252,5 @@ public class OneSixLauncher implements Launcher
             return launchWithMainClass();
         }
     }
+
 }
