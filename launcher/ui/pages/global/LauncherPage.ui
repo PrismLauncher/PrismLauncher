@@ -158,13 +158,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="migrateDataFolderMacBtn">
-         <property name="text">
-          <string>Move the data to new location (will restart the launcher)</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

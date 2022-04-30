@@ -409,69 +409,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         return;
     }
 
-#if defined(Q_OS_MAC)
-    // move user data to new location if on macOS and it still exists in Contents/MacOS
-    QDir fi(applicationDirPath());
-    QString originalData = fi.absolutePath();
-    // if the config file exists in Contents/MacOS, then user data is still there and needs to moved
-    if (QFileInfo::exists(FS::PathCombine(originalData, BuildConfig.LAUNCHER_CONFIGFILE)))
-    {
-        if (!QFileInfo::exists(FS::PathCombine(originalData, "dontmovemacdata")))
-        {
-            QMessageBox::StandardButton askMoveDialogue;
-            askMoveDialogue = QMessageBox::question(
-                nullptr,
-                BuildConfig.LAUNCHER_DISPLAYNAME,
-                "Would you like to move application data to a new data location? It will improve the launcher's performance, but if you switch to older versions it will look like instances have disappeared. If you select no, you can migrate later in settings. You should select yes unless you're commonly switching between different versions (eg. develop and stable).",
-                QMessageBox::Yes | QMessageBox::No,
-                QMessageBox::Yes
-            );
-            if (askMoveDialogue == QMessageBox::Yes)
-            {
-                qDebug() << "On macOS and found config file in old location, moving user data...";
-                QDir dir;
-                QStringList dataFiles {
-                    "*.log", // Launcher log files: ${Launcher_Name}-@.log
-                    "accounts.json",
-                    "accounts",
-                    "assets",
-                    "cache",
-                    "icons",
-                    "instances",
-                    "libraries",
-                    "meta",
-                    "metacache",
-                    "mods",
-                    BuildConfig.LAUNCHER_CONFIGFILE,
-                    "themes",
-                    "translations"
-                };
-                QDirIterator files(originalData, dataFiles);
-                while (files.hasNext()) {
-                    QString filePath(files.next());
-                    QString fileName(files.fileName());
-                    if (!dir.rename(filePath, FS::PathCombine(dataPath, fileName)))
-                    {
-                        qWarning() << "Failed to move " << fileName;
-                    }
-                }
-            }
-            else
-            {
-                dataPath = originalData;
-                QDir::setCurrent(dataPath);
-                QFile file(originalData + "/dontmovemacdata");
-                file.open(QIODevice::WriteOnly);
-            }
-        }
-        else
-        {
-            dataPath = originalData;
-            QDir::setCurrent(dataPath);
-        }
-    }
-#endif
-
     /*
      * Establish the mechanism for communication with an already running PolyMC that uses the same data path.
      * If there is one, tell it what the user actually wanted to do and exit.
