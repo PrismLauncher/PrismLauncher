@@ -691,6 +691,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("LastHostname", "");
         m_settings->registerSetting("JvmArgs", "");
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
+        m_settings->registerSetting("IgnoreJavaWizard", false);
 
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);
@@ -936,6 +937,10 @@ bool Application::createSetupWizard()
 {
     bool javaRequired = [&]()
     {
+        bool ignoreJavaWizard = m_settings->get("IgnoreJavaWizard").toBool();
+        if(ignoreJavaWizard) {
+            return false;
+        }
         QString currentHostName = QHostInfo::localHostName();
         QString oldHostName = settings()->get("LastHostname").toString();
         if (currentHostName != oldHostName)
@@ -966,6 +971,7 @@ bool Application::createSetupWizard()
         {
             m_setupWizard->addPage(new LanguageWizardPage(m_setupWizard));
         }
+
         if (javaRequired)
         {
             m_setupWizard->addPage(new JavaWizardPage(m_setupWizard));
