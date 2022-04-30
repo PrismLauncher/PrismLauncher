@@ -65,13 +65,13 @@ jobs:
             ccache:p
 
       - name: Setup ccache
-        if: runner.os != 'Windows'
+        if: runner.os != 'Windows' && inputs.build_type == 'Debug'
         uses: hendrikmuhs/ccache-action@v1.2.1
         with:
-          key: ${{ matrix.os }}-${{ matrix.appimage }}-${{ inputs.build_type }}
+          key: ${{ matrix.os }}-${{ matrix.appimage }}
 
       - name: Setup ccache (Windows)
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && inputs.build_type == 'Debug'
         shell: msys2 {0}
         run: |
           ccache --set-config=cache_dir='${{ github.workspace }}\.ccache'
@@ -81,13 +81,13 @@ jobs:
           ccache -z  # Zero stats
 
       - name: Retrieve ccache cache (Windows)
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && inputs.build_type == 'Debug'
         uses: actions/cache@v3.0.2
         with:
           path: '${{ github.workspace }}\.ccache'
-          key: ${{ matrix.os }}-${{ matrix.msystem }}-${{ inputs.build_type }}
+          key: ${{ matrix.os }}-${{ matrix.msystem }}
           restore-keys: |
-              ${{ matrix.os }}-${{ matrix.msystem }}-${{ inputs.build_type }}
+              ${{ matrix.os }}-${{ matrix.msystem }}
 
       - name: Set short version
         shell: bash
