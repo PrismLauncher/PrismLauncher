@@ -58,6 +58,8 @@
 
 namespace ATLauncher {
 
+static Meta::VersionPtr getComponentVersion(const QString& uid, const QString& version);
+
 PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString pack, QString version)
 {
     m_support = support;
@@ -115,19 +117,11 @@ void PackInstallTask::onDownloadSucceeded()
     }
     m_version = version;
 
-    auto vlist = APPLICATION->metadataIndex()->get("net.minecraft");
-    if(!vlist)
-    {
-        emitFailed(tr("Failed to get local metadata index for %1").arg("net.minecraft"));
-        return;
-    }
-
-    auto ver = vlist->getVersion(m_version.minecraft);
+    auto ver = getComponentVersion("net.minecraft", m_version.minecraft);
     if (!ver) {
-        emitFailed(tr("Failed to get local metadata index for '%1' v%2").arg("net.minecraft").arg(m_version.minecraft));
+        emitFailed(tr("Failed to get local metadata index for '%1' v%2").arg("net.minecraft", m_version.minecraft));
         return;
     }
-    ver->load(Net::Mode::Online);
     minecraftVersion = ver;
 
     if(m_version.noConfigs) {
@@ -359,17 +353,10 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
     for(const auto & lib : m_version.libraries) {
         // If the library is LiteLoader, we need to ignore it and handle it separately.
         if (liteLoaderMap.contains(lib.md5)) {
-            auto vlist = APPLICATION->metadataIndex()->get("com.mumfrey.liteloader");
-            if (vlist) {
-                if (!vlist->isLoaded())
-                    vlist->load(Net::Mode::Online);
-
-                auto ver = vlist->getVersion(liteLoaderMap.value(lib.md5));
-                if (ver) {
-                    ver->load(Net::Mode::Online);
-                    componentsToInstall.insert("com.mumfrey.liteloader", ver);
-                    continue;
-                }
+            auto ver = getComponentVersion("com.mumfrey.liteloader", liteLoaderMap.value(lib.md5));
+            if (ver) {
+                componentsToInstall.insert("com.mumfrey.liteloader", ver);
+                continue;
             }
         }
 
@@ -643,17 +630,10 @@ void PackInstallTask::downloadMods()
             auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
 
             if(mod.type == ModType::Forge) {
-                auto vlist = APPLICATION->metadataIndex()->get("net.minecraftforge");
-                if(vlist)
-                {
-                    if (!vlist->isLoaded())
-                        vlist->load(Net::Mode::Online);
-                    auto ver = vlist->getVersion(mod.version);
-                    if(ver) {
-                        ver->load(Net::Mode::Online);
-                        componentsToInstall.insert("net.minecraftforge", ver);
-                        continue;
-                    }
+                auto ver = getComponentVersion("net.minecraftforge", mod.version);
+                if (ver) {
+                    componentsToInstall.insert("net.minecraftforge", ver);
+                    continue;
                 }
 
                 qDebug() << "Jarmod: " + path;
@@ -848,6 +828,25 @@ void PackInstallTask::install()
 
     jarmods.clear();
     emitSucceeded();
+}
+
+static Meta::VersionPtr getComponentVersion(const QString& uid, const QString& version)
+{
+    auto vlist = APPLICATION->metadataIndex()->get(uid);
+    if (!vlist)
+        return {};
+
+    if (!vlist->isLoaded())
+        vlist->load(Net::Mode::Online);
+
+    auto ver = vlist->getVersion(version);
+    if (!ver)
+        return {};
+
+    if (!ver->isLoaded())
+        ver->load(Net::Mode::Online);
+
+    return ver;
 }
 
 }
