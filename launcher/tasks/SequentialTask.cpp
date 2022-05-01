@@ -33,10 +33,16 @@ void SequentialTask::executeTask()
 
 bool SequentialTask::abort()
 {
-    bool succeeded = true;
-    for (auto& task : m_queue) {
-        if (!task->abort()) succeeded = false;
+    if(m_currentIndex == -1 || m_currentIndex >= m_queue.size()) {
+        m_queue.clear();
+        return true;
     }
+
+    bool succeeded = m_queue[m_currentIndex]->abort();
+    m_queue.clear();
+
+    if(succeeded)
+        emitAborted();
 
     return succeeded;
 }
@@ -76,7 +82,7 @@ void SequentialTask::subTaskProgress(qint64 current, qint64 total)
         setProgress(0, 100);
         return;
     }
-    setProgress(m_currentIndex, m_queue.count());
+    setProgress(m_currentIndex + 1, m_queue.count());
 
     m_stepProgress = current;
     m_stepTotalProgress = total;
