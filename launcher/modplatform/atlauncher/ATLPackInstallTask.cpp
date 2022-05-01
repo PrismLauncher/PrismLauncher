@@ -574,8 +574,6 @@ void PackInstallTask::downloadMods()
             jobPtr->addNetAction(dl);
 
             auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
-            qDebug() << "Will download" << url << "to" << path;
-            modsToCopy[entry->getFullPath()] = path;
 
             if(mod.type == ModType::Forge) {
                 auto vlist = APPLICATION->metadataIndex()->get("net.minecraftforge");
@@ -597,6 +595,10 @@ void PackInstallTask::downloadMods()
                 qDebug() << "Jarmod: " + path;
                 jarmods.push_back(path);
             }
+
+            // Download after Forge handling, to avoid downloading Forge twice.
+            qDebug() << "Will download" << url << "to" << path;
+            modsToCopy[entry->getFullPath()] = path;
         }
     }
 
