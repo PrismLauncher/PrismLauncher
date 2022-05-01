@@ -1,18 +1,37 @@
+// SPDX-License-Identifier: GPL-3.0-only
 /*
- * Copyright 2020-2021 Jamie Mansfield <jmansfield@cadixdev.org>
- * Copyright 2021 Petr Mrazek <peterix@gmail.com>
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2020-2021 Jamie Mansfield <jmansfield@cadixdev.org>
+ *      Copyright 2021 Petr Mrazek <peterix@gmail.com>
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 #include "ATLPackInstallTask.h"
@@ -305,7 +324,55 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
     auto f = std::make_shared<VersionFile>();
     f->name = m_pack + " " + m_version_name + " (libraries)";
 
+    const static QMap<QString, QString> liteLoaderMap = {
+            { "61179803bcd5fb7790789b790908663d", "1.12-SNAPSHOT" },
+            { "1420785ecbfed5aff4a586c5c9dd97eb", "1.12.2-SNAPSHOT" },
+            { "073f68e2fcb518b91fd0d99462441714", "1.6.2_03" },
+            { "10a15b52fc59b1bfb9c05b56de1097d6", "1.6.2_02" },
+            { "b52f90f08303edd3d4c374e268a5acf1", "1.6.2_04" },
+            { "ea747e24e03e24b7cad5bc8a246e0319", "1.6.2_01" },
+            { "55785ccc82c07ff0ba038fe24be63ea2", "1.7.10_01" },
+            { "63ada46e033d0cb6782bada09ad5ca4e", "1.7.10_04" },
+            { "7983e4b28217c9ae8569074388409c86", "1.7.10_03" },
+            { "c09882458d74fe0697c7681b8993097e", "1.7.10_02" },
+            { "db7235aefd407ac1fde09a7baba50839", "1.7.10_00" },
+            { "6e9028816027f53957bd8fcdfabae064", "1.8" },
+            { "5e732dc446f9fe2abe5f9decaec40cde", "1.10-SNAPSHOT" },
+            { "3a98b5ed95810bf164e71c1a53be568d", "1.11.2-SNAPSHOT" },
+            { "ba8e6285966d7d988a96496f48cbddaa", "1.8.9-SNAPSHOT" },
+            { "8524af3ac3325a82444cc75ae6e9112f", "1.11-SNAPSHOT" },
+            { "53639d52340479ccf206a04f5e16606f", "1.5.2_01" },
+            { "1fcdcf66ce0a0806b7ad8686afdce3f7", "1.6.4_00" },
+            { "531c116f71ae2b11033f9a11a0f8e668", "1.6.4_01" },
+            { "4009eeb99c9068f608d3483a6439af88", "1.7.2_03" },
+            { "66f343354b8417abce1a10d557d2c6e9", "1.7.2_04" },
+            { "ab554c21f28fbc4ae9b098bcb5f4cceb", "1.7.2_05" },
+            { "e1d76a05a3723920e2f80a5e66c45f16", "1.7.2_02" },
+            { "00318cb0c787934d523f63cdfe8ddde4", "1.9-SNAPSHOT" },
+            { "986fd1ee9525cb0dcab7609401cef754", "1.9.4-SNAPSHOT" },
+            { "571ad5e6edd5ff40259570c9be588bb5", "1.9.4" },
+            { "1cdd72f7232e45551f16cc8ffd27ccf3", "1.10.2-SNAPSHOT" },
+            { "8a7c21f32d77ee08b393dd3921ced8eb", "1.10.2" },
+            { "b9bef8abc8dc309069aeba6fbbe58980", "1.12.1-SNAPSHOT" }
+    };
+
     for(const auto & lib : m_version.libraries) {
+        // If the library is LiteLoader, we need to ignore it and handle it separately.
+        if (liteLoaderMap.contains(lib.md5)) {
+            auto vlist = APPLICATION->metadataIndex()->get("com.mumfrey.liteloader");
+            if (vlist) {
+                if (!vlist->isLoaded())
+                    vlist->load(Net::Mode::Online);
+
+                auto ver = vlist->getVersion(liteLoaderMap.value(lib.md5));
+                if (ver) {
+                    ver->load(Net::Mode::Online);
+                    componentsToInstall.insert("com.mumfrey.liteloader", ver);
+                    continue;
+                }
+            }
+        }
+
         auto libName = detectLibrary(lib);
         GradleSpecifier libSpecifier(libName);
 
@@ -579,6 +646,8 @@ void PackInstallTask::downloadMods()
                 auto vlist = APPLICATION->metadataIndex()->get("net.minecraftforge");
                 if(vlist)
                 {
+                    if (!vlist->isLoaded())
+                        vlist->load(Net::Mode::Online);
                     auto ver = vlist->getVersion(mod.version);
                     if(ver) {
                         ver->load(Net::Mode::Online);
