@@ -69,6 +69,8 @@ void Download::addValidator(Validator* v)
 
 void Download::executeTask()
 {
+    setStatus(tr("Downloading %1").arg(m_url.toString()));
+
     if (getState() == Task::State::AbortedByUser) {
         qWarning() << "Attempt to start an aborted Download:" << m_url.toString();
         emitAborted();
@@ -90,6 +92,7 @@ void Download::executeTask()
             emitFailed();
             return;
         case State::AbortedByUser:
+            emitAborted();
             return;
     }
 
@@ -216,13 +219,13 @@ void Download::downloadFinished()
         qDebug() << "Download failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emitFailed();
+        emit failed("");
         return;
     } else if (m_state == State::AbortedByUser) {
         qDebug() << "Download aborted in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emitAborted();
+        emit aborted();
         return;
     }
 
@@ -239,7 +242,7 @@ void Download::downloadFinished()
         qDebug() << "Download failed to finalize:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emitFailed();
+        emit failed("");
         return;
     }
 

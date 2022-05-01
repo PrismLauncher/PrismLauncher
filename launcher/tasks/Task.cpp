@@ -100,6 +100,7 @@ void Task::emitAborted()
     m_failReason = "Aborted.";
     qDebug() << "Task" << describe() << "aborted.";
     emit aborted();
+    emit finished();
 }
 
 void Task::emitSucceeded()

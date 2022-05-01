@@ -79,7 +79,7 @@ class Task : public QObject {
 
    public slots:
     virtual void start();
-    virtual bool abort() { return false; };
+    virtual bool abort() { if(canAbort()) emitAborted(); return canAbort(); };
 
    protected:
     virtual void executeTask() = 0;

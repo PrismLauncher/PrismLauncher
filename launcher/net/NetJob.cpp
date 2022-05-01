@@ -47,7 +47,9 @@ auto NetJob::addNetAction(NetAction::Ptr action) -> bool
     if (action->isRunning()) {
         connect(action.get(), &NetAction::succeeded, [this, action]{ partSucceeded(action->index()); });
         connect(action.get(), &NetAction::failed, [this, action](QString){ partFailed(action->index()); });
+        connect(action.get(), &NetAction::aborted, [this, action](){ partAborted(action->index()); });
         connect(action.get(), &NetAction::progress, [this, action](qint64 done, qint64 total) { partProgress(action->index(), done, total); });
+        connect(action.get(), &NetAction::status, this, &NetJob::status);
     } else {
         m_todo.append(m_parts_progress.size() - 1);
     }
@@ -222,6 +224,7 @@ void NetJob::startMoreParts()
         connect(part.get(), &NetAction::failed, this, [this, part](QString){ partFailed(part->index()); });
         connect(part.get(), &NetAction::aborted, this, [this, part]{ partAborted(part->index()); });
         connect(part.get(), &NetAction::progress, this, [this, part](qint64 done, qint64 total) { partProgress(part->index(), done, total); });
+        connect(part.get(), &NetAction::status, this, &NetJob::status);
 
         part->startAction(m_network);
     }
