@@ -145,7 +145,7 @@ public final class OneSixLauncher implements Launcher {
         invokeMain(minecraftClass);
     }
 
-    void launchWithMainClass() throws Exception {
+    private void launchWithMainClass() throws Exception {
         // window size, title and state, onesix
 
         // FIXME: there is no good way to maximize the minecraft window in onesix.
