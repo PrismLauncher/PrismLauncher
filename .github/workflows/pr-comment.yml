@@ -1,7 +1,7 @@
 name: Comment on pull request
 on:
   workflow_run:
-    workflows: ['Test workflow with upload']
+    workflows: ['Build Application']
     types: [completed]
 jobs:
   pr_comment:
