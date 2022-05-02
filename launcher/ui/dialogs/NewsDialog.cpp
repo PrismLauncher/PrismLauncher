@@ -16,7 +16,7 @@ NewsDialog::NewsDialog(QList<NewsEntryPtr> entries, QWidget* parent) : QDialog(p
     m_article_list_hidden = ui->articleListWidget->isHidden();
 
     auto first_item = ui->articleListWidget->item(0);
-    ui->articleListWidget->setItemSelected(first_item, true);
+    first_item->setSelected(true);
 
     auto article_entry = m_entries.constFind(first_item->text()).value();
     ui->articleTitleLabel->setText(QString("<a href='%1'>%2</a>").arg(article_entry->link, first_item->text()));

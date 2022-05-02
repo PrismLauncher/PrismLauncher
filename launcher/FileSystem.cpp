@@ -346,7 +346,7 @@ bool checkProblemticPathJava(QDir folder)
 }
 
 // Win32 crap
-#if defined Q_OS_WIN
+#ifdef Q_OS_WIN
 
 bool called_coinit = false;
 
@@ -366,7 +366,7 @@ HRESULT CreateLink(LPCSTR linkPath, LPCSTR targetPath, LPCSTR args)
         }
     }
 
-    IShellLink *link;
+    IShellLinkA *link;
     hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink,
                             (LPVOID *)&link);
 

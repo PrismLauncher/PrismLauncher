@@ -321,7 +321,8 @@ bool World::install(const QString &to, const QString &name)
 
     if(ok && !name.isEmpty() && m_actualName != name)
     {
-        World newWorld(finalPath);
+        QFileInfo finalPathInfo(finalPath);
+        World newWorld(finalPathInfo);
         if(newWorld.isValid())
         {
             newWorld.rename(name);

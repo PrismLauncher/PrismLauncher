@@ -61,7 +61,7 @@ void NewsChecker::rssDownloadFinished()
         // Parse the XML.
         if (!doc.setContent(newsData, false, &errorMsg, &errorLine, &errorCol))
         {
-            QString fullErrorMsg = QString("Error parsing RSS feed XML. %s at %d:%d.").arg(errorMsg, errorLine, errorCol);
+            QString fullErrorMsg = QString("Error parsing RSS feed XML. %1 at %2:%3.").arg(errorMsg).arg(errorLine).arg(errorCol);
             fail(fullErrorMsg);
             newsData.clear();
             return;

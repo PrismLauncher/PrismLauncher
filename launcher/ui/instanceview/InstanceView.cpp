@@ -425,7 +425,12 @@ void InstanceView::mouseReleaseEvent(QMouseEvent *event)
         {
             emit clicked(index);
         }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QStyleOptionViewItem option;
+        initViewItemOption(&option);
+#else
         QStyleOptionViewItem option = viewOptions();
+#endif
         if (m_pressedAlreadySelected)
         {
             option.state |= QStyle::State_Selected;
@@ -461,7 +466,12 @@ void InstanceView::mouseDoubleClickEvent(QMouseEvent *event)
     QPersistentModelIndex persistent = index;
     emit doubleClicked(persistent);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QStyleOptionViewItem option;
+    initViewItemOption(&option);
+#else
     QStyleOptionViewItem option = viewOptions();
+#endif
     if ((model()->flags(index) & Qt::ItemIsEnabled) && !style()->styleHint(QStyle::SH_ItemView_ActivateItemOnSingleClick, &option, this))
     {
         emit activated(index);
@@ -474,7 +484,12 @@ void InstanceView::paintEvent(QPaintEvent *event)
 
     QPainter painter(this->viewport());
 
-    QStyleOptionViewItem option(viewOptions());
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QStyleOptionViewItem option;
+    initViewItemOption(&option);
+#else
+    QStyleOptionViewItem option = viewOptions();
+#endif
     option.widget = this;
 
     int wpWidth = viewport()->width();
@@ -528,9 +543,9 @@ void InstanceView::paintEvent(QPaintEvent *event)
 #if 0
     if (!m_lastDragPosition.isNull())
     {
-        QPair<Group *, int> pair = rowDropPos(m_lastDragPosition);
-        Group *category = pair.first;
-        int row = pair.second;
+        std::pair<VisualGroup *, VisualGroup::HitResults> pair = rowDropPos(m_lastDragPosition);
+        VisualGroup *category = pair.first;
+        VisualGroup::HitResults row = pair.second;
         if (category)
         {
             int internalRow = row - category->firstItemIndex;
@@ -618,7 +633,7 @@ void InstanceView::dropEvent(QDropEvent *event)
     {
         if(event->possibleActions() & Qt::MoveAction)
         {
-            QPair<VisualGroup *, VisualGroup::HitResults> dropPos = rowDropPos(event->pos());
+            std::pair<VisualGroup *, VisualGroup::HitResults> dropPos = rowDropPos(event->pos());
             const VisualGroup *group = dropPos.first;
             auto hitresult = dropPos.second;
 
@@ -709,10 +724,18 @@ QRect InstanceView::geometryRect(const QModelIndex &index) const
     int x = pos.first;
     // int y = pos.second;
 
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QStyleOptionViewItem option;
+    initViewItemOption(&option);
+#else
+    QStyleOptionViewItem option = viewOptions();
+#endif
+
     QRect out;
     out.setTop(cat->verticalPosition() + cat->headerHeight() + 5 + cat->rowTopOf(index));
     out.setLeft(m_spacing + x * (itemWidth() + m_spacing));
-    out.setSize(itemDelegate()->sizeHint(viewOptions(), index));
+    out.setSize(itemDelegate()->sizeHint(option, index));
     geometryCache.insert(row, new QRect(out));
     return out;
 }
@@ -759,7 +782,12 @@ QPixmap InstanceView::renderToPixmap(const QModelIndexList &indices, QRect *r) c
     QPixmap pixmap(r->size());
     pixmap.fill(Qt::transparent);
     QPainter painter(&pixmap);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QStyleOptionViewItem option;
+    initViewItemOption(&option);
+#else
     QStyleOptionViewItem option = viewOptions();
+#endif
     option.state |= QStyle::State_Selected;
     for (int j = 0; j < paintPairs.count(); ++j)
     {
@@ -770,16 +798,16 @@ QPixmap InstanceView::renderToPixmap(const QModelIndexList &indices, QRect *r) c
     return pixmap;
 }
 
-QList<QPair<QRect, QModelIndex>> InstanceView::draggablePaintPairs(const QModelIndexList &indices, QRect *r) const
+QList<std::pair<QRect, QModelIndex>> InstanceView::draggablePaintPairs(const QModelIndexList &indices, QRect *r) const
 {
     Q_ASSERT(r);
     QRect &rect = *r;
-    QList<QPair<QRect, QModelIndex>> ret;
+    QList<std::pair<QRect, QModelIndex>> ret;
     for (int i = 0; i < indices.count(); ++i)
     {
         const QModelIndex &index = indices.at(i);
         const QRect current = geometryRect(index);
-        ret += qMakePair(current, index);
+        ret += std::make_pair(current, index);
         rect |= current;
     }
     return ret;
@@ -790,11 +818,11 @@ bool InstanceView::isDragEventAccepted(QDropEvent *event)
     return true;
 }
 
-QPair<VisualGroup *, VisualGroup::HitResults> InstanceView::rowDropPos(const QPoint &pos)
+std::pair<VisualGroup *, VisualGroup::HitResults> InstanceView::rowDropPos(const QPoint &pos)
 {
     VisualGroup::HitResults hitresult;
     auto group = categoryAt(pos + offset(), hitresult);
-    return qMakePair<VisualGroup*, int>(group, hitresult);
+    return std::make_pair(group, hitresult);
 }
 
 QPoint InstanceView::offset() const

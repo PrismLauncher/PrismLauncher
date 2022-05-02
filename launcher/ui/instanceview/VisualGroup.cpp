@@ -55,7 +55,14 @@ void VisualGroup::update()
             positionInRow = 0;
             maxRowHeight = 0;
         }
-        auto itemHeight = view->itemDelegate()->sizeHint(view->viewOptions(), item).height();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QStyleOptionViewItem viewItemOption;
+        view->initViewItemOption(&viewItemOption);
+#else
+        QStyleOptionViewItem viewItemOption = view->viewOptions();
+#endif
+
+        auto itemHeight = view->itemDelegate()->sizeHint(viewItemOption, item).height();
         if(itemHeight > maxRowHeight)
         {
             maxRowHeight = itemHeight;

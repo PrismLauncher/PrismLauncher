@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QList>
+#include <list>
 
 #include "Version.h"
 

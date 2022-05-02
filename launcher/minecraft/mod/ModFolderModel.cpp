@@ -317,7 +317,8 @@ bool ModFolderModel::installMod(const QString &filename)
             return false;
         }
         FS::updateTimestamp(newpath);
-        installedMod.repath(newpath);
+        QFileInfo newpathInfo(newpath);
+        installedMod.repath(newpathInfo);
         update();
         return true;
     }
@@ -335,7 +336,8 @@ bool ModFolderModel::installMod(const QString &filename)
             qWarning() << "Copy of folder from" << originalPath << "to" << newpath << "has (potentially partially) failed.";
             return false;
         }
-        installedMod.repath(newpath);
+        QFileInfo newpathInfo(newpath);
+        installedMod.repath(newpathInfo);
         update();
         return true;
     }

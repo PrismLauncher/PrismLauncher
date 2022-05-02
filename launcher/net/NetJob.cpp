@@ -106,7 +106,7 @@ auto NetJob::abort() -> bool
     m_todo.clear();
 
     // abort active downloads
-    auto toKill = m_doing.toList();
+    auto toKill = m_doing.values();
     for (auto index : toKill) {
         auto part = m_downloads[index];
         fullyAborted &= part->abort();

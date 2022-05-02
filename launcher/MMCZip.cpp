@@ -421,7 +421,7 @@ bool MMCZip::collectFileListRecursively(const QString& rootDir, const QString& s
             continue;
         }
 
-        files->append(e.filePath());  // we want the original paths for MMCZip::compressDirFiles
+        files->append(e);  // we want the original paths for MMCZip::compressDirFiles
     }
     return true;
 }

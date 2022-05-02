@@ -47,7 +47,7 @@ QStringList splitArgs(QString args)
             if (cchar == '\\')
                 escape = true;
             else if (cchar == inquotes)
-                inquotes = 0;
+                inquotes = QChar::Null;
             else
                 current += cchar;
             // otherwise

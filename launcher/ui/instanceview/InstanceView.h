@@ -143,11 +143,11 @@ private: /* methods */
     int calculateItemsPerRow() const;
     int verticalScrollToValue(const QModelIndex &index, const QRect &rect, QListView::ScrollHint hint) const;
     QPixmap renderToPixmap(const QModelIndexList &indices, QRect *r) const;
-    QList<QPair<QRect, QModelIndex>> draggablePaintPairs(const QModelIndexList &indices, QRect *r) const;
+    QList<std::pair<QRect, QModelIndex>> draggablePaintPairs(const QModelIndexList &indices, QRect *r) const;
 
     bool isDragEventAccepted(QDropEvent *event);
 
-    QPair<VisualGroup *, VisualGroup::HitResults> rowDropPos(const QPoint &pos);
+    std::pair<VisualGroup *, VisualGroup::HitResults> rowDropPos(const QPoint &pos);
 
     QPoint offset() const;
 };
