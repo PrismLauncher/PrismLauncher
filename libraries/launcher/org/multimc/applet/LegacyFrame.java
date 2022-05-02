@@ -141,16 +141,19 @@ public final class LegacyFrame extends Frame {
 
         @Override
         public void windowClosing(WindowEvent e) {
-            new Thread(() -> {
-                try {
-                    Thread.sleep(30000L);
-                } catch (InterruptedException localInterruptedException) {
-                    localInterruptedException.printStackTrace();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(30000L);
+                    } catch (InterruptedException localInterruptedException) {
+                        localInterruptedException.printStackTrace();
+                    }
+
+                    LOGGER.info("Forcing exit!");
+
+                    System.exit(0);
                 }
-
-                LOGGER.info("Forcing exit!");
-
-                System.exit(0);
             }).start();
 
             if (appletWrap != null) {

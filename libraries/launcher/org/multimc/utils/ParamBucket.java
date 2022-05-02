@@ -28,8 +28,15 @@ public final class ParamBucket {
     private final Map<String, List<String>> paramsMap = new HashMap<>();
 
     public void add(String key, String value) {
-        paramsMap.computeIfAbsent(key, k -> new ArrayList<>())
-                .add(value);
+        List<String> params = paramsMap.get(key);
+
+        if (params == null) {
+            params = new ArrayList<>();
+
+            paramsMap.put(key, params);
+        }
+
+        params.add(value);
     }
 
     public List<String> all(String key) throws ParameterNotFoundException {
