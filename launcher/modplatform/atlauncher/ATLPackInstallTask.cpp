@@ -754,7 +754,7 @@ bool PackInstallTask::extractMods(
         QString folderToExtract = "";
         if(mod.type == ModType::Extract) {
             folderToExtract = mod.extractFolder;
-            folderToExtract.remove(QRegExp("^/"));
+            folderToExtract.remove(QRegularExpression("^/"));
         }
 
         qDebug() << "Extracting " + mod.file + " to " + extractToDir;

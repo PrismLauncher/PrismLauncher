@@ -39,6 +39,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QDebug>
+#include <QRegularExpression>
 
 #include "settings/INISettingsObject.h"
 #include "settings/Setting.h"
@@ -335,7 +336,7 @@ QString BaseInstance::name() const
 
 QString BaseInstance::windowTitle() const
 {
-    return BuildConfig.LAUNCHER_NAME + ": " + name().replace(QRegExp("[ \n\r\t]+"), " ");
+    return BuildConfig.LAUNCHER_NAME + ": " + name().replace(QRegularExpression("\\s+"), " ");
 }
 
 // FIXME: why is this here? move it to MinecraftInstance!!!

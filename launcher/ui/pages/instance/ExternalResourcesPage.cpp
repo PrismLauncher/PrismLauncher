@@ -32,13 +32,13 @@ class SortProxy : public QSortFilterProxyModel {
         
         const auto& mod = model->at(source_row);
 
-        if (mod.name().contains(filterRegExp()))
+        if (mod.name().contains(filterRegularExpression()))
             return true;
-        if (mod.description().contains(filterRegExp()))
+        if (mod.description().contains(filterRegularExpression()))
             return true;
         
         for (auto& author : mod.authors()) {
-            if (author.contains(filterRegExp())) {
+            if (author.contains(filterRegularExpression())) {
                 return true;
             }
         }

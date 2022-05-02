@@ -15,7 +15,6 @@
 
 #include <QtNetwork>
 #include <QtXml>
-#include <QRegExp>
 
 #include <QDebug>
 

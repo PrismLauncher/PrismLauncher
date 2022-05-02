@@ -58,7 +58,7 @@ QString reprocessMarkdown(QByteArray markdown)
     QString output = hoedown.process(markdown);
 
     // HACK: easier than customizing hoedown
-    output.replace(QRegExp("GH-([0-9]+)"), "<a href=\"https://github.com/PolyMC/PolyMC/issues/\\1\">GH-\\1</a>");
+    output.replace(QRegularExpression("GH-([0-9]+)"), "<a href=\"https://github.com/PolyMC/PolyMC/issues/\\1\">GH-\\1</a>");
     qDebug() << output;
     return output;
 }

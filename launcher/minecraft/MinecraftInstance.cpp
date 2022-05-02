@@ -473,25 +473,25 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
 
 static QString replaceTokensIn(QString text, QMap<QString, QString> with)
 {
+    // TODO: does this still work??
     QString result;
-    QRegExp token_regexp("\\$\\{(.+)\\}");
-    token_regexp.setMinimal(true);
+    QRegularExpression token_regexp("\\$\\{(.+)\\}", QRegularExpression::InvertedGreedinessOption);
     QStringList list;
-    int tail = 0;
-    int head = 0;
-    while ((head = token_regexp.indexIn(text, head)) != -1)
+    QRegularExpressionMatchIterator i = token_regexp.globalMatch(text);
+    int lastCapturedEnd = 0;
+    while (i.hasNext())
     {
-        result.append(text.mid(tail, head - tail));
-        QString key = token_regexp.cap(1);
+        QRegularExpressionMatch match = i.next();
+        result.append(text.mid(lastCapturedEnd, match.capturedStart()));
+        QString key = match.captured(1);
         auto iter = with.find(key);
         if (iter != with.end())
         {
             result.append(*iter);
         }
-        head += token_regexp.matchedLength();
-        tail = head;
+        lastCapturedEnd = match.capturedEnd();
     }
-    result.append(text.mid(tail));
+    result.append(text.mid(lastCapturedEnd));
     return result;
 }
 

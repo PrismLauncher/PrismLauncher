@@ -66,7 +66,7 @@ public:
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
     {
-        const QString pattern = filterRegExp().pattern();
+        const QString pattern = filterRegularExpression().pattern();
         const auto model = static_cast<PageModel *>(sourceModel());
         const auto page = model->pages().at(sourceRow);
         if (!page->shouldDisplay())

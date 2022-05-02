@@ -18,7 +18,7 @@
 
 #include <QPushButton>
 #include <QAction>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 #include <QJsonDocument>
 #include <QDebug>
 
@@ -39,9 +39,9 @@ ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidg
     yellowIcon = APPLICATION->getThemedIcon("status-yellow");
     badIcon = APPLICATION->getThemedIcon("status-bad");
 
-    QRegExp permittedNames("[a-zA-Z0-9_]{3,16}");
+    QRegularExpression permittedNames("[a-zA-Z0-9_]{3,16}");
     auto nameEdit = ui->nameEdit;
-    nameEdit->setValidator(new QRegExpValidator(permittedNames));
+    nameEdit->setValidator(new QRegularExpressionValidator(permittedNames));
     nameEdit->setClearButtonEnabled(true);
     validityAction = nameEdit->addAction(yellowIcon, QLineEdit::LeadingPosition);
     connect(nameEdit, &QLineEdit::textEdited, this, &ProfileSetupDialog::nameEdited);

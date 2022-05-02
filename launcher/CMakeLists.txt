@@ -978,6 +978,7 @@ target_link_libraries(Launcher_logic
     Qt5::Network
     Qt5::Concurrent
     Qt5::Gui
+    Qt5::Widgets
 )
 target_link_libraries(Launcher_logic
     QuaZip::QuaZip

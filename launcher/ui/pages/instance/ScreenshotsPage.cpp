@@ -50,6 +50,7 @@
 #include <QClipboard>
 #include <QKeyEvent>
 #include <QMenu>
+#include <QRegularExpression>
 
 #include <Application.h>
 
@@ -154,7 +155,7 @@ public:
         if (role == Qt::DisplayRole || role == Qt::EditRole)
         {
             QVariant result = sourceModel()->data(mapToSource(proxyIndex), role);
-            return result.toString().remove(QRegExp("\\.png$"));
+            return result.toString().remove(QRegularExpression("\\.png$"));
         }
         if (role == Qt::DecorationRole)
         {

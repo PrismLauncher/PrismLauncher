@@ -89,14 +89,3 @@ void VersionFile::applyTo(LaunchProfile *profile)
     }
     profile->applyProblemSeverity(getProblemSeverity());
 }
-
-/*
-    auto theirVersion = profile->getMinecraftVersion();
-    if (!theirVersion.isNull() && !dependsOnMinecraftVersion.isNull())
-    {
-        if (QRegExp(dependsOnMinecraftVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(theirVersion) == -1)
-        {
-            throw MinecraftVersionMismatch(uid, dependsOnMinecraftVersion, theirVersion);
-        }
-    }
-*/
