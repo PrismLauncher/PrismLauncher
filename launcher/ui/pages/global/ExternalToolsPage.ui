@@ -158,6 +158,9 @@
             <property name="text">
              <string>&amp;Text Editor:</string>
             </property>
+            <property name="buddy">
+             <cstring>jsonEditorTextBox</cstring>
+            </property>
            </widget>
           </item>
           <item row="0" column="2">
