@@ -151,7 +151,7 @@ void Page::openedImpl()
 
         ftbFetchTask->fetch();
         ftbPrivatePacks->load();
-        ftbFetchTask->fetchPrivate(ftbPrivatePacks->getCurrentPackCodes().toList());
+        ftbFetchTask->fetchPrivate(ftbPrivatePacks->getCurrentPackCodes().values());
         initialized = true;
     }
     suggestCurrent();

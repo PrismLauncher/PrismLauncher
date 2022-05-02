@@ -102,7 +102,7 @@ void LogView::rowsInserted(const QModelIndex& parent, int first, int last)
         {
             format.setFont(font.value<QFont>());
         }
-        auto fg = m_model->data(idx, Qt::TextColorRole);
+        auto fg = m_model->data(idx, Qt::ForegroundRole);
         if(fg.isValid())
         {
             format.setForeground(fg.value<QColor>());

@@ -24,7 +24,7 @@
 #include "InstanceView.h"
 #include "BaseInstance.h"
 #include "InstanceList.h"
-#include <xdgicon.h>
+#include <QIcon>
 #include <QTextEdit>
 
 // Origin: Qt
@@ -61,7 +61,7 @@ void drawSelectionRect(QPainter *painter, const QStyleOptionViewItem &option,
         painter->fillRect(rect, option.palette.brush(QPalette::Highlight));
     else
     {
-        QColor backgroundColor = option.palette.color(QPalette::Background);
+        QColor backgroundColor = option.palette.color(QPalette::Window);
         backgroundColor.setAlpha(160);
         painter->fillRect(rect, QBrush(backgroundColor));
     }
@@ -142,7 +142,7 @@ void drawBadges(QPainter *painter, const QStyleOptionViewItem &option, BaseInsta
                 return;
             }
             // FIXME: inject this.
-            auto icon = XdgIcon::fromTheme(it.next());
+            auto icon = QIcon::fromTheme(it.next());
             // opt.icon.paint(painter, iconbox, Qt::AlignCenter, mode, state);
             const QPixmap pixmap;
             // itemSide

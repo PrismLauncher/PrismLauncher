@@ -963,6 +963,7 @@ target_link_libraries(Launcher_logic
     tomlc99
     BuildConfig
     Katabasis
+    Qt5::Widgets
 )
 
 if (UNIX AND NOT CYGWIN AND NOT APPLE)
@@ -979,7 +980,6 @@ target_link_libraries(Launcher_logic
     Qt5::Gui
 )
 target_link_libraries(Launcher_logic
-    Launcher_iconfix
     QuaZip::QuaZip
     hoedown
     LocalPeer

@@ -288,7 +288,11 @@ public:
             return false;
         }
         beginMoveRows(QModelIndex(), row, row, QModelIndex(), row - 1);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
+        m_servers.swapItemsAt(row-1, row);
+#else
         m_servers.swap(row-1, row);
+#endif
         endMoveRows();
         scheduleSave();
         return true;
@@ -306,7 +310,11 @@ public:
             return false;
         }
         beginMoveRows(QModelIndex(), row, row, QModelIndex(), row + 2);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
+        m_servers.swapItemsAt(row+1, row);
+#else
         m_servers.swap(row+1, row);
+#endif
         endMoveRows();
         scheduleSave();
         return true;

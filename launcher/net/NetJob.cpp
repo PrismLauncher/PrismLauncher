@@ -97,7 +97,12 @@ auto NetJob::abort() -> bool
     bool fullyAborted = true;
 
     // fail all downloads on the queue
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    QSet<int> todoSet(m_todo.begin(), m_todo.end());
+    m_failed.unite(todoSet);
+#else
     m_failed.unite(m_todo.toSet());
+#endif
     m_todo.clear();
 
     // abort active downloads

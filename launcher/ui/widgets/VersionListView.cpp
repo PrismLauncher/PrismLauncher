@@ -136,7 +136,7 @@ void VersionListView::paintInfoLabel(QPaintEvent *event) const
     auto innerBounds = bounds;
     innerBounds.adjust(10, 10, -10, -10);
 
-    QColor background = QApplication::palette().color(QPalette::Foreground);
+    QColor background = QApplication::palette().color(QPalette::WindowText);
     QColor foreground = QApplication::palette().color(QPalette::Base);
     foreground.setAlpha(190);
     painter.setFont(font);

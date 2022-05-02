@@ -282,6 +282,23 @@ void LaunchTask::emitFailed(QString reason)
     Task::emitFailed(reason);
 }
 
+void LaunchTask::substituteVariables(const QStringList &args) const
+{
+    auto variables = m_instance->getVariables();
+    auto envVariables = QProcessEnvironment::systemEnvironment();
+
+    for (auto arg : args) {
+        for (auto key : variables)
+        {
+            arg.replace("$" + key, variables.value(key));
+        }
+        for (auto env : envVariables.keys())
+        {
+            arg.replace("$" + env, envVariables.value(env));
+        }
+    }
+}
+
 QString LaunchTask::substituteVariables(const QString &cmd) const
 {
     QString out = cmd;

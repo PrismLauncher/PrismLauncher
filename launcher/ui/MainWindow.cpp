@@ -42,31 +42,31 @@
 
 #include "MainWindow.h"
 
-#include <QtCore/QVariant>
-#include <QtCore/QUrl>
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
+#include <QVariant>
+#include <QUrl>
+#include <QDir>
+#include <QFileInfo>
 
-#include <QtGui/QKeyEvent>
+#include <QKeyEvent>
+#include <QAction>
 
-#include <QtWidgets/QAction>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QButtonGroup>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QHeaderView>
-#include <QtWidgets/QMainWindow>
-#include <QtWidgets/QStatusBar>
-#include <QtWidgets/QToolBar>
-#include <QtWidgets/QWidget>
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QMenuBar>
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QInputDialog>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QToolButton>
-#include <QtWidgets/QWidgetAction>
-#include <QtWidgets/QProgressDialog>
-#include <QtWidgets/QShortcut>
+#include <QApplication>
+#include <QButtonGroup>
+#include <QHBoxLayout>
+#include <QHeaderView>
+#include <QMainWindow>
+#include <QStatusBar>
+#include <QToolBar>
+#include <QWidget>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QLabel>
+#include <QToolButton>
+#include <QWidgetAction>
+#include <QProgressDialog>
+#include <QShortcut>
 
 #include <BaseInstance.h>
 #include <InstanceList.h>
@@ -1494,7 +1494,11 @@ void MainWindow::updateNotAvailable()
 
 QList<int> stringToIntList(const QString &string)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    QStringList split = string.split(',', Qt::SkipEmptyParts);
+#else
     QStringList split = string.split(',', QString::SkipEmptyParts);
+#endif
     QList<int> out;
     for (int i = 0; i < split.size(); ++i)
     {

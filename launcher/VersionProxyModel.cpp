@@ -208,7 +208,8 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
                         {
                             return APPLICATION->getThemedIcon("bug");
                         }
-                        auto pixmap = QPixmapCache::find("placeholder");
+                        QPixmap pixmap;
+                        QPixmapCache::find("placeholder", &pixmap);
                         if(!pixmap)
                         {
                             QPixmap px(16,16);
@@ -216,7 +217,7 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
                             QPixmapCache::insert("placeholder", px);
                             return px;
                         }
-                        return *pixmap;
+                        return pixmap;
                     }
                 }
                 default:

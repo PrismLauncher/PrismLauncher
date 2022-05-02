@@ -51,7 +51,7 @@ QVariant BaseVersionList::data(const QModelIndex &index, int role) const
     switch (role)
     {
     case VersionPointerRole:
-        return qVariantFromValue(version);
+        return QVariant::fromValue(version);
 
     case VersionRole:
         return version->name();

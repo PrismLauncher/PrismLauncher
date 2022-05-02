@@ -2,10 +2,11 @@
 
 #include <QJsonDocument>
 #include <QJsonObject>
+#include "Json.h"
 
 void ApplicationMessage::parse(const QByteArray & input) {
-    auto doc = QJsonDocument::fromBinaryData(input);
-    auto root = doc.object();
+    auto doc = Json::requireDocument(input, "ApplicationMessage");
+    auto root = Json::requireObject(doc, "ApplicationMessage");
 
     command = root.value("command").toString();
     args.clear();
@@ -25,7 +26,5 @@ QByteArray ApplicationMessage::serialize() {
     }
     root.insert("args", outArgs);
 
-    QJsonDocument out;
-    out.setObject(root);
-    return out.toBinaryData();
+    return Json::toText(root);
 }

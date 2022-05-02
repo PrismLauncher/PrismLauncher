@@ -290,7 +290,6 @@ else()
     message(STATUS "Using system QuaZip")
 endif()
 add_subdirectory(libraries/rainbow) # Qt extension for colors
-add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader
 add_subdirectory(libraries/LocalPeer) # fork of a library from Qt solutions
 add_subdirectory(libraries/classparser) # class parser library
 add_subdirectory(libraries/optional-bare)

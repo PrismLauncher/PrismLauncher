@@ -195,7 +195,7 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
         switch (column)
         {
             case SizeColumn:
-                return qVariantFromValue<qlonglong>(world.bytes());
+                return QVariant::fromValue<qlonglong>(world.bytes());
 
             default:
                 return data(index, Qt::DisplayRole);
@@ -215,7 +215,7 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
     }
     case SeedRole:
     {
-        return qVariantFromValue<qlonglong>(world.seed());
+        return QVariant::fromValue<qlonglong>(world.seed());
     }
     case NameRole:
     {
@@ -227,7 +227,7 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
     }
     case SizeRole:
     {
-        return qVariantFromValue<qlonglong>(world.bytes());
+        return QVariant::fromValue<qlonglong>(world.bytes());
     }
     case IconFileRole:
     {

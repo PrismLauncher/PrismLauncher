@@ -171,7 +171,7 @@ void PageContainer::createUI()
     headerHLayout->addSpacerItem(new QSpacerItem(rightMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->setContentsMargins(0, 6, 0, 0);
 
-    m_pageStack->setMargin(0);
+    m_pageStack->setContentsMargins(0, 0, 0, 0);
     m_pageStack->addWidget(new QWidget(this));
 
     m_layout = new QGridLayout;

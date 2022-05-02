@@ -46,7 +46,6 @@ NewComponentDialog::NewComponentDialog(const QString & initialName, const QStrin
     connect(ui->nameTextBox, &QLineEdit::textChanged, this, &NewComponentDialog::updateDialogState);
     connect(ui->uidTextBox, &QLineEdit::textChanged, this, &NewComponentDialog::updateDialogState);
 
-    auto groups = APPLICATION->instances()->getGroups().toSet();
     ui->nameTextBox->setFocus();
 
     originalPlaceholderText = ui->uidTextBox->placeholderText();

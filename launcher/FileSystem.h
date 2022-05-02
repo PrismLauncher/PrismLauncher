@@ -49,8 +49,8 @@ class copy
 public:
     copy(const QString & src, const QString & dst)
     {
-        m_src = src;
-        m_dst = dst;
+        m_src.setPath(src);
+        m_dst.setPath(dst);
     }
     copy & followSymlinks(const bool follow)
     {

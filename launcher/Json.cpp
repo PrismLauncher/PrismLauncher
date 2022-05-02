@@ -22,14 +22,6 @@ void write(const QJsonArray &array, const QString &filename)
     write(QJsonDocument(array), filename);
 }
 
-QByteArray toBinary(const QJsonObject &obj)
-{
-    return QJsonDocument(obj).toBinaryData();
-}
-QByteArray toBinary(const QJsonArray &array)
-{
-    return QJsonDocument(array).toBinaryData();
-}
 QByteArray toText(const QJsonObject &obj)
 {
     return QJsonDocument(obj).toJson(QJsonDocument::Compact);
@@ -48,12 +40,8 @@ QJsonDocument requireDocument(const QByteArray &data, const QString &what)
 {
     if (isBinaryJson(data))
     {
-        QJsonDocument doc = QJsonDocument::fromBinaryData(data);
-        if (doc.isNull())
-        {
-            throw JsonException(what + ": Invalid JSON (binary JSON detected)");
-        }
-        return doc;
+        // FIXME: Is this needed?
+        throw JsonException(what + ": Invalid JSON. Binary JSON unsupported");
     }
     else
     {

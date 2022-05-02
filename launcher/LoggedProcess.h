@@ -43,7 +43,6 @@ public:
 
     State state() const;
     int exitCode() const;
-    qint64 processId() const;
 
     void setDetachable(bool detachable);
 

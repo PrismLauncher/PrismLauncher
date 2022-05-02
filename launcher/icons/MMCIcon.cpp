@@ -15,7 +15,7 @@
 
 #include "MMCIcon.h"
 #include <QFileInfo>
-#include <xdgicon.h>
+#include <QIcon>
 
 IconType operator--(IconType &t, int)
 {
@@ -63,7 +63,7 @@ QIcon MMCIcon::icon() const
     if(!icon.isNull())
         return icon;
     // FIXME: inject this.
-    return XdgIcon::fromTheme(m_images[m_current_type].key);
+    return QIcon::fromTheme(m_images[m_current_type].key);
 }
 
 void MMCIcon::remove(IconType rm_type)

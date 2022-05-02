@@ -116,9 +116,17 @@ bool ModFolderModel::update()
 
 void ModFolderModel::finishUpdate()
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    auto currentList = modsIndex.keys();
+    QSet<QString> currentSet(currentList.begin(), currentList.end());
+    auto & newMods = m_update->mods;
+    auto newList = newMods.keys();
+    QSet<QString> newSet(newList.begin(), newList.end());
+#else
     QSet<QString> currentSet = modsIndex.keys().toSet();
     auto & newMods = m_update->mods;
     QSet<QString> newSet = newMods.keys().toSet();
+#endif
 
     // see if the kept mods changed in some way
     {

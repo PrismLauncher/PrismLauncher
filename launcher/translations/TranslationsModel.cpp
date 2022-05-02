@@ -52,7 +52,7 @@
 
 #include "Application.h"
 
-const static QLatin1Literal defaultLangCode("en_US");
+const static QLatin1String defaultLangCode("en_US");
 
 enum class FileType
 {
@@ -431,9 +431,7 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
             }
             case Column::Completeness:
             {
-                QString text;
-                text.sprintf("%3.1f %%", lang.percentTranslated());
-                return text;
+                return QString("%1%").arg(lang.percentTranslated(), 3, 'f', 1);
             }
         }
     }
