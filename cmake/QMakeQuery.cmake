@@ -3,7 +3,11 @@ if(__QMAKEQUERY_CMAKE__)
 endif()
 set(__QMAKEQUERY_CMAKE__ TRUE)
 
-get_target_property(QMAKE_EXECUTABLE Qt5::qmake LOCATION)
+if(QT_VERSION_MAJOR EQUAL 5)
+    get_target_property(QMAKE_EXECUTABLE Qt5::qmake LOCATION)
+elseif(QT_VERSION_MAJOR EQUAL 6)
+    get_target_property(QMAKE_EXECUTABLE Qt6::qmake LOCATION)
+endif()
 
 function(QUERY_QMAKE VAR RESULT)
     exec_program(${QMAKE_EXECUTABLE} ARGS "-query ${VAR}" RETURN_VALUE return_code OUTPUT_VARIABLE output )

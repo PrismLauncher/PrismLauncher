@@ -154,6 +154,7 @@ add_custom_target(tcversion echo "\\#\\#teamcity[setParameter name=\\'env.LAUNCH
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
+include(QtVersionlessBackport)
 if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     set(QT_VERSION_MAJOR 5)
     find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml)
@@ -162,6 +163,18 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 5)
         find_package(QuaZip-Qt5 1.3 QUIET)
     endif()
     if (NOT QuaZip-Qt5_FOUND)
+        set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
+        set(FORCE_BUNDLED_QUAZIP 1)
+    endif()
+elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
+    set(QT_VERSION_MAJOR 6)
+    find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml Core5Compat)
+    list(APPEND Launcher_QT_LIBS Qt6::Core5Compat)
+
+    if(NOT Launcher_FORCE_BUNDLED_LIBS)
+        find_package(QuaZip-Qt6 1.3 QUIET)
+    endif()
+    if (NOT QuaZip-Qt6_FOUND)
         set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
         set(FORCE_BUNDLED_QUAZIP 1)
     endif()
