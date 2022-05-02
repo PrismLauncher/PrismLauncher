@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-package org.multimc;
+package org.multimc.exception;
 
-public class NotFoundException extends Exception
-{
+public final class ParseException extends IllegalArgumentException {
+
+    public ParseException() {
+        super();
+    }
+
+    public ParseException(String message) {
+        super(message);
+    }
+
 }

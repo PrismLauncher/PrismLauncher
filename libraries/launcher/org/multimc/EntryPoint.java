@@ -14,7 +14,8 @@ package org.multimc;/*
  * limitations under the License.
  */
 
-import org.multimc.onesix.OneSixLauncher;
+import org.multimc.exception.ParseException;
+import org.multimc.utils.ParamBucket;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,31 +24,27 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class EntryPoint
-{
+public final class EntryPoint {
 
     private static final Logger LOGGER = Logger.getLogger("EntryPoint");
 
     private final ParamBucket params = new ParamBucket();
 
-    private org.multimc.Launcher launcher;
+    private String launcherType;
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         EntryPoint listener = new EntryPoint();
 
         int retCode = listener.listen();
 
-        if (retCode != 0)
-        {
+        if (retCode != 0) {
             LOGGER.info("Exiting with " + retCode);
 
             System.exit(retCode);
         }
     }
 
-    private Action parseLine(String inData) throws ParseException
-    {
+    private Action parseLine(String inData) throws ParseException {
         String[] tokens = inData.split("\\s+", 2);
 
         if (tokens.length == 0)
@@ -66,15 +63,9 @@ public class EntryPoint
                 if (tokens.length != 2)
                     throw new ParseException("Expected 2 tokens, got " + tokens.length);
 
-                if (tokens[1].equals("onesix")) {
-                    launcher = new OneSixLauncher();
+                launcherType = tokens[1];
 
-                    LOGGER.info("Using onesix launcher.");
-
-                    return Action.Proceed;
-                } else {
-                    throw new ParseException("Invalid launcher type: " + tokens[1]);
-                }
+                return Action.Proceed;
             }
 
             default: {
@@ -88,8 +79,7 @@ public class EntryPoint
         }
     }
 
-    public int listen()
-    {
+    public int listen() {
         Action action = Action.Proceed;
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
@@ -112,16 +102,31 @@ public class EntryPoint
         }
 
         // Main loop
-        if (action == Action.Abort)
-        {
+        if (action == Action.Abort) {
             LOGGER.info("Launch aborted by the launcher.");
 
             return 1;
         }
 
-        if (launcher != null)
-        {
-            return launcher.launch(params);
+        if (launcherType != null) {
+            try {
+                Launcher launcher =
+                        LauncherFactory
+                                .getInstance()
+                                .createLauncher(launcherType, params);
+
+                launcher.launch();
+
+                return 0;
+            } catch (IllegalArgumentException e) {
+                LOGGER.log(Level.SEVERE, "Wrong argument.", e);
+
+                return 1;
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Exception caught from launcher.", e);
+
+                return 1;
+            }
         }
 
         LOGGER.log(Level.SEVERE, "No valid launcher implementation specified.");

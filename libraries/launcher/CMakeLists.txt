@@ -9,12 +9,13 @@ set(CMAKE_JAVA_COMPILE_FLAGS -target 8 -source 8 -Xlint:deprecation -Xlint:unche
 set(SRC
     org/multimc/EntryPoint.java
     org/multimc/Launcher.java
-    org/multimc/LegacyFrame.java
-    org/multimc/NotFoundException.java
-    org/multimc/ParamBucket.java
-    org/multimc/ParseException.java
-    org/multimc/Utils.java
-    org/multimc/onesix/OneSixLauncher.java
+    org/multimc/LauncherFactory.java
+    org/multimc/impl/OneSixLauncher.java
+    org/multimc/applet/LegacyFrame.java
+    org/multimc/exception/ParameterNotFoundException.java
+    org/multimc/exception/ParseException.java
+    org/multimc/utils/ParamBucket.java
+    org/multimc/utils/Utils.java
     net/minecraft/Launcher.java
 )
 add_jar(NewLaunch ${SRC})
