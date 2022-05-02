@@ -556,7 +556,7 @@ void PackInstallTask::downloadMods()
     QVector<QString> selectedMods;
     if (!optionalMods.isEmpty()) {
         setStatus(tr("Selecting optional mods..."));
-        selectedMods = m_support->chooseOptionalMods(optionalMods);
+        selectedMods = m_support->chooseOptionalMods(m_version, optionalMods);
     }
 
     setStatus(tr("Downloading mods..."));

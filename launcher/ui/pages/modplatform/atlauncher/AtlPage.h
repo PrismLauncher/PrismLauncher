@@ -84,7 +84,7 @@ private:
     void suggestCurrent();
 
     QString chooseVersion(Meta::VersionListPtr vlist, QString minecraftVersion) override;
-    QVector<QString> chooseOptionalMods(QVector<ATLauncher::VersionMod> mods) override;
+    QVector<QString> chooseOptionalMods(ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods) override;
 
 private slots:
     void triggerSearch();

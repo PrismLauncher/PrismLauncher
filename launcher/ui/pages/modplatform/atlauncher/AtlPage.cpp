@@ -169,8 +169,9 @@ void AtlPage::onVersionSelectionChanged(QString data)
     suggestCurrent();
 }
 
-QVector<QString> AtlPage::chooseOptionalMods(QVector<ATLauncher::VersionMod> mods) {
-    AtlOptionalModDialog optionalModDialog(this, mods);
+QVector<QString> AtlPage::chooseOptionalMods(ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods)
+{
+    AtlOptionalModDialog optionalModDialog(this, version, mods);
     optionalModDialog.exec();
     return optionalModDialog.getResult();
 }
