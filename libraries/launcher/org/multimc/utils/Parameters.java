@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class ParamBucket {
+public final class Parameters {
 
     private final Map<String, List<String>> paramsMap = new HashMap<>();
 

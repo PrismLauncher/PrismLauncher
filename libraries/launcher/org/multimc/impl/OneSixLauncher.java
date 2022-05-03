@@ -17,7 +17,7 @@ package org.multimc.impl;
 
 import org.multimc.Launcher;
 import org.multimc.applet.LegacyFrame;
-import org.multimc.utils.ParamBucket;
+import org.multimc.utils.Parameters;
 import org.multimc.utils.Utils;
 
 import java.applet.Applet;
@@ -55,7 +55,7 @@ public final class OneSixLauncher implements Launcher {
 
     private final ClassLoader classLoader;
 
-    public OneSixLauncher(ParamBucket params) {
+    public OneSixLauncher(Parameters params) {
         classLoader = ClassLoader.getSystemClassLoader();
 
         mcParams = params.allSafe("param", Collections.<String>emptyList());
@@ -72,22 +72,29 @@ public final class OneSixLauncher implements Launcher {
 
         cwd = System.getProperty("user.dir");
 
-        String windowParams = params.firstSafe("windowParams", "854x480");
+        String windowParams = params.firstSafe("windowParams", null);
 
-        String[] dimStrings = windowParams.split("x");
+        if (windowParams != null) {
+            String[] dimStrings = windowParams.split("x");
 
-        if (windowParams.equalsIgnoreCase("max")) {
-            maximize = true;
+            if (windowParams.equalsIgnoreCase("max")) {
+                maximize = true;
+
+                winSizeW = DEFAULT_WINDOW_WIDTH;
+                winSizeH = DEFAULT_WINDOW_HEIGHT;
+            } else if (dimStrings.length == 2) {
+                maximize = false;
+
+                winSizeW = Integer.parseInt(dimStrings[0]);
+                winSizeH = Integer.parseInt(dimStrings[1]);
+            } else {
+                throw new IllegalArgumentException("Unexpected window size parameter value: " + windowParams);
+            }
+        } else {
+            maximize = false;
 
             winSizeW = DEFAULT_WINDOW_WIDTH;
             winSizeH = DEFAULT_WINDOW_HEIGHT;
-        } else if (dimStrings.length == 2) {
-            maximize = false;
-
-            winSizeW = Integer.parseInt(dimStrings[0]);
-            winSizeH = Integer.parseInt(dimStrings[1]);
-        } else {
-            throw new IllegalArgumentException("Unexpected window size parameter value: " + windowParams);
         }
     }
 
@@ -121,10 +128,9 @@ public final class OneSixLauncher implements Launcher {
 
                 Applet mcApplet = (Applet) mcAppletClass.getConstructor().newInstance();
 
-                LegacyFrame mcWindow = new LegacyFrame(windowTitle);
+                LegacyFrame mcWindow = new LegacyFrame(windowTitle, mcApplet);
 
                 mcWindow.start(
-                        mcApplet,
                         userName,
                         sessionId,
                         winSizeW,

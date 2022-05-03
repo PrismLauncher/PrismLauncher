@@ -1,7 +1,7 @@
 package org.multimc;
 
 import org.multimc.impl.OneSixLauncher;
-import org.multimc.utils.ParamBucket;
+import org.multimc.utils.Parameters;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,13 +15,13 @@ public final class LauncherFactory {
     private LauncherFactory() {
         launcherRegistry.put("onesix", new LauncherProvider() {
             @Override
-            public Launcher provide(ParamBucket parameters) {
+            public Launcher provide(Parameters parameters) {
                 return new OneSixLauncher(parameters);
             }
         });
     }
 
-    public Launcher createLauncher(String name, ParamBucket parameters) {
+    public Launcher createLauncher(String name, Parameters parameters) {
         LauncherProvider launcherProvider = launcherRegistry.get(name);
 
         if (launcherProvider == null)
@@ -36,7 +36,7 @@ public final class LauncherFactory {
 
     public interface LauncherProvider {
 
-        Launcher provide(ParamBucket parameters);
+        Launcher provide(Parameters parameters);
 
     }
 

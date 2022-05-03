@@ -14,7 +14,7 @@ set(SRC
     org/multimc/applet/LegacyFrame.java
     org/multimc/exception/ParameterNotFoundException.java
     org/multimc/exception/ParseException.java
-    org/multimc/utils/ParamBucket.java
+    org/multimc/utils/Parameters.java
     org/multimc/utils/Utils.java
     net/minecraft/Launcher.java
 )

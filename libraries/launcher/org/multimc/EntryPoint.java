@@ -15,7 +15,7 @@ package org.multimc;/*
  */
 
 import org.multimc.exception.ParseException;
-import org.multimc.utils.ParamBucket;
+import org.multimc.utils.Parameters;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public final class EntryPoint {
 
     private static final Logger LOGGER = Logger.getLogger("EntryPoint");
 
-    private final ParamBucket params = new ParamBucket();
+    private final Parameters params = new Parameters();
 
     private String launcherType;
 

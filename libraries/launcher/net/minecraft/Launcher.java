@@ -24,42 +24,25 @@ import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class Launcher extends Applet implements AppletStub {
+public final class Launcher extends Applet implements AppletStub {
 
     private final Map<String, String> params = new TreeMap<>();
 
+    private final Applet wrappedApplet;
+
     private boolean active = false;
 
-    private Applet wrappedApplet;
-    private URL documentBase;
-
-    public Launcher(Applet applet, URL documentBase) {
+    public Launcher(Applet applet) {
         this.setLayout(new BorderLayout());
 
         this.add(applet, "Center");
 
         this.wrappedApplet = applet;
-        this.documentBase = documentBase;
     }
 
     public void setParameter(String name, String value)
     {
         params.put(name, value);
-    }
-
-    public void replace(Applet applet) {
-        this.wrappedApplet = applet;
-
-        applet.setStub(this);
-        applet.setSize(getWidth(), getHeight());
-
-        this.setLayout(new BorderLayout());
-        this.add(applet, "Center");
-
-        applet.init();
-        active = true;
-        applet.start();
-        validate();
     }
 
     @Override
@@ -135,9 +118,8 @@ public class Launcher extends Applet implements AppletStub {
     public URL getDocumentBase() {
         try {
             // Special case only for Classic versions
-            if (wrappedApplet.getClass().getCanonicalName().startsWith("com.mojang")) {
-                return new URL("http", "www.minecraft.net", 80, "/game/", null);
-            }
+            if (wrappedApplet.getClass().getCanonicalName().startsWith("com.mojang"))
+                return new URL("http", "www.minecraft.net", 80, "/game/");
 
             return new URL("http://www.minecraft.net/game/");
         } catch (MalformedURLException e) {

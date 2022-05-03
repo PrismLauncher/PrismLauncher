@@ -18,10 +18,6 @@ package org.multimc.exception;
 
 public final class ParseException extends IllegalArgumentException {
 
-    public ParseException() {
-        super();
-    }
-
     public ParseException(String message) {
         super(message);
     }
