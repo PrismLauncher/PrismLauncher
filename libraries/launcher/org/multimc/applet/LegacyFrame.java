@@ -28,7 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Scanner;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,7 +51,7 @@ public final class LegacyFrame extends Frame {
             LOGGER.log(Level.WARNING, "Unable to read Minecraft icon!", e);
         }
 
-        this.addWindowListener(new ForceExitHandler());
+        addWindowListener(new ForceExitHandler());
     }
 
     public void start (
@@ -73,34 +73,24 @@ public final class LegacyFrame extends Frame {
                 Paths.get(System.getProperty("user.dir"), "..", "mpticket.corrupt");
 
         if (Files.exists(mpticketFile)) {
-            try (Scanner fileScanner = new Scanner(
-                    Files.newInputStream(mpticketFile),
-                    StandardCharsets.US_ASCII.name()
-            )) {
-                String[] mpticketParams = new String[3];
+            try {
+                List<String> lines = Files.readAllLines(mpticketFile, StandardCharsets.UTF_8);
 
-                for (int i = 0; i < mpticketParams.length; i++) {
-                    if (fileScanner.hasNextLine()) {
-                        mpticketParams[i] = fileScanner.nextLine();
-                    } else {
-                        Files.move(
-                                mpticketFile,
-                                mpticketFileCorrupt,
-                                StandardCopyOption.REPLACE_EXISTING
-                        );
+                if (lines.size() != 3) {
+                    Files.move(
+                            mpticketFile,
+                            mpticketFileCorrupt,
+                            StandardCopyOption.REPLACE_EXISTING
+                    );
 
-                        throw new IllegalArgumentException("Mpticket file is corrupted!");
-                    }
+                    LOGGER.warning("Mpticket file is corrupted!");
+                } else {
+                    appletWrap.setParameter("server", lines.get(0));
+                    appletWrap.setParameter("port", lines.get(1));
+                    appletWrap.setParameter("mppass", lines.get(2));
                 }
-
-                Files.delete(mpticketFile);
-
-                // Assumes parameters are valid and in the correct order
-                appletWrap.setParameter("server", mpticketParams[0]);
-                appletWrap.setParameter("port", mpticketParams[1]);
-                appletWrap.setParameter("mppass", mpticketParams[2]);
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "Unable to read mpticket file!", e);
+                LOGGER.log(Level.WARNING, "Unable to red mpticket file!", e);
             }
         }
 
