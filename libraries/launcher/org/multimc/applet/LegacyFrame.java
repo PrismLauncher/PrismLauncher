@@ -76,7 +76,7 @@ public final class LegacyFrame extends Frame {
             try {
                 List<String> lines = Files.readAllLines(mpticketFile, StandardCharsets.UTF_8);
 
-                if (lines.size() != 3) {
+                if (lines.size() < 3) {
                     Files.move(
                             mpticketFile,
                             mpticketFileCorrupt,
