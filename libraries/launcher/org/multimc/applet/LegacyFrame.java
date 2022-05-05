@@ -85,12 +85,13 @@ public final class LegacyFrame extends Frame {
 
                     LOGGER.warning("Mpticket file is corrupted!");
                 } else {
+                    // Assumes parameters are valid and in the correct order
                     appletWrap.setParameter("server", lines.get(0));
                     appletWrap.setParameter("port", lines.get(1));
                     appletWrap.setParameter("mppass", lines.get(2));
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "Unable to red mpticket file!", e);
+                LOGGER.log(Level.WARNING, "Unable to read mpticket file!", e);
             }
         }
 
