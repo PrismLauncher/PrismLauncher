@@ -130,6 +130,7 @@ struct VersionMod
     QString group;
     QVector<QString> depends;
     QString colour;
+    QString warning;
 
     bool client;
 
@@ -163,6 +164,7 @@ struct PackVersion
     VersionConfigs configs;
 
     QMap<QString, QString> colours;
+    QMap<QString, QString> warnings;
     VersionMessages messages;
 };
 

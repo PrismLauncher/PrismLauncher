@@ -231,7 +231,21 @@ void AtlOptionalModListModel::clearAll() {
 }
 
 void AtlOptionalModListModel::toggleMod(ATLauncher::VersionMod mod, int index) {
-    setMod(mod, index, !m_selection[mod.name]);
+    auto enable = !m_selection[mod.name];
+
+    // If there is a warning for the mod, display that first (if we would be enabling the mod)
+    if (enable && !mod.warning.isEmpty() && m_version.warnings.contains(mod.warning)) {
+        auto message = QString("%1<br><br>%2")
+                           .arg(m_version.warnings[mod.warning], tr("Are you sure that you want to enable this mod?"));
+
+        // fixme: avoid casting here
+        auto result = QMessageBox::warning((QWidget*) this->parent(), tr("Warning"), message, QMessageBox::Yes | QMessageBox::No);
+        if (result != QMessageBox::Yes) {
+            return;
+        }
+    }
+
+    setMod(mod, index, enable);
 }
 
 void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool enable, bool shouldEmit) {

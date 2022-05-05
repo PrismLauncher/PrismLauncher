@@ -198,6 +198,7 @@ static void loadVersionMod(ATLauncher::VersionMod & p, QJsonObject & obj) {
         }
     }
     p.colour = Json::ensureString(obj, QString("colour"), "");
+    p.warning = Json::ensureString(obj, QString("warning"), "");
 
     p.client = Json::ensureBoolean(obj, QString("client"), false);
 
@@ -262,6 +263,11 @@ void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
     auto colourObj = Json::ensureObject(obj, "colours");
     for (const auto &key : colourObj.keys()) {
         v.colours[key] = Json::requireString(colourObj.value(key), "colour");
+    }
+
+    auto warningsObj = Json::ensureObject(obj, "warnings");
+    for (const auto &key : warningsObj.keys()) {
+        v.warnings[key] = Json::requireString(warningsObj.value(key), "warning");
     }
 
     auto messages = Json::ensureObject(obj, "messages");
