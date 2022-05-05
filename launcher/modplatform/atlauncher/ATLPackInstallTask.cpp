@@ -95,14 +95,13 @@ void PackInstallTask::onDownloadSucceeded()
     qDebug() << "PackInstallTask::onDownloadSucceeded: " << QThread::currentThreadId();
     jobPtr.reset();
 
-    QJsonParseError parse_error;
+    QJsonParseError parse_error {};
     QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if(parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from FTB at " << parse_error.offset << " reason: " << parse_error.errorString();
         qWarning() << response;
         return;
     }
-
     auto obj = doc.object();
 
     ATLauncher::PackVersion version;
@@ -116,6 +115,10 @@ void PackInstallTask::onDownloadSucceeded()
         return;
     }
     m_version = version;
+
+    // Display install message if one exists
+    if (!m_version.messages.install.isEmpty())
+        m_support->displayMessage(m_version.messages.install);
 
     auto ver = getComponentVersion("net.minecraft", m_version.minecraft);
     if (!ver) {

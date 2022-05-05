@@ -45,8 +45,12 @@
 
 #include <BuildConfig.h>
 
-AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget *parent)
-        : QWidget(parent), ui(new Ui::AtlPage), dialog(dialog)
+#include <QMessageBox>
+
+AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget* parent)
+    : QWidget(parent)
+    , ui(new Ui::AtlPage)
+    , dialog(dialog)
 {
     ui->setupUi(this);
 
@@ -210,4 +214,9 @@ QString AtlPage::chooseVersion(Meta::VersionListPtr vlist, QString minecraftVers
 
     vselect.exec();
     return vselect.selectedVersion()->descriptor();
+}
+
+void AtlPage::displayMessage(QString message)
+{
+    QMessageBox::information(this, tr("Installing"), message);
 }

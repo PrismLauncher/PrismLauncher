@@ -85,6 +85,7 @@ private:
 
     QString chooseVersion(Meta::VersionListPtr vlist, QString minecraftVersion) override;
     QVector<QString> chooseOptionalMods(ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods) override;
+    void displayMessage(QString message) override;
 
 private slots:
     void triggerSearch();
