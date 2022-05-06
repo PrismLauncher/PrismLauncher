@@ -64,8 +64,14 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
 
         auto hash_list = Json::ensureArray(obj, "hashes");
         if(!hash_list.isEmpty()){
-            if(hash_list.contains(ProviderCaps.hashType(ModPlatform::Provider::FLAME)))
-                file.hash = Json::requireString(hash_list, "value");
+            auto hash_types = ProviderCaps.hashType(ModPlatform::Provider::FLAME);
+            for(auto& hash_type : hash_types) {
+                if(hash_list.contains(hash_type)) {
+                    file.hash = Json::requireString(hash_list, "value");
+                    file.hash_type = hash_type;
+                    break;
+                }
+            }
         }
 
         unsortedVersions.append(file);

@@ -116,8 +116,14 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject &obj) -> ModPlatform::IndexedV
         file.downloadUrl = Json::requireString(parent, "url");
         file.fileName = Json::requireString(parent, "filename");
         auto hash_list = Json::requireObject(parent, "hashes");
-        if (hash_list.contains(ProviderCaps.hashType(ModPlatform::Provider::MODRINTH)))
-            file.hash = Json::requireString(hash_list, ProviderCaps.hashType(ModPlatform::Provider::MODRINTH));
+        auto hash_types = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH);
+        for (auto& hash_type : hash_types) {
+            if (hash_list.contains(hash_type)) {
+                file.hash = Json::requireString(hash_list, hash_type);
+                file.hash_type = hash_type;
+                break;
+            }
+        }
 
         return file;
     }

@@ -16,7 +16,9 @@ enum class Provider {
 class ProviderCapabilities {
    public:
     auto name(Provider) -> const char*;
-    auto hashType(Provider) -> QString;
+    auto readableName(Provider) -> QString;
+    auto hashType(Provider) -> QStringList;
+    auto hash(Provider, QByteArray&, QString type = "") -> QByteArray;
 };
 
 struct ModpackAuthor {
@@ -33,6 +35,7 @@ struct IndexedVersion {
     QString date;
     QString fileName;
     QVector<QString> loaders = {};
+    QString hash_type;
     QString hash;
 };
 

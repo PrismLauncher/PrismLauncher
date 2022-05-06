@@ -1,26 +1,60 @@
 #include "modplatform/ModIndex.h"
 
-namespace ModPlatform{
+#include <QCryptographicHash>
+
+namespace ModPlatform {
 
 auto ProviderCapabilities::name(Provider p) -> const char*
 {
-    switch(p){
-    case Provider::MODRINTH:
-        return "modrinth";
-    case Provider::FLAME:
-        return "curseforge";
+    switch (p) {
+        case Provider::MODRINTH:
+            return "modrinth";
+        case Provider::FLAME:
+            return "curseforge";
     }
     return {};
 }
-auto ProviderCapabilities::hashType(Provider p) -> QString
+auto ProviderCapabilities::readableName(Provider p) -> QString
 {
-    switch(p){
-    case Provider::MODRINTH:
-        return "sha512";
-    case Provider::FLAME:
-        return "murmur2";
+    switch (p) {
+        case Provider::MODRINTH:
+            return "Modrinth";
+        case Provider::FLAME:
+            return "CurseForge";
+    }
+    return {};
+}
+auto ProviderCapabilities::hashType(Provider p) -> QStringList
+{
+    switch (p) {
+        case Provider::MODRINTH:
+            return { "sha512", "sha1" };
+        case Provider::FLAME:
+            return { "murmur2" };
+    }
+    return {};
+}
+auto ProviderCapabilities::hash(Provider p, QByteArray& data, QString type) -> QByteArray
+{
+    switch (p) {
+        case Provider::MODRINTH: {
+            // NOTE: Data is the result of reading the entire JAR file!
+
+            // If 'type' was specified, we use that
+            if (!type.isEmpty() && hashType(p).contains(type)) {
+                if (type == "sha512")
+                    return QCryptographicHash::hash(data, QCryptographicHash::Sha512);
+                else if (type == "sha1")
+                    return QCryptographicHash::hash(data, QCryptographicHash::Sha1);
+            }
+
+            return QCryptographicHash::hash(data, QCryptographicHash::Sha512);
+        }
+        case Provider::FLAME:
+            // TODO
+            break;
     }
     return {};
 }
 
-} // namespace ModPlatform
+}  // namespace ModPlatform
