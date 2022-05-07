@@ -746,6 +746,9 @@ public:
         // disabled until we have an instance selected
         instanceToolBar->setEnabled(false);
         instanceToolBar->setMovable(true);
+        // Qt doesn't like vertical moving toolbars, so we have to force them...
+        // See https://github.com/PolyMC/PolyMC/issues/493
+        connect(instanceToolBar, &QToolBar::orientationChanged, [=](Qt::Orientation){ instanceToolBar->setOrientation(Qt::Vertical); });
         instanceToolBar->setAllowedAreas(Qt::LeftToolBarArea | Qt::RightToolBarArea);
         instanceToolBar->setToolButtonStyle(Qt::ToolButtonTextOnly);
         instanceToolBar->setFloatable(false);
