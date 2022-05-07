@@ -10,7 +10,7 @@ class LocalModUpdateTask : public Task {
    public:
     using Ptr = shared_qobject_ptr<LocalModUpdateTask>;
 
-    explicit LocalModUpdateTask(QDir mods_dir, ModPlatform::IndexedPack& mod, ModPlatform::IndexedVersion& mod_version);
+    explicit LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack& mod, ModPlatform::IndexedVersion& mod_version);
 
     auto canAbort() const -> bool override { return true; }
     auto abort() -> bool override;
