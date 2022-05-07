@@ -14,7 +14,7 @@ class PackwizTest : public QObject {
         QString source = QFINDTESTDATA("testdata");
 
         QDir index_dir(source);
-        QString name_mod("borderless-mining.toml");
+        QString name_mod("borderless-mining.pw.toml");
         QVERIFY(index_dir.entryList().contains(name_mod));
 
         auto metadata = Packwiz::V1::getIndexForMod(index_dir, name_mod);
@@ -39,10 +39,10 @@ class PackwizTest : public QObject {
         QString source = QFINDTESTDATA("testdata");
 
         QDir index_dir(source);
-        QString name_mod("screenshot-to-clipboard-fabric.toml");
+        QString name_mod("screenshot-to-clipboard-fabric.pw.toml");
         QVERIFY(index_dir.entryList().contains(name_mod));
 
-        // Try without the .toml at the end
+        // Try without the .pw.toml at the end
         name_mod.chop(5);
 
         auto metadata = Packwiz::V1::getIndexForMod(index_dir, name_mod);

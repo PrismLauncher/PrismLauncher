@@ -30,7 +30,8 @@ auto ProviderCapabilities::hashType(Provider p) -> QStringList
         case Provider::MODRINTH:
             return { "sha512", "sha1" };
         case Provider::FLAME:
-            return { "murmur2" };
+            // Try newer formats first, fall back to old format
+            return { "sha1", "md5", "murmur2" };
     }
     return {};
 }
@@ -51,7 +52,14 @@ auto ProviderCapabilities::hash(Provider p, QByteArray& data, QString type) -> Q
             return QCryptographicHash::hash(data, QCryptographicHash::Sha512);
         }
         case Provider::FLAME:
-            // TODO
+            // If 'type' was specified, we use that
+            if (!type.isEmpty() && hashType(p).contains(type)) {
+                if(type == "sha1")
+                    return QCryptographicHash::hash(data, QCryptographicHash::Sha1);
+                else if (type == "md5")
+                    return QCryptographicHash::hash(data, QCryptographicHash::Md5);
+            }
+            
             break;
     }
     return {};

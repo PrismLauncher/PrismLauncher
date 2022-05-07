@@ -14,9 +14,9 @@ namespace Packwiz {
 // Helpers
 static inline auto indexFileName(QString const& mod_name) -> QString
 {
-    if(mod_name.endsWith(".toml"))
+    if(mod_name.endsWith(".pw.toml"))
         return mod_name;
-    return QString("%1.toml").arg(mod_name);
+    return QString("%1.pw.toml").arg(mod_name);
 }
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
@@ -28,7 +28,14 @@ auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Mo
     mod.name = mod_pack.name;
     mod.filename = mod_version.fileName;
 
-    mod.url = mod_version.downloadUrl;
+    if(mod_pack.provider == ModPlatform::Provider::FLAME){
+        mod.mode = "metadata:curseforge";
+    }
+    else {
+        mod.mode = "url";
+        mod.url = mod_version.downloadUrl;
+    }
+
     mod.hash_format = mod_version.hash_type;
     mod.hash = mod_version.hash;
 
@@ -84,6 +91,7 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
         addToStream("side", mod.side);
 
         in_stream << QString("\n[download]\n");
+        addToStream("mode", mod.mode);
         addToStream("url", mod.url.toString());
         addToStream("hash-format", mod.hash_format);
         addToStream("hash", mod.hash);
@@ -186,6 +194,7 @@ auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
             return {};
         }
 
+        mod.mode = stringEntry(download_table, "mode");
         mod.url = stringEntry(download_table, "url");
         mod.hash_format = stringEntry(download_table, "hash-format");
         mod.hash = stringEntry(download_table, "hash");

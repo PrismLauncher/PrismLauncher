@@ -22,8 +22,8 @@ class V1 {
         QString side {"both"};
 
         // [download]
+        QString mode {};
         QUrl url {};
-        // FIXME: make hash-format an enum
         QString hash_format {};
         QString hash {};
 
@@ -42,11 +42,11 @@ class V1 {
         auto version() -> QVariant& { return file_id; }
     };
 
-    /* Generates the object representing the information in a mod.toml file via
+    /* Generates the object representing the information in a mod.pw.toml file via
      * its common representation in the launcher, when downloading mods.
      * */
     static auto createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod;
-    /* Generates the object representing the information in a mod.toml file via
+    /* Generates the object representing the information in a mod.pw.toml file via
      * its common representation in the launcher.
      * */
     static auto createModFormat(QDir& index_dir, ::Mod& internal_mod) -> Mod;

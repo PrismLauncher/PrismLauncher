@@ -30,6 +30,17 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     }
 }
 
+static QString enumToString(int hash_algorithm)
+{
+    switch(hash_algorithm){
+    default:
+    case 1:
+        return "sha1";
+    case 2:
+        return "md5";
+    }
+}
+
 void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        QJsonArray& arr,
                                        const shared_qobject_ptr<QNetworkAccessManager>& network,
@@ -63,14 +74,14 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         file.fileName = Json::requireString(obj, "fileName");
 
         auto hash_list = Json::ensureArray(obj, "hashes");
-        if(!hash_list.isEmpty()){
+        for(auto h : hash_list){
+            auto hash_entry = Json::ensureObject(h);
             auto hash_types = ProviderCaps.hashType(ModPlatform::Provider::FLAME);
-            for(auto& hash_type : hash_types) {
-                if(hash_list.contains(hash_type)) {
-                    file.hash = Json::requireString(hash_list, "value");
-                    file.hash_type = hash_type;
-                    break;
-                }
+            auto hash_algo = enumToString(Json::ensureInteger(hash_entry, "algo", 1, "algorithm"));
+            if(hash_types.contains(hash_algo)){
+                file.hash = Json::requireString(hash_entry, "value");
+                file.hash_type = hash_algo;
+                break;
             }
         }
 
