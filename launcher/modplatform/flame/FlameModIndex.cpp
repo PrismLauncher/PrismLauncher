@@ -48,7 +48,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         for (auto mcVer : versionArray) {
             auto str = mcVer.toString();
 
-            if (str.indexOf('.') > -1)
+            if (str.contains('.'))
                 file.mcVersion.append(mcVer.toString());
         }
 
