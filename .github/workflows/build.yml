@@ -17,6 +17,9 @@ jobs:
 
           - os: ubuntu-20.04
 
+          - os: ubuntu-20.04
+            appimage: true
+
           - os: windows-2022
             name: "Windows-i686"
             msystem: mingw32
@@ -66,30 +69,25 @@ jobs:
           ver_short=`git rev-parse --short HEAD`
           echo "VERSION=$ver_short" >> $GITHUB_ENV
 
-      - name: Install OpenJDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
       - name: Install Qt (macOS)
         if: runner.os == 'macOS'
         run: |
          brew update
-         brew install qt@5
+         brew install qt@5 ninja
+         
+      - name: Update Qt (AppImage)
+        if: runner.os == 'Linux' && matrix.appimage == true
+        run: |
+         sudo add-apt-repository ppa:savoury1/qt-5-15
 
       - name: Install Qt (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get -y update
-          sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
-
-      - name: Install Ninja
-        if: runner.os != 'Windows'
-        uses: urkle/action-get-ninja@v1
+          sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5 ninja-build
 
       - name: Prepare AppImage (Linux)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.appimage == true
         run: |
           wget "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage"
@@ -167,7 +165,7 @@ jobs:
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
 
       - name: Package (Linux)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.appimage != true
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR }}
 
@@ -175,7 +173,7 @@ jobs:
           tar --owner root --group root -czf ../PolyMC.tar.gz *
 
       - name: Package (Linux, portable)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.appimage != true
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
@@ -184,7 +182,7 @@ jobs:
           tar -czf ../PolyMC-portable.tar.gz *
 
       - name: Package AppImage (Linux)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.appimage == true
         shell: bash
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
@@ -234,21 +232,21 @@ jobs:
           path: ${{ env.INSTALL_PORTABLE_DIR }}/**
 
       - name: Upload binary tarball (Linux)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.appimage != true
         uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC.tar.gz
 
       - name: Upload binary tarball (Linux, portable)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.appimage != true
         uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC-portable.tar.gz
 
       - name: Upload AppImage (Linux)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && matrix.appimage == true
         uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
