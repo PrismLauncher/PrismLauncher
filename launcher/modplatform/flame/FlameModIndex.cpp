@@ -49,7 +49,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
             auto str = mcVer.toString();
 
             if (str.contains('.'))
-                file.mcVersion.append(mcVer.toString());
+                file.mcVersion.append(str);
         }
 
         file.addonId = pack.addonId;
