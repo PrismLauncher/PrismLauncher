@@ -89,6 +89,10 @@ set(Launcher_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can g
 # MSA Client ID
 set(Launcher_MSA_CLIENT_ID "549033b2-1532-4d4e-ae77-1bbaa46f9d74" CACHE STRING "Client ID you can get from Microsoft Identity Platform when you register an application")
 
+# CurseForge API Key
+# CHANGE THIS IF YOU FORK THIS PROJECT!
+set(Launcher_CURSEFORGE_API_KEY "$2a$10$iR1RdPDG95FWdILZbHuoMOlV4vL4eckBx7QPZR6SVZmliEb9ZQplu" CACHE STRING "CurseForge API Key")
+
 # Bug tracker URL
 set(Launcher_BUG_TRACKER_URL "https://github.com/PolyMC/PolyMC/issues" CACHE STRING "URL for the bug tracker.")
 

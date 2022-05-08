@@ -1,14 +1,9 @@
 #include "FileResolvingTask.h"
 #include "Json.h"
 
-namespace {
-    const char * metabase = "https://cursemeta.dries007.net";
-}
-
 Flame::FileResolvingTask::FileResolvingTask(shared_qobject_ptr<QNetworkAccessManager> network, Flame::Manifest& toProcess)
     : m_network(network), m_toProcess(toProcess)
-{
-}
+{}
 
 void Flame::FileResolvingTask::executeTask()
 {
@@ -17,14 +12,13 @@ void Flame::FileResolvingTask::executeTask()
     m_dljob = new NetJob("Mod id resolver", m_network);
     results.resize(m_toProcess.files.size());
     int index = 0;
-    for(auto & file: m_toProcess.files)
-    {
+    for (auto& file : m_toProcess.files) {
         auto projectIdStr = QString::number(file.projectId);
         auto fileIdStr = QString::number(file.fileId);
-        QString metaurl = QString("%1/%2/%3.json").arg(metabase, projectIdStr, fileIdStr);
+        QString metaurl = QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(projectIdStr, fileIdStr);
         auto dl = Net::Download::makeByteArray(QUrl(metaurl), &results[index]);
         m_dljob->addNetAction(dl);
-        index ++;
+        index++;
     }
     connect(m_dljob.get(), &NetJob::finished, this, &Flame::FileResolvingTask::netJobFinished);
     m_dljob->start();
@@ -34,16 +28,11 @@ void Flame::FileResolvingTask::netJobFinished()
 {
     bool failed = false;
     int index = 0;
-    for(auto & bytes: results)
-    {
-        auto & out = m_toProcess.files[index];
-        try
-        {
+    for (auto& bytes : results) {
+        auto& out = m_toProcess.files[index];
+        try {
             failed &= (!out.parseFromBytes(bytes));
-        }
-        catch (const JSONValidationError &e)
-        {
-
+        } catch (const JSONValidationError& e) {
             qCritical() << "Resolving of" << out.projectId << out.fileId << "failed because of a parsing error:";
             qCritical() << e.cause();
             qCritical() << "JSON:";
@@ -52,12 +41,9 @@ void Flame::FileResolvingTask::netJobFinished()
         }
         index++;
     }
-    if(!failed)
-    {
+    if (!failed) {
         emitSucceeded();
-    }
-    else
-    {
+    } else {
         emitFailed(tr("Some mod ID resolving tasks failed."));
     }
 }
