@@ -39,13 +39,12 @@
 #include <QKeyEvent>
 
 #include "Application.h"
+#include "FlameModel.h"
+#include "InstanceImportTask.h"
 #include "Json.h"
 #include "ui/dialogs/NewInstanceDialog.h"
-#include "InstanceImportTask.h"
-#include "FlameModel.h"
 
-FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget *parent)
-    : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog)
+FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog)
 {
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &FlamePage::triggerSearch);
@@ -112,10 +111,8 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
 {
     ui->versionSelectionBox->clear();
 
-    if(!first.isValid())
-    {
-        if(isOpened)
-        {
+    if (!first.isValid()) {
+        if (isOpened) {
             dialog->setSuggestedPack();
         }
         return;
@@ -130,14 +127,14 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
     else
         text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
     if (!current.authors.empty()) {
-        auto authorToStr = [](Flame::ModpackAuthor & author) {
-            if(author.url.isEmpty()) {
+        auto authorToStr = [](Flame::ModpackAuthor& author) {
+            if (author.url.isEmpty()) {
                 return author.name;
             }
             return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
         };
         QStringList authorStrs;
-        for(auto & author: current.authors) {
+        for (auto& author : current.authors) {
             authorStrs.push_back(authorToStr(author));
         }
         text += "<br>" + tr(" by ") + authorStrs.join(", ");
@@ -146,53 +143,46 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
     ui->packDescription->setHtml(text + current.description);
 
-    if (current.versionsLoaded == false)
-    {
+    if (current.versionsLoaded == false) {
         qDebug() << "Loading flame modpack versions";
         auto netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name), APPLICATION->network());
         auto response = new QByteArray();
         int addonId = current.addonId;
-        netJob->addNetAction(Net::Download::makeByteArray(QString("https://addons-ecs.forgesvc.net/api/v2/addon/%1/files").arg(addonId), response));
+        netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
 
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId]
-        {
-            if(addonId != current.addonId){
-                return; //wrong request
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId] {
+            if (addonId != current.addonId) {
+                return;  // wrong request
             }
             QJsonParseError parse_error;
             QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-            if(parse_error.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response from CurseForge at " << parse_error.offset << " reason: " << parse_error.errorString();
+            if (parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response from CurseForge at " << parse_error.offset
+                           << " reason: " << parse_error.errorString();
                 qWarning() << *response;
                 return;
             }
-            QJsonArray arr = doc.array();
-            try
-            {
+            auto arr = Json::ensureArray(doc.object(), "data");
+            try {
                 Flame::loadIndexedPackVersions(current, arr);
-            }
-            catch(const JSONValidationError &e)
-            {
+            } catch (const JSONValidationError& e) {
                 qDebug() << *response;
                 qWarning() << "Error while reading flame modpack version: " << e.cause();
             }
 
-            for(auto version : current.versions) {
+            for (auto version : current.versions) {
                 ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
             }
 
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob]
-        {
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
             netJob->deleteLater();
             delete response;
         });
         netJob->start();
-    }
-    else
-    {
-        for(auto version : current.versions) {
+    } else {
+        for (auto version : current.versions) {
             ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
         }
 
@@ -202,13 +192,11 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
 void FlamePage::suggestCurrent()
 {
-    if(!isOpened)
-    {
+    if (!isOpened) {
         return;
     }
 
-    if (selectedVersion.isEmpty())
-    {
+    if (selectedVersion.isEmpty()) {
         dialog->setSuggestedPack();
         return;
     }
@@ -216,16 +204,13 @@ void FlamePage::suggestCurrent()
     dialog->setSuggestedPack(current.name, new InstanceImportTask(selectedVersion));
     QString editedLogoName;
     editedLogoName = "curseforge_" + current.logoName.section(".", 0, 0);
-    listModel->getLogo(current.logoName, current.logoUrl, [this, editedLogoName](QString logo)
-    {
-        dialog->setSuggestedIconFromFile(logo, editedLogoName);
-    });
+    listModel->getLogo(current.logoName, current.logoUrl,
+                       [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 }
 
 void FlamePage::onVersionSelectionChanged(QString data)
 {
-    if(data.isNull() || data.isEmpty())
-    {
+    if (data.isNull() || data.isEmpty()) {
         selectedVersion = "";
         return;
     }

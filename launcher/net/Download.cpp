@@ -15,27 +15,27 @@
 
 #include "Download.h"
 
-#include <QFileInfo>
 #include <QDateTime>
 #include <QDebug>
+#include <QFileInfo>
 
-#include "FileSystem.h"
-#include "ChecksumValidator.h"
-#include "MetaCacheSink.h"
 #include "ByteArraySink.h"
+#include "ChecksumValidator.h"
+#include "FileSystem.h"
+#include "MetaCacheSink.h"
 
 #include "BuildConfig.h"
 
 namespace Net {
 
-Download::Download():NetAction()
+Download::Download() : NetAction()
 {
     m_status = Job_NotStarted;
 }
 
 Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry, Options options)
 {
-    Download * dl = new Download();
+    Download* dl = new Download();
     dl->m_url = url;
     dl->m_options = options;
     auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
@@ -45,9 +45,9 @@ Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry, Options options
     return dl;
 }
 
-Download::Ptr Download::makeByteArray(QUrl url, QByteArray *output, Options options)
+Download::Ptr Download::makeByteArray(QUrl url, QByteArray* output, Options options)
 {
-    Download * dl = new Download();
+    Download* dl = new Download();
     dl->m_url = url;
     dl->m_options = options;
     dl->m_sink.reset(new ByteArraySink(output));
@@ -56,30 +56,28 @@ Download::Ptr Download::makeByteArray(QUrl url, QByteArray *output, Options opti
 
 Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
 {
-    Download * dl = new Download();
+    Download* dl = new Download();
     dl->m_url = url;
     dl->m_options = options;
     dl->m_sink.reset(new FileSink(path));
     return dl;
 }
 
-void Download::addValidator(Validator * v)
+void Download::addValidator(Validator* v)
 {
     m_sink->addValidator(v);
 }
 
 void Download::startImpl()
 {
-    if(m_status == Job_Aborted)
-    {
+    if (m_status == Job_Aborted) {
         qWarning() << "Attempt to start an aborted Download:" << m_url.toString();
         emit aborted(m_index_within_job);
         return;
     }
     QNetworkRequest request(m_url);
     m_status = m_sink->init(request);
-    switch(m_status)
-    {
+    switch (m_status) {
         case Job_Finished:
             emit succeeded(m_index_within_job);
             qDebug() << "Download cache hit " << m_url.toString();
@@ -87,7 +85,7 @@ void Download::startImpl()
         case Job_InProgress:
             qDebug() << "Downloading " << m_url.toString();
             break;
-        case Job_Failed_Proceed: // this is meaningless in this context. We do need a sink.
+        case Job_Failed_Proceed:  // this is meaningless in this context. We do need a sink.
         case Job_NotStarted:
         case Job_Failed:
             emit failed(m_index_within_job);
@@ -97,8 +95,11 @@ void Download::startImpl()
     }
 
     request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT);
+    if (request.url().host().contains("api.curseforge.com")) {
+        request.setRawHeader("x-api-key", BuildConfig.CURSEFORGE_API_KEY.toUtf8());
+    };
 
-    QNetworkReply *rep = m_network->get(request);
+    QNetworkReply* rep = m_network->get(request);
 
     m_reply.reset(rep);
     connect(rep, SIGNAL(downloadProgress(qint64, qint64)), SLOT(downloadProgress(qint64, qint64)));
@@ -117,17 +118,12 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 
 void Download::downloadError(QNetworkReply::NetworkError error)
 {
-    if(error == QNetworkReply::OperationCanceledError)
-    {
+    if (error == QNetworkReply::OperationCanceledError) {
         qCritical() << "Aborted " << m_url.toString();
         m_status = Job_Aborted;
-    }
-    else
-    {
-        if(m_options & Option::AcceptLocalFiles)
-        {
-            if(m_sink->hasLocalData())
-            {
+    } else {
+        if (m_options & Option::AcceptLocalFiles) {
+            if (m_sink->hasLocalData()) {
                 m_status = Job_Failed_Proceed;
                 return;
             }
@@ -138,11 +134,10 @@ void Download::downloadError(QNetworkReply::NetworkError error)
     }
 }
 
-void Download::sslErrors(const QList<QSslError> & errors)
+void Download::sslErrors(const QList<QSslError>& errors)
 {
     int i = 1;
-    for (auto error : errors)
-    {
+    for (auto error : errors) {
         qCritical() << "Download" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
         auto cert = error.certificate();
         qCritical() << "Certificate in question:\n" << cert.toText();
@@ -153,33 +148,27 @@ void Download::sslErrors(const QList<QSslError> & errors)
 bool Download::handleRedirect()
 {
     QUrl redirect = m_reply->header(QNetworkRequest::LocationHeader).toUrl();
-    if(!redirect.isValid())
-    {
-        if(!m_reply->hasRawHeader("Location"))
-        {
+    if (!redirect.isValid()) {
+        if (!m_reply->hasRawHeader("Location")) {
             // no redirect -> it's fine to continue
             return false;
         }
         // there is a Location header, but it's not correct. we need to apply some workarounds...
         QByteArray redirectBA = m_reply->rawHeader("Location");
-        if(redirectBA.size() == 0)
-        {
+        if (redirectBA.size() == 0) {
             // empty, yet present redirect header? WTF?
             return false;
         }
         QString redirectStr = QString::fromUtf8(redirectBA);
 
-        if(redirectStr.startsWith("//"))
-        {
+        if (redirectStr.startsWith("//")) {
             /*
              * IF the URL begins with //, we need to insert the URL scheme.
              * See: https://bugreports.qt.io/browse/QTBUG-41061
              * See: http://tools.ietf.org/html/rfc3986#section-4.2
              */
             redirectStr = m_reply->url().scheme() + ":" + redirectStr;
-        }
-        else if(redirectStr.startsWith("/"))
-        {
+        } else if (redirectStr.startsWith("/")) {
             /*
              * IF the URL begins with /, we need to process it as a relative URL
              */
@@ -193,16 +182,13 @@ bool Download::handleRedirect()
          * FIXME: report Qt bug for this
          */
         redirect = QUrl(redirectStr, QUrl::TolerantMode);
-        if(!redirect.isValid())
-        {
+        if (!redirect.isValid()) {
             qWarning() << "Failed to parse redirect URL:" << redirectStr;
             downloadError(QNetworkReply::ProtocolFailure);
             return false;
         }
         qDebug() << "Fixed location header:" << redirect;
-    }
-    else
-    {
+    } else {
         qDebug() << "Location header:" << redirect;
     }
 
@@ -212,35 +198,28 @@ bool Download::handleRedirect()
     return true;
 }
 
-
 void Download::downloadFinished()
 {
     // handle HTTP redirection first
-    if(handleRedirect())
-    {
+    if (handleRedirect()) {
         qDebug() << "Download redirected:" << m_url.toString();
         return;
     }
 
     // if the download failed before this point ...
-    if (m_status == Job_Failed_Proceed)
-    {
+    if (m_status == Job_Failed_Proceed) {
         qDebug() << "Download failed but we are allowed to proceed:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit succeeded(m_index_within_job);
         return;
-    }
-    else if (m_status == Job_Failed)
-    {
+    } else if (m_status == Job_Failed) {
         qDebug() << "Download failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit failed(m_index_within_job);
         return;
-    }
-    else if(m_status == Job_Aborted)
-    {
+    } else if (m_status == Job_Aborted) {
         qDebug() << "Download aborted in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
@@ -250,16 +229,14 @@ void Download::downloadFinished()
 
     // make sure we got all the remaining data, if any
     auto data = m_reply->readAll();
-    if(data.size())
-    {
+    if (data.size()) {
         qDebug() << "Writing extra" << data.size() << "bytes to" << m_target_path;
         m_status = m_sink->write(data);
     }
 
     // otherwise, finalize the whole graph
     m_status = m_sink->finalize(*m_reply.get());
-    if (m_status != Job_Finished)
-    {
+    if (m_status != Job_Finished) {
         qDebug() << "Download failed to finalize:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
@@ -273,32 +250,25 @@ void Download::downloadFinished()
 
 void Download::downloadReadyRead()
 {
-    if(m_status == Job_InProgress)
-    {
+    if (m_status == Job_InProgress) {
         auto data = m_reply->readAll();
         m_status = m_sink->write(data);
-        if(m_status == Job_Failed)
-        {
+        if (m_status == Job_Failed) {
             qCritical() << "Failed to process response chunk for " << m_target_path;
         }
         // qDebug() << "Download" << m_url.toString() << "gained" << data.size() << "bytes";
-    }
-    else
-    {
+    } else {
         qCritical() << "Cannot write to " << m_target_path << ", illegal status" << m_status;
     }
 }
 
-}
+}  // namespace Net
 
 bool Net::Download::abort()
 {
-    if(m_reply)
-    {
+    if (m_reply) {
         m_reply->abort();
-    }
-    else
-    {
+    } else {
         m_status = Job_Aborted;
     }
     return true;

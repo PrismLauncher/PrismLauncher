@@ -39,9 +39,8 @@
 /**
  * \brief The Config class holds all the build-time information passed from the build system.
  */
-class Config
-{
-public:
+class Config {
+   public:
     Config();
     QString LAUNCHER_NAME;
     QString LAUNCHER_DISPLAYNAME;
@@ -73,7 +72,6 @@ public:
 
     /// URL for the updater's channel
     QString UPDATER_BASE;
-
 
     /// User-Agent to use.
     QString USER_AGENT;
@@ -117,6 +115,11 @@ public:
     QString MSA_CLIENT_ID;
 
     /**
+     * Client API key for CurseForge
+     */
+    QString CURSEFORGE_API_KEY;
+
+    /**
      * Metadata repository URL prefix
      */
     QString META_URL;
@@ -154,4 +157,3 @@ public:
 };
 
 extern const Config BuildConfig;
-

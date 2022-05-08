@@ -21,7 +21,8 @@ auto ListModel::debugName() const -> QString
 
 void ListModel::fetchMore(const QModelIndex& parent)
 {
-    if (parent.isValid()) return;
+    if (parent.isValid())
+        return;
     if (nextSearchOffset == 0) {
         qWarning() << "fetchMore with 0 offset is wrong...";
         return;
@@ -32,7 +33,9 @@ void ListModel::fetchMore(const QModelIndex& parent)
 auto ListModel::data(const QModelIndex& index, int role) const -> QVariant
 {
     int pos = index.row();
-    if (pos >= modpacks.size() || pos < 0 || !index.isValid()) { return QString("INVALID INDEX %1").arg(pos); }
+    if (pos >= modpacks.size() || pos < 0 || !index.isValid()) {
+        return QString("INVALID INDEX %1").arg(pos);
+    }
 
     ModPlatform::IndexedPack pack = modpacks.at(pos);
     if (role == Qt::DisplayRole) {
@@ -46,7 +49,9 @@ auto ListModel::data(const QModelIndex& index, int role) const -> QVariant
         }
         return pack.description;
     } else if (role == Qt::DecorationRole) {
-        if (m_logoMap.contains(pack.logoName)) { return (m_logoMap.value(pack.logoName)); }
+        if (m_logoMap.contains(pack.logoName)) {
+            return (m_logoMap.value(pack.logoName));
+        }
         QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
         ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
         return icon;
@@ -63,16 +68,15 @@ void ListModel::requestModVersions(ModPlatform::IndexedPack const& current)
 {
     auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
 
-    m_parent->apiProvider()->getVersions(this,
-            { current.addonId.toString(), getMineVersions(), profile->getModLoader() });
+    m_parent->apiProvider()->getVersions(this, { current.addonId.toString(), getMineVersions(), profile->getModLoader() });
 }
 
 void ListModel::performPaginatedSearch()
 {
     auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
 
-    m_parent->apiProvider()->searchMods(this,
-            { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], profile->getModLoader(), getMineVersions() });
+    m_parent->apiProvider()->searchMods(
+        this, { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], profile->getModLoader(), getMineVersions() });
 }
 
 void ListModel::refresh()
@@ -93,11 +97,9 @@ void ListModel::refresh()
 
 void ListModel::searchWithTerm(const QString& term, const int sort, const bool filter_changed)
 {
-    if (currentSearchTerm == term 
-            && currentSearchTerm.isNull() == term.isNull() 
-            && currentSort == sort 
-            && !filter_changed) 
-        { return; }
+    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort && !filter_changed) {
+        return;
+    }
 
     currentSearchTerm = term;
     currentSort = sort;
@@ -118,7 +120,9 @@ void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallbac
 
 void ListModel::requestLogo(QString logo, QString url)
 {
-    if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo)) { return; }
+    if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo)) {
+        return;
+    }
 
     MetaEntryPtr entry =
         APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)));
@@ -129,7 +133,9 @@ void ListModel::requestLogo(QString logo, QString url)
     QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {
         job->deleteLater();
         emit logoLoaded(logo, QIcon(fullPath));
-        if (waitingCallbacks.contains(logo)) { waitingCallbacks.value(logo)(fullPath); }
+        if (waitingCallbacks.contains(logo)) {
+            waitingCallbacks.value(logo)(fullPath);
+        }
     });
 
     QObject::connect(job, &NetJob::failed, this, [this, logo, job] {
@@ -148,7 +154,9 @@ void ListModel::logoLoaded(QString logo, QIcon out)
     m_loadingLogos.removeAll(logo);
     m_logoMap.insert(logo, out);
     for (int i = 0; i < modpacks.size(); i++) {
-        if (modpacks[i].logoName == logo) { emit dataChanged(createIndex(i, 0), createIndex(i, 0), { Qt::DecorationRole }); }
+        if (modpacks[i].logoName == logo) {
+            emit dataChanged(createIndex(i, 0), createIndex(i, 0), { Qt::DecorationRole });
+        }
     }
 }
 
@@ -199,7 +207,9 @@ void ListModel::searchRequestFailed(QString reason)
         // 409 Gone, notify user to update
         QMessageBox::critical(nullptr, tr("Error"),
                               //: %1 refers to the launcher itself
-                              QString("%1 %2").arg(m_parent->displayName()).arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_NAME)));
+                              QString("%1 %2")
+                                  .arg(m_parent->displayName())
+                                  .arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_NAME)));
     }
     jobPtr.reset();
 
@@ -218,9 +228,12 @@ void ListModel::searchRequestFailed(QString reason)
 void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId)
 {
     auto& current = m_parent->getCurrent();
-    if (addonId != current.addonId) { return; }
+    if (addonId != current.addonId) {
+        return;
+    }
 
-    QJsonArray arr = doc.array();
+    auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
+
     try {
         loadIndexedPackVersions(current, arr);
     } catch (const JSONValidationError& e) {

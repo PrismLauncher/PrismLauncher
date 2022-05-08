@@ -10,23 +10,12 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireInteger(obj, "id");
     pack.name = Json::requireString(obj, "name");
-    pack.websiteUrl = Json::ensureString(obj, "websiteUrl", "");
+    pack.websiteUrl = Json::ensureString(Json::ensureObject(obj, "links"), "websiteUrl", "");
     pack.description = Json::ensureString(obj, "summary", "");
 
-    bool thumbnailFound = false;
-    auto attachments = Json::requireArray(obj, "attachments");
-    for (auto attachmentRaw : attachments) {
-        auto attachmentObj = Json::requireObject(attachmentRaw);
-        bool isDefault = attachmentObj.value("isDefault").toBool(false);
-        if (isDefault) {
-            thumbnailFound = true;
-            pack.logoName = Json::requireString(attachmentObj, "title");
-            pack.logoUrl = Json::requireString(attachmentObj, "thumbnailUrl");
-            break;
-        }
-    }
-
-    if (!thumbnailFound) { throw JSONValidationError(QString("Pack without an icon, skipping: %1").arg(pack.name)); }
+    QJsonObject logo = Json::requireObject(obj, "logo");
+    pack.logoName = Json::requireString(logo, "title");
+    pack.logoUrl = Json::requireString(logo, "thumbnailUrl");
 
     auto authors = Json::requireArray(obj, "authors");
     for (auto authorIter : authors) {
@@ -45,18 +34,22 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
     auto profile = (dynamic_cast<MinecraftInstance*>(inst))->getPackProfile();
-    bool hasFabric = FlameAPI::getMappedModLoader(profile->getModLoader()) == ModAPI::Fabric;
     QString mcVersion = profile->getComponentVersion("net.minecraft");
 
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
 
-        auto versionArray = Json::requireArray(obj, "gameVersion");
-        if (versionArray.isEmpty()) { continue; }
+        auto versionArray = Json::requireArray(obj, "gameVersions");
+        if (versionArray.isEmpty()) {
+            continue;
+        }
 
         ModPlatform::IndexedVersion file;
         for (auto mcVer : versionArray) {
-            file.mcVersion.append(mcVer.toString());
+            auto str = mcVer.toString();
+
+            if (str.indexOf('.') > -1)
+                file.mcVersion.append(mcVer.toString());
         }
 
         file.addonId = pack.addonId;
@@ -66,28 +59,9 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         file.downloadUrl = Json::requireString(obj, "downloadUrl");
         file.fileName = Json::requireString(obj, "fileName");
 
-        auto modules = Json::requireArray(obj, "modules");
-        bool is_valid_fabric_version = false;
-        for (auto m : modules) {
-            auto fname = Json::requireString(m.toObject(), "foldername");
-            // FIXME: This does not work properly when a mod supports more than one mod loader, since
-            // FIXME: This also doesn't deal with Quilt mods at the moment
-            // they bundle the meta files for all of them in the same arquive, even when that version
-            // doesn't support the given mod loader.
-            if (hasFabric) {
-                if (fname == "fabric.mod.json") {
-                    is_valid_fabric_version = true;
-                    break;
-                }
-            } else
-                break;
-            // NOTE: Since we're not validating forge versions, we can just skip this loop.
-        }
-
-        if (hasFabric && !is_valid_fabric_version) continue;
-
         unsortedVersions.append(file);
     }
+
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
         // dates are in RFC 3339 format
         return a.date > b.date;
