@@ -831,7 +831,7 @@ public:
         QMetaObject::connectSlotsByName(MainWindow);
     } // setupUi
 
-    void retranslateUi(QMainWindow *MainWindow)
+    void retranslateUi(MainWindow *MainWindow)
     {
         QString winTitle = tr("%1 - Version %2", "Launcher - Version X").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString());
         MainWindow->setWindowTitle(winTitle);
@@ -851,6 +851,12 @@ public:
         // submenu buttons
         foldersMenuButton->setText(tr("Folders"));
         helpMenuButton->setText(tr("Help"));
+
+        // playtime counter
+        if (MainWindow->m_statusCenter)
+        {
+            MainWindow->updateStatusCenter();
+        }
     } // retranslateUi
 };
 
