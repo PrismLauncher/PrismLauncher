@@ -44,4 +44,6 @@ protected:
 
     qint64 m_stepProgress = 0;
     qint64 m_stepTotalProgress = 100;
+
+    bool m_aborted = false;
 };
