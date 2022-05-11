@@ -16,8 +16,9 @@
 QString GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
 {
     ProgressDialog dialog(parentWidget);
-    auto pasteUrlSetting = APPLICATION->settings()->get("PastebinURL").toString();
-    std::unique_ptr<PasteUpload> paste(new PasteUpload(parentWidget, text, pasteUrlSetting));
+    auto pasteTypeSetting = static_cast<PasteUpload::PasteType>(APPLICATION->settings()->get("PastebinType").toUInt());
+    auto pasteCustomAPIBaseSetting = APPLICATION->settings()->get("PastebinCustomAPIBase").toString();
+    std::unique_ptr<PasteUpload> paste(new PasteUpload(parentWidget, text, pasteCustomAPIBaseSetting, pasteTypeSetting));
 
     dialog.execWithTask(paste.get());
     if (!paste->wasSuccessful())

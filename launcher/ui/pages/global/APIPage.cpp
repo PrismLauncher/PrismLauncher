@@ -3,6 +3,7 @@
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2022 Lenny McLennington <lenny@sneed.church>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,15 +47,34 @@
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
 #include "Application.h"
+#include "net/PasteUpload.h"
 
 APIPage::APIPage(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::APIPage)
 {
+    // this is here so you can reorder the entries in the combobox without messing stuff up
+    unsigned int comboBoxEntries[] = {
+        PasteUpload::PasteType::Mclogs,
+        PasteUpload::PasteType::NullPointer,
+        PasteUpload::PasteType::PasteGG,
+        PasteUpload::PasteType::Hastebin
+    };
+
     static QRegularExpression validUrlRegExp("https?://.+");
+
     ui->setupUi(this);
-    ui->urlChoices->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->urlChoices));
-    ui->tabWidget->tabBar()->hide();\
+
+    for (auto pasteType : comboBoxEntries) {
+        ui->pasteTypeComboBox->addItem(PasteUpload::PasteTypes.at(pasteType).name, pasteType);
+    }
+
+    connect(ui->pasteTypeComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &APIPage::updateBaseURLPlaceholder);
+    // This function needs to be called even when the ComboBox's index is still in its default state.
+    updateBaseURLPlaceholder(ui->pasteTypeComboBox->currentIndex());
+    ui->baseURLEntry->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->baseURLEntry));
+    ui->tabWidget->tabBar()->hide();
+
     loadSettings();
 }
 
@@ -63,11 +83,28 @@ APIPage::~APIPage()
     delete ui;
 }
 
+void APIPage::updateBaseURLPlaceholder(int index)
+{
+    ui->baseURLEntry->setPlaceholderText(PasteUpload::PasteTypes.at(ui->pasteTypeComboBox->itemData(index).toUInt()).defaultBase);
+}
+
 void APIPage::loadSettings()
 {
     auto s = APPLICATION->settings();
-    QString pastebinURL = s->get("PastebinURL").toString();
-    ui->urlChoices->setCurrentText(pastebinURL);
+
+    unsigned int pasteType = s->get("PastebinType").toUInt();
+    QString pastebinURL = s->get("PastebinCustomAPIBase").toString();
+
+    ui->baseURLEntry->setText(pastebinURL);
+    int pasteTypeIndex = ui->pasteTypeComboBox->findData(pasteType);
+    if (pasteTypeIndex == -1)
+    {
+        pasteTypeIndex = ui->pasteTypeComboBox->findData(PasteUpload::PasteType::Mclogs);
+        ui->baseURLEntry->clear();
+    }
+
+    ui->pasteTypeComboBox->setCurrentIndex(pasteTypeIndex);
+
     QString msaClientID = s->get("MSAClientIDOverride").toString();
     ui->msaClientID->setText(msaClientID);
     QString curseKey = s->get("CFKeyOverride").toString();
@@ -77,8 +114,10 @@ void APIPage::loadSettings()
 void APIPage::applySettings()
 {
     auto s = APPLICATION->settings();
-    QString pastebinURL = ui->urlChoices->currentText();
-    s->set("PastebinURL", pastebinURL);
+
+    s->set("PastebinType", ui->pasteTypeComboBox->currentData().toUInt());
+    s->set("PastebinCustomAPIBase", ui->baseURLEntry->text());
+
     QString msaClientID = ui->msaClientID->text();
     s->set("MSAClientIDOverride", msaClientID);
     QString curseKey = ui->curseKey->text();

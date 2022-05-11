@@ -73,6 +73,7 @@ public:
     void retranslate() override;
 
 private:
+    void updateBaseURLPlaceholder(int index);
     void loadSettings();
     void applySettings();
 

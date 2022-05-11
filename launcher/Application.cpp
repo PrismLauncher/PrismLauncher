@@ -36,6 +36,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
+#include "net/PasteUpload.h"
 #include "ui/MainWindow.h"
 #include "ui/InstanceWindow.h"
 
@@ -671,8 +672,36 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("UpdateDialogGeometry", "");
 
-        // pastebin URL
-        m_settings->registerSetting("PastebinURL", "https://0x0.st");
+        // This code feels so stupid is there a less stupid way of doing this?
+        {
+            m_settings->registerSetting("PastebinURL", "");
+            QString pastebinURL = m_settings->get("PastebinURL").toString();
+
+            // If PastebinURL hasn't been set before then use the new default: mclo.gs
+            if (pastebinURL == "") {
+                m_settings->registerSetting("PastebinType", PasteUpload::PasteType::Mclogs);
+                m_settings->registerSetting("PastebinCustomAPIBase", "");
+            }
+            // Otherwise: use 0x0.st
+            else {
+                // The default custom endpoint would usually be "" (meaning there is no custom endpoint specified)
+                // But if the user had customised the paste URL then that should be carried over into the custom endpoint.
+                QString defaultCustomEndpoint = (pastebinURL == "https://0x0.st") ? "" : pastebinURL;
+                m_settings->registerSetting("PastebinType", PasteUpload::PasteType::NullPointer);
+                m_settings->registerSetting("PastebinCustomAPIBase", defaultCustomEndpoint);
+
+                m_settings->reset("PastebinURL");
+            }
+
+            bool ok;
+            unsigned int pasteType = m_settings->get("PastebinType").toUInt(&ok);
+            // If PastebinType is invalid then reset the related settings.
+            if (!ok || !(PasteUpload::PasteType::First <= pasteType && pasteType <= PasteUpload::PasteType::Last))
+            {
+                m_settings->reset("PastebinType");
+                m_settings->reset("PastebinCustomAPIBase");
+            }
+        }
 
         m_settings->registerSetting("CloseAfterLaunch", false);
         m_settings->registerSetting("QuitAfterGameStop", false);

@@ -42,8 +42,22 @@
 #include <QJsonDocument>
 #include <QFile>
 
-PasteUpload::PasteUpload(QWidget *window, QString text, QString url) : m_window(window), m_uploadUrl(url), m_text(text.toUtf8())
+std::array<PasteUpload::PasteTypeInfo, 4> PasteUpload::PasteTypes = {
+    {{"0x0", "https://0x0.st", ""},
+     {"hastebin", "https://hastebin.com", "/documents"},
+     {"paste (paste.gg)", "https://paste.gg", "/api/v1/pastes"},
+     {"mclogs", "https://api.mclo.gs", "/1/log"}}};
+
+PasteUpload::PasteUpload(QWidget *window, QString text, QString baseUrl, PasteType pasteType) : m_window(window), m_baseUrl(baseUrl), m_pasteType(pasteType), m_text(text.toUtf8())
 {
+    if (m_baseUrl == "")
+        m_baseUrl = PasteTypes.at(pasteType).defaultBase;
+
+    // HACK: Paste's docs say the standard API path is at /api/<version> but the official instance paste.gg doesn't follow that??
+    if (pasteType == PasteGG && m_baseUrl == PasteTypes.at(pasteType).defaultBase)
+        m_uploadUrl = "https://api.paste.gg/v1/pastes";
+    else
+        m_uploadUrl = m_baseUrl + PasteTypes.at(pasteType).endpointPath;
 }
 
 PasteUpload::~PasteUpload()
@@ -53,26 +67,73 @@ PasteUpload::~PasteUpload()
 void PasteUpload::executeTask()
 {
     QNetworkRequest request{QUrl(m_uploadUrl)};
+    QNetworkReply *rep{};
+
     request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
 
-    QHttpMultiPart *multiPart = new QHttpMultiPart{QHttpMultiPart::FormDataType};
+    switch (m_pasteType) {
+    case NullPointer: {
+        QHttpMultiPart *multiPart =
+          new QHttpMultiPart{QHttpMultiPart::FormDataType};
 
-    QHttpPart filePart;
-    filePart.setBody(m_text);
-    filePart.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
-    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"file\"; filename=\"log.txt\"");
+        QHttpPart filePart;
+        filePart.setBody(m_text);
+        filePart.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
+        filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                         "form-data; name=\"file\"; filename=\"log.txt\"");
+        multiPart->append(filePart);
 
-    multiPart->append(filePart);
+        rep = APPLICATION->network()->post(request, multiPart);
+        multiPart->setParent(rep);
 
-    QNetworkReply *rep = APPLICATION->network()->post(request, multiPart);
-    multiPart->setParent(rep);
+        break;
+    }
+    case Hastebin: {
+        request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
+        rep = APPLICATION->network()->post(request, m_text);
+        break;
+    }
+    case Mclogs: {
+        QUrlQuery postData;
+        postData.addQueryItem("content", m_text);
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+        rep = APPLICATION->network()->post(request, postData.toString().toUtf8());
+        break;
+    }
+    case PasteGG: {
+        QJsonObject obj;
+        QJsonDocument doc;
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    m_reply = std::shared_ptr<QNetworkReply>(rep);
-    setStatus(tr("Uploading to %1").arg(m_uploadUrl));
+        obj.insert("expires", QDateTime::currentDateTimeUtc().addDays(100).toString(Qt::DateFormat::ISODate));
+
+        QJsonArray files;
+        QJsonObject logFileInfo;
+        QJsonObject logFileContentInfo;
+        logFileContentInfo.insert("format", "text");
+        logFileContentInfo.insert("value", QString::fromUtf8(m_text));
+        logFileInfo.insert("name", "log.txt");
+        logFileInfo.insert("content", logFileContentInfo);
+        files.append(logFileInfo);
+
+        obj.insert("files", files);
+
+        doc.setObject(obj);
+        rep = APPLICATION->network()->post(request, doc.toJson());
+        break;
+    }
+    }
 
     connect(rep, &QNetworkReply::uploadProgress, this, &Task::setProgress);
-    connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
-    connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));
+    connect(rep, &QNetworkReply::finished, this, &PasteUpload::downloadFinished);
+    // This function call would be a lot shorter if we were using the latest Qt
+    connect(rep,
+            static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
+            this, &PasteUpload::downloadError);
+
+    m_reply = std::shared_ptr<QNetworkReply>(rep);
+
+    setStatus(tr("Uploading to %1").arg(m_uploadUrl));
 }
 
 void PasteUpload::downloadError(QNetworkReply::NetworkError error)
@@ -102,6 +163,82 @@ void PasteUpload::downloadFinished()
         return;
     }
 
-    m_pasteLink = QString::fromUtf8(data).trimmed();
+    switch (m_pasteType)
+    {
+    case NullPointer:
+        m_pasteLink = QString::fromUtf8(data).trimmed();
+        break;
+    case Hastebin: {
+        QJsonDocument jsonDoc{QJsonDocument::fromJson(data)};
+        QJsonObject jsonObj{jsonDoc.object()};
+        if (jsonObj.contains("key") && jsonObj["key"].isString())
+        {
+            QString key = jsonDoc.object()["key"].toString();
+            m_pasteLink = m_baseUrl + "/" + key;
+        }
+        else
+        {
+            emitFailed(tr("Error: %1 returned a malformed response body").arg(m_uploadUrl));
+            qCritical() << m_uploadUrl << " returned malformed response body: " << data;
+            return;
+        }
+        break;
+    }
+    case Mclogs: {
+        QJsonDocument jsonDoc{QJsonDocument::fromJson(data)};
+        QJsonObject jsonObj{jsonDoc.object()};
+        if (jsonObj.contains("success") && jsonObj["success"].isBool())
+        {
+            bool success = jsonObj["success"].toBool();
+            if (success)
+            {
+                m_pasteLink = jsonObj["url"].toString();
+            }
+            else
+            {
+                QString error = jsonObj["error"].toString();
+                emitFailed(tr("Error: %1 returned an error: %2").arg(m_uploadUrl, error));
+                qCritical() << m_uploadUrl << " returned error: " << error;
+                qCritical() << "Response body: " << data;
+                return;
+            }
+        }
+        else
+        {
+            emitFailed(tr("Error: %1 returned a malformed response body").arg(m_uploadUrl));
+            qCritical() << m_uploadUrl << " returned malformed response body: " << data;
+            return;
+        }
+        break;
+    }
+    case PasteGG:
+        QJsonDocument jsonDoc{QJsonDocument::fromJson(data)};
+        QJsonObject jsonObj{jsonDoc.object()};
+        if (jsonObj.contains("status") && jsonObj["status"].isString())
+        {
+            QString status = jsonObj["status"].toString();
+            if (status == "success")
+            {
+                m_pasteLink = m_baseUrl + "/p/anonymous/" + jsonObj["result"].toObject()["id"].toString();
+            }
+            else
+            {
+                QString error = jsonObj["error"].toString();
+                QString message = (jsonObj.contains("message") && jsonObj["message"].isString()) ? jsonObj["message"].toString() : "none";
+                emitFailed(tr("Error: %1 returned an error code: %2\nError message: %3").arg(m_uploadUrl, error, message));
+                qCritical() << m_uploadUrl << " returned error: " << error;
+                qCritical() << "Error message: " << message;
+                qCritical() << "Response body: " << data;
+                return;
+            }
+        }
+        else
+        {
+            emitFailed(tr("Error: %1 returned a malformed response body").arg(m_uploadUrl));
+            qCritical() << m_uploadUrl << " returned malformed response body: " << data;
+            return;
+        }
+        break;
+    }
     emitSucceeded();
 }
