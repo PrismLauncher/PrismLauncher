@@ -25,6 +25,13 @@ body:
     - Other
 - type: textarea
   attributes:
+    label: Version of PolyMC
+    description: The version of PolyMC used in the bug report.
+    placeholder: PolyMC 1.2.2
+  validations:
+    required: true
+- type: textarea
+  attributes:
     label: Description of bug
     description: What did you expect to happen, what happened, and why is it incorrect?
     placeholder: The cat button should show a cat, but it showed a dog instead!
