@@ -91,7 +91,7 @@ set(Launcher_MSA_CLIENT_ID "549033b2-1532-4d4e-ae77-1bbaa46f9d74" CACHE STRING "
 
 # CurseForge API Key
 # CHANGE THIS IF YOU FORK THIS PROJECT!
-set(Launcher_CURSEFORGE_API_KEY "$2a$10$iR1RdPDG95FWdILZbHuoMOlV4vL4eckBx7QPZR6SVZmliEb9ZQplu" CACHE STRING "CurseForge API Key")
+set(Launcher_CURSEFORGE_API_KEY "$2a$10$1Oqr2MX3O4n/ilhFGc597u8tfI3L2Hyr9/rtWDAMRjghSQV2QUuxq" CACHE STRING "CurseForge API Key")
 
 # Bug tracker URL
 set(Launcher_BUG_TRACKER_URL "https://github.com/PolyMC/PolyMC/issues" CACHE STRING "URL for the bug tracker.")
