@@ -1,4 +1,4 @@
-package org.multimc;/*
+/*
  * Copyright 2012-2021 MultiMC Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,8 @@ package org.multimc;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.multimc;
 
 import org.multimc.exception.ParseException;
 import org.multimc.utils.Parameters;
