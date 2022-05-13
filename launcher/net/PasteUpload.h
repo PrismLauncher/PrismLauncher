@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,7 +46,7 @@ class PasteUpload : public Task
 {
     Q_OBJECT
 public:
-    enum PasteType : unsigned int {
+    enum PasteType : int {
         // 0x0.st
         NullPointer,
         // hastebin.com

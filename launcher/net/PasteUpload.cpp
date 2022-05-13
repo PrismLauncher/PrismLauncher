@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
+ *  Copyright (C) 2022 Swirl <swurl@swurl.xyz>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,10 +45,10 @@
 #include <QFile>
 
 std::array<PasteUpload::PasteTypeInfo, 4> PasteUpload::PasteTypes = {
-    {{"0x0", "https://0x0.st", ""},
-     {"hastebin", "https://hastebin.com", "/documents"},
-     {"paste (paste.gg)", "https://paste.gg", "/api/v1/pastes"},
-     {"mclogs", "https://api.mclo.gs", "/1/log"}}};
+    {{"0x0.st", "https://0x0.st", ""},
+     {"hastebin", "https://hst.sh", "/documents"},
+     {"paste.gg", "https://paste.gg", "/api/v1/pastes"},
+     {"mclo.gs", "https://api.mclo.gs", "/1/log"}}};
 
 PasteUpload::PasteUpload(QWidget *window, QString text, QString baseUrl, PasteType pasteType) : m_window(window), m_baseUrl(baseUrl), m_pasteType(pasteType), m_text(text.toUtf8())
 {

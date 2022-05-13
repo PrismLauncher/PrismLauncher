@@ -61,6 +61,19 @@
             <property name="placeholderText">
              <string/>
             </property>
+            <property name="clearButtonEnabled">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="baseURLNote">
+            <property name="text">
+             <string>Note: you probably want to change or clear the Base URL after changing the paste service type.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>

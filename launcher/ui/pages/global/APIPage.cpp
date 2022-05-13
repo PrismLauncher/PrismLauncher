@@ -53,8 +53,8 @@ APIPage::APIPage(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::APIPage)
 {
-    // this is here so you can reorder the entries in the combobox without messing stuff up
-    unsigned int comboBoxEntries[] = {
+    // This is here so you can reorder the entries in the combobox without messing stuff up
+    int comboBoxEntries[] = {
         PasteUpload::PasteType::Mclogs,
         PasteUpload::PasteType::NullPointer,
         PasteUpload::PasteType::PasteGG,
@@ -69,13 +69,18 @@ APIPage::APIPage(QWidget *parent) :
         ui->pasteTypeComboBox->addItem(PasteUpload::PasteTypes.at(pasteType).name, pasteType);
     }
 
-    connect(ui->pasteTypeComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &APIPage::updateBaseURLPlaceholder);
+    void (QComboBox::*currentIndexChangedSignal)(int) (&QComboBox::currentIndexChanged);
+    connect(ui->pasteTypeComboBox, currentIndexChangedSignal, this, &APIPage::updateBaseURLPlaceholder);
     // This function needs to be called even when the ComboBox's index is still in its default state.
     updateBaseURLPlaceholder(ui->pasteTypeComboBox->currentIndex());
     ui->baseURLEntry->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->baseURLEntry));
     ui->tabWidget->tabBar()->hide();
 
     loadSettings();
+
+    resetBaseURLNote();
+    connect(ui->pasteTypeComboBox, currentIndexChangedSignal, this, &APIPage::updateBaseURLNote);
+    connect(ui->baseURLEntry, &QLineEdit::textEdited, this, &APIPage::resetBaseURLNote);
 }
 
 APIPage::~APIPage()
@@ -83,16 +88,36 @@ APIPage::~APIPage()
     delete ui;
 }
 
+void APIPage::resetBaseURLNote()
+{
+    ui->baseURLNote->hide();
+    baseURLPasteType = ui->pasteTypeComboBox->currentIndex();
+}
+
+void APIPage::updateBaseURLNote(int index)
+{
+    if (baseURLPasteType == index)
+    {
+        ui->baseURLNote->hide();
+    }
+    else if (!ui->baseURLEntry->text().isEmpty())
+    {
+        ui->baseURLNote->show();
+    }
+}
+
 void APIPage::updateBaseURLPlaceholder(int index)
 {
-    ui->baseURLEntry->setPlaceholderText(PasteUpload::PasteTypes.at(ui->pasteTypeComboBox->itemData(index).toUInt()).defaultBase);
+    int pasteType = ui->pasteTypeComboBox->itemData(index).toInt();
+    QString pasteDefaultURL = PasteUpload::PasteTypes.at(pasteType).defaultBase;
+    ui->baseURLEntry->setPlaceholderText(pasteDefaultURL);
 }
 
 void APIPage::loadSettings()
 {
     auto s = APPLICATION->settings();
 
-    unsigned int pasteType = s->get("PastebinType").toUInt();
+    int pasteType = s->get("PastebinType").toInt();
     QString pastebinURL = s->get("PastebinCustomAPIBase").toString();
 
     ui->baseURLEntry->setText(pastebinURL);
@@ -115,7 +140,7 @@ void APIPage::applySettings()
 {
     auto s = APPLICATION->settings();
 
-    s->set("PastebinType", ui->pasteTypeComboBox->currentData().toUInt());
+    s->set("PastebinType", ui->pasteTypeComboBox->currentData().toInt());
     s->set("PastebinCustomAPIBase", ui->baseURLEntry->text());
 
     QString msaClientID = ui->msaClientID->text();
