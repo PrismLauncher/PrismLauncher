@@ -58,8 +58,8 @@ auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Mo
     mod.hash = mod_version.hash;
 
     mod.provider = mod_pack.provider;
-    mod.file_id = mod_pack.addonId;
-    mod.project_id = mod_version.fileId;
+    mod.file_id = mod_version.fileId;
+    mod.project_id = mod_pack.addonId;
 
     return mod;
 }
