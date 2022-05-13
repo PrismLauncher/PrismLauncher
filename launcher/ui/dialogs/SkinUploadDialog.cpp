@@ -100,7 +100,8 @@ void SkinUploadDialog::on_buttonBox_accepted()
 
 void SkinUploadDialog::on_skinBrowseBtn_clicked()
 {
-    QString raw_path = QFileDialog::getOpenFileName(this, tr("Select Skin Texture"), QString(), "*.png");
+    auto filter = QMimeDatabase().mimeTypeForName("image/png").filterString();
+    QString raw_path = QFileDialog::getOpenFileName(this, tr("Select Skin Texture"), QString(), filter);
     if (raw_path.isEmpty() || !QFileInfo::exists(raw_path))
     {
         return;
