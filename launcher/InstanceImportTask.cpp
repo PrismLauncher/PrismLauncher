@@ -581,8 +581,6 @@ void InstanceImportTask::processModrinth() {
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
-    instanceSettings->registerSetting("InstanceType", "Legacy");
-    instanceSettings->set("InstanceType", "OneSix");
     MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
     auto components = instance.getPackProfile();
     components->buildingFromScratch();

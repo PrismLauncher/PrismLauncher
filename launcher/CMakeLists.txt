@@ -532,6 +532,8 @@ set(FLAME_SOURCES
 set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthPackIndex.cpp
     modplatform/modrinth/ModrinthPackIndex.h
+    modplatform/modrinth/ModrinthPackManifest.cpp
+    modplatform/modrinth/ModrinthPackManifest.h
 )
 
 set(MODPACKSCH_SOURCES
@@ -561,11 +563,6 @@ set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLPackManifest.h
     modplatform/atlauncher/ATLShareCode.cpp
     modplatform/atlauncher/ATLShareCode.h
-)
-
-set(MODRINTH_SOURCES
-    modplatform/modrinth/ModrinthPackManifest.cpp
-    modplatform/modrinth/ModrinthPackManifest.h
 )
 
 add_unit_test(Index
@@ -601,7 +598,6 @@ set(LOGIC_SOURCES
     ${MODPACKSCH_SOURCES}
     ${TECHNIC_SOURCES}
     ${ATLAUNCHER_SOURCES}
-    ${MODRINTH_SOURCES}
 )
 
 SET(LAUNCHER_SOURCES

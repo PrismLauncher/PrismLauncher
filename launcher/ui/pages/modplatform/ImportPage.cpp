@@ -144,8 +144,8 @@ void ImportPage::setUrl(const QString& url)
 
 void ImportPage::on_modpackBtn_clicked()
 {
-    // TODO: Add .mrpack filter
     auto filter = QMimeDatabase().mimeTypeForName("application/zip").filterString();
+    filter += ";;" + tr("Modrinth pack (*.mrpack)");
     const QUrl url = QFileDialog::getOpenFileUrl(this, tr("Choose modpack"), modpackUrl(), filter);
     if (url.isValid())
     {
