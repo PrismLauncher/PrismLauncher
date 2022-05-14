@@ -51,8 +51,6 @@ public final class EntryPoint {
 
     private final Parameters params = new Parameters();
 
-    private String launcherType;
-
     public static void main(String[] args) {
         EntryPoint listener = new EntryPoint();
 
@@ -78,15 +76,6 @@ public final class EntryPoint {
 
             case "abort": {
                 return Action.Abort;
-            }
-
-            case "launcher": {
-                if (tokens.length != 2)
-                    throw new ParseException("Expected 2 tokens, got " + tokens.length);
-
-                launcherType = tokens[1];
-
-                return Action.Proceed;
             }
 
             default: {
@@ -129,30 +118,24 @@ public final class EntryPoint {
             return 1;
         }
 
-        if (launcherType != null) {
-            try {
-                Launcher launcher =
-                        LauncherFactory
-                                .getInstance()
-                                .createLauncher(launcherType, params);
+        try {
+            Launcher launcher =
+                    LauncherFactory
+                            .getInstance()
+                            .createLauncher(params);
 
-                launcher.launch();
+            launcher.launch();
 
-                return 0;
-            } catch (IllegalArgumentException e) {
-                LOGGER.log(Level.SEVERE, "Wrong argument.", e);
+            return 0;
+        } catch (IllegalArgumentException e) {
+            LOGGER.log(Level.SEVERE, "Wrong argument.", e);
 
-                return 1;
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Exception caught from launcher.", e);
+            return 1;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Exception caught from launcher.", e);
 
-                return 1;
-            }
+            return 1;
         }
-
-        LOGGER.log(Level.SEVERE, "No valid launcher implementation specified.");
-
-        return 1;
     }
 
     private enum Action {

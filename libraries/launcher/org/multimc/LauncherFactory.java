@@ -39,7 +39,9 @@ public final class LauncherFactory {
         });
     }
 
-    public Launcher createLauncher(String name, Parameters parameters) {
+    public Launcher createLauncher(Parameters parameters) {
+        String name = parameters.first("launcher");
+
         LauncherProvider launcherProvider = launcherRegistry.get(name);
 
         if (launcherProvider == null)
