@@ -34,14 +34,41 @@
  */
 
 #include "ModrinthPage.h"
-
 #include "ui_ModrinthPage.h"
 
-#include <QKeyEvent>
+#include "ModrinthModel.h"
 
-ModrinthPage::ModrinthPage(NewInstanceDialog *dialog, QWidget *parent) : QWidget(parent), ui(new Ui::ModrinthPage), dialog(dialog)
+#include "InstanceImportTask.h"
+#include "Json.h"
+
+#include <HoeDown.h>
+
+#include <QComboBox>
+#include <QKeyEvent>
+#include <QPushButton>
+
+ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::ModrinthPage), dialog(dialog)
 {
     ui->setupUi(this);
+
+    connect(ui->searchButton, &QPushButton::clicked, this, &ModrinthPage::triggerSearch);
+    ui->searchEdit->installEventFilter(this);
+    m_model = new Modrinth::ModpackListModel(this);
+    ui->packView->setModel(m_model);
+
+    ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
+
+    ui->sortByBox->addItem(tr("Sort by Featured"));
+    ui->sortByBox->addItem(tr("Sort by Popularity"));
+    ui->sortByBox->addItem(tr("Sort by Last Updated"));
+    ui->sortByBox->addItem(tr("Sort by Name"));
+    ui->sortByBox->addItem(tr("Sort by Author"));
+    ui->sortByBox->addItem(tr("Sort by Total Downloads"));
+
+    connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthPage::onSelectionChanged);
+    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthPage::onVersionSelectionChanged);
 }
 
 ModrinthPage::~ModrinthPage()
@@ -60,10 +87,10 @@ void ModrinthPage::openedImpl()
     triggerSearch();
 }
 
-bool ModrinthPage::eventFilter(QObject *watched, QEvent *event)
+bool ModrinthPage::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == ui->searchEdit && event->type() == QEvent::KeyPress) {
-        auto *keyEvent = reinterpret_cast<QKeyEvent *>(event);
+        auto* keyEvent = reinterpret_cast<QKeyEvent*>(event);
         if (keyEvent->key() == Qt::Key_Return) {
             this->triggerSearch();
             keyEvent->accept();
@@ -73,6 +100,176 @@ bool ModrinthPage::eventFilter(QObject *watched, QEvent *event)
     return QObject::eventFilter(watched, event);
 }
 
-void ModrinthPage::triggerSearch() {
+void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
+{
+    ui->versionSelectionBox->clear();
 
+    if (!first.isValid()) {
+        if (isOpened) {
+            dialog->setSuggestedPack();
+        }
+        return;
+    }
+
+    current = m_model->data(first, Qt::UserRole).value<Modrinth::Modpack>();
+    auto name = current.name;
+
+    if (!current.extraInfoLoaded) {
+        qDebug() << "Loading modrinth modpack information";
+
+        auto netJob = new NetJob(QString("Modrinth::PackInformation(%1)").arg(current.name), APPLICATION->network());
+        auto response = new QByteArray();
+
+        QString id = current.id;
+
+        netJob->addNetAction(Net::Download::makeByteArray(QString("https://staging-api.modrinth.com/v2/project/%1").arg(id), response));
+
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
+            if (id != current.id) {
+                return;  // wrong request?
+            }
+
+            QJsonParseError parse_error;
+            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+            if (parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response from Modrinth at " << parse_error.offset
+                           << " reason: " << parse_error.errorString();
+                qWarning() << *response;
+                return;
+            }
+
+            auto obj = Json::requireObject(doc);
+
+            try {
+                Modrinth::loadIndexedInfo(current, obj);
+            } catch (const JSONValidationError& e) {
+                qDebug() << *response;
+                qWarning() << "Error while reading modrinth modpack version: " << e.cause();
+            }
+
+            updateUI();
+            suggestCurrent();
+        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
+            netJob->deleteLater();
+            delete response;
+        });
+        netJob->start();
+    } else
+        updateUI();
+
+    if (!current.versionsLoaded) {
+        qDebug() << "Loading modrinth modpack versions";
+
+        auto netJob = new NetJob(QString("Modrinth::PackVersions(%1)").arg(current.name), APPLICATION->network());
+        auto response = new QByteArray();
+
+        QString id = current.id;
+
+        netJob->addNetAction(
+            Net::Download::makeByteArray(QString("https://staging-api.modrinth.com/v2/project/%1/version").arg(id), response));
+
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
+            if (id != current.id) {
+                return;  // wrong request?
+            }
+
+            QJsonParseError parse_error;
+            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+            if (parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response from Modrinth at " << parse_error.offset
+                           << " reason: " << parse_error.errorString();
+                qWarning() << *response;
+                return;
+            }
+
+            try {
+                Modrinth::loadIndexedVersions(current, doc);
+            } catch (const JSONValidationError& e) {
+                qDebug() << *response;
+                qWarning() << "Error while reading modrinth modpack version: " << e.cause();
+            }
+
+            for (auto version : current.versions) {
+                ui->versionSelectionBox->addItem(version.version, QVariant(version.id));
+            }
+
+            updateVersionsUI();
+            suggestCurrent();
+        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
+            netJob->deleteLater();
+            delete response;
+        });
+        netJob->start();
+
+    } else {
+        for (auto version : current.versions) {
+            ui->versionSelectionBox->addItem(QString("%1 - %2").arg(version.name, version.version), QVariant(version.id));
+        }
+
+        suggestCurrent();
+    }
+}
+
+void ModrinthPage::updateUI()
+{
+    QString text = "";
+
+    if (current.extra.sourceUrl.isEmpty())
+        text = current.name;
+    else
+        text = "<a href=\"" + current.extra.sourceUrl + "\">" + current.name + "</a>";
+
+    if (!current.authors.empty()) {
+        // TODO: Implement multiple authors with links
+        text += "<br>" + tr(" by ") + current.authors.at(0);
+    }
+
+    text += "<br>";
+
+    HoeDown h;
+    text += h.process(current.extra.body.toUtf8());
+
+    ui->packDescription->setHtml(text + current.description);
+}
+
+void ModrinthPage::updateVersionsUI()
+{
+    // idk
+}
+
+void ModrinthPage::suggestCurrent()
+{
+    if (!isOpened) {
+        return;
+    }
+
+    if (selectedVersion.isEmpty()) {
+        dialog->setSuggestedPack();
+        return;
+    }
+
+    for (auto& ver : current.versions) {
+        if (ver.id == selectedVersion) {
+            dialog->setSuggestedPack(current.name, new InstanceImportTask(ver.download_url));
+
+            break;
+        }
+    }
+}
+
+void ModrinthPage::triggerSearch()
+{
+    m_model->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
+}
+
+void ModrinthPage::onVersionSelectionChanged(QString data)
+{
+    if (data.isNull() || data.isEmpty()) {
+        selectedVersion = "";
+        return;
+    }
+    selectedVersion = ui->versionSelectionBox->currentData().toString();
+    suggestCurrent();
 }

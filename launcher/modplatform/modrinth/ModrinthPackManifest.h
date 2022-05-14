@@ -15,18 +15,68 @@
 
 #pragma once
 
+#include <QMetaType>
+
 #include <QByteArray>
 #include <QCryptographicHash>
 #include <QString>
 #include <QUrl>
 
+class MinecraftInstance;
+
 namespace Modrinth {
+
 struct File
 {
     QString path;
+
     QCryptographicHash::Algorithm hashAlgorithm;
     QByteArray hash;
     // TODO: should this support multiple download URLs, like the JSON does?
     QUrl download;
 };
+
+struct ModpackExtra {
+    QString body;
+
+    QString sourceUrl;
+    QString wikiUrl;
+};
+
+struct ModpackVersion {
+    QString name;
+    QString version;
+
+    QString id;
+    QString project_id;
+
+    QString date;
+
+    QString download_url;
+};
+
+struct Modpack {
+    QString id;
+
+    QString name;
+    QString description;
+    QStringList authors;
+    QString iconName;
+    QUrl    iconUrl;
+
+    bool    versionsLoaded = false;
+    bool    extraInfoLoaded = false;
+
+    ModpackExtra extra;
+    QVector<ModpackVersion> versions;
+};
+
+void loadIndexedPack(Modpack&, QJsonObject&);
+void loadIndexedInfo(Modpack&, QJsonObject&);
+void loadIndexedVersions(Modpack&, QJsonDocument&);
+auto loadIndexedVersion(QJsonObject&) -> ModpackVersion;
+
 }
+
+Q_DECLARE_METATYPE(Modrinth::Modpack);
+Q_DECLARE_METATYPE(Modrinth::ModpackVersion);
