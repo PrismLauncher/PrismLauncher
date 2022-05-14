@@ -40,12 +40,12 @@
 
 #include "modplatform/modrinth/ModrinthAPI.h"
 
-class ModrinthPage : public ModPage {
+class ModrinthModPage : public ModPage {
     Q_OBJECT
 
    public:
-    explicit ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance);
-    ~ModrinthPage() override = default;
+    explicit ModrinthModPage(ModDownloadDialog* dialog, BaseInstance* instance);
+    ~ModrinthModPage() override = default;
 
     inline auto displayName() const -> QString override { return "Modrinth"; }
     inline auto icon() const -> QIcon override { return APPLICATION->getThemedIcon("modrinth"); }

@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ModrinthModel.h"
+#include "ModrinthModModel.h"
 
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 

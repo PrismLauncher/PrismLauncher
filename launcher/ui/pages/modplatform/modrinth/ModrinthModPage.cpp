@@ -33,14 +33,14 @@
  *      limitations under the License.
  */
 
-#include "ModrinthPage.h"
+#include "ModrinthModPage.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui_ModPage.h"
 
-#include "ModrinthModel.h"
+#include "ModrinthModModel.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
-ModrinthPage::ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance)
+ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance* instance)
     : ModPage(dialog, instance, new ModrinthAPI())
 {
     listModel = new Modrinth::ListModel(this);
@@ -56,12 +56,12 @@ ModrinthPage::ModrinthPage(ModDownloadDialog* dialog, BaseInstance* instance)
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems, 
     // so it's best not to connect them in the parent's constructor...
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
-    connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthPage::onSelectionChanged);
-    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthPage::onVersionSelectionChanged);
-    connect(ui->modSelectionButton, &QPushButton::clicked, this, &ModrinthPage::onModSelected);
+    connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthModPage::onSelectionChanged);
+    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthModPage::onVersionSelectionChanged);
+    connect(ui->modSelectionButton, &QPushButton::clicked, this, &ModrinthModPage::onModSelected);
 }
 
-auto ModrinthPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderType loader) const -> bool
+auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderType loader) const -> bool
 {
     auto loaderStrings = ModrinthAPI::getModLoaderStrings(loader);
 
@@ -79,4 +79,4 @@ auto ModrinthPage::validateVersion(ModPlatform::IndexedVersion& ver, QString min
 // I don't know why, but doing this on the parent class makes it so that
 // other mod providers start loading before being selected, at least with
 // my Qt, so we need to implement this in every derived class...
-auto ModrinthPage::shouldDisplay() const -> bool { return true; }
+auto ModrinthModPage::shouldDisplay() const -> bool { return true; }

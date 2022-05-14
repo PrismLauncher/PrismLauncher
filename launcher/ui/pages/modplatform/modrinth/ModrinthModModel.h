@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ModrinthPage.h"
+#include "ModrinthModPage.h"
 
 namespace Modrinth {
 
@@ -8,7 +8,7 @@ class ListModel : public ModPlatform::ListModel {
     Q_OBJECT
 
    public:
-    ListModel(ModrinthPage* parent) : ModPlatform::ListModel(parent){};
+    ListModel(ModrinthModPage* parent) : ModPlatform::ListModel(parent){};
     ~ListModel() override = default;
 
    private:

@@ -13,7 +13,7 @@
 #include <QDialogButtonBox>
 
 #include "ui/widgets/PageContainer.h"
-#include "ui/pages/modplatform/modrinth/ModrinthPage.h"
+#include "ui/pages/modplatform/modrinth/ModrinthModPage.h"
 #include "ModDownloadTask.h"
 
 
@@ -98,7 +98,7 @@ void ModDownloadDialog::accept()
 
 QList<BasePage *> ModDownloadDialog::getPages()
 {
-    modrinthPage = new ModrinthPage(this, m_instance);
+    modrinthPage = new ModrinthModPage(this, m_instance);
     flameModPage = new FlameModPage(this, m_instance);
     return
     {

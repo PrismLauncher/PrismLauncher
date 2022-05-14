@@ -782,10 +782,10 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/ImportPage.cpp
     ui/pages/modplatform/ImportPage.h
 
-    ui/pages/modplatform/modrinth/ModrinthModel.cpp
-    ui/pages/modplatform/modrinth/ModrinthModel.h
-    ui/pages/modplatform/modrinth/ModrinthPage.cpp
-    ui/pages/modplatform/modrinth/ModrinthPage.h
+    ui/pages/modplatform/modrinth/ModrinthModModel.cpp
+    ui/pages/modplatform/modrinth/ModrinthModModel.h
+    ui/pages/modplatform/modrinth/ModrinthModPage.cpp
+    ui/pages/modplatform/modrinth/ModrinthModPage.h
 
     # GUI - dialogs
     ui/dialogs/AboutDialog.cpp
