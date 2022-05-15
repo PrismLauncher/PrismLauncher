@@ -71,10 +71,10 @@ void ModpackListModel::performPaginatedSearch()
     // TODO: Move to standalone API
     NetJob* netJob = new NetJob("Modrinth::SearchModpack", APPLICATION->network());
     auto searchAllUrl = QString(
-                            "https://staging-api.modrinth.com/v2/search?"
-                            "query=%1&"
+                            "%1/search?"
+                            "query=%2&"
                             "facets=[[\"project_type:modpack\"]]")
-                            .arg(currentSearchTerm);
+                            .arg(BuildConfig.MODRINTH_STAGING_URL, currentSearchTerm);
 
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchAllUrl), &m_all_response));
 

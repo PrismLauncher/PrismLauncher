@@ -38,6 +38,7 @@
 
 #include "ModrinthModel.h"
 
+#include "BuildConfig.h"
 #include "InstanceImportTask.h"
 #include "Json.h"
 
@@ -122,7 +123,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
         QString id = current.id;
 
-        netJob->addNetAction(Net::Download::makeByteArray(QString("https://staging-api.modrinth.com/v2/project/%1").arg(id), response));
+        netJob->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2").arg(BuildConfig.MODRINTH_STAGING_URL, id), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
             if (id != current.id) {
@@ -167,7 +168,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         QString id = current.id;
 
         netJob->addNetAction(
-            Net::Download::makeByteArray(QString("https://staging-api.modrinth.com/v2/project/%1/version").arg(id), response));
+            Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_STAGING_URL, id), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
             if (id != current.id) {
