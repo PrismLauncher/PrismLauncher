@@ -49,9 +49,10 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
         }
         return pack.description;
     } else if (role == Qt::DecorationRole) {
-        // FIXME: help the icons dont have the same size ;-;
         if (m_logoMap.contains(pack.iconName)) {
-            return (m_logoMap.value(pack.iconName));
+            return (m_logoMap.value(pack.iconName)
+                        .pixmap(48, 48)
+                        .scaled(48, 48, Qt::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
         }
         QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
         ((ModpackListModel*)this)->requestLogo(pack.iconName, pack.iconUrl.toString());
@@ -64,14 +65,6 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
 
     return {};
 }
-
-/*
-void ModpackListModel::requestModVersions(ModPlatform::IndexedPack const& current)
-{
-    auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
-
-    m_parent->apiProvider()->getVersions(this, { current.addonId.toString(), getMineVersions(), profile->getModLoader() });
-}*/
 
 void ModpackListModel::performPaginatedSearch()
 {
@@ -86,7 +79,7 @@ void ModpackListModel::performPaginatedSearch()
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchAllUrl), &m_all_response));
 
     QObject::connect(netJob, &NetJob::succeeded, this, [this] {
-        QJsonParseError parse_error_all {};
+        QJsonParseError parse_error_all{};
 
         QJsonDocument doc_all = QJsonDocument::fromJson(m_all_response, &parse_error_all);
         if (parse_error_all.error != QJsonParseError::NoError) {
@@ -210,7 +203,7 @@ void ModpackListModel::searchRequestFinished(QJsonDocument& doc_all)
             continue;
         }
     }
-    
+
     if (packs_all.size() < 25) {
         searchState = Finished;
     } else {
