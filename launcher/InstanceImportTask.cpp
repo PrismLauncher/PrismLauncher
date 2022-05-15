@@ -480,7 +480,7 @@ void InstanceImportTask::processMultiMC()
 
 void InstanceImportTask::processModrinth() {
     std::vector<Modrinth::File> files;
-    QString minecraftVersion, fabricVersion, forgeVersion;
+    QString minecraftVersion, fabricVersion, quiltVersion, forgeVersion;
     try
     {
         QString indexPath = FS::PathCombine(m_stagingPath, "modrinth.index.json");
@@ -547,6 +547,12 @@ void InstanceImportTask::processModrinth() {
                         throw JSONValidationError("Duplicate Fabric Loader version");
                     fabricVersion = Json::requireString(*it, "Fabric Loader version");
                 }
+                else if (name == "quilt-loader")
+                {
+                    if (!quiltVersion.isEmpty())
+                        throw JSONValidationError("Duplicate Quilt Loader version");
+                    quiltVersion = Json::requireString(*it, "Quilt Loader version");
+                }
                 else if (name == "forge")
                 {
                     if (!forgeVersion.isEmpty())
@@ -587,6 +593,8 @@ void InstanceImportTask::processModrinth() {
     components->setComponentVersion("net.minecraft", minecraftVersion, true);
     if (!fabricVersion.isEmpty())
         components->setComponentVersion("net.fabricmc.fabric-loader", fabricVersion, true);
+    if (!quiltVersion.isEmpty())
+        components->setComponentVersion("org.quiltmc.quilt-loader", quiltVersion, true);
     if (!forgeVersion.isEmpty())
         components->setComponentVersion("net.minecraftforge", forgeVersion, true);
     if (m_instIcon != "default")
