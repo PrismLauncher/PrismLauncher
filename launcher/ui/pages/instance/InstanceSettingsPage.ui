@@ -350,6 +350,35 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="miscellaneousSettingsBox">
+         <property name="title">
+          <string>Miscellaneous</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_12">
+          <item>
+           <widget class="QCheckBox" name="closeAfterLaunchCheck">
+            <property name="text">
+             <string>Close the launcher after game window opens</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="quitAfterGameStopCheck">
+            <property name="text">
+             <string>Quit the launcher after game window closes</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacerMinecraft_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
