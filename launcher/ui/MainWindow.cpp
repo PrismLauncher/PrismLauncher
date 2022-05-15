@@ -238,6 +238,9 @@ public:
     TranslatedAction actionREDDIT;
     TranslatedAction actionAbout;
 
+    TranslatedAction actionNoAccountsAdded;
+    TranslatedAction actionNoDefaultAccount;
+
     QVector<TranslatedToolButton *> all_toolbuttons;
 
     QWidget *centralWidget = nullptr;
@@ -828,7 +831,7 @@ public:
         QMetaObject::connectSlotsByName(MainWindow);
     } // setupUi
 
-    void retranslateUi(QMainWindow *MainWindow)
+    void retranslateUi(MainWindow *MainWindow)
     {
         QString winTitle = tr("%1 - Version %2", "Launcher - Version X").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString());
         MainWindow->setWindowTitle(winTitle);
@@ -848,6 +851,12 @@ public:
         // submenu buttons
         foldersMenuButton->setText(tr("Folders"));
         helpMenuButton->setText(tr("Help"));
+
+        // playtime counter
+        if (MainWindow->m_statusCenter)
+        {
+            MainWindow->updateStatusCenter();
+        }
     } // retranslateUi
 };
 
@@ -1254,10 +1263,14 @@ void MainWindow::repopulateAccountsMenu()
 
     if (accounts->count() <= 0)
     {
-        QAction *action = new QAction(tr("No accounts added!"), this);
-        action->setEnabled(false);
-        accountMenu->addAction(action);
-        ui->profileMenu->addAction(action);
+        ui->all_actions.removeAll(&ui->actionNoAccountsAdded);
+        ui->actionNoAccountsAdded = TranslatedAction(this);
+        ui->actionNoAccountsAdded->setObjectName(QStringLiteral("actionNoAccountsAdded"));
+        ui->actionNoAccountsAdded.setTextId(QT_TRANSLATE_NOOP("MainWindow", "No accounts added!"));
+        ui->actionNoAccountsAdded->setEnabled(false);
+        accountMenu->addAction(ui->actionNoAccountsAdded);
+        ui->profileMenu->addAction(ui->actionNoAccountsAdded);
+        ui->all_actions.append(&ui->actionNoAccountsAdded);
     }
     else
     {
@@ -1297,18 +1310,23 @@ void MainWindow::repopulateAccountsMenu()
     accountMenu->addSeparator();
     ui->profileMenu->addSeparator();
 
-    QAction *action = new QAction(tr("No Default Account"), this);
-    action->setCheckable(true);
-    action->setIcon(APPLICATION->getThemedIcon("noaccount"));
-    action->setData(-1);
-    action->setShortcut(QKeySequence(tr("Ctrl+0")));
+    ui->all_actions.removeAll(&ui->actionNoDefaultAccount);
+    ui->actionNoDefaultAccount = TranslatedAction(this);
+    ui->actionNoDefaultAccount->setObjectName(QStringLiteral("actionNoDefaultAccount"));
+    ui->actionNoDefaultAccount.setTextId(QT_TRANSLATE_NOOP("MainWindow", "No Default Account"));
+    ui->actionNoDefaultAccount->setCheckable(true);
+    ui->actionNoDefaultAccount->setIcon(APPLICATION->getThemedIcon("noaccount"));
+    ui->actionNoDefaultAccount->setData(-1);
+    ui->actionNoDefaultAccount->setShortcut(QKeySequence(tr("Ctrl+0")));
     if (!defaultAccount) {
-        action->setChecked(true);
+        ui->actionNoDefaultAccount->setChecked(true);
     }
 
-    accountMenu->addAction(action);
-    ui->profileMenu->addAction(action);
-    connect(action, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
+    accountMenu->addAction(ui->actionNoDefaultAccount);
+    ui->profileMenu->addAction(ui->actionNoDefaultAccount);
+    connect(ui->actionNoDefaultAccount, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
+    ui->all_actions.append(&ui->actionNoDefaultAccount);
+    ui->actionNoDefaultAccount.retranslate();
 
     accountMenu->addSeparator();
     ui->profileMenu->addSeparator();
