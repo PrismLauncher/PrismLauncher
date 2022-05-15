@@ -35,6 +35,7 @@ void loadIndexedPack(Modpack& pack, QJsonObject& obj)
 void loadIndexedInfo(Modpack& pack, QJsonObject& obj)
 {
     pack.extra.body = Json::ensureString(obj, "body");
+    pack.extra.projectUrl = QString("https://modrinth.com/modpack/%1").arg(Json::ensureString(obj, "slug"));
     pack.extra.sourceUrl = Json::ensureString(obj, "source_url");
     pack.extra.wikiUrl = Json::ensureString(obj, "wiki_url");
 

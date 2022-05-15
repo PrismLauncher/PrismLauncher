@@ -219,7 +219,7 @@ void ModrinthPage::updateUI()
     if (current.extra.sourceUrl.isEmpty())
         text = current.name;
     else
-        text = "<a href=\"" + current.extra.sourceUrl + "\">" + current.name + "</a>";
+        text = "<a href=\"" + current.extra.projectUrl + "\">" + current.name + "</a>";
 
     if (!current.authors.empty()) {
         // TODO: Implement multiple authors with links

@@ -39,6 +39,7 @@ struct File
 struct ModpackExtra {
     QString body;
 
+    QString projectUrl;
     QString sourceUrl;
     QString wikiUrl;
 };
