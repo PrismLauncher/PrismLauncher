@@ -21,6 +21,7 @@
 #include <QCryptographicHash>
 #include <QString>
 #include <QUrl>
+#include <QVector>
 
 class MinecraftInstance;
 
