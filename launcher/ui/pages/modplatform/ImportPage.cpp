@@ -110,7 +110,10 @@ void ImportPage::updateState()
             // FIXME: actually do some validation of what's inside here... this is fake AF
             QFileInfo fi(input);
             // mrpack is a modrinth pack
-            if(fi.exists() && (fi.suffix() == "zip" || fi.suffix() == "mrpack"))
+
+            // Allow non-latin people to use ZIP files!
+            auto zip = QMimeDatabase().mimeTypeForUrl(url).suffixes().contains("zip");
+            if(fi.exists() && (zip || fi.suffix() == "mrpack"))
             {
                 QFileInfo fi(url.fileName());
                 dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url));

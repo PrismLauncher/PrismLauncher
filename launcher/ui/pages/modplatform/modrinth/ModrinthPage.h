@@ -39,48 +39,53 @@
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/pages/BasePage.h"
 
+#include "modplatform/modrinth/ModrinthPackManifest.h"
+
 #include <QWidget>
 
-namespace Ui
-{
-    class ModrinthPage;
+namespace Ui {
+class ModrinthPage;
 }
 
-class ModrinthPage : public QWidget, public BasePage
-{
+namespace Modrinth {
+class ModpackListModel;
+}
+
+class ModrinthPage : public QWidget, public BasePage {
     Q_OBJECT
 
-public:
-    explicit ModrinthPage(NewInstanceDialog *dialog, QWidget *parent = nullptr);
+   public:
+    explicit ModrinthPage(NewInstanceDialog* dialog, QWidget* parent = nullptr);
     ~ModrinthPage() override;
 
-    QString displayName() const override
-    {
-        return tr("Modrinth");
-    }
-    QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("modrinth");
-    }
-    QString id() const override
-    {
-        return "modrinth";
-    }
+    QString displayName() const override { return tr("Modrinth"); }
+    QIcon icon() const override { return APPLICATION->getThemedIcon("modrinth"); }
+    QString id() const override { return "modrinth"; }
+    QString helpPage() const override { return "Modrinth-platform"; }
 
-    virtual QString helpPage() const override
-    {
-        return "Modrinth-platform";
-    }
+    inline auto debugName() const -> QString { return "Modrinth"; }
+    inline auto metaEntryBase() const -> QString { return "ModrinthModpacks"; };
+
+    auto getCurrent() -> Modrinth::Modpack& { return current; }
+    void suggestCurrent();
+
+    void updateUI();
+    void updateVersionsUI();
+
     void retranslate() override;
-
     void openedImpl() override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
-    bool eventFilter(QObject *watched, QEvent *event) override;
-
-private slots:
+   private slots:
+    void onSelectionChanged(QModelIndex first, QModelIndex second);
+    void onVersionSelectionChanged(QString data);
     void triggerSearch();
 
-private:
-    Ui::ModrinthPage *ui;
-    NewInstanceDialog *dialog;
+   private:
+    Ui::ModrinthPage* ui;
+    NewInstanceDialog* dialog;
+    Modrinth::ModpackListModel* m_model;
+
+    Modrinth::Modpack current;
+    QString selectedVersion;
 };
