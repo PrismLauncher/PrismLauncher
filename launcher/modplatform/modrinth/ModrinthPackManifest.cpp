@@ -93,6 +93,23 @@ void loadIndexedVersions(Modpack& pack, QJsonDocument& doc)
     pack.versionsLoaded = true;
 }
 
+auto validadeDownloadUrl(QUrl url) -> bool
+{
+    auto domain = url.host();
+    if(domain == "cdn.modrinth.com")
+        return true;
+    if(domain == "edge.forgecdn.net")
+        return true;
+    if(domain == "media.forgecdn.net")
+        return true;
+    if(domain == "github.com")
+        return true;
+    if(domain == "raw.githubusercontent.com")
+        return true;
+
+    return false;
+}
+
 auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
 {
     ModpackVersion file;
@@ -107,7 +124,6 @@ auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
 
     auto files = Json::requireArray(obj, "files");
 
-    qWarning() << files;
 
     for (auto file_iter : files) {
         File indexed_file;
@@ -121,7 +137,12 @@ auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
                 continue;
         }
 
-        file.download_url = Json::requireString(parent, "url");
+        auto url = Json::requireString(parent, "url");
+
+        if(!validadeDownloadUrl(url))
+            continue;
+
+        file.download_url = url;
         if(is_primary)
             break;
     }
