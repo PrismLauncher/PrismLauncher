@@ -6,7 +6,7 @@ void Flame::loadIndexedPack(Flame::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireInteger(obj, "id");
     pack.name = Json::requireString(obj, "name");
-    pack.websiteUrl = Json::ensureString(obj, "websiteUrl", "");
+    pack.websiteUrl = Json::ensureString(Json::ensureObject(obj, "links"), "websiteUrl", "");
     pack.description = Json::ensureString(obj, "summary", "");
 
     auto logo = Json::requireObject(obj, "logo");
