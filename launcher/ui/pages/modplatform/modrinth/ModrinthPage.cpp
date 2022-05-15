@@ -221,10 +221,8 @@ void ModrinthPage::updateUI()
     else
         text = "<a href=\"" + current.extra.projectUrl + "\">" + current.name + "</a>";
 
-    if (!current.authors.empty()) {
-        // TODO: Implement multiple authors with links
-        text += "<br>" + tr(" by ") + current.authors.at(0);
-    }
+    // TODO: Implement multiple authors with links
+    text += "<br>" + tr(" by ") + QString("<a href=%1>%2</a>").arg(std::get<1>(current.author).toString(), std::get<0>(current.author));
 
     text += "<br>";
 
@@ -255,7 +253,7 @@ void ModrinthPage::suggestCurrent()
             dialog->setSuggestedPack(current.name, new InstanceImportTask(ver.download_url));
             auto iconName = current.iconName;
             m_model->getLogo(iconName, current.iconUrl.toString(),
-                       [this, iconName](QString logo) { dialog->setSuggestedIconFromFile(logo, iconName); });
+                             [this, iconName](QString logo) { dialog->setSuggestedIconFromFile(logo, iconName); });
 
             break;
         }

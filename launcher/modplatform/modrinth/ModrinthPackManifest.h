@@ -62,7 +62,7 @@ struct Modpack {
 
     QString name;
     QString description;
-    QStringList authors;
+    std::tuple<QString, QUrl> author;
     QString iconName;
     QUrl    iconUrl;
 

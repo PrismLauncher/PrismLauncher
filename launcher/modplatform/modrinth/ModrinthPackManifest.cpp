@@ -16,8 +16,12 @@
 #include "ModrinthPackManifest.h"
 #include "Json.h"
 
+#include "modplatform/modrinth/ModrinthAPI.h"
+
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+
+static ModrinthAPI api;
 
 namespace Modrinth {
 
@@ -27,7 +31,8 @@ void loadIndexedPack(Modpack& pack, QJsonObject& obj)
 
     pack.name = Json::ensureString(obj, "title");
     pack.description = Json::ensureString(obj, "description");
-    pack.authors << Json::ensureString(obj, "author");
+    auto temp_author_name = Json::ensureString(obj, "author");
+    pack.author = std::make_tuple(temp_author_name, api.getAuthorURL(temp_author_name));
     pack.iconName = QString("modrinth_%1").arg(Json::ensureString(obj, "slug"));
     pack.iconUrl = Json::ensureString(obj, "icon_url");
 }
