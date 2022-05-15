@@ -218,7 +218,7 @@ void ModrinthPage::updateUI()
 {
     QString text = "";
 
-    if (current.extra.sourceUrl.isEmpty())
+    if (current.extra.projectUrl.isEmpty())
         text = current.name;
     else
         text = "<a href=\"" + current.extra.projectUrl + "\">" + current.name + "</a>";
