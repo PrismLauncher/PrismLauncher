@@ -622,6 +622,10 @@ void InstanceImportTask::processModrinth() {
     {
         instance.setIconKey(m_instIcon);
     }
+    else
+    {
+        instance.setIconKey("modrinth");
+    }
     instance.setName(m_instName);
     instance.saveNow();
 

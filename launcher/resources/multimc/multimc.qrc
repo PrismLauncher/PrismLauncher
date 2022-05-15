@@ -21,7 +21,7 @@
         <file>scalable/atlauncher-placeholder.png</file>
 
         <!-- Modrinth logo icon -->
-        <file>scalable/modrinth.svg</file>
+        <file>scalable/instances/modrinth.svg</file>
 
         <!-- A proxy icon. Our own. SSSsss -->
         <file>scalable/proxy.svg</file>
