@@ -61,12 +61,11 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
-    ui->sortByBox->addItem(tr("Sort by Featured"));
-    ui->sortByBox->addItem(tr("Sort by Popularity"));
-    ui->sortByBox->addItem(tr("Sort by Last Updated"));
-    ui->sortByBox->addItem(tr("Sort by Name"));
-    ui->sortByBox->addItem(tr("Sort by Author"));
+    ui->sortByBox->addItem(tr("Sort by Relevance"));
     ui->sortByBox->addItem(tr("Sort by Total Downloads"));
+    ui->sortByBox->addItem(tr("Sort by Follows"));
+    ui->sortByBox->addItem(tr("Sort by Newest"));
+    ui->sortByBox->addItem(tr("Sort by Last Updated"));
 
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthPage::onSelectionChanged);

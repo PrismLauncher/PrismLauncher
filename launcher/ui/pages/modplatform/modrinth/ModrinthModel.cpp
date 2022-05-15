@@ -105,11 +105,16 @@ void ModpackListModel::performPaginatedSearch()
 {
     // TODO: Move to standalone API
     NetJob* netJob = new NetJob("Modrinth::SearchModpack", APPLICATION->network());
-    auto searchAllUrl = QString(
-                            "%1/search?"
+    auto searchAllUrl = QString(BuildConfig.MODRINTH_STAGING_URL +
+                            "/search?"
+                            "offset=%1&"
+                            "limit=20&"
                             "query=%2&"
+                            "index=%3&"
                             "facets=[[\"project_type:modpack\"]]")
-                            .arg(BuildConfig.MODRINTH_STAGING_URL, currentSearchTerm);
+                            .arg(nextSearchOffset)
+                            .arg(currentSearchTerm)
+                            .arg(currentSort);
 
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchAllUrl), &m_all_response));
 
@@ -148,14 +153,21 @@ void ModpackListModel::refresh()
     performPaginatedSearch();
 }
 
+static std::array<QString, 5> sorts {"relevance", "downloads", "follows", "newest", "updated"};
+
 void ModpackListModel::searchWithTerm(const QString& term, const int sort)
 {
-    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort) {
+    if(sort > 5 || sort < 0)
+        return;
+
+    auto sort_str = sorts.at(sort);
+
+    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort_str) {
         return;
     }
 
     currentSearchTerm = term;
-    currentSort = sort;
+    currentSort = sort_str;
 
     refresh();
 }
@@ -255,7 +267,7 @@ void ModpackListModel::searchRequestFailed(QString reason)
 {
     if (!jobPtr->first()->m_reply) {
         // Network error
-        QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load mods."));
+        QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load modpacks."));
     } else if (jobPtr->first()->m_reply && jobPtr->first()->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
         // 409 Gone, notify user to update
         QMessageBox::critical(nullptr, tr("Error"),

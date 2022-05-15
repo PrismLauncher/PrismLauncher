@@ -104,7 +104,7 @@ class ModpackListModel : public QAbstractListModel {
     QStringList m_loadingLogos;
 
     QString currentSearchTerm;
-    int currentSort = 0;
+    QString currentSort;
     int nextSearchOffset = 0;
     enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } searchState = None;
 
