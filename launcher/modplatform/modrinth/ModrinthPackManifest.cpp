@@ -81,15 +81,23 @@ auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
 
     auto files = Json::requireArray(obj, "files");
 
+    qWarning() << files;
+
     for (auto file_iter : files) {
         File indexed_file;
         auto parent = Json::requireObject(file_iter);
-        if (!Json::ensureBoolean(parent, "primary", false)) {
-            continue;
+        auto is_primary = Json::ensureBoolean(parent, "primary", false);
+        if (!is_primary) {
+            auto filename = Json::ensureString(parent, "filename");
+            // Checking suffix here is fine because it's the response from Modrinth,
+            // so one would assume it will always be in English.
+            if(!filename.endsWith("mrpack") && !filename.endsWith("zip"))
+                continue;
         }
 
         file.download_url = Json::requireString(parent, "url");
-        break;
+        if(is_primary)
+            break;
     }
 
     if(file.download_url.isEmpty())
