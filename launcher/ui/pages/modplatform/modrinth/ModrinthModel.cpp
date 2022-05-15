@@ -153,14 +153,31 @@ void ModpackListModel::refresh()
     performPaginatedSearch();
 }
 
-static std::array<QString, 5> sorts {"relevance", "downloads", "follows", "newest", "updated"};
+static auto sortFromIndex(int index) -> QString
+{
+    switch(index){
+    default:
+    case 1:
+        return "relevance";
+    case 2:
+        return "downloads";
+    case 3:
+        return "follows";
+    case 4:
+        return "newest";
+    case 5:
+        return "updated";
+    }
+
+    return {};
+}
 
 void ModpackListModel::searchWithTerm(const QString& term, const int sort)
 {
     if(sort > 5 || sort < 0)
         return;
 
-    auto sort_str = sorts.at(sort);
+    auto sort_str = sortFromIndex(sort);
 
     if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort_str) {
         return;
