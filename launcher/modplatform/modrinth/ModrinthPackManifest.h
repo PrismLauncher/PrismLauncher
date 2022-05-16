@@ -99,7 +99,7 @@ void loadIndexedInfo(Modpack&, QJsonObject&);
 void loadIndexedVersions(Modpack&, QJsonDocument&);
 auto loadIndexedVersion(QJsonObject&) -> ModpackVersion;
 
-auto validadeDownloadUrl(QUrl) -> bool;
+auto validateDownloadUrl(QUrl) -> bool;
 
 }
 

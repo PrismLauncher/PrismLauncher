@@ -554,10 +554,10 @@ void InstanceImportTask::processModrinth()
                 }
                 file.hash = QByteArray::fromHex(hash.toLatin1());
                 file.hashAlgorithm = hashAlgorithm;
-                // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode (as Modrinth seems to incorrectly
-                // handle spaces)
+                // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode
+                // (as Modrinth seems to incorrectly handle spaces)
                 file.download = Json::requireString(Json::ensureArray(obj, "downloads").first(), "Download URL for " + file.path);
-                if (!file.download.isValid() || !Modrinth::validadeDownloadUrl(file.download)) {
+                if (!file.download.isValid() || !Modrinth::validateDownloadUrl(file.download)) {
                     throw JSONValidationError("Download URL for " + file.path + " is not a correctly formatted URL");
                 }
                 files.push_back(file);
@@ -567,22 +567,18 @@ void InstanceImportTask::processModrinth()
             for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
                 QString name = it.key();
                 if (name == "minecraft") {
-                    if (!minecraftVersion.isEmpty())
-                        throw JSONValidationError("Duplicate Minecraft version");
                     minecraftVersion = Json::requireString(*it, "Minecraft version");
-                } else if (name == "fabric-loader") {
-                    if (!fabricVersion.isEmpty())
-                        throw JSONValidationError("Duplicate Fabric Loader version");
+                }
+                else if (name == "fabric-loader") {
                     fabricVersion = Json::requireString(*it, "Fabric Loader version");
-                } else if (name == "quilt-loader") {
-                    if (!quiltVersion.isEmpty())
-                        throw JSONValidationError("Duplicate Quilt Loader version");
+                }
+                else if (name == "quilt-loader") {
                     quiltVersion = Json::requireString(*it, "Quilt Loader version");
-                } else if (name == "forge") {
-                    if (!forgeVersion.isEmpty())
-                        throw JSONValidationError("Duplicate Forge version");
+                }
+                else if (name == "forge") {
                     forgeVersion = Json::requireString(*it, "Forge version");
-                } else {
+                }
+                else {
                     throw JSONValidationError("Unknown dependency type: " + name);
                 }
             }
@@ -594,6 +590,7 @@ void InstanceImportTask::processModrinth()
         emitFailed(tr("Could not understand pack index:\n") + e.cause());
         return;
     }
+
     QString overridePath = FS::PathCombine(m_stagingPath, "overrides");
     if (QFile::exists(overridePath)) {
         QString mcPath = FS::PathCombine(m_stagingPath, ".minecraft");

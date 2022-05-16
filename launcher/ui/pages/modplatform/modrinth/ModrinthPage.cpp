@@ -195,7 +195,6 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
                 ui->versionSelectionBox->addItem(version.version, QVariant(version.id));
             }
 
-            updateVersionsUI();
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
@@ -231,11 +230,6 @@ void ModrinthPage::updateUI()
     text += h.process(current.extra.body.toUtf8());
 
     ui->packDescription->setHtml(text + current.description);
-}
-
-void ModrinthPage::updateVersionsUI()
-{
-    // idk
 }
 
 void ModrinthPage::suggestCurrent()

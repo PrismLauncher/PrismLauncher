@@ -71,7 +71,6 @@ class ModrinthPage : public QWidget, public BasePage {
     void suggestCurrent();
 
     void updateUI();
-    void updateVersionsUI();
 
     void retranslate() override;
     void openedImpl() override;

@@ -93,7 +93,7 @@ void loadIndexedVersions(Modpack& pack, QJsonDocument& doc)
     pack.versionsLoaded = true;
 }
 
-auto validadeDownloadUrl(QUrl url) -> bool
+auto validateDownloadUrl(QUrl url) -> bool
 {
     auto domain = url.host();
     if(domain == "cdn.modrinth.com")
@@ -139,7 +139,7 @@ auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
 
         auto url = Json::requireString(parent, "url");
 
-        if(!validadeDownloadUrl(url))
+        if(!validateDownloadUrl(url))
             continue;
 
         file.download_url = url;
