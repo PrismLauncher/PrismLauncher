@@ -623,7 +623,7 @@ ServersPage::ServersPage(InstancePtr inst, QWidget* parent)
 
     auto selectionModel = ui->serversView->selectionModel();
     connect(selectionModel, &QItemSelectionModel::currentChanged, this, &ServersPage::currentChanged);
-    connect(m_inst.get(), &MinecraftInstance::runningStatusChanged, this, &ServersPage::on_RunningState_changed);
+    connect(m_inst.get(), &MinecraftInstance::runningStatusChanged, this, &ServersPage::runningStateChanged);
     connect(ui->nameLine, &QLineEdit::textEdited, this, &ServersPage::nameEdited);
     connect(ui->addressLine, &QLineEdit::textEdited, this, &ServersPage::addressEdited);
     connect(ui->resourceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(resourceIndexChanged(int)));
@@ -663,7 +663,7 @@ QMenu * ServersPage::createPopupMenu()
     return filteredMenu;
 }
 
-void ServersPage::on_RunningState_changed(bool running)
+void ServersPage::runningStateChanged(bool running)
 {
     if(m_locked == running)
     {

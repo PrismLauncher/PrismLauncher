@@ -19,7 +19,11 @@ void SkinDelete::executeTask()
 
     setStatus(tr("Deleting skin"));
     connect(rep, &QNetworkReply::uploadProgress, this, &Task::setProgress);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(rep, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
+#else
     connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
+#endif
     connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));
 }
 

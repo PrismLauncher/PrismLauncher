@@ -36,6 +36,7 @@
 #pragma once
 
 #include <memory>
+#include <QAbstractButton>
 #include <QDialog>
 
 #include "ui/pages/BasePage.h"
@@ -73,14 +74,13 @@ public:
     bool apply() override;
     void retranslate() override;
 
+private slots:
+    void proxyGroupChanged(QAbstractButton *button);
+
 private:
     void updateCheckboxStuff();
     void applySettings();
     void loadSettings();
-
-private
-slots:
-    void proxyChanged(int);
 
 private:
     Ui::ProxyPage *ui;

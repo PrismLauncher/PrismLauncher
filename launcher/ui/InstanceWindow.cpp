@@ -97,9 +97,9 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
     // set up instance and launch process recognition
     {
         auto launchTask = m_instance->getLaunchTask();
-        on_InstanceLaunchTask_changed(launchTask);
-        connect(m_instance.get(), &BaseInstance::launchTaskChanged, this, &InstanceWindow::on_InstanceLaunchTask_changed);
-        connect(m_instance.get(), &BaseInstance::runningStatusChanged, this, &InstanceWindow::on_RunningState_changed);
+        instanceLaunchTaskChanged(launchTask);
+        connect(m_instance.get(), &BaseInstance::launchTaskChanged, this, &InstanceWindow::instanceLaunchTaskChanged);
+        connect(m_instance.get(), &BaseInstance::runningStatusChanged, this, &InstanceWindow::runningStateChanged);
     }
 
     // set up instance destruction detection
@@ -152,12 +152,12 @@ void InstanceWindow::on_btnLaunchMinecraftOffline_clicked()
     APPLICATION->launch(m_instance, false, nullptr);
 }
 
-void InstanceWindow::on_InstanceLaunchTask_changed(shared_qobject_ptr<LaunchTask> proc)
+void InstanceWindow::instanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc)
 {
     m_proc = proc;
 }
 
-void InstanceWindow::on_RunningState_changed(bool running)
+void InstanceWindow::runningStateChanged(bool running)
 {
     updateLaunchButtons();
     m_container->refreshContainer();

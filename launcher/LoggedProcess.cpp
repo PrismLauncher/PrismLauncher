@@ -8,7 +8,11 @@ LoggedProcess::LoggedProcess(QObject *parent) : QProcess(parent)
     connect(this, &QProcess::readyReadStandardOutput, this, &LoggedProcess::on_stdOut);
     connect(this, &QProcess::readyReadStandardError, this, &LoggedProcess::on_stdErr);
     connect(this, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(on_exit(int,QProcess::ExitStatus)));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(this, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(on_error(QProcess::ProcessError)));
+#else
     connect(this, SIGNAL(error(QProcess::ProcessError)), this, SLOT(on_error(QProcess::ProcessError)));
+#endif
     connect(this, &QProcess::stateChanged, this, &LoggedProcess::on_stateChange);
 }
 

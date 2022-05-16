@@ -97,7 +97,7 @@ private slots:
     void on_actionMove_Down_triggered();
     void on_actionJoin_triggered();
 
-    void on_RunningState_changed(bool running);
+    void runningStateChanged(bool running);
 
     void nameEdited(const QString & name);
     void addressEdited(const QString & address);

@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,10 +37,10 @@
 #include "ProxyPage.h"
 #include "ui_ProxyPage.h"
 
+#include <QButtonGroup>
 #include <QTabBar>
 
 #include "settings/SettingsObject.h"
-#include "Application.h"
 #include "Application.h"
 
 ProxyPage::ProxyPage(QWidget *parent) : QWidget(parent), ui(new Ui::ProxyPage)
@@ -49,7 +50,8 @@ ProxyPage::ProxyPage(QWidget *parent) : QWidget(parent), ui(new Ui::ProxyPage)
     loadSettings();
     updateCheckboxStuff();
 
-    connect(ui->proxyGroup, SIGNAL(buttonClicked(int)), SLOT(proxyChanged(int)));
+    connect(ui->proxyGroup, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),
+            this, &ProxyPage::proxyGroupChanged);
 }
 
 ProxyPage::~ProxyPage()
@@ -65,13 +67,13 @@ bool ProxyPage::apply()
 
 void ProxyPage::updateCheckboxStuff()
 {
-    ui->proxyAddrBox->setEnabled(!ui->proxyNoneBtn->isChecked() &&
-                                 !ui->proxyDefaultBtn->isChecked());
-    ui->proxyAuthBox->setEnabled(!ui->proxyNoneBtn->isChecked() &&
-                                 !ui->proxyDefaultBtn->isChecked());
+    bool enableEditing = ui->proxyHTTPBtn->isChecked()
+        || ui->proxySOCKS5Btn->isChecked();
+    ui->proxyAddrBox->setEnabled(enableEditing);
+    ui->proxyAuthBox->setEnabled(enableEditing);
 }
 
-void ProxyPage::proxyChanged(int)
+void ProxyPage::proxyGroupChanged(QAbstractButton *button)
 {
     updateCheckboxStuff();
 }

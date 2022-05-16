@@ -20,7 +20,11 @@ void AuthRequest::get(const QNetworkRequest &req, int timeout/* = 60*1000*/) {
     reply_ = APPLICATION->network()->get(request_);
     status_ = Requesting;
     timedReplies_.add(new Katabasis::Reply(reply_, timeout));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(reply_, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)));
+#else
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)));
+#endif
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()));
     connect(reply_, &QNetworkReply::sslErrors, this, &AuthRequest::onSslErrors);
 }
@@ -31,7 +35,11 @@ void AuthRequest::post(const QNetworkRequest &req, const QByteArray &data, int t
     status_ = Requesting;
     reply_ = APPLICATION->network()->post(request_, data_);
     timedReplies_.add(new Katabasis::Reply(reply_, timeout));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(reply_, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)));
+#else
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)));
+#endif
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()));
     connect(reply_, &QNetworkReply::sslErrors, this, &AuthRequest::onSslErrors);
     connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));

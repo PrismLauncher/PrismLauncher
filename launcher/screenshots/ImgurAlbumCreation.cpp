@@ -73,7 +73,11 @@ void ImgurAlbumCreation::executeTask()
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &ImgurAlbumCreation::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &ImgurAlbumCreation::downloadFinished);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(rep, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+#else
     connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+#endif
 }
 void ImgurAlbumCreation::downloadError(QNetworkReply::NetworkError error)
 {
