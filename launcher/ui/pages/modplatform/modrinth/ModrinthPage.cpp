@@ -123,7 +123,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
         QString id = current.id;
 
-        netJob->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2").arg(BuildConfig.MODRINTH_STAGING_URL, id), response));
+        netJob->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
             if (id != current.id) {
@@ -168,7 +168,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         QString id = current.id;
 
         netJob->addNetAction(
-            Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_STAGING_URL, id), response));
+            Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
             if (id != current.id) {
