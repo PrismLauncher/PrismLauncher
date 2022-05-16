@@ -194,7 +194,7 @@ void ModpackListModel::getLogo(const QString& logo, const QString& logoUrl, Logo
 {
     if (m_logoMap.contains(logo)) {
         callback(APPLICATION->metacache()
-                     ->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)))
+                     ->resolveEntry("ModrinthPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))
                      ->getFullPath());
     } else {
         requestLogo(logo, logoUrl);
