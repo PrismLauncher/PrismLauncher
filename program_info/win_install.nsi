@@ -1,24 +1,16 @@
-!define MULTIUSER_EXECUTIONLEVEL Highest
-!define MULTIUSER_MUI
-!define MULTIUSER_INSTALLMODE_COMMANDLINE
-
-!define MULTIUSER_INSTALLMODE_INSTDIR PolyMC
-!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_KEY Software\PolyMC
-!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_VALUENAME InstallDir
-
 !include "FileFunc.nsh"
 !include "MUI2.nsh"
-!include "MultiUser.nsh"
 
 Name "PolyMC"
-RequestExecutionLevel highest
+InstallDir "$LOCALAPPDATA\PolyMC"
+InstallDirRegKey HKCU "Software\PolyMC" "InstallDir"
+RequestExecutionLevel user
 
 ;--------------------------------
 
 ; Pages
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MULTIUSER_PAGE_INSTALLMODE
 !define MUI_COMPONENTSPAGE_NODESC
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
@@ -28,6 +20,10 @@ RequestExecutionLevel highest
 
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
+
+;--------------------------------
+
+; Languages
 
 !insertmacro MUI_LANGUAGE "English"
 
@@ -52,22 +48,22 @@ Section "PolyMC"
   File /r "styles"
 
   ; Write the installation path into the registry
-  WriteRegStr SHCTX SOFTWARE\PolyMC "InstallDir" "$INSTDIR"
+  WriteRegStr HKCU Software\PolyMC "InstallDir" "$INSTDIR"
 
   ; Write the uninstall keys for Windows
   !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\PolyMC"
-  WriteRegStr SHCTX "${UNINST_KEY}" "DisplayName" "PolyMC"
-  WriteRegStr SHCTX "${UNINST_KEY}" "DisplayIcon" "$INSTDIR\polymc.exe"
-  WriteRegStr SHCTX "${UNINST_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe" /$MultiUser.InstallMode'
-  WriteRegStr SHCTX "${UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /$MultiUser.InstallMode /S'
-  WriteRegStr SHCTX "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
-  WriteRegStr SHCTX "${UNINST_KEY}" "Publisher" "PolyMC Contributors"
-  WriteRegStr SHCTX "${UNINST_KEY}" "ProductVersion" "${VERSION}"
+  WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "PolyMC"
+  WriteRegStr HKCU "${UNINST_KEY}" "DisplayIcon" "$INSTDIR\polymc.exe"
+  WriteRegStr HKCU "${UNINST_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegStr HKCU "${UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
+  WriteRegStr HKCU "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
+  WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "PolyMC Contributors"
+  WriteRegStr HKCU "${UNINST_KEY}" "ProductVersion" "${VERSION}"
   ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
   IntFmt $0 "0x%08X" $0
-  WriteRegDWORD SHCTX "${UNINST_KEY}" "EstimatedSize" "$0"
-  WriteRegDWORD SHCTX "${UNINST_KEY}" "NoModify" 1
-  WriteRegDWORD SHCTX "${UNINST_KEY}" "NoRepair" 1
+  WriteRegDWORD HKCU "${UNINST_KEY}" "EstimatedSize" "$0"
+  WriteRegDWORD HKCU "${UNINST_KEY}" "NoModify" 1
+  WriteRegDWORD HKCU "${UNINST_KEY}" "NoRepair" 1
   WriteUninstaller "$INSTDIR\uninstall.exe"
 
 SectionEnd
@@ -93,8 +89,8 @@ Section "Uninstall"
 
   nsExec::Exec /TIMEOUT=2000 'TaskKill /IM polymc.exe /F'
 
-  DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\PolyMC"
-  DeleteRegKey SHCTX SOFTWARE\PolyMC
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\PolyMC"
+  DeleteRegKey HKCU SOFTWARE\PolyMC
 
   Delete $INSTDIR\polymc.exe
   Delete $INSTDIR\uninstall.exe
@@ -157,13 +153,3 @@ Section "Uninstall"
   RMDir "$INSTDIR"
 
 SectionEnd
-
-; Multi-user
-
-Function .onInit
-  !insertmacro MULTIUSER_INIT
-FunctionEnd
-
-Function un.onInit
-  !insertmacro MULTIUSER_UNINIT
-FunctionEnd
