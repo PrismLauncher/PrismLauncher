@@ -85,9 +85,10 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
         return pack.description;
     } else if (role == Qt::DecorationRole) {
         if (m_logoMap.contains(pack.iconName)) {
-            return (m_logoMap.value(pack.iconName)
-                        .pixmap(48, 48)
-                        .scaled(48, 48, Qt::IgnoreAspectRatio, Qt::TransformationMode::SmoothTransformation));
+            auto icon = m_logoMap.value(pack.iconName);
+            auto icon_scaled = QIcon(icon.pixmap(48, 48).scaledToWidth(48));
+
+            return icon_scaled;
         }
         QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
         ((ModpackListModel*)this)->requestLogo(pack.iconName, pack.iconUrl.toString());
