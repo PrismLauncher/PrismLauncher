@@ -251,7 +251,7 @@ void ModrinthPage::suggestCurrent()
 
     for (auto& ver : current.versions) {
         if (ver.id == selectedVersion) {
-            dialog->setSuggestedPack(current.name + " " + ver.version, new InstanceImportTask(ver.download_url));
+            dialog->setSuggestedPack(current.name + " " + ver.version, new InstanceImportTask(ver.download_url, this));
             auto iconName = current.iconName;
             m_model->getLogo(iconName, current.iconUrl.toString(),
                              [this, iconName](QString logo) { dialog->setSuggestedIconFromFile(logo, iconName); });

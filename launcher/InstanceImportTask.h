@@ -55,7 +55,7 @@ class InstanceImportTask : public InstanceTask
 {
     Q_OBJECT
 public:
-    explicit InstanceImportTask(const QUrl sourceUrl);
+    explicit InstanceImportTask(const QUrl sourceUrl, QWidget* parent = nullptr);
 
     bool canAbort() const override { return true; }
     bool abort() override;
@@ -94,4 +94,7 @@ private: /* data */
         Flame,
         Modrinth,
     } m_modpackType = ModpackType::Unknown;
+
+    //FIXME: nuke
+    QWidget* m_parent;
 };

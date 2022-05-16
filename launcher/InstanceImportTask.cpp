@@ -35,35 +35,38 @@
  */
 
 #include "InstanceImportTask.h"
+#include <QtConcurrentRun>
+#include "Application.h"
 #include "BaseInstance.h"
 #include "FileSystem.h"
-#include "Application.h"
 #include "MMCZip.h"
 #include "NullInstance.h"
-#include "settings/INISettingsObject.h"
 #include "icons/IconUtils.h"
-#include <QtConcurrentRun>
+#include "settings/INISettingsObject.h"
 
 // FIXME: this does not belong here, it's Minecraft/Flame specific
+#include <quazip/quazipdir.h>
+#include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/PackManifest.h"
-#include "Json.h"
-#include <quazip/quazipdir.h>
 #include "modplatform/modrinth/ModrinthPackManifest.h"
 #include "modplatform/technic/TechnicPackProcessor.h"
 
-#include "icons/IconList.h"
 #include "Application.h"
+#include "icons/IconList.h"
 #include "net/ChecksumValidator.h"
+
+#include "ui/dialogs/CustomMessageBox.h"
 
 #include <algorithm>
 #include <iterator>
 
-InstanceImportTask::InstanceImportTask(const QUrl sourceUrl)
+InstanceImportTask::InstanceImportTask(const QUrl sourceUrl, QWidget* parent)
 {
     m_sourceUrl = sourceUrl;
+    m_parent = parent;
 }
 
 bool InstanceImportTask::abort()
@@ -476,124 +479,118 @@ void InstanceImportTask::processMultiMC()
     instance.setName(m_instName);
 
     // if the icon was specified by user, use that. otherwise pull icon from the pack
-    if (m_instIcon != "default")
-    {
+    if (m_instIcon != "default") {
         instance.setIconKey(m_instIcon);
-    }
-    else
-    {
+    } else {
         m_instIcon = instance.iconKey();
 
         auto importIconPath = IconUtils::findBestIconIn(instance.instanceRoot(), m_instIcon);
-        if (!importIconPath.isNull() && QFile::exists(importIconPath))
-        {
+        if (!importIconPath.isNull() && QFile::exists(importIconPath)) {
             // import icon
             auto iconList = APPLICATION->icons();
-            if (iconList->iconFileExists(m_instIcon))
-            {
+            if (iconList->iconFileExists(m_instIcon)) {
                 iconList->deleteIcon(m_instIcon);
             }
-            iconList->installIcons({importIconPath});
+            iconList->installIcons({ importIconPath });
         }
     }
     emitSucceeded();
 }
 
-void InstanceImportTask::processModrinth() {
+void InstanceImportTask::processModrinth()
+{
     std::vector<Modrinth::File> files;
     QString minecraftVersion, fabricVersion, quiltVersion, forgeVersion;
-    try
-    {
+    try {
         QString indexPath = FS::PathCombine(m_stagingPath, "modrinth.index.json");
         auto doc = Json::requireDocument(indexPath);
         auto obj = Json::requireObject(doc, "modrinth.index.json");
         int formatVersion = Json::requireInteger(obj, "formatVersion", "modrinth.index.json");
-        if (formatVersion == 1)
-        {
+        if (formatVersion == 1) {
             auto game = Json::requireString(obj, "game", "modrinth.index.json");
-            if (game != "minecraft")
-            {
+            if (game != "minecraft") {
                 throw JSONValidationError("Unknown game: " + game);
             }
 
             auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
-            std::transform(jsonFiles.begin(), jsonFiles.end(), std::back_inserter(files), [](const QJsonObject& obj)
-                {
-                    Modrinth::File file;
-                    file.path = Json::requireString(obj, "path");
-                    QString supported = Json::ensureString(Json::ensureObject(obj, "env"));
-                    QJsonObject hashes = Json::requireObject(obj, "hashes");
-                    QString hash;
-                    QCryptographicHash::Algorithm hashAlgorithm;
-                    hash = Json::ensureString(hashes, "sha1");
-                    hashAlgorithm = QCryptographicHash::Sha1;
-                    if (hash.isEmpty())
-                    {
-                        hash = Json::ensureString(hashes, "sha512");
-                        hashAlgorithm = QCryptographicHash::Sha512;
-                        if (hash.isEmpty())
-                        {
-                            hash = Json::ensureString(hashes, "sha256");
-                            hashAlgorithm = QCryptographicHash::Sha256;
-                            if (hash.isEmpty())
-                            {
-                                throw JSONValidationError("No hash found for: " + file.path);
-                            }
+            bool had_optional = false;
+            for (auto& obj : jsonFiles) {
+                Modrinth::File file;
+                file.path = Json::requireString(obj, "path");
+
+                auto env = Json::ensureObject(obj, "env");
+                QString support = Json::ensureString(env, "client", "unsupported");
+                if (support == "unsupported") {
+                    continue;
+                } else if (support == "optional") {
+                    // TODO: Make a review dialog for choosing which ones the user wants!
+                    if (!had_optional) {
+                        had_optional = true;
+                        auto info = CustomMessageBox::selectable(
+                            m_parent, tr("Optional mod detected!"),
+                            tr("One or more mods from this modpack are optional. They will be downloaded, but disabled by default!"), QMessageBox::Information);
+                        info->exec();
+                    }
+
+                    if (file.path.endsWith(".jar"))
+                        file.path += ".disabled";
+                }
+
+                QJsonObject hashes = Json::requireObject(obj, "hashes");
+                QString hash;
+                QCryptographicHash::Algorithm hashAlgorithm;
+                hash = Json::ensureString(hashes, "sha1");
+                hashAlgorithm = QCryptographicHash::Sha1;
+                if (hash.isEmpty()) {
+                    hash = Json::ensureString(hashes, "sha512");
+                    hashAlgorithm = QCryptographicHash::Sha512;
+                    if (hash.isEmpty()) {
+                        hash = Json::ensureString(hashes, "sha256");
+                        hashAlgorithm = QCryptographicHash::Sha256;
+                        if (hash.isEmpty()) {
+                            throw JSONValidationError("No hash found for: " + file.path);
                         }
                     }
-                    file.hash = QByteArray::fromHex(hash.toLatin1());
-                    file.hashAlgorithm = hashAlgorithm;
-                    // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode (as Modrinth seems to incorrectly handle spaces)
-                    file.download = Json::requireString(Json::ensureArray(obj, "downloads").first(), "Download URL for " + file.path);
-                    if (!file.download.isValid() || !Modrinth::validadeDownloadUrl(file.download))
-                    {
-                        throw JSONValidationError("Download URL for " + file.path + " is not a correctly formatted URL");
-                    }
-                    return file;
-                });
+                }
+                file.hash = QByteArray::fromHex(hash.toLatin1());
+                file.hashAlgorithm = hashAlgorithm;
+                // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode (as Modrinth seems to incorrectly
+                // handle spaces)
+                file.download = Json::requireString(Json::ensureArray(obj, "downloads").first(), "Download URL for " + file.path);
+                if (!file.download.isValid() || !Modrinth::validadeDownloadUrl(file.download)) {
+                    throw JSONValidationError("Download URL for " + file.path + " is not a correctly formatted URL");
+                }
+                files.push_back(file);
+            }
 
             auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
-            for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it)
-            {
+            for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
                 QString name = it.key();
-                if (name == "minecraft")
-                {
+                if (name == "minecraft") {
                     if (!minecraftVersion.isEmpty())
                         throw JSONValidationError("Duplicate Minecraft version");
                     minecraftVersion = Json::requireString(*it, "Minecraft version");
-                }
-                else if (name == "fabric-loader")
-                {
+                } else if (name == "fabric-loader") {
                     if (!fabricVersion.isEmpty())
                         throw JSONValidationError("Duplicate Fabric Loader version");
                     fabricVersion = Json::requireString(*it, "Fabric Loader version");
-                }
-                else if (name == "quilt-loader")
-                {
+                } else if (name == "quilt-loader") {
                     if (!quiltVersion.isEmpty())
                         throw JSONValidationError("Duplicate Quilt Loader version");
                     quiltVersion = Json::requireString(*it, "Quilt Loader version");
-                }
-                else if (name == "forge")
-                {
+                } else if (name == "forge") {
                     if (!forgeVersion.isEmpty())
                         throw JSONValidationError("Duplicate Forge version");
                     forgeVersion = Json::requireString(*it, "Forge version");
-                }
-                else
-                {
+                } else {
                     throw JSONValidationError("Unknown dependency type: " + name);
                 }
             }
-        }
-        else
-        {
+        } else {
             throw JSONValidationError(QStringLiteral("Unknown format version: %s").arg(formatVersion));
         }
         QFile::remove(indexPath);
-    }
-    catch (const JSONValidationError &e)
-    {
+    } catch (const JSONValidationError& e) {
         emitFailed(tr("Could not understand pack index:\n") + e.cause());
         return;
     }
