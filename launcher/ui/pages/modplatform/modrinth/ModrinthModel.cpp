@@ -109,11 +109,12 @@ void ModpackListModel::performPaginatedSearch()
     auto searchAllUrl = QString(BuildConfig.MODRINTH_PROD_URL +
                             "/search?"
                             "offset=%1&"
-                            "limit=20&"
-                            "query=%2&"
-                            "index=%3&"
+                            "limit=%2&"
+                            "query=%3&"
+                            "index=%4&"
                             "facets=[[\"project_type:modpack\"]]")
                             .arg(nextSearchOffset)
+                            .arg(m_modpacks_per_page)
                             .arg(currentSearchTerm)
                             .arg(currentSort);
 
@@ -269,10 +270,10 @@ void ModpackListModel::searchRequestFinished(QJsonDocument& doc_all)
         }
     }
 
-    if (packs_all.size() < 25) {
+    if (packs_all.size() < m_modpacks_per_page) {
         searchState = Finished;
     } else {
-        nextSearchOffset += 25;
+        nextSearchOffset += m_modpacks_per_page;
         searchState = CanPossiblyFetchMore;
     }
 
@@ -306,25 +307,6 @@ void ModpackListModel::searchRequestFailed(QString reason)
     } else {
         searchState = Finished;
     }
-}
-
-void ModpackListModel::versionRequestSucceeded(QJsonDocument doc, QString id)
-{
-    auto& current = m_parent->getCurrent();
-    if (id != current.id) {
-        return;
-    }
-
-    auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
-
-    try {
-        // loadIndexedPackVersions(current, arr);
-    } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << debugName() << " mod version: " << e.cause();
-    }
-
-    // m_parent->updateModVersions();
 }
 
 }  // namespace Modrinth

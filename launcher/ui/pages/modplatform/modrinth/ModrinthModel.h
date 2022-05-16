@@ -79,8 +79,6 @@ class ModpackListModel : public QAbstractListModel {
     void searchRequestFinished(QJsonDocument& doc_all);
     void searchRequestFailed(QString reason);
 
-    void versionRequestSucceeded(QJsonDocument doc, QString addonId);
-
    protected slots:
 
     void logoFailed(QString logo);
@@ -112,5 +110,7 @@ class ModpackListModel : public QAbstractListModel {
 
     QByteArray m_all_response;
     QByteArray m_specific_response;
+
+    int m_modpacks_per_page = 20;
 };
 }  // namespace ModPlatform
