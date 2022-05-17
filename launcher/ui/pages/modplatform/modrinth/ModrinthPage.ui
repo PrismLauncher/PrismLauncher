@@ -19,7 +19,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Note: Modrinth modpacks is still in alpha phase. Some things may be rough on the edges, or not working at all! Use it with caution.</string>
+      <string>Note: Modrinth modpacks are still in alpha phase. Some things may be rough on the edges, or not working at all! Use it with caution.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
