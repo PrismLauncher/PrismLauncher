@@ -1051,6 +1051,14 @@ if(INSTALL_BUNDLE STREQUAL "full")
                 COMPONENT Runtime
             )
         endif()
+        # TLS plugins (Qt 6 only)
+        if(EXISTS "${QT_PLUGINS_DIR}/tls")
+            install(
+                DIRECTORY "${QT_PLUGINS_DIR}/tls"
+                DESTINATION ${PLUGIN_DEST_DIR}
+                COMPONENT Runtime
+            )
+        endif()
     else()
         # Image formats
         install(
@@ -1086,6 +1094,17 @@ if(INSTALL_BUNDLE STREQUAL "full")
         if(EXISTS "${QT_PLUGINS_DIR}/styles")
             install(
                 DIRECTORY "${QT_PLUGINS_DIR}/styles"
+                DESTINATION ${PLUGIN_DEST_DIR}
+                COMPONENT Runtime
+                REGEX "d\\." EXCLUDE
+                REGEX "_debug\\." EXCLUDE
+                REGEX "\\.dSYM" EXCLUDE
+            )
+        endif()
+        # TLS plugins (Qt 6 only)
+        if(EXISTS "${QT_PLUGINS_DIR}/tls")
+            install(
+                DIRECTORY "${QT_PLUGINS_DIR}/tls"
                 DESTINATION ${PLUGIN_DEST_DIR}
                 COMPONENT Runtime
                 REGEX "d\\." EXCLUDE
