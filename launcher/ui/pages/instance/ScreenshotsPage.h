@@ -100,6 +100,7 @@ private slots:
     void on_actionRename_triggered();
     void on_actionView_Folder_triggered();
     void onItemActivated(QModelIndex);
+    void onCurrentSelectionChanged(const QItemSelection &selected);
     void ShowContextMenu(const QPoint &pos);
 
 private:
