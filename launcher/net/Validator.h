@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
- *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
