@@ -86,7 +86,7 @@ class Task : public QObject {
 
    signals:
     void started();
-    virtual void progress(qint64 current, qint64 total);
+    void progress(qint64 current, qint64 total);
     void finished();
     void succeeded();
     void aborted();
