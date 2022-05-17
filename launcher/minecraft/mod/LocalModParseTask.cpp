@@ -263,7 +263,7 @@ std::shared_ptr<ModDetails> ReadFabricModInfo(QByteArray contents)
     return details;
 }
 
-// https://github.com/QuiltMC/rfcs/blob/master/specification/0002-quilt.mod.json.md#the-schema_version-field
+// https://github.com/QuiltMC/rfcs/blob/master/specification/0002-quilt.mod.json.md
 std::shared_ptr<ModDetails> ReadQuiltModInfo(QByteArray contents)
 {
     QJsonParseError jsonError;
@@ -273,6 +273,7 @@ std::shared_ptr<ModDetails> ReadQuiltModInfo(QByteArray contents)
 
     std::shared_ptr<ModDetails> details = std::make_shared<ModDetails>();
 
+    // https://github.com/QuiltMC/rfcs/blob/be6ba280d785395fefa90a43db48e5bfc1d15eb4/specification/0002-quilt.mod.json.md
     if (schemaVersion == 1)
     {
         auto modInfo = Json::requireObject(object.value("quilt_loader"), "Quilt mod info");
