@@ -1,5 +1,24 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #pragma once
 
+#include "BuildConfig.h"
 #include "modplatform/ModAPI.h"
 #include "modplatform/helpers/NetworkModAPI.h"
 
@@ -47,13 +66,13 @@ class ModrinthAPI : public NetworkModAPI {
             return "";
         }
 
-        return QString(
-                   "https://api.modrinth.com/v2/search?"
-                   "offset=%1&"
-                   "limit=25&"
-                   "query=%2&"
-                   "index=%3&"
-                   "facets=[[%4],%5[\"project_type:mod\"]]")
+        return QString(BuildConfig.MODRINTH_PROD_URL +
+                       "/search?"
+                       "offset=%1&"
+                       "limit=25&"
+                       "query=%2&"
+                       "index=%3&"
+                       "facets=[[%4],%5[\"project_type:mod\"]]")
             .arg(args.offset)
             .arg(args.search)
             .arg(args.sorting)
@@ -63,9 +82,10 @@ class ModrinthAPI : public NetworkModAPI {
 
     inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
     {
-        return QString("https://api.modrinth.com/v2/project/%1/version?"
-                "game_versions=[%2]"
-                "loaders=[\"%3\"]")
+        return QString(BuildConfig.MODRINTH_PROD_URL +
+                       "/project/%1/version?"
+                       "game_versions=[%2]"
+                       "loaders=[\"%3\"]")
             .arg(args.addonId)
             .arg(getGameVersionsString(args.mcVersions))
             .arg(getModLoaderStrings(args.loader).join("\",\""));

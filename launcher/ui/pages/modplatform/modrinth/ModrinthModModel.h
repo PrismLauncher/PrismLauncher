@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,17 +18,26 @@
 
 #pragma once
 
-#include "modplatform/ModIndex.h"
-
-#include "BaseInstance.h"
-#include <QNetworkAccessManager>
+#include "ModrinthModPage.h"
 
 namespace Modrinth {
 
-void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj);
-void loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
-                             QJsonArray& arr,
-                             const shared_qobject_ptr<QNetworkAccessManager>& network,
-                             BaseInstance* inst);
+class ListModel : public ModPlatform::ListModel {
+    Q_OBJECT
+
+   public:
+    ListModel(ModrinthModPage* parent) : ModPlatform::ListModel(parent){};
+    ~ListModel() override = default;
+
+   private:
+    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
+    void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
+    
+    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
+
+    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+    static const char* sorts[5];
+    inline auto getSorts() const -> const char** override { return sorts; };
+};
 
 }  // namespace Modrinth

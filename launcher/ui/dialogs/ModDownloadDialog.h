@@ -16,7 +16,7 @@ class ModDownloadDialog;
 
 class PageContainer;
 class QDialogButtonBox;
-class ModrinthPage;
+class ModrinthModPage;
 
 class ModDownloadDialog : public QDialog, public BasePageProvider
 {
@@ -50,7 +50,7 @@ private:
     QVBoxLayout *m_verticalLayout = nullptr;
 
 
-    ModrinthPage *modrinthPage = nullptr;
+    ModrinthModPage *modrinthPage = nullptr;
     FlameModPage *flameModPage = nullptr;
     QHash<QString, ModDownloadTask*> modTask;
     BaseInstance *m_instance;

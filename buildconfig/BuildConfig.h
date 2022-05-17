@@ -151,6 +151,9 @@ class Config {
      */
     QString TECHNIC_API_BUILD = "multimc";
 
+    QString MODRINTH_STAGING_URL = "https://staging-api.modrinth.com/v2";
+    QString MODRINTH_PROD_URL = "https://api.modrinth.com/v2";
+
     /**
      * \brief Converts the Version to a string.
      * \return The version number in string format (major.minor.revision.build).
