@@ -297,20 +297,40 @@ nonstd::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString &
         {
             continue;
         }
+
         name.remove(0, subdir.size());
-        QString absFilePath = directory.absoluteFilePath(name);
+        auto original_name = name;
+
+        // Fix weird "folders with a single file get squashed" thing
+        QString path;
+        if(name.contains('/') && !name.endsWith('/')){
+            path = name.section('/', 0, -2) + "/";
+            FS::ensureFolderPathExists(path);
+
+            name = name.split('/').last();
+        }
+
+        QString absFilePath;
         if(name.isEmpty())
         {
-            absFilePath += "/";
+            absFilePath = directory.absoluteFilePath(name) + "/";
         }
+        else
+        {
+            absFilePath = directory.absoluteFilePath(path + name);
+        }
+
         if (!JlCompress::extractFile(zip, "", absFilePath))
         {
-            qWarning() << "Failed to extract file" << name << "to" << absFilePath;
+            qWarning() << "Failed to extract file" << original_name << "to" << absFilePath;
             JlCompress::removeFile(extracted);
             return nonstd::nullopt;
         }
+
         extracted.append(absFilePath);
-        qDebug() << "Extracted file" << name;
+        QFile::setPermissions(absFilePath, QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser);
+
+        qDebug() << "Extracted file" << name << "to" << absFilePath;
     } while (zip->goToNextFile());
     return extracted;
 }

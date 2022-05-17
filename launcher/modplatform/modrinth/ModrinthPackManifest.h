@@ -19,7 +19,7 @@
  * permission notice:
  *
  *      Copyright 2013-2021 MultiMC Contributors
- *      Copyright 2021-2022 kb1000
+ *      Copyright 2022 kb1000
  *
  *      Licensed under the Apache License, Version 2.0 (the "License");
  *      you may not use this file except in compliance with the License.
@@ -36,56 +36,72 @@
 
 #pragma once
 
-#include "Application.h"
-#include "ui/dialogs/NewInstanceDialog.h"
-#include "ui/pages/BasePage.h"
+#include <QMetaType>
 
-#include "modplatform/modrinth/ModrinthPackManifest.h"
+#include <QByteArray>
+#include <QCryptographicHash>
+#include <QString>
+#include <QUrl>
+#include <QVector>
 
-#include <QWidget>
-
-namespace Ui {
-class ModrinthPage;
-}
+class MinecraftInstance;
 
 namespace Modrinth {
-class ModpackListModel;
+
+struct File
+{
+    QString path;
+
+    QCryptographicHash::Algorithm hashAlgorithm;
+    QByteArray hash;
+    // TODO: should this support multiple download URLs, like the JSON does?
+    QUrl download;
+};
+
+struct ModpackExtra {
+    QString body;
+
+    QString projectUrl;
+    QString sourceUrl;
+    QString wikiUrl;
+};
+
+struct ModpackVersion {
+    QString name;
+    QString version;
+
+    QString id;
+    QString project_id;
+
+    QString date;
+
+    QString download_url;
+};
+
+struct Modpack {
+    QString id;
+
+    QString name;
+    QString description;
+    std::tuple<QString, QUrl> author;
+    QString iconName;
+    QUrl    iconUrl;
+
+    bool    versionsLoaded = false;
+    bool    extraInfoLoaded = false;
+
+    ModpackExtra extra;
+    QVector<ModpackVersion> versions;
+};
+
+void loadIndexedPack(Modpack&, QJsonObject&);
+void loadIndexedInfo(Modpack&, QJsonObject&);
+void loadIndexedVersions(Modpack&, QJsonDocument&);
+auto loadIndexedVersion(QJsonObject&) -> ModpackVersion;
+
+auto validateDownloadUrl(QUrl) -> bool;
+
 }
 
-class ModrinthPage : public QWidget, public BasePage {
-    Q_OBJECT
-
-   public:
-    explicit ModrinthPage(NewInstanceDialog* dialog, QWidget* parent = nullptr);
-    ~ModrinthPage() override;
-
-    QString displayName() const override { return tr("Modrinth"); }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("modrinth"); }
-    QString id() const override { return "modrinth"; }
-    QString helpPage() const override { return "Modrinth-platform"; }
-
-    inline auto debugName() const -> QString { return "Modrinth"; }
-    inline auto metaEntryBase() const -> QString { return "ModrinthModpacks"; };
-
-    auto getCurrent() -> Modrinth::Modpack& { return current; }
-    void suggestCurrent();
-
-    void updateUI();
-
-    void retranslate() override;
-    void openedImpl() override;
-    bool eventFilter(QObject* watched, QEvent* event) override;
-
-   private slots:
-    void onSelectionChanged(QModelIndex first, QModelIndex second);
-    void onVersionSelectionChanged(QString data);
-    void triggerSearch();
-
-   private:
-    Ui::ModrinthPage* ui;
-    NewInstanceDialog* dialog;
-    Modrinth::ModpackListModel* m_model;
-
-    Modrinth::Modpack current;
-    QString selectedVersion;
-};
+Q_DECLARE_METATYPE(Modrinth::Modpack)
+Q_DECLARE_METATYPE(Modrinth::ModpackVersion)

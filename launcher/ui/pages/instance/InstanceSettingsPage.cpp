@@ -101,6 +101,20 @@ void InstanceSettingsPage::applySettings()
 {
     SettingsObject::Lock lock(m_settings);
 
+    // Miscellaneous
+    bool miscellaneous = ui->miscellaneousSettingsBox->isChecked();
+    m_settings->set("OverrideMiscellaneous", miscellaneous);
+    if (miscellaneous)
+    {
+        m_settings->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
+        m_settings->set("QuitAfterGameStop", ui->quitAfterGameStopCheck->isChecked());
+    }
+    else
+    {
+        m_settings->reset("CloseAfterLaunch");
+        m_settings->reset("QuitAfterGameStop");
+    }
+
     // Console
     bool console = ui->consoleSettingsBox->isChecked();
     m_settings->set("OverrideConsole", console);
@@ -247,6 +261,11 @@ void InstanceSettingsPage::applySettings()
 
 void InstanceSettingsPage::loadSettings()
 {
+    // Miscellaneous
+    ui->miscellaneousSettingsBox->setChecked(m_settings->get("OverrideMiscellaneous").toBool());
+    ui->closeAfterLaunchCheck->setChecked(m_settings->get("CloseAfterLaunch").toBool());
+    ui->quitAfterGameStopCheck->setChecked(m_settings->get("QuitAfterGameStop").toBool());
+
     // Console
     ui->consoleSettingsBox->setChecked(m_settings->get("OverrideConsole").toBool());
     ui->showConsoleCheck->setChecked(m_settings->get("ShowConsole").toBool());

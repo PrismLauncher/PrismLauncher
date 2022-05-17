@@ -162,6 +162,11 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
     m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
 
+    // Miscellaneous
+    auto miscellaneousOverride = m_settings->registerSetting("OverrideMiscellaneous", false);
+    m_settings->registerOverride(globalSettings->getSetting("CloseAfterLaunch"), miscellaneousOverride);
+    m_settings->registerOverride(globalSettings->getSetting("QuitAfterGameStop"), miscellaneousOverride);
+
     m_components.reset(new PackProfile(this));
 }
 
@@ -984,7 +989,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     {
         process->setCensorFilter(createCensorFilterFromSession(session));
     }
-    if(APPLICATION->settings()->get("QuitAfterGameStop").toBool())
+    if(m_settings->get("QuitAfterGameStop").toBool())
     {
         auto step = new QuitAfterGameStop(pptr);
         process->appendStep(step);

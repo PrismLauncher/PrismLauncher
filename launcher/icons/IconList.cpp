@@ -36,7 +36,7 @@ IconList::IconList(const QStringList &builtinPaths, QString path, QObject *paren
         auto file_info_list = instance_icons.entryInfoList(QDir::Files, QDir::Name);
         for (auto file_info : file_info_list)
         {
-            builtinNames.insert(file_info.baseName());
+            builtinNames.insert(file_info.completeBaseName());
         }
     }
     for(auto & builtinName : builtinNames)
@@ -51,6 +51,9 @@ IconList::IconList(const QStringList &builtinPaths, QString path, QObject *paren
     connect(m_watcher.get(), SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
 
     directoryChanged(path);
+
+    // Forces the UI to update, so that lengthy icon names are shown properly from the start
+    emit iconUpdated({});
 }
 
 void IconList::directoryChanged(const QString &path)
@@ -94,7 +97,13 @@ void IconList::directoryChanged(const QString &path)
     {
         qDebug() << "Removing " << remove;
         QFileInfo rmfile(remove);
-        QString key = rmfile.baseName();
+        QString key = rmfile.completeBaseName();
+
+        QString suffix = rmfile.suffix();
+        // The icon doesnt have a suffix, but it can have other .s in the name, so we account for those as well
+        if (suffix != "jpeg" && suffix != "png" && suffix != "jpg" && suffix != "ico" && suffix != "svg" && suffix != "gif")
+            key = rmfile.fileName();
+
         int idx = getIconIndex(key);
         if (idx == -1)
             continue;
@@ -117,8 +126,15 @@ void IconList::directoryChanged(const QString &path)
     for (auto add : to_add)
     {
         qDebug() << "Adding " << add;
+
         QFileInfo addfile(add);
-        QString key = addfile.baseName();
+        QString key = addfile.completeBaseName();
+
+        QString suffix = addfile.suffix();
+        // The icon doesnt have a suffix, but it can have other .s in the name, so we account for those as well
+        if (suffix != "jpeg" && suffix != "png" && suffix != "jpg" && suffix != "ico" && suffix != "svg" && suffix != "gif")
+            key = addfile.fileName();
+
         if (addIcon(key, QString(), addfile.filePath(), IconType::FileBased))
         {
             m_watcher->addPath(add);
@@ -133,7 +149,7 @@ void IconList::fileChanged(const QString &path)
     QFileInfo checkfile(path);
     if (!checkfile.exists())
         return;
-    QString key = checkfile.baseName();
+    QString key = checkfile.completeBaseName();
     int idx = getIconIndex(key);
     if (idx == -1)
         return;

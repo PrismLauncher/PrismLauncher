@@ -251,7 +251,7 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget *parent)
     m_model.reset(new QFileSystemModel());
     m_filterModel.reset(new FilterModel());
     m_filterModel->setSourceModel(m_model.get());
-    m_model->setFilter(QDir::Files | QDir::Writable | QDir::Readable);
+    m_model->setFilter(QDir::Files);
     m_model->setReadOnly(false);
     m_model->setNameFilters({"*.png"});
     m_model->setNameFilterDisables(false);
@@ -341,6 +341,29 @@ void ScreenshotsPage::onItemActivated(QModelIndex index)
     auto info = m_model->fileInfo(index);
     QString fileName = info.absoluteFilePath();
     DesktopServices::openFile(info.absoluteFilePath());
+}
+
+void ScreenshotsPage::onCurrentSelectionChanged(const QItemSelection &selected)
+{
+    bool allReadable = !selected.isEmpty();
+    bool allWritable = !selected.isEmpty();
+
+    for (auto index : selected.indexes())
+    {
+        if (!index.isValid())
+            break;
+        auto info = m_model->fileInfo(index);
+        if (!info.isReadable())
+            allReadable = false;
+        if (!info.isWritable())
+            allWritable = false;
+    }
+
+    ui->actionUpload->setEnabled(allReadable);
+    ui->actionCopy_Image->setEnabled(allReadable);
+    ui->actionCopy_File_s->setEnabled(allReadable);
+    ui->actionDelete->setEnabled(allWritable);
+    ui->actionRename->setEnabled(allWritable);
 }
 
 void ScreenshotsPage::on_actionView_Folder_triggered()
@@ -503,6 +526,8 @@ void ScreenshotsPage::openedImpl()
         if(idx.isValid())
         {
             ui->listView->setModel(m_filterModel.get());
+            connect(ui->listView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ScreenshotsPage::onCurrentSelectionChanged);
+            onCurrentSelectionChanged(ui->listView->selectionModel()->selection()); // set initial button enable states
             ui->listView->setRootIndex(m_filterModel->mapFromSource(idx));
         }
         else

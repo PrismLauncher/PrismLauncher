@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -109,7 +110,11 @@ void ImportPage::updateState()
         {
             // FIXME: actually do some validation of what's inside here... this is fake AF
             QFileInfo fi(input);
-            if(fi.exists() && fi.suffix() == "zip")
+            // mrpack is a modrinth pack
+
+            // Allow non-latin people to use ZIP files!
+            auto zip = QMimeDatabase().mimeTypeForUrl(url).suffixes().contains("zip");
+            if(fi.exists() && (zip || fi.suffix() == "mrpack"))
             {
                 QFileInfo fi(url.fileName());
                 dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url));
@@ -143,7 +148,9 @@ void ImportPage::setUrl(const QString& url)
 
 void ImportPage::on_modpackBtn_clicked()
 {
-    const QUrl url = QFileDialog::getOpenFileUrl(this, tr("Choose modpack"), modpackUrl(), tr("Zip (*.zip)"));
+    auto filter = QMimeDatabase().mimeTypeForName("application/zip").filterString();
+    filter += ";;" + tr("Modrinth pack (*.mrpack)");
+    const QUrl url = QFileDialog::getOpenFileUrl(this, tr("Choose modpack"), modpackUrl(), filter);
     if (url.isValid())
     {
         if (url.isLocalFile())
