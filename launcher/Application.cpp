@@ -63,6 +63,7 @@
 #include "ui/setupwizard/SetupWizard.h"
 #include "ui/setupwizard/LanguageWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
+#include "ui/setupwizard/PasteWizardPage.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 
@@ -676,21 +677,17 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // HACK: This code feels so stupid is there a less stupid way of doing this?
         {
             m_settings->registerSetting("PastebinURL", "");
+            m_settings->registerSetting("PastebinType", PasteUpload::PasteType::Mclogs);
+            m_settings->registerSetting("PastebinCustomAPIBase", "");
+
             QString pastebinURL = m_settings->get("PastebinURL").toString();
 
-            // If PastebinURL hasn't been set before then use the new default: mclo.gs
-            if (pastebinURL == "") {
-                m_settings->registerSetting("PastebinType", PasteUpload::PasteType::Mclogs);
-                m_settings->registerSetting("PastebinCustomAPIBase", "");
-            }
-            // Otherwise: use 0x0.st
-            else {
-                // The default custom endpoint would usually be "" (meaning there is no custom endpoint specified)
-                // But if the user had customised the paste URL then that should be carried over into the custom endpoint.
-                QString defaultCustomEndpoint = (pastebinURL == "https://0x0.st") ? "" : pastebinURL;
-                m_settings->registerSetting("PastebinType", PasteUpload::PasteType::NullPointer);
-                m_settings->registerSetting("PastebinCustomAPIBase", defaultCustomEndpoint);
-
+            bool userHadNoPastebin = pastebinURL == "";
+            bool userHadDefaultPastebin = pastebinURL == "https://0x0.st";
+            if (!(userHadNoPastebin || userHadDefaultPastebin))
+            {
+                m_settings->set("PastebinType", PasteUpload::PasteType::NullPointer);
+                m_settings->set("PastebinCustomAPIBase", pastebinURL);
                 m_settings->reset("PastebinURL");
             }
 
@@ -929,7 +926,8 @@ bool Application::createSetupWizard()
             return true;
         return false;
     }();
-    bool wizardRequired = javaRequired || languageRequired;
+    bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
+    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired;
 
     if(wizardRequired)
     {
@@ -942,6 +940,11 @@ bool Application::createSetupWizard()
         if (javaRequired)
         {
             m_setupWizard->addPage(new JavaWizardPage(m_setupWizard));
+        }
+
+        if (pasteInterventionRequired)
+        {
+            m_setupWizard->addPage(new PasteWizardPage(m_setupWizard));
         }
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();
