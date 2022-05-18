@@ -24,12 +24,18 @@
 #include <QUrl>
 #include <QVariant>
 
+struct toml_table_t;
 class QDir;
 
 // Mod from launcher/minecraft/mod/Mod.h
 class Mod;
 
 namespace Packwiz {
+
+auto getRealIndexName(QDir& index_dir, QString normalized_index_name, bool should_match = false) -> QString;
+
+auto stringEntry(toml_table_t* parent, const char* entry_name) -> QString;
+auto intEntry(toml_table_t* parent, const char* entry_name) -> int;
 
 class V1 {
    public:

@@ -23,11 +23,36 @@
 #include <QObject>
 
 #include "toml.h"
+#include "FileSystem.h"
 
 #include "minecraft/mod/Mod.h"
 #include "modplatform/ModIndex.h"
 
 namespace Packwiz {
+
+auto getRealIndexName(QDir& index_dir, QString normalized_fname, bool should_find_match) -> QString
+{
+    QFile index_file(index_dir.absoluteFilePath(normalized_fname));
+
+    QString real_fname = normalized_fname;
+    if (!index_file.exists()) {
+        // Tries to get similar entries
+        for (auto& file_name : index_dir.entryList(QDir::Filter::Files)) {
+            if (!QString::compare(normalized_fname, file_name, Qt::CaseInsensitive)) {
+                real_fname = file_name;
+                break;
+            }
+        }
+
+        if(should_find_match && !QString::compare(normalized_fname, real_fname, Qt::CaseSensitive)){
+            qCritical() << "Could not find a match for a valid metadata file!";
+            qCritical() << "File: " << normalized_fname;
+            return {};
+        }
+    }
+
+    return real_fname;
+}
 
 // Helpers
 static inline auto indexFileName(QString const& mod_name) -> QString
@@ -38,6 +63,33 @@ static inline auto indexFileName(QString const& mod_name) -> QString
 }
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
+
+// Helper functions for extracting data from the TOML file
+auto stringEntry(toml_table_t* parent, const char* entry_name) -> QString
+{
+    toml_datum_t var = toml_string_in(parent, entry_name);
+    if (!var.ok) {
+        qCritical() << QString("Failed to read str property '%1' in mod metadata.").arg(entry_name);
+        return {};
+    }
+
+    QString tmp = var.u.s;
+    free(var.u.s);
+
+    return tmp;
+}
+
+auto intEntry(toml_table_t* parent, const char* entry_name) -> int
+{
+    toml_datum_t var = toml_int_in(parent, entry_name);
+    if (!var.ok) {
+        qCritical() << QString("Failed to read int property '%1' in mod metadata.").arg(entry_name);
+        return {};
+    }
+
+    return var.u.i;
+}
+
 
 auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod
 {
@@ -86,7 +138,11 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
     }
 
     // Ensure the corresponding mod's info exists, and create it if not
-    QFile index_file(index_dir.absoluteFilePath(indexFileName(mod.name)));
+
+    auto normalized_fname = indexFileName(mod.name);
+    auto real_fname = getRealIndexName(index_dir, normalized_fname);
+
+    QFile index_file(index_dir.absoluteFilePath(real_fname));
 
     // There's already data on there!
     // TODO: We should do more stuff here, as the user is likely trying to
@@ -127,11 +183,18 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
             break;
         }
     }
+
+    index_file.close();
 }
 
 void V1::deleteModIndex(QDir& index_dir, QString& mod_name)
 {
-    QFile index_file(index_dir.absoluteFilePath(indexFileName(mod_name)));
+    auto normalized_fname = indexFileName(mod_name);
+    auto real_fname = getRealIndexName(index_dir, normalized_fname);
+    if (real_fname.isEmpty())
+        return;
+
+    QFile index_file(index_dir.absoluteFilePath(real_fname));
 
     if(!index_file.exists()){
         qWarning() << QString("Tried to delete non-existent mod metadata for %1!").arg(mod_name);
@@ -143,42 +206,17 @@ void V1::deleteModIndex(QDir& index_dir, QString& mod_name)
     }
 }
 
-// Helper functions for extracting data from the TOML file
-static auto stringEntry(toml_table_t* parent, const char* entry_name) -> QString
-{
-    toml_datum_t var = toml_string_in(parent, entry_name);
-    if (!var.ok) {
-        qCritical() << QString("Failed to read str property '%1' in mod metadata.").arg(entry_name);
-        return {};
-    }
-
-    QString tmp = var.u.s;
-    free(var.u.s);
-
-    return tmp;
-}
-
-static auto intEntry(toml_table_t* parent, const char* entry_name) -> int
-{
-    toml_datum_t var = toml_int_in(parent, entry_name);
-    if (!var.ok) {
-        qCritical() << QString("Failed to read int property '%1' in mod metadata.").arg(entry_name);
-        return {};
-    }
-
-    return var.u.i;
-}
-
 auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
 {
     Mod mod;
 
-    QFile index_file(index_dir.absoluteFilePath(indexFileName(index_file_name)));
-
-    if (!index_file.exists()) {
-        qWarning() << QString("Tried to get a non-existent mod metadata for %1").arg(index_file_name);
+    auto normalized_fname = indexFileName(index_file_name);
+    auto real_fname = getRealIndexName(index_dir, normalized_fname, true);
+    if (real_fname.isEmpty())
         return {};
-    }
+
+    QFile index_file(index_dir.absoluteFilePath(real_fname));
+
     if (!index_file.open(QIODevice::ReadOnly)) {
         qWarning() << QString("Failed to open mod metadata for %1").arg(index_file_name);
         return {};
@@ -198,14 +236,14 @@ auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
         qWarning() << "Reason: " << QString(errbuf);
         return {};
     }
-    
-    { // Basic info
+
+    {  // Basic info
         mod.name = stringEntry(table, "name");
         mod.filename = stringEntry(table, "filename");
         mod.side = stringEntry(table, "side");
     }
 
-    { // [download] info
+    {  // [download] info
         toml_table_t* download_table = toml_table_in(table, "download");
         if (!download_table) {
             qCritical() << QString("No [download] section found on mod metadata!");
