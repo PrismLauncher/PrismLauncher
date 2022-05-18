@@ -117,7 +117,7 @@ public:
             flags |= Qt::ItemIsUserCheckable;
             if (sourceIndex.model()->hasChildren(sourceIndex))
             {
-                flags |= Qt::ItemIsTristate;
+                flags |= Qt::ItemIsAutoTristate;
             }
         }
 
@@ -210,7 +210,7 @@ public:
                 QStack<QModelIndex> todo;
                 while (1)
                 {
-                    auto node = doing.child(row, 0);
+                    auto node = fsm->index(row, 0, doing);
                     if (!node.isValid())
                     {
                         if (!todo.size())
@@ -259,7 +259,7 @@ public:
             QStack<QModelIndex> todo;
             while (1)
             {
-                auto node = doing.child(row, 0);
+                auto node = this->index(row, 0, doing);
                 if (!node.isValid())
                 {
                     if (!todo.size())
@@ -460,7 +460,7 @@ void ExportInstanceDialog::rowsInserted(QModelIndex parent, int top, int bottom)
     //WARNING: possible off-by-one?
     for(int i = top; i < bottom; i++)
     {
-        auto node = parent.child(i, 0);
+        auto node = proxyModel->index(i, 0, parent);
         if(proxyModel->shouldExpand(node))
         {
             auto expNode = node.parent();

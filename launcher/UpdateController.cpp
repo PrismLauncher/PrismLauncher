@@ -138,20 +138,6 @@ void UpdateController::installUpdates()
                 }
 #endif
                 QFileInfo destination (FS::PathCombine(m_root, op.destination));
-#ifdef Q_OS_WIN32
-                if(QSysInfo::windowsVersion() < QSysInfo::WV_VISTA)
-                {
-                    if(destination.fileName() == windowsExeName)
-                    {
-                        QDir rootDir(m_root);
-                        exeOrigin = rootDir.relativeFilePath(op.source);
-                        exePath = rootDir.relativeFilePath(op.destination);
-                        exeBackup = rootDir.relativeFilePath(FS::PathCombine(backupPath, destination.fileName()));
-                        useXPHack = true;
-                        continue;
-                    }
-                }
-#endif
                 if(destination.exists())
                 {
                     QString backupName = op.destination;
