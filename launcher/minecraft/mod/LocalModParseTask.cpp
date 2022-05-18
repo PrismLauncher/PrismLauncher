@@ -430,19 +430,6 @@ void LocalModParseTask::processAsZip()
         zip.close();
         return;
     }
-    else if (zip.setCurrentFile("fabric.mod.json"))
-    {
-        if (!file.open(QIODevice::ReadOnly))
-        {
-            zip.close();
-            return;
-        }
-
-        m_result->details = ReadFabricModInfo(file.readAll());
-        file.close();
-        zip.close();
-        return;
-    }
     else if (zip.setCurrentFile("quilt.mod.json"))
     {
         if (!file.open(QIODevice::ReadOnly))
@@ -452,6 +439,19 @@ void LocalModParseTask::processAsZip()
         }
 
         m_result->details = ReadQuiltModInfo(file.readAll());
+        file.close();
+        zip.close();
+        return;
+    }
+    else if (zip.setCurrentFile("fabric.mod.json"))
+    {
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            zip.close();
+            return;
+        }
+
+        m_result->details = ReadFabricModInfo(file.readAll());
         file.close();
         zip.close();
         return;
