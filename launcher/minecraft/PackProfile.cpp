@@ -978,8 +978,10 @@ void PackProfile::disableInteraction(bool disable)
     }
 }
 
-ModAPI::ModLoaderType PackProfile::getModLoader()
+ModAPI::ModLoaderTypes PackProfile::getModLoaders()
 {
+    ModAPI::ModLoaderTypes result = ModAPI::Unspecified;
+
     QMapIterator<QString, ModAPI::ModLoaderType> i(modloaderMapping);
 
     while (i.hasNext())
@@ -987,8 +989,8 @@ ModAPI::ModLoaderType PackProfile::getModLoader()
         i.next();
         Component* c = getComponent(i.key());
         if (c != nullptr && c->isEnabled()) {
-            return i.value();
+            result |= i.value();
         }
     }
-    return ModAPI::Unspecified;
+    return result;
 }
