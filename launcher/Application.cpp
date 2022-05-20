@@ -679,6 +679,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Custom MSA credentials
         m_settings->registerSetting("MSAClientIDOverride", "");
+        m_settings->registerSetting("CFKeyOverride", "");
 
         // Init page provider
         {
@@ -1507,4 +1508,14 @@ QString Application::getMSAClientID()
     }
 
     return BuildConfig.MSA_CLIENT_ID;
+}
+
+QString Application::getCurseKey()
+{
+    QString keyOverride = m_settings->get("CFKeyOverride").toString();
+    if (!keyOverride.isEmpty()) {
+        return keyOverride;
+    }
+
+    return BuildConfig.CURSEFORGE_API_KEY;
 }
