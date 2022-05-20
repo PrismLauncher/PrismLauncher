@@ -682,9 +682,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
             QString pastebinURL = m_settings->get("PastebinURL").toString();
 
-            bool userHadNoPastebin = pastebinURL == "";
             bool userHadDefaultPastebin = pastebinURL == "https://0x0.st";
-            if (!(userHadNoPastebin || userHadDefaultPastebin))
+            if (!pastebinURL.isEmpty() && !userHadDefaultPastebin)
             {
                 m_settings->set("PastebinType", PasteUpload::PasteType::NullPointer);
                 m_settings->set("PastebinCustomAPIBase", pastebinURL);
