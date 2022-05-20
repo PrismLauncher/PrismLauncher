@@ -6,26 +6,39 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1989</width>
+    <width>2445</width>
     <height>685</height>
    </rect>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="1">
-    <widget class="QPushButton" name="searchButton">
-     <property name="text">
-      <string>Search</string>
-     </property>
-    </widget>
+   <item row="4" column="0" colspan="2">
+    <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0" rowminimumheight="0" columnminimumwidth="0,0,0">
+     <item row="0" column="2">
+      <widget class="QComboBox" name="versionSelectionBox"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Version selected:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QComboBox" name="sortByBox"/>
+     </item>
+    </layout>
    </item>
-   <item row="0" column="0">
+   <item row="1" column="0">
     <widget class="QLineEdit" name="searchEdit">
      <property name="placeholderText">
       <string>Search and filter...</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2">
+   <item row="3" column="0" colspan="2">
     <layout class="QGridLayout" name="gridLayout_3">
      <item row="1" column="0">
       <widget class="QListView" name="packView">
@@ -55,30 +68,22 @@
      </item>
     </layout>
    </item>
-   <item row="3" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0" rowminimumheight="0" columnminimumwidth="0,0,0">
-     <item row="0" column="2">
-      <widget class="QComboBox" name="versionSelectionBox"/>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Version selected:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QComboBox" name="sortByBox"/>
-     </item>
-    </layout>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_2">
+   <item row="1" column="1">
+    <widget class="QPushButton" name="searchButton">
      <property name="text">
-      <string>WARNING !! Curseforge is very unreliable and low quality. Some mod authors have disabled the ability for third party apps (like polymc) to download the mods, you may need to manually download some mods</string>
+      <string>Search</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="font">
+      <font>
+       <italic>true</italic>
+      </font>
+     </property>
+     <property name="text">
+      <string>WARNING: CurseForge's API is very unreliable and low quality. Also, some mod authors have disabled the ability for third party apps (like PolyMC) to download their mods. As such, you may need to manually download some mods to be able to use the modpack.</string>
      </property>
     </widget>
    </item>

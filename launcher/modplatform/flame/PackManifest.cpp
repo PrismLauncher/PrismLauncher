@@ -82,12 +82,13 @@ bool Flame::File::parseFromBytes(const QByteArray& bytes)
         // this is probably a mod, dunno what else could modpacks download
         targetFolder = "mods";
     }
-    if(!obj.contains("downloadUrl") || obj["downloadUrl"].isNull() || !obj["downloadUrl"].isString() || obj["downloadUrl"].toString().isEmpty()){
+    QString rawUrl = Json::ensureString(obj, "downloadUrl");
+
+    if(rawUrl.isEmpty()){
         //either there somehow is an emtpy string as a link, or it's null either way it's invalid
         //soft failing
         return false;
     }
-    QString rawUrl = Json::requireString(obj, "downloadUrl");
     url = QUrl(rawUrl, QUrl::TolerantMode);
     if (!url.isValid()) {
         throw JSONValidationError(QString("Invalid URL: %1").arg(rawUrl));
