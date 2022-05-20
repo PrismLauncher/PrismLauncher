@@ -1,4 +1,5 @@
 !include "FileFunc.nsh"
+!include "LogicLib.nsh"
 !include "MUI2.nsh"
 
 Unicode true
@@ -119,20 +120,24 @@ Section "PolyMC"
   WriteRegStr HKCU Software\PolyMC "InstallDir" "$INSTDIR"
 
   ; Write the uninstall keys for Windows
-  !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\PolyMC"
-  WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "PolyMC"
-  WriteRegStr HKCU "${UNINST_KEY}" "DisplayIcon" "$INSTDIR\polymc.exe"
-  WriteRegStr HKCU "${UNINST_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegStr HKCU "${UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
-  WriteRegStr HKCU "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
-  WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "PolyMC Contributors"
-  WriteRegStr HKCU "${UNINST_KEY}" "ProductVersion" "${VERSION}"
-  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
-  IntFmt $0 "0x%08X" $0
-  WriteRegDWORD HKCU "${UNINST_KEY}" "EstimatedSize" "$0"
-  WriteRegDWORD HKCU "${UNINST_KEY}" "NoModify" 1
-  WriteRegDWORD HKCU "${UNINST_KEY}" "NoRepair" 1
-  WriteUninstaller "$INSTDIR\uninstall.exe"
+  ${GetParameters} $R0
+  ${GetOptions} $R0 "/NoUninstaller" $R1
+  ${If} ${Errors}
+    !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\PolyMC"
+    WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "PolyMC"
+    WriteRegStr HKCU "${UNINST_KEY}" "DisplayIcon" "$INSTDIR\polymc.exe"
+    WriteRegStr HKCU "${UNINST_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegStr HKCU "${UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
+    WriteRegStr HKCU "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
+    WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "PolyMC Contributors"
+    WriteRegStr HKCU "${UNINST_KEY}" "ProductVersion" "${VERSION}"
+    ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+    IntFmt $0 "0x%08X" $0
+    WriteRegDWORD HKCU "${UNINST_KEY}" "EstimatedSize" "$0"
+    WriteRegDWORD HKCU "${UNINST_KEY}" "NoModify" 1
+    WriteRegDWORD HKCU "${UNINST_KEY}" "NoRepair" 1
+    WriteUninstaller "$INSTDIR\uninstall.exe"
+  ${EndIf}
 
 SectionEnd
 
