@@ -147,13 +147,6 @@ Section "Start Menu Shortcuts"
 
 SectionEnd
 
-Section /o "Portable"
-
-  SetOutPath $INSTDIR
-  File "portable.txt"
-
-SectionEnd
-
 ;--------------------------------
 
 ; Uninstaller
