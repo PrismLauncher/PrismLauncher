@@ -1035,6 +1035,13 @@ install(TARGETS ${Launcher_Name}
     FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
 )
 
+if (UNIX AND APPLE)
+    # Add Sparkle updater
+    # It has to be copied here instead of just allowing fixup_bundle to install it, otherwise essential parts of
+    # the framework aren't installed
+    install(DIRECTORY ${MACOSX_SPARKLE_DIR}/Sparkle.framework DESTINATION ${FRAMEWORK_DEST_DIR} USE_SOURCE_PERMISSIONS)
+endif()
+
 #### The bundle mess! ####
 # Bundle utilities are used to complete the portable packages - they add all the libraries that would otherwise be missing on the target system.
 # NOTE: it seems that this absolutely has to be here, and nowhere else.
