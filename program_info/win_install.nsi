@@ -141,7 +141,7 @@ Section "PolyMC"
 
 SectionEnd
 
-Section "Start Menu Shortcuts"
+Section "Start Menu Shortcuts" SHORTCUTS
 
   CreateShortcut "$SMPROGRAMS\PolyMC.lnk" "$INSTDIR\polymc.exe" "" "$INSTDIR\polymc.exe" 0
 
@@ -219,3 +219,15 @@ Section "Uninstall"
   RMDir "$INSTDIR"
 
 SectionEnd
+
+;--------------------------------
+
+; Extra command line parameters
+
+Function .onInit
+${GetParameters} $R0
+${GetOptions} $R0 "/NoShortcuts" $R1
+${IfNot} ${Errors}
+  !insertmacro UnselectSection ${SHORTCUTS}
+${EndIf}
+FunctionEnd
