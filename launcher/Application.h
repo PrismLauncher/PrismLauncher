@@ -155,6 +155,7 @@ public:
     QString getJarsPath();
 
     QString getMSAClientID();
+    QString getCurseKey();
 
     /// this is the root of the 'installation'. Used for automatic updates
     const QString &root() {

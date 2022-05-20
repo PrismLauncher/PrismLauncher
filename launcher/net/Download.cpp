@@ -25,6 +25,7 @@
 #include "MetaCacheSink.h"
 
 #include "BuildConfig.h"
+#include "Application.h"
 
 namespace Net {
 
@@ -96,7 +97,7 @@ void Download::startImpl()
 
     request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT);
     if (request.url().host().contains("api.curseforge.com")) {
-        request.setRawHeader("x-api-key", BuildConfig.CURSEFORGE_API_KEY.toUtf8());
+        request.setRawHeader("x-api-key", APPLICATION->getCurseKey().toUtf8());
     };
 
     QNetworkReply* rep = m_network->get(request);

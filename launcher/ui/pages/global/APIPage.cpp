@@ -70,6 +70,8 @@ void APIPage::loadSettings()
     ui->urlChoices->setCurrentText(pastebinURL);
     QString msaClientID = s->get("MSAClientIDOverride").toString();
     ui->msaClientID->setText(msaClientID);
+    QString curseKey = s->get("CFKeyOverride").toString();
+    ui->curseKey->setText(curseKey);
 }
 
 void APIPage::applySettings()
@@ -79,6 +81,8 @@ void APIPage::applySettings()
     s->set("PastebinURL", pastebinURL);
     QString msaClientID = ui->msaClientID->text();
     s->set("MSAClientIDOverride", msaClientID);
+    QString curseKey = ui->curseKey->text();
+    s->set("CFKeyOverride", curseKey);
 }
 
 bool APIPage::apply()
