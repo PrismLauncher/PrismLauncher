@@ -5,7 +5,7 @@
 Unicode true
 
 Name "PolyMC"
-InstallDir "$LOCALAPPDATA\PolyMC"
+InstallDir "$LOCALAPPDATA\Programs\PolyMC"
 InstallDirRegKey HKCU "Software\PolyMC" "InstallDir"
 RequestExecutionLevel user
 
