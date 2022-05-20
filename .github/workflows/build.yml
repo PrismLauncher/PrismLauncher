@@ -269,7 +269,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}-Setup
+          name: PolyMC-${{ matrix.name }}-Setup-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC-Setup.exe
 
       - name: Upload binary tarball (Linux)
