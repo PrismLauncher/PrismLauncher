@@ -16,31 +16,28 @@
 
 package net.minecraft;
 
-import java.util.TreeMap;
-import java.util.Map;
-import java.net.URL;
-import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.Graphics;
 import java.applet.Applet;
 import java.applet.AppletStub;
+import java.awt.*;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Map;
+import java.util.TreeMap;
 
-public class Launcher extends Applet implements AppletStub
-{
-    private Applet wrappedApplet;
-    private URL documentBase;
+public final class Launcher extends Applet implements AppletStub {
+
+    private final Map<String, String> params = new TreeMap<>();
+
+    private final Applet wrappedApplet;
+
     private boolean active = false;
-    private final Map<String, String> params;
 
-    public Launcher(Applet applet, URL documentBase)
-    {
-        params = new TreeMap<String, String>();
-
+    public Launcher(Applet applet) {
         this.setLayout(new BorderLayout());
+
         this.add(applet, "Center");
+
         this.wrappedApplet = applet;
-        this.documentBase = documentBase;
     }
 
     public void setParameter(String name, String value)
@@ -48,84 +45,61 @@ public class Launcher extends Applet implements AppletStub
         params.put(name, value);
     }
 
-    public void replace(Applet applet)
-    {
-        this.wrappedApplet = applet;
-
-        applet.setStub(this);
-        applet.setSize(getWidth(), getHeight());
-
-        this.setLayout(new BorderLayout());
-        this.add(applet, "Center");
-
-        applet.init();
-        active = true;
-        applet.start();
-        validate();
-    }
-
     @Override
-    public String getParameter(String name)
-    {
+    public String getParameter(String name) {
         String param = params.get(name);
+
         if (param != null)
             return param;
-        try
-        {
+
+        try {
             return super.getParameter(name);
-        } catch (Exception ignore){}
+        } catch (Exception ignore) {}
+
         return null;
     }
 
     @Override
-    public boolean isActive()
-    {
+    public boolean isActive() {
         return active;
     }
 
     @Override
-    public void appletResize(int width, int height)
-    {
+    public void appletResize(int width, int height) {
         wrappedApplet.resize(width, height);
     }
 
     @Override
-    public void resize(int width, int height)
-    {
+    public void resize(int width, int height) {
         wrappedApplet.resize(width, height);
     }
 
     @Override
-    public void resize(Dimension d)
-    {
+    public void resize(Dimension d) {
         wrappedApplet.resize(d);
     }
 
     @Override
-    public void init()
-    {
+    public void init() {
         if (wrappedApplet != null)
-        {
             wrappedApplet.init();
-        }
     }
 
     @Override
-    public void start()
-    {
+    public void start() {
         wrappedApplet.start();
+
         active = true;
     }
 
     @Override
-    public void stop()
-    {
+    public void stop() {
         wrappedApplet.stop();
+
         active = false;
     }
 
-    public void destroy()
-    {
+    public void destroy() {
         wrappedApplet.destroy();
     }
 
@@ -136,34 +110,34 @@ public class Launcher extends Applet implements AppletStub
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+
         return null;
     }
 
     @Override
-    public URL getDocumentBase()
-    {
+    public URL getDocumentBase() {
         try {
             // Special case only for Classic versions
-            if (wrappedApplet.getClass().getCanonicalName().startsWith("com.mojang")) {
-                return new URL("http", "www.minecraft.net", 80, "/game/", null);
-            }
+            if (wrappedApplet.getClass().getCanonicalName().startsWith("com.mojang"))
+                return new URL("http", "www.minecraft.net", 80, "/game/");
+
             return new URL("http://www.minecraft.net/game/");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+
         return null;
     }
 
     @Override
-    public void setVisible(boolean b)
-    {
+    public void setVisible(boolean b) {
         super.setVisible(b);
+
         wrappedApplet.setVisible(b);
     }
-    public void update(Graphics paramGraphics)
-    {
-    }
-    public void paint(Graphics paramGraphics)
-    {
-    }
+
+    public void update(Graphics paramGraphics) {}
+
+    public void paint(Graphics paramGraphics) {}
+
 }

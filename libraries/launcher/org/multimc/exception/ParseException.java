@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.multimc;
+package org.multimc.exception;
 
-public class ParseException extends java.lang.Exception
-{
-    public ParseException() { super(); }
+public final class ParseException extends IllegalArgumentException {
+
     public ParseException(String message) {
         super(message);
     }
+
 }

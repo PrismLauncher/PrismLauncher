@@ -1,20 +1,42 @@
-package org.multimc;/*
- * Copyright 2012-2021 MultiMC Contributors
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 icelimetea, <fr3shtea@outlook.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
-import org.multimc.onesix.OneSixLauncher;
+package org.multimc;
+
+import org.multimc.exception.ParseException;
+import org.multimc.utils.Parameters;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,31 +45,25 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class EntryPoint
-{
+public final class EntryPoint {
 
     private static final Logger LOGGER = Logger.getLogger("EntryPoint");
 
-    private final ParamBucket params = new ParamBucket();
+    private final Parameters params = new Parameters();
 
-    private org.multimc.Launcher launcher;
-
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         EntryPoint listener = new EntryPoint();
 
         int retCode = listener.listen();
 
-        if (retCode != 0)
-        {
+        if (retCode != 0) {
             LOGGER.info("Exiting with " + retCode);
 
             System.exit(retCode);
         }
     }
 
-    private Action parseLine(String inData) throws ParseException
-    {
+    private Action parseLine(String inData) throws ParseException {
         String[] tokens = inData.split("\\s+", 2);
 
         if (tokens.length == 0)
@@ -62,21 +78,6 @@ public class EntryPoint
                 return Action.Abort;
             }
 
-            case "launcher": {
-                if (tokens.length != 2)
-                    throw new ParseException("Expected 2 tokens, got " + tokens.length);
-
-                if (tokens[1].equals("onesix")) {
-                    launcher = new OneSixLauncher();
-
-                    LOGGER.info("Using onesix launcher.");
-
-                    return Action.Proceed;
-                } else {
-                    throw new ParseException("Invalid launcher type: " + tokens[1]);
-                }
-            }
-
             default: {
                 if (tokens.length != 2)
                     throw new ParseException("Error while parsing:" + inData);
@@ -88,8 +89,7 @@ public class EntryPoint
         }
     }
 
-    public int listen()
-    {
+    public int listen() {
         Action action = Action.Proceed;
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
@@ -112,21 +112,30 @@ public class EntryPoint
         }
 
         // Main loop
-        if (action == Action.Abort)
-        {
+        if (action == Action.Abort) {
             LOGGER.info("Launch aborted by the launcher.");
 
             return 1;
         }
 
-        if (launcher != null)
-        {
-            return launcher.launch(params);
+        try {
+            Launcher launcher =
+                    LauncherFactory
+                            .getInstance()
+                            .createLauncher(params);
+
+            launcher.launch();
+
+            return 0;
+        } catch (IllegalArgumentException e) {
+            LOGGER.log(Level.SEVERE, "Wrong argument.", e);
+
+            return 1;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Exception caught from launcher.", e);
+
+            return 1;
         }
-
-        LOGGER.log(Level.SEVERE, "No valid launcher implementation specified.");
-
-        return 1;
     }
 
     private enum Action {
