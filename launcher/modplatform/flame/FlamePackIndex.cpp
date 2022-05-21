@@ -65,7 +65,15 @@ void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
         // pick the latest version supported
         file.mcVersion = versionArray[0].toString();
         file.version = Json::requireString(version, "displayName");
-        file.downloadUrl = Json::requireString(version, "downloadUrl");
+        file.fileName = Json::requireString(version, "fileName");
+        file.downloadUrl = Json::ensureString(version, "downloadUrl");
+        if(file.downloadUrl.isEmpty()){
+            //FIXME : HACK, MAY NOT WORK FOR LONG
+            file.downloadUrl = QString("https://media.forgecdn.net/files/%1/%2/%3")
+                    .arg(QString::number(QString::number(file.fileId).leftRef(4).toInt())
+                            ,QString::number(QString::number(file.fileId).rightRef(3).toInt())
+                            ,QUrl::toPercentEncoding(file.fileName));
+        }
         unsortedVersions.append(file);
     }
 
