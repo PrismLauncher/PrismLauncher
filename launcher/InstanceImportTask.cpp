@@ -41,6 +41,7 @@
 #include "FileSystem.h"
 #include "MMCZip.h"
 #include "NullInstance.h"
+#include "icons/IconList.h"
 #include "icons/IconUtils.h"
 #include "settings/INISettingsObject.h"
 
