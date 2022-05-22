@@ -1868,6 +1868,9 @@ void MainWindow::globalSettingsClosed()
     updateMainToolBar();
     updateToolsMenu();
     updateStatusCenter();
+    // This needs to be done to prevent UI elements disappearing in the event the config is changed
+    // but PolyMC exits abnormally, causing the window state to never be saved:
+    APPLICATION->settings()->set("MainWindowState", saveState().toBase64());
     update();
 }
 
