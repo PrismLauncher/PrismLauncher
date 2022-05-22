@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>603</width>
-    <height>530</height>
+    <width>512</width>
+    <height>538</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -36,58 +36,42 @@
        <item>
         <widget class="QGroupBox" name="groupBox_paste">
          <property name="title">
-          <string>&amp;Pastebin URL</string>
+          <string>Pastebin Service</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="Line" name="line">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
+           <widget class="QLabel" name="pasteServiceTypeLabel">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: only input that starts with &lt;span style=&quot; font-weight:600;&quot;&gt;http://&lt;/span&gt; or &lt;span style=&quot; font-weight:600;&quot;&gt;https://&lt;/span&gt; will be accepted.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="scaledContents">
-             <bool>false</bool>
+             <string>Paste Service Type</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="urlChoices">
-            <property name="editable">
+           <widget class="QComboBox" name="pasteTypeComboBox"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="baseURLLabel">
+            <property name="text">
+             <string>Base URL</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="baseURLEntry">
+            <property name="placeholderText">
+             <string/>
+            </property>
+            <property name="clearButtonEnabled">
              <bool>true</bool>
             </property>
-            <property name="insertPolicy">
-             <enum>QComboBox::NoInsert</enum>
-            </property>
-            <item>
-             <property name="text">
-              <string notr="true">https://0x0.st</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="baseURLNote">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Here you can choose from a predefined list of paste services, or input the URL of a different paste service of your choice, provided it supports the same protocol as 0x0.st, that is POST a file parameter to the URL and return a link in the response body.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::RichText</enum>
+             <string>Note: you probably want to change or clear the Base URL after changing the paste service type.</string>
             </property>
             <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-            <property name="openExternalLinks">
              <bool>true</bool>
             </property>
            </widget>
@@ -101,13 +85,6 @@
           <string>&amp;Microsoft Authentication</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="Line" name="line_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
           <item>
            <widget class="QLabel" name="label_3">
             <property name="text">
