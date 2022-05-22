@@ -148,6 +148,13 @@ void APIPage::applySettings()
     QString msaClientID = ui->msaClientID->text();
     s->set("MSAClientIDOverride", msaClientID);
     QUrl metaURL = ui->metaURL->text();
+    // Add required trailing slash
+    if (!metaURL.isEmpty() && !metaURL.path().endsWith('/'))
+    {
+        QString path = metaURL.path();
+        path.append('/');
+        metaURL.setPath(path);
+    }
     // Don't allow HTTP, since meta is basically RCE with all the jar files.
     if(!metaURL.isEmpty() && metaURL.scheme() == "http")
     {
