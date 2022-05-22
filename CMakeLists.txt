@@ -38,6 +38,10 @@ set(CMAKE_CXX_FLAGS " -Wall -pedantic -Werror -Wno-deprecated-declarations -D_GL
 if(UNIX AND APPLE)
     set(CMAKE_CXX_FLAGS " -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
 endif()
+# FIXME: GCC 12 complains about some random stuff in QuaZip. Need to fix this later
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "-Wno-error=stringop-overflow ${CMAKE_CXX_FLAGS}")
+endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 
 # Fix build with Qt 5.13
