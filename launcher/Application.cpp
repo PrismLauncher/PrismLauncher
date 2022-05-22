@@ -699,6 +699,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 m_settings->reset("PastebinCustomAPIBase");
             }
         }
+        // meta URL
+        m_settings->registerSetting("MetaURLOverride", "");
 
         m_settings->registerSetting("CloseAfterLaunch", false);
         m_settings->registerSetting("QuitAfterGameStop", false);
