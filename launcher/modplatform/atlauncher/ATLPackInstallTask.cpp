@@ -60,10 +60,11 @@ namespace ATLauncher {
 
 static Meta::VersionPtr getComponentVersion(const QString& uid, const QString& version);
 
-PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString pack, QString version)
+PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString packName, QString version)
 {
     m_support = support;
-    m_pack = pack;
+    m_pack_name = packName;
+    m_pack_safe_name = packName.replace(QRegularExpression("[^A-Za-z0-9]"), "");
     m_version_name = version;
 }
 
@@ -81,7 +82,7 @@ void PackInstallTask::executeTask()
     qDebug() << "PackInstallTask::executeTask: " << QThread::currentThreadId();
     auto *netJob = new NetJob("ATLauncher::VersionFetch", APPLICATION->network());
     auto searchUrl = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json")
-            .arg(m_pack).arg(m_version_name);
+            .arg(m_pack_safe_name).arg(m_version_name);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();
@@ -319,7 +320,7 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
     auto patchFileName = FS::PathCombine(patchDir, target_id + ".json");
 
     auto f = std::make_shared<VersionFile>();
-    f->name = m_pack + " " + m_version_name + " (libraries)";
+    f->name = m_pack_name + " " + m_version_name + " (libraries)";
 
     const static QMap<QString, QString> liteLoaderMap = {
             { "61179803bcd5fb7790789b790908663d", "1.12-SNAPSHOT" },
@@ -465,7 +466,7 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<
     }
 
     auto f = std::make_shared<VersionFile>();
-    f->name = m_pack + " " + m_version_name;
+    f->name = m_pack_name + " " + m_version_name;
     if (!mainClass.isEmpty() && !mainClasses.contains(mainClass)) {
         f->mainClass = mainClass;
     }
@@ -507,9 +508,9 @@ void PackInstallTask::installConfigs()
     setStatus(tr("Downloading configs..."));
     jobPtr = new NetJob(tr("Config download"), APPLICATION->network());
 
-    auto path = QString("Configs/%1/%2.zip").arg(m_pack).arg(m_version_name);
+    auto path = QString("Configs/%1/%2.zip").arg(m_pack_safe_name).arg(m_version_name);
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.zip")
-            .arg(m_pack).arg(m_version_name);
+            .arg(m_pack_safe_name).arg(m_version_name);
     auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", path);
     entry->setStale(true);
 
