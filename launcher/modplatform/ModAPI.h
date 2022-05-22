@@ -16,14 +16,21 @@ class ModAPI {
    public:
     virtual ~ModAPI() = default;
 
-    // https://docs.curseforge.com/?http#tocS_ModLoaderType
-    enum ModLoaderType { Unspecified = 0, Forge = 1, Cauldron = 2, LiteLoader = 3, Fabric = 4, Quilt = 5 };
+    enum ModLoaderType {
+        Unspecified = 0,
+        Forge = 1 << 0,
+        Cauldron = 1 << 1,
+        LiteLoader = 1 << 2,
+        Fabric = 1 << 3,
+        Quilt = 1 << 4
+    };
+    Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
 
     struct SearchArgs {
         int offset;
         QString search;
         QString sorting;
-        ModLoaderType mod_loader;
+        ModLoaderTypes loaders;
         std::list<Version> versions;
     };
 
@@ -33,7 +40,7 @@ class ModAPI {
     struct VersionSearchArgs {
         QString addonId;
         std::list<Version> mcVersions;
-        ModLoaderType loader;
+        ModLoaderTypes loaders;
     };
 
     virtual void getVersions(CallerType* caller, VersionSearchArgs&& args) const = 0;
