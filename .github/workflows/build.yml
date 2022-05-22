@@ -63,6 +63,7 @@ jobs:
             ninja:p
             qt5:p
             ccache:p
+            nsis:p
 
       - name: Setup ccache
         if: runner.os != 'Windows' && inputs.build_type == 'Debug'
@@ -100,7 +101,7 @@ jobs:
         run: |
          brew update
          brew install qt@5 ninja
-         
+
       - name: Update Qt (AppImage)
         if: runner.os == 'Linux' && matrix.appimage == true
         run: |
@@ -190,6 +191,13 @@ jobs:
           cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
 
+      - name: Package (Windows, installer)
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: |
+          cd ${{ env.INSTALL_DIR }}
+          makensis -NOCD "-DVERSION=${{ env.VERSION }}" "-DMUI_ICON=${{ github.workspace }}/program_info/polymc.ico" "-XOutFile ${{ github.workspace }}/PolyMC-Setup.exe" "${{ github.workspace }}/program_info/win_install.nsi"
+
       - name: Package (Linux)
         if: runner.os == 'Linux' && matrix.appimage != true
         run: |
@@ -256,6 +264,13 @@ jobs:
         with:
           name: PolyMC-${{ matrix.name }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
           path: ${{ env.INSTALL_PORTABLE_DIR }}/**
+
+      - name: Upload installer (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v3
+        with:
+          name: PolyMC-${{ matrix.name }}-Setup-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PolyMC-Setup.exe
 
       - name: Upload binary tarball (Linux)
         if: runner.os == 'Linux' && matrix.appimage != true
