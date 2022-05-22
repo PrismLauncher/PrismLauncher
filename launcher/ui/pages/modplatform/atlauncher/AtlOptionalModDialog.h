@@ -56,7 +56,7 @@ public:
         DescriptionColumn,
     };
 
-    AtlOptionalModListModel(QWidget *parent, QVector<ATLauncher::VersionMod> mods);
+    AtlOptionalModListModel(QWidget *parent, ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods);
 
     QVector<QString> getResult();
 
@@ -86,7 +86,9 @@ private:
     NetJob::Ptr m_jobPtr;
     QByteArray m_response;
 
+    ATLauncher::PackVersion m_version;
     QVector<ATLauncher::VersionMod> m_mods;
+
     QMap<QString, bool> m_selection;
     QMap<QString, int> m_index;
     QMap<QString, QVector<QString>> m_dependants;
@@ -96,7 +98,7 @@ class AtlOptionalModDialog : public QDialog {
     Q_OBJECT
 
 public:
-    AtlOptionalModDialog(QWidget *parent, QVector<ATLauncher::VersionMod> mods);
+    AtlOptionalModDialog(QWidget *parent, ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods);
     ~AtlOptionalModDialog() override;
 
     QVector<QString> getResult() {
