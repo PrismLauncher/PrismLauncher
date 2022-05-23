@@ -414,14 +414,16 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
 
 bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<PackProfile> profile)
 {
-    if (m_version.mainClass.mainClass.isEmpty() && m_version.extraArguments.isEmpty()) {
+    if (m_version.mainClass.mainClass.isEmpty() && m_version.extraArguments.arguments.isEmpty()) {
         return true;
     }
 
     auto mainClass = m_version.mainClass.mainClass;
+    auto extraArguments = m_version.extraArguments.arguments;
 
     auto hasMainClassDepends = !m_version.mainClass.depends.isEmpty();
-    if (hasMainClassDepends) {
+    auto hasExtraArgumentsDepends = !m_version.extraArguments.depends.isEmpty();
+    if (hasMainClassDepends || hasExtraArgumentsDepends) {
         QSet<QString> mods;
         for (const auto& item : m_version.mods) {
             mods.insert(item.name);
@@ -430,6 +432,14 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<
         if (hasMainClassDepends && !mods.contains(m_version.mainClass.depends)) {
             mainClass = "";
         }
+
+        if (hasExtraArgumentsDepends && !mods.contains(m_version.extraArguments.depends)) {
+            extraArguments = "";
+        }
+    }
+
+    if (mainClass.isEmpty() && extraArguments.isEmpty()) {
+        return true;
     }
 
     auto uuid = QUuid::createUuid();
@@ -461,7 +471,7 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<
     }
 
     // Parse out tweakers
-    auto args = m_version.extraArguments.split(" ");
+    auto args = extraArguments.split(" ");
     QString previous;
     for(auto arg : args) {
         if(arg.startsWith("--tweakClass=") || previous == "--tweakClass") {
