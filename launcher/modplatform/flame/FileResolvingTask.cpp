@@ -31,21 +31,7 @@ void Flame::FileResolvingTask::netJobFinished()
     for (auto& bytes : results) {
         auto& out = m_toProcess.files[index];
         try {
-            bool fail = (!out.parseFromBytes(bytes));
-            if(fail){
-                //failed :( probably disabled mod, try to add to the list
-                auto doc = Json::requireDocument(bytes);
-                if (!doc.isObject()) {
-                    throw JSONValidationError(QString("data is not an object? that's not supposed to happen"));
-                }
-                auto obj = Json::ensureObject(doc.object(), "data");
-                //FIXME : HACK, MAY NOT WORK FOR LONG
-                out.url = QUrl(QString("https://media.forgecdn.net/files/%1/%2/%3")
-                        .arg(QString::number(QString::number(out.fileId).leftRef(4).toInt())
-                             ,QString::number(QString::number(out.fileId).rightRef(3).toInt())
-                             ,QUrl::toPercentEncoding(out.fileName)), QUrl::TolerantMode);
-            }
-            failed &= fail;
+            failed &= (!out.parseFromBytes(bytes));
         } catch (const JSONValidationError& e) {
             qCritical() << "Resolving of" << out.projectId << out.fileId << "failed because of a parsing error:";
             qCritical() << e.cause();
