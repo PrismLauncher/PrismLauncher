@@ -60,12 +60,13 @@ namespace ATLauncher {
 
 static Meta::VersionPtr getComponentVersion(const QString& uid, const QString& version);
 
-PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString packName, QString version)
+PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString packName, QString version, InstallMode installMode)
 {
     m_support = support;
     m_pack_name = packName;
     m_pack_safe_name = packName.replace(QRegularExpression("[^A-Za-z0-9]"), "");
     m_version_name = version;
+    m_install_mode = installMode;
 }
 
 bool PackInstallTask::abort()
@@ -117,9 +118,27 @@ void PackInstallTask::onDownloadSucceeded()
     }
     m_version = version;
 
-    // Display install message if one exists
-    if (!m_version.messages.install.isEmpty())
-        m_support->displayMessage(m_version.messages.install);
+    // Derived from the installation mode
+    QString message;
+
+    switch (m_install_mode) {
+    case InstallMode::Reinstall:
+    case InstallMode::Update:
+        message = m_version.messages.update;
+        break;
+
+    case InstallMode::Install:
+        message = m_version.messages.install;
+        break;
+
+    default:
+        emitFailed(tr("Unsupported installation mode"));
+        break;
+    }
+
+    // Display message if one exists
+    if (!message.isEmpty())
+        m_support->displayMessage(message);
 
     auto ver = getComponentVersion("net.minecraft", m_version.minecraft);
     if (!ver) {

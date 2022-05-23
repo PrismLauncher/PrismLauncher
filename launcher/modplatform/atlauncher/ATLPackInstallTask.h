@@ -50,6 +50,12 @@
 
 namespace ATLauncher {
 
+enum class InstallMode {
+    Install,
+    Reinstall,
+    Update,
+};
+
 class UserInteractionSupport {
 
 public:
@@ -75,7 +81,7 @@ class PackInstallTask : public InstanceTask
 Q_OBJECT
 
 public:
-    explicit PackInstallTask(UserInteractionSupport *support, QString packName, QString version);
+    explicit PackInstallTask(UserInteractionSupport *support, QString packName, QString version, InstallMode installMode = InstallMode::Install);
     virtual ~PackInstallTask(){}
 
     bool canAbort() const override { return true; }
@@ -117,6 +123,7 @@ private:
     NetJob::Ptr jobPtr;
     QByteArray response;
 
+    InstallMode m_install_mode;
     QString m_pack_name;
     QString m_pack_safe_name;
     QString m_version_name;
