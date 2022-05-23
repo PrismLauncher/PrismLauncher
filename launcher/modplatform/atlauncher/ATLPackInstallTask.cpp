@@ -781,6 +781,17 @@ bool PackInstallTask::extractMods(
     for (auto iter = toCopy.begin(); iter != toCopy.end(); iter++) {
         auto &from = iter.key();
         auto &to = iter.value();
+
+        // If the file already exists, assume the mod is the correct copy - and remove
+        // the copy from the Configs.zip
+        QFileInfo fileInfo(to);
+        if (fileInfo.exists()) {
+            if (!QFile::remove(to)) {
+                qWarning() << "Failed to delete" << to;
+                return false;
+            }
+        }
+
         FS::copy fileCopyOperation(from, to);
         if(!fileCopyOperation()) {
             qWarning() << "Failed to copy" << from << "to" << to;
