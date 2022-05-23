@@ -150,12 +150,18 @@ struct VersionMessages
     QString update;
 };
 
+struct PackVersionMainClass
+{
+    QString mainClass;
+    QString depends;
+};
+
 struct PackVersion
 {
     QString version;
     QString minecraft;
     bool noConfigs;
-    QString mainClass;
+    PackVersionMainClass mainClass;
     QString extraArguments;
 
     VersionLoader loader;
