@@ -34,6 +34,11 @@ void SequentialTask::executeTask()
 bool SequentialTask::abort()
 {
     if(m_currentIndex == -1 || m_currentIndex >= m_queue.size()) {
+        if(m_currentIndex == -1) {
+            // Don't call emitAborted() here, we want to bypass the 'is the task running' check
+            emit aborted();
+            emit finished();
+        }
         m_queue.clear();
         return true;
     }
