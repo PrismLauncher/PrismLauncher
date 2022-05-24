@@ -41,7 +41,10 @@ class FlameAPI : public NetworkModAPI {
             .arg(gameVersionStr);
     };
 
-    inline auto getModInfoURL(QString& id) const -> QString override { return {}; };
+    inline auto getModInfoURL(QString& id) const -> QString override
+    {
+        return QString("https://api.curseforge.com/v1/mods/%1").arg(id);
+    };
 
     inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
     {

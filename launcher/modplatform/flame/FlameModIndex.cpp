@@ -25,6 +25,27 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
         packAuthor.url = Json::requireString(author, "url");
         pack.authors.append(packAuthor);
     }
+
+    loadExtraPackData(pack, obj);
+}
+
+void FlameMod::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& obj)
+{
+    auto links_obj = Json::ensureObject(obj, "links");
+
+    pack.extraData.issuesUrl = Json::ensureString(links_obj, "issuesUrl");
+    if(pack.extraData.issuesUrl.endsWith('/'))
+        pack.extraData.issuesUrl.chop(1);
+
+    pack.extraData.sourceUrl = Json::ensureString(links_obj, "sourceUrl");
+    if(pack.extraData.sourceUrl.endsWith('/'))
+        pack.extraData.sourceUrl.chop(1);
+
+    pack.extraData.wikiUrl = Json::ensureString(links_obj, "wikiUrl");
+    if(pack.extraData.wikiUrl.endsWith('/'))
+        pack.extraData.wikiUrl.chop(1);
+
+    pack.extraDataLoaded = true;
 }
 
 void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
