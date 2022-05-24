@@ -871,9 +871,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_mcedit.reset(new MCEditTool(m_settings));
     }
 
+#ifdef Q_OS_MACOS
     connect(this, &Application::clickedOnDock, [this]() {
         this->showMainWindow();
     });
+#endif
 
     connect(this, &Application::aboutToQuit, [this](){
         if(m_instances)

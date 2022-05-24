@@ -182,7 +182,10 @@ signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
     void globalSettingsClosed();
+
+#ifdef Q_OS_MACOS
     void clickedOnDock();
+#endif
 
 public slots:
     bool launch(
