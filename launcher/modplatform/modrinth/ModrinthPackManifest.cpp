@@ -62,8 +62,22 @@ void loadIndexedInfo(Modpack& pack, QJsonObject& obj)
 {
     pack.extra.body = Json::ensureString(obj, "body");
     pack.extra.projectUrl = QString("https://modrinth.com/modpack/%1").arg(Json::ensureString(obj, "slug"));
+
+    pack.extra.issuesUrl = Json::ensureString(obj, "issues_url");
+    if(pack.extra.issuesUrl.endsWith('/'))
+        pack.extra.issuesUrl.chop(1);
+
     pack.extra.sourceUrl = Json::ensureString(obj, "source_url");
+    if(pack.extra.sourceUrl.endsWith('/'))
+        pack.extra.sourceUrl.chop(1);
+
     pack.extra.wikiUrl = Json::ensureString(obj, "wiki_url");
+    if(pack.extra.wikiUrl.endsWith('/'))
+        pack.extra.wikiUrl.chop(1);
+
+    pack.extra.discordUrl = Json::ensureString(obj, "discord_url");
+    if(pack.extra.discordUrl.endsWith('/'))
+        pack.extra.discordUrl.chop(1);
 
     auto donate_arr = Json::ensureArray(obj, "donation_urls");
     for(auto d : donate_arr){

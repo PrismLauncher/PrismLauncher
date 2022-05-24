@@ -224,19 +224,37 @@ void ModrinthPage::updateUI()
     // TODO: Implement multiple authors with links
     text += "<br>" + tr(" by ") + QString("<a href=%1>%2</a>").arg(std::get<1>(current.author).toString(), std::get<0>(current.author));
 
-    if(!current.extra.donate.isEmpty()) {
-        text += tr("<br><br>Donate information:<br>");
-        auto donateToStr = [](Modrinth::DonationData& donate) -> QString {
-            return QString("<a href=\"%1\">%2</a>").arg(donate.url, donate.platform);
-        };
-        QStringList donates;
-        for (auto& donate : current.extra.donate) {
-            donates.append(donateToStr(donate));
+    if(current.extraInfoLoaded) {
+        if (!current.extra.donate.isEmpty()) {
+            text += "<br><br>" + tr("Donate information: ");
+            auto donateToStr = [](Modrinth::DonationData& donate) -> QString {
+                return QString("<a href=\"%1\">%2</a>").arg(donate.url, donate.platform);
+            };
+            QStringList donates;
+            for (auto& donate : current.extra.donate) {
+                donates.append(donateToStr(donate));
+            }
+            text += donates.join(", ");
         }
-        text += donates.join(", ");
+
+        if (!current.extra.issuesUrl.isEmpty()
+         || !current.extra.sourceUrl.isEmpty()
+         || !current.extra.wikiUrl.isEmpty()
+         || !current.extra.discordUrl.isEmpty()) {
+            text += "<br><br>" + tr("External links:") + "<br>";
+        }
+
+        if (!current.extra.issuesUrl.isEmpty())
+            text += "- " + tr("Issues: <a href=%1>%1</a>").arg(current.extra.issuesUrl) + "<br>";
+        if (!current.extra.wikiUrl.isEmpty())
+            text += "- " + tr("Wiki: <a href=%1>%1</a>").arg(current.extra.wikiUrl) + "<br>";
+        if (!current.extra.sourceUrl.isEmpty())
+            text += "- " + tr("Source code: <a href=%1>%1</a>").arg(current.extra.sourceUrl) + "<br>";
+        if (!current.extra.discordUrl.isEmpty())
+            text += "- " + tr("Discord: <a href=%1>%1</a>").arg(current.extra.discordUrl) + "<br>";
     }
 
-    text += "<br>";
+    text += "<hr>";
 
     HoeDown h;
     text += h.process(current.extra.body.toUtf8());

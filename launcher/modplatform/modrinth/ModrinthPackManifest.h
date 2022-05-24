@@ -68,8 +68,11 @@ struct ModpackExtra {
     QString body;
 
     QString projectUrl;
+
+    QString issuesUrl;
     QString sourceUrl;
     QString wikiUrl;
+    QString discordUrl;
 
     QList<DonationData> donate;
 
