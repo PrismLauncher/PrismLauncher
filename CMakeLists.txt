@@ -143,7 +143,7 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml)
 
     if(NOT Launcher_FORCE_BUNDLED_LIBS)
-        find_package(QuaZip-Qt5 1.3)
+        find_package(QuaZip-Qt5 1.3 QUIET)
     endif()
     if (NOT QuaZip-Qt5_FOUND)
         set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
