@@ -216,7 +216,7 @@ void ModPage::updateUi()
     }
 
     if(!current.extraData.donate.isEmpty()) {
-        text += "<br><br>Donation information:<br>";
+        text += tr("<br><br>Donate information:<br>");
         auto donateToStr = [](ModPlatform::DonationData& donate) -> QString {
             return QString("<a href=\"%1\">%2</a>").arg(donate.url, donate.platform);
         };
