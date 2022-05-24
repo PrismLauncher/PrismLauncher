@@ -65,6 +65,19 @@ void loadIndexedInfo(Modpack& pack, QJsonObject& obj)
     pack.extra.sourceUrl = Json::ensureString(obj, "source_url");
     pack.extra.wikiUrl = Json::ensureString(obj, "wiki_url");
 
+    auto donate_arr = Json::ensureArray(obj, "donation_urls");
+    for(auto d : donate_arr){
+        auto d_obj = Json::requireObject(d);
+
+        DonationData donate;
+
+        donate.id = Json::ensureString(d_obj, "id");
+        donate.platform = Json::ensureString(d_obj, "platform");
+        donate.url = Json::ensureString(d_obj, "url");
+
+        pack.extra.donate.append(donate);
+    }
+
     pack.extraInfoLoaded = true;
 }
 

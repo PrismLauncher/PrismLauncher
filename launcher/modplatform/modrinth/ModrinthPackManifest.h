@@ -58,12 +58,21 @@ struct File
     QUrl download;
 };
 
+struct DonationData {
+    QString id;
+    QString platform;
+    QString url;
+};
+
 struct ModpackExtra {
     QString body;
 
     QString projectUrl;
     QString sourceUrl;
     QString wikiUrl;
+
+    QList<DonationData> donate;
+
 };
 
 struct ModpackVersion {

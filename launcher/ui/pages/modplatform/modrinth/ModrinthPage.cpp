@@ -224,6 +224,18 @@ void ModrinthPage::updateUI()
     // TODO: Implement multiple authors with links
     text += "<br>" + tr(" by ") + QString("<a href=%1>%2</a>").arg(std::get<1>(current.author).toString(), std::get<0>(current.author));
 
+    if(!current.extra.donate.isEmpty()) {
+        text += "<br><br>Donation information:<br>";
+        auto donateToStr = [](Modrinth::DonationData& donate) -> QString {
+            return QString("<a href=\"%1\">%2</a>").arg(donate.url, donate.platform);
+        };
+        QStringList donates;
+        for (auto& donate : current.extra.donate) {
+            donates.append(donateToStr(donate));
+        }
+        text += donates.join(", ");
+    }
+
     text += "<br>";
 
     HoeDown h;
