@@ -119,29 +119,6 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
     }
 
     current = listModel->data(first, Qt::UserRole).value<Flame::IndexedPack>();
-    QString text = "";
-    QString name = current.name;
-
-    if (current.websiteUrl.isEmpty())
-        text = name;
-    else
-        text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
-    if (!current.authors.empty()) {
-        auto authorToStr = [](Flame::ModpackAuthor& author) {
-            if (author.url.isEmpty()) {
-                return author.name;
-            }
-            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
-        };
-        QStringList authorStrs;
-        for (auto& author : current.authors) {
-            authorStrs.push_back(authorToStr(author));
-        }
-        text += "<br>" + tr(" by ") + authorStrs.join(", ");
-    }
-    text += "<br><br>";
-
-    ui->packDescription->setHtml(text + current.description);
 
     if (current.versionsLoaded == false) {
         qDebug() << "Loading flame modpack versions";
@@ -188,6 +165,8 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
         suggestCurrent();
     }
+
+    updateUi();
 }
 
 void FlamePage::suggestCurrent()
@@ -216,4 +195,47 @@ void FlamePage::onVersionSelectionChanged(QString data)
     }
     selectedVersion = ui->versionSelectionBox->currentData().toString();
     suggestCurrent();
+}
+
+void FlamePage::updateUi()
+{
+    QString text = "";
+    QString name = current.name;
+
+    if (current.extra.websiteUrl.isEmpty())
+        text = name;
+    else
+        text = "<a href=\"" + current.extra.websiteUrl + "\">" + name + "</a>";
+    if (!current.authors.empty()) {
+        auto authorToStr = [](Flame::ModpackAuthor& author) {
+            if (author.url.isEmpty()) {
+                return author.name;
+            }
+            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
+        };
+        QStringList authorStrs;
+        for (auto& author : current.authors) {
+            authorStrs.push_back(authorToStr(author));
+        }
+        text += "<br>" + tr(" by ") + authorStrs.join(", ");
+    }
+
+    if(current.extraInfoLoaded) {
+        if (!current.extra.issuesUrl.isEmpty()
+         || !current.extra.sourceUrl.isEmpty()
+         || !current.extra.wikiUrl.isEmpty()) {
+            text += "<br><br>" + tr("External links:") + "<br>";
+        }
+
+        if (!current.extra.issuesUrl.isEmpty())
+            text += "- " + tr("Issues: <a href=%1>%1</a>").arg(current.extra.issuesUrl) + "<br>";
+        if (!current.extra.wikiUrl.isEmpty())
+            text += "- " + tr("Wiki: <a href=%1>%1</a>").arg(current.extra.wikiUrl) + "<br>";
+        if (!current.extra.sourceUrl.isEmpty())
+            text += "- " + tr("Source code: <a href=%1>%1</a>").arg(current.extra.sourceUrl) + "<br>";
+    }
+
+    text += "<hr>";
+
+    ui->packDescription->setHtml(text + current.description);
 }
