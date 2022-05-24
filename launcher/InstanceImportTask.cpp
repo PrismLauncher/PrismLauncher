@@ -135,18 +135,20 @@ void InstanceImportTask::processZipPack()
         return;
     }
 
-    QStringList blacklist = {"instance.cfg", "manifest.json"};
-    QString mmcFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "instance.cfg");
-    bool technicFound = QuaZipDir(m_packZip.get()).exists("/bin/modpack.jar") || QuaZipDir(m_packZip.get()).exists("/bin/version.json");
-    QString flameFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "manifest.json");
-    QString modrinthFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "modrinth.index.json");
+    QuaZipDir packZipDir(m_packZip.get());
+
+    // https://docs.modrinth.com/docs/modpacks/format_definition/#storage
+    bool modrinthFound = packZipDir.exists("/modrinth.index.json");
+    bool technicFound = packZipDir.exists("/bin/modpack.jar") || packZipDir.exists("/bin/version.json");
     QString root;
-    if(!mmcFound.isNull())
+
+    // NOTE: Prioritize modpack platforms that aren't searched for recursively.
+    // Especially Flame has a very common filename for its manifest, which may appear inside overrides for example
+    if(modrinthFound)
     {
-        // process as MultiMC instance/pack
-        qDebug() << "MultiMC:" << mmcFound;
-        root = mmcFound;
-        m_modpackType = ModpackType::MultiMC;
+        // process as Modrinth pack
+        qDebug() << "Modrinth:" << modrinthFound;
+        m_modpackType = ModpackType::Modrinth;
     }
     else if (technicFound)
     {
@@ -156,19 +158,25 @@ void InstanceImportTask::processZipPack()
         extractDir.cd(".minecraft");
         m_modpackType = ModpackType::Technic;
     }
-    else if(!flameFound.isNull())
+    else
     {
-        // process as Flame pack
-        qDebug() << "Flame:" << flameFound;
-        root = flameFound;
-        m_modpackType = ModpackType::Flame;
-    }
-    else if(!modrinthFound.isNull())
-    {
-        // process as Modrinth pack
-        qDebug() << "Modrinth:" << modrinthFound;
-        root = modrinthFound;
-        m_modpackType = ModpackType::Modrinth;
+        QString mmcRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "instance.cfg");
+        QString flameRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "manifest.json");
+
+        if (!mmcRoot.isEmpty())
+        {
+            // process as MultiMC instance/pack
+            qDebug() << "MultiMC:" << mmcRoot;
+            root = mmcRoot;
+            m_modpackType = ModpackType::MultiMC;
+        }
+        else if(!flameRoot.isEmpty())
+        {
+            // process as Flame pack
+            qDebug() << "Flame:" << flameRoot;
+            root = flameRoot;
+            m_modpackType = ModpackType::Flame;
+        }
     }
     if(m_modpackType == ModpackType::Unknown)
     {
