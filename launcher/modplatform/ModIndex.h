@@ -32,6 +32,11 @@ struct IndexedVersion {
 
 struct ExtraPackData {
     QList<DonationData> donate;
+
+    QString issuesUrl;
+    QString sourceUrl;
+    QString wikiUrl;
+    QString discordUrl;
 };
 
 struct IndexedPack {

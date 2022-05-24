@@ -52,6 +52,22 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 
 void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
+    pack.extraData.issuesUrl = Json::ensureString(obj, "issues_url");
+    if(pack.extraData.issuesUrl.endsWith('/'))
+        pack.extraData.issuesUrl.chop(1);
+
+    pack.extraData.sourceUrl = Json::ensureString(obj, "source_url");
+    if(pack.extraData.sourceUrl.endsWith('/'))
+        pack.extraData.sourceUrl.chop(1);
+
+    pack.extraData.wikiUrl = Json::ensureString(obj, "wiki_url");
+    if(pack.extraData.wikiUrl.endsWith('/'))
+        pack.extraData.wikiUrl.chop(1);
+
+    pack.extraData.discordUrl = Json::ensureString(obj, "discord_url");
+    if(pack.extraData.discordUrl.endsWith('/'))
+        pack.extraData.discordUrl.chop(1);
+
     auto donate_arr = Json::ensureArray(obj, "donation_urls");
     for(auto d : donate_arr){
         auto d_obj = Json::requireObject(d);
