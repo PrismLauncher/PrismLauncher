@@ -871,6 +871,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_mcedit.reset(new MCEditTool(m_settings));
     }
 
+    connect(this, &Application::clickedOnDock, [this]() {
+        this->showMainWindow();
+    });
+
     connect(this, &Application::aboutToQuit, [this](){
         if(m_instances)
         {
@@ -952,6 +956,22 @@ bool Application::createSetupWizard()
         return true;
     }
     return false;
+}
+
+bool Application::event(QEvent* event) {
+#ifdef Q_OS_MACOS
+    if (event->type() == QEvent::ApplicationStateChange) {
+        auto ev = static_cast<QApplicationStateChangeEvent*>(event);
+
+        if (m_prevAppState == Qt::ApplicationActive
+                && ev->applicationState() == Qt::ApplicationActive) {
+            qDebug() << "Clicked on dock!";
+            emit clickedOnDock();
+        }
+        m_prevAppState = ev->applicationState();
+    }
+#endif
+    return QApplication::event(event);
 }
 
 void Application::setupWizardFinished(int status)
@@ -1284,6 +1304,10 @@ void Application::subRunningInstance()
 
 bool Application::shouldExitNow() const
 {
+#ifdef Q_OS_MACOS
+    return false;
+#endif
+
     return m_runningInstances == 0 && m_openWindows == 0;
 }
 
