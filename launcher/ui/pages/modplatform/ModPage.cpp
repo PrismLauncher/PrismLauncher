@@ -94,28 +94,6 @@ void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
     if (!first.isValid()) { return; }
 
     current = listModel->data(first, Qt::UserRole).value<ModPlatform::IndexedPack>();
-    QString text = "";
-    QString name = current.name;
-
-    if (current.websiteUrl.isEmpty())
-        text = name;
-    else
-        text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
-
-    if (!current.authors.empty()) {
-        auto authorToStr = [](ModPlatform::ModpackAuthor& author) -> QString {
-            if (author.url.isEmpty()) { return author.name; }
-            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
-        };
-        QStringList authorStrs;
-        for (auto& author : current.authors) {
-            authorStrs.push_back(authorToStr(author));
-        }
-        text += "<br>" + tr(" by ") + authorStrs.join(", ");
-    }
-    text += "<br><br>";
-
-    ui->packDescription->setHtml(text + current.description);
 
     if (!current.versionsLoaded) {
         qDebug() << QString("Loading %1 mod versions").arg(debugName());
@@ -132,6 +110,13 @@ void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
         updateSelectionButton();
     }
+
+    if(!current.extraDataLoaded){
+        qDebug() << QString("Loading %1 mod info").arg(debugName());
+        listModel->requestModInfo(current);
+    }
+
+    updateUi();
 }
 
 void ModPage::onVersionSelectionChanged(QString data)
@@ -206,4 +191,43 @@ void ModPage::updateSelectionButton()
     } else {
         ui->modSelectionButton->setText(tr("Deselect mod for download"));
     }
+}
+
+void ModPage::updateUi()
+{
+    QString text = "";
+    QString name = current.name;
+
+    if (current.websiteUrl.isEmpty())
+        text = name;
+    else
+        text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
+
+    if (!current.authors.empty()) {
+        auto authorToStr = [](ModPlatform::ModpackAuthor& author) -> QString {
+            if (author.url.isEmpty()) { return author.name; }
+            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
+        };
+        QStringList authorStrs;
+        for (auto& author : current.authors) {
+            authorStrs.push_back(authorToStr(author));
+        }
+        text += "<br>" + tr(" by ") + authorStrs.join(", ");
+    }
+
+    if(!current.extraData.donate.isEmpty()) {
+        text += "<br><br>Donation information:<br>";
+        auto donateToStr = [](ModPlatform::DonationData& donate) -> QString {
+            return QString("<a href=\"%1\">%2</a>").arg(donate.url, donate.platform);
+        };
+        QStringList donates;
+        for (auto& donate : current.extraData.donate) {
+            donates.append(donateToStr(donate));
+        }
+        text += donates.join(", ");
+    }
+
+    text += "<br><br>";
+
+    ui->packDescription->setHtml(text + current.description);
 }

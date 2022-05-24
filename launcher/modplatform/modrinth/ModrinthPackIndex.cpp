@@ -45,6 +45,27 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     modAuthor.name = Json::requireString(obj, "author");
     modAuthor.url = api.getAuthorURL(modAuthor.name);
     pack.authors.append(modAuthor);
+
+    // Modrinth can have more data than what's provided by the basic search :)
+    pack.extraDataLoaded = false;
+}
+
+void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& obj)
+{
+    auto donate_arr = Json::ensureArray(obj, "donation_urls");
+    for(auto d : donate_arr){
+        auto d_obj = Json::requireObject(d);
+
+        ModPlatform::DonationData donate;
+
+        donate.id = Json::ensureString(d_obj, "id");
+        donate.platform = Json::ensureString(d_obj, "platform");
+        donate.url = Json::ensureString(d_obj, "url");
+
+        pack.extraData.donate.append(donate);
+    }
+
+    pack.extraDataLoaded = true;
 }
 
 void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,

@@ -41,6 +41,8 @@ class FlameAPI : public NetworkModAPI {
             .arg(gameVersionStr);
     };
 
+    inline auto getModInfoURL(QString& id) const -> QString override { return {}; };
+
     inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
     {
         QString gameVersionQuery = args.mcVersions.size() == 1 ? QString("gameVersion=%1&").arg(args.mcVersions.front().toString()) : "";

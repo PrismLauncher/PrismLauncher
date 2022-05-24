@@ -79,6 +79,11 @@ void ListModel::performPaginatedSearch()
         this, { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], profile->getModLoaders(), getMineVersions() });
 }
 
+void ListModel::requestModInfo(ModPlatform::IndexedPack& current)
+{
+    m_parent->apiProvider()->getModInfo(this, current);
+}
+
 void ListModel::refresh()
 {
     if (jobPtr) {
@@ -223,6 +228,21 @@ void ListModel::searchRequestFailed(QString reason)
     } else {
         searchState = Finished;
     }
+}
+
+void ListModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack)
+{
+    qDebug() << "Loading mod info";
+
+    try {
+        auto obj = Json::requireObject(doc);
+        loadExtraPackInfo(pack, obj);
+    } catch (const JSONValidationError& e) {
+        qDebug() << doc;
+        qWarning() << "Error while reading " << debugName() << " mod info: " << e.cause();
+    }
+
+    m_parent->updateUi();
 }
 
 void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId)

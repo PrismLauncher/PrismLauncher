@@ -75,6 +75,11 @@ class ModrinthAPI : public NetworkModAPI {
             .arg(getGameVersionsArray(args.versions));
     };
 
+    inline auto getModInfoURL(QString& id) const -> QString override
+    {
+        return BuildConfig.MODRINTH_PROD_URL + "/project/" + id;
+    };
+
     inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
     {
         return QString(BuildConfig.MODRINTH_PROD_URL +
