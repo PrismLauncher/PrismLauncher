@@ -1,6 +1,7 @@
 ---
 Language:        Cpp
 BasedOnStyle:  Chromium
+IndentWidth: 4
 AlignConsecutiveMacros: false
 AlignConsecutiveAssignments: false
 AllowShortIfStatementsOnASingleLine: false
