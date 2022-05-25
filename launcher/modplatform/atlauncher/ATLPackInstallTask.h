@@ -105,6 +105,7 @@ private:
     bool createLibrariesComponent(QString instanceRoot, std::shared_ptr<PackProfile> profile);
     bool createPackComponent(QString instanceRoot, std::shared_ptr<PackProfile> profile);
 
+    void deleteExistingFiles();
     void installConfigs();
     void extractConfigs();
     void downloadMods();

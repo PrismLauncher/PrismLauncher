@@ -120,15 +120,18 @@ void PackInstallTask::onDownloadSucceeded()
 
     // Derived from the installation mode
     QString message;
+    bool resetDirectory;
 
     switch (m_install_mode) {
     case InstallMode::Reinstall:
     case InstallMode::Update:
         message = m_version.messages.update;
+        resetDirectory = true;
         break;
 
     case InstallMode::Install:
         message = m_version.messages.install;
+        resetDirectory = false;
         break;
 
     default:
@@ -147,6 +150,10 @@ void PackInstallTask::onDownloadSucceeded()
     }
     minecraftVersion = ver;
 
+    if (resetDirectory) {
+        deleteExistingFiles();
+    }
+
     if(m_version.noConfigs) {
         downloadMods();
     }
@@ -160,6 +167,116 @@ void PackInstallTask::onDownloadFailed(QString reason)
     qDebug() << "PackInstallTask::onDownloadFailed: " << QThread::currentThreadId();
     jobPtr.reset();
     emitFailed(reason);
+}
+
+void PackInstallTask::deleteExistingFiles()
+{
+    setStatus(tr("Deleting existing files..."));
+
+    // Setup defaults, as per https://wiki.atlauncher.com/pack-admin/xml/delete
+    VersionDeletes deletes;
+    deletes.folders.append(VersionDelete{ "root", "mods%s%" });
+    deletes.folders.append(VersionDelete{ "root", "configs%s%" });
+    deletes.folders.append(VersionDelete{ "root", "bin%s%" });
+
+    // Setup defaults, as per https://wiki.atlauncher.com/pack-admin/xml/keep
+    VersionKeeps keeps;
+    keeps.files.append(VersionKeep{ "root", "mods%s%PortalGunSounds.pak" });
+    keeps.folders.append(VersionKeep{ "root", "mods%s%rei_minimap%s%" });
+    keeps.folders.append(VersionKeep{ "root", "mods%s%VoxelMods%s%" });
+    keeps.files.append(VersionKeep{ "root", "config%s%NEI.cfg" });
+    keeps.files.append(VersionKeep{ "root", "options.txt" });
+    keeps.files.append(VersionKeep{ "root", "servers.dat" });
+
+    // Merge with version deletes and keeps
+    for (const auto& item : m_version.deletes.files)
+        deletes.files.append(item);
+    for (const auto& item : m_version.deletes.folders)
+        deletes.folders.append(item);
+    for (const auto& item : m_version.keeps.files)
+        keeps.files.append(item);
+    for (const auto& item : m_version.keeps.folders)
+        keeps.folders.append(item);
+
+    auto getPathForBase = [this](const QString& base) {
+        auto minecraftPath = FS::PathCombine(m_stagingPath, "minecraft");
+
+        if (base == "root") {
+            return minecraftPath;
+        }
+        else if (base == "config") {
+            return FS::PathCombine(minecraftPath, "config");
+        }
+        else {
+            qWarning() << "Unrecognised base path" << base;
+            return minecraftPath;
+        }
+    };
+
+    auto convertToSystemPath = [](const QString& path) {
+        auto t = path;
+        t.replace("%s%", QDir::separator());
+        return t;
+    };
+
+    auto shouldKeep = [keeps, getPathForBase, convertToSystemPath](const QString& fullPath) {
+        for (const auto& item : keeps.files) {
+            auto basePath = getPathForBase(item.base);
+            auto targetPath = convertToSystemPath(item.target);
+            auto path = FS::PathCombine(basePath, targetPath);
+
+            if (fullPath == path) {
+                return true;
+            }
+        }
+
+        for (const auto& item : keeps.folders) {
+            auto basePath = getPathForBase(item.base);
+            auto targetPath = convertToSystemPath(item.target);
+            auto path = FS::PathCombine(basePath, targetPath);
+
+            if (fullPath.startsWith(path)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    // Keep track of files to delete
+    QSet<QString> filesToDelete;
+
+    for (const auto& item : deletes.files) {
+        auto basePath = getPathForBase(item.base);
+        auto targetPath = convertToSystemPath(item.target);
+        auto fullPath = FS::PathCombine(basePath, targetPath);
+
+        if (shouldKeep(fullPath))
+            continue;
+
+        filesToDelete.insert(fullPath);
+    }
+
+    for (const auto& item : deletes.folders) {
+        auto basePath = getPathForBase(item.base);
+        auto targetPath = convertToSystemPath(item.target);
+        auto fullPath = FS::PathCombine(basePath, targetPath);
+
+        QDirIterator it(fullPath, QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            auto path = it.next();
+
+            if (shouldKeep(path))
+                continue;
+
+            filesToDelete.insert(path);
+        }
+    }
+
+    // Delete the files
+    for (const auto& item : filesToDelete) {
+        QFile::remove(item);
+    }
 }
 
 QString PackInstallTask::getDirForModType(ModType type, QString raw)
