@@ -146,7 +146,7 @@
           <item>
            <widget class="QLineEdit" name="metaURL">
             <property name="placeholderText">
-             <string>(Default)</string>
+             <string/>
             </property>
            </widget>
           </item>
