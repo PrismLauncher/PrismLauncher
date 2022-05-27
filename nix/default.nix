@@ -1,5 +1,5 @@
-{ lib
-, mkDerivation
+{ stdenv
+, lib
 , fetchFromGitHub
 , cmake
 , ninja
@@ -7,11 +7,10 @@
 , jdk
 , zlib
 , file
-, makeWrapper
+, wrapQtAppsHook
 , xorg
 , libpulseaudio
 , qtbase
-, quazip
 , libGL
 , msaClientID ? ""
 
@@ -37,13 +36,13 @@ let
   gameLibraryPath = libpath + ":/run/opengl-driver/lib";
 in
 
-mkDerivation rec {
+stdenv.mkDerivation rec {
   pname = "polymc";
   inherit version;
 
   src = lib.cleanSource self;
 
-  nativeBuildInputs = [ cmake ninja jdk file makeWrapper ];
+  nativeBuildInputs = [ cmake ninja jdk file wrapQtAppsHook ];
   buildInputs = [ qtbase quazip zlib ];
 
   dontWrapQtApps = true;
@@ -58,13 +57,13 @@ mkDerivation rec {
 
   cmakeFlags = [
     "-GNinja"
-    "-DLauncher_PORTABLE=OFF"
+    "-DENABLE_LTO=on"
+    "-DLauncher_QT_VERSION_MAJOR=${lib.versions.major qtbase.version}"
   ] ++ lib.optionals (msaClientID != "") [ "-DLauncher_MSA_CLIENT_ID=${msaClientID}" ];
 
   postInstall = ''
     # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
-    wrapProgram $out/bin/polymc \
-      "''${qtWrapperArgs[@]}" \
+    wrapQtApp $out/bin/polymc \
       --set GAME_LIBRARY_PATH ${gameLibraryPath} \
       --prefix POLYMC_JAVA_PATHS : ${jdk}/lib/openjdk/bin/java:${jdk8}/lib/openjdk/bin/java \
       --prefix PATH : ${lib.makeBinPath [ xorg.xrandr ]}
