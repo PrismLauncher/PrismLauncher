@@ -48,12 +48,6 @@ mkDerivation rec {
 
   dontWrapQtApps = true;
 
-  postPatch = lib.optionalString (msaClientID != "") ''
-    # add client ID
-    substituteInPlace CMakeLists.txt \
-      --replace '17b47edd-c884-4997-926d-9e7f9a6b4647' '${msaClientID}'
-  '';
-
   postUnpack = ''
     # Copy libnbtplusplus
     rm -rf source/libraries/libnbtplusplus
@@ -65,7 +59,7 @@ mkDerivation rec {
   cmakeFlags = [
     "-GNinja"
     "-DLauncher_PORTABLE=OFF"
-  ];
+  ] ++ lib.optionals (msaClientID != "") [ "-DLauncher_MSA_CLIENT_ID=${msaClientID}" ];
 
   postInstall = ''
     # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
