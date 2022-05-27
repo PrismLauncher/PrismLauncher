@@ -72,7 +72,8 @@ InstanceImportTask::InstanceImportTask(const QUrl sourceUrl, QWidget* parent)
 
 bool InstanceImportTask::abort()
 {
-    m_filesNetJob->abort();
+    if (m_filesNetJob)
+        m_filesNetJob->abort();
     m_extractFuture.cancel();
 
     return false;
@@ -386,7 +387,7 @@ void InstanceImportTask::processFlame()
     {
         auto results = m_modIdResolver->getResults();
         m_filesNetJob = new NetJob(tr("Mod download"), APPLICATION->network());
-        for(auto result: results.files)
+        for(const auto& result: results.files)
         {
             QString filename = result.fileName;
             if(!result.required)
