@@ -11,6 +11,7 @@
 , xorg
 , libpulseaudio
 , qtbase
+, quazip
 , libGL
 , msaClientID ? ""
 
@@ -18,7 +19,6 @@
 , self
 , version
 , libnbtplusplus
-, quazip
 }:
 
 let
@@ -43,8 +43,8 @@ mkDerivation rec {
 
   src = lib.cleanSource self;
 
-  nativeBuildInputs = [ cmake ninja file makeWrapper ];
-  buildInputs = [ qtbase jdk zlib ];
+  nativeBuildInputs = [ cmake ninja jdk file makeWrapper ];
+  buildInputs = [ qtbase quazip zlib ];
 
   dontWrapQtApps = true;
 
@@ -55,12 +55,11 @@ mkDerivation rec {
   '';
 
   postUnpack = ''
-    # Copy submodules inputs
-    rm -rf source/libraries/{libnbtplusplus,quazip}
-    mkdir source/libraries/{libnbtplusplus,quazip}
+    # Copy libnbtplusplus
+    rm -rf source/libraries/libnbtplusplus
+    mkdir source/libraries/libnbtplusplus
     cp -a ${libnbtplusplus}/* source/libraries/libnbtplusplus
-    cp -a ${quazip}/* source/libraries/quazip
-    chmod a+r+w source/libraries/{libnbtplusplus,quazip}/*
+    chmod a+r+w source/libraries/libnbtplusplus/*
   '';
 
   cmakeFlags = [

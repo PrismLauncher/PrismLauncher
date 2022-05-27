@@ -5,10 +5,9 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
     libnbtplusplus = { url = "github:multimc/libnbtplusplus"; flake = false; };
-    quazip = { url = "github:stachenov/quazip"; flake = false; };
   };
 
-  outputs = { self, nixpkgs, libnbtplusplus, quazip, ... }:
+  outputs = { self, nixpkgs, libnbtplusplus, ... }:
     let
       # Generate a user-friendly version number.
       version = builtins.substring 0 8 self.lastModifiedDate;
@@ -23,7 +22,7 @@
       pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
     in
     {
-      packages = forAllSystems (system: { polymc = pkgs.${system}.libsForQt5.callPackage ./packages/nix/polymc { inherit version self quazip libnbtplusplus; }; });
+      packages = forAllSystems (system: { polymc = pkgs.${system}.libsForQt5.callPackage ./packages/nix/polymc { inherit version self libnbtplusplus; }; });
       defaultPackage = forAllSystems (system: self.packages.${system}.polymc);
 
       apps = forAllSystems (system: { polymc = { type = "app"; program = "${self.defaultPackage.${system}}/bin/polymc"; }; });
