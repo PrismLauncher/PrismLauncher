@@ -36,13 +36,16 @@
        <item>
         <widget class="QGroupBox" name="groupBox_paste">
          <property name="title">
-          <string>Pastebin Service</string>
+          <string>&amp;Pastebin Service</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
            <widget class="QLabel" name="pasteServiceTypeLabel">
             <property name="text">
-             <string>Paste Service Type</string>
+             <string>Paste Service &amp;Type</string>
+            </property>
+            <property name="buddy">
+             <cstring>pasteTypeComboBox</cstring>
             </property>
            </widget>
           </item>
@@ -52,7 +55,10 @@
           <item>
            <widget class="QLabel" name="baseURLLabel">
             <property name="text">
-             <string>Base URL</string>
+             <string>Base &amp;URL</string>
+            </property>
+            <property name="buddy">
+             <cstring>baseURLEntry</cstring>
             </property>
            </widget>
           </item>
