@@ -3,6 +3,7 @@
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2022 Lenny McLennington <lenny@sneed.church>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,16 +47,43 @@
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
 #include "Application.h"
+#include "net/PasteUpload.h"
+#include "BuildConfig.h"
 
 APIPage::APIPage(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::APIPage)
 {
+    // This is here so you can reorder the entries in the combobox without messing stuff up
+    int comboBoxEntries[] = {
+        PasteUpload::PasteType::Mclogs,
+        PasteUpload::PasteType::NullPointer,
+        PasteUpload::PasteType::PasteGG,
+        PasteUpload::PasteType::Hastebin
+    };
+
     static QRegularExpression validUrlRegExp("https?://.+");
+
     ui->setupUi(this);
-    ui->urlChoices->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->urlChoices));
-    ui->tabWidget->tabBar()->hide();\
+
+    for (auto pasteType : comboBoxEntries) {
+        ui->pasteTypeComboBox->addItem(PasteUpload::PasteTypes.at(pasteType).name, pasteType);
+    }
+
+    void (QComboBox::*currentIndexChangedSignal)(int) (&QComboBox::currentIndexChanged);
+    connect(ui->pasteTypeComboBox, currentIndexChangedSignal, this, &APIPage::updateBaseURLPlaceholder);
+    // This function needs to be called even when the ComboBox's index is still in its default state.
+    updateBaseURLPlaceholder(ui->pasteTypeComboBox->currentIndex());
+    ui->baseURLEntry->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->baseURLEntry));
+    ui->tabWidget->tabBar()->hide();
+
+    ui->metaURL->setPlaceholderText(BuildConfig.META_URL);
+
     loadSettings();
+
+    resetBaseURLNote();
+    connect(ui->pasteTypeComboBox, currentIndexChangedSignal, this, &APIPage::updateBaseURLNote);
+    connect(ui->baseURLEntry, &QLineEdit::textEdited, this, &APIPage::resetBaseURLNote);
 }
 
 APIPage::~APIPage()
@@ -63,13 +91,52 @@ APIPage::~APIPage()
     delete ui;
 }
 
+void APIPage::resetBaseURLNote()
+{
+    ui->baseURLNote->hide();
+    baseURLPasteType = ui->pasteTypeComboBox->currentIndex();
+}
+
+void APIPage::updateBaseURLNote(int index)
+{
+    if (baseURLPasteType == index)
+    {
+        ui->baseURLNote->hide();
+    }
+    else if (!ui->baseURLEntry->text().isEmpty())
+    {
+        ui->baseURLNote->show();
+    }
+}
+
+void APIPage::updateBaseURLPlaceholder(int index)
+{
+    int pasteType = ui->pasteTypeComboBox->itemData(index).toInt();
+    QString pasteDefaultURL = PasteUpload::PasteTypes.at(pasteType).defaultBase;
+    ui->baseURLEntry->setPlaceholderText(pasteDefaultURL);
+}
+
 void APIPage::loadSettings()
 {
     auto s = APPLICATION->settings();
-    QString pastebinURL = s->get("PastebinURL").toString();
-    ui->urlChoices->setCurrentText(pastebinURL);
+
+    int pasteType = s->get("PastebinType").toInt();
+    QString pastebinURL = s->get("PastebinCustomAPIBase").toString();
+
+    ui->baseURLEntry->setText(pastebinURL);
+    int pasteTypeIndex = ui->pasteTypeComboBox->findData(pasteType);
+    if (pasteTypeIndex == -1)
+    {
+        pasteTypeIndex = ui->pasteTypeComboBox->findData(PasteUpload::PasteType::Mclogs);
+        ui->baseURLEntry->clear();
+    }
+
+    ui->pasteTypeComboBox->setCurrentIndex(pasteTypeIndex);
+
     QString msaClientID = s->get("MSAClientIDOverride").toString();
     ui->msaClientID->setText(msaClientID);
+    QString metaURL = s->get("MetaURLOverride").toString();
+    ui->metaURL->setText(metaURL);
     QString curseKey = s->get("CFKeyOverride").toString();
     ui->curseKey->setText(curseKey);
 }
@@ -77,10 +144,27 @@ void APIPage::loadSettings()
 void APIPage::applySettings()
 {
     auto s = APPLICATION->settings();
-    QString pastebinURL = ui->urlChoices->currentText();
-    s->set("PastebinURL", pastebinURL);
+
+    s->set("PastebinType", ui->pasteTypeComboBox->currentData().toInt());
+    s->set("PastebinCustomAPIBase", ui->baseURLEntry->text());
+
     QString msaClientID = ui->msaClientID->text();
     s->set("MSAClientIDOverride", msaClientID);
+    QUrl metaURL = ui->metaURL->text();
+    // Add required trailing slash
+    if (!metaURL.isEmpty() && !metaURL.path().endsWith('/'))
+    {
+        QString path = metaURL.path();
+        path.append('/');
+        metaURL.setPath(path);
+    }
+    // Don't allow HTTP, since meta is basically RCE with all the jar files.
+    if(!metaURL.isEmpty() && metaURL.scheme() == "http")
+    {
+        metaURL.setScheme("https");
+    }
+
+    s->set("MetaURLOverride", metaURL);
     QString curseKey = ui->curseKey->text();
     s->set("CFKeyOverride", curseKey);
 }

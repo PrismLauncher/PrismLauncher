@@ -65,8 +65,12 @@ void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
         // pick the latest version supported
         file.mcVersion = versionArray[0].toString();
         file.version = Json::requireString(version, "displayName");
-        file.downloadUrl = Json::requireString(version, "downloadUrl");
-        unsortedVersions.append(file);
+        file.downloadUrl = Json::ensureString(version, "downloadUrl");
+
+        // only add if we have a download URL (third party distribution is enabled)
+        if (!file.downloadUrl.isEmpty()) {
+            unsortedVersions.append(file);
+        }
     }
 
     auto orderSortPredicate = [](const IndexedVersion& a, const IndexedVersion& b) -> bool { return a.fileId > b.fileId; };

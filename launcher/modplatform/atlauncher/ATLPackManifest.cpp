@@ -1,18 +1,37 @@
+// SPDX-License-Identifier: GPL-3.0-only
 /*
- * Copyright 2020-2021 Jamie Mansfield <jmansfield@cadixdev.org>
- * Copyright 2021 Petr Mrazek <peterix@gmail.com>
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2020-2021 Jamie Mansfield <jmansfield@cadixdev.org>
+ *      Copyright 2021 Petr Mrazek <peterix@gmail.com>
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 #include "ATLPackManifest.h"
@@ -178,11 +197,31 @@ static void loadVersionMod(ATLauncher::VersionMod & p, QJsonObject & obj) {
             p.depends.append(Json::requireString(depends));
         }
     }
+    p.colour = Json::ensureString(obj, QString("colour"), "");
+    p.warning = Json::ensureString(obj, QString("warning"), "");
 
     p.client = Json::ensureBoolean(obj, QString("client"), false);
 
     // computed
     p.effectively_hidden = p.hidden || p.library;
+}
+
+static void loadVersionMessages(ATLauncher::VersionMessages& m, QJsonObject& obj)
+{
+    m.install = Json::ensureString(obj, "install", "");
+    m.update = Json::ensureString(obj, "update", "");
+}
+
+static void loadVersionMainClass(ATLauncher::PackVersionMainClass& m, QJsonObject& obj)
+{
+    m.mainClass = Json::ensureString(obj, "mainClass", "");
+    m.depends = Json::ensureString(obj, "depends", "");
+}
+
+static void loadVersionExtraArguments(ATLauncher::PackVersionExtraArguments& a, QJsonObject& obj)
+{
+    a.arguments = Json::ensureString(obj, "arguments", "");
+    a.depends = Json::ensureString(obj, "depends", "");
 }
 
 void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
@@ -193,12 +232,12 @@ void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
 
     if(obj.contains("mainClass")) {
         auto main = Json::requireObject(obj, "mainClass");
-        v.mainClass = Json::ensureString(main, "mainClass", "");
+        loadVersionMainClass(v.mainClass, main);
     }
 
     if(obj.contains("extraArguments")) {
         auto arguments = Json::requireObject(obj, "extraArguments");
-        v.extraArguments = Json::ensureString(arguments, "arguments", "");
+        loadVersionExtraArguments(v.extraArguments, arguments);
     }
 
     if(obj.contains("loader")) {
@@ -232,4 +271,17 @@ void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
         auto configsObj = Json::requireObject(obj, "configs");
         loadVersionConfigs(v.configs, configsObj);
     }
+
+    auto colourObj = Json::ensureObject(obj, "colours");
+    for (const auto &key : colourObj.keys()) {
+        v.colours[key] = Json::requireString(colourObj.value(key), "colour");
+    }
+
+    auto warningsObj = Json::ensureObject(obj, "warnings");
+    for (const auto &key : warningsObj.keys()) {
+        v.warnings[key] = Json::requireString(warningsObj.value(key), "warning");
+    }
+
+    auto messages = Json::ensureObject(obj, "messages");
+    loadVersionMessages(v.messages, messages);
 }

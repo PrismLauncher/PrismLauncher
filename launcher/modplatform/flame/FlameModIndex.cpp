@@ -56,15 +56,8 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         file.fileId = Json::requireInteger(obj, "id");
         file.date = Json::requireString(obj, "fileDate");
         file.version = Json::requireString(obj, "displayName");
+        file.downloadUrl = Json::requireString(obj, "downloadUrl");
         file.fileName = Json::requireString(obj, "fileName");
-        file.downloadUrl = Json::ensureString(obj, "downloadUrl", "");
-        if(file.downloadUrl.isEmpty()){
-            //FIXME : HACK, MAY NOT WORK FOR LONG
-            file.downloadUrl = QString("https://media.forgecdn.net/files/%1/%2/%3")
-                                   .arg(QString::number(QString::number(file.fileId.toInt()).leftRef(4).toInt())
-                                           ,QString::number(QString::number(file.fileId.toInt()).rightRef(3).toInt())
-                                           ,QUrl::toPercentEncoding(file.fileName));
-        }
 
         unsortedVersions.append(file);
     }

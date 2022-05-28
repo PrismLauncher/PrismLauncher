@@ -118,7 +118,7 @@ public:
     // todo(merged): is this the best approach
     void appendComponent(ComponentPtr component);
 
-    ModAPI::ModLoaderType getModLoader();
+    ModAPI::ModLoaderTypes getModLoaders();
 
 private:
     void scheduleSave();

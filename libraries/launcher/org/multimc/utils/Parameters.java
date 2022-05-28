@@ -14,36 +14,41 @@
  * limitations under the License.
  */
 
-package org.multimc;
+package org.multimc.utils;
+
+import org.multimc.exception.ParameterNotFoundException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ParamBucket
-{
+public final class Parameters {
 
     private final Map<String, List<String>> paramsMap = new HashMap<>();
 
-    public void add(String key, String value)
-    {
-        paramsMap.computeIfAbsent(key, k -> new ArrayList<>())
-                .add(value);
+    public void add(String key, String value) {
+        List<String> params = paramsMap.get(key);
+
+        if (params == null) {
+            params = new ArrayList<>();
+
+            paramsMap.put(key, params);
+        }
+
+        params.add(value);
     }
 
-    public List<String> all(String key) throws NotFoundException
-    {
+    public List<String> all(String key) throws ParameterNotFoundException {
         List<String> params = paramsMap.get(key);
 
         if (params == null)
-            throw new NotFoundException();
+            throw new ParameterNotFoundException(key);
 
         return params;
     }
 
-    public List<String> allSafe(String key, List<String> def)
-    {
+    public List<String> allSafe(String key, List<String> def) {
         List<String> params = paramsMap.get(key);
 
         if (params == null || params.isEmpty())
@@ -52,34 +57,22 @@ public class ParamBucket
         return params;
     }
 
-    public List<String> allSafe(String key)
-    {
-        return allSafe(key, new ArrayList<>());
-    }
-
-    public String first(String key) throws NotFoundException
-    {
+    public String first(String key) throws ParameterNotFoundException {
         List<String> list = all(key);
 
         if (list.isEmpty())
-            throw new NotFoundException();
+            throw new ParameterNotFoundException(key);
 
         return list.get(0);
     }
 
-    public String firstSafe(String key, String def)
-    {
+    public String firstSafe(String key, String def) {
         List<String> params = paramsMap.get(key);
 
         if (params == null || params.isEmpty())
             return def;
 
         return params.get(0);
-    }
-
-    public String firstSafe(String key)
-    {
-        return firstSafe(key, "");
     }
 
 }

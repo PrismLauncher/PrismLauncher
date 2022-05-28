@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package org.multimc;
+package org.multimc.exception;
 
-public class NotFoundException extends Exception
-{
+public final class ParameterNotFoundException extends IllegalArgumentException {
+
+    public ParameterNotFoundException(String key) {
+        super("Unknown parameter name: " + key);
+    }
+
 }

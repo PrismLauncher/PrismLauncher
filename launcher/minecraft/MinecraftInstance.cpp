@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -487,9 +488,8 @@ QStringList MinecraftInstance::processMinecraftArgs(
         }
     }
 
-    // blatant self-promotion.
-    token_mapping["profile_name"] = token_mapping["version_name"] = BuildConfig.LAUNCHER_NAME;
-
+    token_mapping["profile_name"] = name();
+    token_mapping["version_name"] = profile->getMinecraftVersion();
     token_mapping["version_type"] = profile->getMinecraftVersionType();
 
     QString absRootDir = QDir(gameRoot()).absolutePath();

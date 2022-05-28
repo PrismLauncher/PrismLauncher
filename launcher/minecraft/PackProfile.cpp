@@ -36,6 +36,13 @@
 #include "ComponentUpdateTask.h"
 
 #include "Application.h"
+#include "modplatform/ModAPI.h"
+
+static const QMap<QString, ModAPI::ModLoaderType> modloaderMapping{
+    {"net.minecraftforge", ModAPI::Forge},
+    {"net.fabricmc.fabric-loader", ModAPI::Fabric},
+    {"org.quiltmc.quilt-loader", ModAPI::Quilt}
+};
 
 PackProfile::PackProfile(MinecraftInstance * instance)
     : QAbstractListModel()
@@ -971,19 +978,19 @@ void PackProfile::disableInteraction(bool disable)
     }
 }
 
-ModAPI::ModLoaderType PackProfile::getModLoader()
+ModAPI::ModLoaderTypes PackProfile::getModLoaders()
 {
-    if (!getComponentVersion("net.minecraftforge").isEmpty())
+    ModAPI::ModLoaderTypes result = ModAPI::Unspecified;
+
+    QMapIterator<QString, ModAPI::ModLoaderType> i(modloaderMapping);
+
+    while (i.hasNext())
     {
-        return ModAPI::Forge;
+        i.next();
+        Component* c = getComponent(i.key());
+        if (c != nullptr && c->isEnabled()) {
+            result |= i.value();
+        }
     }
-    else if (!getComponentVersion("net.fabricmc.fabric-loader").isEmpty())
-    {
-        return ModAPI::Fabric;
-    }
-    else if (!getComponentVersion("org.quiltmc.quilt-loader").isEmpty())
-    {
-        return ModAPI::Quilt;
-    }
-    return ModAPI::Unspecified;
+    return result;
 }

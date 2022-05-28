@@ -1,109 +1,131 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 #include "FileSink.h"
-#include <QFile>
-#include <QFileInfo>
+
 #include "FileSystem.h"
 
 namespace Net {
 
-FileSink::FileSink(QString filename)
-    :m_filename(filename)
-{
-    // nil
-}
-
-FileSink::~FileSink()
-{
-    // nil
-}
-
-JobStatus FileSink::init(QNetworkRequest& request)
+Task::State FileSink::init(QNetworkRequest& request)
 {
     auto result = initCache(request);
-    if(result != Job_InProgress)
-    {
+    if (result != Task::State::Running) {
         return result;
     }
+
     // create a new save file and open it for writing
-    if (!FS::ensureFilePathExists(m_filename))
-    {
+    if (!FS::ensureFilePathExists(m_filename)) {
         qCritical() << "Could not create folder for " + m_filename;
-        return Job_Failed;
+        return Task::State::Failed;
     }
+
     wroteAnyData = false;
     m_output_file.reset(new QSaveFile(m_filename));
-    if (!m_output_file->open(QIODevice::WriteOnly))
-    {
+    if (!m_output_file->open(QIODevice::WriteOnly)) {
         qCritical() << "Could not open " + m_filename + " for writing";
-        return Job_Failed;
+        return Task::State::Failed;
     }
 
-    if(initAllValidators(request))
-        return Job_InProgress;
-    return Job_Failed;
+    if (initAllValidators(request))
+        return Task::State::Running;
+    return Task::State::Failed;
 }
 
-JobStatus FileSink::initCache(QNetworkRequest &)
+Task::State FileSink::write(QByteArray& data)
 {
-    return Job_InProgress;
-}
-
-JobStatus FileSink::write(QByteArray& data)
-{
-    if (!writeAllValidators(data) || m_output_file->write(data) != data.size())
-    {
+    if (!writeAllValidators(data) || m_output_file->write(data) != data.size()) {
         qCritical() << "Failed writing into " + m_filename;
         m_output_file->cancelWriting();
         m_output_file.reset();
         wroteAnyData = false;
-        return Job_Failed;
+        return Task::State::Failed;
     }
+
     wroteAnyData = true;
-    return Job_InProgress;
+    return Task::State::Running;
 }
 
-JobStatus FileSink::abort()
+Task::State FileSink::abort()
 {
     m_output_file->cancelWriting();
     failAllValidators();
-    return Job_Failed;
+    return Task::State::Failed;
 }
 
-JobStatus FileSink::finalize(QNetworkReply& reply)
+Task::State FileSink::finalize(QNetworkReply& reply)
 {
     bool gotFile = false;
     QVariant statusCodeV = reply.attribute(QNetworkRequest::HttpStatusCodeAttribute);
     bool validStatus = false;
     int statusCode = statusCodeV.toInt(&validStatus);
-    if(validStatus)
-    {
+    if (validStatus) {
         // this leaves out 304 Not Modified
         gotFile = statusCode == 200 || statusCode == 203;
     }
+
     // if we wrote any data to the save file, we try to commit the data to the real file.
     // if it actually got a proper file, we write it even if it was empty
-    if (gotFile || wroteAnyData)
-    {
+    if (gotFile || wroteAnyData) {
         // ask validators for data consistency
         // we only do this for actual downloads, not 'your data is still the same' cache hits
-        if(!finalizeAllValidators(reply))
-            return Job_Failed;
+        if (!finalizeAllValidators(reply))
+            return Task::State::Failed;
+
         // nothing went wrong...
-        if (!m_output_file->commit())
-        {
+        if (!m_output_file->commit()) {
             qCritical() << "Failed to commit changes to " << m_filename;
             m_output_file->cancelWriting();
-            return Job_Failed;
+            return Task::State::Failed;
         }
     }
+
     // then get rid of the save file
     m_output_file.reset();
 
     return finalizeCache(reply);
 }
 
-JobStatus FileSink::finalizeCache(QNetworkReply &)
+Task::State FileSink::initCache(QNetworkRequest&)
 {
-    return Job_Finished;
+    return Task::State::Running;
+}
+
+Task::State FileSink::finalizeCache(QNetworkReply&)
+{
+    return Task::State::Succeeded;
 }
 
 bool FileSink::hasLocalData()
@@ -111,4 +133,4 @@ bool FileSink::hasLocalData()
     QFileInfo info(m_filename);
     return info.exists() && info.size() != 0;
 }
-}
+}  // namespace Net

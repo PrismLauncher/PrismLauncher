@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,6 +37,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
+#include "net/PasteUpload.h"
 #include "ui/MainWindow.h"
 #include "ui/InstanceWindow.h"
 
@@ -61,6 +63,7 @@
 #include "ui/setupwizard/SetupWizard.h"
 #include "ui/setupwizard/LanguageWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
+#include "ui/setupwizard/PasteWizardPage.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 
@@ -671,8 +674,33 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("UpdateDialogGeometry", "");
 
-        // pastebin URL
-        m_settings->registerSetting("PastebinURL", "https://0x0.st");
+        // HACK: This code feels so stupid is there a less stupid way of doing this?
+        {
+            m_settings->registerSetting("PastebinURL", "");
+            m_settings->registerSetting("PastebinType", PasteUpload::PasteType::Mclogs);
+            m_settings->registerSetting("PastebinCustomAPIBase", "");
+
+            QString pastebinURL = m_settings->get("PastebinURL").toString();
+
+            bool userHadDefaultPastebin = pastebinURL == "https://0x0.st";
+            if (!pastebinURL.isEmpty() && !userHadDefaultPastebin)
+            {
+                m_settings->set("PastebinType", PasteUpload::PasteType::NullPointer);
+                m_settings->set("PastebinCustomAPIBase", pastebinURL);
+                m_settings->reset("PastebinURL");
+            }
+
+            bool ok;
+            int pasteType = m_settings->get("PastebinType").toInt(&ok);
+            // If PastebinType is invalid then reset the related settings.
+            if (!ok || !(PasteUpload::PasteType::First <= pasteType && pasteType <= PasteUpload::PasteType::Last))
+            {
+                m_settings->reset("PastebinType");
+                m_settings->reset("PastebinCustomAPIBase");
+            }
+        }
+        // meta URL
+        m_settings->registerSetting("MetaURLOverride", "");
 
         m_settings->registerSetting("CloseAfterLaunch", false);
         m_settings->registerSetting("QuitAfterGameStop", false);
@@ -899,7 +927,8 @@ bool Application::createSetupWizard()
             return true;
         return false;
     }();
-    bool wizardRequired = javaRequired || languageRequired;
+    bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
+    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired;
 
     if(wizardRequired)
     {
@@ -912,6 +941,11 @@ bool Application::createSetupWizard()
         if (javaRequired)
         {
             m_setupWizard->addPage(new JavaWizardPage(m_setupWizard));
+        }
+
+        if (pasteInterventionRequired)
+        {
+            m_setupWizard->addPage(new PasteWizardPage(m_setupWizard));
         }
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();

@@ -1,3 +1,38 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 #include "ImgurAlbumCreation.h"
 
 #include <QNetworkRequest>
@@ -13,12 +48,12 @@
 ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenShot::Ptr> screenshots) : NetAction(), m_screenshots(screenshots)
 {
     m_url = BuildConfig.IMGUR_BASE_URL + "album.json";
-    m_status = Job_NotStarted;
+    m_state = State::Inactive;
 }
 
-void ImgurAlbumCreation::startImpl()
+void ImgurAlbumCreation::executeTask()
 {
-    m_status = Job_InProgress;
+    m_state = State::Running;
     QNetworkRequest request(m_url);
     request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -43,11 +78,11 @@ void ImgurAlbumCreation::startImpl()
 void ImgurAlbumCreation::downloadError(QNetworkReply::NetworkError error)
 {
     qDebug() << m_reply->errorString();
-    m_status = Job_Failed;
+    m_state = State::Failed;
 }
 void ImgurAlbumCreation::downloadFinished()
 {
-    if (m_status != Job_Failed)
+    if (m_state != State::Failed)
     {
         QByteArray data = m_reply->readAll();
         m_reply.reset();
@@ -56,33 +91,32 @@ void ImgurAlbumCreation::downloadFinished()
         if (jsonError.error != QJsonParseError::NoError)
         {
             qDebug() << jsonError.errorString();
-            emit failed(m_index_within_job);
+            emitFailed();
             return;
         }
         auto object = doc.object();
         if (!object.value("success").toBool())
         {
             qDebug() << doc.toJson();
-            emit failed(m_index_within_job);
+            emitFailed();
             return;
         }
         m_deleteHash = object.value("data").toObject().value("deletehash").toString();
         m_id = object.value("data").toObject().value("id").toString();
-        m_status = Job_Finished;
-        emit succeeded(m_index_within_job);
+        m_state = State::Succeeded;
+        emit succeeded();
         return;
     }
     else
     {
         qDebug() << m_reply->readAll();
         m_reply.reset();
-        emit failed(m_index_within_job);
+        emitFailed();
         return;
     }
 }
 void ImgurAlbumCreation::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-    m_total_progress = bytesTotal;
-    m_progress = bytesReceived;
-    emit netActionProgress(m_index_within_job, bytesReceived, bytesTotal);
+    setProgress(bytesReceived, bytesTotal);
+    emit progress(bytesReceived, bytesTotal);
 }
