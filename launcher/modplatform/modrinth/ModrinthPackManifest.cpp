@@ -42,6 +42,8 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
+#include <QSet>
+
 static ModrinthAPI api;
 
 namespace Modrinth {
@@ -95,17 +97,15 @@ void loadIndexedVersions(Modpack& pack, QJsonDocument& doc)
 
 auto validateDownloadUrl(QUrl url) -> bool
 {
-    auto domain = url.host();
-    if(domain == "cdn.modrinth.com")
-        return true;
-    if(domain == "github.com")
-        return true;
-    if(domain == "raw.githubusercontent.com")
-        return true;
-    if(domain == "gitlab.com")
-        return true;
+    static QSet<QString> domainWhitelist{
+        "cdn.modrinth.com",
+        "github.com",
+        "raw.githubusercontent.com",
+        "gitlab.com"
+    };
 
-    return false;
+    auto domain = url.host();
+    return domainWhitelist.contains(domain);
 }
 
 auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
