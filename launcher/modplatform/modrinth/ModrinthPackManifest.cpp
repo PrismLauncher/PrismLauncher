@@ -98,10 +98,6 @@ auto validateDownloadUrl(QUrl url) -> bool
     auto domain = url.host();
     if(domain == "cdn.modrinth.com")
         return true;
-    if(domain == "edge.forgecdn.net")
-        return true;
-    if(domain == "media.forgecdn.net")
-        return true;
     if(domain == "github.com")
         return true;
     if(domain == "raw.githubusercontent.com")

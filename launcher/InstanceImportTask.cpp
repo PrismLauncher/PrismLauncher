@@ -641,10 +641,15 @@ void InstanceImportTask::processModrinth()
                 file.hashAlgorithm = hashAlgorithm;
                 // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode
                 // (as Modrinth seems to incorrectly handle spaces)
+
                 file.download = Json::requireString(Json::ensureArray(modInfo, "downloads").first(), "Download URL for " + file.path);
-                if (!file.download.isValid() || !Modrinth::validateDownloadUrl(file.download)) {
-                    throw JSONValidationError("Download URL for " + file.path + " is not a correctly formatted URL");
-                }
+
+                if(!file.download.isValid())
+                    throw JSONValidationError(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));
+                else if(!Modrinth::validateDownloadUrl(file.download))
+                    throw JSONValidationError(
+                            tr("Download URL for %1 is from a non-whitelisted by Modrinth domain: %2").arg(file.path, file.download.host()));
+
                 files.push_back(file);
             }
 
