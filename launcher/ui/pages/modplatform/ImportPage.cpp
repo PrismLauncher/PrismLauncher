@@ -117,7 +117,7 @@ void ImportPage::updateState()
             if(fi.exists() && (zip || fi.suffix() == "mrpack"))
             {
                 QFileInfo fi(url.fileName());
-                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url));
+                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url,this));
                 dialog->setSuggestedIcon("default");
             }
         }
@@ -130,7 +130,7 @@ void ImportPage::updateState()
             }
             // hook, line and sinker.
             QFileInfo fi(url.fileName());
-            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url));
+            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url,this));
             dialog->setSuggestedIcon("default");
         }
     }

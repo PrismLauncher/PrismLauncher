@@ -42,6 +42,7 @@
 #include <QFutureWatcher>
 #include "settings/SettingsObject.h"
 #include "QObjectPtr.h"
+#include "modplatform/flame/PackManifest.h"
 
 #include <nonstd/optional>
 
@@ -59,6 +60,10 @@ public:
 
     bool canAbort() const override { return true; }
     bool abort() override;
+    const QVector<Flame::File> &getBlockedFiles() const
+    {
+        return m_blockedMods;
+    }
 
 protected:
     //! Entry point for tasks.
@@ -87,6 +92,7 @@ private: /* data */
     std::unique_ptr<QuaZip> m_packZip;
     QFuture<nonstd::optional<QStringList>> m_extractFuture;
     QFutureWatcher<nonstd::optional<QStringList>> m_extractFutureWatcher;
+    QVector<Flame::File> m_blockedMods;
     enum class ModpackType{
         Unknown,
         MultiMC,
