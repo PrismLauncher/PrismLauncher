@@ -102,6 +102,8 @@ auto validateDownloadUrl(QUrl url) -> bool
         return true;
     if(domain == "raw.githubusercontent.com")
         return true;
+    if(domain == "gitlab.com")
+        return true;
 
     return false;
 }
