@@ -585,6 +585,7 @@ void InstanceImportTask::processMultiMC()
 void InstanceImportTask::processModrinth()
 {
     std::vector<Modrinth::File> files;
+    std::vector<Modrinth::File> non_whitelisted_files;
     QString minecraftVersion, fabricVersion, quiltVersion, forgeVersion;
     try {
         QString indexPath = FS::PathCombine(m_stagingPath, "modrinth.index.json");
@@ -650,11 +651,27 @@ void InstanceImportTask::processModrinth()
                 }
                 else if (!Modrinth::validateDownloadUrl(file.download)) {
                     qDebug() << QString("Download URL (%1) for %2 is from a non-whitelisted by Modrinth domain").arg(file.download.toString(), file.path);
-                    throw JSONValidationError(
-                            tr("Download URL for %1 is from a non-whitelisted by Modrinth domain: %2").arg(file.path, file.download.host()));
+                    non_whitelisted_files.push_back(file);
                 }
 
                 files.push_back(file);
+            }
+
+            if (!non_whitelisted_files.empty()) {
+                QString text;
+                for (const auto& file : non_whitelisted_files) {
+                    text += tr("Filepath: %1<br>URL: <a href='%2'>%2</a><br>").arg(file.path, file.download.toString());
+                }
+
+                auto message_dialog = new ScrollMessageBox(m_parent, tr("Non-whitelisted mods found"),
+                                                           tr("The following mods have URLs that are not whitelisted by Modrinth.\n"
+                                                              "Proceed with caution!"),
+                                                           text);
+                message_dialog->setModal(true);
+                if (message_dialog->exec() == QDialog::Rejected) {
+                    emitFailed("Aborted");
+                    return;
+                }
             }
 
             auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
