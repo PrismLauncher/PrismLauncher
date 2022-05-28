@@ -141,9 +141,15 @@ Section "PolyMC"
 
 SectionEnd
 
-Section "Start Menu Shortcuts" SHORTCUTS
+Section "Start Menu Shortcut" SM_SHORTCUTS
 
   CreateShortcut "$SMPROGRAMS\PolyMC.lnk" "$INSTDIR\polymc.exe" "" "$INSTDIR\polymc.exe" 0
+
+SectionEnd
+
+Section "Desktop Shortcut" DESKTOP_SHORTCUTS
+
+  CreateShortcut "$DESKTOP\PolyMC.lnk" "$INSTDIR\polymc.exe" "" "$INSTDIR\polymc.exe" 0
 
 SectionEnd
 
@@ -215,6 +221,7 @@ Section "Uninstall"
   RMDir /r $INSTDIR\styles
 
   Delete "$SMPROGRAMS\PolyMC.lnk"
+  Delete "$DESKTOP\PolyMC.lnk"
 
   RMDir "$INSTDIR"
 
@@ -228,6 +235,7 @@ Function .onInit
 ${GetParameters} $R0
 ${GetOptions} $R0 "/NoShortcuts" $R1
 ${IfNot} ${Errors}
-  !insertmacro UnselectSection ${SHORTCUTS}
+  !insertmacro UnselectSection ${SM_SHORTCUTS}
+  !insertmacro UnselectSection ${DESKTOP_SHORTCUTS}
 ${EndIf}
 FunctionEnd
