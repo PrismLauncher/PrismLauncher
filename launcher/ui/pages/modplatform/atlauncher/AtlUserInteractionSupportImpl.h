@@ -35,70 +35,22 @@
 
 #pragma once
 
-#include "AtlFilterModel.h"
-#include "AtlListModel.h"
+#include <QObject>
 
-#include <QWidget>
-#include <modplatform/atlauncher/ATLPackInstallTask.h>
+#include "modplatform/atlauncher/ATLPackInstallTask.h"
 
-#include "Application.h"
-#include "ui/pages/BasePage.h"
-#include "tasks/Task.h"
-
-namespace Ui
-{
-    class AtlPage;
-}
-
-class NewInstanceDialog;
-
-class AtlPage : public QWidget, public BasePage
-{
-Q_OBJECT
+class AtlUserInteractionSupportImpl : public QObject, public ATLauncher::UserInteractionSupport {
+    Q_OBJECT
 
 public:
-    explicit AtlPage(NewInstanceDialog* dialog, QWidget *parent = 0);
-    virtual ~AtlPage();
-    virtual QString displayName() const override
-    {
-        return "ATLauncher";
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("atlauncher");
-    }
-    virtual QString id() const override
-    {
-        return "atl";
-    }
-    virtual QString helpPage() const override
-    {
-        return "ATL-platform";
-    }
-    virtual bool shouldDisplay() const override;
-    void retranslate() override;
-
-    void openedImpl() override;
+    AtlUserInteractionSupportImpl(QWidget* parent);
 
 private:
-    void suggestCurrent();
-
-private slots:
-    void triggerSearch();
-
-    void onSortingSelectionChanged(QString data);
-
-    void onSelectionChanged(QModelIndex first, QModelIndex second);
-    void onVersionSelectionChanged(QString data);
+    QString chooseVersion(Meta::VersionListPtr vlist, QString minecraftVersion) override;
+    QVector<QString> chooseOptionalMods(ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods) override;
+    void displayMessage(QString message) override;
 
 private:
-    Ui::AtlPage *ui = nullptr;
-    NewInstanceDialog* dialog = nullptr;
-    Atl::ListModel* listModel = nullptr;
-    Atl::FilterModel* filterModel = nullptr;
+    QWidget* m_parent;
 
-    ATLauncher::IndexedPack selected;
-    QString selectedVersion;
-
-    bool initialized = false;
 };

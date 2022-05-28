@@ -741,6 +741,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/atlauncher/AtlOptionalModDialog.h
     ui/pages/modplatform/atlauncher/AtlPage.cpp
     ui/pages/modplatform/atlauncher/AtlPage.h
+    ui/pages/modplatform/atlauncher/AtlUserInteractionSupportImpl.cpp
+    ui/pages/modplatform/atlauncher/AtlUserInteractionSupportImpl.h
 
     ui/pages/modplatform/ftb/FtbFilterModel.cpp
     ui/pages/modplatform/ftb/FtbFilterModel.h
