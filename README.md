@@ -82,8 +82,11 @@ To modify download information or change packaging information send a pull reque
 
 Do whatever you want, we don't care. Just follow the license. If you have any questions about this feel free to ask in an issue.
 
+Be aware that if you build this software without removing the provided API keys in [CMakeLists.txt](CMakeLists.txt) you are accepting the following terms and conditions:
+ - [Microsoft Identity Platform Terms of Use](https://docs.microsoft.com/en-us/legal/microsoft-identity-platform/terms-of-use)
+ - [CurseForge 3rd Party API Terms and Conditions](https://support.curseforge.com/en/support/solutions/articles/9000207405-curse-forge-3rd-party-api-terms-and-conditions)
+If you do not agree with these terms and conditions, then remove the associated API keys from the [CMakeLists.txt](CMakeLists.txt) file.
+
 All launcher code is available under the GPL-3.0-only license.
   
-[Source for the website](https://github.com/PolyMC/polymc.github.io) is hosted under the AGPL-3.0-or-later License.
-
 The logo and related assets are under the CC BY-SA 4.0 license.
