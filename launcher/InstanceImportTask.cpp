@@ -644,11 +644,15 @@ void InstanceImportTask::processModrinth()
 
                 file.download = Json::requireString(Json::ensureArray(modInfo, "downloads").first(), "Download URL for " + file.path);
 
-                if(!file.download.isValid())
+                if (!file.download.isValid()) {
+                    qDebug() << QString("Download URL (%1) for %2 is not a correctly formatted URL").arg(file.download.toString(), file.path);
                     throw JSONValidationError(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));
-                else if(!Modrinth::validateDownloadUrl(file.download))
+                }
+                else if (!Modrinth::validateDownloadUrl(file.download)) {
+                    qDebug() << QString("Download URL (%1) for %2 is from a non-whitelisted by Modrinth domain").arg(file.download.toString(), file.path);
                     throw JSONValidationError(
                             tr("Download URL for %1 is from a non-whitelisted by Modrinth domain: %2").arg(file.path, file.download.host()));
+                }
 
                 files.push_back(file);
             }
