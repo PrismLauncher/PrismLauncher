@@ -863,6 +863,7 @@ void PackInstallTask::install()
 
     instance.setName(m_instName);
     instance.setIconKey(m_instIcon);
+    instance.setManagedPack("atlauncher", m_pack_safe_name, m_pack_name, m_version_name, m_version_name);
     instanceSettings->resumeSave();
 
     jarmods.clear();
