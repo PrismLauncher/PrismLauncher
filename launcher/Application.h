@@ -164,7 +164,7 @@ public:
     QString getJarPath(QString jarFile);
 
     QString getMSAClientID();
-    QString getCurseKey();
+    QString getFlameAPIKey();
     QString getUserAgent();
     QString getUserAgentUncached();
 

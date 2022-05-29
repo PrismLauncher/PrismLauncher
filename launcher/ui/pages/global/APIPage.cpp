@@ -137,8 +137,8 @@ void APIPage::loadSettings()
     ui->msaClientID->setText(msaClientID);
     QString metaURL = s->get("MetaURLOverride").toString();
     ui->metaURL->setText(metaURL);
-    QString curseKey = s->get("CFKeyOverride").toString();
-    ui->curseKey->setText(curseKey);
+    QString flameKey = s->get("FlameKeyOverride").toString();
+    ui->flameKey->setText(flameKey);
     QString customUserAgent = s->get("UserAgentOverride").toString();
     ui->userAgentLineEdit->setText(customUserAgent);
 }
@@ -167,8 +167,8 @@ void APIPage::applySettings()
     }
 
     s->set("MetaURLOverride", metaURL);
-    QString curseKey = ui->curseKey->text();
-    s->set("CFKeyOverride", curseKey);
+    QString flameKey = ui->flameKey->text();
+    s->set("FlameKeyOverride", flameKey);
     s->set("UserAgentOverride", ui->userAgentLineEdit->text());
 }
 
