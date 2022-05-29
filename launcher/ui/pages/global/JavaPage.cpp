@@ -95,7 +95,7 @@ void JavaPage::applySettings()
 
     // Java Settings
     s->set("JavaPath", ui->javaPathTextBox->text());
-    s->set("JvmArgs", ui->jvmArgsTextBox->toPlainText());
+    s->set("JvmArgs", ui->jvmArgsTextBox->toPlainText().replace("\n", " "));
     s->set("IgnoreJavaCompatibility", ui->skipCompatibilityCheckbox->isChecked());
     s->set("IgnoreJavaWizard", ui->skipJavaWizardCheckbox->isChecked());
     JavaCommon::checkJVMArgs(s->get("JvmArgs").toString(), this->parentWidget());
