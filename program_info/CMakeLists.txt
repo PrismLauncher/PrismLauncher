@@ -21,3 +21,6 @@ set(Launcher_Portable_File "program_info/portable.txt" PARENT_SCOPE)
 
 configure_file(org.polymc.PolyMC.desktop.in org.polymc.PolyMC.desktop)
 configure_file(org.polymc.PolyMC.metainfo.xml.in org.polymc.PolyMC.metainfo.xml)
+configure_file(polymc.rc.in polymc.rc @ONLY)
+configure_file(polymc.manifest.in polymc.manifest @ONLY)
+configure_file(polymc.ico polymc.ico COPYONLY)
