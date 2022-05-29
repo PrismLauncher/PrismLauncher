@@ -11,6 +11,7 @@
 , xorg
 , libpulseaudio
 , qtbase
+, quazip
 , libGL
 , msaClientID ? ""
 
@@ -18,6 +19,7 @@
 , self
 , version
 , libnbtplusplus
+, enableLTO ? false
 }:
 
 let
@@ -57,9 +59,9 @@ stdenv.mkDerivation rec {
 
   cmakeFlags = [
     "-GNinja"
-    "-DENABLE_LTO=on"
     "-DLauncher_QT_VERSION_MAJOR=${lib.versions.major qtbase.version}"
-  ] ++ lib.optionals (msaClientID != "") [ "-DLauncher_MSA_CLIENT_ID=${msaClientID}" ];
+  ] ++ lib.optionals enableLTO [ "-DENABLE_LTO=on" ]
+    ++ lib.optionals (msaClientID != "") [ "-DLauncher_MSA_CLIENT_ID=${msaClientID}" ];
 
   postInstall = ''
     # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
