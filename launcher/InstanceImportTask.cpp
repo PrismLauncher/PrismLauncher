@@ -164,14 +164,14 @@ void InstanceImportTask::processZipPack()
         QString mmcRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "instance.cfg");
         QString flameRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "manifest.json");
 
-        if (!mmcRoot.isEmpty())
+        if (!mmcRoot.isNull())
         {
             // process as MultiMC instance/pack
             qDebug() << "MultiMC:" << mmcRoot;
             root = mmcRoot;
             m_modpackType = ModpackType::MultiMC;
         }
-        else if(!flameRoot.isEmpty())
+        else if(!flameRoot.isNull())
         {
             // process as Flame pack
             qDebug() << "Flame:" << flameRoot;
