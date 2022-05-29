@@ -69,7 +69,6 @@ private:
 
     QString InstIconKey;
     ImportPage *importPage = nullptr;
-    FlamePage *flamePage = nullptr;
     std::unique_ptr<InstanceTask> creationTask;
 
     bool importIcon = false;

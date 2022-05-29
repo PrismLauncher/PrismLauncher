@@ -93,6 +93,14 @@ public:
         Initialized
     };
 
+    enum Capability {
+        None = 0,
+
+        SupportsMSA = 1 << 0,
+        SupportsFlame = 1 << 1,
+    };
+    Q_DECLARE_FLAGS(Capabilities, Capability)
+
 public:
     Application(int &argc, char **argv);
     virtual ~Application();
@@ -156,6 +164,8 @@ public:
     shared_qobject_ptr<HttpMetaCache> metacache();
 
     shared_qobject_ptr<Meta::Index> metadataIndex();
+
+    Capabilities currentCapabilities();
 
     /*!
      * Finds and returns the full path to a jar file.

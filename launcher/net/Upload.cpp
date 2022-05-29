@@ -174,7 +174,8 @@ namespace Net {
         }
 
         request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
-        if (request.url().host().contains("api.curseforge.com")) {
+        if (APPLICATION->currentCapabilities() & Application::SupportsFlame
+                && request.url().host().contains("api.curseforge.com")) {
             request.setRawHeader("x-api-key", APPLICATION->getFlameAPIKey().toUtf8());
         }
         //TODO other types of post requests ?

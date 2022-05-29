@@ -48,9 +48,6 @@ private:
     QDialogButtonBox * m_buttons = nullptr;
     QVBoxLayout *m_verticalLayout = nullptr;
 
-
-    ModrinthModPage *modrinthPage = nullptr;
-    FlameModPage *flameModPage = nullptr;
     QHash<QString, ModDownloadTask*> modTask;
     BaseInstance *m_instance;
 };

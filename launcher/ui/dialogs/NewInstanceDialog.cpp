@@ -124,20 +124,21 @@ void NewInstanceDialog::accept()
 
 QList<BasePage *> NewInstanceDialog::getPages()
 {
+    QList<BasePage *> pages;
+
     importPage = new ImportPage(this);
-    flamePage = new FlamePage(this);
-    auto technicPage = new TechnicPage(this);
-    return
-    {
-        new VanillaPage(this),
-        importPage,
-        new AtlPage(this),
-        flamePage,
-        new FtbPage(this),
-        new LegacyFTB::Page(this),
-        new ModrinthPage(this),
-        technicPage
-    };
+
+    pages.append(new VanillaPage(this));
+    pages.append(importPage);
+    pages.append(new AtlPage(this));
+    if (APPLICATION->currentCapabilities() & Application::SupportsFlame)
+        pages.append(new FlamePage(this));
+    pages.append(new FtbPage(this));
+    pages.append(new LegacyFTB::Page(this));
+    pages.append(new ModrinthPage(this));
+    pages.append(new TechnicPage(this));
+
+    return pages;
 }
 
 QString NewInstanceDialog::dialogTitle()

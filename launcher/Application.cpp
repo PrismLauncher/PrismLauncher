@@ -1569,6 +1569,16 @@ shared_qobject_ptr<Meta::Index> Application::metadataIndex()
     return m_metadataIndex;
 }
 
+Application::Capabilities Application::currentCapabilities()
+{
+    Capabilities c;
+    if (!getMSAClientID().isEmpty())
+        c |= SupportsMSA;
+    if (!getFlameAPIKey().isEmpty())
+        c |= SupportsFlame;
+    return c;
+}
+
 QString Application::getJarPath(QString jarFile)
 {
     QStringList potentialPaths = {

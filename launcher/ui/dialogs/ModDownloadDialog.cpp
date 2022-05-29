@@ -4,6 +4,7 @@
 #include <icons/IconList.h>
 #include <InstanceList.h>
 
+#include "Application.h"
 #include "ProgressDialog.h"
 #include "ReviewMessageBox.h"
 
@@ -100,13 +101,13 @@ void ModDownloadDialog::accept()
 
 QList<BasePage *> ModDownloadDialog::getPages()
 {
-    modrinthPage = new ModrinthModPage(this, m_instance);
-    flameModPage = new FlameModPage(this, m_instance);
-    return
-    {
-        modrinthPage,
-        flameModPage
-    };
+    QList<BasePage *> pages;
+
+    pages.append(new ModrinthModPage(this, m_instance));
+    if (APPLICATION->currentCapabilities() & Application::SupportsFlame)
+        pages.append(new FlameModPage(this, m_instance));
+
+    return pages;
 }
 
 void ModDownloadDialog::addSelectedMod(const QString& name, ModDownloadTask* task)
