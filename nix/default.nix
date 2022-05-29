@@ -1,5 +1,5 @@
-{ lib
-, mkDerivation
+{ stdenv
+, lib
 , fetchFromGitHub
 , cmake
 , ninja
@@ -7,7 +7,7 @@
 , jdk
 , zlib
 , file
-, makeWrapper
+, wrapQtAppsHook
 , xorg
 , libpulseaudio
 , qtbase
@@ -18,7 +18,6 @@
 , self
 , version
 , libnbtplusplus
-, quazip
 }:
 
 let
@@ -37,41 +36,34 @@ let
   gameLibraryPath = libpath + ":/run/opengl-driver/lib";
 in
 
-mkDerivation rec {
+stdenv.mkDerivation rec {
   pname = "polymc";
   inherit version;
 
   src = lib.cleanSource self;
 
-  nativeBuildInputs = [ cmake ninja file makeWrapper ];
-  buildInputs = [ qtbase jdk zlib ];
+  nativeBuildInputs = [ cmake ninja jdk file wrapQtAppsHook ];
+  buildInputs = [ qtbase quazip zlib ];
 
   dontWrapQtApps = true;
 
-  postPatch = lib.optionalString (msaClientID != "") ''
-    # add client ID
-    substituteInPlace CMakeLists.txt \
-      --replace '17b47edd-c884-4997-926d-9e7f9a6b4647' '${msaClientID}'
-  '';
-
   postUnpack = ''
-    # Copy submodules inputs
-    rm -rf source/libraries/{libnbtplusplus,quazip}
-    mkdir source/libraries/{libnbtplusplus,quazip}
+    # Copy libnbtplusplus
+    rm -rf source/libraries/libnbtplusplus
+    mkdir source/libraries/libnbtplusplus
     cp -a ${libnbtplusplus}/* source/libraries/libnbtplusplus
-    cp -a ${quazip}/* source/libraries/quazip
-    chmod a+r+w source/libraries/{libnbtplusplus,quazip}/*
+    chmod a+r+w source/libraries/libnbtplusplus/*
   '';
 
   cmakeFlags = [
     "-GNinja"
-    "-DLauncher_PORTABLE=OFF"
-  ];
+    "-DENABLE_LTO=on"
+    "-DLauncher_QT_VERSION_MAJOR=${lib.versions.major qtbase.version}"
+  ] ++ lib.optionals (msaClientID != "") [ "-DLauncher_MSA_CLIENT_ID=${msaClientID}" ];
 
   postInstall = ''
     # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
-    wrapProgram $out/bin/polymc \
-      "''${qtWrapperArgs[@]}" \
+    wrapQtApp $out/bin/polymc \
       --set GAME_LIBRARY_PATH ${gameLibraryPath} \
       --prefix POLYMC_JAVA_PATHS : ${jdk}/lib/openjdk/bin/java:${jdk8}/lib/openjdk/bin/java \
       --prefix PATH : ${lib.makeBinPath [ xorg.xrandr ]}
