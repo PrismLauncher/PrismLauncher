@@ -68,7 +68,7 @@ class ModAPI {
     {
         QString s;
         for(auto& ver : mcVersions){
-            s += QString("%1,").arg(ver.toString());
+            s += QString("\"%1\",").arg(ver.toString());
         }
         s.remove(s.length() - 1, 1); //remove last comma
         return s;
