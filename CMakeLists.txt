@@ -91,13 +91,6 @@ set(Launcher_META_URL "https://meta.polymc.org/v1/" CACHE STRING "URL to fetch L
 # Imgur API Client ID
 set(Launcher_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can get from Imgur when you register an application")
 
-# MSA Client ID
-set(Launcher_MSA_CLIENT_ID "549033b2-1532-4d4e-ae77-1bbaa46f9d74" CACHE STRING "Client ID you can get from Microsoft Identity Platform when you register an application")
-
-# CurseForge API Key
-# CHANGE THIS IF YOU FORK THIS PROJECT!
-set(Launcher_CURSEFORGE_API_KEY "$2a$10$1Oqr2MX3O4n/ilhFGc597u8tfI3L2Hyr9/rtWDAMRjghSQV2QUuxq" CACHE STRING "CurseForge API Key")
-
 # Bug tracker URL
 set(Launcher_BUG_TRACKER_URL "https://github.com/PolyMC/PolyMC/issues" CACHE STRING "URL for the bug tracker.")
 
@@ -118,6 +111,22 @@ set(Launcher_SUBREDDIT_URL "https://www.reddit.com/r/PolyMCLauncher/" CACHE STRI
 # Builds
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
 set(Launcher_QT_VERSION_MAJOR "5" CACHE STRING "Major Qt version to build against")
+
+# API Keys
+# NOTE: These API keys are here for convenience. If you rebrand this software or intend to break the terms of service
+# of these platforms, please change these API keys beforehand.
+# Be aware that if you were to use these API keys for malicious purposes they might get revoked, which might cause
+# breakage to thousands of users.
+# If you don't plan to use these features of this software, you can just remove these values.
+
+# By using this key in your builds you accept the terms of use laid down in
+# https://docs.microsoft.com/en-us/legal/microsoft-identity-platform/terms-of-use
+set(Launcher_MSA_CLIENT_ID "549033b2-1532-4d4e-ae77-1bbaa46f9d74" CACHE STRING "Client ID you can get from Microsoft Identity Platform when you register an application")
+
+# By using this key in your builds you accept the terms and conditions laid down in
+# https://support.curseforge.com/en/support/solutions/articles/9000207405-curse-forge-3rd-party-api-terms-and-conditions
+# NOTE: CurseForge requires you to change this if you make any kind of derivative work.
+set(Launcher_CURSEFORGE_API_KEY "$2a$10$1Oqr2MX3O4n/ilhFGc597u8tfI3L2Hyr9/rtWDAMRjghSQV2QUuxq" CACHE STRING "CurseForge API Key")
 
 
 #### Check the current Git commit and branch
