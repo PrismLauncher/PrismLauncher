@@ -69,13 +69,15 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
     // This is structured like that so that these changes
     // do not affect the Resource pack and Shader pack tabs
     {
-        auto act = new QAction(tr("Download mods"), this);
-        act->setToolTip(tr("Download mods from online mod platforms"));
-        ui->actionsToolbar->insertActionBefore(ui->actionAddItem, act);
-        connect(act, &QAction::triggered, this, &ModFolderPage::installMods);
+        ui->actionDownloadItem->setText(tr("Download mods"));
+        ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
+        ui->actionDownloadItem->setEnabled(true);
+        ui->actionAddItem->setText(tr("Add file"));
+        ui->actionAddItem->setToolTip(tr("Add a locally downloaded file"));
 
-        ui->actionAddItem->setText(tr("Add .jar"));
-        ui->actionAddItem->setToolTip(tr("Add mods via local file"));
+        ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
+
+        connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::installMods);
     }
 }
 

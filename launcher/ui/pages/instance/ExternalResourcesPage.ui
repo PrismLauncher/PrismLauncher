@@ -136,6 +136,17 @@
     <string>View &amp;Folder</string>
    </property>
   </action>
+  <action name="actionDownloadItem">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Download</string>
+   </property>
+   <property name="toolTip">
+    <string>Download a new resource</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
