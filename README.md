@@ -83,7 +83,7 @@ To modify download information or change packaging information send a pull reque
 We don't care what you do with your fork as long as you do the following as a basic courtesy:
 - Follow the terms of the [license](LICENSE) (not just a courtesy, but also a legal responsibility)
 - Make it clear that your fork is not PolyMC and is not endorsed by or affiliated with the PolyMC project (https://polymc.org).
-- If you are distributing this fork, go through [CMakeLists.txt](CMakeLists.txt) and change PolyMC's API keys to your own or set them to empty strings (`""`) to disable them (this way the program will still compile but the functionality requiring to those keys will be disabled).
+- If you are distributing this fork, go through [CMakeLists.txt](CMakeLists.txt) and change PolyMC's API keys to your own or set them to empty strings (`""`) to disable them (this way the program will still compile but the functionality requiring those keys will be disabled).
 
 If you have any questions or want any clarification on the above conditions please make an issue and ask us.
 
