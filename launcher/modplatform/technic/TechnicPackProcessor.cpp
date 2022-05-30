@@ -187,7 +187,7 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings, const 
             }
             else
             {
-                static QSet<QString> possibleLoaders{
+                static QStringList possibleLoaders{
                         "net.minecraftforge:minecraftforge:",
                         "net.fabricmc:fabric-loader:",
                         "org.quiltmc:quilt-loader:"
