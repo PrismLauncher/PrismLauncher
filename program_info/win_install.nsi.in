@@ -4,11 +4,11 @@
 
 Unicode true
 
-Name "@Launcher_Name@"
-InstallDir "$LOCALAPPDATA\Programs\@Launcher_Name@"
-InstallDirRegKey HKCU "Software\@Launcher_Name@" "InstallDir"
+Name "@Launcher_CommonName@"
+InstallDir "$LOCALAPPDATA\Programs\@Launcher_CommonName@"
+InstallDirRegKey HKCU "Software\@Launcher_CommonName@" "InstallDir"
 RequestExecutionLevel user
-OutFile "../@Launcher_Name@-Setup.exe"
+OutFile "../@Launcher_CommonName@-Setup.exe"
 
 !define MUI_ICON "../@Launcher_Branding_ICO@"
 
@@ -102,7 +102,7 @@ OutFile "../@Launcher_Name@-Setup.exe"
 ;--------------------------------
 
 ; The stuff to install
-Section "@Launcher_Name@"
+Section "@Launcher_CommonName@"
 
   SectionIn RO
 
@@ -120,19 +120,19 @@ Section "@Launcher_Name@"
   File /r "styles"
 
   ; Write the installation path into the registry
-  WriteRegStr HKCU Software\@Launcher_Name@ "InstallDir" "$INSTDIR"
+  WriteRegStr HKCU Software\@Launcher_CommonName@ "InstallDir" "$INSTDIR"
 
   ; Write the uninstall keys for Windows
   ${GetParameters} $R0
   ${GetOptions} $R0 "/NoUninstaller" $R1
   ${If} ${Errors}
-    !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\@Launcher_Name@"
-    WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "@Launcher_Name@"
+    !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\@Launcher_CommonName@"
+    WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "@Launcher_CommonName@"
     WriteRegStr HKCU "${UNINST_KEY}" "DisplayIcon" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe"
     WriteRegStr HKCU "${UNINST_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe"'
     WriteRegStr HKCU "${UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
     WriteRegStr HKCU "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
-    WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "@Launcher_Name@ Contributors"
+    WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "@Launcher_CommonName@ Contributors"
     WriteRegStr HKCU "${UNINST_KEY}" "ProductVersion" "@Launcher_RELEASE_VERSION_NAME@"
     ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
     IntFmt $0 "0x%08X" $0
@@ -146,13 +146,13 @@ SectionEnd
 
 Section "Start Menu Shortcut" SM_SHORTCUTS
 
-  CreateShortcut "$SMPROGRAMS\@Launcher_Name@.lnk" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" 0
+  CreateShortcut "$SMPROGRAMS\@Launcher_CommonName@.lnk" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" 0
 
 SectionEnd
 
 Section "Desktop Shortcut" DESKTOP_SHORTCUTS
 
-  CreateShortcut "$DESKTOP\@Launcher_Name@.lnk" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" 0
+  CreateShortcut "$DESKTOP\@Launcher_CommonName@.lnk" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" 0
 
 SectionEnd
 
@@ -164,8 +164,8 @@ Section "Uninstall"
 
   nsExec::Exec /TIMEOUT=2000 'TaskKill /IM @Launcher_APP_BINARY_NAME@.exe /F'
 
-  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\@Launcher_Name@"
-  DeleteRegKey HKCU SOFTWARE\@Launcher_Name@
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\@Launcher_CommonName@"
+  DeleteRegKey HKCU SOFTWARE\@Launcher_CommonName@
 
   Delete $INSTDIR\@Launcher_APP_BINARY_NAME@.exe
   Delete $INSTDIR\uninstall.exe
@@ -223,8 +223,8 @@ Section "Uninstall"
   RMDir /r $INSTDIR\platforms
   RMDir /r $INSTDIR\styles
 
-  Delete "$SMPROGRAMS\@Launcher_Name@.lnk"
-  Delete "$DESKTOP\@Launcher_Name@.lnk"
+  Delete "$SMPROGRAMS\@Launcher_CommonName@.lnk"
+  Delete "$DESKTOP\@Launcher_CommonName@.lnk"
 
   RMDir "$INSTDIR"
 

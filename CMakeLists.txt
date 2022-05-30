@@ -260,8 +260,6 @@ elseif(WIN32)
 
     # install as bundle
     set(INSTALL_BUNDLE "full")
-
-    configure_file(program_info/win_install.nsi.in program_info/win_install.nsi @ONLY)
 else()
     message(FATAL_ERROR "Platform not supported")
 endif()
