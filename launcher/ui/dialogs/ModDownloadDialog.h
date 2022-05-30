@@ -32,6 +32,7 @@ public:
     void addSelectedMod(const QString & name = QString(), ModDownloadTask * task = nullptr);
     void removeSelectedMod(const QString & name = QString());
     bool isModSelected(const QString & name, const QString & filename) const;
+    bool isModSelected(const QString & name) const;
 
     const QList<ModDownloadTask*> getTasks();
     const std::shared_ptr<ModFolderModel> &mods;
@@ -40,8 +41,6 @@ public slots:
     void confirm();
     void accept() override;
     void reject() override;
-
-//private slots:
 
 private:
     Ui::ModDownloadDialog *ui = nullptr;

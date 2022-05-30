@@ -41,6 +41,7 @@ class ModPage : public QWidget, public BasePage {
 
     auto apiProvider() const -> const ModAPI* { return api.get(); };
     auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
+    auto getDialog() const -> const ModDownloadDialog* { return dialog; }
 
     auto getCurrent() -> ModPlatform::IndexedPack& { return current; }
     void updateModVersions(int prev_count = -1);
