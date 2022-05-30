@@ -185,13 +185,22 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings, const 
                     components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1, 1));
                 }
             }
-            else if (libraryName.startsWith("net.minecraftforge:minecraftforge:"))
+            else
             {
-                components->setComponentVersion("net.minecraftforge", libraryName.section(':', 2));
-            }
-            else if (libraryName.startsWith("net.fabricmc:fabric-loader:"))
-            {
-                components->setComponentVersion("net.fabricmc.fabric-loader", libraryName.section(':', 2));
+                static QSet<QString> possibleLoaders{
+                        "net.minecraftforge:minecraftforge:",
+                        "net.fabricmc:fabric-loader:",
+                        "org.quiltmc:quilt-loader:"
+                };
+                for (const auto& loader : possibleLoaders)
+                {
+                    if (libraryName.startsWith(loader))
+                    {
+                        auto loaderComponent = loader.chopped(1).replace(":", ".");
+                        components->setComponentVersion(loaderComponent, libraryName.section(':', 2));
+                        break;
+                    }
+                }
             }
         }
     }
