@@ -40,8 +40,10 @@
 
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QRegularExpression>
 #include <QStandardPaths>
 #include <QTabBar>
+#include <QValidator>
 #include <QVariant>
 
 #include "settings/SettingsObject.h"
@@ -63,6 +65,10 @@ APIPage::APIPage(QWidget *parent) :
     };
 
     static QRegularExpression validUrlRegExp("https?://.+");
+    static QRegularExpression validMSAClientID(QRegularExpression::anchoredPattern(
+                "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"));
+    static QRegularExpression validFlameKey(QRegularExpression::anchoredPattern(
+                "\\$2[ayb]\\$.{56}"));
 
     ui->setupUi(this);
 
@@ -75,6 +81,8 @@ APIPage::APIPage(QWidget *parent) :
     // This function needs to be called even when the ComboBox's index is still in its default state.
     updateBaseURLPlaceholder(ui->pasteTypeComboBox->currentIndex());
     ui->baseURLEntry->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->baseURLEntry));
+    ui->msaClientID->setValidator(new QRegularExpressionValidator(validMSAClientID, ui->msaClientID));
+    ui->flameKey->setValidator(new QRegularExpressionValidator(validFlameKey, ui->flameKey));
 
     ui->metaURL->setPlaceholderText(BuildConfig.META_URL);
     ui->userAgentLineEdit->setPlaceholderText(BuildConfig.USER_AGENT);
