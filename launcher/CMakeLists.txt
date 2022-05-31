@@ -128,6 +128,8 @@ set(NET_SOURCES
     net/PasteUpload.h
     net/Sink.h
     net/Validator.h
+    net/Upload.cpp
+    net/Upload.h
 )
 
 # Game launch logic
@@ -837,6 +839,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/SkinUploadDialog.h
     ui/dialogs/ModDownloadDialog.cpp
     ui/dialogs/ModDownloadDialog.h
+    ui/dialogs/ScrollMessageBox.cpp
+    ui/dialogs/ScrollMessageBox.h
 
     # GUI - widgets
     ui/widgets/Common.cpp
@@ -940,6 +944,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/dialogs/LoginDialog.ui
     ui/dialogs/EditAccountDialog.ui
     ui/dialogs/ReviewMessageBox.ui
+    ui/dialogs/ScrollMessageBox.ui
 )
 
 qt5_add_resources(LAUNCHER_RESOURCES
@@ -958,7 +963,7 @@ qt5_add_resources(LAUNCHER_RESOURCES
 
 ######## Windows resource files ########
 if(WIN32)
-    set(LAUNCHER_RCS ../${Launcher_Branding_WindowsRC})
+    set(LAUNCHER_RCS ${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_WindowsRC})
 endif()
 
 # Add executable

@@ -201,7 +201,7 @@ void FlamePage::suggestCurrent()
         return;
     }
 
-    dialog->setSuggestedPack(current.name, new InstanceImportTask(selectedVersion));
+    dialog->setSuggestedPack(current.name, new InstanceImportTask(selectedVersion,this));
     QString editedLogoName;
     editedLogoName = "curseforge_" + current.logoName.section(".", 0, 0);
     listModel->getLogo(current.logoName, current.logoUrl,

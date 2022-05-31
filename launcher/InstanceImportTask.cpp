@@ -60,9 +60,9 @@
 #include "net/ChecksumValidator.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ScrollMessageBox.h"
 
 #include <algorithm>
-#include <iterator>
 
 InstanceImportTask::InstanceImportTask(const QUrl sourceUrl, QWidget* parent)
 {
@@ -72,7 +72,8 @@ InstanceImportTask::InstanceImportTask(const QUrl sourceUrl, QWidget* parent)
 
 bool InstanceImportTask::abort()
 {
-    m_filesNetJob->abort();
+    if (m_filesNetJob)
+        m_filesNetJob->abort();
     m_extractFuture.cancel();
 
     return false;
@@ -135,18 +136,20 @@ void InstanceImportTask::processZipPack()
         return;
     }
 
-    QStringList blacklist = {"instance.cfg", "manifest.json"};
-    QString mmcFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "instance.cfg");
-    bool technicFound = QuaZipDir(m_packZip.get()).exists("/bin/modpack.jar") || QuaZipDir(m_packZip.get()).exists("/bin/version.json");
-    QString flameFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "manifest.json");
-    QString modrinthFound = MMCZip::findFolderOfFileInZip(m_packZip.get(), "modrinth.index.json");
+    QuaZipDir packZipDir(m_packZip.get());
+
+    // https://docs.modrinth.com/docs/modpacks/format_definition/#storage
+    bool modrinthFound = packZipDir.exists("/modrinth.index.json");
+    bool technicFound = packZipDir.exists("/bin/modpack.jar") || packZipDir.exists("/bin/version.json");
     QString root;
-    if(!mmcFound.isNull())
+
+    // NOTE: Prioritize modpack platforms that aren't searched for recursively.
+    // Especially Flame has a very common filename for its manifest, which may appear inside overrides for example
+    if(modrinthFound)
     {
-        // process as MultiMC instance/pack
-        qDebug() << "MultiMC:" << mmcFound;
-        root = mmcFound;
-        m_modpackType = ModpackType::MultiMC;
+        // process as Modrinth pack
+        qDebug() << "Modrinth:" << modrinthFound;
+        m_modpackType = ModpackType::Modrinth;
     }
     else if (technicFound)
     {
@@ -156,19 +159,25 @@ void InstanceImportTask::processZipPack()
         extractDir.cd(".minecraft");
         m_modpackType = ModpackType::Technic;
     }
-    else if(!flameFound.isNull())
+    else
     {
-        // process as Flame pack
-        qDebug() << "Flame:" << flameFound;
-        root = flameFound;
-        m_modpackType = ModpackType::Flame;
-    }
-    else if(!modrinthFound.isNull())
-    {
-        // process as Modrinth pack
-        qDebug() << "Modrinth:" << modrinthFound;
-        root = modrinthFound;
-        m_modpackType = ModpackType::Modrinth;
+        QString mmcRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "instance.cfg");
+        QString flameRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "manifest.json");
+
+        if (!mmcRoot.isNull())
+        {
+            // process as MultiMC instance/pack
+            qDebug() << "MultiMC:" << mmcRoot;
+            root = mmcRoot;
+            m_modpackType = ModpackType::MultiMC;
+        }
+        else if(!flameRoot.isNull())
+        {
+            // process as Flame pack
+            qDebug() << "Flame:" << flameRoot;
+            root = flameRoot;
+            m_modpackType = ModpackType::Flame;
+        }
     }
     if(m_modpackType == ModpackType::Unknown)
     {
@@ -385,61 +394,136 @@ void InstanceImportTask::processFlame()
     connect(m_modIdResolver.get(), &Flame::FileResolvingTask::succeeded, [&]()
     {
         auto results = m_modIdResolver->getResults();
-        m_filesNetJob = new NetJob(tr("Mod download"), APPLICATION->network());
-        for(auto result: results.files)
-        {
-            QString filename = result.fileName;
-            if(!result.required)
-            {
-                filename += ".disabled";
-            }
-
-            auto relpath = FS::PathCombine("minecraft", result.targetFolder, filename);
-            auto path = FS::PathCombine(m_stagingPath , relpath);
-
-            switch(result.type)
-            {
-                case Flame::File::Type::Folder:
-                {
-                    logWarning(tr("This 'Folder' may need extracting: %1").arg(relpath));
-                    // fall-through intentional, we treat these as plain old mods and dump them wherever.
-                }
-                case Flame::File::Type::SingleFile:
-                case Flame::File::Type::Mod:
-                {
-                    qDebug() << "Will download" << result.url << "to" << path;
-                    auto dl = Net::Download::makeFile(result.url, path);
-                    m_filesNetJob->addNetAction(dl);
-                    break;
-                }
-                case Flame::File::Type::Modpack:
-                    logWarning(tr("Nesting modpacks in modpacks is not implemented, nothing was downloaded: %1").arg(relpath));
-                    break;
-                case Flame::File::Type::Cmod2:
-                case Flame::File::Type::Ctoc:
-                case Flame::File::Type::Unknown:
-                    logWarning(tr("Unrecognized/unhandled PackageType for: %1").arg(relpath));
-                    break;
+        //first check for blocked mods
+        QString text;
+        auto anyBlocked = false;
+        for(const auto& result: results.files.values()) {
+            if (!result.resolved || result.url.isEmpty()) {
+                text += QString("%1: <a href='%2'>%2</a><br/>").arg(result.fileName, result.websiteUrl);
+                anyBlocked = true;
             }
         }
-        m_modIdResolver.reset();
-        connect(m_filesNetJob.get(), &NetJob::succeeded, this, [&]()
-        {
-            m_filesNetJob.reset();
-            emitSucceeded();
+        if(anyBlocked) {
+            qWarning() << "Blocked mods found, displaying mod list";
+
+            auto message_dialog = new ScrollMessageBox(m_parent,
+                                                       tr("Blocked mods found"),
+                                                       tr("The following mods were blocked on third party launchers.<br/>"
+                                                          "You will need to manually download them and add them to the modpack"),
+                                                       text);
+            message_dialog->setModal(true);
+            message_dialog->show();
+            connect(message_dialog, &QDialog::rejected, [&]() {
+                m_modIdResolver.reset();
+                emitFailed("Canceled");
+            });
+            connect(message_dialog, &QDialog::accepted, [&]() {
+                m_filesNetJob = new NetJob(tr("Mod download"), APPLICATION->network());
+                for (const auto &result: m_modIdResolver->getResults().files) {
+                    QString filename = result.fileName;
+                    if (!result.required) {
+                        filename += ".disabled";
+                    }
+
+                    auto relpath = FS::PathCombine("minecraft", result.targetFolder, filename);
+                    auto path = FS::PathCombine(m_stagingPath, relpath);
+
+                    switch (result.type) {
+                        case Flame::File::Type::Folder: {
+                            logWarning(tr("This 'Folder' may need extracting: %1").arg(relpath));
+                            // fall-through intentional, we treat these as plain old mods and dump them wherever.
+                        }
+                        case Flame::File::Type::SingleFile:
+                        case Flame::File::Type::Mod: {
+                            if (!result.url.isEmpty()) {
+                                qDebug() << "Will download" << result.url << "to" << path;
+                                auto dl = Net::Download::makeFile(result.url, path);
+                                m_filesNetJob->addNetAction(dl);
+                            }
+                            break;
+                        }
+                        case Flame::File::Type::Modpack:
+                            logWarning(
+                                    tr("Nesting modpacks in modpacks is not implemented, nothing was downloaded: %1").arg(
+                                            relpath));
+                            break;
+                        case Flame::File::Type::Cmod2:
+                        case Flame::File::Type::Ctoc:
+                        case Flame::File::Type::Unknown:
+                            logWarning(tr("Unrecognized/unhandled PackageType for: %1").arg(relpath));
+                            break;
+                    }
+                }
+                m_modIdResolver.reset();
+                connect(m_filesNetJob.get(), &NetJob::succeeded, this, [&]() {
+                            m_filesNetJob.reset();
+                            emitSucceeded();
+                        }
+                );
+                connect(m_filesNetJob.get(), &NetJob::failed, [&](QString reason) {
+                    m_filesNetJob.reset();
+                    emitFailed(reason);
+                });
+                connect(m_filesNetJob.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
+                    setProgress(current, total);
+                });
+                setStatus(tr("Downloading mods..."));
+                m_filesNetJob->start();
+            });
+        }else{
+            //TODO extract to function ?
+            m_filesNetJob = new NetJob(tr("Mod download"), APPLICATION->network());
+            for (const auto &result: m_modIdResolver->getResults().files) {
+                QString filename = result.fileName;
+                if (!result.required) {
+                    filename += ".disabled";
+                }
+
+                auto relpath = FS::PathCombine("minecraft", result.targetFolder, filename);
+                auto path = FS::PathCombine(m_stagingPath, relpath);
+
+                switch (result.type) {
+                    case Flame::File::Type::Folder: {
+                        logWarning(tr("This 'Folder' may need extracting: %1").arg(relpath));
+                        // fall-through intentional, we treat these as plain old mods and dump them wherever.
+                    }
+                    case Flame::File::Type::SingleFile:
+                    case Flame::File::Type::Mod: {
+                        if (!result.url.isEmpty()) {
+                            qDebug() << "Will download" << result.url << "to" << path;
+                            auto dl = Net::Download::makeFile(result.url, path);
+                            m_filesNetJob->addNetAction(dl);
+                        }
+                        break;
+                    }
+                    case Flame::File::Type::Modpack:
+                        logWarning(
+                                tr("Nesting modpacks in modpacks is not implemented, nothing was downloaded: %1").arg(
+                                        relpath));
+                        break;
+                    case Flame::File::Type::Cmod2:
+                    case Flame::File::Type::Ctoc:
+                    case Flame::File::Type::Unknown:
+                        logWarning(tr("Unrecognized/unhandled PackageType for: %1").arg(relpath));
+                        break;
+                }
+            }
+            m_modIdResolver.reset();
+            connect(m_filesNetJob.get(), &NetJob::succeeded, this, [&]() {
+                        m_filesNetJob.reset();
+                        emitSucceeded();
+                    }
+            );
+            connect(m_filesNetJob.get(), &NetJob::failed, [&](QString reason) {
+                m_filesNetJob.reset();
+                emitFailed(reason);
+            });
+            connect(m_filesNetJob.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
+                setProgress(current, total);
+            });
+            setStatus(tr("Downloading mods..."));
+            m_filesNetJob->start();
         }
-        );
-        connect(m_filesNetJob.get(), &NetJob::failed, [&](QString reason)
-        {
-            m_filesNetJob.reset();
-            emitFailed(reason);
-        });
-        connect(m_filesNetJob.get(), &NetJob::progress, [&](qint64 current, qint64 total)
-        {
-            setProgress(current, total);
-        });
-        setStatus(tr("Downloading mods..."));
-        m_filesNetJob->start();
     }
     );
     connect(m_modIdResolver.get(), &Flame::FileResolvingTask::failed, [&](QString reason)
@@ -501,6 +585,7 @@ void InstanceImportTask::processMultiMC()
 void InstanceImportTask::processModrinth()
 {
     std::vector<Modrinth::File> files;
+    std::vector<Modrinth::File> non_whitelisted_files;
     QString minecraftVersion, fabricVersion, quiltVersion, forgeVersion;
     try {
         QString indexPath = FS::PathCombine(m_stagingPath, "modrinth.index.json");
@@ -515,11 +600,11 @@ void InstanceImportTask::processModrinth()
 
             auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
             bool had_optional = false;
-            for (auto& obj : jsonFiles) {
+            for (auto& modInfo : jsonFiles) {
                 Modrinth::File file;
-                file.path = Json::requireString(obj, "path");
+                file.path = Json::requireString(modInfo, "path");
 
-                auto env = Json::ensureObject(obj, "env");
+                auto env = Json::ensureObject(modInfo, "env");
                 QString support = Json::ensureString(env, "client", "unsupported");
                 if (support == "unsupported") {
                     continue;
@@ -537,7 +622,7 @@ void InstanceImportTask::processModrinth()
                         file.path += ".disabled";
                 }
 
-                QJsonObject hashes = Json::requireObject(obj, "hashes");
+                QJsonObject hashes = Json::requireObject(modInfo, "hashes");
                 QString hash;
                 QCryptographicHash::Algorithm hashAlgorithm;
                 hash = Json::ensureString(hashes, "sha1");
@@ -557,11 +642,36 @@ void InstanceImportTask::processModrinth()
                 file.hashAlgorithm = hashAlgorithm;
                 // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode
                 // (as Modrinth seems to incorrectly handle spaces)
-                file.download = Json::requireString(Json::ensureArray(obj, "downloads").first(), "Download URL for " + file.path);
-                if (!file.download.isValid() || !Modrinth::validateDownloadUrl(file.download)) {
-                    throw JSONValidationError("Download URL for " + file.path + " is not a correctly formatted URL");
+
+                file.download = Json::requireString(Json::ensureArray(modInfo, "downloads").first(), "Download URL for " + file.path);
+
+                if (!file.download.isValid()) {
+                    qDebug() << QString("Download URL (%1) for %2 is not a correctly formatted URL").arg(file.download.toString(), file.path);
+                    throw JSONValidationError(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));
                 }
+                else if (!Modrinth::validateDownloadUrl(file.download)) {
+                    qDebug() << QString("Download URL (%1) for %2 is from a non-whitelisted by Modrinth domain").arg(file.download.toString(), file.path);
+                    non_whitelisted_files.push_back(file);
+                }
+
                 files.push_back(file);
+            }
+
+            if (!non_whitelisted_files.empty()) {
+                QString text;
+                for (const auto& file : non_whitelisted_files) {
+                    text += tr("Filepath: %1<br>URL: <a href='%2'>%2</a><br>").arg(file.path, file.download.toString());
+                }
+
+                auto message_dialog = new ScrollMessageBox(m_parent, tr("Non-whitelisted mods found"),
+                                                           tr("The following mods have URLs that are not whitelisted by Modrinth.\n"
+                                                              "Proceed with caution!"),
+                                                           text);
+                message_dialog->setModal(true);
+                if (message_dialog->exec() == QDialog::Rejected) {
+                    emitFailed("Aborted");
+                    return;
+                }
             }
 
             auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");

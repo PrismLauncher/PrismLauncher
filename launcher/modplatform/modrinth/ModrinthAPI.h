@@ -79,11 +79,11 @@ class ModrinthAPI : public NetworkModAPI {
     {
         return QString(BuildConfig.MODRINTH_PROD_URL +
                        "/project/%1/version?"
-                       "game_versions=[%2]"
+                       "game_versions=[%2]&"
                        "loaders=[\"%3\"]")
-            .arg(args.addonId)
-            .arg(getGameVersionsString(args.mcVersions))
-            .arg(getModLoaderStrings(args.loaders).join("\",\""));
+            .arg(args.addonId,
+             getGameVersionsString(args.mcVersions),
+             getModLoaderStrings(args.loaders).join("\",\""));
     };
 
     auto getGameVersionsArray(std::list<Version> mcVersions) const -> QString

@@ -10,7 +10,7 @@ class FileResolvingTask : public Task
 {
     Q_OBJECT
 public:
-    explicit FileResolvingTask(shared_qobject_ptr<QNetworkAccessManager> network, Flame::Manifest &toProcess);
+    explicit FileResolvingTask(const shared_qobject_ptr<QNetworkAccessManager>& network, Flame::Manifest &toProcess);
     virtual ~FileResolvingTask() {};
 
     const Flame::Manifest &getResults() const
@@ -27,7 +27,11 @@ protected slots:
 private: /* data */
     shared_qobject_ptr<QNetworkAccessManager> m_network;
     Flame::Manifest m_toProcess;
-    QVector<QByteArray> results;
+    std::shared_ptr<QByteArray> result;
     NetJob::Ptr m_dljob;
+
+    void modrinthCheckFinished();
+
+    QMap<File *, QByteArray *> blockedProjects;
 };
 }

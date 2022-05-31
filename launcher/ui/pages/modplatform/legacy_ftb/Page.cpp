@@ -175,7 +175,7 @@ void Page::suggestCurrent()
         return;
     }
 
-    dialog->setSuggestedPack(selected.name, new PackInstallTask(APPLICATION->network(), selected, selectedVersion));
+    dialog->setSuggestedPack(selected.name + " " + selectedVersion, new PackInstallTask(APPLICATION->network(), selected, selectedVersion));
     QString editedLogoName;
     if(selected.logo.toLower().startsWith("ftb"))
     {

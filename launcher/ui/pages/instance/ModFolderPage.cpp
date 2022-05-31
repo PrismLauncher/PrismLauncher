@@ -402,6 +402,10 @@ void ModFolderPage::on_actionInstall_mods_triggered()
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
         });
+        connect(tasks, &Task::aborted, [this, tasks]() {
+            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
+            tasks->deleteLater();
+        });
         connect(tasks, &Task::succeeded, [this, tasks]() {
             QStringList warnings = tasks->warnings();
             if (warnings.count()) { CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show(); }
@@ -411,6 +415,7 @@ void ModFolderPage::on_actionInstall_mods_triggered()
         for (auto task : mdownload.getTasks()) {
             tasks->addTask(task);
         }
+
         ProgressDialog loadDialog(this);
         loadDialog.setSkipButton(true, tr("Abort"));
         loadDialog.execWithTask(tasks);

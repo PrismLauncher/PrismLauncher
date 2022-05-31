@@ -48,6 +48,7 @@
 #include "tools/BaseProfiler.h"
 #include "Application.h"
 #include "net/PasteUpload.h"
+#include "BuildConfig.h"
 
 APIPage::APIPage(QWidget *parent) :
     QWidget(parent),
@@ -75,6 +76,8 @@ APIPage::APIPage(QWidget *parent) :
     updateBaseURLPlaceholder(ui->pasteTypeComboBox->currentIndex());
     ui->baseURLEntry->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->baseURLEntry));
     ui->tabWidget->tabBar()->hide();
+
+    ui->metaURL->setPlaceholderText(BuildConfig.META_URL);
 
     loadSettings();
 

@@ -113,12 +113,15 @@ jobs:
         if: runner.os == 'Linux' && matrix.appimage == true
         run: |
          sudo add-apt-repository ppa:savoury1/qt-5-15
+         sudo add-apt-repository ppa:savoury1/kde-5-80
+         sudo add-apt-repository ppa:savoury1/gpg
+         sudo add-apt-repository ppa:savoury1/ffmpeg4
 
       - name: Install Qt (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get -y update
-          sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5 ninja-build
+          sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5 ninja-build qt5-image-formats-plugins
 
       - name: Prepare AppImage (Linux)
         if: runner.os == 'Linux' && matrix.appimage == true

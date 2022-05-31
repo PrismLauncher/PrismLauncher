@@ -41,7 +41,7 @@ static void loadManifestV1(Flame::Manifest& m, QJsonObject& manifest)
         auto obj = Json::requireObject(item);
         Flame::File file;
         loadFileV1(file, obj);
-        m.files.append(file);
+        m.files.insert(file.fileId,file);
     }
     m.overrides = Json::ensureString(manifest, "overrides", "overrides");
 }
@@ -61,21 +61,9 @@ void Flame::loadManifest(Flame::Manifest& m, const QString& filepath)
     loadManifestV1(m, obj);
 }
 
-bool Flame::File::parseFromBytes(const QByteArray& bytes)
+bool Flame::File::parseFromObject(const QJsonObject& obj)
 {
-    auto doc = Json::requireDocument(bytes);
-    if (!doc.isObject()) {
-        throw JSONValidationError(QString("data is not an object? that's not supposed to happen"));
-    }
-    auto obj = Json::ensureObject(doc.object(), "data");
-
     fileName = Json::requireString(obj, "fileName");
-
-    QString rawUrl = Json::requireString(obj, "downloadUrl");
-    url = QUrl(rawUrl, QUrl::TolerantMode);
-    if (!url.isValid()) {
-        throw JSONValidationError(QString("Invalid URL: %1").arg(rawUrl));
-    }
     // This is a piece of a Flame project JSON pulled out into the file metadata (here) for convenience
     // It is also optional
     type = File::Type::SingleFile;
@@ -86,6 +74,25 @@ bool Flame::File::parseFromBytes(const QByteArray& bytes)
     } else {
         // this is probably a mod, dunno what else could modpacks download
         targetFolder = "mods";
+    }
+    // get the hash
+    hash = QString();
+    auto hashes = Json::ensureArray(obj, "hashes");
+    for(QJsonValueRef item : hashes) {
+        auto hobj = Json::requireObject(item);
+        auto algo = Json::requireInteger(hobj, "algo");
+        auto value = Json::requireString(hobj, "value");
+        if (algo == 1) {
+            hash = value;
+        }
+    }
+
+
+    // may throw, if the project is blocked
+    QString rawUrl = Json::ensureString(obj, "downloadUrl");
+    url = QUrl(rawUrl, QUrl::TolerantMode);
+    if (!url.isValid()) {
+        throw JSONValidationError(QString("Invalid URL: %1").arg(rawUrl));
     }
 
     resolved = true;

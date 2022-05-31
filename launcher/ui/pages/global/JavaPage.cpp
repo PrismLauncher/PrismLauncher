@@ -95,7 +95,7 @@ void JavaPage::applySettings()
 
     // Java Settings
     s->set("JavaPath", ui->javaPathTextBox->text());
-    s->set("JvmArgs", ui->jvmArgsTextBox->text());
+    s->set("JvmArgs", ui->jvmArgsTextBox->toPlainText().replace("\n", " "));
     s->set("IgnoreJavaCompatibility", ui->skipCompatibilityCheckbox->isChecked());
     s->set("IgnoreJavaWizard", ui->skipJavaWizardCheckbox->isChecked());
     JavaCommon::checkJVMArgs(s->get("JvmArgs").toString(), this->parentWidget());
@@ -120,7 +120,7 @@ void JavaPage::loadSettings()
 
     // Java Settings
     ui->javaPathTextBox->setText(s->get("JavaPath").toString());
-    ui->jvmArgsTextBox->setText(s->get("JvmArgs").toString());
+    ui->jvmArgsTextBox->setPlainText(s->get("JvmArgs").toString());
     ui->skipCompatibilityCheckbox->setChecked(s->get("IgnoreJavaCompatibility").toBool());
     ui->skipJavaWizardCheckbox->setChecked(s->get("IgnoreJavaWizard").toBool());
 }
@@ -166,7 +166,7 @@ void JavaPage::on_javaTestBtn_clicked()
         return;
     }
     checker.reset(new JavaCommon::TestCheck(
-        this, ui->javaPathTextBox->text(), ui->jvmArgsTextBox->text(),
+        this, ui->javaPathTextBox->text(), ui->jvmArgsTextBox->toPlainText().replace("\n", " "),
         ui->minMemSpinBox->value(), ui->maxMemSpinBox->value(), ui->permGenSpinBox->value()));
     connect(checker.get(), SIGNAL(finished()), SLOT(checkerFinished()));
     checker->run();

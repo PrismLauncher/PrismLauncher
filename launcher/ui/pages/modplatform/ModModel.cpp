@@ -38,27 +38,44 @@ auto ListModel::data(const QModelIndex& index, int role) const -> QVariant
     }
 
     ModPlatform::IndexedPack pack = modpacks.at(pos);
-    if (role == Qt::DisplayRole) {
-        return pack.name;
-    } else if (role == Qt::ToolTipRole) {
-        if (pack.description.length() > 100) {
-            // some magic to prevent to long tooltips and replace html linebreaks
-            QString edit = pack.description.left(97);
-            edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
-            return edit;
+    switch (role) {
+        case Qt::DisplayRole: {
+            return pack.name;
         }
-        return pack.description;
-    } else if (role == Qt::DecorationRole) {
-        if (m_logoMap.contains(pack.logoName)) {
-            return (m_logoMap.value(pack.logoName));
+        case Qt::ToolTipRole: {
+            if (pack.description.length() > 100) {
+                // some magic to prevent to long tooltips and replace html linebreaks
+                QString edit = pack.description.left(97);
+                edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
+                return edit;
+            }
+            return pack.description;
         }
-        QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
-        ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
-        return icon;
-    } else if (role == Qt::UserRole) {
-        QVariant v;
-        v.setValue(pack);
-        return v;
+        case Qt::DecorationRole: {
+            if (m_logoMap.contains(pack.logoName)) {
+                return (m_logoMap.value(pack.logoName));
+            }
+            QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
+            // un-const-ify this
+            ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
+            return icon;
+        }
+        case Qt::UserRole: {
+            QVariant v;
+            v.setValue(pack);
+            return v;
+        }
+        case Qt::FontRole: {
+            QFont font;
+            if (m_parent->getDialog()->isModSelected(pack.name)) {
+                font.setBold(true);
+                font.setUnderline(true);
+            }
+
+            return font;
+        }
+        default:
+            break;
     }
 
     return {};
