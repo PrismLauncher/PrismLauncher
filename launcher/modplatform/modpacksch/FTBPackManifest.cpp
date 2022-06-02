@@ -127,13 +127,16 @@ static void loadVersionFile(ModpacksCH::VersionFile & a, QJsonObject & obj)
     a.path = Json::requireString(obj, "path");
     a.name = Json::requireString(obj, "name");
     a.version = Json::requireString(obj, "version");
-    a.url = Json::requireString(obj, "url");
+    a.url = Json::ensureString(obj, "url");  // optional
     a.sha1 = Json::requireString(obj, "sha1");
     a.size = Json::requireInteger(obj, "size");
     a.clientOnly = Json::requireBoolean(obj, "clientonly");
     a.serverOnly = Json::requireBoolean(obj, "serveronly");
     a.optional = Json::requireBoolean(obj, "optional");
     a.updated = Json::requireInteger(obj, "updated");
+    auto curseforgeObj = Json::ensureObject(obj, "curseforge");  // optional
+    a.curseforge.project = Json::ensureInteger(curseforgeObj, "project");
+    a.curseforge.file = Json::ensureInteger(curseforgeObj, "file");
 }
 
 void ModpacksCH::loadVersion(ModpacksCH::Version & m, QJsonObject & obj)

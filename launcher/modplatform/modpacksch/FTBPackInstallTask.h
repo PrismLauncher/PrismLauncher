@@ -19,8 +19,12 @@
 
 #include "FTBPackManifest.h"
 
+#include "QObjectPtr.h"
+#include "modplatform/flame/FileResolvingTask.h"
 #include "InstanceTask.h"
 #include "net/NetJob.h"
+
+#include <QWidget>
 
 namespace ModpacksCH {
 
@@ -29,7 +33,7 @@ class PackInstallTask : public InstanceTask
     Q_OBJECT
 
 public:
-    explicit PackInstallTask(Modpack pack, QString version);
+    explicit PackInstallTask(Modpack pack, QString version, QWidget* parent = nullptr);
     virtual ~PackInstallTask(){}
 
     bool canAbort() const override { return true; }
@@ -43,6 +47,7 @@ private slots:
     void onDownloadFailed(QString reason);
 
 private:
+    void resolveMods();
     void downloadPack();
     void install();
 
@@ -50,6 +55,9 @@ private:
     bool abortable = false;
 
     NetJob::Ptr jobPtr;
+    shared_qobject_ptr<Flame::FileResolvingTask> modIdResolver;
+    QMap<int, int> indexFileIdMap;
+
     QByteArray response;
 
     Modpack m_pack;
@@ -58,6 +66,8 @@ private:
 
     QMap<QString, QString> filesToCopy;
 
+    //FIXME: nuke
+    QWidget* m_parent;
 };
 
 }

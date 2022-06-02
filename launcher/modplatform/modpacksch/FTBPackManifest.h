@@ -97,6 +97,12 @@ struct VersionTarget
     int64_t updated;
 };
 
+struct VersionFileCurseForge
+{
+    int project;
+    int file;
+};
+
 struct VersionFile
 {
     int id;
@@ -111,6 +117,7 @@ struct VersionFile
     bool serverOnly;
     bool optional;
     int64_t updated;
+    VersionFileCurseForge curseforge;
 };
 
 struct Version
