@@ -20,17 +20,17 @@ public:
 
     void addTask(Task::Ptr task);
 
-protected slots:
-    void executeTask() override;
 public slots:
     bool abort() override;
 
-private
+protected
 slots:
-    void startNext();
-    void subTaskFailed(const QString &msg);
-    void subTaskStatus(const QString &msg);
-    void subTaskProgress(qint64 current, qint64 total);
+    void executeTask() override;
+
+    virtual void startNext();
+    virtual void subTaskFailed(const QString &msg);
+    virtual void subTaskStatus(const QString &msg);
+    virtual void subTaskProgress(qint64 current, qint64 total);
 
 protected:
     void setStepStatus(QString status) { m_step_status = status; emit stepStatus(status); };

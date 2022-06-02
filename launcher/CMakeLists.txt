@@ -397,6 +397,8 @@ set(TASKS_SOURCES
     tasks/ConcurrentTask.cpp
     tasks/SequentialTask.h
     tasks/SequentialTask.cpp
+    tasks/MultipleOptionsTask.h
+    tasks/MultipleOptionsTask.cpp
 )
 
 ecm_add_test(tasks/Task_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
