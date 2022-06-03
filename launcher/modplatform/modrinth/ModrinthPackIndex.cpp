@@ -130,6 +130,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject &obj, QString preferred_hash_t
         file.loaders.append(loader.toString());
     }
     file.version = Json::requireString(obj, "name");
+    file.changelog = Json::requireString(obj, "changelog");
 
     auto files = Json::requireArray(obj, "files");
     int i = 0;

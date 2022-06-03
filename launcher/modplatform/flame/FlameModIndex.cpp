@@ -7,6 +7,7 @@
 #include "net/NetJob.h"
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
+static FlameAPI api;
 
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
@@ -91,7 +92,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
     pack.versionsLoaded = true;
 }
 
-auto FlameMod::loadIndexedPackVersion(QJsonObject& obj) -> ModPlatform::IndexedVersion
+auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> ModPlatform::IndexedVersion
 {
     auto versionArray = Json::requireArray(obj, "gameVersions");
     if (versionArray.isEmpty()) {
@@ -124,5 +125,9 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj) -> ModPlatform::IndexedV
             break;
         }
     }
+
+    if(load_changelog)
+        file.changelog = api.getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
+
     return file;
 }

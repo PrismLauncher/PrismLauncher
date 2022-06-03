@@ -62,6 +62,7 @@ struct IndexedVersion {
     QString hash_type;
     QString hash;
     bool is_preferred = true;
+    QString changelog;
 };
 
 struct ExtraPackData {
