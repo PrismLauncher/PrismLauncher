@@ -3,7 +3,15 @@
 #include "modplatform/ModIndex.h"
 #include "modplatform/helpers/NetworkModAPI.h"
 
+#include "net/NetJob.h"
+
 class FlameAPI : public NetworkModAPI {
+   public:
+    auto matchFingerprints(const std::list<uint>& fingerprints, QByteArray* response) -> NetJob::Ptr;
+    auto getModFileChangelog(int modId, int fileId) -> QString;
+
+    auto getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion;
+
    private:
     inline auto getSortFieldInt(QString sortString) const -> int
     {

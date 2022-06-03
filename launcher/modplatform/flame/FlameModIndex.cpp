@@ -110,7 +110,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj) -> ModPlatform::IndexedV
     file.fileId = Json::requireInteger(obj, "id");
     file.date = Json::requireString(obj, "fileDate");
     file.version = Json::requireString(obj, "displayName");
-    file.downloadUrl = Json::requireString(obj, "downloadUrl");
+    file.downloadUrl = Json::ensureString(obj, "downloadUrl");
     file.fileName = Json::requireString(obj, "fileName");
 
     auto hash_list = Json::ensureArray(obj, "hashes");
