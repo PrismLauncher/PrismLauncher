@@ -61,6 +61,7 @@ struct IndexedVersion {
     QVector<QString> loaders = {};
     QString hash_type;
     QString hash;
+    bool is_preferred = true;
 };
 
 struct ExtraPackData {

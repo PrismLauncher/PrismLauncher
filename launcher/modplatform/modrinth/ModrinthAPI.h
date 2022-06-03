@@ -22,10 +22,32 @@
 #include "modplatform/ModAPI.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/helpers/NetworkModAPI.h"
+#include "net/NetJob.h"
 
 #include <QDebug>
 
 class ModrinthAPI : public NetworkModAPI {
+   public:
+    auto currentVersion(QString hash,
+                        QString hash_format,
+                        QByteArray* response) -> NetJob::Ptr;
+
+    auto currentVersions(const QStringList& hashes,
+                         QString hash_format,
+                         QByteArray* response) -> NetJob::Ptr;
+
+    auto latestVersion(QString hash,
+                       QString hash_format,
+                       std::list<Version> mcVersions,
+                       ModLoaderTypes loaders,
+                       QByteArray* response) -> NetJob::Ptr;
+
+    auto latestVersions(const QStringList& hashes,
+                        QString hash_format,
+                        std::list<Version> mcVersions,
+                        ModLoaderTypes loaders,
+                        QByteArray* response) -> NetJob::Ptr;
+
    public:
     inline auto getAuthorURL(const QString& name) const -> QString { return "https://modrinth.com/user/" + name; };
 

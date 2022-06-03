@@ -111,7 +111,7 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
     pack.versionsLoaded = true;
 }
 
-auto Modrinth::loadIndexedPackVersion(QJsonObject &obj) -> ModPlatform::IndexedVersion
+auto Modrinth::loadIndexedPackVersion(QJsonObject &obj, QString preferred_hash_type, QString preferred_file_name) -> ModPlatform::IndexedVersion
 {
     ModPlatform::IndexedVersion file;
 
@@ -142,6 +142,11 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject &obj) -> ModPlatform::IndexedV
         auto parent = files[i].toObject();
         auto fileName = Json::requireString(parent, "filename");
 
+        if (!preferred_file_name.isEmpty() && fileName.contains(preferred_file_name)) {
+            file.is_preferred = true;
+            break;
+        }
+
         // Grab the primary file, if available
         if (Json::requireBoolean(parent, "primary"))
             break;
@@ -153,13 +158,20 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject &obj) -> ModPlatform::IndexedV
     if (parent.contains("url")) {
         file.downloadUrl = Json::requireString(parent, "url");
         file.fileName = Json::requireString(parent, "filename");
+        file.is_preferred = Json::requireBoolean(parent, "primary");
         auto hash_list = Json::requireObject(parent, "hashes");
-        auto hash_types = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH);
-        for (auto& hash_type : hash_types) {
-            if (hash_list.contains(hash_type)) {
-                file.hash = Json::requireString(hash_list, hash_type);
-                file.hash_type = hash_type;
-                break;
+        
+        if (hash_list.contains(preferred_hash_type)) {
+            file.hash = Json::requireString(hash_list, preferred_hash_type);
+            file.hash_type = preferred_hash_type;
+        } else {
+            auto hash_types = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH);
+            for (auto& hash_type : hash_types) {
+                if (hash_list.contains(hash_type)) {
+                    file.hash = Json::requireString(hash_list, hash_type);
+                    file.hash_type = hash_type;
+                    break;
+                }
             }
         }
 
