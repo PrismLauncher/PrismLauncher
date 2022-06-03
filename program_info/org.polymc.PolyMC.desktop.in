@@ -8,5 +8,5 @@ Exec=@Launcher_APP_BINARY_NAME@
 StartupNotify=true
 Icon=org.polymc.PolyMC
 Categories=Game;
-Keywords=game;minecraft;launcher;
+Keywords=game;minecraft;launcher;mc;
 StartupWMClass=PolyMC
