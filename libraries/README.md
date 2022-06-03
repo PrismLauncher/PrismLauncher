@@ -149,6 +149,12 @@ BSD licensed, derived from [QtSingleApplication](https://github.com/qtproject/qt
 
 Changes are made to make the code more generic and useful in less usual conditions.
 
+## murmur2
+
+Canonical implementation of the murmur2 hash, taken from [SMHasher](https://github.com/aappleby/smhasher).
+
+Public domain (the author disclaimed the copyright).
+
 ## optional-bare
 
 A simple single-file header-only version of a C++17-like optional for default-constructible, copyable types, for C++98 and later.
