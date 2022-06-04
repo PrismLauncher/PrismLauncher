@@ -71,7 +71,7 @@ void PasteUpload::executeTask()
     QNetworkRequest request{QUrl(m_uploadUrl)};
     QNetworkReply *rep{};
 
-    request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
+    request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgentUncached().toUtf8());
 
     switch (m_pasteType) {
     case NullPointer: {
@@ -91,7 +91,7 @@ void PasteUpload::executeTask()
         break;
     }
     case Hastebin: {
-        request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
+        request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgentUncached().toUtf8());
         rep = APPLICATION->network()->post(request, m_text);
         break;
     }

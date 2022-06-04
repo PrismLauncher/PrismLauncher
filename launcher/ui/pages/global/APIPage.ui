@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>702</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -214,6 +214,31 @@
             </property>
             <property name="openExternalLinks">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_ua">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>User Agent</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QLineEdit" name="userAgentLineEdit"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="userAgentLabel">
+            <property name="text">
+             <string>Enter a custom User Agent here. The special string ${launcher_version} will be replaced with the version of the launcher.</string>
             </property>
            </widget>
           </item>

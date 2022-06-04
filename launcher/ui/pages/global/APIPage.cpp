@@ -78,6 +78,7 @@ APIPage::APIPage(QWidget *parent) :
     ui->tabWidget->tabBar()->hide();
 
     ui->metaURL->setPlaceholderText(BuildConfig.META_URL);
+    ui->userAgentLineEdit->setPlaceholderText(BuildConfig.USER_AGENT);
 
     loadSettings();
 
@@ -139,6 +140,8 @@ void APIPage::loadSettings()
     ui->metaURL->setText(metaURL);
     QString curseKey = s->get("CFKeyOverride").toString();
     ui->curseKey->setText(curseKey);
+    QString customUserAgent = s->get("UserAgentOverride").toString();
+    ui->userAgentLineEdit->setText(customUserAgent);
 }
 
 void APIPage::applySettings()
@@ -167,6 +170,7 @@ void APIPage::applySettings()
     s->set("MetaURLOverride", metaURL);
     QString curseKey = ui->curseKey->text();
     s->set("CFKeyOverride", curseKey);
+    s->set("UserAgentOverride", ui->userAgentLineEdit->text());
 }
 
 bool APIPage::apply()
