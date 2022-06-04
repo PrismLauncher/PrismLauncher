@@ -22,15 +22,17 @@
       pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
     in
     {
-      packages = forAllSystems (system: {
+      packages = forAllSystems (system: rec {
         polymc = pkgs.${system}.libsForQt5.callPackage ./nix { inherit version self libnbtplusplus; };
         polymc-qt6 = pkgs.${system}.qt6Packages.callPackage ./nix { inherit version self libnbtplusplus; };
+        
+        default = polymc;
       });
 
-      defaultPackage = forAllSystems (system: self.packages.${system}.polymc);
+      defaultPackage = forAllSystems (system: self.packages.${system}.default);
 
-      apps = forAllSystems (system: { polymc = { type = "app"; program = "${self.defaultPackage.${system}}/bin/polymc"; }; });
-      defaultApp = forAllSystems (system: self.apps.${system}.polymc);
+      apps = forAllSystems (system: rec { polymc = { type = "app"; program = "${self.defaultPackage.${system}}/bin/polymc"; }; default = polymc; });
+      defaultApp = forAllSystems (system: self.apps.${system}.default);
 
       overlay = final: prev: { polymc = self.defaultPackage.${final.system}; };
     };
