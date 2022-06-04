@@ -18,34 +18,27 @@
 
 #pragma once
 
-#include "net/NetJob.h"
-#include "tasks/SequentialTask.h"
+#include <QDir>
 
 #include "modplatform/ModIndex.h"
-#include "minecraft/mod/tasks/LocalModUpdateTask.h"
+#include "tasks/Task.h"
 
-class ModFolderModel;
-
-class ModDownloadTask : public SequentialTask {
+class LocalModUpdateTask : public Task {
     Q_OBJECT
-public:
-    explicit ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods);
-    const QString& getFilename() const { return m_mod_version.fileName; }
+   public:
+    using Ptr = shared_qobject_ptr<LocalModUpdateTask>;
 
-private:
-    ModPlatform::IndexedPack m_mod;
-    ModPlatform::IndexedVersion m_mod_version;
-    const std::shared_ptr<ModFolderModel> mods;
+    explicit LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack& mod, ModPlatform::IndexedVersion& mod_version);
 
-    NetJob::Ptr m_filesNetJob;
-    LocalModUpdateTask::Ptr m_update_task;
+    auto canAbort() const -> bool override { return true; }
+    auto abort() -> bool override;
 
-    void downloadProgressChanged(qint64 current, qint64 total);
+   protected slots:
+    //! Entry point for tasks.
+    void executeTask() override;
 
-    void downloadFailed(QString reason);
-
-    void downloadSucceeded();
+   private:
+    QDir m_index_dir;
+    ModPlatform::IndexedPack& m_mod;
+    ModPlatform::IndexedVersion& m_mod_version;
 };
-
-
-

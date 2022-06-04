@@ -64,12 +64,18 @@ void SequentialTask::startNext()
         return;
     }
     Task::Ptr next = m_queue[m_currentIndex];
+
     connect(next.get(), SIGNAL(failed(QString)), this, SLOT(subTaskFailed(QString)));
-    connect(next.get(), SIGNAL(status(QString)), this, SLOT(subTaskStatus(QString)));
-    connect(next.get(), SIGNAL(progress(qint64, qint64)), this, SLOT(subTaskProgress(qint64, qint64)));
     connect(next.get(), SIGNAL(succeeded()), this, SLOT(startNext()));
 
+    connect(next.get(), SIGNAL(status(QString)), this, SLOT(subTaskStatus(QString)));
+    connect(next.get(), SIGNAL(stepStatus(QString)), this, SLOT(subTaskStatus(QString)));
+    
+    connect(next.get(), SIGNAL(progress(qint64, qint64)), this, SLOT(subTaskProgress(qint64, qint64)));
+
     setStatus(tr("Executing task %1 out of %2").arg(m_currentIndex + 1).arg(m_queue.size()));
+    setStepStatus(next->isMultiStep() ? next->getStepStatus() : next->getStatus());
+
     next->start();
 }
 
@@ -79,7 +85,7 @@ void SequentialTask::subTaskFailed(const QString& msg)
 }
 void SequentialTask::subTaskStatus(const QString& msg)
 {
-    setStepStatus(m_queue[m_currentIndex]->getStatus());
+    setStepStatus(msg);
 }
 void SequentialTask::subTaskProgress(qint64 current, qint64 total)
 {

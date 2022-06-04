@@ -33,47 +33,50 @@
 *      limitations under the License.
 */
 
-#pragma once
+#include "ModFolderLoadTask.h"
 
-#include <memory>
-
-#include <QString>
-#include <QStringList>
-
+#include "Application.h"
 #include "minecraft/mod/MetadataHandler.h"
 
-enum class ModStatus {
-    Installed,      // Both JAR and Metadata are present
-    NotInstalled,   // Only the Metadata is present
-    NoMetadata,     // Only the JAR is present
-};
+ModFolderLoadTask::ModFolderLoadTask(QDir& mods_dir, QDir& index_dir) 
+    : m_mods_dir(mods_dir), m_index_dir(index_dir), m_result(new Result())
+{}
 
-struct ModDetails
+void ModFolderLoadTask::run()
 {
-    /* Mod ID as defined in the ModLoader-specific metadata */
-    QString mod_id;
-    
-    /* Human-readable name */
-    QString name;
-    
-    /* Human-readable mod version */
-    QString version;
-    
-    /* Human-readable minecraft version */
-    QString mcversion;
-    
-    /* URL for mod's home page */
-    QString homeurl;
-    
-    /* Human-readable description */
-    QString description;
+    if (!APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+        // Read metadata first
+        getFromMetadata();
+    }
 
-    /* List of the author's names */
-    QStringList authors;
+    // Read JAR files that don't have metadata
+    m_mods_dir.refresh();
+    for (auto entry : m_mods_dir.entryInfoList()) {
+        Mod mod(entry);
+        if(m_result->mods.contains(mod.internal_id())){
+            m_result->mods[mod.internal_id()].setStatus(ModStatus::Installed);
+        }
+        else {
+            m_result->mods[mod.internal_id()] = mod;
+            m_result->mods[mod.internal_id()].setStatus(ModStatus::NoMetadata);
+        }
+    }
 
-    /* Installation status of the mod */
-    ModStatus status;
+    emit succeeded();
+}
 
-    /* Metadata information, if any */
-    std::shared_ptr<Metadata::ModStruct> metadata;
-};
+void ModFolderLoadTask::getFromMetadata()
+{
+    m_index_dir.refresh();
+    for (auto entry : m_index_dir.entryList(QDir::Files)) {
+        auto metadata = Metadata::get(m_index_dir, entry);
+
+        if(!metadata.isValid()){
+            return;
+        }
+
+        Mod mod(m_mods_dir, metadata);
+        mod.setStatus(ModStatus::NotInstalled);
+        m_result->mods[mod.internal_id()] = mod;
+    }
+}

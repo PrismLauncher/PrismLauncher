@@ -88,6 +88,7 @@ slots:
     void on_instDirBrowseBtn_clicked();
     void on_modsDirBrowseBtn_clicked();
     void on_iconsDirBrowseBtn_clicked();
+    void on_metadataDisableBtn_clicked();
 
     /*!
      * Updates the list of update channels in the combo box.

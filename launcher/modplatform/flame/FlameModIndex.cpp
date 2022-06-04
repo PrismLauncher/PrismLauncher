@@ -6,9 +6,12 @@
 #include "modplatform/flame/FlameAPI.h"
 #include "net/NetJob.h"
 
+static ModPlatform::ProviderCapabilities ProviderCaps;
+
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireInteger(obj, "id");
+    pack.provider = ModPlatform::Provider::FLAME;
     pack.name = Json::requireString(obj, "name");
     pack.websiteUrl = Json::ensureString(Json::ensureObject(obj, "links"), "websiteUrl", "");
     pack.description = Json::ensureString(obj, "summary", "");
@@ -27,6 +30,17 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     }
 }
 
+static QString enumToString(int hash_algorithm)
+{
+    switch(hash_algorithm){
+    default:
+    case 1:
+        return "sha1";
+    case 2:
+        return "md5";
+    }
+}
+
 void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        QJsonArray& arr,
                                        const shared_qobject_ptr<QNetworkAccessManager>& network,
@@ -38,28 +52,13 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
 
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
+        
+        auto file = loadIndexedPackVersion(obj);
+        if(!file.addonId.isValid())
+            file.addonId = pack.addonId;
 
-        auto versionArray = Json::requireArray(obj, "gameVersions");
-        if (versionArray.isEmpty()) {
-            continue;
-        }
-
-        ModPlatform::IndexedVersion file;
-        for (auto mcVer : versionArray) {
-            auto str = mcVer.toString();
-
-            if (str.contains('.'))
-                file.mcVersion.append(str);
-        }
-
-        file.addonId = pack.addonId;
-        file.fileId = Json::requireInteger(obj, "id");
-        file.date = Json::requireString(obj, "fileDate");
-        file.version = Json::requireString(obj, "displayName");
-        file.downloadUrl = Json::requireString(obj, "downloadUrl");
-        file.fileName = Json::requireString(obj, "fileName");
-
-        unsortedVersions.append(file);
+        if(file.fileId.isValid()) // Heuristic to check if the returned value is valid
+            unsortedVersions.append(file);
     }
 
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
@@ -69,4 +68,40 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
     std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
     pack.versions = unsortedVersions;
     pack.versionsLoaded = true;
+}
+
+auto FlameMod::loadIndexedPackVersion(QJsonObject& obj) -> ModPlatform::IndexedVersion
+{
+    auto versionArray = Json::requireArray(obj, "gameVersions");
+    if (versionArray.isEmpty()) {
+        return {};
+    }
+
+    ModPlatform::IndexedVersion file;
+    for (auto mcVer : versionArray) {
+        auto str = mcVer.toString();
+
+        if (str.contains('.'))
+            file.mcVersion.append(str);
+    }
+
+    file.addonId = Json::requireInteger(obj, "modId");
+    file.fileId = Json::requireInteger(obj, "id");
+    file.date = Json::requireString(obj, "fileDate");
+    file.version = Json::requireString(obj, "displayName");
+    file.downloadUrl = Json::requireString(obj, "downloadUrl");
+    file.fileName = Json::requireString(obj, "fileName");
+
+    auto hash_list = Json::ensureArray(obj, "hashes");
+    for (auto h : hash_list) {
+        auto hash_entry = Json::ensureObject(h);
+        auto hash_types = ProviderCaps.hashType(ModPlatform::Provider::FLAME);
+        auto hash_algo = enumToString(Json::ensureInteger(hash_entry, "algo", 1, "algorithm"));
+        if (hash_types.contains(hash_algo)) {
+            file.hash = Json::requireString(hash_entry, "value");
+            file.hash_type = hash_algo;
+            break;
+        }
+    }
+    return file;
 }

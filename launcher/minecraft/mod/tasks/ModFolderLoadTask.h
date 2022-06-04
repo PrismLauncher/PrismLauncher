@@ -35,45 +35,35 @@
 
 #pragma once
 
+#include <QDir>
+#include <QMap>
+#include <QObject>
+#include <QRunnable>
 #include <memory>
+#include "minecraft/mod/Mod.h"
 
-#include <QString>
-#include <QStringList>
-
-#include "minecraft/mod/MetadataHandler.h"
-
-enum class ModStatus {
-    Installed,      // Both JAR and Metadata are present
-    NotInstalled,   // Only the Metadata is present
-    NoMetadata,     // Only the JAR is present
-};
-
-struct ModDetails
+class ModFolderLoadTask : public QObject, public QRunnable
 {
-    /* Mod ID as defined in the ModLoader-specific metadata */
-    QString mod_id;
-    
-    /* Human-readable name */
-    QString name;
-    
-    /* Human-readable mod version */
-    QString version;
-    
-    /* Human-readable minecraft version */
-    QString mcversion;
-    
-    /* URL for mod's home page */
-    QString homeurl;
-    
-    /* Human-readable description */
-    QString description;
+    Q_OBJECT
+public:
+    struct Result {
+        QMap<QString, Mod> mods;
+    };
+    using ResultPtr = std::shared_ptr<Result>;
+    ResultPtr result() const {
+        return m_result;
+    }
 
-    /* List of the author's names */
-    QStringList authors;
+public:
+    ModFolderLoadTask(QDir& mods_dir, QDir& index_dir);
+    void run();
+signals:
+    void succeeded();
 
-    /* Installation status of the mod */
-    ModStatus status;
+private:
+    void getFromMetadata();
 
-    /* Metadata information, if any */
-    std::shared_ptr<Metadata::ModStruct> metadata;
+private:
+    QDir& m_mods_dir, m_index_dir;
+    ResultPtr m_result;
 };

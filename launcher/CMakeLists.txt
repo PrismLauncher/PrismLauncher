@@ -324,19 +324,22 @@ set(MINECRAFT_SOURCES
     minecraft/WorldList.h
     minecraft/WorldList.cpp
 
+    minecraft/mod/MetadataHandler.h
     minecraft/mod/Mod.h
     minecraft/mod/Mod.cpp
     minecraft/mod/ModDetails.h
     minecraft/mod/ModFolderModel.h
     minecraft/mod/ModFolderModel.cpp
-    minecraft/mod/ModFolderLoadTask.h
-    minecraft/mod/ModFolderLoadTask.cpp
-    minecraft/mod/LocalModParseTask.h
-    minecraft/mod/LocalModParseTask.cpp
     minecraft/mod/ResourcePackFolderModel.h
     minecraft/mod/ResourcePackFolderModel.cpp
     minecraft/mod/TexturePackFolderModel.h
     minecraft/mod/TexturePackFolderModel.cpp
+    minecraft/mod/tasks/ModFolderLoadTask.h
+    minecraft/mod/tasks/ModFolderLoadTask.cpp
+    minecraft/mod/tasks/LocalModParseTask.h
+    minecraft/mod/tasks/LocalModParseTask.cpp
+    minecraft/mod/tasks/LocalModUpdateTask.h
+    minecraft/mod/tasks/LocalModUpdateTask.cpp
 
     # Assets
     minecraft/AssetsUtils.h
@@ -499,6 +502,9 @@ set(META_SOURCES
 )
 
 set(API_SOURCES
+    modplatform/ModIndex.h
+    modplatform/ModIndex.cpp
+
     modplatform/ModAPI.h
 
     modplatform/flame/FlameAPI.h
@@ -544,6 +550,17 @@ set(MODPACKSCH_SOURCES
     modplatform/modpacksch/FTBPackManifest.h
     modplatform/modpacksch/FTBPackManifest.cpp
 )
+
+set(PACKWIZ_SOURCES
+    modplatform/packwiz/Packwiz.h
+    modplatform/packwiz/Packwiz.cpp
+)
+
+add_unit_test(Packwiz
+    SOURCES modplatform/packwiz/Packwiz_test.cpp
+    DATA modplatform/packwiz/testdata
+    LIBS Launcher_logic
+    )
 
 set(TECHNIC_SOURCES
     modplatform/technic/SingleZipPackInstallTask.h
@@ -598,6 +615,7 @@ set(LOGIC_SOURCES
     ${FLAME_SOURCES}
     ${MODRINTH_SOURCES}
     ${MODPACKSCH_SOURCES}
+    ${PACKWIZ_SOURCES}
     ${TECHNIC_SOURCES}
     ${ATLAUNCHER_SOURCES}
 )

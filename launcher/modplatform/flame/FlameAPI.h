@@ -1,5 +1,6 @@
 #pragma once
 
+#include "modplatform/ModIndex.h"
 #include "modplatform/helpers/NetworkModAPI.h"
 
 class FlameAPI : public NetworkModAPI {

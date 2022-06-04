@@ -92,6 +92,7 @@ class Task : public QObject {
     void aborted();
     void failed(QString reason);
     void status(QString status);
+    void stepStatus(QString status);
 
    public slots:
     virtual void start();

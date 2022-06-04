@@ -184,6 +184,11 @@ void LauncherPage::on_modsDirBrowseBtn_clicked()
     }
 }
 
+void LauncherPage::on_metadataDisableBtn_clicked()
+{
+    ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
+}
+
 void LauncherPage::refreshUpdateChannelList()
 {
     // Stop listening for selection changes. It's going to change a lot while we update it and
@@ -338,6 +343,9 @@ void LauncherPage::applySettings()
         s->set("InstSortMode", "Name");
         break;
     }
+
+    // Mods
+    s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {
@@ -440,6 +448,10 @@ void LauncherPage::loadSettings()
     {
         ui->sortByNameBtn->setChecked(true);
     }
+
+    // Mods
+    ui->metadataDisableBtn->setChecked(s->get("DontUseModMetadata").toBool());
+    ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
 }
 
 void LauncherPage::refreshFontPreview()

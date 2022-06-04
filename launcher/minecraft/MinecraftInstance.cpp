@@ -659,23 +659,23 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
             out << QString("%1:").arg(label);
             auto modList = model.allMods();
             std::sort(modList.begin(), modList.end(), [](Mod &a, Mod &b) {
-                auto aName = a.filename().completeBaseName();
-                auto bName = b.filename().completeBaseName();
+                auto aName = a.fileinfo().completeBaseName();
+                auto bName = b.fileinfo().completeBaseName();
                 return aName.localeAwareCompare(bName) < 0;
             });
             for(auto & mod: modList)
             {
                 if(mod.type() == Mod::MOD_FOLDER)
                 {
-                    out << u8"  [📁] " + mod.filename().completeBaseName() + " (folder)";
+                    out << u8"  [📁] " + mod.fileinfo().completeBaseName() + " (folder)";
                     continue;
                 }
 
                 if(mod.enabled()) {
-                    out << u8"  [✔️] " + mod.filename().completeBaseName();
+                    out << u8"  [✔️] " + mod.fileinfo().completeBaseName();
                 }
                 else {
-                    out << u8"  [❌] " + mod.filename().completeBaseName() + " (disabled)";
+                    out << u8"  [❌] " + mod.fileinfo().completeBaseName() + " (disabled)";
                 }
 
             }

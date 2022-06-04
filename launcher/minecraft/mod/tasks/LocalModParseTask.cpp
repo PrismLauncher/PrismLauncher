@@ -35,7 +35,6 @@ std::shared_ptr<ModDetails> ReadMCModInfo(QByteArray contents)
             details->name = name;
         }
         details->version = firstObj.value("version").toString();
-        details->updateurl = firstObj.value("updateUrl").toString();
         auto homeurl = firstObj.value("url").toString().trimmed();
         if(!homeurl.isEmpty())
         {
@@ -57,7 +56,6 @@ std::shared_ptr<ModDetails> ReadMCModInfo(QByteArray contents)
         {
             details->authors.append(author.toString());
         }
-        details->credits = firstObj.value("credits").toString();
         return details;
     };
     QJsonParseError jsonError;
@@ -168,27 +166,9 @@ std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
     }
     if(!authors.isEmpty())
     {
-        // author information is stored as a string now, not a list
         details->authors.append(authors);
     }
-    // is credits even used anywhere? including this for completion/parity with old data version
-    toml_datum_t creditsDatum = toml_string_in(tomlData, "credits");
-    QString credits = "";
-    if(creditsDatum.ok)
-    {
-        authors = creditsDatum.u.s;
-        free(creditsDatum.u.s);
-    }
-    else
-    {
-        creditsDatum = toml_string_in(tomlModsTable0, "credits");
-        if(creditsDatum.ok)
-        {
-            credits = creditsDatum.u.s;
-            free(creditsDatum.u.s);
-        }
-    }
-    details->credits = credits;
+
     toml_datum_t homeurlDatum = toml_string_in(tomlData, "displayURL");
     QString homeurl = "";
     if(homeurlDatum.ok)

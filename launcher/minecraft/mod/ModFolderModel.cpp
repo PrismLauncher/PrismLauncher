@@ -14,17 +14,19 @@
  */
 
 #include "ModFolderModel.h"
+
 #include <FileSystem.h>
+#include <QDebug>
+#include <QFileSystemWatcher>
 #include <QMimeData>
+#include <QString>
+#include <QThreadPool>
 #include <QUrl>
 #include <QUuid>
-#include <QString>
-#include <QFileSystemWatcher>
-#include <QDebug>
-#include "ModFolderLoadTask.h"
-#include <QThreadPool>
 #include <algorithm>
-#include "LocalModParseTask.h"
+
+#include "minecraft/mod/tasks/LocalModParseTask.h"
+#include "minecraft/mod/tasks/ModFolderLoadTask.h"
 
 ModFolderModel::ModFolderModel(const QString &dir) : QAbstractListModel(), m_dir(dir)
 {
@@ -79,10 +81,14 @@ bool ModFolderModel::update()
         return true;
     }
 
-    auto task = new ModFolderLoadTask(m_dir);
+    auto index_dir = indexDir();
+    auto task = new ModFolderLoadTask(dir(), index_dir);
+
     m_update = task->result();
+
     QThreadPool *threadPool = QThreadPool::globalInstance();
     connect(task, &ModFolderLoadTask::succeeded, this, &ModFolderModel::finishUpdate);
+    
     threadPool->start(task);
     return true;
 }
@@ -153,7 +159,7 @@ void ModFolderModel::finishUpdate()
         modsIndex.clear();
         int idx = 0;
         for(auto & mod: mods) {
-            modsIndex[mod.mmc_id()] = idx;
+            modsIndex[mod.internal_id()] = idx;
             idx++;
         }
     }
@@ -174,9 +180,9 @@ void ModFolderModel::resolveMod(Mod& m)
         return;
     }
 
-    auto task = new LocalModParseTask(nextResolutionTicket, m.type(), m.filename());
+    auto task = new LocalModParseTask(nextResolutionTicket, m.type(), m.fileinfo());
     auto result = task->result();
-    result->id = m.mmc_id();
+    result->id = m.internal_id();
     activeTickets.insert(nextResolutionTicket, result);
     m.setResolving(true, nextResolutionTicket);
     nextResolutionTicket++;
@@ -333,8 +339,12 @@ bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
 
     for (auto i: indexes)
     {
+        if(i.column() != 0) {
+            continue;
+        }
         Mod &m = mods[i.row()];
-        m.destroy();
+        auto index_dir = indexDir();
+        m.destroy(index_dir);
     }
     return true;
 }
@@ -381,7 +391,7 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
         }
 
     case Qt::ToolTipRole:
-        return mods[row].mmc_id();
+        return mods[row].internal_id();
 
     case Qt::CheckStateRole:
         switch (column)
@@ -436,11 +446,11 @@ bool ModFolderModel::setModStatus(int row, ModFolderModel::ModStatusAction actio
     }
 
     // preserve the row, but change its ID
-    auto oldId = mod.mmc_id();
+    auto oldId = mod.internal_id();
     if(!mod.enable(!mod.enabled())) {
         return false;
     }
-    auto newId = mod.mmc_id();
+    auto newId = mod.internal_id();
     if(modsIndex.contains(newId)) {
         // NOTE: this could handle a corner case, where we are overwriting a file, because the same 'mod' exists both enabled and disabled
         // But is it necessary?
