@@ -168,6 +168,21 @@ jobs:
           cmake --build ${{ env.BUILD_DIR }}
 
       ##
+      # TEST
+      ##
+
+      - name: Test
+        if: runner.os != 'Windows'
+        run: |
+          ctest --test-dir build --output-on-failure
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: |
+          ctest --test-dir build --output-on-failure
+
+      ##
       # PACKAGE BUILDS
       ##
 
