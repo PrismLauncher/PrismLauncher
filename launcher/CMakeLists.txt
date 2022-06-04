@@ -850,6 +850,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ScrollMessageBox.h
     ui/dialogs/ChooseProviderDialog.h
     ui/dialogs/ChooseProviderDialog.cpp
+    ui/dialogs/ModUpdateDialog.cpp
+    ui/dialogs/ModUpdateDialog.h
 
     # GUI - widgets
     ui/widgets/Common.cpp

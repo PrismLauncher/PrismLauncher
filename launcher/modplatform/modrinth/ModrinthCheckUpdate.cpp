@@ -81,11 +81,14 @@ void ModrinthCheckUpdate::executeTask()
         try {
             for (auto hash : mappings.keys()) {
                 auto project_obj = doc[hash].toObject();
+
+                // If the returned project is empty, but we have Modrinth metadata,
+                // it means this specific version is not available
                 if (project_obj.isEmpty()) {
                     qDebug() << "Mod " << mappings.find(hash).value().name() << " got an empty response.";
                     qDebug() << "Hash: " << hash;
 
-                    emit checkFailed(mappings.find(hash).value(), tr("Couldn't find mod in Modrinth"));
+                    emit checkFailed(mappings.find(hash).value(), tr("Couldn't find the latest version of this mod with the correct mod loader and game version."));
 
                     continue;
                 }

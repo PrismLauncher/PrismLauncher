@@ -74,16 +74,13 @@ void FlameCheckUpdate::executeTask()
     setStatus(tr("Preparing mods for CurseForge..."));
     setProgress(0, 5);
 
-    QHash<QString, Mod> mappings;
+    QHash<int, Mod> mappings;
 
     // Create all hashes
-    QStringList hashes;
     std::list<uint> murmur_hashes;
 
     auto best_hash_type = ProviderCaps.hashType(ModPlatform::Provider::FLAME).first();
     for (auto mod : m_mods) {
-        auto hash = mod.metadata()->hash;
-
         QByteArray jar_data;
 
         try {
@@ -106,14 +103,7 @@ void FlameCheckUpdate::executeTask()
         auto murmur_hash = MurmurHash2(jar_data_treated, jar_data_treated.length());
         murmur_hashes.emplace_back(murmur_hash);
 
-        // Sadly the API can only handle one hash type per call, se we
-        // need to generate a new hash if the current one is innadequate
-        // (though it will rarely happen, if at all)
-        if (mod.metadata()->hash_format != best_hash_type)
-            hash = QString(ProviderCaps.hash(ModPlatform::Provider::FLAME, jar_data, best_hash_type).toHex());
-
-        hashes.append(hash);
-        mappings.insert(hash, mod);
+        mappings.insert(mod.metadata()->mod_id().toInt(), mod);
     }
 
     auto* response = new QByteArray();
@@ -154,9 +144,10 @@ void FlameCheckUpdate::executeTask()
                     return;
                 }
 
-                auto mod_iter = mappings.find(current_ver.hash);
+                auto mod_iter = mappings.find(current_ver.addonId.toInt());
                 if (mod_iter == mappings.end()) {
                     qCritical() << "Failed to remap mod from Flame!";
+                    qDebug() << match_obj;
                     continue;
                 }
 
@@ -191,7 +182,7 @@ void FlameCheckUpdate::executeTask()
                     continue;
                 }
 
-                if (!latest_ver.hash.isEmpty() && current_ver.hash != latest_ver.hash) {
+                if (!latest_ver.hash.isEmpty() && (current_ver.hash != latest_ver.hash || mod.status() == ModStatus::NotInstalled)) {
                     // Fake pack with the necessary info to pass to the download task :)
                     ModPlatform::IndexedPack pack;
                     pack.name = mod.name();
