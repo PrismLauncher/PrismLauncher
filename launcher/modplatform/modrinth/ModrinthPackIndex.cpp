@@ -130,6 +130,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject &obj, QString preferred_hash_t
         file.loaders.append(loader.toString());
     }
     file.version = Json::requireString(obj, "name");
+    file.version_number = Json::requireString(obj, "version_number");
     file.changelog = Json::requireString(obj, "changelog");
 
     auto files = Json::requireArray(obj, "files");
@@ -159,7 +160,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject &obj, QString preferred_hash_t
     if (parent.contains("url")) {
         file.downloadUrl = Json::requireString(parent, "url");
         file.fileName = Json::requireString(parent, "filename");
-        file.is_preferred = Json::requireBoolean(parent, "primary");
+        file.is_preferred = Json::requireBoolean(parent, "primary") || (files.count() == 1);
         auto hash_list = Json::requireObject(parent, "hashes");
         
         if (hash_list.contains(preferred_hash_type)) {

@@ -54,6 +54,7 @@ struct IndexedVersion {
     QVariant addonId;
     QVariant fileId;
     QString version;
+    QString version_number = {};
     QVector<QString> mcVersion;
     QString downloadUrl;
     QString date;

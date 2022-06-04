@@ -485,6 +485,8 @@ set(API_SOURCES
     modplatform/EnsureMetadataTask.h
     modplatform/EnsureMetadataTask.cpp
 
+    modplatform/CheckUpdateTask.h
+
     modplatform/flame/FlameAPI.h
     modplatform/flame/FlameAPI.cpp
     modplatform/modrinth/ModrinthAPI.h
@@ -514,6 +516,8 @@ set(FLAME_SOURCES
     modplatform/flame/PackManifest.cpp
     modplatform/flame/FileResolvingTask.h
     modplatform/flame/FileResolvingTask.cpp
+    modplatform/flame/FlameCheckUpdate.cpp
+    modplatform/flame/FlameCheckUpdate.h
 )
 
 set(MODRINTH_SOURCES
@@ -521,6 +525,8 @@ set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthPackIndex.h
     modplatform/modrinth/ModrinthPackManifest.cpp
     modplatform/modrinth/ModrinthPackManifest.h
+    modplatform/modrinth/ModrinthCheckUpdate.cpp
+    modplatform/modrinth/ModrinthCheckUpdate.h
 )
 
 set(MODPACKSCH_SOURCES
