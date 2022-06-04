@@ -52,7 +52,7 @@ public:
         Enable,
         Toggle
     };
-    ModFolderModel(const QString &dir);
+    ModFolderModel(const QString &dir, bool is_indexed);
 
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
@@ -146,6 +146,7 @@ protected:
     bool scheduled_update = false;
     bool interaction_disabled = false;
     QDir m_dir;
+    bool m_is_indexed;
     QMap<QString, int> modsIndex;
     QMap<int, LocalModParseTask::ResultPtr> activeTickets;
     int nextResolutionTicket = 0;

@@ -1,4 +1,5 @@
 #include "ModPage.h"
+#include "Application.h"
 #include "ui_ModPage.h"
 
 #include <QKeyEvent>
@@ -150,7 +151,8 @@ void ModPage::onModSelected()
     if (dialog->isModSelected(current.name, version.fileName)) {
         dialog->removeSelectedMod(current.name);
     } else {
-        dialog->addSelectedMod(current.name, new ModDownloadTask(current, version, dialog->mods));
+        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        dialog->addSelectedMod(current.name, new ModDownloadTask(current, version, dialog->mods, is_indexed));
     }
 
     updateSelectionButton();

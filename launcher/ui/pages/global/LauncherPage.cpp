@@ -450,7 +450,7 @@ void LauncherPage::loadSettings()
     }
 
     // Mods
-    ui->metadataDisableBtn->setChecked(s->get("DontUseModMetadata").toBool());
+    ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
 }
 

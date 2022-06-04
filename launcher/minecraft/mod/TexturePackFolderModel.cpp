@@ -1,6 +1,6 @@
 #include "TexturePackFolderModel.h"
 
-TexturePackFolderModel::TexturePackFolderModel(const QString &dir) : ModFolderModel(dir) {
+TexturePackFolderModel::TexturePackFolderModel(const QString &dir) : ModFolderModel(dir, false) {
 }
 
 QVariant TexturePackFolderModel::headerData(int section, Qt::Orientation orientation, int role) const {

@@ -55,7 +55,7 @@ public:
     }
 
 public:
-    ModFolderLoadTask(QDir& mods_dir, QDir& index_dir);
+    ModFolderLoadTask(QDir& mods_dir, QDir& index_dir, bool is_indexed);
     void run();
 signals:
     void succeeded();
@@ -65,5 +65,6 @@ private:
 
 private:
     QDir& m_mods_dir, m_index_dir;
+    bool m_is_indexed;
     ResultPtr m_result;
 };

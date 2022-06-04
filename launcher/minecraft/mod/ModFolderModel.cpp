@@ -28,7 +28,7 @@
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
 
-ModFolderModel::ModFolderModel(const QString &dir) : QAbstractListModel(), m_dir(dir)
+ModFolderModel::ModFolderModel(const QString &dir, bool is_indexed) : QAbstractListModel(), m_dir(dir), m_is_indexed(is_indexed)
 {
     FS::ensureFolderPathExists(m_dir.absolutePath());
     m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
@@ -82,7 +82,7 @@ bool ModFolderModel::update()
     }
 
     auto index_dir = indexDir();
-    auto task = new ModFolderLoadTask(dir(), index_dir);
+    auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed);
 
     m_update = task->result();
 

@@ -32,7 +32,7 @@ slots:
         {
             QString folder = source;
             QTemporaryDir tempDir;
-            ModFolderModel m(tempDir.path());
+            ModFolderModel m(tempDir.path(), true);
             m.installMod(folder);
             verify(tempDir.path());
         }
@@ -41,7 +41,7 @@ slots:
         {
             QString folder = source + '/';
             QTemporaryDir tempDir;
-            ModFolderModel m(tempDir.path());
+            ModFolderModel m(tempDir.path(), true);
             m.installMod(folder);
             verify(tempDir.path());
         }

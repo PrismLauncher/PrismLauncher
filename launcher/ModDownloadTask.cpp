@@ -21,12 +21,14 @@
 #include "Application.h"
 #include "minecraft/mod/ModFolderModel.h"
 
-ModDownloadTask::ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods)
+ModDownloadTask::ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods, bool is_indexed)
     : m_mod(mod), m_mod_version(version), mods(mods)
 {
-    m_update_task.reset(new LocalModUpdateTask(mods->indexDir(), m_mod, m_mod_version));
+    if (is_indexed) {
+        m_update_task.reset(new LocalModUpdateTask(mods->indexDir(), m_mod, m_mod_version));
 
-    addTask(m_update_task);
+        addTask(m_update_task);
+    }
 
     m_filesNetJob.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
     m_filesNetJob->setStatus(tr("Downloading mod:\n%1").arg(m_mod_version.downloadUrl));

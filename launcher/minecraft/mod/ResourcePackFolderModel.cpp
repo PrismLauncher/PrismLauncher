@@ -1,6 +1,6 @@
 #include "ResourcePackFolderModel.h"
 
-ResourcePackFolderModel::ResourcePackFolderModel(const QString &dir) : ModFolderModel(dir) {
+ResourcePackFolderModel::ResourcePackFolderModel(const QString &dir) : ModFolderModel(dir, false) {
 }
 
 QVariant ResourcePackFolderModel::headerData(int section, Qt::Orientation orientation, int role) const {

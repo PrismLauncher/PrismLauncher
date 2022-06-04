@@ -161,7 +161,7 @@ auto Mod::destroy(QDir& index_dir) -> bool
 {
     auto n = name();
     // FIXME: This can fail to remove the metadata if the
-    // "DontUseModMetadata" setting is on, since there could
+    // "ModMetadataDisabled" setting is on, since there could
     // be a name mismatch!
     Metadata::remove(index_dir, n);
 
