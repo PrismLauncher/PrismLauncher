@@ -47,7 +47,7 @@ If there are any issues with the space or you are using a client that does not s
 [![Support](https://img.shields.io/matrix/polymc-support:matrix.org?label=PolyMC%20Support)](https://matrix.to/#/#polymc-support:matrix.org)
 [![Voice](https://img.shields.io/matrix/polymc-voice:matrix.org?label=PolyMC%20Voice)](https://matrix.to/#/#polymc-voice:matrix.org)
 
-we also have a subreddit you can post your issues and suggestions on:
+We also have a subreddit you can post your issues and suggestions on:
 
 [r/PolyMCLauncher](https://www.reddit.com/r/PolyMCLauncher/)
 
