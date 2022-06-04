@@ -265,7 +265,7 @@
               <item>
                <widget class="QLabel" name="userAgentLabel">
                 <property name="text">
-                 <string>Enter a custom User Agent here. The special string ${launcher_version} will be replaced with the version of the launcher.</string>
+                 <string>Enter a custom User Agent here. The special string $LAUNCHER_VER will be replaced with the version of the launcher.</string>
                 </property>
                </widget>
               </item>

@@ -1557,9 +1557,9 @@ QString Application::getCurseKey()
 
 QString Application::getUserAgent()
 {
-    QString keyOverride = m_settings->get("UserAgentOverride").toString();
-    if (!keyOverride.isEmpty()) {
-        return keyOverride;
+    QString uaOverride = m_settings->get("UserAgentOverride").toString();
+    if (!uaOverride.isEmpty()) {
+        return uaOverride.replace("$LAUNCHER_VER", BuildConfig.printableVersionString());
     }
 
     return BuildConfig.USER_AGENT;
@@ -1567,9 +1567,9 @@ QString Application::getUserAgent()
 
 QString Application::getUserAgentUncached()
 {
-    QString keyOverride = m_settings->get("UserAgentOverride").toString();
-    if (!keyOverride.isEmpty()) {
-        return keyOverride;
+    QString uaOverride = m_settings->get("UserAgentOverride").toString();
+    if (!uaOverride.isEmpty()) {
+        return uaOverride.replace("$LAUNCHER_VER", BuildConfig.printableVersionString());
     }
 
     return BuildConfig.USER_AGENT_UNCACHED;
