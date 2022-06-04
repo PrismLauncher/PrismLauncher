@@ -61,7 +61,7 @@ class PackwizTest : public QObject {
         QVERIFY(index_dir.entryList().contains(name_mod));
 
         // Try without the .pw.toml at the end
-        name_mod.chop(5);
+        name_mod.chop(8);
 
         auto metadata = Packwiz::V1::getIndexForMod(index_dir, name_mod);
 
