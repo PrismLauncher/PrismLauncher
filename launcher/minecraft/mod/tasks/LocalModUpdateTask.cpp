@@ -22,6 +22,10 @@
 #include "FileSystem.h"
 #include "minecraft/mod/MetadataHandler.h"
 
+#ifdef Q_OS_WIN32
+#include <windows.h>
+#endif
+
 LocalModUpdateTask::LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack& mod, ModPlatform::IndexedVersion& mod_version)
     : m_index_dir(index_dir), m_mod(mod), m_mod_version(mod_version)
 {
@@ -29,6 +33,10 @@ LocalModUpdateTask::LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack&
     if (!FS::ensureFolderPathExists(index_dir.path())) {
         emitFailed(QString("Unable to create index for mod %1!").arg(m_mod.name));
     }
+
+#ifdef Q_OS_WIN32
+    SetFileAttributesA(index_dir.path().toStdString().c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
+#endif
 }
 
 void LocalModUpdateTask::executeTask()
