@@ -49,6 +49,7 @@
 #include "ui/GuiUtil.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ModDownloadDialog.h"
+#include "ui/dialogs/ModUpdateDialog.h"
 
 #include "DesktopServices.h"
 
@@ -78,6 +79,23 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
 
         connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::installMods);
+
+        ui->actionUpdateItem->setToolTip(tr("Tries to find / update all selected mods (all mods if none is selected)"));
+        ui->actionsToolbar->insertActionAfter(ui->actionAddItem, ui->actionUpdateItem);
+        connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
+
+        connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+                [this] { ui->actionUpdateItem->setEnabled(ui->treeView->selectionModel()->hasSelection() || !m_model->empty()); });
+
+        connect(mods.get(), &ModFolderModel::rowsInserted, this,
+                [this] { ui->actionUpdateItem->setEnabled(ui->treeView->selectionModel()->hasSelection() || !m_model->empty()); });
+                
+        connect(mods.get(), &ModFolderModel::updateFinished, this, [this, mods] {
+            ui->actionUpdateItem->setEnabled(ui->treeView->selectionModel()->hasSelection() || !m_model->empty());
+
+            // Prevent a weird crash when trying to open the mods page twice in a session o.O
+            disconnect(mods.get(), &ModFolderModel::updateFinished, this, 0);
+        });
     }
 }
 
@@ -107,7 +125,6 @@ bool CoreModFolderPage::shouldDisplay() const
             return false;
         if (version->getComponent("net.minecraft")->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate)
             return true;
-        
     }
     return false;
 }
@@ -118,7 +135,7 @@ void ModFolderPage::installMods()
         return;
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
-    
+
     auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
     if (profile->getModLoaders() == ModAPI::Unspecified) {
         QMessageBox::critical(this, tr("Error"), tr("Please install a mod loader first!"));
@@ -140,11 +157,66 @@ void ModFolderPage::installMods()
             QStringList warnings = tasks->warnings();
             if (warnings.count())
                 CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
-            
+
             tasks->deleteLater();
         });
 
         for (auto& task : mdownload.getTasks()) {
+            tasks->addTask(task);
+        }
+
+        ProgressDialog loadDialog(this);
+        loadDialog.setSkipButton(true, tr("Abort"));
+        loadDialog.execWithTask(tasks);
+
+        m_model->update();
+    }
+}
+
+void ModFolderPage::updateMods()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+
+    auto mods_list = m_model->selectedMods(selection);
+    bool use_all = mods_list.empty();
+    if (use_all)
+        mods_list = m_model->allMods().toStdList();
+
+    ModUpdateDialog update_dialog(this, m_instance, m_model, mods_list);
+    update_dialog.checkCandidates();
+
+    if (update_dialog.aborted()) {
+        CustomMessageBox::selectable(this, tr("Aborted"), tr("The mod updater was aborted!"), QMessageBox::Warning)->show();
+        return;
+    }
+    if (update_dialog.noUpdates()) {
+        CustomMessageBox::selectable(this, tr("Update checker"),
+                                     (mods_list.size() == 1)
+                                         ? tr("'%1' is up-to-date! :)").arg(mods_list.front().name())
+                                         : tr("All %1mods are up-to-date! :)").arg(use_all ? "" : (tr("selected") + " ")))
+            ->exec();
+        return;
+    }
+
+    if (update_dialog.exec()) {
+        ConcurrentTask* tasks = new ConcurrentTask(this);
+        connect(tasks, &Task::failed, [this, tasks](QString reason) {
+            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+            tasks->deleteLater();
+        });
+        connect(tasks, &Task::aborted, [this, tasks]() {
+            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
+            tasks->deleteLater();
+        });
+        connect(tasks, &Task::succeeded, [this, tasks]() {
+            QStringList warnings = tasks->warnings();
+            if (warnings.count()) {
+                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+            }
+            tasks->deleteLater();
+        });
+
+        for (auto task : update_dialog.getTasks()) {
             tasks->addTask(task);
         }
 

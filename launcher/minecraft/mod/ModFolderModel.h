@@ -144,6 +144,8 @@ public:
         return mods;
     }
 
+    auto selectedMods(QModelIndexList& indexes) -> std::list<Mod>;
+
 public slots:
     void disableInteraction(bool disabled);
 

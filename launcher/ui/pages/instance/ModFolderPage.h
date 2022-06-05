@@ -56,6 +56,7 @@ class ModFolderPage : public ExternalResourcesPage {
 
    private slots:
     void installMods();
+    void updateMods();
 };
 
 class CoreModFolderPage : public ModFolderPage {

@@ -259,6 +259,18 @@ bool ModFolderModel::isValid()
     return m_dir.exists() && m_dir.isReadable();
 }
 
+auto ModFolderModel::selectedMods(QModelIndexList& indexes) -> std::list<Mod>
+{
+    std::list<Mod> selected_mods;
+    for (auto i : indexes) {
+        if(i.column() != 0)
+            continue;
+
+        selected_mods.push_back(mods[i.row()]);
+    }
+    return selected_mods;
+}
+
 // FIXME: this does not take disabled mod (with extra .disable extension) into account...
 bool ModFolderModel::installMod(const QString &filename)
 {
