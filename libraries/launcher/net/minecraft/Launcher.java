@@ -28,11 +28,15 @@ public final class Launcher extends Applet implements AppletStub {
 
     private final Map<String, String> params = new TreeMap<>();
 
-    private final Applet wrappedApplet;
+    private Applet wrappedApplet;
 
     private boolean active = false;
 
     public Launcher(Applet applet) {
+        this(applet, null);
+    }
+
+    public Launcher(Applet applet, URL documentBase) {
         this.setLayout(new BorderLayout());
 
         this.add(applet, "Center");
@@ -40,8 +44,25 @@ public final class Launcher extends Applet implements AppletStub {
         this.wrappedApplet = applet;
     }
 
-    public void setParameter(String name, String value)
-    {
+    public void replace(Applet applet) {
+        this.wrappedApplet = applet;
+
+        applet.setStub(this);
+        applet.setSize(getWidth(), getHeight());
+
+        this.setLayout(new BorderLayout());
+        this.add(applet, "Center");
+
+        applet.init();
+
+        active = true;
+
+        applet.start();
+
+        validate();
+    }
+
+    public void setParameter(String name, String value) {
         params.put(name, value);
     }
 
