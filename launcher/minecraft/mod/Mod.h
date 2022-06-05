@@ -73,8 +73,8 @@ public:
     auto authors()     const -> QStringList;
     auto status()      const -> ModStatus;
 
-    auto metadata() const -> const std::shared_ptr<Metadata::ModStruct> { return details().metadata; };
-    auto metadata() -> std::shared_ptr<Metadata::ModStruct> { return m_localDetails->metadata; };
+    auto metadata() -> std::shared_ptr<Metadata::ModStruct>;
+    auto metadata() const -> const std::shared_ptr<Metadata::ModStruct>;
 
     void setStatus(ModStatus status);
     void setMetadata(Metadata::ModStruct* metadata);
@@ -109,6 +109,10 @@ protected:
     /* If the mod has metadata, this will be filled in the constructor, and passed to 
      * the ModDetails when calling finishResolvingWithDetails */
     std::shared_ptr<Metadata::ModStruct> m_temp_metadata;
+
+    /* Set the mod status while it doesn't have local details just yet */
+    ModStatus m_temp_status = ModStatus::NotInstalled;
+
     std::shared_ptr<ModDetails> m_localDetails;
 
     bool m_enabled = true;
