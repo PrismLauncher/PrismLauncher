@@ -56,6 +56,32 @@ IconList::IconList(const QStringList &builtinPaths, QString path, QObject *paren
     emit iconUpdated({});
 }
 
+void IconList::sortIconList()
+{
+    qDebug() << "Sorting icon list...";
+
+    QVector<MMCIcon> newIcons = QVector<MMCIcon>();
+    QVectorIterator<MMCIcon> iconIter(icons);
+
+iconLoop:
+    while(iconIter.hasNext())
+    {
+        MMCIcon a = iconIter.next();
+        for(int i=0;i<newIcons.size();i++)
+        {
+            if(a.m_key.compare(newIcons[i].m_key) < 0)
+            {
+                newIcons.insert(i,a);
+                goto iconLoop;
+            }
+        }
+        newIcons.append(a);
+    }
+
+    icons = newIcons;
+    reindex();
+}
+
 void IconList::directoryChanged(const QString &path)
 {
     QDir new_dir (path);
@@ -141,6 +167,8 @@ void IconList::directoryChanged(const QString &path)
             emit iconUpdated(key);
         }
     }
+
+    sortIconList();
 }
 
 void IconList::fileChanged(const QString &path)
