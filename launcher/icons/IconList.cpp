@@ -59,26 +59,9 @@ IconList::IconList(const QStringList &builtinPaths, QString path, QObject *paren
 void IconList::sortIconList()
 {
     qDebug() << "Sorting icon list...";
-
-    QVector<MMCIcon> newIcons = QVector<MMCIcon>();
-    QVectorIterator<MMCIcon> iconIter(icons);
-
-iconLoop:
-    while(iconIter.hasNext())
-    {
-        MMCIcon a = iconIter.next();
-        for(int i=0;i<newIcons.size();i++)
-        {
-            if(a.m_key.compare(newIcons[i].m_key) < 0)
-            {
-                newIcons.insert(i,a);
-                goto iconLoop;
-            }
-        }
-        newIcons.append(a);
-    }
-
-    icons = newIcons;
+    std::sort(icons.begin(), icons.end(), [](const MMCIcon& a, const MMCIcon& b) {
+        return a.m_key.compare(b.m_key) < 0;
+    });
     reindex();
 }
 
