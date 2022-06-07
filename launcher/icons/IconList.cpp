@@ -60,7 +60,7 @@ void IconList::sortIconList()
 {
     qDebug() << "Sorting icon list...";
     std::sort(icons.begin(), icons.end(), [](const MMCIcon& a, const MMCIcon& b) {
-        return a.m_key.compare(b.m_key) < 0;
+        return a.m_key.localeAwareCompare(b.m_key) < 0;
     });
     reindex();
 }
