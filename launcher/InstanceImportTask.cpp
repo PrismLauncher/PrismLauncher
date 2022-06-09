@@ -586,7 +586,6 @@ void InstanceImportTask::processMultiMC()
 void InstanceImportTask::processModrinth()
 {
     std::vector<Modrinth::File> files;
-    std::vector<Modrinth::File> non_whitelisted_files;
     QString minecraftVersion, fabricVersion, quiltVersion, forgeVersion;
     try {
         QString indexPath = FS::PathCombine(m_stagingPath, "modrinth.index.json");
@@ -663,37 +662,11 @@ void InstanceImportTask::processModrinth()
                             throw JSONValidationError(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));
                     }
                     else {
-                        if (!Modrinth::validateDownloadUrl(download_url)) {
-                            qDebug() << QString("Download URL (%1) for %2 is from a non-whitelisted by Modrinth domain").arg(download_url.toString(), file.path);
-                            if(is_last && file.downloads.isEmpty())
-                                non_whitelisted_files.push_back(file);
-                        }
-
                         file.downloads.push_back(download_url);
                     }
                 }
 
                 files.push_back(file);
-            }
-
-            if (!non_whitelisted_files.empty()) {
-                QString text;
-                for (const auto& file : non_whitelisted_files) {
-                    text += tr("Filepath: %1<br>").arg(file.path);
-                    for(auto d : file.downloads)
-                        text  += tr("URL:") + QString("<a href='%1'>%2</a>").arg(d.toString());
-                    text += "<br>";
-                }
-
-                auto message_dialog = new ScrollMessageBox(m_parent, tr("Non-whitelisted mods found"),
-                                                           tr("The following mods have URLs that are not whitelisted by Modrinth.\n"
-                                                              "Proceed with caution!"),
-                                                           text);
-                message_dialog->setModal(true);
-                if (message_dialog->exec() == QDialog::Rejected) {
-                    emitFailed("Aborted");
-                    return;
-                }
             }
 
             auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
