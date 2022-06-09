@@ -582,6 +582,7 @@ void InstanceImportTask::processMultiMC()
     emitSucceeded();
 }
 
+// https://docs.modrinth.com/docs/modpacks/format_definition/
 void InstanceImportTask::processModrinth()
 {
     std::vector<Modrinth::File> files;
@@ -600,26 +601,30 @@ void InstanceImportTask::processModrinth()
 
             auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
             bool had_optional = false;
-            for (auto& modInfo : jsonFiles) {
+            for (auto modInfo : jsonFiles) {
                 Modrinth::File file;
                 file.path = Json::requireString(modInfo, "path");
 
                 auto env = Json::ensureObject(modInfo, "env");
-                QString support = Json::ensureString(env, "client", "unsupported");
-                if (support == "unsupported") {
-                    continue;
-                } else if (support == "optional") {
-                    // TODO: Make a review dialog for choosing which ones the user wants!
-                    if (!had_optional) {
-                        had_optional = true;
-                        auto info = CustomMessageBox::selectable(
-                            m_parent, tr("Optional mod detected!"),
-                            tr("One or more mods from this modpack are optional. They will be downloaded, but disabled by default!"), QMessageBox::Information);
-                        info->exec();
-                    }
+                // 'env' field is optional
+                if (!env.isEmpty()) {
+                    QString support = Json::ensureString(env, "client", "unsupported");
+                    if (support == "unsupported") {
+                        continue;
+                    } else if (support == "optional") {
+                        // TODO: Make a review dialog for choosing which ones the user wants!
+                        if (!had_optional) {
+                            had_optional = true;
+                            auto info = CustomMessageBox::selectable(
+                                m_parent, tr("Optional mod detected!"),
+                                tr("One or more mods from this modpack are optional. They will be downloaded, but disabled by default!"),
+                                QMessageBox::Information);
+                            info->exec();
+                        }
 
-                    if (file.path.endsWith(".jar"))
-                        file.path += ".disabled";
+                        if (file.path.endsWith(".jar"))
+                            file.path += ".disabled";
+                    }
                 }
 
                 QJsonObject hashes = Json::requireObject(modInfo, "hashes");
