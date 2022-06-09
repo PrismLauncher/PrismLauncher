@@ -645,18 +645,32 @@ void InstanceImportTask::processModrinth()
                 }
                 file.hash = QByteArray::fromHex(hash.toLatin1());
                 file.hashAlgorithm = hashAlgorithm;
+                
                 // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode
                 // (as Modrinth seems to incorrectly handle spaces)
+                
+                auto download_arr = Json::ensureArray(modInfo, "downloads");
+                for(auto download : download_arr) {
+                    qWarning() << download.toString();
+                    bool is_last = download.toString() == download_arr.last().toString();
 
-                file.download = Json::requireString(Json::ensureArray(modInfo, "downloads").first(), "Download URL for " + file.path);
+                    auto download_url = QUrl(download.toString());
 
-                if (!file.download.isValid()) {
-                    qDebug() << QString("Download URL (%1) for %2 is not a correctly formatted URL").arg(file.download.toString(), file.path);
-                    throw JSONValidationError(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));
-                }
-                else if (!Modrinth::validateDownloadUrl(file.download)) {
-                    qDebug() << QString("Download URL (%1) for %2 is from a non-whitelisted by Modrinth domain").arg(file.download.toString(), file.path);
-                    non_whitelisted_files.push_back(file);
+                    if (!download_url.isValid()) {
+                        qDebug() << QString("Download URL (%1) for %2 is not a correctly formatted URL")
+                                        .arg(download_url.toString(), file.path);
+                        if(is_last && file.downloads.isEmpty())
+                            throw JSONValidationError(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));
+                    }
+                    else {
+                        if (!Modrinth::validateDownloadUrl(download_url)) {
+                            qDebug() << QString("Download URL (%1) for %2 is from a non-whitelisted by Modrinth domain").arg(download_url.toString(), file.path);
+                            if(is_last && file.downloads.isEmpty())
+                                non_whitelisted_files.push_back(file);
+                        }
+
+                        file.downloads.push_back(download_url);
+                    }
                 }
 
                 files.push_back(file);
@@ -665,7 +679,10 @@ void InstanceImportTask::processModrinth()
             if (!non_whitelisted_files.empty()) {
                 QString text;
                 for (const auto& file : non_whitelisted_files) {
-                    text += tr("Filepath: %1<br>URL: <a href='%2'>%2</a><br>").arg(file.path, file.download.toString());
+                    text += tr("Filepath: %1<br>").arg(file.path);
+                    for(auto d : file.downloads)
+                        text  += tr("URL:") + QString("<a href='%1'>%2</a>").arg(d.toString());
+                    text += "<br>";
                 }
 
                 auto message_dialog = new ScrollMessageBox(m_parent, tr("Non-whitelisted mods found"),
@@ -740,13 +757,24 @@ void InstanceImportTask::processModrinth()
     instance.saveNow();
 
     m_filesNetJob = new NetJob(tr("Mod download"), APPLICATION->network());
-    for (auto &file : files)
+    for (auto file : files)
     {
         auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path);
-        qDebug() << "Will download" << file.download << "to" << path;
-        auto dl = Net::Download::makeFile(file.download, path);
+        qDebug() << "Will try to download" << file.downloads.front() << "to" << path;
+        auto dl = Net::Download::makeFile(file.downloads.front(), path);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         m_filesNetJob->addNetAction(dl);
+
+        if (file.downloads.size() > 1) {
+            // FIXME: This really needs to be put into a ConcurrentTask of
+            // MultipleOptionsTask's , once those exist :)
+            connect(dl.get(), &NetAction::failed, [this, &file, path, dl]{
+                auto dl = Net::Download::makeFile(file.downloads.dequeue(), path);
+                dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
+                m_filesNetJob->addNetAction(dl);
+                dl->succeeded();
+            });
+        }
     }
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, [&]()
             {
