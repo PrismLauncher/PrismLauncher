@@ -2101,6 +2101,9 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         selectionBad();
         return;
     }
+    if (m_selectedInstance) {
+        disconnect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::on_InstanceState_changed);
+    }
     QString id = current.data(InstanceList::InstanceIDRole).toString();
     m_selectedInstance = APPLICATION->instances()->getInstanceById(id);
     if (m_selectedInstance)
@@ -2127,6 +2130,8 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         updateToolsMenu();
 
         APPLICATION->settings()->set("SelectedInstance", m_selectedInstance->id());
+
+        connect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::on_InstanceState_changed);
     }
     else
     {
@@ -2215,4 +2220,10 @@ void MainWindow::updateStatusCenter()
     if (timePlayed > 0) {
         m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
     }
+}
+
+void MainWindow::on_InstanceState_changed(bool running)
+{
+    auto current = view->selectionModel()->currentIndex();
+    instanceChanged(current, current);
 }

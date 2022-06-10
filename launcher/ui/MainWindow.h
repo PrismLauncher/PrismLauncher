@@ -192,6 +192,8 @@ private slots:
     void keyReleaseEvent(QKeyEvent *event) override;
 #endif
 
+    void on_InstanceState_changed(bool running);
+
 private:
     void retranslateUi();
 
