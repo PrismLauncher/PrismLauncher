@@ -2102,7 +2102,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         return;
     }
     if (m_selectedInstance) {
-        disconnect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::on_InstanceState_changed);
+        disconnect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
     }
     QString id = current.data(InstanceList::InstanceIDRole).toString();
     m_selectedInstance = APPLICATION->instances()->getInstanceById(id);
@@ -2131,7 +2131,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 
         APPLICATION->settings()->set("SelectedInstance", m_selectedInstance->id());
 
-        connect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::on_InstanceState_changed);
+        connect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
     }
     else
     {
@@ -2222,7 +2222,7 @@ void MainWindow::updateStatusCenter()
     }
 }
 
-void MainWindow::on_InstanceState_changed(bool running)
+void MainWindow::refreshCurrentInstance(bool running)
 {
     auto current = view->selectionModel()->currentIndex();
     instanceChanged(current, current);
