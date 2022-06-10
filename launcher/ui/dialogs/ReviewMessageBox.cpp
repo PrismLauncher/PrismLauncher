@@ -40,7 +40,7 @@ auto ReviewMessageBox::deselectedMods() -> QStringList
 
     auto* item = ui->modTreeWidget->topLevelItem(0);
 
-    for (int i = 0; item != nullptr; ++i) {
+    for (int i = 1; item != nullptr; ++i) {
         if (item->checkState(0) == Qt::CheckState::Unchecked) {
             list.append(item->text(0));
         }

@@ -305,7 +305,7 @@ auto ModUpdateDialog::getTasks() -> const std::list<ModDownloadTask*>
 
     auto* item = ui->modTreeWidget->topLevelItem(0);
 
-    for (int i = 0; item != nullptr; ++i) {
+    for (int i = 1; item != nullptr; ++i) {
         if (item->checkState(0) == Qt::CheckState::Checked) {
             list.push_back(m_tasks.find(item->text(0)).value());
         }
