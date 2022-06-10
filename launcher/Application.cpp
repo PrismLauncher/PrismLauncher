@@ -1306,10 +1306,6 @@ void Application::subRunningInstance()
 
 bool Application::shouldExitNow() const
 {
-#ifdef Q_OS_MACOS
-    return false;
-#endif
-
     return m_runningInstances == 0 && m_openWindows == 0;
 }
 
