@@ -44,6 +44,11 @@ void LocalModUpdateTask::executeTask()
 {
     setStatus(tr("Updating index for mod:\n%1").arg(m_mod.name));
 
+    auto old_metadata = Metadata::get(m_index_dir, m_mod.name);
+    if (old_metadata.isValid()) {
+        emit hasOldMod(old_metadata.name, old_metadata.filename);
+    }
+
     auto pw_mod = Metadata::create(m_index_dir, m_mod, m_mod_version);
     Metadata::update(m_index_dir, pw_mod);
 

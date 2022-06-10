@@ -356,6 +356,20 @@ bool ModFolderModel::installMod(const QString &filename)
     return false;
 }
 
+bool ModFolderModel::uninstallMod(const QString& filename, bool preserve_metadata)
+{
+
+    for(auto mod : allMods()){
+        if(mod.fileinfo().fileName() == filename){
+            auto index_dir = indexDir();
+            mod.destroy(index_dir, preserve_metadata);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool ModFolderModel::setModStatus(const QModelIndexList& indexes, ModStatusAction enable)
 {
     if(interaction_disabled) {

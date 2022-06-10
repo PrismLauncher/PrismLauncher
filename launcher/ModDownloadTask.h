@@ -46,6 +46,11 @@ private:
     void downloadFailed(QString reason);
 
     void downloadSucceeded();
+
+    std::tuple<QString, QString> to_delete {"", ""};
+
+private slots:
+    void hasOldMod(QString name, QString filename);
 };
 
 

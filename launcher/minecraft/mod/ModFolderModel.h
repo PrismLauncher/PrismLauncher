@@ -118,6 +118,8 @@ public:
      */
     bool installMod(const QString& filename);
 
+    bool uninstallMod(const QString& filename, bool preserve_metadata = false);
+
     /// Deletes all the selected mods
     bool deleteMods(const QModelIndexList &indexes);
 

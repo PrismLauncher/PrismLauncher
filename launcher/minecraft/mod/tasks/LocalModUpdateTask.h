@@ -37,6 +37,9 @@ class LocalModUpdateTask : public Task {
     //! Entry point for tasks.
     void executeTask() override;
 
+   signals:
+    void hasOldMod(QString name, QString filename);
+
    private:
     QDir m_index_dir;
     ModPlatform::IndexedPack& m_mod;

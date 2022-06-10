@@ -183,9 +183,12 @@ auto Mod::details() const -> const ModDetails&
 auto Mod::name() const -> QString
 {
     auto d_name = details().name;
-    if (!d_name.isEmpty()) {
+    if (!d_name.isEmpty())
         return d_name;
-    }
+
+    if (status() != ModStatus::NoMetadata)
+        return metadata()->name;
+
     return m_name;
 }
 
