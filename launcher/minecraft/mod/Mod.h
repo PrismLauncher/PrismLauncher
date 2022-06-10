@@ -82,7 +82,7 @@ public:
     auto enable(bool value) -> bool;
 
     // delete all the files of this mod
-    auto destroy(QDir& index_dir) -> bool;
+    auto destroy(QDir& index_dir, bool preserve_metadata = false) -> bool;
 
     // change the mod's filesystem path (used by mod lists for *MAGIC* purposes)
     void repath(const QFileInfo &file);
