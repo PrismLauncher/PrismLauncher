@@ -124,4 +124,8 @@ QString getDesktopDir();
 // call it *name* and assign it the icon *icon*
 // return true if operation succeeded
 bool createShortCut(QString location, QString dest, QStringList args, QString name, QString iconLocation);
+
+// Overrides one folder with the contents of another, preserving items exclusive to the first folder
+// Equivalent to doing QDir::rename, but allowing for overrides
+bool overrideFolder(QString overwritten_path, QString override_path);
 }

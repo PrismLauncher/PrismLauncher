@@ -696,12 +696,22 @@ void InstanceImportTask::processModrinth()
         emitFailed(tr("Could not understand pack index:\n") + e.cause());
         return;
     }
+    
+    auto mcPath = FS::PathCombine(m_stagingPath, ".minecraft");
 
-    QString overridePath = FS::PathCombine(m_stagingPath, "overrides");
-    if (QFile::exists(overridePath)) {
-        QString mcPath = FS::PathCombine(m_stagingPath, ".minecraft");
-        if (!QFile::rename(overridePath, mcPath)) {
+    auto override_path = FS::PathCombine(m_stagingPath, "overrides");
+    if (QFile::exists(override_path)) {
+        if (!QFile::rename(override_path, mcPath)) {
             emitFailed(tr("Could not rename the overrides folder:\n") + "overrides");
+            return;
+        }
+    }
+
+    // Do client overrides
+    auto client_override_path = FS::PathCombine(m_stagingPath, "client-overrides");
+    if (QFile::exists(client_override_path)) {
+        if (!FS::overrideFolder(mcPath, client_override_path)) {
+            emitFailed(tr("Could not rename the client overrides folder:\n") + "client overrides");
             return;
         }
     }
