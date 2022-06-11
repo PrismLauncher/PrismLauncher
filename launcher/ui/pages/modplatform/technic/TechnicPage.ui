@@ -60,7 +60,11 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QTextBrowser" name="packDescription"/>
+      <widget class="QTextBrowser" name="packDescription">
+       <property name="openExternalLinks">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
