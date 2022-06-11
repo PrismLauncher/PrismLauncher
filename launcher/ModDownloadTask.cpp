@@ -46,8 +46,12 @@ ModDownloadTask::ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::Inde
 void ModDownloadTask::downloadSucceeded()
 {
     m_filesNetJob.reset();
-    if (!std::get<0>(to_delete).isEmpty())
-        mods->uninstallMod(std::get<1>(to_delete), true);
+    auto name = std::get<0>(to_delete);
+    if (!name.isEmpty()) {
+        // If they have the same name, we keep the metadata.
+        // This is a workaround for mods that change names between versions ;c
+        mods->uninstallMod(std::get<1>(to_delete), name == m_mod.name);
+    }
 }
 
 void ModDownloadTask::downloadFailed(QString reason)

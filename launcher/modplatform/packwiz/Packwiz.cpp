@@ -144,6 +144,9 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
 
     QFile index_file(index_dir.absoluteFilePath(real_fname));
 
+    if (real_fname != normalized_fname)
+        index_file.rename(normalized_fname);
+
     // There's already data on there!
     // TODO: We should do more stuff here, as the user is likely trying to
     // override a file. In this case, check versions and ask the user what
@@ -196,13 +199,25 @@ void V1::deleteModIndex(QDir& index_dir, QString& mod_name)
 
     QFile index_file(index_dir.absoluteFilePath(real_fname));
 
-    if(!index_file.exists()){
+    if (!index_file.exists()) {
         qWarning() << QString("Tried to delete non-existent mod metadata for %1!").arg(mod_name);
         return;
     }
 
-    if(!index_file.remove()){
+    if (!index_file.remove()) {
         qWarning() << QString("Failed to remove metadata for mod %1!").arg(mod_name);
+    }
+}
+
+void V1::deleteModIndex(QDir& index_dir, QVariant& mod_id)
+{
+    for (auto& file_name : index_dir.entryList(QDir::Filter::Files)) {
+        auto mod = getIndexForMod(index_dir, file_name);
+
+        if (mod.mod_id() == mod_id) {
+            deleteModIndex(index_dir, mod.name);
+            break;
+        }
     }
 }
 
@@ -286,4 +301,16 @@ auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
     return mod;
 }
 
-} // namespace Packwiz
+auto V1::getIndexForMod(QDir& index_dir, QVariant& mod_id) -> Mod
+{
+    for (auto& file_name : index_dir.entryList(QDir::Filter::Files)) {
+        auto mod = getIndexForMod(index_dir, file_name);
+
+        if (mod.mod_id() == mod_id)
+            return mod;
+    }
+
+    return {};
+}
+
+}  // namespace Packwiz

@@ -44,7 +44,7 @@ void LocalModUpdateTask::executeTask()
 {
     setStatus(tr("Updating index for mod:\n%1").arg(m_mod.name));
 
-    auto old_metadata = Metadata::get(m_index_dir, m_mod.name);
+    auto old_metadata = Metadata::get(m_index_dir, m_mod.addonId);
     if (old_metadata.isValid()) {
         emit hasOldMod(old_metadata.name, old_metadata.filename);
     }

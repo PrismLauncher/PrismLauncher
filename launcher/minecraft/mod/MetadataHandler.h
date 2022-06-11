@@ -52,8 +52,18 @@ class Metadata {
         Packwiz::V1::deleteModIndex(index_dir, mod_name);
     }
 
+    static void remove(QDir& index_dir, QVariant& mod_id)
+    {
+        Packwiz::V1::deleteModIndex(index_dir, mod_id);
+    }
+
     static auto get(QDir& index_dir, QString& mod_name) -> ModStruct
     {
         return Packwiz::V1::getIndexForMod(index_dir, mod_name);
+    }
+
+    static auto get(QDir& index_dir, QVariant& mod_id) -> ModStruct
+    {
+        return Packwiz::V1::getIndexForMod(index_dir, mod_id);
     }
 };

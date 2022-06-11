@@ -164,12 +164,8 @@ void Mod::setMetadata(Metadata::ModStruct* metadata)
 
 auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
 {
-    auto n = name();
-    // FIXME: This can fail to remove the metadata if the
-    // "ModMetadataDisabled" setting is on, since there could
-    // be a name mismatch!
-    if(!preserve_metadata)
-        Metadata::remove(index_dir, n);
+    if (!preserve_metadata && status() != ModStatus::NoMetadata)
+        Metadata::remove(index_dir, metadata()->mod_id());
 
     m_type = MOD_UNKNOWN;
     return FS::deletePath(m_file.filePath());
