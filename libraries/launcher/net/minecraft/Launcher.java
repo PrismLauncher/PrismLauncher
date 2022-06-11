@@ -24,24 +24,65 @@ import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
 
+/*
+ * WARNING: This class is reflectively accessed by legacy Forge versions.
+ * Changing field and method declarations without further testing is not recommended.
+ */
 public final class Launcher extends Applet implements AppletStub {
 
     private final Map<String, String> params = new TreeMap<>();
 
-    private final Applet wrappedApplet;
+    private Applet wrappedApplet;
+
+    private URL documentBase;
 
     private boolean active = false;
 
     public Launcher(Applet applet) {
+        this(applet, null);
+    }
+
+    public Launcher(Applet applet, URL documentBase) {
         this.setLayout(new BorderLayout());
 
         this.add(applet, "Center");
 
         this.wrappedApplet = applet;
+
+        try {
+            if (documentBase != null) {
+                this.documentBase = documentBase;
+            } else if (applet.getClass().getPackage().getName().startsWith("com.mojang")) {
+                // Special case only for Classic versions
+
+                this.documentBase = new URL("http", "www.minecraft.net", 80, "/game/");
+            } else {
+                this.documentBase = new URL("http://www.minecraft.net/game/");
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void setParameter(String name, String value)
-    {
+    public void replace(Applet applet) {
+        this.wrappedApplet = applet;
+
+        applet.setStub(this);
+        applet.setSize(getWidth(), getHeight());
+
+        this.setLayout(new BorderLayout());
+        this.add(applet, "Center");
+
+        applet.init();
+
+        active = true;
+
+        applet.start();
+
+        validate();
+    }
+
+    public void setParameter(String name, String value) {
         params.put(name, value);
     }
 
@@ -54,7 +95,7 @@ public final class Launcher extends Applet implements AppletStub {
 
         try {
             return super.getParameter(name);
-        } catch (Exception ignore) {}
+        } catch (Exception ignored) {}
 
         return null;
     }
@@ -108,25 +149,13 @@ public final class Launcher extends Applet implements AppletStub {
         try {
             return new URL("http://www.minecraft.net/game/");
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-
-        return null;
     }
 
     @Override
     public URL getDocumentBase() {
-        try {
-            // Special case only for Classic versions
-            if (wrappedApplet.getClass().getCanonicalName().startsWith("com.mojang"))
-                return new URL("http", "www.minecraft.net", 80, "/game/");
-
-            return new URL("http://www.minecraft.net/game/");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return documentBase;
     }
 
     @Override
