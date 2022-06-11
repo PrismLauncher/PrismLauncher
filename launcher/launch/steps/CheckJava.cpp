@@ -75,11 +75,14 @@ void CheckJava::executeTask()
     qlonglong javaUnixTime = javaInfo.lastModified().toMSecsSinceEpoch();
     auto storedUnixTime = settings->get("JavaTimestamp").toLongLong();
     auto storedArchitecture = settings->get("JavaArchitecture").toString();
+    auto storedRealArchitecture = settings->get("JavaRealArchitecture").toString();
     auto storedVersion = settings->get("JavaVersion").toString();
     auto storedVendor = settings->get("JavaVendor").toString();
     m_javaUnixTime = javaUnixTime;
     // if timestamps are not the same, or something is missing, check!
-    if (javaUnixTime != storedUnixTime || storedVersion.size() == 0 || storedArchitecture.size() == 0 || storedVendor.size() == 0)
+    if (javaUnixTime != storedUnixTime || storedVersion.size() == 0
+        || storedArchitecture.size() == 0 || storedRealArchitecture.size() == 0
+        || storedVendor.size() == 0)
     {
         m_JavaChecker = new JavaChecker();
         emit logLine(QString("Checking Java version..."), MessageLevel::Launcher);
@@ -92,8 +95,9 @@ void CheckJava::executeTask()
     {
         auto verString = instance->settings()->get("JavaVersion").toString();
         auto archString = instance->settings()->get("JavaArchitecture").toString();
+        auto realArchString = settings->get("JavaRealArchitecture").toString();
         auto vendorString = instance->settings()->get("JavaVendor").toString();
-        printJavaInfo(verString, archString, vendorString);
+        printJavaInfo(verString, archString, realArchString, vendorString);
     }
     emitSucceeded();
 }
@@ -124,10 +128,11 @@ void CheckJava::checkJavaFinished(JavaCheckResult result)
         case JavaCheckResult::Validity::Valid:
         {
             auto instance = m_parent->instance();
-            printJavaInfo(result.javaVersion.toString(), result.realPlatform, result.javaVendor);
+            printJavaInfo(result.javaVersion.toString(), result.mojangPlatform, result.realPlatform, result.javaVendor);
             printSystemInfo(true, result.is_64bit);
             instance->settings()->set("JavaVersion", result.javaVersion.toString());
             instance->settings()->set("JavaArchitecture", result.mojangPlatform);
+            instance->settings()->set("JavaRealArchitecture", result.realPlatform);
             instance->settings()->set("JavaVendor", result.javaVendor);
             instance->settings()->set("JavaTimestamp", m_javaUnixTime);
             emitSucceeded();
@@ -136,9 +141,10 @@ void CheckJava::checkJavaFinished(JavaCheckResult result)
     }
 }
 
-void CheckJava::printJavaInfo(const QString& version, const QString& architecture, const QString & vendor)
+void CheckJava::printJavaInfo(const QString& version, const QString& architecture, const QString& realArchitecture, const QString & vendor)
 {
-    emit logLine(QString("Java is version %1, using %2 architecture, from %3.\n\n").arg(version, architecture, vendor), MessageLevel::Launcher);
+    emit logLine(QString("Java is version %1, using %2 (%3) architecture, from %4.\n\n")
+                    .arg(version, architecture, realArchitecture, vendor), MessageLevel::Launcher);
 }
 
 void CheckJava::printSystemInfo(bool javaIsKnown, bool javaIs64bit)
