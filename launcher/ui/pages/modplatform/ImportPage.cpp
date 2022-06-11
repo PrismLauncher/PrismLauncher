@@ -110,11 +110,13 @@ void ImportPage::updateState()
         {
             // FIXME: actually do some validation of what's inside here... this is fake AF
             QFileInfo fi(input);
-            // mrpack is a modrinth pack
 
             // Allow non-latin people to use ZIP files!
-            auto zip = QMimeDatabase().mimeTypeForUrl(url).suffixes().contains("zip");
-            if(fi.exists() && (zip || fi.suffix() == "mrpack"))
+            bool isZip = QMimeDatabase().mimeTypeForUrl(url).suffixes().contains("zip");
+            // mrpack is a modrinth pack
+            bool isMRPack = fi.suffix() == "mrpack";
+
+            if(fi.exists() && (isZip || isMRPack))
             {
                 QFileInfo fi(url.fileName());
                 dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url,this));
@@ -149,7 +151,8 @@ void ImportPage::setUrl(const QString& url)
 void ImportPage::on_modpackBtn_clicked()
 {
     auto filter = QMimeDatabase().mimeTypeForName("application/zip").filterString();
-    filter += ";;" + tr("Modrinth pack (*.mrpack)");
+    //: Option for filtering for *.mrpack files when importing
+    filter += ";;" + tr("Modrinth pack") + " (*.mrpack)";
     const QUrl url = QFileDialog::getOpenFileUrl(this, tr("Choose modpack"), modpackUrl(), filter);
     if (url.isValid())
     {
