@@ -30,7 +30,7 @@
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string notr="true">Tab 1</string>
+       <string notr="true">Services</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
@@ -86,51 +86,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_msa">
-         <property name="title">
-          <string>&amp;Microsoft Authentication</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Note: you probably don't need to set this if logging in via Microsoft Authentication already works.</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::RichText</enum>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="msaClientID">
-            <property name="placeholderText">
-             <string>(Default)</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Enter a custom client ID for Microsoft Authentication here. </string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::RichText</enum>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-            <property name="openExternalLinks">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
         <widget class="QGroupBox" name="groupBox_meta">
          <property name="title">
           <string>Meta&amp;data Server</string>
@@ -176,35 +131,55 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_curse">
-         <property name="enabled">
-          <bool>true</bool>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>API Keys</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
+        <widget class="QGroupBox" name="groupBox_msa">
          <property name="title">
-          <string>&amp;CurseForge Core API</string>
+          <string>&amp;Microsoft Authentication</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_6">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
-           <widget class="QLabel" name="label_8">
+           <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Note: you probably don't need to set this if CurseForge already works.</string>
+             <string>Note: you probably don't need to set this if logging in via Microsoft Authentication already works.</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="curseKey">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
+           <widget class="QLineEdit" name="msaClientID">
             <property name="placeholderText">
              <string>(Default)</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_7">
+           <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Enter a custom API Key for CurseForge here. </string>
+             <string>Enter a custom client ID for Microsoft Authentication here. </string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
@@ -221,7 +196,97 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_curse">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="title">
+          <string>&amp;CurseForge Core API</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Note: you probably don't need to set this if CurseForge already works.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Enter a custom API Key for CurseForge here. </string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+            <property name="openExternalLinks">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLineEdit" name="curseKey">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="placeholderText">
+             <string>(Default)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>Miscellaneous</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QGroupBox" name="groupBox_ua">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>User Agent</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QLineEdit" name="userAgentLineEdit"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="userAgentLabel">
+            <property name="text">
+             <string>Enter a custom User Agent here. The special string $LAUNCHER_VER will be replaced with the version of the launcher.</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>

@@ -711,6 +711,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // Custom MSA credentials
         m_settings->registerSetting("MSAClientIDOverride", "");
         m_settings->registerSetting("CFKeyOverride", "");
+        m_settings->registerSetting("UserAgentOverride", "");
 
         // Init page provider
         {
@@ -1555,4 +1556,25 @@ QString Application::getCurseKey()
     }
 
     return BuildConfig.CURSEFORGE_API_KEY;
+}
+
+QString Application::getUserAgent()
+{
+    QString uaOverride = m_settings->get("UserAgentOverride").toString();
+    if (!uaOverride.isEmpty()) {
+        return uaOverride.replace("$LAUNCHER_VER", BuildConfig.printableVersionString());
+    }
+
+    return BuildConfig.USER_AGENT;
+}
+
+QString Application::getUserAgentUncached()
+{
+    QString uaOverride = m_settings->get("UserAgentOverride").toString();
+    if (!uaOverride.isEmpty()) {
+        uaOverride += " (Uncached)";
+        return uaOverride.replace("$LAUNCHER_VER", BuildConfig.printableVersionString());
+    }
+
+    return BuildConfig.USER_AGENT_UNCACHED;
 }

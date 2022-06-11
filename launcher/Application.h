@@ -156,6 +156,8 @@ public:
 
     QString getMSAClientID();
     QString getCurseKey();
+    QString getUserAgent();
+    QString getUserAgentUncached();
 
     /// this is the root of the 'installation'. Used for automatic updates
     const QString &root() {
