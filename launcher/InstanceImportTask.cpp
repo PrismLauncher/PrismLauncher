@@ -744,7 +744,7 @@ void InstanceImportTask::processModrinth()
     {
         auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path);
         qDebug() << "Will try to download" << file.downloads.front() << "to" << path;
-        auto dl = Net::Download::makeFile(file.downloads.front(), path);
+        auto dl = Net::Download::makeFile(file.downloads.dequeue(), path);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         m_filesNetJob->addNetAction(dl);
 
