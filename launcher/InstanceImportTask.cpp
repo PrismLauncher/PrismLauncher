@@ -748,7 +748,7 @@ void InstanceImportTask::processModrinth()
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         m_filesNetJob->addNetAction(dl);
 
-        if (file.downloads.size() > 1) {
+        if (file.downloads.size() > 0) {
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             connect(dl.get(), &NetAction::failed, [this, &file, path, dl]{
