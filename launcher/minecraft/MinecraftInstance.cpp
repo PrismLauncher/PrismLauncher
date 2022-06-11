@@ -168,6 +168,8 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
     m_settings->registerOverride(globalSettings->getSetting("CloseAfterLaunch"), miscellaneousOverride);
     m_settings->registerOverride(globalSettings->getSetting("QuitAfterGameStop"), miscellaneousOverride);
 
+    m_settings->set("InstanceType", "OneSix");
+
     m_components.reset(new PackProfile(this));
 }
 
