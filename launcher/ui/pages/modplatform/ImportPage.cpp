@@ -114,7 +114,7 @@ void ImportPage::updateState()
 
             // Allow non-latin people to use ZIP files!
             auto zip = QMimeDatabase().mimeTypeForUrl(url).suffixes().contains("zip");
-            if(fi.exists() && (zip || fi.suffix() == "mrpack"))
+            if(fi.exists() && (zip || fi.suffix() == "mrpack" || fi.fileName().endsWith("mrpack")))
             {
                 QFileInfo fi(url.fileName());
                 dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url,this));
@@ -149,7 +149,7 @@ void ImportPage::setUrl(const QString& url)
 void ImportPage::on_modpackBtn_clicked()
 {
     auto filter = QMimeDatabase().mimeTypeForName("application/zip").filterString();
-    filter += ";;" + tr("Modrinth pack (*.mrpack)");
+    filter += ";;" + tr("Modrinth pack (*.mrpack *mrpack)");
     const QUrl url = QFileDialog::getOpenFileUrl(this, tr("Choose modpack"), modpackUrl(), filter);
     if (url.isValid())
     {
