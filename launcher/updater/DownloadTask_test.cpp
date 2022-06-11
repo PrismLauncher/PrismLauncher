@@ -1,8 +1,6 @@
 #include <QTest>
 #include <QSignalSpy>
 
-#include "TestUtil.h"
-
 #include "updater/GoUpdate.h"
 #include "updater/DownloadTask.h"
 #include "updater/UpdateChecker.h"
@@ -71,13 +69,23 @@ slots:
 
     void test_parseVersionInfo_data()
     {
+        QFile f1(QFINDTESTDATA("testdata/1.json"));
+        f1.open(QFile::ReadOnly);
+        QByteArray data1 = f1.readAll();
+        f1.close();
+
+        QFile f2(QFINDTESTDATA("testdata/2.json"));
+        f2.open(QFile::ReadOnly);
+        QByteArray data2 = f2.readAll();
+        f2.close();
+
         QTest::addColumn<QByteArray>("data");
         QTest::addColumn<VersionFileList>("list");
         QTest::addColumn<QString>("error");
         QTest::addColumn<bool>("ret");
 
         QTest::newRow("one")
-            << GET_TEST_FILE("data/1.json")
+            << data1
             << (VersionFileList()
                 << VersionFileEntry{"fileOne",
                                                         493,
@@ -93,7 +101,7 @@ slots:
                                                         "f12df554b21e320be6471d7154130e70"})
             << QString() << true;
         QTest::newRow("two")
-            << GET_TEST_FILE("data/2.json")
+            << data2
             << (VersionFileList()
                 << VersionFileEntry{"fileOne",
                                                         493,
@@ -133,42 +141,42 @@ slots:
         QTest::newRow("test 1")
             << tempFolder << (VersionFileList()
                               << VersionFileEntry{
-                                     "data/fileOne", 493,
+                                     QFINDTESTDATA("testdata/fileOne"), 493,
                                      FileSourceList()
                                          << FileSource(
                                                 "http", "http://host/path/fileOne-1"),
                                      "9eb84090956c484e32cb6c08455a667b"}
                               << VersionFileEntry{
-                                     "data/fileTwo", 644,
+                                     QFINDTESTDATA("testdata/fileTwo"), 644,
                                      FileSourceList()
                                          << FileSource(
                                                 "http", "http://host/path/fileTwo-1"),
                                      "38f94f54fa3eb72b0ea836538c10b043"}
                               << VersionFileEntry{
-                                     "data/fileThree", 420,
+                                     QFINDTESTDATA("testdata/fileThree"), 420,
                                      FileSourceList()
                                          << FileSource(
                                                 "http", "http://host/path/fileThree-1"),
                                      "f12df554b21e320be6471d7154130e70"})
             << (VersionFileList()
                 << VersionFileEntry{
-                       "data/fileOne", 493,
+                       QFINDTESTDATA("testdata/fileOne"), 493,
                        FileSourceList()
                            << FileSource("http",
                                                              "http://host/path/fileOne-2"),
                        "42915a71277c9016668cce7b82c6b577"}
                 << VersionFileEntry{
-                       "data/fileTwo", 644,
+                       QFINDTESTDATA("testdata/fileTwo"), 644,
                        FileSourceList()
                            << FileSource("http",
                                                              "http://host/path/fileTwo-2"),
                        "38f94f54fa3eb72b0ea836538c10b043"})
             << (OperationList()
-                << Operation::DeleteOp("data/fileThree")
+                << Operation::DeleteOp(QFINDTESTDATA("testdata/fileThree"))
                 << Operation::CopyOp(
                        FS::PathCombine(tempFolder,
-                                   QString("data/fileOne").replace("/", "_")),
-                       "data/fileOne", 493));
+                                   QFINDTESTDATA("data/fileOne").replace("/", "_")),
+                       QFINDTESTDATA("data/fileOne"), 493));
     }
     void test_processFileLists()
     {

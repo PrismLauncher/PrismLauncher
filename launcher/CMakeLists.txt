@@ -4,8 +4,6 @@ project(application)
 
 ######## Sources and headers ########
 
-include (UnitTest)
-
 set(CORE_SOURCES
     # LOGIC - Base classes and infrastructure
     BaseInstaller.h
@@ -90,16 +88,11 @@ set(CORE_SOURCES
     MMCTime.cpp
 )
 
-add_unit_test(FileSystem
-    SOURCES FileSystem_test.cpp
-    LIBS Launcher_logic
-    DATA testdata
-    )
+ecm_add_test(FileSystem_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME FileSystem)  # TODO: needs testdata
 
-add_unit_test(GZip
-    SOURCES GZip_test.cpp
-    LIBS Launcher_logic
-    )
+ecm_add_test(GZip_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME GZip)
 
 set(PATHMATCHER_SOURCES
     # Path matchers
@@ -168,16 +161,10 @@ if (Launcher_UPDATER_BASE)
         updater/DownloadTask.cpp
     )
 
-    add_unit_test(UpdateChecker
-        SOURCES updater/UpdateChecker_test.cpp
-        LIBS Launcher_logic
-        DATA updater/testdata
-    )
-    add_unit_test(DownloadTask
-        SOURCES updater/DownloadTask_test.cpp
-        LIBS Launcher_logic
-        DATA updater/testdata
-    )
+    ecm_add_test(updater/UpdateChecker_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+        TEST_NAME UpdateChecker)
+    ecm_add_test(updater/DownloadTask_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+        TEST_NAME DownloadTask)
 endif()
 
 # Backend for the news bar... there's usually no news.
@@ -359,10 +346,8 @@ set(MINECRAFT_SOURCES
     mojang/PackageManifest.cpp
     minecraft/Agent.h)
 
-add_unit_test(GradleSpecifier
-    SOURCES minecraft/GradleSpecifier_test.cpp
-    LIBS Launcher_logic
-    )
+ecm_add_test(minecraft/GradleSpecifier_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME GradleSpecifier)
 
 if(BUILD_TESTING)
     add_executable(PackageManifest
@@ -382,28 +367,20 @@ if(BUILD_TESTING)
     )
 endif()
 
-add_unit_test(MojangVersionFormat
-    SOURCES minecraft/MojangVersionFormat_test.cpp
-    LIBS Launcher_logic
-    DATA minecraft/testdata
-    )
+# TODO: needs minecraft/testdata
+ecm_add_test(minecraft/MojangVersionFormat_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME MojangVersionFormat)
 
-add_unit_test(Library
-    SOURCES minecraft/Library_test.cpp
-    LIBS Launcher_logic
-    )
+ecm_add_test(minecraft/Library_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME Library)
 
 # FIXME: shares data with FileSystem test
-add_unit_test(ModFolderModel
-    SOURCES minecraft/mod/ModFolderModel_test.cpp
-    DATA testdata
-    LIBS Launcher_logic
-    )
+# TODO: needs testdata
+ecm_add_test(minecraft/mod/ModFolderModel_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME ModFolderModel)
 
-add_unit_test(ParseUtils
-    SOURCES minecraft/ParseUtils_test.cpp
-    LIBS Launcher_logic
-    )
+ecm_add_test(minecraft/ParseUtils_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME ParseUtils)
 
 # the screenshots feature
 set(SCREENSHOTS_SOURCES
@@ -422,10 +399,8 @@ set(TASKS_SOURCES
     tasks/SequentialTask.cpp
 )
 
-add_unit_test(Task
-    SOURCES tasks/Task_test.cpp
-    LIBS Launcher_logic
-    )
+ecm_add_test(tasks/Task_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME Task)
 
 set(SETTINGS_SOURCES
     # Settings
@@ -443,10 +418,8 @@ set(SETTINGS_SOURCES
     settings/SettingsObject.h
 )
 
-add_unit_test(INIFile
-    SOURCES settings/INIFile_test.cpp
-    LIBS Launcher_logic
-    )
+ecm_add_test(settings/INIFile_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME INIFile)
 
 set(JAVA_SOURCES
     java/JavaChecker.h
@@ -463,10 +436,8 @@ set(JAVA_SOURCES
     java/JavaVersion.cpp
 )
 
-add_unit_test(JavaVersion
-    SOURCES java/JavaVersion_test.cpp
-    LIBS Launcher_logic
-    )
+ecm_add_test(java/JavaVersion_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME JavaVersion)
 
 set(TRANSLATIONS_SOURCES
     translations/TranslationsModel.h
@@ -558,11 +529,9 @@ set(PACKWIZ_SOURCES
     modplatform/packwiz/Packwiz.cpp
 )
 
-add_unit_test(Packwiz
-    SOURCES modplatform/packwiz/Packwiz_test.cpp
-    DATA modplatform/packwiz/testdata
-    LIBS Launcher_logic
-    )
+# TODO: needs modplatform/packwiz/testdata
+ecm_add_test(modplatform/packwiz/Packwiz_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME Packwiz)
 
 set(TECHNIC_SOURCES
     modplatform/technic/SingleZipPackInstallTask.h
@@ -586,10 +555,8 @@ set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLShareCode.h
 )
 
-add_unit_test(Index
-    SOURCES meta/Index_test.cpp
-    LIBS Launcher_logic
-    )
+ecm_add_test(meta/Index_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME Index)
 
 ################################ COMPILE ################################
 

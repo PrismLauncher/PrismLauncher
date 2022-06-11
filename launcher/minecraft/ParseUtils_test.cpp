@@ -1,5 +1,4 @@
 #include <QTest>
-#include "TestUtil.h"
 
 #include "minecraft/ParseUtils.h"
 
@@ -42,4 +41,3 @@ slots:
 QTEST_GUILESS_MAIN(ParseUtilsTest)
 
 #include "ParseUtils_test.moc"
-

@@ -22,8 +22,4 @@ add_library(systeminfo STATIC ${systeminfo_SOURCES})
 target_link_libraries(systeminfo Qt5::Core Qt5::Gui Qt5::Network)
 target_include_directories(systeminfo PUBLIC include)
 
-include (UnitTest)
-add_unit_test(sys
-    SOURCES src/sys_test.cpp
-    LIBS systeminfo
-)
+ecm_add_test(src/sys_test.cpp LINK_LIBRARIES systeminfo Qt5::Test TEST_NAME sys)

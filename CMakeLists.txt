@@ -6,13 +6,11 @@ if(WIN32)
 endif()
 
 project(Launcher)
-include(CTest)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
 if(IS_IN_SOURCE_BUILD)
     message(FATAL_ERROR "You are building the Launcher in-source. Please separate the build tree from the source tree.")
 endif()
-
 
 ##################################### Set CMake options #####################################
 set(CMAKE_AUTOMOC ON)
@@ -63,6 +61,17 @@ if(ENABLE_LTO)
     endif()
 endif()
 
+option(BUILD_TESTING "Build the testing tree." ON)
+
+find_package(ECM REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
+if (BUILD_TESTING)
+    include(CTest)
+    include(ECMAddTests)
+
+    enable_testing()
+endif()
+
 ##################################### Set Application options #####################################
 
 ######## Set URLs ########
@@ -101,8 +110,6 @@ set(Launcher_MATRIX_URL "https://matrix.to/#/#polymc:matrix.org" CACHE STRING "U
 
 # Discord URL
 set(Launcher_DISCORD_URL "https://discord.gg/Z52pwxWCHP" CACHE STRING "URL for the Discord guild.")
-
-
 
 # Subreddit URL
 set(Launcher_SUBREDDIT_URL "https://www.reddit.com/r/PolyMCLauncher/" CACHE STRING "URL for the subreddit.")
