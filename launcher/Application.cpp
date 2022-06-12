@@ -871,6 +871,12 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_mcedit.reset(new MCEditTool(m_settings));
     }
 
+#ifdef Q_OS_MACOS
+    connect(this, &Application::clickedOnDock, [this]() {
+        this->showMainWindow();
+    });
+#endif
+
     connect(this, &Application::aboutToQuit, [this](){
         if(m_instances)
         {
@@ -952,6 +958,21 @@ bool Application::createSetupWizard()
         return true;
     }
     return false;
+}
+
+bool Application::event(QEvent* event) {
+#ifdef Q_OS_MACOS
+    if (event->type() == QEvent::ApplicationStateChange) {
+        auto ev = static_cast<QApplicationStateChangeEvent*>(event);
+
+        if (m_prevAppState == Qt::ApplicationActive
+                && ev->applicationState() == Qt::ApplicationActive) {
+            emit clickedOnDock();
+        }
+        m_prevAppState = ev->applicationState();
+    }
+#endif
+    return QApplication::event(event);
 }
 
 void Application::setupWizardFinished(int status)
