@@ -967,7 +967,6 @@ bool Application::event(QEvent* event) {
 
         if (m_prevAppState == Qt::ApplicationActive
                 && ev->applicationState() == Qt::ApplicationActive) {
-            qDebug() << "Clicked on dock!";
             emit clickedOnDock();
         }
         m_prevAppState = ev->applicationState();
