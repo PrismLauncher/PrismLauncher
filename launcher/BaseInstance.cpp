@@ -59,7 +59,11 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     m_settings->registerSetting("lastLaunchTime", 0);
     m_settings->registerSetting("totalTimePlayed", 0);
     m_settings->registerSetting("lastTimePlayed", 0);
-    m_settings->registerSetting("InstanceType", "");
+
+    // NOTE: Sometimees InstanceType is already registered, as it was used to identify the type of
+    // a locally stored instance
+    if (!m_settings->getSetting("InstanceType"))
+        m_settings->registerSetting("InstanceType", "");
 
     // Custom Commands
     auto commandSetting = m_settings->registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
