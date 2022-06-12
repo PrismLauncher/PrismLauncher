@@ -102,9 +102,9 @@ OutFile "../@Launcher_CommonName@-Setup.exe"
 ;--------------------------------
 
 ; Version info
-VIProductVersion "@Launcher_RELEASE_VERSION_NAME@"
-VIFileVersion "@Launcher_RELEASE_VERSION_NAME@"
-VIAddVersionKey "FileVersion" "@Launcher_RELEASE_VERSION_NAME@"
+VIProductVersion "@Launcher_RELEASE_VERSION_NAME4@"
+VIFileVersion "@Launcher_RELEASE_VERSION_NAME4@"
+VIAddVersionKey "FileVersion" "@Launcher_RELEASE_VERSION_NAME4@"
 
 ;--------------------------------
 
@@ -140,7 +140,7 @@ Section "@Launcher_CommonName@"
     WriteRegStr HKCU "${UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
     WriteRegStr HKCU "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
     WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "@Launcher_CommonName@ Contributors"
-    WriteRegStr HKCU "${UNINST_KEY}" "ProductVersion" "@Launcher_RELEASE_VERSION_NAME@"
+    WriteRegStr HKCU "${UNINST_KEY}" "ProductVersion" "@Launcher_RELEASE_VERSION_NAME4@"
     ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
     IntFmt $0 "0x%08X" $0
     WriteRegDWORD HKCU "${UNINST_KEY}" "EstimatedSize" "$0"
