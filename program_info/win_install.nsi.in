@@ -101,6 +101,13 @@ OutFile "../@Launcher_CommonName@-Setup.exe"
 
 ;--------------------------------
 
+; Version info
+VIProductVersion "@Launcher_RELEASE_VERSION_NAME@"
+VIFileVersion "@Launcher_RELEASE_VERSION_NAME@"
+VIAddVersionKey "FileVersion" "@Launcher_RELEASE_VERSION_NAME@"
+
+;--------------------------------
+
 ; The stuff to install
 Section "@Launcher_CommonName@"
 
