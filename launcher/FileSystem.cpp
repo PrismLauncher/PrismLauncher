@@ -454,4 +454,47 @@ bool createShortCut(QString location, QString dest, QStringList args, QString na
     return false;
 #endif
 }
+
+QStringList listFolderPaths(QDir root)
+{
+    auto createAbsPath = [](QFileInfo const& entry) { return FS::PathCombine(entry.path(), entry.fileName()); };
+
+    QStringList entries;
+
+    root.refresh();
+    for (auto entry : root.entryInfoList(QDir::Filter::Files)) {
+        entries.append(createAbsPath(entry));
+    }
+
+    for (auto entry : root.entryInfoList(QDir::Filter::AllDirs | QDir::Filter::NoDotAndDotDot)) {
+        entries.append(listFolderPaths(createAbsPath(entry)));
+    }
+
+    return entries;
+}
+
+bool overrideFolder(QString overwritten_path, QString override_path)
+{
+    if (!FS::ensureFolderPathExists(overwritten_path))
+        return false;
+
+    QStringList paths_to_override;
+    QDir root_override (override_path);
+    for (auto file : listFolderPaths(root_override)) {
+        QString destination = file;
+        destination.replace(override_path, overwritten_path);
+
+        qDebug() << QString("Applying override %1 in %2").arg(file, destination);
+
+        if (QFile::exists(destination))
+            QFile::remove(destination);
+        if (!QFile::rename(file, destination)) {
+            qCritical() << QString("Failed to apply override from %1 to %2").arg(file, destination);
+            return false;
+        }
+    }
+
+    return true;
+}
+
 }
