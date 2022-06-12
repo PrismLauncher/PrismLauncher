@@ -32,8 +32,11 @@ slots:
         {
             QString folder = source;
             QTemporaryDir tempDir;
+            QEventLoop loop;
             ModFolderModel m(tempDir.path(), true);
+            connect(&m, &ModFolderModel::updateFinished, &loop, &QEventLoop::quit);
             m.installMod(folder);
+            loop.exec();
             verify(tempDir.path());
         }
 
@@ -41,8 +44,11 @@ slots:
         {
             QString folder = source + '/';
             QTemporaryDir tempDir;
+            QEventLoop loop;
             ModFolderModel m(tempDir.path(), true);
+            connect(&m, &ModFolderModel::updateFinished, &loop, &QEventLoop::quit);
             m.installMod(folder);
+            loop.exec();
             verify(tempDir.path());
         }
     }
