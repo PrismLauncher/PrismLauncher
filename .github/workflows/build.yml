@@ -206,7 +206,7 @@ jobs:
         shell: msys2 {0}
         run: |
           cd ${{ env.INSTALL_DIR }}
-          makensis -NOCD "-DVERSION=${{ env.VERSION }}" "-DMUI_ICON=${{ github.workspace }}/program_info/polymc.ico" "-XOutFile ${{ github.workspace }}/PolyMC-Setup.exe" "${{ github.workspace }}/program_info/win_install.nsi"
+          makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
 
       - name: Package (Linux)
         if: runner.os == 'Linux' && matrix.appimage != true
