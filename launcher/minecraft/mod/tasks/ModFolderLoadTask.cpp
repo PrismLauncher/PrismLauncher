@@ -69,10 +69,12 @@ void ModFolderLoadTask::run()
                 m_result->mods[mod.internal_id()] = mod;
 
                 auto metadata = m_result->mods[chopped_id].metadata();
-                mod.setMetadata(new Metadata::ModStruct(*metadata));
+                if (metadata) {
+                    mod.setMetadata(new Metadata::ModStruct(*metadata));
 
-                m_result->mods[mod.internal_id()].setStatus(ModStatus::Installed);
-                m_result->mods.remove(chopped_id);
+                    m_result->mods[mod.internal_id()].setStatus(ModStatus::Installed);
+                    m_result->mods.remove(chopped_id);
+                }
             }
             else {
                 m_result->mods[mod.internal_id()] = mod;
