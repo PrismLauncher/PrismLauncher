@@ -46,6 +46,7 @@
 #include <QInputDialog>
 #include <QProcess>
 #include <Qt>
+#include <QSortFilterProxyModel>
 
 #include "tools/MCEditTool.h"
 #include "FileSystem.h"

@@ -47,6 +47,7 @@
 
 #include <QFileSystemWatcher>
 #include <QMenu>
+#include <QTimer>
 
 static const int COLUMN_COUNT = 2; // 3 , TBD: latency and other nice things.
 

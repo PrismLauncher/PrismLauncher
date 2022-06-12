@@ -154,6 +154,7 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QSt
     fflush(stderr);
 }
 
+#ifdef LAUNCHER_WITH_UPDATER
 QString getIdealPlatform(QString currentPlatform) {
     auto info = Sys::getKernelInfo();
     switch(info.kernelType) {
@@ -192,6 +193,7 @@ QString getIdealPlatform(QString currentPlatform) {
     }
     return currentPlatform;
 }
+#endif
 
 }
 
@@ -754,6 +756,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         qDebug() << "<> Translations loaded.";
     }
 
+#ifdef LAUNCHER_WITH_UPDATER
     // initialize the updater
     if(BuildConfig.UPDATER_ENABLED)
     {
@@ -763,6 +766,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_updateChecker.reset(new UpdateChecker(m_network, channelUrl, BuildConfig.VERSION_CHANNEL, BuildConfig.VERSION_BUILD));
         qDebug() << "<> Updater started.";
     }
+#endif
 
     // Instance icons
     {
@@ -1408,7 +1412,9 @@ MainWindow* Application::showMainWindow(bool minimized)
         }
 
         m_mainWindow->checkInstancePathForProblems();
+#ifdef LAUNCHER_WITH_UPDATER
         connect(this, &Application::updateAllowedChanged, m_mainWindow, &MainWindow::updatesAllowedChanged);
+#endif
         connect(m_mainWindow, &MainWindow::isClosing, this, &Application::on_windowClose);
         m_openWindows++;
     }

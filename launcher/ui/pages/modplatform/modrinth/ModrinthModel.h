@@ -39,6 +39,7 @@
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
 #include "ui/pages/modplatform/modrinth/ModrinthPage.h"
+#include "net/NetJob.h"
 
 class ModPage;
 class Version;

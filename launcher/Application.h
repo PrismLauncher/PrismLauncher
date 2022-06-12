@@ -42,7 +42,10 @@
 #include <QIcon>
 #include <QDateTime>
 #include <QUrl>
+
+#ifdef LAUNCHER_WITH_UPDATER
 #include <updater/GoUpdate.h>
+#endif
 
 #include <BaseInstance.h>
 
