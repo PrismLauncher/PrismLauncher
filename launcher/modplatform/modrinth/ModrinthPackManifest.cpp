@@ -95,19 +95,6 @@ void loadIndexedVersions(Modpack& pack, QJsonDocument& doc)
     pack.versionsLoaded = true;
 }
 
-auto validateDownloadUrl(QUrl url) -> bool
-{
-    static QSet<QString> domainWhitelist{
-        "cdn.modrinth.com",
-        "github.com",
-        "raw.githubusercontent.com",
-        "gitlab.com"
-    };
-
-    auto domain = url.host();
-    return domainWhitelist.contains(domain);
-}
-
 auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
 {
     ModpackVersion file;
@@ -136,9 +123,6 @@ auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
         }
 
         auto url = Json::requireString(parent, "url");
-
-        if(!validateDownloadUrl(url))
-            continue;
 
         file.download_url = url;
         if(is_primary)
