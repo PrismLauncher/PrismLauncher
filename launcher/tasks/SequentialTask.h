@@ -1,49 +1,21 @@
 #pragma once
 
-#include "Task.h"
-#include "QObjectPtr.h"
+#include "ConcurrentTask.h"
 
-#include <QQueue>
-
-class SequentialTask : public Task
-{
+/** A concurrent task that only allows one concurrent task :)
+ *
+ *  This should be used when there's a need to maintain a strict ordering of task executions, and
+ *  the starting of a task is contingent on the success of the previous one.
+ *
+ *  See MultipleOptionsTask if that's not the case.
+ */
+class SequentialTask : public ConcurrentTask {
     Q_OBJECT
-public:
-    explicit SequentialTask(QObject *parent = nullptr, const QString& task_name = "");
-    virtual ~SequentialTask();
+   public:
+    explicit SequentialTask(QObject* parent = nullptr, QString task_name = "");
+    ~SequentialTask() override = default;
 
-    inline auto isMultiStep() const -> bool override { return m_queue.size() > 1; };
-    auto getStepProgress() const -> qint64 override;
-    auto getStepTotalProgress() const -> qint64 override;
-
-    inline auto getStepStatus() const -> QString override { return m_step_status; }
-
-    void addTask(Task::Ptr task);
-
-public slots:
-    bool abort() override;
-
-protected
-slots:
-    void executeTask() override;
-
-    virtual void startNext();
-    virtual void subTaskFailed(const QString &msg);
-    virtual void subTaskStatus(const QString &msg);
-    virtual void subTaskProgress(qint64 current, qint64 total);
-
-protected:
-    void setStepStatus(QString status) { m_step_status = status; emit stepStatus(status); };
-
-protected:
-    QString m_name;
-    QString m_step_status;
-
-    QQueue<Task::Ptr > m_queue;
-    int m_currentIndex;
-
-    qint64 m_stepProgress = 0;
-    qint64 m_stepTotalProgress = 100;
-
-    bool m_aborted = false;
+   protected:
+    void startNext() override;
+    void updateState() override;
 };
