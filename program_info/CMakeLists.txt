@@ -14,6 +14,8 @@ set(Launcher_MetaInfo "program_info/org.polymc.PolyMC.metainfo.xml" PARENT_SCOPE
 set(Launcher_ManPage "program_info/polymc.6.txt" PARENT_SCOPE)
 set(Launcher_SVG "program_info/org.polymc.PolyMC.svg" PARENT_SCOPE)
 set(Launcher_Branding_ICNS "program_info/polymc.icns" PARENT_SCOPE)
+set(Launcher_Branding_ICO "program_info/polymc.ico")
+set(Launcher_Branding_ICO "${Launcher_Branding_ICO}" PARENT_SCOPE)
 set(Launcher_Branding_WindowsRC "program_info/polymc.rc" PARENT_SCOPE)
 set(Launcher_Branding_LogoQRC "program_info/polymc.qrc" PARENT_SCOPE)
 
@@ -24,3 +26,4 @@ configure_file(org.polymc.PolyMC.metainfo.xml.in org.polymc.PolyMC.metainfo.xml)
 configure_file(polymc.rc.in polymc.rc @ONLY)
 configure_file(polymc.manifest.in polymc.manifest @ONLY)
 configure_file(polymc.ico polymc.ico COPYONLY)
+configure_file(win_install.nsi.in win_install.nsi @ONLY)
