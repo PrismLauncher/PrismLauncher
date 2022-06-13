@@ -2,6 +2,7 @@
 /*
 *  PolyMC - Minecraft Launcher
 *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+*  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
 *
 *  This program is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -165,7 +166,7 @@ auto Mod::destroy(QDir& index_dir) -> bool
 {
     auto n = name();
     // FIXME: This can fail to remove the metadata if the
-    // "DontUseModMetadata" setting is on, since there could
+    // "ModMetadataDisabled" setting is on, since there could
     // be a name mismatch!
     Metadata::remove(index_dir, n);
 

@@ -2,6 +2,7 @@
 /*
 *  PolyMC - Minecraft Launcher
 *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+*  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
 *
 *  This program is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -34,11 +35,6 @@ LocalModUpdateTask::LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack&
 void LocalModUpdateTask::executeTask()
 {
     setStatus(tr("Updating index for mod:\n%1").arg(m_mod.name));
-
-    if(APPLICATION->settings()->get("DontUseModMetadata").toBool()){
-        emitSucceeded();
-        return;
-    }
 
     auto pw_mod = Metadata::create(m_index_dir, m_mod, m_mod_version);
     Metadata::update(m_index_dir, pw_mod);

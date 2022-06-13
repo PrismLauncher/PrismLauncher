@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,6 +39,7 @@
 #include <QClipboard>
 #include <QApplication>
 #include <QFileDialog>
+#include <QStandardPaths>
 
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"

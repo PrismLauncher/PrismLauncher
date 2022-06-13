@@ -156,27 +156,29 @@ set(LAUNCH_SOURCES
     launch/LogModel.h
 )
 
-# Old update system
-set(UPDATE_SOURCES
-    updater/GoUpdate.h
-    updater/GoUpdate.cpp
-    updater/UpdateChecker.h
-    updater/UpdateChecker.cpp
-    updater/DownloadTask.h
-    updater/DownloadTask.cpp
-)
-
-add_unit_test(UpdateChecker
-    SOURCES updater/UpdateChecker_test.cpp
-    LIBS Launcher_logic
-    DATA updater/testdata
+if (Launcher_UPDATER_BASE)
+    set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_WITH_UPDATER ${Launcher_APP_BINARY_DEFS}")
+    # Old update system
+    set(UPDATE_SOURCES
+        updater/GoUpdate.h
+        updater/GoUpdate.cpp
+        updater/UpdateChecker.h
+        updater/UpdateChecker.cpp
+        updater/DownloadTask.h
+        updater/DownloadTask.cpp
     )
 
-add_unit_test(DownloadTask
-    SOURCES updater/DownloadTask_test.cpp
-    LIBS Launcher_logic
-    DATA updater/testdata
+    add_unit_test(UpdateChecker
+        SOURCES updater/UpdateChecker_test.cpp
+        LIBS Launcher_logic
+        DATA updater/testdata
     )
+    add_unit_test(DownloadTask
+        SOURCES updater/DownloadTask_test.cpp
+        LIBS Launcher_logic
+        DATA updater/testdata
+    )
+endif()
 
 # Backend for the news bar... there's usually no news.
 set(NEWS_SOURCES

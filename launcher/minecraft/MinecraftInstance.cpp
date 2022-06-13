@@ -1015,7 +1015,8 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::loaderModList() const
 {
     if (!m_loader_mod_list)
     {
-        m_loader_mod_list.reset(new ModFolderModel(modsRoot()));
+        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        m_loader_mod_list.reset(new ModFolderModel(modsRoot(), is_indexed));
         m_loader_mod_list->disableInteraction(isRunning());
         connect(this, &BaseInstance::runningStatusChanged, m_loader_mod_list.get(), &ModFolderModel::disableInteraction);
     }
@@ -1026,7 +1027,8 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::coreModList() const
 {
     if (!m_core_mod_list)
     {
-        m_core_mod_list.reset(new ModFolderModel(coreModsDir()));
+        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        m_core_mod_list.reset(new ModFolderModel(coreModsDir(), is_indexed));
         m_core_mod_list->disableInteraction(isRunning());
         connect(this, &BaseInstance::runningStatusChanged, m_core_mod_list.get(), &ModFolderModel::disableInteraction);
     }

@@ -1,17 +1,38 @@
-/* Copyright 2013-2021 MultiMC Contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+*  PolyMC - Minecraft Launcher
+*  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+*  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+*
+*  This program is free software: you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation, version 3.
+*
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*
+* This file incorporates work covered by the following copyright and
+* permission notice:
+*
+*      Copyright 2013-2021 MultiMC Contributors
+*
+*      Licensed under the Apache License, Version 2.0 (the "License");
+*      you may not use this file except in compliance with the License.
+*      You may obtain a copy of the License at
+*
+*          http://www.apache.org/licenses/LICENSE-2.0
+*
+*      Unless required by applicable law or agreed to in writing, software
+*      distributed under the License is distributed on an "AS IS" BASIS,
+*      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*      See the License for the specific language governing permissions and
+*      limitations under the License.
+*/
 
 #include "ModFolderModel.h"
 
@@ -28,7 +49,7 @@
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
 
-ModFolderModel::ModFolderModel(const QString &dir) : QAbstractListModel(), m_dir(dir)
+ModFolderModel::ModFolderModel(const QString &dir, bool is_indexed) : QAbstractListModel(), m_dir(dir), m_is_indexed(is_indexed)
 {
     FS::ensureFolderPathExists(m_dir.absolutePath());
     m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
@@ -82,7 +103,7 @@ bool ModFolderModel::update()
     }
 
     auto index_dir = indexDir();
-    auto task = new ModFolderLoadTask(dir(), index_dir);
+    auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed);
 
     m_update = task->result();
 

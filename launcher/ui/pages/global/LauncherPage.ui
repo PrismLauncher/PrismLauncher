@@ -50,6 +50,9 @@
          <property name="title">
           <string>Update Settings</string>
          </property>
+         <property name="visible">
+          <bool>false</bool>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
            <widget class="QCheckBox" name="autoUpdateCheckBox">

@@ -2,6 +2,7 @@
 /*
 *  PolyMC - Minecraft Launcher
 *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+*  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
 *
 *  This program is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -55,7 +56,7 @@ public:
     }
 
 public:
-    ModFolderLoadTask(QDir& mods_dir, QDir& index_dir);
+    ModFolderLoadTask(QDir& mods_dir, QDir& index_dir, bool is_indexed);
     void run();
 signals:
     void succeeded();
@@ -65,5 +66,6 @@ private:
 
 private:
     QDir& m_mods_dir, m_index_dir;
+    bool m_is_indexed;
     ResultPtr m_result;
 };

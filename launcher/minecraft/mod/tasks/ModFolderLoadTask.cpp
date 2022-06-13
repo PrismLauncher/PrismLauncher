@@ -2,6 +2,7 @@
 /*
 *  PolyMC - Minecraft Launcher
 *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+*  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
 *
 *  This program is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -38,13 +39,13 @@
 #include "Application.h"
 #include "minecraft/mod/MetadataHandler.h"
 
-ModFolderLoadTask::ModFolderLoadTask(QDir& mods_dir, QDir& index_dir) 
-    : m_mods_dir(mods_dir), m_index_dir(index_dir), m_result(new Result())
+ModFolderLoadTask::ModFolderLoadTask(QDir& mods_dir, QDir& index_dir, bool is_indexed) 
+    : m_mods_dir(mods_dir), m_index_dir(index_dir), m_is_indexed(is_indexed), m_result(new Result())
 {}
 
 void ModFolderLoadTask::run()
 {
-    if (!APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (m_is_indexed) {
         // Read metadata first
         getFromMetadata();
     }
