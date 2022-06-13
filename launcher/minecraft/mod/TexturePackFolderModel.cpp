@@ -35,7 +35,7 @@
 
 #include "TexturePackFolderModel.h"
 
-TexturePackFolderModel::TexturePackFolderModel(const QString &dir) : ModFolderModel(dir, false) {
+TexturePackFolderModel::TexturePackFolderModel(const QString &dir) : ModFolderModel(dir) {
 }
 
 QVariant TexturePackFolderModel::headerData(int section, Qt::Orientation orientation, int role) const {
