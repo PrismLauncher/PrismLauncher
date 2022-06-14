@@ -334,10 +334,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // on macOS, touch the root to force Finder to reload the .app metadata (and fix any icon change issues)
         FS::updateTimestamp(m_rootPath);
 #endif
-
-#ifdef LAUNCHER_JARS_LOCATION
-        m_jarsPath = TOSTRING(LAUNCHER_JARS_LOCATION);
-#endif
     }
 
     QString adjustedBy;
@@ -1557,13 +1553,22 @@ shared_qobject_ptr<Meta::Index> Application::metadataIndex()
     return m_metadataIndex;
 }
 
-QString Application::getJarsPath()
+QString Application::getJarPath(QString jarFile)
 {
-    if(m_jarsPath.isEmpty())
+    QStringList potentialPaths = {
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+        FS::PathCombine(m_rootPath, "share/jars"),
+#endif
+        FS::PathCombine(m_rootPath, "jars"),
+        FS::PathCombine(applicationDirPath(), "jars")
+    };
+    for(QString p : potentialPaths)
     {
-        return FS::PathCombine(QCoreApplication::applicationDirPath(), "jars");
+        QString jarPath = FS::PathCombine(p, jarFile);
+        if (QFileInfo(jarPath).isFile())
+            return jarPath;
     }
-    return FS::PathCombine(m_rootPath, m_jarsPath);
+    return {};
 }
 
 QString Application::getMSAClientID()

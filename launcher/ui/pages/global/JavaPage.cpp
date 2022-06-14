@@ -127,6 +127,11 @@ void JavaPage::loadSettings()
 
 void JavaPage::on_javaDetectBtn_clicked()
 {
+    if (JavaUtils::getJavaCheckPath().isEmpty()) {
+        JavaCommon::javaCheckNotFound(this);
+        return;
+    }
+
     JavaInstallPtr java;
 
     VersionSelectDialog vselect(APPLICATION->javalist().get(), tr("Select a Java version"), this, true);

@@ -92,6 +92,15 @@ bool fitsInLocal8bit(const QString & string)
 
 void LauncherPartLaunch::executeTask()
 {
+    QString jarPath = APPLICATION->getJarPath("NewLaunch.jar");
+    if (jarPath.isEmpty())
+    {
+        const char *reason = QT_TR_NOOP("Launcher library could not be found. Please check your installation.");
+        emit logLine(tr(reason), MessageLevel::Fatal);
+        emitFailed(tr(reason));
+        return;
+    }
+
     auto instance = m_parent->instance();
     std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
 
@@ -108,7 +117,7 @@ void LauncherPartLaunch::executeTask()
     m_process.setDetachable(true);
 
     auto classPath = minecraftInstance->getClassPath();
-    classPath.prepend(FS::PathCombine(APPLICATION->getJarsPath(), "NewLaunch.jar"));
+    classPath.prepend(jarPath);
 
     auto natPath = minecraftInstance->getNativePath();
 #ifdef Q_OS_WIN

@@ -50,6 +50,7 @@
 #include "Application.h"
 
 #include "java/JavaInstallList.h"
+#include "java/JavaUtils.h"
 #include "FileSystem.h"
 
 
@@ -336,6 +337,11 @@ void InstanceSettingsPage::loadSettings()
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
 {
+    if (JavaUtils::getJavaCheckPath().isEmpty()) {
+        JavaCommon::javaCheckNotFound(this);
+        return;
+    }
+
     JavaInstallPtr java;
 
     VersionSelectDialog vselect(APPLICATION->javalist().get(), tr("Select a Java version"), this, true);

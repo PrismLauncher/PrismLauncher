@@ -24,6 +24,7 @@
 #include "java/JavaUtils.h"
 #include "java/JavaInstallList.h"
 #include "FileSystem.h"
+#include "Application.h"
 
 #define IBUS "@im=ibus"
 
@@ -437,3 +438,8 @@ QList<QString> JavaUtils::FindJavaPaths()
     return addJavasFromEnv(javas);
 }
 #endif
+
+QString JavaUtils::getJavaCheckPath()
+{
+    return APPLICATION->getJarPath("JavaCheck.jar");
+}

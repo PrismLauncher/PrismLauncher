@@ -1,4 +1,5 @@
 #include "JavaCommon.h"
+#include "java/JavaUtils.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include <MMCStrings.h>
 
@@ -65,10 +66,22 @@ void JavaCommon::javaBinaryWasBad(QWidget *parent, JavaCheckResult result)
     CustomMessageBox::selectable(parent, QObject::tr("Java test failure"), text, QMessageBox::Warning)->show();
 }
 
+void JavaCommon::javaCheckNotFound(QWidget *parent)
+{
+    QString text;
+    text += QObject::tr("Java checker library could not be found. Please check your installation");
+    CustomMessageBox::selectable(parent, QObject::tr("Java test failure"), text, QMessageBox::Warning)->show();
+}
+
 void JavaCommon::TestCheck::run()
 {
     if (!JavaCommon::checkJVMArgs(m_args, m_parent))
     {
+        emit finished();
+        return;
+    }
+    if (JavaUtils::getJavaCheckPath().isEmpty()) {
+        javaCheckNotFound(m_parent);
         emit finished();
         return;
     }
