@@ -57,12 +57,24 @@ struct File {
     QQueue<QUrl> downloads;
 };
 
+struct DonationData {
+    QString id;
+    QString platform;
+    QString url;
+};
+
 struct ModpackExtra {
     QString body;
 
     QString projectUrl;
+
+    QString issuesUrl;
     QString sourceUrl;
     QString wikiUrl;
+    QString discordUrl;
+
+    QList<DonationData> donate;
+
 };
 
 struct ModpackVersion {

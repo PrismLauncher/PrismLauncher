@@ -36,10 +36,12 @@ class ModPage : public QWidget, public BasePage {
 
     void retranslate() override;
 
+    void updateUi();
+
     auto shouldDisplay() const -> bool override = 0;
     virtual auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders = ModAPI::Unspecified) const -> bool = 0;
 
-    auto apiProvider() const -> const ModAPI* { return api.get(); };
+    auto apiProvider() -> ModAPI* { return api.get(); };
     auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
     auto getDialog() const -> const ModDownloadDialog* { return dialog; }
 

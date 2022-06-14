@@ -79,6 +79,8 @@ public:
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 
+    void updateUi();
+
     void openedImpl() override;
 
     bool eventFilter(QObject * watched, QEvent * event) override;

@@ -30,6 +30,11 @@ void ListModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
     Modrinth::loadIndexedPack(m, obj);
 }
 
+void ListModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
+{
+    Modrinth::loadExtraPackData(m, obj);
+}
+
 void ListModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
     Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), m_parent->m_instance);

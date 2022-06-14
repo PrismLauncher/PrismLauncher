@@ -44,6 +44,12 @@ struct ModpackAuthor {
     QString url;
 };
 
+struct DonationData {
+    QString id;
+    QString platform;
+    QString url;
+};
+
 struct IndexedVersion {
     QVariant addonId;
     QVariant fileId;
@@ -55,6 +61,15 @@ struct IndexedVersion {
     QVector<QString> loaders = {};
     QString hash_type;
     QString hash;
+};
+
+struct ExtraPackData {
+    QList<DonationData> donate;
+
+    QString issuesUrl;
+    QString sourceUrl;
+    QString wikiUrl;
+    QString discordUrl;
 };
 
 struct IndexedPack {
@@ -69,6 +84,10 @@ struct IndexedPack {
 
     bool versionsLoaded = false;
     QVector<IndexedVersion> versions;
+
+    // Don't load by default, since some modplatform don't have that info
+    bool extraDataLoaded = true;
+    ExtraPackData extraData;
 };
 
 }  // namespace ModPlatform

@@ -20,6 +20,13 @@ struct IndexedVersion {
     QString downloadUrl;
 };
 
+struct ModpackExtra {
+    QString websiteUrl;
+    QString wikiUrl;
+    QString issuesUrl;
+    QString sourceUrl;
+};
+
 struct IndexedPack
 {
     int addonId;
@@ -28,13 +35,16 @@ struct IndexedPack
     QList<ModpackAuthor> authors;
     QString logoName;
     QString logoUrl;
-    QString websiteUrl;
 
     bool versionsLoaded = false;
     QVector<IndexedVersion> versions;
+
+    bool extraInfoLoaded = false;
+    ModpackExtra extra;
 };
 
 void loadIndexedPack(IndexedPack & m, QJsonObject & obj);
+void loadIndexedInfo(IndexedPack&, QJsonObject&);
 void loadIndexedPackVersions(IndexedPack & m, QJsonArray & arr);
 }
 

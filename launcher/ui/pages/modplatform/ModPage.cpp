@@ -130,28 +130,6 @@ void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
     if (!first.isValid()) { return; }
 
     current = listModel->data(first, Qt::UserRole).value<ModPlatform::IndexedPack>();
-    QString text = "";
-    QString name = current.name;
-
-    if (current.websiteUrl.isEmpty())
-        text = name;
-    else
-        text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
-
-    if (!current.authors.empty()) {
-        auto authorToStr = [](ModPlatform::ModpackAuthor& author) -> QString {
-            if (author.url.isEmpty()) { return author.name; }
-            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
-        };
-        QStringList authorStrs;
-        for (auto& author : current.authors) {
-            authorStrs.push_back(authorToStr(author));
-        }
-        text += "<br>" + tr(" by ") + authorStrs.join(", ");
-    }
-    text += "<br><br>";
-
-    ui->packDescription->setHtml(text + current.description);
 
     if (!current.versionsLoaded) {
         qDebug() << QString("Loading %1 mod versions").arg(debugName());
@@ -168,6 +146,13 @@ void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
         updateSelectionButton();
     }
+
+    if(!current.extraDataLoaded){
+        qDebug() << QString("Loading %1 mod info").arg(debugName());
+        listModel->requestModInfo(current);
+    }
+
+    updateUi();
 }
 
 void ModPage::onVersionSelectionChanged(QString data)
@@ -243,4 +228,62 @@ void ModPage::updateSelectionButton()
     } else {
         ui->modSelectionButton->setText(tr("Deselect mod for download"));
     }
+}
+
+void ModPage::updateUi()
+{
+    QString text = "";
+    QString name = current.name;
+
+    if (current.websiteUrl.isEmpty())
+        text = name;
+    else
+        text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
+
+    if (!current.authors.empty()) {
+        auto authorToStr = [](ModPlatform::ModpackAuthor& author) -> QString {
+            if (author.url.isEmpty()) { return author.name; }
+            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
+        };
+        QStringList authorStrs;
+        for (auto& author : current.authors) {
+            authorStrs.push_back(authorToStr(author));
+        }
+        text += "<br>" + tr(" by ") + authorStrs.join(", ");
+    }
+
+    
+    if(current.extraDataLoaded) {
+        if (!current.extraData.donate.isEmpty()) {
+            text += "<br><br>" + tr("Donate information: ");
+            auto donateToStr = [](ModPlatform::DonationData& donate) -> QString {
+                return QString("<a href=\"%1\">%2</a>").arg(donate.url, donate.platform);
+            };
+            QStringList donates;
+            for (auto& donate : current.extraData.donate) {
+                donates.append(donateToStr(donate));
+            }
+            text += donates.join(", ");
+        }
+
+        if (!current.extraData.issuesUrl.isEmpty()
+         || !current.extraData.sourceUrl.isEmpty()
+         || !current.extraData.wikiUrl.isEmpty()
+         || !current.extraData.discordUrl.isEmpty()) {
+            text += "<br><br>" + tr("External links:") + "<br>";
+        }
+
+        if (!current.extraData.issuesUrl.isEmpty())
+            text += "- " + tr("Issues: <a href=%1>%1</a>").arg(current.extraData.issuesUrl) + "<br>";
+        if (!current.extraData.wikiUrl.isEmpty())
+            text += "- " + tr("Wiki: <a href=%1>%1</a>").arg(current.extraData.wikiUrl) + "<br>";
+        if (!current.extraData.sourceUrl.isEmpty())
+            text += "- " + tr("Source code: <a href=%1>%1</a>").arg(current.extraData.sourceUrl) + "<br>";
+        if (!current.extraData.discordUrl.isEmpty())
+            text += "- " + tr("Discord: <a href=%1>%1</a>").arg(current.extraData.discordUrl) + "<br>";
+    }
+
+    text += "<hr>";
+
+    ui->packDescription->setHtml(text + current.description);
 }

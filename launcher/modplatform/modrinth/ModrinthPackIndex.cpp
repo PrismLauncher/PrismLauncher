@@ -48,6 +48,43 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     modAuthor.name = Json::requireString(obj, "author");
     modAuthor.url = api.getAuthorURL(modAuthor.name);
     pack.authors.append(modAuthor);
+
+    // Modrinth can have more data than what's provided by the basic search :)
+    pack.extraDataLoaded = false;
+}
+
+void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& obj)
+{
+    pack.extraData.issuesUrl = Json::ensureString(obj, "issues_url");
+    if(pack.extraData.issuesUrl.endsWith('/'))
+        pack.extraData.issuesUrl.chop(1);
+
+    pack.extraData.sourceUrl = Json::ensureString(obj, "source_url");
+    if(pack.extraData.sourceUrl.endsWith('/'))
+        pack.extraData.sourceUrl.chop(1);
+
+    pack.extraData.wikiUrl = Json::ensureString(obj, "wiki_url");
+    if(pack.extraData.wikiUrl.endsWith('/'))
+        pack.extraData.wikiUrl.chop(1);
+
+    pack.extraData.discordUrl = Json::ensureString(obj, "discord_url");
+    if(pack.extraData.discordUrl.endsWith('/'))
+        pack.extraData.discordUrl.chop(1);
+
+    auto donate_arr = Json::ensureArray(obj, "donation_urls");
+    for(auto d : donate_arr){
+        auto d_obj = Json::requireObject(d);
+
+        ModPlatform::DonationData donate;
+
+        donate.id = Json::ensureString(d_obj, "id");
+        donate.platform = Json::ensureString(d_obj, "platform");
+        donate.url = Json::ensureString(d_obj, "url");
+
+        pack.extraData.donate.append(donate);
+    }
+
+    pack.extraDataLoaded = true;
 }
 
 void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
