@@ -75,7 +75,7 @@ class PackInstallTask : public InstanceTask
 Q_OBJECT
 
 public:
-    explicit PackInstallTask(UserInteractionSupport *support, QString pack, QString version);
+    explicit PackInstallTask(UserInteractionSupport *support, QString packName, QString version);
     virtual ~PackInstallTask(){}
 
     bool canAbort() const override { return true; }
@@ -117,7 +117,8 @@ private:
     NetJob::Ptr jobPtr;
     QByteArray response;
 
-    QString m_pack;
+    QString m_pack_name;
+    QString m_pack_safe_name;
     QString m_version_name;
     PackVersion m_version;
 

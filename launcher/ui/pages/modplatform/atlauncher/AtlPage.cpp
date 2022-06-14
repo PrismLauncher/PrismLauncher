@@ -117,7 +117,7 @@ void AtlPage::suggestCurrent()
         return;
     }
 
-    dialog->setSuggestedPack(selected.name + " " + selectedVersion, new ATLauncher::PackInstallTask(this, selected.safeName, selectedVersion));
+    dialog->setSuggestedPack(selected.name + " " + selectedVersion, new ATLauncher::PackInstallTask(this, selected.name, selectedVersion));
     auto editedLogoName = selected.safeName;
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1.png").arg(selected.safeName.toLower());
     listModel->getLogo(selected.safeName, url, [this, editedLogoName](QString logo)
