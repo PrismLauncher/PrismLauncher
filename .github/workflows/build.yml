@@ -28,7 +28,7 @@ jobs:
             name: "Windows-x86_64"
             msystem: mingw64
 
-          - os: macos-11
+          - os: macos-12
             macosx_deployment_target: 10.13
 
     runs-on: ${{ matrix.os }}
