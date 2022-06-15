@@ -245,6 +245,7 @@ Function .onInit
 ${GetParameters} $R0
 ${GetOptions} $R0 "/NoShortcuts" $R1
 ${IfNot} ${Errors}
+${OrIf} ${FileExists} "$InstDir\@Launcher_APP_BINARY_NAME@.exe"
   !insertmacro UnselectSection ${SM_SHORTCUTS}
   !insertmacro UnselectSection ${DESKTOP_SHORTCUTS}
 ${EndIf}
