@@ -53,7 +53,7 @@ void Flame::loadIndexedInfo(IndexedPack& pack, QJsonObject& obj)
 {
     auto links_obj = Json::ensureObject(obj, "links");
 
-    pack.extra.websiteUrl = Json::ensureString(links_obj, "issuesUrl");
+    pack.extra.websiteUrl = Json::ensureString(links_obj, "websiteUrl");
     if(pack.extra.websiteUrl.endsWith('/'))
         pack.extra.websiteUrl.chop(1);
 
