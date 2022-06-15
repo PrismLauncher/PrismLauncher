@@ -125,7 +125,7 @@ cp /home/peterix/minecraft/FTB/versions/1.7.10/1.7.10.jar
 launcher onesix
 ```
 
-Available under the Apache 2.0 license.
+Available under `GPL-3.0-only`, sublicensed from its original `Apache-2.0` codebase
 
 ## libnbtplusplus
 libnbt++ is a free C++ library for Minecraft's file format Named Binary Tag (NBT). It can read and write compressed and uncompressed NBT files and provides a code interface for working with NBT data.
