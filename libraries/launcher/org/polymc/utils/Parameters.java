@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.multimc.utils;
+package org.polymc.utils;
 
-import org.multimc.exception.ParameterNotFoundException;
+import org.polymc.exception.ParameterNotFoundException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

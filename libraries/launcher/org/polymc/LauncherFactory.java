@@ -16,10 +16,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.multimc;
+package org.polymc;
 
-import org.multimc.impl.OneSixLauncher;
-import org.multimc.utils.Parameters;
+import org.polymc.impl.OneSixLauncher;
+import org.polymc.utils.Parameters;
 
 import java.util.HashMap;
 import java.util.Map;

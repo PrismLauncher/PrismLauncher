@@ -33,10 +33,10 @@
  *      limitations under the License.
  */
 
-package org.multimc;
+package org.polymc;
 
-import org.multimc.exception.ParseException;
-import org.multimc.utils.Parameters;
+import org.polymc.exception.ParseException;
+import org.polymc.utils.Parameters;
 
 import java.io.BufferedReader;
 import java.io.IOException;
