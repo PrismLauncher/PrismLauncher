@@ -13,7 +13,7 @@ class CheckUpdateTask : public Task {
 
    public:
     CheckUpdateTask(std::list<Mod>& mods, std::list<Version>& mcVersions, ModAPI::ModLoaderTypes loaders, std::shared_ptr<ModFolderModel> mods_folder)
-        : m_mods(mods), m_game_versions(mcVersions), m_loaders(loaders), m_mods_folder(mods_folder) {};
+        : Task(nullptr), m_mods(mods), m_game_versions(mcVersions), m_loaders(loaders), m_mods_folder(mods_folder) {};
 
     struct UpdatableMod {
         QString name;

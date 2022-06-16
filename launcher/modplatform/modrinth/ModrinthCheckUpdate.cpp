@@ -88,7 +88,9 @@ void ModrinthCheckUpdate::executeTask()
                     qDebug() << "Mod " << mappings.find(hash).value().name() << " got an empty response.";
                     qDebug() << "Hash: " << hash;
 
-                    emit checkFailed(mappings.find(hash).value(), tr("Couldn't find the latest version of this mod with the correct mod loader and game version."));
+                    emit checkFailed(
+                        mappings.find(hash).value(),
+                        tr("No valid version found for this mod. It's probably unavailable for the current game version / mod loader."));
 
                     continue;
                 }
@@ -134,6 +136,7 @@ void ModrinthCheckUpdate::executeTask()
                     // Fake pack with the necessary info to pass to the download task :)
                     ModPlatform::IndexedPack pack;
                     pack.name = mod.name();
+                    pack.slug = mod.metadata()->slug;
                     pack.addonId = mod.metadata()->project_id;
                     pack.websiteUrl = mod.homeurl();
                     for (auto& author : mod.authors())
