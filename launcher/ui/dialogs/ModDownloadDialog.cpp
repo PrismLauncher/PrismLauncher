@@ -78,7 +78,7 @@ ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel> &mods
 
     QMetaObject::connectSlotsByName(this);
     setWindowModality(Qt::WindowModal);
-    setWindowTitle("Download mods");
+    setWindowTitle(dialogTitle());
 }
 
 QString ModDownloadDialog::dialogTitle()
