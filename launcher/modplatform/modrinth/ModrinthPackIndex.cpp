@@ -87,6 +87,8 @@ void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
         pack.extraData.donate.append(donate);
     }
 
+    pack.extraData.body = Json::ensureString(obj, "body");
+
     pack.extraDataLoaded = true;
 }
 
