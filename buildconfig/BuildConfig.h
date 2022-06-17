@@ -83,6 +83,9 @@ class Config {
     /// The git commit hash of this build
     QString GIT_COMMIT;
 
+    /// The git tag of this build
+    QString GIT_TAG;
+
     /// The git refspec of this build
     QString GIT_REFSPEC;
 

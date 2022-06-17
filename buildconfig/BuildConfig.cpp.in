@@ -62,8 +62,10 @@ Config::Config()
     UPDATER_BASE = "@Launcher_UPDATER_BASE@";
 
     GIT_COMMIT = "@Launcher_GIT_COMMIT@";
+    GIT_TAG = "@Launcher_GIT_TAG@";
     GIT_REFSPEC = "@Launcher_GIT_REFSPEC@";
-    if (GIT_REFSPEC == QStringLiteral("GITDIR-NOTFOUND"))
+    if (GIT_REFSPEC == QStringLiteral("GITDIR-NOTFOUND")
+        || GIT_TAG == QStringLiteral("-128-NOTFOUND"))
     {
         VERSION_CHANNEL = QStringLiteral("stable");
     }
