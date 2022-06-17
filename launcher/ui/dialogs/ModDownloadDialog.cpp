@@ -64,6 +64,7 @@ ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel> &mods
     OkButton->setEnabled(false);
     OkButton->setDefault(true);
     OkButton->setAutoDefault(true);
+    OkButton->setText(tr("Review and confirm"));
     connect(OkButton, &QPushButton::clicked, this, &ModDownloadDialog::confirm);
 
     auto CancelButton = m_buttons->button(QDialogButtonBox::Cancel);
