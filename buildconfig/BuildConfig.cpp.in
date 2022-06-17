@@ -115,7 +115,7 @@ QString Config::printableVersionString() const
     // if a build number is set, also add it to the end
     if(VERSION_BUILD >= 0)
     {
-        vstr += "-" + QString::number(VERSION_BUILD);
+        vstr += "+build." + QString::number(VERSION_BUILD);
     }
     return vstr;
 }
