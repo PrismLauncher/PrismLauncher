@@ -79,6 +79,8 @@ QString AccountTask::getStateMessage() const
 bool AccountTask::changeState(AccountTaskState newState, QString reason)
 {
     m_taskState = newState;
+    // FIXME: virtual method invoked in constructor.
+    // We want that behavior, but maybe make it less weird?
     setStatus(getStateMessage());
     switch(newState) {
         case AccountTaskState::STATE_CREATED: {

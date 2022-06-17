@@ -59,7 +59,7 @@ class FlameAPI : public NetworkModAPI {
     };
 
    public:
-    static auto getMappedModLoader(const ModLoaderTypes loaders) -> const int
+    static auto getMappedModLoader(const ModLoaderTypes loaders) -> int
     {
         // https://docs.curseforge.com/?http#tocS_ModLoaderType
         if (loaders & Forge)

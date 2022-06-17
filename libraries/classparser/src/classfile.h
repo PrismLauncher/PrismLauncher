@@ -17,7 +17,7 @@ public:
         is_synthetic = false;
         read_be(magic);
         if (magic != 0xCAFEBABE)
-            throw new classfile_exception();
+            throw classfile_exception();
         read_be(minor_version);
         read_be(major_version);
         constants.load(*this);

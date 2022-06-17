@@ -329,6 +329,11 @@ POTranslator::POTranslator(const QString& filename, QObject* parent) : QTranslat
     d->reload();
 }
 
+POTranslator::~POTranslator()
+{
+    delete d;
+}
+
 QString POTranslator::translate(const char* context, const char* sourceText, const char* disambiguation, int n) const
 {
     if(disambiguation)
