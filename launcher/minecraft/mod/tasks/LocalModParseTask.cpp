@@ -4,6 +4,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonValue>
+#include <QString>
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 #include <toml.h>
@@ -71,7 +72,13 @@ std::shared_ptr<ModDetails> ReadMCModInfo(QByteArray contents)
         if(val.isUndefined()) {
             val = jsonDoc.object().value("modListVersion");
         }
-        int version = val.toDouble();
+
+        int version = Json::ensureInteger(val, -1);
+
+        // Some mods set the number with "", so it's a String instead
+        if (version < 0)
+            version = Json::ensureString(val, "").toInt();
+
         if (version != 2)
         {
             qCritical() << "BAD stuff happened to mod json:";
