@@ -147,25 +147,36 @@ void Mod::setStatus(ModStatus status)
     if (m_localDetails) {
         m_localDetails->status = status;
     } else {
-        m_temp_status = status;
+        if (!m_temp_status.get())
+            m_temp_status.reset(new ModStatus());
+
+        *m_temp_status = status;
     }
 }
-void Mod::setMetadata(Metadata::ModStruct* metadata)
+void Mod::setMetadata(const Metadata::ModStruct& metadata)
 {
     if (status() == ModStatus::NoMetadata)
         setStatus(ModStatus::Installed);
 
     if (m_localDetails) {
-        m_localDetails->metadata.reset(metadata);
+        m_localDetails->metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
     } else {
-        m_temp_metadata.reset(metadata);
+        m_temp_metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
     }
 }
 
 auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
 {
-    if (!preserve_metadata && status() != ModStatus::NoMetadata)
-        Metadata::remove(index_dir, metadata()->mod_id());
+    if (!preserve_metadata) {
+        qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
+
+        if (metadata()) {
+            Metadata::remove(index_dir, metadata()->slug);
+        } else {
+            auto n = name();
+            Metadata::remove(index_dir, n);
+        }
+    }
 
     m_type = MOD_UNKNOWN;
     return FS::deletePath(m_file.filePath());
@@ -182,7 +193,7 @@ auto Mod::name() const -> QString
     if (!d_name.isEmpty())
         return d_name;
 
-    if (status() != ModStatus::NoMetadata)
+    if (metadata())
         return metadata()->name;
 
     return m_name;
@@ -211,7 +222,7 @@ auto Mod::authors() const -> QStringList
 auto Mod::status() const -> ModStatus
 {
     if (!m_localDetails)
-        return m_temp_status;
+        return m_temp_status ? *m_temp_status : ModStatus::NoMetadata;
     return details().status;
 }
 
@@ -235,11 +246,10 @@ void Mod::finishResolvingWithDetails(std::shared_ptr<ModDetails> details)
     m_resolved = true;
     m_localDetails = details;
 
-    if (m_localDetails && m_temp_metadata && m_temp_metadata->isValid()) {
-        m_localDetails->metadata = m_temp_metadata;
-        if (status() == ModStatus::NoMetadata)
-            setStatus(ModStatus::Installed);
-    }
+    setStatus(m_temp_status ? *m_temp_status : ModStatus::NoMetadata);
 
-    setStatus(m_temp_status);
+    if (m_localDetails && m_temp_metadata && m_temp_metadata->isValid()) {
+        setMetadata(*m_temp_metadata);
+        m_temp_metadata.reset();
+    }
 }

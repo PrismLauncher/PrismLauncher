@@ -37,9 +37,9 @@ class Metadata {
         return Packwiz::V1::createModFormat(index_dir, mod_pack, mod_version);
     }
 
-    static auto create(QDir& index_dir, Mod& internal_mod) -> ModStruct
+    static auto create(QDir& index_dir, Mod& internal_mod, QString mod_slug) -> ModStruct
     {
-        return Packwiz::V1::createModFormat(index_dir, internal_mod);
+        return Packwiz::V1::createModFormat(index_dir, internal_mod, mod_slug);
     }
 
     static void update(QDir& index_dir, ModStruct& mod)
@@ -47,9 +47,9 @@ class Metadata {
         Packwiz::V1::updateModIndex(index_dir, mod);
     }
 
-    static void remove(QDir& index_dir, QString& mod_name)
+    static void remove(QDir& index_dir, QString mod_slug)
     {
-        Packwiz::V1::deleteModIndex(index_dir, mod_name);
+        Packwiz::V1::deleteModIndex(index_dir, mod_slug);
     }
 
     static void remove(QDir& index_dir, QVariant& mod_id)
@@ -57,9 +57,9 @@ class Metadata {
         Packwiz::V1::deleteModIndex(index_dir, mod_id);
     }
 
-    static auto get(QDir& index_dir, QString& mod_name) -> ModStruct
+    static auto get(QDir& index_dir, QString mod_slug) -> ModStruct
     {
-        return Packwiz::V1::getIndexForMod(index_dir, mod_name);
+        return Packwiz::V1::getIndexForMod(index_dir, mod_slug);
     }
 
     static auto get(QDir& index_dir, QVariant& mod_id) -> ModStruct

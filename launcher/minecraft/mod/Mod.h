@@ -77,7 +77,7 @@ public:
     auto metadata() const -> const std::shared_ptr<Metadata::ModStruct>;
 
     void setStatus(ModStatus status);
-    void setMetadata(Metadata::ModStruct* metadata);
+    void setMetadata(const Metadata::ModStruct& metadata);
 
     auto enable(bool value) -> bool;
 
@@ -111,7 +111,7 @@ protected:
     std::shared_ptr<Metadata::ModStruct> m_temp_metadata;
 
     /* Set the mod status while it doesn't have local details just yet */
-    ModStatus m_temp_status = ModStatus::NotInstalled;
+    std::shared_ptr<ModStatus> m_temp_status;
 
     std::shared_ptr<ModDetails> m_localDetails;
 

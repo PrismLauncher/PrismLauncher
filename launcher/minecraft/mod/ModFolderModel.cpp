@@ -65,14 +65,20 @@ void ModFolderModel::startWatching()
 
     update();
 
+    // Watch the mods folder
     is_watching = m_watcher->addPath(m_dir.absolutePath());
-    if (is_watching)
-    {
+    if (is_watching) {
         qDebug() << "Started watching " << m_dir.absolutePath();
-    }
-    else
-    {
+    } else {
         qDebug() << "Failed to start watching " << m_dir.absolutePath();
+    }
+
+    // Watch the mods index folder
+    is_watching = m_watcher->addPath(indexDir().absolutePath());
+    if (is_watching) {
+        qDebug() << "Started watching " << indexDir().absolutePath();
+    } else {
+        qDebug() << "Failed to start watching " << indexDir().absolutePath();
     }
 }
 
@@ -82,13 +88,17 @@ void ModFolderModel::stopWatching()
         return;
 
     is_watching = !m_watcher->removePath(m_dir.absolutePath());
-    if (!is_watching)
-    {
+    if (!is_watching) {
         qDebug() << "Stopped watching " << m_dir.absolutePath();
-    }
-    else
-    {
+    } else {
         qDebug() << "Failed to stop watching " << m_dir.absolutePath();
+    }
+
+    is_watching = !m_watcher->removePath(indexDir().absolutePath());
+    if (!is_watching) {
+        qDebug() << "Stopped watching " << indexDir().absolutePath();
+    } else {
+        qDebug() << "Failed to stop watching " << indexDir().absolutePath();
     }
 }
 

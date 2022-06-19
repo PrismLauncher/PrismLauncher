@@ -40,6 +40,7 @@ auto intEntry(toml_table_t* parent, const char* entry_name) -> int;
 class V1 {
    public:
     struct Mod {
+        QString slug {};
         QString name {};
         QString filename {};
         // FIXME: make side an enum
@@ -58,7 +59,7 @@ class V1 {
 
        public:
         // This is a totally heuristic, but should work for now.
-        auto isValid() const -> bool { return !name.isEmpty() && !project_id.isNull(); }
+        auto isValid() const -> bool { return !slug.isEmpty() && !project_id.isNull(); }
 
         // Different providers can use different names for the same thing
         // Modrinth-specific
@@ -71,9 +72,9 @@ class V1 {
      * */
     static auto createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod;
     /* Generates the object representing the information in a mod.pw.toml file via
-     * its common representation in the launcher.
+     * its common representation in the launcher, plus a necessary slug.
      * */
-    static auto createModFormat(QDir& index_dir, ::Mod& internal_mod) -> Mod;
+    static auto createModFormat(QDir& index_dir, ::Mod& internal_mod, QString slug) -> Mod;
 
     /* Updates the mod index for the provided mod.
      * This creates a new index if one does not exist already
@@ -81,16 +82,16 @@ class V1 {
      * */
     static void updateModIndex(QDir& index_dir, Mod& mod);
 
-    /* Deletes the metadata for the mod with the given name. If the metadata doesn't exist, it does nothing. */
-    static void deleteModIndex(QDir& index_dir, QString& mod_name);
+    /* Deletes the metadata for the mod with the given slug. If the metadata doesn't exist, it does nothing. */
+    static void deleteModIndex(QDir& index_dir, QString& mod_slug);
 
     /* Deletes the metadata for the mod with the given id. If the metadata doesn't exist, it does nothing. */
     static void deleteModIndex(QDir& index_dir, QVariant& mod_id);
 
-    /* Gets the metadata for a mod with a particular name.
+    /* Gets the metadata for a mod with a particular file name.
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.
      * */
-    static auto getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod;
+    static auto getIndexForMod(QDir& index_dir, QString slug) -> Mod;
 
     /* Gets the metadata for a mod with a particular id.
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.
