@@ -88,8 +88,19 @@ auto ModrinthAPI::latestVersions(const QStringList& hashes,
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(
-        QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), response, body_raw));
+    netJob->addNetAction(Net::Upload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), response, body_raw));
+
+    QObject::connect(netJob, &NetJob::finished, [response] { delete response; });
+
+    return netJob;
+}
+
+auto ModrinthAPI::getProjects(QStringList addonIds, QByteArray* response) const -> NetJob::Ptr
+{
+    auto netJob = new NetJob(QString("Modrinth::GetProjects"), APPLICATION->network());
+    auto searchUrl = getMultipleModInfoURL(addonIds);
+
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
 
     QObject::connect(netJob, &NetJob::finished, [response] { delete response; });
 

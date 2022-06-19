@@ -123,3 +123,26 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
 
     return ver;
 }
+
+auto FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const -> NetJob::Ptr
+{
+    auto* netJob = new NetJob(QString("Flame::GetProjects"), APPLICATION->network());
+
+    QJsonObject body_obj;
+    QJsonArray addons_arr;
+    for (auto& addonId : addonIds) {
+        addons_arr.append(addonId);
+    }
+
+    body_obj["modIds"] = addons_arr;
+
+    QJsonDocument body(body_obj);
+    auto body_raw = body.toJson();
+
+    netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/mods"), response, body_raw));
+
+    QObject::connect(netJob, &NetJob::finished, [response] { delete response; });
+    QObject::connect(netJob, &NetJob::failed, [body_raw] { qDebug() << body_raw; });
+
+    return netJob;
+}

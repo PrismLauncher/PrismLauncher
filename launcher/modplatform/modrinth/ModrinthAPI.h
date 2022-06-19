@@ -22,7 +22,6 @@
 #include "modplatform/ModAPI.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/helpers/NetworkModAPI.h"
-#include "net/NetJob.h"
 
 #include <QDebug>
 
@@ -47,6 +46,8 @@ class ModrinthAPI : public NetworkModAPI {
                         std::list<Version> mcVersions,
                         ModLoaderTypes loaders,
                         QByteArray* response) -> NetJob::Ptr;
+
+    auto getProjects(QStringList addonIds, QByteArray* response) const -> NetJob::Ptr override;
 
    public:
     inline auto getAuthorURL(const QString& name) const -> QString { return "https://modrinth.com/user/" + name; };
@@ -101,6 +102,11 @@ class ModrinthAPI : public NetworkModAPI {
     inline auto getModInfoURL(QString& id) const -> QString override
     {
         return BuildConfig.MODRINTH_PROD_URL + "/project/" + id;
+    };
+
+    inline auto getMultipleModInfoURL(QStringList ids) const -> QString
+    {
+        return BuildConfig.MODRINTH_PROD_URL + QString("/projects?ids=[\"%1\"]").arg(ids.join("\",\""));
     };
 
     inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
