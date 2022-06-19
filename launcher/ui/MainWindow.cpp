@@ -2183,6 +2183,7 @@ void MainWindow::selectionBad()
     statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
     ui->setInstanceActionsEnabled(false);
+    updateToolsMenu();
     ui->renameButton->setText(tr("Rename Instance"));
     updateInstanceToolIcon("grass");
 
