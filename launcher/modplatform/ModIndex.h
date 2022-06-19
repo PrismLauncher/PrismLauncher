@@ -55,11 +55,11 @@ struct IndexedVersion {
     QVariant fileId;
     QString version;
     QString version_number = {};
-    QVector<QString> mcVersion;
+    QStringList mcVersion;
     QString downloadUrl;
     QString date;
     QString fileName;
-    QVector<QString> loaders = {};
+    QStringList loaders = {};
     QString hash_type;
     QString hash;
     bool is_preferred = true;
@@ -79,6 +79,7 @@ struct IndexedPack {
     QVariant addonId;
     Provider provider;
     QString name;
+    QString slug;
     QString description;
     QList<ModpackAuthor> authors;
     QString logoName;

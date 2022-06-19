@@ -29,13 +29,16 @@ static ModPlatform::ProviderCapabilities ProviderCaps;
 
 void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
-    pack.addonId = Json::requireString(obj, "project_id");
+    pack.addonId = Json::ensureString(obj, "project_id");
+    if (pack.addonId.toString().isEmpty())
+        pack.addonId = Json::requireString(obj, "id");
+
     pack.provider = ModPlatform::Provider::MODRINTH;
     pack.name = Json::requireString(obj, "title");
     
-    QString slug = Json::ensureString(obj, "slug", "");
-    if (!slug.isEmpty())
-        pack.websiteUrl = "https://modrinth.com/mod/" + Json::ensureString(obj, "slug", "");
+    pack.slug = Json::ensureString(obj, "slug", "");
+    if (!pack.slug.isEmpty())
+        pack.websiteUrl = "https://modrinth.com/mod/" + pack.slug;
     else
         pack.websiteUrl = "";
 
@@ -45,7 +48,7 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     pack.logoName = pack.addonId.toString();
 
     ModPlatform::ModpackAuthor modAuthor;
-    modAuthor.name = Json::requireString(obj, "author");
+    modAuthor.name = Json::ensureString(obj, "author", QObject::tr("No author(s)"));
     modAuthor.url = api.getAuthorURL(modAuthor.name);
     pack.authors.append(modAuthor);
 
