@@ -62,8 +62,10 @@ void ModUpdateDialog::checkCandidates()
     // Report failed metadata generation
     if (!m_failed_metadata.empty()) {
         QString text;
-        for (const auto& mod : m_failed_metadata) {
-            text += tr("Mod name: %1<br>File name: %2<br><br>").arg(mod.name(), mod.fileinfo().fileName());
+        for (const auto& failed : m_failed_metadata) {
+            const auto& mod = std::get<0>(failed);
+            const auto& reason = std::get<1>(failed);
+            text += tr("Mod name: %1<br>File name: %2<br>Reason: %3<br><br>").arg(mod.name(), mod.fileinfo().fileName(), reason);
         }
 
         ScrollMessageBox message_dialog(m_parent, tr("Metadata generation failed"),
@@ -316,7 +318,9 @@ void ModUpdateDialog::onMetadataFailed(Mod& mod, bool try_others, ModPlatform::P
 
         m_second_try_metadata->addTask(task);
     } else {
-        m_failed_metadata.push_back(mod);
+        QString reason { tr("Didn't find a valid version on the selected mod provider(s)") };
+
+        m_failed_metadata.emplace_back(mod, reason);
     }
 }
 

@@ -33,6 +33,11 @@ void ModrinthCheckUpdate::executeTask()
     QStringList hashes;
     auto best_hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
     for (auto mod : m_mods) {
+        if (!mod.enabled()) {
+            emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
+            continue;
+        }
+
         auto hash = mod.metadata()->hash;
 
         // Sadly the API can only handle one hash type per call, se we

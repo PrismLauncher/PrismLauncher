@@ -50,7 +50,7 @@ class ModUpdateDialog final : public ReviewMessageBox {
     std::list<Mod> m_flame_to_update;
 
     SequentialTask* m_second_try_metadata;
-    std::list<Mod> m_failed_metadata;
+    std::list<std::tuple<Mod, QString>> m_failed_metadata;
     std::list<std::tuple<Mod, QString, QUrl>> m_failed_check_update;
 
     QHash<QString, ModDownloadTask*> m_tasks;

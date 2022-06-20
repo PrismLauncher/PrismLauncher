@@ -118,6 +118,11 @@ void FlameCheckUpdate::executeTask()
 
     int i = 0;
     for (auto mod : m_mods) {
+        if (!mod.enabled()) {
+            emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
+            continue;
+        }
+
         setStatus(tr("Getting API response from CurseForge for '%1'").arg(mod.name()));
         setProgress(i++, m_mods.size());
 

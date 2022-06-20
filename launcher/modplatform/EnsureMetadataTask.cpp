@@ -455,6 +455,8 @@ void EnsureMetadataTask::modrinthCallback(ModPlatform::IndexedPack& pack, ModPla
 {
     // Prevent file name mismatch
     ver.fileName = mod.fileinfo().fileName();
+    if (ver.fileName.endsWith(".disabled"))
+        ver.fileName.chop(9);
 
     QDir tmp_index_dir(m_index_dir);
 
@@ -487,6 +489,8 @@ void EnsureMetadataTask::flameCallback(ModPlatform::IndexedPack& pack, ModPlatfo
     try {
         // Prevent file name mismatch
         ver.fileName = mod.fileinfo().fileName();
+        if (ver.fileName.endsWith(".disabled"))
+            ver.fileName.chop(9);
 
         QDir tmp_index_dir(m_index_dir);
 
