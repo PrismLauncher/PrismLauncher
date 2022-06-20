@@ -16,8 +16,7 @@
 #include "modplatform/modrinth/ModrinthCheckUpdate.h"
 
 #include <HoeDown.h>
-
-#include <QTextEdit>
+#include <QTextBrowser>
 #include <QTreeWidgetItem>
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
@@ -47,7 +46,6 @@ ModUpdateDialog::ModUpdateDialog(QWidget* parent,
 
     ui->explainLabel->setText(tr("You're about to update the following mods:"));
     ui->onlyCheckedLabel->setText(tr("Only mods with a check will be updated!"));
-
 }
 
 void ModUpdateDialog::checkCandidates()
@@ -69,9 +67,9 @@ void ModUpdateDialog::checkCandidates()
         }
 
         ScrollMessageBox message_dialog(m_parent, tr("Metadata generation failed"),
-                                                   tr("Could not generate metadata for the following mods:<br>"
-                                                      "Do you wish to proceed without those mods?"),
-                                                   text);
+                                        tr("Could not generate metadata for the following mods:<br>"
+                                           "Do you wish to proceed without those mods?"),
+                                        text);
         message_dialog.setModal(true);
         if (message_dialog.exec() == QDialog::Rejected) {
             m_aborted = true;
@@ -83,7 +81,7 @@ void ModUpdateDialog::checkCandidates()
     auto versions = mcVersions(m_instance);
     auto loaders = mcLoaders(m_instance);
 
-    SequentialTask check_task (m_parent, tr("Checking for updates"));
+    SequentialTask check_task(m_parent, tr("Checking for updates"));
 
     if (!m_modrinth_to_update.empty()) {
         m_modrinth_check_task = new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model);
@@ -166,9 +164,9 @@ void ModUpdateDialog::checkCandidates()
         }
 
         ScrollMessageBox message_dialog(m_parent, tr("Failed to check for updates"),
-                                                   tr("Could not check or get the following mods for updates:<br>"
-                                                      "Do you wish to proceed without those mods?"),
-                                                   text);
+                                        tr("Could not check or get the following mods for updates:<br>"
+                                           "Do you wish to proceed without those mods?"),
+                                        text);
         message_dialog.setModal(true);
         if (message_dialog.exec() == QDialog::Rejected) {
             m_aborted = true;
@@ -178,8 +176,21 @@ void ModUpdateDialog::checkCandidates()
     }
 
     // If there's no mod to be updated
-    if (ui->modTreeWidget->topLevelItemCount() == 0)
+    if (ui->modTreeWidget->topLevelItemCount() == 0) {
         m_no_updates = true;
+    } else {
+        // FIXME: Find a more efficient way of doing this!
+
+        // Sort major items in alphabetical order (also sorts the children unfortunately)
+        ui->modTreeWidget->sortItems(0, Qt::SortOrder::AscendingOrder);
+
+        // Re-sort the children
+        auto* item = ui->modTreeWidget->topLevelItem(0);
+        for (int i = 1; item != nullptr; ++i) {
+            item->sortChildren(0, Qt::SortOrder::DescendingOrder);
+            item = ui->modTreeWidget->topLevelItem(i);
+        }
+    }
 
     if (m_aborted || m_no_updates)
         QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
@@ -318,7 +329,7 @@ void ModUpdateDialog::onMetadataFailed(Mod& mod, bool try_others, ModPlatform::P
 
         m_second_try_metadata->addTask(task);
     } else {
-        QString reason { tr("Didn't find a valid version on the selected mod provider(s)") };
+        QString reason{ tr("Didn't find a valid version on the selected mod provider(s)") };
 
         m_failed_metadata.emplace_back(mod, reason);
     }
@@ -344,20 +355,23 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
     changelog_item->setText(0, tr("Changelog of the latest version"));
 
     auto changelog = new QTreeWidgetItem(changelog_item);
+    auto changelog_area = new QTextBrowser();
 
-    auto changelog_area = new QTextEdit();
-    HoeDown h;
-    changelog_area->setText(h.process(info.changelog.toUtf8()));
-    changelog_area->setReadOnly(true);
-    if (info.changelog.size() < 250)  // heuristic
-        changelog_area->setSizeAdjustPolicy(QTextEdit::SizeAdjustPolicy::AdjustToContents);
+    switch (info.provider) {
+        case ModPlatform::Provider::MODRINTH: {
+            HoeDown h;
+            changelog_area->setHtml(h.process(info.changelog.toUtf8()));
+            break;
+        }
+        case ModPlatform::Provider::FLAME: {
+            changelog_area->setHtml(info.changelog);
+            break;
+        }
+    }
+
+    changelog_area->setOpenExternalLinks(true);
 
     ui->modTreeWidget->setItemWidget(changelog, 0, changelog_area);
-    changelog_item->insertChildren(0, { changelog });
-
-    item_top->insertChildren(0, { old_version_item });
-    item_top->insertChildren(1, { new_version_item });
-    item_top->insertChildren(2, { changelog_item });
 
     ui->modTreeWidget->addTopLevelItem(item_top);
 }
