@@ -305,7 +305,7 @@ nonstd::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString &
         QString path;
         if(name.contains('/') && !name.endsWith('/')){
             path = name.section('/', 0, -2) + "/";
-            FS::ensureFolderPathExists(path);
+            FS::ensureFolderPathExists(FS::PathCombine(target, path));
 
             name = name.split('/').last();
         }
