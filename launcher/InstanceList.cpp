@@ -547,8 +547,20 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
     auto instanceRoot = FS::PathCombine(m_instDir, id);
     auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(instanceRoot, "instance.cfg"));
     InstancePtr inst;
-    // TODO: Handle incompatible instances
-    inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
+
+    instanceSettings->registerSetting("InstanceType", "");
+
+    QString inst_type = instanceSettings->get("InstanceType").toString();
+
+    // NOTE: Some PolyMC versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a OneSix instance
+    if (inst_type == "OneSix" || inst_type.isEmpty())
+    {
+        inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
+    }
+    else
+    {
+        inst.reset(new NullInstance(m_globalSettings, instanceSettings, instanceRoot));
+    }
     qDebug() << "Loaded instance " << inst->name() << " from " << inst->instanceRoot();
     return inst;
 }

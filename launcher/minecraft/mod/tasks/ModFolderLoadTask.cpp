@@ -2,6 +2,7 @@
 /*
 *  PolyMC - Minecraft Launcher
 *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+*  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
 *
 *  This program is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -38,13 +39,13 @@
 #include "Application.h"
 #include "minecraft/mod/MetadataHandler.h"
 
-ModFolderLoadTask::ModFolderLoadTask(QDir& mods_dir, QDir& index_dir) 
-    : m_mods_dir(mods_dir), m_index_dir(index_dir), m_result(new Result())
+ModFolderLoadTask::ModFolderLoadTask(QDir& mods_dir, QDir& index_dir, bool is_indexed) 
+    : m_mods_dir(mods_dir), m_index_dir(index_dir), m_is_indexed(is_indexed), m_result(new Result())
 {}
 
 void ModFolderLoadTask::run()
 {
-    if (!APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+    if (m_is_indexed) {
         // Read metadata first
         getFromMetadata();
     }
@@ -53,12 +54,33 @@ void ModFolderLoadTask::run()
     m_mods_dir.refresh();
     for (auto entry : m_mods_dir.entryInfoList()) {
         Mod mod(entry);
-        if(m_result->mods.contains(mod.internal_id())){
-            m_result->mods[mod.internal_id()].setStatus(ModStatus::Installed);
+
+        if (mod.enabled()) {
+            if (m_result->mods.contains(mod.internal_id())) {
+                m_result->mods[mod.internal_id()].setStatus(ModStatus::Installed);
+            }
+            else {
+                m_result->mods[mod.internal_id()] = mod;
+                m_result->mods[mod.internal_id()].setStatus(ModStatus::NoMetadata);
+            }
         }
-        else {
-            m_result->mods[mod.internal_id()] = mod;
-            m_result->mods[mod.internal_id()].setStatus(ModStatus::NoMetadata);
+        else { 
+            QString chopped_id = mod.internal_id().chopped(9);
+            if (m_result->mods.contains(chopped_id)) {
+                m_result->mods[mod.internal_id()] = mod;
+
+                auto metadata = m_result->mods[chopped_id].metadata();
+                if (metadata) {
+                    mod.setMetadata(new Metadata::ModStruct(*metadata));
+
+                    m_result->mods[mod.internal_id()].setStatus(ModStatus::Installed);
+                    m_result->mods.remove(chopped_id);
+                }
+            }
+            else {
+                m_result->mods[mod.internal_id()] = mod;
+                m_result->mods[mod.internal_id()].setStatus(ModStatus::NoMetadata);
+            }
         }
     }
 

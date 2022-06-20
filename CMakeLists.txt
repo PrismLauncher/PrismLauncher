@@ -45,8 +45,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_DISABLE_DEPRECATED_BEFORE=0x050C00")
 
 # set CXXFLAGS for build targets
-set(CMAKE_CXX_FLAGS_DEBUG "-O2 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS}")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS_RELEASE}")
 
 option(ENABLE_LTO "Enable Link Time Optimization" off)
 
@@ -73,8 +72,8 @@ set(Launcher_HELP_URL "https://polymc.org/wiki/help-pages/%1" CACHE STRING "URL 
 
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR    1)
-set(Launcher_VERSION_MINOR    3)
-set(Launcher_VERSION_HOTFIX   1)
+set(Launcher_VERSION_MINOR    4)
+set(Launcher_VERSION_HOTFIX   0)
 
 # Build number
 set(Launcher_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")

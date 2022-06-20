@@ -56,6 +56,15 @@ IconList::IconList(const QStringList &builtinPaths, QString path, QObject *paren
     emit iconUpdated({});
 }
 
+void IconList::sortIconList()
+{
+    qDebug() << "Sorting icon list...";
+    std::sort(icons.begin(), icons.end(), [](const MMCIcon& a, const MMCIcon& b) {
+        return a.m_key.localeAwareCompare(b.m_key) < 0;
+    });
+    reindex();
+}
+
 void IconList::directoryChanged(const QString &path)
 {
     QDir new_dir (path);
@@ -141,6 +150,8 @@ void IconList::directoryChanged(const QString &path)
             emit iconUpdated(key);
         }
     }
+
+    sortIconList();
 }
 
 void IconList::fileChanged(const QString &path)

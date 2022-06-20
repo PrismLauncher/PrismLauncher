@@ -96,3 +96,16 @@ If you do not agree with these terms and conditions, then remove the associated 
 All launcher code is available under the GPL-3.0-only license.
   
 The logo and related assets are under the CC BY-SA 4.0 license.
+
+## Sponsors
+Thank you to all our generous backers over at Open Collective! Support PolyMC by [becoming a backer](https://opencollective.com/polymc).
+
+[![OpenCollective Backers](https://opencollective.com/polymc/backers.svg?width=890&limit=1000)](https://opencollective.com/polymc#backers)
+
+Also, thanks to JetBrains for providing us a few licenses for all their products, as part of their [Open Source program](https://www.jetbrains.com/opensource/).
+
+[![JetBrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://www.jetbrains.com/opensource/)
+
+Additionally, thanks to the awesome people over at [MacStadium](https://www.macstadium.com/), for providing M1-Macs for development purposes!
+
+<a href="https://www.macstadium.com"><img src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" alt="Powered by MacStadium" width="300"></a>

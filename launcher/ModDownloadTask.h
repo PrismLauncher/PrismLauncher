@@ -2,6 +2,7 @@
 /*
 *  PolyMC - Minecraft Launcher
 *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+*  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
 *
 *  This program is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -29,7 +30,7 @@ class ModFolderModel;
 class ModDownloadTask : public SequentialTask {
     Q_OBJECT
 public:
-    explicit ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods);
+    explicit ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods, bool is_indexed);
     const QString& getFilename() const { return m_mod_version.fileName; }
 
 private:

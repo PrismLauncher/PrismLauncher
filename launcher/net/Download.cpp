@@ -116,7 +116,7 @@ void Download::executeTask()
             return;
     }
 
-    request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT);
+    request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
     if (request.url().host().contains("api.curseforge.com")) {
         request.setRawHeader("x-api-key", APPLICATION->getCurseKey().toUtf8());
     };

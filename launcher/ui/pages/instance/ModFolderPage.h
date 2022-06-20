@@ -41,6 +41,7 @@
 #include "ui/pages/BasePage.h"
 
 #include <Application.h>
+#include <QSortFilterProxyModel>
 
 class ModFolderModel;
 namespace Ui

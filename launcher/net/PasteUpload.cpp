@@ -3,6 +3,7 @@
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
  *  Copyright (C) 2022 Swirl <swurl@swurl.xyz>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,6 +44,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QFile>
+#include <QHttpPart>
+#include <QUrlQuery>
 
 std::array<PasteUpload::PasteTypeInfo, 4> PasteUpload::PasteTypes = {
     {{"0x0.st", "https://0x0.st", ""},
@@ -71,7 +74,7 @@ void PasteUpload::executeTask()
     QNetworkRequest request{QUrl(m_uploadUrl)};
     QNetworkReply *rep{};
 
-    request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
+    request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgentUncached().toUtf8());
 
     switch (m_pasteType) {
     case NullPointer: {
@@ -91,7 +94,7 @@ void PasteUpload::executeTask()
         break;
     }
     case Hastebin: {
-        request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT_UNCACHED);
+        request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgentUncached().toUtf8());
         rep = APPLICATION->network()->post(request, m_text);
         break;
     }

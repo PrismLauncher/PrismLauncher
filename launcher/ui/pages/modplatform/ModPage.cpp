@@ -1,4 +1,40 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 #include "ModPage.h"
+#include "Application.h"
 #include "ui_ModPage.h"
 
 #include <QKeyEvent>
@@ -94,28 +130,6 @@ void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
     if (!first.isValid()) { return; }
 
     current = listModel->data(first, Qt::UserRole).value<ModPlatform::IndexedPack>();
-    QString text = "";
-    QString name = current.name;
-
-    if (current.websiteUrl.isEmpty())
-        text = name;
-    else
-        text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
-
-    if (!current.authors.empty()) {
-        auto authorToStr = [](ModPlatform::ModpackAuthor& author) -> QString {
-            if (author.url.isEmpty()) { return author.name; }
-            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
-        };
-        QStringList authorStrs;
-        for (auto& author : current.authors) {
-            authorStrs.push_back(authorToStr(author));
-        }
-        text += "<br>" + tr(" by ") + authorStrs.join(", ");
-    }
-    text += "<br><br>";
-
-    ui->packDescription->setHtml(text + current.description);
 
     if (!current.versionsLoaded) {
         qDebug() << QString("Loading %1 mod versions").arg(debugName());
@@ -132,6 +146,13 @@ void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
         updateSelectionButton();
     }
+
+    if(!current.extraDataLoaded){
+        qDebug() << QString("Loading %1 mod info").arg(debugName());
+        listModel->requestModInfo(current);
+    }
+
+    updateUi();
 }
 
 void ModPage::onVersionSelectionChanged(QString data)
@@ -150,7 +171,8 @@ void ModPage::onModSelected()
     if (dialog->isModSelected(current.name, version.fileName)) {
         dialog->removeSelectedMod(current.name);
     } else {
-        dialog->addSelectedMod(current.name, new ModDownloadTask(current, version, dialog->mods));
+        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        dialog->addSelectedMod(current.name, new ModDownloadTask(current, version, dialog->mods, is_indexed));
     }
 
     updateSelectionButton();
@@ -206,4 +228,62 @@ void ModPage::updateSelectionButton()
     } else {
         ui->modSelectionButton->setText(tr("Deselect mod for download"));
     }
+}
+
+void ModPage::updateUi()
+{
+    QString text = "";
+    QString name = current.name;
+
+    if (current.websiteUrl.isEmpty())
+        text = name;
+    else
+        text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
+
+    if (!current.authors.empty()) {
+        auto authorToStr = [](ModPlatform::ModpackAuthor& author) -> QString {
+            if (author.url.isEmpty()) { return author.name; }
+            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
+        };
+        QStringList authorStrs;
+        for (auto& author : current.authors) {
+            authorStrs.push_back(authorToStr(author));
+        }
+        text += "<br>" + tr(" by ") + authorStrs.join(", ");
+    }
+
+    
+    if(current.extraDataLoaded) {
+        if (!current.extraData.donate.isEmpty()) {
+            text += "<br><br>" + tr("Donate information: ");
+            auto donateToStr = [](ModPlatform::DonationData& donate) -> QString {
+                return QString("<a href=\"%1\">%2</a>").arg(donate.url, donate.platform);
+            };
+            QStringList donates;
+            for (auto& donate : current.extraData.donate) {
+                donates.append(donateToStr(donate));
+            }
+            text += donates.join(", ");
+        }
+
+        if (!current.extraData.issuesUrl.isEmpty()
+         || !current.extraData.sourceUrl.isEmpty()
+         || !current.extraData.wikiUrl.isEmpty()
+         || !current.extraData.discordUrl.isEmpty()) {
+            text += "<br><br>" + tr("External links:") + "<br>";
+        }
+
+        if (!current.extraData.issuesUrl.isEmpty())
+            text += "- " + tr("Issues: <a href=%1>%1</a>").arg(current.extraData.issuesUrl) + "<br>";
+        if (!current.extraData.wikiUrl.isEmpty())
+            text += "- " + tr("Wiki: <a href=%1>%1</a>").arg(current.extraData.wikiUrl) + "<br>";
+        if (!current.extraData.sourceUrl.isEmpty())
+            text += "- " + tr("Source code: <a href=%1>%1</a>").arg(current.extraData.sourceUrl) + "<br>";
+        if (!current.extraData.discordUrl.isEmpty())
+            text += "- " + tr("Discord: <a href=%1>%1</a>").arg(current.extraData.discordUrl) + "<br>";
+    }
+
+    text += "<hr>";
+
+    ui->packDescription->setHtml(text + current.description);
 }

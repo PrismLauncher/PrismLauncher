@@ -78,6 +78,7 @@ LauncherPage::LauncherPage(QWidget *parent) : QWidget(parent), ui(new Ui::Launch
     m_languageModel = APPLICATION->translations();
     loadSettings();
 
+#ifdef LAUNCHER_WITH_UPDATER
     if(BuildConfig.UPDATER_ENABLED)
     {
         QObject::connect(APPLICATION->updateChecker().get(), &UpdateChecker::channelListLoaded, this, &LauncherPage::refreshUpdateChannelList);
@@ -90,11 +91,9 @@ LauncherPage::LauncherPage(QWidget *parent) : QWidget(parent), ui(new Ui::Launch
         {
             APPLICATION->updateChecker()->updateChanList(false);
         }
+        ui->updateSettingsBox->setHidden(false);
     }
-    else
-    {
-        ui->updateSettingsBox->setHidden(true);
-    }
+#endif
     connect(ui->fontSizeBox, SIGNAL(valueChanged(int)), SLOT(refreshFontPreview()));
     connect(ui->consoleFont, SIGNAL(currentFontChanged(QFont)), SLOT(refreshFontPreview()));
 }
@@ -189,6 +188,7 @@ void LauncherPage::on_metadataDisableBtn_clicked()
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
 }
 
+#ifdef LAUNCHER_WITH_UPDATER
 void LauncherPage::refreshUpdateChannelList()
 {
     // Stop listening for selection changes. It's going to change a lot while we update it and
@@ -260,6 +260,7 @@ void LauncherPage::refreshUpdateChannelDesc()
         m_currentUpdateChannel = selected.id;
     }
 }
+#endif
 
 void LauncherPage::applySettings()
 {
@@ -450,7 +451,7 @@ void LauncherPage::loadSettings()
     }
 
     // Mods
-    ui->metadataDisableBtn->setChecked(s->get("DontUseModMetadata").toBool());
+    ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
 }
 

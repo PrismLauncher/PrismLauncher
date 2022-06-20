@@ -7,6 +7,7 @@
 
 namespace ModPlatform {
 class ListModel;
+struct IndexedPack;
 }
 
 class ModAPI {
@@ -35,6 +36,7 @@ class ModAPI {
     };
 
     virtual void searchMods(CallerType* caller, SearchArgs&& args) const = 0;
+    virtual void getModInfo(CallerType* caller, ModPlatform::IndexedPack& pack) = 0;
 
 
     struct VersionSearchArgs {

@@ -2,6 +2,7 @@
 /*
 *  PolyMC - Minecraft Launcher
 *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+*  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
 *
 *  This program is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -58,8 +59,6 @@ Mod::Mod(const QFileInfo& file)
 
 Mod::Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata)
     : m_file(mods_dir.absoluteFilePath(metadata.filename))
-    // It is weird, but name is not reliable for comparing with the JAR files name
-    // FIXME: Maybe use hash when implemented?
     , m_internal_id(metadata.filename)
     , m_name(metadata.name)
 {
@@ -131,7 +130,7 @@ auto Mod::enable(bool value) -> bool
             return false;
     } else {
         path += ".disabled";
-        
+
         if (!file.rename(path))
             return false;
     }
@@ -145,23 +144,29 @@ auto Mod::enable(bool value) -> bool
 
 void Mod::setStatus(ModStatus status)
 {
-    if(m_localDetails.get())
+    if (m_localDetails) {
         m_localDetails->status = status;
+    } else {
+        m_temp_status = status;
+    }
 }
 void Mod::setMetadata(Metadata::ModStruct* metadata)
 {
-    if(status() == ModStatus::NoMetadata)
+    if (status() == ModStatus::NoMetadata)
         setStatus(ModStatus::Installed);
 
-    if(m_localDetails.get())
+    if (m_localDetails) {
         m_localDetails->metadata.reset(metadata);
+    } else {
+        m_temp_metadata.reset(metadata);
+    }
 }
 
 auto Mod::destroy(QDir& index_dir) -> bool
 {
     auto n = name();
     // FIXME: This can fail to remove the metadata if the
-    // "DontUseModMetadata" setting is on, since there could
+    // "ModMetadataDisabled" setting is on, since there could
     // be a name mismatch!
     Metadata::remove(index_dir, n);
 
@@ -205,7 +210,23 @@ auto Mod::authors() const -> QStringList
 
 auto Mod::status() const -> ModStatus
 {
+    if (!m_localDetails)
+        return m_temp_status;
     return details().status;
+}
+
+auto Mod::metadata() -> std::shared_ptr<Metadata::ModStruct>
+{
+    if (m_localDetails)
+        return m_localDetails->metadata;
+    return m_temp_metadata;
+}
+
+auto Mod::metadata() const -> const std::shared_ptr<Metadata::ModStruct>
+{
+    if (m_localDetails)
+        return m_localDetails->metadata;
+    return m_temp_metadata;
 }
 
 void Mod::finishResolvingWithDetails(std::shared_ptr<ModDetails> details)
@@ -214,11 +235,11 @@ void Mod::finishResolvingWithDetails(std::shared_ptr<ModDetails> details)
     m_resolved = true;
     m_localDetails = details;
 
-    if (status() != ModStatus::NoMetadata 
-            && m_temp_metadata.get()
-            && m_temp_metadata->isValid() && 
-            m_localDetails.get()) {
-        
-        m_localDetails->metadata.swap(m_temp_metadata);
+    if (m_localDetails && m_temp_metadata && m_temp_metadata->isValid()) {
+        m_localDetails->metadata = m_temp_metadata;
+        if (status() == ModStatus::NoMetadata)
+            setStatus(ModStatus::Installed);
     }
+
+    setStatus(m_temp_status);
 }
