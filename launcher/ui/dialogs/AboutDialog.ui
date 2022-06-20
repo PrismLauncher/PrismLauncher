@@ -89,6 +89,9 @@
    </item>
    <item>
     <widget class="QLabel" name="versionLabel">
+     <property name="cursor">
+      <cursorShape>IBeamCursor</cursorShape>
+     </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
      </property>
@@ -166,6 +169,9 @@
        </item>
        <item>
         <widget class="QLabel" name="platformLabel">
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
          <property name="text">
           <string>Platform:</string>
          </property>
@@ -179,6 +185,9 @@
        </item>
        <item>
         <widget class="QLabel" name="buildNumLabel">
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
          <property name="text">
           <string>Build Number:</string>
          </property>
@@ -192,6 +201,9 @@
        </item>
        <item>
         <widget class="QLabel" name="channelLabel">
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
          <property name="text">
           <string>Channel:</string>
          </property>
