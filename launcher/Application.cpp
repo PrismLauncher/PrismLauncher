@@ -626,6 +626,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("JavaPath", "");
         m_settings->registerSetting("JavaTimestamp", 0);
         m_settings->registerSetting("JavaArchitecture", "");
+        m_settings->registerSetting("JavaRealArchitecture", "");
         m_settings->registerSetting("JavaVersion", "");
         m_settings->registerSetting("JavaVendor", "");
         m_settings->registerSetting("LastHostname", "");
