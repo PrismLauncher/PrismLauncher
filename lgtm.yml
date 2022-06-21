@@ -1,0 +1,2 @@
+queries:
+  - exclude: "cpp/fixme-comment"  # We like to use FIXME
