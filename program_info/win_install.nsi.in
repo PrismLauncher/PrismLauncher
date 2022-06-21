@@ -164,7 +164,7 @@ Section "Start Menu Shortcut" SM_SHORTCUTS
 
 SectionEnd
 
-Section "Desktop Shortcut" DESKTOP_SHORTCUTS
+Section /o "Desktop Shortcut" DESKTOP_SHORTCUTS
 
   CreateShortcut "$DESKTOP\@Launcher_CommonName@.lnk" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" 0
 
@@ -252,6 +252,7 @@ Function .onInit
 ${GetParameters} $R0
 ${GetOptions} $R0 "/NoShortcuts" $R1
 ${IfNot} ${Errors}
+${OrIf} ${FileExists} "$InstDir\@Launcher_APP_BINARY_NAME@.exe"
   !insertmacro UnselectSection ${SM_SHORTCUTS}
   !insertmacro UnselectSection ${DESKTOP_SHORTCUTS}
 ${EndIf}
