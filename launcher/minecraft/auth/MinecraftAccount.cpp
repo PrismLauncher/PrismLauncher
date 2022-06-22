@@ -135,6 +135,7 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::login(QString password) {
     m_currentTask.reset(new MojangLogin(&data, password));
     connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
     connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
     emit activityChanged(true);
     return m_currentTask;
 }
@@ -145,6 +146,7 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA() {
     m_currentTask.reset(new MSAInteractive(&data));
     connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
     connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
     emit activityChanged(true);
     return m_currentTask;
 }
@@ -155,6 +157,7 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::loginOffline() {
     m_currentTask.reset(new OfflineLogin(&data));
     connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
     connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
     emit activityChanged(true);
     return m_currentTask;
 }
@@ -176,6 +179,7 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::refresh() {
 
     connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
     connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
     emit activityChanged(true);
     return m_currentTask;
 }

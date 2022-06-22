@@ -98,6 +98,7 @@ void MinecraftUpdate::next()
         auto task = m_tasks[m_currentTask - 1];
         disconnect(task.get(), &Task::succeeded, this, &MinecraftUpdate::subtaskSucceeded);
         disconnect(task.get(), &Task::failed, this, &MinecraftUpdate::subtaskFailed);
+        disconnect(task.get(), &Task::aborted, this, &Task::abort);
         disconnect(task.get(), &Task::progress, this, &MinecraftUpdate::progress);
         disconnect(task.get(), &Task::status, this, &MinecraftUpdate::setStatus);
     }
@@ -115,6 +116,7 @@ void MinecraftUpdate::next()
     }
     connect(task.get(), &Task::succeeded, this, &MinecraftUpdate::subtaskSucceeded);
     connect(task.get(), &Task::failed, this, &MinecraftUpdate::subtaskFailed);
+    connect(task.get(), &Task::aborted, this, &Task::abort);
     connect(task.get(), &Task::progress, this, &MinecraftUpdate::progress);
     connect(task.get(), &Task::status, this, &MinecraftUpdate::setStatus);
     // if the task is already running, do not start it again
