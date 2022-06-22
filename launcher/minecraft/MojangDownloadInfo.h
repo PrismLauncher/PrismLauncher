@@ -65,7 +65,7 @@ struct MojangAssetIndexInfo : public MojangDownloadInfo
         // https://www.theregister.co.uk/2017/02/28/aws_is_awol_as_s3_goes_haywire/
         if(id == "legacy")
         {
-            url = "https://launchermeta.mojang.com/mc/assets/legacy/c0fd82e8ce9fbc93119e40d96d5a4e62cfa3f729/legacy.json";
+            url = "https://piston-meta.mojang.com/mc/assets/legacy/c0fd82e8ce9fbc93119e40d96d5a4e62cfa3f729/legacy.json";
         }
         // HACK
         else
