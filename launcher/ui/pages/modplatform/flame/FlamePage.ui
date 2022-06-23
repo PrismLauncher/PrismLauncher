@@ -19,7 +19,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Note: CurseForge's API is very unreliable. CurseForge and some mod authors have disallowed downloading mods in third-party applications like PolyMC. As such, you may need to manually download some mods to be able to install a modpack.</string>
+      <string>Note: CurseForge now provides a setting for creators that allows to block access to third-party tools like PolyMC. As such, you may need to manually download some mods to be able to install a modpack.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
