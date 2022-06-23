@@ -10,7 +10,7 @@ Flame::FileResolvingTask::FileResolvingTask(const shared_qobject_ptr<QNetworkAcc
 void Flame::FileResolvingTask::executeTask()
 {
     setStatus(tr("Resolving mod IDs..."));
-    setProgress(0, m_toProcess.files.size());
+    setProgress(0, 3);
     m_dljob = new NetJob("Mod id resolver", m_network);
     result.reset(new QByteArray());
     //build json data to send
@@ -29,6 +29,7 @@ void Flame::FileResolvingTask::executeTask()
 
 void Flame::FileResolvingTask::netJobFinished()
 {
+    setProgress(1, 3);
     int index = 0;
     // job to check modrinth for blocked projects
     auto job = new NetJob("Modrinth check", m_network);
@@ -63,6 +64,7 @@ void Flame::FileResolvingTask::netJobFinished()
 }
 
 void Flame::FileResolvingTask::modrinthCheckFinished() {
+    setProgress(2, 3);
     qDebug() << "Finished with blocked mods : " << blockedProjects.size();
 
     for (auto it = blockedProjects.keyBegin(); it != blockedProjects.keyEnd(); it++) {

@@ -412,12 +412,8 @@ void InstanceImportTask::processFlame()
                                                           "You will need to manually download them and add them to the modpack"),
                                                        text);
             message_dialog->setModal(true);
-            message_dialog->show();
-            connect(message_dialog, &QDialog::rejected, [&]() {
-                m_modIdResolver.reset();
-                emitFailed("Canceled");
-            });
-            connect(message_dialog, &QDialog::accepted, [&]() {
+
+            if (message_dialog->exec()) {
                 m_filesNetJob = new NetJob(tr("Mod download"), APPLICATION->network());
                 for (const auto &result: m_modIdResolver->getResults().files) {
                     QString filename = result.fileName;
@@ -469,8 +465,11 @@ void InstanceImportTask::processFlame()
                 });
                 setStatus(tr("Downloading mods..."));
                 m_filesNetJob->start();
-            });
-        }else{
+            } else {
+                m_modIdResolver.reset();
+                emitFailed("Canceled");
+            }
+        } else {
             //TODO extract to function ?
             m_filesNetJob = new NetJob(tr("Mod download"), APPLICATION->network());
             for (const auto &result: m_modIdResolver->getResults().files) {
