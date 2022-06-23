@@ -64,12 +64,16 @@ Config::Config()
     GIT_COMMIT = "@Launcher_GIT_COMMIT@";
     GIT_TAG = "@Launcher_GIT_TAG@";
     GIT_REFSPEC = "@Launcher_GIT_REFSPEC@";
+
+    // Assume that builds outside of Git repos are "stable"
     if (GIT_REFSPEC == QStringLiteral("GITDIR-NOTFOUND")
-        || GIT_TAG == QStringLiteral("-128-NOTFOUND"))
+        || GIT_TAG == QStringLiteral("GITDIR-NOTFOUND"))
     {
-        VERSION_CHANNEL = QStringLiteral("stable");
+        GIT_REFSPEC = "refs/heads/stable";
+        GIT_TAG = versionString();
     }
-    else if(GIT_REFSPEC.startsWith("refs/heads/"))
+
+    if (GIT_REFSPEC.startsWith("refs/heads/"))
     {
         VERSION_CHANNEL = GIT_REFSPEC;
         VERSION_CHANNEL.remove("refs/heads/");
@@ -83,7 +87,7 @@ Config::Config()
     }
     else
     {
-        VERSION_CHANNEL = QObject::tr("unknown");
+        VERSION_CHANNEL = "unknown";
     }
 
     VERSION_STR = "@Launcher_VERSION_STRING@";
@@ -102,9 +106,14 @@ Config::Config()
     SUBREDDIT_URL = "@Launcher_SUBREDDIT_URL@";
 }
 
+QString Config::versionString() const
+{
+    return QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_HOTFIX);
+}
+
 QString Config::printableVersionString() const
 {
-    QString vstr = QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_HOTFIX);
+    QString vstr = versionString();
 
     // If the build is not a main release, append the channel
     if(VERSION_CHANNEL != "stable" && GIT_TAG != vstr)

@@ -157,6 +157,7 @@ class Config {
     QString MODRINTH_STAGING_URL = "https://staging-api.modrinth.com/v2";
     QString MODRINTH_PROD_URL = "https://api.modrinth.com/v2";
 
+    QString versionString() const;
     /**
      * \brief Converts the Version to a string.
      * \return The version number in string format (major.minor.revision.build).
