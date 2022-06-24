@@ -199,7 +199,10 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             }
 
             for (auto version : current.versions) {
-                ui->versionSelectionBox->addItem(version.version, QVariant(version.id));
+                if (!version.name.contains(version.version))
+                    ui->versionSelectionBox->addItem(QString("%1 — %2").arg(version.name, version.version), QVariant(version.id));
+                else
+                    ui->versionSelectionBox->addItem(version.name, QVariant(version.id));
             }
 
             QVariant current_updated;
@@ -218,7 +221,10 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 
     } else {
         for (auto version : current.versions) {
-            ui->versionSelectionBox->addItem(QString("%1 - %2").arg(version.name, version.version), QVariant(version.id));
+            if (!version.name.contains(version.version))
+                ui->versionSelectionBox->addItem(QString("%1 - %2").arg(version.name, version.version), QVariant(version.id));
+            else
+                ui->versionSelectionBox->addItem(version.name, QVariant(version.id));
         }
 
         suggestCurrent();
