@@ -101,18 +101,18 @@ bool ModrinthPage::eventFilter(QObject* watched, QEvent* event)
     return QObject::eventFilter(watched, event);
 }
 
-void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
+void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 {
     ui->versionSelectionBox->clear();
 
-    if (!first.isValid()) {
+    if (!curr.isValid()) {
         if (isOpened) {
             dialog->setSuggestedPack();
         }
         return;
     }
 
-    current = m_model->data(first, Qt::UserRole).value<Modrinth::Modpack>();
+    current = m_model->data(curr, Qt::UserRole).value<Modrinth::Modpack>();
     auto name = current.name;
 
     if (!current.extraInfoLoaded) {
@@ -125,7 +125,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
         netJob->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id, curr] {
             if (id != current.id) {
                 return;  // wrong request?
             }
@@ -149,6 +149,13 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
             }
 
             updateUI();
+
+            QVariant current_updated;
+            current_updated.setValue(current);
+
+            if (!m_model->setData(curr, current_updated, Qt::UserRole))
+                qWarning() << "Failed to cache extra info for the current pack!";
+
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
@@ -170,7 +177,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         netJob->addNetAction(
             Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id, curr] {
             if (id != current.id) {
                 return;  // wrong request?
             }
@@ -194,6 +201,12 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
             for (auto version : current.versions) {
                 ui->versionSelectionBox->addItem(version.version, QVariant(version.id));
             }
+
+            QVariant current_updated;
+            current_updated.setValue(current);
+
+            if (!m_model->setData(curr, current_updated, Qt::UserRole))
+                qWarning() << "Failed to cache versions for the current pack!";
 
             suggestCurrent();
         });
@@ -224,7 +237,7 @@ void ModrinthPage::updateUI()
     // TODO: Implement multiple authors with links
     text += "<br>" + tr(" by ") + QString("<a href=%1>%2</a>").arg(std::get<1>(current.author).toString(), std::get<0>(current.author));
 
-    if(current.extraInfoLoaded) {
+    if (current.extraInfoLoaded) {
         if (!current.extra.donate.isEmpty()) {
             text += "<br><br>" + tr("Donate information: ");
             auto donateToStr = [](Modrinth::DonationData& donate) -> QString {

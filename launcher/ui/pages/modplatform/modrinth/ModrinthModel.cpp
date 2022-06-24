@@ -104,6 +104,17 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
     return {};
 }
 
+bool ModpackListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    int pos = index.row();
+    if (pos >= modpacks.size() || pos < 0 || !index.isValid())
+        return false;
+
+    modpacks[pos] = value.value<Modrinth::Modpack>();
+
+    return true;
+}
+
 void ModpackListModel::performPaginatedSearch()
 {
     // TODO: Move to standalone API
