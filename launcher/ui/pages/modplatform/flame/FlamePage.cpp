@@ -157,6 +157,10 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             if (!listModel->setData(curr, current_updated, Qt::UserRole))
                 qWarning() << "Failed to cache versions for the current pack!";
 
+            // TODO: Check whether it's a connection issue or the project disabled 3rd-party distribution.
+            if (current.versionsLoaded && ui->versionSelectionBox->count() < 1) {
+                ui->versionSelectionBox->addItem(tr("No version is available!"), -1);
+            }
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
@@ -172,6 +176,11 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         suggestCurrent();
     }
 
+    // TODO: Check whether it's a connection issue or the project disabled 3rd-party distribution.
+    if (current.versionsLoaded && ui->versionSelectionBox->count() < 1) {
+        ui->versionSelectionBox->addItem(tr("No version is available!"), -1);
+    }
+
     updateUi();
 }
 
@@ -181,7 +190,7 @@ void FlamePage::suggestCurrent()
         return;
     }
 
-    if (selectedVersion.isEmpty()) {
+    if (selectedVersion.isEmpty() || selectedVersion == "-1") {
         dialog->setSuggestedPack();
         return;
     }
