@@ -357,10 +357,12 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
     auto changelog = new QTreeWidgetItem(changelog_item);
     auto changelog_area = new QTextBrowser();
 
+
     switch (info.provider) {
         case ModPlatform::Provider::MODRINTH: {
             HoeDown h;
-            changelog_area->setHtml(h.process(info.changelog.toUtf8()));
+            // HoeDown bug?: \n aren't converted to <br>
+            changelog_area->setHtml(h.process(info.changelog.toUtf8()).replace('\n', "<br>"));
             break;
         }
         case ModPlatform::Provider::FLAME: {
