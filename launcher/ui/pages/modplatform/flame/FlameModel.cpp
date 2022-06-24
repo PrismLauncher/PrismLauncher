@@ -57,6 +57,17 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
+bool ListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    int pos = index.row();
+    if (pos >= modpacks.size() || pos < 0 || !index.isValid())
+        return false;
+
+    modpacks[pos] = value.value<Flame::IndexedPack>();
+
+    return true;
+}
+
 void ListModel::logoLoaded(QString logo, QIcon out)
 {
     m_loadingLogos.removeAll(logo);

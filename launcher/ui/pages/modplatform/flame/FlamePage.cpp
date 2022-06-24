@@ -107,18 +107,18 @@ void FlamePage::triggerSearch()
     listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
 }
 
-void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
+void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 {
     ui->versionSelectionBox->clear();
 
-    if (!first.isValid()) {
+    if (!curr.isValid()) {
         if (isOpened) {
             dialog->setSuggestedPack();
         }
         return;
     }
 
-    current = listModel->data(first, Qt::UserRole).value<Flame::IndexedPack>();
+    current = listModel->data(curr, Qt::UserRole).value<Flame::IndexedPack>();
 
     if (current.versionsLoaded == false) {
         qDebug() << "Loading flame modpack versions";
@@ -127,7 +127,7 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
         int addonId = current.addonId;
         netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
 
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId] {
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId, curr] {
             if (addonId != current.addonId) {
                 return;  // wrong request
             }
@@ -150,6 +150,12 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
             for (auto version : current.versions) {
                 ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
             }
+
+            QVariant current_updated;
+            current_updated.setValue(current);
+
+            if (!listModel->setData(curr, current_updated, Qt::UserRole))
+                qWarning() << "Failed to cache versions for the current pack!";
 
             suggestCurrent();
         });
