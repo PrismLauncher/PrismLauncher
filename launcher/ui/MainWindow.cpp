@@ -95,6 +95,7 @@
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/widgets/LabeledToolButton.h"
 #include "ui/dialogs/NewInstanceDialog.h"
+#include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/VersionSelectDialog.h"
@@ -1952,20 +1953,17 @@ void MainWindow::on_actionOpenWiki_triggered()
 
 void MainWindow::on_actionMoreNews_triggered()
 {
-    DesktopServices::openUrl(QUrl(BuildConfig.NEWS_OPEN_URL));
+    auto entries = m_newsChecker->getNewsEntries();
+    NewsDialog news_dialog(entries, this);
+    news_dialog.exec();
 }
 
 void MainWindow::newsButtonClicked()
 {
-    QList<NewsEntryPtr> entries = m_newsChecker->getNewsEntries();
-    if (entries.count() > 0)
-    {
-        DesktopServices::openUrl(QUrl(entries[0]->link));
-    }
-    else
-    {
-        DesktopServices::openUrl(QUrl(BuildConfig.NEWS_OPEN_URL));
-    }
+    auto entries = m_newsChecker->getNewsEntries();
+    NewsDialog news_dialog(entries, this);
+    news_dialog.toggleArticleList();
+    news_dialog.exec();
 }
 
 void MainWindow::on_actionAbout_triggered()
