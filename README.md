@@ -1,8 +1,7 @@
-<p align="center">
-  <img src="./program_info/polymc-header-black.svg#gh-light-mode-only" alt="PolyMC logo"/>
-  <img src="./program_info/polymc-header.svg#gh-dark-mode-only" alt="PolyMC logo"/>
+ <p align="center">
+<img src="./program_info/polymc-header-black.svg#gh-light-mode-only" alt="PolyMC logo" width="50%"/>
+<img src="./program_info/polymc-header.svg#gh-dark-mode-only" alt="PolyMC logo" width="50%"/>
 </p>
-<br>
 
 PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
 
