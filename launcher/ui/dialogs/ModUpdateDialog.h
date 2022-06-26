@@ -18,7 +18,7 @@ class ModUpdateDialog final : public ReviewMessageBox {
     explicit ModUpdateDialog(QWidget* parent,
                              BaseInstance* instance,
                              const std::shared_ptr<ModFolderModel> mod_model,
-                             std::list<Mod>& search_for);
+                             std::list<Mod::Ptr>& search_for);
 
     void checkCandidates();
 
@@ -34,8 +34,8 @@ class ModUpdateDialog final : public ReviewMessageBox {
     auto ensureMetadata() -> bool;
 
    private slots:
-    void onMetadataEnsured(Mod&);
-    void onMetadataFailed(Mod&, bool try_others = false, ModPlatform::Provider first_choice = ModPlatform::Provider::MODRINTH);
+    void onMetadataEnsured(Mod*);
+    void onMetadataFailed(Mod*, bool try_others = false, ModPlatform::Provider first_choice = ModPlatform::Provider::MODRINTH);
 
    private:
     QWidget* m_parent;
@@ -45,13 +45,13 @@ class ModUpdateDialog final : public ReviewMessageBox {
 
     const std::shared_ptr<ModFolderModel> m_mod_model;
 
-    std::list<Mod>& m_candidates;
-    std::list<Mod> m_modrinth_to_update;
-    std::list<Mod> m_flame_to_update;
+    std::list<Mod::Ptr>& m_candidates;
+    std::list<Mod*> m_modrinth_to_update;
+    std::list<Mod*> m_flame_to_update;
 
     SequentialTask* m_second_try_metadata;
-    std::list<std::tuple<Mod, QString>> m_failed_metadata;
-    std::list<std::tuple<Mod, QString, QUrl>> m_failed_check_update;
+    std::list<std::tuple<Mod*, QString>> m_failed_metadata;
+    std::list<std::tuple<Mod*, QString, QUrl>> m_failed_check_update;
 
     QHash<QString, ModDownloadTask*> m_tasks;
     BaseInstance* m_instance;

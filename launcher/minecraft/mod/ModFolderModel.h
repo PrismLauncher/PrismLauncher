@@ -101,13 +101,13 @@ public:
     {
         return size() == 0;
     }
-    Mod &operator[](size_t index)
+    Mod& operator[](size_t index)
     {
-        return mods[index];
+        return *mods[index];
     }
-    const Mod &at(size_t index) const
+    const Mod& at(size_t index) const
     {
-        return mods.at(index);
+        return *mods.at(index);
     }
 
     /// Reloads the mod list and returns true if the list changed.
@@ -141,12 +141,12 @@ public:
         return { QString("%1/.index").arg(dir().absolutePath()) };
     }
 
-    const QList<Mod> & allMods()
+    const QList<Mod::Ptr>& allMods()
     {
         return mods;
     }
 
-    auto selectedMods(QModelIndexList& indexes) -> std::list<Mod>;
+    auto selectedMods(QModelIndexList& indexes) -> std::list<Mod::Ptr>;
 
 public slots:
     void disableInteraction(bool disabled);
@@ -161,7 +161,7 @@ signals:
     void updateFinished();
 
 private:
-    void resolveMod(Mod& m);
+    void resolveMod(Mod::Ptr m);
     bool setModStatus(int index, ModStatusAction action);
 
 protected:
@@ -175,5 +175,5 @@ protected:
     QMap<QString, int> modsIndex;
     QMap<int, LocalModParseTask::ResultPtr> activeTickets;
     int nextResolutionTicket = 0;
-    QList<Mod> mods;
+    QList<Mod::Ptr> mods;
 };

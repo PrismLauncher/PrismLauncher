@@ -39,10 +39,12 @@
 #include <QFileInfo>
 #include <QList>
 
+#include "QObjectPtr.h"
 #include "ModDetails.h"
 
-class Mod
+class Mod : public QObject
 {
+    Q_OBJECT
 public:
     enum ModType
     {
@@ -52,6 +54,8 @@ public:
         MOD_FOLDER,     //!< The mod is in a folder on the filesystem.
         MOD_LITEMOD,    //!< The mod is a litemod
     };
+
+    using Ptr = shared_qobject_ptr<Mod>;
 
     Mod() = default;
     Mod(const QFileInfo &file);

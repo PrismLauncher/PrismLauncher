@@ -192,7 +192,7 @@ void ModFolderPage::updateMods()
     if (update_dialog.noUpdates()) {
         CustomMessageBox::selectable(this, tr("Update checker"),
                                      (mods_list.size() == 1)
-                                         ? tr("'%1' is up-to-date! :)").arg(mods_list.front().name())
+                                         ? tr("'%1' is up-to-date! :)").arg(mods_list.front()->name())
                                          : tr("All %1mods are up-to-date! :)").arg(use_all ? "" : (tr("selected") + " ")))
             ->exec();
         return;

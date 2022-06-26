@@ -19,7 +19,7 @@ static ModPlatform::ProviderCapabilities ProviderCaps;
 static ModrinthAPI modrinth_api;
 static FlameAPI flame_api;
 
-EnsureMetadataTask::EnsureMetadataTask(Mod& mod, QDir dir, ModPlatform::Provider prov) : Task(nullptr), m_index_dir(dir), m_provider(prov)
+EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::Provider prov) : Task(nullptr), m_index_dir(dir), m_provider(prov)
 {
     auto hash = getHash(mod);
     if (hash.isEmpty())
@@ -28,11 +28,11 @@ EnsureMetadataTask::EnsureMetadataTask(Mod& mod, QDir dir, ModPlatform::Provider
         m_mods.insert(hash, mod);
 }
 
-EnsureMetadataTask::EnsureMetadataTask(std::list<Mod>& mods, QDir dir, ModPlatform::Provider prov)
+EnsureMetadataTask::EnsureMetadataTask(std::list<Mod*>& mods, QDir dir, ModPlatform::Provider prov)
     : Task(nullptr), m_index_dir(dir), m_provider(prov)
 {
-    for (auto& mod : mods) {
-        if (!mod.valid()) {
+    for (auto* mod : mods) {
+        if (!mod->valid()) {
             emitFail(mod);
             continue;
         }
@@ -47,14 +47,14 @@ EnsureMetadataTask::EnsureMetadataTask(std::list<Mod>& mods, QDir dir, ModPlatfo
     }
 }
 
-QString EnsureMetadataTask::getHash(Mod& mod)
+QString EnsureMetadataTask::getHash(Mod* mod)
 {
     /* Here we create a mapping hash -> mod, because we need that relationship to parse the API routes */
     QByteArray jar_data;
     try {
-        jar_data = FS::read(mod.fileinfo().absoluteFilePath());
+        jar_data = FS::read(mod->fileinfo().absoluteFilePath());
     } catch (FS::FileSystemException& e) {
-        qCritical() << QString("Failed to open / read JAR file of %1").arg(mod.name());
+        qCritical() << QString("Failed to open / read JAR file of %1").arg(mod->name());
         qCritical() << QString("Reason: ") << e.cause();
 
         return {};
@@ -95,19 +95,19 @@ void EnsureMetadataTask::executeTask()
 {
     setStatus(tr("Checking if mods have metadata..."));
 
-    for (auto mod : m_mods) {
-        if (!mod.valid())
+    for (auto* mod : m_mods) {
+        if (!mod->valid())
             continue;
 
         // They already have the right metadata :o
-        if (mod.status() != ModStatus::NoMetadata && mod.metadata() && mod.metadata()->provider == m_provider) {
-            qDebug() << "Mod" << mod.name() << "already has metadata!";
+        if (mod->status() != ModStatus::NoMetadata && mod->metadata() && mod->metadata()->provider == m_provider) {
+            qDebug() << "Mod" << mod->name() << "already has metadata!";
             emitReady(mod);
             return;
         }
 
         // Folders don't have metadata
-        if (mod.type() == Mod::MOD_FOLDER) {
+        if (mod->type() == Mod::MOD_FOLDER) {
             emitReady(mod);
             return;
         }
@@ -125,7 +125,7 @@ void EnsureMetadataTask::executeTask()
     }
 
     auto invalidade_leftover = [this] {
-        QMutableHashIterator<QString, Mod> mods_iter(m_mods);
+        QMutableHashIterator<QString, Mod*> mods_iter(m_mods);
         while (mods_iter.hasNext()) {
             auto mod = mods_iter.next();
             emitFail(mod.value());
@@ -170,23 +170,23 @@ void EnsureMetadataTask::executeTask()
         setStatus(tr("Requesting metadata information from %1...").arg(ProviderCaps.readableName(m_provider)));
     else if (!m_mods.empty())
         setStatus(tr("Requesting metadata information from %1 for '%2'...")
-                      .arg(ProviderCaps.readableName(m_provider), m_mods.begin().value().name()));
+                      .arg(ProviderCaps.readableName(m_provider), m_mods.begin().value()->name()));
 
     m_current_task = version_task.get();
     version_task->start();
 }
 
-void EnsureMetadataTask::emitReady(Mod& m)
+void EnsureMetadataTask::emitReady(Mod* m)
 {
-    qDebug() << QString("Generated metadata for %1").arg(m.name());
+    qDebug() << QString("Generated metadata for %1").arg(m->name());
     emit metadataReady(m);
 
     m_mods.remove(getHash(m));
 }
 
-void EnsureMetadataTask::emitFail(Mod& m)
+void EnsureMetadataTask::emitFail(Mod* m)
 {
-    qDebug() << QString("Failed to generate metadata for %1").arg(m.name());
+    qDebug() << QString("Failed to generate metadata for %1").arg(m->name());
     emit metadataFailed(m);
 
     m_mods.remove(getHash(m));
@@ -224,8 +224,8 @@ NetJob::Ptr EnsureMetadataTask::modrinthVersionsTask()
                 try {
                     auto entry = Json::requireObject(entries, hash);
 
-                    setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod.name()));
-                    qDebug() << "Getting version for" << mod.name() << "from Modrinth";
+                    setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod->name()));
+                    qDebug() << "Getting version for" << mod->name() << "from Modrinth";
 
                     m_temp_versions.insert(hash, Modrinth::loadIndexedPackVersion(entry));
                 } catch (Json::JsonException& e) {
@@ -284,17 +284,22 @@ NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
 
             for (auto entry : entries) {
                 auto entry_obj = Json::requireObject(entry);
-                auto entry_id = Json::requireString(entry_obj, "id");
 
-                auto hash = addonIds.find(entry_id).value();
+                ModPlatform::IndexedPack pack;
+                Modrinth::loadIndexedPack(pack, entry_obj);
 
-                auto mod = m_mods.find(hash).value();
+                auto hash = addonIds.find(pack.addonId.toString()).value();
+
+                auto mod_iter = m_mods.find(hash);
+                if (mod_iter == m_mods.end()) {
+                    qWarning() << "Invalid project id from the API response.";
+                    continue;
+                }
+
+                auto* mod = mod_iter.value();
 
                 try {
-                    setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod.name()));
-
-                    ModPlatform::IndexedPack pack;
-                    Modrinth::loadIndexedPack(pack, entry_obj);
+                    setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod->name()));
 
                     modrinthCallback(pack, m_temp_versions.find(hash).value(), mod);
                 } catch (Json::JsonException& e) {
@@ -365,7 +370,7 @@ NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
                     continue;
                 }
 
-                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name()));
+                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg((*mod)->name()));
 
                 m_temp_versions.insert(fingerprint, FlameMod::loadIndexedPackVersion(file_obj));
             }
@@ -385,7 +390,10 @@ NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
     for (auto const& hash : m_mods.keys()) {
         if (m_temp_versions.contains(hash)) {
             auto const& data = m_temp_versions.find(hash).value();
-            addonIds.insert(data.addonId.toString(), hash);
+
+            auto id_str = data.addonId.toString();
+            if (!id_str.isEmpty())
+                addonIds.insert(data.addonId.toString(), hash);
         }
     }
 
@@ -429,7 +437,7 @@ NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
                 auto mod = m_mods.find(hash).value();
 
                 try {
-                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod.name()));
+                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name()));
 
                     ModPlatform::IndexedPack pack;
                     FlameMod::loadIndexedPack(pack, entry_obj);
@@ -451,10 +459,10 @@ NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
     return proj_task;
 }
 
-void EnsureMetadataTask::modrinthCallback(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Mod& mod)
+void EnsureMetadataTask::modrinthCallback(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Mod* mod)
 {
     // Prevent file name mismatch
-    ver.fileName = mod.fileinfo().fileName();
+    ver.fileName = mod->fileinfo().fileName();
     if (ver.fileName.endsWith(".disabled"))
         ver.fileName.chop(9);
 
@@ -479,16 +487,16 @@ void EnsureMetadataTask::modrinthCallback(ModPlatform::IndexedPack& pack, ModPla
         return;
     }
 
-    mod.setMetadata(metadata);
+    mod->setMetadata(metadata);
 
     emitReady(mod);
 }
 
-void EnsureMetadataTask::flameCallback(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Mod& mod)
+void EnsureMetadataTask::flameCallback(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Mod* mod)
 {
     try {
         // Prevent file name mismatch
-        ver.fileName = mod.fileinfo().fileName();
+        ver.fileName = mod->fileinfo().fileName();
         if (ver.fileName.endsWith(".disabled"))
             ver.fileName.chop(9);
 
@@ -513,7 +521,7 @@ void EnsureMetadataTask::flameCallback(ModPlatform::IndexedPack& pack, ModPlatfo
             return;
         }
 
-        mod.setMetadata(metadata);
+        mod->setMetadata(metadata);
 
         emitReady(mod);
     } catch (Json::JsonException& e) {

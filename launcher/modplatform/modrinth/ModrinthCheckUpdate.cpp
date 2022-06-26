@@ -27,29 +27,29 @@ void ModrinthCheckUpdate::executeTask()
     setStatus(tr("Preparing mods for Modrinth..."));
     setProgress(0, 3);
 
-    QHash<QString, Mod> mappings;
+    QHash<QString, Mod*> mappings;
 
     // Create all hashes
     QStringList hashes;
     auto best_hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
-    for (auto mod : m_mods) {
-        if (!mod.enabled()) {
+    for (auto* mod : m_mods) {
+        if (!mod->enabled()) {
             emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
             continue;
         }
 
-        auto hash = mod.metadata()->hash;
+        auto hash = mod->metadata()->hash;
 
         // Sadly the API can only handle one hash type per call, se we
         // need to generate a new hash if the current one is innadequate
         // (though it will rarely happen, if at all)
-        if (mod.metadata()->hash_format != best_hash_type) {
+        if (mod->metadata()->hash_format != best_hash_type) {
             QByteArray jar_data;
 
             try {
-                jar_data = FS::read(mod.fileinfo().absoluteFilePath());
+                jar_data = FS::read(mod->fileinfo().absoluteFilePath());
             } catch (FS::FileSystemException& e) {
-                qCritical() << QString("Failed to open / read JAR file of %1").arg(mod.name());
+                qCritical() << QString("Failed to open / read JAR file of %1").arg(mod->name());
                 qCritical() << QString("Reason: ") << e.cause();
 
                 failed(e.what());
@@ -90,7 +90,7 @@ void ModrinthCheckUpdate::executeTask()
                 // If the returned project is empty, but we have Modrinth metadata,
                 // it means this specific version is not available
                 if (project_obj.isEmpty()) {
-                    qDebug() << "Mod " << mappings.find(hash).value().name() << " got an empty response.";
+                    qDebug() << "Mod " << mappings.find(hash).value()->name() << " got an empty response.";
                     qDebug() << "Hash: " << hash;
 
                     emit checkFailed(
@@ -134,24 +134,24 @@ void ModrinthCheckUpdate::executeTask()
                 auto mod = *mod_iter;
 
                 auto key = project_ver.hash;
-                if ((key != hash && project_ver.is_preferred) || (mod.status() == ModStatus::NotInstalled)) {
-                    if (mod.version() == project_ver.version_number)
+                if ((key != hash && project_ver.is_preferred) || (mod->status() == ModStatus::NotInstalled)) {
+                    if (mod->version() == project_ver.version_number)
                         continue;
 
                     // Fake pack with the necessary info to pass to the download task :)
                     ModPlatform::IndexedPack pack;
-                    pack.name = mod.name();
-                    pack.slug = mod.metadata()->slug;
-                    pack.addonId = mod.metadata()->project_id;
-                    pack.websiteUrl = mod.homeurl();
-                    for (auto& author : mod.authors())
+                    pack.name = mod->name();
+                    pack.slug = mod->metadata()->slug;
+                    pack.addonId = mod->metadata()->project_id;
+                    pack.websiteUrl = mod->homeurl();
+                    for (auto& author : mod->authors())
                         pack.authors.append({ author });
-                    pack.description = mod.description();
+                    pack.description = mod->description();
                     pack.provider = ModPlatform::Provider::MODRINTH;
 
                     auto download_task = new ModDownloadTask(pack, project_ver, m_mods_folder);
 
-                    m_updatable.emplace_back(mod.name(), hash, mod.version(), project_ver.version_number, project_ver.changelog,
+                    m_updatable.emplace_back(pack.name, hash, mod->version(), project_ver.version_number, project_ver.changelog,
                                              ModPlatform::Provider::MODRINTH, download_task);
                 }
             }

@@ -117,16 +117,16 @@ void FlameCheckUpdate::executeTask()
     setStatus(tr("Preparing mods for CurseForge..."));
 
     int i = 0;
-    for (auto mod : m_mods) {
-        if (!mod.enabled()) {
+    for (auto* mod : m_mods) {
+        if (!mod->enabled()) {
             emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
             continue;
         }
 
-        setStatus(tr("Getting API response from CurseForge for '%1'").arg(mod.name()));
+        setStatus(tr("Getting API response from CurseForge for '%1'").arg(mod->name()));
         setProgress(i++, m_mods.size());
 
-        auto latest_ver = api.getLatestVersion({ mod.metadata()->project_id.toString(), m_game_versions, m_loaders });
+        auto latest_ver = api.getLatestVersion({ mod->metadata()->project_id.toString(), m_game_versions, m_loaders });
 
         // Check if we were aborted while getting the latest version
         if (m_was_aborted) {
@@ -134,7 +134,7 @@ void FlameCheckUpdate::executeTask()
             return;
         }
 
-        setStatus(tr("Parsing the API response from CurseForge for '%1'...").arg(mod.name()));
+        setStatus(tr("Parsing the API response from CurseForge for '%1'...").arg(mod->name()));
 
         if (!latest_ver.addonId.isValid()) {
             emit checkFailed(mod, tr("No valid version found for this mod. It's probably unavailable for the current game "
@@ -142,7 +142,7 @@ void FlameCheckUpdate::executeTask()
             continue;
         }
 
-        if (latest_ver.downloadUrl.isEmpty() && latest_ver.fileId != mod.metadata()->file_id) {
+        if (latest_ver.downloadUrl.isEmpty() && latest_ver.fileId != mod->metadata()->file_id) {
             auto pack = getProjectInfo(latest_ver);
             auto recover_url = QString("%1/download/%2").arg(pack.websiteUrl, latest_ver.fileId.toString());
             emit checkFailed(mod, tr("Mod has a new update available, but is opted-out on CurseForge"), recover_url);
@@ -150,26 +150,26 @@ void FlameCheckUpdate::executeTask()
             continue;
         }
 
-        if (!latest_ver.hash.isEmpty() && (mod.metadata()->hash != latest_ver.hash || mod.status() == ModStatus::NotInstalled)) {
+        if (!latest_ver.hash.isEmpty() && (mod->metadata()->hash != latest_ver.hash || mod->status() == ModStatus::NotInstalled)) {
             // Fake pack with the necessary info to pass to the download task :)
             ModPlatform::IndexedPack pack;
-            pack.name = mod.name();
-            pack.slug = mod.metadata()->slug;
-            pack.addonId = mod.metadata()->project_id;
-            pack.websiteUrl = mod.homeurl();
-            for (auto& author : mod.authors())
+            pack.name = mod->name();
+            pack.slug = mod->metadata()->slug;
+            pack.addonId = mod->metadata()->project_id;
+            pack.websiteUrl = mod->homeurl();
+            for (auto& author : mod->authors())
                 pack.authors.append({ author });
-            pack.description = mod.description();
+            pack.description = mod->description();
             pack.provider = ModPlatform::Provider::FLAME;
 
-            auto old_version = mod.version();
-            if (old_version.isEmpty() && mod.status() != ModStatus::NotInstalled) {
-                auto current_ver = getFileInfo(latest_ver.addonId.toInt(), mod.metadata()->file_id.toInt());
+            auto old_version = mod->version();
+            if (old_version.isEmpty() && mod->status() != ModStatus::NotInstalled) {
+                auto current_ver = getFileInfo(latest_ver.addonId.toInt(), mod->metadata()->file_id.toInt());
                 old_version = current_ver.version;
             }
 
             auto download_task = new ModDownloadTask(pack, latest_ver, m_mods_folder);
-            m_updatable.emplace_back(mod.name(), mod.metadata()->hash, old_version, latest_ver.version,
+            m_updatable.emplace_back(pack.name, mod->metadata()->hash, old_version, latest_ver.version,
                                      api.getModFileChangelog(latest_ver.addonId.toInt(), latest_ver.fileId.toInt()),
                                      ModPlatform::Provider::FLAME, download_task);
         }
