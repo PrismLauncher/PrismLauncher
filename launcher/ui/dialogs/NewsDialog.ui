@@ -95,7 +95,7 @@
  <connections>
   <connection>
    <sender>closeButton</sender>
-   <signal>pressed()</signal>
+   <signal>clicked()</signal>
    <receiver>NewsDialog</receiver>
    <slot>accept()</slot>
    <hints>
