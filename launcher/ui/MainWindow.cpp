@@ -822,7 +822,7 @@ public:
         }
         MainWindow->resize(800, 600);
         MainWindow->setWindowIcon(APPLICATION->getThemedIcon("logo"));
-        MainWindow->setWindowTitle(BuildConfig.LAUNCHER_DISPLAYNAME);
+        MainWindow->setWindowTitle(APPLICATION->applicationDisplayName());
 #ifndef QT_NO_ACCESSIBILITY
         MainWindow->setAccessibleName(BuildConfig.LAUNCHER_NAME);
 #endif
@@ -857,8 +857,6 @@ public:
 
     void retranslateUi(MainWindow *MainWindow)
     {
-        QString winTitle = tr("%1 - Version %2", "Launcher - Version X").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString());
-        MainWindow->setWindowTitle(winTitle);
         // all the actions
         for(auto * item: all_actions)
         {
