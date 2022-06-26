@@ -503,6 +503,8 @@ public:
         menuBar->setVisible(APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
 
         fileMenu = menuBar->addMenu(tr("&File"));
+        // Workaround for QTBUG-94802 (https://bugreports.qt.io/browse/QTBUG-94802); also present for other menus
+        fileMenu->setSeparatorsCollapsible(false);
         fileMenu->addAction(actionAddInstance);
         fileMenu->addAction(actionLaunchInstance);
         fileMenu->addAction(actionLaunchInstanceOffline);
@@ -526,15 +528,18 @@ public:
         fileMenu->addAction(actionSettings);
 
         viewMenu = menuBar->addMenu(tr("&View"));
+        viewMenu->setSeparatorsCollapsible(false);
         viewMenu->addAction(actionCAT);
         viewMenu->addSeparator();
 
         menuBar->addMenu(foldersMenu);
 
         profileMenu = menuBar->addMenu(tr("&Profiles"));
+        profileMenu->setSeparatorsCollapsible(false);
         profileMenu->addAction(actionManageAccounts);
 
         helpMenu = menuBar->addMenu(tr("&Help"));
+        helpMenu->setSeparatorsCollapsible(false);
         helpMenu->addAction(actionAbout);
         helpMenu->addAction(actionOpenWiki);
         helpMenu->addAction(actionNewsMenuBar);
