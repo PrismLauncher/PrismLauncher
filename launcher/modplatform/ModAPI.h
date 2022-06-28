@@ -75,8 +75,8 @@ class ModAPI {
     virtual void searchMods(CallerType* caller, SearchArgs&& args) const = 0;
     virtual void getModInfo(CallerType* caller, ModPlatform::IndexedPack& pack) = 0;
 
-    virtual auto getProject(QString addonId, QByteArray* response) const -> NetJob::Ptr = 0;
-    virtual auto getProjects(QStringList addonIds, QByteArray* response) const -> NetJob::Ptr = 0;
+    virtual auto getProject(QString addonId, QByteArray* response) const -> NetJob* = 0;
+    virtual auto getProjects(QStringList addonIds, QByteArray* response) const -> NetJob* = 0;
 
 
     struct VersionSearchArgs {

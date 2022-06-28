@@ -95,14 +95,14 @@ auto ModrinthAPI::latestVersions(const QStringList& hashes,
     return netJob;
 }
 
-auto ModrinthAPI::getProjects(QStringList addonIds, QByteArray* response) const -> NetJob::Ptr
+auto ModrinthAPI::getProjects(QStringList addonIds, QByteArray* response) const -> NetJob*
 {
     auto netJob = new NetJob(QString("Modrinth::GetProjects"), APPLICATION->network());
     auto searchUrl = getMultipleModInfoURL(addonIds);
 
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
 
-    QObject::connect(netJob, &NetJob::finished, [response] { delete response; });
+    QObject::connect(netJob, &NetJob::finished, [response, netJob] { delete response; netJob->deleteLater(); });
 
     return netJob;
 }

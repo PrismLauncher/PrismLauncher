@@ -124,7 +124,7 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
     return ver;
 }
 
-auto FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const -> NetJob::Ptr
+auto FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const -> NetJob*
 {
     auto* netJob = new NetJob(QString("Flame::GetProjects"), APPLICATION->network());
 
@@ -141,7 +141,7 @@ auto FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const -> 
 
     netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/mods"), response, body_raw));
 
-    QObject::connect(netJob, &NetJob::finished, [response] { delete response; });
+    QObject::connect(netJob, &NetJob::finished, [response, netJob] { delete response; netJob->deleteLater(); });
     QObject::connect(netJob, &NetJob::failed, [body_raw] { qDebug() << body_raw; });
 
     return netJob;

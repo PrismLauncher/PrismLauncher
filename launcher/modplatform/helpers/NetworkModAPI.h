@@ -8,7 +8,7 @@ class NetworkModAPI : public ModAPI {
     void getModInfo(CallerType* caller, ModPlatform::IndexedPack& pack) override;
     void getVersions(CallerType* caller, VersionSearchArgs&& args) const override;
 
-    auto getProject(QString addonId, QByteArray* response) const -> NetJob::Ptr override;
+    auto getProject(QString addonId, QByteArray* response) const -> NetJob* override;
 
    protected:
     virtual auto getModSearchURL(SearchArgs& args) const -> QString = 0;

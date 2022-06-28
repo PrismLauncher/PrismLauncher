@@ -36,7 +36,7 @@ void NetworkModAPI::getModInfo(CallerType* caller, ModPlatform::IndexedPack& pac
     auto response = new QByteArray();
     auto job = getProject(pack.addonId.toString(), response);
 
-    QObject::connect(job.get(), &NetJob::succeeded, caller, [caller, &pack, response] {
+    QObject::connect(job, &NetJob::succeeded, caller, [caller, &pack, response] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -80,7 +80,7 @@ void NetworkModAPI::getVersions(CallerType* caller, VersionSearchArgs&& args) co
     netJob->start();
 }
 
-auto NetworkModAPI::getProject(QString addonId, QByteArray* response) const -> NetJob::Ptr
+auto NetworkModAPI::getProject(QString addonId, QByteArray* response) const -> NetJob*
 {
     auto netJob = new NetJob(QString("%1::GetProject").arg(addonId), APPLICATION->network());
     auto searchUrl = getModInfoURL(addonId);

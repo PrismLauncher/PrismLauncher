@@ -47,7 +47,7 @@ class ModrinthAPI : public NetworkModAPI {
                         ModLoaderTypes loaders,
                         QByteArray* response) -> NetJob::Ptr;
 
-    auto getProjects(QStringList addonIds, QByteArray* response) const -> NetJob::Ptr override;
+    auto getProjects(QStringList addonIds, QByteArray* response) const -> NetJob* override;
 
    public:
     inline auto getAuthorURL(const QString& name) const -> QString { return "https://modrinth.com/user/" + name; };
