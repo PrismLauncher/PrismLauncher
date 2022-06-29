@@ -826,8 +826,16 @@ QString MinecraftInstance::getStatusbarDescription()
         traits.append(tr("broken"));
     }
 
+    QString mcVersion = m_components->getComponentVersion("net.minecraft");
+    if (mcVersion.isEmpty())
+    {
+        // Load component info if needed
+        m_components->reload(Net::Mode::Offline);
+        mcVersion = m_components->getComponentVersion("net.minecraft");
+    }
+
     QString description;
-    description.append(tr("Minecraft %1 (%2)").arg(m_components->getComponentVersion("net.minecraft")).arg(typeName()));
+    description.append(tr("Minecraft %1 (%2)").arg(mcVersion).arg(typeName()));
     if(m_settings->get("ShowGameTime").toBool())
     {
         if (lastTimePlayed() > 0) {
