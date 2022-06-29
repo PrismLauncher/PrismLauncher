@@ -835,7 +835,7 @@ QString MinecraftInstance::getStatusbarDescription()
     }
 
     QString description;
-    description.append(tr("Minecraft %1 (%2)").arg(mcVersion).arg(typeName()));
+    description.append(tr("Minecraft %1").arg(mcVersion));
     if(m_settings->get("ShowGameTime").toBool())
     {
         if (lastTimePlayed() > 0) {
