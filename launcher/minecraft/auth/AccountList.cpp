@@ -366,7 +366,7 @@ QVariant AccountList::headerData(int section, Qt::Orientation orientation, int r
         switch (section)
         {
         case ProfileNameColumn:
-            return tr("Profile");
+            return tr("Username");
         case NameColumn:
             return tr("Account");
         case TypeColumn:
@@ -383,7 +383,7 @@ QVariant AccountList::headerData(int section, Qt::Orientation orientation, int r
         switch (section)
         {
         case ProfileNameColumn:
-            return tr("Name of the Minecraft profile associated with the account.");
+            return tr("Minecraft username associated with the account.");
         case NameColumn:
             return tr("User name of the account.");
         case TypeColumn:
@@ -391,7 +391,7 @@ QVariant AccountList::headerData(int section, Qt::Orientation orientation, int r
         case StatusColumn:
             return tr("Current status of the account.");
         case MigrationColumn:
-            return tr("Can this account migrate to Microsoft account?");
+            return tr("Can this account migrate to a Microsoft account?");
         default:
             return QVariant();
         }
