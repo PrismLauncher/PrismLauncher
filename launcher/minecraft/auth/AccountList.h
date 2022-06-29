@@ -58,8 +58,8 @@ public:
     enum VListColumns
     {
         // TODO: Add icon column.
-        NameColumn = 0,
-        ProfileNameColumn,
+        ProfileNameColumn = 0,
+        NameColumn,
         MigrationColumn,
         TypeColumn,
         StatusColumn,
