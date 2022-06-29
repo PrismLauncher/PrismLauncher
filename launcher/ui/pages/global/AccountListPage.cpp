@@ -73,9 +73,11 @@ AccountListPage::AccountListPage(QWidget *parent)
     m_accounts = APPLICATION->accounts();
 
     ui->listView->setModel(m_accounts.get());
-    ui->listView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    ui->listView->header()->setSectionResizeMode(1, QHeaderView::Stretch);
-    ui->listView->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::ProfileNameColumn, QHeaderView::Stretch);
+    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::NameColumn, QHeaderView::Stretch);
+    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::MigrationColumn, QHeaderView::ResizeToContents);
+    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::TypeColumn, QHeaderView::ResizeToContents);
+    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::StatusColumn, QHeaderView::ResizeToContents);
     ui->listView->setSelectionMode(QAbstractItemView::SingleSelection);
 
     // Expand the account column
