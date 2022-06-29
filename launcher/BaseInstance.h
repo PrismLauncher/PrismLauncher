@@ -188,6 +188,7 @@ public:
      * Create envrironment variables for running the instance
      */
     virtual QProcessEnvironment createEnvironment() = 0;
+    virtual QProcessEnvironment createLaunchEnvironment() = 0;
 
     /*!
      * Returns a matcher that can maps relative paths within the instance to whether they are 'log files'

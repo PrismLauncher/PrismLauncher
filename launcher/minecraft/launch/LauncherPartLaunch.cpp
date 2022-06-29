@@ -44,6 +44,10 @@
 #include "Commandline.h"
 #include "Application.h"
 
+#ifdef Q_OS_LINUX
+#include "gamemode_client.h"
+#endif
+
 LauncherPartLaunch::LauncherPartLaunch(LaunchTask *parent) : LaunchStep(parent)
 {
     auto instance = parent->instance();
@@ -102,7 +106,7 @@ void LauncherPartLaunch::executeTask()
 
     auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
 
-    m_process.setProcessEnvironment(instance->createEnvironment());
+    m_process.setProcessEnvironment(instance->createLaunchEnvironment());
 
     // make detachable - this will keep the process running even if the object is destroyed
     m_process.setDetachable(true);
@@ -167,6 +171,17 @@ void LauncherPartLaunch::executeTask()
     {
         m_process.start(javaPath, args);
     }
+
+#ifdef Q_OS_LINUX
+    if (instance->settings()->get("EnableFeralGamemode").toBool())
+    {
+        auto pid = m_process.processId();
+        if (pid)
+        {
+            gamemode_request_start_for(pid);
+        }
+    }
+#endif
 }
 
 void LauncherPartLaunch::on_state(LoggedProcess::State state)

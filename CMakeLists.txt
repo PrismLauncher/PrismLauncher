@@ -293,6 +293,7 @@ add_subdirectory(libraries/classparser) # class parser library
 add_subdirectory(libraries/optional-bare)
 add_subdirectory(libraries/tomlc99) # toml parser
 add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too much
+add_subdirectory(libraries/gamemode)
 
 ############################### Built Artifacts ###############################
 
