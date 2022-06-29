@@ -255,18 +255,20 @@ void AccountListPage::updateButtonStates()
 {
     // If there is no selection, disable buttons that require something selected.
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
-    bool hasSelection = selection.size() > 0;
+    bool hasSelection = !selection.empty();
     bool accountIsReady = false;
+    bool accountIsOnline;
     if (hasSelection)
     {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         accountIsReady = !account->isActive();
+        accountIsOnline = !account->isOffline();
     }
     ui->actionRemove->setEnabled(accountIsReady);
     ui->actionSetDefault->setEnabled(accountIsReady);
-    ui->actionUploadSkin->setEnabled(accountIsReady);
-    ui->actionDeleteSkin->setEnabled(accountIsReady);
+    ui->actionUploadSkin->setEnabled(accountIsReady && accountIsOnline);
+    ui->actionDeleteSkin->setEnabled(accountIsReady && accountIsOnline);
     ui->actionRefresh->setEnabled(accountIsReady);
 
     if(m_accounts->defaultAccount().get() == nullptr) {
