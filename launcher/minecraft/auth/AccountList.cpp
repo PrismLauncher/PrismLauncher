@@ -349,7 +349,7 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
         case Qt::CheckStateRole:
             switch (index.column())
             {
-                case NameColumn:
+                case ProfileNameColumn:
                     return account == m_defaultAccount ? Qt::Checked : Qt::Unchecked;
             }
 
