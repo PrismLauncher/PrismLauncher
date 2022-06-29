@@ -269,7 +269,7 @@ void AccountListPage::updateButtonStates()
     ui->actionSetDefault->setEnabled(accountIsReady);
     ui->actionUploadSkin->setEnabled(accountIsReady && accountIsOnline);
     ui->actionDeleteSkin->setEnabled(accountIsReady && accountIsOnline);
-    ui->actionRefresh->setEnabled(accountIsReady);
+    ui->actionRefresh->setEnabled(accountIsReady && accountIsOnline);
 
     if(m_accounts->defaultAccount().get() == nullptr) {
         ui->actionNoDefault->setEnabled(false);
