@@ -13,7 +13,7 @@ namespace {
 // FIXME: wasteful
 void RemoveThePrefix(QString& string)
 {
-    QRegularExpression regex(QStringLiteral("^(([Tt][Hh][eE])|([Tt][eE][Hh])) +"));
+    QRegularExpression regex(QStringLiteral("^(?:the|teh) +"), QRegularExpression::CaseInsensitiveOption);
     string.remove(regex);
     string = string.trimmed();
 }
