@@ -881,6 +881,8 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/InstanceDelegate.h
     ui/instanceview/VisualGroup.cpp
     ui/instanceview/VisualGroup.h
+    JavaDownloader.cpp
+    JavaDownloader.h
 )
 
 if(WIN32)
