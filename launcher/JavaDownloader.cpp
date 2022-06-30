@@ -14,10 +14,9 @@ struct File{
 };
 
 void JavaDownloader::downloadJava(bool isLegacy, const QString& OS) {
-    //Query the adoptium API to get a good version
     auto netJob = new NetJob(QString("JRE::QueryVersions"), APPLICATION->network());
     auto response = new QByteArray();
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl("https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json"), response));
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl("https://piston-meta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json"), response));
     QObject::connect(netJob, &NetJob::finished,[netJob, response]{
         netJob->deleteLater();
         delete response;
