@@ -304,7 +304,7 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
                         return tr("Offline", "Account status");
                     }
                     case AccountState::Online: {
-                        return tr("Online", "Account status");
+                        return tr("Ready", "Account status");
                     }
                     case AccountState::Working: {
                         return tr("Working", "Account status");
