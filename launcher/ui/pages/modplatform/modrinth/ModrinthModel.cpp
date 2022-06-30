@@ -160,15 +160,15 @@ static auto sortFromIndex(int index) -> QString
 {
     switch(index){
     default:
-    case 1:
+    case 0:
         return "relevance";
-    case 2:
+    case 1:
         return "downloads";
-    case 3:
+    case 2:
         return "follows";
-    case 4:
+    case 3:
         return "newest";
-    case 5:
+    case 4:
         return "updated";
     }
 
