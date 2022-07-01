@@ -358,7 +358,6 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
     auto changelog = new QTreeWidgetItem(changelog_item);
     auto changelog_area = new QTextBrowser();
 
-
     switch (info.provider) {
         case ModPlatform::Provider::MODRINTH: {
             HoeDown h;
@@ -379,6 +378,12 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
     }
 
     changelog_area->setOpenExternalLinks(true);
+    changelog_area->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
+    changelog_area->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
+
+    // HACK: Is there a better way of achieving this?
+    auto font_height = QFontMetrics(changelog_area->font()).height();
+    changelog_area->setMaximumHeight((changelog_area->toPlainText().count(QRegularExpression("\n|<br>")) + 2) * font_height);
 
     ui->modTreeWidget->setItemWidget(changelog, 0, changelog_area);
 
