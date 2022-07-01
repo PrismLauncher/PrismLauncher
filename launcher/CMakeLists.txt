@@ -580,6 +580,8 @@ SET(LAUNCHER_SOURCES
     UpdateController.h
     ApplicationMessage.h
     ApplicationMessage.cpp
+    SysInfo.h
+    SysInfo.cpp
 
     # GUI - general utilities
     DesktopServices.h
