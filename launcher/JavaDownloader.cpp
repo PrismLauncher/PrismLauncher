@@ -1,6 +1,7 @@
 #include "JavaDownloader.h"
 #include "Application.h"
 #include "FileSystem.h"
+#include "Json.h"
 #include "MMCZip.h"
 #include "net/ChecksumValidator.h"
 #include "net/NetJob.h"
@@ -11,6 +12,7 @@ struct File {
     QString path;
     QString url;
     QByteArray hash;
+    bool isExec;
 };
 
 void JavaDownloader::downloadJava(bool isLegacy, const QString& OS)
@@ -23,7 +25,7 @@ void JavaDownloader::downloadJava(bool isLegacy, const QString& OS)
         netJob->deleteLater();
         delete response;
     });
-    QObject::connect(netJob, &NetJob::succeeded, [response, &OS, isLegacy] {
+    QObject::connect(netJob, &NetJob::succeeded, [response, OS, isLegacy] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -31,7 +33,7 @@ void JavaDownloader::downloadJava(bool isLegacy, const QString& OS)
             qWarning() << *response;
             return;
         }
-        auto versionArray = doc.object()[OS].toObject()[isLegacy ? "jre-legacy" : "java-runtime-gamma"].toArray();
+        auto versionArray = Json::ensureArray(Json::ensureObject(doc.object(), OS), isLegacy ? "jre-legacy" : "java-runtime-gamma");
         if (!versionArray.empty()) {
             auto url = versionArray[0].toObject()["manifest"].toObject()["url"].toString();
             auto download = new NetJob(QString("JRE::DownloadJava"), APPLICATION->network());
@@ -53,35 +55,37 @@ void JavaDownloader::downloadJava(bool isLegacy, const QString& OS)
                 }
 
                 // valid json doc, begin making jre spot
-                auto output =
-                    FS::PathCombine(QCoreApplication::applicationDirPath(), QString("java/") + (isLegacy ? "java-legacy" : "java-current"));
+                auto output = FS::PathCombine(QString("java"), (isLegacy ? "java-legacy" : "java-current"));
                 FS::ensureFolderPathExists(output);
                 std::vector<File> toDownload;
                 auto list = doc.object()["files"].toObject();
-                for (auto element : list) {
-                    auto obj = element.toObject();
-                    for (const auto& paths : obj.keys()) {
-                        auto file = FS::PathCombine(output, paths);
+                for (const auto& paths : list.keys()) {
+                    auto file = FS::PathCombine(output, paths);
 
-                        auto type = obj[paths].toObject()["type"].toString();
-                        if (type == "directory") {
-                            FS::ensureFolderPathExists(file);
-                        } else if (type == "link") {
-                            // this is linux only !
-                            auto target = FS::PathCombine(file, "../" + obj[paths].toObject()["target"].toString());
-                            QFile(target).link(file);
-                        } else if (type == "file") {
-                            // TODO download compressed version if it exists ?
-                            auto raw = obj[paths].toObject()["downloads"].toObject()["raw"].toObject();
-                            auto f = File{ file, raw["url"].toString(), QByteArray::fromHex(raw["sha1"].toString().toLatin1()) };
-                            toDownload.push_back(f);
-                        }
+                    auto type = list[paths].toObject()["type"].toString();
+                    if (type == "directory") {
+                        FS::ensureFolderPathExists(file);
+                    } else if (type == "link") {
+                        // this is linux only !
+                        auto target = FS::PathCombine(file, "../" + list[paths].toObject()["target"].toString());
+                        QFile(target).link(file);
+                    } else if (type == "file") {
+                        // TODO download compressed version if it exists ?
+                        auto raw = list[paths].toObject()["downloads"].toObject()["raw"].toObject();
+                        auto isExec = list[paths].toObject()["executable"].toBool();
+                        auto f = File{ file, raw["url"].toString(), QByteArray::fromHex(raw["sha1"].toString().toLatin1()), isExec };
+                        toDownload.push_back(f);
                     }
                 }
                 auto elementDownload = new NetJob("JRE::FileDownload", APPLICATION->network());
                 for (const auto& file : toDownload) {
                     auto dl = Net::Download::makeFile(file.url, file.path);
                     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, file.hash));
+                    if (file.isExec) {
+                        QObject::connect(dl.get(), &Net::Download::succeeded, [file] {
+                            QFile(file.path).setPermissions(QFile(file.path).permissions() | QFileDevice::Permissions(0x1111));
+                        });
+                    }
                     elementDownload->addNetAction(dl);
                 }
                 QObject::connect(elementDownload, &NetJob::finished, [elementDownload] { elementDownload->deleteLater(); });
@@ -90,7 +94,7 @@ void JavaDownloader::downloadJava(bool isLegacy, const QString& OS)
             download->start();
         } else {
             // mojang does not have a JRE for us, let's get azul zulu
-            QString javaVersion = isLegacy ? QString("8.0") : QString("17.0");
+            QString javaVersion = isLegacy ? QString("8.0") : QString("18.0");
             QString azulOS;
             QString arch;
             QString bitness;
@@ -100,11 +104,16 @@ void JavaDownloader::downloadJava(bool isLegacy, const QString& OS)
                 azulOS = "macos";
                 arch = "arm";
                 bitness = "64";
-            } else if (OS == "linux-aarch64") {
-                // linux aarch64
+            } else if (OS == "linux-arm64") {
+                // linux arm64
                 azulOS = "linux";
                 arch = "arm";
                 bitness = "64";
+            } else if (OS == "linux-arm") {
+                // linux arm (32)
+                azulOS = "linux";
+                arch = "arm";
+                bitness = "32";
             }
             auto metaResponse = new QByteArray();
             auto downloadJob = new NetJob(QString("JRE::QueryAzulMeta"), APPLICATION->network());
@@ -143,16 +152,18 @@ void JavaDownloader::downloadJava(bool isLegacy, const QString& OS)
                     download->addNetAction(Net::Download::makeCached(downloadURL, entry));
                     auto zippath = entry->getFullPath();
                     QObject::connect(download, &NetJob::finished, [download] { download->deleteLater(); });
-                    QObject::connect(download, &NetJob::succeeded, [isLegacy, zippath] {
+                    QObject::connect(download, &NetJob::succeeded, [isLegacy, zippath, downloadURL] {
                         auto output = FS::PathCombine(FS::PathCombine(QCoreApplication::applicationDirPath(), "java"),
                                                       isLegacy ? "java-legacy" : "java-current");
                         // This should do all of the extracting and creating folders
-                        MMCZip::extractDir(zippath, output);
+                        MMCZip::extractDir(zippath, downloadURL.fileName().chopped(4), output);
                     });
+                    download->start();
                 } else {
                     qWarning() << "No suitable JRE found !!";
                 }
             });
+            downloadJob->start();
         }
     });
 

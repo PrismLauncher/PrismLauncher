@@ -52,6 +52,9 @@
 #include <FileSystem.h>
 #include "Application.h"
 #include <sys.h>
+#include "SysInfo.h"
+#include "JavaDownloader.h"
+
 
 JavaPage::JavaPage(QWidget *parent) : QWidget(parent), ui(new Ui::JavaPage)
 {
@@ -175,6 +178,44 @@ void JavaPage::on_javaTestBtn_clicked()
         ui->minMemSpinBox->value(), ui->maxMemSpinBox->value(), ui->permGenSpinBox->value()));
     connect(checker.get(), SIGNAL(finished()), SLOT(checkerFinished()));
     checker->run();
+}
+
+void JavaPage::on_javaDownloadBtn_clicked(){
+    QString sys = SysInfo::currentSystem();
+    if(sys == "osx"){
+        sys = "mac-os";
+    }
+    QString arch = SysInfo::useQTForArch();
+    QString version;
+    if(sys == "windows"){
+        if(arch == "x86_64"){
+            version = "windows-x64";
+        }else if(arch == "i386"){
+            version = "windows-x86";
+        }else{
+            //Unknown, maybe arm, appending arch for downloader
+            version = "windows-"+arch;
+        }
+    }else if(sys == "mac-os"){
+        if(arch == "arm64"){
+            version = "mac-os-arm64";
+        }else{
+            version = "mac-os";
+        }
+    }else if(sys == "linux"){
+        if(arch == "x86_64"){
+            version = "linux";
+        }else {
+            // will work for i386, and arm(64)
+            version = "linux-" + arch;
+        }
+    }else{
+        // ? ? ? ? ? unknown os, at least it won't have a java version on mojang or azul, display warning
+        QMessageBox::warning(this, tr("Unknown OS"), tr("The OS you are running is not supported by Mojang or Azul. Please install Java manually."));
+        return;
+    }
+    //TODO display a selection for java 8 or 18
+    JavaDownloader::downloadJava(false, version);
 }
 
 void JavaPage::checkerFinished()

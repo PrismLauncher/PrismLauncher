@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>545</width>
-    <height>580</height>
+    <width>559</width>
+    <height>659</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -276,6 +276,13 @@
               <width>16777215</width>
               <height>100</height>
              </size>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QPushButton" name="javaDownloadBtn">
+            <property name="text">
+             <string>Download Java</string>
             </property>
            </widget>
           </item>
