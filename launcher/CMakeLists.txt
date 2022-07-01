@@ -847,6 +847,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/NewComponentDialog.h
     ui/dialogs/NewInstanceDialog.cpp
     ui/dialogs/NewInstanceDialog.h
+    ui/dialogs/NewsDialog.cpp
+    ui/dialogs/NewsDialog.h
     ui/pagedialog/PageDialog.cpp
     ui/pagedialog/PageDialog.h
     ui/dialogs/ProgressDialog.cpp
@@ -956,6 +958,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/dialogs/NewInstanceDialog.ui
     ui/dialogs/UpdateDialog.ui
     ui/dialogs/NewComponentDialog.ui
+    ui/dialogs/NewsDialog.ui
     ui/dialogs/ProfileSelectDialog.ui
     ui/dialogs/SkinUploadDialog.ui
     ui/dialogs/ExportInstanceDialog.ui
