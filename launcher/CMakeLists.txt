@@ -717,6 +717,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/BasePageProvider.h
 
     # GUI - instance pages
+    ui/pages/instance/ExternalResourcesPage.cpp
+    ui/pages/instance/ExternalResourcesPage.h
     ui/pages/instance/GameOptionsPage.cpp
     ui/pages/instance/GameOptionsPage.h
     ui/pages/instance/VersionPage.cpp
@@ -924,7 +926,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/pages/global/ProxyPage.ui
     ui/pages/global/MinecraftPage.ui
     ui/pages/global/ExternalToolsPage.ui
-    ui/pages/instance/ModFolderPage.ui
+    ui/pages/instance/ExternalResourcesPage.ui
     ui/pages/instance/NotesPage.ui
     ui/pages/instance/LogPage.ui
     ui/pages/instance/ServersPage.ui

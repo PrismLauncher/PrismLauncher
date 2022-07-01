@@ -35,20 +35,24 @@
 
 #pragma once
 
-#include "ModFolderPage.h"
-#include "ui_ModFolderPage.h"
+#include "ExternalResourcesPage.h"
+#include "ui_ExternalResourcesPage.h"
 
-class ShaderPackPage : public ModFolderPage
+class ShaderPackPage : public ExternalResourcesPage
 {
     Q_OBJECT
 public:
     explicit ShaderPackPage(MinecraftInstance *instance, QWidget *parent = 0)
-        : ModFolderPage(instance, instance->shaderPackList(), "shaderpacks",
-                        "shaderpacks", tr("Shader packs"), "Resource-packs", parent)
+        : ExternalResourcesPage(instance, instance->shaderPackList(), parent)
     {
-        ui->actionView_configs->setVisible(false);
+        ui->actionViewConfigs->setVisible(false);
     }
     virtual ~ShaderPackPage() {}
+
+    QString displayName() const override { return tr("Shader packs"); }
+    QIcon icon() const override { return APPLICATION->getThemedIcon("shaderpacks"); }
+    QString id() const override { return "shaderpacks"; }
+    QString helpPage() const override { return "Resource-packs"; }
 
     virtual bool shouldDisplay() const override
     {

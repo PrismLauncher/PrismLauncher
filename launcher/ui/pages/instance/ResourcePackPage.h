@@ -35,24 +35,28 @@
 
 #pragma once
 
-#include "ModFolderPage.h"
-#include "ui_ModFolderPage.h"
+#include "ExternalResourcesPage.h"
+#include "ui_ExternalResourcesPage.h"
 
-class ResourcePackPage : public ModFolderPage
+class ResourcePackPage : public ExternalResourcesPage
 {
     Q_OBJECT
 public:
     explicit ResourcePackPage(MinecraftInstance *instance, QWidget *parent = 0)
-        : ModFolderPage(instance, instance->resourcePackList(), "resourcepacks",
-                        "resourcepacks", tr("Resource packs"), "Resource-packs", parent)
+        : ExternalResourcesPage(instance, instance->resourcePackList(), parent)
     {
-        ui->actionView_configs->setVisible(false);
+        ui->actionViewConfigs->setVisible(false);
     }
     virtual ~ResourcePackPage() {}
 
+    QString displayName() const override { return tr("Resource packs"); }
+    QIcon icon() const override { return APPLICATION->getThemedIcon("resourcepacks"); }
+    QString id() const override { return "resourcepacks"; }
+    QString helpPage() const override { return "Resource-packs"; }
+
     virtual bool shouldDisplay() const override
     {
-        return !m_inst->traits().contains("no-texturepacks") &&
-               !m_inst->traits().contains("texturepacks");
+        return !m_instance->traits().contains("no-texturepacks") &&
+               !m_instance->traits().contains("texturepacks");
     }
 };
