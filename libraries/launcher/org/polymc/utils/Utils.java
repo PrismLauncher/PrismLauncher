@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.multimc.utils;
+package org.polymc.utils;
 
 import java.io.File;
 import java.lang.reflect.Field;

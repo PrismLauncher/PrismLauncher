@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.multimc.applet;
+package org.polymc.applet;
 
 import net.minecraft.Launcher;
 

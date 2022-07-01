@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.multimc.exception;
+package org.polymc.exception;
 
-public final class ParseException extends IllegalArgumentException {
+public final class ParameterNotFoundException extends IllegalArgumentException {
 
-    public ParseException(String message) {
-        super(message);
+    public ParameterNotFoundException(String key) {
+        super("Unknown parameter name: " + key);
     }
 
 }
