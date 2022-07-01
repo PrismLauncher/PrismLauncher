@@ -108,10 +108,8 @@ void ModUpdateDialog::checkCandidates()
     });
 
     // Check for updates
-    // FIXME: SOMEHOW THIS IS NOT MODAL???????
     ProgressDialog progress_dialog(m_parent);
     progress_dialog.setSkipButton(true, tr("Abort"));
-    progress_dialog.setVisible(true);
     progress_dialog.setWindowTitle(tr("Checking for updates..."));
     auto ret = progress_dialog.execWithTask(&check_task);
 
