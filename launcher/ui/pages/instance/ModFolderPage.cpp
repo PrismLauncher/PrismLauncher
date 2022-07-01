@@ -60,7 +60,7 @@
 #include "modplatform/ModAPI.h"
 
 #include "Version.h"
-#include "tasks/SequentialTask.h"
+#include "tasks/ConcurrentTask.h"
 #include "ui/dialogs/ProgressDialog.h"
 
 ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
@@ -127,7 +127,7 @@ void ModFolderPage::installMods()
 
     ModDownloadDialog mdownload(m_model, this, m_instance);
     if (mdownload.exec()) {
-        SequentialTask* tasks = new SequentialTask(this);
+        ConcurrentTask* tasks = new ConcurrentTask(this);
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
