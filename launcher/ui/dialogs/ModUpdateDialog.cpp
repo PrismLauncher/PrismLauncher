@@ -8,6 +8,8 @@
 #include "FileSystem.h"
 #include "Json.h"
 
+#include "tasks/ConcurrentTask.h"
+
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
@@ -39,7 +41,7 @@ ModUpdateDialog::ModUpdateDialog(QWidget* parent,
     , m_parent(parent)
     , m_mod_model(mods)
     , m_candidates(search_for)
-    , m_second_try_metadata(new SequentialTask())
+    , m_second_try_metadata(new ConcurrentTask())
     , m_instance(instance)
 {
     ReviewMessageBox::setGeometry(0, 0, 800, 600);

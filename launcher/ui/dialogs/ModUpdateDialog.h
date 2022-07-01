@@ -11,6 +11,7 @@
 class Mod;
 class ModrinthCheckUpdate;
 class FlameCheckUpdate;
+class ConcurrentTask;
 
 class ModUpdateDialog final : public ReviewMessageBox {
     Q_OBJECT
@@ -49,7 +50,7 @@ class ModUpdateDialog final : public ReviewMessageBox {
     std::list<Mod*> m_modrinth_to_update;
     std::list<Mod*> m_flame_to_update;
 
-    SequentialTask* m_second_try_metadata;
+    ConcurrentTask* m_second_try_metadata;
     std::list<std::tuple<Mod*, QString>> m_failed_metadata;
     std::list<std::tuple<Mod*, QString, QUrl>> m_failed_check_update;
 
