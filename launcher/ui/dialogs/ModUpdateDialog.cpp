@@ -363,7 +363,13 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
         case ModPlatform::Provider::MODRINTH: {
             HoeDown h;
             // HoeDown bug?: \n aren't converted to <br>
-            changelog_area->setHtml(h.process(info.changelog.toUtf8()).replace('\n', "<br>"));
+            auto text = h.process(info.changelog.toUtf8());
+
+            // Don't convert if there's an HTML tag right after (Qt rendering weirdness)
+            text.remove(QRegularExpression("(\n+)(?=<)"));
+            text.replace('\n', "<br>");
+
+            changelog_area->setHtml(text);
             break;
         }
         case ModPlatform::Provider::FLAME: {
