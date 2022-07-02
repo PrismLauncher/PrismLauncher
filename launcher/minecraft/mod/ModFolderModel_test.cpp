@@ -35,7 +35,6 @@
 
 #include <QTest>
 #include <QTemporaryDir>
-#include "TestUtil.h"
 
 #include "FileSystem.h"
 #include "minecraft/mod/ModFolderModel.h"
@@ -50,7 +49,7 @@ slots:
     void test_1178()
     {
         // source
-        QString source = QFINDTESTDATA("data/test_folder");
+        QString source = QFINDTESTDATA("testdata/test_folder");
 
         // sanity check
         QVERIFY(!source.endsWith('/'));

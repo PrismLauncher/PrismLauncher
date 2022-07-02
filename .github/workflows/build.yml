@@ -61,6 +61,7 @@ jobs:
           pacboy: >-
             toolchain:p
             cmake:p
+            extra-cmake-modules:p
             ninja:p
             qt5:p
             ccache:p
@@ -107,7 +108,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
          brew update
-         brew install qt@5 ninja
+         brew install qt@5 ninja extra-cmake-modules
 
       - name: Update Qt (AppImage)
         if: runner.os == 'Linux' && matrix.appimage == true
@@ -121,7 +122,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get -y update
-          sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5 ninja-build qt5-image-formats-plugins
+          sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5 ninja-build qt5-image-formats-plugins extra-cmake-modules
 
       - name: Prepare AppImage (Linux)
         if: runner.os == 'Linux' && matrix.appimage == true
@@ -166,6 +167,21 @@ jobs:
         shell: msys2 {0}
         run: |
           cmake --build ${{ env.BUILD_DIR }}
+
+      ##
+      # TEST
+      ##
+
+      - name: Test
+        if: runner.os != 'Windows'
+        run: |
+          ctest --test-dir build --output-on-failure
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: |
+          ctest --test-dir build --output-on-failure
 
       ##
       # PACKAGE BUILDS

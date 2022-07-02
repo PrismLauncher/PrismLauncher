@@ -21,7 +21,6 @@
 #include <QTest>
 
 #include "Packwiz.h"
-#include "TestUtil.h"
 
 class PackwizTest : public QObject {
     Q_OBJECT
