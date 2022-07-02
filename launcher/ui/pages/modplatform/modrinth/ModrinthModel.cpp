@@ -87,6 +87,7 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
     } else if (role == Qt::DecorationRole) {
         if (m_logoMap.contains(pack.iconName)) {
             auto icon = m_logoMap.value(pack.iconName);
+            // FIXME: This doesn't really belong here, but Qt doesn't offer a good way right now ;(
             auto icon_scaled = QIcon(icon.pixmap(48, 48).scaledToWidth(48));
 
             return icon_scaled;
