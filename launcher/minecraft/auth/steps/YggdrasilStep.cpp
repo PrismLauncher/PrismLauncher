@@ -9,6 +9,7 @@ YggdrasilStep::YggdrasilStep(AccountData* data, QString password) : AuthStep(dat
 
     connect(m_yggdrasil, &Task::failed, this, &YggdrasilStep::onAuthFailed);
     connect(m_yggdrasil, &Task::succeeded, this, &YggdrasilStep::onAuthSucceeded);
+    connect(m_yggdrasil, &Task::aborted, this, &YggdrasilStep::onAuthFailed);
 }
 
 YggdrasilStep::~YggdrasilStep() noexcept = default;

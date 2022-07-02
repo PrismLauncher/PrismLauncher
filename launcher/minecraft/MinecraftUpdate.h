@@ -27,6 +27,8 @@
 class MinecraftVersion;
 class MinecraftInstance;
 
+// FIXME: This looks very similar to a SequentialTask. Maybe we can reduce code duplications? :^)
+
 class MinecraftUpdate : public Task
 {
     Q_OBJECT

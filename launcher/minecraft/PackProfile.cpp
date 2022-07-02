@@ -346,6 +346,7 @@ void PackProfile::resolve(Net::Mode netmode)
     d->m_updateTask.reset(updateTask);
     connect(updateTask, &ComponentUpdateTask::succeeded, this, &PackProfile::updateSucceeded);
     connect(updateTask, &ComponentUpdateTask::failed, this, &PackProfile::updateFailed);
+    connect(updateTask, &ComponentUpdateTask::aborted, this, [this]{ updateFailed(tr("Aborted")); });
     d->m_updateTask->start();
 }
 
