@@ -166,6 +166,9 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 5)
         set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
         set(FORCE_BUNDLED_QUAZIP 1)
     endif()
+
+    # Qt 6 sets these by default. Notably causes Windows APIs to use UNICODE strings.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE")
 elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_VERSION_MAJOR 6)
     find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml Core5Compat)

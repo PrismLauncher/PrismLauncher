@@ -197,25 +197,25 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
         archType = "32";
 
     HKEY jreKey;
-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, keyName.toStdString().c_str(), 0,
+    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, keyName.toStdWString().c_str(), 0,
                       KEY_READ | keyType | KEY_ENUMERATE_SUB_KEYS, &jreKey) == ERROR_SUCCESS)
     {
         // Read the current type version from the registry.
         // This will be used to find any key that contains the JavaHome value.
         char *value = new char[0];
         DWORD valueSz = 0;
-        if (RegQueryValueExA(jreKey, "CurrentVersion", NULL, NULL, (BYTE *)value, &valueSz) ==
+        if (RegQueryValueExW(jreKey, L"CurrentVersion", NULL, NULL, (BYTE *)value, &valueSz) ==
             ERROR_MORE_DATA)
         {
             value = new char[valueSz];
-            RegQueryValueExA(jreKey, "CurrentVersion", NULL, NULL, (BYTE *)value, &valueSz);
+            RegQueryValueExW(jreKey, L"CurrentVersion", NULL, NULL, (BYTE *)value, &valueSz);
         }
 
         TCHAR subKeyName[255];
         DWORD subKeyNameSize, numSubKeys, retCode;
 
         // Get the number of subkeys
-        RegQueryInfoKeyA(jreKey, NULL, NULL, NULL, &numSubKeys, NULL, NULL, NULL, NULL, NULL,
+        RegQueryInfoKeyW(jreKey, NULL, NULL, NULL, &numSubKeys, NULL, NULL, NULL, NULL, NULL,
                         NULL, NULL);
 
         // Iterate until RegEnumKeyEx fails
@@ -224,30 +224,26 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
             for (DWORD i = 0; i < numSubKeys; i++)
             {
                 subKeyNameSize = 255;
-                retCode = RegEnumKeyExA(jreKey, i, subKeyName, &subKeyNameSize, NULL, NULL, NULL,
+                retCode = RegEnumKeyExW(jreKey, i, subKeyName, &subKeyNameSize, NULL, NULL, NULL,
                                         NULL);
-#ifdef _UNICODE
                 QString newSubkeyName = QString::fromWCharArray(subKeyName);
-#else
-                QString newSubkeyName = QString::fromLocal8Bit(subKeyName);
-#endif
                 if (retCode == ERROR_SUCCESS)
                 {
                     // Now open the registry key for the version that we just got.
                     QString newKeyName = keyName + "\\" + newSubkeyName + subkeySuffix;
 
                     HKEY newKey;
-                    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, newKeyName.toStdString().c_str(), 0,
+                    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, newKeyName.toStdWString().c_str(), 0,
                                       KEY_READ | KEY_WOW64_64KEY, &newKey) == ERROR_SUCCESS)
                     {
                         // Read the JavaHome value to find where Java is installed.
                         value = new char[0];
                         valueSz = 0;
-                        if (RegQueryValueExA(newKey, keyJavaDir.toStdString().c_str(), NULL, NULL, (BYTE *)value,
+                        if (RegQueryValueExW(newKey, keyJavaDir.toStdWString().c_str(), NULL, NULL, (BYTE *)value,
                                              &valueSz) == ERROR_MORE_DATA)
                         {
                             value = new char[valueSz];
-                            RegQueryValueExA(newKey, keyJavaDir.toStdString().c_str(), NULL, NULL, (BYTE *)value,
+                            RegQueryValueExW(newKey, keyJavaDir.toStdWString().c_str(), NULL, NULL, (BYTE *)value,
                                              &valueSz);
 
                             // Now, we construct the version object and add it to the list.
