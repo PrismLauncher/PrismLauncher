@@ -185,15 +185,14 @@ else()
     message(FATAL_ERROR "Qt version ${Launcher_QT_VERSION_MAJOR} is not supported")
 endif()
 
-# The Qt5 cmake files don't provide its install paths, so ask qmake.
-include(QMakeQuery)
-query_qmake(QT_INSTALL_PLUGINS QT_PLUGINS_DIR)
-query_qmake(QT_INSTALL_IMPORTS QT_IMPORTS_DIR)
-query_qmake(QT_INSTALL_LIBS QT_LIBS_DIR)
-query_qmake(QT_INSTALL_LIBEXECS QT_LIBEXECS_DIR)
-query_qmake(QT_HOST_DATA QT_DATA_DIR)
+include(ECMQueryQt)
+ecm_query_qt(QT_PLUGINS_DIR  QT_INSTALL_PLUGINS)
+ecm_query_qt(QT_LIBS_DIR     QT_INSTALL_LIBS)
+ecm_query_qt(QT_LIBEXECS_DIR QT_INSTALL_LIBEXECS)
+ecm_query_qt(QT_DATA_DIR     QT_HOST_DATA)
 set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
 
+# NOTE: Qt 6 already sets this by default
 if (Qt5_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
