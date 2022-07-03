@@ -15,6 +15,7 @@
 , libGL
 , msaClientID ? ""
 , extraJDKs ? [ ]
+, extra-cmake-modules
 
   # flake
 , self
@@ -47,7 +48,7 @@ stdenv.mkDerivation rec {
 
   src = lib.cleanSource self;
 
-  nativeBuildInputs = [ cmake ninja jdk file wrapQtAppsHook ];
+  nativeBuildInputs = [ cmake extra-cmake-modules ninja jdk file wrapQtAppsHook ];
   buildInputs = [ qtbase quazip zlib ];
 
   dontWrapQtApps = true;
