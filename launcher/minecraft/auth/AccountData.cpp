@@ -473,7 +473,7 @@ QString AccountData::accountDisplayString() const {
             return userName();
         }
         case AccountType::Offline: {
-            return userName();
+            return QObject::tr("<Offline>");
         }
         case AccountType::MSA: {
             if(xboxApiToken.extra.contains("gtg")) {
