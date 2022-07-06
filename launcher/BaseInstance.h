@@ -174,6 +174,11 @@ public:
      */
     virtual SettingsObjectPtr settings() const;
 
+    /*!
+     * \brief Loads instance settings if they're not already loaded.
+     */
+    virtual void loadSettingsIfNeeded() = 0;
+
     /// returns a valid update task
     virtual Task::Ptr createUpdateTask(Net::Mode mode) = 0;
 
@@ -285,7 +290,11 @@ protected slots:
 
 protected: /* data */
     QString m_rootDir;
+
     SettingsObjectPtr m_settings;
+    SettingsObjectWeakPtr m_global_settings;
+    bool m_settings_loaded = false;
+
     // InstanceFlags m_flags;
     bool m_isRunning = false;
     shared_qobject_ptr<LaunchTask> m_launchProcess;

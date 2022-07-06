@@ -15,6 +15,10 @@ public:
     void saveNow() override
     {
     }
+    void loadSettingsIfNeeded() override
+    {
+        m_settings_loaded = true;
+    }
     QString getStatusbarDescription() override
     {
         return tr("Unknown instance type");

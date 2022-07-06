@@ -115,6 +115,21 @@ private:
 MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
     : BaseInstance(globalSettings, settings, rootDir)
 {
+    loadSettingsIfNeeded();
+
+    m_components.reset(new PackProfile(this));
+}
+
+void MinecraftInstance::saveNow()
+{
+    m_components->saveNow();
+}
+
+void MinecraftInstance::loadSettingsIfNeeded()
+{
+    if (m_settings_loaded)
+        return;
+
     // Java Settings
     auto javaOverride = m_settings->registerSetting("OverrideJava", false);
     auto locationOverride = m_settings->registerSetting("OverrideJavaLocation", false);
@@ -124,64 +139,61 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
     auto javaOrLocation = std::make_shared<OrSetting>("JavaOrLocationOverride", javaOverride, locationOverride);
     auto javaOrArgs = std::make_shared<OrSetting>("JavaOrArgsOverride", javaOverride, argsOverride);
 
-    m_settings->registerOverride(globalSettings->getSetting("JavaPath"), javaOrLocation);
-    m_settings->registerOverride(globalSettings->getSetting("JvmArgs"), javaOrArgs);
-    m_settings->registerOverride(globalSettings->getSetting("IgnoreJavaCompatibility"), javaOrLocation);
+    if (auto globalSettings = m_global_settings.lock()) {
+        m_settings->registerOverride(globalSettings->getSetting("JavaPath"), javaOrLocation);
+        m_settings->registerOverride(globalSettings->getSetting("JvmArgs"), javaOrArgs);
+        m_settings->registerOverride(globalSettings->getSetting("IgnoreJavaCompatibility"), javaOrLocation);
 
-    // special!
-    m_settings->registerPassthrough(globalSettings->getSetting("JavaTimestamp"), javaOrLocation);
-    m_settings->registerPassthrough(globalSettings->getSetting("JavaVersion"), javaOrLocation);
-    m_settings->registerPassthrough(globalSettings->getSetting("JavaArchitecture"), javaOrLocation);
+        // special!
+        m_settings->registerPassthrough(globalSettings->getSetting("JavaTimestamp"), javaOrLocation);
+        m_settings->registerPassthrough(globalSettings->getSetting("JavaVersion"), javaOrLocation);
+        m_settings->registerPassthrough(globalSettings->getSetting("JavaArchitecture"), javaOrLocation);
 
-    // Window Size
-    auto windowSetting = m_settings->registerSetting("OverrideWindow", false);
-    m_settings->registerOverride(globalSettings->getSetting("LaunchMaximized"), windowSetting);
-    m_settings->registerOverride(globalSettings->getSetting("MinecraftWinWidth"), windowSetting);
-    m_settings->registerOverride(globalSettings->getSetting("MinecraftWinHeight"), windowSetting);
+        // Window Size
+        auto windowSetting = m_settings->registerSetting("OverrideWindow", false);
+        m_settings->registerOverride(globalSettings->getSetting("LaunchMaximized"), windowSetting);
+        m_settings->registerOverride(globalSettings->getSetting("MinecraftWinWidth"), windowSetting);
+        m_settings->registerOverride(globalSettings->getSetting("MinecraftWinHeight"), windowSetting);
 
-    // Memory
-    auto memorySetting = m_settings->registerSetting("OverrideMemory", false);
-    m_settings->registerOverride(globalSettings->getSetting("MinMemAlloc"), memorySetting);
-    m_settings->registerOverride(globalSettings->getSetting("MaxMemAlloc"), memorySetting);
-    m_settings->registerOverride(globalSettings->getSetting("PermGen"), memorySetting);
+        // Memory
+        auto memorySetting = m_settings->registerSetting("OverrideMemory", false);
+        m_settings->registerOverride(globalSettings->getSetting("MinMemAlloc"), memorySetting);
+        m_settings->registerOverride(globalSettings->getSetting("MaxMemAlloc"), memorySetting);
+        m_settings->registerOverride(globalSettings->getSetting("PermGen"), memorySetting);
 
-    // Minecraft launch method
-    auto launchMethodOverride = m_settings->registerSetting("OverrideMCLaunchMethod", false);
-    m_settings->registerOverride(globalSettings->getSetting("MCLaunchMethod"), launchMethodOverride);
+        // Minecraft launch method
+        auto launchMethodOverride = m_settings->registerSetting("OverrideMCLaunchMethod", false);
+        m_settings->registerOverride(globalSettings->getSetting("MCLaunchMethod"), launchMethodOverride);
 
-    // Native library workarounds
-    auto nativeLibraryWorkaroundsOverride = m_settings->registerSetting("OverrideNativeWorkarounds", false);
-    m_settings->registerOverride(globalSettings->getSetting("UseNativeOpenAL"), nativeLibraryWorkaroundsOverride);
-    m_settings->registerOverride(globalSettings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
+        // Native library workarounds
+        auto nativeLibraryWorkaroundsOverride = m_settings->registerSetting("OverrideNativeWorkarounds", false);
+        m_settings->registerOverride(globalSettings->getSetting("UseNativeOpenAL"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(globalSettings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
 
-    // Peformance related options
-    auto performanceOverride = m_settings->registerSetting("OverridePerformance", false);
-    m_settings->registerOverride(globalSettings->getSetting("EnableFeralGamemode"), performanceOverride);
-    m_settings->registerOverride(globalSettings->getSetting("EnableMangoHud"), performanceOverride);
-    m_settings->registerOverride(globalSettings->getSetting("UseDiscreteGpu"), performanceOverride);
+        // Peformance related options
+        auto performanceOverride = m_settings->registerSetting("OverridePerformance", false);
+        m_settings->registerOverride(globalSettings->getSetting("EnableFeralGamemode"), performanceOverride);
+        m_settings->registerOverride(globalSettings->getSetting("EnableMangoHud"), performanceOverride);
+        m_settings->registerOverride(globalSettings->getSetting("UseDiscreteGpu"), performanceOverride);
 
-    // Game time
-    auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
-    m_settings->registerOverride(globalSettings->getSetting("ShowGameTime"), gameTimeOverride);
-    m_settings->registerOverride(globalSettings->getSetting("RecordGameTime"), gameTimeOverride);
+        // Game time
+        auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
+        m_settings->registerOverride(globalSettings->getSetting("ShowGameTime"), gameTimeOverride);
+        m_settings->registerOverride(globalSettings->getSetting("RecordGameTime"), gameTimeOverride);
+
+        // Miscellaneous
+        auto miscellaneousOverride = m_settings->registerSetting("OverrideMiscellaneous", false);
+        m_settings->registerOverride(globalSettings->getSetting("CloseAfterLaunch"), miscellaneousOverride);
+        m_settings->registerOverride(globalSettings->getSetting("QuitAfterGameStop"), miscellaneousOverride);
+
+        m_settings->set("InstanceType", "OneSix");
+    }
 
     // Join server on launch, this does not have a global override
     m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
 
-    // Miscellaneous
-    auto miscellaneousOverride = m_settings->registerSetting("OverrideMiscellaneous", false);
-    m_settings->registerOverride(globalSettings->getSetting("CloseAfterLaunch"), miscellaneousOverride);
-    m_settings->registerOverride(globalSettings->getSetting("QuitAfterGameStop"), miscellaneousOverride);
-
-    m_settings->set("InstanceType", "OneSix");
-
-    m_components.reset(new PackProfile(this));
-}
-
-void MinecraftInstance::saveNow()
-{
-    m_components->saveNow();
+    m_settings_loaded = true;
 }
 
 QString MinecraftInstance::typeName() const

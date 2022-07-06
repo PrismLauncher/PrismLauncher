@@ -20,6 +20,8 @@ public:
     virtual ~MinecraftInstance() {};
     virtual void saveNow() override;
 
+    void loadSettingsIfNeeded() override;
+
     // FIXME: remove
     QString typeName() const override;
     // FIXME: remove
