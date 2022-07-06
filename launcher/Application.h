@@ -157,7 +157,11 @@ public:
 
     shared_qobject_ptr<Meta::Index> metadataIndex();
 
-    QString getJarsPath();
+    /*!
+     * Finds and returns the full path to a jar file.
+     * Returns a null-string if it could not be found.
+     */
+    QString getJarPath(QString jarFile);
 
     QString getMSAClientID();
     QString getCurseKey();
@@ -241,7 +245,6 @@ private:
     std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     std::unique_ptr<MCEditTool> m_mcedit;
-    QString m_jarsPath;
     QSet<QString> m_features;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;

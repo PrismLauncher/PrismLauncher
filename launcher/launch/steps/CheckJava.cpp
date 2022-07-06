@@ -34,6 +34,7 @@
  */
 
 #include "CheckJava.h"
+#include "java/JavaUtils.h"
 #include <launch/LaunchTask.h>
 #include <FileSystem.h>
 #include <QStandardPaths>
@@ -69,6 +70,14 @@ void CheckJava::executeTask()
     else
     {
         emit logLine("Java path is:\n" + m_javaPath + "\n\n", MessageLevel::Launcher);
+    }
+
+    if (JavaUtils::getJavaCheckPath().isEmpty())
+    {
+        const char *reason = QT_TR_NOOP("Java checker library could not be found. Please check your installation.");
+        emit logLine(tr(reason), MessageLevel::Fatal);
+        emitFailed(tr(reason));
+        return;
     }
 
     QFileInfo javaInfo(realJavaPath);
