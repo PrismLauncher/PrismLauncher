@@ -20,7 +20,7 @@ public:
     virtual ~MinecraftInstance() {};
     virtual void saveNow() override;
 
-    void loadSettingsIfNeeded() override;
+    void loadSpecificSettings() override;
 
     // FIXME: remove
     QString typeName() const override;
@@ -81,15 +81,15 @@ public:
     //////  Launch stuff //////
     Task::Ptr createUpdateTask(Net::Mode mode) override;
     shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) override;
-    QStringList extraArguments() const override;
+    QStringList extraArguments() override;
     QStringList verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) override;
     QList<Mod> getJarMods() const;
     QString createLaunchScript(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin);
     /// get arguments passed to java
-    QStringList javaArguments() const;
+    QStringList javaArguments();
 
     /// get variables for launch command variable substitution/environment
-    QMap<QString, QString> getVariables() const override;
+    QMap<QString, QString> getVariables() override;
 
     /// create an environment for launching processes
     QProcessEnvironment createEnvironment() override;
@@ -105,16 +105,16 @@ public:
     QString getStatusbarDescription() override;
 
     // FIXME: remove
-    virtual QStringList getClassPath() const;
+    virtual QStringList getClassPath();
     // FIXME: remove
-    virtual QStringList getNativeJars() const;
+    virtual QStringList getNativeJars();
     // FIXME: remove
     virtual QString getMainClass() const;
 
     // FIXME: remove
     virtual QStringList processMinecraftArgs(AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) const;
 
-    virtual JavaVersion getJavaVersion() const;
+    virtual JavaVersion getJavaVersion();
 
 protected:
     QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);

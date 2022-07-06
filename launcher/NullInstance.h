@@ -15,9 +15,9 @@ public:
     void saveNow() override
     {
     }
-    void loadSettingsIfNeeded() override
+    void loadSpecificSettings() override
     {
-        m_settings_loaded = true;
+        setSpecificSettingsLoaded(true);
     }
     QString getStatusbarDescription() override
     {
@@ -47,7 +47,7 @@ public:
     {
         return QProcessEnvironment();
     }
-    QMap<QString, QString> getVariables() const override
+    QMap<QString, QString> getVariables() override
     {
         return QMap<QString, QString>();
     }

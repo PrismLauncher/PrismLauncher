@@ -149,7 +149,7 @@ void BaseInstance::setManagedPack(const QString& type, const QString& id, const 
 
 int BaseInstance::getConsoleMaxLines() const
 {
-    auto lineSetting = settings()->getSetting("ConsoleMaxLines");
+    auto lineSetting = m_settings->getSetting("ConsoleMaxLines");
     bool conversionOk = false;
     int maxLines = lineSetting->get().toInt(&conversionOk);
     if(!conversionOk)
@@ -162,7 +162,7 @@ int BaseInstance::getConsoleMaxLines() const
 
 bool BaseInstance::shouldStopOnConsoleOverflow() const
 {
-    return settings()->get("ConsoleOverflowStop").toBool();
+    return m_settings->get("ConsoleOverflowStop").toBool();
 }
 
 void BaseInstance::iconUpdated(QString key)
@@ -237,7 +237,7 @@ void BaseInstance::setRunning(bool running)
 
 int64_t BaseInstance::totalTimePlayed() const
 {
-    qint64 current = settings()->get("totalTimePlayed").toLongLong();
+    qint64 current = m_settings->get("totalTimePlayed").toLongLong();
     if(m_isRunning)
     {
         QDateTime timeNow = QDateTime::currentDateTime();
@@ -253,7 +253,7 @@ int64_t BaseInstance::lastTimePlayed() const
         QDateTime timeNow = QDateTime::currentDateTime();
         return m_timeStarted.secsTo(timeNow);
     }
-    return settings()->get("lastTimePlayed").toLongLong();
+    return m_settings->get("lastTimePlayed").toLongLong();
 }
 
 void BaseInstance::resetTimePlayed()
@@ -272,8 +272,10 @@ QString BaseInstance::instanceRoot() const
     return m_rootDir;
 }
 
-SettingsObjectPtr BaseInstance::settings() const
+SettingsObjectPtr BaseInstance::settings()
 {
+    loadSpecificSettings();
+
     return m_settings;
 }
 
@@ -340,7 +342,7 @@ QString BaseInstance::windowTitle() const
 }
 
 // FIXME: why is this here? move it to MinecraftInstance!!!
-QStringList BaseInstance::extraArguments() const
+QStringList BaseInstance::extraArguments()
 {
     return Commandline::splitArgs(settings()->get("JvmArgs").toString());
 }
