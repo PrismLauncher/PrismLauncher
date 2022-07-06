@@ -115,7 +115,7 @@ protected:
     std::shared_ptr<Metadata::ModStruct> m_temp_metadata;
 
     /* Set the mod status while it doesn't have local details just yet */
-    std::shared_ptr<ModStatus> m_temp_status;
+    ModStatus m_temp_status = ModStatus::NoMetadata;
 
     std::shared_ptr<ModDetails> m_localDetails;
 

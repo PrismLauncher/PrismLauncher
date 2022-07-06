@@ -147,10 +147,7 @@ void Mod::setStatus(ModStatus status)
     if (m_localDetails) {
         m_localDetails->status = status;
     } else {
-        if (!m_temp_status.get())
-            m_temp_status.reset(new ModStatus());
-
-        *m_temp_status = status;
+        m_temp_status = status;
     }
 }
 void Mod::setMetadata(const Metadata::ModStruct& metadata)
@@ -222,7 +219,7 @@ auto Mod::authors() const -> QStringList
 auto Mod::status() const -> ModStatus
 {
     if (!m_localDetails)
-        return m_temp_status ? *m_temp_status : ModStatus::NoMetadata;
+        return m_temp_status;
     return details().status;
 }
 
@@ -246,7 +243,7 @@ void Mod::finishResolvingWithDetails(std::shared_ptr<ModDetails> details)
     m_resolved = true;
     m_localDetails = details;
 
-    setStatus(m_temp_status ? *m_temp_status : ModStatus::NoMetadata);
+    setStatus(m_temp_status);
 
     if (m_localDetails && m_temp_metadata && m_temp_metadata->isValid()) {
         setMetadata(*m_temp_metadata);
