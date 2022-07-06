@@ -972,6 +972,13 @@ target_link_libraries(Launcher_logic
     BuildConfig
     Katabasis
 )
+
+if (UNIX AND NOT CYGWIN AND NOT APPLE)
+    target_link_libraries(Launcher_logic
+        gamemode
+    )
+endif()
+
 target_link_libraries(Launcher_logic
     Qt5::Core
     Qt5::Xml

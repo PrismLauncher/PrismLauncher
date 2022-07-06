@@ -12,13 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "DirectJavaLaunch.h"
+
+#include <QStandardPaths>
+
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
 #include <FileSystem.h>
 #include <Commandline.h>
-#include <QStandardPaths>
+
+#ifdef Q_OS_LINUX
+#include "gamemode_client.h"
+#endif
 
 DirectJavaLaunch::DirectJavaLaunch(LaunchTask *parent) : LaunchStep(parent)
 {
@@ -50,7 +55,7 @@ void DirectJavaLaunch::executeTask()
 
     auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
 
-    m_process.setProcessEnvironment(instance->createEnvironment());
+    m_process.setProcessEnvironment(instance->createLaunchEnvironment());
 
     // make detachable - this will keep the process running even if the object is destroyed
     m_process.setDetachable(true);
@@ -79,6 +84,17 @@ void DirectJavaLaunch::executeTask()
     {
         m_process.start(javaPath, args);
     }
+
+#ifdef Q_OS_LINUX
+    if (instance->settings()->get("EnableFeralGamemode").toBool())
+    {
+        auto pid = m_process.processId();
+        if (pid)
+        {
+            gamemode_request_start_for(pid);
+        }
+    }
+#endif
 }
 
 void DirectJavaLaunch::on_state(LoggedProcess::State state)

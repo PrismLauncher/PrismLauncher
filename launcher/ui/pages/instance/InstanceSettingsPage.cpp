@@ -232,6 +232,22 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("UseNativeGLFW");
     }
 
+    // Performance
+    bool performance = ui->perfomanceGroupBox->isChecked();
+    m_settings->set("OverridePerformance", performance);
+    if(performance)
+    {
+        m_settings->set("EnableFeralGamemode", ui->enableFeralGamemodeCheck->isChecked());
+        m_settings->set("EnableMangoHud", ui->enableMangoHud->isChecked());
+        m_settings->set("UseDiscreteGpu", ui->useDiscreteGpuCheck->isChecked());
+    }
+    else
+    {
+        m_settings->reset("EnableFeralGamemode");
+        m_settings->reset("EnableMangoHud");
+        m_settings->reset("UseDiscreteGpu");
+    }
+
     // Game time
     bool gameTime = ui->gameTimeGroupBox->isChecked();
     m_settings->set("OverrideGameTime", gameTime);
@@ -324,6 +340,16 @@ void InstanceSettingsPage::loadSettings()
     ui->nativeWorkaroundsGroupBox->setChecked(m_settings->get("OverrideNativeWorkarounds").toBool());
     ui->useNativeGLFWCheck->setChecked(m_settings->get("UseNativeGLFW").toBool());
     ui->useNativeOpenALCheck->setChecked(m_settings->get("UseNativeOpenAL").toBool());
+
+    // Performance
+    ui->perfomanceGroupBox->setChecked(m_settings->get("OverridePerformance").toBool());
+    ui->enableFeralGamemodeCheck->setChecked(m_settings->get("EnableFeralGamemode").toBool());
+    ui->enableMangoHud->setChecked(m_settings->get("EnableMangoHud").toBool());
+    ui->useDiscreteGpuCheck->setChecked(m_settings->get("UseDiscreteGpu").toBool());
+
+    #if !defined(Q_OS_LINUX)
+    ui->perfomanceGroupBox->setVisible(false);
+    #endif
 
     // Miscellanous
     ui->gameTimeGroupBox->setChecked(m_settings->get("OverrideGameTime").toBool());

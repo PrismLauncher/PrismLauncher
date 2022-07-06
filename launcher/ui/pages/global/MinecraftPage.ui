@@ -135,6 +135,45 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="perfomanceGroupBox">
+         <property name="title">
+          <string>Performance</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QCheckBox" name="enableFeralGamemodeCheck">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable Feral Interactive's GameMode, to potentially improve gaming performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable Feral GameMode</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="enableMangoHud">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable MangoHud's advanced performance overlay.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable MangoHud</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="useDiscreteGpuCheck">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the discrete GPU instead of the primary GPU.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Use discrete GPU</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="gameTimeGroupBox">
          <property name="title">
           <string>Game time</string>
@@ -181,15 +220,15 @@
            </widget>
           </item>
           <item>
-            <widget class="QCheckBox" name="quitAfterGameStopCheck">
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The launcher will automatically quit after the game exits or crashes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-             <property name="text">
-              <string>&amp;Quit the launcher after game window closes</string>
-             </property>
-            </widget>
-           </item>
+           <widget class="QCheckBox" name="quitAfterGameStopCheck">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The launcher will automatically quit after the game exits or crashes.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>&amp;Quit the launcher after game window closes</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -218,6 +257,9 @@
   <tabstop>windowHeightSpinBox</tabstop>
   <tabstop>useNativeGLFWCheck</tabstop>
   <tabstop>useNativeOpenALCheck</tabstop>
+  <tabstop>enableFeralGamemodeCheck</tabstop>
+  <tabstop>enableMangoHud</tabstop>
+  <tabstop>useDiscreteGpuCheck</tabstop>
  </tabstops>
  <resources/>
  <connections/>

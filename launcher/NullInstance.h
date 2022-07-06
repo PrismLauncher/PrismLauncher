@@ -39,6 +39,10 @@ public:
     {
         return QProcessEnvironment();
     }
+    QProcessEnvironment createLaunchEnvironment() override
+    {
+        return QProcessEnvironment();
+    }
     QMap<QString, QString> getVariables() const override
     {
         return QMap<QString, QString>();

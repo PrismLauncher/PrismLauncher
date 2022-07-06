@@ -154,6 +154,12 @@ MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsO
     m_settings->registerOverride(globalSettings->getSetting("UseNativeOpenAL"), nativeLibraryWorkaroundsOverride);
     m_settings->registerOverride(globalSettings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
 
+    // Peformance related options
+    auto performanceOverride = m_settings->registerSetting("OverridePerformance", false);
+    m_settings->registerOverride(globalSettings->getSetting("EnableFeralGamemode"), performanceOverride);
+    m_settings->registerOverride(globalSettings->getSetting("EnableMangoHud"), performanceOverride);
+    m_settings->registerOverride(globalSettings->getSetting("UseDiscreteGpu"), performanceOverride);
+
     // Game time
     auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
     m_settings->registerOverride(globalSettings->getSetting("ShowGameTime"), gameTimeOverride);
@@ -432,6 +438,36 @@ QProcessEnvironment MinecraftInstance::createEnvironment()
     {
         env.insert(it.key(), it.value());
     }
+    return env;
+}
+
+QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
+{
+    // prepare the process environment
+    QProcessEnvironment env = createEnvironment();
+
+#ifdef Q_OS_LINUX
+    if (settings()->get("EnableMangoHud").toBool())
+    {
+        auto preload = env.value("LD_PRELOAD", "") + ":libMangoHud_dlsym.so:libMangoHud.so";
+        auto lib_path = env.value("LD_LIBRARY_PATH", "") +  ":/usr/local/$LIB/mangohud/:/usr/$LIB/mangohud/";
+
+        env.insert("LD_PRELOAD", preload);
+        env.insert("LD_LIBRARY_PATH", lib_path);
+        env.insert("MANGOHUD", "1");
+    }
+
+    if (settings()->get("UseDiscreteGpu").toBool())
+    {
+        // Open Source Drivers
+        env.insert("DRI_PRIME", "1");
+        // Proprietary Nvidia Drivers
+        env.insert("__NV_PRIME_RENDER_OFFLOAD", "1");
+        env.insert("__VK_LAYER_NV_optimus", "NVIDIA_only");
+        env.insert("__GLX_VENDOR_LIBRARY_NAME", "nvidia");
+    }
+#endif
+
     return env;
 }
 

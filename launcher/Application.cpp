@@ -638,6 +638,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("UseNativeOpenAL", false);
         m_settings->registerSetting("UseNativeGLFW", false);
 
+        // Peformance related options
+        m_settings->registerSetting("EnableFeralGamemode", false);
+        m_settings->registerSetting("EnableMangoHud", false);
+        m_settings->registerSetting("UseDiscreteGpu", false);
+
         // Game time
         m_settings->registerSetting("ShowGameTime", true);
         m_settings->registerSetting("ShowGlobalGameTime", true);
