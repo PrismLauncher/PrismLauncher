@@ -117,6 +117,7 @@ set(NET_SOURCES
     net/NetAction.h
     net/NetJob.cpp
     net/NetJob.h
+    net/NetUtils.h
     net/PasteUpload.cpp
     net/PasteUpload.h
     net/Sink.h

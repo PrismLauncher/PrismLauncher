@@ -6,6 +6,7 @@
 
 #include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
+#include "net/NetUtils.h"
 
 XboxProfileStep::XboxProfileStep(AccountData* data) : AuthStep(data) {
 
@@ -58,10 +59,18 @@ void XboxProfileStep::onRequestDone(
 #ifndef NDEBUG
         qDebug() << data;
 #endif
-        finished(
-            AccountTaskState::STATE_FAILED_SOFT,
-            tr("Failed to retrieve the Xbox profile.")
-        );
+        if (Net::isApplicationError(error)) {
+            emit finished(
+                AccountTaskState::STATE_FAILED_SOFT,
+                tr("Failed to retrieve the Xbox profile: %1").arg(requestor->errorString_)
+            );
+        }
+        else {
+            emit finished(
+                AccountTaskState::STATE_OFFLINE,
+                tr("Failed to retrieve the Xbox profile: %1").arg(requestor->errorString_)
+            );
+        }
         return;
     }
 
