@@ -46,8 +46,6 @@
 
 #include <BuildConfig.h>
 
-#include <net/NetJob.h>
-
 namespace LegacyFTB {
 
 FilterModel::FilterModel(QObject *parent) : QSortFilterProxyModel(parent)

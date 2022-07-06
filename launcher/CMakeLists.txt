@@ -149,23 +149,20 @@ set(LAUNCH_SOURCES
     launch/LogModel.h
 )
 
-if (Launcher_UPDATER_BASE)
-    set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_WITH_UPDATER ${Launcher_APP_BINARY_DEFS}")
-    # Old update system
-    set(UPDATE_SOURCES
-        updater/GoUpdate.h
-        updater/GoUpdate.cpp
-        updater/UpdateChecker.h
-        updater/UpdateChecker.cpp
-        updater/DownloadTask.h
-        updater/DownloadTask.cpp
-    )
+# Old update system
+set(UPDATE_SOURCES
+    updater/GoUpdate.h
+    updater/GoUpdate.cpp
+    updater/UpdateChecker.h
+    updater/UpdateChecker.cpp
+    updater/DownloadTask.h
+    updater/DownloadTask.cpp
+)
 
-    ecm_add_test(updater/UpdateChecker_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
-        TEST_NAME UpdateChecker)
-    ecm_add_test(updater/DownloadTask_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
-        TEST_NAME DownloadTask)
-endif()
+ecm_add_test(updater/UpdateChecker_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME UpdateChecker)
+ecm_add_test(updater/DownloadTask_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
+    TEST_NAME DownloadTask)
 
 # Backend for the news bar... there's usually no news.
 set(NEWS_SOURCES

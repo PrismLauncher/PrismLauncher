@@ -40,7 +40,6 @@
 #include "Application.h"
 
 #include <QIcon>
-#include <QIdentityProxyModel>
 #include <QScrollBar>
 #include <QShortcut>
 
