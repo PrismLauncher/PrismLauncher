@@ -159,11 +159,6 @@ set(UPDATE_SOURCES
     updater/DownloadTask.cpp
 )
 
-ecm_add_test(updater/UpdateChecker_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
-    TEST_NAME UpdateChecker)
-ecm_add_test(updater/DownloadTask_test.cpp LINK_LIBRARIES Launcher_logic Qt5::Test
-    TEST_NAME DownloadTask)
-
 # Backend for the news bar... there's usually no news.
 set(NEWS_SOURCES
     # News System
