@@ -9,6 +9,14 @@ This library has served as a base for some (much more full-featured and advanced
 
 Copyright belongs to Petr Mrázek, unless explicitly stated otherwise in the source files. Available under the Apache 2.0 license.
 
+## gamemode
+
+A performance optimization daemon.
+
+See [github repo](https://github.com/FeralInteractive/gamemode).
+
+BSD licensed
+
 ## hoedown
 Hoedown is a revived fork of Sundown, the Markdown parser based on the original code of the Upskirt library by Natacha Porté.
 
@@ -180,10 +188,3 @@ Tiny implementation of LZMA2 de/compression. This format is only used by Forge t
 
 Public domain.
 
-## gamemode
-
-performance optimisation daemon
-
-Upstream https://github.com/FeralInteractive/gamemode
-
-BSD licensed
