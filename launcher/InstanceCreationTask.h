@@ -1,26 +1,39 @@
 #pragma once
 
-#include "tasks/Task.h"
-#include "net/NetJob.h"
-#include <QUrl>
-#include "settings/SettingsObject.h"
 #include "BaseVersion.h"
 #include "InstanceTask.h"
 
-class InstanceCreationTask : public InstanceTask
-{
+class InstanceCreationTask : public InstanceTask {
     Q_OBJECT
-public:
-    explicit InstanceCreationTask(BaseVersionPtr version);
-    explicit InstanceCreationTask(BaseVersionPtr version, QString loader, BaseVersionPtr loaderVersion);
+   public:
+    InstanceCreationTask();
+    virtual ~InstanceCreationTask() = default;
 
-protected:
-    //! Entry point for tasks.
-    virtual void executeTask() override;
+   protected:
+    void executeTask() final override;
 
-private: /* data */
-    BaseVersionPtr m_version;
-    bool m_usingLoader;
-    QString m_loader;
-    BaseVersionPtr m_loaderVersion;
+    /**
+     * Tries to update an already existing instance.
+     *
+     * This can be implemented by subclasses to provide a way of updating an already existing
+     * instance, according to that implementation's concept of 'identity' (i.e. instances that
+     * are updates / downgrades of one another).
+     *
+     * If this returns true, createInstance() will not run, so you should do all update steps in here.
+     * Otherwise, createInstance() is run as normal.
+     */
+    virtual bool updateInstance() { return false; };
+
+    /**
+     * Creates a new instance.
+     *
+     * Returns whether the instance creation was successful (true) or not (false).
+     */
+    virtual bool createInstance() { return false; };
+
+   protected:
+    void setError(QString message) { m_error_message = message; };
+
+   private:
+    QString m_error_message;
 };

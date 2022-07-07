@@ -39,12 +39,12 @@
 #include <QTabBar>
 
 #include "Application.h"
+#include "Filter.h"
+#include "Version.h"
 #include "meta/Index.h"
 #include "meta/VersionList.h"
+#include "minecraft/VanillaInstanceCreationTask.h"
 #include "ui/dialogs/NewInstanceDialog.h"
-#include "Filter.h"
-#include "InstanceCreationTask.h"
-#include "Version.h"
 
 VanillaPage::VanillaPage(NewInstanceDialog *dialog, QWidget *parent)
     : QWidget(parent), dialog(dialog), ui(new Ui::VanillaPage)
@@ -217,11 +217,11 @@ void VanillaPage::suggestCurrent()
 
     // There isn't a selected version if the version list is empty
     if(ui->loaderVersionList->selectedVersion() == nullptr)
-        dialog->setSuggestedPack(m_selectedVersion->descriptor(), new InstanceCreationTask(m_selectedVersion));
+        dialog->setSuggestedPack(m_selectedVersion->descriptor(), new VanillaCreationTask(m_selectedVersion));
     else
     {
         dialog->setSuggestedPack(m_selectedVersion->descriptor(),
-                                 new InstanceCreationTask(m_selectedVersion, m_selectedLoader,
+                                 new VanillaCreationTask(m_selectedVersion, m_selectedLoader,
                                                           m_selectedLoaderVersion));
     }
     dialog->setSuggestedIcon("default");
