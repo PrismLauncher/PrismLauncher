@@ -9,31 +9,29 @@
 
   outputs = { self, nixpkgs, libnbtplusplus, ... }:
     let
-      # Generate a user-friendly version number.
+      # User-friendly version number.
       version = builtins.substring 0 8 self.lastModifiedDate;
 
-      # System types to support (qtbase is currently broken for "aarch64-darwin")
+      # Supported systems (qtbase is currently broken for "aarch64-darwin")
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" ];
 
       # Helper function to generate an attrset '{ x86_64-linux = f "x86_64-linux"; ... }'.
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-      # Nixpkgs instantiated for supported system types.
+      # Nixpkgs instantiated for supported systems.
       pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
+
+      packagesFn = pkgs: rec {
+        polymc = pkgs.libsForQt5.callPackage ./nix { inherit version self libnbtplusplus; };
+        polymc-qt6 = pkgs.qt6Packages.callPackage ./nix { inherit version self libnbtplusplus; };
+      };
     in
     {
-      packages = forAllSystems (system: rec {
-        polymc = pkgs.${system}.libsForQt5.callPackage ./nix { inherit version self libnbtplusplus; };
-        polymc-qt6 = pkgs.${system}.qt6Packages.callPackage ./nix { inherit version self libnbtplusplus; };
-        
-        default = polymc;
-      });
+      packages = forAllSystems (system:
+        let packages = packagesFn pkgs.${system}; in
+        packages // { default = packages.polymc; }
+      );
 
-      defaultPackage = forAllSystems (system: self.packages.${system}.default);
-
-      apps = forAllSystems (system: rec { polymc = { type = "app"; program = "${self.defaultPackage.${system}}/bin/polymc"; }; default = polymc; });
-      defaultApp = forAllSystems (system: self.apps.${system}.default);
-
-      overlay = final: prev: { polymc = self.defaultPackage.${final.system}; };
+      overlay = final: packagesFn;
     };
 }
