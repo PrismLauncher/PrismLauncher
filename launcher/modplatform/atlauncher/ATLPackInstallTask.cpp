@@ -830,14 +830,14 @@ void PackInstallTask::install()
         auto version = getVersionForLoader("net.minecraftforge");
         if(version == Q_NULLPTR) return;
 
-        components->setComponentVersion("net.minecraftforge", version, true);
+        components->setComponentVersion("net.minecraftforge", version);
     }
     else if(m_version.loader.type == QString("fabric"))
     {
         auto version = getVersionForLoader("net.fabricmc.fabric-loader");
         if(version == Q_NULLPTR) return;
 
-        components->setComponentVersion("net.fabricmc.fabric-loader", version, true);
+        components->setComponentVersion("net.fabricmc.fabric-loader", version);
     }
     else if(m_version.loader.type != QString())
     {
