@@ -219,6 +219,10 @@ void ListModel::searchRequestFinished(QJsonDocument& doc)
         searchState = CanPossiblyFetchMore;
     }
 
+    // When you have a Qt build with assertions turned on, proceeding here will abort the application
+    if (newList.size() == 0)
+        return;
+
     beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);
     modpacks.append(newList);
     endInsertRows();

@@ -104,6 +104,17 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
     return {};
 }
 
+bool ModpackListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    int pos = index.row();
+    if (pos >= modpacks.size() || pos < 0 || !index.isValid())
+        return false;
+
+    modpacks[pos] = value.value<Modrinth::Modpack>();
+
+    return true;
+}
+
 void ModpackListModel::performPaginatedSearch()
 {
     // TODO: Move to standalone API
@@ -278,6 +289,10 @@ void ModpackListModel::searchRequestFinished(QJsonDocument& doc_all)
         nextSearchOffset += m_modpacks_per_page;
         searchState = CanPossiblyFetchMore;
     }
+
+    // When you have a Qt build with assertions turned on, proceeding here will abort the application
+    if (newList.size() == 0)
+        return;
 
     beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);
     modpacks.append(newList);
