@@ -593,15 +593,16 @@ void InstanceImportTask::processModrinth()
     inst_creation_task->setIcon(m_instIcon);
     inst_creation_task->setGroup(m_instGroup);
     
-    connect(inst_creation_task, &Task::succeeded, this, &InstanceImportTask::emitSucceeded);
+    connect(inst_creation_task, &Task::succeeded, this, [this, inst_creation_task] {
+        setOverride(inst_creation_task->shouldOverride());
+        emitSucceeded();
+    });
     connect(inst_creation_task, &Task::failed, this, &InstanceImportTask::emitFailed);
     connect(inst_creation_task, &Task::progress, this, &InstanceImportTask::setProgress);
     connect(inst_creation_task, &Task::status, this, &InstanceImportTask::setStatus);
-    connect(inst_creation_task, &Task::finished, this, [inst_creation_task]{ inst_creation_task->deleteLater(); });
+    connect(inst_creation_task, &Task::finished, inst_creation_task, &InstanceCreationTask::deleteLater);
 
-    connect(this, &Task::aborted, inst_creation_task, [inst_creation_task] {
-        inst_creation_task->abort();
-    });
+    connect(this, &Task::aborted, inst_creation_task, &InstanceCreationTask::abort);
 
     inst_creation_task->start();
 }

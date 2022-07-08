@@ -535,7 +535,20 @@ InstancePtr InstanceList::getInstanceById(QString instId) const
     return InstancePtr();
 }
 
-QModelIndex InstanceList::getInstanceIndexById(const QString& id) const
+InstancePtr InstanceList::getInstanceByManagedName(QString managed_name) const
+{
+    if (managed_name.isEmpty())
+        return {};
+
+    for (auto instance : m_instances) {
+        if (instance->getManagedPackName() == managed_name)
+            return instance;
+    }
+
+    return {};
+}
+
+QModelIndex InstanceList::getInstanceIndexById(const QString &id) const
 {
     return index(getInstIndex(getInstanceById(id).get()));
 }
@@ -764,9 +777,8 @@ class InstanceStaging : public Task {
     Q_OBJECT
     const unsigned minBackoff = 1;
     const unsigned maxBackoff = 16;
-
    public:
-    InstanceStaging(InstanceList* parent, Task* child, const QString& stagingPath, const QString& instanceName, const QString& groupName)
+    InstanceStaging(InstanceList* parent, InstanceTask* child, const QString& stagingPath, const QString& instanceName, const QString& groupName)
         : backoff(minBackoff, maxBackoff)
     {
         m_parent = parent;
@@ -808,7 +820,8 @@ class InstanceStaging : public Task {
     void childSucceded()
     {
         unsigned sleepTime = backoff();
-        if (m_parent->commitStagedInstance(m_stagingPath, m_instanceName, m_groupName)) {
+        if (m_parent->commitStagedInstance(m_stagingPath, m_instanceName, m_groupName, m_child->shouldOverride()))
+        {
             emitSucceeded();
             return;
         }
@@ -834,8 +847,8 @@ class InstanceStaging : public Task {
      */
     ExponentialSeries backoff;
     QString m_stagingPath;
-    InstanceList* m_parent;
-    unique_qobject_ptr<Task> m_child;
+    InstanceList * m_parent;
+    unique_qobject_ptr<InstanceTask> m_child;
     QString m_instanceName;
     QString m_groupName;
     QTimer m_backoffTimer;
@@ -866,23 +879,52 @@ QString InstanceList::getStagedInstancePath()
     return path;
 }
 
-bool InstanceList::commitStagedInstance(const QString& path, const QString& instanceName, const QString& groupName)
+bool InstanceList::commitStagedInstance(const QString& path, const QString& instanceName, const QString& groupName, bool should_override)
 {
     QDir dir;
-    QString instID = FS::DirNameFromString(instanceName, m_instDir);
+    QString instID;
+    InstancePtr inst;
+
+    QString raw_inst_name = instanceName.section(' ', 0, -2);
+    if (should_override) {
+        // This is to avoid problems when the instance folder gets manually renamed
+        if ((inst = getInstanceByManagedName(raw_inst_name))) {
+            instID = QFileInfo(inst->instanceRoot()).fileName();
+        } else {
+            instID = FS::RemoveInvalidFilenameChars(raw_inst_name, '-');
+        }
+    } else {
+        instID = FS::DirNameFromString(raw_inst_name, m_instDir);
+    }
+
     {
         WatchLock lock(m_watcher, m_instDir);
         QString destination = FS::PathCombine(m_instDir, instID);
-        if (!dir.rename(path, destination)) {
-            qWarning() << "Failed to move" << path << "to" << destination;
-            return false;
+
+        if (should_override) {
+            if (!FS::overrideFolder(destination, path)) {
+                qWarning() << "Failed to override" << path << "to" << destination;
+                return false;
+            }
+
+            if (!inst)
+                inst = getInstanceById(instID);
+            if (inst)
+                inst->setName(instanceName);
+        } else {
+            if (!dir.rename(path, destination)) {
+                qWarning() << "Failed to move" << path << "to" << destination;
+                return false;
+            }
         }
         m_instanceGroupIndex[instID] = groupName;
-        instanceSet.insert(instID);
         m_groupNameCache.insert(groupName);
+        instanceSet.insert(instID);
+
         emit instancesChanged();
         emit instanceSelectRequest(instID);
     }
+
     saveGroupList();
     return true;
 }

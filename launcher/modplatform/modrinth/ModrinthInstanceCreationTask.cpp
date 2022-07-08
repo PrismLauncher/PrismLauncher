@@ -2,24 +2,127 @@
 
 #include "Application.h"
 #include "FileSystem.h"
+#include "InstanceList.h"
 #include "Json.h"
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
-#include "net/NetJob.h"
+#include "modplatform/ModIndex.h"
+
 #include "net/ChecksumValidator.h"
 
 #include "settings/INISettingsObject.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 
+#include <QAbstractButton>
+
+bool ModrinthCreationTask::abort()
+{
+    if (m_files_job)
+        return m_files_job->abort();
+    return true;
+}
+
+bool ModrinthCreationTask::updateInstance()
+{
+    auto instance_list = APPLICATION->instances();
+
+    // FIXME: How to handle situations when there's more than one install already for a given modpack?
+    // Based on the way we create the instance name (name + " " + version). Is there a better way?
+    auto inst = instance_list->getInstanceByManagedName(m_instName.section(' ', 0, -2));
+
+    if (!inst) {
+        inst = instance_list->getInstanceById(m_instName);
+
+        if (!inst)
+            return false;
+    }
+
+    QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
+    if (!parseManifest(index_path, m_files))
+        return false;
+
+    auto version_id = inst->getManagedPackVersionID();
+    auto version_str = !version_id.isEmpty() ? tr(" (version %1)").arg(version_id) : "";
+
+    auto info = CustomMessageBox::selectable(m_parent, tr("Similar modpack was found!"),
+                                             tr("One or more of your instances are from this same modpack%1. Do you want to create a "
+                                                "separate instance, or update the existing one?")
+                                                 .arg(version_str),
+                                             QMessageBox::Information, QMessageBox::Ok | QMessageBox::Abort);
+    info->setButtonText(QMessageBox::Ok, tr("Update existing instance"));
+    info->setButtonText(QMessageBox::Abort, tr("Create new instance"));
+
+    if (info->exec() && info->clickedButton() == info->button(QMessageBox::Abort))
+        return false;
+
+    // Remove repeated files, we don't need to download them!
+    QDir old_inst_dir(inst->instanceRoot());
+
+    QString old_index_path(FS::PathCombine(old_inst_dir.absolutePath(), "mrpack", "modrinth.index.json"));
+    QFileInfo old_index_file(old_index_path);
+    if (old_index_file.exists()) {
+        std::vector<Modrinth::File> old_files;
+        parseManifest(old_index_path, old_files);
+
+        // Let's remove all duplicated, identical resources!
+        auto files_iterator = m_files.begin();
+begin:
+        while (files_iterator != m_files.end()) {
+            auto const& file = *files_iterator;
+
+            auto old_files_iterator = old_files.begin();
+            while (old_files_iterator != old_files.end()) {
+                auto const& old_file = *old_files_iterator;
+
+                if (old_file.hash == file.hash) {
+                    qDebug() << "Removed file at" << file.path << "from list of downloads";
+                    files_iterator = m_files.erase(files_iterator);
+                    old_files_iterator = old_files.erase(old_files_iterator);
+                    goto begin; // Sorry :c
+                }
+
+                old_files_iterator++;
+            }
+
+            files_iterator++;
+        }
+
+        // Some files were removed from the old version, and some will be downloaded in an updated version,
+        // so we're fine removing them!
+        if (!old_files.empty()) {
+            QDir old_minecraft_dir(inst->gameRoot());
+            for (auto const& file : old_files) {
+                qWarning() << "Removing" << file.path;
+                old_minecraft_dir.remove(file.path);
+            }
+        }
+    }
+
+    // TODO: Currently 'overrides' will always override the stuff on update. How do we preserve unchanged overrides?
+
+    setOverride(true);
+    qDebug() << "Will override instance!";
+
+    // We let it go through the createInstance() stage, just with a couple modifications for updating
+    return false;
+}
+
+// https://docs.modrinth.com/docs/modpacks/format_definition/
 bool ModrinthCreationTask::createInstance()
 {
     QEventLoop loop;
 
-    if (m_files.empty() && !parseManifest())
+    QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
+    if (m_files.empty() && !parseManifest(index_path, m_files))
         return false;
+
+    // Keep index file in case we need it some other time (like when changing versions)
+    QString new_index_place(FS::PathCombine(m_stagingPath, "mrpack", "modrinth.index.json"));
+    FS::ensureFilePathExists(new_index_place);
+    QFile::rename(index_path, new_index_place);
 
     auto mcPath = FS::PathCombine(m_stagingPath, ".minecraft");
 
@@ -43,6 +146,7 @@ bool ModrinthCreationTask::createInstance()
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
     MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
+
     auto components = instance.getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", minecraftVersion, true);
@@ -53,6 +157,7 @@ bool ModrinthCreationTask::createInstance()
         components->setComponentVersion("org.quiltmc.quilt-loader", quiltVersion);
     if (!forgeVersion.isEmpty())
         components->setComponentVersion("net.minecraftforge", forgeVersion);
+
     if (m_instIcon != "default") {
         instance.setIconKey(m_instIcon);
     } else {
@@ -101,11 +206,10 @@ bool ModrinthCreationTask::createInstance()
     return ended_well;
 }
 
-bool ModrinthCreationTask::parseManifest()
+bool ModrinthCreationTask::parseManifest(QString index_path, std::vector<Modrinth::File>& files)
 {
     try {
-        QString indexPath = FS::PathCombine(m_stagingPath, "modrinth.index.json");
-        auto doc = Json::requireDocument(indexPath);
+        auto doc = Json::requireDocument(index_path);
         auto obj = Json::requireObject(doc, "modrinth.index.json");
         int formatVersion = Json::requireInteger(obj, "formatVersion", "modrinth.index.json");
         if (formatVersion == 1) {
@@ -184,7 +288,7 @@ bool ModrinthCreationTask::parseManifest()
                     }
                 }
 
-                m_files.push_back(file);
+                files.push_back(file);
             }
 
             auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
@@ -205,7 +309,7 @@ bool ModrinthCreationTask::parseManifest()
         } else {
             throw JSONValidationError(QStringLiteral("Unknown format version: %s").arg(formatVersion));
         }
-        QFile::remove(indexPath);
+
     } catch (const JSONValidationError& e) {
         setError(tr("Could not understand pack index:\n") + e.cause());
         return false;
