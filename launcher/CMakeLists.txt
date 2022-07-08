@@ -495,6 +495,8 @@ set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthPackManifest.h
     modplatform/modrinth/ModrinthCheckUpdate.cpp
     modplatform/modrinth/ModrinthCheckUpdate.h
+    modplatform/modrinth/ModrinthInstanceCreationTask.cpp
+    modplatform/modrinth/ModrinthInstanceCreationTask.h
 )
 
 set(MODPACKSCH_SOURCES
