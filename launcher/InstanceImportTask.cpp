@@ -35,33 +35,25 @@
  */
 
 #include "InstanceImportTask.h"
-#include <QtConcurrentRun>
+
 #include "Application.h"
-#include "BaseInstance.h"
 #include "FileSystem.h"
 #include "MMCZip.h"
 #include "NullInstance.h"
+
 #include "icons/IconList.h"
 #include "icons/IconUtils.h"
-#include "settings/INISettingsObject.h"
 
-// FIXME: this does not belong here, it's Minecraft/Flame specific
-#include <quazip/quazipdir.h>
-#include "Json.h"
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
 #include "modplatform/technic/TechnicPackProcessor.h"
 #include "modplatform/modrinth/ModrinthInstanceCreationTask.h"
 #include "modplatform/flame/FlameInstanceCreationTask.h"
 
-#include "Application.h"
-#include "icons/IconList.h"
-#include "net/ChecksumValidator.h"
+#include "settings/INISettingsObject.h"
 
-#include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/BlockedModsDialog.h"
-
+#include <QtConcurrentRun>
 #include <algorithm>
+
+#include <quazip/quazipdir.h>
 
 InstanceImportTask::InstanceImportTask(const QUrl sourceUrl, QWidget* parent)
 {
@@ -80,26 +72,26 @@ bool InstanceImportTask::abort()
 
 void InstanceImportTask::executeTask()
 {
-    if (m_sourceUrl.isLocalFile())
-    {
+    if (m_sourceUrl.isLocalFile()) {
         m_archivePath = m_sourceUrl.toLocalFile();
         processZipPack();
-    }
-    else
-    {
+    } else {
         setStatus(tr("Downloading modpack:\n%1").arg(m_sourceUrl.toString()));
         m_downloadRequired = true;
 
-        const QString path = m_sourceUrl.host() + '/' + m_sourceUrl.path();
+        const QString path(m_sourceUrl.host() + '/' + m_sourceUrl.path());
+
         auto entry = APPLICATION->metacache()->resolveEntry("general", path);
         entry->setStale(true);
+        m_archivePath = entry->getFullPath();
+
         m_filesNetJob = new NetJob(tr("Modpack download"), APPLICATION->network());
         m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
-        m_archivePath = entry->getFullPath();
-        auto job = m_filesNetJob.get();
-        connect(job, &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
-        connect(job, &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);
-        connect(job, &NetJob::failed, this, &InstanceImportTask::downloadFailed);
+
+        connect(m_filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
+        connect(m_filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);
+        connect(m_filesNetJob.get(), &NetJob::failed, this, &InstanceImportTask::downloadFailed);
+
         m_filesNetJob->start();
     }
 }
@@ -118,7 +110,7 @@ void InstanceImportTask::downloadFailed(QString reason)
 
 void InstanceImportTask::downloadProgressChanged(qint64 current, qint64 total)
 {
-    setProgress(current / 2, total);
+    setProgress(current, total);
 }
 
 void InstanceImportTask::processZipPack()
