@@ -486,6 +486,8 @@ set(FLAME_SOURCES
     modplatform/flame/FileResolvingTask.cpp
     modplatform/flame/FlameCheckUpdate.cpp
     modplatform/flame/FlameCheckUpdate.h
+    modplatform/flame/FlameInstanceCreationTask.h
+    modplatform/flame/FlameInstanceCreationTask.cpp
 )
 
 set(MODRINTH_SOURCES

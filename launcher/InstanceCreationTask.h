@@ -31,6 +31,8 @@ class InstanceCreationTask : public InstanceTask {
      */
     virtual bool createInstance() { return false; };
 
+    QString getError() const { return m_error_message; }
+
    protected:
     void setError(QString message) { m_error_message = message; };
 
