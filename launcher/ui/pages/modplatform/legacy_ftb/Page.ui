@@ -25,7 +25,7 @@
         <widget class="QTreeView" name="publicPackList">
          <property name="maximumSize">
           <size>
-           <width>250</width>
+           <width>16777215</width>
            <height>16777215</height>
           </size>
          </property>
@@ -51,7 +51,7 @@
         <widget class="QTreeView" name="thirdPartyPackList">
          <property name="maximumSize">
           <size>
-           <width>250</width>
+           <width>16777215</width>
            <height>16777215</height>
           </size>
          </property>
@@ -71,7 +71,7 @@
         <widget class="QTreeView" name="privatePackList">
          <property name="maximumSize">
           <size>
-           <width>250</width>
+           <width>16777215</width>
            <height>16777215</height>
           </size>
          </property>
