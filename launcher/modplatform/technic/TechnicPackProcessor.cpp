@@ -187,17 +187,17 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings, const 
             }
             else
             {
-                static QStringList possibleLoaders{
-                        "net.minecraftforge:minecraftforge:",
-                        "net.fabricmc:fabric-loader:",
-                        "org.quiltmc:quilt-loader:"
+                // <Technic library name prefix> -> <our component name>
+                static QMap<QString, QString> loaderMap {
+                    {"net.minecraftforge:minecraftforge:", "net.minecraftforge"},
+                    {"net.fabricmc:fabric-loader:", "net.fabricmc.fabric-loader"},
+                    {"org.quiltmc:quilt-loader:", "org.quiltmc.quilt-loader"}
                 };
-                for (const auto& loader : possibleLoaders)
+                for (const auto& loader : loaderMap.keys())
                 {
                     if (libraryName.startsWith(loader))
                     {
-                        auto loaderComponent = loader.chopped(1).replace(":", ".");
-                        components->setComponentVersion(loaderComponent, libraryName.section(':', 2));
+                        components->setComponentVersion(loaderMap.value(loader), libraryName.section(':', 2));
                         break;
                     }
                 }
