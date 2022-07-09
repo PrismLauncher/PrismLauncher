@@ -26,12 +26,12 @@ jobs:
             qt_modules: 'qt5compat qtimageformats'
 
           - os: windows-2022
-            name: "Windows-i686-Legacy"
+            name: "Windows-Legacy"
             msystem: mingw32
             qt_ver: 5
 
           - os: windows-2022
-            name: "Windows-i686"
+            name: "Windows"
             msystem: mingw32
             qt_ver: 6
 
