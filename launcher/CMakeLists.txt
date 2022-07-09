@@ -1107,7 +1107,6 @@ if(INSTALL_BUNDLE STREQUAL "full")
                 DIRECTORY "${QT_PLUGINS_DIR}/tls"
                 DESTINATION ${PLUGIN_DEST_DIR}
                 COMPONENT Runtime
-                REGEX "d\\." EXCLUDE
                 REGEX "_debug\\." EXCLUDE
                 REGEX "\\.dSYM" EXCLUDE
             )
