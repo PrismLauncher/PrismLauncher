@@ -77,6 +77,7 @@ jobs:
             qt${{ matrix.qt_ver }}-base:p
             qt${{ matrix.qt_ver }}-svg:p
             qt${{ matrix.qt_ver }}-imageformats:p
+            quazip-qt${{ matrix.qt_ver }}:p
             ccache:p
             nsis:p
             ${{ matrix.qt_ver == 6 && 'qt6-5compat:p' || '' }}
