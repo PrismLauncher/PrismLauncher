@@ -43,9 +43,11 @@ jobs:
           for d in PolyMC-Windows-*; do
             cd "${d}" || continue
             ARCH="$(echo -n ${d} | cut -d '-' -f 3)"
+            LEGACY="$(echo -n ${d} | grep -o Legacy || true)"
             INST="$(echo -n ${d} | grep -o Setup || true)"
             PORT="$(echo -n ${d} | grep -o Portable || true)"
             NAME="PolyMC-Windows-${ARCH}"
+            test -z "${LEGACY}" || NAME="${NAME}-Legacy"
             test -z "${PORT}" || NAME="${NAME}-Portable"
             test -z "${INST}" || mv PolyMC-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
             test -n "${INST}" || zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *

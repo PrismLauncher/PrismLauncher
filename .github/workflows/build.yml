@@ -26,14 +26,14 @@ jobs:
             qt_modules: 'qt5compat qtimageformats'
 
           - os: windows-2022
-            name: "Windows-i686"
+            name: "Windows-i686-Legacy"
             msystem: mingw32
             qt_ver: 5
 
           - os: windows-2022
-            name: "Windows-x86_64"
-            msystem: mingw64
-            qt_ver: 5
+            name: "Windows-i686"
+            msystem: mingw32
+            qt_ver: 6
 
           - os: macos-12
             macosx_deployment_target: 10.14
