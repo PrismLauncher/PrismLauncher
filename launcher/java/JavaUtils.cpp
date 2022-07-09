@@ -91,7 +91,7 @@ QProcessEnvironment CleanEnviroment()
 
     QStringList stripped =
     {
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
         "LD_LIBRARY_PATH",
         "LD_PRELOAD",
 #endif
@@ -122,7 +122,7 @@ QProcessEnvironment CleanEnviroment()
 
             qDebug() << "Env: stripped" << key << value << "to" << newValue;
         }
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
         // Strip IBus
         // IBus is a Linux IME framework. For some reason, it breaks MC?
         if (key == "XMODIFIERS" && value.contains(IBUS))
