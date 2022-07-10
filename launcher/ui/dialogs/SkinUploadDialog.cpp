@@ -60,7 +60,7 @@ void SkinUploadDialog::on_buttonBox_accepted()
     QRegularExpression urlPrefixMatcher(QRegularExpression::anchoredPattern("^([a-z]+)://.+$"));
     bool isLocalFile = false;
     // it has an URL prefix -> it is an URL
-    if(urlPrefixMatcher.match(input).hasMatch())  // TODO: does this work?
+    if(urlPrefixMatcher.match(input).hasMatch())
     {
         QUrl fileURL = input;
         if(fileURL.isValid())
