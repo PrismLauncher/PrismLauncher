@@ -32,13 +32,10 @@ slots:
     void subTaskStatus(const QString &msg);
     void subTaskProgress(qint64 current, qint64 total);
 
-signals:
-    void stepStatus(QString status);
+protected:
+    void setStepStatus(QString status) { m_step_status = status; emit stepStatus(status); };
 
-private:
-    void setStepStatus(QString status) { m_step_status = status; };
-
-private:
+protected:
     QString m_name;
     QString m_step_status;
 

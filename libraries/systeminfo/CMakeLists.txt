@@ -1,6 +1,11 @@
 project(systeminfo)
 
-find_package(Qt5Core)
+if(QT_VERSION_MAJOR EQUAL 5)
+    find_package(Qt5 COMPONENTS Core REQUIRED)
+elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
+    find_package(Qt6 COMPONENTS Core Core5Compat REQUIRED)
+    list(APPEND systeminfo_LIBS Qt${QT_VERSION_MAJOR}::Core5Compat)
+endif()
 
 set(systeminfo_SOURCES
 include/sys.h
@@ -19,11 +24,7 @@ elseif (UNIX)
 endif()
 
 add_library(systeminfo STATIC ${systeminfo_SOURCES})
-target_link_libraries(systeminfo Qt5::Core Qt5::Gui Qt5::Network)
+target_link_libraries(systeminfo Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Network ${systeminfo_LIBS})
 target_include_directories(systeminfo PUBLIC include)
 
-include (UnitTest)
-add_unit_test(sys
-    SOURCES src/sys_test.cpp
-    LIBS systeminfo
-)
+ecm_add_test(src/sys_test.cpp LINK_LIBRARIES systeminfo Qt${QT_VERSION_MAJOR}::Test TEST_NAME sys)

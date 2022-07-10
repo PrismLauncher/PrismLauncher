@@ -94,18 +94,12 @@
           <string>Folders</string>
          </property>
          <layout class="QGridLayout" name="foldersBoxLayout">
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelInstDir">
+          <item row="1" column="2">
+           <widget class="QToolButton" name="modsDirBrowseBtn">
             <property name="text">
-             <string>I&amp;nstances:</string>
-            </property>
-            <property name="buddy">
-             <cstring>instDirTextBox</cstring>
+             <string notr="true">...</string>
             </property>
            </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="instDirTextBox"/>
           </item>
           <item row="0" column="2">
            <widget class="QToolButton" name="instDirBrowseBtn">
@@ -114,28 +108,15 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelModsDir">
-            <property name="text">
-             <string>&amp;Mods:</string>
-            </property>
-            <property name="buddy">
-             <cstring>modsDirTextBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="modsDirTextBox"/>
-          </item>
-          <item row="1" column="2">
-           <widget class="QToolButton" name="modsDirBrowseBtn">
+          <item row="2" column="2">
+           <widget class="QToolButton" name="iconsDirBrowseBtn">
             <property name="text">
              <string notr="true">...</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="iconsDirTextBox"/>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="instDirTextBox"/>
           </item>
           <item row="2" column="0">
            <widget class="QLabel" name="labelIconsDir">
@@ -147,10 +128,58 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QToolButton" name="iconsDirBrowseBtn">
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="modsDirTextBox"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelInstDir">
             <property name="text">
-             <string notr="true">...</string>
+             <string>I&amp;nstances:</string>
+            </property>
+            <property name="buddy">
+             <cstring>instDirTextBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="iconsDirTextBox"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelModsDir">
+            <property name="text">
+             <string>&amp;Mods:</string>
+            </property>
+            <property name="buddy">
+             <cstring>modsDirTextBox</cstring>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="modsBox">
+         <property name="title">
+          <string>Mods</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QCheckBox" name="metadataDisableBtn">
+            <property name="toolTip">
+             <string>Disable using metadata provided by mod providers (like Modrinth or Curseforge) for mods.</string>
+            </property>
+            <property name="text">
+             <string>Disable using metadata for mods?</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="metadataWarningLabel">
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#f5c211;&quot;&gt;Warning&lt;/span&gt;&lt;span style=&quot; color:#f5c211;&quot;&gt;: Disabling mod metadata may also disable some upcoming QoL features, such as mod updating!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
             </property>
            </widget>
           </item>

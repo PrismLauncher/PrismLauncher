@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ExternalResourcesPage</class>
+ <widget class="QMainWindow" name="ExternalResourcesPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1042</width>
+    <height>501</height>
+   </rect>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item row="4" column="1" colspan="3">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="filterEdit">
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="filterLabel">
+        <property name="text">
+         <string>Filter:</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="1" colspan="3">
+     <widget class="MCModInfoFrame" name="frame">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1" colspan="3">
+     <widget class="ModListView" name="treeView">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
+      <property name="dragDropMode">
+       <enum>QAbstractItemView::DropOnly</enum>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="WideBar" name="actionsToolbar">
+   <property name="windowTitle">
+    <string>Actions</string>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextOnly</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>RightToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionAddItem"/>
+   <addaction name="separator"/>
+   <addaction name="actionRemoveItem"/>
+   <addaction name="actionEnableItem"/>
+   <addaction name="actionDisableItem"/>
+   <addaction name="actionViewConfigs"/>
+   <addaction name="actionViewFolder"/>
+  </widget>
+  <action name="actionAddItem">
+   <property name="text">
+    <string>&amp;Add</string>
+   </property>
+   <property name="toolTip">
+    <string>Add</string>
+   </property>
+  </action>
+  <action name="actionRemoveItem">
+   <property name="text">
+    <string>&amp;Remove</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove selected item</string>
+   </property>
+  </action>
+  <action name="actionEnableItem">
+   <property name="text">
+    <string>&amp;Enable</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable selected item</string>
+   </property>
+  </action>
+  <action name="actionDisableItem">
+   <property name="text">
+    <string>&amp;Disable</string>
+   </property>
+   <property name="toolTip">
+    <string>Disable selected item</string>
+   </property>
+  </action>
+  <action name="actionViewConfigs">
+   <property name="text">
+    <string>View &amp;Configs</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the 'config' folder in the system file manager.</string>
+   </property>
+  </action>
+  <action name="actionViewFolder">
+   <property name="text">
+    <string>View &amp;Folder</string>
+   </property>
+  </action>
+  <action name="actionDownloadItem">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Download</string>
+   </property>
+   <property name="toolTip">
+    <string>Download a new resource</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ModListView</class>
+   <extends>QTreeView</extends>
+   <header>ui/widgets/ModListView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MCModInfoFrame</class>
+   <extends>QFrame</extends>
+   <header>ui/widgets/MCModInfoFrame.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WideBar</class>
+   <extends>QToolBar</extends>
+   <header>ui/widgets/WideBar.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>treeView</tabstop>
+  <tabstop>filterEdit</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

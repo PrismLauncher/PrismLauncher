@@ -46,6 +46,7 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QDir>
+#include <QRegularExpression>
 #include "LockedFile.h"
 
 #if defined(Q_OS_WIN)
@@ -72,7 +73,7 @@ ApplicationId ApplicationId::fromTraditionalApp()
     protoId = protoId.toLower();
 #endif
     auto prefix = protoId.section(QLatin1Char('/'), -1);
-    prefix.remove(QRegExp("[^a-zA-Z]"));
+    prefix.remove(QRegularExpression("[^a-zA-Z]"));
     prefix.truncate(6);
     QByteArray idc = protoId.toUtf8();
     quint16 idNum = qChecksum(idc.constData(), idc.size());
@@ -162,15 +163,15 @@ bool LocalPeer::sendMessage(const QByteArray &message, int timeout)
 
     QLocalSocket socket;
     bool connOk = false;
-    for(int i = 0; i < 2; i++) {
+    int tries = 2;
+    for(int i = 0; i < tries; i++) {
         // Try twice, in case the other instance is just starting up
         socket.connectToServer(socketName);
         connOk = socket.waitForConnected(timeout/2);
-        if (connOk || i)
+        if (!connOk && i < (tries - 1))
         {
-            break;
+            std::this_thread::sleep_for(std::chrono::milliseconds(250));
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
     if (!connOk)
     {

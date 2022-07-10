@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
- *  Copyright (c) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,9 +61,9 @@ ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance* instan
     connect(ui->modSelectionButton, &QPushButton::clicked, this, &ModrinthModPage::onModSelected);
 }
 
-auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderType loader) const -> bool
+auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders) const -> bool
 {
-    auto loaderStrings = ModrinthAPI::getModLoaderStrings(loader);
+    auto loaderStrings = ModrinthAPI::getModLoaderStrings(loaders);
 
     auto loaderCompatible = false;
     for (auto remoteLoader : ver.loaders)

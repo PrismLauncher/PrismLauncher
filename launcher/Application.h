@@ -94,6 +94,8 @@ public:
     Application(int &argc, char **argv);
     virtual ~Application();
 
+    bool event(QEvent* event) override;
+
     std::shared_ptr<SettingsObject> settings() const {
         return m_settings;
     }
@@ -152,9 +154,16 @@ public:
 
     shared_qobject_ptr<Meta::Index> metadataIndex();
 
-    QString getJarsPath();
+    /*!
+     * Finds and returns the full path to a jar file.
+     * Returns a null-string if it could not be found.
+     */
+    QString getJarPath(QString jarFile);
 
     QString getMSAClientID();
+    QString getCurseKey();
+    QString getUserAgent();
+    QString getUserAgentUncached();
 
     /// this is the root of the 'installation'. Used for automatic updates
     const QString &root() {
@@ -179,6 +188,10 @@ signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
     void globalSettingsClosed();
+
+#ifdef Q_OS_MACOS
+    void clickedOnDock();
+#endif
 
 public slots:
     bool launch(
@@ -229,13 +242,16 @@ private:
     std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     std::unique_ptr<MCEditTool> m_mcedit;
-    QString m_jarsPath;
     QSet<QString> m_features;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 
     QString m_rootPath;
     Status m_status = Application::StartingUp;
+
+#ifdef Q_OS_MACOS
+    Qt::ApplicationState m_prevAppState = Qt::ApplicationInactive;
+#endif
 
 #if defined Q_OS_WIN32
     // used on Windows to attach the standard IO streams

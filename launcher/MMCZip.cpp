@@ -151,23 +151,23 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
             continue;
         if (mod.type() == Mod::MOD_ZIPFILE)
         {
-            if (!mergeZipFiles(&zipOut, mod.filename(), addedFiles))
+            if (!mergeZipFiles(&zipOut, mod.fileinfo(), addedFiles))
             {
                 zipOut.close();
                 QFile::remove(targetJarPath);
-                qCritical() << "Failed to add" << mod.filename().fileName() << "to the jar.";
+                qCritical() << "Failed to add" << mod.fileinfo().fileName() << "to the jar.";
                 return false;
             }
         }
         else if (mod.type() == Mod::MOD_SINGLEFILE)
         {
             // FIXME: buggy - does not work with addedFiles
-            auto filename = mod.filename();
+            auto filename = mod.fileinfo();
             if (!JlCompress::compressFile(&zipOut, filename.absoluteFilePath(), filename.fileName()))
             {
                 zipOut.close();
                 QFile::remove(targetJarPath);
-                qCritical() << "Failed to add" << mod.filename().fileName() << "to the jar.";
+                qCritical() << "Failed to add" << mod.fileinfo().fileName() << "to the jar.";
                 return false;
             }
             addedFiles.insert(filename.fileName());
@@ -176,7 +176,7 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
         {
             // untested, but seems to be unused / not possible to reach
             // FIXME: buggy - does not work with addedFiles
-            auto filename = mod.filename();
+            auto filename = mod.fileinfo();
             QString what_to_zip = filename.absoluteFilePath();
             QDir dir(what_to_zip);
             dir.cdUp();
@@ -193,7 +193,7 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
             {
                 zipOut.close();
                 QFile::remove(targetJarPath);
-                qCritical() << "Failed to add" << mod.filename().fileName() << "to the jar.";
+                qCritical() << "Failed to add" << mod.fileinfo().fileName() << "to the jar.";
                 return false;
             }
             qDebug() << "Adding folder " << filename.fileName() << " from "
@@ -204,7 +204,7 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
             // Make sure we do not continue launching when something is missing or undefined...
             zipOut.close();
             QFile::remove(targetJarPath);
-            qCritical() << "Failed to add unknown mod type" << mod.filename().fileName() << "to the jar.";
+            qCritical() << "Failed to add unknown mod type" << mod.fileinfo().fileName() << "to the jar.";
             return false;
         }
     }
@@ -305,7 +305,7 @@ nonstd::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString &
         QString path;
         if(name.contains('/') && !name.endsWith('/')){
             path = name.section('/', 0, -2) + "/";
-            FS::ensureFolderPathExists(path);
+            FS::ensureFolderPathExists(FS::PathCombine(target, path));
 
             name = name.split('/').last();
         }
@@ -421,7 +421,7 @@ bool MMCZip::collectFileListRecursively(const QString& rootDir, const QString& s
             continue;
         }
 
-        files->append(e.filePath());  // we want the original paths for MMCZip::compressDirFiles
+        files->append(e);  // we want the original paths for MMCZip::compressDirFiles
     }
     return true;
 }

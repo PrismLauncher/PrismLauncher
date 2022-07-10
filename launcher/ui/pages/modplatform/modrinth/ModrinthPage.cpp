@@ -101,18 +101,18 @@ bool ModrinthPage::eventFilter(QObject* watched, QEvent* event)
     return QObject::eventFilter(watched, event);
 }
 
-void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
+void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 {
     ui->versionSelectionBox->clear();
 
-    if (!first.isValid()) {
+    if (!curr.isValid()) {
         if (isOpened) {
             dialog->setSuggestedPack();
         }
         return;
     }
 
-    current = m_model->data(first, Qt::UserRole).value<Modrinth::Modpack>();
+    current = m_model->data(curr, Qt::UserRole).value<Modrinth::Modpack>();
     auto name = current.name;
 
     if (!current.extraInfoLoaded) {
@@ -125,7 +125,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
         netJob->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id, curr] {
             if (id != current.id) {
                 return;  // wrong request?
             }
@@ -149,6 +149,13 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
             }
 
             updateUI();
+
+            QVariant current_updated;
+            current_updated.setValue(current);
+
+            if (!m_model->setData(curr, current_updated, Qt::UserRole))
+                qWarning() << "Failed to cache extra info for the current pack!";
+
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
@@ -170,7 +177,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
         netJob->addNetAction(
             Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id, curr] {
             if (id != current.id) {
                 return;  // wrong request?
             }
@@ -192,8 +199,17 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
             }
 
             for (auto version : current.versions) {
-                ui->versionSelectionBox->addItem(version.version, QVariant(version.id));
+                if (!version.name.contains(version.version))
+                    ui->versionSelectionBox->addItem(QString("%1 — %2").arg(version.name, version.version), QVariant(version.id));
+                else
+                    ui->versionSelectionBox->addItem(version.name, QVariant(version.id));
             }
+
+            QVariant current_updated;
+            current_updated.setValue(current);
+
+            if (!m_model->setData(curr, current_updated, Qt::UserRole))
+                qWarning() << "Failed to cache versions for the current pack!";
 
             suggestCurrent();
         });
@@ -205,7 +221,10 @@ void ModrinthPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
     } else {
         for (auto version : current.versions) {
-            ui->versionSelectionBox->addItem(QString("%1 - %2").arg(version.name, version.version), QVariant(version.id));
+            if (!version.name.contains(version.version))
+                ui->versionSelectionBox->addItem(QString("%1 - %2").arg(version.name, version.version), QVariant(version.id));
+            else
+                ui->versionSelectionBox->addItem(version.name, QVariant(version.id));
         }
 
         suggestCurrent();
@@ -224,7 +243,37 @@ void ModrinthPage::updateUI()
     // TODO: Implement multiple authors with links
     text += "<br>" + tr(" by ") + QString("<a href=%1>%2</a>").arg(std::get<1>(current.author).toString(), std::get<0>(current.author));
 
-    text += "<br>";
+    if (current.extraInfoLoaded) {
+        if (!current.extra.donate.isEmpty()) {
+            text += "<br><br>" + tr("Donate information: ");
+            auto donateToStr = [](Modrinth::DonationData& donate) -> QString {
+                return QString("<a href=\"%1\">%2</a>").arg(donate.url, donate.platform);
+            };
+            QStringList donates;
+            for (auto& donate : current.extra.donate) {
+                donates.append(donateToStr(donate));
+            }
+            text += donates.join(", ");
+        }
+
+        if (!current.extra.issuesUrl.isEmpty()
+         || !current.extra.sourceUrl.isEmpty()
+         || !current.extra.wikiUrl.isEmpty()
+         || !current.extra.discordUrl.isEmpty()) {
+            text += "<br><br>" + tr("External links:") + "<br>";
+        }
+
+        if (!current.extra.issuesUrl.isEmpty())
+            text += "- " + tr("Issues: <a href=%1>%1</a>").arg(current.extra.issuesUrl) + "<br>";
+        if (!current.extra.wikiUrl.isEmpty())
+            text += "- " + tr("Wiki: <a href=%1>%1</a>").arg(current.extra.wikiUrl) + "<br>";
+        if (!current.extra.sourceUrl.isEmpty())
+            text += "- " + tr("Source code: <a href=%1>%1</a>").arg(current.extra.sourceUrl) + "<br>";
+        if (!current.extra.discordUrl.isEmpty())
+            text += "- " + tr("Discord: <a href=%1>%1</a>").arg(current.extra.discordUrl) + "<br>";
+    }
+
+    text += "<hr>";
 
     HoeDown h;
     text += h.process(current.extra.body.toUtf8());

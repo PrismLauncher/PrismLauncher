@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -287,7 +288,11 @@ public:
             return false;
         }
         beginMoveRows(QModelIndex(), row, row, QModelIndex(), row - 1);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
+        m_servers.swapItemsAt(row-1, row);
+#else
         m_servers.swap(row-1, row);
+#endif
         endMoveRows();
         scheduleSave();
         return true;
@@ -305,7 +310,11 @@ public:
             return false;
         }
         beginMoveRows(QModelIndex(), row, row, QModelIndex(), row + 2);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
+        m_servers.swapItemsAt(row+1, row);
+#else
         m_servers.swap(row+1, row);
+#endif
         endMoveRows();
         scheduleSave();
         return true;
@@ -614,7 +623,7 @@ ServersPage::ServersPage(InstancePtr inst, QWidget* parent)
 
     auto selectionModel = ui->serversView->selectionModel();
     connect(selectionModel, &QItemSelectionModel::currentChanged, this, &ServersPage::currentChanged);
-    connect(m_inst.get(), &MinecraftInstance::runningStatusChanged, this, &ServersPage::on_RunningState_changed);
+    connect(m_inst.get(), &MinecraftInstance::runningStatusChanged, this, &ServersPage::runningStateChanged);
     connect(ui->nameLine, &QLineEdit::textEdited, this, &ServersPage::nameEdited);
     connect(ui->addressLine, &QLineEdit::textEdited, this, &ServersPage::addressEdited);
     connect(ui->resourceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(resourceIndexChanged(int)));
@@ -654,7 +663,7 @@ QMenu * ServersPage::createPopupMenu()
     return filteredMenu;
 }
 
-void ServersPage::on_RunningState_changed(bool running)
+void ServersPage::runningStateChanged(bool running)
 {
     if(m_locked == running)
     {

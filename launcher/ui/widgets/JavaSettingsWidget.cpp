@@ -11,6 +11,7 @@
 
 #include <sys.h>
 
+#include "JavaCommon.h"
 #include "java/JavaInstall.h"
 #include "java/JavaUtils.h"
 #include "FileSystem.h"
@@ -133,6 +134,10 @@ void JavaSettingsWidget::initialize()
 
 void JavaSettingsWidget::refresh()
 {
+    if (JavaUtils::getJavaCheckPath().isEmpty()) {
+        JavaCommon::javaCheckNotFound(this);
+        return;
+    }
     m_versionWidget->loadList();
 }
 

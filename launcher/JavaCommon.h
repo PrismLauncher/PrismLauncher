@@ -10,12 +10,14 @@ namespace JavaCommon
 {
     bool checkJVMArgs(QString args, QWidget *parent);
 
-    // Show a dialog saying that the Java binary was not usable
-    void javaBinaryWasBad(QWidget *parent, JavaCheckResult result);
-    // Show a dialog saying that the Java binary was not usable because of bad options
-    void javaArgsWereBad(QWidget *parent, JavaCheckResult result);
     // Show a dialog saying that the Java binary was usable
     void javaWasOk(QWidget *parent, JavaCheckResult result);
+    // Show a dialog saying that the Java binary was not usable because of bad options
+    void javaArgsWereBad(QWidget *parent, JavaCheckResult result);
+    // Show a dialog saying that the Java binary was not usable
+    void javaBinaryWasBad(QWidget *parent, JavaCheckResult result);
+    // Show a dialog if we couldn't find Java Checker
+    void javaCheckNotFound(QWidget *parent);
 
     class TestCheck : public QObject
     {

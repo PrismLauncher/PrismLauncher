@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,6 +50,7 @@
 #include <QClipboard>
 #include <QKeyEvent>
 #include <QMenu>
+#include <QRegularExpression>
 
 #include <Application.h>
 
@@ -153,7 +155,7 @@ public:
         if (role == Qt::DisplayRole || role == Qt::EditRole)
         {
             QVariant result = sourceModel()->data(mapToSource(proxyIndex), role);
-            return result.toString().remove(QRegExp("\\.png$"));
+            return result.toString().remove(QRegularExpression("\\.png$"));
         }
         if (role == Qt::DecorationRole)
         {
@@ -269,7 +271,7 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget *parent)
     ui->listView->setViewMode(QListView::IconMode);
     ui->listView->setResizeMode(QListView::Adjust);
     ui->listView->installEventFilter(this);
-    ui->listView->setEditTriggers(0);
+    ui->listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->listView->setItemDelegate(new CenteredEditingDelegate(this));
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->listView, &QListView::customContextMenuRequested, this, &ScreenshotsPage::ShowContextMenu);

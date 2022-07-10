@@ -107,41 +107,18 @@ void FlamePage::triggerSearch()
     listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
 }
 
-void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
+void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 {
     ui->versionSelectionBox->clear();
 
-    if (!first.isValid()) {
+    if (!curr.isValid()) {
         if (isOpened) {
             dialog->setSuggestedPack();
         }
         return;
     }
 
-    current = listModel->data(first, Qt::UserRole).value<Flame::IndexedPack>();
-    QString text = "";
-    QString name = current.name;
-
-    if (current.websiteUrl.isEmpty())
-        text = name;
-    else
-        text = "<a href=\"" + current.websiteUrl + "\">" + name + "</a>";
-    if (!current.authors.empty()) {
-        auto authorToStr = [](Flame::ModpackAuthor& author) {
-            if (author.url.isEmpty()) {
-                return author.name;
-            }
-            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
-        };
-        QStringList authorStrs;
-        for (auto& author : current.authors) {
-            authorStrs.push_back(authorToStr(author));
-        }
-        text += "<br>" + tr(" by ") + authorStrs.join(", ");
-    }
-    text += "<br><br>";
-
-    ui->packDescription->setHtml(text + current.description);
+    current = listModel->data(curr, Qt::UserRole).value<Flame::IndexedPack>();
 
     if (current.versionsLoaded == false) {
         qDebug() << "Loading flame modpack versions";
@@ -150,7 +127,7 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
         int addonId = current.addonId;
         netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
 
-        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId] {
+        QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId, curr] {
             if (addonId != current.addonId) {
                 return;  // wrong request
             }
@@ -174,6 +151,16 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
                 ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
             }
 
+            QVariant current_updated;
+            current_updated.setValue(current);
+
+            if (!listModel->setData(curr, current_updated, Qt::UserRole))
+                qWarning() << "Failed to cache versions for the current pack!";
+
+            // TODO: Check whether it's a connection issue or the project disabled 3rd-party distribution.
+            if (current.versionsLoaded && ui->versionSelectionBox->count() < 1) {
+                ui->versionSelectionBox->addItem(tr("No version is available!"), -1);
+            }
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
@@ -188,6 +175,13 @@ void FlamePage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
         suggestCurrent();
     }
+
+    // TODO: Check whether it's a connection issue or the project disabled 3rd-party distribution.
+    if (current.versionsLoaded && ui->versionSelectionBox->count() < 1) {
+        ui->versionSelectionBox->addItem(tr("No version is available!"), -1);
+    }
+
+    updateUi();
 }
 
 void FlamePage::suggestCurrent()
@@ -196,12 +190,12 @@ void FlamePage::suggestCurrent()
         return;
     }
 
-    if (selectedVersion.isEmpty()) {
+    if (selectedVersion.isEmpty() || selectedVersion == "-1") {
         dialog->setSuggestedPack();
         return;
     }
 
-    dialog->setSuggestedPack(current.name, new InstanceImportTask(selectedVersion));
+    dialog->setSuggestedPack(current.name, new InstanceImportTask(selectedVersion,this));
     QString editedLogoName;
     editedLogoName = "curseforge_" + current.logoName.section(".", 0, 0);
     listModel->getLogo(current.logoName, current.logoUrl,
@@ -216,4 +210,47 @@ void FlamePage::onVersionSelectionChanged(QString data)
     }
     selectedVersion = ui->versionSelectionBox->currentData().toString();
     suggestCurrent();
+}
+
+void FlamePage::updateUi()
+{
+    QString text = "";
+    QString name = current.name;
+
+    if (current.extra.websiteUrl.isEmpty())
+        text = name;
+    else
+        text = "<a href=\"" + current.extra.websiteUrl + "\">" + name + "</a>";
+    if (!current.authors.empty()) {
+        auto authorToStr = [](Flame::ModpackAuthor& author) {
+            if (author.url.isEmpty()) {
+                return author.name;
+            }
+            return QString("<a href=\"%1\">%2</a>").arg(author.url, author.name);
+        };
+        QStringList authorStrs;
+        for (auto& author : current.authors) {
+            authorStrs.push_back(authorToStr(author));
+        }
+        text += "<br>" + tr(" by ") + authorStrs.join(", ");
+    }
+
+    if(current.extraInfoLoaded) {
+        if (!current.extra.issuesUrl.isEmpty()
+         || !current.extra.sourceUrl.isEmpty()
+         || !current.extra.wikiUrl.isEmpty()) {
+            text += "<br><br>" + tr("External links:") + "<br>";
+        }
+
+        if (!current.extra.issuesUrl.isEmpty())
+            text += "- " + tr("Issues: <a href=%1>%1</a>").arg(current.extra.issuesUrl) + "<br>";
+        if (!current.extra.wikiUrl.isEmpty())
+            text += "- " + tr("Wiki: <a href=%1>%1</a>").arg(current.extra.wikiUrl) + "<br>";
+        if (!current.extra.sourceUrl.isEmpty())
+            text += "- " + tr("Source code: <a href=%1>%1</a>").arg(current.extra.sourceUrl) + "<br>";
+    }
+
+    text += "<hr>";
+
+    ui->packDescription->setHtml(text + current.description);
 }

@@ -1,5 +1,4 @@
 #include <QTest>
-#include "TestUtil.h"
 
 #include "meta/Index.h"
 #include "meta/VersionList.h"

@@ -20,6 +20,7 @@
 
 #include "BuildConfig.h"
 #include "modplatform/ModAPI.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/helpers/NetworkModAPI.h"
 
 #include <QDebug>
@@ -28,30 +29,25 @@ class ModrinthAPI : public NetworkModAPI {
    public:
     inline auto getAuthorURL(const QString& name) const -> QString { return "https://modrinth.com/user/" + name; };
 
-    static auto getModLoaderStrings(ModLoaderType type) -> const QStringList
+    static auto getModLoaderStrings(const ModLoaderTypes types) -> const QStringList
     {
         QStringList l;
-        switch (type)
+        for (auto loader : {Forge, Fabric, Quilt})
         {
-            case Unspecified:
-                for (auto loader : {Forge, Fabric, Quilt})
-                {
-                    l << ModAPI::getModLoaderString(loader);
-                }
-                break;
-
-            case Quilt:
-                l << ModAPI::getModLoaderString(Fabric);
-            default:
-                l << ModAPI::getModLoaderString(type);
+            if ((types & loader) || types == Unspecified)
+            {
+                l << ModAPI::getModLoaderString(loader);
+            }
         }
+        if ((types & Quilt) && (~types & Fabric))  // Add Fabric if Quilt is in use, if Fabric isn't already there
+            l << ModAPI::getModLoaderString(Fabric);
         return l;
     }
 
-    static auto getModLoaderFilters(ModLoaderType type) -> const QString
+    static auto getModLoaderFilters(ModLoaderTypes types) -> const QString
     {
         QStringList l;
-        for (auto loader : getModLoaderStrings(type))
+        for (auto loader : getModLoaderStrings(types))
         {
             l << QString("\"categories:%1\"").arg(loader);
         }
@@ -61,7 +57,7 @@ class ModrinthAPI : public NetworkModAPI {
    private:
     inline auto getModSearchURL(SearchArgs& args) const -> QString override
     {
-        if (!validateModLoader(args.mod_loader)) {
+        if (!validateModLoaders(args.loaders)) {
             qWarning() << "Modrinth only have Forge and Fabric-compatible mods!";
             return "";
         }
@@ -76,19 +72,24 @@ class ModrinthAPI : public NetworkModAPI {
             .arg(args.offset)
             .arg(args.search)
             .arg(args.sorting)
-            .arg(getModLoaderFilters(args.mod_loader))
+            .arg(getModLoaderFilters(args.loaders))
             .arg(getGameVersionsArray(args.versions));
+    };
+
+    inline auto getModInfoURL(QString& id) const -> QString override
+    {
+        return BuildConfig.MODRINTH_PROD_URL + "/project/" + id;
     };
 
     inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
     {
         return QString(BuildConfig.MODRINTH_PROD_URL +
                        "/project/%1/version?"
-                       "game_versions=[%2]"
+                       "game_versions=[%2]&"
                        "loaders=[\"%3\"]")
-            .arg(args.addonId)
-            .arg(getGameVersionsString(args.mcVersions))
-            .arg(getModLoaderStrings(args.loader).join("\",\""));
+            .arg(args.addonId,
+             getGameVersionsString(args.mcVersions),
+             getModLoaderStrings(args.loaders).join("\",\""));
     };
 
     auto getGameVersionsArray(std::list<Version> mcVersions) const -> QString
@@ -101,9 +102,9 @@ class ModrinthAPI : public NetworkModAPI {
         return s.isEmpty() ? QString() : QString("[%1],").arg(s);
     }
 
-    inline auto validateModLoader(ModLoaderType modLoader) const -> bool
+    inline auto validateModLoaders(ModLoaderTypes loaders) const -> bool
     {
-        return modLoader == Unspecified || modLoader == Forge || modLoader == Fabric || modLoader == Quilt;
+        return (loaders == Unspecified) || (loaders & (Forge | Fabric | Quilt));
     }
 
 };

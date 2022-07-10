@@ -31,6 +31,31 @@ void NetworkModAPI::searchMods(CallerType* caller, SearchArgs&& args) const
     netJob->start();
 }
 
+void NetworkModAPI::getModInfo(CallerType* caller, ModPlatform::IndexedPack& pack)
+{
+    auto id_str = pack.addonId.toString();
+    auto netJob = new NetJob(QString("%1::ModInfo").arg(id_str), APPLICATION->network());
+    auto searchUrl = getModInfoURL(id_str);
+
+    auto response = new QByteArray();
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
+
+    QObject::connect(netJob, &NetJob::succeeded, [response, &pack, caller] {
+        QJsonParseError parse_error{};
+        auto doc = QJsonDocument::fromJson(*response, &parse_error);
+        if (parse_error.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response for " << pack.name << " at " << parse_error.offset
+                       << " reason: " << parse_error.errorString();
+            qWarning() << *response;
+            return;
+        }
+
+        caller->infoRequestFinished(doc, pack);
+    });
+
+    netJob->start();
+}
+
 void NetworkModAPI::getVersions(CallerType* caller, VersionSearchArgs&& args) const
 {
     auto netJob = new NetJob(QString("%1::ModVersions(%2)").arg(caller->debugName()).arg(args.addonId), APPLICATION->network());

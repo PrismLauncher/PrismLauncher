@@ -79,7 +79,7 @@ element_value *element_value::readElementValue(util::membuffer &input,
         }
         return new element_value_array(ARRAY, vals, pool);
     default:
-        throw new java::classfile_exception();
+        throw java::classfile_exception();
     }
 }
 }

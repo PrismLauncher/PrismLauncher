@@ -38,27 +38,48 @@ auto ListModel::data(const QModelIndex& index, int role) const -> QVariant
     }
 
     ModPlatform::IndexedPack pack = modpacks.at(pos);
-    if (role == Qt::DisplayRole) {
-        return pack.name;
-    } else if (role == Qt::ToolTipRole) {
-        if (pack.description.length() > 100) {
-            // some magic to prevent to long tooltips and replace html linebreaks
-            QString edit = pack.description.left(97);
-            edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
-            return edit;
+    switch (role) {
+        case Qt::DisplayRole: {
+            return pack.name;
         }
-        return pack.description;
-    } else if (role == Qt::DecorationRole) {
-        if (m_logoMap.contains(pack.logoName)) {
-            return (m_logoMap.value(pack.logoName));
+        case Qt::ToolTipRole: {
+            if (pack.description.length() > 100) {
+                // some magic to prevent to long tooltips and replace html linebreaks
+                QString edit = pack.description.left(97);
+                edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
+                return edit;
+            }
+            return pack.description;
         }
-        QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
-        ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
-        return icon;
-    } else if (role == Qt::UserRole) {
-        QVariant v;
-        v.setValue(pack);
-        return v;
+        case Qt::DecorationRole: {
+            if (m_logoMap.contains(pack.logoName)) {
+                auto icon = m_logoMap.value(pack.logoName);
+                // FIXME: This doesn't really belong here, but Qt doesn't offer a good way right now ;(
+                auto icon_scaled = QIcon(icon.pixmap(48, 48).scaledToWidth(48));
+
+                return icon_scaled;
+            }
+            QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
+            // un-const-ify this
+            ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
+            return icon;
+        }
+        case Qt::UserRole: {
+            QVariant v;
+            v.setValue(pack);
+            return v;
+        }
+        case Qt::FontRole: {
+            QFont font;
+            if (m_parent->getDialog()->isModSelected(pack.name)) {
+                font.setBold(true);
+                font.setUnderline(true);
+            }
+
+            return font;
+        }
+        default:
+            break;
     }
 
     return {};
@@ -68,7 +89,7 @@ void ListModel::requestModVersions(ModPlatform::IndexedPack const& current)
 {
     auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
 
-    m_parent->apiProvider()->getVersions(this, { current.addonId.toString(), getMineVersions(), profile->getModLoader() });
+    m_parent->apiProvider()->getVersions(this, { current.addonId.toString(), getMineVersions(), profile->getModLoaders() });
 }
 
 void ListModel::performPaginatedSearch()
@@ -76,7 +97,12 @@ void ListModel::performPaginatedSearch()
     auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
 
     m_parent->apiProvider()->searchMods(
-        this, { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], profile->getModLoader(), getMineVersions() });
+        this, { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], profile->getModLoaders(), getMineVersions() });
+}
+
+void ListModel::requestModInfo(ModPlatform::IndexedPack& current)
+{
+    m_parent->apiProvider()->getModInfo(this, current);
 }
 
 void ListModel::refresh()
@@ -193,6 +219,10 @@ void ListModel::searchRequestFinished(QJsonDocument& doc)
         searchState = CanPossiblyFetchMore;
     }
 
+    // When you have a Qt build with assertions turned on, proceeding here will abort the application
+    if (newList.size() == 0)
+        return;
+
     beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);
     modpacks.append(newList);
     endInsertRows();
@@ -223,6 +253,21 @@ void ListModel::searchRequestFailed(QString reason)
     } else {
         searchState = Finished;
     }
+}
+
+void ListModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack)
+{
+    qDebug() << "Loading mod info";
+
+    try {
+        auto obj = Json::requireObject(doc);
+        loadExtraPackInfo(pack, obj);
+    } catch (const JSONValidationError& e) {
+        qDebug() << doc;
+        qWarning() << "Error while reading " << debugName() << " mod info: " << e.cause();
+    }
+
+    m_parent->updateUi();
 }
 
 void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId)

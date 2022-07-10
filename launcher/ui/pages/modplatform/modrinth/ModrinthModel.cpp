@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -86,6 +87,7 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
     } else if (role == Qt::DecorationRole) {
         if (m_logoMap.contains(pack.iconName)) {
             auto icon = m_logoMap.value(pack.iconName);
+            // FIXME: This doesn't really belong here, but Qt doesn't offer a good way right now ;(
             auto icon_scaled = QIcon(icon.pixmap(48, 48).scaledToWidth(48));
 
             return icon_scaled;
@@ -100,6 +102,17 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
     }
 
     return {};
+}
+
+bool ModpackListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    int pos = index.row();
+    if (pos >= modpacks.size() || pos < 0 || !index.isValid())
+        return false;
+
+    modpacks[pos] = value.value<Modrinth::Modpack>();
+
+    return true;
 }
 
 void ModpackListModel::performPaginatedSearch()
@@ -159,15 +172,15 @@ static auto sortFromIndex(int index) -> QString
 {
     switch(index){
     default:
-    case 1:
+    case 0:
         return "relevance";
-    case 2:
+    case 1:
         return "downloads";
-    case 3:
+    case 2:
         return "follows";
-    case 4:
+    case 3:
         return "newest";
-    case 5:
+    case 4:
         return "updated";
     }
 
@@ -276,6 +289,10 @@ void ModpackListModel::searchRequestFinished(QJsonDocument& doc_all)
         nextSearchOffset += m_modpacks_per_page;
         searchState = CanPossiblyFetchMore;
     }
+
+    // When you have a Qt build with assertions turned on, proceeding here will abort the application
+    if (newList.size() == 0)
+        return;
 
     beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);
     modpacks.append(newList);

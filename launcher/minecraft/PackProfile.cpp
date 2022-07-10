@@ -1,16 +1,36 @@
-/* Copyright 2013-2021 MultiMC Contributors
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 #include <QFile>
@@ -36,6 +56,13 @@
 #include "ComponentUpdateTask.h"
 
 #include "Application.h"
+#include "modplatform/ModAPI.h"
+
+static const QMap<QString, ModAPI::ModLoaderType> modloaderMapping{
+    {"net.minecraftforge", ModAPI::Forge},
+    {"net.fabricmc.fabric-loader", ModAPI::Fabric},
+    {"org.quiltmc.quilt-loader", ModAPI::Quilt}
+};
 
 PackProfile::PackProfile(MinecraftInstance * instance)
     : QAbstractListModel()
@@ -339,6 +366,7 @@ void PackProfile::resolve(Net::Mode netmode)
     d->m_updateTask.reset(updateTask);
     connect(updateTask, &ComponentUpdateTask::succeeded, this, &PackProfile::updateSucceeded);
     connect(updateTask, &ComponentUpdateTask::failed, this, &PackProfile::updateFailed);
+    connect(updateTask, &ComponentUpdateTask::aborted, this, [this]{ updateFailed(tr("Aborted")); });
     d->m_updateTask->start();
 }
 
@@ -680,7 +708,11 @@ void PackProfile::move(const int index, const MoveDirection direction)
         return;
     }
     beginMoveRows(QModelIndex(), index, index, QModelIndex(), togap);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
+    d->components.swapItemsAt(index, theirIndex);
+#else
     d->components.swap(index, theirIndex);
+#endif
     endMoveRows();
     invalidateLaunchProfile();
     scheduleSave();
@@ -971,19 +1003,19 @@ void PackProfile::disableInteraction(bool disable)
     }
 }
 
-ModAPI::ModLoaderType PackProfile::getModLoader()
+ModAPI::ModLoaderTypes PackProfile::getModLoaders()
 {
-    if (!getComponentVersion("net.minecraftforge").isEmpty())
+    ModAPI::ModLoaderTypes result = ModAPI::Unspecified;
+
+    QMapIterator<QString, ModAPI::ModLoaderType> i(modloaderMapping);
+
+    while (i.hasNext())
     {
-        return ModAPI::Forge;
+        i.next();
+        Component* c = getComponent(i.key());
+        if (c != nullptr && c->isEnabled()) {
+            result |= i.value();
+        }
     }
-    else if (!getComponentVersion("net.fabricmc.fabric-loader").isEmpty())
-    {
-        return ModAPI::Fabric;
-    }
-    else if (!getComponentVersion("org.quiltmc.quilt-loader").isEmpty())
-    {
-        return ModAPI::Quilt;
-    }
-    return ModAPI::Unspecified;
+    return result;
 }

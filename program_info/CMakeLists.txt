@@ -1,6 +1,7 @@
 set(Launcher_CommonName "PolyMC")
 
-set(Launcher_Copyright "PolyMC Contributors\\n© 2012-2021 MultiMC Contributors" PARENT_SCOPE)
+set(Launcher_Copyright "PolyMC Contributors\\n© 2012-2021 MultiMC Contributors")
+set(Launcher_Copyright "${Launcher_Copyright}" PARENT_SCOPE)
 set(Launcher_Domain "polymc.org" PARENT_SCOPE)
 set(Launcher_Name "${Launcher_CommonName}" PARENT_SCOPE)
 set(Launcher_DisplayName "${Launcher_CommonName}" PARENT_SCOPE)
@@ -14,6 +15,8 @@ set(Launcher_MetaInfo "program_info/org.polymc.PolyMC.metainfo.xml" PARENT_SCOPE
 set(Launcher_ManPage "program_info/polymc.6.txt" PARENT_SCOPE)
 set(Launcher_SVG "program_info/org.polymc.PolyMC.svg" PARENT_SCOPE)
 set(Launcher_Branding_ICNS "program_info/polymc.icns" PARENT_SCOPE)
+set(Launcher_Branding_ICO "program_info/polymc.ico")
+set(Launcher_Branding_ICO "${Launcher_Branding_ICO}" PARENT_SCOPE)
 set(Launcher_Branding_WindowsRC "program_info/polymc.rc" PARENT_SCOPE)
 set(Launcher_Branding_LogoQRC "program_info/polymc.qrc" PARENT_SCOPE)
 
@@ -21,3 +24,7 @@ set(Launcher_Portable_File "program_info/portable.txt" PARENT_SCOPE)
 
 configure_file(org.polymc.PolyMC.desktop.in org.polymc.PolyMC.desktop)
 configure_file(org.polymc.PolyMC.metainfo.xml.in org.polymc.PolyMC.metainfo.xml)
+configure_file(polymc.rc.in polymc.rc @ONLY)
+configure_file(polymc.manifest.in polymc.manifest @ONLY)
+configure_file(polymc.ico polymc.ico COPYONLY)
+configure_file(win_install.nsi.in win_install.nsi @ONLY)

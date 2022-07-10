@@ -197,6 +197,10 @@ void ComponentUpdateTask::loadComponents()
             {
                 remoteLoadFailed(taskIndex, error);
             });
+            connect(indexLoadTask.get(), &Task::aborted, [=]()
+            {
+                remoteLoadFailed(taskIndex, tr("Aborted"));
+            });
             taskIndex++;
         }
     }
@@ -242,6 +246,10 @@ void ComponentUpdateTask::loadComponents()
             connect(loadTask.get(), &Task::failed, [=](const QString & error)
             {
                 remoteLoadFailed(taskIndex, error);
+            });
+            connect(loadTask.get(), &Task::aborted, [=]()
+            {
+                remoteLoadFailed(taskIndex, tr("Aborted"));
             });
             RemoteLoadStatus status;
             status.type = loadType;

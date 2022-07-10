@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,6 +37,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
+#include "net/PasteUpload.h"
 #include "ui/MainWindow.h"
 #include "ui/InstanceWindow.h"
 
@@ -61,6 +63,7 @@
 #include "ui/setupwizard/SetupWizard.h"
 #include "ui/setupwizard/LanguageWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
+#include "ui/setupwizard/PasteWizardPage.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 
@@ -81,6 +84,7 @@
 #include <QDebug>
 #include <QStyleFactory>
 #include <QWindow>
+#include <QIcon>
 
 #include "InstanceList.h"
 
@@ -96,7 +100,6 @@
 #include "tools/JVisualVM.h"
 #include "tools/MCEditTool.h"
 
-#include <xdgicon.h>
 #include "settings/INISettingsObject.h"
 #include "settings/Setting.h"
 
@@ -221,7 +224,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
     setApplicationName(BuildConfig.LAUNCHER_NAME);
-    setApplicationDisplayName(BuildConfig.LAUNCHER_DISPLAYNAME);
+    setApplicationDisplayName(QString("%1 %2").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString()));
     setApplicationVersion(BuildConfig.printableVersionString());
     setDesktopFileName(BuildConfig.LAUNCHER_DESKTOPFILENAME);
     startTime = QDateTime::currentDateTime();
@@ -328,10 +331,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_rootPath = foo.absolutePath();
         // on macOS, touch the root to force Finder to reload the .app metadata (and fix any icon change issues)
         FS::updateTimestamp(m_rootPath);
-#endif
-
-#ifdef LAUNCHER_JARS_LOCATION
-        m_jarsPath = TOSTRING(LAUNCHER_JARS_LOCATION);
 #endif
     }
 
@@ -622,6 +621,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("JavaPath", "");
         m_settings->registerSetting("JavaTimestamp", 0);
         m_settings->registerSetting("JavaArchitecture", "");
+        m_settings->registerSetting("JavaRealArchitecture", "");
         m_settings->registerSetting("JavaVersion", "");
         m_settings->registerSetting("JavaVendor", "");
         m_settings->registerSetting("LastHostname", "");
@@ -633,6 +633,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("UseNativeOpenAL", false);
         m_settings->registerSetting("UseNativeGLFW", false);
 
+        // Peformance related options
+        m_settings->registerSetting("EnableFeralGamemode", false);
+        m_settings->registerSetting("EnableMangoHud", false);
+        m_settings->registerSetting("UseDiscreteGpu", false);
+
         // Game time
         m_settings->registerSetting("ShowGameTime", true);
         m_settings->registerSetting("ShowGlobalGameTime", true);
@@ -640,6 +645,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Minecraft launch method
         m_settings->registerSetting("MCLaunchMethod", "LauncherPart");
+
+        // Minecraft mods
+        m_settings->registerSetting("ModMetadataDisabled", false);
 
         // Minecraft offline player name
         m_settings->registerSetting("LastOfflinePlayerName", "");
@@ -672,14 +680,41 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("UpdateDialogGeometry", "");
 
-        // pastebin URL
-        m_settings->registerSetting("PastebinURL", "https://0x0.st");
+        // HACK: This code feels so stupid is there a less stupid way of doing this?
+        {
+            m_settings->registerSetting("PastebinURL", "");
+            m_settings->registerSetting("PastebinType", PasteUpload::PasteType::Mclogs);
+            m_settings->registerSetting("PastebinCustomAPIBase", "");
+
+            QString pastebinURL = m_settings->get("PastebinURL").toString();
+
+            bool userHadDefaultPastebin = pastebinURL == "https://0x0.st";
+            if (!pastebinURL.isEmpty() && !userHadDefaultPastebin)
+            {
+                m_settings->set("PastebinType", PasteUpload::PasteType::NullPointer);
+                m_settings->set("PastebinCustomAPIBase", pastebinURL);
+                m_settings->reset("PastebinURL");
+            }
+
+            bool ok;
+            int pasteType = m_settings->get("PastebinType").toInt(&ok);
+            // If PastebinType is invalid then reset the related settings.
+            if (!ok || !(PasteUpload::PasteType::First <= pasteType && pasteType <= PasteUpload::PasteType::Last))
+            {
+                m_settings->reset("PastebinType");
+                m_settings->reset("PastebinCustomAPIBase");
+            }
+        }
+        // meta URL
+        m_settings->registerSetting("MetaURLOverride", "");
 
         m_settings->registerSetting("CloseAfterLaunch", false);
         m_settings->registerSetting("QuitAfterGameStop", false);
 
         // Custom MSA credentials
         m_settings->registerSetting("MSAClientIDOverride", "");
+        m_settings->registerSetting("CFKeyOverride", "");
+        m_settings->registerSetting("UserAgentOverride", "");
 
         // Init page provider
         {
@@ -843,6 +878,12 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_mcedit.reset(new MCEditTool(m_settings));
     }
 
+#ifdef Q_OS_MACOS
+    connect(this, &Application::clickedOnDock, [this]() {
+        this->showMainWindow();
+    });
+#endif
+
     connect(this, &Application::aboutToQuit, [this](){
         if(m_instances)
         {
@@ -899,7 +940,8 @@ bool Application::createSetupWizard()
             return true;
         return false;
     }();
-    bool wizardRequired = javaRequired || languageRequired;
+    bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
+    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired;
 
     if(wizardRequired)
     {
@@ -913,11 +955,31 @@ bool Application::createSetupWizard()
         {
             m_setupWizard->addPage(new JavaWizardPage(m_setupWizard));
         }
+
+        if (pasteInterventionRequired)
+        {
+            m_setupWizard->addPage(new PasteWizardPage(m_setupWizard));
+        }
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();
         return true;
     }
     return false;
+}
+
+bool Application::event(QEvent* event) {
+#ifdef Q_OS_MACOS
+    if (event->type() == QEvent::ApplicationStateChange) {
+        auto ev = static_cast<QApplicationStateChangeEvent*>(event);
+
+        if (m_prevAppState == Qt::ApplicationActive
+                && ev->applicationState() == Qt::ApplicationActive) {
+            emit clickedOnDock();
+        }
+        m_prevAppState = ev->applicationState();
+    }
+#endif
+    return QApplication::event(event);
 }
 
 void Application::setupWizardFinished(int status)
@@ -1121,7 +1183,7 @@ void Application::setApplicationTheme(const QString& name, bool initial)
 
 void Application::setIconTheme(const QString& name)
 {
-    XdgIcon::setThemeName(name);
+    QIcon::setThemeName(name);
 }
 
 QIcon Application::getThemedIcon(const QString& name)
@@ -1129,7 +1191,7 @@ QIcon Application::getThemedIcon(const QString& name)
     if(name == "logo") {
         return QIcon(":/org.polymc.PolyMC.svg");
     }
-    return XdgIcon::fromTheme(name);
+    return QIcon::fromTheme(name);
 }
 
 bool Application::openJsonEditor(const QString &filename)
@@ -1491,13 +1553,22 @@ shared_qobject_ptr<Meta::Index> Application::metadataIndex()
     return m_metadataIndex;
 }
 
-QString Application::getJarsPath()
+QString Application::getJarPath(QString jarFile)
 {
-    if(m_jarsPath.isEmpty())
+    QStringList potentialPaths = {
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+        FS::PathCombine(m_rootPath, "share/jars"),
+#endif
+        FS::PathCombine(m_rootPath, "jars"),
+        FS::PathCombine(applicationDirPath(), "jars")
+    };
+    for(QString p : potentialPaths)
     {
-        return FS::PathCombine(QCoreApplication::applicationDirPath(), "jars");
+        QString jarPath = FS::PathCombine(p, jarFile);
+        if (QFileInfo(jarPath).isFile())
+            return jarPath;
     }
-    return FS::PathCombine(m_rootPath, m_jarsPath);
+    return {};
 }
 
 QString Application::getMSAClientID()
@@ -1508,4 +1579,35 @@ QString Application::getMSAClientID()
     }
 
     return BuildConfig.MSA_CLIENT_ID;
+}
+
+QString Application::getCurseKey()
+{
+    QString keyOverride = m_settings->get("CFKeyOverride").toString();
+    if (!keyOverride.isEmpty()) {
+        return keyOverride;
+    }
+
+    return BuildConfig.CURSEFORGE_API_KEY;
+}
+
+QString Application::getUserAgent()
+{
+    QString uaOverride = m_settings->get("UserAgentOverride").toString();
+    if (!uaOverride.isEmpty()) {
+        return uaOverride.replace("$LAUNCHER_VER", BuildConfig.printableVersionString());
+    }
+
+    return BuildConfig.USER_AGENT;
+}
+
+QString Application::getUserAgentUncached()
+{
+    QString uaOverride = m_settings->get("UserAgentOverride").toString();
+    if (!uaOverride.isEmpty()) {
+        uaOverride += " (Uncached)";
+        return uaOverride.replace("$LAUNCHER_VER", BuildConfig.printableVersionString());
+    }
+
+    return BuildConfig.USER_AGENT_UNCACHED;
 }

@@ -40,6 +40,7 @@
 
 #include <QByteArray>
 #include <QCryptographicHash>
+#include <QQueue>
 #include <QString>
 #include <QUrl>
 #include <QVector>
@@ -48,22 +49,32 @@ class MinecraftInstance;
 
 namespace Modrinth {
 
-struct File
-{
+struct File {
     QString path;
 
     QCryptographicHash::Algorithm hashAlgorithm;
     QByteArray hash;
-    // TODO: should this support multiple download URLs, like the JSON does?
-    QUrl download;
+    QQueue<QUrl> downloads;
+};
+
+struct DonationData {
+    QString id;
+    QString platform;
+    QString url;
 };
 
 struct ModpackExtra {
     QString body;
 
     QString projectUrl;
+
+    QString issuesUrl;
     QString sourceUrl;
     QString wikiUrl;
+    QString discordUrl;
+
+    QList<DonationData> donate;
+
 };
 
 struct ModpackVersion {

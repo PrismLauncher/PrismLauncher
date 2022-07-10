@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>491</width>
-    <height>474</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -30,56 +30,91 @@
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string notr="true">Tab 1</string>
+       <string notr="true">Services</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QGroupBox" name="groupBox_paste">
          <property name="title">
-          <string>&amp;Pastebin URL</string>
+          <string>&amp;Pastebin Service</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="Line" name="line">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
+           <widget class="QLabel" name="pasteServiceTypeLabel">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: only input that starts with &lt;span style=&quot; font-weight:600;&quot;&gt;http://&lt;/span&gt; or &lt;span style=&quot; font-weight:600;&quot;&gt;https://&lt;/span&gt; will be accepted.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>Paste Service &amp;Type</string>
             </property>
-            <property name="scaledContents">
-             <bool>false</bool>
+            <property name="buddy">
+             <cstring>pasteTypeComboBox</cstring>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="urlChoices">
-            <property name="editable">
+           <widget class="QComboBox" name="pasteTypeComboBox"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="baseURLLabel">
+            <property name="text">
+             <string>Base &amp;URL</string>
+            </property>
+            <property name="buddy">
+             <cstring>baseURLEntry</cstring>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="baseURLEntry">
+            <property name="placeholderText">
+             <string/>
+            </property>
+            <property name="clearButtonEnabled">
              <bool>true</bool>
             </property>
-            <property name="insertPolicy">
-             <enum>QComboBox::NoInsert</enum>
-            </property>
-            <item>
-             <property name="text">
-              <string notr="true">https://0x0.st</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="baseURLNote">
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Here you can choose from a predefined list of paste services, or input the URL of a different paste service of your choice, provided it supports the same protocol as 0x0.st, that is POST a file parameter to the URL and return a link in the response body.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>Note: you probably want to change or clear the Base URL after changing the paste service type.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_meta">
+         <property name="title">
+          <string>Meta&amp;data Server</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>You can set this to a third-party metadata server to use patched libraries or other hacks.</string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="metaURL">
+            <property name="placeholderText">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Enter a custom URL for meta here.</string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
@@ -96,18 +131,31 @@
         </widget>
        </item>
        <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>API Keys</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
         <widget class="QGroupBox" name="groupBox_msa">
          <property name="title">
           <string>&amp;Microsoft Authentication</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="Line" name="line_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
           <item>
            <widget class="QLabel" name="label_3">
             <property name="text">
@@ -148,7 +196,97 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_curse">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="title">
+          <string>&amp;CurseForge Core API</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Note: you probably don't need to set this if CurseForge already works.</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Enter a custom API Key for CurseForge here. </string>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::RichText</enum>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+            <property name="openExternalLinks">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLineEdit" name="curseKey">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="placeholderText">
+             <string>(Default)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>Miscellaneous</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QGroupBox" name="groupBox_ua">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>User Agent</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QLineEdit" name="userAgentLineEdit"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="userAgentLabel">
+            <property name="text">
+             <string>Enter a custom User Agent here. The special string $LAUNCHER_VER will be replaced with the version of the launcher.</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -166,9 +304,6 @@
    </item>
   </layout>
  </widget>
- <tabstops>
-  <tabstop>tabWidget</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>

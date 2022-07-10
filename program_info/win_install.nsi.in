@@ -1,0 +1,217 @@
+!include "FileFunc.nsh"
+!include "LogicLib.nsh"
+!include "MUI2.nsh"
+
+Unicode true
+
+Name "@Launcher_CommonName@"
+InstallDir "$LOCALAPPDATA\Programs\@Launcher_CommonName@"
+InstallDirRegKey HKCU "Software\@Launcher_CommonName@" "InstallDir"
+RequestExecutionLevel user
+OutFile "../@Launcher_CommonName@-Setup.exe"
+
+!define MUI_ICON "../@Launcher_Branding_ICO@"
+
+;--------------------------------
+
+; Pages
+
+!insertmacro MUI_PAGE_WELCOME
+!define MUI_COMPONENTSPAGE_NODESC
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!define MUI_FINISHPAGE_RUN "$InstDir\@Launcher_APP_BINARY_NAME@.exe"
+!insertmacro MUI_PAGE_FINISH
+
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+;--------------------------------
+
+; Languages
+
+!insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_LANGUAGE "French"
+!insertmacro MUI_LANGUAGE "German"
+!insertmacro MUI_LANGUAGE "Spanish"
+!insertmacro MUI_LANGUAGE "SpanishInternational"
+!insertmacro MUI_LANGUAGE "SimpChinese"
+!insertmacro MUI_LANGUAGE "TradChinese"
+!insertmacro MUI_LANGUAGE "Japanese"
+!insertmacro MUI_LANGUAGE "Korean"
+!insertmacro MUI_LANGUAGE "Italian"
+!insertmacro MUI_LANGUAGE "Dutch"
+!insertmacro MUI_LANGUAGE "Danish"
+!insertmacro MUI_LANGUAGE "Swedish"
+!insertmacro MUI_LANGUAGE "Norwegian"
+!insertmacro MUI_LANGUAGE "NorwegianNynorsk"
+!insertmacro MUI_LANGUAGE "Finnish"
+!insertmacro MUI_LANGUAGE "Greek"
+!insertmacro MUI_LANGUAGE "Russian"
+!insertmacro MUI_LANGUAGE "Portuguese"
+!insertmacro MUI_LANGUAGE "PortugueseBR"
+!insertmacro MUI_LANGUAGE "Polish"
+!insertmacro MUI_LANGUAGE "Ukrainian"
+!insertmacro MUI_LANGUAGE "Czech"
+!insertmacro MUI_LANGUAGE "Slovak"
+!insertmacro MUI_LANGUAGE "Croatian"
+!insertmacro MUI_LANGUAGE "Bulgarian"
+!insertmacro MUI_LANGUAGE "Hungarian"
+!insertmacro MUI_LANGUAGE "Thai"
+!insertmacro MUI_LANGUAGE "Romanian"
+!insertmacro MUI_LANGUAGE "Latvian"
+!insertmacro MUI_LANGUAGE "Macedonian"
+!insertmacro MUI_LANGUAGE "Estonian"
+!insertmacro MUI_LANGUAGE "Turkish"
+!insertmacro MUI_LANGUAGE "Lithuanian"
+!insertmacro MUI_LANGUAGE "Slovenian"
+!insertmacro MUI_LANGUAGE "Serbian"
+!insertmacro MUI_LANGUAGE "SerbianLatin"
+!insertmacro MUI_LANGUAGE "Arabic"
+!insertmacro MUI_LANGUAGE "Farsi"
+!insertmacro MUI_LANGUAGE "Hebrew"
+!insertmacro MUI_LANGUAGE "Indonesian"
+!insertmacro MUI_LANGUAGE "Mongolian"
+!insertmacro MUI_LANGUAGE "Luxembourgish"
+!insertmacro MUI_LANGUAGE "Albanian"
+!insertmacro MUI_LANGUAGE "Breton"
+!insertmacro MUI_LANGUAGE "Belarusian"
+!insertmacro MUI_LANGUAGE "Icelandic"
+!insertmacro MUI_LANGUAGE "Malay"
+!insertmacro MUI_LANGUAGE "Bosnian"
+!insertmacro MUI_LANGUAGE "Kurdish"
+!insertmacro MUI_LANGUAGE "Irish"
+!insertmacro MUI_LANGUAGE "Uzbek"
+!insertmacro MUI_LANGUAGE "Galician"
+!insertmacro MUI_LANGUAGE "Afrikaans"
+!insertmacro MUI_LANGUAGE "Catalan"
+!insertmacro MUI_LANGUAGE "Esperanto"
+!insertmacro MUI_LANGUAGE "Asturian"
+!insertmacro MUI_LANGUAGE "Basque"
+!insertmacro MUI_LANGUAGE "Pashto"
+!insertmacro MUI_LANGUAGE "ScotsGaelic"
+!insertmacro MUI_LANGUAGE "Georgian"
+!insertmacro MUI_LANGUAGE "Vietnamese"
+!insertmacro MUI_LANGUAGE "Welsh"
+!insertmacro MUI_LANGUAGE "Armenian"
+!insertmacro MUI_LANGUAGE "Corsican"
+!insertmacro MUI_LANGUAGE "Tatar"
+!insertmacro MUI_LANGUAGE "Hindi"
+
+;--------------------------------
+
+; Version info
+VIProductVersion "@Launcher_RELEASE_VERSION_NAME4@"
+VIFileVersion "@Launcher_RELEASE_VERSION_NAME4@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "@Launcher_CommonName@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "@Launcher_CommonName@ Installer"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "@Launcher_Copyright@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "@Launcher_RELEASE_VERSION_NAME4@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_RELEASE_VERSION_NAME4@"
+
+;--------------------------------
+
+; The stuff to install
+Section "@Launcher_CommonName@"
+
+  SectionIn RO
+
+  nsExec::Exec /TIMEOUT=2000 'TaskKill /IM @Launcher_APP_BINARY_NAME@.exe /F'
+
+  SetOutPath $INSTDIR
+
+  File "@Launcher_APP_BINARY_NAME@.exe"
+  File "qt.conf"
+  File *.dll
+  File /r "iconengines"
+  File /r "imageformats"
+  File /r "jars"
+  File /r "platforms"
+  File /r "styles"
+  File /nonfatal /r "tls"
+
+  ; Write the installation path into the registry
+  WriteRegStr HKCU Software\@Launcher_CommonName@ "InstallDir" "$INSTDIR"
+
+  ; Write the uninstall keys for Windows
+  ${GetParameters} $R0
+  ${GetOptions} $R0 "/NoUninstaller" $R1
+  ${If} ${Errors}
+    !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\@Launcher_CommonName@"
+    WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "@Launcher_CommonName@"
+    WriteRegStr HKCU "${UNINST_KEY}" "DisplayIcon" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe"
+    WriteRegStr HKCU "${UNINST_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe"'
+    WriteRegStr HKCU "${UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
+    WriteRegStr HKCU "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
+    WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "@Launcher_CommonName@ Contributors"
+    WriteRegStr HKCU "${UNINST_KEY}" "Version" "@Launcher_RELEASE_VERSION_NAME4@"
+    WriteRegStr HKCU "${UNINST_KEY}" "DisplayVersion" "@Launcher_RELEASE_VERSION_NAME@"
+    WriteRegStr HKCU "${UNINST_KEY}" "VersionMajor" "@Launcher_VERSION_MAJOR@"
+    WriteRegStr HKCU "${UNINST_KEY}" "VersionMinor" "@Launcher_VERSION_MINOR@"
+    ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+    IntFmt $0 "0x%08X" $0
+    WriteRegDWORD HKCU "${UNINST_KEY}" "EstimatedSize" "$0"
+    WriteRegDWORD HKCU "${UNINST_KEY}" "NoModify" 1
+    WriteRegDWORD HKCU "${UNINST_KEY}" "NoRepair" 1
+    WriteUninstaller "$INSTDIR\uninstall.exe"
+  ${EndIf}
+
+SectionEnd
+
+Section "Start Menu Shortcut" SM_SHORTCUTS
+
+  CreateShortcut "$SMPROGRAMS\@Launcher_CommonName@.lnk" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" 0
+
+SectionEnd
+
+Section /o "Desktop Shortcut" DESKTOP_SHORTCUTS
+
+  CreateShortcut "$DESKTOP\@Launcher_CommonName@.lnk" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" 0
+
+SectionEnd
+
+;--------------------------------
+
+; Uninstaller
+
+Section "Uninstall"
+
+  nsExec::Exec /TIMEOUT=2000 'TaskKill /IM @Launcher_APP_BINARY_NAME@.exe /F'
+
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\@Launcher_CommonName@"
+  DeleteRegKey HKCU SOFTWARE\@Launcher_CommonName@
+
+  Delete $INSTDIR\@Launcher_APP_BINARY_NAME@.exe
+  Delete $INSTDIR\qt.conf
+  Delete $INSTDIR\*.dll
+
+  Delete $INSTDIR\uninstall.exe
+
+  RMDir /r $INSTDIR\iconengines
+  RMDir /r $INSTDIR\imageformats
+  RMDir /r $INSTDIR\jars
+  RMDir /r $INSTDIR\platforms
+  RMDir /r $INSTDIR\styles
+  RMDir /r $INSTDIR\tls
+
+  Delete "$SMPROGRAMS\@Launcher_CommonName@.lnk"
+  Delete "$DESKTOP\@Launcher_CommonName@.lnk"
+
+  RMDir "$INSTDIR"
+
+SectionEnd
+
+;--------------------------------
+
+; Extra command line parameters
+
+Function .onInit
+${GetParameters} $R0
+${GetOptions} $R0 "/NoShortcuts" $R1
+${IfNot} ${Errors}
+${OrIf} ${FileExists} "$InstDir\@Launcher_APP_BINARY_NAME@.exe"
+  !insertmacro UnselectSection ${SM_SHORTCUTS}
+  !insertmacro UnselectSection ${DESKTOP_SHORTCUTS}
+${EndIf}
+FunctionEnd

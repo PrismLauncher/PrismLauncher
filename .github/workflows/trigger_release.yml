@@ -42,11 +42,14 @@ jobs:
 
           for d in PolyMC-Windows-*; do
             cd "${d}" || continue
-            ARCH="$(echo -n ${d} | cut -d '-' -f 3)"
+            LEGACY="$(echo -n ${d} | grep -o Legacy || true)"
+            INST="$(echo -n ${d} | grep -o Setup || true)"
             PORT="$(echo -n ${d} | grep -o Portable || true)"
-            NAME="PolyMC-Windows-${ARCH}"
+            NAME="PolyMC-Windows"
+            test -z "${LEGACY}" || NAME="${NAME}-Legacy"
             test -z "${PORT}" || NAME="${NAME}-Portable"
-            zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *
+            test -z "${INST}" || mv PolyMC-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
+            test -n "${INST}" || zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *
             cd ..
           done
 
@@ -66,7 +69,9 @@ jobs:
             PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
             PolyMC-Windows-i686-${{ env.VERSION }}.zip
             PolyMC-Windows-i686-Portable-${{ env.VERSION }}.zip
+            PolyMC-Windows-i686-Setup-${{ env.VERSION }}.exe
             PolyMC-Windows-x86_64-${{ env.VERSION }}.zip
             PolyMC-Windows-x86_64-Portable-${{ env.VERSION }}.zip
+            PolyMC-Windows-x86_64-Setup-${{ env.VERSION }}.exe
             PolyMC-macOS-${{ env.VERSION }}.tar.gz
             PolyMC-${{ env.VERSION }}.tar.gz

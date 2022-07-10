@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
- *  Copyright (c) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ class FlameModPage : public ModPage {
     inline auto debugName() const -> QString override { return "Flame"; }
     inline auto metaEntryBase() const -> QString override { return "FlameMods"; };
 
-    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderType loader = ModAPI::Unspecified) const -> bool override;
+    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders = ModAPI::Unspecified) const -> bool override;
 
     auto shouldDisplay() const -> bool override;
 };

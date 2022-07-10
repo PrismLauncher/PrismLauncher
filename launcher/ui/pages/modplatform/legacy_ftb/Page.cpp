@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -151,7 +152,7 @@ void Page::openedImpl()
 
         ftbFetchTask->fetch();
         ftbPrivatePacks->load();
-        ftbFetchTask->fetchPrivate(ftbPrivatePacks->getCurrentPackCodes().toList());
+        ftbFetchTask->fetchPrivate(ftbPrivatePacks->getCurrentPackCodes().values());
         initialized = true;
     }
     suggestCurrent();
@@ -175,7 +176,7 @@ void Page::suggestCurrent()
         return;
     }
 
-    dialog->setSuggestedPack(selected.name, new PackInstallTask(APPLICATION->network(), selected, selectedVersion));
+    dialog->setSuggestedPack(selected.name + " " + selectedVersion, new PackInstallTask(APPLICATION->network(), selected, selectedVersion));
     QString editedLogoName;
     if(selected.logo.toLower().startsWith("ftb"))
     {

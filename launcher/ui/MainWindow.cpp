@@ -1,51 +1,72 @@
-/* Copyright 2013-2021 MultiMC Contributors
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
- * Authors: Andrew Okin
- *          Peterix
- *          Orochimarufan <orochimarufan.x3@gmail.com>
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Authors: Andrew Okin
+ *               Peterix
+ *               Orochimarufan <orochimarufan.x3@gmail.com>
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
+
 #include "Application.h"
 #include "BuildConfig.h"
 
 #include "MainWindow.h"
 
-#include <QtCore/QVariant>
-#include <QtCore/QUrl>
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
+#include <QVariant>
+#include <QUrl>
+#include <QDir>
+#include <QFileInfo>
 
-#include <QtGui/QKeyEvent>
+#include <QKeyEvent>
+#include <QAction>
 
-#include <QtWidgets/QAction>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QButtonGroup>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QHeaderView>
-#include <QtWidgets/QMainWindow>
-#include <QtWidgets/QStatusBar>
-#include <QtWidgets/QToolBar>
-#include <QtWidgets/QWidget>
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QMenuBar>
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QInputDialog>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QToolButton>
-#include <QtWidgets/QWidgetAction>
-#include <QtWidgets/QProgressDialog>
-#include <QtWidgets/QShortcut>
+#include <QApplication>
+#include <QButtonGroup>
+#include <QHBoxLayout>
+#include <QHeaderView>
+#include <QMainWindow>
+#include <QStatusBar>
+#include <QToolBar>
+#include <QWidget>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QLabel>
+#include <QToolButton>
+#include <QWidgetAction>
+#include <QProgressDialog>
+#include <QShortcut>
 
 #include <BaseInstance.h>
 #include <InstanceList.h>
@@ -74,6 +95,7 @@
 #include "ui/instanceview/InstanceDelegate.h"
 #include "ui/widgets/LabeledToolButton.h"
 #include "ui/dialogs/NewInstanceDialog.h"
+#include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/VersionSelectDialog.h"
@@ -203,6 +225,7 @@ public:
     TranslatedAction actionMoreNews;
     TranslatedAction actionManageAccounts;
     TranslatedAction actionLaunchInstance;
+    TranslatedAction actionKillInstance;
     TranslatedAction actionRenameInstance;
     TranslatedAction actionChangeInstGroup;
     TranslatedAction actionChangeInstIcon;
@@ -212,7 +235,6 @@ public:
     TranslatedAction actionMods;
     TranslatedAction actionViewSelectedInstFolder;
     TranslatedAction actionViewSelectedMCFolder;
-    TranslatedAction actionViewSelectedModsFolder;
     TranslatedAction actionDeleteInstance;
     TranslatedAction actionConfig_Folder;
     TranslatedAction actionCAT;
@@ -261,27 +283,6 @@ public:
     TranslatedToolbar instanceToolBar;
     TranslatedToolbar newsToolBar;
     QVector<TranslatedToolbar *> all_toolbars;
-    bool m_kill = false;
-
-    void updateLaunchAction()
-    {
-        if(m_kill)
-        {
-            actionLaunchInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Kill"));
-            actionLaunchInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Kill the running instance"));
-        }
-        else
-        {
-            actionLaunchInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Launch"));
-            actionLaunchInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Launch the selected instance."));
-        }
-        actionLaunchInstance.retranslate();
-    }
-    void setLaunchAction(bool kill)
-    {
-        m_kill = kill;
-        updateLaunchAction();
-    }
 
     void createMainToolbarActions(MainWindow *MainWindow)
     {
@@ -482,9 +483,12 @@ public:
         menuBar->setVisible(APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
 
         fileMenu = menuBar->addMenu(tr("&File"));
+        // Workaround for QTBUG-94802 (https://bugreports.qt.io/browse/QTBUG-94802); also present for other menus
+        fileMenu->setSeparatorsCollapsible(false);
         fileMenu->addAction(actionAddInstance);
         fileMenu->addAction(actionLaunchInstance);
         fileMenu->addAction(actionLaunchInstanceOffline);
+        fileMenu->addAction(actionKillInstance);
         fileMenu->addAction(actionCloseWindow);
         fileMenu->addSeparator();
         fileMenu->addAction(actionEditInstance);
@@ -505,15 +509,18 @@ public:
         fileMenu->addAction(actionSettings);
 
         viewMenu = menuBar->addMenu(tr("&View"));
+        viewMenu->setSeparatorsCollapsible(false);
         viewMenu->addAction(actionCAT);
         viewMenu->addSeparator();
 
         menuBar->addMenu(foldersMenu);
 
         profileMenu = menuBar->addMenu(tr("&Profiles"));
+        profileMenu->setSeparatorsCollapsible(false);
         profileMenu->addAction(actionManageAccounts);
 
         helpMenu = menuBar->addMenu(tr("&Help"));
+        helpMenu->setSeparatorsCollapsible(false);
         helpMenu->addAction(actionAbout);
         helpMenu->addAction(actionOpenWiki);
         helpMenu->addAction(actionNewsMenuBar);
@@ -559,10 +566,9 @@ public:
     }
 
     // "Instance actions" are actions that require an instance to be selected (i.e. "new instance" is not here)
+    // Actions that also require other conditions (e.g. a running instance) won't be changed.
     void setInstanceActionsEnabled(bool enabled)
     {
-        actionLaunchInstance->setEnabled(enabled);
-        actionLaunchInstanceOffline->setEnabled(enabled);
         actionEditInstance->setEnabled(enabled);
         actionEditInstNotes->setEnabled(enabled);
         actionMods->setEnabled(enabled);
@@ -649,6 +655,14 @@ public:
         actionLaunchInstanceOffline.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Launch the selected instance in offline mode."));
         all_actions.append(&actionLaunchInstanceOffline);
 
+        actionKillInstance = TranslatedAction(MainWindow);
+        actionKillInstance->setObjectName(QStringLiteral("actionKillInstance"));
+        actionKillInstance->setDisabled(true);
+        actionKillInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Kill"));
+        actionKillInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Kill the running instance"));
+        actionKillInstance->setShortcut(QKeySequence(tr("Ctrl+K")));
+        all_actions.append(&actionKillInstance);
+
         actionEditInstance = TranslatedAction(MainWindow);
         actionEditInstance->setObjectName(QStringLiteral("actionEditInstance"));
         actionEditInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Edit Inst&ance..."));
@@ -693,14 +707,6 @@ public:
         actionViewSelectedMCFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's Minecraft folder in a file browser."));
         actionViewSelectedMCFolder->setShortcut(QKeySequence(tr("Ctrl+M")));
         all_actions.append(&actionViewSelectedMCFolder);
-
-        /*
-        actionViewSelectedModsFolder = TranslatedAction(MainWindow);
-        actionViewSelectedModsFolder->setObjectName(QStringLiteral("actionViewSelectedModsFolder"));
-        actionViewSelectedModsFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Mods Folder"));
-        actionViewSelectedModsFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's mods folder in a file browser."));
-        all_actions.append(&actionViewSelectedModsFolder);
-        */
 
         actionConfig_Folder = TranslatedAction(MainWindow);
         actionConfig_Folder->setObjectName(QStringLiteral("actionConfig_Folder"));
@@ -764,6 +770,7 @@ public:
 
         instanceToolBar->addAction(actionLaunchInstance);
         instanceToolBar->addAction(actionLaunchInstanceOffline);
+        instanceToolBar->addAction(actionKillInstance);
 
         instanceToolBar->addSeparator();
 
@@ -777,9 +784,6 @@ public:
         instanceToolBar->addSeparator();
 
         instanceToolBar->addAction(actionViewSelectedMCFolder);
-        /*
-        instanceToolBar->addAction(actionViewSelectedModsFolder);
-        */
         instanceToolBar->addAction(actionConfig_Folder);
         instanceToolBar->addAction(actionViewSelectedInstFolder);
 
@@ -801,7 +805,7 @@ public:
         }
         MainWindow->resize(800, 600);
         MainWindow->setWindowIcon(APPLICATION->getThemedIcon("logo"));
-        MainWindow->setWindowTitle(BuildConfig.LAUNCHER_DISPLAYNAME);
+        MainWindow->setWindowTitle(APPLICATION->applicationDisplayName());
 #ifndef QT_NO_ACCESSIBILITY
         MainWindow->setAccessibleName(BuildConfig.LAUNCHER_NAME);
 #endif
@@ -836,8 +840,6 @@ public:
 
     void retranslateUi(MainWindow *MainWindow)
     {
-        QString winTitle = tr("%1 - Version %2", "Launcher - Version X").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString());
-        MainWindow->setWindowTitle(winTitle);
         // all the actions
         for(auto * item: all_actions)
         {
@@ -1169,14 +1171,10 @@ void MainWindow::updateToolsMenu()
     QToolButton *launchButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstance));
     QToolButton *launchOfflineButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstanceOffline));
 
-    if(m_selectedInstance && m_selectedInstance->isRunning())
-    {
-        ui->actionLaunchInstance->setMenu(nullptr);
-        ui->actionLaunchInstanceOffline->setMenu(nullptr);
-        launchButton->setPopupMode(QToolButton::InstantPopup);
-        launchOfflineButton->setPopupMode(QToolButton::InstantPopup);
-        return;
-    }
+    bool currentInstanceRunning = m_selectedInstance && m_selectedInstance->isRunning();
+
+    ui->actionLaunchInstance->setDisabled(!m_selectedInstance || currentInstanceRunning);
+    ui->actionLaunchInstanceOffline->setDisabled(!m_selectedInstance || currentInstanceRunning);
 
     QMenu *launchMenu = ui->actionLaunchInstance->menu();
     QMenu *launchOfflineMenu = ui->actionLaunchInstanceOffline->menu();
@@ -1204,6 +1202,9 @@ void MainWindow::updateToolsMenu()
     normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
     if (m_selectedInstance)
     {
+        normalLaunch->setEnabled(m_selectedInstance->canLaunch());
+        normalLaunchOffline->setEnabled(m_selectedInstance->canLaunch());
+
         connect(normalLaunch, &QAction::triggered, [this]() {
             APPLICATION->launch(m_selectedInstance, true);
         });
@@ -1234,6 +1235,9 @@ void MainWindow::updateToolsMenu()
         }
         else if (m_selectedInstance)
         {
+            profilerAction->setEnabled(m_selectedInstance->canLaunch());
+            profilerOfflineAction->setEnabled(m_selectedInstance->canLaunch());
+
             connect(profilerAction, &QAction::triggered, [this, profiler]()
                     {
                         APPLICATION->launch(m_selectedInstance, true, profiler.get());
@@ -1486,7 +1490,11 @@ void MainWindow::updateNotAvailable()
 
 QList<int> stringToIntList(const QString &string)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    QStringList split = string.split(',', Qt::SkipEmptyParts);
+#else
     QStringList split = string.split(',', QString::SkipEmptyParts);
+#endif
     QList<int> out;
     for (int i = 0; i < split.size(); ++i)
     {
@@ -1876,12 +1884,10 @@ void MainWindow::globalSettingsClosed()
     updateMainToolBar();
     updateToolsMenu();
     updateStatusCenter();
+    // This needs to be done to prevent UI elements disappearing in the event the config is changed
+    // but PolyMC exits abnormally, causing the window state to never be saved:
+    APPLICATION->settings()->set("MainWindowState", saveState().toBase64());
     update();
-}
-
-void MainWindow::on_actionInstanceSettings_triggered()
-{
-    APPLICATION->showInstanceWindow(m_selectedInstance, "settings");
 }
 
 void MainWindow::on_actionEditInstNotes_triggered()
@@ -1926,20 +1932,17 @@ void MainWindow::on_actionOpenWiki_triggered()
 
 void MainWindow::on_actionMoreNews_triggered()
 {
-    DesktopServices::openUrl(QUrl(BuildConfig.NEWS_OPEN_URL));
+    auto entries = m_newsChecker->getNewsEntries();
+    NewsDialog news_dialog(entries, this);
+    news_dialog.exec();
 }
 
 void MainWindow::newsButtonClicked()
 {
-    QList<NewsEntryPtr> entries = m_newsChecker->getNewsEntries();
-    if (entries.count() > 0)
-    {
-        DesktopServices::openUrl(QUrl(entries[0]->link));
-    }
-    else
-    {
-        DesktopServices::openUrl(QUrl(BuildConfig.NEWS_OPEN_URL));
-    }
+    auto entries = m_newsChecker->getNewsEntries();
+    NewsDialog news_dialog(entries, this);
+    news_dialog.toggleArticleList();
+    news_dialog.exec();
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -2009,20 +2012,6 @@ void MainWindow::on_actionViewSelectedMCFolder_triggered()
     }
 }
 
-void MainWindow::on_actionViewSelectedModsFolder_triggered()
-{
-    if (m_selectedInstance)
-    {
-        QString str = m_selectedInstance->modsRoot();
-        if (!FS::ensureFilePathExists(str))
-        {
-            // TODO: report error
-            return;
-        }
-        DesktopServices::openDirectory(QDir(str).absolutePath());
-    }
-}
-
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     // Save the window state and geometry.
@@ -2055,15 +2044,7 @@ void MainWindow::instanceActivated(QModelIndex index)
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
-    if (!m_selectedInstance)
-    {
-        return;
-    }
-    if(m_selectedInstance->isRunning())
-    {
-        APPLICATION->kill(m_selectedInstance);
-    }
-    else
+    if(m_selectedInstance && !m_selectedInstance->isRunning())
     {
         APPLICATION->launch(m_selectedInstance);
     }
@@ -2079,6 +2060,14 @@ void MainWindow::on_actionLaunchInstanceOffline_triggered()
     if (m_selectedInstance)
     {
         APPLICATION->launch(m_selectedInstance, false);
+    }
+}
+
+void MainWindow::on_actionKillInstance_triggered()
+{
+    if(m_selectedInstance && m_selectedInstance->isRunning())
+    {
+        APPLICATION->kill(m_selectedInstance);
     }
 }
 
@@ -2106,23 +2095,18 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         selectionBad();
         return;
     }
+    if (m_selectedInstance) {
+        disconnect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
+    }
     QString id = current.data(InstanceList::InstanceIDRole).toString();
     m_selectedInstance = APPLICATION->instances()->getInstanceById(id);
     if (m_selectedInstance)
     {
         ui->instanceToolBar->setEnabled(true);
         ui->setInstanceActionsEnabled(true);
-        if(m_selectedInstance->isRunning())
-        {
-            ui->actionLaunchInstance->setEnabled(true);
-            ui->setLaunchAction(true);
-        }
-        else
-        {
-            ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
-            ui->setLaunchAction(false);
-        }
+        ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
         ui->actionLaunchInstanceOffline->setEnabled(m_selectedInstance->canLaunch());
+        ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
         ui->renameButton->setText(m_selectedInstance->name());
         m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
@@ -2132,11 +2116,16 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         updateToolsMenu();
 
         APPLICATION->settings()->set("SelectedInstance", m_selectedInstance->id());
+
+        connect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
     }
     else
     {
         ui->instanceToolBar->setEnabled(false);
         ui->setInstanceActionsEnabled(false);
+        ui->actionLaunchInstance->setEnabled(false);
+        ui->actionLaunchInstanceOffline->setEnabled(false);
+        ui->actionKillInstance->setEnabled(false);
         APPLICATION->settings()->set("SelectedInstance", QString());
         selectionBad();
         return;
@@ -2166,6 +2155,7 @@ void MainWindow::selectionBad()
     statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
     ui->setInstanceActionsEnabled(false);
+    updateToolsMenu();
     ui->renameButton->setText(tr("Rename Instance"));
     updateInstanceToolIcon("grass");
 
@@ -2220,4 +2210,10 @@ void MainWindow::updateStatusCenter()
     if (timePlayed > 0) {
         m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
     }
+}
+
+void MainWindow::refreshCurrentInstance(bool running)
+{
+    auto current = view->selectionModel()->currentIndex();
+    instanceChanged(current, current);
 }

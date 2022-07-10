@@ -6,7 +6,6 @@ void Flame::loadIndexedPack(Flame::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireInteger(obj, "id");
     pack.name = Json::requireString(obj, "name");
-    pack.websiteUrl = Json::ensureString(Json::ensureObject(obj, "links"), "websiteUrl", "");
     pack.description = Json::ensureString(obj, "summary", "");
 
     auto logo = Json::requireObject(obj, "logo");
@@ -46,6 +45,32 @@ void Flame::loadIndexedPack(Flame::IndexedPack& pack, QJsonObject& obj)
     if (!found) {
         throw JSONValidationError(QString("Pack with no good file, skipping: %1").arg(pack.name));
     }
+
+    loadIndexedInfo(pack, obj);
+}
+
+void Flame::loadIndexedInfo(IndexedPack& pack, QJsonObject& obj)
+{
+    auto links_obj = Json::ensureObject(obj, "links");
+
+    pack.extra.websiteUrl = Json::ensureString(links_obj, "websiteUrl");
+    if(pack.extra.websiteUrl.endsWith('/'))
+        pack.extra.websiteUrl.chop(1);
+
+    pack.extra.issuesUrl = Json::ensureString(links_obj, "issuesUrl");
+    if(pack.extra.issuesUrl.endsWith('/'))
+        pack.extra.issuesUrl.chop(1);
+
+    pack.extra.sourceUrl = Json::ensureString(links_obj, "sourceUrl");
+    if(pack.extra.sourceUrl.endsWith('/'))
+        pack.extra.sourceUrl.chop(1);
+
+    pack.extra.wikiUrl = Json::ensureString(links_obj, "wikiUrl");
+    if(pack.extra.wikiUrl.endsWith('/'))
+        pack.extra.wikiUrl.chop(1);
+
+    pack.extraInfoLoaded = true;
+
 }
 
 void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
@@ -65,8 +90,12 @@ void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
         // pick the latest version supported
         file.mcVersion = versionArray[0].toString();
         file.version = Json::requireString(version, "displayName");
-        file.downloadUrl = Json::requireString(version, "downloadUrl");
-        unsortedVersions.append(file);
+        file.downloadUrl = Json::ensureString(version, "downloadUrl");
+
+        // only add if we have a download URL (third party distribution is enabled)
+        if (!file.downloadUrl.isEmpty()) {
+            unsortedVersions.append(file);
+        }
     }
 
     auto orderSortPredicate = [](const IndexedVersion& a, const IndexedVersion& b) -> bool { return a.fileId > b.fileId; };

@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -97,7 +98,7 @@ private slots:
     void on_actionMove_Down_triggered();
     void on_actionJoin_triggered();
 
-    void on_RunningState_changed(bool running);
+    void runningStateChanged(bool running);
 
     void nameEdited(const QString & name);
     void addressEdited(const QString & address);

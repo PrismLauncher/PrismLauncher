@@ -282,6 +282,10 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
         case Qt::DisplayRole:
             switch (index.column())
             {
+            case ProfileNameColumn: {
+                return account->profileName();
+            }
+
             case NameColumn:
                 return account->accountDisplayString();
 
@@ -300,7 +304,7 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
                         return tr("Offline", "Account status");
                     }
                     case AccountState::Online: {
-                        return tr("Online", "Account status");
+                        return tr("Ready", "Account status");
                     }
                     case AccountState::Working: {
                         return tr("Working", "Account status");
@@ -318,10 +322,6 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
                         return tr("Gone", "Account status");
                     }
                 }
-            }
-
-            case ProfileNameColumn: {
-                return account->profileName();
             }
 
             case MigrationColumn: {
@@ -349,7 +349,7 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
         case Qt::CheckStateRole:
             switch (index.column())
             {
-                case NameColumn:
+                case ProfileNameColumn:
                     return account == m_defaultAccount ? Qt::Checked : Qt::Unchecked;
             }
 
@@ -365,6 +365,8 @@ QVariant AccountList::headerData(int section, Qt::Orientation orientation, int r
     case Qt::DisplayRole:
         switch (section)
         {
+        case ProfileNameColumn:
+            return tr("Username");
         case NameColumn:
             return tr("Account");
         case TypeColumn:
@@ -373,8 +375,6 @@ QVariant AccountList::headerData(int section, Qt::Orientation orientation, int r
             return tr("Status");
         case MigrationColumn:
             return tr("Can Migrate?");
-        case ProfileNameColumn:
-            return tr("Profile");
         default:
             return QVariant();
         }
@@ -382,6 +382,8 @@ QVariant AccountList::headerData(int section, Qt::Orientation orientation, int r
     case Qt::ToolTipRole:
         switch (section)
         {
+        case ProfileNameColumn:
+            return tr("Minecraft username associated with the account.");
         case NameColumn:
             return tr("User name of the account.");
         case TypeColumn:
@@ -389,9 +391,7 @@ QVariant AccountList::headerData(int section, Qt::Orientation orientation, int r
         case StatusColumn:
             return tr("Current status of the account.");
         case MigrationColumn:
-            return tr("Can this account migrate to Microsoft account?");
-        case ProfileNameColumn:
-            return tr("Name of the Minecraft profile associated with the account.");
+            return tr("Can this account migrate to a Microsoft account?");
         default:
             return QVariant();
         }

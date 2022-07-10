@@ -15,7 +15,6 @@ CMakeLists.txt.user.*
 /.settings
 /.idea
 /.vscode
-.clang-format
 cmake-build-*/
 Debug
 

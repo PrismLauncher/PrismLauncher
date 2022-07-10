@@ -122,10 +122,10 @@ void ListModel::requestFinished()
     jobPtr.reset();
     remainingPacks.clear();
 
-    QJsonParseError parse_error;
+    QJsonParseError parse_error {};
     QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if(parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from FTB at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qWarning() << "Error while parsing JSON response from ModpacksCH at " << parse_error.offset << " reason: " << parse_error.errorString();
         qWarning() << response;
         return;
     }
@@ -169,7 +169,7 @@ void ListModel::packRequestFinished()
     QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
 
     if(parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from FTB at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qWarning() << "Error while parsing JSON response from ModpacksCH at " << parse_error.offset << " reason: " << parse_error.errorString();
         qWarning() << response;
         return;
     }
@@ -184,7 +184,7 @@ void ListModel::packRequestFinished()
     catch (const JSONValidationError &e)
     {
         qDebug() << QString::fromUtf8(response);
-        qWarning() << "Error while reading pack manifest from FTB: " << e.cause();
+        qWarning() << "Error while reading pack manifest from ModpacksCH: " << e.cause();
         return;
     }
 
@@ -192,7 +192,7 @@ void ListModel::packRequestFinished()
     // ignore those "dud" packs.
     if (pack.versions.empty())
     {
-        qWarning() << "FTB Pack " << pack.id << " ignored. reason: lacking any versions";
+        qWarning() << "ModpacksCH Pack " << pack.id << " ignored. reason: lacking any versions";
     }
     else
     {
@@ -270,7 +270,7 @@ void ListModel::requestLogo(QString logo, QString url)
 
     bool stale = entry->isStale();
 
-    NetJob *job = new NetJob(QString("FTB Icon Download %1").arg(logo), APPLICATION->network());
+    NetJob *job = new NetJob(QString("ModpacksCH Icon Download %1").arg(logo), APPLICATION->network());
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();

@@ -6,13 +6,11 @@ if(WIN32)
 endif()
 
 project(Launcher)
-include(CTest)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
 if(IS_IN_SOURCE_BUILD)
     message(FATAL_ERROR "You are building the Launcher in-source. Please separate the build tree from the source tree.")
 endif()
-
 
 ##################################### Set CMake options #####################################
 set(CMAKE_AUTOMOC ON)
@@ -34,16 +32,18 @@ set(CMAKE_C_STANDARD_REQUIRED true)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
-set(CMAKE_CXX_FLAGS " -Wall -pedantic -Werror -Wno-deprecated-declarations -D_GLIBCXX_USE_CXX11_ABI=0 -fstack-protector-strong --param=ssp-buffer-size=4 -O3 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-Wall -pedantic -D_GLIBCXX_USE_CXX11_ABI=0 -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
 if(UNIX AND APPLE)
-    set(CMAKE_CXX_FLAGS " -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-stdlib=libc++ ${CMAKE_CXX_FLAGS}")
 endif()
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror=return-type")
 
 # Fix build with Qt 5.13
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_DISABLE_DEPRECATED_BEFORE=0x050C00")
+
+# set CXXFLAGS for build targets
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS_RELEASE}")
 
 option(ENABLE_LTO "Enable Link Time Optimization" off)
 
@@ -61,6 +61,16 @@ if(ENABLE_LTO)
     endif()
 endif()
 
+option(BUILD_TESTING "Build the testing tree." ON)
+
+find_package(ECM REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
+include(CTest)
+include(ECMAddTests)
+if (BUILD_TESTING)
+    enable_testing()
+endif()
+
 ##################################### Set Application options #####################################
 
 ######## Set URLs ########
@@ -70,8 +80,8 @@ set(Launcher_HELP_URL "https://polymc.org/wiki/help-pages/%1" CACHE STRING "URL 
 
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR    1)
-set(Launcher_VERSION_MINOR    2)
-set(Launcher_VERSION_HOTFIX   2)
+set(Launcher_VERSION_MINOR    4)
+set(Launcher_VERSION_HOTFIX   0)
 
 # Build number
 set(Launcher_VERSION_BUILD -1 CACHE STRING "Build number. -1 for no build number.")
@@ -88,13 +98,6 @@ set(Launcher_META_URL "https://meta.polymc.org/v1/" CACHE STRING "URL to fetch L
 # Imgur API Client ID
 set(Launcher_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can get from Imgur when you register an application")
 
-# MSA Client ID
-set(Launcher_MSA_CLIENT_ID "549033b2-1532-4d4e-ae77-1bbaa46f9d74" CACHE STRING "Client ID you can get from Microsoft Identity Platform when you register an application")
-
-# CurseForge API Key
-# CHANGE THIS IF YOU FORK THIS PROJECT!
-set(Launcher_CURSEFORGE_API_KEY "$2a$10$1Oqr2MX3O4n/ilhFGc597u8tfI3L2Hyr9/rtWDAMRjghSQV2QUuxq" CACHE STRING "CurseForge API Key")
-
 # Bug tracker URL
 set(Launcher_BUG_TRACKER_URL "https://github.com/PolyMC/PolyMC/issues" CACHE STRING "URL for the bug tracker.")
 
@@ -107,14 +110,28 @@ set(Launcher_MATRIX_URL "https://matrix.to/#/#polymc:matrix.org" CACHE STRING "U
 # Discord URL
 set(Launcher_DISCORD_URL "https://discord.gg/Z52pwxWCHP" CACHE STRING "URL for the Discord guild.")
 
-
-
 # Subreddit URL
 set(Launcher_SUBREDDIT_URL "https://www.reddit.com/r/PolyMCLauncher/" CACHE STRING "URL for the subreddit.")
 
 # Builds
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
 set(Launcher_QT_VERSION_MAJOR "5" CACHE STRING "Major Qt version to build against")
+
+# API Keys
+# NOTE: These API keys are here for convenience. If you rebrand this software or intend to break the terms of service
+# of these platforms, please change these API keys beforehand.
+# Be aware that if you were to use these API keys for malicious purposes they might get revoked, which might cause
+# breakage to thousands of users.
+# If you don't plan to use these features of this software, you can just remove these values.
+
+# By using this key in your builds you accept the terms of use laid down in
+# https://docs.microsoft.com/en-us/legal/microsoft-identity-platform/terms-of-use
+set(Launcher_MSA_CLIENT_ID "549033b2-1532-4d4e-ae77-1bbaa46f9d74" CACHE STRING "Client ID you can get from Microsoft Identity Platform when you register an application")
+
+# By using this key in your builds you accept the terms and conditions laid down in
+# https://support.curseforge.com/en/support/solutions/articles/9000207405-curse-forge-3rd-party-api-terms-and-conditions
+# NOTE: CurseForge requires you to change this if you make any kind of derivative work.
+set(Launcher_CURSEFORGE_API_KEY "$2a$10$1Oqr2MX3O4n/ilhFGc597u8tfI3L2Hyr9/rtWDAMRjghSQV2QUuxq" CACHE STRING "CurseForge API Key")
 
 
 #### Check the current Git commit and branch
@@ -125,6 +142,8 @@ message(STATUS "Git commit: ${Launcher_GIT_COMMIT}")
 message(STATUS "Git refspec: ${Launcher_GIT_REFSPEC}")
 
 set(Launcher_RELEASE_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}")
+set(Launcher_RELEASE_VERSION_NAME4 "${Launcher_RELEASE_VERSION_NAME}.0")
+set(Launcher_RELEASE_VERSION_NAME4_COMMA "${Launcher_VERSION_MAJOR},${Launcher_VERSION_MINOR},${Launcher_VERSION_HOTFIX},0")
 string(TIMESTAMP TODAY "%Y-%m-%d")
 set(Launcher_RELEASE_TIMESTAMP "${TODAY}")
 
@@ -135,14 +154,30 @@ add_custom_target(tcversion echo "\\#\\#teamcity[setParameter name=\\'env.LAUNCH
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
+include(QtVersionlessBackport)
 if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     set(QT_VERSION_MAJOR 5)
     find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml)
 
     if(NOT Launcher_FORCE_BUNDLED_LIBS)
-        find_package(QuaZip-Qt5 1.3)
+        find_package(QuaZip-Qt5 1.3 QUIET)
     endif()
     if (NOT QuaZip-Qt5_FOUND)
+        set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
+        set(FORCE_BUNDLED_QUAZIP 1)
+    endif()
+
+    # Qt 6 sets these by default. Notably causes Windows APIs to use UNICODE strings.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE")
+elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
+    set(QT_VERSION_MAJOR 6)
+    find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml Core5Compat)
+    list(APPEND Launcher_QT_LIBS Qt6::Core5Compat)
+
+    if(NOT Launcher_FORCE_BUNDLED_LIBS)
+        find_package(QuaZip-Qt6 1.3 QUIET)
+    endif()
+    if (NOT QuaZip-Qt6_FOUND)
         set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
         set(FORCE_BUNDLED_QUAZIP 1)
     endif()
@@ -150,15 +185,14 @@ else()
     message(FATAL_ERROR "Qt version ${Launcher_QT_VERSION_MAJOR} is not supported")
 endif()
 
-# The Qt5 cmake files don't provide its install paths, so ask qmake.
-include(QMakeQuery)
-query_qmake(QT_INSTALL_PLUGINS QT_PLUGINS_DIR)
-query_qmake(QT_INSTALL_IMPORTS QT_IMPORTS_DIR)
-query_qmake(QT_INSTALL_LIBS QT_LIBS_DIR)
-query_qmake(QT_INSTALL_LIBEXECS QT_LIBEXECS_DIR)
-query_qmake(QT_HOST_DATA QT_DATA_DIR)
+include(ECMQueryQt)
+ecm_query_qt(QT_PLUGINS_DIR  QT_INSTALL_PLUGINS)
+ecm_query_qt(QT_LIBS_DIR     QT_INSTALL_LIBS)
+ecm_query_qt(QT_LIBEXECS_DIR QT_INSTALL_LIBEXECS)
+ecm_query_qt(QT_DATA_DIR     QT_HOST_DATA)
 set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
 
+# NOTE: Qt 6 already sets this by default
 if (Qt5_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
@@ -226,9 +260,6 @@ elseif(UNIX)
     # Set RPATH
     SET(Launcher_BINARY_RPATH "$ORIGIN/")
 
-    # jars path is determined on runtime, relative to "Application root path", generally /usr or the root of the portable bundle
-    set(Launcher_APP_BINARY_DEFS "-DLAUNCHER_JARS_LOCATION=${JARS_DEST_DIR}")
-
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${LAUNCHER_ICON_DEST_DIR})
@@ -281,12 +312,12 @@ else()
     message(STATUS "Using system QuaZip")
 endif()
 add_subdirectory(libraries/rainbow) # Qt extension for colors
-add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader
 add_subdirectory(libraries/LocalPeer) # fork of a library from Qt solutions
 add_subdirectory(libraries/classparser) # class parser library
 add_subdirectory(libraries/optional-bare)
 add_subdirectory(libraries/tomlc99) # toml parser
 add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too much
+add_subdirectory(libraries/gamemode)
 
 ############################### Built Artifacts ###############################
 

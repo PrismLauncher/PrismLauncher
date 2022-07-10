@@ -1,22 +1,42 @@
-/* Copyright 2013-2021 MultiMC Contributors
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 #include "Download.h"
 
 #include <QDateTime>
-#include <QDebug>
 #include <QFileInfo>
 
 #include "ByteArraySink.h"
@@ -25,38 +45,38 @@
 #include "MetaCacheSink.h"
 
 #include "BuildConfig.h"
+#include "Application.h"
 
 namespace Net {
 
 Download::Download() : NetAction()
 {
-    m_status = Job_NotStarted;
+    m_state = State::Inactive;
 }
 
-Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry, Options options)
+auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
 {
-    Download* dl = new Download();
+    auto* dl = new Download();
     dl->m_url = url;
     dl->m_options = options;
     auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
     auto cachedNode = new MetaCacheSink(entry, md5Node);
     dl->m_sink.reset(cachedNode);
-    dl->m_target_path = entry->getFullPath();
     return dl;
 }
 
-Download::Ptr Download::makeByteArray(QUrl url, QByteArray* output, Options options)
+auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> Download::Ptr
 {
-    Download* dl = new Download();
+    auto* dl = new Download();
     dl->m_url = url;
     dl->m_options = options;
     dl->m_sink.reset(new ByteArraySink(output));
     return dl;
 }
 
-Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
+auto Download::makeFile(QUrl url, QString path, Options options) -> Download::Ptr
 {
-    Download* dl = new Download();
+    auto* dl = new Download();
     dl->m_url = url;
     dl->m_options = options;
     dl->m_sink.reset(new FileSink(path));
@@ -68,69 +88,74 @@ void Download::addValidator(Validator* v)
     m_sink->addValidator(v);
 }
 
-void Download::startImpl()
+void Download::executeTask()
 {
-    if (m_status == Job_Aborted) {
+    setStatus(tr("Downloading %1").arg(m_url.toString()));
+
+    if (getState() == Task::State::AbortedByUser) {
         qWarning() << "Attempt to start an aborted Download:" << m_url.toString();
-        emit aborted(m_index_within_job);
+        emitAborted();
         return;
     }
+
     QNetworkRequest request(m_url);
-    m_status = m_sink->init(request);
-    switch (m_status) {
-        case Job_Finished:
-            emit succeeded(m_index_within_job);
+    m_state = m_sink->init(request);
+    switch (m_state) {
+        case State::Succeeded:
+            emit succeeded();
             qDebug() << "Download cache hit " << m_url.toString();
             return;
-        case Job_InProgress:
+        case State::Running:
             qDebug() << "Downloading " << m_url.toString();
             break;
-        case Job_Failed_Proceed:  // this is meaningless in this context. We do need a sink.
-        case Job_NotStarted:
-        case Job_Failed:
-            emit failed(m_index_within_job);
+        case State::Inactive:
+        case State::Failed:
+            emitFailed();
             return;
-        case Job_Aborted:
+        case State::AbortedByUser:
+            emitAborted();
             return;
     }
 
-    request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT);
+    request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
     if (request.url().host().contains("api.curseforge.com")) {
-        request.setRawHeader("x-api-key", BuildConfig.CURSEFORGE_API_KEY.toUtf8());
+        request.setRawHeader("x-api-key", APPLICATION->getCurseKey().toUtf8());
     };
 
     QNetworkReply* rep = m_network->get(request);
 
     m_reply.reset(rep);
-    connect(rep, SIGNAL(downloadProgress(qint64, qint64)), SLOT(downloadProgress(qint64, qint64)));
-    connect(rep, SIGNAL(finished()), SLOT(downloadFinished()));
+    connect(rep, &QNetworkReply::downloadProgress, this, &Download::downloadProgress);
+    connect(rep, &QNetworkReply::finished, this, &Download::downloadFinished);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(rep, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+#else
     connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+#endif
     connect(rep, &QNetworkReply::sslErrors, this, &Download::sslErrors);
     connect(rep, &QNetworkReply::readyRead, this, &Download::downloadReadyRead);
 }
 
 void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-    m_total_progress = bytesTotal;
-    m_progress = bytesReceived;
-    emit netActionProgress(m_index_within_job, bytesReceived, bytesTotal);
+    setProgress(bytesReceived, bytesTotal);
 }
 
 void Download::downloadError(QNetworkReply::NetworkError error)
 {
     if (error == QNetworkReply::OperationCanceledError) {
         qCritical() << "Aborted " << m_url.toString();
-        m_status = Job_Aborted;
+        m_state = State::AbortedByUser;
     } else {
         if (m_options & Option::AcceptLocalFiles) {
             if (m_sink->hasLocalData()) {
-                m_status = Job_Failed_Proceed;
+                m_state = State::Succeeded;
                 return;
             }
         }
         // error happened during download.
         qCritical() << "Failed " << m_url.toString() << " with reason " << error;
-        m_status = Job_Failed;
+        m_state = State::Failed;
     }
 }
 
@@ -145,7 +170,7 @@ void Download::sslErrors(const QList<QSslError>& errors)
     }
 }
 
-bool Download::handleRedirect()
+auto Download::handleRedirect() -> bool
 {
     QUrl redirect = m_reply->header(QNetworkRequest::LocationHeader).toUrl();
     if (!redirect.isValid()) {
@@ -194,7 +219,8 @@ bool Download::handleRedirect()
 
     m_url = QUrl(redirect.toString());
     qDebug() << "Following redirect to " << m_url.toString();
-    start(m_network);
+    startAction(m_network);
+
     return true;
 }
 
@@ -207,74 +233,71 @@ void Download::downloadFinished()
     }
 
     // if the download failed before this point ...
-    if (m_status == Job_Failed_Proceed) {
+    if (m_state == State::Succeeded)  // pretend to succeed so we continue processing :)
+    {
         qDebug() << "Download failed but we are allowed to proceed:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emit succeeded(m_index_within_job);
+        emit succeeded();
         return;
-    } else if (m_status == Job_Failed) {
+    } else if (m_state == State::Failed) {
         qDebug() << "Download failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emit failed(m_index_within_job);
+        emit failed("");
         return;
-    } else if (m_status == Job_Aborted) {
+    } else if (m_state == State::AbortedByUser) {
         qDebug() << "Download aborted in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emit aborted(m_index_within_job);
+        emit aborted();
         return;
     }
 
     // make sure we got all the remaining data, if any
     auto data = m_reply->readAll();
     if (data.size()) {
-        qDebug() << "Writing extra" << data.size() << "bytes to" << m_target_path;
-        m_status = m_sink->write(data);
+        qDebug() << "Writing extra" << data.size() << "bytes";
+        m_state = m_sink->write(data);
     }
 
     // otherwise, finalize the whole graph
-    m_status = m_sink->finalize(*m_reply.get());
-    if (m_status != Job_Finished) {
+    m_state = m_sink->finalize(*m_reply.get());
+    if (m_state != State::Succeeded) {
         qDebug() << "Download failed to finalize:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emit failed(m_index_within_job);
+        emit failed("");
         return;
     }
+
     m_reply.reset();
     qDebug() << "Download succeeded:" << m_url.toString();
-    emit succeeded(m_index_within_job);
+    emit succeeded();
 }
 
 void Download::downloadReadyRead()
 {
-    if (m_status == Job_InProgress) {
+    if (m_state == State::Running) {
         auto data = m_reply->readAll();
-        m_status = m_sink->write(data);
-        if (m_status == Job_Failed) {
-            qCritical() << "Failed to process response chunk for " << m_target_path;
+        m_state = m_sink->write(data);
+        if (m_state == State::Failed) {
+            qCritical() << "Failed to process response chunk";
         }
         // qDebug() << "Download" << m_url.toString() << "gained" << data.size() << "bytes";
     } else {
-        qCritical() << "Cannot write to " << m_target_path << ", illegal status" << m_status;
+        qCritical() << "Cannot write download data! illegal status " << m_status;
     }
 }
 
 }  // namespace Net
 
-bool Net::Download::abort()
+auto Net::Download::abort() -> bool
 {
     if (m_reply) {
         m_reply->abort();
     } else {
-        m_status = Job_Aborted;
+        m_state = State::AbortedByUser;
     }
-    return true;
-}
-
-bool Net::Download::canAbort()
-{
     return true;
 }

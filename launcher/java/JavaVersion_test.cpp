@@ -1,5 +1,4 @@
 #include <QTest>
-#include "TestUtil.h"
 
 #include "java/JavaVersion.h"
 

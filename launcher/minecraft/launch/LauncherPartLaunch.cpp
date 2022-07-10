@@ -1,16 +1,36 @@
-/* Copyright 2013-2021 MultiMC Contributors
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 #include "LauncherPartLaunch.h"
@@ -22,6 +42,10 @@
 #include "FileSystem.h"
 #include "Commandline.h"
 #include "Application.h"
+
+#ifdef Q_OS_LINUX
+#include "gamemode_client.h"
+#endif
 
 LauncherPartLaunch::LauncherPartLaunch(LaunchTask *parent) : LaunchStep(parent)
 {
@@ -71,6 +95,15 @@ bool fitsInLocal8bit(const QString & string)
 
 void LauncherPartLaunch::executeTask()
 {
+    QString jarPath = APPLICATION->getJarPath("NewLaunch.jar");
+    if (jarPath.isEmpty())
+    {
+        const char *reason = QT_TR_NOOP("Launcher library could not be found. Please check your installation.");
+        emit logLine(tr(reason), MessageLevel::Fatal);
+        emitFailed(tr(reason));
+        return;
+    }
+
     auto instance = m_parent->instance();
     std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
 
@@ -81,13 +114,13 @@ void LauncherPartLaunch::executeTask()
 
     auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
 
-    m_process.setProcessEnvironment(instance->createEnvironment());
+    m_process.setProcessEnvironment(instance->createLaunchEnvironment());
 
     // make detachable - this will keep the process running even if the object is destroyed
     m_process.setDetachable(true);
 
     auto classPath = minecraftInstance->getClassPath();
-    classPath.prepend(FS::PathCombine(APPLICATION->getJarsPath(), "NewLaunch.jar"));
+    classPath.prepend(jarPath);
 
     auto natPath = minecraftInstance->getNativePath();
 #ifdef Q_OS_WIN
@@ -121,7 +154,7 @@ void LauncherPartLaunch::executeTask()
 #else
     args << classPath.join(':');
 #endif
-    args << "org.multimc.EntryPoint";
+    args << "org.polymc.EntryPoint";
 
     qDebug() << args.join(' ');
 
@@ -146,6 +179,17 @@ void LauncherPartLaunch::executeTask()
     {
         m_process.start(javaPath, args);
     }
+
+#ifdef Q_OS_LINUX
+    if (instance->settings()->get("EnableFeralGamemode").toBool())
+    {
+        auto pid = m_process.processId();
+        if (pid)
+        {
+            gamemode_request_start_for(pid);
+        }
+    }
+#endif
 }
 
 void LauncherPartLaunch::on_state(LoggedProcess::State state)

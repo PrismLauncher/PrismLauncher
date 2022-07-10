@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,7 +56,7 @@ void VersionFile::applyTo(LaunchProfile *profile)
     // Only real Minecraft can set those. Don't let anything override them.
     if (isMinecraftVersion(uid))
     {
-        profile->applyMinecraftVersion(minecraftVersion);
+        profile->applyMinecraftVersion(version);
         profile->applyMinecraftVersionType(type);
         // HACK: ignore assets from other version files than Minecraft
         // workaround for stupid assets issue caused by amazon:
@@ -88,14 +89,3 @@ void VersionFile::applyTo(LaunchProfile *profile)
     }
     profile->applyProblemSeverity(getProblemSeverity());
 }
-
-/*
-    auto theirVersion = profile->getMinecraftVersion();
-    if (!theirVersion.isNull() && !dependsOnMinecraftVersion.isNull())
-    {
-        if (QRegExp(dependsOnMinecraftVersion, Qt::CaseInsensitive, QRegExp::Wildcard).indexIn(theirVersion) == -1)
-        {
-            throw MinecraftVersionMismatch(uid, dependsOnMinecraftVersion, theirVersion);
-        }
-    }
-*/

@@ -57,6 +57,17 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
+bool ListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    int pos = index.row();
+    if (pos >= modpacks.size() || pos < 0 || !index.isValid())
+        return false;
+
+    modpacks[pos] = value.value<Flame::IndexedPack>();
+
+    return true;
+}
+
 void ListModel::logoLoaded(QString logo, QIcon out)
 {
     m_loadingLogos.removeAll(logo);
@@ -210,6 +221,11 @@ void Flame::ListModel::searchRequestFinished()
         nextSearchOffset += 25;
         searchState = CanPossiblyFetchMore;
     }
+
+    // When you have a Qt build with assertions turned on, proceeding here will abort the application
+    if (newList.size() == 0)
+        return;
+
     beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);
     modpacks.append(newList);
     endInsertRows();

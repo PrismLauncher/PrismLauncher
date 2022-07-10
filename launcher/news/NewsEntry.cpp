@@ -54,7 +54,7 @@ inline QString childValue(const QDomElement& element, const QString& childName, 
 bool NewsEntry::fromXmlElement(const QDomElement& element, NewsEntry* entry, QString* errorMsg)
 {
     QString title = childValue(element, "title", tr("Untitled"));
-    QString content = childValue(element, "description", tr("No content."));
+    QString content = childValue(element, "content", tr("No content."));
     QString link = childValue(element, "id");
 
     entry->title = title;

@@ -1,24 +1,25 @@
-import java.lang.Integer;
+public final class JavaCheck {
 
-public class JavaCheck
-{
-    private static final String[] keys = {"os.arch", "java.version", "java.vendor"};
-    public static void main (String [] args)
-    {
-        int ret = 0;
-        for(String key : keys)
-        {
+    private static final String[] CHECKED_PROPERTIES = new String[] {
+            "os.arch",
+            "java.version",
+            "java.vendor"
+    };
+
+    public static void main(String[] args) {
+        int returnCode = 0;
+
+        for (String key : CHECKED_PROPERTIES) {
             String property = System.getProperty(key);
-            if(property != null)
-            {
+
+            if (property != null) {
                 System.out.println(key + "=" + property);
-            }
-            else
-            {
-                ret = 1;
+            } else {
+                returnCode = 1;
             }
         }
-        
-        System.exit(ret);
+
+        System.exit(returnCode);
     }
+
 }

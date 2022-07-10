@@ -2,7 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
- *  Copyright (c) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -110,14 +110,16 @@ void ImportPage::updateState()
         {
             // FIXME: actually do some validation of what's inside here... this is fake AF
             QFileInfo fi(input);
-            // mrpack is a modrinth pack
 
             // Allow non-latin people to use ZIP files!
-            auto zip = QMimeDatabase().mimeTypeForUrl(url).suffixes().contains("zip");
-            if(fi.exists() && (zip || fi.suffix() == "mrpack"))
+            bool isZip = QMimeDatabase().mimeTypeForUrl(url).suffixes().contains("zip");
+            // mrpack is a modrinth pack
+            bool isMRPack = fi.suffix() == "mrpack";
+
+            if(fi.exists() && (isZip || isMRPack))
             {
                 QFileInfo fi(url.fileName());
-                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url));
+                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url,this));
                 dialog->setSuggestedIcon("default");
             }
         }
@@ -130,7 +132,7 @@ void ImportPage::updateState()
             }
             // hook, line and sinker.
             QFileInfo fi(url.fileName());
-            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url));
+            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url,this));
             dialog->setSuggestedIcon("default");
         }
     }
@@ -149,7 +151,8 @@ void ImportPage::setUrl(const QString& url)
 void ImportPage::on_modpackBtn_clicked()
 {
     auto filter = QMimeDatabase().mimeTypeForName("application/zip").filterString();
-    filter += ";;" + tr("Modrinth pack (*.mrpack)");
+    //: Option for filtering for *.mrpack files when importing
+    filter += ";;" + tr("Modrinth pack") + " (*.mrpack)";
     const QUrl url = QFileDialog::getOpenFileUrl(this, tr("Choose modpack"), modpackUrl(), filter);
     if (url.isValid())
     {

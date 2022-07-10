@@ -9,6 +9,14 @@ This library has served as a base for some (much more full-featured and advanced
 
 Copyright belongs to Petr Mrázek, unless explicitly stated otherwise in the source files. Available under the Apache 2.0 license.
 
+## gamemode
+
+A performance optimization daemon.
+
+See [github repo](https://github.com/FeralInteractive/gamemode).
+
+BSD licensed
+
 ## hoedown
 Hoedown is a revived fork of Sundown, the Markdown parser based on the original code of the Upskirt library by Natacha Porté.
 
@@ -125,7 +133,7 @@ cp /home/peterix/minecraft/FTB/versions/1.7.10/1.7.10.jar
 launcher onesix
 ```
 
-Available under the Apache 2.0 license.
+Available under `GPL-3.0-only` (with classpath exception), sublicensed from its original `Apache-2.0` codebase
 
 ## libnbtplusplus
 libnbt++ is a free C++ library for Minecraft's file format Named Binary Tag (NBT). It can read and write compressed and uncompressed NBT files and provides a code interface for working with NBT data.
@@ -179,3 +187,4 @@ Licenced under the MIT licence.
 Tiny implementation of LZMA2 de/compression. This format is only used by Forge to save bandwidth.
 
 Public domain.
+

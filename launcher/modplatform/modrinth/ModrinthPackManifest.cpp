@@ -42,6 +42,8 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
+#include <QSet>
+
 static ModrinthAPI api;
 
 namespace Modrinth {
@@ -62,8 +64,35 @@ void loadIndexedInfo(Modpack& pack, QJsonObject& obj)
 {
     pack.extra.body = Json::ensureString(obj, "body");
     pack.extra.projectUrl = QString("https://modrinth.com/modpack/%1").arg(Json::ensureString(obj, "slug"));
+
+    pack.extra.issuesUrl = Json::ensureString(obj, "issues_url");
+    if(pack.extra.issuesUrl.endsWith('/'))
+        pack.extra.issuesUrl.chop(1);
+
     pack.extra.sourceUrl = Json::ensureString(obj, "source_url");
+    if(pack.extra.sourceUrl.endsWith('/'))
+        pack.extra.sourceUrl.chop(1);
+
     pack.extra.wikiUrl = Json::ensureString(obj, "wiki_url");
+    if(pack.extra.wikiUrl.endsWith('/'))
+        pack.extra.wikiUrl.chop(1);
+
+    pack.extra.discordUrl = Json::ensureString(obj, "discord_url");
+    if(pack.extra.discordUrl.endsWith('/'))
+        pack.extra.discordUrl.chop(1);
+
+    auto donate_arr = Json::ensureArray(obj, "donation_urls");
+    for(auto d : donate_arr){
+        auto d_obj = Json::requireObject(d);
+
+        DonationData donate;
+
+        donate.id = Json::ensureString(d_obj, "id");
+        donate.platform = Json::ensureString(d_obj, "platform");
+        donate.url = Json::ensureString(d_obj, "url");
+
+        pack.extra.donate.append(donate);
+    }
 
     pack.extraInfoLoaded = true;
 }
@@ -91,23 +120,6 @@ void loadIndexedVersions(Modpack& pack, QJsonDocument& doc)
     pack.versions.swap(unsortedVersions);
 
     pack.versionsLoaded = true;
-}
-
-auto validateDownloadUrl(QUrl url) -> bool
-{
-    auto domain = url.host();
-    if(domain == "cdn.modrinth.com")
-        return true;
-    if(domain == "edge.forgecdn.net")
-        return true;
-    if(domain == "media.forgecdn.net")
-        return true;
-    if(domain == "github.com")
-        return true;
-    if(domain == "raw.githubusercontent.com")
-        return true;
-
-    return false;
 }
 
 auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
@@ -138,9 +150,6 @@ auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
         }
 
         auto url = Json::requireString(parent, "url");
-
-        if(!validateDownloadUrl(url))
-            continue;
 
         file.download_url = url;
         if(is_primary)

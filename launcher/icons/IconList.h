@@ -71,6 +71,7 @@ private:
     // hide assign op
     IconList &operator=(const IconList &) = delete;
     void reindex();
+    void sortIconList();
 
 public slots:
     void directoryChanged(const QString &path);

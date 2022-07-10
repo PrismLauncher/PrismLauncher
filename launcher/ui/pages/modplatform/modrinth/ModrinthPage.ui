@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>837</width>
-    <height>685</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <layout class="QVBoxLayout">
@@ -23,6 +23,9 @@
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -59,9 +62,6 @@
          <width>48</width>
          <height>48</height>
         </size>
-       </property>
-       <property name="uniformItemSizes">
-        <bool>true</bool>
        </property>
       </widget>
      </item>

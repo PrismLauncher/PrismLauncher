@@ -1,3 +1,38 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 #include "JavaChecker.h"
 
 #include <QFile>
@@ -16,7 +51,13 @@ JavaChecker::JavaChecker(QObject *parent) : QObject(parent)
 
 void JavaChecker::performCheck()
 {
-    QString checkerJar = FS::PathCombine(APPLICATION->getJarsPath(), "JavaCheck.jar");
+    QString checkerJar = JavaUtils::getJavaCheckPath();
+
+    if (checkerJar.isEmpty())
+    {
+        qDebug() << "Java checker library could not be found. Please check your installation.";
+        return;
+    }
 
     QStringList args;
 
@@ -47,7 +88,11 @@ void JavaChecker::performCheck()
     qDebug() << "Running java checker: " + m_path + args.join(" ");;
 
     connect(process.get(), SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(finished(int, QProcess::ExitStatus)));
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(process.get(), SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
+#else
     connect(process.get(), SIGNAL(error(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
+#endif
     connect(process.get(), SIGNAL(readyReadStandardOutput()), this, SLOT(stdoutReady()));
     connect(process.get(), SIGNAL(readyReadStandardError()), this, SLOT(stderrReady()));
     connect(&killTimer, SIGNAL(timeout()), SLOT(timeout()));
@@ -99,7 +144,12 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     bool success = true;
 
     QMap<QString, QString> results;
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    QStringList lines = m_stdout.split("\n", Qt::SkipEmptyParts);
+#else
     QStringList lines = m_stdout.split("\n", QString::SkipEmptyParts);
+#endif
     for(QString line : lines)
     {
         line = line.trimmed();
@@ -108,7 +158,11 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
             continue;
         }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+        auto parts = line.split('=', Qt::SkipEmptyParts);
+#else
         auto parts = line.split('=', QString::SkipEmptyParts);
+#endif
         if(parts.size() != 2 || parts[0].isEmpty() || parts[1].isEmpty())
         {
             continue;

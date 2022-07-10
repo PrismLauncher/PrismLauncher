@@ -1,5 +1,6 @@
 #pragma once
 #include "errors.h"
+#include "membuffer.h"
 #include <sstream>
 
 namespace java
@@ -90,7 +91,7 @@ public:
             break;
         default:
             // invalid constant type!
-            throw new classfile_exception();
+            throw classfile_exception();
         }
     }
     constant(int)
@@ -210,7 +211,7 @@ public:
     {
         if (constant_index == 0 || constant_index > constants.size())
         {
-            throw new classfile_exception();
+            throw classfile_exception();
         }
         return constants[constant_index - 1];
     }

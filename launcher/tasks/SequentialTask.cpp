@@ -33,10 +33,21 @@ void SequentialTask::executeTask()
 
 bool SequentialTask::abort()
 {
-    bool succeeded = true;
-    for (auto& task : m_queue) {
-        if (!task->abort()) succeeded = false;
+    if(m_currentIndex == -1 || m_currentIndex >= m_queue.size()) {
+        if(m_currentIndex == -1) {
+            // Don't call emitAborted() here, we want to bypass the 'is the task running' check
+            emit aborted();
+            emit finished();
+        }
+        m_queue.clear();
+        return true;
     }
+
+    bool succeeded = m_queue[m_currentIndex]->abort();
+    m_queue.clear();
+
+    if(succeeded)
+        emitAborted();
 
     return succeeded;
 }
@@ -53,12 +64,18 @@ void SequentialTask::startNext()
         return;
     }
     Task::Ptr next = m_queue[m_currentIndex];
+
     connect(next.get(), SIGNAL(failed(QString)), this, SLOT(subTaskFailed(QString)));
-    connect(next.get(), SIGNAL(status(QString)), this, SLOT(subTaskStatus(QString)));
-    connect(next.get(), SIGNAL(progress(qint64, qint64)), this, SLOT(subTaskProgress(qint64, qint64)));
     connect(next.get(), SIGNAL(succeeded()), this, SLOT(startNext()));
 
+    connect(next.get(), SIGNAL(status(QString)), this, SLOT(subTaskStatus(QString)));
+    connect(next.get(), SIGNAL(stepStatus(QString)), this, SLOT(subTaskStatus(QString)));
+    
+    connect(next.get(), SIGNAL(progress(qint64, qint64)), this, SLOT(subTaskProgress(qint64, qint64)));
+
     setStatus(tr("Executing task %1 out of %2").arg(m_currentIndex + 1).arg(m_queue.size()));
+    setStepStatus(next->isMultiStep() ? next->getStepStatus() : next->getStatus());
+
     next->start();
 }
 
@@ -68,7 +85,7 @@ void SequentialTask::subTaskFailed(const QString& msg)
 }
 void SequentialTask::subTaskStatus(const QString& msg)
 {
-    setStepStatus(m_queue[m_currentIndex]->getStatus());
+    setStepStatus(msg);
 }
 void SequentialTask::subTaskProgress(qint64 current, qint64 total)
 {
@@ -76,7 +93,7 @@ void SequentialTask::subTaskProgress(qint64 current, qint64 total)
         setProgress(0, 100);
         return;
     }
-    setProgress(m_currentIndex, m_queue.count());
+    setProgress(m_currentIndex + 1, m_queue.count());
 
     m_stepProgress = current;
     m_stepTotalProgress = total;

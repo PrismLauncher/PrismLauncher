@@ -1,10 +1,47 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 #include "JavaCommon.h"
+#include "java/JavaUtils.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include <MMCStrings.h>
+#include <QRegularExpression>
 
 bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget *parent)
 {
-    if (jvmargs.contains("-XX:PermSize=") || jvmargs.contains(QRegExp("-Xm[sx]"))
+    if (jvmargs.contains("-XX:PermSize=") || jvmargs.contains(QRegularExpression("-Xm[sx]"))
         || jvmargs.contains("-XX-MaxHeapSize") || jvmargs.contains("-XX:InitialHeapSize"))
     {
         auto warnStr = QObject::tr(
@@ -18,7 +55,7 @@ bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget *parent)
         return false;
     }
     // block lunacy with passing required version to the JVM
-    if (jvmargs.contains(QRegExp("-version:.*"))) {
+    if (jvmargs.contains(QRegularExpression("-version:.*"))) {
         auto warnStr = QObject::tr(
             "You tried to pass required Java version argument to the JVM (using \"-version:xxx\"). This is not safe and will not be allowed.\n"
             "This message will be displayed until you remove this from the JVM arguments.");
@@ -65,10 +102,22 @@ void JavaCommon::javaBinaryWasBad(QWidget *parent, JavaCheckResult result)
     CustomMessageBox::selectable(parent, QObject::tr("Java test failure"), text, QMessageBox::Warning)->show();
 }
 
+void JavaCommon::javaCheckNotFound(QWidget *parent)
+{
+    QString text;
+    text += QObject::tr("Java checker library could not be found. Please check your installation");
+    CustomMessageBox::selectable(parent, QObject::tr("Java test failure"), text, QMessageBox::Warning)->show();
+}
+
 void JavaCommon::TestCheck::run()
 {
     if (!JavaCommon::checkJVMArgs(m_args, m_parent))
     {
+        emit finished();
+        return;
+    }
+    if (JavaUtils::getJavaCheckPath().isEmpty()) {
+        javaCheckNotFound(m_parent);
         emit finished();
         return;
     }
