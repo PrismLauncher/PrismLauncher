@@ -216,10 +216,10 @@ void PackInstallTask::install()
         if(target.type != "modloader") continue;
 
         if(target.name == "forge") {
-            components->setComponentVersion("net.minecraftforge", target.version, true);
+            components->setComponentVersion("net.minecraftforge", target.version);
         }
         else if(target.name == "fabric") {
-            components->setComponentVersion("net.fabricmc.fabric-loader", target.version, true);
+            components->setComponentVersion("net.fabricmc.fabric-loader", target.version);
         }
     }
 
