@@ -7,7 +7,7 @@
 
 #include "net/Upload.h"
 
-auto FlameAPI::matchFingerprints(const std::list<uint>& fingerprints, QByteArray* response) -> NetJob::Ptr
+auto FlameAPI::matchFingerprints(const QList<uint>& fingerprints, QByteArray* response) -> NetJob::Ptr
 {
     auto* netJob = new NetJob(QString("Flame::MatchFingerprints"), APPLICATION->network());
 

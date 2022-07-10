@@ -271,9 +271,9 @@ bool ModFolderModel::isValid()
     return m_dir.exists() && m_dir.isReadable();
 }
 
-auto ModFolderModel::selectedMods(QModelIndexList& indexes) -> std::list<Mod::Ptr>
+auto ModFolderModel::selectedMods(QModelIndexList& indexes) -> QList<Mod::Ptr>
 {
-    std::list<Mod::Ptr> selected_mods;
+    QList<Mod::Ptr> selected_mods;
     for (auto i : indexes) {
         if(i.column() != 0)
             continue;

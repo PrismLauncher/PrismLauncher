@@ -8,7 +8,7 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
     Q_OBJECT
 
    public:
-    ModrinthCheckUpdate(std::list<Mod*>& mods, std::list<Version>& mcVersions, ModAPI::ModLoaderTypes loaders, std::shared_ptr<ModFolderModel> mods_folder)
+    ModrinthCheckUpdate(QList<Mod*>& mods, std::list<Version>& mcVersions, ModAPI::ModLoaderTypes loaders, std::shared_ptr<ModFolderModel> mods_folder)
         : CheckUpdateTask(mods, mcVersions, loaders, mods_folder)
     {}
 

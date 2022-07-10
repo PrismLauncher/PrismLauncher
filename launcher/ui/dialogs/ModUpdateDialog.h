@@ -19,13 +19,13 @@ class ModUpdateDialog final : public ReviewMessageBox {
     explicit ModUpdateDialog(QWidget* parent,
                              BaseInstance* instance,
                              const std::shared_ptr<ModFolderModel> mod_model,
-                             std::list<Mod::Ptr>& search_for);
+                             QList<Mod::Ptr>& search_for);
 
     void checkCandidates();
 
     void appendMod(const CheckUpdateTask::UpdatableMod& info);
 
-    const std::list<ModDownloadTask*> getTasks();
+    const QList<ModDownloadTask*> getTasks();
     auto indexDir() const -> QDir { return m_mod_model->indexDir(); }
 
     auto noUpdates() const -> bool { return m_no_updates; };
@@ -46,13 +46,13 @@ class ModUpdateDialog final : public ReviewMessageBox {
 
     const std::shared_ptr<ModFolderModel> m_mod_model;
 
-    std::list<Mod::Ptr>& m_candidates;
-    std::list<Mod*> m_modrinth_to_update;
-    std::list<Mod*> m_flame_to_update;
+    QList<Mod::Ptr>& m_candidates;
+    QList<Mod*> m_modrinth_to_update;
+    QList<Mod*> m_flame_to_update;
 
     ConcurrentTask* m_second_try_metadata;
-    std::list<std::tuple<Mod*, QString>> m_failed_metadata;
-    std::list<std::tuple<Mod*, QString, QUrl>> m_failed_check_update;
+    QList<std::tuple<Mod*, QString>> m_failed_metadata;
+    QList<std::tuple<Mod*, QString, QUrl>> m_failed_check_update;
 
     QHash<QString, ModDownloadTask*> m_tasks;
     BaseInstance* m_instance;

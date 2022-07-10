@@ -36,7 +36,7 @@ static ModAPI::ModLoaderTypes mcLoaders(BaseInstance* inst)
 ModUpdateDialog::ModUpdateDialog(QWidget* parent,
                                  BaseInstance* instance,
                                  const std::shared_ptr<ModFolderModel> mods,
-                                 std::list<Mod::Ptr>& search_for)
+                                 QList<Mod::Ptr>& search_for)
     : ReviewMessageBox(parent, tr("Confirm mods to update"), "")
     , m_parent(parent)
     , m_mod_model(mods)
@@ -88,14 +88,14 @@ void ModUpdateDialog::checkCandidates()
     if (!m_modrinth_to_update.empty()) {
         m_modrinth_check_task = new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model);
         connect(m_modrinth_check_task, &CheckUpdateTask::checkFailed, this,
-                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.emplace_back(mod, reason, recover_url); });
+                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({mod, reason, recover_url}); });
         check_task.addTask(m_modrinth_check_task);
     }
 
     if (!m_flame_to_update.empty()) {
         m_flame_check_task = new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_mod_model);
         connect(m_flame_check_task, &CheckUpdateTask::checkFailed, this,
-                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.emplace_back(mod, reason, recover_url); });
+                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({mod, reason, recover_url}); });
         check_task.addTask(m_flame_check_task);
     }
 
@@ -205,8 +205,8 @@ auto ModUpdateDialog::ensureMetadata() -> bool
 
     // A better use of data structures here could remove the need for this QHash
     QHash<QString, bool> should_try_others;
-    std::list<Mod*> modrinth_tmp;
-    std::list<Mod*> flame_tmp;
+    QList<Mod*> modrinth_tmp;
+    QList<Mod*> flame_tmp;
 
     bool confirm_rest = false;
     bool try_others_rest = false;
@@ -332,7 +332,7 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::P
     } else {
         QString reason{ tr("Didn't find a valid version on the selected mod provider(s)") };
 
-        m_failed_metadata.emplace_back(mod, reason);
+        m_failed_metadata.append({mod, reason});
     }
 }
 
@@ -390,9 +390,9 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
     ui->modTreeWidget->addTopLevelItem(item_top);
 }
 
-auto ModUpdateDialog::getTasks() -> const std::list<ModDownloadTask*>
+auto ModUpdateDialog::getTasks() -> const QList<ModDownloadTask*>
 {
-    std::list<ModDownloadTask*> list;
+    QList<ModDownloadTask*> list;
 
     auto* item = ui->modTreeWidget->topLevelItem(0);
 

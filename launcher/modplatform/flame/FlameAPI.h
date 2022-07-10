@@ -5,7 +5,7 @@
 
 class FlameAPI : public NetworkModAPI {
    public:
-    auto matchFingerprints(const std::list<uint>& fingerprints, QByteArray* response) -> NetJob::Ptr;
+    auto matchFingerprints(const QList<uint>& fingerprints, QByteArray* response) -> NetJob::Ptr;
     auto getModFileChangelog(int modId, int fileId) -> QString;
 
     auto getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion;

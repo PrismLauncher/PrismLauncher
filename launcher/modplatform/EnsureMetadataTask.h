@@ -13,7 +13,7 @@ class EnsureMetadataTask : public Task {
 
    public:
     EnsureMetadataTask(Mod*, QDir, ModPlatform::Provider = ModPlatform::Provider::MODRINTH);
-    EnsureMetadataTask(std::list<Mod*>&, QDir, ModPlatform::Provider = ModPlatform::Provider::MODRINTH);
+    EnsureMetadataTask(QList<Mod*>&, QDir, ModPlatform::Provider = ModPlatform::Provider::MODRINTH);
 
     ~EnsureMetadataTask() = default;
 

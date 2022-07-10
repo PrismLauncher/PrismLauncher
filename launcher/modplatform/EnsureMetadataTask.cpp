@@ -28,7 +28,7 @@ EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::Provider
         m_mods.insert(hash, mod);
 }
 
-EnsureMetadataTask::EnsureMetadataTask(std::list<Mod*>& mods, QDir dir, ModPlatform::Provider prov)
+EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform::Provider prov)
     : Task(nullptr), m_index_dir(dir), m_provider(prov)
 {
     for (auto* mod : mods) {
@@ -323,7 +323,7 @@ NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
 {
     auto* response = new QByteArray();
 
-    std::list<uint> fingerprints;
+    QList<uint> fingerprints;
     for (auto& murmur : m_mods.keys()) {
         fingerprints.push_back(murmur.toUInt());
     }

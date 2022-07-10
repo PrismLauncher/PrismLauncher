@@ -146,7 +146,7 @@ public:
         return mods;
     }
 
-    auto selectedMods(QModelIndexList& indexes) -> std::list<Mod::Ptr>;
+    auto selectedMods(QModelIndexList& indexes) -> QList<Mod::Ptr>;
 
 public slots:
     void disableInteraction(bool disabled);
