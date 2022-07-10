@@ -1024,7 +1024,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     }
 
 
-#ifdef LAUNCHER_WITH_UPDATER
     if(BuildConfig.UPDATER_ENABLED)
     {
         bool updatesAllowed = APPLICATION->updatesAreAllowed();
@@ -1043,7 +1042,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
             updater->checkForUpdate(APPLICATION->settings()->get("UpdateChannel").toString(), false);
         }
     }
-#endif
 
     setSelectedInstanceById(APPLICATION->settings()->get("SelectedInstance").toString());
 
@@ -1355,7 +1353,6 @@ void MainWindow::repopulateAccountsMenu()
     ui->profileMenu->addAction(ui->actionManageAccounts);
 }
 
-#ifdef LAUNCHER_WITH_UPDATER
 void MainWindow::updatesAllowedChanged(bool allowed)
 {
     if(!BuildConfig.UPDATER_ENABLED)
@@ -1364,7 +1361,6 @@ void MainWindow::updatesAllowedChanged(bool allowed)
     }
     ui->actionCheckUpdate->setEnabled(allowed);
 }
-#endif
 
 /*
  * Assumes the sender is a QAction
@@ -1470,7 +1466,6 @@ void MainWindow::updateNewsLabel()
     }
 }
 
-#ifdef LAUNCHER_WITH_UPDATER
 void MainWindow::updateAvailable(GoUpdate::Status status)
 {
     if(!APPLICATION->updatesAreAllowed())
@@ -1496,7 +1491,6 @@ void MainWindow::updateNotAvailable()
     UpdateDialog dlg(false, this);
     dlg.exec();
 }
-#endif
 
 QList<int> stringToIntList(const QString &string)
 {
@@ -1518,7 +1512,6 @@ QString intListToString(const QList<int> &list)
     return slist.join(',');
 }
 
-#ifdef LAUNCHER_WITH_UPDATER
 void MainWindow::downloadUpdates(GoUpdate::Status status)
 {
     if(!APPLICATION->updatesAreAllowed())
@@ -1552,7 +1545,6 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
         CustomMessageBox::selectable(this, tr("Error"), updateTask.failReason(), QMessageBox::Warning)->show();
     }
 }
-#endif
 
 void MainWindow::onCatToggled(bool state)
 {
@@ -1865,7 +1857,6 @@ void MainWindow::on_actionConfig_Folder_triggered()
     }
 }
 
-#ifdef LAUNCHER_WITH_UPDATER
 void MainWindow::checkForUpdates()
 {
     if(BuildConfig.UPDATER_ENABLED)
@@ -1878,7 +1869,6 @@ void MainWindow::checkForUpdates()
         qWarning() << "Updater not set up. Cannot check for updates.";
     }
 }
-#endif
 
 void MainWindow::on_actionSettings_triggered()
 {

@@ -35,7 +35,6 @@
 
 #pragma once
 
-#include <QItemSelection>
 #include <QMainWindow>
 
 #include "ui/pages/BasePage.h"

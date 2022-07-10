@@ -90,7 +90,6 @@ slots:
     void on_iconsDirBrowseBtn_clicked();
     void on_metadataDisableBtn_clicked();
 
-#ifdef LAUNCHER_WITH_UPDATER
     /*!
      * Updates the list of update channels in the combo box.
      */
@@ -101,12 +100,12 @@ slots:
      */
     void refreshUpdateChannelDesc();
 
-    void updateChannelSelectionChanged(int index);
-#endif
     /*!
      * Updates the font preview
      */
     void refreshFontPreview();
+
+    void updateChannelSelectionChanged(int index);
 
 private:
     Ui::LauncherPage *ui;
