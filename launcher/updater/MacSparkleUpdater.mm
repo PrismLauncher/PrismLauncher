@@ -217,6 +217,6 @@ void MacSparkleUpdater::setBetaAllowed(bool allowed)
 void MacSparkleUpdater::loadChannelsFromSettings()
 {
     QStringList channelList = APPLICATION->settings()->get("UpdateChannel").toString().split(" ");
-    auto channels = QSet<QString>::fromList(channelList);
+    QSet<QString> channels(channelList.begin(), channelList.end());
     setAllowedChannels(channels);
 }
