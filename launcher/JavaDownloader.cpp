@@ -95,7 +95,7 @@ void JavaDownloader::executeTask()
                     elementDownload->addNetAction(dl);
                 }
                 QObject::connect(elementDownload, &NetJob::finished, [elementDownload] { elementDownload->deleteLater(); });
-                QObject::connect(elementDownload, &NetJob::succeeded, [this]{emitSucceeded();});
+                QObject::connect(elementDownload, &NetJob::succeeded, [this] { emitSucceeded(); });
                 elementDownload->start();
             });
             download->start();
