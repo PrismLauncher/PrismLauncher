@@ -32,7 +32,7 @@ set(CMAKE_C_STANDARD_REQUIRED true)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
-set(CMAKE_CXX_FLAGS "-Wall -pedantic -Werror -Wno-deprecated-declarations -D_GLIBCXX_USE_CXX11_ABI=0 -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-Wall -pedantic -D_GLIBCXX_USE_CXX11_ABI=0 -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
 if(UNIX AND APPLE)
     set(CMAKE_CXX_FLAGS "-stdlib=libc++ ${CMAKE_CXX_FLAGS}")
 endif()
@@ -154,6 +154,7 @@ add_custom_target(tcversion echo "\\#\\#teamcity[setParameter name=\\'env.LAUNCH
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
+include(QtVersionlessBackport)
 if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     set(QT_VERSION_MAJOR 5)
     find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml)
@@ -165,19 +166,33 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 5)
         set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
         set(FORCE_BUNDLED_QUAZIP 1)
     endif()
+
+    # Qt 6 sets these by default. Notably causes Windows APIs to use UNICODE strings.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE")
+elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
+    set(QT_VERSION_MAJOR 6)
+    find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml Core5Compat)
+    list(APPEND Launcher_QT_LIBS Qt6::Core5Compat)
+
+    if(NOT Launcher_FORCE_BUNDLED_LIBS)
+        find_package(QuaZip-Qt6 1.3 QUIET)
+    endif()
+    if (NOT QuaZip-Qt6_FOUND)
+        set(QUAZIP_QT_MAJOR_VERSION ${QT_VERSION_MAJOR} CACHE STRING "Qt version to use (4, 5 or 6), defaults to ${QT_VERSION_MAJOR}" FORCE)
+        set(FORCE_BUNDLED_QUAZIP 1)
+    endif()
 else()
     message(FATAL_ERROR "Qt version ${Launcher_QT_VERSION_MAJOR} is not supported")
 endif()
 
-# The Qt5 cmake files don't provide its install paths, so ask qmake.
-include(QMakeQuery)
-query_qmake(QT_INSTALL_PLUGINS QT_PLUGINS_DIR)
-query_qmake(QT_INSTALL_IMPORTS QT_IMPORTS_DIR)
-query_qmake(QT_INSTALL_LIBS QT_LIBS_DIR)
-query_qmake(QT_INSTALL_LIBEXECS QT_LIBEXECS_DIR)
-query_qmake(QT_HOST_DATA QT_DATA_DIR)
+include(ECMQueryQt)
+ecm_query_qt(QT_PLUGINS_DIR  QT_INSTALL_PLUGINS)
+ecm_query_qt(QT_LIBS_DIR     QT_INSTALL_LIBS)
+ecm_query_qt(QT_LIBEXECS_DIR QT_INSTALL_LIBEXECS)
+ecm_query_qt(QT_DATA_DIR     QT_HOST_DATA)
 set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
 
+# NOTE: Qt 6 already sets this by default
 if (Qt5_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
@@ -290,7 +305,6 @@ else()
     message(STATUS "Using system QuaZip")
 endif()
 add_subdirectory(libraries/rainbow) # Qt extension for colors
-add_subdirectory(libraries/iconfix) # fork of Qt's QIcon loader
 add_subdirectory(libraries/LocalPeer) # fork of a library from Qt solutions
 add_subdirectory(libraries/classparser) # class parser library
 add_subdirectory(libraries/optional-bare)

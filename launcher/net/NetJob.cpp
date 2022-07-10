@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -97,11 +98,16 @@ auto NetJob::abort() -> bool
     bool fullyAborted = true;
 
     // fail all downloads on the queue
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    QSet<int> todoSet(m_todo.begin(), m_todo.end());
+    m_failed.unite(todoSet);
+#else
     m_failed.unite(m_todo.toSet());
+#endif
     m_todo.clear();
 
     // abort active downloads
-    auto toKill = m_doing.toList();
+    auto toKill = m_doing.values();
     for (auto index : toKill) {
         auto part = m_downloads[index];
         fullyAborted &= part->abort();

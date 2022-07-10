@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,7 +53,7 @@
 
 #include "Application.h"
 
-const static QLatin1Literal defaultLangCode("en_US");
+const static QLatin1String defaultLangCode("en_US");
 
 enum class FileType
 {
@@ -431,9 +432,7 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
             }
             case Column::Completeness:
             {
-                QString text;
-                text.sprintf("%3.1f %%", lang.percentTranslated());
-                return text;
+                return QString("%1%").arg(lang.percentTranslated(), 3, 'f', 1);
             }
         }
     }

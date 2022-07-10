@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,6 +37,7 @@
 #pragma once
 
 #include <memory>
+#include <QAbstractButton>
 #include <QDialog>
 
 #include "ui/pages/BasePage.h"
@@ -73,14 +75,13 @@ public:
     bool apply() override;
     void retranslate() override;
 
+private slots:
+    void proxyGroupChanged(QAbstractButton *button);
+
 private:
     void updateCheckboxStuff();
     void applySettings();
     void loadSettings();
-
-private
-slots:
-    void proxyChanged(int);
 
 private:
     Ui::ProxyPage *ui;

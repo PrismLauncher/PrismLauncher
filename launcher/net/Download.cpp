@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -126,7 +127,11 @@ void Download::executeTask()
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::downloadProgress, this, &Download::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &Download::downloadFinished);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(rep, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+#else
     connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+#endif
     connect(rep, &QNetworkReply::sslErrors, this, &Download::sslErrors);
     connect(rep, &QNetworkReply::readyRead, this, &Download::downloadReadyRead);
 }

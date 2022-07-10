@@ -7,5 +7,5 @@ add_library(BuildConfig STATIC
     ${CMAKE_CURRENT_BINARY_DIR}/BuildConfig.cpp
 )
 
-target_link_libraries(BuildConfig Qt5::Core)
+target_link_libraries(BuildConfig Qt${QT_VERSION_MAJOR}::Core)
 target_include_directories(BuildConfig PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

@@ -84,6 +84,7 @@
 #include <QDebug>
 #include <QStyleFactory>
 #include <QWindow>
+#include <QIcon>
 
 #include "InstanceList.h"
 
@@ -99,7 +100,6 @@
 #include "tools/JVisualVM.h"
 #include "tools/MCEditTool.h"
 
-#include <xdgicon.h>
 #include "settings/INISettingsObject.h"
 #include "settings/Setting.h"
 
@@ -1182,7 +1182,7 @@ void Application::setApplicationTheme(const QString& name, bool initial)
 
 void Application::setIconTheme(const QString& name)
 {
-    XdgIcon::setThemeName(name);
+    QIcon::setThemeName(name);
 }
 
 QIcon Application::getThemedIcon(const QString& name)
@@ -1190,7 +1190,7 @@ QIcon Application::getThemedIcon(const QString& name)
     if(name == "logo") {
         return QIcon(":/org.polymc.PolyMC.svg");
     }
-    return XdgIcon::fromTheme(name);
+    return QIcon::fromTheme(name);
 }
 
 bool Application::openJsonEditor(const QString &filename)

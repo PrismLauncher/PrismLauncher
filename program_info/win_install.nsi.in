@@ -129,6 +129,7 @@ Section "@Launcher_CommonName@"
   File /r "jars"
   File /r "platforms"
   File /r "styles"
+  File /nonfatal /r "tls"
 
   ; Write the installation path into the registry
   WriteRegStr HKCU Software\@Launcher_CommonName@ "InstallDir" "$INSTDIR"
@@ -182,60 +183,17 @@ Section "Uninstall"
   DeleteRegKey HKCU SOFTWARE\@Launcher_CommonName@
 
   Delete $INSTDIR\@Launcher_APP_BINARY_NAME@.exe
-  Delete $INSTDIR\uninstall.exe
-  Delete $INSTDIR\portable.txt
-
-  Delete $INSTDIR\libbrotlicommon.dll
-  Delete $INSTDIR\libbrotlidec.dll
-  Delete $INSTDIR\libbz2-1.dll
-  Delete $INSTDIR\libcrypto-1_1-x64.dll
-  Delete $INSTDIR\libcrypto-1_1.dll
-  Delete $INSTDIR\libdouble-conversion.dll
-  Delete $INSTDIR\libfreetype-6.dll
-  Delete $INSTDIR\libgcc_s_seh-1.dll
-  Delete $INSTDIR\libgcc_s_dw2-1.dll
-  Delete $INSTDIR\libglib-2.0-0.dll
-  Delete $INSTDIR\libgraphite2.dll
-  Delete $INSTDIR\libharfbuzz-0.dll
-  Delete $INSTDIR\libiconv-2.dll
-  Delete $INSTDIR\libicudt69.dll
-  Delete $INSTDIR\libicuin69.dll
-  Delete $INSTDIR\libicuuc69.dll
-  Delete $INSTDIR\libintl-8.dll
-  Delete $INSTDIR\libjasper-4.dll
-  Delete $INSTDIR\libjpeg-8.dll
-  Delete $INSTDIR\libmd4c.dll
-  Delete $INSTDIR\libpcre-1.dll
-  Delete $INSTDIR\libpcre2-16-0.dll
-  Delete $INSTDIR\libpng16-16.dll
-  Delete $INSTDIR\libssl-1_1-x64.dll
-  Delete $INSTDIR\libssl-1_1.dll
-  Delete $INSTDIR\libssp-0.dll
-  Delete $INSTDIR\libstdc++-6.dll
-  Delete $INSTDIR\libwebp-7.dll
-  Delete $INSTDIR\libwebpdemux-2.dll
-  Delete $INSTDIR\libwebpmux-3.dll
-  Delete $INSTDIR\libwinpthread-1.dll
-  Delete $INSTDIR\libzstd.dll
-  Delete $INSTDIR\Qt5Core.dll
-  Delete $INSTDIR\Qt5Gui.dll
-  Delete $INSTDIR\Qt5Network.dll
-  Delete $INSTDIR\Qt5Qml.dll
-  Delete $INSTDIR\Qt5QmlModels.dll
-  Delete $INSTDIR\Qt5Quick.dll
-  Delete $INSTDIR\Qt5Svg.dll
-  Delete $INSTDIR\Qt5WebSockets.dll
-  Delete $INSTDIR\Qt5Widgets.dll
-  Delete $INSTDIR\Qt5Xml.dll
-  Delete $INSTDIR\zlib1.dll
-
   Delete $INSTDIR\qt.conf
+  Delete $INSTDIR\*.dll
+
+  Delete $INSTDIR\uninstall.exe
 
   RMDir /r $INSTDIR\iconengines
   RMDir /r $INSTDIR\imageformats
   RMDir /r $INSTDIR\jars
   RMDir /r $INSTDIR\platforms
   RMDir /r $INSTDIR\styles
+  RMDir /r $INSTDIR\tls
 
   Delete "$SMPROGRAMS\@Launcher_CommonName@.lnk"
   Delete "$DESKTOP\@Launcher_CommonName@.lnk"

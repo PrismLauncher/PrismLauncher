@@ -39,6 +39,7 @@
 #include <QJsonArray>
 #include <QDebug>
 #include <QUuid>
+#include <QRegularExpression>
 
 namespace {
 void tokenToJSONV3(QJsonObject &parent, Katabasis::Token t, const char * tokenName) {
@@ -451,7 +452,7 @@ void AccountData::invalidateClientToken() {
     if(type != AccountType::Mojang) {
         return;
     }
-    yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegExp("[{-}]"));
+    yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{-}]"));
 }
 
 QString AccountData::profileId() const {

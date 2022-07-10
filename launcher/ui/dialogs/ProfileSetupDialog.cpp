@@ -1,16 +1,36 @@
-/* Copyright 2013-2021 MultiMC Contributors
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 #include "ProfileSetupDialog.h"
@@ -18,7 +38,7 @@
 
 #include <QPushButton>
 #include <QAction>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 #include <QJsonDocument>
 #include <QDebug>
 
@@ -39,9 +59,9 @@ ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidg
     yellowIcon = APPLICATION->getThemedIcon("status-yellow");
     badIcon = APPLICATION->getThemedIcon("status-bad");
 
-    QRegExp permittedNames("[a-zA-Z0-9_]{3,16}");
+    QRegularExpression permittedNames("[a-zA-Z0-9_]{3,16}");
     auto nameEdit = ui->nameEdit;
-    nameEdit->setValidator(new QRegExpValidator(permittedNames));
+    nameEdit->setValidator(new QRegularExpressionValidator(permittedNames));
     nameEdit->setClearButtonEnabled(true);
     validityAction = nameEdit->addAction(yellowIcon, QLineEdit::LeadingPosition);
     connect(nameEdit, &QLineEdit::textEdited, this, &ProfileSetupDialog::nameEdited);

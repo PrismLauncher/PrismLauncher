@@ -36,6 +36,7 @@ SOFTWARE.
 #include <QProcess>
 #include <QDebug>
 #include <QDir>
+#include <QRegularExpression>
 
 #include <functional>
 
@@ -88,7 +89,9 @@ bool Sys::main_lsb_info(Sys::LsbInfo & out)
 {
     int status=0;
     QProcess lsbProcess;
-    lsbProcess.start("lsb_release -a");
+    QStringList arguments;
+    arguments << "-a";
+    lsbProcess.start("lsb_release",  arguments);
     lsbProcess.waitForFinished();
     status = lsbProcess.exitStatus();
     QString output = lsbProcess.readAllStandardOutput();
@@ -170,7 +173,11 @@ void Sys::lsb_postprocess(Sys::LsbInfo & lsb, Sys::DistributionInfo & out)
     else
     {
         // ubuntu, debian, gentoo, scientific, slackware, ... ?
-        auto parts = dist.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+        auto parts = dist.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+#else
+        auto parts = dist.split(QRegularExpression("\\s+"), QString::SkipEmptyParts);
+#endif
         if(parts.size())
         {
             dist = parts[0];
@@ -209,7 +216,11 @@ QString Sys::_extract_distribution(const QString & x)
     {
         return "sles";
     }
-    QStringList list = release.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    QStringList list = release.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+#else
+    QStringList list = release.split(QRegularExpression("\\s+"), QString::SkipEmptyParts);
+#endif
     if(list.size())
     {
         return list[0];
@@ -219,12 +230,16 @@ QString Sys::_extract_distribution(const QString & x)
 
 QString Sys::_extract_version(const QString & x)
 {
-    QRegExp versionish_string("\\d+(?:\\.\\d+)*$");
-    QStringList list = x.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+    QRegularExpression versionish_string(QRegularExpression::anchoredPattern("\\d+(?:\\.\\d+)*$"));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    QStringList list = x.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+#else
+    QStringList list = x.split(QRegularExpression("\\s+"), QString::SkipEmptyParts);
+#endif
     for(int i = list.size() - 1; i >= 0; --i)
     {
         QString chunk = list[i];
-        if(versionish_string.exactMatch(chunk))
+        if(versionish_string.match(chunk).hasMatch())
         {
             return chunk;
         }
