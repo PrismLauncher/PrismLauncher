@@ -1,13 +1,12 @@
 #include <QString>
-#include "settings/SettingsObject.h"
+#include "minecraft/LaunchContext.h"
 #ifdef Q_OS_MACOS
 #include <sys/sysctl.h>
 #endif
 
 namespace SysInfo {
 QString currentSystem();
-QString currentArch(const SettingsObjectPtr& settingsObj);
-QString runCheckerForArch(const SettingsObjectPtr& settingsObj);
+QString currentArch(LaunchContext launchContext);
+QString runCheckerForArch(LaunchContext launchContext);
 QString useQTForArch();
 }
-

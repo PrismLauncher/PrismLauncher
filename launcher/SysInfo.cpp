@@ -1,6 +1,6 @@
 #include <QString>
 #include <QDebug>
-#include "settings/SettingsObject.h"
+#include "minecraft/LaunchContext.h"
 #ifdef Q_OS_MACOS
 #include <sys/sysctl.h>
 #endif
@@ -68,18 +68,24 @@ QString useQTForArch(){
     return qtArch;
 }
 
-QString runCheckerForArch(const SettingsObjectPtr& settingsObj){
-    QString checkerJar = FS::PathCombine(APPLICATION->getJarsPath(), "JavaCheck.jar");
+QString runCheckerForArch(LaunchContext launchContext){
+    QString checkerJar = JavaUtils::getJavaCheckPath();
+
+    if (checkerJar.isEmpty())
+    {
+        qDebug() << "Java checker library could not be found. Please check your installation.";
+        return useQTForArch();
+    }
 
     QStringList args;
 
     QProcessPtr process = new QProcess();
     args.append({"-jar", checkerJar});
     process->setArguments(args);
-    process->setProgram(settingsObj->get("JavaPath").toString());
+    process->setProgram(launchContext.getJavaPath().toString());
     process->setProcessChannelMode(QProcess::SeparateChannels);
     process->setProcessEnvironment(CleanEnviroment());
-    qDebug() << "Running java checker: " + settingsObj->get("JavaPath").toString() + args.join(" ");;
+    qDebug() << "Running java checker: " + launchContext.getJavaPath().toString() + args.join(" ");;
 
     process->start();
     if(!process->waitForFinished(15000)){
@@ -105,7 +111,11 @@ QString runCheckerForArch(const SettingsObjectPtr& settingsObj){
         stderr_javaChecker += added;
 
         QMap<QString, QString> results;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+        QStringList lines = stdout_javaChecker.split("\n", Qt::SkipEmptyParts);
+#else
         QStringList lines = stdout_javaChecker.split("\n", QString::SkipEmptyParts);
+#endif
         for(QString line : lines)
         {
             line = line.trimmed();
@@ -114,7 +124,11 @@ QString runCheckerForArch(const SettingsObjectPtr& settingsObj){
                 continue;
             }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+            auto parts = line.split('=', Qt::SkipEmptyParts);
+#else
             auto parts = line.split('=', QString::SkipEmptyParts);
+#endif
             if(parts.size() != 2 || parts[0].isEmpty() || parts[1].isEmpty())
             {
                 continue;
@@ -136,13 +150,13 @@ QString runCheckerForArch(const SettingsObjectPtr& settingsObj){
     }
 }
 
-QString currentArch(const SettingsObjectPtr& settingsObj) {
-    auto realJavaArchitecture = settingsObj->get("JavaRealArchitecture").toString();
+QString currentArch(LaunchContext launchContext) {
+    auto realJavaArchitecture = launchContext.getRealJavaArch().toString();
     if(realJavaArchitecture == ""){
         //BRO WHY NOW I HAVE TO USE A JAVA CHECKER >:(
         qDebug() << "SysInfo: BRO I HAVE TO USE A JAVA CHECKER WHY IS JAVA ARCH BORKED";
-        settingsObj->set("JavaRealArchitecture", runCheckerForArch(settingsObj));
-        realJavaArchitecture = settingsObj->get("JavaRealArchitecture").toString();
+        launchContext.setRealJavaArch(runCheckerForArch(launchContext));
+        realJavaArchitecture = launchContext.getRealJavaArch().toString();
     }
     //qDebug() << "SysInfo: realJavaArch = " << realJavaArchitecture;
     if(realJavaArchitecture == "aarch64"){
