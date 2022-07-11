@@ -52,10 +52,7 @@
 #include <sys.h>
 #include "Application.h"
 #include "JavaDownloader.h"
-#include "SysInfo.h"
 #include "settings/SettingsObject.h"
-#include "ui/dialogs/ProgressDialog.h"
-#include <QDialogButtonBox>
 
 JavaPage::JavaPage(QWidget *parent) : QWidget(parent), ui(new Ui::JavaPage)
 {
@@ -181,57 +178,9 @@ void JavaPage::on_javaTestBtn_clicked()
     checker->run();
 }
 
-void JavaPage::on_javaDownloadBtn_clicked(){
-    QString sys = SysInfo::currentSystem();
-    if(sys == "osx"){
-        sys = "mac-os";
-    }
-    QString arch = SysInfo::useQTForArch();
-    QString version;
-    if(sys == "windows"){
-        if(arch == "x86_64"){
-            version = "windows-x64";
-        }else if(arch == "i386"){
-            version = "windows-x86";
-        }else{
-            //Unknown, maybe arm, appending arch for downloader
-            version = "windows-"+arch;
-        }
-    }else if(sys == "mac-os"){
-        if(arch == "arm64"){
-            version = "mac-os-arm64";
-        }else{
-            version = "mac-os";
-        }
-    }else if(sys == "linux"){
-        if(arch == "x86_64"){
-            version = "linux";
-        }else {
-            // will work for i386, and arm(64)
-            version = "linux-" + arch;
-        }
-    }else{
-        // ? ? ? ? ? unknown os, at least it won't have a java version on mojang or azul, display warning
-        QMessageBox::warning(this, tr("Unknown OS"), tr("The OS you are running is not supported by Mojang or Azul. Please install Java manually."));
-        return;
-    }
-    //Selection using QMessageBox for java 8 or 17
-    QMessageBox box(QMessageBox::Icon::Question, tr("Java version"), tr("Do you want to download Java version 8 or 17?\n Java 8 is recommended for minecraft versions below 1.17\n Java 17 is recommended for minecraft versions above or equal to 1.17"),
-                        QMessageBox::NoButton, this);
-    box.addButton("Java 17", QMessageBox::YesRole);
-    auto no = box.addButton("Java 8", QMessageBox::NoRole);
-    auto cancel = box.addButton(tr("Download both"), QMessageBox::AcceptRole);
-    box.exec();
-    bool isLegacy = box.clickedButton() == no;
-
-    auto down = new JavaDownloader(isLegacy, version);
-    ProgressDialog dialog(this);
-    dialog.execWithTask(down);
-    if(box.clickedButton() == cancel) {
-        auto dwn = new JavaDownloader(false, version);
-        ProgressDialog dg(this);
-        dg.execWithTask(dwn);
-    }
+void JavaPage::on_javaDownloadBtn_clicked()
+{
+   JavaDownloader::showPrompts(this);
 }
 
 void JavaPage::checkerFinished()

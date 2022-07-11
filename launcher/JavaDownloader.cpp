@@ -1,11 +1,15 @@
 #include "JavaDownloader.h"
+#include <QMessageBox>
+#include <QPushButton>
 #include "Application.h"
 #include "FileSystem.h"
 #include "Json.h"
 #include "MMCZip.h"
+#include "SysInfo.h"
 #include "net/ChecksumValidator.h"
 #include "net/NetJob.h"
 #include "quazip.h"
+#include "ui/dialogs/ProgressDialog.h"
 
 // Quick & dirty struct to store files
 struct File {
@@ -95,6 +99,7 @@ void JavaDownloader::executeTask()
                     elementDownload->addNetAction(dl);
                 }
                 QObject::connect(elementDownload, &NetJob::finished, [elementDownload] { elementDownload->deleteLater(); });
+                QObject::connect(elementDownload, &NetJob::progress, this, &JavaDownloader::progress);
                 QObject::connect(elementDownload, &NetJob::succeeded, [this] { emitSucceeded(); });
                 elementDownload->start();
             });
@@ -181,4 +186,78 @@ void JavaDownloader::executeTask()
     });
 
     netJob->start();
+}
+void JavaDownloader::showPrompts(QWidget* parent)
+{
+    QString sys = SysInfo::currentSystem();
+    if (sys == "osx") {
+        sys = "mac-os";
+    }
+    QString arch = SysInfo::useQTForArch();
+    QString version;
+    if (sys == "windows") {
+        if (arch == "x86_64") {
+            version = "windows-x64";
+        } else if (arch == "i386") {
+            version = "windows-x86";
+        } else {
+            // Unknown, maybe arm, appending arch for downloader
+            version = "windows-" + arch;
+        }
+    } else if (sys == "mac-os") {
+        if (arch == "arm64") {
+            version = "mac-os-arm64";
+        } else {
+            version = "mac-os";
+        }
+    } else if (sys == "linux") {
+        if (arch == "x86_64") {
+            version = "linux";
+        } else {
+            // will work for i386, and arm(64)
+            version = "linux-" + arch;
+        }
+    } else {
+        // ? ? ? ? ? unknown os, at least it won't have a java version on mojang or azul, display warning
+        QMessageBox::warning(parent, tr("Unknown OS"),
+                             tr("The OS you are running is not supported by Mojang or Azul. Please install Java manually."));
+        return;
+    }
+    // Selection using QMessageBox for java 8 or 17
+    QMessageBox box(QMessageBox::Icon::Question, tr("Java version"),
+                    tr("Do you want to download Java version 8 or 17?\n Java 8 is recommended for minecraft versions below 1.17\n Java 17 "
+                       "is recommended for minecraft versions above or equal to 1.17"),
+                    QMessageBox::NoButton, parent);
+    auto yes = box.addButton("Java 17", QMessageBox::AcceptRole);
+    auto no = box.addButton("Java 8", QMessageBox::AcceptRole);
+    auto both = box.addButton(tr("Download both"), QMessageBox::AcceptRole);
+    auto cancel = box.addButton(QMessageBox::Cancel);
+
+    if (QFileInfo::exists(FS::PathCombine(QString("java"), "java-legacy"))) {
+        no->setEnabled(false);
+    }
+    if (QFileInfo::exists(FS::PathCombine(QString("java"), "java-current"))) {
+        yes->setEnabled(false);
+    }
+    if (!yes->isEnabled() || !no->isEnabled()) {
+        both->setEnabled(false);
+    }
+    if (!yes->isEnabled() && !no->isEnabled()) {
+        QMessageBox::warning(parent, tr("Already installed !"), tr("Both versions of java are already installed !"));
+        return;
+    }
+    box.exec();
+    if (box.clickedButton() == nullptr || box.clickedButton() == cancel) {
+        return;
+    }
+    bool isLegacy = box.clickedButton() == no;
+
+    auto down = new JavaDownloader(isLegacy, version);
+    ProgressDialog dialog(parent);
+    dialog.execWithTask(down);
+    if (box.clickedButton() == both) {
+        auto dwn = new JavaDownloader(false, version);
+        ProgressDialog dg(parent);
+        dg.execWithTask(dwn);
+    }
 }

@@ -63,6 +63,7 @@ protected slots:
     void javaVersionSelected(BaseVersionPtr version);
     void on_javaBrowseBtn_clicked();
     void on_javaStatusBtn_clicked();
+    void on_javaDownloadBtn_clicked();
     void checkFinished(JavaCheckResult result);
 
 protected: /* methods */
@@ -88,6 +89,8 @@ private: /* data */
     QSpinBox *m_minMemSpinBox = nullptr;
     QLabel *m_labelPermGen = nullptr;
     QSpinBox *m_permGenSpinBox = nullptr;
+
+    QPushButton *m_javaDownloadBtn = nullptr;
     QIcon goodIcon;
     QIcon yellowIcon;
     QIcon badIcon;

@@ -49,6 +49,7 @@
 #include "JavaCommon.h"
 #include "Application.h"
 
+#include "JavaDownloader.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 #include "FileSystem.h"
@@ -372,6 +373,11 @@ void InstanceSettingsPage::loadSettings()
 
     ui->serverJoinGroupBox->setChecked(m_settings->get("JoinServerOnLaunch").toBool());
     ui->serverJoinAddress->setText(m_settings->get("JoinServerOnLaunchAddress").toString());
+}
+
+void InstanceSettingsPage::on_javaDownloadBtn_clicked()
+{
+    JavaDownloader::showPrompts(this);
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

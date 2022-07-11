@@ -81,6 +81,7 @@ private slots:
     void on_javaDetectBtn_clicked();
     void on_javaTestBtn_clicked();
     void on_javaBrowseBtn_clicked();
+    void on_javaDownloadBtn_clicked();
 
     void applySettings();
     void loadSettings();

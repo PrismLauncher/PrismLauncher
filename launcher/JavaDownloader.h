@@ -10,6 +10,7 @@ class JavaDownloader : public Task {
     explicit JavaDownloader(bool isLegacy, const QString& OS) : m_isLegacy(isLegacy), m_OS(OS) {}
 
     void executeTask() override;
+    static void showPrompts(QWidget* parent = nullptr);
 
    private:
     bool m_isLegacy;
