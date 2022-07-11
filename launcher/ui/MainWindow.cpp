@@ -240,6 +240,7 @@ public:
     TranslatedAction actionCAT;
     TranslatedAction actionCopyInstance;
     TranslatedAction actionLaunchInstanceOffline;
+    TranslatedAction actionLaunchInstanceDemo;
     TranslatedAction actionScreenshots;
     TranslatedAction actionExportInstance;
     QVector<TranslatedAction *> all_actions;
@@ -499,6 +500,7 @@ public:
         fileMenu->addAction(actionAddInstance);
         fileMenu->addAction(actionLaunchInstance);
         fileMenu->addAction(actionLaunchInstanceOffline);
+        fileMenu->addAction(actionLaunchInstanceDemo);
         fileMenu->addAction(actionKillInstance);
         fileMenu->addAction(actionCloseWindow);
         fileMenu->addSeparator();
@@ -669,6 +671,12 @@ public:
         actionLaunchInstanceOffline.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Launch the selected instance in offline mode."));
         all_actions.append(&actionLaunchInstanceOffline);
 
+        actionLaunchInstanceDemo = TranslatedAction(MainWindow);
+        actionLaunchInstanceDemo->setObjectName(QStringLiteral("actionLaunchInstanceDemo"));
+        actionLaunchInstanceDemo.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Launch &Demo"));
+        actionLaunchInstanceDemo.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Launch the selected instance in demo mode."));
+        all_actions.append(&actionLaunchInstanceDemo);
+
         actionKillInstance = TranslatedAction(MainWindow);
         actionKillInstance->setObjectName(QStringLiteral("actionKillInstance"));
         actionKillInstance->setDisabled(true);
@@ -785,6 +793,7 @@ public:
 
         instanceToolBar->addAction(actionLaunchInstance);
         instanceToolBar->addAction(actionLaunchInstanceOffline);
+        instanceToolBar->addAction(actionLaunchInstanceDemo);
         instanceToolBar->addAction(actionKillInstance);
 
         instanceToolBar->addSeparator();
@@ -1190,16 +1199,20 @@ void MainWindow::updateToolsMenu()
 {
     QToolButton *launchButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstance));
     QToolButton *launchOfflineButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstanceOffline));
+    QToolButton *launchDemoButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstanceDemo));
 
     bool currentInstanceRunning = m_selectedInstance && m_selectedInstance->isRunning();
 
     ui->actionLaunchInstance->setDisabled(!m_selectedInstance || currentInstanceRunning);
     ui->actionLaunchInstanceOffline->setDisabled(!m_selectedInstance || currentInstanceRunning);
+    ui->actionLaunchInstanceDemo->setDisabled(!m_selectedInstance || currentInstanceRunning);
 
     QMenu *launchMenu = ui->actionLaunchInstance->menu();
     QMenu *launchOfflineMenu = ui->actionLaunchInstanceOffline->menu();
+    QMenu *launchDemoMenu = ui->actionLaunchInstanceDemo->menu();
     launchButton->setPopupMode(QToolButton::MenuButtonPopup);
     launchOfflineButton->setPopupMode(QToolButton::MenuButtonPopup);
+    launchDemoButton->setPopupMode(QToolButton::MenuButtonPopup);
     if (launchMenu)
     {
         launchMenu->clear();
@@ -1215,66 +1228,90 @@ void MainWindow::updateToolsMenu()
     {
         launchOfflineMenu = new QMenu(this);
     }
+    if (launchDemoMenu) {
+        launchDemoMenu->clear();
+    }
+    else
+    {
+        launchDemoMenu = new QMenu(this);
+    }
 
     QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
     normalLaunch->setShortcut(QKeySequence::Open);
     QAction *normalLaunchOffline = launchOfflineMenu->addAction(tr("Launch Offline"));
     normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
+    QAction *normalLaunchDemo = launchDemoMenu->addAction(tr("Launch Demo"));
     if (m_selectedInstance)
     {
         normalLaunch->setEnabled(m_selectedInstance->canLaunch());
         normalLaunchOffline->setEnabled(m_selectedInstance->canLaunch());
+        normalLaunchDemo->setEnabled(m_selectedInstance->canLaunch());
 
         connect(normalLaunch, &QAction::triggered, [this]() {
-            APPLICATION->launch(m_selectedInstance, true);
+            APPLICATION->launch(m_selectedInstance, true, false);
         });
         connect(normalLaunchOffline, &QAction::triggered, [this]() {
-            APPLICATION->launch(m_selectedInstance, false);
+            APPLICATION->launch(m_selectedInstance, false, false);
+        });
+        connect(normalLaunchDemo, &QAction::triggered, [this]() {
+            APPLICATION->launch(m_selectedInstance, false, true);
         });
     }
     else
     {
         normalLaunch->setDisabled(true);
         normalLaunchOffline->setDisabled(true);
+        normalLaunchDemo->setDisabled(true);
     }
     QString profilersTitle = tr("Profilers");
     launchMenu->addSeparator()->setText(profilersTitle);
     launchOfflineMenu->addSeparator()->setText(profilersTitle);
+    launchDemoMenu->addSeparator()->setText(profilersTitle);
     for (auto profiler : APPLICATION->profilers().values())
     {
         QAction *profilerAction = launchMenu->addAction(profiler->name());
         QAction *profilerOfflineAction = launchOfflineMenu->addAction(profiler->name());
+        QAction *profilerDemoAction = launchDemoMenu->addAction(profiler->name());
         QString error;
         if (!profiler->check(&error))
         {
             profilerAction->setDisabled(true);
             profilerOfflineAction->setDisabled(true);
+            profilerDemoAction->setDisabled(true);
             QString profilerToolTip = tr("Profiler not setup correctly. Go into settings, \"External Tools\".");
             profilerAction->setToolTip(profilerToolTip);
             profilerOfflineAction->setToolTip(profilerToolTip);
+            profilerDemoAction->setToolTip(profilerToolTip);
         }
         else if (m_selectedInstance)
         {
             profilerAction->setEnabled(m_selectedInstance->canLaunch());
             profilerOfflineAction->setEnabled(m_selectedInstance->canLaunch());
+            profilerDemoAction->setEnabled(m_selectedInstance->canLaunch());
 
             connect(profilerAction, &QAction::triggered, [this, profiler]()
                     {
-                        APPLICATION->launch(m_selectedInstance, true, profiler.get());
+                        APPLICATION->launch(m_selectedInstance, true, false, profiler.get());
                     });
             connect(profilerOfflineAction, &QAction::triggered, [this, profiler]()
                     {
-                        APPLICATION->launch(m_selectedInstance, false, profiler.get());
+                        APPLICATION->launch(m_selectedInstance, false, false, profiler.get());
+                    });
+            connect(profilerDemoAction, &QAction::triggered, [this, profiler]()
+                    {
+                        APPLICATION->launch(m_selectedInstance, false, true, profiler.get());
                     });
         }
         else
         {
             profilerAction->setDisabled(true);
             profilerOfflineAction->setDisabled(true);
+            profilerDemoAction->setDisabled(true);
         }
     }
     ui->actionLaunchInstance->setMenu(launchMenu);
     ui->actionLaunchInstanceOffline->setMenu(launchOfflineMenu);
+    ui->actionLaunchInstanceDemo->setMenu(launchDemoMenu);
 }
 
 void MainWindow::repopulateAccountsMenu()
@@ -2096,6 +2133,14 @@ void MainWindow::on_actionLaunchInstanceOffline_triggered()
     }
 }
 
+void MainWindow::on_actionLaunchInstanceDemo_triggered()
+{
+    if (m_selectedInstance)
+    {
+        APPLICATION->launch(m_selectedInstance, false, true);
+    }
+}
+
 void MainWindow::on_actionKillInstance_triggered()
 {
     if(m_selectedInstance && m_selectedInstance->isRunning())
@@ -2139,6 +2184,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         ui->setInstanceActionsEnabled(true);
         ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
         ui->actionLaunchInstanceOffline->setEnabled(m_selectedInstance->canLaunch());
+        ui->actionLaunchInstanceDemo->setEnabled(m_selectedInstance->canLaunch());
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
         ui->renameButton->setText(m_selectedInstance->name());
@@ -2158,6 +2204,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         ui->setInstanceActionsEnabled(false);
         ui->actionLaunchInstance->setEnabled(false);
         ui->actionLaunchInstanceOffline->setEnabled(false);
+        ui->actionLaunchInstanceDemo->setEnabled(false);
         ui->actionKillInstance->setEnabled(false);
         APPLICATION->settings()->set("SelectedInstance", QString());
         selectionBad();
