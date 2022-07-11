@@ -273,6 +273,11 @@ void PackProfile::scheduleSave()
     d->m_saveTimer.start();
 }
 
+RuntimeContext PackProfile::runtimeContext()
+{
+    return d->m_instance->runtimeContext();
+}
+
 QString PackProfile::componentsFilePath() const
 {
     return FS::PathCombine(d->m_instance->instanceRoot(), "mmc-pack.json");
@@ -784,7 +789,7 @@ bool PackProfile::removeComponent_internal(ComponentPtr patch)
             return true;
         }
         QStringList jar, temp1, temp2, temp3;
-        jarMod->getApplicableFiles(currentSystem, jar, temp1, temp2, temp3, d->m_instance->jarmodsPath().absolutePath());
+        jarMod->getApplicableFiles(d->m_instance->runtimeContext(), jar, temp1, temp2, temp3, d->m_instance->jarmodsPath().absolutePath());
         QFileInfo finfo (jar[0]);
         if(finfo.exists())
         {

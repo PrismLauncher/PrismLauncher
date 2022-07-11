@@ -84,4 +84,8 @@ public:
     QString modsRoot() const override {
         return QString();
     }
+    void updateRuntimeContext()
+    {
+        // NOOP
+    }
 };

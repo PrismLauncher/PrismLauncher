@@ -19,7 +19,7 @@
 #include <QList>
 #include <QJsonObject>
 #include <memory>
-#include "OpSys.h"
+#include "RuntimeContext.h"
 
 class Library;
 class Rule;
@@ -58,23 +58,23 @@ class OsRule : public Rule
 {
 private:
     // the OS
-    OpSys m_system;
+    QString m_system;
     // the OS version regexp
     QString m_version_regexp;
 
 protected:
     virtual bool applies(const Library *)
     {
-        return (m_system == currentSystem);
+        return (m_system == RuntimeContext::currentSystem());
     }
-    OsRule(RuleAction result, OpSys system, QString version_regexp)
+    OsRule(RuleAction result, QString system, QString version_regexp)
         : Rule(result), m_system(system), m_version_regexp(version_regexp)
     {
     }
 
 public:
     virtual QJsonObject toJson();
-    static std::shared_ptr<OsRule> create(RuleAction result, OpSys system,
+    static std::shared_ptr<OsRule> create(RuleAction result, QString system,
                                           QString version_regexp)
     {
         return std::shared_ptr<OsRule>(new OsRule(result, system, version_regexp));

@@ -60,7 +60,7 @@ void Component::applyTo(LaunchProfile* profile)
     auto vfile = getVersionFile();
     if(vfile)
     {
-        vfile->applyTo(profile);
+        vfile->applyTo(profile, m_parent->runtimeContext());
     }
     else
     {

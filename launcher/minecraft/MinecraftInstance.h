@@ -72,6 +72,8 @@ public:
     /** Returns whether the instance, with its version, has support for demo mode. */
     [[nodiscard]] bool supportsDemo() const;
 
+    void updateRuntimeContext();
+
     //////  Profile management //////
     std::shared_ptr<PackProfile> getPackProfile() const;
 

@@ -104,6 +104,9 @@ public:
     /// if there is a save scheduled, do it now.
     void saveNow();
 
+    /// helper method, returns RuntimeContext of instance
+    RuntimeContext runtimeContext();
+
 signals:
     void minecraftChanged();
 

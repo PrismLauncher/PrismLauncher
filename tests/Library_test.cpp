@@ -87,7 +87,7 @@ slots:
     void test_legacy_native()
     {
         Library test("test.package:testname:testversion");
-        test.m_nativeClassifiers[OpSys::Os_Linux]="linux";
+        test.m_nativeClassifiers["linux"] = "linux";
         QCOMPARE(test.isNative(), true);
         test.setRepositoryURL("file://foo/bar");
         {
@@ -108,9 +108,9 @@ slots:
     void test_legacy_native_arch()
     {
         Library test("test.package:testname:testversion");
-        test.m_nativeClassifiers[OpSys::Os_Linux]="linux-${arch}";
-        test.m_nativeClassifiers[OpSys::Os_OSX]="osx-${arch}";
-        test.m_nativeClassifiers[OpSys::Os_Windows]="windows-${arch}";
+        test.m_nativeClassifiers["linux"]="linux-${arch}";
+        test.m_nativeClassifiers["osx"]="osx-${arch}";
+        test.m_nativeClassifiers["windows"]="windows-${arch}";
         QCOMPARE(test.isNative(), true);
         test.setRepositoryURL("file://foo/bar");
         {
@@ -159,7 +159,7 @@ slots:
     void test_legacy_native_arch_local_override()
     {
         Library test("test.package:testname:testversion");
-        test.m_nativeClassifiers[OpSys::Os_Linux]="linux-${arch}";
+        test.m_nativeClassifiers["linux"]="linux-${arch}";
         test.setHint("local");
         QCOMPARE(test.isNative(), true);
         test.setRepositoryURL("file://foo/bar");

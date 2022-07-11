@@ -7,7 +7,7 @@
 #include <BuildConfig.h>
 
 
-void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& native, QStringList& native32,
+void Library::getApplicableFiles(const RuntimeContext & runtimeContext, QStringList& jar, QStringList& native, QStringList& native32,
                                  QStringList& native64, const QString &overridePath) const
 {
     bool local = isLocal();
@@ -21,7 +21,7 @@ void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& na
         }
         return out.absoluteFilePath();
     };
-    QString raw_storage = storageSuffix(system);
+    QString raw_storage = storageSuffix(runtimeContext);
     if(isNative())
     {
         if (raw_storage.contains("${arch}"))
@@ -45,7 +45,7 @@ void Library::getApplicableFiles(OpSys system, QStringList& jar, QStringList& na
 }
 
 QList<NetAction::Ptr> Library::getDownloads(
-    OpSys system,
+    const RuntimeContext & runtimeContext,
     class HttpMetaCache* cache,
     QStringList& failedLocalFiles,
     const QString & overridePath
@@ -107,14 +107,14 @@ QList<NetAction::Ptr> Library::getDownloads(
         return true;
     };
 
-    QString raw_storage = storageSuffix(system);
+    QString raw_storage = storageSuffix(runtimeContext);
     if(m_mojangDownloads)
     {
         if(isNative())
         {
-            if(m_nativeClassifiers.contains(system))
+            if(m_nativeClassifiers.contains(runtimeContext.currentSystem()))
             {
-                auto nativeClassifier = m_nativeClassifiers[system];
+                auto nativeClassifier = m_nativeClassifiers[runtimeContext.currentSystem()];
                 if(nativeClassifier.contains("${arch}"))
                 {
                     auto nat32Classifier = nativeClassifier;
@@ -203,7 +203,7 @@ QList<NetAction::Ptr> Library::getDownloads(
     return out;
 }
 
-bool Library::isActive() const
+bool Library::isActive(const RuntimeContext & runtimeContext) const
 {
     bool result = true;
     if (m_rules.empty())
@@ -223,7 +223,7 @@ bool Library::isActive() const
     }
     if (isNative())
     {
-        result = result && m_nativeClassifiers.contains(currentSystem);
+        result = result && m_nativeClassifiers.contains(runtimeContext.currentSystem());
     }
     return result;
 }
@@ -257,7 +257,7 @@ QString Library::storagePrefix() const
     return m_storagePrefix;
 }
 
-QString Library::filename(OpSys system) const
+QString Library::filename(const RuntimeContext & runtimeContext) const
 {
     if(!m_filename.isEmpty())
     {
@@ -271,9 +271,9 @@ QString Library::filename(OpSys system) const
 
     // otherwise native, override classifiers. Mojang HACK!
     GradleSpecifier nativeSpec = m_name;
-    if (m_nativeClassifiers.contains(system))
+    if (m_nativeClassifiers.contains(runtimeContext.currentSystem()))
     {
-        nativeSpec.setClassifier(m_nativeClassifiers[system]);
+        nativeSpec.setClassifier(m_nativeClassifiers[runtimeContext.currentSystem()]);
     }
     else
     {
@@ -282,14 +282,14 @@ QString Library::filename(OpSys system) const
     return nativeSpec.getFileName();
 }
 
-QString Library::displayName(OpSys system) const
+QString Library::displayName(const RuntimeContext & runtimeContext) const
 {
     if(!m_displayname.isEmpty())
         return m_displayname;
-    return filename(system);
+    return filename(runtimeContext);
 }
 
-QString Library::storageSuffix(OpSys system) const
+QString Library::storageSuffix(const RuntimeContext & runtimeContext) const
 {
     // non-native? use only the gradle specifier
     if (!isNative())
@@ -299,9 +299,9 @@ QString Library::storageSuffix(OpSys system) const
 
     // otherwise native, override classifiers. Mojang HACK!
     GradleSpecifier nativeSpec = m_name;
-    if (m_nativeClassifiers.contains(system))
+    if (m_nativeClassifiers.contains(runtimeContext.currentSystem()))
     {
-        nativeSpec.setClassifier(m_nativeClassifiers[system]);
+        nativeSpec.setClassifier(m_nativeClassifiers[runtimeContext.currentSystem()]);
     }
     else
     {
