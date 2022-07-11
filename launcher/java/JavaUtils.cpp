@@ -204,12 +204,6 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
         // This will be used to find any key that contains the JavaHome value.
         TCHAR *value = new TCHAR[0];
         DWORD valueSz = 0;
-        if (RegQueryValueExW(jreKey, L"CurrentVersion", NULL, NULL, (BYTE *)value, &valueSz) ==
-            ERROR_MORE_DATA)
-        {
-            value = new TCHAR[valueSz];
-            RegQueryValueExW(jreKey, L"CurrentVersion", NULL, NULL, (BYTE *)value, &valueSz);
-        }
 
         TCHAR subKeyName[255];
         DWORD subKeyNameSize, numSubKeys, retCode;
@@ -237,6 +231,7 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
                                       KEY_READ | KEY_WOW64_64KEY, &newKey) == ERROR_SUCCESS)
                     {
                         // Read the JavaHome value to find where Java is installed.
+                        delete [] value;
                         value = new TCHAR[0];
                         valueSz = 0;
                         if (RegQueryValueExW(newKey, keyJavaDir.toStdWString().c_str(), NULL, NULL, (BYTE *)value,
