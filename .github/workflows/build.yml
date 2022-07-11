@@ -109,9 +109,9 @@ jobs:
         uses: actions/cache@v3.0.2
         with:
           path: '${{ github.workspace }}\.ccache'
-          key: ${{ matrix.os }}-${{ matrix.msystem }}
+          key: ${{ matrix.os }}--qt${{ matrix.qt_ver }}
           restore-keys: |
-              ${{ matrix.os }}-${{ matrix.msystem }}
+              ${{ matrix.os }}--qt${{ matrix.qt_ver }}
 
       - name: Set short version
         shell: bash
@@ -134,7 +134,7 @@ jobs:
       - name: Install Qt (Linux)
         if: runner.os == 'Linux' && matrix.appimage != true
         run: |
-          sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5 qt5-image-formats-plugins
+          sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5 
 
       - name: Install Qt (macOS and AppImage)
         if: matrix.qt_ver == 6 && runner.os != 'Windows'
