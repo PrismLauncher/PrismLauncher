@@ -118,8 +118,9 @@ void Download::executeTask()
     }
 
     request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
-    if (request.url().host().contains("api.curseforge.com")) {
-        request.setRawHeader("x-api-key", APPLICATION->getCurseKey().toUtf8());
+    if (APPLICATION->currentCapabilities() & Application::SupportsFlame
+            && request.url().host().contains("api.curseforge.com")) {
+        request.setRawHeader("x-api-key", APPLICATION->getFlameAPIKey().toUtf8());
     };
 
     QNetworkReply* rep = m_network->get(request);

@@ -711,9 +711,20 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("CloseAfterLaunch", false);
         m_settings->registerSetting("QuitAfterGameStop", false);
 
-        // Custom MSA credentials
+        // Custom Microsoft Authentication Client ID
         m_settings->registerSetting("MSAClientIDOverride", "");
-        m_settings->registerSetting("CFKeyOverride", "");
+
+        // Custom Flame API Key
+        {
+            m_settings->registerSetting("CFKeyOverride", "");
+            m_settings->registerSetting("FlameKeyOverride", "");
+
+            QString flameKey = m_settings->get("CFKeyOverride").toString();
+
+            if (!flameKey.isEmpty())
+                m_settings->set("FlameKeyOverride", flameKey);
+            m_settings->reset("CFKeyOverride");
+        }
         m_settings->registerSetting("UserAgentOverride", "");
 
         // Init page provider
@@ -1553,6 +1564,16 @@ shared_qobject_ptr<Meta::Index> Application::metadataIndex()
     return m_metadataIndex;
 }
 
+Application::Capabilities Application::currentCapabilities()
+{
+    Capabilities c;
+    if (!getMSAClientID().isEmpty())
+        c |= SupportsMSA;
+    if (!getFlameAPIKey().isEmpty())
+        c |= SupportsFlame;
+    return c;
+}
+
 QString Application::getJarPath(QString jarFile)
 {
     QStringList potentialPaths = {
@@ -1581,14 +1602,14 @@ QString Application::getMSAClientID()
     return BuildConfig.MSA_CLIENT_ID;
 }
 
-QString Application::getCurseKey()
+QString Application::getFlameAPIKey()
 {
-    QString keyOverride = m_settings->get("CFKeyOverride").toString();
+    QString keyOverride = m_settings->get("FlameKeyOverride").toString();
     if (!keyOverride.isEmpty()) {
         return keyOverride;
     }
 
-    return BuildConfig.CURSEFORGE_API_KEY;
+    return BuildConfig.FLAME_API_KEY;
 }
 
 QString Application::getUserAgent()

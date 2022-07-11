@@ -90,6 +90,14 @@ public:
         Initialized
     };
 
+    enum Capability {
+        None = 0,
+
+        SupportsMSA = 1 << 0,
+        SupportsFlame = 1 << 1,
+    };
+    Q_DECLARE_FLAGS(Capabilities, Capability)
+
 public:
     Application(int &argc, char **argv);
     virtual ~Application();
@@ -154,6 +162,8 @@ public:
 
     shared_qobject_ptr<Meta::Index> metadataIndex();
 
+    Capabilities currentCapabilities();
+
     /*!
      * Finds and returns the full path to a jar file.
      * Returns a null-string if it could not be found.
@@ -161,7 +171,7 @@ public:
     QString getJarPath(QString jarFile);
 
     QString getMSAClientID();
-    QString getCurseKey();
+    QString getFlameAPIKey();
     QString getUserAgent();
     QString getUserAgentUncached();
 

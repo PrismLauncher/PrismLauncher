@@ -1,9 +1,28 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "ModDownloadDialog.h"
 
 #include <BaseVersion.h>
 #include <icons/IconList.h>
 #include <InstanceList.h>
 
+#include "Application.h"
 #include "ProgressDialog.h"
 #include "ReviewMessageBox.h"
 
@@ -100,13 +119,13 @@ void ModDownloadDialog::accept()
 
 QList<BasePage *> ModDownloadDialog::getPages()
 {
-    modrinthPage = new ModrinthModPage(this, m_instance);
-    flameModPage = new FlameModPage(this, m_instance);
-    return
-    {
-        modrinthPage,
-        flameModPage
-    };
+    QList<BasePage *> pages;
+
+    pages.append(new ModrinthModPage(this, m_instance));
+    if (APPLICATION->currentCapabilities() & Application::SupportsFlame)
+        pages.append(new FlameModPage(this, m_instance));
+
+    return pages;
 }
 
 void ModDownloadDialog::addSelectedMod(const QString& name, ModDownloadTask* task)
