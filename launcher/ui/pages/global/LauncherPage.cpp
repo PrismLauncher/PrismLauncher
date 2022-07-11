@@ -90,6 +90,13 @@ LauncherPage::LauncherPage(QWidget *parent) : QWidget(parent), ui(new Ui::Launch
         {
             APPLICATION->updateChecker()->updateChanList(false);
         }
+
+        if (APPLICATION->updateChecker()->getExternalUpdater())
+        {
+            ui->updateChannelComboBox->setVisible(false);
+            ui->updateChannelDescLabel->setVisible(false);
+            ui->updateChannelLabel->setVisible(false);
+        }
     }
     else
     {
@@ -266,7 +273,16 @@ void LauncherPage::applySettings()
     auto s = APPLICATION->settings();
 
     // Updates
-    s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
+    if (BuildConfig.UPDATER_ENABLED && APPLICATION->updateChecker()->getExternalUpdater())
+    {
+        APPLICATION->updateChecker()->getExternalUpdater()->setAutomaticallyChecksForUpdates(
+                ui->autoUpdateCheckBox->isChecked());
+    }
+    else
+    {
+        s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
+    }
+
     s->set("UpdateChannel", m_currentUpdateChannel);
     auto original = s->get("IconTheme").toString();
     //FIXME: make generic
@@ -351,7 +367,16 @@ void LauncherPage::loadSettings()
 {
     auto s = APPLICATION->settings();
     // Updates
-    ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
+    if (BuildConfig.UPDATER_ENABLED && APPLICATION->updateChecker()->getExternalUpdater())
+    {
+        ui->autoUpdateCheckBox->setChecked(
+                APPLICATION->updateChecker()->getExternalUpdater()->getAutomaticallyChecksForUpdates());
+    }
+    else
+    {
+        ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
+    }
+
     m_currentUpdateChannel = s->get("UpdateChannel").toString();
     //FIXME: make generic
     auto theme = s->get("IconTheme").toString();

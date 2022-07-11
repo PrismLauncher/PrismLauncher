@@ -40,5 +40,9 @@
     <true/>
     <key>NSHumanReadableCopyright</key>
     <string>${MACOSX_BUNDLE_COPYRIGHT}</string>
+    <key>SUPublicEDKey</key>
+    <string>${MACOSX_SPARKLE_UPDATE_PUBLIC_KEY}</string>
+    <key>SUFeedURL</key>
+    <string>${MACOSX_SPARKLE_UPDATE_FEED_URL}</string>
 </dict>
 </plist>

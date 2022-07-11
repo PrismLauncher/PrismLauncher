@@ -61,6 +61,14 @@ Config::Config()
     BUILD_PLATFORM = "@Launcher_BUILD_PLATFORM@";
     UPDATER_BASE = "@Launcher_UPDATER_BASE@";
 
+    MAC_SPARKLE_PUB_KEY = "@MACOSX_SPARKLE_UPDATE_PUBLIC_KEY@";
+    MAC_SPARKLE_APPCAST_URL = "@MACOSX_SPARKLE_UPDATE_FEED_URL@";
+
+    if (BUILD_PLATFORM == "macOS" && !MAC_SPARKLE_PUB_KEY.isEmpty() && !MAC_SPARKLE_APPCAST_URL.isEmpty())
+    {
+        UPDATER_ENABLED = true;
+    }
+
     GIT_COMMIT = "@Launcher_GIT_COMMIT@";
     GIT_REFSPEC = "@Launcher_GIT_REFSPEC@";
     if (GIT_REFSPEC == QStringLiteral("GITDIR-NOTFOUND"))

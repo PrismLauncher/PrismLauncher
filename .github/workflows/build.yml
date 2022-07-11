@@ -7,6 +7,10 @@ on:
         description: Type of build (Debug, Release, RelWithDebInfo, MinSizeRel)
         type: string
         default: Debug
+    secrets:
+      SPARKLE_ED25519_KEY:
+        description: Private key for signing Sparkle updates
+        required: false
 
 jobs:
   build:
@@ -218,6 +222,25 @@ jobs:
           chmod +x "PolyMC.app/Contents/MacOS/polymc"
           sudo codesign --sign - --deep --force --entitlements "../program_info/App.entitlements" --options runtime "PolyMC.app/Contents/MacOS/polymc"
           tar -czf ../PolyMC.tar.gz *
+
+      - name: Make Sparkle signature (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          if [ '${{ secrets.SPARKLE_ED25519_KEY }}' != '' ]; then
+            brew install openssl@3
+            echo '${{ secrets.SPARKLE_ED25519_KEY }}' > ed25519-priv.pem
+            signature=$(/usr/local/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PolyMC.tar.gz -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
+            rm ed25519-priv.pem
+            cat >> $GITHUB_STEP_SUMMARY << EOF
+          ### Artifact Information :information_source:
+          - :memo: Sparkle Signature (ed25519): \`$signature\`
+          EOF
+          else
+            cat >> $GITHUB_STEP_SUMMARY << EOF
+          ### Artifact Information :information_source:
+          - :warning: Sparkle Signature (ed25519): No private key available (likely a pull request or fork)
+          EOF
+          fi
 
       - name: Package (Windows)
         if: runner.os == 'Windows'

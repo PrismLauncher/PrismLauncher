@@ -543,6 +543,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     {
         m_settings.reset(new INISettingsObject(BuildConfig.LAUNCHER_CONFIGFILE, this));
         // Updates
+        // Multiple channels are separated by spaces
         m_settings->registerSetting("UpdateChannel", BuildConfig.VERSION_CHANNEL);
         m_settings->registerSetting("AutoUpdate", true);
 

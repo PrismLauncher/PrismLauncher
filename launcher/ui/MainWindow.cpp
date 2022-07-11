@@ -284,7 +284,7 @@ public:
     TranslatedToolbar newsToolBar;
     QVector<TranslatedToolbar *> all_toolbars;
 
-    void createMainToolbarActions(QMainWindow *MainWindow)
+    void createMainToolbarActions(MainWindow *MainWindow)
     {
         actionAddInstance = TranslatedAction(MainWindow);
         actionAddInstance->setObjectName(QStringLiteral("actionAddInstance"));
@@ -1028,6 +1028,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         if (APPLICATION->settings()->get("AutoUpdate").toBool() && updatesAllowed)
         {
             updater->checkForUpdate(APPLICATION->settings()->get("UpdateChannel").toString(), false);
+        }
+
+        if (APPLICATION->updateChecker()->getExternalUpdater())
+        {
+            connect(APPLICATION->updateChecker()->getExternalUpdater(),
+                    &ExternalUpdater::canCheckForUpdatesChanged,
+                    this,
+                    &MainWindow::updatesAllowedChanged);
         }
     }
 

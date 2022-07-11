@@ -157,6 +157,12 @@ set(UPDATE_SOURCES
     updater/UpdateChecker.cpp
     updater/DownloadTask.h
     updater/DownloadTask.cpp
+    updater/ExternalUpdater.h
+)
+
+set(MAC_UPDATE_SOURCES
+    updater/MacSparkleUpdater.h
+    updater/MacSparkleUpdater.mm
 )
 
 # Backend for the news bar... there's usually no news.
@@ -476,7 +482,7 @@ set(API_SOURCES
 
     modplatform/flame/FlameAPI.h
     modplatform/modrinth/ModrinthAPI.h
-    
+
     modplatform/helpers/NetworkModAPI.h
     modplatform/helpers/NetworkModAPI.cpp
 )
@@ -582,6 +588,10 @@ set(LOGIC_SOURCES
     ${TECHNIC_SOURCES}
     ${ATLAUNCHER_SOURCES}
 )
+
+if(APPLE)
+    set (LOGIC_SOURCES ${LOGIC_SOURCES} ${MAC_UPDATE_SOURCES})
+endif()
 
 SET(LAUNCHER_SOURCES
     # Application base
@@ -987,6 +997,22 @@ target_link_libraries(Launcher_logic
     LocalPeer
     Launcher_rainbow
 )
+if(APPLE)
+    set(CMAKE_MACOSX_RPATH 1)
+    set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks/")
+
+    file(DOWNLOAD ${MACOSX_SPARKLE_DOWNLOAD_URL} ${CMAKE_BINARY_DIR}/Sparkle.tar.xz EXPECTED_HASH SHA256=${MACOSX_SPARKLE_SHA256})
+    file(ARCHIVE_EXTRACT INPUT ${CMAKE_BINARY_DIR}/Sparkle.tar.xz DESTINATION ${CMAKE_BINARY_DIR}/frameworks/Sparkle)
+
+    find_library(SPARKLE_FRAMEWORK Sparkle "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
+    target_link_libraries(Launcher_logic
+        "-framework AppKit"
+        "-framework Carbon"
+        "-framework Foundation"
+        "-framework ApplicationServices"
+    )
+    target_link_libraries(Launcher_logic ${SPARKLE_FRAMEWORK})
+endif()
 
 target_link_libraries(Launcher_logic)
 
@@ -1009,7 +1035,15 @@ install(TARGETS ${Launcher_Name}
     BUNDLE DESTINATION "." COMPONENT Runtime
     LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
     RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
+    FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
 )
+
+if (UNIX AND APPLE)
+    # Add Sparkle updater
+    # It has to be copied here instead of just allowing fixup_bundle to install it, otherwise essential parts of
+    # the framework aren't installed
+    install(DIRECTORY ${MACOSX_SPARKLE_DIR}/Sparkle.framework DESTINATION ${FRAMEWORK_DEST_DIR} USE_SOURCE_PERMISSIONS)
+endif()
 
 #### The bundle mess! ####
 # Bundle utilities are used to complete the portable packages - they add all the libraries that would otherwise be missing on the target system.
