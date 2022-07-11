@@ -127,7 +127,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get -y update
-          sudo apt-get -y install ninja-build extra-cmake-modules
+          sudo apt-get -y install ninja-build extra-cmake-modules scdoc
 
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
