@@ -150,7 +150,7 @@ call was successful. If so, you may proceed to read the value
 corresponding to the type of the content.
 
 For example:
-```
+```c
 toml_datum_t host = toml_string_in(tab, "host");
 if (host.ok) {
 	printf("host: %s\n", host.u.s);
