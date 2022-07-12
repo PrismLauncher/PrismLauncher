@@ -95,7 +95,7 @@ int main()
 }
 ```
 
-#### Accessing Table Content
+### Accessing Table Content
 
 TOML tables are dictionaries where lookups are done using string keys. In
 general, all access functions on tables are named `toml_*_in(...)`.
@@ -124,7 +124,7 @@ for (int i = 0; ; i++) {
 }
 ```
 
-#### Accessing Array Content
+### Accessing Array Content
 
 TOML arrays can be deref-ed using integer indices. In general, all access methods on arrays are named `toml_*_at()`.
 
@@ -146,7 +146,7 @@ toml_table_at(arr, idx);
 toml_array_at(arr, idx);
 ```
 
-#### toml_datum_t
+### toml_datum_t
 
 Some `toml_*_at` and `toml_*_in` functions return a toml_datum_t
 structure. The `ok` flag in the structure indicates if the function
