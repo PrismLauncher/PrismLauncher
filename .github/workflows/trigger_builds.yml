@@ -11,6 +11,7 @@ on:
       - '**.nix'
       - 'packages/**'
       - '.github/ISSUE_TEMPLATE/**'
+      - '.markdownlint**'
   pull_request:
     paths-ignore:
       - '**.md'
@@ -19,6 +20,7 @@ on:
       - '**.nix'
       - 'packages/**'
       - '.github/ISSUE_TEMPLATE/**'
+      - '.markdownlint**'
   workflow_dispatch:
 
 jobs:
