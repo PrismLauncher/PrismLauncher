@@ -1,4 +1,4 @@
- <p align="center">
+<p align="center">
 <img src="./program_info/polymc-header-black.svg#gh-light-mode-only" alt="PolyMC logo" width="50%"/>
 <img src="./program_info/polymc-header.svg#gh-dark-mode-only" alt="PolyMC logo" width="50%"/>
 </p>
