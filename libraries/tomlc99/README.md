@@ -17,8 +17,8 @@ parses this config file:
 
 ```toml
 [server]
-	host = "www.example.com"
-	port = [ 8080, 8181, 8282 ]
+    host = "www.example.com"
+    port = [ 8080, 8181, 8282 ]
 ```
 
 The steps for getting values from our file is usually :
@@ -158,8 +158,8 @@ For example:
 ```c
 toml_datum_t host = toml_string_in(tab, "host");
 if (host.ok) {
-	printf("host: %s\n", host.u.s);
-	free(host.u.s);   /* FREE applies to string and timestamp types only */
+    printf("host: %s\n", host.u.s);
+    free(host.u.s);   /* FREE applies to string and timestamp types only */
 }
 ```
 
