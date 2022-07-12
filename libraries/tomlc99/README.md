@@ -10,7 +10,6 @@ If you are looking for a C++ library, you might try this wrapper: [https://githu
 [iarna/toml-spec-tests](https://github.com/iarna/toml-spec-tests).
 * Provides very simple and intuitive interface.
 
-
 ## Usage
 
 Please see the `toml.h` file for details. What follows is a simple example that
@@ -182,7 +181,6 @@ To test against the standard test set provided by BurntSushi/toml-test:
 % bash build.sh   # do this once
 % bash run.sh     # this will run the test suite
 ```
-
 
 To test against the standard test set provided by iarna/toml:
 

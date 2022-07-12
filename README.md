@@ -14,7 +14,6 @@ If you want to read about why this fork was created, check out [our FAQ page](ht
 - All downloads and instructions for PolyMC can be found [here](https://polymc.org/download/)
 - Last build status: https://github.com/PolyMC/PolyMC/actions
 
-
 ## Development Builds
 
 There are per-commit development builds available [here](https://github.com/PolyMC/PolyMC/actions). These have debug information in the binaries, so their file sizes are relatively larger.

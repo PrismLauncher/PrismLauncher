@@ -26,7 +26,6 @@
 > OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 > OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 # SimpleCrypt by Andre Somers
 
 Cryptographic methods for Qt.
@@ -107,4 +106,3 @@ Bug fixes, support for ```qml``` module
 # Fabian Vogt <https://github.com/Vogtinator>
 
 Bug fixes, support for building without Qt keywords enabled
-
