@@ -136,9 +136,11 @@ set(Launcher_CURSEFORGE_API_KEY "$2a$10$1Oqr2MX3O4n/ilhFGc597u8tfI3L2Hyr9/rtWDAM
 
 #### Check the current Git commit and branch
 include(GetGitRevisionDescription)
+git_get_exact_tag(Launcher_GIT_TAG)
 get_git_head_revision(Launcher_GIT_REFSPEC Launcher_GIT_COMMIT)
 
 message(STATUS "Git commit: ${Launcher_GIT_COMMIT}")
+message(STATUS "Git tag: ${Launcher_GIT_TAG}")
 message(STATUS "Git refspec: ${Launcher_GIT_REFSPEC}")
 
 set(Launcher_RELEASE_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.${Launcher_VERSION_HOTFIX}")
