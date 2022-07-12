@@ -71,8 +71,8 @@ stdenv.mkDerivation rec {
   postInstall = ''
     # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
     wrapQtApp $out/bin/polymc \
-      --run '[ -f /etc/NIXOS ] && export GAME_LIBRARY_PATH="${stdenv.cc.cc.lib}/lib"' \
-      --prefix GAME_LIBRARY_PATH : ${gameLibraryPath} \
+      --run '[ -f /etc/NIXOS ] && export LD_LIBRARY_PATH="${stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"' \
+      --prefix LD_LIBRARY_PATH : ${gameLibraryPath} \
       --prefix POLYMC_JAVA_PATHS : ${javaPaths} \
       --prefix PATH : ${lib.makeBinPath [ xorg.xrandr ]}
   '';
