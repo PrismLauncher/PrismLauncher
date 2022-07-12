@@ -54,12 +54,12 @@
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
     DEALINGS IN THE SOFTWARE.
 
-# Qt 5
+# Qt 5/6
 
-    Copyright (C) 2014 Digia Plc and/or its subsidiary(-ies).
-    Contact: http://www.qt-project.org/legal
+    Copyright (C) 2022 The Qt Company Ltd and other contributors.
+    Contact: https://www.qt.io/licensing
 
-    Licensed under LGPL v2.1
+    Licensed under LGPL v3
 
 # libnbt++
 
@@ -149,26 +149,27 @@
 
 # Quazip
 
-    Copyright (C) 2005-2011 Sergey A. Tachenov
+    Copyright (C) 2005-2021 Sergey A. Tachenov
 
-    This program is free software; you can redistribute it and/or modify it
-    under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or (at
-    your option) any later version.
+    The QuaZip library is licensed under the GNU Lesser General Public
+    License V2.1 plus a static linking exception.
 
-    This program is distributed in the hope that it will be useful, but
-    WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser
-    General Public License for more details.
+    The original ZIP/UNZIP package (MiniZip) is copyrighted by Gilles
+    Vollant and contributors, see quazip/(un)zip.h files for details.
+    Basically it's the zlib license.
 
-    You should have received a copy of the GNU Lesser General Public License
-    along with this program; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+    STATIC LINKING EXCEPTION
+
+    The copyright holders give you permission to link this library with
+    independent modules to produce an executable, regardless of the license
+    terms of these independent modules, and to copy and distribute the
+    resulting executable under terms of your choice, provided that you also
+    meet, for each linked independent module, the terms and conditions of
+    the license of that module. An independent module is a module which is
+    not derived from or based on this library. If you modify this library,
+    you must extend this exception to your version of the library.
 
     See COPYING file for the full LGPL text.
-
-    Original ZIP package is copyrighted by Gilles Vollant, see
-    quazip/(un)zip.h files for details, basically it's zlib license.
 
 # xz-minidec
 
