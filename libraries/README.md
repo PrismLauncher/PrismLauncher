@@ -57,6 +57,7 @@ A `legacy` and `onesix` launchers are available.
 * `onesix` can handle launching any Minecraft version, at the cost of some extra features `legacy` enables (custom window icon and title).
 
 Example (some parts have been censored):
+
 ```
 mod legacyjavafixer-1.0
 mainClass net.minecraft.launchwrapper.Launch

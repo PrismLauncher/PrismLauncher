@@ -1,6 +1,7 @@
 # How to import
 
 To import with flakes use
+
 ```nix
 {
   inputs = {

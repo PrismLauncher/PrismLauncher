@@ -102,6 +102,7 @@ general, all access functions on tables are named `toml_*_in(...)`.
 
 In the normal case, you know the key and its content type, and retrievals can be done
 using one of these functions:
+
 ```c
 toml_string_in(tab, key);
 toml_bool_in(tab, key);
@@ -113,6 +114,7 @@ toml_array_in(tab, key);
 ```
 
 You can also interrogate the keys in a table using an integer index:
+
 ```c
 toml_table_t* tab = toml_parse_file(...);
 for (int i = 0; ; i++) {
@@ -127,11 +129,13 @@ for (int i = 0; ; i++) {
 TOML arrays can be deref-ed using integer indices. In general, all access methods on arrays are named `toml_*_at()`.
 
 To obtain the size of an array:
+
 ```c
 int size = toml_array_nelem(arr);
 ```
 
 To obtain the content of an array, use a valid index and call one of these functions:
+
 ```c
 toml_string_at(arr, idx);
 toml_bool_at(arr, idx);
@@ -150,6 +154,7 @@ call was successful. If so, you may proceed to read the value
 corresponding to the type of the content.
 
 For example:
+
 ```c
 toml_datum_t host = toml_string_in(tab, "host");
 if (host.ok) {
