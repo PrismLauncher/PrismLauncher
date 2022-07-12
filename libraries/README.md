@@ -43,6 +43,7 @@ MIT licensed.
 Java launcher part for Minecraft.
 
 It:
+
 * Starts a process
 * Waits for a launch script on stdin
 * Consumes the launch script you feed it

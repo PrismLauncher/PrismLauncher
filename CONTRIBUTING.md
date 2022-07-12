@@ -6,6 +6,7 @@ Try to follow the existing formatting.
 If there is no existing formatting, you may use `clang-format` with our included `.clang-format` configuration.
 
 In general, in order of importance:
+
 - Make sure your IDE is not messing up line endings or whitespace and avoid using linters.
 - Prefer readability over dogma.
 - Keep to the existing formatting.
