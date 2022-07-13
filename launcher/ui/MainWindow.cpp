@@ -1241,6 +1241,8 @@ void MainWindow::updateToolsMenu()
     QAction *normalLaunchOffline = launchOfflineMenu->addAction(tr("Launch Offline"));
     normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
     QAction *normalLaunchDemo = launchDemoMenu->addAction(tr("Launch Demo"));
+    normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
+
     if (m_selectedInstance)
     {
         normalLaunch->setEnabled(m_selectedInstance->canLaunch());
