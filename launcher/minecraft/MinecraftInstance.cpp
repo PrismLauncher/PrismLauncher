@@ -174,11 +174,6 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("EnableMangoHud"), performanceOverride);
         m_settings->registerOverride(global_settings->getSetting("UseDiscreteGpu"), performanceOverride);
 
-        // Game time
-        auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
-        m_settings->registerOverride(global_settings->getSetting("ShowGameTime"), gameTimeOverride);
-        m_settings->registerOverride(global_settings->getSetting("RecordGameTime"), gameTimeOverride);
-
         // Miscellaneous
         auto miscellaneousOverride = m_settings->registerSetting("OverrideMiscellaneous", false);
         m_settings->registerOverride(global_settings->getSetting("CloseAfterLaunch"), miscellaneousOverride);

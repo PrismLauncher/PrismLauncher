@@ -58,9 +58,15 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     m_settings->registerSetting("name", "Unnamed Instance");
     m_settings->registerSetting("iconKey", "default");
     m_settings->registerSetting("notes", "");
+
     m_settings->registerSetting("lastLaunchTime", 0);
     m_settings->registerSetting("totalTimePlayed", 0);
     m_settings->registerSetting("lastTimePlayed", 0);
+
+    // Game time override
+    auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
+    m_settings->registerOverride(globalSettings->getSetting("ShowGameTime"), gameTimeOverride);
+    m_settings->registerOverride(globalSettings->getSetting("RecordGameTime"), gameTimeOverride);
 
     // NOTE: Sometimees InstanceType is already registered, as it was used to identify the type of
     // a locally stored instance
