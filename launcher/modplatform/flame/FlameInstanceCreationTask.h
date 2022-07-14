@@ -19,6 +19,7 @@ class FlameCreationTask final : public InstanceCreationTask {
 
     bool abort() override;
 
+    bool updateInstance() override;
     bool createInstance() override;
 
    private slots:
@@ -29,5 +30,9 @@ class FlameCreationTask final : public InstanceCreationTask {
     QWidget* m_parent = nullptr;
 
     shared_qobject_ptr<Flame::FileResolvingTask> m_mod_id_resolver;
-    NetJob::Ptr m_files_job;
+    Flame::Manifest m_pack;
+
+    // Handle to allow aborting
+    NetJob* m_process_update_file_info_job = nullptr;
+    NetJob::Ptr m_files_job = nullptr;
 };

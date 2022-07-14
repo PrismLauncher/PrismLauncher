@@ -29,21 +29,29 @@ static void loadMinecraftV1(Flame::Minecraft& m, QJsonObject& minecraft)
     }
 }
 
-static void loadManifestV1(Flame::Manifest& m, QJsonObject& manifest)
+static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
 {
     auto mc = Json::requireObject(manifest, "minecraft");
-    loadMinecraftV1(m.minecraft, mc);
-    m.name = Json::ensureString(manifest, QString("name"), "Unnamed");
-    m.version = Json::ensureString(manifest, QString("version"), QString());
-    m.author = Json::ensureString(manifest, QString("author"), "Anonymous");
+
+    loadMinecraftV1(pack.minecraft, mc);
+
+    pack.name = Json::ensureString(manifest, QString("name"), "Unnamed");
+    pack.version = Json::ensureString(manifest, QString("version"), QString());
+    pack.author = Json::ensureString(manifest, QString("author"), "Anonymous");
+
     auto arr = Json::ensureArray(manifest, "files", QJsonArray());
-    for (QJsonValueRef item : arr) {
+    for (auto item : arr) {
         auto obj = Json::requireObject(item);
+
         Flame::File file;
         loadFileV1(file, obj);
-        m.files.insert(file.fileId,file);
+
+        pack.files.insert(file.fileId,file);
     }
-    m.overrides = Json::ensureString(manifest, "overrides", "overrides");
+
+    pack.overrides = Json::ensureString(manifest, "overrides", "overrides");
+
+    pack.is_loaded = true;
 }
 
 void Flame::loadManifest(Flame::Manifest& m, const QString& filepath)

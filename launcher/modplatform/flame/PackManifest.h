@@ -35,11 +35,11 @@
 
 #pragma once
 
-#include <QString>
-#include <QVector>
-#include <QMap>
-#include <QUrl>
 #include <QJsonObject>
+#include <QMap>
+#include <QString>
+#include <QUrl>
+#include <QVector>
 
 namespace Flame
 {
@@ -97,6 +97,8 @@ struct Manifest
     //File id -> File
     QMap<int,Flame::File> files;
     QString overrides;
+
+    bool is_loaded = false;
 };
 
 void loadManifest(Flame::Manifest & m, const QString &filepath);
