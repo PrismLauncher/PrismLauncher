@@ -335,7 +335,7 @@ void PackInstallTask::install()
 
     components->saveNow();
 
-    instance.setName(m_instName);
+    instance.setName(name());
     instance.setIconKey(m_instIcon);
     instance.setManagedPack("modpacksch", QString::number(m_pack.id), m_pack.name, QString::number(m_version.id), m_version.name);
     instanceSettings->resumeSave();

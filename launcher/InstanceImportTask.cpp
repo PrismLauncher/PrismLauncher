@@ -255,7 +255,7 @@ void InstanceImportTask::processFlame()
 {
     auto* inst_creation_task = new FlameCreationTask(m_stagingPath, m_globalSettings, m_parent);
 
-    inst_creation_task->setName(m_instName);
+    inst_creation_task->setName(*this);
     inst_creation_task->setIcon(m_instIcon);
     inst_creation_task->setGroup(m_instGroup);
     
@@ -278,7 +278,7 @@ void InstanceImportTask::processTechnic()
     shared_qobject_ptr<Technic::TechnicPackProcessor> packProcessor = new Technic::TechnicPackProcessor();
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &InstanceImportTask::emitSucceeded);
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &InstanceImportTask::emitFailed);
-    packProcessor->run(m_globalSettings, m_instName, m_instIcon, m_stagingPath);
+    packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath);
 }
 
 void InstanceImportTask::processMultiMC()
@@ -292,7 +292,7 @@ void InstanceImportTask::processMultiMC()
     instance.resetTimePlayed();
 
     // set a new nice name
-    instance.setName(m_instName);
+    instance.setName(name());
 
     // if the icon was specified by user, use that. otherwise pull icon from the pack
     if (m_instIcon != "default") {
@@ -317,7 +317,7 @@ void InstanceImportTask::processModrinth()
 {
     auto* inst_creation_task = new ModrinthCreationTask(m_stagingPath, m_globalSettings, m_parent, m_sourceUrl.toString());
 
-    inst_creation_task->setName(m_instName);
+    inst_creation_task->setName(*this);
     inst_creation_task->setIcon(m_instIcon);
     inst_creation_task->setGroup(m_instGroup);
     

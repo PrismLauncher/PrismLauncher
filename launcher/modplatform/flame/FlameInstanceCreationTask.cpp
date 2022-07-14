@@ -5,6 +5,7 @@
 
 #include "Application.h"
 #include "FileSystem.h"
+#include "InstanceList.h"
 #include "Json.h"
 
 #include "minecraft/MinecraftInstance.h"
@@ -288,7 +289,8 @@ bool FlameCreationTask::createInstance()
         FS::deletePath(jarmodsPath);
     }
 
-    instance.setName(m_instName);
+    instance.setManagedPack("flame", {}, m_pack.name, {}, m_pack.version);
+    instance.setName(name());
 
     m_mod_id_resolver = new Flame::FileResolvingTask(APPLICATION->network(), m_pack);
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::succeeded, this, [this, &loop] { idResolverSucceeded(loop); });

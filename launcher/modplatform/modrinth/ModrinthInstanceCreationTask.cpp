@@ -8,8 +8,6 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
-#include "modplatform/ModIndex.h"
-
 #include "net/ChecksumValidator.h"
 
 #include "settings/INISettingsObject.h"
@@ -30,11 +28,10 @@ bool ModrinthCreationTask::updateInstance()
     auto instance_list = APPLICATION->instances();
 
     // FIXME: How to handle situations when there's more than one install already for a given modpack?
-    // Based on the way we create the instance name (name + " " + version). Is there a better way?
-    auto inst = instance_list->getInstanceByManagedName(m_instName.section(' ', 0, -2));
+    auto inst = instance_list->getInstanceByManagedName(originalName());
 
     if (!inst) {
-        inst = instance_list->getInstanceById(m_instName);
+        inst = instance_list->getInstanceById(originalName());
 
         if (!inst)
             return false;
@@ -163,8 +160,9 @@ bool ModrinthCreationTask::createInstance()
     } else {
         instance.setIconKey("modrinth");
     }
-    instance.setName(m_instName);
+
     instance.setManagedPack("modrinth", getManagedPackID(), m_managed_name, m_managed_id, {});
+    instance.setName(name());
     instance.saveNow();
 
     m_files_job = new NetJob(tr("Mod download"), APPLICATION->network());

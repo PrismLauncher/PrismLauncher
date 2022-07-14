@@ -177,13 +177,30 @@ NewInstanceDialog::~NewInstanceDialog()
     delete ui;
 }
 
-void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task)
+void NewInstanceDialog::setSuggestedPack(QString name, InstanceTask* task)
 {
     creationTask.reset(task);
-    ui->instNameTextBox->setPlaceholderText(name);
 
-    if(!task)
-    {
+    ui->instNameTextBox->setPlaceholderText(name);
+    importVersion.clear();
+
+    if (!task) {
+        ui->iconButton->setIcon(APPLICATION->icons()->getIcon("default"));
+        importIcon = false;
+    }
+
+    auto allowOK = task && !instName().isEmpty();
+    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
+}
+
+void NewInstanceDialog::setSuggestedPack(QString name, QString version, InstanceTask* task)
+{
+    creationTask.reset(task);
+
+    ui->instNameTextBox->setPlaceholderText(name);
+    importVersion = version;
+
+    if (!task) {
         ui->iconButton->setIcon(APPLICATION->icons()->getIcon("default"));
         importIcon = false;
     }
@@ -214,7 +231,11 @@ InstanceTask * NewInstanceDialog::extractTask()
 {
     InstanceTask * extracted = creationTask.get();
     creationTask.release();
-    extracted->setName(instName());
+
+    InstanceName inst_name(ui->instNameTextBox->placeholderText().trimmed(), importVersion);
+    inst_name.setName(ui->instNameTextBox->text().trimmed());
+    extracted->setName(inst_name);
+
     extracted->setGroup(instGroup());
     extracted->setIcon(iconKey());
     return extracted;

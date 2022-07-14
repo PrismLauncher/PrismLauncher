@@ -37,7 +37,6 @@
 
 #include <QDialog>
 
-#include "BaseVersion.h"
 #include "ui/pages/BasePageProvider.h"
 #include "InstanceTask.h"
 
@@ -61,7 +60,8 @@ public:
 
     void updateDialogState();
 
-    void setSuggestedPack(const QString & name = QString(), InstanceTask * task = nullptr);
+    void setSuggestedPack(QString name = QString(), InstanceTask * task = nullptr);
+    void setSuggestedPack(QString name, QString version, InstanceTask * task = nullptr);
     void setSuggestedIconFromFile(const QString &path, const QString &name);
     void setSuggestedIcon(const QString &key);
 
@@ -94,6 +94,8 @@ private:
     bool importIcon = false;
     QString importIconPath;
     QString importIconName;
+
+    QString importVersion;
 
     void importIconNow();
 };

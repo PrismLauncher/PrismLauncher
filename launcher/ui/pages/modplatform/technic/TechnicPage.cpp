@@ -271,11 +271,11 @@ void TechnicPage::selectVersion() {
 
     if (!current.isSolder)
     {
-        dialog->setSuggestedPack(current.name + " " + selectedVersion, new Technic::SingleZipPackInstallTask(current.url, current.minecraftVersion));
+        dialog->setSuggestedPack(current.name, selectedVersion, new Technic::SingleZipPackInstallTask(current.url, current.minecraftVersion));
     }
     else
     {
-        dialog->setSuggestedPack(current.name + " " + selectedVersion, new Technic::SolderPackInstallTask(APPLICATION->network(), current.url, current.slug, selectedVersion, current.minecraftVersion));
+        dialog->setSuggestedPack(current.name, selectedVersion, new Technic::SolderPackInstallTask(APPLICATION->network(), current.url, current.slug, selectedVersion, current.minecraftVersion));
     }
 }
 

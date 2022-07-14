@@ -214,7 +214,7 @@ void Technic::SolderPackInstallTask::extractFinished()
     shared_qobject_ptr<Technic::TechnicPackProcessor> packProcessor = new Technic::TechnicPackProcessor();
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &Technic::SolderPackInstallTask::emitSucceeded);
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &Technic::SolderPackInstallTask::emitFailed);
-    packProcessor->run(m_globalSettings, m_instName, m_instIcon, m_stagingPath, m_minecraftVersion, true);
+    packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath, m_minecraftVersion, true);
 }
 
 void Technic::SolderPackInstallTask::extractAborted()

@@ -778,19 +778,14 @@ class InstanceStaging : public Task {
     const unsigned minBackoff = 1;
     const unsigned maxBackoff = 16;
    public:
-    InstanceStaging(InstanceList* parent, InstanceTask* child, const QString& stagingPath, const QString& instanceName, const QString& groupName)
-        : backoff(minBackoff, maxBackoff)
+    InstanceStaging(InstanceList* parent, InstanceTask* child, QString stagingPath, InstanceName const& instanceName, QString groupName)
+        : m_parent(parent), backoff(minBackoff, maxBackoff), m_stagingPath(std::move(stagingPath)), m_instance_name(std::move(instanceName)), m_groupName(std::move(groupName))
     {
-        m_parent = parent;
         m_child.reset(child);
         connect(child, &Task::succeeded, this, &InstanceStaging::childSucceded);
         connect(child, &Task::failed, this, &InstanceStaging::childFailed);
         connect(child, &Task::status, this, &InstanceStaging::setStatus);
         connect(child, &Task::progress, this, &InstanceStaging::setProgress);
-        m_instanceName = instanceName;
-        m_groupName = groupName;
-        m_stagingPath = stagingPath;
-        m_backoffTimer.setSingleShot(true);
         connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);
     }
 
@@ -820,7 +815,7 @@ class InstanceStaging : public Task {
     void childSucceded()
     {
         unsigned sleepTime = backoff();
-        if (m_parent->commitStagedInstance(m_stagingPath, m_instanceName, m_groupName, m_child->shouldOverride()))
+        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, m_child->shouldOverride()))
         {
             emitSucceeded();
             return;
@@ -830,7 +825,7 @@ class InstanceStaging : public Task {
             emitFailed(tr("Failed to commit instance, even after multiple retries. It is being blocked by something."));
             return;
         }
-        qDebug() << "Failed to commit instance" << m_instanceName << "Initiating backoff:" << sleepTime;
+        qDebug() << "Failed to commit instance" << m_instance_name.name() << "Initiating backoff:" << sleepTime;
         m_backoffTimer.start(sleepTime * 500);
     }
     void childFailed(const QString& reason)
@@ -840,6 +835,7 @@ class InstanceStaging : public Task {
     }
 
    private:
+    InstanceList * m_parent;
     /*
      * WHY: the whole reason why this uses an exponential backoff retry scheme is antivirus on Windows.
      * Basically, it starts messing things up while the launcher is extracting/creating instances
@@ -847,9 +843,8 @@ class InstanceStaging : public Task {
      */
     ExponentialSeries backoff;
     QString m_stagingPath;
-    InstanceList * m_parent;
     unique_qobject_ptr<InstanceTask> m_child;
-    QString m_instanceName;
+    InstanceName m_instance_name;
     QString m_groupName;
     QTimer m_backoffTimer;
 };
@@ -859,7 +854,7 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
     auto stagingPath = getStagedInstancePath();
     task->setStagingPath(stagingPath);
     task->setParentSettings(m_globalSettings);
-    return new InstanceStaging(this, task, stagingPath, task->name(), task->group());
+    return new InstanceStaging(this, task, stagingPath, *task, task->group());
 }
 
 QString InstanceList::getStagedInstancePath()
@@ -879,22 +874,23 @@ QString InstanceList::getStagedInstancePath()
     return path;
 }
 
-bool InstanceList::commitStagedInstance(const QString& path, const QString& instanceName, const QString& groupName, bool should_override)
+bool InstanceList::commitStagedInstance(QString path, InstanceName const& instanceName, QString groupName, bool should_override)
 {
     QDir dir;
     QString instID;
     InstancePtr inst;
 
-    QString raw_inst_name = instanceName.section(' ', 0, -2);
     if (should_override) {
         // This is to avoid problems when the instance folder gets manually renamed
-        if ((inst = getInstanceByManagedName(raw_inst_name))) {
+        if ((inst = getInstanceByManagedName(instanceName.originalName()))) {
+            instID = QFileInfo(inst->instanceRoot()).fileName();
+        } else if ((inst = getInstanceByManagedName(instanceName.modifiedName()))) {
             instID = QFileInfo(inst->instanceRoot()).fileName();
         } else {
-            instID = FS::RemoveInvalidFilenameChars(raw_inst_name, '-');
+            instID = FS::RemoveInvalidFilenameChars(instanceName.modifiedName(), '-');
         }
     } else {
-        instID = FS::DirNameFromString(raw_inst_name, m_instDir);
+        instID = FS::DirNameFromString(instanceName.modifiedName(), m_instDir);
     }
 
     {
@@ -910,7 +906,7 @@ bool InstanceList::commitStagedInstance(const QString& path, const QString& inst
             if (!inst)
                 inst = getInstanceById(instID);
             if (inst)
-                inst->setName(instanceName);
+                inst->setName(instanceName.name());
         } else {
             if (!dir.rename(path, destination)) {
                 qWarning() << "Failed to move" << path << "to" << destination;
