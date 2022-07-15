@@ -53,6 +53,7 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     , ui(new Ui::ModPage)
     , dialog(dialog)
     , filter_widget(static_cast<MinecraftInstance*>(instance)->getPackProfile()->getComponentVersion("net.minecraft"), this)
+    , m_fetch_progress(this, false)
     , api(api)
 {
     ui->setupUi(this);
@@ -70,7 +71,12 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
-    ui->gridLayout_3->addWidget(&filter_widget, 0, 0, 1, ui->gridLayout_3->columnCount());
+    m_fetch_progress.hideIfInactive(true);
+    m_fetch_progress.setFixedHeight(24);
+    m_fetch_progress.progressFormat("");
+
+    ui->gridLayout_3->addWidget(&m_fetch_progress, 0, 0, 1, ui->gridLayout_3->columnCount());
+    ui->gridLayout_3->addWidget(&filter_widget, 1, 0, 1, ui->gridLayout_3->columnCount());
 
     filter_widget.setInstance(static_cast<MinecraftInstance*>(m_instance));
     m_filter = filter_widget.getFilter();
@@ -151,6 +157,7 @@ void ModPage::triggerSearch()
     }
 
     listModel->searchWithTerm(getSearchTerm(), ui->sortByBox->currentIndex(), changed);
+    m_fetch_progress.watch(listModel->activeJob());
 }
 
 QString ModPage::getSearchTerm() const

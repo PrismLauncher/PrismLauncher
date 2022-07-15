@@ -30,6 +30,7 @@ class ListModel : public QAbstractListModel {
     auto data(const QModelIndex& index, int role) const -> QVariant override;
 
     inline void setActiveJob(NetJob::Ptr ptr) { jobPtr = ptr; }
+    inline NetJob* activeJob() { return jobPtr.get(); }
 
     /* Ask the API for more information */
     void fetchMore(const QModelIndex& parent) override;

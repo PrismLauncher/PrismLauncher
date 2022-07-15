@@ -8,6 +8,7 @@
 #include "ui/pages/BasePage.h"
 #include "ui/pages/modplatform/ModModel.h"
 #include "ui/widgets/ModFilterWidget.h"
+#include "ui/widgets/ProgressWidget.h"
 
 class ModDownloadDialog;
 
@@ -74,6 +75,8 @@ class ModPage : public QWidget, public BasePage {
 
     ModFilterWidget filter_widget;
     std::shared_ptr<ModFilterWidget::Filter> m_filter;
+
+    ProgressWidget m_fetch_progress;
 
     ModPlatform::ListModel* listModel = nullptr;
     ModPlatform::IndexedPack current;
