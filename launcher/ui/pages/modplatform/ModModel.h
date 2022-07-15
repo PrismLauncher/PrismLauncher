@@ -2,7 +2,6 @@
 
 #include <QAbstractListModel>
 
-#include "modplatform/ModAPI.h"
 #include "modplatform/ModIndex.h"
 #include "net/NetJob.h"
 

@@ -43,6 +43,7 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "ui/dialogs/ModDownloadDialog.h"
+#include "ui/widgets/ProjectItem.h"
 
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     : QWidget(dialog)
@@ -71,6 +72,8 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     connect(&filter_widget, &ModFilterWidget::filterUnchanged, this, [&]{
         ui->searchButton->setStyleSheet("text-decoration: none");
     });
+
+    ui->packView->setItemDelegate(new ProjectItemDelegate(this));
 }
 
 ModPage::~ModPage()

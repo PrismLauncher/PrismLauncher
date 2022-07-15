@@ -6,6 +6,8 @@
 #include "minecraft/PackProfile.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
+#include "ui/widgets/ProjectItem.h"
+
 #include <QMessageBox>
 
 namespace ModPlatform {
@@ -39,9 +41,6 @@ auto ListModel::data(const QModelIndex& index, int role) const -> QVariant
 
     ModPlatform::IndexedPack pack = modpacks.at(pos);
     switch (role) {
-        case Qt::DisplayRole: {
-            return pack.name;
-        }
         case Qt::ToolTipRole: {
             if (pack.description.length() > 100) {
                 // some magic to prevent to long tooltips and replace html linebreaks
@@ -64,20 +63,20 @@ auto ListModel::data(const QModelIndex& index, int role) const -> QVariant
             ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
             return icon;
         }
+        case Qt::SizeHintRole: 
+            return QSize(0, 58);
         case Qt::UserRole: {
             QVariant v;
             v.setValue(pack);
             return v;
         }
-        case Qt::FontRole: {
-            QFont font;
-            if (m_parent->getDialog()->isModSelected(pack.name)) {
-                font.setBold(true);
-                font.setUnderline(true);
-            }
-
-            return font;
-        }
+    // Custom data
+        case UserDataTypes::TITLE:
+            return pack.name;
+        case UserDataTypes::DESCRIPTION:
+            return pack.description;
+        case UserDataTypes::SELECTED:
+            return m_parent->getDialog()->isModSelected(pack.name);
         default:
             break;
     }
