@@ -56,8 +56,15 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     , api(api)
 {
     ui->setupUi(this);
+
     connect(ui->searchButton, &QPushButton::clicked, this, &ModPage::triggerSearch);
     connect(ui->modFilterButton, &QPushButton::clicked, this, &ModPage::filterMods);
+
+    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_search_timer.setSingleShot(true);
+
+    connect(&m_search_timer, &QTimer::timeout, this, &ModPage::triggerSearch);
+
     ui->searchEdit->installEventFilter(this);
 
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -101,6 +108,11 @@ auto ModPage::eventFilter(QObject* watched, QEvent* event) -> bool
             triggerSearch();
             keyEvent->accept();
             return true;
+        } else {
+            if (m_search_timer.isActive())
+                m_search_timer.stop();
+
+            m_search_timer.start(350);
         }
     } else if (watched == ui->packView && event->type() == QEvent::KeyPress) {
         auto* keyEvent = dynamic_cast<QKeyEvent*>(event);

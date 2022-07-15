@@ -81,4 +81,7 @@ class ModPage : public QWidget, public BasePage {
     std::unique_ptr<ModAPI> api;
 
     int selectedVersion = -1;
+
+    // Used to do instant searching with a delay to cache quick changes
+    QTimer m_search_timer;
 };
