@@ -55,6 +55,8 @@ ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel>& mods
 
     m_container->addButtons(m_buttons);
 
+    connect(m_container, &PageContainer::selectedPageChanged, this, &ModDownloadDialog::selectedPageChanged);
+
     // Bonk Qt over its stupid head and make sure it understands which button is the default one...
     // See: https://stackoverflow.com/questions/24556831/qbuttonbox-set-default-button
     auto OkButton = m_buttons->button(QDialogButtonBox::Ok);
@@ -162,4 +164,22 @@ bool ModDownloadDialog::isModSelected(QString name) const
 const QList<ModDownloadTask*> ModDownloadDialog::getTasks()
 {
     return modTask.values();
+}
+
+void ModDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* selected)
+{
+    auto* prev_page = dynamic_cast<ModPage*>(previous);
+    if (!prev_page) {
+        qCritical() << "Page '" << previous->displayName() << "' in ModDownloadDialog is not a ModPage!";
+        return;
+    }
+
+    auto* selected_page = dynamic_cast<ModPage*>(selected);
+    if (!selected_page) {
+        qCritical() << "Page '" << selected->displayName() << "' in ModDownloadDialog is not a ModPage!";
+        return;
+    }
+
+    // Same effect as having a global search bar
+    selected_page->setSearchTerm(prev_page->getSearchTerm());
 }

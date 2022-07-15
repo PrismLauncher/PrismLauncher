@@ -34,7 +34,7 @@ class PageContainer;
 class QDialogButtonBox;
 class ModrinthModPage;
 
-class ModDownloadDialog : public QDialog, public BasePageProvider
+class ModDownloadDialog final : public QDialog, public BasePageProvider
 {
     Q_OBJECT
 
@@ -57,6 +57,9 @@ public slots:
     void confirm();
     void accept() override;
     void reject() override;
+
+private slots:
+    void selectedPageChanged(BasePage* previous, BasePage* selected);
 
 private:
     Ui::ModDownloadDialog *ui = nullptr;

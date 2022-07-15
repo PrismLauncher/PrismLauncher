@@ -45,6 +45,11 @@ class ModPage : public QWidget, public BasePage {
     auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
     auto getDialog() const -> const ModDownloadDialog* { return dialog; }
 
+    /** Get the current term in the search bar. */
+    auto getSearchTerm() const -> QString;
+    /** Programatically set the term in the search bar. */
+    void setSearchTerm(QString);
+
     auto getCurrent() -> ModPlatform::IndexedPack& { return current; }
     void updateModVersions(int prev_count = -1);
 

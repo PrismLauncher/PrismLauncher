@@ -138,7 +138,16 @@ void ModPage::triggerSearch()
         updateSelectionButton();
     }
 
-    listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex(), changed);
+    listModel->searchWithTerm(getSearchTerm(), ui->sortByBox->currentIndex(), changed);
+}
+
+QString ModPage::getSearchTerm() const
+{
+    return ui->searchEdit->text();
+}
+void ModPage::setSearchTerm(QString term)
+{
+    ui->searchEdit->setText(term);
 }
 
 void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
