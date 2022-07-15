@@ -76,6 +76,7 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     });
 
     ui->packView->setItemDelegate(new ProjectItemDelegate(this));
+    ui->packView->installEventFilter(this);
 }
 
 ModPage::~ModPage()
@@ -98,6 +99,18 @@ auto ModPage::eventFilter(QObject* watched, QEvent* event) -> bool
         auto* keyEvent = dynamic_cast<QKeyEvent*>(event);
         if (keyEvent->key() == Qt::Key_Return) {
             triggerSearch();
+            keyEvent->accept();
+            return true;
+        }
+    } else if (watched == ui->packView && event->type() == QEvent::KeyPress) {
+        auto* keyEvent = dynamic_cast<QKeyEvent*>(event);
+        if (keyEvent->key() == Qt::Key_Return) {
+            onModSelected();
+
+            // To have the 'select mod' button outlined instead of the 'review and confirm' one
+            ui->modSelectionButton->setFocus(Qt::FocusReason::ShortcutFocusReason);
+            ui->packView->setFocus(Qt::FocusReason::NoFocusReason);
+
             keyEvent->accept();
             return true;
         }
@@ -172,6 +185,9 @@ void ModPage::onVersionSelectionChanged(QString data)
 
 void ModPage::onModSelected()
 {
+    if (selectedVersion < 0)
+        return;
+
     auto& version = current.versions[selectedVersion];
     if (dialog->isModSelected(current.name, version.fileName)) {
         dialog->removeSelectedMod(current.name);
