@@ -44,6 +44,11 @@
 
 #include <QDebug>
 
+/** Maximum time to hold a cache entry
+ *  = 1 week in milliseconds
+ */
+#define TIME_TO_EXPIRE 1*7*24*60*60*1000
+
 auto MetaEntry::getFullPath() -> QString
 {
     // FIXME: make local?
@@ -119,6 +124,15 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
         // md5sums matched... keep entry and save the new state to file
         entry->local_changed_timestamp = file_last_changed;
         SaveEventually();
+    }
+
+    // Get rid of old entries, to prevent cache problems
+    auto current_time = QDateTime::currentMSecsSinceEpoch();
+    auto remote_time = QDateTime::fromString(entry->remote_changed_timestamp).toMSecsSinceEpoch();
+    if (current_time - remote_time < TIME_TO_EXPIRE) {
+        qWarning() << "Removing cache entry because of old age!";
+        selected_base.entry_list.remove(resource_path);
+        return staleEntry(base, resource_path);
     }
 
     // entry passed all the checks we cared about.
@@ -239,6 +253,8 @@ void HttpMetaCache::SaveNow()
 {
     if (m_index_file.isNull())
         return;
+
+    qDebug() << "[HttpMetaCache]" << "Saving metacache with" << m_entries.size() << "entries";
 
     QJsonObject toplevel;
     Json::writeString(toplevel, "version", "1");
