@@ -202,14 +202,6 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
     {
         // Read the current type version from the registry.
         // This will be used to find any key that contains the JavaHome value.
-        char *value = new char[0];
-        DWORD valueSz = 0;
-        if (RegQueryValueExW(jreKey, L"CurrentVersion", NULL, NULL, (BYTE *)value, &valueSz) ==
-            ERROR_MORE_DATA)
-        {
-            value = new char[valueSz];
-            RegQueryValueExW(jreKey, L"CurrentVersion", NULL, NULL, (BYTE *)value, &valueSz);
-        }
 
         TCHAR subKeyName[255];
         DWORD subKeyNameSize, numSubKeys, retCode;
@@ -237,14 +229,17 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
                                       KEY_READ | KEY_WOW64_64KEY, &newKey) == ERROR_SUCCESS)
                     {
                         // Read the JavaHome value to find where Java is installed.
-                        value = new char[0];
-                        valueSz = 0;
+                        TCHAR *value = NULL;
+                        DWORD valueSz = 0;
                         if (RegQueryValueExW(newKey, keyJavaDir.toStdWString().c_str(), NULL, NULL, (BYTE *)value,
                                              &valueSz) == ERROR_MORE_DATA)
                         {
-                            value = new char[valueSz];
+                            value = new TCHAR[valueSz];
                             RegQueryValueExW(newKey, keyJavaDir.toStdWString().c_str(), NULL, NULL, (BYTE *)value,
                                              &valueSz);
+
+                            QString newValue = QString::fromWCharArray(value);
+                            delete [] value;
 
                             // Now, we construct the version object and add it to the list.
                             JavaInstallPtr javaVersion(new JavaInstall());
@@ -252,7 +247,7 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
                             javaVersion->id = newSubkeyName;
                             javaVersion->arch = archType;
                             javaVersion->path =
-                                QDir(FS::PathCombine(value, "bin")).absoluteFilePath("javaw.exe");
+                                QDir(FS::PathCombine(newValue, "bin")).absoluteFilePath("javaw.exe");
                             javas.append(javaVersion);
                         }
 
