@@ -834,8 +834,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/SkinUploadDialog.h
     ui/dialogs/ModDownloadDialog.cpp
     ui/dialogs/ModDownloadDialog.h
-    ui/dialogs/ScrollMessageBox.cpp
-    ui/dialogs/ScrollMessageBox.h
+    ui/dialogs/BlockedModsDialog.cpp
+    ui/dialogs/BlockedModsDialog.h
 
     # GUI - widgets
     ui/widgets/Common.cpp
@@ -940,7 +940,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/LoginDialog.ui
     ui/dialogs/EditAccountDialog.ui
     ui/dialogs/ReviewMessageBox.ui
-    ui/dialogs/ScrollMessageBox.ui
+    ui/dialogs/BlockedModsDialog.ui
 )
 
 qt_add_resources(LAUNCHER_RESOURCES

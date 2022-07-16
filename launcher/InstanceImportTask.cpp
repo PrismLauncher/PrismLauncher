@@ -60,7 +60,7 @@
 #include "net/ChecksumValidator.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/ScrollMessageBox.h"
+#include "ui/dialogs/BlockedModsDialog.h"
 
 #include <algorithm>
 
@@ -396,21 +396,24 @@ void InstanceImportTask::processFlame()
         auto results = m_modIdResolver->getResults();
         //first check for blocked mods
         QString text;
+        QList<QUrl> urls;
         auto anyBlocked = false;
         for(const auto& result: results.files.values()) {
             if (!result.resolved || result.url.isEmpty()) {
                 text += QString("%1: <a href='%2'>%2</a><br/>").arg(result.fileName, result.websiteUrl);
+                urls.append(QUrl(result.websiteUrl));
                 anyBlocked = true;
             }
         }
         if(anyBlocked) {
             qWarning() << "Blocked mods found, displaying mod list";
 
-            auto message_dialog = new ScrollMessageBox(m_parent,
+            auto message_dialog = new BlockedModsDialog(m_parent,
                                                        tr("Blocked mods found"),
                                                        tr("The following mods were blocked on third party launchers.<br/>"
                                                           "You will need to manually download them and add them to the modpack"),
-                                                       text);
+                                                       text,
+                                                       urls);
             message_dialog->setModal(true);
 
             if (message_dialog->exec()) {
