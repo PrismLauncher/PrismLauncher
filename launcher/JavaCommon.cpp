@@ -105,7 +105,7 @@ void JavaCommon::javaBinaryWasBad(QWidget *parent, JavaCheckResult result)
 void JavaCommon::javaCheckNotFound(QWidget *parent)
 {
     QString text;
-    text += QObject::tr("Java checker library could not be found. Please check your installation");
+    text += QObject::tr("Java checker library could not be found. Please check your installation.");
     CustomMessageBox::selectable(parent, QObject::tr("Java test failure"), text, QMessageBox::Warning)->show();
 }
 
