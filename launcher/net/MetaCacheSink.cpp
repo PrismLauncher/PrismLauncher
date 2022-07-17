@@ -36,10 +36,15 @@
 #include "MetaCacheSink.h"
 #include <QFile>
 #include <QFileInfo>
-#include "FileSystem.h"
 #include "Application.h"
 
 namespace Net {
+
+/** Maximum time to hold a cache entry
+ *  = 1 week in seconds
+ */
+#define MAX_TIME_TO_EXPIRE 1*7*24*60*60
+
 
 MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator * md5sum)
     :Net::FileSink(entry->getFullPath()), m_entry(entry), m_md5Node(md5sum)
@@ -88,6 +93,37 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply & reply)
     }
 
     m_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
+
+    { // Cache lifetime
+        if (reply.hasRawHeader("Cache-Control")) {
+            auto cache_control_header = reply.rawHeader("Cache-Control");
+            // qDebug() << "[MetaCache] Parsing 'Cache-Control' header with" << cache_control_header;
+
+            QRegularExpression max_age_expr("max-age=([0-9]+)");
+            qint64 max_age = max_age_expr.match(cache_control_header).captured(1).toLongLong();
+            m_entry->setMaximumAge(max_age);
+
+        } else if (reply.hasRawHeader("Expires")) {
+            auto expires_header = reply.rawHeader("Expires");
+            // qDebug() << "[MetaCache] Parsing 'Expires' header with" << expires_header;
+
+            qint64 max_age = QDateTime::fromString(expires_header).toSecsSinceEpoch() - QDateTime::currentSecsSinceEpoch();
+            m_entry->setMaximumAge(max_age);
+        } else {
+            m_entry->setMaximumAge(MAX_TIME_TO_EXPIRE);
+        }
+
+        if (reply.hasRawHeader("Age")) {
+            auto age_header = reply.rawHeader("Age");
+            // qDebug() << "[MetaCache] Parsing 'Age' header with" << age_header;
+
+            qint64 current_age = age_header.toLongLong();
+            m_entry->setCurrentAge(current_age);
+        } else {
+            m_entry->setCurrentAge(0);
+        }
+    }
+
     m_entry->setStale(false);
     APPLICATION->metacache()->updateEntry(m_entry);
 
