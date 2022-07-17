@@ -36,7 +36,6 @@
 
 #include "ModFolderLoadTask.h"
 
-#include "Application.h"
 #include "minecraft/mod/MetadataHandler.h"
 
 ModFolderLoadTask::ModFolderLoadTask(QDir& mods_dir, QDir& index_dir, bool is_indexed) 
@@ -53,7 +52,7 @@ void ModFolderLoadTask::run()
     // Read JAR files that don't have metadata
     m_mods_dir.refresh();
     for (auto entry : m_mods_dir.entryInfoList()) {
-        auto* mod = new Mod(entry);
+        Mod::Ptr mod(new Mod(entry));
 
         if (mod->enabled()) {
             if (m_result->mods.contains(mod->internal_id())) {

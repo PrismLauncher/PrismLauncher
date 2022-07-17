@@ -143,7 +143,7 @@ void ModFolderModel::finishUpdate()
         QSet<QString> kept = currentSet;
         kept.intersect(newSet);
         for(auto& keptMod : kept) {
-            auto* newMod = newMods[keptMod];
+            auto newMod = newMods[keptMod];
             auto row = modsIndex[keptMod];
             auto currentMod = mods[row];
             if(newMod->dateTimeChanged() == currentMod->dateTimeChanged()) {
