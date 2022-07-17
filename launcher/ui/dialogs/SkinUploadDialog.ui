@@ -21,7 +21,11 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QLineEdit" name="skinPathTextBox"/>
+       <widget class="QLineEdit" name="skinPathTextBox">
+        <property name="placeholderText">
+         <string>Leave empty to keep current skin</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="skinBrowseBtn">
