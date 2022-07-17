@@ -96,20 +96,22 @@ void EnsureMetadataTask::executeTask()
     setStatus(tr("Checking if mods have metadata..."));
 
     for (auto* mod : m_mods) {
-        if (!mod->valid())
+        if (!mod->valid()) {
+            qDebug() << "Mod" << mod->name() << "is invalid!";
+            emitFail(mod);
             continue;
+        }
 
         // They already have the right metadata :o
         if (mod->status() != ModStatus::NoMetadata && mod->metadata() && mod->metadata()->provider == m_provider) {
             qDebug() << "Mod" << mod->name() << "already has metadata!";
             emitReady(mod);
-            return;
+            continue;
         }
 
         // Folders don't have metadata
         if (mod->type() == Mod::MOD_FOLDER) {
             emitReady(mod);
-            return;
         }
     }
 
