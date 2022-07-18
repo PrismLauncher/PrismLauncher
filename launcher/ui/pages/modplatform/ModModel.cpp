@@ -100,7 +100,8 @@ void ListModel::requestModVersions(ModPlatform::IndexedPack const& current)
 {
     auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
 
-    m_parent->apiProvider()->getVersions(this, { current.addonId.toString(), getMineVersions(), profile->getModLoaders() });
+    m_parent->apiProvider()->getVersions({ current.addonId.toString(), getMineVersions(), profile->getModLoaders() },
+                                         [this, current](QJsonDocument& doc, QString addonId) { versionRequestSucceeded(doc, addonId); });
 }
 
 void ListModel::performPaginatedSearch()

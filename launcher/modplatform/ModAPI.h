@@ -85,7 +85,7 @@ class ModAPI {
         ModLoaderTypes loaders;
     };
 
-    virtual void getVersions(CallerType* caller, VersionSearchArgs&& args) const = 0;
+    virtual void getVersions(VersionSearchArgs&& args, std::function<void(QJsonDocument&, QString)> callback) const = 0;
 
     static auto getModLoaderString(ModLoaderType type) -> const QString {
         switch (type) {
