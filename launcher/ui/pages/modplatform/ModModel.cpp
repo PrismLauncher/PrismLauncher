@@ -102,7 +102,8 @@ void ListModel::performPaginatedSearch()
 
 void ListModel::requestModInfo(ModPlatform::IndexedPack& current)
 {
-    m_parent->apiProvider()->getModInfo(this, current);
+    m_parent->apiProvider()->getModInfo(
+        current, [this](QJsonDocument& doc, ModPlatform::IndexedPack& pack) { infoRequestFinished(doc, pack); });
 }
 
 void ListModel::refresh()
