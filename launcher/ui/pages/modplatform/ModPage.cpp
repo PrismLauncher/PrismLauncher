@@ -183,7 +183,7 @@ void ModPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         ui->modSelectionButton->setText(tr("Loading versions..."));
         ui->modSelectionButton->setEnabled(false);
 
-        listModel->requestModVersions(current);
+        listModel->requestModVersions(current, curr);
     } else {
         for (int i = 0; i < current.versions.size(); i++) {
             ui->versionSelectionBox->addItem(current.versions[i].version, QVariant(i));

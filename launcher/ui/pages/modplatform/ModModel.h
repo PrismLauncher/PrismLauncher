@@ -38,7 +38,7 @@ class ListModel : public QAbstractListModel {
     void refresh();
     void searchWithTerm(const QString& term, const int sort, const bool filter_changed);
     void requestModInfo(ModPlatform::IndexedPack& current, QModelIndex index);
-    void requestModVersions(const ModPlatform::IndexedPack& current);
+    void requestModVersions(const ModPlatform::IndexedPack& current, QModelIndex index);
 
     virtual void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) {};
@@ -54,7 +54,7 @@ class ListModel : public QAbstractListModel {
 
     void infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index);
 
-    void versionRequestSucceeded(QJsonDocument doc, QString addonId);
+    void versionRequestSucceeded(QJsonDocument doc, QString addonId, const QModelIndex& index);
 
    protected slots:
 
