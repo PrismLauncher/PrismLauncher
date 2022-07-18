@@ -62,24 +62,24 @@ void ProgressDialog::updateSize()
 int ProgressDialog::execWithTask(Task* task)
 {
     this->task = task;
-    QDialog::DialogCode result;
 
     if (!task) {
-        qDebug() << "Programmer error: progress dialog created with null task.";
-        return Accepted;
+        qDebug() << "Programmer error: Progress dialog created with null task.";
+        return QDialog::DialogCode::Accepted;
     }
 
+    QDialog::DialogCode result;
     if (handleImmediateResult(result)) {
         return result;
     }
 
     // Connect signals.
-    connect(task, SIGNAL(started()), SLOT(onTaskStarted()));
-    connect(task, SIGNAL(failed(QString)), SLOT(onTaskFailed(QString)));
-    connect(task, SIGNAL(succeeded()), SLOT(onTaskSucceeded()));
-    connect(task, SIGNAL(status(QString)), SLOT(changeStatus(const QString&)));
-    connect(task, SIGNAL(stepStatus(QString)), SLOT(changeStatus(const QString&)));
-    connect(task, SIGNAL(progress(qint64, qint64)), SLOT(changeProgress(qint64, qint64)));
+    connect(task, &Task::started, this, &ProgressDialog::onTaskStarted);
+    connect(task, &Task::failed, this, &ProgressDialog::onTaskFailed);
+    connect(task, &Task::succeeded, this, &ProgressDialog::onTaskSucceeded);
+    connect(task, &Task::status, this, &ProgressDialog::changeStatus);
+    connect(task, &Task::stepStatus, this, &ProgressDialog::changeStatus);
+    connect(task, &Task::progress, this, &ProgressDialog::changeProgress);
 
     connect(task, &Task::aborted, [this] { onTaskFailed(tr("Aborted by user")); });
 
@@ -89,19 +89,15 @@ int ProgressDialog::execWithTask(Task* task)
         ui->globalProgressBar->setHidden(true);
     }
 
-    // if this didn't connect to an already running task, invoke start
+    // It's a good idea to start the task after we entered the dialog's event loop :^)
     if (!task->isRunning()) {
-        task->start();
-    }
-    if (task->isRunning()) {
-        changeProgress(task->getProgress(), task->getTotalProgress());
-        changeStatus(task->getStatus());
-        return QDialog::exec();
-    } else if (handleImmediateResult(result)) {
-        return result;
+        QMetaObject::invokeMethod(task, &Task::start, Qt::QueuedConnection);
     } else {
-        return QDialog::Rejected;
+        changeStatus(task->getStatus());
+        changeProgress(task->getProgress(), task->getTotalProgress());
     }
+
+    return QDialog::exec();
 }
 
 // TODO: only provide the unique_ptr overloads

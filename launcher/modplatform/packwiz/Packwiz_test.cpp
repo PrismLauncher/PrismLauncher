@@ -32,10 +32,11 @@ class PackwizTest : public QObject {
         QString source = QFINDTESTDATA("testdata");
 
         QDir index_dir(source);
-        QString name_mod("borderless-mining.pw.toml");
-        QVERIFY(index_dir.entryList().contains(name_mod));
+        QString slug_mod("borderless-mining");
+        QString file_name = slug_mod + ".pw.toml";
+        QVERIFY(index_dir.entryList().contains(file_name));
 
-        auto metadata = Packwiz::V1::getIndexForMod(index_dir, name_mod);
+        auto metadata = Packwiz::V1::getIndexForMod(index_dir, slug_mod);
 
         QVERIFY(metadata.isValid());
 

@@ -30,7 +30,7 @@ class ModFolderModel;
 class ModDownloadTask : public SequentialTask {
     Q_OBJECT
 public:
-    explicit ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods, bool is_indexed);
+    explicit ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods, bool is_indexed = true);
     const QString& getFilename() const { return m_mod_version.fileName; }
 
 private:
@@ -46,6 +46,11 @@ private:
     void downloadFailed(QString reason);
 
     void downloadSucceeded();
+
+    std::tuple<QString, QString> to_delete {"", ""};
+
+private slots:
+    void hasOldMod(QString name, QString filename);
 };
 
 

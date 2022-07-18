@@ -33,18 +33,14 @@ void NetworkModAPI::searchMods(CallerType* caller, SearchArgs&& args) const
 
 void NetworkModAPI::getModInfo(CallerType* caller, ModPlatform::IndexedPack& pack)
 {
-    auto id_str = pack.addonId.toString();
-    auto netJob = new NetJob(QString("%1::ModInfo").arg(id_str), APPLICATION->network());
-    auto searchUrl = getModInfoURL(id_str);
-
     auto response = new QByteArray();
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
+    auto job = getProject(pack.addonId.toString(), response);
 
-    QObject::connect(netJob, &NetJob::succeeded, [response, &pack, caller] {
+    QObject::connect(job, &NetJob::succeeded, caller, [caller, &pack, response] {
         QJsonParseError parse_error{};
-        auto doc = QJsonDocument::fromJson(*response, &parse_error);
+        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for " << pack.name << " at " << parse_error.offset
+            qWarning() << "Error while parsing JSON response from " << caller->debugName() << " at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
             qWarning() << *response;
             return;
@@ -53,7 +49,7 @@ void NetworkModAPI::getModInfo(CallerType* caller, ModPlatform::IndexedPack& pac
         caller->infoRequestFinished(doc, pack);
     });
 
-    netJob->start();
+    job->start();
 }
 
 void NetworkModAPI::getVersions(CallerType* caller, VersionSearchArgs&& args) const
@@ -82,4 +78,19 @@ void NetworkModAPI::getVersions(CallerType* caller, VersionSearchArgs&& args) co
     });
 
     netJob->start();
+}
+
+auto NetworkModAPI::getProject(QString addonId, QByteArray* response) const -> NetJob*
+{
+    auto netJob = new NetJob(QString("%1::GetProject").arg(addonId), APPLICATION->network());
+    auto searchUrl = getModInfoURL(addonId);
+
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
+
+    QObject::connect(netJob, &NetJob::finished, [response, netJob] {
+        netJob->deleteLater();
+        delete response;
+    });
+
+    return netJob;
 }

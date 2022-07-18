@@ -76,13 +76,20 @@ void WideBar::addSeparator()
     m_entries.push_back(entry);
 }
 
-void WideBar::insertActionBefore(QAction* before, QAction* action){
-    auto iter = std::find_if(m_entries.begin(), m_entries.end(), [before](BarEntry * entry) {
-        return entry->wideAction == before;
+auto WideBar::getMatching(QAction* act) -> QList<BarEntry*>::iterator
+{
+    auto iter = std::find_if(m_entries.begin(), m_entries.end(), [act](BarEntry * entry) {
+        return entry->wideAction == act;
     });
-    if(iter == m_entries.end()) {
+    
+    return iter;
+}
+
+void WideBar::insertActionBefore(QAction* before, QAction* action){
+    auto iter = getMatching(before);
+    if(iter == m_entries.end())
         return;
-    }
+
     auto entry = new BarEntry();
     entry->qAction = insertWidget((*iter)->qAction, new ActionButton(action, this));
     entry->wideAction = action;
@@ -90,20 +97,42 @@ void WideBar::insertActionBefore(QAction* before, QAction* action){
     m_entries.insert(iter, entry);
 }
 
+void WideBar::insertActionAfter(QAction* after, QAction* action){
+    auto iter = getMatching(after);
+    if(iter == m_entries.end())
+        return;
+
+    auto entry = new BarEntry();
+    entry->qAction = insertWidget((*(iter+1))->qAction, new ActionButton(action, this));
+    entry->wideAction = action;
+    entry->type = BarEntry::Action;
+    m_entries.insert(iter + 1, entry);
+}
+
 void WideBar::insertSpacer(QAction* action)
 {
-    auto iter = std::find_if(m_entries.begin(), m_entries.end(), [action](BarEntry * entry) {
-        return entry->wideAction == action;
-    });
-    if(iter == m_entries.end()) {
+    auto iter = getMatching(action);
+    if(iter == m_entries.end())
         return;
-    }
+
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     auto entry = new BarEntry();
     entry->qAction = insertWidget((*iter)->qAction, spacer);
     entry->type = BarEntry::Spacer;
+    m_entries.insert(iter, entry);
+}
+
+void WideBar::insertSeparator(QAction* before)
+{
+    auto iter = getMatching(before);
+    if(iter == m_entries.end())
+        return;
+
+    auto entry = new BarEntry();
+    entry->qAction = QToolBar::insertSeparator(before);
+    entry->type = BarEntry::Separator;
     m_entries.insert(iter, entry);
 }
 

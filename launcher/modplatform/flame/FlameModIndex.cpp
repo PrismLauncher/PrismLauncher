@@ -7,20 +7,22 @@
 #include "net/NetJob.h"
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
+static FlameAPI api;
 
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireInteger(obj, "id");
     pack.provider = ModPlatform::Provider::FLAME;
     pack.name = Json::requireString(obj, "name");
+    pack.slug = Json::requireString(obj, "slug");
     pack.websiteUrl = Json::ensureString(Json::ensureObject(obj, "links"), "websiteUrl", "");
     pack.description = Json::ensureString(obj, "summary", "");
 
-    QJsonObject logo = Json::requireObject(obj, "logo");
-    pack.logoName = Json::requireString(logo, "title");
-    pack.logoUrl = Json::requireString(logo, "thumbnailUrl");
+    QJsonObject logo = Json::ensureObject(obj, "logo");
+    pack.logoName = Json::ensureString(logo, "title");
+    pack.logoUrl = Json::ensureString(logo, "thumbnailUrl");
 
-    auto authors = Json::requireArray(obj, "authors");
+    auto authors = Json::ensureArray(obj, "authors");
     for (auto authorIter : authors) {
         auto author = Json::requireObject(authorIter);
         ModPlatform::ModpackAuthor packAuthor;
@@ -91,7 +93,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
     pack.versionsLoaded = true;
 }
 
-auto FlameMod::loadIndexedPackVersion(QJsonObject& obj) -> ModPlatform::IndexedVersion
+auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> ModPlatform::IndexedVersion
 {
     auto versionArray = Json::requireArray(obj, "gameVersions");
     if (versionArray.isEmpty()) {
@@ -110,7 +112,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj) -> ModPlatform::IndexedV
     file.fileId = Json::requireInteger(obj, "id");
     file.date = Json::requireString(obj, "fileDate");
     file.version = Json::requireString(obj, "displayName");
-    file.downloadUrl = Json::requireString(obj, "downloadUrl");
+    file.downloadUrl = Json::ensureString(obj, "downloadUrl");
     file.fileName = Json::requireString(obj, "fileName");
 
     auto hash_list = Json::ensureArray(obj, "hashes");
@@ -124,5 +126,9 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj) -> ModPlatform::IndexedV
             break;
         }
     }
+
+    if(load_changelog)
+        file.changelog = api.getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
+
     return file;
 }

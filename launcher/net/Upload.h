@@ -46,6 +46,8 @@ namespace Net {
 
     public:
         static Upload::Ptr makeByteArray(QUrl url, QByteArray *output, QByteArray m_post_data);
+        auto abort() -> bool override;
+        auto canAbort() const -> bool override { return true; };
 
     protected slots:
         void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;

@@ -397,6 +397,8 @@ set(TASKS_SOURCES
     tasks/ConcurrentTask.cpp
     tasks/SequentialTask.h
     tasks/SequentialTask.cpp
+    tasks/MultipleOptionsTask.h
+    tasks/MultipleOptionsTask.cpp
 )
 
 ecm_add_test(tasks/Task_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
@@ -480,9 +482,15 @@ set(API_SOURCES
 
     modplatform/ModAPI.h
 
-    modplatform/flame/FlameAPI.h
-    modplatform/modrinth/ModrinthAPI.h
+    modplatform/EnsureMetadataTask.h
+    modplatform/EnsureMetadataTask.cpp
 
+    modplatform/CheckUpdateTask.h
+
+    modplatform/flame/FlameAPI.h
+    modplatform/flame/FlameAPI.cpp
+    modplatform/modrinth/ModrinthAPI.h
+    modplatform/modrinth/ModrinthAPI.cpp
     modplatform/helpers/NetworkModAPI.h
     modplatform/helpers/NetworkModAPI.cpp
 )
@@ -508,6 +516,8 @@ set(FLAME_SOURCES
     modplatform/flame/PackManifest.cpp
     modplatform/flame/FileResolvingTask.h
     modplatform/flame/FileResolvingTask.cpp
+    modplatform/flame/FlameCheckUpdate.cpp
+    modplatform/flame/FlameCheckUpdate.h
 )
 
 set(MODRINTH_SOURCES
@@ -515,6 +525,8 @@ set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthPackIndex.h
     modplatform/modrinth/ModrinthPackManifest.cpp
     modplatform/modrinth/ModrinthPackManifest.h
+    modplatform/modrinth/ModrinthCheckUpdate.cpp
+    modplatform/modrinth/ModrinthCheckUpdate.h
 )
 
 set(MODPACKSCH_SOURCES
@@ -836,6 +848,10 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ModDownloadDialog.h
     ui/dialogs/ScrollMessageBox.cpp
     ui/dialogs/ScrollMessageBox.h
+    ui/dialogs/ChooseProviderDialog.h
+    ui/dialogs/ChooseProviderDialog.cpp
+    ui/dialogs/ModUpdateDialog.cpp
+    ui/dialogs/ModUpdateDialog.h
 
     # GUI - widgets
     ui/widgets/Common.cpp
@@ -941,6 +957,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/EditAccountDialog.ui
     ui/dialogs/ReviewMessageBox.ui
     ui/dialogs/ScrollMessageBox.ui
+    ui/dialogs/ChooseProviderDialog.ui
 )
 
 qt_add_resources(LAUNCHER_RESOURCES
@@ -967,6 +984,7 @@ add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHE
 target_link_libraries(Launcher_logic
     systeminfo
     Launcher_classparser
+    Launcher_murmur2
     nbt++
     ${ZLIB_LIBRARIES}
     optional-bare

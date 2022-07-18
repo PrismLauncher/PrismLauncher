@@ -44,10 +44,21 @@ void LocalModUpdateTask::executeTask()
 {
     setStatus(tr("Updating index for mod:\n%1").arg(m_mod.name));
 
-    auto pw_mod = Metadata::create(m_index_dir, m_mod, m_mod_version);
-    Metadata::update(m_index_dir, pw_mod);
+    auto old_metadata = Metadata::get(m_index_dir, m_mod.addonId);
+    if (old_metadata.isValid()) {
+        emit hasOldMod(old_metadata.name, old_metadata.filename);
+        if (m_mod.slug.isEmpty())
+            m_mod.slug = old_metadata.slug;
+    }
 
-    emitSucceeded();
+    auto pw_mod = Metadata::create(m_index_dir, m_mod, m_mod_version);
+    if (pw_mod.isValid()) {
+        Metadata::update(m_index_dir, pw_mod);
+        emitSucceeded();
+    } else {
+        qCritical() << "Tried to update an invalid mod!";
+        emitFailed(tr("Invalid metadata"));
+    }
 }
 
 auto LocalModUpdateTask::abort() -> bool
