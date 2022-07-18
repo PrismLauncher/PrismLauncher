@@ -150,25 +150,30 @@ void Mod::setStatus(ModStatus status)
         m_temp_status = status;
     }
 }
-void Mod::setMetadata(Metadata::ModStruct* metadata)
+void Mod::setMetadata(const Metadata::ModStruct& metadata)
 {
     if (status() == ModStatus::NoMetadata)
         setStatus(ModStatus::Installed);
 
     if (m_localDetails) {
-        m_localDetails->metadata.reset(metadata);
+        m_localDetails->metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
     } else {
-        m_temp_metadata.reset(metadata);
+        m_temp_metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
     }
 }
 
-auto Mod::destroy(QDir& index_dir) -> bool
+auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
 {
-    auto n = name();
-    // FIXME: This can fail to remove the metadata if the
-    // "ModMetadataDisabled" setting is on, since there could
-    // be a name mismatch!
-    Metadata::remove(index_dir, n);
+    if (!preserve_metadata) {
+        qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
+
+        if (metadata()) {
+            Metadata::remove(index_dir, metadata()->slug);
+        } else {
+            auto n = name();
+            Metadata::remove(index_dir, n);
+        }
+    }
 
     m_type = MOD_UNKNOWN;
     return FS::deletePath(m_file.filePath());
@@ -182,9 +187,12 @@ auto Mod::details() const -> const ModDetails&
 auto Mod::name() const -> QString
 {
     auto d_name = details().name;
-    if (!d_name.isEmpty()) {
+    if (!d_name.isEmpty())
         return d_name;
-    }
+
+    if (metadata())
+        return metadata()->name;
+
     return m_name;
 }
 
@@ -235,11 +243,10 @@ void Mod::finishResolvingWithDetails(std::shared_ptr<ModDetails> details)
     m_resolved = true;
     m_localDetails = details;
 
-    if (m_localDetails && m_temp_metadata && m_temp_metadata->isValid()) {
-        m_localDetails->metadata = m_temp_metadata;
-        if (status() == ModStatus::NoMetadata)
-            setStatus(ModStatus::Installed);
-    }
-
     setStatus(m_temp_status);
+
+    if (m_localDetails && m_temp_metadata && m_temp_metadata->isValid()) {
+        setMetadata(*m_temp_metadata);
+        m_temp_metadata.reset();
+    }
 }

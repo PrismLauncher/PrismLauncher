@@ -75,7 +75,7 @@ namespace MMCZip
     /**
      * take a source jar, add mods to it, resulting in target jar
      */
-    bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod>& mods);
+    bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods);
 
     /**
      * Find a single file in archive by file name (not path)

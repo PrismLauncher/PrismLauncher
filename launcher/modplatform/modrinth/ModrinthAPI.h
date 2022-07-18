@@ -27,6 +27,29 @@
 
 class ModrinthAPI : public NetworkModAPI {
    public:
+    auto currentVersion(QString hash,
+                        QString hash_format,
+                        QByteArray* response) -> NetJob::Ptr;
+
+    auto currentVersions(const QStringList& hashes,
+                         QString hash_format,
+                         QByteArray* response) -> NetJob::Ptr;
+
+    auto latestVersion(QString hash,
+                       QString hash_format,
+                       std::list<Version> mcVersions,
+                       ModLoaderTypes loaders,
+                       QByteArray* response) -> NetJob::Ptr;
+
+    auto latestVersions(const QStringList& hashes,
+                        QString hash_format,
+                        std::list<Version> mcVersions,
+                        ModLoaderTypes loaders,
+                        QByteArray* response) -> NetJob::Ptr;
+
+    auto getProjects(QStringList addonIds, QByteArray* response) const -> NetJob* override;
+
+   public:
     inline auto getAuthorURL(const QString& name) const -> QString { return "https://modrinth.com/user/" + name; };
 
     static auto getModLoaderStrings(const ModLoaderTypes types) -> const QStringList
@@ -79,6 +102,11 @@ class ModrinthAPI : public NetworkModAPI {
     inline auto getModInfoURL(QString& id) const -> QString override
     {
         return BuildConfig.MODRINTH_PROD_URL + "/project/" + id;
+    };
+
+    inline auto getMultipleModInfoURL(QStringList ids) const -> QString
+    {
+        return BuildConfig.MODRINTH_PROD_URL + QString("/projects?ids=[\"%1\"]").arg(ids.join("\",\""));
     };
 
     inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override

@@ -55,11 +55,11 @@ auto getRealIndexName(QDir& index_dir, QString normalized_fname, bool should_fin
 }
 
 // Helpers
-static inline auto indexFileName(QString const& mod_name) -> QString
+static inline auto indexFileName(QString const& mod_slug) -> QString
 {
-    if(mod_name.endsWith(".pw.toml"))
-        return mod_name;
-    return QString("%1.pw.toml").arg(mod_name);
+    if(mod_slug.endsWith(".pw.toml"))
+        return mod_slug;
+    return QString("%1.pw.toml").arg(mod_slug);
 }
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
@@ -95,6 +95,7 @@ auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Mo
 {
     Mod mod;
 
+    mod.slug = mod_pack.slug;
     mod.name = mod_pack.name;
     mod.filename = mod_version.fileName;
 
@@ -116,12 +117,10 @@ auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Mo
     return mod;
 }
 
-auto V1::createModFormat(QDir& index_dir, ::Mod& internal_mod) -> Mod
+auto V1::createModFormat(QDir& index_dir, ::Mod& internal_mod, QString slug) -> Mod
 {
-    auto mod_name = internal_mod.name();
-
     // Try getting metadata if it exists
-    Mod mod { getIndexForMod(index_dir, mod_name) };
+    Mod mod { getIndexForMod(index_dir, slug) };
     if(mod.isValid())
         return mod;
 
@@ -139,10 +138,13 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
 
     // Ensure the corresponding mod's info exists, and create it if not
 
-    auto normalized_fname = indexFileName(mod.name);
+    auto normalized_fname = indexFileName(mod.slug);
     auto real_fname = getRealIndexName(index_dir, normalized_fname);
 
     QFile index_file(index_dir.absoluteFilePath(real_fname));
+
+    if (real_fname != normalized_fname)
+        index_file.rename(normalized_fname);
 
     // There's already data on there!
     // TODO: We should do more stuff here, as the user is likely trying to
@@ -184,33 +186,46 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
         }
     }
 
+    index_file.flush();
     index_file.close();
 }
 
-void V1::deleteModIndex(QDir& index_dir, QString& mod_name)
+void V1::deleteModIndex(QDir& index_dir, QString& mod_slug)
 {
-    auto normalized_fname = indexFileName(mod_name);
+    auto normalized_fname = indexFileName(mod_slug);
     auto real_fname = getRealIndexName(index_dir, normalized_fname);
     if (real_fname.isEmpty())
         return;
 
     QFile index_file(index_dir.absoluteFilePath(real_fname));
 
-    if(!index_file.exists()){
-        qWarning() << QString("Tried to delete non-existent mod metadata for %1!").arg(mod_name);
+    if (!index_file.exists()) {
+        qWarning() << QString("Tried to delete non-existent mod metadata for %1!").arg(mod_slug);
         return;
     }
 
-    if(!index_file.remove()){
-        qWarning() << QString("Failed to remove metadata for mod %1!").arg(mod_name);
+    if (!index_file.remove()) {
+        qWarning() << QString("Failed to remove metadata for mod %1!").arg(mod_slug);
     }
 }
 
-auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
+void V1::deleteModIndex(QDir& index_dir, QVariant& mod_id)
+{
+    for (auto& file_name : index_dir.entryList(QDir::Filter::Files)) {
+        auto mod = getIndexForMod(index_dir, file_name);
+
+        if (mod.mod_id() == mod_id) {
+            deleteModIndex(index_dir, mod.name);
+            break;
+        }
+    }
+}
+
+auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
 {
     Mod mod;
 
-    auto normalized_fname = indexFileName(index_file_name);
+    auto normalized_fname = indexFileName(slug);
     auto real_fname = getRealIndexName(index_dir, normalized_fname, true);
     if (real_fname.isEmpty())
         return {};
@@ -218,7 +233,7 @@ auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
     QFile index_file(index_dir.absoluteFilePath(real_fname));
 
     if (!index_file.open(QIODevice::ReadOnly)) {
-        qWarning() << QString("Failed to open mod metadata for %1").arg(index_file_name);
+        qWarning() << QString("Failed to open mod metadata for %1").arg(slug);
         return {};
     }
 
@@ -232,10 +247,12 @@ auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
     index_file.close();
 
     if (!table) {
-        qWarning() << QString("Could not open file %1!").arg(indexFileName(index_file_name));
+        qWarning() << QString("Could not open file %1!").arg(normalized_fname);
         qWarning() << "Reason: " << QString(errbuf);
         return {};
     }
+
+    mod.slug = slug;
 
     {  // Basic info
         mod.name = stringEntry(table, "name");
@@ -286,4 +303,16 @@ auto V1::getIndexForMod(QDir& index_dir, QString& index_file_name) -> Mod
     return mod;
 }
 
-} // namespace Packwiz
+auto V1::getIndexForMod(QDir& index_dir, QVariant& mod_id) -> Mod
+{
+    for (auto& file_name : index_dir.entryList(QDir::Filter::Files)) {
+        auto mod = getIndexForMod(index_dir, file_name);
+
+        if (mod.mod_id() == mod_id)
+            return mod;
+    }
+
+    return {};
+}
+
+}  // namespace Packwiz

@@ -43,6 +43,16 @@
 
 namespace Net {
 
+    bool Upload::abort()
+    {
+        if (m_reply) {
+            m_reply->abort();
+        } else {
+            m_state = State::AbortedByUser;
+        }
+        return true;
+    }
+
     void Upload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal) {
         setProgress(bytesReceived, bytesTotal);
     }

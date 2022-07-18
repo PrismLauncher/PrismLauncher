@@ -57,68 +57,72 @@ void SkinUploadDialog::on_buttonBox_accepted()
 {
     QString fileName;
     QString input = ui->skinPathTextBox->text();
-    QRegularExpression urlPrefixMatcher(QRegularExpression::anchoredPattern("^([a-z]+)://.+$"));
-    bool isLocalFile = false;
-    // it has an URL prefix -> it is an URL
-    if(urlPrefixMatcher.match(input).hasMatch())
-    {
-        QUrl fileURL = input;
-        if(fileURL.isValid())
+    ProgressDialog prog(this);
+    SequentialTask skinUpload;
+
+    if (!input.isEmpty()) {
+        QRegularExpression urlPrefixMatcher(QRegularExpression::anchoredPattern("^([a-z]+)://.+$"));
+        bool isLocalFile = false;
+        // it has an URL prefix -> it is an URL
+        if(urlPrefixMatcher.match(input).hasMatch())
         {
-            // local?
-            if(fileURL.isLocalFile())
+            QUrl fileURL = input;
+            if(fileURL.isValid())
             {
-                isLocalFile = true;
-                fileName = fileURL.toLocalFile();
+                // local?
+                if(fileURL.isLocalFile())
+                {
+                    isLocalFile = true;
+                    fileName = fileURL.toLocalFile();
+                }
+                else
+                {
+                    CustomMessageBox::selectable(
+                        this,
+                        tr("Skin Upload"),
+                        tr("Using remote URLs for setting skins is not implemented yet."),
+                        QMessageBox::Warning
+                        )->exec();
+                    close();
+                    return;
+                }
             }
             else
             {
                 CustomMessageBox::selectable(
                     this,
                     tr("Skin Upload"),
-                    tr("Using remote URLs for setting skins is not implemented yet."),
+                    tr("You cannot use an invalid URL for uploading skins."),
                     QMessageBox::Warning
-                )->exec();
+                    )->exec();
                 close();
                 return;
             }
         }
         else
         {
-            CustomMessageBox::selectable(
-                this,
-                tr("Skin Upload"),
-                tr("You cannot use an invalid URL for uploading skins."),
-                QMessageBox::Warning
-            )->exec();
+            // just assume it's a path then
+            isLocalFile = true;
+            fileName = ui->skinPathTextBox->text();
+        }
+        if (isLocalFile && !QFile::exists(fileName))
+        {
+            CustomMessageBox::selectable(this, tr("Skin Upload"), tr("Skin file does not exist!"), QMessageBox::Warning)->exec();
             close();
             return;
         }
+        SkinUpload::Model model = SkinUpload::STEVE;
+        if (ui->steveBtn->isChecked())
+        {
+            model = SkinUpload::STEVE;
+        }
+        else if (ui->alexBtn->isChecked())
+        {
+            model = SkinUpload::ALEX;
+        }
+        skinUpload.addTask(shared_qobject_ptr<SkinUpload>(new SkinUpload(this, m_acct->accessToken(), FS::read(fileName), model)));
     }
-    else
-    {
-        // just assume it's a path then
-        isLocalFile = true;
-        fileName = ui->skinPathTextBox->text();
-    }
-    if (isLocalFile && !QFile::exists(fileName))
-    {
-        CustomMessageBox::selectable(this, tr("Skin Upload"), tr("Skin file does not exist!"), QMessageBox::Warning)->exec();
-        close();
-        return;
-    }
-    SkinUpload::Model model = SkinUpload::STEVE;
-    if (ui->steveBtn->isChecked())
-    {
-        model = SkinUpload::STEVE;
-    }
-    else if (ui->alexBtn->isChecked())
-    {
-        model = SkinUpload::ALEX;
-    }
-    ProgressDialog prog(this);
-    SequentialTask skinUpload;
-    skinUpload.addTask(shared_qobject_ptr<SkinUpload>(new SkinUpload(this, m_acct->accessToken(), FS::read(fileName), model)));
+
     auto selectedCape = ui->capeCombo->currentData().toString();
     if(selectedCape != m_acct->accountData()->minecraftProfile.currentCape) {
         skinUpload.addTask(shared_qobject_ptr<CapeChange>(new CapeChange(this, m_acct->accessToken(), selectedCape)));

@@ -39,10 +39,12 @@
 #include <QFileInfo>
 #include <QList>
 
+#include "QObjectPtr.h"
 #include "ModDetails.h"
 
-class Mod
+class Mod : public QObject
 {
+    Q_OBJECT
 public:
     enum ModType
     {
@@ -52,6 +54,8 @@ public:
         MOD_FOLDER,     //!< The mod is in a folder on the filesystem.
         MOD_LITEMOD,    //!< The mod is a litemod
     };
+
+    using Ptr = shared_qobject_ptr<Mod>;
 
     Mod() = default;
     Mod(const QFileInfo &file);
@@ -77,12 +81,12 @@ public:
     auto metadata() const -> const std::shared_ptr<Metadata::ModStruct>;
 
     void setStatus(ModStatus status);
-    void setMetadata(Metadata::ModStruct* metadata);
+    void setMetadata(const Metadata::ModStruct& metadata);
 
     auto enable(bool value) -> bool;
 
     // delete all the files of this mod
-    auto destroy(QDir& index_dir) -> bool;
+    auto destroy(QDir& index_dir, bool preserve_metadata = false) -> bool;
 
     // change the mod's filesystem path (used by mod lists for *MAGIC* purposes)
     void repath(const QFileInfo &file);
@@ -111,7 +115,7 @@ protected:
     std::shared_ptr<Metadata::ModStruct> m_temp_metadata;
 
     /* Set the mod status while it doesn't have local details just yet */
-    ModStatus m_temp_status = ModStatus::NotInstalled;
+    ModStatus m_temp_status = ModStatus::NoMetadata;
 
     std::shared_ptr<ModDetails> m_localDetails;
 

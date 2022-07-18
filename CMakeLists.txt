@@ -323,6 +323,7 @@ add_subdirectory(libraries/optional-bare)
 add_subdirectory(libraries/tomlc99) # toml parser
 add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too much
 add_subdirectory(libraries/gamemode)
+add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
 
 ############################### Built Artifacts ###############################
 

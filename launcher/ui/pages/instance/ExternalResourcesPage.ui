@@ -147,6 +147,17 @@
     <string>Download a new resource</string>
    </property>
   </action>
+  <action name="actionUpdateItem">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Check for &amp;Updates</string>
+   </property>
+   <property name="toolTip">
+    <string>"Tries to find / update all selected resources (all resources if none is selected)"</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

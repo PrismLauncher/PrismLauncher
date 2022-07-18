@@ -48,7 +48,7 @@ class ModFolderLoadTask : public QObject, public QRunnable
     Q_OBJECT
 public:
     struct Result {
-        QMap<QString, Mod> mods;
+        QMap<QString, Mod::Ptr> mods;
     };
     using ResultPtr = std::shared_ptr<Result>;
     ResultPtr result() const {

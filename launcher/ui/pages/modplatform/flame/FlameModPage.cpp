@@ -64,7 +64,7 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance)
 auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders) const -> bool
 {
     Q_UNUSED(loaders);
-    return ver.mcVersion.contains(mineVer);
+    return ver.mcVersion.contains(mineVer) && !ver.downloadUrl.isEmpty();
 }
 
 // I don't know why, but doing this on the parent class makes it so that

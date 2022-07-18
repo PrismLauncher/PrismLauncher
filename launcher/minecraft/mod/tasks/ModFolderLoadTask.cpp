@@ -36,7 +36,6 @@
 
 #include "ModFolderLoadTask.h"
 
-#include "Application.h"
 #include "minecraft/mod/MetadataHandler.h"
 
 ModFolderLoadTask::ModFolderLoadTask(QDir& mods_dir, QDir& index_dir, bool is_indexed) 
@@ -53,33 +52,33 @@ void ModFolderLoadTask::run()
     // Read JAR files that don't have metadata
     m_mods_dir.refresh();
     for (auto entry : m_mods_dir.entryInfoList()) {
-        Mod mod(entry);
+        Mod::Ptr mod(new Mod(entry));
 
-        if (mod.enabled()) {
-            if (m_result->mods.contains(mod.internal_id())) {
-                m_result->mods[mod.internal_id()].setStatus(ModStatus::Installed);
+        if (mod->enabled()) {
+            if (m_result->mods.contains(mod->internal_id())) {
+                m_result->mods[mod->internal_id()]->setStatus(ModStatus::Installed);
             }
             else {
-                m_result->mods[mod.internal_id()] = mod;
-                m_result->mods[mod.internal_id()].setStatus(ModStatus::NoMetadata);
+                m_result->mods[mod->internal_id()] = mod;
+                m_result->mods[mod->internal_id()]->setStatus(ModStatus::NoMetadata);
             }
         }
         else { 
-            QString chopped_id = mod.internal_id().chopped(9);
+            QString chopped_id = mod->internal_id().chopped(9);
             if (m_result->mods.contains(chopped_id)) {
-                m_result->mods[mod.internal_id()] = mod;
+                m_result->mods[mod->internal_id()] = mod;
 
-                auto metadata = m_result->mods[chopped_id].metadata();
+                auto metadata = m_result->mods[chopped_id]->metadata();
                 if (metadata) {
-                    mod.setMetadata(new Metadata::ModStruct(*metadata));
+                    mod->setMetadata(*metadata);
 
-                    m_result->mods[mod.internal_id()].setStatus(ModStatus::Installed);
+                    m_result->mods[mod->internal_id()]->setStatus(ModStatus::Installed);
                     m_result->mods.remove(chopped_id);
                 }
             }
             else {
-                m_result->mods[mod.internal_id()] = mod;
-                m_result->mods[mod.internal_id()].setStatus(ModStatus::NoMetadata);
+                m_result->mods[mod->internal_id()] = mod;
+                m_result->mods[mod->internal_id()]->setStatus(ModStatus::NoMetadata);
             }
         }
     }
@@ -97,8 +96,8 @@ void ModFolderLoadTask::getFromMetadata()
             return;
         }
 
-        Mod mod(m_mods_dir, metadata);
-        mod.setStatus(ModStatus::NotInstalled);
-        m_result->mods[mod.internal_id()] = mod;
+        auto* mod = new Mod(m_mods_dir, metadata);
+        mod->setStatus(ModStatus::NotInstalled);
+        m_result->mods[mod->internal_id()] = mod;
     }
 }

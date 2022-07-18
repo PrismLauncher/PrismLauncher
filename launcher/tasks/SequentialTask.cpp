@@ -1,5 +1,7 @@
 #include "SequentialTask.h"
 
+#include <QDebug>
+
 SequentialTask::SequentialTask(QObject* parent, const QString& task_name) : Task(parent), m_name(task_name), m_currentIndex(-1) {}
 
 SequentialTask::~SequentialTask()
@@ -39,14 +41,15 @@ bool SequentialTask::abort()
             emit aborted();
             emit finished();
         }
-        m_queue.clear();
+
+        m_aborted = true;
         return true;
     }
 
     bool succeeded = m_queue[m_currentIndex]->abort();
-    m_queue.clear();
+    m_aborted = succeeded;
 
-    if(succeeded)
+    if (succeeded)
         emitAborted();
 
     return succeeded;
@@ -54,10 +57,14 @@ bool SequentialTask::abort()
 
 void SequentialTask::startNext()
 {
-    if (m_currentIndex != -1) {
-        Task::Ptr previous = m_queue[m_currentIndex];
+    if (m_aborted)
+        return;
+
+    if (m_currentIndex != -1 && m_currentIndex < m_queue.size()) {
+        Task::Ptr previous = m_queue.at(m_currentIndex);
         disconnect(previous.get(), 0, this, 0);
     }
+
     m_currentIndex++;
     if (m_queue.isEmpty() || m_currentIndex >= m_queue.size()) {
         emitSucceeded();
@@ -76,6 +83,8 @@ void SequentialTask::startNext()
     setStatus(tr("Executing task %1 out of %2").arg(m_currentIndex + 1).arg(m_queue.size()));
     setStepStatus(next->isMultiStep() ? next->getStepStatus() : next->getStatus());
 
+    setProgress(m_currentIndex + 1, m_queue.count());
+
     next->start();
 }
 
@@ -93,7 +102,6 @@ void SequentialTask::subTaskProgress(qint64 current, qint64 total)
         setProgress(0, 100);
         return;
     }
-    setProgress(m_currentIndex + 1, m_queue.count());
 
     m_stepProgress = current;
     m_stepTotalProgress = total;

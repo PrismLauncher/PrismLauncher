@@ -27,6 +27,7 @@ ModDownloadTask::ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::Inde
 {
     if (is_indexed) {
         m_update_task.reset(new LocalModUpdateTask(mods->indexDir(), m_mod, m_mod_version));
+        connect(m_update_task.get(), &LocalModUpdateTask::hasOldMod, this, &ModDownloadTask::hasOldMod);
 
         addTask(m_update_task);
     }
@@ -40,12 +41,16 @@ ModDownloadTask::ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::Inde
     connect(m_filesNetJob.get(), &NetJob::failed, this, &ModDownloadTask::downloadFailed);
 
     addTask(m_filesNetJob);
-
 }
 
 void ModDownloadTask::downloadSucceeded()
 {
     m_filesNetJob.reset();
+    auto name = std::get<0>(to_delete);
+    auto filename = std::get<1>(to_delete);
+    if (!name.isEmpty() && filename != m_mod_version.fileName) {
+        mods->uninstallMod(filename, true);
+    }
 }
 
 void ModDownloadTask::downloadFailed(QString reason)
@@ -57,4 +62,11 @@ void ModDownloadTask::downloadFailed(QString reason)
 void ModDownloadTask::downloadProgressChanged(qint64 current, qint64 total)
 {
     emit progress(current, total);
+}
+
+// This indirection is done so that we don't delete a mod before being sure it was
+// downloaded successfully!
+void ModDownloadTask::hasOldMod(QString name, QString filename)
+{
+    to_delete = {name, filename};
 }

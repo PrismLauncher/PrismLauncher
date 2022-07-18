@@ -101,13 +101,13 @@ public:
     {
         return size() == 0;
     }
-    Mod &operator[](size_t index)
+    Mod& operator[](size_t index)
     {
-        return mods[index];
+        return *mods[index];
     }
-    const Mod &at(size_t index) const
+    const Mod& at(size_t index) const
     {
-        return mods.at(index);
+        return *mods.at(index);
     }
 
     /// Reloads the mod list and returns true if the list changed.
@@ -117,6 +117,8 @@ public:
      * Adds the given mod to the list at the given index - if the list supports custom ordering
      */
     bool installMod(const QString& filename);
+
+    bool uninstallMod(const QString& filename, bool preserve_metadata = false);
 
     /// Deletes all the selected mods
     bool deleteMods(const QModelIndexList &indexes);
@@ -139,10 +141,12 @@ public:
         return { QString("%1/.index").arg(dir().absolutePath()) };
     }
 
-    const QList<Mod> & allMods()
+    const QList<Mod::Ptr>& allMods()
     {
         return mods;
     }
+
+    auto selectedMods(QModelIndexList& indexes) -> QList<Mod::Ptr>;
 
 public slots:
     void disableInteraction(bool disabled);
@@ -157,7 +161,7 @@ signals:
     void updateFinished();
 
 private:
-    void resolveMod(Mod& m);
+    void resolveMod(Mod::Ptr m);
     bool setModStatus(int index, ModStatusAction action);
 
 protected:
@@ -171,5 +175,5 @@ protected:
     QMap<QString, int> modsIndex;
     QMap<int, LocalModParseTask::ResultPtr> activeTickets;
     int nextResolutionTicket = 0;
-    QList<Mod> mods;
+    QList<Mod::Ptr> mods;
 };
