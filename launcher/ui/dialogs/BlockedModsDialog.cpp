@@ -1,6 +1,6 @@
 #include "BlockedModsDialog.h"
 #include "ui_BlockedModsDialog.h"
-#include "qpushbutton.h"
+#include <QPushButton>
 #include <QDialogButtonBox>
 #include <QDesktopServices>
 
