@@ -169,13 +169,13 @@ void ModPage::setSearchTerm(QString term)
     ui->searchEdit->setText(term);
 }
 
-void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
+void ModPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 {
     ui->versionSelectionBox->clear();
 
-    if (!first.isValid()) { return; }
+    if (!curr.isValid()) { return; }
 
-    current = listModel->data(first, Qt::UserRole).value<ModPlatform::IndexedPack>();
+    current = listModel->data(curr, Qt::UserRole).value<ModPlatform::IndexedPack>();
 
     if (!current.versionsLoaded) {
         qDebug() << QString("Loading %1 mod versions").arg(debugName());
@@ -195,7 +195,8 @@ void ModPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
     if(!current.extraDataLoaded){
         qDebug() << QString("Loading %1 mod info").arg(debugName());
-        listModel->requestModInfo(current);
+
+        listModel->requestModInfo(current, curr);
     }
 
     updateUi();

@@ -85,6 +85,17 @@ auto ListModel::data(const QModelIndex& index, int role) const -> QVariant
     return {};
 }
 
+bool ListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    int pos = index.row();
+    if (pos >= modpacks.size() || pos < 0 || !index.isValid())
+        return false;
+
+    modpacks[pos] = value.value<ModPlatform::IndexedPack>();
+
+    return true;
+}
+
 void ListModel::requestModVersions(ModPlatform::IndexedPack const& current)
 {
     auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
@@ -100,10 +111,10 @@ void ListModel::performPaginatedSearch()
         this, { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], profile->getModLoaders(), getMineVersions() });
 }
 
-void ListModel::requestModInfo(ModPlatform::IndexedPack& current)
+void ListModel::requestModInfo(ModPlatform::IndexedPack& current, QModelIndex index)
 {
     m_parent->apiProvider()->getModInfo(
-        current, [this](QJsonDocument& doc, ModPlatform::IndexedPack& pack) { infoRequestFinished(doc, pack); });
+        current, [this, index](QJsonDocument& doc, ModPlatform::IndexedPack& pack) { infoRequestFinished(doc, pack, index); });
 }
 
 void ListModel::refresh()
@@ -256,7 +267,7 @@ void ListModel::searchRequestFailed(QString reason)
     }
 }
 
-void ListModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack)
+void ListModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
 {
     qDebug() << "Loading mod info";
 
@@ -266,6 +277,16 @@ void ListModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack
     } catch (const JSONValidationError& e) {
         qDebug() << doc;
         qWarning() << "Error while reading " << debugName() << " mod info: " << e.cause();
+    }
+
+    // Check if the index is still valid for this mod or not
+    if (pack.addonId == data(index, Qt::UserRole).value<ModPlatform::IndexedPack>().addonId) {
+        // Cache info :^)
+        QVariant new_pack;
+        new_pack.setValue(pack);
+        if (!setData(index, new_pack, Qt::UserRole)) {
+            qWarning() << "Failed to cache mod info!";
+        }
     }
 
     m_parent->updateUi();
