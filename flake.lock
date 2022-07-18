@@ -19,26 +19,26 @@
     "libnbtplusplus": {
       "flake": false,
       "locked": {
-        "lastModified": 1591558203,
-        "narHash": "sha256-QgvNvaoFflCXEPCCFBCeZvYTpuiwScBG7EosUgFwFNQ=",
-        "owner": "multimc",
+        "lastModified": 1650031308,
+        "narHash": "sha256-TvVOjkUobYJD9itQYueELJX3wmecvEdCbJ0FinW2mL4=",
+        "owner": "PolyMC",
         "repo": "libnbtplusplus",
-        "rev": "dc72a20b7efd304d12af2025223fad07b4b78464",
+        "rev": "2203af7eeb48c45398139b583615134efd8d407f",
         "type": "github"
       },
       "original": {
-        "owner": "multimc",
+        "owner": "PolyMC",
         "repo": "libnbtplusplus",
         "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1654665288,
-        "narHash": "sha256-7blJpfoZEu7GKb84uh3io/5eSJNdaagXD9d15P9iQMs=",
+        "lastModified": 1658119717,
+        "narHash": "sha256-4upOZIQQ7Bc4CprqnHsKnqYfw+arJeAuU+QcpjYBXW0=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "43ecbe7840d155fa933ee8a500fb00dbbc651fc8",
+        "rev": "9eb60f25aff0d2218c848dd4574a0ab5e296cabe",
         "type": "github"
       },
       "original": {
