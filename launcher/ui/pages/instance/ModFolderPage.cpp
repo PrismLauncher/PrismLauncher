@@ -80,7 +80,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
         connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::installMods);
 
-        ui->actionUpdateItem->setToolTip(tr("Tries to find / update all selected mods (all mods if none is selected)"));
+        ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
         ui->actionsToolbar->insertActionAfter(ui->actionAddItem, ui->actionUpdateItem);
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
 
@@ -190,10 +190,15 @@ void ModFolderPage::updateMods()
         return;
     }
     if (update_dialog.noUpdates()) {
-        CustomMessageBox::selectable(this, tr("Update checker"),
-                                     (mods_list.size() == 1)
-                                         ? tr("'%1' is up-to-date! :)").arg(mods_list.front()->name())
-                                         : tr("All %1mods are up-to-date! :)").arg(use_all ? "" : (tr("selected") + " ")))
+        QString message{ tr("'%1' is up-to-date! :)").arg(mods_list.front()->name()) };
+        if (mods_list.size() > 1) {
+            if (use_all) {
+                message = tr("All mods are up-to-date! :)");
+            } else {
+                message = tr("All selected mods are up-to-date! :)");
+            }
+        }
+        CustomMessageBox::selectable(this, tr("Update checker"), message)
             ->exec();
         return;
     }

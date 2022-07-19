@@ -155,7 +155,7 @@
     <string>Check for &amp;Updates</string>
    </property>
    <property name="toolTip">
-    <string>"Tries to find / update all selected resources (all resources if none is selected)"</string>
+    <string>Try to check or update all selected resources (all resources if none are selected)</string>
    </property>
   </action>
  </widget>

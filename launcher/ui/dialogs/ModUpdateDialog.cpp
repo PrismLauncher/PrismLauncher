@@ -158,8 +158,8 @@ void ModUpdateDialog::checkCandidates()
             if (!reason.isEmpty())
                 text += tr("Reason: %1").arg(reason) + "<br>";
             if (!recover_url.isEmpty())
-                text += tr("Possible solution: ") + tr("Getting the latest version manually:") + "<br>" +
-                        QString("<a href='%1'>").arg(recover_url.toString()) + recover_url.toString() + "</a><br>";
+                text += tr("Possible solution: Getting the latest version manually:<br>"
+                           "<a href='%1'>%1</a><br>").arg(recover_url.toString());
             text += "<br>";
         }
 
@@ -241,9 +241,9 @@ auto ModUpdateDialog::ensureMetadata() -> bool
         }
 
         ChooseProviderDialog chooser(this);
-        chooser.setDescription(tr("This mod (%1) does not have a metadata yet. We need to create one in order to keep relevant "
-                                  "information on how to update this "
-                                  "mod. To do this, please select a mod provider from which we can search for updates for %1.")
+        chooser.setDescription(tr("The mod '%1' does not have a metadata yet. We need to generate it in order to track relevant "
+                                  "information on how to update this mod. "
+                                  "To do this, please select a mod provider which we can use to check for updates for this mod.")
                                    .arg(candidate->name()));
         auto confirmed = chooser.exec() == QDialog::DialogCode::Accepted;
 
@@ -330,7 +330,7 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::P
 
         m_second_try_metadata->addTask(task);
     } else {
-        QString reason{ tr("Didn't find a valid version on the selected mod provider(s)") };
+        QString reason{ tr("Couldn't find a valid version on the selected mod provider(s)") };
 
         m_failed_metadata.append({mod, reason});
     }
