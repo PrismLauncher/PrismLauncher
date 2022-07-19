@@ -81,6 +81,8 @@ ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel>& mods
     QMetaObject::connectSlotsByName(this);
     setWindowModality(Qt::WindowModal);
     setWindowTitle(dialogTitle());
+
+    restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("ModDownloadGeometry").toByteArray()));
 }
 
 QString ModDownloadDialog::dialogTitle()
@@ -90,6 +92,7 @@ QString ModDownloadDialog::dialogTitle()
 
 void ModDownloadDialog::reject()
 {
+    APPLICATION->settings()->set("ModDownloadGeometry", saveGeometry().toBase64());
     QDialog::reject();
 }
 
@@ -116,6 +119,7 @@ void ModDownloadDialog::confirm()
 
 void ModDownloadDialog::accept()
 {
+    APPLICATION->settings()->set("ModDownloadGeometry", saveGeometry().toBase64());
     QDialog::accept();
 }
 

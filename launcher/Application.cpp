@@ -680,6 +680,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("UpdateDialogGeometry", "");
 
+        m_settings->registerSetting("ModDownloadGeometry", "");
+
         // HACK: This code feels so stupid is there a less stupid way of doing this?
         {
             m_settings->registerSetting("PastebinURL", "");
