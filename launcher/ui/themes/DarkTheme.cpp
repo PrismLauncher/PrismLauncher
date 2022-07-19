@@ -31,6 +31,7 @@ QPalette DarkTheme::colorScheme()
     darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
     darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
     darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+    darkPalette.setColor(QPalette::PlaceholderText, Qt::darkGray);
     return fadeInactive(darkPalette, fadeAmount(),  fadeColor());
 }
 
