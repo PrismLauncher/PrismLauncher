@@ -67,6 +67,43 @@ auto FlameAPI::getModFileChangelog(int modId, int fileId) -> QString
     return changelog;
 }
 
+auto FlameAPI::getModDescription(int modId) -> QString
+{
+    QEventLoop lock;
+    QString description;
+
+    auto* netJob = new NetJob(QString("Flame::ModDescription"), APPLICATION->network());
+    auto* response = new QByteArray();
+    netJob->addNetAction(Net::Download::makeByteArray(
+        QString("https://api.curseforge.com/v1/mods/%1/description")
+            .arg(QString::number(modId)), response));
+
+    QObject::connect(netJob, &NetJob::succeeded, [netJob, response, &description] {
+        QJsonParseError parse_error{};
+        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+        if (parse_error.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Flame::ModDescription at " << parse_error.offset
+                       << " reason: " << parse_error.errorString();
+            qWarning() << *response;
+
+            netJob->failed(parse_error.errorString());
+            return;
+        }
+
+        description = Json::ensureString(doc.object(), "data");
+    });
+
+    QObject::connect(netJob, &NetJob::finished, [response, &lock] {
+        delete response;
+        lock.quit();
+    });
+
+    netJob->start();
+    lock.exec();
+
+    return description;
+}
+
 auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion
 {
     QEventLoop loop;

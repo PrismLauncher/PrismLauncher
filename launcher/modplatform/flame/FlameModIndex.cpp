@@ -4,10 +4,9 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "net/NetJob.h"
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
 static FlameAPI api;
+static ModPlatform::ProviderCapabilities ProviderCaps;
 
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
@@ -49,6 +48,8 @@ void FlameMod::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
     pack.extraData.wikiUrl = Json::ensureString(links_obj, "wikiUrl");
     if(pack.extraData.wikiUrl.endsWith('/'))
         pack.extraData.wikiUrl.chop(1);
+
+    pack.extraData.body  = api.getModDescription(pack.addonId.toInt());
 
     pack.extraDataLoaded = true;
 }
