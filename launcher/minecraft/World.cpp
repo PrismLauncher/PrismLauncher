@@ -53,12 +53,12 @@
 
 #include <QCoreApplication>
 
-#include <nonstd/optional>
+#include <optional>
 
-using nonstd::optional;
-using nonstd::nullopt;
+using std::optional;
+using std::nullopt;
 
-GameType::GameType(nonstd::optional<int> original):
+GameType::GameType(std::optional<int> original):
     original(original)
 {
     if(!original) {
