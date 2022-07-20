@@ -158,8 +158,9 @@ void ModUpdateDialog::checkCandidates()
             if (!reason.isEmpty())
                 text += tr("Reason: %1").arg(reason) + "<br>";
             if (!recover_url.isEmpty())
-                text += tr("Possible solution: Getting the latest version manually:<br>"
-                           "<a href='%1'>%1</a><br>").arg(recover_url.toString());
+                //: %1 is the link to download it manually
+                text += tr("Possible solution: Getting the latest version manually:<br>%1<br>")
+                    .arg(QString("<a href='%1'>%1</a>").arg(recover_url.toString()));
             text += "<br>";
         }
 
