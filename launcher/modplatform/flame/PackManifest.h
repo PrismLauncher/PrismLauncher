@@ -46,7 +46,7 @@ namespace Flame
 struct File
 {
     // NOTE: throws JSONValidationError
-    bool parseFromObject(const QJsonObject& object);
+    bool parseFromObject(const QJsonObject& object, bool throw_on_blocked = true);
 
     int projectId = 0;
     int fileId = 0;

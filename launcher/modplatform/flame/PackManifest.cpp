@@ -61,7 +61,7 @@ void Flame::loadManifest(Flame::Manifest& m, const QString& filepath)
     loadManifestV1(m, obj);
 }
 
-bool Flame::File::parseFromObject(const QJsonObject& obj)
+bool Flame::File::parseFromObject(const QJsonObject& obj,  bool throw_on_blocked)
 {
     fileName = Json::requireString(obj, "fileName");
     // This is a piece of a Flame project JSON pulled out into the file metadata (here) for convenience
@@ -91,7 +91,7 @@ bool Flame::File::parseFromObject(const QJsonObject& obj)
     // may throw, if the project is blocked
     QString rawUrl = Json::ensureString(obj, "downloadUrl");
     url = QUrl(rawUrl, QUrl::TolerantMode);
-    if (!url.isValid()) {
+    if (!url.isValid() && throw_on_blocked) {
         throw JSONValidationError(QString("Invalid URL: %1").arg(rawUrl));
     }
 
