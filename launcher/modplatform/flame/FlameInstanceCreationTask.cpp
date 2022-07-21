@@ -154,6 +154,7 @@ bool FlameCreationTask::createInstance()
 void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
 {
     auto results = m_mod_id_resolver->getResults();
+
     // first check for blocked mods
     QString text;
     QList<QUrl> urls;
@@ -176,109 +177,65 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         message_dialog->setModal(true);
 
         if (message_dialog->exec()) {
-            m_files_job = new NetJob(tr("Mod download"), APPLICATION->network());
-            for (const auto& result : m_mod_id_resolver->getResults().files) {
-                QString filename = result.fileName;
-                if (!result.required) {
-                    filename += ".disabled";
-                }
-
-                auto relpath = FS::PathCombine("minecraft", result.targetFolder, filename);
-                auto path = FS::PathCombine(m_stagingPath, relpath);
-
-                switch (result.type) {
-                    case Flame::File::Type::Folder: {
-                        logWarning(tr("This 'Folder' may need extracting: %1").arg(relpath));
-                        // fall-through intentional, we treat these as plain old mods and dump them wherever.
-                    }
-                    case Flame::File::Type::SingleFile:
-                    case Flame::File::Type::Mod: {
-                        if (!result.url.isEmpty()) {
-                            qDebug() << "Will download" << result.url << "to" << path;
-                            auto dl = Net::Download::makeFile(result.url, path);
-                            m_files_job->addNetAction(dl);
-                        }
-                        break;
-                    }
-                    case Flame::File::Type::Modpack:
-                        logWarning(tr("Nesting modpacks in modpacks is not implemented, nothing was downloaded: %1").arg(relpath));
-                        break;
-                    case Flame::File::Type::Cmod2:
-                    case Flame::File::Type::Ctoc:
-                    case Flame::File::Type::Unknown:
-                        logWarning(tr("Unrecognized/unhandled PackageType for: %1").arg(relpath));
-                        break;
-                }
-            }
-
-            m_mod_id_resolver.reset();
-            connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
-                m_files_job.reset();
-                emitSucceeded();
-            });
-            connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
-                m_files_job.reset();
-                setError(reason);
-            });
-            connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { setProgress(current, total); });
-            connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
-
-            setStatus(tr("Downloading mods..."));
-            m_files_job->start();
+            setupDownloadJob(loop);
         } else {
             m_mod_id_resolver.reset();
             setError("Canceled");
         }
     } else {
-        // TODO extract to function ?
-        m_files_job = new NetJob(tr("Mod download"), APPLICATION->network());
-        for (const auto& result : m_mod_id_resolver->getResults().files) {
-            QString filename = result.fileName;
-            if (!result.required) {
-                filename += ".disabled";
-            }
+        setupDownloadJob(loop);
+    }
+}
 
-            auto relpath = FS::PathCombine("minecraft", result.targetFolder, filename);
-            auto path = FS::PathCombine(m_stagingPath, relpath);
-
-            switch (result.type) {
-                case Flame::File::Type::Folder: {
-                    logWarning(tr("This 'Folder' may need extracting: %1").arg(relpath));
-                    // fall-through intentional, we treat these as plain old mods and dump them wherever.
-                }
-                case Flame::File::Type::SingleFile:
-                case Flame::File::Type::Mod: {
-                    if (!result.url.isEmpty()) {
-                        qDebug() << "Will download" << result.url << "to" << path;
-                        auto dl = Net::Download::makeFile(result.url, path);
-                        m_files_job->addNetAction(dl);
-                    }
-                    break;
-                }
-                case Flame::File::Type::Modpack:
-                    logWarning(tr("Nesting modpacks in modpacks is not implemented, nothing was downloaded: %1").arg(relpath));
-                    break;
-                case Flame::File::Type::Cmod2:
-                case Flame::File::Type::Ctoc:
-                case Flame::File::Type::Unknown:
-                    logWarning(tr("Unrecognized/unhandled PackageType for: %1").arg(relpath));
-                    break;
-            }
+void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
+{
+    m_files_job = new NetJob(tr("Mod download"), APPLICATION->network());
+    for (const auto& result : m_mod_id_resolver->getResults().files) {
+        QString filename = result.fileName;
+        if (!result.required) {
+            filename += ".disabled";
         }
 
-        m_mod_id_resolver.reset();
-        connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
-            m_files_job.reset();
-            emitSucceeded();
-        });
-        connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
-            m_files_job.reset();
-            setError(reason);
-        });
-        connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { setProgress(current, total); });
-        connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
+        auto relpath = FS::PathCombine("minecraft", result.targetFolder, filename);
+        auto path = FS::PathCombine(m_stagingPath, relpath);
 
-        setStatus(tr("Downloading mods..."));
-        m_files_job->start();
+        switch (result.type) {
+            case Flame::File::Type::Folder: {
+                logWarning(tr("This 'Folder' may need extracting: %1").arg(relpath));
+                // fall-through intentional, we treat these as plain old mods and dump them wherever.
+            }
+            case Flame::File::Type::SingleFile:
+            case Flame::File::Type::Mod: {
+                if (!result.url.isEmpty()) {
+                    qDebug() << "Will download" << result.url << "to" << path;
+                    auto dl = Net::Download::makeFile(result.url, path);
+                    m_files_job->addNetAction(dl);
+                }
+                break;
+            }
+            case Flame::File::Type::Modpack:
+                logWarning(tr("Nesting modpacks in modpacks is not implemented, nothing was downloaded: %1").arg(relpath));
+                break;
+            case Flame::File::Type::Cmod2:
+            case Flame::File::Type::Ctoc:
+            case Flame::File::Type::Unknown:
+                logWarning(tr("Unrecognized/unhandled PackageType for: %1").arg(relpath));
+                break;
+        }
     }
+
+    m_mod_id_resolver.reset();
+    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
+        m_files_job.reset();
+        emitSucceeded();
+    });
+    connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
+        m_files_job.reset();
+        setError(reason);
+    });
+    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { setProgress(current, total); });
+    connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
+
+    setStatus(tr("Downloading mods..."));
+    m_files_job->start();
 }

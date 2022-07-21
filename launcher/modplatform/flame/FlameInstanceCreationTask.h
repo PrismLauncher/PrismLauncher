@@ -23,6 +23,7 @@ class FlameCreationTask final : public InstanceCreationTask {
 
    private slots:
     void idResolverSucceeded(QEventLoop&);
+    void setupDownloadJob(QEventLoop&);
 
    private:
     QWidget* m_parent = nullptr;
