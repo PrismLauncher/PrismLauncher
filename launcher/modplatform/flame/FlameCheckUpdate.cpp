@@ -123,7 +123,7 @@ void FlameCheckUpdate::executeTask()
             continue;
         }
 
-        setStatus(tr("Getting API response from CurseForge for '%1'").arg(mod->name()));
+        setStatus(tr("Getting API response from CurseForge for '%1'...").arg(mod->name()));
         setProgress(i++, m_mods.size());
 
         auto latest_ver = api.getLatestVersion({ mod->metadata()->project_id.toString(), m_game_versions, m_loaders });
@@ -145,7 +145,7 @@ void FlameCheckUpdate::executeTask()
         if (latest_ver.downloadUrl.isEmpty() && latest_ver.fileId != mod->metadata()->file_id) {
             auto pack = getProjectInfo(latest_ver);
             auto recover_url = QString("%1/download/%2").arg(pack.websiteUrl, latest_ver.fileId.toString());
-            emit checkFailed(mod, tr("Mod has a new update available, but is opted-out on CurseForge"), recover_url);
+            emit checkFailed(mod, tr("Mod has a new update available, but is not downloadable using CurseForge."), recover_url);
 
             continue;
         }
