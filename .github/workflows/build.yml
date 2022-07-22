@@ -374,14 +374,14 @@ jobs:
         if: runner.os == 'Linux' && matrix.qt_ver !=5
         uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ runner.os }}-qt6-${{ env.VERSION }}-${{ inputs.build_type }}
+          name: PolyMC-${{ runner.os }}-Qt6-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC.tar.gz
 
       - name: Upload binary tarball (Linux, portable, Qt 6)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
         uses: actions/upload-artifact@v3
         with:
-          name: PolyMC-${{ runner.os }}-Portable-qt6-${{ env.VERSION }}-${{ inputs.build_type }}
+          name: PolyMC-${{ runner.os }}-Qt6-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC-portable.tar.gz
 
       - name: Upload AppImage (Linux)
