@@ -54,6 +54,8 @@ class NetAction : public Task {
     QUrl url() { return m_url; }
     auto index() -> int { return m_index_within_job; }
 
+    void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
+
    protected slots:
     virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) = 0;
     virtual void downloadError(QNetworkReply::NetworkError error) = 0;
