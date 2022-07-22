@@ -79,6 +79,8 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     homepage = "https://polymc.org/";
+    downloadPage = "https://polymc.org/download/";
+    changelog = "https://github.com/PolyMC/PolyMC/releases";
     description = "A free, open source launcher for Minecraft";
     longDescription = ''
       Allows you to have multiple, separate instances of Minecraft (each with
