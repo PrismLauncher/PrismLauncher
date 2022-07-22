@@ -71,7 +71,7 @@ void ConcurrentTask::startNext()
     if (m_aborted || m_doing.count() > m_total_max_size)
         return;
 
-    if (m_queue.isEmpty() && m_doing.isEmpty()) {
+    if (m_queue.isEmpty() && m_doing.isEmpty() && !wasSuccessful()) {
         emitSucceeded();
         return;
     }
