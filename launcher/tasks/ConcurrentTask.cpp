@@ -132,11 +132,6 @@ void ConcurrentTask::subTaskStatus(const QString& msg)
 
 void ConcurrentTask::subTaskProgress(qint64 current, qint64 total)
 {
-    if (total == 0) {
-        setProgress(0, 100);
-        return;
-    }
-
     m_stepProgress = current;
     m_stepTotalProgress = total;
 }
