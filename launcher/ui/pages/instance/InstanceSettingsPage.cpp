@@ -349,7 +349,7 @@ void InstanceSettingsPage::loadSettings()
     ui->useDiscreteGpuCheck->setChecked(m_settings->get("UseDiscreteGpu").toBool());
 
     #if !defined(Q_OS_LINUX)
-    ui->perfomanceGroupBox->setVisible(false);
+    ui->settingsTabs->setTabVisible(ui->settingsTabs->indexOf(ui->performancePage), false);
     #endif
 
     // Miscellanous
