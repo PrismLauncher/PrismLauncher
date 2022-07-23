@@ -56,9 +56,10 @@ void PreLaunchCommand::executeTask()
     const QString program = args.takeFirst();
     m_process.start(program, args);
 #else
-    QString prelaunch_cmd = m_parent->substituteVariables(m_command);
-    emit logLine(tr("Running Pre-Launch command: %1").arg(prelaunch_cmd), MessageLevel::Launcher);
-    m_process.start(prelaunch_cmd);
+    m_parent->substituteVariables(m_command);
+
+    emit logLine(tr("Running Pre-Launch command: %1").arg(m_command), MessageLevel::Launcher);
+    m_process.start(m_command);
 #endif
 }
 
