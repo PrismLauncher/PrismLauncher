@@ -6,6 +6,7 @@
 
 #include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
+#include "net/NetUtils.h"
 
 XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data, Katabasis::Token *token, QString relyingParty, QString authorizationKind):
     AuthStep(data),
@@ -62,10 +63,24 @@ void XboxAuthorizationStep::onRequestDone(
 #endif
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
-        if(!processSTSError(error, data, headers)) {
+        if (Net::isApplicationError(error)) {
+            if(!processSTSError(error, data, headers)) {
+                emit finished(
+                    AccountTaskState::STATE_FAILED_SOFT,
+                    tr("Failed to get authorization for %1 services. Error %2.").arg(m_authorizationKind, error)
+                );
+            }
+            else {
+                emit finished(
+                    AccountTaskState::STATE_FAILED_SOFT,
+                    tr("Unknown STS error for %1 services: %2").arg(m_authorizationKind, requestor->errorString_)
+                );
+            }
+        }
+        else {
             emit finished(
-                AccountTaskState::STATE_FAILED_SOFT,
-                tr("Failed to get authorization for %1 services. Error %2.").arg(m_authorizationKind, error)
+                AccountTaskState::STATE_OFFLINE,
+                tr("Failed to get authorization for %1 services: %2").arg(m_authorizationKind, requestor->errorString_)
             );
         }
         return;

@@ -5,6 +5,7 @@
 #include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
 #include "minecraft/auth/AccountTask.h"
+#include "net/NetUtils.h"
 
 LauncherLoginStep::LauncherLoginStep(AccountData* data) : AuthStep(data) {
 
@@ -58,10 +59,18 @@ void LauncherLoginStep::onRequestDone(
 #ifndef NDEBUG
         qDebug() << data;
 #endif
-        emit finished(
-            AccountTaskState::STATE_FAILED_SOFT,
-            tr("Failed to get Minecraft access token: %1").arg(requestor->errorString_)
-        );
+        if (Net::isApplicationError(error)) {
+            emit finished(
+                AccountTaskState::STATE_FAILED_SOFT,
+                tr("Failed to get Minecraft access token: %1").arg(requestor->errorString_)
+            );
+        }
+        else {
+            emit finished(
+                AccountTaskState::STATE_OFFLINE,
+                tr("Failed to get Minecraft access token: %1").arg(requestor->errorString_)
+            );
+        }
         return;
     }
 
