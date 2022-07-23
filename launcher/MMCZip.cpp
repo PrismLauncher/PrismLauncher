@@ -141,9 +141,10 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
     QSet<QString> addedFiles;
 
     // Modify the jar
-    for (auto i = mods.constEnd(); i != mods.constBegin(); --i)
+    // This needs to be done in reverse-order to ensure we respect the loading order of components
+    for (auto i = mods.crbegin(); i != mods.crend(); i++)
     {
-        const Mod* mod = *i;
+        const auto* mod = *i;
         // do not merge disabled mods.
         if (!mod->enabled())
             continue;
