@@ -55,10 +55,9 @@ Config::Config()
     // Version information
     VERSION_MAJOR = @Launcher_VERSION_MAJOR@;
     VERSION_MINOR = @Launcher_VERSION_MINOR@;
-    VERSION_HOTFIX = @Launcher_VERSION_HOTFIX@;
-    VERSION_BUILD = @Launcher_VERSION_BUILD@;
 
     BUILD_PLATFORM = "@Launcher_BUILD_PLATFORM@";
+    BUILD_DATE = "@Launcher_BUILD_TIMESTAMP@";
     UPDATER_BASE = "@Launcher_UPDATER_BASE@";
 
     MAC_SPARKLE_PUB_KEY = "@MACOSX_SPARKLE_UPDATE_PUBLIC_KEY@";
@@ -85,7 +84,7 @@ Config::Config()
     {
         VERSION_CHANNEL = GIT_REFSPEC;
         VERSION_CHANNEL.remove("refs/heads/");
-        if(!UPDATER_BASE.isEmpty() && !BUILD_PLATFORM.isEmpty() && VERSION_BUILD >= 0) {
+        if(!UPDATER_BASE.isEmpty() && !BUILD_PLATFORM.isEmpty()) {
             UPDATER_ENABLED = true;
         }
     }
@@ -98,7 +97,6 @@ Config::Config()
         VERSION_CHANNEL = "unknown";
     }
 
-    VERSION_STR = "@Launcher_VERSION_STRING@";
     NEWS_RSS_URL = "@Launcher_NEWS_RSS_URL@";
     NEWS_OPEN_URL = "@Launcher_NEWS_OPEN_URL@";
     HELP_URL = "@Launcher_HELP_URL@";
@@ -116,7 +114,7 @@ Config::Config()
 
 QString Config::versionString() const
 {
-    return QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_HOTFIX);
+    return QString("%1.%2").arg(VERSION_MAJOR).arg(VERSION_MINOR);
 }
 
 QString Config::printableVersionString() const
@@ -127,12 +125,6 @@ QString Config::printableVersionString() const
     if(VERSION_CHANNEL != "stable" && GIT_TAG != vstr)
     {
         vstr += "-" + VERSION_CHANNEL;
-    }
-
-    // if a build number is set, also add it to the end
-    if(VERSION_BUILD >= 0)
-    {
-        vstr += "+build." + QString::number(VERSION_BUILD);
     }
     return vstr;
 }

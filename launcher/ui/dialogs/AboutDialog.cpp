@@ -147,10 +147,15 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
     else
         ui->platformLabel->setVisible(false);
 
-    if (BuildConfig.VERSION_BUILD >= 0)
-        ui->buildNumLabel->setText(tr("Build Number") +": " + QString::number(BuildConfig.VERSION_BUILD));
+    if (!BuildConfig.GIT_COMMIT.isEmpty())
+        ui->commitLabel->setText(tr("Commit: %1").arg(BuildConfig.GIT_COMMIT));
     else
-        ui->buildNumLabel->setVisible(false);
+        ui->commitLabel->setVisible(false);
+
+    if (!BuildConfig.BUILD_DATE.isEmpty())
+        ui->buildDateLabel->setText(tr("Build date: %1").arg(BuildConfig.BUILD_DATE));
+    else
+        ui->buildDateLabel->setVisible(false);
 
     if (!BuildConfig.VERSION_CHANNEL.isEmpty())
         ui->channelLabel->setText(tr("Channel") +": " + BuildConfig.VERSION_CHANNEL);

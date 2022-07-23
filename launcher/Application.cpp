@@ -774,7 +774,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         auto platform = getIdealPlatform(BuildConfig.BUILD_PLATFORM);
         auto channelUrl = BuildConfig.UPDATER_BASE + platform + "/channels.json";
         qDebug() << "Initializing updater with platform: " << platform << " -- " << channelUrl;
-        m_updateChecker.reset(new UpdateChecker(m_network, channelUrl, BuildConfig.VERSION_CHANNEL, BuildConfig.VERSION_BUILD));
+        m_updateChecker.reset(new UpdateChecker(m_network, channelUrl, BuildConfig.VERSION_CHANNEL));
         qDebug() << "<> Updater started.";
     }
 

@@ -184,12 +184,28 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="buildNumLabel">
+        <widget class="QLabel" name="buildDateLabel">
          <property name="cursor">
           <cursorShape>IBeamCursor</cursorShape>
          </property>
          <property name="text">
-          <string>Build Number:</string>
+          <string>Build Date:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="textInteractionFlags">
+          <set>Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="commitLabel">
+         <property name="cursor">
+          <cursorShape>IBeamCursor</cursorShape>
+         </property>
+         <property name="text">
+          <string>Commit:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
