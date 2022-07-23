@@ -35,6 +35,8 @@ jobs:
       - name: Package artifacts properly
         run: |
           mv ${{ github.workspace }}/PolyMC-source PolyMC-${{ env.VERSION }}
+          mv PolyMC-Linux-Qt6-Portable*/PolyMC-portable.tar.gz PolyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
+          mv PolyMC-Linux-Qt6*/PolyMC.tar.gz PolyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz          
           mv PolyMC-Linux-Portable*/PolyMC-portable.tar.gz PolyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
           mv PolyMC-Linux*/PolyMC.tar.gz PolyMC-Linux-${{ env.VERSION }}.tar.gz
           mv PolyMC-*.AppImage/PolyMC-*.AppImage PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
@@ -70,6 +72,8 @@ jobs:
             PolyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
             PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
             PolyMC-Windows-Legacy-${{ env.VERSION }}.zip
+            PolyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz
+            PolyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
             PolyMC-Windows-Legacy-Portable-${{ env.VERSION }}.zip
             PolyMC-Windows-Legacy-Setup-${{ env.VERSION }}.exe
             PolyMC-Windows-${{ env.VERSION }}.zip
