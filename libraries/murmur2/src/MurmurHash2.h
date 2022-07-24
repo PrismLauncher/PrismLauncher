@@ -15,10 +15,13 @@
 
 //-----------------------------------------------------------------------------
 
+#define KiB 1024
+#define MiB 1024*KiB
+
 uint32_t MurmurHash2(
     std::ifstream&& file_stream,
-    std::size_t buffer_size = 4096,
-    std::function<bool(char)> filter_out = [](char) { return true; });
+    std::size_t buffer_size = 4*MiB,
+    std::function<bool(char)> filter_out = [](char) { return false; });
 
 struct IncrementalHashInfo {
     uint32_t h;
