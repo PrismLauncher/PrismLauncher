@@ -3,89 +3,72 @@
 #include <MurmurHash2.h>
 #include <QDebug>
 
-#include "FileSystem.h"
 #include "Json.h"
+
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/tasks/LocalModUpdateTask.h"
+
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
+
 #include "net/NetJob.h"
-#include "tasks/MultipleOptionsTask.h"
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
 static ModrinthAPI modrinth_api;
 static FlameAPI flame_api;
 
-EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::Provider prov) : Task(nullptr), m_index_dir(dir), m_provider(prov)
+EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::Provider prov)
+    : Task(nullptr), m_index_dir(dir), m_provider(prov), m_hashing_task(nullptr), m_current_task(nullptr)
 {
-    auto hash = getHash(mod);
-    if (hash.isEmpty())
-        emitFail(mod);
-    else
-        m_mods.insert(hash, mod);
+    auto hash_task = createNewHash(mod);
+    connect(hash_task.get(), &Task::succeeded, [this, hash_task, mod] { m_mods.insert(hash_task->getResult(), mod); });
+    connect(hash_task.get(), &Task::failed, [this, hash_task, mod] { emitFail(mod, RemoveFromList::No); });
+    hash_task->start();
 }
 
 EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform::Provider prov)
-    : Task(nullptr), m_index_dir(dir), m_provider(prov)
+    : Task(nullptr), m_index_dir(dir), m_provider(prov), m_current_task(nullptr)
 {
+    m_hashing_task = new ConcurrentTask(this, "MakeHashesTask", 10);
     for (auto* mod : mods) {
-        if (!mod->valid()) {
-            emitFail(mod);
+        auto hash_task = createNewHash(mod);
+        if (!hash_task)
             continue;
-        }
-
-        auto hash = getHash(mod);
-        if (hash.isEmpty()) {
-            emitFail(mod);
-            continue;
-        }
-
-        m_mods.insert(hash, mod);
+        connect(hash_task.get(), &Task::succeeded, [this, hash_task, mod] { m_mods.insert(hash_task->getResult(), mod); });
+        connect(hash_task.get(), &Task::failed, [this, hash_task, mod] { emitFail(mod, RemoveFromList::No); });
+        m_hashing_task->addTask(hash_task);
     }
 }
 
-QString EnsureMetadataTask::getHash(Mod* mod)
+Hashing::Hasher::Ptr EnsureMetadataTask::createNewHash(Mod* mod)
 {
-    /* Here we create a mapping hash -> mod, because we need that relationship to parse the API routes */
-    if (mod->type() == Mod::MOD_FOLDER)
-        return {};
+    if (!mod->valid() || mod->type() == Mod::MOD_FOLDER)
+        return nullptr;
 
-    QString result;
-    switch (m_provider) {
-        case ModPlatform::Provider::MODRINTH: {
-            QFile file(mod->fileinfo().absoluteFilePath());
+    return Hashing::createHasher(mod->fileinfo().absoluteFilePath(), m_provider);
+}
 
-            try {
-                file.open(QFile::ReadOnly);
-            } catch (FS::FileSystemException& e) {
-                qCritical() << QString("Failed to open JAR file of %1").arg(mod->name());
-                qCritical() << QString("Reason: ") << e.cause();
-
-                return {};
-            }
-
-            auto hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
-            result = ProviderCaps.hash(ModPlatform::Provider::MODRINTH, &file, hash_type);
-
-            file.close();
-
+QString EnsureMetadataTask::getExistingHash(Mod* mod)
+{
+    // Check for already computed hashes
+    // (linear on the number of mods vs. linear on the size of the mod's JAR)
+    auto it = m_mods.keyValueBegin();
+    while (it != m_mods.keyValueEnd()) {
+        if ((*it).second == mod)
             break;
-        }
-        case ModPlatform::Provider::FLAME: {
-            auto should_filter_out = [](char c) {
-                // CF-specific
-                return (c == 9 || c == 10 || c == 13 || c == 32);
-            };
-
-            std::ifstream file_stream(mod->fileinfo().absoluteFilePath().toStdString(), std::ifstream::binary);
-            result = QString::number(MurmurHash2(std::move(file_stream), 4096, should_filter_out));
-        }
+        it++;
     }
 
-    return result;
+    // We already have the hash computed
+    if (it != m_mods.keyValueEnd()) {
+        return (*it).first;
+    }
+
+    // No existing hash
+    return {};
 }
 
 bool EnsureMetadataTask::abort()
@@ -185,20 +168,22 @@ void EnsureMetadataTask::executeTask()
     version_task->start();
 }
 
-void EnsureMetadataTask::emitReady(Mod* m)
+void EnsureMetadataTask::emitReady(Mod* m, RemoveFromList remove)
 {
     qDebug() << QString("Generated metadata for %1").arg(m->name());
     emit metadataReady(m);
 
-    m_mods.remove(getHash(m));
+    if (remove == RemoveFromList::Yes)
+        m_mods.remove(getExistingHash(m));
 }
 
-void EnsureMetadataTask::emitFail(Mod* m)
+void EnsureMetadataTask::emitFail(Mod* m, RemoveFromList remove)
 {
     qDebug() << QString("Failed to generate metadata for %1").arg(m->name());
     emit metadataFailed(m);
 
-    m_mods.remove(getHash(m));
+    if (remove == RemoveFromList::Yes)
+        m_mods.remove(getExistingHash(m));
 }
 
 // Modrinth
