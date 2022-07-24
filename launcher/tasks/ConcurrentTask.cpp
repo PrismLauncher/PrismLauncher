@@ -45,25 +45,31 @@ void ConcurrentTask::executeTask()
 
 bool ConcurrentTask::abort()
 {
+    m_queue.clear();
+    m_aborted = true;
+
     if (m_doing.isEmpty()) {
         // Don't call emitAborted() here, we want to bypass the 'is the task running' check
         emit aborted();
         emit finished();
 
-        m_aborted = true;
         return true;
     }
 
-    m_queue.clear();
+    bool suceedeed = true;
 
-    m_aborted = true;
-    for (auto task : m_doing)
-        m_aborted &= task->abort();
+    QMutableHashIterator<Task*, Task::Ptr> doing_iter(m_doing);
+    while (doing_iter.hasNext()) {
+        auto task = doing_iter.next();
+        suceedeed &= (task.value())->abort();
+    }
 
-    if (m_aborted)
+    if (suceedeed)
         emitAborted();
+    else
+        emitFailed(tr("Failed to abort all running tasks."));
 
-    return m_aborted;
+    return suceedeed;
 }
 
 void ConcurrentTask::startNext()
