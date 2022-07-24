@@ -75,14 +75,13 @@ QString EnsureMetadataTask::getHash(Mod* mod)
             break;
         }
         case ModPlatform::Provider::FLAME: {
-            QByteArray jar_data_treated;
-            for (char c : jar_data) {
+            auto should_filter_out = [](char c) {
                 // CF-specific
-                if (!(c == 9 || c == 10 || c == 13 || c == 32))
-                    jar_data_treated.push_back(c);
-            }
+                return (c == 9 || c == 10 || c == 13 || c == 32);
+            };
 
-            return QString::number(MurmurHash2(jar_data_treated, jar_data_treated.length()));
+            std::ifstream file_stream(mod->fileinfo().absoluteFilePath().toStdString(), std::ifstream::binary);
+            result = QString::number(MurmurHash2(std::move(file_stream), 4096, should_filter_out));
         }
     }
 
