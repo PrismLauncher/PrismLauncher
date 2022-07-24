@@ -1,30 +1,30 @@
 //-----------------------------------------------------------------------------
-// MurmurHash2 was written by Austin Appleby, and is placed in the public
-// domain. The author hereby disclaims copyright to this source code.
+// The original MurmurHash2 was written by Austin Appleby, and is placed in the
+// public domain. The author hereby disclaims copyright to this source code.
+//
+// This was modified as to possibilitate it's usage incrementally.
+// Those modifications are also placed in the public domain, and the author of
+// such modifications hereby disclaims copyright to this source code.
 
 #pragma once
 
-//-----------------------------------------------------------------------------
-// Platform-specific functions and macros
+#include <cstdint>
+#include <fstream>
 
-// Microsoft Visual Studio
-
-#if defined(_MSC_VER) && (_MSC_VER < 1600)
-
-typedef unsigned char uint8_t;
-typedef unsigned int uint32_t;
-typedef unsigned __int64 uint64_t;
-
-// Other compilers
-
-#else	// defined(_MSC_VER)
-
-#include <stdint.h>
-
-#endif // !defined(_MSC_VER)
+#include <functional>
 
 //-----------------------------------------------------------------------------
 
-uint64_t MurmurHash2        ( const void* key, int len, uint32_t seed = 1 );
+uint32_t MurmurHash2(
+    std::ifstream&& file_stream,
+    std::size_t buffer_size = 4096,
+    std::function<bool(char)> filter_out = [](char) { return true; });
+
+struct IncrementalHashInfo {
+    uint32_t h;
+    uint32_t len;
+};
+
+void FourBytes_MurmurHash2(const unsigned char* data, IncrementalHashInfo& prev);
 
 //-----------------------------------------------------------------------------
