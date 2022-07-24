@@ -46,17 +46,19 @@ void ModrinthCheckUpdate::executeTask()
         if (mod->metadata()->hash_format != best_hash_type) {
             QByteArray jar_data;
 
+            QFile file(mod->fileinfo().absoluteFilePath());
             try {
-                jar_data = FS::read(mod->fileinfo().absoluteFilePath());
+                file.open(QFile::ReadOnly);
             } catch (FS::FileSystemException& e) {
-                qCritical() << QString("Failed to open / read JAR file of %1").arg(mod->name());
+                qCritical() << QString("Failed to open JAR file of %1").arg(mod->name());
                 qCritical() << QString("Reason: ") << e.cause();
 
                 failed(e.what());
                 return;
             }
 
-            hash = QString(ProviderCaps.hash(ModPlatform::Provider::MODRINTH, jar_data, best_hash_type).toHex());
+            hash = ProviderCaps.hash(ModPlatform::Provider::MODRINTH, &file, best_hash_type);
+            file.close();
         }
 
         hashes.append(hash);

@@ -50,21 +50,29 @@ EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform:
 QString EnsureMetadataTask::getHash(Mod* mod)
 {
     /* Here we create a mapping hash -> mod, because we need that relationship to parse the API routes */
-    QByteArray jar_data;
-    try {
-        jar_data = FS::read(mod->fileinfo().absoluteFilePath());
-    } catch (FS::FileSystemException& e) {
-        qCritical() << QString("Failed to open / read JAR file of %1").arg(mod->name());
-        qCritical() << QString("Reason: ") << e.cause();
-
+    if (mod->type() == Mod::MOD_FOLDER)
         return {};
-    }
 
+    QString result;
     switch (m_provider) {
         case ModPlatform::Provider::MODRINTH: {
-            auto hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
+            QFile file(mod->fileinfo().absoluteFilePath());
 
-            return QString(ProviderCaps.hash(ModPlatform::Provider::MODRINTH, jar_data, hash_type).toHex());
+            try {
+                file.open(QFile::ReadOnly);
+            } catch (FS::FileSystemException& e) {
+                qCritical() << QString("Failed to open JAR file of %1").arg(mod->name());
+                qCritical() << QString("Reason: ") << e.cause();
+
+                return {};
+            }
+
+            auto hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
+            result = ProviderCaps.hash(ModPlatform::Provider::MODRINTH, &file, hash_type);
+
+            file.close();
+
+            break;
         }
         case ModPlatform::Provider::FLAME: {
             QByteArray jar_data_treated;
@@ -78,7 +86,7 @@ QString EnsureMetadataTask::getHash(Mod* mod)
         }
     }
 
-    return {};
+    return result;
 }
 
 bool EnsureMetadataTask::abort()
