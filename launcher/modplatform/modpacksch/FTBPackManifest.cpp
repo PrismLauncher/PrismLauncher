@@ -154,8 +154,8 @@ static void loadVersionFile(ModpacksCH::VersionFile & a, QJsonObject & obj)
     a.optional = Json::requireBoolean(obj, "optional");
     a.updated = Json::requireInteger(obj, "updated");
     auto curseforgeObj = Json::ensureObject(obj, "curseforge");  // optional
-    a.curseforge.project = Json::ensureInteger(curseforgeObj, "project");
-    a.curseforge.file = Json::ensureInteger(curseforgeObj, "file");
+    a.curseforge.project_id = Json::ensureInteger(curseforgeObj, "project");
+    a.curseforge.file_id = Json::ensureInteger(curseforgeObj, "file");
 }
 
 void ModpacksCH::loadVersion(ModpacksCH::Version & m, QJsonObject & obj)

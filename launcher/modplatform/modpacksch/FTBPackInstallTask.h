@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -38,16 +39,16 @@
 
 #include "FTBPackManifest.h"
 
+#include "InstanceTask.h"
 #include "QObjectPtr.h"
 #include "modplatform/flame/FileResolvingTask.h"
-#include "InstanceTask.h"
 #include "net/NetJob.h"
 
 #include <QWidget>
 
 namespace ModpacksCH {
 
-class PackInstallTask : public InstanceTask
+class PackInstallTask final : public InstanceTask
 {
     Q_OBJECT
 
@@ -62,8 +63,13 @@ protected:
     void executeTask() override;
 
 private slots:
-    void onDownloadSucceeded();
-    void onDownloadFailed(QString reason);
+    void onManifestDownloadSucceeded();
+    void onResolveModsSucceeded();
+    void onModDownloadSucceeded();
+
+    void onManifestDownloadFailed(QString reason);
+    void onResolveModsFailed(QString reason);
+    void onModDownloadFailed(QString reason);
 
 private:
     void resolveMods();
@@ -73,17 +79,18 @@ private:
 private:
     bool m_abortable = true;
 
-    NetJob::Ptr jobPtr = nullptr;
-    shared_qobject_ptr<Flame::FileResolvingTask> modIdResolver = nullptr;
-    QMap<int, int> indexFileIdMap;
+    NetJob::Ptr m_net_job = nullptr;
+    shared_qobject_ptr<Flame::FileResolvingTask> m_mod_id_resolver_task = nullptr;
 
-    QByteArray response;
+    QList<int> m_file_id_map;
+
+    QByteArray m_response;
 
     Modpack m_pack;
     QString m_version_name;
     Version m_version;
 
-    QMap<QString, QString> filesToCopy;
+    QMap<QString, QString> m_files_to_copy;
 
     //FIXME: nuke
     QWidget* m_parent;

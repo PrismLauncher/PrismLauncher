@@ -118,8 +118,8 @@ struct VersionTarget
 
 struct VersionFileCurseForge
 {
-    int project;
-    int file;
+    int project_id;
+    int file_id;
 };
 
 struct VersionFile
