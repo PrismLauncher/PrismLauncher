@@ -53,13 +53,13 @@ class PackInstallTask : public InstanceTask
 
 public:
     explicit PackInstallTask(Modpack pack, QString version, QWidget* parent = nullptr);
-    virtual ~PackInstallTask(){}
+    ~PackInstallTask() override = default;
 
-    bool canAbort() const override { return true; }
+    bool canAbort() const override { return m_abortable; }
     bool abort() override;
 
 protected:
-    virtual void executeTask() override;
+    void executeTask() override;
 
 private slots:
     void onDownloadSucceeded();
@@ -71,10 +71,10 @@ private:
     void install();
 
 private:
-    bool abortable = false;
+    bool m_abortable = true;
 
-    NetJob::Ptr jobPtr;
-    shared_qobject_ptr<Flame::FileResolvingTask> modIdResolver;
+    NetJob::Ptr jobPtr = nullptr;
+    shared_qobject_ptr<Flame::FileResolvingTask> modIdResolver = nullptr;
     QMap<int, int> indexFileIdMap;
 
     QByteArray response;

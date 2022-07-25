@@ -43,7 +43,6 @@
 #include "minecraft/PackProfile.h"
 #include "modplatform/flame/PackManifest.h"
 #include "net/ChecksumValidator.h"
-#include "net/Upload.h"
 #include "settings/INISettingsObject.h"
 
 #include "BuildConfig.h"
@@ -53,26 +52,30 @@
 namespace ModpacksCH {
 
 PackInstallTask::PackInstallTask(Modpack pack, QString version, QWidget* parent)
+    : m_pack(std::move(pack)), m_version_name(std::move(version)), m_parent(parent)
 {
-    m_pack = pack;
-    m_version_name = version;
-    m_parent = parent;
 }
 
 bool PackInstallTask::abort()
 {
-    if(abortable)
-    {
-        if (modIdResolver)
-            return modIdResolver->abort();
-        else if (jobPtr)
-            return jobPtr->abort();
-    }
-    return false;
+    bool aborted = true;
+
+    if (jobPtr)
+        aborted &= jobPtr->abort();
+    if (modIdResolver)
+        aborted &= modIdResolver->abort();
+
+    // FIXME: This should be 'emitAborted()', but InstanceStaging doesn't connect to the abort signal yet...
+    if (aborted)
+        emitFailed(tr("Aborted"));
+
+    return aborted;
 }
 
 void PackInstallTask::executeTask()
 {
+    setStatus(tr("Getting the manifest..."));
+
     // Find pack version
     bool found = false;
     VersionInfo version;
@@ -91,13 +94,17 @@ void PackInstallTask::executeTask()
     }
 
     auto *netJob = new NetJob("ModpacksCH::VersionFetch", APPLICATION->network());
+
     auto searchUrl = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/%1/%2").arg(m_pack.id).arg(version.id);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
+
     jobPtr = netJob;
-    jobPtr->start();
 
     QObject::connect(netJob, &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     QObject::connect(netJob, &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
+    QObject::connect(netJob, &NetJob::progress, this, &PackInstallTask::setProgress);
+
+    jobPtr->start();
 }
 
 void PackInstallTask::onDownloadSucceeded()
@@ -115,15 +122,13 @@ void PackInstallTask::onDownloadSucceeded()
     auto obj = doc.object();
 
     ModpacksCH::Version version;
-    try
-    {
+    try {
         ModpacksCH::loadVersion(version, obj);
-    }
-    catch (const JSONValidationError &e)
-    {
+    } catch (const JSONValidationError &e) {
         emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
         return;
     }
+
     m_version = version;
 
     resolveMods();
@@ -132,29 +137,35 @@ void PackInstallTask::onDownloadSucceeded()
 void PackInstallTask::onDownloadFailed(QString reason)
 {
     jobPtr.reset();
+
     emitFailed(reason);
 }
 
 void PackInstallTask::resolveMods()
 {
     setStatus(tr("Resolving mods..."));
+    setProgress(0, 100);
+
+    indexFileIdMap.clear();
 
     Flame::Manifest manifest;
-    indexFileIdMap.clear();
     int index = 0;
-    for(auto file : m_version.files) {
+
+    for(auto const& file : m_version.files) {
         if(!file.serverOnly && file.url.isEmpty()) {
-            if(file.curseforge.file <= 0)
-                emitFailed("Invalid manifest");  // TODO better error
+            if(file.curseforge.file <= 0) {
+                emitFailed(QString("Invalid manifest: There's no information available to download the file '%1'!").arg(file.name));
+                return;
+            }
 
-            Flame::File f;
-            f.projectId = file.curseforge.project;
-            f.fileId = file.curseforge.file;
-            f.hash = file.sha1;
+            Flame::File flame_file;
+            flame_file.projectId = file.curseforge.project;
+            flame_file.fileId = file.curseforge.file;
+            flame_file.hash = file.sha1;
 
 
-            manifest.files.insert(f.fileId, f);
-            indexFileIdMap.insert(index, f.fileId);
+            manifest.files.insert(flame_file.fileId, flame_file);
+            indexFileIdMap.insert(index, flame_file.fileId);
         }
         index++;
     }
@@ -163,55 +174,56 @@ void PackInstallTask::resolveMods()
 
     connect(modIdResolver.get(), &Flame::FileResolvingTask::succeeded, this, [&]()
     {
-        abortable = false;
+        m_abortable = false;
 
-        //first check for blocked mods
         QString text;
         auto anyBlocked = false;
 
         Flame::Manifest results = modIdResolver->getResults();
-        for(int index : indexFileIdMap.keys())
-        {
-            int fileId = indexFileIdMap[index];
-            Flame::File foo = results.files[fileId];
-            VersionFile &bar = m_version.files[index];
-            if (!foo.resolved || foo.url.isEmpty())
-            {
-                QString type = bar.type;
+        for (auto index : indexFileIdMap.keys()) {
+            int fileId = indexFileIdMap.constFind(index).value();
+
+            Flame::File results_file = results.files[fileId];
+            VersionFile& local_file = m_version.files[index];
+
+            // First check for blocked mods
+            if (!results_file.resolved || results_file.url.isEmpty()) {
+                QString type(local_file.type);
+
                 type[0] = type[0].toUpper();
-                text += QString("%1: %2 - <a href='%3'>%3</a><br/>").arg(type, bar.name, foo.websiteUrl);
+                text += QString("%1: %2 - <a href='%3'>%3</a><br/>").arg(type, local_file.name, results_file.websiteUrl);
                 anyBlocked = true;
             } else {
-                bar.url = foo.url.toString();
+                local_file.url = results_file.url.toString();
             }
         }
-        if(anyBlocked) {
-            qWarning() << "Blocked files found, displaying file list";
+
+        if (anyBlocked) {
+            qDebug() << "Blocked files found, displaying file list";
 
             auto message_dialog = new ScrollMessageBox(m_parent,
                                                        tr("Blocked files found"),
                                                        tr("The following files are not available for download in third party launchers.<br/>"
                                                           "You will need to manually download them and add them to the instance."),
                                                        text);
-            message_dialog->setModal(true);
-            message_dialog->show();
-            connect(message_dialog, &QDialog::rejected, [&]() {
-                modIdResolver.reset();
-                emitFailed("Canceled");
-            });
-            connect(message_dialog, &QDialog::accepted, [&]() {
+            if (message_dialog->exec() == QDialog::Accepted) {
                 modIdResolver.reset();
                 downloadPack();
-            });
+            } else {
+                modIdResolver.reset();
+                abort();
+                return;
+            }
         } else {
             modIdResolver.reset();
             downloadPack();
         }
     });
+
     connect(modIdResolver.get(), &Flame::FileResolvingTask::failed, this, &PackInstallTask::onDownloadFailed);
+    connect(modIdResolver.get(), &Flame::FileResolvingTask::progress, this, &PackInstallTask::setProgress);
 
     modIdResolver->start();
-    abortable = true;
 }
 
 void PackInstallTask::downloadPack()
@@ -219,11 +231,12 @@ void PackInstallTask::downloadPack()
     setStatus(tr("Downloading mods..."));
 
     jobPtr = new NetJob(tr("Mod download"), APPLICATION->network());
-    for(auto file : m_version.files) {
-        if(file.serverOnly || file.url.isEmpty()) continue;
+    for (auto const& file : m_version.files) {
+        if (file.serverOnly || file.url.isEmpty())
+            continue;
 
-        QFileInfo fileName(file.name);
-        auto cacheName = fileName.completeBaseName() + "-" + file.sha1 + "." + fileName.suffix();
+        QFileInfo file_info(file.name);
+        auto cacheName = file_info.completeBaseName() + "-" + file.sha1 + "." + file_info.suffix();
 
         auto entry = APPLICATION->metacache()->resolveEntry("ModpacksCHPacks", cacheName);
         entry->setStale(true);
@@ -235,6 +248,7 @@ void PackInstallTask::downloadPack()
             qWarning() << "Ignoring" << file.url << "as a file of that path is already downloading.";
             continue;
         }
+
         qDebug() << "Will download" << file.url << "to" << path;
         filesToCopy[path] = entry->getFullPath();
 
@@ -243,37 +257,36 @@ void PackInstallTask::downloadPack()
             auto rawSha1 = QByteArray::fromHex(file.sha1.toLatin1());
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
         }
+
         jobPtr->addNetAction(dl);
     }
 
     connect(jobPtr.get(), &NetJob::succeeded, this, [&]()
     {
-        abortable = false;
         jobPtr.reset();
         install();
     });
     connect(jobPtr.get(), &NetJob::failed, [&](QString reason)
     {
-        abortable = false;
         jobPtr.reset();
         emitFailed(reason);
     });
-    connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total)
-    {
-        abortable = true;
-        setProgress(current, total);
-    });
+    connect(jobPtr.get(), &NetJob::progress, this, &PackInstallTask::setProgress);
 
     jobPtr->start();
+
+    m_abortable = true;
 }
 
 void PackInstallTask::install()
 {
+    m_abortable = false;
+
     setStatus(tr("Copying modpack files"));
 
-    for (auto iter = filesToCopy.begin(); iter != filesToCopy.end(); iter++) {
-        auto &to = iter.key();
-        auto &from = iter.value();
+    for (auto iter = filesToCopy.cbegin(); iter != filesToCopy.cend(); iter++) {
+        auto& to = iter.key();
+        auto& from = iter.value();
         FS::copy fileCopyOperation(from, to);
         if(!fileCopyOperation()) {
             qWarning() << "Failed to copy" << from << "to" << to;
