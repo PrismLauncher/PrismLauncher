@@ -280,10 +280,13 @@ void PackInstallTask::downloadPack()
 
 void PackInstallTask::install()
 {
+    setStatus(tr("Copying modpack files..."));
+    setProgress(0, filesToCopy.size());
+    QCoreApplication::processEvents();
+
     m_abortable = false;
 
-    setStatus(tr("Copying modpack files"));
-
+    int i = 0;
     for (auto iter = filesToCopy.cbegin(); iter != filesToCopy.cend(); iter++) {
         auto& to = iter.key();
         auto& from = iter.value();
@@ -293,9 +296,13 @@ void PackInstallTask::install()
             emitFailed(tr("Failed to copy files"));
             return;
         }
+
+        setProgress(i++, filesToCopy.size());
+        QCoreApplication::processEvents();
     }
 
-    setStatus(tr("Installing modpack"));
+    setStatus(tr("Installing modpack..."));
+    QCoreApplication::processEvents();
 
     auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(instanceConfigPath);
