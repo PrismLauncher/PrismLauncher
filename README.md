@@ -64,7 +64,7 @@ The translation effort for PolyMC is hosted on [Weblate](https://hosted.weblate.
 
 ## Download information
 
-To modify download information or change packaging information send a pull request or issue to the website [Here](https://github.com/PolyMC/polymc.github.io/blob/master/src/download.md)
+To modify download information or change packaging information send a pull request or issue to the website [here](https://github.com/PolyMC/polymc.github.io/tree/master/src/download).
 
 ## Forking/Redistributing/Custom builds policy
 
