@@ -60,6 +60,10 @@
 #include "ui/themes/BrightTheme.h"
 #include "ui/themes/CustomTheme.h"
 
+#ifdef Q_OS_WIN
+#include "ui/WinDarkmode.h"
+#endif
+
 #include "ui/setupwizard/SetupWizard.h"
 #include "ui/setupwizard/LanguageWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
@@ -1185,6 +1189,15 @@ void Application::setApplicationTheme(const QString& name, bool initial)
     {
         auto & theme = (*themeIter).second;
         theme->apply(initial);
+#ifdef Q_OS_WIN
+        if (m_mainWindow) {
+            if (QString::compare(theme->id(), "dark") == 0) {
+                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
+            } else {
+                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+            }
+        }
+#endif
     }
     else
     {
@@ -1412,6 +1425,13 @@ MainWindow* Application::showMainWindow(bool minimized)
         m_mainWindow = new MainWindow();
         m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
         m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
+#ifdef Q_OS_WIN
+        if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
+            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
+        } else {
+            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+        }
+#endif
         if(minimized)
         {
             m_mainWindow->showMinimized();
