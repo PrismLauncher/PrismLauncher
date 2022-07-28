@@ -43,8 +43,7 @@ void ProgressDialog::setSkipButton(bool present, QString label)
 void ProgressDialog::on_skipButton_clicked(bool checked)
 {
     Q_UNUSED(checked);
-    if (task->abort())
-        QDialog::reject();
+    task->abort();
 }
 
 ProgressDialog::~ProgressDialog()
@@ -81,7 +80,7 @@ int ProgressDialog::execWithTask(Task* task)
     connect(task, &Task::stepStatus, this, &ProgressDialog::changeStatus);
     connect(task, &Task::progress, this, &ProgressDialog::changeProgress);
 
-    connect(task, &Task::aborted, [this] { onTaskFailed(tr("Aborted by user")); });
+    connect(task, &Task::aborted, [this] { QDialog::reject(); });
 
     m_is_multi_step = task->isMultiStep();
     if (!m_is_multi_step) {

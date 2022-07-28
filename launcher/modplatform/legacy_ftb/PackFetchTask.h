@@ -33,10 +33,12 @@ private:
 protected slots:
     void fileDownloadFinished();
     void fileDownloadFailed(QString reason);
+    void fileDownloadAborted();
 
 signals:
     void finished(ModpackList publicPacks, ModpackList thirdPartyPacks);
     void failed(QString reason);
+    void aborted();
 
     void privateFileDownloadFinished(Modpack modpack);
     void privateFileDownloadFailed(QString reason, QString packCode);

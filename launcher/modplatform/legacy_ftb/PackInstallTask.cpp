@@ -86,6 +86,7 @@ void PackInstallTask::downloadPack()
     connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
     connect(netJobContainer.get(), &NetJob::progress, this, &PackInstallTask::onDownloadProgress);
+    connect(netJobContainer.get(), &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
     netJobContainer->start();
 
     progress(1, 4);
@@ -108,6 +109,11 @@ void PackInstallTask::onDownloadProgress(qint64 current, qint64 total)
     abortable = true;
     progress(current, total * 4);
     setStatus(tr("Downloading zip for %1 (%2%)").arg(m_pack.name).arg(current / 10));
+}
+
+void PackInstallTask::onDownloadAborted()
+{
+    emitAborted();
 }
 
 void PackInstallTask::unzip()

@@ -95,6 +95,7 @@ private:
 private slots:
     void ftbPackDataDownloadSuccessfully(ModpackList publicPacks, ModpackList thirdPartyPacks);
     void ftbPackDataDownloadFailed(QString reason);
+    void ftbPackDataDownloadAborted();
 
     void ftbPrivatePackDataDownloadSuccessfully(Modpack pack);
     void ftbPrivatePackDataDownloadFailed(QString reason, QString packCode);

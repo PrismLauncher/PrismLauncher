@@ -784,6 +784,7 @@ class InstanceStaging : public Task {
         m_child.reset(child);
         connect(child, &Task::succeeded, this, &InstanceStaging::childSucceded);
         connect(child, &Task::failed, this, &InstanceStaging::childFailed);
+        connect(child, &Task::aborted, this, &InstanceStaging::childAborted);
         connect(child, &Task::status, this, &InstanceStaging::setStatus);
         connect(child, &Task::progress, this, &InstanceStaging::setProgress);
         connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);
@@ -794,17 +795,14 @@ class InstanceStaging : public Task {
     // FIXME/TODO: add ability to abort during instance commit retries
     bool abort() override
     {
-        if (m_child && m_child->canAbort()) {
+        if (m_child && m_child->canAbort())
             return m_child->abort();
-        }
+
         return false;
     }
     bool canAbort() const override
     {
-        if (m_child && m_child->canAbort()) {
-            return true;
-        }
-        return false;
+        return (m_child && m_child->canAbort());
     }
 
    protected:
@@ -834,7 +832,12 @@ class InstanceStaging : public Task {
         emitFailed(reason);
     }
 
-   private:
+    void childAborted()
+    {
+        emitAborted();
+    }
+
+private:
     InstanceList * m_parent;
     /*
      * WHY: the whole reason why this uses an exponential backoff retry scheme is antivirus on Windows.

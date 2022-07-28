@@ -65,9 +65,8 @@ bool PackInstallTask::abort()
     if (m_mod_id_resolver_task)
         aborted &= m_mod_id_resolver_task->abort();
 
-    // FIXME: This should be 'emitAborted()', but InstanceStaging doesn't connect to the abort signal yet...
     if (aborted)
-        emitFailed(tr("Aborted"));
+        emitAborted();
 
     return aborted;
 }

@@ -61,6 +61,7 @@ namespace Technic
         void downloadSucceeded();
         void downloadFailed(QString reason);
         void downloadProgressChanged(qint64 current, qint64 total);
+        void downloadAborted();
         void extractFinished();
         void extractAborted();
 

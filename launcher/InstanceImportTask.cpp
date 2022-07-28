@@ -91,6 +91,7 @@ void InstanceImportTask::executeTask()
         connect(m_filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
         connect(m_filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);
         connect(m_filesNetJob.get(), &NetJob::failed, this, &InstanceImportTask::downloadFailed);
+        connect(m_filesNetJob.get(), &NetJob::aborted, this, &InstanceImportTask::downloadAborted);
 
         m_filesNetJob->start();
     }
@@ -111,6 +112,12 @@ void InstanceImportTask::downloadFailed(QString reason)
 void InstanceImportTask::downloadProgressChanged(qint64 current, qint64 total)
 {
     setProgress(current, total);
+}
+
+void InstanceImportTask::downloadAborted()
+{
+    emitAborted();
+    m_filesNetJob.reset();
 }
 
 void InstanceImportTask::processZipPack()
@@ -246,9 +253,7 @@ void InstanceImportTask::extractFinished()
 
 void InstanceImportTask::extractAborted()
 {
-    emitFailed(tr("Instance import has been aborted."));
-    emit aborted();
-    return;
+    emitAborted();
 }
 
 void InstanceImportTask::processFlame()

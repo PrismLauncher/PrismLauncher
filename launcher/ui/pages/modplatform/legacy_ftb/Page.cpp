@@ -146,6 +146,7 @@ void Page::openedImpl()
     {
         connect(ftbFetchTask.get(), &PackFetchTask::finished, this, &Page::ftbPackDataDownloadSuccessfully);
         connect(ftbFetchTask.get(), &PackFetchTask::failed, this, &Page::ftbPackDataDownloadFailed);
+        connect(ftbFetchTask.get(), &PackFetchTask::aborted, this, &Page::ftbPackDataDownloadAborted);
 
         connect(ftbFetchTask.get(), &PackFetchTask::privateFileDownloadFinished, this, &Page::ftbPrivatePackDataDownloadSuccessfully);
         connect(ftbFetchTask.get(), &PackFetchTask::privateFileDownloadFailed, this, &Page::ftbPrivatePackDataDownloadFailed);
@@ -220,7 +221,12 @@ void Page::ftbPackDataDownloadSuccessfully(ModpackList publicPacks, ModpackList 
 
 void Page::ftbPackDataDownloadFailed(QString reason)
 {
-    //TODO: Display the error
+    CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+}
+
+void Page::ftbPackDataDownloadAborted()
+{
+    CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."), QMessageBox::Information)->show();
 }
 
 void Page::ftbPrivatePackDataDownloadSuccessfully(Modpack pack)

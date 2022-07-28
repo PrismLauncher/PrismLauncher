@@ -77,6 +77,7 @@ void Technic::SolderPackInstallTask::executeTask()
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SolderPackInstallTask::fileListSucceeded);
     connect(job, &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
+    connect(job, &NetJob::aborted, this, &Technic::SolderPackInstallTask::downloadAborted);
     m_filesNetJob->start();
 }
 
@@ -127,6 +128,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &Technic::SolderPackInstallTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &Technic::SolderPackInstallTask::downloadProgressChanged);
     connect(m_filesNetJob.get(), &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
+    connect(m_filesNetJob.get(), &NetJob::aborted, this, &Technic::SolderPackInstallTask::downloadAborted);
     m_filesNetJob->start();
 }
 
@@ -169,6 +171,12 @@ void Technic::SolderPackInstallTask::downloadProgressChanged(qint64 current, qin
 {
     m_abortable = true;
     setProgress(current / 2, total);
+}
+
+void Technic::SolderPackInstallTask::downloadAborted()
+{
+    emitAborted();
+    m_filesNetJob.reset();
 }
 
 void Technic::SolderPackInstallTask::extractFinished()
