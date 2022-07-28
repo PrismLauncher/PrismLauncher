@@ -7,6 +7,13 @@ Flame::FileResolvingTask::FileResolvingTask(const shared_qobject_ptr<QNetworkAcc
     : m_network(network), m_toProcess(toProcess)
 {}
 
+bool Flame::FileResolvingTask::abort()
+{
+    if (m_dljob)
+        return m_dljob->abort();
+    return true;
+}
+
 void Flame::FileResolvingTask::executeTask()
 {
     setStatus(tr("Resolving mod IDs..."));
