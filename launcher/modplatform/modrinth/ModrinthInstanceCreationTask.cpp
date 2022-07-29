@@ -8,6 +8,8 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
+#include "modplatform/helpers/OverrideUtils.h"
+
 #include "net/ChecksumValidator.h"
 
 #include "settings/INISettingsObject.h"
@@ -58,7 +60,9 @@ bool ModrinthCreationTask::updateInstance()
     // Remove repeated files, we don't need to download them!
     QDir old_inst_dir(inst->instanceRoot());
 
-    QString old_index_path(FS::PathCombine(old_inst_dir.absolutePath(), "mrpack", "modrinth.index.json"));
+    QString old_index_folder(FS::PathCombine(old_inst_dir.absolutePath(), "mrpack"));
+
+    QString old_index_path(FS::PathCombine(old_index_folder, "modrinth.index.json"));
     QFileInfo old_index_file(old_index_path);
     if (old_index_file.exists()) {
         std::vector<Modrinth::File> old_files;
@@ -66,7 +70,7 @@ bool ModrinthCreationTask::updateInstance()
 
         // Let's remove all duplicated, identical resources!
         auto files_iterator = m_files.begin();
-begin:
+    begin:
         while (files_iterator != m_files.end()) {
             auto const& file = *files_iterator;
 
@@ -78,7 +82,7 @@ begin:
                     qDebug() << "Removed file at" << file.path << "from list of downloads";
                     files_iterator = m_files.erase(files_iterator);
                     old_files_iterator = old_files.erase(old_files_iterator);
-                    goto begin; // Sorry :c
+                    goto begin;  // Sorry :c
                 }
 
                 old_files_iterator++;
@@ -87,18 +91,32 @@ begin:
             files_iterator++;
         }
 
+        QDir old_minecraft_dir(inst->gameRoot());
         // Some files were removed from the old version, and some will be downloaded in an updated version,
         // so we're fine removing them!
         if (!old_files.empty()) {
-            QDir old_minecraft_dir(inst->gameRoot());
             for (auto const& file : old_files) {
-                qWarning() << "Removing" << file.path;
+                qDebug() << "Removing" << file.path;
                 old_minecraft_dir.remove(file.path);
             }
         }
+
+        // We will remove all the previous overrides, to prevent duplicate files!
+        // TODO: Currently 'overrides' will always override the stuff on update. How do we preserve unchanged overrides?
+        // FIXME: We may want to do something about disabled mods.
+        auto old_overrides = Override::readOverrides("overrides", old_index_folder);
+        for (auto entry : old_overrides) {
+            qDebug() << "Removing" << entry;
+            old_minecraft_dir.remove(entry);
+        }
+
+        auto old_client_overrides = Override::readOverrides("client-overrides", old_index_folder);
+        for (auto entry : old_overrides) {
+            qDebug() << "Removing" << entry;
+            old_minecraft_dir.remove(entry);
+        }
     }
 
-    // TODO: Currently 'overrides' will always override the stuff on update. How do we preserve unchanged overrides?
 
     setOverride(true);
     qDebug() << "Will override instance!";
@@ -112,12 +130,14 @@ bool ModrinthCreationTask::createInstance()
 {
     QEventLoop loop;
 
+    QString parent_folder(FS::PathCombine(m_stagingPath, "mrpack"));
+
     QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
     if (m_files.empty() && !parseManifest(index_path, m_files))
         return false;
 
     // Keep index file in case we need it some other time (like when changing versions)
-    QString new_index_place(FS::PathCombine(m_stagingPath, "mrpack", "modrinth.index.json"));
+    QString new_index_place(FS::PathCombine(parent_folder, "modrinth.index.json"));
     FS::ensureFilePathExists(new_index_place);
     QFile::rename(index_path, new_index_place);
 
@@ -125,6 +145,10 @@ bool ModrinthCreationTask::createInstance()
 
     auto override_path = FS::PathCombine(m_stagingPath, "overrides");
     if (QFile::exists(override_path)) {
+        // Create a list of overrides in "overrides.txt" inside mrpack/
+        Override::createOverrides("overrides", parent_folder, override_path);
+
+        // Apply the overrides
         if (!QFile::rename(override_path, mcPath)) {
             setError(tr("Could not rename the overrides folder:\n") + "overrides");
             return false;
@@ -134,6 +158,10 @@ bool ModrinthCreationTask::createInstance()
     // Do client overrides
     auto client_override_path = FS::PathCombine(m_stagingPath, "client-overrides");
     if (QFile::exists(client_override_path)) {
+        // Create a list of overrides in "client-overrides.txt" inside mrpack/
+        Override::createOverrides("client-overrides", parent_folder, client_override_path);
+
+        // Apply the overrides
         if (!FS::overrideFolder(mcPath, client_override_path)) {
             setError(tr("Could not rename the client overrides folder:\n") + "client overrides");
             return false;
