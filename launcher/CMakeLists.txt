@@ -461,6 +461,8 @@ set(API_SOURCES
     modplatform/helpers/NetworkModAPI.cpp
     modplatform/helpers/HashUtils.h
     modplatform/helpers/HashUtils.cpp
+    modplatform/helpers/OverrideUtils.h
+    modplatform/helpers/OverrideUtils.cpp
 )
 
 set(FTB_SOURCES
