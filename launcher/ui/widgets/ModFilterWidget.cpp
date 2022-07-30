@@ -1,6 +1,8 @@
 #include "ModFilterWidget.h"
 #include "ui_ModFilterWidget.h"
 
+#include "Application.h"
+
 ModFilterWidget::ModFilterWidget(Version def, QWidget* parent)
     : QTabWidget(parent), m_filter(new Filter()),  ui(new Ui::ModFilterWidget)
 {
@@ -15,6 +17,24 @@ ModFilterWidget::ModFilterWidget(Version def, QWidget* parent)
     connect(&m_mcVersion_buttons, SIGNAL(idClicked(int)), this, SLOT(onVersionFilterChanged(int)));
 
     m_filter->versions.push_front(def);
+
+    m_version_list = APPLICATION->metadataIndex()->get("net.minecraft");
+    if (!m_version_list->isLoaded()) {
+        QEventLoop load_version_list_loop;
+
+        auto task = m_version_list->getLoadTask();
+
+        connect(task.get(), &Task::failed, [this]{
+            ui->majorVersionButton->setText(tr("Major version match (failed to get version index)"));
+            disableVersionButton(VersionButtonID::Major);
+        });
+        connect(task.get(), &Task::finished, &load_version_list_loop, &QEventLoop::quit);
+
+        if (!task->isRunning())
+            task->start();
+
+        load_version_list_loop.exec();
+    }
 
     setHidden(true);
 }
@@ -76,7 +96,7 @@ void ModFilterWidget::onVersionFilterChanged(int id)
     //ui->lowerVersionComboBox->setEnabled(id == VersionButtonID::Between);
     //ui->upperVersionComboBox->setEnabled(id == VersionButtonID::Between);
 
-    int index = 0;
+    int index = 1;
 
     auto cast_id = (VersionButtonID) id;
     if (cast_id != m_version_id) {
@@ -93,10 +113,15 @@ void ModFilterWidget::onVersionFilterChanged(int id)
         break;
     case(VersionButtonID::Major): {
         auto versionSplit = mcVersionStr().split(".");
-        for(auto i = Version(QString("%1.%2").arg(versionSplit[0], versionSplit[1])); i <= mcVersion(); index++){
-            m_filter->versions.push_front(i);
-            i = Version(QString("%1.%2.%3").arg(versionSplit[0], versionSplit[1], QString("%1").arg(index)));
+
+        auto major_version = QString("%1.%2").arg(versionSplit[0], versionSplit[1]);
+        QString version_str = major_version;
+
+        while (m_version_list->hasVersion(version_str)) {
+            m_filter->versions.emplace_back(version_str);
+            version_str = QString("%1.%2").arg(major_version, QString::number(index++));
         }
+
         break;
     }
     case(VersionButtonID::All):
