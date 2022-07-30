@@ -16,11 +16,11 @@
 #pragma once
 #include <QFileInfo>
 #include <QDateTime>
-#include <nonstd/optional>
+#include <optional>
 
 struct GameType {
     GameType() = default;
-    GameType (nonstd::optional<int> original);
+    GameType (std::optional<int> original);
 
     QString toTranslatedString() const;
     QString toLogString() const;
@@ -33,7 +33,7 @@ struct GameType {
         Adventure,
         Spectator
     } type = Unknown;
-    nonstd::optional<int> original;
+    std::optional<int> original;
 };
 
 class World
