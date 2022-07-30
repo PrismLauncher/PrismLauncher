@@ -4,6 +4,10 @@
 #include <QButtonGroup>
 
 #include "Version.h"
+
+#include "meta/Index.h"
+#include "meta/VersionList.h"
+
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
@@ -61,7 +65,11 @@ private:
 
     MinecraftInstance* m_instance = nullptr;
 
+
+/* Version stuff */
     QButtonGroup m_mcVersion_buttons;
+
+    Meta::VersionListPtr m_version_list;
 
     /* Used to tell if the filter was changed since the last getFilter() call */
     VersionButtonID m_last_version_id = VersionButtonID::Strict;

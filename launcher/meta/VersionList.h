@@ -66,6 +66,7 @@ public:
     QString humanReadable() const;
 
     VersionPtr getVersion(const QString &version);
+    bool hasVersion(QString version) const;
 
     QVector<VersionPtr> versions() const
     {
