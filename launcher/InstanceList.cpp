@@ -33,30 +33,32 @@
  *      limitations under the License.
  */
 
+#include <QDebug>
 #include <QDir>
 #include <QDirIterator>
-#include <QSet>
 #include <QFile>
-#include <QThread>
-#include <QTextStream>
-#include <QXmlStreamReader>
-#include <QTimer>
-#include <QDebug>
 #include <QFileSystemWatcher>
-#include <QUuid>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMimeData>
+#include <QSet>
+#include <QStack>
+#include <QPair>
+#include <QTextStream>
+#include <QThread>
+#include <QTimer>
+#include <QUuid>
+#include <QXmlStreamReader>
 
-#include "InstanceList.h"
 #include "BaseInstance.h"
-#include "InstanceTask.h"
-#include "settings/INISettingsObject.h"
-#include "NullInstance.h"
-#include "minecraft/MinecraftInstance.h"
-#include "FileSystem.h"
 #include "ExponentialSeries.h"
+#include "FileSystem.h"
+#include "InstanceList.h"
+#include "InstanceTask.h"
+#include "NullInstance.h"
 #include "WatchLock.h"
+#include "minecraft/MinecraftInstance.h"
+#include "settings/INISettingsObject.h"
 
 #ifdef Q_OS_WIN32
 #include <Windows.h>
@@ -64,13 +66,12 @@
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
-InstanceList::InstanceList(SettingsObjectPtr settings, const QString & instDir, QObject *parent)
+InstanceList::InstanceList(SettingsObjectPtr settings, const QString& instDir, QObject* parent)
     : QAbstractListModel(parent), m_globalSettings(settings)
 {
     resumeWatch();
     // Create aand normalize path
-    if (!QDir::current().exists(instDir))
-    {
+    if (!QDir::current().exists(instDir)) {
         QDir::current().mkpath(instDir);
     }
 
@@ -83,9 +84,7 @@ InstanceList::InstanceList(SettingsObjectPtr settings, const QString & instDir, 
     m_watcher->addPath(m_instDir);
 }
 
-InstanceList::~InstanceList()
-{
-}
+InstanceList::~InstanceList() {}
 
 Qt::DropActions InstanceList::supportedDragActions() const
 {
@@ -99,7 +98,7 @@ Qt::DropActions InstanceList::supportedDropActions() const
 
 bool InstanceList::canDropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) const
 {
-    if(data && data->hasFormat("application/x-instanceid")) {
+    if (data && data->hasFormat("application/x-instanceid")) {
         return true;
     }
     return false;
@@ -107,7 +106,7 @@ bool InstanceList::canDropMimeData(const QMimeData* data, Qt::DropAction action,
 
 bool InstanceList::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
 {
-    if(data && data->hasFormat("application/x-instanceid")) {
+    if (data && data->hasFormat("application/x-instanceid")) {
         return true;
     }
     return false;
@@ -120,35 +119,33 @@ QStringList InstanceList::mimeTypes() const
     return types;
 }
 
-QMimeData * InstanceList::mimeData(const QModelIndexList& indexes) const
+QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
 {
     auto mimeData = QAbstractListModel::mimeData(indexes);
-    if(indexes.size() == 1) {
+    if (indexes.size() == 1) {
         auto instanceId = data(indexes[0], InstanceIDRole).toString();
         mimeData->setData("application/x-instanceid", instanceId.toUtf8());
     }
     return mimeData;
 }
 
-
-int InstanceList::rowCount(const QModelIndex &parent) const
+int InstanceList::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
     return m_instances.count();
 }
 
-QModelIndex InstanceList::index(int row, int column, const QModelIndex &parent) const
+QModelIndex InstanceList::index(int row, int column, const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
     if (row < 0 || row >= m_instances.size())
         return QModelIndex();
-    return createIndex(row, column, (void *)m_instances.at(row).get());
+    return createIndex(row, column, (void*)m_instances.at(row).get());
 }
 
-QVariant InstanceList::data(const QModelIndex &index, int role) const
+QVariant InstanceList::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
-    {
+    if (!index.isValid()) {
         return QVariant();
     }
     BaseInstance *pdata = static_cast<BaseInstance *>(index.internalPointer());
@@ -193,29 +190,25 @@ QVariant InstanceList::data(const QModelIndex &index, int role) const
 
 bool InstanceList::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (!index.isValid())
-    {
+    if (!index.isValid()) {
         return false;
     }
-    if(role != Qt::EditRole)
-    {
+    if (role != Qt::EditRole) {
         return false;
     }
-    BaseInstance *pdata = static_cast<BaseInstance *>(index.internalPointer());
+    BaseInstance* pdata = static_cast<BaseInstance*>(index.internalPointer());
     auto newName = value.toString();
-    if(pdata->name() == newName)
-    {
+    if (pdata->name() == newName) {
         return true;
     }
     pdata->setName(newName);
     return true;
 }
 
-Qt::ItemFlags InstanceList::flags(const QModelIndex &index) const
+Qt::ItemFlags InstanceList::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags f;
-    if (index.isValid())
-    {
+    if (index.isValid()) {
         f |= (Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
     }
     return f;
@@ -224,13 +217,11 @@ Qt::ItemFlags InstanceList::flags(const QModelIndex &index) const
 GroupId InstanceList::getInstanceGroup(const InstanceId& id) const
 {
     auto inst = getInstanceById(id);
-    if(!inst)
-    {
+    if (!inst) {
         return GroupId();
     }
     auto iter = m_instanceGroupIndex.find(inst->id());
-    if(iter != m_instanceGroupIndex.end())
-    {
+    if (iter != m_instanceGroupIndex.end()) {
         return *iter;
     }
     return GroupId();
@@ -239,33 +230,27 @@ GroupId InstanceList::getInstanceGroup(const InstanceId& id) const
 void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
 {
     auto inst = getInstanceById(id);
-    if(!inst)
-    {
+    if (!inst) {
         qDebug() << "Attempt to set a null instance's group";
         return;
     }
 
     bool changed = false;
     auto iter = m_instanceGroupIndex.find(inst->id());
-    if(iter != m_instanceGroupIndex.end())
-    {
-        if(*iter != name)
-        {
+    if (iter != m_instanceGroupIndex.end()) {
+        if (*iter != name) {
             *iter = name;
             changed = true;
         }
-    }
-    else
-    {
+    } else {
         changed = true;
         m_instanceGroupIndex[id] = name;
     }
 
-    if(changed)
-    {
+    if (changed) {
         m_groupNameCache.insert(name);
         auto idx = getInstIndex(inst.get());
-        emit dataChanged(index(idx), index(idx), {GroupRole});
+        emit dataChanged(index(idx), index(idx), { GroupRole });
         saveGroupList();
     }
 }
@@ -279,24 +264,20 @@ void InstanceList::deleteGroup(const QString& name)
 {
     bool removed = false;
     qDebug() << "Delete group" << name;
-    for(auto & instance: m_instances)
-    {
-        const auto & instID = instance->id();
+    for (auto& instance : m_instances) {
+        const auto& instID = instance->id();
         auto instGroupName = getInstanceGroup(instID);
-        if(instGroupName == name)
-        {
+        if (instGroupName == name) {
             m_instanceGroupIndex.remove(instID);
             qDebug() << "Remove" << instID << "from group" << name;
             removed = true;
             auto idx = getInstIndex(instance.get());
-            if(idx > 0)
-            {
-                emit dataChanged(index(idx), index(idx), {GroupRole});
+            if (idx > 0) {
+                emit dataChanged(index(idx), index(idx), { GroupRole });
             }
         }
     }
-    if(removed)
-    {
+    if (removed) {
         saveGroupList();
     }
 }
@@ -306,23 +287,75 @@ bool InstanceList::isGroupCollapsed(const QString& group)
     return m_collapsedGroups.contains(group);
 }
 
+bool InstanceList::trashInstance(const InstanceId& id)
+{
+    auto inst = getInstanceById(id);
+    if (!inst) {
+        qDebug() << "Cannot trash instance" << id << ". No such instance is present (deleted externally?).";
+        return false;
+    }
+
+    auto cachedGroupId = m_instanceGroupIndex[id];
+
+    qDebug() << "Will trash instance" << id;
+    QString trashedLoc;
+
+    if (m_instanceGroupIndex.remove(id)) {
+        saveGroupList();
+    }
+
+    if (!FS::trash(inst->instanceRoot(), &trashedLoc)) {
+        qDebug() << "Trash of instance" << id << "has not been completely successfully...";
+        return false;
+    }
+
+    qDebug() << "Instance" << id << "has been trashed by the launcher.";
+    m_trashHistory.push({id, inst->instanceRoot(), trashedLoc, cachedGroupId});
+    
+    return true;
+}
+
+bool InstanceList::trashedSomething() {
+    return !m_trashHistory.empty();
+}
+
+void InstanceList::undoTrashInstance() {
+    if (m_trashHistory.empty()) {
+        qWarning() << "Nothing to recover from trash.";
+        return;
+    }
+
+    auto top = m_trashHistory.pop();
+
+    while (QDir(top.polyPath).exists()) {
+        top.id += "1";
+        top.polyPath += "1";
+    }
+
+    qDebug() << "Moving" << top.trashPath << "back to" << top.polyPath;
+    QFile(top.trashPath).rename(top.polyPath);
+
+    m_instanceGroupIndex[top.id] = top.groupName;
+    m_groupNameCache.insert(top.groupName);
+
+    saveGroupList();
+    emit instancesChanged();
+}
+
 void InstanceList::deleteInstance(const InstanceId& id)
 {
     auto inst = getInstanceById(id);
-    if(!inst)
-    {
+    if (!inst) {
         qDebug() << "Cannot delete instance" << id << ". No such instance is present (deleted externally?).";
         return;
     }
 
-    if(m_instanceGroupIndex.remove(id))
-    {
+    if (m_instanceGroupIndex.remove(id)) {
         saveGroupList();
     }
 
     qDebug() << "Will delete instance" << id;
-    if(!FS::deletePath(inst->instanceRoot()))
-    {
+    if (!FS::deletePath(inst->instanceRoot())) {
         qWarning() << "Deletion of instance" << id << "has not been completely successful ...";
         return;
     }
@@ -330,15 +363,13 @@ void InstanceList::deleteInstance(const InstanceId& id)
     qDebug() << "Instance" << id << "has been deleted by the launcher.";
 }
 
-static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstancePtr> &list)
+static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstancePtr>& list)
 {
     QMap<InstanceId, InstanceLocator> out;
     int i = 0;
-    for(auto & item: list)
-    {
+    for (auto& item : list) {
         auto id = item->id();
-        if(out.contains(id))
-        {
+        if (out.contains(id)) {
             qWarning() << "Duplicate ID" << id << "in instance list";
         }
         out[id] = std::make_pair(item, i);
@@ -347,24 +378,21 @@ static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstancePtr> &
     return out;
 }
 
-QList< InstanceId > InstanceList::discoverInstances()
+QList<InstanceId> InstanceList::discoverInstances()
 {
     qDebug() << "Discovering instances in" << m_instDir;
     QList<InstanceId> out;
     QDirIterator iter(m_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
-    while (iter.hasNext())
-    {
+    while (iter.hasNext()) {
         QString subDir = iter.next();
         QFileInfo dirInfo(subDir);
         if (!QFileInfo(FS::PathCombine(subDir, "instance.cfg")).exists())
             continue;
         // if it is a symlink, ignore it if it goes to the instance folder
-        if(dirInfo.isSymLink())
-        {
+        if (dirInfo.isSymLink()) {
             QFileInfo targetInfo(dirInfo.symLinkTarget());
             QFileInfo instDirInfo(m_instDir);
-            if(targetInfo.canonicalPath() == instDirInfo.canonicalFilePath())
-            {
+            if (targetInfo.canonicalPath() == instDirInfo.canonicalFilePath()) {
                 qDebug() << "Ignoring symlink" << subDir << "that leads into the instances folder";
                 continue;
             }
@@ -388,74 +416,56 @@ InstanceList::InstListError InstanceList::loadList()
 
     QList<InstancePtr> newList;
 
-    for(auto & id: discoverInstances())
-    {
-        if(existingIds.contains(id))
-        {
+    for (auto& id : discoverInstances()) {
+        if (existingIds.contains(id)) {
             auto instPair = existingIds[id];
             existingIds.remove(id);
             qDebug() << "Should keep and soft-reload" << id;
-        }
-        else
-        {
+        } else {
             InstancePtr instPtr = loadInstance(id);
-            if(instPtr)
-            {
+            if (instPtr) {
                 newList.append(instPtr);
             }
         }
     }
 
     // TODO: looks like a general algorithm with a few specifics inserted. Do something about it.
-    if(!existingIds.isEmpty())
-    {
+    if (!existingIds.isEmpty()) {
         // get the list of removed instances and sort it by their original index, from last to first
         auto deadList = existingIds.values();
-        auto orderSortPredicate = [](const InstanceLocator & a, const InstanceLocator & b) -> bool
-        {
-            return a.second > b.second;
-        };
+        auto orderSortPredicate = [](const InstanceLocator& a, const InstanceLocator& b) -> bool { return a.second > b.second; };
         std::sort(deadList.begin(), deadList.end(), orderSortPredicate);
         // remove the contiguous ranges of rows
         int front_bookmark = -1;
         int back_bookmark = -1;
         int currentItem = -1;
-        auto removeNow = [&]()
-        {
+        auto removeNow = [&]() {
             beginRemoveRows(QModelIndex(), front_bookmark, back_bookmark);
             m_instances.erase(m_instances.begin() + front_bookmark, m_instances.begin() + back_bookmark + 1);
             endRemoveRows();
             front_bookmark = -1;
             back_bookmark = currentItem;
         };
-        for(auto & removedItem: deadList)
-        {
+        for (auto& removedItem : deadList) {
             auto instPtr = removedItem.first;
             instPtr->invalidate();
             currentItem = removedItem.second;
-            if(back_bookmark == -1)
-            {
+            if (back_bookmark == -1) {
                 // no bookmark yet
                 back_bookmark = currentItem;
-            }
-            else if(currentItem == front_bookmark - 1)
-            {
+            } else if (currentItem == front_bookmark - 1) {
                 // part of contiguous sequence, continue
-            }
-            else
-            {
+            } else {
                 // seam between previous and current item
                 removeNow();
             }
             front_bookmark = currentItem;
         }
-        if(back_bookmark != -1)
-        {
+        if (back_bookmark != -1) {
             removeNow();
         }
     }
-    if(newList.size())
-    {
+    if (newList.size()) {
         add(newList);
     }
     m_dirty = false;
@@ -466,26 +476,23 @@ InstanceList::InstListError InstanceList::loadList()
 void InstanceList::updateTotalPlayTime()
 {
     totalPlayTime = 0;
-    for(auto const& itr : m_instances)
-    {
+    for (auto const& itr : m_instances) {
         totalPlayTime += itr.get()->totalTimePlayed();
     }
 }
 
 void InstanceList::saveNow()
 {
-    for(auto & item: m_instances)
-    {
+    for (auto& item : m_instances) {
         item->saveNow();
     }
 }
 
-void InstanceList::add(const QList<InstancePtr> &t)
+void InstanceList::add(const QList<InstancePtr>& t)
 {
     beginInsertRows(QModelIndex(), m_instances.count(), m_instances.count() + t.size() - 1);
     m_instances.append(t);
-    for(auto & ptr : t)
-    {
+    for (auto& ptr : t) {
         connect(ptr.get(), &BaseInstance::propertiesChanged, this, &InstanceList::propertiesChanged);
     }
     endInsertRows();
@@ -493,69 +500,61 @@ void InstanceList::add(const QList<InstancePtr> &t)
 
 void InstanceList::resumeWatch()
 {
-    if(m_watchLevel > 0)
-    {
+    if (m_watchLevel > 0) {
         qWarning() << "Bad suspend level resume in instance list";
         return;
     }
     m_watchLevel++;
-    if(m_watchLevel > 0 && m_dirty)
-    {
+    if (m_watchLevel > 0 && m_dirty) {
         loadList();
     }
 }
 
 void InstanceList::suspendWatch()
 {
-    m_watchLevel --;
+    m_watchLevel--;
 }
 
 void InstanceList::providerUpdated()
 {
     m_dirty = true;
-    if(m_watchLevel == 1)
-    {
+    if (m_watchLevel == 1) {
         loadList();
     }
 }
 
 InstancePtr InstanceList::getInstanceById(QString instId) const
 {
-    if(instId.isEmpty())
+    if (instId.isEmpty())
         return InstancePtr();
-    for(auto & inst: m_instances)
-    {
-        if (inst->id() == instId)
-        {
+    for (auto& inst : m_instances) {
+        if (inst->id() == instId) {
             return inst;
         }
     }
     return InstancePtr();
 }
 
-QModelIndex InstanceList::getInstanceIndexById(const QString &id) const
+QModelIndex InstanceList::getInstanceIndexById(const QString& id) const
 {
     return index(getInstIndex(getInstanceById(id).get()));
 }
 
-int InstanceList::getInstIndex(BaseInstance *inst) const
+int InstanceList::getInstIndex(BaseInstance* inst) const
 {
     int count = m_instances.count();
-    for (int i = 0; i < count; i++)
-    {
-        if (inst == m_instances[i].get())
-        {
+    for (int i = 0; i < count; i++) {
+        if (inst == m_instances[i].get()) {
             return i;
         }
     }
     return -1;
 }
 
-void InstanceList::propertiesChanged(BaseInstance *inst)
+void InstanceList::propertiesChanged(BaseInstance* inst)
 {
     int i = getInstIndex(inst);
-    if (i != -1)
-    {
+    if (i != -1) {
         emit dataChanged(index(i), index(i));
         updateTotalPlayTime();
     }
@@ -563,8 +562,7 @@ void InstanceList::propertiesChanged(BaseInstance *inst)
 
 InstancePtr InstanceList::loadInstance(const InstanceId& id)
 {
-    if(!m_groupsLoaded)
-    {
+    if (!m_groupsLoaded) {
         loadGroupList();
     }
 
@@ -592,50 +590,42 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
 void InstanceList::saveGroupList()
 {
     qDebug() << "Will save group list now.";
-    if(!m_instancesProbed)
-    {
+    if (!m_instancesProbed) {
         qDebug() << "Group saving prevented because we don't know the full list of instances yet.";
         return;
     }
     WatchLock foo(m_watcher, m_instDir);
     QString groupFileName = m_instDir + "/instgroups.json";
     QMap<QString, QSet<QString>> reverseGroupMap;
-    for (auto iter = m_instanceGroupIndex.begin(); iter != m_instanceGroupIndex.end(); iter++)
-    {
+    for (auto iter = m_instanceGroupIndex.begin(); iter != m_instanceGroupIndex.end(); iter++) {
         QString id = iter.key();
         QString group = iter.value();
         if (group.isEmpty())
             continue;
-        if(!instanceSet.contains(id))
-        {
+        if (!instanceSet.contains(id)) {
             qDebug() << "Skipping saving missing instance" << id << "to groups list.";
             continue;
         }
 
-        if (!reverseGroupMap.count(group))
-        {
+        if (!reverseGroupMap.count(group)) {
             QSet<QString> set;
             set.insert(id);
             reverseGroupMap[group] = set;
-        }
-        else
-        {
-            QSet<QString> &set = reverseGroupMap[group];
+        } else {
+            QSet<QString>& set = reverseGroupMap[group];
             set.insert(id);
         }
     }
     QJsonObject toplevel;
     toplevel.insert("formatVersion", QJsonValue(QString("1")));
     QJsonObject groupsArr;
-    for (auto iter = reverseGroupMap.begin(); iter != reverseGroupMap.end(); iter++)
-    {
+    for (auto iter = reverseGroupMap.begin(); iter != reverseGroupMap.end(); iter++) {
         auto list = iter.value();
         auto name = iter.key();
         QJsonObject groupObj;
         QJsonArray instanceArr;
         groupObj.insert("hidden", QJsonValue(m_collapsedGroups.contains(name)));
-        for (auto item : list)
-        {
+        for (auto item : list) {
             instanceArr.append(QJsonValue(item));
         }
         groupObj.insert("instances", instanceArr);
@@ -643,13 +633,10 @@ void InstanceList::saveGroupList()
     }
     toplevel.insert("groups", groupsArr);
     QJsonDocument doc(toplevel);
-    try
-    {
+    try {
         FS::write(groupFileName, doc.toJson());
         qDebug() << "Group list saved.";
-    }
-    catch (const FS::FileSystemException &e)
-    {
+    } catch (const FS::FileSystemException& e) {
         qCritical() << "Failed to write instance group file :" << e.cause();
     }
 }
@@ -665,12 +652,9 @@ void InstanceList::loadGroupList()
         return;
 
     QByteArray jsonData;
-    try
-    {
+    try {
         jsonData = FS::read(groupFileName);
-    }
-    catch (const FS::FileSystemException &e)
-    {
+    } catch (const FS::FileSystemException& e) {
         qCritical() << "Failed to read instance group file :" << e.cause();
         return;
     }
@@ -679,17 +663,15 @@ void InstanceList::loadGroupList()
     QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &error);
 
     // if the json was bad, fail
-    if (error.error != QJsonParseError::NoError)
-    {
+    if (error.error != QJsonParseError::NoError) {
         qCritical() << QString("Failed to parse instance group file: %1 at offset %2")
-                            .arg(error.errorString(), QString::number(error.offset))
-                            .toUtf8();
+                           .arg(error.errorString(), QString::number(error.offset))
+                           .toUtf8();
         return;
     }
 
     // if the root of the json wasn't an object, fail
-    if (!jsonDoc.isObject())
-    {
+    if (!jsonDoc.isObject()) {
         qWarning() << "Invalid group file. Root entry should be an object.";
         return;
     }
@@ -701,8 +683,7 @@ void InstanceList::loadGroupList()
         return;
 
     // Get the groups. if it's not an object, fail
-    if (!rootObj.value("groups").isObject())
-    {
+    if (!rootObj.value("groups").isObject()) {
         qWarning() << "Invalid group list JSON: 'groups' should be an object.";
         return;
     }
@@ -712,21 +693,20 @@ void InstanceList::loadGroupList()
 
     // Iterate through all the groups.
     QJsonObject groupMapping = rootObj.value("groups").toObject();
-    for (QJsonObject::iterator iter = groupMapping.begin(); iter != groupMapping.end(); iter++)
-    {
+    for (QJsonObject::iterator iter = groupMapping.begin(); iter != groupMapping.end(); iter++) {
         QString groupName = iter.key();
 
         // If not an object, complain and skip to the next one.
-        if (!iter.value().isObject())
-        {
+        if (!iter.value().isObject()) {
             qWarning() << QString("Group '%1' in the group list should be an object.").arg(groupName).toUtf8();
             continue;
         }
 
         QJsonObject groupObj = iter.value().toObject();
-        if (!groupObj.value("instances").isArray())
-        {
-            qWarning() << QString("Group '%1' in the group list is invalid. It should contain an array called 'instances'.").arg(groupName).toUtf8();
+        if (!groupObj.value("instances").isArray()) {
+            qWarning() << QString("Group '%1' in the group list is invalid. It should contain an array called 'instances'.")
+                              .arg(groupName)
+                              .toUtf8();
             continue;
         }
 
@@ -734,15 +714,14 @@ void InstanceList::loadGroupList()
         groupSet.insert(groupName);
 
         auto hidden = groupObj.value("hidden").toBool(false);
-        if(hidden) {
+        if (hidden) {
             m_collapsedGroups.insert(groupName);
         }
 
         // Iterate through the list of instances in the group.
         QJsonArray instancesArray = groupObj.value("instances").toArray();
 
-        for (QJsonArray::iterator iter2 = instancesArray.begin(); iter2 != instancesArray.end(); iter2++)
-        {
+        for (QJsonArray::iterator iter2 = instancesArray.begin(); iter2 != instancesArray.end(); iter2++) {
             m_instanceGroupIndex[(*iter2).toString()] = groupName;
         }
     }
@@ -757,13 +736,11 @@ void InstanceList::instanceDirContentsChanged(const QString& path)
     emit instancesChanged();
 }
 
-void InstanceList::on_InstFolderChanged(const Setting &setting, QVariant value)
+void InstanceList::on_InstFolderChanged(const Setting& setting, QVariant value)
 {
     QString newInstDir = QDir(value.toString()).canonicalPath();
-    if(newInstDir != m_instDir)
-    {
-        if(m_groupsLoaded)
-        {
+    if (newInstDir != m_instDir) {
+        if (m_groupsLoaded) {
             saveGroupList();
         }
         m_instDir = newInstDir;
@@ -775,7 +752,7 @@ void InstanceList::on_InstFolderChanged(const Setting &setting, QVariant value)
 void InstanceList::on_GroupStateChanged(const QString& group, bool collapsed)
 {
     qDebug() << "Group" << group << (collapsed ? "collapsed" : "expanded");
-    if(collapsed) {
+    if (collapsed) {
         m_collapsedGroups.insert(group);
     } else {
         m_collapsedGroups.remove(group);
@@ -783,19 +760,14 @@ void InstanceList::on_GroupStateChanged(const QString& group, bool collapsed)
     saveGroupList();
 }
 
-class InstanceStaging : public Task
-{
-Q_OBJECT
+class InstanceStaging : public Task {
+    Q_OBJECT
     const unsigned minBackoff = 1;
     const unsigned maxBackoff = 16;
-public:
-    InstanceStaging (
-        InstanceList * parent,
-        Task * child,
-        const QString & stagingPath,
-        const QString& instanceName,
-        const QString& groupName )
-    : backoff(minBackoff, maxBackoff)
+
+   public:
+    InstanceStaging(InstanceList* parent, Task* child, const QString& stagingPath, const QString& instanceName, const QString& groupName)
+        : backoff(minBackoff, maxBackoff)
     {
         m_parent = parent;
         m_child.reset(child);
@@ -810,62 +782,51 @@ public:
         connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);
     }
 
-    virtual ~InstanceStaging() {};
-
+    virtual ~InstanceStaging(){};
 
     // FIXME/TODO: add ability to abort during instance commit retries
     bool abort() override
     {
-        if(m_child && m_child->canAbort())
-        {
+        if (m_child && m_child->canAbort()) {
             return m_child->abort();
         }
         return false;
     }
     bool canAbort() const override
     {
-        if(m_child && m_child->canAbort())
-        {
+        if (m_child && m_child->canAbort()) {
             return true;
         }
         return false;
     }
 
-protected:
-    virtual void executeTask() override
-    {
-        m_child->start();
-    }
-    QStringList warnings() const override
-    {
-        return m_child->warnings();
-    }
+   protected:
+    virtual void executeTask() override { m_child->start(); }
+    QStringList warnings() const override { return m_child->warnings(); }
 
-private slots:
+   private slots:
     void childSucceded()
     {
         unsigned sleepTime = backoff();
-        if(m_parent->commitStagedInstance(m_stagingPath, m_instanceName, m_groupName))
-        {
+        if (m_parent->commitStagedInstance(m_stagingPath, m_instanceName, m_groupName)) {
             emitSucceeded();
             return;
         }
         // we actually failed, retry?
-        if(sleepTime == maxBackoff)
-        {
+        if (sleepTime == maxBackoff) {
             emitFailed(tr("Failed to commit instance, even after multiple retries. It is being blocked by something."));
             return;
         }
         qDebug() << "Failed to commit instance" << m_instanceName << "Initiating backoff:" << sleepTime;
         m_backoffTimer.start(sleepTime * 500);
     }
-    void childFailed(const QString & reason)
+    void childFailed(const QString& reason)
     {
         m_parent->destroyStagingPath(m_stagingPath);
         emitFailed(reason);
     }
 
-private:
+   private:
     /*
      * WHY: the whole reason why this uses an exponential backoff retry scheme is antivirus on Windows.
      * Basically, it starts messing things up while the launcher is extracting/creating instances
@@ -873,14 +834,14 @@ private:
      */
     ExponentialSeries backoff;
     QString m_stagingPath;
-    InstanceList * m_parent;
+    InstanceList* m_parent;
     unique_qobject_ptr<Task> m_child;
     QString m_instanceName;
     QString m_groupName;
     QTimer m_backoffTimer;
 };
 
-Task * InstanceList::wrapInstanceTask(InstanceTask * task)
+Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 {
     auto stagingPath = getStagedInstancePath();
     task->setStagingPath(stagingPath);
@@ -895,8 +856,7 @@ QString InstanceList::getStagedInstancePath()
     QString relPath = FS::PathCombine(tempDir, key);
     QDir rootPath(m_instDir);
     auto path = FS::PathCombine(m_instDir, relPath);
-    if(!rootPath.mkpath(relPath))
-    {
+    if (!rootPath.mkpath(relPath)) {
         return QString();
     }
 #ifdef Q_OS_WIN32
@@ -913,8 +873,7 @@ bool InstanceList::commitStagedInstance(const QString& path, const QString& inst
     {
         WatchLock lock(m_watcher, m_instDir);
         QString destination = FS::PathCombine(m_instDir, instID);
-        if(!dir.rename(path, destination))
-        {
+        if (!dir.rename(path, destination)) {
             qWarning() << "Failed to move" << path << "to" << destination;
             return false;
         }
@@ -933,7 +892,8 @@ bool InstanceList::destroyStagingPath(const QString& keyPath)
     return FS::deletePath(keyPath);
 }
 
-int InstanceList::getTotalPlayTime() {
+int InstanceList::getTotalPlayTime()
+{
     updateTotalPlayTime();
     return totalPlayTime;
 }
