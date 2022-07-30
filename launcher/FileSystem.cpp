@@ -37,6 +37,7 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
 #include <QSaveFile>
@@ -57,6 +58,8 @@
 #else
 #include <utime.h>
 #endif
+
+#include <filesystem>
 
 namespace FS {
 
@@ -128,6 +131,8 @@ bool ensureFolderPathExists(QString foldernamepath)
 
 bool copy::operator()(const QString& offset)
 {
+    using copy_opts = std::filesystem::copy_options;
+
 // NOTE always deep copy on windows. the alternatives are too messy.
 #if defined Q_OS_WIN32
     m_followSymlinks = true;
@@ -136,47 +141,40 @@ bool copy::operator()(const QString& offset)
     auto src = PathCombine(m_src.absolutePath(), offset);
     auto dst = PathCombine(m_dst.absolutePath(), offset);
 
-    QFileInfo currentSrc(src);
-    if (!currentSrc.exists())
-        return false;
+    std::error_code err;
 
-    if (!m_followSymlinks && currentSrc.isSymLink()) {
-        qDebug() << "creating symlink" << src << " - " << dst;
-        if (!ensureFilePathExists(dst)) {
-            qWarning() << "Cannot create path!";
-            return false;
+    std::filesystem::copy_options opt = copy_opts::none;
+
+    // The default behavior is to follow symlinks
+    if (!m_followSymlinks)
+        opt |= copy_opts::copy_symlinks;
+
+
+    // We can't use copy_opts::recursive because we need to take into account the
+    // blacklisted paths, so we iterate over the source directory, and if there's no blacklist
+    // match, we copy the file.
+    QDir src_dir(src);
+    QDirIterator source_it(src, QDir::Filter::Files, QDirIterator::Subdirectories);
+
+    while (source_it.hasNext()) {
+        auto src_path = source_it.next();
+        auto relative_path = src_dir.relativeFilePath(src_path);
+
+        if (m_blacklist && m_blacklist->matches(relative_path))
+            continue;
+
+        auto dst_path = PathCombine(dst, relative_path);
+        ensureFilePathExists(dst_path);
+
+        std::filesystem::copy(src_path.toStdString(), dst_path.toStdString(), opt, err);
+        if (err) {
+            qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
+            qDebug() << "Source file:" << src_path;
+            qDebug() << "Destination file:" << dst_path;
         }
-        return QFile::link(currentSrc.symLinkTarget(), dst);
-    } else if (currentSrc.isFile()) {
-        qDebug() << "copying file" << src << " - " << dst;
-        if (!ensureFilePathExists(dst)) {
-            qWarning() << "Cannot create path!";
-            return false;
-        }
-        return QFile::copy(src, dst);
-    } else if (currentSrc.isDir()) {
-        qDebug() << "recursing" << offset;
-        if (!ensureFolderPathExists(dst)) {
-            qWarning() << "Cannot create path!";
-            return false;
-        }
-        QDir currentDir(src);
-        for (auto& f : currentDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System)) {
-            auto inner_offset = PathCombine(offset, f);
-            // ignore and skip stuff that matches the blacklist.
-            if (m_blacklist && m_blacklist->matches(inner_offset)) {
-                continue;
-            }
-            if (!operator()(inner_offset)) {
-                qWarning() << "Failed to copy" << inner_offset;
-                return false;
-            }
-        }
-    } else {
-        qCritical() << "Copy ERROR: Unknown filesystem object:" << src;
-        return false;
     }
-    return true;
+
+    return err.value() == 0;
 }
 
 bool deletePath(QString path)
