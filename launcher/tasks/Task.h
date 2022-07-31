@@ -68,7 +68,7 @@ class Task : public QObject, public QRunnable {
 
     virtual QStringList warnings() const;
 
-    virtual bool canAbort() const { return false; }
+    virtual bool canAbort() const { return m_can_abort; }
 
     auto getState() const -> State { return m_state; }
 
@@ -96,12 +96,18 @@ class Task : public QObject, public QRunnable {
     void status(QString status);
     void stepStatus(QString status);
 
+    /** Emitted when the canAbort() status has changed.
+     */
+    void abortStatusChanged(bool can_abort);
+
    public slots:
     // QRunnable's interface
     void run() override { start(); }
 
     virtual void start();
     virtual bool abort() { if(canAbort()) emitAborted(); return canAbort(); };
+
+    void setAbortStatus(bool can_abort) { m_can_abort = can_abort; emit abortStatusChanged(can_abort); }
 
    protected:
     virtual void executeTask() = 0;
@@ -125,4 +131,8 @@ class Task : public QObject, public QRunnable {
 
     // TODO: Nuke in favor of QLoggingCategory
     bool m_show_debug = true;
+
+   private:
+    // Change using setAbortStatus
+    bool m_can_abort = false;
 };
