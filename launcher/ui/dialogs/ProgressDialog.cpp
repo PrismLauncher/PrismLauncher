@@ -81,6 +81,7 @@ int ProgressDialog::execWithTask(Task* task)
     connect(task, &Task::progress, this, &ProgressDialog::changeProgress);
 
     connect(task, &Task::aborted, [this] { QDialog::reject(); });
+    connect(task, &Task::abortStatusChanged, ui->skipButton, &QPushButton::setEnabled);
 
     m_is_multi_step = task->isMultiStep();
     if (!m_is_multi_step) {
