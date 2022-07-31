@@ -5,7 +5,6 @@
 #include "InstanceList.h"
 #include "Json.h"
 
-#include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
 #include "modplatform/helpers/OverrideUtils.h"
@@ -43,8 +42,8 @@ bool ModrinthCreationTask::updateInstance()
     if (!parseManifest(index_path, m_files))
         return false;
 
-    auto version_id = inst->getManagedPackVersionID();
-    auto version_str = !version_id.isEmpty() ? tr(" (version %1)").arg(version_id) : "";
+    auto version_name = inst->getManagedPackVersionName();
+    auto version_str = !version_name.isEmpty() ? tr(" (version %1)").arg(version_name) : "";
 
     auto info = CustomMessageBox::selectable(m_parent, tr("Similar modpack was found!"),
                                              tr("One or more of your instances are from this same modpack%1. Do you want to create a "
@@ -66,7 +65,7 @@ bool ModrinthCreationTask::updateInstance()
     QFileInfo old_index_file(old_index_path);
     if (old_index_file.exists()) {
         std::vector<Modrinth::File> old_files;
-        parseManifest(old_index_path, old_files);
+        parseManifest(old_index_path, old_files, false);
 
         // Let's remove all duplicated, identical resources!
         auto files_iterator = m_files.begin();
@@ -120,6 +119,8 @@ bool ModrinthCreationTask::updateInstance()
 
     setOverride(true);
     qDebug() << "Will override instance!";
+
+    m_instance = inst;
 
     // We let it go through the createInstance() stage, just with a couple modifications for updating
     return false;
@@ -189,7 +190,7 @@ bool ModrinthCreationTask::createInstance()
         instance.setIconKey("modrinth");
     }
 
-    instance.setManagedPack("modrinth", getManagedPackID(), m_managed_name, m_managed_id, {});
+    instance.setManagedPack("modrinth", getManagedPackID(), m_managed_name, m_managed_version_id, version());
     instance.setName(name());
     instance.saveNow();
 
@@ -229,10 +230,17 @@ bool ModrinthCreationTask::createInstance()
 
     loop.exec();
 
+    if (m_instance) {
+        auto inst = m_instance.value();
+
+        inst->copyManagedPack(instance);
+        inst->setName(instance.name());
+    }
+
     return ended_well;
 }
 
-bool ModrinthCreationTask::parseManifest(QString index_path, std::vector<Modrinth::File>& files)
+bool ModrinthCreationTask::parseManifest(QString index_path, std::vector<Modrinth::File>& files, bool set_managed_info)
 {
     try {
         auto doc = Json::requireDocument(index_path);
@@ -244,8 +252,10 @@ bool ModrinthCreationTask::parseManifest(QString index_path, std::vector<Modrint
                 throw JSONValidationError("Unknown game: " + game);
             }
 
-            m_managed_version_id = Json::ensureString(obj, "versionId", "Managed ID");
-            m_managed_name = Json::ensureString(obj, "name", "Managed Name");
+            if (set_managed_info) {
+                m_managed_version_id = Json::ensureString(obj, "versionId", {}, "Managed ID");
+                m_managed_name = Json::ensureString(obj, "name", {}, "Managed Name");
+            }
 
             auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
             bool had_optional = false;
@@ -348,7 +358,7 @@ QString ModrinthCreationTask::getManagedPackID() const
 {
     if (!m_source_url.isEmpty()) {
         QRegularExpression regex(R"(data\/(.*)\/versions)");
-        return regex.match(m_source_url).captured(0);
+        return regex.match(m_source_url).captured(1);
     }
 
     return {};

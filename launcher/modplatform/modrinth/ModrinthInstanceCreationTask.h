@@ -2,6 +2,10 @@
 
 #include "InstanceCreationTask.h"
 
+#include <optional>
+
+#include "minecraft/MinecraftInstance.h"
+
 #include "modplatform/modrinth/ModrinthPackManifest.h"
 
 #include "net/NetJob.h"
@@ -11,7 +15,7 @@ class ModrinthCreationTask final : public InstanceCreationTask {
 
    public:
     ModrinthCreationTask(QString staging_path, SettingsObjectPtr global_settings, QWidget* parent, QString source_url = {})
-        : InstanceCreationTask(), m_parent(parent)
+        : InstanceCreationTask(), m_parent(parent), m_source_url(std::move(source_url))
     {
         setStagingPath(staging_path);
         setParentSettings(global_settings);
@@ -24,7 +28,7 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     bool createInstance() override;
 
    private:
-    bool parseManifest(QString, std::vector<Modrinth::File>&);
+    bool parseManifest(QString, std::vector<Modrinth::File>&, bool set_managed_info = true);
     QString getManagedPackID() const;
 
    private:
@@ -36,4 +40,6 @@ class ModrinthCreationTask final : public InstanceCreationTask {
 
     std::vector<Modrinth::File> m_files;
     NetJob::Ptr m_files_job;
+
+    std::optional<InstancePtr> m_instance;
 };
