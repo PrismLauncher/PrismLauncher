@@ -43,8 +43,8 @@ void ProgressDialog::setSkipButton(bool present, QString label)
 void ProgressDialog::on_skipButton_clicked(bool checked)
 {
     Q_UNUSED(checked);
-    task->abort();
-    QDialog::reject();
+    if (task->abort())
+        QDialog::reject();
 }
 
 ProgressDialog::~ProgressDialog()

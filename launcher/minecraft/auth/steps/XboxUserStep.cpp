@@ -4,6 +4,7 @@
 
 #include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
+#include "net/NetUtils.h"
 
 XboxUserStep::XboxUserStep(AccountData* data) : AuthStep(data) {
 
@@ -53,7 +54,17 @@ void XboxUserStep::onRequestDone(
 
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
-        emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication failed."));
+        if (Net::isApplicationError(error)) {
+            emit finished(AccountTaskState::STATE_FAILED_SOFT,
+                tr("XBox user authentication failed: %1").arg(requestor->errorString_)
+            );
+        }
+        else {
+            emit finished(
+                AccountTaskState::STATE_OFFLINE,
+                tr("XBox user authentication failed: %1").arg(requestor->errorString_)
+            );
+        }
         return;
     }
 

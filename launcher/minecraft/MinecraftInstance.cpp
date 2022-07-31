@@ -709,15 +709,15 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
             {
                 if(mod->type() == Mod::MOD_FOLDER)
                 {
-                    out << u8"  [📁] " + mod->fileinfo().completeBaseName() + " (folder)";
+                    out << u8"  [🖿] " + mod->fileinfo().completeBaseName() + " (folder)";
                     continue;
                 }
 
                 if(mod->enabled()) {
-                    out << u8"  [✔️]" + mod->fileinfo().completeBaseName();
+                    out << u8"  [✔] " + mod->fileinfo().completeBaseName();
                 }
                 else {
-                    out << u8"  [❌] " + mod->fileinfo().completeBaseName() + " (disabled)";
+                    out << u8"  [✘] " + mod->fileinfo().completeBaseName() + " (disabled)";
                 }
 
             }

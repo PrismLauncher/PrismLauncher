@@ -77,10 +77,12 @@ public:
     {
         return m_ptr;
     }
-    bool operator==(const shared_qobject_ptr<T>& other) {
+    template<typename U>
+    bool operator==(const shared_qobject_ptr<U>& other) const {
         return m_ptr == other.m_ptr;
     }
-    bool operator!=(const shared_qobject_ptr<T>& other) {
+    template<typename U>
+    bool operator!=(const shared_qobject_ptr<U>& other) const {
         return m_ptr != other.m_ptr;
     }
 

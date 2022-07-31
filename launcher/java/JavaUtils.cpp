@@ -52,25 +52,24 @@ JavaUtils::JavaUtils()
 {
 }
 
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-static QString processLD_LIBRARY_PATH(const QString & LD_LIBRARY_PATH)
+QString stripVariableEntries(QString name, QString target, QString remove)
 {
-    QDir mmcBin(QCoreApplication::applicationDirPath());
-    auto items = LD_LIBRARY_PATH.split(':');
-    QStringList final;
-    for(auto & item: items)
-    {
-        QDir test(item);
-        if(test == mmcBin)
-        {
-            qDebug() << "Env:LD_LIBRARY_PATH ignoring path" << item;
-            continue;
-        }
-        final.append(item);
-    }
-    return final.join(':');
-}
+    char delimiter = ':';
+#ifdef Q_OS_WIN32
+    delimiter = ';';
 #endif
+
+    auto targetItems = target.split(delimiter);
+    auto toRemove = remove.split(delimiter);
+
+    for (QString item : toRemove) {
+        bool removed = targetItems.removeOne(item);
+        if (!removed)
+            qWarning() << "Entry" << item
+                << "could not be stripped from variable" << name;
+    }
+    return targetItems.join(delimiter);
+}
 
 QProcessEnvironment CleanEnviroment()
 {
@@ -89,6 +88,16 @@ QProcessEnvironment CleanEnviroment()
         "JAVA_OPTIONS",
         "JAVA_TOOL_OPTIONS"
     };
+
+    QStringList stripped =
+    {
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+        "LD_LIBRARY_PATH",
+        "LD_PRELOAD",
+#endif
+        "QT_PLUGIN_PATH",
+        "QT_FONTPATH"
+    };
     for(auto key: rawenv.keys())
     {
         auto value = rawenv.value(key);
@@ -98,19 +107,22 @@ QProcessEnvironment CleanEnviroment()
             qDebug() << "Env: ignoring" << key << value;
             continue;
         }
-        // filter PolyMC-related things
-        if(key.startsWith("QT_"))
+
+        // These are used to strip the original variables
+        // If there is "LD_LIBRARY_PATH" and "LAUNCHER_LD_LIBRARY_PATH", we want to
+        // remove all values in "LAUNCHER_LD_LIBRARY_PATH" from "LD_LIBRARY_PATH"
+        if(key.startsWith("LAUNCHER_"))
         {
             qDebug() << "Env: ignoring" << key << value;
             continue;
         }
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-        // Do not pass LD_* variables to java. They were intended for PolyMC
-        if(key.startsWith("LD_"))
+        if(stripped.contains(key))
         {
-            qDebug() << "Env: ignoring" << key << value;
-            continue;
+            QString newValue = stripVariableEntries(key, value, rawenv.value("LAUNCHER_" + key));
+
+            qDebug() << "Env: stripped" << key << value << "to" << newValue;
         }
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
         // Strip IBus
         // IBus is a Linux IME framework. For some reason, it breaks MC?
         if (key == "XMODIFIERS" && value.contains(IBUS))
@@ -119,22 +131,12 @@ QProcessEnvironment CleanEnviroment()
             value.replace(IBUS, "");
             qDebug() << "Env: stripped" << IBUS << "from" << save << ":" << value;
         }
-        if(key == "GAME_PRELOAD")
-        {
-            env.insert("LD_PRELOAD", value);
-            continue;
-        }
-        if(key == "GAME_LIBRARY_PATH")
-        {
-            env.insert("LD_LIBRARY_PATH", processLD_LIBRARY_PATH(value));
-            continue;
-        }
 #endif
         // qDebug() << "Env: " << key << value;
         env.insert(key, value);
     }
 #ifdef Q_OS_LINUX
-    // HACK: Workaround for QTBUG42500
+    // HACK: Workaround for QTBUG-42500
     if(!env.contains("LD_LIBRARY_PATH"))
     {
         env.insert("LD_LIBRARY_PATH", "");
@@ -203,7 +205,7 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
         // Read the current type version from the registry.
         // This will be used to find any key that contains the JavaHome value.
 
-        TCHAR subKeyName[255];
+        WCHAR subKeyName[255];
         DWORD subKeyNameSize, numSubKeys, retCode;
 
         // Get the number of subkeys
@@ -229,12 +231,11 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
                                       KEY_READ | KEY_WOW64_64KEY, &newKey) == ERROR_SUCCESS)
                     {
                         // Read the JavaHome value to find where Java is installed.
-                        TCHAR *value = NULL;
                         DWORD valueSz = 0;
-                        if (RegQueryValueExW(newKey, keyJavaDir.toStdWString().c_str(), NULL, NULL, (BYTE *)value,
-                                             &valueSz) == ERROR_MORE_DATA)
+                        if (RegQueryValueExW(newKey, keyJavaDir.toStdWString().c_str(), NULL, NULL, NULL,
+                                             &valueSz) == ERROR_SUCCESS)
                         {
-                            value = new TCHAR[valueSz];
+                            WCHAR *value = new WCHAR[valueSz];
                             RegQueryValueExW(newKey, keyJavaDir.toStdWString().c_str(), NULL, NULL, (BYTE *)value,
                                              &valueSz);
 

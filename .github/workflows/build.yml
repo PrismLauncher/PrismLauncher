@@ -23,10 +23,9 @@ jobs:
             qt_ver: 5
 
           - os: ubuntu-20.04
-            appimage: true
             qt_ver: 6
             qt_host: linux
-            qt_version: '6.3.1'
+            qt_version: '6.2.4'
             qt_modules: 'qt5compat qtimageformats'
             qt_path: /home/runner/work/PolyMC/Qt
 
@@ -92,7 +91,7 @@ jobs:
         if: runner.os != 'Windows' && inputs.build_type == 'Debug'
         uses: hendrikmuhs/ccache-action@v1.2.1
         with:
-          key: ${{ matrix.os }}-${{ matrix.appimage }}
+          key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}
 
       - name: Setup ccache (Windows)
         if: runner.os == 'Windows' && inputs.build_type == 'Debug'
@@ -115,9 +114,9 @@ jobs:
         uses: actions/cache@v3.0.2
         with:
           path: '${{ github.workspace }}\.ccache'
-          key: ${{ matrix.os }}--qt${{ matrix.qt_ver }}
+          key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}
           restore-keys: |
-              ${{ matrix.os }}--qt${{ matrix.qt_ver }}
+              ${{ matrix.os }}-qt${{ matrix.qt_ver }}
 
       - name: Set short version
         shell: bash
@@ -138,7 +137,7 @@ jobs:
           brew install ninja extra-cmake-modules
 
       - name: Install Qt (Linux)
-        if: runner.os == 'Linux' && matrix.appimage != true
+        if: runner.os == 'Linux' && matrix.qt_ver != 6
         run: |
           sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
  
@@ -162,7 +161,7 @@ jobs:
            aqtversion: ==2.1.*
 
       - name: Prepare AppImage (Linux)
-        if: runner.os == 'Linux' && matrix.appimage == true
+        if: runner.os == 'Linux' && matrix.qt_ver != 5
         run: |
           wget "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage"
@@ -281,7 +280,7 @@ jobs:
           makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
 
       - name: Package (Linux)
-        if: runner.os == 'Linux' && matrix.appimage != true
+        if: runner.os == 'Linux'
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR }}
 
@@ -289,7 +288,7 @@ jobs:
           tar --owner root --group root -czf ../PolyMC.tar.gz *
 
       - name: Package (Linux, portable)
-        if: runner.os == 'Linux' && matrix.appimage != true
+        if: runner.os == 'Linux'
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
@@ -298,7 +297,7 @@ jobs:
           tar -czf ../PolyMC-portable.tar.gz *
 
       - name: Package AppImage (Linux)
-        if: runner.os == 'Linux' && matrix.appimage == true
+        if: runner.os == 'Linux' && matrix.qt_ver != 5
         shell: bash
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
@@ -357,22 +356,36 @@ jobs:
           name: PolyMC-${{ matrix.name }}-Setup-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC-Setup.exe
 
-      - name: Upload binary tarball (Linux)
-        if: runner.os == 'Linux' && matrix.appimage != true
+      - name: Upload binary tarball (Linux, Qt 5)
+        if: runner.os == 'Linux' && matrix.qt_ver != 6
         uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC.tar.gz
 
-      - name: Upload binary tarball (Linux, portable)
-        if: runner.os == 'Linux' && matrix.appimage != true
+      - name: Upload binary tarball (Linux, portable, Qt 5)
+        if: runner.os == 'Linux' && matrix.qt_ver != 6
         uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PolyMC-portable.tar.gz
 
+      - name: Upload binary tarball (Linux, Qt 6)
+        if: runner.os == 'Linux' && matrix.qt_ver !=5
+        uses: actions/upload-artifact@v3
+        with:
+          name: PolyMC-${{ runner.os }}-Qt6-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PolyMC.tar.gz
+
+      - name: Upload binary tarball (Linux, portable, Qt 6)
+        if: runner.os == 'Linux' && matrix.qt_ver != 5
+        uses: actions/upload-artifact@v3
+        with:
+          name: PolyMC-${{ runner.os }}-Qt6-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: PolyMC-portable.tar.gz
+
       - name: Upload AppImage (Linux)
-        if: runner.os == 'Linux' && matrix.appimage == true
+        if: runner.os == 'Linux' && matrix.qt_ver != 5
         uses: actions/upload-artifact@v3
         with:
           name: PolyMC-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage

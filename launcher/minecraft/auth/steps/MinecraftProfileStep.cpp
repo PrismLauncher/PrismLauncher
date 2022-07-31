@@ -4,6 +4,7 @@
 
 #include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
+#include "net/NetUtils.h"
 
 MinecraftProfileStep::MinecraftProfileStep(AccountData* data) : AuthStep(data) {
 
@@ -64,10 +65,18 @@ void MinecraftProfileStep::onRequestDone(
         qWarning() << " Response:";
         qWarning() << QString::fromUtf8(data);
 
-        emit finished(
-            AccountTaskState::STATE_FAILED_SOFT,
-            tr("Minecraft Java profile acquisition failed.")
-        );
+        if (Net::isApplicationError(error)) {
+            emit finished(
+                AccountTaskState::STATE_FAILED_SOFT,
+                tr("Minecraft Java profile acquisition failed: %1").arg(requestor->errorString_)
+            );
+        }
+        else {
+            emit finished(
+                AccountTaskState::STATE_OFFLINE,
+                tr("Minecraft Java profile acquisition failed: %1").arg(requestor->errorString_)
+            );
+        }
         return;
     }
     if(!Parsers::parseMinecraftProfile(data, m_data->minecraftProfile)) {

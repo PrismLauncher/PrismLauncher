@@ -13,6 +13,9 @@ public:
     explicit FileResolvingTask(const shared_qobject_ptr<QNetworkAccessManager>& network, Flame::Manifest &toProcess);
     virtual ~FileResolvingTask() {};
 
+    bool canAbort() const override { return true; }
+    bool abort() override;
+
     const Flame::Manifest &getResults() const
     {
         return m_toProcess;

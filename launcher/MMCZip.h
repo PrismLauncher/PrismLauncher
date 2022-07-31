@@ -42,7 +42,7 @@
 #include <functional>
 
 #include <quazip/JlCompress.h>
-#include <nonstd/optional>
+#include <optional>
 
 namespace MMCZip
 {
@@ -95,7 +95,7 @@ namespace MMCZip
     /**
      * Extract a subdirectory from an archive
      */
-    nonstd::optional<QStringList> extractSubDir(QuaZip *zip, const QString & subdir, const QString &target);
+    std::optional<QStringList> extractSubDir(QuaZip *zip, const QString & subdir, const QString &target);
 
     bool extractRelFile(QuaZip *zip, const QString & file, const QString &target);
 
@@ -106,7 +106,7 @@ namespace MMCZip
      * \param dir The directory to extract to, the current directory if left empty.
      * \return The list of the full paths of the files extracted, empty on failure.
      */
-    nonstd::optional<QStringList> extractDir(QString fileCompressed, QString dir);
+    std::optional<QStringList> extractDir(QString fileCompressed, QString dir);
 
     /**
      * Extract a subdirectory from an archive
@@ -116,7 +116,7 @@ namespace MMCZip
      * \param dir The directory to extract to, the current directory if left empty.
      * \return The list of the full paths of the files extracted, empty on failure.
      */
-    nonstd::optional<QStringList> extractDir(QString fileCompressed, QString subdir, QString dir);
+    std::optional<QStringList> extractDir(QString fileCompressed, QString subdir, QString dir);
 
     /**
      * Extract a single file from an archive into a directory

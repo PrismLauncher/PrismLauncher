@@ -155,14 +155,6 @@ Canonical implementation of the murmur2 hash, taken from [SMHasher](https://gith
 
 Public domain (the author disclaimed the copyright).
 
-## optional-bare
-
-A simple single-file header-only version of a C++17-like optional for default-constructible, copyable types, for C++98 and later.
-
-Imported from: https://github.com/martinmoene/optional-bare/commit/0bb1d183bcee1e854c4ea196b533252c51f98b81
-
-Boost Software License - Version 1.0
-
 ## quazip
 
 A zip manipulation library, forked for MultiMC's use.

@@ -44,7 +44,7 @@
 #include "QObjectPtr.h"
 #include "modplatform/flame/PackManifest.h"
 
-#include <nonstd/optional>
+#include <optional>
 
 class QuaZip;
 namespace Flame
@@ -90,8 +90,8 @@ private: /* data */
     QString m_archivePath;
     bool m_downloadRequired = false;
     std::unique_ptr<QuaZip> m_packZip;
-    QFuture<nonstd::optional<QStringList>> m_extractFuture;
-    QFutureWatcher<nonstd::optional<QStringList>> m_extractFutureWatcher;
+    QFuture<std::optional<QStringList>> m_extractFuture;
+    QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
     QVector<Flame::File> m_blockedMods;
     enum class ModpackType{
         Unknown,

@@ -282,35 +282,22 @@ void LaunchTask::emitFailed(QString reason)
     Task::emitFailed(reason);
 }
 
-void LaunchTask::substituteVariables(const QStringList &args) const
+void LaunchTask::substituteVariables(QStringList &args) const
 {
-    auto variables = m_instance->getVariables();
-    auto envVariables = QProcessEnvironment::systemEnvironment();
+    auto env = m_instance->createEnvironment();
 
-    for (auto arg : args) {
-        for (auto key : variables)
-        {
-            arg.replace("$" + key, variables.value(key));
-        }
-        for (auto env : envVariables.keys())
-        {
-            arg.replace("$" + env, envVariables.value(env));
-        }
+    for (auto key : env.keys())
+    {
+        args.replaceInStrings("$" + key, env.value(key));
     }
 }
 
-QString LaunchTask::substituteVariables(const QString &cmd) const
+void LaunchTask::substituteVariables(QString &cmd) const
 {
-    QString out = cmd;
-    auto variables = m_instance->getVariables();
-    for (auto it = variables.begin(); it != variables.end(); ++it)
+    auto env = m_instance->createEnvironment();
+
+    for (auto key : env.keys())
     {
-        out.replace("$" + it.key(), it.value());
+        cmd.replace("$" + key, env.value(key));
     }
-    auto env = QProcessEnvironment::systemEnvironment();
-    for (auto var : env.keys())
-    {
-        out.replace("$" + var, env.value(var));
-    }
-    return out;
 }
