@@ -147,6 +147,7 @@ public:
     QString getManagedPackVersionID();
     QString getManagedPackVersionName();
     void setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version);
+    void copyManagedPack(BaseInstance& other);
 
     /// guess log level from a line of game log
     virtual MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level)

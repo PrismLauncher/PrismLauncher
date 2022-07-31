@@ -154,6 +154,16 @@ void BaseInstance::setManagedPack(const QString& type, const QString& id, const 
     settings()->set("ManagedPackVersionName", version);
 }
 
+void BaseInstance::copyManagedPack(BaseInstance& other)
+{
+    settings()->set("ManagedPack", other.isManagedPack());
+    settings()->set("ManagedPackType", other.getManagedPackType());
+    settings()->set("ManagedPackID", other.getManagedPackID());
+    settings()->set("ManagedPackName", other.getManagedPackName());
+    settings()->set("ManagedPackVersionID", other.getManagedPackVersionID());
+    settings()->set("ManagedPackVersionName", other.getManagedPackVersionName());
+}
+
 int BaseInstance::getConsoleMaxLines() const
 {
     auto lineSetting = m_settings->getSetting("ConsoleMaxLines");
