@@ -2,6 +2,10 @@
 
 #include "InstanceCreationTask.h"
 
+#include <optional>
+
+#include "minecraft/MinecraftInstance.h"
+
 #include "modplatform/flame/FileResolvingTask.h"
 
 #include "net/NetJob.h"
@@ -35,4 +39,6 @@ class FlameCreationTask final : public InstanceCreationTask {
     // Handle to allow aborting
     NetJob* m_process_update_file_info_job = nullptr;
     NetJob::Ptr m_files_job = nullptr;
+
+    std::optional<InstancePtr> m_instance;
 };

@@ -186,6 +186,8 @@ bool FlameCreationTask::updateInstance()
     setOverride(true);
     qDebug() << "Will override instance!";
 
+    m_instance = inst;
+
     // We let it go through the createInstance() stage, just with a couple modifications for updating
     return false;
 }
@@ -318,6 +320,13 @@ bool FlameCreationTask::createInstance()
     m_mod_id_resolver->start();
 
     loop.exec();
+
+    if (m_instance) {
+        auto inst = m_instance.value();
+
+        inst->copyManagedPack(instance);
+        inst->setName(instance.name());
+    }
 
     return getError().isEmpty();
 }
