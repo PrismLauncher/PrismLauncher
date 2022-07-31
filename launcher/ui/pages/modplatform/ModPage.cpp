@@ -226,6 +226,9 @@ void ModPage::onModSelected()
     }
 
     updateSelectionButton();
+
+    /* Force redraw on the mods list when the selection changes */
+    ui->packView->adjustSize();
 }
 
 
