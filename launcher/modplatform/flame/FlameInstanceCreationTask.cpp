@@ -11,13 +11,12 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
+#include "modplatform/helpers/OverrideUtils.h"
+
 #include "settings/INISettingsObject.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/BlockedModsDialog.h"
-
-// NOTE: Because of CF's ToS, I don't know if it counts as caching data, so it'll be disabled for now
-#define DO_DIFF_UPDATE 0
 
 const static QMap<QString, QString> forgemap = { { "1.2.5", "3.4.9.171" },
                                                  { "1.4.2", "6.0.1.355" },
@@ -77,7 +76,9 @@ bool FlameCreationTask::updateInstance()
 
     QDir old_inst_dir(inst->instanceRoot());
 
-    QString old_index_path(FS::PathCombine(old_inst_dir.absolutePath(), "flame", "manifest.json"));
+    QString old_index_folder(FS::PathCombine(old_inst_dir.absolutePath(), "flame"));
+    QString old_index_path(FS::PathCombine(old_index_folder, "manifest.json"));
+
     QFileInfo old_index_file(old_index_path);
     if (old_index_file.exists()) {
         Flame::Manifest old_pack;
@@ -85,11 +86,9 @@ bool FlameCreationTask::updateInstance()
 
         auto& old_files = old_pack.files;
 
-#if DO_DIFF_UPDATE
-        // Remove repeated files, we don't need to download them!
         auto& files = m_pack.files;
 
-        // Let's remove all duplicated, identical resources!
+        // Remove repeated files, we don't need to download them!
         auto files_iterator = files.begin();
         while (files_iterator != files.end()) {
             auto const& file = files_iterator;
@@ -107,7 +106,18 @@ bool FlameCreationTask::updateInstance()
 
             files_iterator++;
         }
-#endif
+
+        QString old_minecraft_dir(inst->gameRoot());
+
+        // We will remove all the previous overrides, to prevent duplicate files!
+        // TODO: Currently 'overrides' will always override the stuff on update. How do we preserve unchanged overrides?
+        // FIXME: We may want to do something about disabled mods.
+        auto old_overrides = Override::readOverrides("overrides", old_index_folder);
+        for (auto entry : old_overrides) {
+            qDebug() << "Removing" << entry;
+            old_minecraft_dir.remove(entry);
+        }
+
         // Remove remaining old files (we need to do an API request to know which ids are which files...)
         QStringList fileIds;
 
@@ -120,7 +130,7 @@ bool FlameCreationTask::updateInstance()
 
         QEventLoop loop;
 
-        connect(job, &NetJob::succeeded, this, [raw_response, fileIds, old_inst_dir, &old_files] {
+        connect(job, &NetJob::succeeded, this, [raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir] {
             // Parse the API response
             QJsonParseError parse_error{};
             auto doc = QJsonDocument::fromJson(*raw_response, &parse_error);
@@ -158,7 +168,7 @@ bool FlameCreationTask::updateInstance()
                     continue;
 
                 qDebug() << "Removing" << file.fileName << "at" << file.targetFolder;
-                QString path(FS::PathCombine(old_inst_dir.absolutePath(), "minecraft", file.targetFolder, file.fileName));
+                QString path(FS::PathCombine(old_minecraft_dir, file.targetFolder, file.fileName));
                 if (!QFile::remove(path))
                     qDebug() << "Failed to remove file at" << path;
             }
@@ -172,7 +182,6 @@ bool FlameCreationTask::updateInstance()
 
         m_process_update_file_info_job = nullptr;
     }
-    // TODO: Currently 'overrides' will always override the stuff on update. How do we preserve unchanged overrides?
 
     setOverride(true);
     qDebug() << "Will override instance!";
@@ -185,13 +194,15 @@ bool FlameCreationTask::createInstance()
 {
     QEventLoop loop;
 
+    QString parent_folder(FS::PathCombine(m_stagingPath, "flame"));
+
     try {
         QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
         if (!m_pack.is_loaded)
             Flame::loadManifest(m_pack, index_path);
 
         // Keep index file in case we need it some other time (like when changing versions)
-        QString new_index_place(FS::PathCombine(m_stagingPath, "flame", "manifest.json"));
+        QString new_index_place(FS::PathCombine(parent_folder, "manifest.json"));
         FS::ensureFilePathExists(new_index_place);
         QFile::rename(index_path, new_index_place);
 
@@ -203,6 +214,9 @@ bool FlameCreationTask::createInstance()
     if (!m_pack.overrides.isEmpty()) {
         QString overridePath = FS::PathCombine(m_stagingPath, m_pack.overrides);
         if (QFile::exists(overridePath)) {
+            // Create a list of overrides in "overrides.txt" inside flame/
+            Override::createOverrides("overrides", parent_folder, overridePath);
+
             QString mcPath = FS::PathCombine(m_stagingPath, "minecraft");
             if (!QFile::rename(overridePath, mcPath)) {
                 setError(tr("Could not rename the overrides folder:\n") + m_pack.overrides);
@@ -338,6 +352,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         } else {
             m_mod_id_resolver.reset();
             setError("Canceled");
+            loop.quit();
         }
     } else {
         setupDownloadJob(loop);
