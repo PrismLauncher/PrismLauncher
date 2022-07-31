@@ -27,7 +27,7 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     bool createInstance() override;
 
    private:
-    bool parseManifest(QString, std::vector<Modrinth::File>&, bool set_managed_info = true);
+    bool parseManifest(QString, std::vector<Modrinth::File>&, bool set_managed_info = true, bool show_optional_dialog = true);
     QString getManagedPackID() const;
 
    private:

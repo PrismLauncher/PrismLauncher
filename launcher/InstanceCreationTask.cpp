@@ -11,6 +11,12 @@ void InstanceCreationTask::executeTask()
         return;
     }
 
+    // When the user aborted in the update stage.
+    if (m_abort) {
+        emitAborted();
+        return;
+    }
+
     // If this is set, it means we're updating an instance. Since the previous step likely
     // removed some old files, we'd better not let the user abort the next task, since it'd
     // put the instance in an invalid state.

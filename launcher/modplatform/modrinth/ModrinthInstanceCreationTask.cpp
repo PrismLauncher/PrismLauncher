@@ -42,22 +42,32 @@ bool ModrinthCreationTask::updateInstance()
     }
 
     QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
-    if (!parseManifest(index_path, m_files))
+    if (!parseManifest(index_path, m_files, true, false))
         return false;
 
     auto version_name = inst->getManagedPackVersionName();
     auto version_str = !version_name.isEmpty() ? tr(" (version %1)").arg(version_name) : "";
 
-    auto info = CustomMessageBox::selectable(m_parent, tr("Similar modpack was found!"),
-                                             tr("One or more of your instances are from this same modpack%1. Do you want to create a "
-                                                "separate instance, or update the existing one?")
-                                                 .arg(version_str),
-                                             QMessageBox::Information, QMessageBox::Ok | QMessageBox::Abort);
-    info->setButtonText(QMessageBox::Ok, tr("Update existing instance"));
-    info->setButtonText(QMessageBox::Abort, tr("Create new instance"));
+    auto info = CustomMessageBox::selectable(
+        m_parent, tr("Similar modpack was found!"),
+        tr("One or more of your instances are from this same modpack%1. Do you want to create a "
+           "separate instance, or update the existing one?\n\nNOTE: Make sure you made a backup of your important instance data before "
+           "updating, as worlds can be corrupted and some configuration may be lost (due to pack overrides).")
+            .arg(version_str),
+        QMessageBox::Information, QMessageBox::Ok | QMessageBox::Reset | QMessageBox::Abort);
+    info->setButtonText(QMessageBox::Ok, tr("Create new instance"));
+    info->setButtonText(QMessageBox::Abort, tr("Update existing instance"));
+    info->setButtonText(QMessageBox::Reset, tr("Cancel"));
 
-    if (info->exec() && info->clickedButton() == info->button(QMessageBox::Abort))
+    info->exec();
+
+    if (info->clickedButton() == info->button(QMessageBox::Ok))
         return false;
+
+    if (info->clickedButton() == info->button(QMessageBox::Reset)) {
+        m_abort = true;
+        return false;
+    }
 
     // Remove repeated files, we don't need to download them!
     QDir old_inst_dir(inst->instanceRoot());
@@ -68,7 +78,7 @@ bool ModrinthCreationTask::updateInstance()
     QFileInfo old_index_file(old_index_path);
     if (old_index_file.exists()) {
         std::vector<Modrinth::File> old_files;
-        parseManifest(old_index_path, old_files, false);
+        parseManifest(old_index_path, old_files, false, false);
 
         // Let's remove all duplicated, identical resources!
         auto files_iterator = m_files.begin();
@@ -137,7 +147,7 @@ bool ModrinthCreationTask::createInstance()
     QString parent_folder(FS::PathCombine(m_stagingPath, "mrpack"));
 
     QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
-    if (m_files.empty() && !parseManifest(index_path, m_files))
+    if (m_files.empty() && !parseManifest(index_path, m_files, true, true))
         return false;
 
     // Keep index file in case we need it some other time (like when changing versions)
@@ -243,7 +253,7 @@ bool ModrinthCreationTask::createInstance()
     return ended_well;
 }
 
-bool ModrinthCreationTask::parseManifest(QString index_path, std::vector<Modrinth::File>& files, bool set_managed_info)
+bool ModrinthCreationTask::parseManifest(QString index_path, std::vector<Modrinth::File>& files, bool set_managed_info, bool show_optional_dialog)
 {
     try {
         auto doc = Json::requireDocument(index_path);
@@ -274,7 +284,7 @@ bool ModrinthCreationTask::parseManifest(QString index_path, std::vector<Modrint
                         continue;
                     } else if (support == "optional") {
                         // TODO: Make a review dialog for choosing which ones the user wants!
-                        if (!had_optional) {
+                        if (!had_optional && show_optional_dialog) {
                             had_optional = true;
                             auto info = CustomMessageBox::selectable(
                                 m_parent, tr("Optional mod detected!"),

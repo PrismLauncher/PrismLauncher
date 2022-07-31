@@ -36,6 +36,9 @@ class InstanceCreationTask : public InstanceTask {
    protected:
     void setError(QString message) { m_error_message = message; };
 
+   protected:
+    bool m_abort = false;
+
    private:
     QString m_error_message;
 };
