@@ -22,7 +22,6 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     }
 
     bool abort() override;
-    bool canAbort() const override { return true; }
 
     bool updateInstance() override;
     bool createInstance() override;

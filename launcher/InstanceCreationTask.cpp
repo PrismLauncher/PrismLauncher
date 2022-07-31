@@ -2,11 +2,22 @@
 
 #include <QDebug>
 
-InstanceCreationTask::InstanceCreationTask() {}
+InstanceCreationTask::InstanceCreationTask() = default;
 
 void InstanceCreationTask::executeTask()
 {
-    if (updateInstance() || createInstance()) {
+    if (updateInstance()) {
+        emitSucceeded();
+        return;
+    }
+
+    // If this is set, it means we're updating an instance. Since the previous step likely
+    // removed some old files, we'd better not let the user abort the next task, since it'd
+    // put the instance in an invalid state.
+    // TODO: Figure out an unexpensive way of making such file removal a recoverable transaction.
+    setAbortStatus(!shouldOverride());
+
+    if (createInstance()) {
         emitSucceeded();
         return;
     }

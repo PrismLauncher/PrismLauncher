@@ -785,6 +785,7 @@ class InstanceStaging : public Task {
         connect(child, &Task::succeeded, this, &InstanceStaging::childSucceded);
         connect(child, &Task::failed, this, &InstanceStaging::childFailed);
         connect(child, &Task::aborted, this, &InstanceStaging::childAborted);
+        connect(child, &Task::abortStatusChanged, this, &InstanceStaging::setAbortStatus);
         connect(child, &Task::status, this, &InstanceStaging::setStatus);
         connect(child, &Task::progress, this, &InstanceStaging::setProgress);
         connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);

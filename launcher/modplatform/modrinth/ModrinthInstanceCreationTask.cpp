@@ -19,9 +19,12 @@
 
 bool ModrinthCreationTask::abort()
 {
+    if (!canAbort())
+        return false;
+
     if (m_files_job)
         return m_files_job->abort();
-    return true;
+    return Task::abort();
 }
 
 bool ModrinthCreationTask::updateInstance()

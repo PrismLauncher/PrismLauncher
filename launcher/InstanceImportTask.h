@@ -58,7 +58,6 @@ class InstanceImportTask : public InstanceTask
 public:
     explicit InstanceImportTask(const QUrl sourceUrl, QWidget* parent = nullptr);
 
-    bool canAbort() const override { return true; }
     bool abort() override;
     const QVector<Flame::File> &getBlockedFiles() const
     {

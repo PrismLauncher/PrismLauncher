@@ -63,15 +63,20 @@ InstanceImportTask::InstanceImportTask(const QUrl sourceUrl, QWidget* parent)
 
 bool InstanceImportTask::abort()
 {
+    if (!canAbort())
+        return false;
+
     if (m_filesNetJob)
         m_filesNetJob->abort();
     m_extractFuture.cancel();
 
-    return false;
+    return Task::abort();
 }
 
 void InstanceImportTask::executeTask()
 {
+    setAbortStatus(true);
+
     if (m_sourceUrl.isLocalFile()) {
         m_archivePath = m_sourceUrl.toLocalFile();
         processZipPack();
@@ -274,6 +279,7 @@ void InstanceImportTask::processFlame()
     connect(inst_creation_task, &Task::finished, inst_creation_task, &InstanceCreationTask::deleteLater);
 
     connect(this, &Task::aborted, inst_creation_task, &InstanceCreationTask::abort);
+    connect(inst_creation_task, &Task::abortStatusChanged, this, &Task::setAbortStatus);
 
     inst_creation_task->start();
 }
@@ -336,6 +342,7 @@ void InstanceImportTask::processModrinth()
     connect(inst_creation_task, &Task::finished, inst_creation_task, &InstanceCreationTask::deleteLater);
 
     connect(this, &Task::aborted, inst_creation_task, &InstanceCreationTask::abort);
+    connect(inst_creation_task, &Task::abortStatusChanged, this, &Task::setAbortStatus);
 
     inst_creation_task->start();
 }

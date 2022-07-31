@@ -27,6 +27,9 @@ static const FlameAPI api;
 
 bool FlameCreationTask::abort()
 {
+    if (!canAbort())
+        return false;
+
     if (m_process_update_file_info_job)
         m_process_update_file_info_job->abort();
     if (m_files_job)
@@ -34,7 +37,7 @@ bool FlameCreationTask::abort()
     if (m_mod_id_resolver)
         m_mod_id_resolver->abort();
 
-    return true;
+    return Task::abort();
 }
 
 bool FlameCreationTask::updateInstance()
