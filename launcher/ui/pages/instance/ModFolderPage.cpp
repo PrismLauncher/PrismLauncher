@@ -89,6 +89,9 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
         connect(mods.get(), &ModFolderModel::rowsInserted, this,
                 [this] { ui->actionUpdateItem->setEnabled(ui->treeView->selectionModel()->hasSelection() || !m_model->empty()); });
+
+        connect(mods.get(), &ModFolderModel::rowsRemoved, this,
+                [this] { ui->actionUpdateItem->setEnabled(ui->treeView->selectionModel()->hasSelection() || !m_model->empty()); });
                 
         connect(mods.get(), &ModFolderModel::updateFinished, this, [this, mods] {
             ui->actionUpdateItem->setEnabled(ui->treeView->selectionModel()->hasSelection() || !m_model->empty());
