@@ -22,11 +22,6 @@ Hoedown is a revived fork of Sundown, the Markdown parser based on the original 
 
 See [github repo](https://github.com/hoedown/hoedown).
 
-## iconfix
-This was originally part of the razor-qt project and the Qt toolkit, respecitvely. Its sole purpose is to reimplement Qt's icon loading logic to prevent it from using any platform plugins that could break icon loading.
-
-Licensed under LGPL 2.1
-
 ## javacheck
 Simple Java tool that prints the JVM details - version and platform bitness.
 
