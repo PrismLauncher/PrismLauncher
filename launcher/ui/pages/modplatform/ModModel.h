@@ -18,7 +18,7 @@ class ListModel : public QAbstractListModel {
 
    public:
     ListModel(ModPage* parent);
-    ~ListModel() override = default;
+    ~ListModel() override;
 
     inline auto rowCount(const QModelIndex& parent) const -> int override { return modpacks.size(); };
     inline auto columnCount(const QModelIndex& parent) const -> int override { return 1; };

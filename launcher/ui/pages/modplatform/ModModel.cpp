@@ -13,7 +13,16 @@
 
 namespace ModPlatform {
 
-ListModel::ListModel(ModPage* parent) : QAbstractListModel(parent), m_parent(parent) {}
+// HACK: We need this to prevent callbacks from calling the ListModel after it has already been deleted.
+// This leaks a tiny bit of memory per time the user has opened the mod dialog. How to make this better?
+static QHash<ListModel*, bool> s_running;
+
+ListModel::ListModel(ModPage* parent) : QAbstractListModel(parent), m_parent(parent) { s_running.insert(this, true); }
+
+ListModel::~ListModel()
+{
+    s_running.find(this).value() = false;
+}
 
 auto ListModel::debugName() const -> QString
 {
@@ -101,7 +110,11 @@ void ListModel::requestModVersions(ModPlatform::IndexedPack const& current, QMod
     auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
 
     m_parent->apiProvider()->getVersions({ current.addonId.toString(), getMineVersions(), profile->getModLoaders() },
-                                         [this, current, index](QJsonDocument& doc, QString addonId) { versionRequestSucceeded(doc, addonId, index); });
+                                         [this, current, index](QJsonDocument& doc, QString addonId) {
+                                             if (!s_running.constFind(this).value())
+                                                 return;
+                                             versionRequestSucceeded(doc, addonId, index);
+                                         });
 }
 
 void ListModel::performPaginatedSearch()
@@ -114,8 +127,11 @@ void ListModel::performPaginatedSearch()
 
 void ListModel::requestModInfo(ModPlatform::IndexedPack& current, QModelIndex index)
 {
-    m_parent->apiProvider()->getModInfo(
-        current, [this, index](QJsonDocument& doc, ModPlatform::IndexedPack& pack) { infoRequestFinished(doc, pack, index); });
+    m_parent->apiProvider()->getModInfo(current, [this, index](QJsonDocument& doc, ModPlatform::IndexedPack& pack) {
+        if (!s_running.constFind(this).value())
+            return;
+        infoRequestFinished(doc, pack, index);
+    });
 }
 
 void ListModel::refresh()
