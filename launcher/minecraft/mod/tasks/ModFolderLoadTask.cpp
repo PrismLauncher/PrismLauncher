@@ -83,6 +83,17 @@ void ModFolderLoadTask::run()
         }
     }
 
+    // Remove orphan metadata to prevent issues
+    // See https://github.com/PolyMC/PolyMC/issues/996
+    QMutableMapIterator<QString, Mod::Ptr> iter(m_result->mods);
+    while (iter.hasNext()) {
+        auto mod = iter.next().value();
+        if (mod->status() == ModStatus::NotInstalled) {
+            mod->destroy(m_index_dir, false);
+            iter.remove();
+        }
+    }
+
     emit succeeded();
 }
 
