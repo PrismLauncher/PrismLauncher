@@ -33,7 +33,7 @@ body:
 - type: textarea
   attributes:
     label: Version of Qt
-    description: The version of Qt used in the bug report. You can find it in Help- About PolyMC- About Qt.
+    description: The version of Qt used in the bug report. You can find it in Help -> About PolyMC -> About Qt.
     placeholder: Qt 6.3.0
   validations:
     required: true
