@@ -53,6 +53,7 @@ class ModFolderPage : public ExternalResourcesPage {
     virtual QString helpPage() const override { return "Loader-mods"; }
 
     virtual bool shouldDisplay() const override;
+    virtual void runningStateChanged(bool running);
 
    private slots:
     void installMods();

@@ -106,6 +106,13 @@ CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFold
     : ModFolderPage(inst, mods, parent)
 {}
 
+void ModFolderPage::runningStateChanged(bool running)
+{
+    ExternalResourcesPage::runningStateChanged(running);
+    ui->actionDownloadItem->setEnabled(!running);
+    ui->actionUpdateItem->setEnabled(!running);
+}
+
 bool ModFolderPage::shouldDisplay() const
 {
     return true;
