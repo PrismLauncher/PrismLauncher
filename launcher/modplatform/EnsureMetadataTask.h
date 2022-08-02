@@ -39,8 +39,8 @@ class EnsureMetadataTask : public Task {
         Yes,
         No
     };
-    void emitReady(Mod*, RemoveFromList = RemoveFromList::Yes);
-    void emitFail(Mod*, RemoveFromList = RemoveFromList::Yes);
+    void emitReady(Mod*, QString key = {}, RemoveFromList = RemoveFromList::Yes);
+    void emitFail(Mod*, QString key = {}, RemoveFromList = RemoveFromList::Yes);
 
     // Hashes and stuff
     auto createNewHash(Mod*) -> Hashing::Hasher::Ptr;

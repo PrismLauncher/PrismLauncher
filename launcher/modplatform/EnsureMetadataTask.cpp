@@ -24,8 +24,10 @@ EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::Provider
     : Task(nullptr), m_index_dir(dir), m_provider(prov), m_hashing_task(nullptr), m_current_task(nullptr)
 {
     auto hash_task = createNewHash(mod);
+    if (!hash_task)
+        return;
     connect(hash_task.get(), &Task::succeeded, [this, hash_task, mod] { m_mods.insert(hash_task->getResult(), mod); });
-    connect(hash_task.get(), &Task::failed, [this, hash_task, mod] { emitFail(mod, RemoveFromList::No); });
+    connect(hash_task.get(), &Task::failed, [this, hash_task, mod] { emitFail(mod, "", RemoveFromList::No); });
     hash_task->start();
 }
 
@@ -38,14 +40,14 @@ EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform:
         if (!hash_task)
             continue;
         connect(hash_task.get(), &Task::succeeded, [this, hash_task, mod] { m_mods.insert(hash_task->getResult(), mod); });
-        connect(hash_task.get(), &Task::failed, [this, hash_task, mod] { emitFail(mod, RemoveFromList::No); });
+        connect(hash_task.get(), &Task::failed, [this, hash_task, mod] { emitFail(mod, "", RemoveFromList::No); });
         m_hashing_task->addTask(hash_task);
     }
 }
 
 Hashing::Hasher::Ptr EnsureMetadataTask::createNewHash(Mod* mod)
 {
-    if (!mod->valid() || mod->type() == Mod::MOD_FOLDER)
+    if (!mod || !mod->valid() || mod->type() == Mod::MOD_FOLDER)
         return nullptr;
 
     return Hashing::createHasher(mod->fileinfo().absoluteFilePath(), m_provider);
@@ -120,7 +122,7 @@ void EnsureMetadataTask::executeTask()
         QMutableHashIterator<QString, Mod*> mods_iter(m_mods);
         while (mods_iter.hasNext()) {
             auto mod = mods_iter.next();
-            emitFail(mod.value());
+            emitFail(mod.value(), mod.key());
         }
 
         emitSucceeded();
@@ -168,22 +170,44 @@ void EnsureMetadataTask::executeTask()
     version_task->start();
 }
 
-void EnsureMetadataTask::emitReady(Mod* m, RemoveFromList remove)
+void EnsureMetadataTask::emitReady(Mod* m, QString key, RemoveFromList remove)
 {
+    if (!m) {
+        qCritical() << "Tried to mark a null mod as ready.";
+        if (!key.isEmpty())
+            m_mods.remove(key);
+
+        return;
+    }
+
     qDebug() << QString("Generated metadata for %1").arg(m->name());
     emit metadataReady(m);
 
-    if (remove == RemoveFromList::Yes)
-        m_mods.remove(getExistingHash(m));
+    if (remove == RemoveFromList::Yes) {
+        if (key.isEmpty())
+            key = getExistingHash(m);
+        m_mods.remove(key);
+    }
 }
 
-void EnsureMetadataTask::emitFail(Mod* m, RemoveFromList remove)
+void EnsureMetadataTask::emitFail(Mod* m, QString key, RemoveFromList remove)
 {
+    if (!m) {
+        qCritical() << "Tried to mark a null mod as failed.";
+        if (!key.isEmpty())
+            m_mods.remove(key);
+
+        return;
+    }
+
     qDebug() << QString("Failed to generate metadata for %1").arg(m->name());
     emit metadataFailed(m);
 
-    if (remove == RemoveFromList::Yes)
-        m_mods.remove(getExistingHash(m));
+    if (remove == RemoveFromList::Yes) {
+        if (key.isEmpty())
+            key = getExistingHash(m);
+        m_mods.remove(key);
+    }
 }
 
 // Modrinth
