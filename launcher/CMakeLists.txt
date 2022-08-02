@@ -855,6 +855,10 @@ SET(LAUNCHER_SOURCES
     ui/widgets/PageContainer.cpp
     ui/widgets/PageContainer.h
     ui/widgets/PageContainer_p.h
+    ui/widgets/ProjectDescriptionPage.h
+    ui/widgets/ProjectDescriptionPage.cpp
+    ui/widgets/VariableSizedImageObject.h
+    ui/widgets/VariableSizedImageObject.cpp
     ui/widgets/ProjectItem.h
     ui/widgets/ProjectItem.cpp
     ui/widgets/VersionListView.cpp
