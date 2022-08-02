@@ -43,7 +43,7 @@ jobs:
             macosx_deployment_target: 10.14
             qt_ver: 6
             qt_host: mac
-            qt_version: '6.3.1'
+            qt_version: '6.3.0'
             qt_modules: 'qt5compat qtimageformats'
             qt_path: /Users/runner/work/PolyMC/Qt
 
