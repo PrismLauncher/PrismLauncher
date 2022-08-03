@@ -84,24 +84,25 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->insertActionAfter(ui->actionAddItem, ui->actionUpdateItem);
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
 
-        connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this] {
-            ui->actionUpdateItem->setEnabled(!(m_instance && m_instance->isRunning()) &&
-                                             (ui->treeView->selectionModel()->hasSelection() || !m_model->empty()));
+        auto check_allow_update = [this] {
+            return (!m_instance || !m_instance->isRunning()) &&
+                   (ui->treeView->selectionModel()->hasSelection() || !m_model->empty());
+        };
+
+        connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, check_allow_update] {
+            ui->actionUpdateItem->setEnabled(check_allow_update());
         });
 
-        connect(mods.get(), &ModFolderModel::rowsInserted, this, [this] {
-            ui->actionUpdateItem->setEnabled(!(m_instance && m_instance->isRunning()) &&
-                                             (ui->treeView->selectionModel()->hasSelection() || !m_model->empty()));
+        connect(mods.get(), &ModFolderModel::rowsInserted, this, [this, check_allow_update] {
+            ui->actionUpdateItem->setEnabled(check_allow_update());
         });
 
-        connect(mods.get(), &ModFolderModel::rowsRemoved, this, [this] {
-            ui->actionUpdateItem->setEnabled(!(m_instance && m_instance->isRunning()) &&
-                                             (ui->treeView->selectionModel()->hasSelection() || !m_model->empty()));
+        connect(mods.get(), &ModFolderModel::rowsRemoved, this, [this, check_allow_update] {
+            ui->actionUpdateItem->setEnabled(check_allow_update());
         });
 
-        connect(mods.get(), &ModFolderModel::updateFinished, this, [this, mods] {
-            ui->actionUpdateItem->setEnabled(!(m_instance && m_instance->isRunning()) &&
-                                             (ui->treeView->selectionModel()->hasSelection() || !m_model->empty()));
+        connect(mods.get(), &ModFolderModel::updateFinished, this, [this, check_allow_update, mods] {
+            ui->actionUpdateItem->setEnabled(check_allow_update());
 
             // Prevent a weird crash when trying to open the mods page twice in a session o.O
             disconnect(mods.get(), &ModFolderModel::updateFinished, this, 0);
