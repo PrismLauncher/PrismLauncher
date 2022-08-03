@@ -145,16 +145,25 @@ void LaunchController::login() {
         return;
     }
 
-    // we try empty password first :)
-    QString password;
     // we loop until the user succeeds in logging in or gives up
     bool tryagain = true;
-    // the failure. the default failure.
-    const QString needLoginAgain = tr("Your account is currently not logged in. Please enter your password to log in again. <br /> <br /> This could be caused by a password change.");
-    QString failReason = needLoginAgain;
+    unsigned int tries = 0;
 
     while (tryagain)
     {
+        if (tries > 0 && tries % 3 == 0) {
+            auto result = QMessageBox::question(
+                m_parentWidget,
+                tr("Continue launch?"),
+                tr("It looks like we couldn't launch after %1 tries. Do you want to continue trying?")
+                    .arg(tries)
+            );
+
+            if (result == QMessageBox::No) {
+                return;
+            }
+        }
+        tries++;
         m_session = std::make_shared<AuthSession>();
         m_session->wants_online = m_online;
         m_accountToUse->fillSession(m_session);
