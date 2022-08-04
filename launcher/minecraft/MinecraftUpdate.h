@@ -50,7 +50,7 @@ private:
 
 private:
     MinecraftInstance *m_inst = nullptr;
-    QList<std::shared_ptr<Task>> m_tasks;
+    QList<Task::Ptr> m_tasks;
     QString m_preFailure;
     int m_currentTask = -1;
     bool m_abort = false;

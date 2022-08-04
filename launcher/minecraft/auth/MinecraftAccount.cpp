@@ -238,7 +238,7 @@ void MinecraftAccount::authFailed(QString reason)
 }
 
 bool MinecraftAccount::isActive() const {
-    return m_currentTask;
+    return !m_currentTask.isNull();
 }
 
 bool MinecraftAccount::shouldRefresh() const {
