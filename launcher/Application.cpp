@@ -321,7 +321,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     {
         // Root path is used for updates and portable data
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
         QDir foo(FS::PathCombine(binPath, "..")); // typically portable-root or /usr
         m_rootPath = foo.absolutePath();
 #elif defined(Q_OS_WIN32)
