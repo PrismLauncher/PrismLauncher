@@ -160,6 +160,7 @@ void LaunchController::login() {
             );
 
             if (result == QMessageBox::No) {
+                emitAborted();
                 return;
             }
         }
