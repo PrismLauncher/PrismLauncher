@@ -119,11 +119,9 @@ void EnsureMetadataTask::executeTask()
     }
 
     auto invalidade_leftover = [this] {
-        QMutableHashIterator<QString, Mod*> mods_iter(m_mods);
-        while (mods_iter.hasNext()) {
-            auto mod = mods_iter.next();
-            emitFail(mod.value(), mod.key());
-        }
+        for (auto mod = m_mods.constBegin(); mod != m_mods.constEnd(); mod++)
+            emitFail(mod.value(), mod.key(), RemoveFromList::No);
+        m_mods.clear();
 
         emitSucceeded();
     };
