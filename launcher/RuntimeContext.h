@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QSet>
 #include <QString>
 #include "settings/SettingsObject.h"
 
@@ -7,6 +8,7 @@ struct RuntimeContext {
     QString javaArchitecture;
     QString javaRealArchitecture;
     QString javaPath;
+    QString system;
 
     QString mappedJavaRealArchitecture() const {
         if (javaRealArchitecture == "aarch64") {
@@ -19,6 +21,27 @@ struct RuntimeContext {
         javaArchitecture = instanceSettings->get("JavaArchitecture").toString();
         javaRealArchitecture = instanceSettings->get("JavaRealArchitecture").toString();
         javaPath = instanceSettings->get("JavaPath").toString();
+        system = currentSystem();
+    }
+
+    QString getClassifier() const {
+        return system + "-" + mappedJavaRealArchitecture();
+    }
+
+    // "Legacy" refers to the fact that Mojang assumed that these are the only two architectures
+    bool isLegacyArch() const {
+        QSet<QString> legacyArchitectures{"amd64", "x86_64", "i686"};
+        return legacyArchitectures.contains(mappedJavaRealArchitecture());
+    }
+
+    bool classifierMatches(QString target) const {
+        // try to match precise classifier "[os]-[arch]"
+        bool x = target == getClassifier();
+        // try to match imprecise classifier on legacy architectures "[os]"
+        if (!x && isLegacyArch())
+            x = target == system;
+
+        return x;
     }
 
     static QString currentSystem() {

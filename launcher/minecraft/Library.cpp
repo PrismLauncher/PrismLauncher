@@ -112,9 +112,9 @@ QList<NetAction::Ptr> Library::getDownloads(
     {
         if(isNative())
         {
-            if(m_nativeClassifiers.contains(runtimeContext.currentSystem()))
+            auto nativeClassifier = getCompatibleNative(runtimeContext);
+            if(!nativeClassifier.isNull())
             {
-                auto nativeClassifier = m_nativeClassifiers[runtimeContext.currentSystem()];
                 if(nativeClassifier.contains("${arch}"))
                 {
                     auto nat32Classifier = nativeClassifier;
@@ -215,7 +215,7 @@ bool Library::isActive(const RuntimeContext & runtimeContext) const
         RuleAction ruleResult = Disallow;
         for (auto rule : m_rules)
         {
-            RuleAction temp = rule->apply(this);
+            RuleAction temp = rule->apply(this, runtimeContext);
             if (temp != Defer)
                 ruleResult = temp;
         }
@@ -223,7 +223,7 @@ bool Library::isActive(const RuntimeContext & runtimeContext) const
     }
     if (isNative())
     {
-        result = result && m_nativeClassifiers.contains(runtimeContext.currentSystem());
+        result = result && !getCompatibleNative(runtimeContext).isNull();
     }
     return result;
 }
@@ -236,6 +236,19 @@ bool Library::isLocal() const
 bool Library::isAlwaysStale() const
 {
     return m_hint == "always-stale";
+}
+
+QString Library::getCompatibleNative(const RuntimeContext & runtimeContext) const {
+    // try to match precise classifier "[os]-[arch]"
+    auto entry = m_nativeClassifiers.constFind(runtimeContext.getClassifier());
+    // try to match imprecise classifier on legacy architectures "[os]"
+    if (entry == m_nativeClassifiers.constEnd() && runtimeContext.isLegacyArch())
+        entry = m_nativeClassifiers.constFind(runtimeContext.system);
+
+    if (entry == m_nativeClassifiers.constEnd())
+        return QString();
+
+    return entry.value();
 }
 
 void Library::setStoragePrefix(QString prefix)
@@ -271,9 +284,10 @@ QString Library::filename(const RuntimeContext & runtimeContext) const
 
     // otherwise native, override classifiers. Mojang HACK!
     GradleSpecifier nativeSpec = m_name;
-    if (m_nativeClassifiers.contains(runtimeContext.currentSystem()))
+    QString nativeClassifier = getCompatibleNative(runtimeContext);
+    if (!nativeClassifier.isNull())
     {
-        nativeSpec.setClassifier(m_nativeClassifiers[runtimeContext.currentSystem()]);
+        nativeSpec.setClassifier(nativeClassifier);
     }
     else
     {
@@ -299,9 +313,10 @@ QString Library::storageSuffix(const RuntimeContext & runtimeContext) const
 
     // otherwise native, override classifiers. Mojang HACK!
     GradleSpecifier nativeSpec = m_name;
-    if (m_nativeClassifiers.contains(runtimeContext.currentSystem()))
+    QString nativeClassifier = getCompatibleNative(runtimeContext);
+    if (!nativeClassifier.isNull())
     {
-        nativeSpec.setClassifier(m_nativeClassifiers[runtimeContext.currentSystem()]);
+        nativeSpec.setClassifier(nativeClassifier);
     }
     else
     {

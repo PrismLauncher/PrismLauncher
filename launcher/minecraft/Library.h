@@ -3,6 +3,7 @@
 #include <net/NetAction.h>
 #include <QPair>
 #include <QList>
+#include <QString>
 #include <QStringList>
 #include <QMap>
 #include <QDir>
@@ -154,6 +155,8 @@ public: /* methods */
     // Get a list of downloads for this library
     QList<NetAction::Ptr> getDownloads(const RuntimeContext & runtimeContext, class HttpMetaCache * cache,
                                      QStringList & failedLocalFiles, const QString & overridePath) const;
+
+    QString getCompatibleNative(const RuntimeContext & runtimeContext) const;
 
 private: /* methods */
     /// the default storage prefix used by PolyMC
