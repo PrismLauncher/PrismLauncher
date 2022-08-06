@@ -3,6 +3,7 @@
 This folder has third-party or otherwise external libraries needed for other parts to work.
 
 ## classparser
+
 A simplistic parser for Java class files.
 
 This library has served as a base for some (much more full-featured and advanced) work under NDA for AVG. It, however, should NOT be confused with that work.
@@ -18,16 +19,19 @@ See [github repo](https://github.com/FeralInteractive/gamemode).
 BSD licensed
 
 ## hoedown
+
 Hoedown is a revived fork of Sundown, the Markdown parser based on the original code of the Upskirt library by Natacha Porté.
 
 See [github repo](https://github.com/hoedown/hoedown).
 
 ## javacheck
+
 Simple Java tool that prints the JVM details - version and platform bitness.
 
 Do what you want with it. It is so trivial that noone cares.
 
 ## Katabasis
+
 Oauth2 library customized for Microsoft authentication.
 
 This is a fork of the [O2 library](https://github.com/pipacs/o2).
@@ -35,6 +39,7 @@ This is a fork of the [O2 library](https://github.com/pipacs/o2).
 MIT licensed.
 
 ## launcher
+
 Java launcher part for Minecraft.
 
 It:
@@ -131,6 +136,7 @@ launcher onesix
 Available under `GPL-3.0-only` (with classpath exception), sublicensed from its original `Apache-2.0` codebase
 
 ## libnbtplusplus
+
 libnbt++ is a free C++ library for Minecraft's file format Named Binary Tag (NBT). It can read and write compressed and uncompressed NBT files and provides a code interface for working with NBT data.
 
 See [github repo](https://github.com/ljfa-ag/libnbtplusplus).
@@ -138,6 +144,7 @@ See [github repo](https://github.com/ljfa-ag/libnbtplusplus).
 Available either under LGPL version 3 or later.
 
 ## LocalPeer
+
 Library for making only one instance of the application run at all times.
 
 BSD licensed, derived from [QtSingleApplication](https://github.com/qtproject/qt-solutions/tree/master/qtsingleapplication).
@@ -157,6 +164,7 @@ A zip manipulation library, forked for MultiMC's use.
 LGPL 2.1
 
 ## rainbow
+
 Color functions extracted from [KGuiAddons](https://inqlude.org/libraries/kguiaddons.html). Used for adaptive text coloring.
 
 Available either under LGPL version 2.1 or later.

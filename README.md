@@ -85,6 +85,7 @@ All launcher code is available under the GPL-3.0-only license.
 The logo and related assets are under the CC BY-SA 4.0 license.
 
 ## Sponsors
+
 Thank you to all our generous backers over at Open Collective! Support PolyMC by [becoming a backer](https://opencollective.com/polymc).
 
 [![OpenCollective Backers](https://opencollective.com/polymc/backers.svg?width=890&limit=1000)](https://opencollective.com/polymc#backers)
