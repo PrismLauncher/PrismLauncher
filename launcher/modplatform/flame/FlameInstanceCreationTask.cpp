@@ -30,6 +30,7 @@ bool FlameCreationTask::abort()
     if (!canAbort())
         return false;
 
+    m_abort = true;
     if (m_process_update_file_info_job)
         m_process_update_file_info_job->abort();
     if (m_files_job)

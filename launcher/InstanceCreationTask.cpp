@@ -6,6 +6,8 @@ InstanceCreationTask::InstanceCreationTask() = default;
 
 void InstanceCreationTask::executeTask()
 {
+    setAbortStatus(true);
+
     if (updateInstance()) {
         emitSucceeded();
         return;

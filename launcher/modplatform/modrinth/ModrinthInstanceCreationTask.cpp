@@ -22,8 +22,9 @@ bool ModrinthCreationTask::abort()
     if (!canAbort())
         return false;
 
+    m_abort = true;
     if (m_files_job)
-        return m_files_job->abort();
+        m_files_job->abort();
     return Task::abort();
 }
 

@@ -796,10 +796,12 @@ class InstanceStaging : public Task {
     // FIXME/TODO: add ability to abort during instance commit retries
     bool abort() override
     {
-        if (m_child && m_child->canAbort())
-            return m_child->abort();
+        if (!canAbort())
+            return false;
 
-        return false;
+        m_child->abort();
+
+        return Task::abort();
     }
     bool canAbort() const override
     {
