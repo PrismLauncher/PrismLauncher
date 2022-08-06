@@ -105,12 +105,15 @@ bool ModrinthCreationTask::updateInstance()
         }
 
         QDir old_minecraft_dir(inst->gameRoot());
+
         // Some files were removed from the old version, and some will be downloaded in an updated version,
         // so we're fine removing them!
         if (!old_files.empty()) {
             for (auto const& file : old_files) {
-                qDebug() << "Removing" << file.path;
-                old_minecraft_dir.remove(file.path);
+                if (file.path.isEmpty())
+                    continue;
+                qDebug() << "Scheduling" << file.path << "for removal";
+                m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path));
             }
         }
 
@@ -119,14 +122,18 @@ bool ModrinthCreationTask::updateInstance()
         // FIXME: We may want to do something about disabled mods.
         auto old_overrides = Override::readOverrides("overrides", old_index_folder);
         for (auto entry : old_overrides) {
-            qDebug() << "Removing" << entry;
-            old_minecraft_dir.remove(entry);
+            if (entry.isEmpty())
+                continue;
+            qDebug() << "Scheduling" << entry << "for removal";
+            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
 
         auto old_client_overrides = Override::readOverrides("client-overrides", old_index_folder);
         for (auto entry : old_overrides) {
-            qDebug() << "Removing" << entry;
-            old_minecraft_dir.remove(entry);
+            if (entry.isEmpty())
+                continue;
+            qDebug() << "Scheduling" << entry << "for removal";
+            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
     }
 
@@ -244,7 +251,8 @@ bool ModrinthCreationTask::createInstance()
 
     loop.exec();
 
-    if (m_instance) {
+    if (m_instance && ended_well) {
+        setAbortStatus(false);
         auto inst = m_instance.value();
 
         inst->copyManagedPack(instance);

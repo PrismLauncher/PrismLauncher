@@ -120,15 +120,17 @@ bool FlameCreationTask::updateInstance()
             files_iterator++;
         }
 
-        QString old_minecraft_dir(inst->gameRoot());
+        QDir old_minecraft_dir(inst->gameRoot());
 
         // We will remove all the previous overrides, to prevent duplicate files!
         // TODO: Currently 'overrides' will always override the stuff on update. How do we preserve unchanged overrides?
         // FIXME: We may want to do something about disabled mods.
         auto old_overrides = Override::readOverrides("overrides", old_index_folder);
         for (auto entry : old_overrides) {
-            qDebug() << "Removing" << entry;
-            old_minecraft_dir.remove(entry);
+            if (entry.isEmpty())
+                continue;
+            qDebug() << "Scheduling" << entry << "for removal";
+            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
 
         // Remove remaining old files (we need to do an API request to know which ids are which files...)
@@ -143,7 +145,7 @@ bool FlameCreationTask::updateInstance()
 
         QEventLoop loop;
 
-        connect(job, &NetJob::succeeded, this, [raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir] {
+        connect(job, &NetJob::succeeded, this, [this, raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir] {
             // Parse the API response
             QJsonParseError parse_error{};
             auto doc = QJsonDocument::fromJson(*raw_response, &parse_error);
@@ -180,10 +182,9 @@ bool FlameCreationTask::updateInstance()
                 if (file.fileName.isEmpty() || file.targetFolder.isEmpty())
                     continue;
 
-                qDebug() << "Removing" << file.fileName << "at" << file.targetFolder;
-                QString path(FS::PathCombine(old_minecraft_dir, file.targetFolder, file.fileName));
-                if (!QFile::remove(path))
-                    qDebug() << "Failed to remove file at" << path;
+                QString relative_path(FS::PathCombine(file.targetFolder, file.fileName));
+                qDebug() << "Scheduling" << relative_path << "for removal";
+                m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
             }
         });
         connect(job, &NetJob::finished, &loop, &QEventLoop::quit);
@@ -334,14 +335,17 @@ bool FlameCreationTask::createInstance()
 
     loop.exec();
 
-    if (m_instance) {
+    bool did_succeed = getError().isEmpty();
+
+    if (m_instance && did_succeed) {
+        setAbortStatus(false);
         auto inst = m_instance.value();
 
         inst->copyManagedPack(instance);
         inst->setName(instance.name());
     }
 
-    return getError().isEmpty();
+    return did_succeed;
 }
 
 void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
@@ -421,7 +425,6 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     m_mod_id_resolver.reset();
     connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
         m_files_job.reset();
-        emitSucceeded();
     });
     connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
         m_files_job.reset();

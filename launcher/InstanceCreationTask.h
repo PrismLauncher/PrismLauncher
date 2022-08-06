@@ -39,6 +39,8 @@ class InstanceCreationTask : public InstanceTask {
    protected:
     bool m_abort = false;
 
+    QStringList m_files_to_remove;
+
    private:
     QString m_error_message;
 };
