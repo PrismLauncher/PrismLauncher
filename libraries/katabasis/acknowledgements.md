@@ -1,4 +1,4 @@
-# O2 library by Akos Polster and contributors
+## O2 library by Akos Polster and contributors
 
 [The origin of this fork.](https://github.com/pipacs/o2)
 
@@ -26,7 +26,7 @@
 > OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 > OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# SimpleCrypt by Andre Somers
+## SimpleCrypt by Andre Somers
 
 Cryptographic methods for Qt.
 
@@ -56,7 +56,7 @@ Cryptographic methods for Qt.
 > (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 > SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Mandeep Sandhu <mandeepsandhu.chd@gmail.com>
+## Mandeep Sandhu <mandeepsandhu.chd@gmail.com>
 
 Configurable settings storage, Twitter XAuth specialization, new demos, cleanups.
 
@@ -67,42 +67,42 @@ Configurable settings storage, Twitter XAuth specialization, new demos, cleanups
 > Regards,
 > -mandeep"
 
-# Sergey Gavrushkin <https://github.com/ncux>
+## Sergey Gavrushkin <https://github.com/ncux>
 
 FreshBooks specialization
 
-# Theofilos Intzoglou <https://github.com/parapente>
+## Theofilos Intzoglou <https://github.com/parapente>
 
 Hubic specialization
 
-# Dimitar
+## Dimitar
 
 SurveyMonkey specialization
 
-# David Brooks <https://github.com/dbrnz>
+## David Brooks <https://github.com/dbrnz>
 
 CMake related fixes and improvements.
 
-# Lukas Vogel <https://github.com/lukedirtwalker>
+## Lukas Vogel <https://github.com/lukedirtwalker>
 
 Spotify support
 
-# Alan Garny <https://github.com/agarny>
+## Alan Garny <https://github.com/agarny>
 
 Windows DLL build support
 
-# MartinMikita <https://github.com/MartinMikita>
+## MartinMikita <https://github.com/MartinMikita>
 
 Bug fixes
 
-# Larry Shaffer <https://github.com/dakcarto>
+## Larry Shaffer <https://github.com/dakcarto>
 
 Versioning, shared lib, install target and header support
 
-# Gilmanov Ildar <https://github.com/gilmanov-ildar>
+## Gilmanov Ildar <https://github.com/gilmanov-ildar>
 
 Bug fixes, support for ```qml``` module
 
-# Fabian Vogt <https://github.com/Vogtinator>
+## Fabian Vogt <https://github.com/Vogtinator>
 
 Bug fixes, support for building without Qt keywords enabled
