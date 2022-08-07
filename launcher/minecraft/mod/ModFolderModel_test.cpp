@@ -35,6 +35,7 @@
 
 #include <QTest>
 #include <QTemporaryDir>
+#include <QTimer>
 
 #include "FileSystem.h"
 #include "minecraft/mod/ModFolderModel.h"
@@ -65,11 +66,25 @@ slots:
         {
             QString folder = source;
             QTemporaryDir tempDir;
+
             QEventLoop loop;
+
             ModFolderModel m(tempDir.path(), true);
+
             connect(&m, &ModFolderModel::updateFinished, &loop, &QEventLoop::quit);
+
+            QTimer expire_timer;
+            expire_timer.callOnTimeout(&loop, &QEventLoop::quit);
+            expire_timer.setSingleShot(true);
+            expire_timer.start(4000);
+
             m.installMod(folder);
+
             loop.exec();
+
+            QVERIFY2(expire_timer.isActive(), "Timer has expired. The update never finished.");
+            expire_timer.stop();
+
             verify(tempDir.path());
         }
 
@@ -79,9 +94,21 @@ slots:
             QTemporaryDir tempDir;
             QEventLoop loop;
             ModFolderModel m(tempDir.path(), true);
+
             connect(&m, &ModFolderModel::updateFinished, &loop, &QEventLoop::quit);
+
+            QTimer expire_timer;
+            expire_timer.callOnTimeout(&loop, &QEventLoop::quit);
+            expire_timer.setSingleShot(true);
+            expire_timer.start(4000);
+
             m.installMod(folder);
+
             loop.exec();
+
+            QVERIFY2(expire_timer.isActive(), "Timer has expired. The update never finished.");
+            expire_timer.stop();
+
             verify(tempDir.path());
         }
     }
