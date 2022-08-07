@@ -280,8 +280,7 @@ QString DirNameFromString(QString string, QString inDir)
         if (num == 0) {
             dirName = baseName;
         } else {
-            dirName = baseName + QString::number(num);
-            ;
+            dirName = baseName + "(" + QString::number(num) + ")";
         }
 
         // If it's over 9000
