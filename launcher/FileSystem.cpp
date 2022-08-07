@@ -300,50 +300,6 @@ bool checkProblemticPathJava(QDir folder)
     return pathfoldername.contains("!", Qt::CaseInsensitive);
 }
 
-// Win32 crap
-#ifdef Q_OS_WIN
-
-bool called_coinit = false;
-
-HRESULT CreateLink(LPCCH linkPath, LPCWSTR targetPath, LPCWSTR args)
-{
-    HRESULT hres;
-
-    if (!called_coinit) {
-        hres = CoInitialize(NULL);
-        called_coinit = true;
-
-        if (!SUCCEEDED(hres)) {
-            qWarning("Failed to initialize COM. Error 0x%08lX", hres);
-            return hres;
-        }
-    }
-
-    IShellLink* link;
-    hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&link);
-
-    if (SUCCEEDED(hres)) {
-        IPersistFile* persistFile;
-
-        link->SetPath(targetPath);
-        link->SetArguments(args);
-
-        hres = link->QueryInterface(IID_IPersistFile, (LPVOID*)&persistFile);
-        if (SUCCEEDED(hres)) {
-            WCHAR wstr[MAX_PATH];
-
-            MultiByteToWideChar(CP_ACP, 0, linkPath, -1, wstr, MAX_PATH);
-
-            hres = persistFile->Save(wstr, TRUE);
-            persistFile->Release();
-        }
-        link->Release();
-    }
-    return hres;
-}
-
-#endif
-
 QString getDesktopDir()
 {
     return QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
