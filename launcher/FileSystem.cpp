@@ -61,6 +61,22 @@
 
 #include <filesystem>
 
+#if defined Q_OS_WIN32
+
+std::wstring toStdString(QString s)
+{
+    return s.toStdWString();
+}
+
+#else
+
+std::string toStdString(QString s)
+{
+    return s.toStdString();
+}
+
+#endif
+
 namespace FS {
 
 void ensureExists(const QDir& dir)
@@ -166,7 +182,7 @@ bool copy::operator()(const QString& offset)
         auto dst_path = PathCombine(dst, relative_path);
         ensureFilePathExists(dst_path);
 
-        std::filesystem::copy(src_path.toStdString(), dst_path.toStdString(), opt, err);
+        std::filesystem::copy(toStdString(src_path), toStdString(dst_path), opt, err);
         if (err) {
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
@@ -181,7 +197,7 @@ bool deletePath(QString path)
 {
     std::error_code err;
 
-    std::filesystem::remove_all(path.toStdString(), err);
+    std::filesystem::remove_all(toStdString(path), err);
 
     if (err) {
         qWarning() << "Failed to remove files:" << QString::fromStdString(err.message());
@@ -368,7 +384,7 @@ bool overrideFolder(QString overwritten_path, QString override_path)
     std::error_code err;
     std::filesystem::copy_options opt = copy_opts::recursive | copy_opts::overwrite_existing;
 
-    std::filesystem::copy(override_path.toStdString(), overwritten_path.toStdString(), opt, err);
+    std::filesystem::copy(toStdString(override_path), toStdString(overwritten_path), opt, err);
 
     if (err) {
         qCritical() << QString("Failed to apply override from %1 to %2").arg(override_path, overwritten_path);
