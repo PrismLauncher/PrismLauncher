@@ -403,47 +403,24 @@ bool createShortCut(QString location, QString dest, QStringList args, QString na
 #endif
 }
 
-QStringList listFolderPaths(QDir root)
-{
-    auto createAbsPath = [](QFileInfo const& entry) { return FS::PathCombine(entry.path(), entry.fileName()); };
-
-    QStringList entries;
-
-    root.refresh();
-    for (auto entry : root.entryInfoList(QDir::Filter::Files)) {
-        entries.append(createAbsPath(entry));
-    }
-
-    for (auto entry : root.entryInfoList(QDir::Filter::AllDirs | QDir::Filter::NoDotAndDotDot)) {
-        entries.append(listFolderPaths(createAbsPath(entry)));
-    }
-
-    return entries;
-}
-
 bool overrideFolder(QString overwritten_path, QString override_path)
 {
+    using copy_opts = std::filesystem::copy_options;
+
     if (!FS::ensureFolderPathExists(overwritten_path))
         return false;
 
-    QStringList paths_to_override;
-    QDir root_override (override_path);
-    for (auto file : listFolderPaths(root_override)) {
-        QString destination = file;
-        destination.replace(override_path, overwritten_path);
-        ensureFilePathExists(destination);
+    std::error_code err;
+    std::filesystem::copy_options opt = copy_opts::recursive | copy_opts::overwrite_existing;
 
-        qDebug() << QString("Applying override %1 in %2").arg(file, destination);
+    std::filesystem::copy(override_path.toStdString(), overwritten_path.toStdString(), opt, err);
 
-        if (QFile::exists(destination))
-            QFile::remove(destination);
-        if (!QFile::rename(file, destination)) {
-            qCritical() << QString("Failed to apply override from %1 to %2").arg(file, destination);
-            return false;
-        }
+    if (err) {
+        qCritical() << QString("Failed to apply override from %1 to %2").arg(override_path, overwritten_path);
+        qCritical() << "Reason:" << QString::fromStdString(err.message());
     }
 
-    return true;
+    return err.value() == 0;
 }
 
 }
