@@ -113,6 +113,11 @@
 
 #include <sys.h>
 
+#ifdef Q_OS_LINUX
+#include <dlfcn.h>
+#include "gamemode_client.h"
+#endif
+
 
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -1573,6 +1578,23 @@ void Application::updateCapabilities()
         m_capabilities |= SupportsMSA;
     if (!getFlameAPIKey().isEmpty())
         m_capabilities |= SupportsFlame;
+
+#ifdef Q_OS_LINUX
+    if (gamemode_query_status() >= 0)
+        m_capabilities |= SupportsGameMode;
+
+    {
+        void *dummy = dlopen("libMangoHud_dlsym.so", RTLD_LAZY);
+        // try normal variant as well
+        if (dummy == NULL)
+            dummy = dlopen("libMangoHud.so", RTLD_LAZY);
+
+        if (dummy != NULL) {
+            dlclose(dummy);
+            m_capabilities |= SupportsMangoHud;
+        }
+    }
+#endif
 }
 
 QString Application::getJarPath(QString jarFile)

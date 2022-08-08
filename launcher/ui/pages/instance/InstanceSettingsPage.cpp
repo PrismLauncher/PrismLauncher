@@ -348,9 +348,19 @@ void InstanceSettingsPage::loadSettings()
     ui->enableMangoHud->setChecked(m_settings->get("EnableMangoHud").toBool());
     ui->useDiscreteGpuCheck->setChecked(m_settings->get("UseDiscreteGpu").toBool());
 
-    #if !defined(Q_OS_LINUX)
+#if !defined(Q_OS_LINUX)
     ui->settingsTabs->setTabVisible(ui->settingsTabs->indexOf(ui->performancePage), false);
-    #endif
+#endif
+
+    if (!(APPLICATION->capabilities() & Application::SupportsGameMode)) {
+        ui->enableFeralGamemodeCheck->setDisabled(true);
+        ui->enableFeralGamemodeCheck->setToolTip(tr("Feral Interactive's GameMode could not be found on your system."));
+    }
+
+    if (!(APPLICATION->capabilities() & Application::SupportsMangoHud)) {
+        ui->enableMangoHud->setDisabled(true);
+        ui->enableMangoHud->setToolTip(tr("MangoHud could not be found on your system."));
+    }
 
     // Miscellanous
     ui->gameTimeGroupBox->setChecked(m_settings->get("OverrideGameTime").toBool());

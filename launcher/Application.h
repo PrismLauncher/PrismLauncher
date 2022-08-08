@@ -95,6 +95,8 @@ public:
 
         SupportsMSA = 1 << 0,
         SupportsFlame = 1 << 1,
+        SupportsGameMode = 1 << 2,
+        SupportsMangoHud = 1 << 3,
     };
     Q_DECLARE_FLAGS(Capabilities, Capability)
 
