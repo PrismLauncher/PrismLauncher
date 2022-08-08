@@ -56,8 +56,4 @@ struct DistributionInfo
 DistributionInfo getDistributionInfo();
 
 uint64_t getSystemRam();
-
-bool isSystem64bit();
-
-bool isCPU64bit();
 }
