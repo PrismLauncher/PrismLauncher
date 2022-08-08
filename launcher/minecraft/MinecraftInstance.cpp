@@ -447,7 +447,7 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
     QProcessEnvironment env = createEnvironment();
 
 #ifdef Q_OS_LINUX
-    if (settings()->get("EnableMangoHud").toBool())
+    if (settings()->get("EnableMangoHud").toBool() && APPLICATION->capabilities() & Application::SupportsMangoHud)
     {
         auto preload = env.value("LD_PRELOAD", "") + ":libMangoHud_dlsym.so:libMangoHud.so";
 

@@ -21,6 +21,8 @@
 #include <FileSystem.h>
 #include <Commandline.h>
 
+#include "Application.h"
+
 #ifdef Q_OS_LINUX
 #include "gamemode_client.h"
 #endif
@@ -86,7 +88,7 @@ void DirectJavaLaunch::executeTask()
     }
 
 #ifdef Q_OS_LINUX
-    if (instance->settings()->get("EnableFeralGamemode").toBool())
+    if (instance->settings()->get("EnableFeralGamemode").toBool() && APPLICATION->capabilities() & Application::SupportsGameMode)
     {
         auto pid = m_process.processId();
         if (pid)
