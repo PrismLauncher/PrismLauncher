@@ -162,7 +162,7 @@ public:
 
     shared_qobject_ptr<Meta::Index> metadataIndex();
 
-    Capabilities currentCapabilities();
+    void updateCapabilities();
 
     /*!
      * Finds and returns the full path to a jar file.
@@ -178,6 +178,10 @@ public:
     /// this is the root of the 'installation'. Used for automatic updates
     const QString &root() {
         return m_rootPath;
+    }
+
+    const Capabilities capabilities() {
+        return m_capabilities;
     }
 
     /*!
@@ -258,6 +262,7 @@ private:
 
     QString m_rootPath;
     Status m_status = Application::StartingUp;
+    Capabilities m_capabilities;
 
 #ifdef Q_OS_MACOS
     Qt::ApplicationState m_prevAppState = Qt::ApplicationInactive;

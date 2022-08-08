@@ -216,7 +216,7 @@ namespace Net {
         }
 
         request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
-        if (APPLICATION->currentCapabilities() & Application::SupportsFlame
+        if (APPLICATION->capabilities() & Application::SupportsFlame
                 && request.url().host().contains("api.curseforge.com")) {
             request.setRawHeader("x-api-key", APPLICATION->getFlameAPIKey().toUtf8());
         }

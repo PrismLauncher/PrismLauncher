@@ -919,6 +919,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     {
         return;
     }
+
+    updateCapabilities();
     performMainStartupAction();
 }
 
@@ -1564,14 +1566,13 @@ shared_qobject_ptr<Meta::Index> Application::metadataIndex()
     return m_metadataIndex;
 }
 
-Application::Capabilities Application::currentCapabilities()
+void Application::updateCapabilities()
 {
-    Capabilities c;
+    m_capabilities = None;
     if (!getMSAClientID().isEmpty())
-        c |= SupportsMSA;
+        m_capabilities |= SupportsMSA;
     if (!getFlameAPIKey().isEmpty())
-        c |= SupportsFlame;
-    return c;
+        m_capabilities |= SupportsFlame;
 }
 
 QString Application::getJarPath(QString jarFile)
