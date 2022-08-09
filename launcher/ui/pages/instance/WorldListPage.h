@@ -93,7 +93,7 @@ protected:
 private:
     QModelIndex getSelectedWorld();
     bool isWorldSafe(QModelIndex index);
-    bool worldSafetyNagQuestion();
+    bool worldSafetyNagQuestion(const QString &actionType);
     void mceditError();
 
 private:
