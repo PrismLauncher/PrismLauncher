@@ -318,6 +318,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ModDetails.h
     minecraft/mod/ModFolderModel.h
     minecraft/mod/ModFolderModel.cpp
+    minecraft/mod/Resource.h
+    minecraft/mod/Resource.cpp
     minecraft/mod/ResourcePackFolderModel.h
     minecraft/mod/ResourcePackFolderModel.cpp
     minecraft/mod/TexturePackFolderModel.h

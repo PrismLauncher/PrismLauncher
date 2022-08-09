@@ -110,7 +110,7 @@ void EnsureMetadataTask::executeTask()
         }
 
         // Folders don't have metadata
-        if (mod->type() == Mod::MOD_FOLDER) {
+        if (mod->type() == ResourceType::FOLDER) {
             emitReady(mod);
         }
     }

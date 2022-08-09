@@ -714,7 +714,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
             });
             for(auto mod: modList)
             {
-                if(mod->type() == Mod::MOD_FOLDER)
+                if(mod->type() == ResourceType::FOLDER)
                 {
                     out << u8"  [🖿] " + mod->fileinfo().completeBaseName() + " (folder)";
                     continue;

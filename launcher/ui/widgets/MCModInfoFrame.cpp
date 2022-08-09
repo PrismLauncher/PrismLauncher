@@ -23,7 +23,7 @@
 
 void MCModInfoFrame::updateWithMod(Mod &m)
 {
-    if (m.type() == m.MOD_FOLDER)
+    if (m.type() == ResourceType::FOLDER)
     {
         clear();
         return;
