@@ -63,7 +63,11 @@ LoggedProcess::~LoggedProcess()
 QStringList reprocess(const QByteArray& data, QTextDecoder& decoder)
 {
     auto str = decoder.toUnicode(data);
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, QString::SkipEmptyParts);
+#else
     auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, Qt::SkipEmptyParts);
+#endif
     return lines;
 }
 
