@@ -42,8 +42,9 @@
 #include <QRunnable>
 #include <memory>
 #include "minecraft/mod/Mod.h"
+#include "tasks/Task.h"
 
-class ModFolderLoadTask : public QObject, public QRunnable
+class ModFolderLoadTask : public Task
 {
     Q_OBJECT
 public:
@@ -56,16 +57,15 @@ public:
     }
 
 public:
-    ModFolderLoadTask(QDir& mods_dir, QDir& index_dir, bool is_indexed, bool clean_orphan = false);
-    void run();
-signals:
-    void succeeded();
+    ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan = false);
+
+    void executeTask() override;
 
 private:
     void getFromMetadata();
 
 private:
-    QDir& m_mods_dir, m_index_dir;
+    QDir m_mods_dir, m_index_dir;
     bool m_is_indexed;
     bool m_clean_orphan;
     ResultPtr m_result;

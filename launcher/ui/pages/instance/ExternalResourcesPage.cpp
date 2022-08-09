@@ -32,12 +32,12 @@ class SortProxy : public QSortFilterProxyModel {
         
         const auto& mod = model->at(source_row);
 
-        if (filterRegularExpression().match(mod.name()).hasMatch())
+        if (filterRegularExpression().match(mod->name()).hasMatch())
             return true;
-        if (filterRegularExpression().match(mod.description()).hasMatch())
+        if (filterRegularExpression().match(mod->description()).hasMatch())
             return true;
         
-        for (auto& author : mod.authors()) {
+        for (auto& author : mod->authors()) {
             if (filterRegularExpression().match(author).hasMatch()) {
                 return true;
             }
@@ -292,6 +292,6 @@ void ExternalResourcesPage::current(const QModelIndex& current, const QModelInde
 
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
-    Mod& m = m_model->operator[](row);
+    Mod& m = *m_model->operator[](row);
     ui->frame->updateWithMod(m);
 }

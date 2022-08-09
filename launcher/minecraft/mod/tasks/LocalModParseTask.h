@@ -2,17 +2,17 @@
 
 #include <QDebug>
 #include <QObject>
-#include <QRunnable>
 
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/ModDetails.h"
 
-class LocalModParseTask : public QObject, public QRunnable
+#include "tasks/Task.h"
+
+class LocalModParseTask : public Task
 {
     Q_OBJECT
 public:
     struct Result {
-        QString id;
         std::shared_ptr<ModDetails> details;
     };
     using ResultPtr = std::shared_ptr<Result>;
@@ -20,11 +20,10 @@ public:
         return m_result;
     }
 
-    LocalModParseTask(int token, Mod::ModType type, const QFileInfo & modFile);
-    void run();
+    LocalModParseTask(int token, ResourceType type, const QFileInfo & modFile);
+    void executeTask() override;
 
-signals:
-    void finished(int token);
+    [[nodiscard]] int token() const { return m_token; }
 
 private:
     void processAsZip();
@@ -33,7 +32,7 @@ private:
 
 private:
     int m_token;
-    Mod::ModType m_type;
+    ResourceType m_type;
     QFileInfo m_modFile;
     ResultPtr m_result;
 };

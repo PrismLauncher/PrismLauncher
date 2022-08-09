@@ -1,0 +1,274 @@
+#pragma once
+
+#include <QAbstractListModel>
+#include <QDir>
+#include <QFileSystemWatcher>
+#include <QMutex>
+#include <QSet>
+
+#include "Resource.h"
+
+#include "tasks/Task.h"
+
+class QRunnable;
+
+/** A basic model for external resources.
+ *
+ *  To implement one such model, you need to implement, at the very minimum:
+ *  - columnCount: The number of columns in your model.
+ *  - data: How the model data is displayed and accessed.
+ *  - headerData: Display properties of the header.
+ */
+class ResourceFolderModel : public QAbstractListModel {
+    Q_OBJECT
+   public:
+    ResourceFolderModel(QDir, QObject* parent = nullptr);
+
+    /** Starts watching the paths for changes.
+     *
+     *  Returns whether starting to watch all the paths was successful.
+     *  If one or more fails, it returns false.
+     */
+    bool startWatching(const QStringList paths);
+
+    /** Stops watching the paths for changes.
+     *
+     *  Returns whether stopping to watch all the paths was successful.
+     *  If one or more fails, it returns false.
+     */
+    bool stopWatching(const QStringList paths);
+
+    /** Given a path in the system, install that resource, moving it to its place in the
+     *  instance file hierarchy.
+     *
+     *  Returns whether the installation was succcessful.
+     */
+    virtual bool installResource(QString path);
+
+    /** Uninstall (i.e. remove all data about it) a resource, given its file name.
+     *
+     *  Returns whether the removal was successful.
+     */
+    virtual bool uninstallResource(QString file_name);
+
+    virtual bool deleteResources(const QModelIndexList&);
+
+    /** Creates a new update task and start it. Returns false if no update was done, like when an update is already underway. */
+    virtual bool update();
+
+    /** Creates a new parse task, if needed, for 'res' and start it.*/
+    virtual void resolveResource(Resource::Ptr res);
+
+    [[nodiscard]] size_t size() const { return m_resources.size(); };
+    [[nodiscard]] bool empty() const { return size() == 0; }
+
+    [[nodiscard]] QDir const& dir() const { return m_dir; }
+
+    /* Qt behavior */
+
+    [[nodiscard]] int rowCount(const QModelIndex&) const override { return size(); }
+    [[nodiscard]] int columnCount(const QModelIndex&) const override = 0;
+
+    [[nodiscard]] Qt::DropActions supportedDropActions() const override;
+
+    /// flags, mostly to support drag&drop
+    [[nodiscard]] Qt::ItemFlags flags(const QModelIndex& index) const override;
+    [[nodiscard]] QStringList mimeTypes() const override;
+    bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
+
+    [[nodiscard]] bool validateIndex(const QModelIndex& index) const;
+
+    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override = 0;
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override { return false; };
+
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override = 0;
+
+   public slots:
+    void enableInteraction(bool enabled);
+
+   signals:
+    void updateFinished();
+
+   protected:
+    /** This creates a new update task to be executed by update().
+     *
+     *  The task should load and parse all resources necessary, and provide a way of accessing such results.
+     *
+     *  This Task is normally executed when opening a page, so it shouldn't contain much heavy work.
+     *  If such work is needed, try using it in the Task create by createParseTask() instead!
+     */
+    [[nodiscard]] virtual Task* createUpdateTask();
+
+    /** This creates a new parse task to be executed by onUpdateSucceeded().
+     *
+     *  This task should load and parse all heavy info needed by a resource, such as parsing a manifest. It gets executed
+     *  in the background, so it slowly updates the UI as tasks get done.
+     */
+    [[nodiscard]] virtual Task* createParseTask(Resource const&) { return nullptr; };
+
+    /** Standard implementation of the model update logic.
+     *
+     *  It uses set operations to find differences between the current state and the updated state,
+     *  to act only on those disparities.
+     *
+     *  The implementation is at the end of this header.
+     */
+    template <typename T>
+    void applyUpdates(QSet<QString>& current_set, QSet<QString>& new_set, QMap<QString, T>& new_resources);
+
+   protected slots:
+    void directoryChanged(QString);
+
+    /** Called when the update task is successful.
+     *
+     *  This usually calls static_cast on the specific Task type returned by createUpdateTask,
+     *  so care must be taken in such cases.
+     *  TODO: Figure out a way to express this relationship better without templated classes (Q_OBJECT macro dissalows that).
+     */
+    virtual void onUpdateSucceeded();
+    virtual void onUpdateFailed() {}
+
+    /** Called when the parse task with the given ticket is successful.
+     *
+     *  This is just a simple reference implementation. You probably want to override it with your own logic in a subclass
+     *  if the resource is complex and has more stuff to parse.
+     */
+    virtual void onParseSucceeded(int ticket, QString resource_id);
+    virtual void onParseFailed(int ticket, QString resource_id) {}
+
+   protected:
+    bool m_can_interact = true;
+
+    QDir m_dir;
+    QFileSystemWatcher m_watcher;
+    bool m_is_watching = false;
+
+    Task::Ptr m_current_update_task = nullptr;
+    bool m_scheduled_update = false;
+
+    QList<Resource::Ptr> m_resources;
+
+    // Represents the relationship between a resource's internal ID and it's row position on the model.
+    QMap<QString, int> m_resources_index;
+
+    QMap<int, Task::Ptr> m_active_parse_tasks;
+    int m_next_resolution_ticket = 0;
+    QMutex m_ticket_mutex;
+};
+
+/* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
+#define RESOURCE_HELPERS(T)                                                                                                        \
+    [[nodiscard]] T* operator[](size_t index)                                                                                      \
+    {                                                                                                                              \
+        return static_cast<T*>(m_resources[index].get());                                                                          \
+    }                                                                                                                              \
+    [[nodiscard]] T* at(size_t index)                                                                                              \
+    {                                                                                                                              \
+        return static_cast<T*>(m_resources[index].get());                                                                          \
+    }                                                                                                                              \
+    [[nodiscard]] const T* at(size_t index) const                                                                                  \
+    {                                                                                                                              \
+        return static_cast<const T*>(m_resources.at(index).get());                                                                 \
+    }                                                                                                                              \
+    [[nodiscard]] T* first()                                                                                                       \
+    {                                                                                                                              \
+        return static_cast<T*>(m_resources.first().get());                                                                         \
+    }                                                                                                                              \
+    [[nodiscard]] T* last()                                                                                                        \
+    {                                                                                                                              \
+        return static_cast<T*>(m_resources.last().get());                                                                          \
+    }                                                                                                                              \
+    [[nodiscard]] T* find(QString id)                                                                                              \
+    {                                                                                                                              \
+        auto iter = std::find_if(m_resources.begin(), m_resources.end(), [&](Resource::Ptr r) { return r->internal_id() == id; }); \
+        if (iter == m_resources.end())                                                                                             \
+            return nullptr;                                                                                                        \
+        return static_cast<T*>((*iter).get());                                                                                     \
+    }
+
+/* Template definition to avoid some code duplication */
+template <typename T>
+void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>& new_set, QMap<QString, T>& new_resources)
+{
+    // see if the kept resources changed in some way
+    {
+        QSet<QString> kept_set = current_set;
+        kept_set.intersect(new_set);
+
+        for (auto& kept : kept_set) {
+            auto row = m_resources_index[kept];
+
+            auto new_resource = new_resources[kept];
+            auto current_resource = m_resources[row];
+
+            if (new_resource->dateTimeChanged() == current_resource->dateTimeChanged()) {
+                // no significant change, ignore...
+                continue;
+            }
+
+            // If the resource is resolving, but something about it changed, we don't want to
+            // continue the resolving.
+            if (current_resource->isResolving()) {
+                m_active_parse_tasks.remove(current_resource->resolutionTicket());
+            }
+
+            m_resources[row] = new_resource;
+            resolveResource(new_resource);
+            emit dataChanged(index(row, 0), index(row, columnCount(QModelIndex()) - 1));
+        }
+    }
+
+    // remove resources no longer present
+    {
+        QSet<QString> removed_set = current_set;
+        removed_set.subtract(new_set);
+
+        QList<int> removed_rows;
+        for (auto& removed : removed_set)
+            removed_rows.append(m_resources_index[removed]);
+
+        std::sort(removed_rows.begin(), removed_rows.end());
+
+        for (auto& removed_index : removed_rows) {
+            beginRemoveRows(QModelIndex(), removed_index, removed_index);
+
+            auto removed_it = m_resources.begin() + removed_index;
+            if ((*removed_it)->isResolving()) {
+                m_active_parse_tasks.remove((*removed_it)->resolutionTicket());
+            }
+
+            m_resources.erase(removed_it);
+
+            endRemoveRows();
+        }
+    }
+
+    // add new resources to the end
+    {
+        QSet<QString> added_set = new_set;
+        added_set.subtract(current_set);
+
+        // When you have a Qt build with assertions turned on, proceeding here will abort the application
+        if (added_set.size() > 0) {
+            beginInsertRows(QModelIndex(), m_resources.size(), m_resources.size() + added_set.size() - 1);
+
+            for (auto& added : added_set) {
+                auto res = new_resources[added];
+                m_resources.append(res);
+                resolveResource(res);
+            }
+
+            endInsertRows();
+        }
+    }
+
+    // update index
+    {
+        m_resources_index.clear();
+        int idx = 0;
+        for (auto mod : m_resources) {
+            m_resources_index[mod->internal_id()] = idx;
+            idx++;
+        }
+    }
+}

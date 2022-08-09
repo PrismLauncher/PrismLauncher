@@ -338,13 +338,13 @@ std::shared_ptr<ModDetails> ReadLiteModInfo(QByteArray contents)
 
 }
 
-LocalModParseTask::LocalModParseTask(int token, Mod::ModType type, const QFileInfo& modFile):
+LocalModParseTask::LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile):
+    Task(nullptr, false),
     m_token(token),
     m_type(type),
     m_modFile(modFile),
     m_result(new Result())
-{
-}
+{}
 
 void LocalModParseTask::processAsZip()
 {
@@ -497,21 +497,21 @@ void LocalModParseTask::processAsLitemod()
     zip.close();
 }
 
-void LocalModParseTask::run()
+void LocalModParseTask::executeTask()
 {
     switch(m_type)
     {
-        case Mod::MOD_ZIPFILE:
+        case ResourceType::ZIPFILE:
             processAsZip();
             break;
-        case Mod::MOD_FOLDER:
+        case ResourceType::FOLDER:
             processAsFolder();
             break;
-        case Mod::MOD_LITEMOD:
+        case ResourceType::LITEMOD:
             processAsLitemod();
             break;
         default:
             break;
     }
-    emit finished(m_token);
+    emitSucceeded();
 }
