@@ -54,172 +54,6 @@ ModFolderModel::ModFolderModel(const QString &dir, bool is_indexed) : ResourceFo
     FS::ensureFolderPathExists(m_dir.absolutePath());
 }
 
-Task* ModFolderModel::createUpdateTask()
-{
-    auto index_dir = indexDir();
-    auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load);
-    m_first_folder_load = false;
-    return task;
-}
-
-void ModFolderModel::startWatching()
-{
-    // Remove orphaned metadata next time
-    m_first_folder_load = true;
-    ResourceFolderModel::startWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
-}
-
-void ModFolderModel::stopWatching()
-{
-    ResourceFolderModel::stopWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
-}
-
-void ModFolderModel::onUpdateSucceeded()
-{
-    auto update_results = static_cast<ModFolderLoadTask*>(m_current_update_task.get())->result();
-
-    auto& new_mods = update_results->mods;
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    auto current_list = m_resources_index.keys();
-    QSet<QString> current_set(current_list.begin(), current_list.end());
-
-    auto new_list = new_mods.keys();
-    QSet<QString> new_set(new_list.begin(), new_list.end());
-#else
-    QSet<QString> current_set(m_resources_index.keys().toSet());
-    QSet<QString> new_set(new_mods.keys().toSet());
-#endif
-
-    applyUpdates(current_set, new_set, new_mods);
-    
-    update_results.reset();
-    m_current_update_task.reset();
-
-    emit updateFinished();
-
-    if(m_scheduled_update) {
-        m_scheduled_update = false;
-        update();
-    }
-}
-
-Task* ModFolderModel::createParseTask(Resource const& resource)
-{
-    return new LocalModParseTask(m_next_resolution_ticket, resource.type(), resource.fileinfo());
-}
-
-void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
-{
-    auto iter = m_active_parse_tasks.constFind(ticket);
-    if (iter == m_active_parse_tasks.constEnd())
-        return;
-
-    int row = m_resources_index[mod_id];
-
-    auto parse_task = *iter;
-    auto cast_task = static_cast<LocalModParseTask*>(parse_task.get());
-
-    Q_ASSERT(cast_task->token() == ticket);
-
-    auto resource = find(mod_id);
-
-    auto result = cast_task->result();
-    if (result && resource)
-        resource->finishResolvingWithDetails(result->details);
-
-    emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
-
-    parse_task->deleteLater();
-    m_active_parse_tasks.remove(ticket);
-}
-
-
-bool ModFolderModel::isValid()
-{
-    return m_dir.exists() && m_dir.isReadable();
-}
-
-auto ModFolderModel::selectedMods(QModelIndexList& indexes) -> QList<Mod::Ptr>
-{
-    QList<Mod::Ptr> selected_resources;
-    for (auto i : indexes) {
-        if(i.column() != 0)
-            continue;
-
-        selected_resources.push_back(at(i.row()));
-    }
-    return selected_resources;
-}
-
-auto ModFolderModel::allMods() -> QList<Mod::Ptr>
-{
-    QList<Mod::Ptr> mods;
-
-    for (auto res : m_resources)
-        mods.append(static_cast<Mod*>(res.get()));
-
-    return mods;
-}
-
-bool ModFolderModel::uninstallMod(const QString& filename, bool preserve_metadata)
-{
-    for(auto mod : allMods()){
-        if(mod->fileinfo().fileName() == filename){
-            auto index_dir = indexDir();
-            mod->destroy(index_dir, preserve_metadata);
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool ModFolderModel::setModStatus(const QModelIndexList& indexes, ModStatusAction enable)
-{
-    if(!m_can_interact) {
-        return false;
-    }
-
-    if(indexes.isEmpty())
-        return true;
-
-    for (auto index: indexes)
-    {
-        if(index.column() != 0) {
-            continue;
-        }
-        setModStatus(index.row(), enable);
-    }
-    return true;
-}
-
-bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
-{
-    if(!m_can_interact) {
-        return false;
-    }
-
-    if(indexes.isEmpty())
-        return true;
-
-    for (auto i: indexes)
-    {
-        if(i.column() != 0) {
-            continue;
-        }
-        auto m = at(i.row());
-        auto index_dir = indexDir();
-        m->destroy(index_dir);
-    }
-    return true;
-}
-
-int ModFolderModel::columnCount(const QModelIndex &parent) const
-{
-    return NUM_COLUMNS;
-}
-
 QVariant ModFolderModel::data(const QModelIndex &index, int role) const
 {
     if (!validateIndex(index))
@@ -283,6 +117,211 @@ bool ModFolderModel::setData(const QModelIndex &index, const QVariant &value, in
     return false;
 }
 
+QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    switch (role)
+    {
+    case Qt::DisplayRole:
+        switch (section)
+        {
+        case ActiveColumn:
+            return QString();
+        case NameColumn:
+            return tr("Name");
+        case VersionColumn:
+            return tr("Version");
+        case DateColumn:
+            return tr("Last changed");
+        default:
+            return QVariant();
+        }
+
+    case Qt::ToolTipRole:
+        switch (section)
+        {
+        case ActiveColumn:
+            return tr("Is the mod enabled?");
+        case NameColumn:
+            return tr("The name of the mod.");
+        case VersionColumn:
+            return tr("The version of the mod.");
+        case DateColumn:
+            return tr("The date and time this mod was last changed (or added).");
+        default:
+            return QVariant();
+        }
+    default:
+        return QVariant();
+    }
+    return QVariant();
+}
+
+int ModFolderModel::columnCount(const QModelIndex &parent) const
+{
+    return NUM_COLUMNS;
+}
+
+Task* ModFolderModel::createUpdateTask()
+{
+    auto index_dir = indexDir();
+    auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load);
+    m_first_folder_load = false;
+    return task;
+}
+
+Task* ModFolderModel::createParseTask(Resource const& resource)
+{
+    return new LocalModParseTask(m_next_resolution_ticket, resource.type(), resource.fileinfo());
+}
+
+bool ModFolderModel::uninstallMod(const QString& filename, bool preserve_metadata)
+{
+    for(auto mod : allMods()){
+        if(mod->fileinfo().fileName() == filename){
+            auto index_dir = indexDir();
+            mod->destroy(index_dir, preserve_metadata);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
+{
+    if(!m_can_interact) {
+        return false;
+    }
+
+    if(indexes.isEmpty())
+        return true;
+
+    for (auto i: indexes)
+    {
+        if(i.column() != 0) {
+            continue;
+        }
+        auto m = at(i.row());
+        auto index_dir = indexDir();
+        m->destroy(index_dir);
+    }
+    return true;
+}
+
+bool ModFolderModel::isValid()
+{
+    return m_dir.exists() && m_dir.isReadable();
+}
+
+void ModFolderModel::startWatching()
+{
+    // Remove orphaned metadata next time
+    m_first_folder_load = true;
+    ResourceFolderModel::startWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
+}
+
+void ModFolderModel::stopWatching()
+{
+    ResourceFolderModel::stopWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
+}
+
+auto ModFolderModel::selectedMods(QModelIndexList& indexes) -> QList<Mod::Ptr>
+{
+    QList<Mod::Ptr> selected_resources;
+    for (auto i : indexes) {
+        if(i.column() != 0)
+            continue;
+
+        selected_resources.push_back(at(i.row()));
+    }
+    return selected_resources;
+}
+
+auto ModFolderModel::allMods() -> QList<Mod::Ptr>
+{
+    QList<Mod::Ptr> mods;
+
+    for (auto res : m_resources)
+        mods.append(static_cast<Mod*>(res.get()));
+
+    return mods;
+}
+
+void ModFolderModel::onUpdateSucceeded()
+{
+    auto update_results = static_cast<ModFolderLoadTask*>(m_current_update_task.get())->result();
+
+    auto& new_mods = update_results->mods;
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    auto current_list = m_resources_index.keys();
+    QSet<QString> current_set(current_list.begin(), current_list.end());
+
+    auto new_list = new_mods.keys();
+    QSet<QString> new_set(new_list.begin(), new_list.end());
+#else
+    QSet<QString> current_set(m_resources_index.keys().toSet());
+    QSet<QString> new_set(new_mods.keys().toSet());
+#endif
+
+    applyUpdates(current_set, new_set, new_mods);
+    
+    update_results.reset();
+    m_current_update_task.reset();
+
+    emit updateFinished();
+
+    if(m_scheduled_update) {
+        m_scheduled_update = false;
+        update();
+    }
+}
+
+void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
+{
+    auto iter = m_active_parse_tasks.constFind(ticket);
+    if (iter == m_active_parse_tasks.constEnd())
+        return;
+
+    int row = m_resources_index[mod_id];
+
+    auto parse_task = *iter;
+    auto cast_task = static_cast<LocalModParseTask*>(parse_task.get());
+
+    Q_ASSERT(cast_task->token() == ticket);
+
+    auto resource = find(mod_id);
+
+    auto result = cast_task->result();
+    if (result && resource)
+        resource->finishResolvingWithDetails(result->details);
+
+    emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
+
+    parse_task->deleteLater();
+    m_active_parse_tasks.remove(ticket);
+}
+
+
+bool ModFolderModel::setModStatus(const QModelIndexList& indexes, ModStatusAction enable)
+{
+    if(!m_can_interact) {
+        return false;
+    }
+
+    if(indexes.isEmpty())
+        return true;
+
+    for (auto index: indexes)
+    {
+        if(index.column() != 0) {
+            continue;
+        }
+        setModStatus(index.row(), enable);
+    }
+    return true;
+}
+
 bool ModFolderModel::setModStatus(int row, ModFolderModel::ModStatusAction action)
 {
     if(row < 0 || row >= m_resources.size()) {
@@ -322,44 +361,5 @@ bool ModFolderModel::setModStatus(int row, ModFolderModel::ModStatusAction actio
     m_resources_index[newId] = row;
     emit dataChanged(index(row, 0), index(row, columnCount(QModelIndex()) - 1));
     return true;
-}
-
-QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    switch (role)
-    {
-    case Qt::DisplayRole:
-        switch (section)
-        {
-        case ActiveColumn:
-            return QString();
-        case NameColumn:
-            return tr("Name");
-        case VersionColumn:
-            return tr("Version");
-        case DateColumn:
-            return tr("Last changed");
-        default:
-            return QVariant();
-        }
-
-    case Qt::ToolTipRole:
-        switch (section)
-        {
-        case ActiveColumn:
-            return tr("Is the mod enabled?");
-        case NameColumn:
-            return tr("The name of the mod.");
-        case VersionColumn:
-            return tr("The version of the mod.");
-        case DateColumn:
-            return tr("The date and time this mod was last changed (or added).");
-        default:
-            return QVariant();
-        }
-    default:
-        return QVariant();
-    }
-    return QVariant();
 }
 

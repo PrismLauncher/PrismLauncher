@@ -85,14 +85,13 @@ public:
     [[nodiscard]] Task* createUpdateTask() override;
     [[nodiscard]] Task* createParseTask(Resource const&) override;
 
-    // Alias for old code, consider those deprecated and don't use in new code :gun:
     bool installMod(QString file_path) { return ResourceFolderModel::installResource(file_path); }
-    void disableInteraction(bool disabled) { ResourceFolderModel::enableInteraction(!disabled); }
-
     bool uninstallMod(const QString& filename, bool preserve_metadata = false);
 
     /// Deletes all the selected mods
     bool deleteMods(const QModelIndexList &indexes);
+
+    void disableInteraction(bool disabled) { ResourceFolderModel::enableInteraction(!disabled); }
 
     /// Enable or disable listed mods
     bool setModStatus(const QModelIndexList &indexes, ModStatusAction action);
