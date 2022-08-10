@@ -1258,6 +1258,9 @@ bool Application::launch(
         }
         connect(controller.get(), &LaunchController::succeeded, this, &Application::controllerSucceeded);
         connect(controller.get(), &LaunchController::failed, this, &Application::controllerFailed);
+        connect(controller.get(), &LaunchController::aborted, this, [this] {
+            controllerFailed(tr("Aborted"));
+        });
         addRunningInstance();
         controller->start();
         return true;
