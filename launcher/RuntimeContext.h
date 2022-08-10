@@ -30,7 +30,7 @@ struct RuntimeContext {
 
     // "Legacy" refers to the fact that Mojang assumed that these are the only two architectures
     bool isLegacyArch() const {
-        QSet<QString> legacyArchitectures{"amd64", "x86_64", "i686"};
+        QSet<QString> legacyArchitectures{"amd64", "x86_64", "i386", "i686", "x86"};
         return legacyArchitectures.contains(mappedJavaRealArchitecture());
     }
 
