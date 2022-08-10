@@ -14,6 +14,13 @@ enum class ResourceType {
     LITEMOD,     //!< The resource is a litemod
 };
 
+enum class SortType {
+    NAME,
+    DATE,
+    VERSION,
+    ENABLED,
+};
+
 /** General class for managed resources. It mirrors a file in disk, with some more info
  *  for display and house-keeping purposes.
  *
@@ -39,6 +46,20 @@ class Resource : public QObject {
 
     [[nodiscard]] virtual auto name() const -> QString { return m_name; }
     [[nodiscard]] virtual bool valid() const { return m_type != ResourceType::UNKNOWN; }
+
+    /** Compares two Resources, for sorting purposes, considering a ascending order, returning:
+     *  > 0: 'this' comes after 'other'
+     *  = 0: 'this' is equal to 'other'
+     *  < 0: 'this' comes before 'other'
+     *
+     *  The second argument in the pair is true if the sorting type that decided which one is greater was 'type'.
+     */
+    [[nodiscard]] virtual auto compare(Resource const& other, SortType type = SortType::NAME) const -> std::pair<int, bool>;
+
+    /** Returns whether the given filter should filter out 'this' (false),
+     *  or if such filter includes the Resource (true).
+     */
+    [[nodiscard]] virtual bool applyFilter(QRegularExpression filter) const;
 
     [[nodiscard]] auto shouldResolve() const -> bool { return !m_is_resolving && !m_is_resolved; }
     [[nodiscard]] auto isResolving() const -> bool { return m_is_resolving; }

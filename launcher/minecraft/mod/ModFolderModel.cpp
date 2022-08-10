@@ -52,6 +52,7 @@
 ModFolderModel::ModFolderModel(const QString &dir, bool is_indexed) : ResourceFolderModel(dir), m_is_indexed(is_indexed)
 {
     FS::ensureFolderPathExists(m_dir.absolutePath());
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE };
 }
 
 QVariant ModFolderModel::data(const QModelIndex &index, int role) const
@@ -213,16 +214,16 @@ bool ModFolderModel::isValid()
     return m_dir.exists() && m_dir.isReadable();
 }
 
-void ModFolderModel::startWatching()
+bool ModFolderModel::startWatching()
 {
     // Remove orphaned metadata next time
     m_first_folder_load = true;
-    ResourceFolderModel::startWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
+    return ResourceFolderModel::startWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
 }
 
-void ModFolderModel::stopWatching()
+bool ModFolderModel::stopWatching()
 {
-    ResourceFolderModel::stopWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
+    return ResourceFolderModel::stopWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
 }
 
 auto ModFolderModel::selectedMods(QModelIndexList& indexes) -> QList<Mod::Ptr>

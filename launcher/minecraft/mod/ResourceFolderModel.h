@@ -5,12 +5,13 @@
 #include <QFileSystemWatcher>
 #include <QMutex>
 #include <QSet>
+#include <QSortFilterProxyModel>
 
 #include "Resource.h"
 
 #include "tasks/Task.h"
 
-class QRunnable;
+class QSortFilterProxyModel;
 
 /** A basic model for external resources.
  *
@@ -38,6 +39,10 @@ class ResourceFolderModel : public QAbstractListModel {
      */
     bool stopWatching(const QStringList paths);
 
+    /* Helper methods for subclasses, using a predetermined list of paths. */
+    virtual bool startWatching() { return startWatching({ m_dir.absolutePath() }); };
+    virtual bool stopWatching() { return stopWatching({ m_dir.absolutePath() }); };
+
     /** Given a path in the system, install that resource, moving it to its place in the
      *  instance file hierarchy.
      *
@@ -61,13 +66,18 @@ class ResourceFolderModel : public QAbstractListModel {
 
     [[nodiscard]] size_t size() const { return m_resources.size(); };
     [[nodiscard]] bool empty() const { return size() == 0; }
+    [[nodiscard]] Resource const& at(int index) const { return *m_resources.at(index); }
+    [[nodiscard]] QList<Resource::Ptr> const& all() const { return m_resources; }
 
     [[nodiscard]] QDir const& dir() const { return m_dir; }
 
     /* Qt behavior */
 
-    [[nodiscard]] int rowCount(const QModelIndex&) const override { return size(); }
-    [[nodiscard]] int columnCount(const QModelIndex&) const override = 0;
+    /* Basic columns */
+    enum Columns { NAME_COLUMN = 0, DATE_COLUMN, NUM_COLUMNS };
+
+    [[nodiscard]] int rowCount(const QModelIndex& = {}) const override { return size(); }
+    [[nodiscard]] int columnCount(const QModelIndex& = {}) const override { return NUM_COLUMNS; };
 
     [[nodiscard]] Qt::DropActions supportedDropActions() const override;
 
@@ -78,13 +88,31 @@ class ResourceFolderModel : public QAbstractListModel {
 
     [[nodiscard]] bool validateIndex(const QModelIndex& index) const;
 
-    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override = 0;
+    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override { return false; };
 
-    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override = 0;
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
+    /** This creates a proxy model to filter / sort the model for a UI.
+     *
+     *  The actual comparisons and filtering are done directly by the Resource, so to modify behavior go there instead!
+     */
+    QSortFilterProxyModel* createFilterProxyModel(QObject* parent = nullptr);
+
+    [[nodiscard]] SortType columnToSortKey(size_t column) const;
+
+    class ProxyModel : public QSortFilterProxyModel {
+       public:
+        explicit ProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
+
+       protected:
+        [[nodiscard]] bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
+        [[nodiscard]] bool lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const override;
+    };
 
    public slots:
     void enableInteraction(bool enabled);
+    void disableInteraction(bool disabled) { enableInteraction(!disabled); }
 
    signals:
     void updateFinished();
@@ -137,6 +165,10 @@ class ResourceFolderModel : public QAbstractListModel {
     virtual void onParseFailed(int ticket, QString resource_id) {}
 
    protected:
+    // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
+    // As such, the order in with they appear is very important!
+    QList<SortType> m_column_sort_keys = { SortType::NAME, SortType::DATE };
+
     bool m_can_interact = true;
 
     QDir m_dir;

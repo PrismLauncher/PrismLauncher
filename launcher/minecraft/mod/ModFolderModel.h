@@ -91,15 +91,13 @@ public:
     /// Deletes all the selected mods
     bool deleteMods(const QModelIndexList &indexes);
 
-    void disableInteraction(bool disabled) { ResourceFolderModel::enableInteraction(!disabled); }
-
     /// Enable or disable listed mods
     bool setModStatus(const QModelIndexList &indexes, ModStatusAction action);
 
     bool isValid();
 
-    void startWatching();
-    void stopWatching();
+    bool startWatching() override;
+    bool stopWatching() override;
 
     QDir indexDir() { return { QString("%1/.index").arg(dir().absolutePath()) }; }
 

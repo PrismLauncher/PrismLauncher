@@ -170,8 +170,11 @@ bool ResourceFolderModel::update()
     }
 
     m_current_update_task.reset(createUpdateTask());
+    if (!m_current_update_task)
+        return false;
 
-    connect(m_current_update_task.get(), &Task::succeeded, this, &ResourceFolderModel::onUpdateSucceeded, Qt::ConnectionType::QueuedConnection);
+    connect(m_current_update_task.get(), &Task::succeeded, this, &ResourceFolderModel::onUpdateSucceeded,
+            Qt::ConnectionType::QueuedConnection);
     connect(m_current_update_task.get(), &Task::failed, this, &ResourceFolderModel::onUpdateFailed, Qt::ConnectionType::QueuedConnection);
 
     auto* thread_pool = QThreadPool::globalInstance();
@@ -187,6 +190,8 @@ void ResourceFolderModel::resolveResource(Resource::Ptr res)
     }
 
     auto task = createParseTask(*res);
+    if (!task)
+        return;
 
     m_ticket_mutex.lock();
     int ticket = m_next_resolution_ticket;
@@ -196,8 +201,10 @@ void ResourceFolderModel::resolveResource(Resource::Ptr res)
     res->setResolving(true, ticket);
     m_active_parse_tasks.insert(ticket, task);
 
-    connect(task, &Task::succeeded, this, [=] { onParseSucceeded(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
-    connect(task, &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
+    connect(
+        task, &Task::succeeded, this, [=] { onParseSucceeded(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
+    connect(
+        task, &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
 
     auto* thread_pool = QThreadPool::globalInstance();
     thread_pool->start(task);
@@ -325,6 +332,71 @@ bool ResourceFolderModel::validateIndex(const QModelIndex& index) const
     return true;
 }
 
+QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
+{
+    if (!validateIndex(index))
+        return {};
+
+    int row = index.row();
+    int column = index.column();
+
+    switch (role) {
+        case Qt::DisplayRole:
+            switch (column) {
+                case NAME_COLUMN:
+                    return m_resources[row]->name();
+                case DATE_COLUMN:
+                    return m_resources[row]->dateTimeChanged();
+                default:
+                    return {};
+            }
+        case Qt::ToolTipRole:
+            return m_resources[row]->internal_id();
+        default:
+            return {};
+    }
+}
+
+QVariant ResourceFolderModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    switch (role) {
+        case Qt::DisplayRole:
+            switch (section) {
+                case NAME_COLUMN:
+                    return tr("Name");
+                case DATE_COLUMN:
+                    return tr("Last modified");
+                default:
+                    return {};
+            }
+        case Qt::ToolTipRole: {
+            switch (section) {
+                case NAME_COLUMN:
+                    return tr("The name of the resource.");
+                case DATE_COLUMN:
+                    return tr("The date and time this resource was last changed (or added).");
+                default:
+                    return {};
+            }
+        }
+        default:
+            break;
+    }
+
+    return {};
+}
+
+QSortFilterProxyModel* ResourceFolderModel::createFilterProxyModel(QObject* parent)
+{
+    return new ProxyModel(parent);
+}
+
+SortType ResourceFolderModel::columnToSortKey(size_t column) const
+{
+    Q_ASSERT(m_column_sort_keys.size() == columnCount());
+    return m_column_sort_keys.at(column);
+}
+
 void ResourceFolderModel::enableInteraction(bool enabled)
 {
     if (m_can_interact == enabled)
@@ -334,3 +406,39 @@ void ResourceFolderModel::enableInteraction(bool enabled)
     if (size())
         emit dataChanged(index(0), index(size() - 1));
 }
+
+/* Standard Proxy Model for createFilterProxyModel */
+[[nodiscard]] bool ResourceFolderModel::ProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
+{
+    auto* model = qobject_cast<ResourceFolderModel*>(sourceModel());
+    if (!model)
+        return true;
+
+    const auto& resource = model->at(source_row);
+
+    return resource.applyFilter(filterRegularExpression());
+}
+
+[[nodiscard]] bool ResourceFolderModel::ProxyModel::lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const
+{
+    auto* model = qobject_cast<ResourceFolderModel*>(sourceModel());
+    if (!model || !source_left.isValid() || !source_right.isValid() || source_left.column() != source_right.column()) {
+        return QSortFilterProxyModel::lessThan(source_left, source_right);
+    }
+
+    // we are now guaranteed to have two valid indexes in the same column... we love the provided invariants unconditionally and
+    // proceed.
+
+    auto column_sort_key = model->columnToSortKey(source_left.column());
+    auto const& resource_left = model->at(source_left.row());
+    auto const& resource_right = model->at(source_right.row());
+
+    auto compare_result = resource_left.compare(resource_right, column_sort_key);
+    if (compare_result.first == 0)
+        return QSortFilterProxyModel::lessThan(source_left, source_right);
+
+    if (compare_result.second || sortOrder() != Qt::DescendingOrder)
+        return (compare_result.first < 0);
+    return (compare_result.first > 0);
+}
+

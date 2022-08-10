@@ -70,6 +70,9 @@ public:
 
     auto enable(bool value) -> bool;
 
+    [[nodiscard]] auto compare(Resource const& other, SortType type) const -> std::pair<int, bool> override;
+    [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
+
     // Delete all the files of this mod
     auto destroy(QDir& index_dir, bool preserve_metadata = false) -> bool;
 

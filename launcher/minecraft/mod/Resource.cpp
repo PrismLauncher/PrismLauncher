@@ -1,5 +1,7 @@
 #include "Resource.h"
 
+#include <QRegularExpression>
+
 #include "FileSystem.h"
 
 Resource::Resource(QObject* parent) : QObject(parent) {}
@@ -44,6 +46,43 @@ void Resource::parseFile()
     }
 
     m_changed_date_time = m_file_info.lastModified();
+}
+
+static void removeThePrefix(QString& string)
+{
+    QRegularExpression regex(QStringLiteral("^(?:the|teh) +"), QRegularExpression::CaseInsensitiveOption);
+    string.remove(regex);
+    string = string.trimmed();
+}
+
+std::pair<int, bool> Resource::compare(const Resource& other, SortType type) const
+{
+    switch (type) {
+        default:
+        case SortType::NAME: {
+            QString this_name{ name() };
+            QString other_name{ other.name() };
+
+            removeThePrefix(this_name);
+            removeThePrefix(other_name);
+
+            auto compare_result = QString::compare(this_name, other_name, Qt::CaseInsensitive);
+            if (compare_result != 0)
+                return { compare_result, type == SortType::NAME };
+        }
+        case SortType::DATE:
+            if (dateTimeChanged() > other.dateTimeChanged())
+                return { 1, type == SortType::DATE };
+            if (dateTimeChanged() < other.dateTimeChanged())
+                return { -1, type == SortType::DATE };
+    }
+
+    return { 0, false };
+}
+
+bool Resource::applyFilter(QRegularExpression filter) const
+{
+    return filter.match(name()).hasMatch();
 }
 
 bool Resource::destroy()

@@ -39,8 +39,10 @@
 #include <QDebug>
 #include <QDir>
 #include <QString>
+#include <QRegularExpression>
 
 #include "MetadataHandler.h"
+#include "Version.h"
 
 namespace {
 
@@ -109,6 +111,51 @@ void Mod::setMetadata(const Metadata::ModStruct& metadata)
     } else {
         m_temp_metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
     }
+}
+
+std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
+{
+    auto cast_other = dynamic_cast<Mod const*>(&other);
+    if (!cast_other)
+        return Resource::compare(other, type);
+
+    switch (type) {
+        default:
+        case SortType::ENABLED:
+            if (enabled() && !cast_other->enabled())
+                return { 1, type == SortType::ENABLED };
+            if (!enabled() && cast_other->enabled())
+                return { -1, type == SortType::ENABLED };
+        case SortType::NAME:
+        case SortType::DATE: {
+            auto res = Resource::compare(other, type);
+            if (res.first != 0)
+                return res;
+        }
+        case SortType::VERSION: {
+            auto this_ver = Version(version());
+            auto other_ver = Version(cast_other->version());
+            if (this_ver > other_ver)
+                return { 1, type == SortType::VERSION };
+            if (this_ver < other_ver)
+                return { -1, type == SortType::VERSION };
+        }
+    }
+    return { 0, false };
+}
+
+bool Mod::applyFilter(QRegularExpression filter) const
+{
+    if (filter.match(description()).hasMatch())
+        return true;
+
+    for (auto& author : authors()) {
+        if (filter.match(author).hasMatch()) {
+            return true;
+        }
+    }
+
+    return Resource::applyFilter(filter);
 }
 
 auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
