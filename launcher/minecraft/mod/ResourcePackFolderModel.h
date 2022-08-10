@@ -1,13 +1,10 @@
 #pragma once
 
-#include "ModFolderModel.h"
+#include "ResourceFolderModel.h"
 
-class ResourcePackFolderModel : public ModFolderModel
+class ResourcePackFolderModel : public ResourceFolderModel
 {
     Q_OBJECT
-
 public:
     explicit ResourcePackFolderModel(const QString &dir);
-
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 };
