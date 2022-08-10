@@ -211,7 +211,7 @@ void WorldListPage::on_actionDatapacks_triggered()
         return;
     }
 
-    if(!worldSafetyNagQuestion("Open World Datapacks Folder"))
+    if(!worldSafetyNagQuestion(tr("Open World Datapacks Folder")))
         return;
 
     auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
@@ -269,7 +269,7 @@ void WorldListPage::on_actionMCEdit_triggered()
         return;
     }
 
-    if(!worldSafetyNagQuestion("Open World in MCEdit"))
+    if(!worldSafetyNagQuestion(tr("Open World in MCEdit")))
         return;
 
     auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
@@ -377,7 +377,7 @@ bool WorldListPage::worldSafetyNagQuestion(const QString &actionType)
 {
     if(!isWorldSafe(getSelectedWorld()))
     {
-        auto result = QMessageBox::question(this, tr("%1").arg(actionType), tr("Changing a world while Minecraft is running is potentially unsafe.\nDo you wish to proceed?"));
+        auto result = QMessageBox::question(this, actionType, tr("Changing a world while Minecraft is running is potentially unsafe.\nDo you wish to proceed?"));
         if(result == QMessageBox::No)
         {
             return false;
@@ -395,7 +395,7 @@ void WorldListPage::on_actionCopy_triggered()
         return;
     }
 
-    if(!worldSafetyNagQuestion("Copy World"))
+    if(!worldSafetyNagQuestion(tr("Copy World")))
         return;
 
     auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
@@ -417,7 +417,7 @@ void WorldListPage::on_actionRename_triggered()
         return;
     }
 
-    if(!worldSafetyNagQuestion("Rename World"))
+    if(!worldSafetyNagQuestion(tr("Rename World")))
         return;
 
     auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
