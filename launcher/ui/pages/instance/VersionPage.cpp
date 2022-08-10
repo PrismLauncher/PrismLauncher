@@ -196,10 +196,10 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
     switch(severity)
     {
         case ProblemSeverity::Warning:
-            ui->frame->setModText(tr("%1 possibly has issues.").arg(patch->getName()));
+            ui->frame->setName(tr("%1 possibly has issues.").arg(patch->getName()));
             break;
         case ProblemSeverity::Error:
-            ui->frame->setModText(tr("%1 has issues!").arg(patch->getName()));
+            ui->frame->setName(tr("%1 has issues!").arg(patch->getName()));
             break;
         default:
         case ProblemSeverity::None:
@@ -222,7 +222,7 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
         problemOut += problem.m_description;
         problemOut += "\n";
     }
-    ui->frame->setModDescription(problemOut);
+    ui->frame->setDescription(problemOut);
 }
 
 void VersionPage::updateRunningStatus(bool running)

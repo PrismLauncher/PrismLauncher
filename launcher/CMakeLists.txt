@@ -326,6 +326,7 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ResourcePackFolderModel.cpp
     minecraft/mod/TexturePackFolderModel.h
     minecraft/mod/TexturePackFolderModel.cpp
+    minecraft/mod/ShaderPackFolderModel.h
     minecraft/mod/tasks/BasicFolderLoadTask.h
     minecraft/mod/tasks/ModFolderLoadTask.h
     minecraft/mod/tasks/ModFolderLoadTask.cpp
@@ -884,8 +885,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/LineSeparator.h
     ui/widgets/LogView.cpp
     ui/widgets/LogView.h
-    ui/widgets/MCModInfoFrame.cpp
-    ui/widgets/MCModInfoFrame.h
+    ui/widgets/InfoFrame.cpp
+    ui/widgets/InfoFrame.h
     ui/widgets/ModFilterWidget.cpp
     ui/widgets/ModFilterWidget.h
     ui/widgets/ModListView.cpp
@@ -947,7 +948,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/technic/TechnicPage.ui
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
-    ui/widgets/MCModInfoFrame.ui
+    ui/widgets/InfoFrame.ui
     ui/widgets/ModFilterWidget.ui
     ui/dialogs/CopyInstanceDialog.ui
     ui/dialogs/ProfileSetupDialog.ui

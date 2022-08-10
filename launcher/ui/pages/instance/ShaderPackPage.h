@@ -38,12 +38,14 @@
 #include "ExternalResourcesPage.h"
 #include "ui_ExternalResourcesPage.h"
 
+#include "minecraft/mod/ShaderPackFolderModel.h"
+
 class ShaderPackPage : public ExternalResourcesPage
 {
     Q_OBJECT
 public:
-    explicit ShaderPackPage(MinecraftInstance *instance, QWidget *parent = 0)
-        : ExternalResourcesPage(instance, instance->shaderPackList(), parent)
+    explicit ShaderPackPage(MinecraftInstance *instance, std::shared_ptr<ShaderPackFolderModel> model, QWidget *parent = 0)
+        : ExternalResourcesPage(instance, model, parent)
     {
         ui->actionViewConfigs->setVisible(false);
     }

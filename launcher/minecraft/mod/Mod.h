@@ -50,7 +50,8 @@ public:
 
     Mod() = default;
     Mod(const QFileInfo &file);
-    explicit Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata);
+    Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata);
+    Mod(QString file_path) : Mod(QFileInfo(file_path)) {}
 
     auto enabled()         const -> bool { return m_enabled; }
 

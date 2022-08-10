@@ -7,6 +7,10 @@
 #include "minecraft/launch/MinecraftServerTarget.h"
 
 class ModFolderModel;
+class ResourceFolderModel;
+class ResourcePackFolderModel;
+class ShaderPackFolderModel;
+class TexturePackFolderModel;
 class WorldList;
 class GameOptions;
 class LaunchStep;
@@ -72,9 +76,9 @@ public:
     //////  Mod Lists  //////
     std::shared_ptr<ModFolderModel> loaderModList() const;
     std::shared_ptr<ModFolderModel> coreModList() const;
-    std::shared_ptr<ModFolderModel> resourcePackList() const;
-    std::shared_ptr<ModFolderModel> texturePackList() const;
-    std::shared_ptr<ModFolderModel> shaderPackList() const;
+    std::shared_ptr<ResourcePackFolderModel> resourcePackList() const;
+    std::shared_ptr<TexturePackFolderModel> texturePackList() const;
+    std::shared_ptr<ShaderPackFolderModel> shaderPackList() const;
     std::shared_ptr<WorldList> worldList() const;
     std::shared_ptr<GameOptions> gameOptionsModel() const;
 
@@ -125,9 +129,9 @@ protected: // data
     std::shared_ptr<PackProfile> m_components;
     mutable std::shared_ptr<ModFolderModel> m_loader_mod_list;
     mutable std::shared_ptr<ModFolderModel> m_core_mod_list;
-    mutable std::shared_ptr<ModFolderModel> m_resource_pack_list;
-    mutable std::shared_ptr<ModFolderModel> m_shader_pack_list;
-    mutable std::shared_ptr<ModFolderModel> m_texture_pack_list;
+    mutable std::shared_ptr<ResourcePackFolderModel> m_resource_pack_list;
+    mutable std::shared_ptr<ShaderPackFolderModel> m_shader_pack_list;
+    mutable std::shared_ptr<TexturePackFolderModel> m_texture_pack_list;
     mutable std::shared_ptr<WorldList> m_world_list;
     mutable std::shared_ptr<GameOptions> m_game_options;
 };

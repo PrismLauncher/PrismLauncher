@@ -34,6 +34,8 @@ class Resource : public QObject {
 
     Resource(QObject* parent = nullptr);
     Resource(QFileInfo file_info);
+    Resource(QString file_path) : Resource(QFileInfo(file_path)) {}
+
     ~Resource() override = default;
 
     void setFile(QFileInfo file_info);

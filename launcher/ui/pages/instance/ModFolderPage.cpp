@@ -65,7 +65,7 @@
 #include "ui/dialogs/ProgressDialog.h"
 
 ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
-    : ExternalResourcesPage(inst, mods, parent)
+    : ExternalResourcesPage(inst, mods, parent), m_model(mods)
 {
     // This is structured like that so that these changes
     // do not affect the Resource pack and Shader pack tabs
@@ -110,6 +110,8 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
         ModFolderPage::runningStateChanged(m_instance && m_instance->isRunning());
     }
+
+    connect(ui->treeView, &ModListView::activated, this, &ModFolderPage::itemActivated);
 }
 
 void ModFolderPage::runningStateChanged(bool running)
@@ -121,6 +123,44 @@ void ModFolderPage::runningStateChanged(bool running)
 
 bool ModFolderPage::shouldDisplay() const
 {
+    return true;
+}
+
+void ModFolderPage::itemActivated(const QModelIndex&)
+{
+    if (!m_controlsEnabled)
+        return;
+
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setModStatus(selection.indexes(), ModFolderModel::Toggle);
+}
+
+void ModFolderPage::enableItem()
+{
+    if (!m_controlsEnabled)
+        return;
+
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setModStatus(selection.indexes(), ModFolderModel::Enable);
+}
+
+void ModFolderPage::disableItem()
+{
+    if (!m_controlsEnabled)
+        return;
+
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setModStatus(selection.indexes(), ModFolderModel::Disable);
+}
+
+bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+{
+    auto sourceCurrent = m_filterModel->mapToSource(current);
+    int row = sourceCurrent.row();
+    Mod const* m = m_model->at(row);
+    if (m)
+        ui->frame->updateWithMod(*m);
+
     return true;
 }
 

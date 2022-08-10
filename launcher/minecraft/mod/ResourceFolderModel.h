@@ -261,6 +261,9 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
 
         std::sort(removed_rows.begin(), removed_rows.end());
 
+        for (int i = 0; i < removed_rows.size(); i++)
+            removed_rows[i] -= i;
+
         for (auto& removed_index : removed_rows) {
             beginRemoveRows(QModelIndex(), removed_index, removed_index);
 

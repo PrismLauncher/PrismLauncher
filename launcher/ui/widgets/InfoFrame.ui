@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MCModInfoFrame</class>
- <widget class="QFrame" name="MCModInfoFrame">
+ <class>InfoFrame</class>
+ <widget class="QFrame" name="InfoFrame">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -39,7 +39,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLabel" name="label_ModText">
+    <widget class="QLabel" name="nameLabel">
      <property name="text">
       <string notr="true"/>
      </property>
@@ -61,7 +61,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label_ModDescription">
+    <widget class="QLabel" name="descriptionLabel">
      <property name="toolTip">
       <string notr="true"/>
      </property>

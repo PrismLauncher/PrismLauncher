@@ -76,6 +76,7 @@
 
 #include "mod/ModFolderModel.h"
 #include "mod/ResourcePackFolderModel.h"
+#include "mod/ShaderPackFolderModel.h"
 #include "mod/TexturePackFolderModel.h"
 
 #include "WorldList.h"
@@ -1092,18 +1093,18 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::coreModList() const
     return m_core_mod_list;
 }
 
-std::shared_ptr<ModFolderModel> MinecraftInstance::resourcePackList() const
+std::shared_ptr<ResourcePackFolderModel> MinecraftInstance::resourcePackList() const
 {
     if (!m_resource_pack_list)
     {
         m_resource_pack_list.reset(new ResourcePackFolderModel(resourcePacksDir()));
-        m_resource_pack_list->disableInteraction(isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_resource_pack_list.get(), &ModFolderModel::disableInteraction);
+        m_resource_pack_list->enableInteraction(!isRunning());
+        connect(this, &BaseInstance::runningStatusChanged, m_resource_pack_list.get(), &ResourcePackFolderModel::disableInteraction);
     }
     return m_resource_pack_list;
 }
 
-std::shared_ptr<ModFolderModel> MinecraftInstance::texturePackList() const
+std::shared_ptr<TexturePackFolderModel> MinecraftInstance::texturePackList() const
 {
     if (!m_texture_pack_list)
     {
@@ -1114,11 +1115,11 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::texturePackList() const
     return m_texture_pack_list;
 }
 
-std::shared_ptr<ModFolderModel> MinecraftInstance::shaderPackList() const
+std::shared_ptr<ShaderPackFolderModel> MinecraftInstance::shaderPackList() const
 {
     if (!m_shader_pack_list)
     {
-        m_shader_pack_list.reset(new ResourcePackFolderModel(shaderPacksDir()));
+        m_shader_pack_list.reset(new ShaderPackFolderModel(shaderPacksDir()));
         m_shader_pack_list->disableInteraction(isRunning());
         connect(this, &BaseInstance::runningStatusChanged, m_shader_pack_list.get(), &ModFolderModel::disableInteraction);
     }

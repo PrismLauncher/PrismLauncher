@@ -35,5 +35,4 @@
 
 #include "ResourcePackFolderModel.h"
 
-ResourcePackFolderModel::ResourcePackFolderModel(const QString &dir) : ResourceFolderModel(dir) {
-}
+ResourcePackFolderModel::ResourcePackFolderModel(const QString &dir) : ResourceFolderModel(QDir(dir)) {}

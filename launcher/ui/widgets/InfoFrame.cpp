@@ -14,14 +14,28 @@
  */
 
 #include <QMessageBox>
-#include <QtGui>
 
-#include "MCModInfoFrame.h"
-#include "ui_MCModInfoFrame.h"
+#include "InfoFrame.h"
+#include "ui_InfoFrame.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 
-void MCModInfoFrame::updateWithMod(Mod &m)
+InfoFrame::InfoFrame(QWidget *parent) :
+    QFrame(parent),
+    ui(new Ui::InfoFrame)
+{
+    ui->setupUi(this);
+    ui->descriptionLabel->setHidden(true);
+    ui->nameLabel->setHidden(true);
+    updateHiddenState();
+}
+
+InfoFrame::~InfoFrame()
+{
+    delete ui;
+}
+
+void InfoFrame::updateWithMod(Mod const& m)
 {
     if (m.type() == ResourceType::FOLDER)
     {
@@ -43,42 +57,32 @@ void MCModInfoFrame::updateWithMod(Mod &m)
     if (!m.authors().isEmpty())
         text += " by " + m.authors().join(", ");
 
-    setModText(text);
+    setName(text);
 
     if (m.description().isEmpty())
     {
-        setModDescription(QString());
+        setDescription(QString());
     }
     else
     {
-        setModDescription(m.description());
+        setDescription(m.description());
     }
 }
 
-void MCModInfoFrame::clear()
+void InfoFrame::updateWithResource(const Resource& resource)
 {
-    setModText(QString());
-    setModDescription(QString());
+    setName(resource.name());
 }
 
-MCModInfoFrame::MCModInfoFrame(QWidget *parent) :
-    QFrame(parent),
-    ui(new Ui::MCModInfoFrame)
+void InfoFrame::clear()
 {
-    ui->setupUi(this);
-    ui->label_ModDescription->setHidden(true);
-    ui->label_ModText->setHidden(true);
-    updateHiddenState();
+    setName();
+    setDescription();
 }
 
-MCModInfoFrame::~MCModInfoFrame()
+void InfoFrame::updateHiddenState()
 {
-    delete ui;
-}
-
-void MCModInfoFrame::updateHiddenState()
-{
-    if(ui->label_ModDescription->isHidden() && ui->label_ModText->isHidden())
+    if(ui->descriptionLabel->isHidden() && ui->nameLabel->isHidden())
     {
         setHidden(true);
     }
@@ -88,34 +92,34 @@ void MCModInfoFrame::updateHiddenState()
     }
 }
 
-void MCModInfoFrame::setModText(QString text)
+void InfoFrame::setName(QString text)
 {
     if(text.isEmpty())
     {
-        ui->label_ModText->setHidden(true);
+        ui->nameLabel->setHidden(true);
     }
     else
     {
-        ui->label_ModText->setText(text);
-        ui->label_ModText->setHidden(false);
+        ui->nameLabel->setText(text);
+        ui->nameLabel->setHidden(false);
     }
     updateHiddenState();
 }
 
-void MCModInfoFrame::setModDescription(QString text)
+void InfoFrame::setDescription(QString text)
 {
     if(text.isEmpty())
     {
-        ui->label_ModDescription->setHidden(true);
+        ui->descriptionLabel->setHidden(true);
         updateHiddenState();
         return;
     }
     else
     {
-        ui->label_ModDescription->setHidden(false);
+        ui->descriptionLabel->setHidden(false);
         updateHiddenState();
     }
-    ui->label_ModDescription->setToolTip("");
+    ui->descriptionLabel->setToolTip("");
     QString intermediatetext = text.trimmed();
     bool prev(false);
     QChar rem('\n');
@@ -133,36 +137,36 @@ void MCModInfoFrame::setModDescription(QString text)
     labeltext.reserve(300);
     if(finaltext.length() > 290)
     {
-        ui->label_ModDescription->setOpenExternalLinks(false);
-        ui->label_ModDescription->setTextFormat(Qt::TextFormat::RichText);
-        desc = text;
+        ui->descriptionLabel->setOpenExternalLinks(false);
+        ui->descriptionLabel->setTextFormat(Qt::TextFormat::RichText);
+        m_description = text;
         // This allows injecting HTML here.
         labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
-        QObject::connect(ui->label_ModDescription, &QLabel::linkActivated, this, &MCModInfoFrame::modDescEllipsisHandler);
+        QObject::connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler);
     }
     else
     {
-        ui->label_ModDescription->setTextFormat(Qt::TextFormat::PlainText);
+        ui->descriptionLabel->setTextFormat(Qt::TextFormat::PlainText);
         labeltext.append(finaltext);
     }
-    ui->label_ModDescription->setText(labeltext);
+    ui->descriptionLabel->setText(labeltext);
 }
 
-void MCModInfoFrame::modDescEllipsisHandler(const QString &link)
+void InfoFrame::descriptionEllipsisHandler(QString link)
 {
-    if(!currentBox)
+    if(!m_current_box)
     {
-        currentBox = CustomMessageBox::selectable(this, QString(), desc);
-        connect(currentBox, &QMessageBox::finished, this, &MCModInfoFrame::boxClosed);
-        currentBox->show();
+        m_current_box = CustomMessageBox::selectable(this, "", m_description);
+        connect(m_current_box, &QMessageBox::finished, this, &InfoFrame::boxClosed);
+        m_current_box->show();
     }
     else
     {
-        currentBox->setText(desc);
+        m_current_box->setText(m_description);
     }
 }
 
-void MCModInfoFrame::boxClosed(int result)
+void InfoFrame::boxClosed(int result)
 {
-    currentBox = nullptr;
+    m_current_box = nullptr;
 }
