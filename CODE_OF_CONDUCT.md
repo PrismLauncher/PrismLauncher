@@ -1,4 +1,5 @@
 # Contributor Covenant Code of Conduct
+
 This is a modified version of the Contributor Covenant.
 See commit history to see our changes.
 
@@ -133,4 +134,3 @@ For answers to common questions about this code of conduct, see the FAQ at
 [Mozilla CoC]: https://github.com/mozilla/diversity
 [FAQ]: https://www.contributor-covenant.org/faq
 [translations]: https://www.contributor-covenant.org/translations
-

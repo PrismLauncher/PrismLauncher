@@ -10,7 +10,6 @@ If you are looking for a C++ library, you might try this wrapper: [https://githu
 [iarna/toml-spec-tests](https://github.com/iarna/toml-spec-tests).
 * Provides very simple and intuitive interface.
 
-
 ## Usage
 
 Please see the `toml.h` file for details. What follows is a simple example that
@@ -18,8 +17,8 @@ parses this config file:
 
 ```toml
 [server]
-	host = "www.example.com"
-	port = [ 8080, 8181, 8282 ]
+    host = "www.example.com"
+    port = [ 8080, 8181, 8282 ]
 ```
 
 The steps for getting values from our file is usually :
@@ -96,13 +95,14 @@ int main()
 }
 ```
 
-#### Accessing Table Content
+### Accessing Table Content
 
 TOML tables are dictionaries where lookups are done using string keys. In
 general, all access functions on tables are named `toml_*_in(...)`.
 
 In the normal case, you know the key and its content type, and retrievals can be done
 using one of these functions:
+
 ```c
 toml_string_in(tab, key);
 toml_bool_in(tab, key);
@@ -114,6 +114,7 @@ toml_array_in(tab, key);
 ```
 
 You can also interrogate the keys in a table using an integer index:
+
 ```c
 toml_table_t* tab = toml_parse_file(...);
 for (int i = 0; ; i++) {
@@ -123,16 +124,18 @@ for (int i = 0; ; i++) {
 }
 ```
 
-#### Accessing Array Content
+### Accessing Array Content
 
 TOML arrays can be deref-ed using integer indices. In general, all access methods on arrays are named `toml_*_at()`.
 
 To obtain the size of an array:
+
 ```c
 int size = toml_array_nelem(arr);
 ```
 
 To obtain the content of an array, use a valid index and call one of these functions:
+
 ```c
 toml_string_at(arr, idx);
 toml_bool_at(arr, idx);
@@ -143,7 +146,7 @@ toml_table_at(arr, idx);
 toml_array_at(arr, idx);
 ```
 
-#### toml_datum_t
+### toml_datum_t
 
 Some `toml_*_at` and `toml_*_in` functions return a toml_datum_t
 structure. The `ok` flag in the structure indicates if the function
@@ -151,15 +154,16 @@ call was successful. If so, you may proceed to read the value
 corresponding to the type of the content.
 
 For example:
-```
+
+```c
 toml_datum_t host = toml_string_in(tab, "host");
 if (host.ok) {
-	printf("host: %s\n", host.u.s);
-	free(host.u.s);   /* FREE applies to string and timestamp types only */
+    printf("host: %s\n", host.u.s);
+    free(host.u.s);   /* FREE applies to string and timestamp types only */
 }
 ```
 
-** IMPORTANT: if the accessed value is a string or a timestamp, you must call `free(datum.u.s)` or `free(datum.u.ts)` respectively after usage. **
+**IMPORTANT: if the accessed value is a string or a timestamp, you must call `free(datum.u.s)` or `free(datum.u.ts)` respectively after usage.**
 
 ## Building and installing
 
@@ -182,7 +186,6 @@ To test against the standard test set provided by BurntSushi/toml-test:
 % bash build.sh   # do this once
 % bash run.sh     # this will run the test suite
 ```
-
 
 To test against the standard test set provided by iarna/toml:
 
