@@ -864,6 +864,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_metacache->addBase("ModpacksCHPacks", QDir("cache/ModpacksCHPacks").absolutePath());
         m_metacache->addBase("TechnicPacks", QDir("cache/TechnicPacks").absolutePath());
         m_metacache->addBase("FlamePacks", QDir("cache/FlamePacks").absolutePath());
+        m_metacache->addBase("FlameMods", QDir("cache/FlameMods").absolutePath());
         m_metacache->addBase("ModrinthPacks", QDir("cache/ModrinthPacks").absolutePath());
         m_metacache->addBase("root", QDir::currentPath());
         m_metacache->addBase("translations", QDir("translations").absolutePath());
