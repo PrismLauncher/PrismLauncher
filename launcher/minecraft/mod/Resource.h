@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QFileInfo>
 #include <QObject>
+#include <QPointer>
 
 #include "QObjectPtr.h"
 
@@ -31,6 +32,7 @@ class Resource : public QObject {
     Q_DISABLE_COPY(Resource)
    public:
     using Ptr = shared_qobject_ptr<Resource>;
+    using WeakPtr = QPointer<Resource>;
 
     Resource(QObject* parent = nullptr);
     Resource(QFileInfo file_info);

@@ -101,8 +101,8 @@ public:
 
     QDir indexDir() { return { QString("%1/.index").arg(dir().absolutePath()) }; }
 
-    auto selectedMods(QModelIndexList& indexes) -> QList<Mod::Ptr>;
-    auto allMods() -> QList<Mod::Ptr>;
+    auto selectedMods(QModelIndexList& indexes) -> QList<Mod*>;
+    auto allMods() -> QList<Mod*>;
 
     RESOURCE_HELPERS(Mod)
 

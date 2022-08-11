@@ -226,9 +226,9 @@ bool ModFolderModel::stopWatching()
     return ResourceFolderModel::stopWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
 }
 
-auto ModFolderModel::selectedMods(QModelIndexList& indexes) -> QList<Mod::Ptr>
+auto ModFolderModel::selectedMods(QModelIndexList& indexes) -> QList<Mod*>
 {
-    QList<Mod::Ptr> selected_resources;
+    QList<Mod*> selected_resources;
     for (auto i : indexes) {
         if(i.column() != 0)
             continue;
@@ -238,12 +238,13 @@ auto ModFolderModel::selectedMods(QModelIndexList& indexes) -> QList<Mod::Ptr>
     return selected_resources;
 }
 
-auto ModFolderModel::allMods() -> QList<Mod::Ptr>
+auto ModFolderModel::allMods() -> QList<Mod*>
 {
-    QList<Mod::Ptr> mods;
+    QList<Mod*> mods;
 
-    for (auto res : m_resources)
+    for (auto& res : m_resources) {
         mods.append(static_cast<Mod*>(res.get()));
+    }
 
     return mods;
 }

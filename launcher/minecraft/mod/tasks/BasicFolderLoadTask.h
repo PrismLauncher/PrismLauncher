@@ -17,7 +17,7 @@ class BasicFolderLoadTask : public Task
     Q_OBJECT
 public:
     struct Result {
-        QMap<QString, Resource::Ptr> resources;
+        QMap<QString, Resource*> resources;
     };
     using ResultPtr = std::shared_ptr<Result>;
 

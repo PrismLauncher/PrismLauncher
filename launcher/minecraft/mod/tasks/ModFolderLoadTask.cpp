@@ -52,7 +52,7 @@ void ModFolderLoadTask::executeTask()
     // Read JAR files that don't have metadata
     m_mods_dir.refresh();
     for (auto entry : m_mods_dir.entryInfoList()) {
-        Mod::Ptr mod(new Mod(entry));
+        Mod* mod(new Mod(entry));
 
         if (mod->enabled()) {
             if (m_result->mods.contains(mod->internal_id())) {

@@ -135,7 +135,7 @@ bool ResourceFolderModel::installResource(QString original_path)
 
 bool ResourceFolderModel::uninstallResource(QString file_name)
 {
-    for (auto resource : m_resources) {
+    for (auto& resource : m_resources) {
         if (resource->fileinfo().fileName() == file_name)
             return resource->destroy();
     }
@@ -155,7 +155,7 @@ bool ResourceFolderModel::deleteResources(const QModelIndexList& indexes)
             continue;
         }
 
-        auto resource = m_resources.at(i.row());
+        auto& resource = m_resources.at(i.row());
         resource->destroy();
     }
     return true;
@@ -183,7 +183,7 @@ bool ResourceFolderModel::update()
     return true;
 }
 
-void ResourceFolderModel::resolveResource(Resource::Ptr res)
+void ResourceFolderModel::resolveResource(Resource::WeakPtr res)
 {
     if (!res->shouldResolve()) {
         return;
