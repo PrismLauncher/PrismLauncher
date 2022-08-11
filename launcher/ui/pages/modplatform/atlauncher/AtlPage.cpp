@@ -37,13 +37,12 @@
 #include "AtlPage.h"
 #include "ui_AtlPage.h"
 
-#include "modplatform/atlauncher/ATLPackInstallTask.h"
+#include "BuildConfig.h"
 
 #include "AtlOptionalModDialog.h"
+#include "AtlUserInteractionSupportImpl.h"
+#include "modplatform/atlauncher/ATLPackInstallTask.h"
 #include "ui/dialogs/NewInstanceDialog.h"
-#include "ui/dialogs/VersionSelectDialog.h"
-
-#include <BuildConfig.h>
 
 #include <QMessageBox>
 
@@ -117,7 +116,9 @@ void AtlPage::suggestCurrent()
         return;
     }
 
-    dialog->setSuggestedPack(selected.name + " " + selectedVersion, new ATLauncher::PackInstallTask(this, selected.name, selectedVersion));
+    auto uiSupport = new AtlUserInteractionSupportImpl(this);
+    dialog->setSuggestedPack(selected.name + " " + selectedVersion, new ATLauncher::PackInstallTask(uiSupport, selected.name, selectedVersion));
+
     auto editedLogoName = selected.safeName;
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1.png").arg(selected.safeName.toLower());
     listModel->getLogo(selected.safeName, url, [this, editedLogoName](QString logo)
@@ -171,52 +172,4 @@ void AtlPage::onVersionSelectionChanged(QString data)
 
     selectedVersion = data;
     suggestCurrent();
-}
-
-QVector<QString> AtlPage::chooseOptionalMods(ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods)
-{
-    AtlOptionalModDialog optionalModDialog(this, version, mods);
-    optionalModDialog.exec();
-    return optionalModDialog.getResult();
-}
-
-QString AtlPage::chooseVersion(Meta::VersionListPtr vlist, QString minecraftVersion) {
-    VersionSelectDialog vselect(vlist.get(), "Choose Version", APPLICATION->activeWindow(), false);
-    if (minecraftVersion != Q_NULLPTR) {
-        vselect.setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
-        vselect.setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
-    }
-    else {
-        vselect.setEmptyString(tr("No versions are currently available"));
-    }
-    vselect.setEmptyErrorString(tr("Couldn't load or download the version lists!"));
-
-    // select recommended build
-    for (int i = 0; i < vlist->versions().size(); i++) {
-        auto version = vlist->versions().at(i);
-        auto reqs = version->requires();
-
-        // filter by minecraft version, if the loader depends on a certain version.
-        if (minecraftVersion != Q_NULLPTR) {
-            auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Meta::Require &req) {
-                return req.uid == "net.minecraft";
-            });
-            if (iter == reqs.end()) continue;
-            if (iter->equalsVersion != minecraftVersion) continue;
-        }
-
-        // first recommended build we find, we use.
-        if (version->isRecommended()) {
-            vselect.setCurrentVersion(version->descriptor());
-            break;
-        }
-    }
-
-    vselect.exec();
-    return vselect.selectedVersion()->descriptor();
-}
-
-void AtlPage::displayMessage(QString message)
-{
-    QMessageBox::information(this, tr("Installing"), message);
 }

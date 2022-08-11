@@ -224,6 +224,64 @@ static void loadVersionExtraArguments(ATLauncher::PackVersionExtraArguments& a, 
     a.depends = Json::ensureString(obj, "depends", "");
 }
 
+static void loadVersionKeep(ATLauncher::VersionKeep& k, QJsonObject& obj)
+{
+    k.base = Json::requireString(obj, "base");
+    k.target = Json::requireString(obj, "target");
+}
+
+static void loadVersionKeeps(ATLauncher::VersionKeeps& k, QJsonObject& obj)
+{
+    if (obj.contains("files")) {
+        auto files = Json::requireArray(obj, "files");
+        for (const auto keepRaw : files) {
+            auto keepObj = Json::requireObject(keepRaw);
+            ATLauncher::VersionKeep keep;
+            loadVersionKeep(keep, keepObj);
+            k.files.append(keep);
+        }
+    }
+
+    if (obj.contains("folders")) {
+        auto folders = Json::requireArray(obj, "folders");
+        for (const auto keepRaw : folders) {
+            auto keepObj = Json::requireObject(keepRaw);
+            ATLauncher::VersionKeep keep;
+            loadVersionKeep(keep, keepObj);
+            k.folders.append(keep);
+        }
+    }
+}
+
+static void loadVersionDelete(ATLauncher::VersionDelete& d, QJsonObject& obj)
+{
+    d.base = Json::requireString(obj, "base");
+    d.target = Json::requireString(obj, "target");
+}
+
+static void loadVersionDeletes(ATLauncher::VersionDeletes& d, QJsonObject& obj)
+{
+    if (obj.contains("files")) {
+        auto files = Json::requireArray(obj, "files");
+        for (const auto deleteRaw : files) {
+            auto deleteObj = Json::requireObject(deleteRaw);
+            ATLauncher::VersionDelete versionDelete;
+            loadVersionDelete(versionDelete, deleteObj);
+            d.files.append(versionDelete);
+        }
+    }
+
+    if (obj.contains("folders")) {
+        auto folders = Json::requireArray(obj, "folders");
+        for (const auto deleteRaw : folders) {
+            auto deleteObj = Json::requireObject(deleteRaw);
+            ATLauncher::VersionDelete versionDelete;
+            loadVersionDelete(versionDelete, deleteObj);
+            d.folders.append(versionDelete);
+        }
+    }
+}
+
 void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
 {
     v.version = Json::requireString(obj, "version");
@@ -284,4 +342,10 @@ void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
 
     auto messages = Json::ensureObject(obj, "messages");
     loadVersionMessages(v.messages, messages);
+
+    auto keeps = Json::ensureObject(obj, "keeps");
+    loadVersionKeeps(v.keeps, keeps);
+
+    auto deletes = Json::ensureObject(obj, "deletes");
+    loadVersionDeletes(v.deletes, deletes);
 }

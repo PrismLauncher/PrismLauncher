@@ -150,6 +150,26 @@ struct VersionMessages
     QString update;
 };
 
+struct VersionKeep {
+    QString base;
+    QString target;
+};
+
+struct VersionKeeps {
+    QVector<VersionKeep> files;
+    QVector<VersionKeep> folders;
+};
+
+struct VersionDelete {
+    QString base;
+    QString target;
+};
+
+struct VersionDeletes {
+    QVector<VersionDelete> files;
+    QVector<VersionDelete> folders;
+};
+
 struct PackVersionMainClass
 {
     QString mainClass;
@@ -178,6 +198,9 @@ struct PackVersion
     QMap<QString, QString> colours;
     QMap<QString, QString> warnings;
     VersionMessages messages;
+
+    VersionKeeps keeps;
+    VersionDeletes deletes;
 };
 
 void loadVersion(PackVersion & v, QJsonObject & obj);
