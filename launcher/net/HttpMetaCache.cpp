@@ -121,6 +121,14 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
         SaveEventually();
     }
 
+    // Get rid of old entries, to prevent cache problems
+    auto current_time = QDateTime::currentSecsSinceEpoch();
+    if (entry->isExpired(current_time - ( file_last_changed / 1000 ))) {
+        qWarning() << "Removing cache entry because of old age!";
+        selected_base.entry_list.remove(resource_path);
+        return staleEntry(base, resource_path);
+    }
+
     // entry passed all the checks we cared about.
     entry->basePath = getBasePath(base);
     return entry;
@@ -221,6 +229,8 @@ void HttpMetaCache::Load()
         foo->etag = Json::ensureString(element_obj, "etag");
         foo->local_changed_timestamp = Json::ensureDouble(element_obj, "last_changed_timestamp");
         foo->remote_changed_timestamp = Json::ensureString(element_obj, "remote_changed_timestamp");
+        foo->current_age = Json::ensureDouble(element_obj, "current_age");
+        foo->max_age = Json::ensureDouble(element_obj, "max_age");
         // presumed innocent until closer examination
         foo->stale = false;
 
@@ -239,6 +249,8 @@ void HttpMetaCache::SaveNow()
 {
     if (m_index_file.isNull())
         return;
+
+    qDebug() << "[HttpMetaCache]" << "Saving metacache with" << m_entries.size() << "entries";
 
     QJsonObject toplevel;
     Json::writeString(toplevel, "version", "1");
@@ -259,6 +271,8 @@ void HttpMetaCache::SaveNow()
             entryObj.insert("last_changed_timestamp", QJsonValue(double(entry->local_changed_timestamp)));
             if (!entry->remote_changed_timestamp.isEmpty())
                 entryObj.insert("remote_changed_timestamp", QJsonValue(entry->remote_changed_timestamp));
+            entryObj.insert("current_age", QJsonValue(double(entry->current_age)));
+            entryObj.insert("max_age", QJsonValue(double(entry->max_age)));
             entriesArr.append(entryObj);
         }
     }
