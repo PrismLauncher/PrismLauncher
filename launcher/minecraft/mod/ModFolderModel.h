@@ -172,6 +172,7 @@ protected:
     bool interaction_disabled = false;
     QDir m_dir;
     bool m_is_indexed;
+    bool m_first_folder_load = true;
     QMap<QString, int> modsIndex;
     QMap<int, LocalModParseTask::ResultPtr> activeTickets;
     int nextResolutionTicket = 0;
