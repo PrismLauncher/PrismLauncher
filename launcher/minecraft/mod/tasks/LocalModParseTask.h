@@ -20,6 +20,9 @@ public:
         return m_result;
     }
 
+    [[nodiscard]] bool canAbort() const override { return true; }
+    bool abort() override;
+
     LocalModParseTask(int token, ResourceType type, const QFileInfo & modFile);
     void executeTask() override;
 
@@ -35,4 +38,6 @@ private:
     ResourceType m_type;
     QFileInfo m_modFile;
     ResultPtr m_result;
+
+    bool m_aborted = false;
 };

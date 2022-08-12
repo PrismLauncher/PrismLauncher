@@ -17,7 +17,7 @@ class BasicFolderLoadTask : public Task
     Q_OBJECT
 public:
     struct Result {
-        QMap<QString, Resource*> resources;
+        QMap<QString, Resource::Ptr> resources;
     };
     using ResultPtr = std::shared_ptr<Result>;
 
@@ -27,6 +27,10 @@ public:
 
 public:
     BasicFolderLoadTask(QDir dir) : Task(nullptr, false), m_dir(dir), m_result(new Result) {}
+
+    [[nodiscard]] bool canAbort() const override { return true; }
+    bool abort() override { m_aborted = true; return true; }
+
     void executeTask() override
     {
         m_dir.refresh();
@@ -35,10 +39,15 @@ public:
             m_result->resources.insert(resource->internal_id(), resource);
         }
 
-        emitSucceeded();
+        if (m_aborted)
+            emitAborted();
+        else
+            emitSucceeded();
     }
 
 private:
     QDir m_dir;
     ResultPtr m_result;
+
+    bool m_aborted = false;
 };

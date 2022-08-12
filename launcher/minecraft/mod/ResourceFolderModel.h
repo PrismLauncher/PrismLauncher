@@ -62,7 +62,7 @@ class ResourceFolderModel : public QAbstractListModel {
     virtual bool update();
 
     /** Creates a new parse task, if needed, for 'res' and start it.*/
-    virtual void resolveResource(Resource::WeakPtr res);
+    virtual void resolveResource(Resource::Ptr res);
 
     [[nodiscard]] size_t size() const { return m_resources.size(); };
     [[nodiscard]] bool empty() const { return size() == 0; }
@@ -70,6 +70,13 @@ class ResourceFolderModel : public QAbstractListModel {
     [[nodiscard]] QList<Resource::Ptr> const& all() const { return m_resources; }
 
     [[nodiscard]] QDir const& dir() const { return m_dir; }
+
+    /** Checks whether there's any parse tasks being done.
+     *
+     *  Since they can be quite expensive, and are usually done in a separate thread, if we were to destroy the model while having
+     *  such tasks would introduce an undefined behavior, most likely resulting in a crash.
+     */
+    [[nodiscard]] bool hasPendingParseTasks() const;
 
     /* Qt behavior */
 
@@ -228,10 +235,12 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
         QSet<QString> kept_set = current_set;
         kept_set.intersect(new_set);
 
-        for (auto& kept : kept_set) {
-            auto row = m_resources_index[kept];
+        for (auto const& kept : kept_set) {
+            auto row_it = m_resources_index.constFind(kept);
+            Q_ASSERT(row_it != m_resources_index.constEnd());
+            auto row = row_it.value();
 
-            auto new_resource = new_resources[kept];
+            auto& new_resource = new_resources[kept];
             auto const& current_resource = m_resources[row];
 
             if (new_resource->dateTimeChanged() == current_resource->dateTimeChanged()) {
@@ -242,11 +251,12 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             // If the resource is resolving, but something about it changed, we don't want to
             // continue the resolving.
             if (current_resource->isResolving()) {
-                m_active_parse_tasks.remove(current_resource->resolutionTicket());
+                auto task = (*m_active_parse_tasks.find(current_resource->resolutionTicket())).get();
+                task->abort();
             }
 
-            m_resources[row] = new_resource;
-            resolveResource(new_resource);
+            m_resources[row].reset(new_resource);
+            resolveResource(m_resources.at(row));
             emit dataChanged(index(row, 0), index(row, columnCount(QModelIndex()) - 1));
         }
     }
@@ -260,21 +270,21 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
         for (auto& removed : removed_set)
             removed_rows.append(m_resources_index[removed]);
 
-        std::sort(removed_rows.begin(), removed_rows.end());
-
-        for (int i = 0; i < removed_rows.size(); i++)
-            removed_rows[i] -= i;
+        std::sort(removed_rows.begin(), removed_rows.end(), std::greater<int>());
 
         for (auto& removed_index : removed_rows) {
-            beginRemoveRows(QModelIndex(), removed_index, removed_index);
-
             auto removed_it = m_resources.begin() + removed_index;
+
+            Q_ASSERT(removed_it != m_resources.end());
+            Q_ASSERT(removed_set.contains(removed_it->get()->internal_id()));
+
             if ((*removed_it)->isResolving()) {
-                m_active_parse_tasks.remove((*removed_it)->resolutionTicket());
+                auto task = (*m_active_parse_tasks.find((*removed_it)->resolutionTicket())).get();
+                task->abort();
             }
 
+            beginRemoveRows(QModelIndex(), removed_index, removed_index);
             m_resources.erase(removed_it);
-
             endRemoveRows();
         }
     }

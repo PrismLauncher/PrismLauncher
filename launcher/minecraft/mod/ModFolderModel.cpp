@@ -165,7 +165,7 @@ int ModFolderModel::columnCount(const QModelIndex &parent) const
 Task* ModFolderModel::createUpdateTask()
 {
     auto index_dir = indexDir();
-    auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load);
+    auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load, this);
     m_first_folder_load = false;
     return task;
 }
@@ -181,6 +181,9 @@ bool ModFolderModel::uninstallMod(const QString& filename, bool preserve_metadat
         if(mod->fileinfo().fileName() == filename){
             auto index_dir = indexDir();
             mod->destroy(index_dir, preserve_metadata);
+
+            update();
+
             return true;
         }
     }
@@ -206,6 +209,9 @@ bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
         auto index_dir = indexDir();
         m->destroy(index_dir);
     }
+
+    update();
+
     return true;
 }
 
@@ -268,14 +274,13 @@ void ModFolderModel::onUpdateSucceeded()
 
     applyUpdates(current_set, new_set, new_mods);
     
-    update_results.reset();
     m_current_update_task.reset();
 
-    emit updateFinished();
-
-    if(m_scheduled_update) {
+    if (m_scheduled_update) {
         m_scheduled_update = false;
         update();
+    } else {
+        emit updateFinished();
     }
 }
 
@@ -299,9 +304,6 @@ void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
         resource->finishResolvingWithDetails(std::move(result->details));
 
     emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
-
-    parse_task->deleteLater();
-    m_active_parse_tasks.remove(ticket);
 }
 
 

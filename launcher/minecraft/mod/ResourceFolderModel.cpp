@@ -24,8 +24,6 @@ bool ResourceFolderModel::startWatching(const QStringList paths)
     if (m_is_watching)
         return false;
 
-    update();
-
     auto couldnt_be_watched = m_watcher.addPaths(paths);
     for (auto path : paths) {
         if (couldnt_be_watched.contains(path))
@@ -33,6 +31,8 @@ bool ResourceFolderModel::startWatching(const QStringList paths)
         else
             qDebug() << "Started watching " << path;
     }
+
+    update();
 
     m_is_watching = !m_is_watching;
     return m_is_watching;
@@ -105,7 +105,8 @@ bool ResourceFolderModel::installResource(QString original_path)
             QFileInfo new_path_file_info(new_path);
             resource.setFile(new_path_file_info);
 
-            update();
+            if (!m_is_watching)
+                return update();
 
             return true;
         }
@@ -123,7 +124,8 @@ bool ResourceFolderModel::installResource(QString original_path)
             QFileInfo newpathInfo(new_path);
             resource.setFile(newpathInfo);
 
-            update();
+            if (!m_is_watching)
+                return update();
 
             return true;
         }
@@ -136,8 +138,13 @@ bool ResourceFolderModel::installResource(QString original_path)
 bool ResourceFolderModel::uninstallResource(QString file_name)
 {
     for (auto& resource : m_resources) {
-        if (resource->fileinfo().fileName() == file_name)
-            return resource->destroy();
+        if (resource->fileinfo().fileName() == file_name) {
+            auto res = resource->destroy();
+
+            update();
+
+            return res;
+        }
     }
     return false;
 }
@@ -156,13 +163,21 @@ bool ResourceFolderModel::deleteResources(const QModelIndexList& indexes)
         }
 
         auto& resource = m_resources.at(i.row());
+
         resource->destroy();
     }
+
+    update();
+
     return true;
 }
 
+static QMutex s_update_task_mutex;
 bool ResourceFolderModel::update()
 {
+    // We hold a lock here to prevent race conditions on the m_current_update_task reset.
+    QMutexLocker lock(&s_update_task_mutex);
+
     // Already updating, so we schedule a future update and return.
     if (m_current_update_task) {
         m_scheduled_update = true;
@@ -183,7 +198,7 @@ bool ResourceFolderModel::update()
     return true;
 }
 
-void ResourceFolderModel::resolveResource(Resource::WeakPtr res)
+void ResourceFolderModel::resolveResource(Resource::Ptr res)
 {
     if (!res->shouldResolve()) {
         return;
@@ -205,6 +220,8 @@ void ResourceFolderModel::resolveResource(Resource::WeakPtr res)
         task, &Task::succeeded, this, [=] { onParseSucceeded(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
     connect(
         task, &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
+    connect(
+        task, &Task::finished, this, [=] { m_active_parse_tasks.remove(ticket); }, Qt::ConnectionType::QueuedConnection);
 
     auto* thread_pool = QThreadPool::globalInstance();
     thread_pool->start(task);
@@ -229,15 +246,13 @@ void ResourceFolderModel::onUpdateSucceeded()
 
     applyUpdates(current_set, new_set, new_resources);
 
-    update_results.reset();
-    m_current_update_task->deleteLater();
     m_current_update_task.reset();
-
-    emit updateFinished();
 
     if (m_scheduled_update) {
         m_scheduled_update = false;
         update();
+    } else {
+        emit updateFinished();
     }
 }
 
@@ -247,9 +262,6 @@ void ResourceFolderModel::onParseSucceeded(int ticket, QString resource_id)
     if (iter == m_active_parse_tasks.constEnd())
         return;
 
-    (*iter)->deleteLater();
-    m_active_parse_tasks.remove(ticket);
-
     int row = m_resources_index[resource_id];
     emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
 }
@@ -257,6 +269,12 @@ void ResourceFolderModel::onParseSucceeded(int ticket, QString resource_id)
 Task* ResourceFolderModel::createUpdateTask()
 {
     return new BasicFolderLoadTask(m_dir);
+}
+
+
+bool ResourceFolderModel::hasPendingParseTasks() const
+{
+    return !m_active_parse_tasks.isEmpty();
 }
 
 void ResourceFolderModel::directoryChanged(QString path)

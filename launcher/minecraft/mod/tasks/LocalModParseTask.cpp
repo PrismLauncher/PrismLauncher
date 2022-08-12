@@ -497,6 +497,12 @@ void LocalModParseTask::processAsLitemod()
     zip.close();
 }
 
+bool LocalModParseTask::abort()
+{
+    m_aborted = true;
+    return true;
+}
+
 void LocalModParseTask::executeTask()
 {
     switch(m_type)
@@ -513,5 +519,9 @@ void LocalModParseTask::executeTask()
         default:
             break;
     }
-    emitSucceeded();
+
+    if (m_aborted)
+        emitAborted();
+    else
+        emitSucceeded();
 }
