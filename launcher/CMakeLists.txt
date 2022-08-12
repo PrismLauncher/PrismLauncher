@@ -381,8 +381,8 @@ ecm_add_test(minecraft/Library_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VER
 
 # FIXME: shares data with FileSystem test
 # TODO: needs testdata
-ecm_add_test(minecraft/mod/ModFolderModel_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME ModFolderModel)
+ecm_add_test(minecraft/mod/ResourceFolderModel_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+    TEST_NAME ResourceFolderModel)
 
 ecm_add_test(minecraft/ParseUtils_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
     TEST_NAME ParseUtils)

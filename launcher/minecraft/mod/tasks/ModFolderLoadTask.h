@@ -57,7 +57,7 @@ public:
     }
 
 public:
-    ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan = false);
+    ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan = false, QObject* parent = nullptr);
 
     void executeTask() override;
 

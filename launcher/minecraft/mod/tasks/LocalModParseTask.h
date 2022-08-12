@@ -13,7 +13,7 @@ class LocalModParseTask : public Task
     Q_OBJECT
 public:
     struct Result {
-        std::shared_ptr<ModDetails> details;
+        ModDetails details;
     };
     using ResultPtr = std::shared_ptr<Result>;
     ResultPtr result() const {

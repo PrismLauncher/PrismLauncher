@@ -296,7 +296,7 @@ void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
 
     auto result = cast_task->result();
     if (result && resource)
-        resource->finishResolvingWithDetails(result->details);
+        resource->finishResolvingWithDetails(std::move(result->details));
 
     emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
 

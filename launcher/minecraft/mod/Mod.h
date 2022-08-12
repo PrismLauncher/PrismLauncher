@@ -68,7 +68,8 @@ public:
     auto metadata() const -> const std::shared_ptr<Metadata::ModStruct>;
 
     void setStatus(ModStatus status);
-    void setMetadata(const Metadata::ModStruct& metadata);
+    void setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata);
+    void setMetadata(const Metadata::ModStruct& metadata) { setMetadata(std::make_shared<Metadata::ModStruct>(metadata)); }
 
     auto enable(bool value) -> bool;
 
@@ -78,17 +79,10 @@ public:
     // Delete all the files of this mod
     auto destroy(QDir& index_dir, bool preserve_metadata = false) -> bool;
 
-    void finishResolvingWithDetails(std::shared_ptr<ModDetails> details);
+    void finishResolvingWithDetails(ModDetails&& details);
 
 protected:
-    /* If the mod has metadata, this will be filled in the constructor, and passed to 
-     * the ModDetails when calling finishResolvingWithDetails */
-    std::shared_ptr<Metadata::ModStruct> m_temp_metadata;
-
-    /* Set the mod status while it doesn't have local details just yet */
-    ModStatus m_temp_status = ModStatus::NoMetadata;
-
-    std::shared_ptr<ModDetails> m_localDetails;
+    ModDetails m_local_details;
 
     bool m_enabled = true;
 };

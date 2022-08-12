@@ -44,13 +44,7 @@
 #include "MetadataHandler.h"
 #include "Version.h"
 
-namespace {
-
-ModDetails invalidDetails;
-
-}
-
-Mod::Mod(const QFileInfo& file) : Resource(file)
+Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {
     m_enabled = (file.suffix() != "disabled");
 }
@@ -59,7 +53,7 @@ Mod::Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata)
     : Mod(mods_dir.absoluteFilePath(metadata.filename))
 {
     m_name = metadata.name;
-    m_temp_metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
+    m_local_details.metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
 }
 
 auto Mod::enable(bool value) -> bool
@@ -95,22 +89,14 @@ auto Mod::enable(bool value) -> bool
 
 void Mod::setStatus(ModStatus status)
 {
-    if (m_localDetails) {
-        m_localDetails->status = status;
-    } else {
-        m_temp_status = status;
-    }
+    m_local_details.status = status;
 }
-void Mod::setMetadata(const Metadata::ModStruct& metadata)
+void Mod::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
 {
     if (status() == ModStatus::NoMetadata)
         setStatus(ModStatus::Installed);
 
-    if (m_localDetails) {
-        m_localDetails->metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
-    } else {
-        m_temp_metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
-    }
+    m_local_details.metadata = metadata;
 }
 
 std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
@@ -176,7 +162,7 @@ auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
 
 auto Mod::details() const -> const ModDetails&
 {
-    return m_localDetails ? *m_localDetails : invalidDetails;
+    return m_local_details;
 }
 
 auto Mod::name() const -> QString
@@ -213,35 +199,29 @@ auto Mod::authors() const -> QStringList
 
 auto Mod::status() const -> ModStatus
 {
-    if (!m_localDetails)
-        return m_temp_status;
     return details().status;
 }
 
 auto Mod::metadata() -> std::shared_ptr<Metadata::ModStruct>
 {
-    if (m_localDetails)
-        return m_localDetails->metadata;
-    return m_temp_metadata;
+    return m_local_details.metadata;
 }
 
 auto Mod::metadata() const -> const std::shared_ptr<Metadata::ModStruct>
 {
-    if (m_localDetails)
-        return m_localDetails->metadata;
-    return m_temp_metadata;
+    return m_local_details.metadata;
 }
 
-void Mod::finishResolvingWithDetails(std::shared_ptr<ModDetails> details)
+void Mod::finishResolvingWithDetails(ModDetails&& details)
 {
     m_is_resolving = false;
     m_is_resolved = true;
-    m_localDetails = details;
 
-    setStatus(m_temp_status);
+    std::shared_ptr<Metadata::ModStruct> metadata = details.metadata;
+    if (details.status == ModStatus::Unknown)
+        details.status = m_local_details.status;
 
-    if (m_localDetails && m_temp_metadata && m_temp_metadata->isValid()) {
-        setMetadata(*m_temp_metadata);
-        m_temp_metadata.reset();
-    }
+    m_local_details = std::move(details);
+    if (metadata)
+        setMetadata(std::move(metadata));
 }

@@ -46,34 +46,49 @@ enum class ModStatus {
     Installed,      // Both JAR and Metadata are present
     NotInstalled,   // Only the Metadata is present
     NoMetadata,     // Only the JAR is present
+    Unknown,        // Default status
 };
 
 struct ModDetails
 {
     /* Mod ID as defined in the ModLoader-specific metadata */
-    QString mod_id;
+    QString mod_id = {};
     
     /* Human-readable name */
-    QString name;
+    QString name = {};
     
     /* Human-readable mod version */
-    QString version;
+    QString version = {};
     
     /* Human-readable minecraft version */
-    QString mcversion;
+    QString mcversion = {};
     
     /* URL for mod's home page */
-    QString homeurl;
+    QString homeurl = {};
     
     /* Human-readable description */
-    QString description;
+    QString description = {};
 
     /* List of the author's names */
-    QStringList authors;
+    QStringList authors = {};
 
     /* Installation status of the mod */
-    ModStatus status;
+    ModStatus status = ModStatus::Unknown;
 
     /* Metadata information, if any */
-    std::shared_ptr<Metadata::ModStruct> metadata;
+    std::shared_ptr<Metadata::ModStruct> metadata = nullptr;
+
+    ModDetails() = default;
+
+    /** Metadata should be handled manually to properly set the mod status. */
+    ModDetails(ModDetails& other)
+        : mod_id(other.mod_id)
+        , name(other.name)
+        , version(other.version)
+        , mcversion(other.mcversion)
+        , homeurl(other.homeurl)
+        , description(other.description)
+        , authors(other.authors)
+        , status(other.status)
+    {}
 };
