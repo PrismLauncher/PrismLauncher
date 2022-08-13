@@ -89,8 +89,8 @@ private:
     void changeState(LoggedProcess::State state);
 
 private:
-    QTextDecoder m_err_decoder = QTextDecoder(QTextCodec::codecForName("UTF-8"));
-    QTextDecoder m_out_decoder = QTextDecoder(QTextCodec::codecForName("UTF-8"));
+    QTextDecoder m_err_decoder = QTextDecoder(QTextCodec::codecForLocale());
+    QTextDecoder m_out_decoder = QTextDecoder(QTextCodec::codecForLocale());
     bool m_killed = false;
     State m_state = NotRunning;
     int m_exit_code = 0;
