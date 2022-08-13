@@ -380,8 +380,8 @@ bool ResourceFolderModel::validateIndex(const QModelIndex& index) const
     if (!index.isValid())
         return false;
 
-    size_t row = index.row();
-    if (row < 0 || row >= size())
+    int row = index.row();
+    if (row < 0 || row >= m_resources.size())
         return false;
 
     return true;

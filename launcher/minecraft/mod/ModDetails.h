@@ -91,4 +91,32 @@ struct ModDetails
         , authors(other.authors)
         , status(other.status)
     {}
+
+    ModDetails& operator=(ModDetails& other)
+    {
+        this->mod_id = other.mod_id;
+        this->name = other.name;
+        this->version = other.version;
+        this->mcversion = other.mcversion;
+        this->homeurl = other.homeurl;
+        this->description = other.description;
+        this->authors = other.authors;
+        this->status = other.status;
+
+        return *this;
+    }
+
+    ModDetails& operator=(ModDetails&& other)
+    {
+        this->mod_id = other.mod_id;
+        this->name = other.name;
+        this->version = other.version;
+        this->mcversion = other.mcversion;
+        this->homeurl = other.homeurl;
+        this->description = other.description;
+        this->authors = other.authors;
+        this->status = other.status;
+
+        return *this;
+    }
 };
