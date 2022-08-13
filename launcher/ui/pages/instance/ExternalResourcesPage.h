@@ -45,15 +45,15 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     virtual bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
 
    protected slots:
-    virtual void itemActivated(const QModelIndex& index) {};
+    void itemActivated(const QModelIndex& index);
     void filterTextChanged(const QString& newContents);
     virtual void runningStateChanged(bool running);
 
     virtual void addItem();
     virtual void removeItem();
 
-    virtual void enableItem() {};
-    virtual void disableItem() {};
+    virtual void enableItem();
+    virtual void disableItem();
 
     virtual void viewFolder();
     virtual void viewConfigs();

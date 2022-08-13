@@ -29,8 +29,10 @@ void Resource::parseFile()
         m_type = ResourceType::FOLDER;
         m_name = file_name;
     } else if (m_file_info.isFile()) {
-        if (file_name.endsWith(".disabled"))
+        if (file_name.endsWith(".disabled")) {
             file_name.chop(9);
+            m_enabled = false;
+        }
 
         if (file_name.endsWith(".zip") || file_name.endsWith(".jar")) {
             m_type = ResourceType::ZIPFILE;
@@ -59,6 +61,11 @@ std::pair<int, bool> Resource::compare(const Resource& other, SortType type) con
 {
     switch (type) {
         default:
+        case SortType::ENABLED:
+            if (enabled() && !other.enabled())
+                return { 1, type == SortType::ENABLED };
+            if (!enabled() && other.enabled())
+                return { -1, type == SortType::ENABLED };
         case SortType::NAME: {
             QString this_name{ name() };
             QString other_name{ other.name() };
@@ -83,6 +90,54 @@ std::pair<int, bool> Resource::compare(const Resource& other, SortType type) con
 bool Resource::applyFilter(QRegularExpression filter) const
 {
     return filter.match(name()).hasMatch();
+}
+
+bool Resource::enable(EnableAction action)
+{
+    if (m_type == ResourceType::UNKNOWN || m_type == ResourceType::FOLDER)
+        return false;
+
+
+    QString path = m_file_info.absoluteFilePath();
+    QFile file(path);
+
+    bool enable = true;
+    switch (action) {
+        case EnableAction::ENABLE:
+            enable = true;
+            break;
+        case EnableAction::DISABLE:
+            enable = false;
+            break;
+        case EnableAction::TOGGLE:
+        default:
+            enable = !enabled();
+            break;
+    }
+
+    if (m_enabled == enable)
+        return false;
+
+    if (enable) {
+        // m_enabled is false, but there's no '.disabled' suffix.
+        // TODO: Report error?
+        if (!path.endsWith(".disabled"))
+            return false;
+        path.chop(9);
+
+        if (!file.rename(path))
+            return false;
+    } else {
+        path += ".disabled";
+
+        if (!file.rename(path))
+            return false;
+    }
+
+    setFile(QFileInfo(path));
+
+    m_enabled = enable;
+    return true;
 }
 
 bool Resource::destroy()

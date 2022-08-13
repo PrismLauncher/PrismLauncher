@@ -40,6 +40,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     connect(ui->actionViewFolder, &QAction::triggered, this, &ExternalResourcesPage::viewFolder);
 
     connect(ui->treeView, &ModListView::customContextMenuRequested, this, &ExternalResourcesPage::ShowContextMenu);
+    connect(ui->treeView, &ModListView::activated, this, &ExternalResourcesPage::itemActivated);
 
     auto selection_model = ui->treeView->selectionModel();
     connect(selection_model, &QItemSelectionModel::currentChanged, this, &ExternalResourcesPage::current);
@@ -79,6 +80,15 @@ void ExternalResourcesPage::closedImpl()
 void ExternalResourcesPage::retranslate()
 {
     ui->retranslateUi(this);
+}
+
+void ExternalResourcesPage::itemActivated(const QModelIndex&)
+{
+    if (!m_controlsEnabled)
+        return;
+
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setResourceEnabled(selection.indexes(), EnableAction::TOGGLE);
 }
 
 void ExternalResourcesPage::filterTextChanged(const QString& newContents)
@@ -155,6 +165,24 @@ void ExternalResourcesPage::removeItem()
     
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     m_model->deleteResources(selection.indexes());
+}
+
+void ExternalResourcesPage::enableItem()
+{
+    if (!m_controlsEnabled)
+        return;
+
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setResourceEnabled(selection.indexes(), EnableAction::ENABLE);
+}
+
+void ExternalResourcesPage::disableItem()
+{
+    if (!m_controlsEnabled)
+        return;
+
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setResourceEnabled(selection.indexes(), EnableAction::DISABLE);
 }
 
 void ExternalResourcesPage::viewConfigs()

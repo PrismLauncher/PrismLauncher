@@ -22,6 +22,12 @@ enum class SortType {
     ENABLED,
 };
 
+enum class EnableAction {
+    ENABLE,
+    DISABLE,
+    TOGGLE
+};
+
 /** General class for managed resources. It mirrors a file in disk, with some more info
  *  for display and house-keeping purposes.
  *
@@ -47,6 +53,7 @@ class Resource : public QObject {
     [[nodiscard]] auto dateTimeChanged() const -> QDateTime { return m_changed_date_time; }
     [[nodiscard]] auto internal_id() const -> QString { return m_internal_id; }
     [[nodiscard]] auto type() const -> ResourceType { return m_type; }
+    [[nodiscard]] bool enabled() const { return m_enabled; }
 
     [[nodiscard]] virtual auto name() const -> QString { return m_name; }
     [[nodiscard]] virtual bool valid() const { return m_type != ResourceType::UNKNOWN; }
@@ -64,6 +71,12 @@ class Resource : public QObject {
      *  or if such filter includes the Resource (true).
      */
     [[nodiscard]] virtual bool applyFilter(QRegularExpression filter) const;
+
+    /** Changes the enabled property, according to 'action'.
+     *
+     *  Returns whether a change was applied to the Resource's properties.
+     */
+    bool enable(EnableAction action);
 
     [[nodiscard]] auto shouldResolve() const -> bool { return !m_is_resolving && !m_is_resolved; }
     [[nodiscard]] auto isResolving() const -> bool { return m_is_resolving; }
@@ -91,6 +104,9 @@ class Resource : public QObject {
 
     /* The type of file we're dealing with. */
     ResourceType m_type = ResourceType::UNKNOWN;
+
+    /* Whether the resource is enabled (e.g. shows up in the game) or not. */
+    bool m_enabled = true;
 
     /* Used to keep trach of pending / concluded actions on the resource. */
     bool m_is_resolving = false;

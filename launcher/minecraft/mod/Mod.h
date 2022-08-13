@@ -54,8 +54,6 @@ public:
     Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata);
     Mod(QString file_path) : Mod(QFileInfo(file_path)) {}
 
-    auto enabled()         const -> bool { return m_enabled; }
-
     auto details()     const -> const ModDetails&;
     auto name()        const -> QString override;
     auto version()     const -> QString;
@@ -71,8 +69,6 @@ public:
     void setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata);
     void setMetadata(const Metadata::ModStruct& metadata) { setMetadata(std::make_shared<Metadata::ModStruct>(metadata)); }
 
-    auto enable(bool value) -> bool;
-
     [[nodiscard]] auto compare(Resource const& other, SortType type) const -> std::pair<int, bool> override;
     [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
 
@@ -83,6 +79,4 @@ public:
 
 protected:
     ModDetails m_local_details;
-
-    bool m_enabled = true;
 };

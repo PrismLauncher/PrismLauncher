@@ -56,37 +56,6 @@ Mod::Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata)
     m_local_details.metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
 }
 
-auto Mod::enable(bool value) -> bool
-{
-    if (m_type == ResourceType::UNKNOWN || m_type == ResourceType::FOLDER)
-        return false;
-
-    if (m_enabled == value)
-        return false;
-
-    QString path = m_file_info.absoluteFilePath();
-    QFile file(path);
-    if (value) {
-        if (!path.endsWith(".disabled"))
-            return false;
-        path.chop(9);
-
-        if (!file.rename(path))
-            return false;
-    } else {
-        path += ".disabled";
-
-        if (!file.rename(path))
-            return false;
-    }
-
-    if (status() == ModStatus::NoMetadata)
-        setFile(QFileInfo(path));
-
-    m_enabled = value;
-    return true;
-}
-
 void Mod::setStatus(ModStatus status)
 {
     m_local_details.status = status;
@@ -108,10 +77,6 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
     switch (type) {
         default:
         case SortType::ENABLED:
-            if (enabled() && !cast_other->enabled())
-                return { 1, type == SortType::ENABLED };
-            if (!enabled() && cast_other->enabled())
-                return { -1, type == SortType::ENABLED };
         case SortType::NAME:
         case SortType::DATE: {
             auto res = Resource::compare(other, type);

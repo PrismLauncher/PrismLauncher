@@ -172,6 +172,44 @@ bool ResourceFolderModel::deleteResources(const QModelIndexList& indexes)
     return true;
 }
 
+bool ResourceFolderModel::setResourceEnabled(const QModelIndexList &indexes, EnableAction action)
+{
+    if (!m_can_interact)
+        return false;
+
+    if (indexes.isEmpty())
+        return true;
+
+    bool succeeded = true;
+    for (auto const& idx : indexes) {
+        if (!validateIndex(idx) || idx.column() != 0)
+            continue;
+
+        int row = idx.row();
+
+        auto& resource = m_resources[row];
+
+        // Preserve the row, but change its ID
+        auto old_id = resource->internal_id();
+        if (!resource->enable(action)) {
+            succeeded = false;
+            continue;
+        }
+
+        auto new_id = resource->internal_id();
+        if (m_resources_index.contains(new_id)) {
+            // FIXME: https://github.com/PolyMC/PolyMC/issues/550
+        }
+
+        m_resources_index.remove(old_id);
+        m_resources_index[new_id] = row;
+
+        emit dataChanged(index(row, 0), index(row, columnCount(QModelIndex()) - 1));
+    }
+
+    return succeeded;
+}
+
 static QMutex s_update_task_mutex;
 bool ResourceFolderModel::update()
 {
@@ -271,7 +309,6 @@ Task* ResourceFolderModel::createUpdateTask()
     return new BasicFolderLoadTask(m_dir);
 }
 
-
 bool ResourceFolderModel::hasPendingParseTasks() const
 {
     return !m_active_parse_tasks.isEmpty();
@@ -370,9 +407,28 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
             }
         case Qt::ToolTipRole:
             return m_resources[row]->internal_id();
+        case Qt::CheckStateRole:
+            switch (column) {
+                case ACTIVE_COLUMN:
+                    return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
+                default:
+                    return {};
+            }
         default:
             return {};
     }
+}
+
+bool ResourceFolderModel::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    int row = index.row();
+    if (row < 0 || row >= rowCount(index) || !index.isValid())
+        return false;
+
+    if (role == Qt::CheckStateRole)
+        return setResourceEnabled({ index }, EnableAction::TOGGLE);
+
+    return false;
 }
 
 QVariant ResourceFolderModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -389,9 +445,14 @@ QVariant ResourceFolderModel::headerData(int section, Qt::Orientation orientatio
             }
         case Qt::ToolTipRole: {
             switch (section) {
+                case ACTIVE_COLUMN:
+                    //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
+                    return tr("Is the resource enabled?");
                 case NAME_COLUMN:
+                    //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
                     return tr("The name of the resource.");
                 case DATE_COLUMN:
+                    //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
                     return tr("The date and time this resource was last changed (or added).");
                 default:
                     return {};
@@ -459,4 +520,3 @@ void ResourceFolderModel::enableInteraction(bool enabled)
         return (compare_result.first < 0);
     return (compare_result.first > 0);
 }
-

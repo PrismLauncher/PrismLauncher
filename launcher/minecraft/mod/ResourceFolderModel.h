@@ -55,8 +55,13 @@ class ResourceFolderModel : public QAbstractListModel {
      *  Returns whether the removal was successful.
      */
     virtual bool uninstallResource(QString file_name);
-
     virtual bool deleteResources(const QModelIndexList&);
+
+    /** Applies the given 'action' to the resources in 'indexes'.
+     *
+     *  Returns whether the action was successfully applied to all resources.
+     */
+    virtual bool setResourceEnabled(const QModelIndexList& indexes, EnableAction action);
 
     /** Creates a new update task and start it. Returns false if no update was done, like when an update is already underway. */
     virtual bool update();
@@ -66,6 +71,7 @@ class ResourceFolderModel : public QAbstractListModel {
 
     [[nodiscard]] size_t size() const { return m_resources.size(); };
     [[nodiscard]] bool empty() const { return size() == 0; }
+    [[nodiscard]] Resource& at(int index) { return *m_resources.at(index); }
     [[nodiscard]] Resource const& at(int index) const { return *m_resources.at(index); }
     [[nodiscard]] QList<Resource::Ptr> const& all() const { return m_resources; }
 
@@ -81,7 +87,7 @@ class ResourceFolderModel : public QAbstractListModel {
     /* Qt behavior */
 
     /* Basic columns */
-    enum Columns { NAME_COLUMN = 0, DATE_COLUMN, NUM_COLUMNS };
+    enum Columns { ACTIVE_COLUMN = 0, NAME_COLUMN, DATE_COLUMN, NUM_COLUMNS };
 
     [[nodiscard]] int rowCount(const QModelIndex& = {}) const override { return size(); }
     [[nodiscard]] int columnCount(const QModelIndex& = {}) const override { return NUM_COLUMNS; };
@@ -96,7 +102,7 @@ class ResourceFolderModel : public QAbstractListModel {
     [[nodiscard]] bool validateIndex(const QModelIndex& index) const;
 
     [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override { return false; };
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
     [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
@@ -174,7 +180,7 @@ class ResourceFolderModel : public QAbstractListModel {
    protected:
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
-    QList<SortType> m_column_sort_keys = { SortType::NAME, SortType::DATE };
+    QList<SortType> m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE };
 
     bool m_can_interact = true;
 

@@ -104,20 +104,6 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
     }
 }
 
-bool ModFolderModel::setData(const QModelIndex &index, const QVariant &value, int role)
-{
-    if (index.row() < 0 || index.row() >= rowCount(index) || !index.isValid())
-    {
-        return false;
-    }
-
-    if (role == Qt::CheckStateRole)
-    {
-        return setModStatus(index.row(), Toggle);
-    }
-    return false;
-}
-
 QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     switch (role)
@@ -305,65 +291,3 @@ void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
 
     emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
 }
-
-
-bool ModFolderModel::setModStatus(const QModelIndexList& indexes, ModStatusAction enable)
-{
-    if(!m_can_interact) {
-        return false;
-    }
-
-    if(indexes.isEmpty())
-        return true;
-
-    for (auto index: indexes)
-    {
-        if(index.column() != 0) {
-            continue;
-        }
-        setModStatus(index.row(), enable);
-    }
-    return true;
-}
-
-bool ModFolderModel::setModStatus(int row, ModFolderModel::ModStatusAction action)
-{
-    if(row < 0 || row >= m_resources.size()) {
-        return false;
-    }
-
-    auto mod = at(row);
-    bool desiredStatus;
-    switch(action) {
-        case Enable:
-            desiredStatus = true;
-            break;
-        case Disable:
-            desiredStatus = false;
-            break;
-        case Toggle:
-        default:
-            desiredStatus = !mod->enabled();
-            break;
-    }
-
-    if(desiredStatus == mod->enabled()) {
-        return true;
-    }
-
-    // preserve the row, but change its ID
-    auto oldId = mod->internal_id();
-    if(!mod->enable(!mod->enabled())) {
-        return false;
-    }
-    auto newId = mod->internal_id();
-    if(m_resources_index.contains(newId)) {
-        // NOTE: this could handle a corner case, where we are overwriting a file, because the same 'mod' exists both enabled and disabled
-        // But is it necessary?
-    }
-    m_resources_index.remove(oldId);
-    m_resources_index[newId] = row;
-    emit dataChanged(index(row, 0), index(row, columnCount(QModelIndex()) - 1));
-    return true;
-}
-

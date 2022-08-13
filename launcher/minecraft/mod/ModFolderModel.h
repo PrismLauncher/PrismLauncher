@@ -77,7 +77,6 @@ public:
     ModFolderModel(const QString &dir, bool is_indexed = false);
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     int columnCount(const QModelIndex &parent) const override;
@@ -90,9 +89,6 @@ public:
 
     /// Deletes all the selected mods
     bool deleteMods(const QModelIndexList &indexes);
-
-    /// Enable or disable listed mods
-    bool setModStatus(const QModelIndexList &indexes, ModStatusAction action);
 
     bool isValid();
 
@@ -110,9 +106,6 @@ private
 slots:
     void onUpdateSucceeded() override;
     void onParseSucceeded(int ticket, QString resource_id) override;
-
-private:
-    bool setModStatus(int index, ModStatusAction action);
 
 protected:
     bool m_is_indexed;

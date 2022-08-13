@@ -212,6 +212,62 @@ slots:
             QCoreApplication::processEvents();
         }
     }
+
+    void test_enable_disable()
+    {
+        QString folder_resource = QFINDTESTDATA("testdata/test_folder");
+        QString file_mod = QFINDTESTDATA("testdata/supercoolmod.jar");
+
+        QTemporaryDir tmp;
+        ResourceFolderModel model(tmp.path());
+
+        QCOMPARE(model.size(), 0);
+
+        {
+            EXEC_UPDATE_TASK(model.installResource(folder_resource), QVERIFY)
+        }
+        {
+            EXEC_UPDATE_TASK(model.installResource(file_mod), QVERIFY)
+        }
+
+        for (auto res : model.all())
+            qDebug() << res->name();
+
+        QCOMPARE(model.size(), 2);
+
+        auto& res_1 = model.at(0).type() != ResourceType::FOLDER ? model.at(0) : model.at(1);
+        auto& res_2 = model.at(0).type() == ResourceType::FOLDER ? model.at(0) : model.at(1);
+        auto id_1 = res_1.internal_id();
+        auto id_2 = res_2.internal_id();
+        bool initial_enabled_res_2 =  res_2.enabled();
+        bool initial_enabled_res_1 =  res_1.enabled();
+
+        QVERIFY(res_1.type() != ResourceType::FOLDER && res_1.type() != ResourceType::UNKNOWN);
+        qDebug() << "res_1 is of the correct type.";
+        QVERIFY(res_1.enabled());
+        qDebug() << "res_1 is initially enabled.";
+
+        QVERIFY(res_1.enable(EnableAction::TOGGLE));
+
+        QVERIFY(res_1.enabled() == !initial_enabled_res_1);
+        qDebug() << "res_1 got successfully toggled.";
+
+        QVERIFY(res_1.enable(EnableAction::TOGGLE));
+        qDebug() << "res_1 got successfully toggled again.";
+
+        QVERIFY(res_1.enabled() == initial_enabled_res_1);
+        QVERIFY(res_1.internal_id() == id_1);
+        qDebug() << "res_1 got back to its initial state.";
+
+        QVERIFY(!res_2.enable(initial_enabled_res_2 ? EnableAction::ENABLE : EnableAction::DISABLE));
+        QVERIFY(res_2.enabled() == initial_enabled_res_2);
+        QVERIFY(res_2.internal_id() == id_2);
+
+        while (model.hasPendingParseTasks()) {
+            QTest::qSleep(20);
+            QCoreApplication::processEvents();
+        }
+    }
 };
 
 QTEST_GUILESS_MAIN(ResourceFolderModelTest)
