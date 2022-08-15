@@ -6,7 +6,7 @@
   </provides>
   <launchable type="desktop-id">org.polymc.PolyMC.desktop</launchable>
   <name>PolyMC</name>
-  <developer_name>PolyMC Team</developer_name>
+  <developer_name>PolyMC</developer_name>
   <summary>A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
@@ -16,35 +16,39 @@
     <p>PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.</p>
     <p>Features:</p>
     <ul>
-      <li>Easily install game modifications, such as Fabric or Forge</li>
+      <li>Easily install game modifications, such as Fabric, Forge and Quilt</li>
       <li>Control your java settings</li>
       <li>Manage worlds and resource packs from the launcher</li>
       <li>See logs and other details easily</li>
       <li>Kill Minecraft in case of a crash/freeze</li>
       <li>Isolate minecraft instances to keep everything clean</li>
-      <li>Install mods directly from the launcher</li>
+      <li>Install and update mods directly from the launcher</li>
     </ul>
   </description>
   <screenshots>
     <screenshot type="default">
       <caption>The main PolyMC window</caption>
-      <image type="source" width="931" height="759">https://polymc.org/img/screenshots/LauncherDark.png</image>
+      <image type="source" width="578" height="452">https://polymc.org/img/screenshots/LauncherDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Modpack installation</caption>
-      <image type="source" width="860" height="848">https://polymc.org/img/screenshots/ModpackInstallDark.png</image>
+      <image type="source" width="523" height="452">https://polymc.org/img/screenshots/ModpackInstallDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Mod installation</caption>
-      <image type="source" width="1018" height="858">https://polymc.org/img/screenshots/ModInstallDark.png</image>
+      <image type="source" width="654" height="452">https://polymc.org/img/screenshots/ModInstallDark.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Mod updating</caption>
+      <image type="source" width="490" height="452">https://polymc.org/img/screenshots/ModUpdateDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Instance management</caption>
-      <image type="source" width="777" height="693">https://polymc.org/img/screenshots/PropertiesDark.png</image>
+      <image type="source" width="667" height="452">https://polymc.org/img/screenshots/PropertiesDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Cat :)</caption>
-      <image type="source" width="931" height="759">https://polymc.org/img/screenshots/LauncherCatDark.png</image>
+      <image type="source" width="555" height="452">https://polymc.org/img/screenshots/LauncherCatDark.png</image>
     </screenshot>
   </screenshots>
   <releases>
