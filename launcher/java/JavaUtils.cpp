@@ -177,6 +177,12 @@ QStringList addJavasFromEnv(QList<QString> javas)
     QByteArray env = qgetenv("POLYMC_JAVA_PATHS");
 #if defined(Q_OS_WIN32)
     QList<QString> javaPaths = QString::fromLocal8Bit(env).replace("\\", "/").split(QLatin1String(";"));
+    
+    QByteArray envPath = qgetenv("PATH");
+    QList<QString> javaPathsfromPath = QString::fromLocal8Bit(envPath).replace("\\", "/").split(QLatin1String(";"));
+    for (QString string : javaPathsfromPath) {
+        javaPaths.append(string + "/javaw.exe");
+    }
 #else
     QList<QString> javaPaths = QString::fromLocal8Bit(env).split(QLatin1String(":"));
 #endif
