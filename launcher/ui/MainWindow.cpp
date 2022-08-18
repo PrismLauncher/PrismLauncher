@@ -1445,6 +1445,7 @@ void MainWindow::updateNewsLabel()
     {
         newsLabel->setText(tr("Loading news..."));
         newsLabel->setEnabled(false);
+        ui->actionMoreNews->setVisible(false);
     }
     else
     {
@@ -1453,11 +1454,13 @@ void MainWindow::updateNewsLabel()
         {
             newsLabel->setText(entries[0]->title);
             newsLabel->setEnabled(true);
+            ui->actionMoreNews->setVisible(true);
         }
         else
         {
             newsLabel->setText(tr("No news available."));
             newsLabel->setEnabled(false);
+            ui->actionMoreNews->setVisible(false);
         }
     }
 }
