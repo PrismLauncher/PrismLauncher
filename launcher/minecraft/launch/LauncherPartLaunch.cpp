@@ -95,8 +95,8 @@ bool fitsInLocal8bit(const QString & string)
 
 void LauncherPartLaunch::executeTask()
 {
-    QString jarPath = APPLICATION->getJarPath("NewLaunch.jar");
-    if (jarPath.isEmpty())
+    QString newLaunchJar = APPLICATION->getJarPath("NewLaunch.jar");
+    if (newLaunchJar.isEmpty())
     {
         const char *reason = QT_TR_NOOP("Launcher library could not be found. Please check your installation.");
         emit logLine(tr(reason), MessageLevel::Fatal);
@@ -119,9 +119,6 @@ void LauncherPartLaunch::executeTask()
     // make detachable - this will keep the process running even if the object is destroyed
     m_process.setDetachable(true);
 
-    auto classPath = minecraftInstance->getClassPath();
-    classPath.prepend(jarPath);
-
     auto natPath = minecraftInstance->getNativePath();
 #ifdef Q_OS_WIN
     if (!fitsInLocal8bit(natPath))
@@ -137,23 +134,7 @@ void LauncherPartLaunch::executeTask()
 #endif
 
     args << "-cp";
-#ifdef Q_OS_WIN
-    QStringList processed;
-    for(auto & item: classPath)
-    {
-        if (!fitsInLocal8bit(item))
-        {
-            processed << shortPathName(item);
-        }
-        else
-        {
-            processed << item;
-        }
-    }
-    args << processed.join(';');
-#else
-    args << classPath.join(':');
-#endif
+    args << newLaunchJar;
     args << "org.polymc.EntryPoint";
 
     qDebug() << args.join(' ');
