@@ -34,8 +34,9 @@
  */
 
 #include "LoggedProcess.h"
-#include "MessageLevel.h"
 #include <QDebug>
+#include <QTextDecoder>
+#include "MessageLevel.h"
 
 LoggedProcess::LoggedProcess(QObject *parent) : QProcess(parent)
 {
@@ -59,25 +60,26 @@ LoggedProcess::~LoggedProcess()
     }
 }
 
-QStringList reprocess(const QByteArray & data, QString & leftover)
+QStringList reprocess(const QByteArray& data, QTextDecoder& decoder)
 {
-    QString str = leftover + QString::fromLocal8Bit(data);
-
-    str.remove('\r');
-    QStringList lines = str.split("\n");
-    leftover = lines.takeLast();
+    auto str = decoder.toUnicode(data);
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, QString::SkipEmptyParts);
+#else
+    auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, Qt::SkipEmptyParts);
+#endif
     return lines;
 }
 
 void LoggedProcess::on_stdErr()
 {
-    auto lines = reprocess(readAllStandardError(), m_err_leftover);
+    auto lines = reprocess(readAllStandardError(), m_err_decoder);
     emit log(lines, MessageLevel::StdErr);
 }
 
 void LoggedProcess::on_stdOut()
 {
-    auto lines = reprocess(readAllStandardOutput(), m_out_leftover);
+    auto lines = reprocess(readAllStandardOutput(), m_out_decoder);
     emit log(lines, MessageLevel::StdOut);
 }
 
@@ -85,18 +87,6 @@ void LoggedProcess::on_exit(int exit_code, QProcess::ExitStatus status)
 {
     // save the exit code
     m_exit_code = exit_code;
-
-    // Flush console window
-    if (!m_err_leftover.isEmpty())
-    {
-        emit log({m_err_leftover}, MessageLevel::StdErr);
-        m_err_leftover.clear();
-    }
-    if (!m_out_leftover.isEmpty())
-    {
-        emit log({m_err_leftover}, MessageLevel::StdOut);
-        m_out_leftover.clear();
-    }
 
     // based on state, send signals
     if (!m_is_aborting)
