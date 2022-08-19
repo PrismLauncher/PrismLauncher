@@ -174,11 +174,17 @@ JavaInstallPtr JavaUtils::GetDefaultJava()
 
 QStringList addJavasFromEnv(QList<QString> javas)
 {
-    QByteArray env = qgetenv("POLYMC_JAVA_PATHS");
+    auto env = qEnvironmentVariable("POLYMC_JAVA_PATHS");
 #if defined(Q_OS_WIN32)
-    QList<QString> javaPaths = QString::fromLocal8Bit(env).replace("\\", "/").split(QLatin1String(";"));
+    QList<QString> javaPaths = env.replace("\\", "/").split(QLatin1String(";"));
+    
+    auto envPath = qEnvironmentVariable("PATH");
+    QList<QString> javaPathsfromPath = envPath.replace("\\", "/").split(QLatin1String(";"));
+    for (QString string : javaPathsfromPath) {
+        javaPaths.append(string + "/javaw.exe");
+    }
 #else
-    QList<QString> javaPaths = QString::fromLocal8Bit(env).split(QLatin1String(":"));
+    QList<QString> javaPaths = env.split(QLatin1String(":"));
 #endif
     for(QString i : javaPaths)
     {
