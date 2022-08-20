@@ -48,7 +48,7 @@
 
 #include "Application.h"
 #include "BuildConfig.h"
-#include "ui/dialogs/ScrollMessageBox.h"
+#include "ui/dialogs/BlockedModsDialog.h"
 
 namespace ModpacksCH {
 
@@ -173,6 +173,7 @@ void PackInstallTask::onResolveModsSucceeded()
     m_abortable = false;
 
     QString text;
+    QList<QUrl> urls;
     auto anyBlocked = false;
 
     Flame::Manifest results = m_mod_id_resolver_task->getResults();
@@ -190,6 +191,7 @@ void PackInstallTask::onResolveModsSucceeded()
 
             type[0] = type[0].toUpper();
             text += QString("%1: %2 - <a href='%3'>%3</a><br/>").arg(type, local_file.name, results_file.websiteUrl);
+            urls.append(QUrl(results_file.websiteUrl));
             anyBlocked = true;
         } else {
             local_file.url = results_file.url.toString();
@@ -201,10 +203,11 @@ void PackInstallTask::onResolveModsSucceeded()
     if (anyBlocked) {
         qDebug() << "Blocked files found, displaying file list";
 
-        auto message_dialog = new ScrollMessageBox(m_parent, tr("Blocked files found"),
+        auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked files found"),
                                                    tr("The following files are not available for download in third party launchers.<br/>"
                                                       "You will need to manually download them and add them to the instance."),
-                                                   text);
+                                                   text,
+                                                   urls);
 
         if (message_dialog->exec() == QDialog::Accepted)
             downloadPack();
