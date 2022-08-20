@@ -112,10 +112,6 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
     }
 }
 
-CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
-    : ModFolderPage(inst, mods, parent)
-{}
-
 void ModFolderPage::runningStateChanged(bool running)
 {
     ExternalResourcesPage::runningStateChanged(running);
@@ -126,27 +122,6 @@ void ModFolderPage::runningStateChanged(bool running)
 bool ModFolderPage::shouldDisplay() const
 {
     return true;
-}
-
-bool CoreModFolderPage::shouldDisplay() const
-{
-    if (ModFolderPage::shouldDisplay()) {
-        auto inst = dynamic_cast<MinecraftInstance*>(m_instance);
-        if (!inst)
-            return true;
-
-        auto version = inst->getPackProfile();
-
-        if (!version)
-            return true;
-        if (!version->getComponent("net.minecraftforge"))
-            return false;
-        if (!version->getComponent("net.minecraft"))
-            return false;
-        if (version->getComponent("net.minecraft")->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate)
-            return true;
-    }
-    return false;
 }
 
 void ModFolderPage::installMods()
@@ -251,4 +226,29 @@ void ModFolderPage::updateMods()
 
         m_model->update();
     }
+}
+
+CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
+    : ModFolderPage(inst, mods, parent)
+{}
+
+bool CoreModFolderPage::shouldDisplay() const
+{
+    if (ModFolderPage::shouldDisplay()) {
+        auto inst = dynamic_cast<MinecraftInstance*>(m_instance);
+        if (!inst)
+            return true;
+
+        auto version = inst->getPackProfile();
+
+        if (!version)
+            return true;
+        if (!version->getComponent("net.minecraftforge"))
+            return false;
+        if (!version->getComponent("net.minecraft"))
+            return false;
+        if (version->getComponent("net.minecraft")->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate)
+            return true;
+    }
+    return false;
 }
