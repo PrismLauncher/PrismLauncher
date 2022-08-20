@@ -55,10 +55,6 @@ class Config {
     int VERSION_MAJOR;
     /// The minor version number.
     int VERSION_MINOR;
-    /// The hotfix number.
-    int VERSION_HOTFIX;
-    /// The build number.
-    int VERSION_BUILD;
 
     /**
      * The version channel
@@ -70,6 +66,9 @@ class Config {
 
     /// A short string identifying this build's platform. For example, "lin64" or "win32".
     QString BUILD_PLATFORM;
+
+    /// A string containing the build timestamp
+    QString BUILD_DATE;
 
     /// URL for the updater's channel
     QString UPDATER_BASE;
@@ -94,9 +93,6 @@ class Config {
 
     /// The git refspec of this build
     QString GIT_REFSPEC;
-
-    /// This is printed on start to standard output
-    QString VERSION_STR;
 
     /**
      * This is used to fetch the news RSS feed.

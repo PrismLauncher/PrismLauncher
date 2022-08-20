@@ -52,7 +52,7 @@
     </screenshot>
   </screenshots>
   <releases>
-    <release version="@Launcher_RELEASE_VERSION_NAME@" date="@Launcher_RELEASE_TIMESTAMP@"></release>
+    <release version="@Launcher_VERSION_NAME@" date="@Launcher_BUILD_TIMESTAMP@"></release>
   </releases>
   <content_rating type="oars-1.1">
     <content_attribute id="violence-fantasy">moderate</content_attribute>

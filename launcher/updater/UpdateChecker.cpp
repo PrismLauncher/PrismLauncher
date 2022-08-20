@@ -25,12 +25,11 @@
 
 #include "BuildConfig.h"
 
-UpdateChecker::UpdateChecker(shared_qobject_ptr<QNetworkAccessManager> nam, QString channelUrl, QString currentChannel, int currentBuild)
+UpdateChecker::UpdateChecker(shared_qobject_ptr<QNetworkAccessManager> nam, QString channelUrl, QString currentChannel)
 {
     m_network = nam;
     m_channelUrl = channelUrl;
     m_currentChannel = currentChannel;
-    m_currentBuild = currentBuild;
 
 #ifdef Q_OS_MAC
     m_externalUpdater = new MacSparkleUpdater();
