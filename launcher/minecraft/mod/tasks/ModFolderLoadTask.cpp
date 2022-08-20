@@ -38,8 +38,8 @@
 
 #include "minecraft/mod/MetadataHandler.h"
 
-ModFolderLoadTask::ModFolderLoadTask(QDir& mods_dir, QDir& index_dir, bool is_indexed) 
-    : m_mods_dir(mods_dir), m_index_dir(index_dir), m_is_indexed(is_indexed), m_result(new Result())
+ModFolderLoadTask::ModFolderLoadTask(QDir& mods_dir, QDir& index_dir, bool is_indexed, bool clean_orphan)
+    : m_mods_dir(mods_dir), m_index_dir(index_dir), m_is_indexed(is_indexed), m_clean_orphan(clean_orphan), m_result(new Result())
 {}
 
 void ModFolderLoadTask::run()
@@ -85,12 +85,14 @@ void ModFolderLoadTask::run()
 
     // Remove orphan metadata to prevent issues
     // See https://github.com/PolyMC/PolyMC/issues/996
-    QMutableMapIterator<QString, Mod::Ptr> iter(m_result->mods);
-    while (iter.hasNext()) {
-        auto mod = iter.next().value();
-        if (mod->status() == ModStatus::NotInstalled) {
-            mod->destroy(m_index_dir, false);
-            iter.remove();
+    if (m_clean_orphan) {
+        QMutableMapIterator<QString, Mod::Ptr> iter(m_result->mods);
+        while (iter.hasNext()) {
+            auto mod = iter.next().value();
+            if (mod->status() == ModStatus::NotInstalled) {
+                mod->destroy(m_index_dir, false);
+                iter.remove();
+            }
         }
     }
 
