@@ -114,54 +114,54 @@ QString BaseInstance::getPostExitCommand()
     return settings()->get("PostExitCommand").toString();
 }
 
-bool BaseInstance::isManagedPack()
+bool BaseInstance::isManagedPack() const
 {
-    return settings()->get("ManagedPack").toBool();
+    return m_settings->get("ManagedPack").toBool();
 }
 
-QString BaseInstance::getManagedPackType()
+QString BaseInstance::getManagedPackType() const
 {
-    return settings()->get("ManagedPackType").toString();
+    return m_settings->get("ManagedPackType").toString();
 }
 
-QString BaseInstance::getManagedPackID()
+QString BaseInstance::getManagedPackID() const
 {
-    return settings()->get("ManagedPackID").toString();
+    return m_settings->get("ManagedPackID").toString();
 }
 
-QString BaseInstance::getManagedPackName()
+QString BaseInstance::getManagedPackName() const
 {
-    return settings()->get("ManagedPackName").toString();
+    return m_settings->get("ManagedPackName").toString();
 }
 
-QString BaseInstance::getManagedPackVersionID()
+QString BaseInstance::getManagedPackVersionID() const
 {
-    return settings()->get("ManagedPackVersionID").toString();
+    return m_settings->get("ManagedPackVersionID").toString();
 }
 
-QString BaseInstance::getManagedPackVersionName()
+QString BaseInstance::getManagedPackVersionName() const
 {
-    return settings()->get("ManagedPackVersionName").toString();
+    return m_settings->get("ManagedPackVersionName").toString();
 }
 
 void BaseInstance::setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version)
 {
-    settings()->set("ManagedPack", true);
-    settings()->set("ManagedPackType", type);
-    settings()->set("ManagedPackID", id);
-    settings()->set("ManagedPackName", name);
-    settings()->set("ManagedPackVersionID", versionId);
-    settings()->set("ManagedPackVersionName", version);
+    m_settings->set("ManagedPack", true);
+    m_settings->set("ManagedPackType", type);
+    m_settings->set("ManagedPackID", id);
+    m_settings->set("ManagedPackName", name);
+    m_settings->set("ManagedPackVersionID", versionId);
+    m_settings->set("ManagedPackVersionName", version);
 }
 
 void BaseInstance::copyManagedPack(BaseInstance& other)
 {
-    settings()->set("ManagedPack", other.isManagedPack());
-    settings()->set("ManagedPackType", other.getManagedPackType());
-    settings()->set("ManagedPackID", other.getManagedPackID());
-    settings()->set("ManagedPackName", other.getManagedPackName());
-    settings()->set("ManagedPackVersionID", other.getManagedPackVersionID());
-    settings()->set("ManagedPackVersionName", other.getManagedPackVersionName());
+    m_settings->set("ManagedPack", other.isManagedPack());
+    m_settings->set("ManagedPackType", other.getManagedPackType());
+    m_settings->set("ManagedPackID", other.getManagedPackID());
+    m_settings->set("ManagedPackName", other.getManagedPackName());
+    m_settings->set("ManagedPackVersionID", other.getManagedPackVersionID());
+    m_settings->set("ManagedPackVersionName", other.getManagedPackVersionName());
 }
 
 int BaseInstance::getConsoleMaxLines() const

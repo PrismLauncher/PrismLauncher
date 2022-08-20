@@ -140,12 +140,12 @@ public:
     QString getPostExitCommand();
     QString getWrapperCommand();
 
-    bool isManagedPack();
-    QString getManagedPackType();
-    QString getManagedPackID();
-    QString getManagedPackName();
-    QString getManagedPackVersionID();
-    QString getManagedPackVersionName();
+    bool isManagedPack() const;
+    QString getManagedPackType() const;
+    QString getManagedPackID() const;
+    QString getManagedPackName() const;
+    QString getManagedPackVersionID() const;
+    QString getManagedPackVersionName() const;
     void setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version);
     void copyManagedPack(BaseInstance& other);
 
