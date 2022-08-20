@@ -15,6 +15,10 @@ public:
     void saveNow() override
     {
     }
+    void loadSpecificSettings() override
+    {
+        setSpecificSettingsLoaded(true);
+    }
     QString getStatusbarDescription() override
     {
         return tr("Unknown instance type");
@@ -43,7 +47,7 @@ public:
     {
         return QProcessEnvironment();
     }
-    QMap<QString, QString> getVariables() const override
+    QMap<QString, QString> getVariables() override
     {
         return QMap<QString, QString>();
     }

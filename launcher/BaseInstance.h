@@ -154,7 +154,7 @@ public:
         return level;
     };
 
-    virtual QStringList extraArguments() const;
+    virtual QStringList extraArguments();
 
     /// Traits. Normally inside the version, depends on instance implementation.
     virtual QSet <QString> traits() const = 0;
@@ -170,9 +170,18 @@ public:
     /*!
      * \brief Gets this instance's settings object.
      * This settings object stores instance-specific settings.
+     *
+     * Note that this method is not const.
+     * It may call loadSpecificSettings() to ensure those are loaded.
+     *
      * \return A pointer to this instance's settings object.
      */
-    virtual SettingsObjectPtr settings() const;
+    virtual SettingsObjectPtr settings();
+
+    /*!
+     * \brief Loads settings specific to an instance type if they're not already loaded.
+     */
+    virtual void loadSpecificSettings() = 0;
 
     /// returns a valid update task
     virtual Task::Ptr createUpdateTask(Net::Mode mode) = 0;
@@ -206,7 +215,7 @@ public:
     virtual QString instanceConfigFolder() const = 0;
 
     /// get variables this instance exports
-    virtual QMap<QString, QString> getVariables() const = 0;
+    virtual QMap<QString, QString> getVariables() = 0;
 
     virtual QString typeName() const = 0;
 
@@ -268,6 +277,11 @@ public:
 protected:
     void changeStatus(Status newStatus);
 
+    SettingsObjectPtr globalSettings() const { return m_global_settings.lock(); };
+
+    bool isSpecificSettingsLoaded() const { return m_specific_settings_loaded; }
+    void setSpecificSettingsLoaded(bool loaded) { m_specific_settings_loaded = loaded; }
+
 signals:
     /*!
      * \brief Signal emitted when properties relevant to the instance view change
@@ -296,6 +310,10 @@ private: /* data */
     bool m_crashed = false;
     bool m_hasUpdate = false;
     bool m_hasBrokenVersion = false;
+
+    SettingsObjectWeakPtr m_global_settings;
+    bool m_specific_settings_loaded = false;
+
 };
 
 Q_DECLARE_METATYPE(shared_qobject_ptr<BaseInstance>)

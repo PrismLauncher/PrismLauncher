@@ -53,14 +53,21 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     : QObject()
 {
     m_settings = settings;
+    m_global_settings = globalSettings;
     m_rootDir = rootDir;
 
     m_settings->registerSetting("name", "Unnamed Instance");
     m_settings->registerSetting("iconKey", "default");
     m_settings->registerSetting("notes", "");
+
     m_settings->registerSetting("lastLaunchTime", 0);
     m_settings->registerSetting("totalTimePlayed", 0);
     m_settings->registerSetting("lastTimePlayed", 0);
+
+    // Game time override
+    auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
+    m_settings->registerOverride(globalSettings->getSetting("ShowGameTime"), gameTimeOverride);
+    m_settings->registerOverride(globalSettings->getSetting("RecordGameTime"), gameTimeOverride);
 
     // NOTE: Sometimees InstanceType is already registered, as it was used to identify the type of
     // a locally stored instance
@@ -149,7 +156,7 @@ void BaseInstance::setManagedPack(const QString& type, const QString& id, const 
 
 int BaseInstance::getConsoleMaxLines() const
 {
-    auto lineSetting = settings()->getSetting("ConsoleMaxLines");
+    auto lineSetting = m_settings->getSetting("ConsoleMaxLines");
     bool conversionOk = false;
     int maxLines = lineSetting->get().toInt(&conversionOk);
     if(!conversionOk)
@@ -162,7 +169,7 @@ int BaseInstance::getConsoleMaxLines() const
 
 bool BaseInstance::shouldStopOnConsoleOverflow() const
 {
-    return settings()->get("ConsoleOverflowStop").toBool();
+    return m_settings->get("ConsoleOverflowStop").toBool();
 }
 
 void BaseInstance::iconUpdated(QString key)
@@ -237,7 +244,7 @@ void BaseInstance::setRunning(bool running)
 
 int64_t BaseInstance::totalTimePlayed() const
 {
-    qint64 current = settings()->get("totalTimePlayed").toLongLong();
+    qint64 current = m_settings->get("totalTimePlayed").toLongLong();
     if(m_isRunning)
     {
         QDateTime timeNow = QDateTime::currentDateTime();
@@ -253,7 +260,7 @@ int64_t BaseInstance::lastTimePlayed() const
         QDateTime timeNow = QDateTime::currentDateTime();
         return m_timeStarted.secsTo(timeNow);
     }
-    return settings()->get("lastTimePlayed").toLongLong();
+    return m_settings->get("lastTimePlayed").toLongLong();
 }
 
 void BaseInstance::resetTimePlayed()
@@ -272,8 +279,10 @@ QString BaseInstance::instanceRoot() const
     return m_rootDir;
 }
 
-SettingsObjectPtr BaseInstance::settings() const
+SettingsObjectPtr BaseInstance::settings()
 {
+    loadSpecificSettings();
+
     return m_settings;
 }
 
@@ -340,7 +349,7 @@ QString BaseInstance::windowTitle() const
 }
 
 // FIXME: why is this here? move it to MinecraftInstance!!!
-QStringList BaseInstance::extraArguments() const
+QStringList BaseInstance::extraArguments()
 {
     return Commandline::splitArgs(settings()->get("JvmArgs").toString());
 }
