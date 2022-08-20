@@ -101,7 +101,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
 {
     ui->setupUi(this);
 
-    runningStateChanged(m_instance && m_instance->isRunning());
+    ExternalResourcesPage::runningStateChanged(m_instance && m_instance->isRunning());
 
     ui->actionsToolbar->insertSpacer(ui->actionViewConfigs);
 
