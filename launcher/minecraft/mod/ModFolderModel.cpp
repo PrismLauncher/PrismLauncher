@@ -63,6 +63,9 @@ void ModFolderModel::startWatching()
     if(is_watching)
         return;
 
+    // Remove orphaned metadata next time
+    m_first_folder_load = true;
+
     update();
 
     // Watch the mods folder
@@ -113,7 +116,8 @@ bool ModFolderModel::update()
     }
 
     auto index_dir = indexDir();
-    auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed);
+    auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load);
+    m_first_folder_load = false;
 
     m_update = task->result();
 
