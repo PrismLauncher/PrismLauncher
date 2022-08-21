@@ -107,7 +107,7 @@ class Task : public QObject, public QRunnable {
     virtual void start();
     virtual bool abort() { if(canAbort()) emitAborted(); return canAbort(); };
 
-    void setAbortStatus(bool can_abort) { m_can_abort = can_abort; emit abortStatusChanged(can_abort); }
+    void setAbortable(bool can_abort) { m_can_abort = can_abort; emit abortStatusChanged(can_abort); }
 
    protected:
     virtual void executeTask() = 0;

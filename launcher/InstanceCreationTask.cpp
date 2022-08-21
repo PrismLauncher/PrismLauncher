@@ -7,7 +7,7 @@ InstanceCreationTask::InstanceCreationTask() = default;
 
 void InstanceCreationTask::executeTask()
 {
-    setAbortStatus(true);
+    setAbortable(true);
 
     if (updateInstance()) {
         emitSucceeded();
@@ -35,7 +35,7 @@ void InstanceCreationTask::executeTask()
     // files scheduled to, and we'd better not let the user abort in the middle of it, since it'd
     // put the instance in an invalid state.
     if (shouldOverride()) {
-        setAbortStatus(false);
+        setAbortable(false);
         setStatus(tr("Removing old conflicting files..."));
         qDebug() << "Removing old files";
 

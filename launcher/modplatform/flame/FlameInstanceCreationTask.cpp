@@ -338,7 +338,7 @@ bool FlameCreationTask::createInstance()
     bool did_succeed = getError().isEmpty();
 
     if (m_instance && did_succeed) {
-        setAbortStatus(false);
+        setAbortable(false);
         auto inst = m_instance.value();
 
         inst->copyManagedPack(instance);

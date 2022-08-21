@@ -252,7 +252,7 @@ bool ModrinthCreationTask::createInstance()
     loop.exec();
 
     if (m_instance && ended_well) {
-        setAbortStatus(false);
+        setAbortable(false);
         auto inst = m_instance.value();
 
         inst->copyManagedPack(instance);

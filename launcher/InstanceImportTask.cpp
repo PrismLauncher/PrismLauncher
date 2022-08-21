@@ -75,7 +75,7 @@ bool InstanceImportTask::abort()
 
 void InstanceImportTask::executeTask()
 {
-    setAbortStatus(true);
+    setAbortable(true);
 
     if (m_sourceUrl.isLocalFile()) {
         m_archivePath = m_sourceUrl.toLocalFile();
@@ -280,7 +280,7 @@ void InstanceImportTask::processFlame()
 
     connect(this, &Task::aborted, inst_creation_task, &InstanceCreationTask::abort);
     connect(inst_creation_task, &Task::aborted, this, &Task::abort);
-    connect(inst_creation_task, &Task::abortStatusChanged, this, &Task::setAbortStatus);
+    connect(inst_creation_task, &Task::abortStatusChanged, this, &Task::setAbortable);
 
     inst_creation_task->start();
 }
@@ -344,7 +344,7 @@ void InstanceImportTask::processModrinth()
 
     connect(this, &Task::aborted, inst_creation_task, &InstanceCreationTask::abort);
     connect(inst_creation_task, &Task::aborted, this, &Task::abort);
-    connect(inst_creation_task, &Task::abortStatusChanged, this, &Task::setAbortStatus);
+    connect(inst_creation_task, &Task::abortStatusChanged, this, &Task::setAbortable);
 
     inst_creation_task->start();
 }
