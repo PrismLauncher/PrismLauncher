@@ -195,6 +195,17 @@ bool FlameCreationTask::updateInstance()
         loop.exec();
 
         m_process_update_file_info_job = nullptr;
+    } else {
+        // We don't have an old index file, so we may duplicate stuff!
+        auto dialog = CustomMessageBox::selectable(m_parent,
+                tr("No index file."),
+                tr("We couldn't find a suitable index file for the older version. This may cause some of the files to be duplicated. Do you want to continue?"),
+                QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
+
+        if (dialog->exec() == QDialog::DialogCode::Rejected) {
+            m_abort = true;
+            return false;
+        }
     }
 
     setOverride(true);
