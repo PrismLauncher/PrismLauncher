@@ -64,13 +64,17 @@ class MetaEntry {
     auto getMD5Sum() -> QString { return md5sum; }
     void setMD5Sum(QString md5sum) { this->md5sum = md5sum; }
 
+    /* Whether the entry expires after some time (false) or not (true). */
+    void makeEternal(bool eternal) { is_eternal = eternal; }
+    [[nodiscard]] bool isEternal() const { return is_eternal; }
+
     auto getCurrentAge() -> qint64 { return current_age; }
     void setCurrentAge(qint64 age) { current_age = age; }
 
     auto getMaximumAge() -> qint64 { return max_age; }
     void setMaximumAge(qint64 age) { max_age = age; }
 
-    bool isExpired(qint64 offset) { return current_age >= max_age - offset; };
+    bool isExpired(qint64 offset) { return !is_eternal && (current_age >= max_age - offset); };
 
    protected:
     QString baseId;
@@ -78,10 +82,13 @@ class MetaEntry {
     QString relativePath;
     QString md5sum;
     QString etag;
+
     qint64 local_changed_timestamp = 0;
     QString remote_changed_timestamp;  // QString for now, RFC 2822 encoded time
     qint64 current_age = 0;
     qint64 max_age = 0;
+    bool is_eternal = false;
+
     bool stale = true;
 };
 

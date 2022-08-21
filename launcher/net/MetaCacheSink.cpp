@@ -46,8 +46,8 @@ namespace Net {
 #define MAX_TIME_TO_EXPIRE 1*7*24*60*60
 
 
-MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator * md5sum)
-    :Net::FileSink(entry->getFullPath()), m_entry(entry), m_md5Node(md5sum)
+MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator * md5sum, bool is_eternal)
+    :Net::FileSink(entry->getFullPath()), m_entry(entry), m_md5Node(md5sum), m_is_eternal(is_eternal)
 {
     addValidator(md5sum);
 }
@@ -95,7 +95,10 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply & reply)
     m_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
 
     { // Cache lifetime
-        if (reply.hasRawHeader("Cache-Control")) {
+        if (m_is_eternal) {
+            qDebug() << "[MetaCache] Adding eternal cache entry:" << m_entry->getFullPath();
+            m_entry->makeEternal(true);
+        } else if (reply.hasRawHeader("Cache-Control")) {
             auto cache_control_header = reply.rawHeader("Cache-Control");
             // qDebug() << "[MetaCache] Parsing 'Cache-Control' header with" << cache_control_header;
 
