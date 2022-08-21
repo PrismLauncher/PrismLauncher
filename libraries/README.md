@@ -15,7 +15,7 @@ A performance optimization daemon.
 
 See [github repo](https://github.com/FeralInteractive/gamemode).
 
-BSD licensed
+BSD-3-Clause licensed
 
 ## hoedown
 Hoedown is a revived fork of Sundown, the Markdown parser based on the original code of the Upskirt library by Natacha Porté.
@@ -165,9 +165,9 @@ Boost Software License - Version 1.0
 
 ## quazip
 
-A zip manipulation library, forked for MultiMC's use.
+A zip manipulation library.
 
-LGPL 2.1
+LGPL 2.1 with linking exception.
 
 ## rainbow
 Color functions extracted from [KGuiAddons](https://inqlude.org/libraries/kguiaddons.html). Used for adaptive text coloring.
@@ -176,7 +176,7 @@ Available either under LGPL version 2.1 or later.
 
 ## systeminfo
 
-A MultiMC-specific library for probing system information.
+A PolyMC-specific library for probing system information.
 
 Apache 2.0
 
@@ -190,7 +190,7 @@ Licenced under the MIT licence.
 
 ## xz-embedded
 
-Tiny implementation of LZMA2 de/compression. This format is only used by Forge to save bandwidth.
+Tiny implementation of LZMA2 de/compression. This format was only used by Forge to save bandwidth.
 
 Public domain.
 
