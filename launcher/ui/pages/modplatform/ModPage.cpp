@@ -47,12 +47,12 @@
 #include "ui/dialogs/ModDownloadDialog.h"
 #include "ui/widgets/ProjectItem.h"
 
+
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     : QWidget(dialog)
     , m_instance(instance)
     , ui(new Ui::ModPage)
     , dialog(dialog)
-    , filter_widget(static_cast<MinecraftInstance*>(instance)->getPackProfile()->getComponentVersion("net.minecraft"), this)
     , m_fetch_progress(this, false)
     , api(api)
 {
@@ -76,17 +76,6 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     m_fetch_progress.progressFormat("");
 
     ui->gridLayout_3->addWidget(&m_fetch_progress, 0, 0, 1, ui->gridLayout_3->columnCount());
-    ui->gridLayout_3->addWidget(&filter_widget, 1, 0, 1, ui->gridLayout_3->columnCount());
-
-    filter_widget.setInstance(static_cast<MinecraftInstance*>(m_instance));
-    m_filter = filter_widget.getFilter();
-
-    connect(&filter_widget, &ModFilterWidget::filterChanged, this, [&]{
-        ui->searchButton->setStyleSheet("text-decoration: underline");
-    });
-    connect(&filter_widget, &ModFilterWidget::filterUnchanged, this, [&]{
-        ui->searchButton->setStyleSheet("text-decoration: none");
-    });
 
     ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     ui->packView->installEventFilter(this);
@@ -95,6 +84,26 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
 ModPage::~ModPage()
 {
     delete ui;
+}
+
+void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
+{
+    if (m_filter_widget)
+        disconnect(m_filter_widget.get(), nullptr, nullptr, nullptr);
+
+    m_filter_widget.swap(widget);
+
+    ui->gridLayout_3->addWidget(m_filter_widget.get(), 0, 0, 1, ui->gridLayout_3->columnCount());
+
+    m_filter_widget->setInstance(static_cast<MinecraftInstance*>(m_instance));
+    m_filter = m_filter_widget->getFilter();
+
+    connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this, [&]{
+        ui->searchButton->setStyleSheet("text-decoration: underline");
+    });
+    connect(m_filter_widget.get(), &ModFilterWidget::filterUnchanged, this, [&]{
+        ui->searchButton->setStyleSheet("text-decoration: none");
+    });
 }
 
 
@@ -141,13 +150,13 @@ auto ModPage::eventFilter(QObject* watched, QEvent* event) -> bool
 
 void ModPage::filterMods()
 {
-    filter_widget.setHidden(!filter_widget.isHidden());
+    m_filter_widget->setHidden(!m_filter_widget->isHidden());
 }
 
 void ModPage::triggerSearch()
 {
-    auto changed = filter_widget.changed();
-    m_filter = filter_widget.getFilter();
+    auto changed = m_filter_widget->changed();
+    m_filter = m_filter_widget->getFilter();
     
     if(changed){
         ui->packView->clearSelection();
