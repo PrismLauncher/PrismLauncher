@@ -88,6 +88,9 @@ QList<NetAction::Ptr> Library::getDownloads(
             options |= Net::Download::Option::AcceptLocalFiles;
         }
 
+        // Don't add a time limit for the libraries cache entry validity
+        options |= Net::Download::Option::MakeEternal;
+
         if(sha1.size())
         {
             auto rawSha1 = QByteArray::fromHex(sha1.toLatin1());
