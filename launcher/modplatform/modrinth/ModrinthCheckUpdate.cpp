@@ -2,10 +2,13 @@
 #include "ModrinthAPI.h"
 #include "ModrinthPackIndex.h"
 
-#include "FileSystem.h"
 #include "Json.h"
 
 #include "ModDownloadTask.h"
+
+#include "modplatform/helpers/HashUtils.h"
+
+#include "tasks/ConcurrentTask.h"
 
 static ModrinthAPI api;
 static ModPlatform::ProviderCapabilities ProviderCaps;
@@ -32,6 +35,8 @@ void ModrinthCheckUpdate::executeTask()
     // Create all hashes
     QStringList hashes;
     auto best_hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
+
+    ConcurrentTask hashing_task(this, "MakeModrinthHashesTask", 10);
     for (auto* mod : m_mods) {
         if (!mod->enabled()) {
             emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
@@ -44,24 +49,24 @@ void ModrinthCheckUpdate::executeTask()
         // need to generate a new hash if the current one is innadequate
         // (though it will rarely happen, if at all)
         if (mod->metadata()->hash_format != best_hash_type) {
-            QByteArray jar_data;
-
-            try {
-                jar_data = FS::read(mod->fileinfo().absoluteFilePath());
-            } catch (FS::FileSystemException& e) {
-                qCritical() << QString("Failed to open / read JAR file of %1").arg(mod->name());
-                qCritical() << QString("Reason: ") << e.cause();
-
-                failed(e.what());
-                return;
-            }
-
-            hash = QString(ProviderCaps.hash(ModPlatform::Provider::MODRINTH, jar_data, best_hash_type).toHex());
+            auto hash_task = Hashing::createModrinthHasher(mod->fileinfo().absoluteFilePath());
+            connect(hash_task.get(), &Task::succeeded, [&] {
+                QString hash (hash_task->getResult());
+                hashes.append(hash);
+                mappings.insert(hash, mod);
+            });
+            connect(hash_task.get(), &Task::failed, [this, hash_task] { failed("Failed to generate hash"); });
+            hashing_task.addTask(hash_task);
+        } else {
+            hashes.append(hash);
+            mappings.insert(hash, mod);
         }
-
-        hashes.append(hash);
-        mappings.insert(hash, mod);
     }
+
+    QEventLoop loop;
+    connect(&hashing_task, &Task::finished, [&loop]{ loop.quit(); });
+    hashing_task.start();
+    loop.exec();
 
     auto* response = new QByteArray();
     auto job = api.latestVersions(hashes, best_hash_type, m_game_versions, m_loaders, response);

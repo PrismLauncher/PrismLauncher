@@ -494,6 +494,8 @@ set(API_SOURCES
     modplatform/modrinth/ModrinthAPI.cpp
     modplatform/helpers/NetworkModAPI.h
     modplatform/helpers/NetworkModAPI.cpp
+    modplatform/helpers/HashUtils.h
+    modplatform/helpers/HashUtils.cpp
 )
 
 set(FTB_SOURCES

@@ -19,6 +19,8 @@
 #include "modplatform/ModIndex.h"
 
 #include <QCryptographicHash>
+#include <QDebug>
+#include <QIODevice>
 
 namespace ModPlatform {
 
@@ -53,34 +55,26 @@ auto ProviderCapabilities::hashType(Provider p) -> QStringList
     }
     return {};
 }
-auto ProviderCapabilities::hash(Provider p, QByteArray& data, QString type) -> QByteArray
+
+auto ProviderCapabilities::hash(Provider p, QIODevice* device, QString type) -> QString
 {
+    QCryptographicHash::Algorithm algo = QCryptographicHash::Sha1;
     switch (p) {
         case Provider::MODRINTH: {
-            // NOTE: Data is the result of reading the entire JAR file!
-
-            // If 'type' was specified, we use that
-            if (!type.isEmpty() && hashType(p).contains(type)) {
-                if (type == "sha512")
-                    return QCryptographicHash::hash(data, QCryptographicHash::Sha512);
-                else if (type == "sha1")
-                    return QCryptographicHash::hash(data, QCryptographicHash::Sha1);
-            }
-
-            return QCryptographicHash::hash(data, QCryptographicHash::Sha512);
+            algo = (type == "sha1") ? QCryptographicHash::Sha1 : QCryptographicHash::Sha512;
+            break;
         }
         case Provider::FLAME:
-            // If 'type' was specified, we use that
-            if (!type.isEmpty() && hashType(p).contains(type)) {
-                if(type == "sha1")
-                    return QCryptographicHash::hash(data, QCryptographicHash::Sha1);
-                else if (type == "md5")
-                    return QCryptographicHash::hash(data, QCryptographicHash::Md5);
-            }
-            
+            algo = (type == "sha1") ? QCryptographicHash::Sha1 : QCryptographicHash::Md5;
             break;
     }
-    return {};
+
+    QCryptographicHash hash(algo);
+    if(!hash.addData(device))
+        qCritical() << "Failed to read JAR to create hash!";
+
+    Q_ASSERT(hash.result().length() == hash.hashLength(algo));
+    return { hash.result().toHex() };
 }
 
 }  // namespace ModPlatform
