@@ -7,7 +7,7 @@
 #include "minecraft/MinecraftInstance.h"
 #include "ui/pages/BasePage.h"
 
-class ModFolderModel;
+class ResourceFolderModel;
 
 namespace Ui {
 class ExternalResourcesPage;
@@ -19,8 +19,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
-    // FIXME: Switch to different model (or change the name of this one)
-    explicit ExternalResourcesPage(BaseInstance* instance, std::shared_ptr<ModFolderModel> model, QWidget* parent = nullptr);
+    explicit ExternalResourcesPage(BaseInstance* instance, std::shared_ptr<ResourceFolderModel> model, QWidget* parent = nullptr);
     virtual ~ExternalResourcesPage();
 
     virtual QString displayName() const override = 0;
@@ -41,7 +40,9 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     QMenu* createPopupMenu() override;
 
    public slots:
-    void current(const QModelIndex& current, const QModelIndex& previous);
+    bool current(const QModelIndex& current, const QModelIndex& previous);
+
+    virtual bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous);
 
    protected slots:
     void itemActivated(const QModelIndex& index);
@@ -63,7 +64,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     BaseInstance* m_instance = nullptr;
 
     Ui::ExternalResourcesPage* ui = nullptr;
-    std::shared_ptr<ModFolderModel> m_model;
+    std::shared_ptr<ResourceFolderModel> m_model;
     QSortFilterProxyModel* m_filterModel = nullptr;
 
     QString m_fileSelectionFilter;

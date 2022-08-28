@@ -39,38 +39,23 @@
 #include <QFileInfo>
 #include <QList>
 
-#include "QObjectPtr.h"
+#include "Resource.h"
 #include "ModDetails.h"
 
-class Mod : public QObject
+class Mod : public Resource
 {
     Q_OBJECT
 public:
-    enum ModType
-    {
-        MOD_UNKNOWN,    //!< Indicates an unspecified mod type.
-        MOD_ZIPFILE,    //!< The mod is a zip file containing the mod's class files.
-        MOD_SINGLEFILE, //!< The mod is a single file (not a zip file).
-        MOD_FOLDER,     //!< The mod is in a folder on the filesystem.
-        MOD_LITEMOD,    //!< The mod is a litemod
-    };
-
     using Ptr = shared_qobject_ptr<Mod>;
+    using WeakPtr = QPointer<Mod>;
 
     Mod() = default;
     Mod(const QFileInfo &file);
-    explicit Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata);
-
-    auto fileinfo()        const -> QFileInfo { return m_file; }
-    auto dateTimeChanged() const -> QDateTime { return m_changedDateTime; }
-    auto internal_id()     const -> QString { return m_internal_id; }
-    auto type()            const -> ModType { return m_type; }
-    auto enabled()         const -> bool { return m_enabled; }
-
-    auto valid() const -> bool { return m_type != MOD_UNKNOWN; }
+    Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata);
+    Mod(QString file_path) : Mod(QFileInfo(file_path)) {}
 
     auto details()     const -> const ModDetails&;
-    auto name()        const -> QString;
+    auto name()        const -> QString override;
     auto version()     const -> QString;
     auto homeurl()     const -> QString;
     auto description() const -> QString;
@@ -81,46 +66,17 @@ public:
     auto metadata() const -> const std::shared_ptr<Metadata::ModStruct>;
 
     void setStatus(ModStatus status);
-    void setMetadata(const Metadata::ModStruct& metadata);
+    void setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata);
+    void setMetadata(const Metadata::ModStruct& metadata) { setMetadata(std::make_shared<Metadata::ModStruct>(metadata)); }
 
-    auto enable(bool value) -> bool;
+    [[nodiscard]] auto compare(Resource const& other, SortType type) const -> std::pair<int, bool> override;
+    [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
 
-    // delete all the files of this mod
+    // Delete all the files of this mod
     auto destroy(QDir& index_dir, bool preserve_metadata = false) -> bool;
 
-    // change the mod's filesystem path (used by mod lists for *MAGIC* purposes)
-    void repath(const QFileInfo &file);
-
-    auto shouldResolve()    const -> bool { return !m_resolving && !m_resolved; }
-    auto isResolving()      const -> bool { return m_resolving; }
-    auto resolutionTicket() const -> int  { return m_resolutionTicket; }
-
-    void setResolving(bool resolving, int resolutionTicket) {
-        m_resolving = resolving;
-        m_resolutionTicket = resolutionTicket;
-    }
-    void finishResolvingWithDetails(std::shared_ptr<ModDetails> details);
+    void finishResolvingWithDetails(ModDetails&& details);
 
 protected:
-    QFileInfo m_file;
-    QDateTime m_changedDateTime;
-
-    QString m_internal_id;
-    /* Name as reported via the file name */
-    QString m_name;
-    ModType m_type = MOD_UNKNOWN;
-
-    /* If the mod has metadata, this will be filled in the constructor, and passed to 
-     * the ModDetails when calling finishResolvingWithDetails */
-    std::shared_ptr<Metadata::ModStruct> m_temp_metadata;
-
-    /* Set the mod status while it doesn't have local details just yet */
-    ModStatus m_temp_status = ModStatus::NoMetadata;
-
-    std::shared_ptr<ModDetails> m_localDetails;
-
-    bool m_enabled = true;
-    bool m_resolving = false;
-    bool m_resolved = false;
-    int m_resolutionTicket = 0;
+    ModDetails m_local_details;
 };

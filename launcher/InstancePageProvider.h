@@ -37,9 +37,9 @@ public:
         modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
         values.append(modsPage);
         values.append(new CoreModFolderPage(onesix.get(), onesix->coreModList()));
-        values.append(new ResourcePackPage(onesix.get()));
-        values.append(new TexturePackPage(onesix.get()));
-        values.append(new ShaderPackPage(onesix.get()));
+        values.append(new ResourcePackPage(onesix.get(), onesix->resourcePackList()));
+        values.append(new TexturePackPage(onesix.get(), onesix->texturePackList()));
+        values.append(new ShaderPackPage(onesix.get(), onesix->shaderPackList()));
         values.append(new NotesPage(onesix.get()));
         values.append(new WorldListPage(onesix.get(), onesix->worldList()));
         values.append(new ServersPage(onesix));

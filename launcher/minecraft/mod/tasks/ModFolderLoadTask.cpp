@@ -38,11 +38,11 @@
 
 #include "minecraft/mod/MetadataHandler.h"
 
-ModFolderLoadTask::ModFolderLoadTask(QDir& mods_dir, QDir& index_dir, bool is_indexed, bool clean_orphan)
-    : m_mods_dir(mods_dir), m_index_dir(index_dir), m_is_indexed(is_indexed), m_clean_orphan(clean_orphan), m_result(new Result())
+ModFolderLoadTask::ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan, QObject* parent)
+    : Task(parent, false), m_mods_dir(mods_dir), m_index_dir(index_dir), m_is_indexed(is_indexed), m_clean_orphan(clean_orphan), m_result(new Result())
 {}
 
-void ModFolderLoadTask::run()
+void ModFolderLoadTask::executeTask()
 {
     if (m_is_indexed) {
         // Read metadata first
@@ -52,7 +52,7 @@ void ModFolderLoadTask::run()
     // Read JAR files that don't have metadata
     m_mods_dir.refresh();
     for (auto entry : m_mods_dir.entryInfoList()) {
-        Mod::Ptr mod(new Mod(entry));
+        Mod* mod(new Mod(entry));
 
         if (mod->enabled()) {
             if (m_result->mods.contains(mod->internal_id())) {
@@ -96,7 +96,7 @@ void ModFolderLoadTask::run()
         }
     }
 
-    emit succeeded();
+    emitSucceeded();
 }
 
 void ModFolderLoadTask::getFromMetadata()

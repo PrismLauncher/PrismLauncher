@@ -36,130 +36,77 @@
 
 #include "Mod.h"
 
+#include <QDebug>
 #include <QDir>
 #include <QString>
+#include <QRegularExpression>
 
-#include <FileSystem.h>
-#include <QDebug>
-
-#include "Application.h"
 #include "MetadataHandler.h"
+#include "Version.h"
 
-namespace {
-
-ModDetails invalidDetails;
-
-}
-
-Mod::Mod(const QFileInfo& file)
+Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {
-    repath(file);
-    m_changedDateTime = file.lastModified();
+    m_enabled = (file.suffix() != "disabled");
 }
 
 Mod::Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata)
-    : m_file(mods_dir.absoluteFilePath(metadata.filename))
-    , m_internal_id(metadata.filename)
-    , m_name(metadata.name)
+    : Mod(mods_dir.absoluteFilePath(metadata.filename))
 {
-    if (m_file.isDir()) {
-        m_type = MOD_FOLDER;
-    } else {
-        if (metadata.filename.endsWith(".zip") || metadata.filename.endsWith(".jar"))
-            m_type = MOD_ZIPFILE;
-        else if (metadata.filename.endsWith(".litemod"))
-            m_type = MOD_LITEMOD;
-        else
-            m_type = MOD_SINGLEFILE;
-    }
-
-    m_enabled = true;
-    m_changedDateTime = m_file.lastModified();
-
-    m_temp_metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
-}
-
-void Mod::repath(const QFileInfo& file)
-{
-    m_file = file;
-    QString name_base = file.fileName();
-
-    m_type = Mod::MOD_UNKNOWN;
-
-    m_internal_id = name_base;
-
-    if (m_file.isDir()) {
-        m_type = MOD_FOLDER;
-        m_name = name_base;
-    } else if (m_file.isFile()) {
-        if (name_base.endsWith(".disabled")) {
-            m_enabled = false;
-            name_base.chop(9);
-        } else {
-            m_enabled = true;
-        }
-        if (name_base.endsWith(".zip") || name_base.endsWith(".jar")) {
-            m_type = MOD_ZIPFILE;
-            name_base.chop(4);
-        } else if (name_base.endsWith(".litemod")) {
-            m_type = MOD_LITEMOD;
-            name_base.chop(8);
-        } else {
-            m_type = MOD_SINGLEFILE;
-        }
-        m_name = name_base;
-    }
-}
-
-auto Mod::enable(bool value) -> bool
-{
-    if (m_type == Mod::MOD_UNKNOWN || m_type == Mod::MOD_FOLDER)
-        return false;
-
-    if (m_enabled == value)
-        return false;
-
-    QString path = m_file.absoluteFilePath();
-    QFile file(path);
-    if (value) {
-        if (!path.endsWith(".disabled"))
-            return false;
-        path.chop(9);
-
-        if (!file.rename(path))
-            return false;
-    } else {
-        path += ".disabled";
-
-        if (!file.rename(path))
-            return false;
-    }
-
-    if (status() == ModStatus::NoMetadata)
-        repath(QFileInfo(path));
-
-    m_enabled = value;
-    return true;
+    m_name = metadata.name;
+    m_local_details.metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
 }
 
 void Mod::setStatus(ModStatus status)
 {
-    if (m_localDetails) {
-        m_localDetails->status = status;
-    } else {
-        m_temp_status = status;
-    }
+    m_local_details.status = status;
 }
-void Mod::setMetadata(const Metadata::ModStruct& metadata)
+void Mod::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
 {
     if (status() == ModStatus::NoMetadata)
         setStatus(ModStatus::Installed);
 
-    if (m_localDetails) {
-        m_localDetails->metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
-    } else {
-        m_temp_metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
+    m_local_details.metadata = metadata;
+}
+
+std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
+{
+    auto cast_other = dynamic_cast<Mod const*>(&other);
+    if (!cast_other)
+        return Resource::compare(other, type);
+
+    switch (type) {
+        default:
+        case SortType::ENABLED:
+        case SortType::NAME:
+        case SortType::DATE: {
+            auto res = Resource::compare(other, type);
+            if (res.first != 0)
+                return res;
+        }
+        case SortType::VERSION: {
+            auto this_ver = Version(version());
+            auto other_ver = Version(cast_other->version());
+            if (this_ver > other_ver)
+                return { 1, type == SortType::VERSION };
+            if (this_ver < other_ver)
+                return { -1, type == SortType::VERSION };
+        }
     }
+    return { 0, false };
+}
+
+bool Mod::applyFilter(QRegularExpression filter) const
+{
+    if (filter.match(description()).hasMatch())
+        return true;
+
+    for (auto& author : authors()) {
+        if (filter.match(author).hasMatch()) {
+            return true;
+        }
+    }
+
+    return Resource::applyFilter(filter);
 }
 
 auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
@@ -175,13 +122,12 @@ auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
         }
     }
 
-    m_type = MOD_UNKNOWN;
-    return FS::deletePath(m_file.filePath());
+    return Resource::destroy();
 }
 
 auto Mod::details() const -> const ModDetails&
 {
-    return m_localDetails ? *m_localDetails : invalidDetails;
+    return m_local_details;
 }
 
 auto Mod::name() const -> QString
@@ -218,35 +164,29 @@ auto Mod::authors() const -> QStringList
 
 auto Mod::status() const -> ModStatus
 {
-    if (!m_localDetails)
-        return m_temp_status;
     return details().status;
 }
 
 auto Mod::metadata() -> std::shared_ptr<Metadata::ModStruct>
 {
-    if (m_localDetails)
-        return m_localDetails->metadata;
-    return m_temp_metadata;
+    return m_local_details.metadata;
 }
 
 auto Mod::metadata() const -> const std::shared_ptr<Metadata::ModStruct>
 {
-    if (m_localDetails)
-        return m_localDetails->metadata;
-    return m_temp_metadata;
+    return m_local_details.metadata;
 }
 
-void Mod::finishResolvingWithDetails(std::shared_ptr<ModDetails> details)
+void Mod::finishResolvingWithDetails(ModDetails&& details)
 {
-    m_resolving = false;
-    m_resolved = true;
-    m_localDetails = details;
+    m_is_resolving = false;
+    m_is_resolved = true;
 
-    setStatus(m_temp_status);
+    std::shared_ptr<Metadata::ModStruct> metadata = details.metadata;
+    if (details.status == ModStatus::Unknown)
+        details.status = m_local_details.status;
 
-    if (m_localDetails && m_temp_metadata && m_temp_metadata->isValid()) {
-        setMetadata(*m_temp_metadata);
-        m_temp_metadata.reset();
-    }
+    m_local_details = std::move(details);
+    if (metadata)
+        setMetadata(std::move(metadata));
 }

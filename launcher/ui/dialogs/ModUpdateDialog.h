@@ -19,7 +19,7 @@ class ModUpdateDialog final : public ReviewMessageBox {
     explicit ModUpdateDialog(QWidget* parent,
                              BaseInstance* instance,
                              const std::shared_ptr<ModFolderModel> mod_model,
-                             QList<Mod::Ptr>& search_for);
+                             QList<Mod*>& search_for);
 
     void checkCandidates();
 
@@ -46,7 +46,7 @@ class ModUpdateDialog final : public ReviewMessageBox {
 
     const std::shared_ptr<ModFolderModel> m_mod_model;
 
-    QList<Mod::Ptr>& m_candidates;
+    QList<Mod*>& m_candidates;
     QList<Mod*> m_modrinth_to_update;
     QList<Mod*> m_flame_to_update;
 

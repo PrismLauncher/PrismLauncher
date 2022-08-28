@@ -64,7 +64,7 @@
        </layout>
       </item>
       <item>
-       <widget class="MCModInfoFrame" name="frame">
+       <widget class="InfoFrame" name="frame">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
           <horstretch>0</horstretch>
@@ -278,9 +278,9 @@
    <header>ui/widgets/ModListView.h</header>
   </customwidget>
   <customwidget>
-   <class>MCModInfoFrame</class>
+   <class>InfoFrame</class>
    <extends>QFrame</extends>
-   <header>ui/widgets/MCModInfoFrame.h</header>
+   <header>ui/widgets/InfoFrame.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

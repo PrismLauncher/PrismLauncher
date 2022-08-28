@@ -37,8 +37,9 @@
 
 #include <QDebug>
 
-Task::Task(QObject *parent) : QObject(parent)
+Task::Task(QObject *parent, bool show_debug) : QObject(parent), m_show_debug(show_debug)
 {
+    setAutoDelete(false);
 }
 
 void Task::setStatus(const QString &new_status)
@@ -63,27 +64,32 @@ void Task::start()
     {
         case State::Inactive:
         {
-            qDebug() << "Task" << describe() << "starting for the first time";
+            if (m_show_debug)
+                qDebug() << "Task" << describe() << "starting for the first time";
             break;
         }
         case State::AbortedByUser:
         {
-            qDebug() << "Task" << describe() << "restarting for after being aborted by user";
+            if (m_show_debug)
+                qDebug() << "Task" << describe() << "restarting for after being aborted by user";
             break;
         }
         case State::Failed:
         {
-            qDebug() << "Task" << describe() << "restarting for after failing at first";
+            if (m_show_debug)
+                qDebug() << "Task" << describe() << "restarting for after failing at first";
             break;
         }
         case State::Succeeded:
         {
-            qDebug() << "Task" << describe() << "restarting for after succeeding at first";
+            if (m_show_debug)
+                qDebug() << "Task" << describe() << "restarting for after succeeding at first";
             break;
         }
         case State::Running:
         {
-            qWarning() << "The launcher tried to start task" << describe() << "while it was already running!";
+            if (m_show_debug)
+                qWarning() << "The launcher tried to start task" << describe() << "while it was already running!";
             return;
         }
     }
@@ -118,7 +124,8 @@ void Task::emitAborted()
     }
     m_state = State::AbortedByUser;
     m_failReason = "Aborted.";
-    qDebug() << "Task" << describe() << "aborted.";
+    if (m_show_debug)
+        qDebug() << "Task" << describe() << "aborted.";
     emit aborted();
     emit finished();
 }
@@ -132,7 +139,8 @@ void Task::emitSucceeded()
         return;
     }
     m_state = State::Succeeded;
-    qDebug() << "Task" << describe() << "succeeded";
+    if (m_show_debug)
+        qDebug() << "Task" << describe() << "succeeded";
     emit succeeded();
     emit finished();
 }

@@ -16,37 +16,39 @@
 #pragma once
 
 #include <QFrame>
+
 #include "minecraft/mod/Mod.h"
+#include "minecraft/mod/ResourcePack.h"
 
 namespace Ui
 {
-class MCModInfoFrame;
+class InfoFrame;
 }
 
-class MCModInfoFrame : public QFrame
-{
+class InfoFrame : public QFrame {
     Q_OBJECT
 
-public:
-    explicit MCModInfoFrame(QWidget *parent = 0);
-    ~MCModInfoFrame();
+   public:
+    InfoFrame(QWidget* parent = nullptr);
+    ~InfoFrame() override;
 
-    void setModText(QString text);
-    void setModDescription(QString text);
+    void setName(QString text = {});
+    void setDescription(QString text = {});
 
-    void updateWithMod(Mod &m);
     void clear();
 
-public slots:
-    void modDescEllipsisHandler(const QString& link );
+    void updateWithMod(Mod const& m);
+    void updateWithResource(Resource const& resource);
+
+   public slots:
+    void descriptionEllipsisHandler(QString link);
     void boxClosed(int result);
 
-private:
+   private:
     void updateHiddenState();
 
-private:
-    Ui::MCModInfoFrame *ui;
-    QString desc;
-    class QMessageBox * currentBox = nullptr;
+   private:
+    Ui::InfoFrame* ui;
+    QString m_description;
+    class QMessageBox* m_current_box = nullptr;
 };
-

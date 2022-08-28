@@ -148,7 +148,7 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
         // do not merge disabled mods.
         if (!mod->enabled())
             continue;
-        if (mod->type() == Mod::MOD_ZIPFILE)
+        if (mod->type() == ResourceType::ZIPFILE)
         {
             if (!mergeZipFiles(&zipOut, mod->fileinfo(), addedFiles))
             {
@@ -158,7 +158,7 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
                 return false;
             }
         }
-        else if (mod->type() == Mod::MOD_SINGLEFILE)
+        else if (mod->type() == ResourceType::SINGLEFILE)
         {
             // FIXME: buggy - does not work with addedFiles
             auto filename = mod->fileinfo();
@@ -171,7 +171,7 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
             }
             addedFiles.insert(filename.fileName());
         }
-        else if (mod->type() == Mod::MOD_FOLDER)
+        else if (mod->type() == ResourceType::FOLDER)
         {
             // untested, but seems to be unused / not possible to reach
             // FIXME: buggy - does not work with addedFiles

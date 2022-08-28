@@ -35,9 +35,11 @@
 
 #pragma once
 
+#include <QRunnable>
+
 #include "QObjectPtr.h"
 
-class Task : public QObject {
+class Task : public QObject, public QRunnable {
     Q_OBJECT
    public:
     using Ptr = shared_qobject_ptr<Task>;
@@ -45,7 +47,7 @@ class Task : public QObject {
     enum class State { Inactive, Running, Succeeded, Failed, AbortedByUser };
 
    public:
-    explicit Task(QObject* parent = 0);
+    explicit Task(QObject* parent = 0, bool show_debug_log = true);
     virtual ~Task() = default;
 
     bool isRunning() const;
@@ -95,6 +97,9 @@ class Task : public QObject {
     void stepStatus(QString status);
 
    public slots:
+    // QRunnable's interface
+    void run() override { start(); }
+
     virtual void start();
     virtual bool abort() { if(canAbort()) emitAborted(); return canAbort(); };
 
@@ -117,4 +122,7 @@ class Task : public QObject {
     QString m_status;
     int m_progress = 0;
     int m_progressTotal = 100;
+
+    // TODO: Nuke in favor of QLoggingCategory
+    bool m_show_debug = true;
 };

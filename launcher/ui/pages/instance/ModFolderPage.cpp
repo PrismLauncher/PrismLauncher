@@ -65,7 +65,7 @@
 #include "ui/dialogs/ProgressDialog.h"
 
 ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
-    : ExternalResourcesPage(inst, mods, parent)
+    : ExternalResourcesPage(inst, mods, parent), m_model(mods)
 {
     // This is structured like that so that these changes
     // do not affect the Resource pack and Shader pack tabs
@@ -121,6 +121,17 @@ void ModFolderPage::runningStateChanged(bool running)
 
 bool ModFolderPage::shouldDisplay() const
 {
+    return true;
+}
+
+bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+{
+    auto sourceCurrent = m_filterModel->mapToSource(current);
+    int row = sourceCurrent.row();
+    Mod const* m = m_model->at(row);
+    if (m)
+        ui->frame->updateWithMod(*m);
+
     return true;
 }
 

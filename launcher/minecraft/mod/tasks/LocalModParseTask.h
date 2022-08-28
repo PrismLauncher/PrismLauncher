@@ -2,29 +2,31 @@
 
 #include <QDebug>
 #include <QObject>
-#include <QRunnable>
 
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/ModDetails.h"
 
-class LocalModParseTask : public QObject, public QRunnable
+#include "tasks/Task.h"
+
+class LocalModParseTask : public Task
 {
     Q_OBJECT
 public:
     struct Result {
-        QString id;
-        std::shared_ptr<ModDetails> details;
+        ModDetails details;
     };
     using ResultPtr = std::shared_ptr<Result>;
     ResultPtr result() const {
         return m_result;
     }
 
-    LocalModParseTask(int token, Mod::ModType type, const QFileInfo & modFile);
-    void run();
+    [[nodiscard]] bool canAbort() const override { return true; }
+    bool abort() override;
 
-signals:
-    void finished(int token);
+    LocalModParseTask(int token, ResourceType type, const QFileInfo & modFile);
+    void executeTask() override;
+
+    [[nodiscard]] int token() const { return m_token; }
 
 private:
     void processAsZip();
@@ -33,7 +35,9 @@ private:
 
 private:
     int m_token;
-    Mod::ModType m_type;
+    ResourceType m_type;
     QFileInfo m_modFile;
     ResultPtr m_result;
+
+    bool m_aborted = false;
 };

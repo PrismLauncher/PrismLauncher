@@ -20,22 +20,22 @@ namespace {
 
 // OLD format:
 // https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/5bf6a2d05145ec79387acc0d45c958642fb049fc
-std::shared_ptr<ModDetails> ReadMCModInfo(QByteArray contents)
+ModDetails ReadMCModInfo(QByteArray contents)
 {
-    auto getInfoFromArray = [&](QJsonArray arr)->std::shared_ptr<ModDetails>
+    auto getInfoFromArray = [&](QJsonArray arr) -> ModDetails
     {
         if (!arr.at(0).isObject()) {
-            return nullptr;
+            return {};
         }
-        std::shared_ptr<ModDetails> details = std::make_shared<ModDetails>();
+        ModDetails details;
         auto firstObj = arr.at(0).toObject();
-        details->mod_id = firstObj.value("modid").toString();
+        details.mod_id = firstObj.value("modid").toString();
         auto name = firstObj.value("name").toString();
         // NOTE: ignore stupid example mods copies where the author didn't even bother to change the name
         if(name != "Example Mod") {
-            details->name = name;
+            details.name = name;
         }
-        details->version = firstObj.value("version").toString();
+        details.version = firstObj.value("version").toString();
         auto homeurl = firstObj.value("url").toString().trimmed();
         if(!homeurl.isEmpty())
         {
@@ -45,8 +45,8 @@ std::shared_ptr<ModDetails> ReadMCModInfo(QByteArray contents)
                 homeurl.prepend("http://");
             }
         }
-        details->homeurl = homeurl;
-        details->description = firstObj.value("description").toString();
+        details.homeurl = homeurl;
+        details.description = firstObj.value("description").toString();
         QJsonArray authors = firstObj.value("authorList").toArray();
         if (authors.size() == 0) {
             // FIXME: what is the format of this? is there any?
@@ -55,7 +55,7 @@ std::shared_ptr<ModDetails> ReadMCModInfo(QByteArray contents)
 
         for (auto author: authors)
         {
-            details->authors.append(author.toString());
+            details.authors.append(author.toString());
         }
         return details;
     };
@@ -83,7 +83,7 @@ std::shared_ptr<ModDetails> ReadMCModInfo(QByteArray contents)
         {
             qCritical() << "BAD stuff happened to mod json:";
             qCritical() << contents;
-            return nullptr;
+            return {};
         }
         auto arrVal = jsonDoc.object().value("modlist");
         if(arrVal.isUndefined()) {
@@ -94,13 +94,13 @@ std::shared_ptr<ModDetails> ReadMCModInfo(QByteArray contents)
             return getInfoFromArray(arrVal.toArray());
         }
     }
-    return nullptr;
+    return {};
 }
 
 // https://github.com/MinecraftForge/Documentation/blob/5ab4ba6cf9abc0ac4c0abd96ad187461aefd72af/docs/gettingstarted/structuring.md
-std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
+ModDetails ReadMCModTOML(QByteArray contents)
 {
-    std::shared_ptr<ModDetails> details = std::make_shared<ModDetails>();
+    ModDetails details;
 
     char errbuf[200];
     // top-level table
@@ -108,7 +108,7 @@ std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
 
     if(!tomlData)
     {
-        return nullptr;
+        return {};
     }
 
     // array defined by [[mods]]
@@ -116,7 +116,7 @@ std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
     if(!tomlModsArr)
     {
         qWarning() << "Corrupted mods.toml? Couldn't find [[mods]] array!";
-        return nullptr;
+        return {};
     }
 
     // we only really care about the first element, since multiple mods in one file is not supported by us at the moment
@@ -124,33 +124,33 @@ std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
     if(!tomlModsTable0)
     {
         qWarning() << "Corrupted mods.toml? [[mods]] didn't have an element at index 0!";
-        return nullptr;
+        return {};
     }
 
     // mandatory properties - always in [[mods]]
     toml_datum_t modIdDatum = toml_string_in(tomlModsTable0, "modId");
     if(modIdDatum.ok)
     {
-        details->mod_id = modIdDatum.u.s;
+        details.mod_id = modIdDatum.u.s;
         // library says this is required for strings
         free(modIdDatum.u.s);
     }
     toml_datum_t versionDatum = toml_string_in(tomlModsTable0, "version");
     if(versionDatum.ok)
     {
-        details->version = versionDatum.u.s;
+        details.version = versionDatum.u.s;
         free(versionDatum.u.s);
     }
     toml_datum_t displayNameDatum = toml_string_in(tomlModsTable0, "displayName");
     if(displayNameDatum.ok)
     {
-        details->name = displayNameDatum.u.s;
+        details.name = displayNameDatum.u.s;
         free(displayNameDatum.u.s);
     }
     toml_datum_t descriptionDatum = toml_string_in(tomlModsTable0, "description");
     if(descriptionDatum.ok)
     {
-        details->description = descriptionDatum.u.s;
+        details.description = descriptionDatum.u.s;
         free(descriptionDatum.u.s);
     }
 
@@ -173,7 +173,7 @@ std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
     }
     if(!authors.isEmpty())
     {
-        details->authors.append(authors);
+        details.authors.append(authors);
     }
 
     toml_datum_t homeurlDatum = toml_string_in(tomlData, "displayURL");
@@ -200,7 +200,7 @@ std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
             homeurl.prepend("http://");
         }
     }
-    details->homeurl = homeurl;
+    details.homeurl = homeurl;
 
     // this seems to be recursive, so it should free everything
     toml_free(tomlData);
@@ -209,20 +209,20 @@ std::shared_ptr<ModDetails> ReadMCModTOML(QByteArray contents)
 }
 
 // https://fabricmc.net/wiki/documentation:fabric_mod_json
-std::shared_ptr<ModDetails> ReadFabricModInfo(QByteArray contents)
+ModDetails ReadFabricModInfo(QByteArray contents)
 {
     QJsonParseError jsonError;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
     auto object = jsonDoc.object();
     auto schemaVersion = object.contains("schemaVersion") ? object.value("schemaVersion").toInt(0) : 0;
 
-    std::shared_ptr<ModDetails> details = std::make_shared<ModDetails>();
+    ModDetails details;
 
-    details->mod_id = object.value("id").toString();
-    details->version = object.value("version").toString();
+    details.mod_id = object.value("id").toString();
+    details.version = object.value("version").toString();
 
-    details->name = object.contains("name") ? object.value("name").toString() : details->mod_id;
-    details->description = object.value("description").toString();
+    details.name = object.contains("name") ? object.value("name").toString() : details.mod_id;
+    details.description = object.value("description").toString();
 
     if (schemaVersion >= 1)
     {
@@ -230,10 +230,10 @@ std::shared_ptr<ModDetails> ReadFabricModInfo(QByteArray contents)
         for (auto author: authors)
         {
             if(author.isObject()) {
-                details->authors.append(author.toObject().value("name").toString());
+                details.authors.append(author.toObject().value("name").toString());
             }
             else {
-                details->authors.append(author.toString());
+                details.authors.append(author.toString());
             }
         }
 
@@ -243,7 +243,7 @@ std::shared_ptr<ModDetails> ReadFabricModInfo(QByteArray contents)
 
             if (contact.contains("homepage"))
             {
-                details->homeurl = contact.value("homepage").toString();
+                details.homeurl = contact.value("homepage").toString();
             }
         }
     }
@@ -251,50 +251,50 @@ std::shared_ptr<ModDetails> ReadFabricModInfo(QByteArray contents)
 }
 
 // https://github.com/QuiltMC/rfcs/blob/master/specification/0002-quilt.mod.json.md
-std::shared_ptr<ModDetails> ReadQuiltModInfo(QByteArray contents)
+ModDetails ReadQuiltModInfo(QByteArray contents)
 {
     QJsonParseError jsonError;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
     auto object = Json::requireObject(jsonDoc, "quilt.mod.json");
     auto schemaVersion = Json::ensureInteger(object.value("schema_version"), 0, "Quilt schema_version");
 
-    std::shared_ptr<ModDetails> details = std::make_shared<ModDetails>();
+    ModDetails details;
 
     // https://github.com/QuiltMC/rfcs/blob/be6ba280d785395fefa90a43db48e5bfc1d15eb4/specification/0002-quilt.mod.json.md
     if (schemaVersion == 1)
     {
         auto modInfo = Json::requireObject(object.value("quilt_loader"), "Quilt mod info");
 
-        details->mod_id = Json::requireString(modInfo.value("id"), "Mod ID");
-        details->version = Json::requireString(modInfo.value("version"), "Mod version");
+        details.mod_id = Json::requireString(modInfo.value("id"), "Mod ID");
+        details.version = Json::requireString(modInfo.value("version"), "Mod version");
 
         auto modMetadata = Json::ensureObject(modInfo.value("metadata"));
 
-        details->name = Json::ensureString(modMetadata.value("name"), details->mod_id);
-        details->description = Json::ensureString(modMetadata.value("description"));
+        details.name = Json::ensureString(modMetadata.value("name"), details.mod_id);
+        details.description = Json::ensureString(modMetadata.value("description"));
 
         auto modContributors = Json::ensureObject(modMetadata.value("contributors"));
 
         // We don't really care about the role of a contributor here
-        details->authors += modContributors.keys();
+        details.authors += modContributors.keys();
 
         auto modContact = Json::ensureObject(modMetadata.value("contact"));
 
         if (modContact.contains("homepage"))
         {
-            details->homeurl = Json::requireString(modContact.value("homepage"));
+            details.homeurl = Json::requireString(modContact.value("homepage"));
         }
     }
     return details;
 }
 
-std::shared_ptr<ModDetails> ReadForgeInfo(QByteArray contents)
+ModDetails ReadForgeInfo(QByteArray contents)
 {
-    std::shared_ptr<ModDetails> details = std::make_shared<ModDetails>();
+    ModDetails details;
     // Read the data
-    details->name = "Minecraft Forge";
-    details->mod_id = "Forge";
-    details->homeurl = "http://www.minecraftforge.net/forum/";
+    details.name = "Minecraft Forge";
+    details.mod_id = "Forge";
+    details.homeurl = "http://www.minecraftforge.net/forum/";
     INIFile ini;
     if (!ini.loadFile(contents))
         return details;
@@ -304,47 +304,47 @@ std::shared_ptr<ModDetails> ReadForgeInfo(QByteArray contents)
     QString revision = ini.get("forge.revision.number", "0").toString();
     QString build = ini.get("forge.build.number", "0").toString();
 
-    details->version = major + "." + minor + "." + revision + "." + build;
+    details.version = major + "." + minor + "." + revision + "." + build;
     return details;
 }
 
-std::shared_ptr<ModDetails> ReadLiteModInfo(QByteArray contents)
+ModDetails ReadLiteModInfo(QByteArray contents)
 {
-    std::shared_ptr<ModDetails> details = std::make_shared<ModDetails>();
+    ModDetails details;
     QJsonParseError jsonError;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
     auto object = jsonDoc.object();
     if (object.contains("name"))
     {
-        details->mod_id = details->name = object.value("name").toString();
+        details.mod_id = details.name = object.value("name").toString();
     }
     if (object.contains("version"))
     {
-        details->version = object.value("version").toString("");
+        details.version = object.value("version").toString("");
     }
     else
     {
-        details->version = object.value("revision").toString("");
+        details.version = object.value("revision").toString("");
     }
-    details->mcversion = object.value("mcversion").toString();
+    details.mcversion = object.value("mcversion").toString();
     auto author = object.value("author").toString();
     if(!author.isEmpty()) {
-        details->authors.append(author);
+        details.authors.append(author);
     }
-    details->description = object.value("description").toString();
-    details->homeurl = object.value("url").toString();
+    details.description = object.value("description").toString();
+    details.homeurl = object.value("url").toString();
     return details;
 }
 
 }
 
-LocalModParseTask::LocalModParseTask(int token, Mod::ModType type, const QFileInfo& modFile):
+LocalModParseTask::LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile):
+    Task(nullptr, false),
     m_token(token),
     m_type(type),
     m_modFile(modFile),
     m_result(new Result())
-{
-}
+{}
 
 void LocalModParseTask::processAsZip()
 {
@@ -366,7 +366,7 @@ void LocalModParseTask::processAsZip()
         file.close();
 
         // to replace ${file.jarVersion} with the actual version, as needed
-        if (m_result->details && m_result->details->version == "${file.jarVersion}")
+        if (m_result->details.version == "${file.jarVersion}")
         {
             if (zip.setCurrentFile("META-INF/MANIFEST.MF"))
             {
@@ -395,7 +395,7 @@ void LocalModParseTask::processAsZip()
                     manifestVersion = "NONE";
                 }
 
-                m_result->details->version = manifestVersion;
+                m_result->details.version = manifestVersion;
 
                 file.close();
             }
@@ -497,21 +497,31 @@ void LocalModParseTask::processAsLitemod()
     zip.close();
 }
 
-void LocalModParseTask::run()
+bool LocalModParseTask::abort()
+{
+    m_aborted = true;
+    return true;
+}
+
+void LocalModParseTask::executeTask()
 {
     switch(m_type)
     {
-        case Mod::MOD_ZIPFILE:
+        case ResourceType::ZIPFILE:
             processAsZip();
             break;
-        case Mod::MOD_FOLDER:
+        case ResourceType::FOLDER:
             processAsFolder();
             break;
-        case Mod::MOD_LITEMOD:
+        case ResourceType::LITEMOD:
             processAsLitemod();
             break;
         default:
             break;
     }
-    emit finished(m_token);
+
+    if (m_aborted)
+        emitAborted();
+    else
+        emitSucceeded();
 }

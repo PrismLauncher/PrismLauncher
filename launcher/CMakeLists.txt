@@ -318,10 +318,16 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ModDetails.h
     minecraft/mod/ModFolderModel.h
     minecraft/mod/ModFolderModel.cpp
+    minecraft/mod/Resource.h
+    minecraft/mod/Resource.cpp
+    minecraft/mod/ResourceFolderModel.h
+    minecraft/mod/ResourceFolderModel.cpp
     minecraft/mod/ResourcePackFolderModel.h
     minecraft/mod/ResourcePackFolderModel.cpp
     minecraft/mod/TexturePackFolderModel.h
     minecraft/mod/TexturePackFolderModel.cpp
+    minecraft/mod/ShaderPackFolderModel.h
+    minecraft/mod/tasks/BasicFolderLoadTask.h
     minecraft/mod/tasks/ModFolderLoadTask.h
     minecraft/mod/tasks/ModFolderLoadTask.cpp
     minecraft/mod/tasks/LocalModParseTask.h
@@ -375,8 +381,8 @@ ecm_add_test(minecraft/Library_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VER
 
 # FIXME: shares data with FileSystem test
 # TODO: needs testdata
-ecm_add_test(minecraft/mod/ModFolderModel_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
-    TEST_NAME ModFolderModel)
+ecm_add_test(minecraft/mod/ResourceFolderModel_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+    TEST_NAME ResourceFolderModel)
 
 ecm_add_test(minecraft/ParseUtils_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
     TEST_NAME ParseUtils)
@@ -881,8 +887,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/LineSeparator.h
     ui/widgets/LogView.cpp
     ui/widgets/LogView.h
-    ui/widgets/MCModInfoFrame.cpp
-    ui/widgets/MCModInfoFrame.h
+    ui/widgets/InfoFrame.cpp
+    ui/widgets/InfoFrame.h
     ui/widgets/ModFilterWidget.cpp
     ui/widgets/ModFilterWidget.h
     ui/widgets/ModListView.cpp
@@ -944,7 +950,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/technic/TechnicPage.ui
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
-    ui/widgets/MCModInfoFrame.ui
+    ui/widgets/InfoFrame.ui
     ui/widgets/ModFilterWidget.ui
     ui/dialogs/CopyInstanceDialog.ui
     ui/dialogs/ProfileSetupDialog.ui
