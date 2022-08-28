@@ -47,7 +47,7 @@ EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform:
 
 Hashing::Hasher::Ptr EnsureMetadataTask::createNewHash(Mod* mod)
 {
-    if (!mod || !mod->valid() || mod->type() == Mod::MOD_FOLDER)
+    if (!mod || !mod->valid() || mod->type() == ResourceType::FOLDER)
         return nullptr;
 
     return Hashing::createHasher(mod->fileinfo().absoluteFilePath(), m_provider);
