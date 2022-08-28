@@ -24,6 +24,8 @@
 #include <QVariant>
 #include <QVector>
 
+class QIODevice;
+
 namespace ModPlatform {
 
 enum class Provider {
@@ -36,7 +38,7 @@ class ProviderCapabilities {
     auto name(Provider) -> const char*;
     auto readableName(Provider) -> QString;
     auto hashType(Provider) -> QStringList;
-    auto hash(Provider, QByteArray&, QString type = "") -> QByteArray;
+    auto hash(Provider, QIODevice*, QString type = "") -> QString;
 };
 
 struct ModpackAuthor {

@@ -1,12 +1,14 @@
 #pragma once
 
 #include "ModIndex.h"
-#include "tasks/SequentialTask.h"
 #include "net/NetJob.h"
+
+#include "modplatform/helpers/HashUtils.h"
+
+#include "tasks/ConcurrentTask.h"
 
 class Mod;
 class QDir;
-class MultipleOptionsTask;
 
 class EnsureMetadataTask : public Task {
     Q_OBJECT
@@ -16,6 +18,8 @@ class EnsureMetadataTask : public Task {
     EnsureMetadataTask(QList<Mod*>&, QDir, ModPlatform::Provider = ModPlatform::Provider::MODRINTH);
 
     ~EnsureMetadataTask() = default;
+
+    Task::Ptr getHashingTask() { return m_hashing_task; }
 
    public slots:
     bool abort() override;
@@ -31,10 +35,16 @@ class EnsureMetadataTask : public Task {
     auto flameProjectsTask() -> NetJob::Ptr;
 
     // Helpers
-    void emitReady(Mod*);
-    void emitFail(Mod*);
+    enum class RemoveFromList {
+        Yes,
+        No
+    };
+    void emitReady(Mod*, QString key = {}, RemoveFromList = RemoveFromList::Yes);
+    void emitFail(Mod*, QString key = {}, RemoveFromList = RemoveFromList::Yes);
 
-    auto getHash(Mod*) -> QString;
+    // Hashes and stuff
+    auto createNewHash(Mod*) -> Hashing::Hasher::Ptr;
+    auto getExistingHash(Mod*) -> QString;
 
    private slots:
     void modrinthCallback(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Mod*);
@@ -50,5 +60,6 @@ class EnsureMetadataTask : public Task {
     ModPlatform::Provider m_provider;
 
     QHash<QString, ModPlatform::IndexedVersion> m_temp_versions;
+    ConcurrentTask* m_hashing_task;
     NetJob* m_current_task;
 };
