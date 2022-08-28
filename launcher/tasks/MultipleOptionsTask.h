@@ -1,11 +1,11 @@
 #pragma once
 
-#include "ConcurrentTask.h"
+#include "SequentialTask.h"
 
 /* This task type will attempt to do run each of it's subtasks in sequence,
  * until one of them succeeds. When that happens, the remaining tasks will not run.
  * */
-class MultipleOptionsTask : public ConcurrentTask {
+class MultipleOptionsTask : public SequentialTask {
     Q_OBJECT
    public:
     explicit MultipleOptionsTask(QObject* parent = nullptr, const QString& task_name = "");
