@@ -35,6 +35,7 @@ class ResourcePack : public Resource {
     void setDescription(QString new_description);
 
     [[nodiscard]] auto compare(Resource const& other, SortType type) const -> std::pair<int, bool> override;
+    [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
 
    protected:
     mutable QMutex m_data_lock;

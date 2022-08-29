@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QMap>
+#include <QRegularExpression>
 
 #include "Version.h"
 
@@ -68,4 +69,20 @@ std::pair<int, bool> ResourcePack::compare(const Resource& other, SortType type)
         }
     }
     return { 0, false };
+}
+
+bool ResourcePack::applyFilter(QRegularExpression filter) const
+{
+    if (filter.match(description()).hasMatch())
+        return true;
+
+    if (filter.match(QString::number(packFormat())).hasMatch())
+        return true;
+
+    if (filter.match(compatibleVersions().first.toString()).hasMatch())
+        return true;
+    if (filter.match(compatibleVersions().second.toString()).hasMatch())
+        return true;
+
+    return Resource::applyFilter(filter);
 }
