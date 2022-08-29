@@ -43,7 +43,7 @@
 
 ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir) : ResourceFolderModel(QDir(dir))
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE };
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE };
 }
 
 QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const

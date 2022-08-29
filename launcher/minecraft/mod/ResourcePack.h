@@ -34,6 +34,8 @@ class ResourcePack : public Resource {
     /** Thread-safe. */
     void setDescription(QString new_description);
 
+    [[nodiscard]] auto compare(Resource const& other, SortType type) const -> std::pair<int, bool> override;
+
    protected:
     mutable QMutex m_data_lock;
 

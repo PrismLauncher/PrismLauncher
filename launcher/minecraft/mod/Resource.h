@@ -20,6 +20,7 @@ enum class SortType {
     DATE,
     VERSION,
     ENABLED,
+    PACK_FORMAT
 };
 
 enum class EnableAction {
