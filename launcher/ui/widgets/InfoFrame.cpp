@@ -87,11 +87,14 @@ void InfoFrame::updateWithMod(Mod const& m)
     {
         setDescription(m.description());
     }
+
+    setImage();
 }
 
 void InfoFrame::updateWithResource(const Resource& resource)
 {
     setName(resource.name());
+    setImage();
 }
 
 // https://www.sportskeeda.com/minecraft-wiki/color-codes
@@ -146,12 +149,14 @@ void InfoFrame::updateWithResourcePack(const ResourcePack& resource_pack)
     description_parsed.replace("\n", "<br>");
 
     setDescription(description_parsed);
+    setImage(resource_pack.image({64, 64}));
 }
 
 void InfoFrame::clear()
 {
     setName();
     setDescription();
+    setImage();
 }
 
 void InfoFrame::updateHiddenState()
@@ -224,6 +229,16 @@ void InfoFrame::setDescription(QString text)
         labeltext.append(finaltext);
     }
     ui->descriptionLabel->setText(labeltext);
+}
+
+void InfoFrame::setImage(QPixmap img)
+{
+    if (img.isNull()) {
+        ui->iconLabel->setHidden(true);
+    } else {
+        ui->iconLabel->setHidden(false);
+        ui->iconLabel->setPixmap(img);
+    }
 }
 
 void InfoFrame::descriptionEllipsisHandler(QString link)

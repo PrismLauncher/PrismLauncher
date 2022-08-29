@@ -34,6 +34,7 @@ class InfoFrame : public QFrame {
 
     void setName(QString text = {});
     void setDescription(QString text = {});
+    void setImage(QPixmap img = {});
 
     void clear();
 
