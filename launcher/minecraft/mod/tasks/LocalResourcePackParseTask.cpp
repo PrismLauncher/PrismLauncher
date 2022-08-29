@@ -1,3 +1,21 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "LocalResourcePackParseTask.h"
 
 #include "FileSystem.h"
@@ -6,67 +24,28 @@
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
-LocalResourcePackParseTask::LocalResourcePackParseTask(int token, ResourcePack& rp)
-    : Task(nullptr, false), m_token(token), m_resource_pack(rp)
-{}
+namespace ResourcePackUtils {
 
-bool LocalResourcePackParseTask::abort()
+bool process(ResourcePack& pack)
 {
-    m_aborted = true;
-    return true;
-}
-
-void LocalResourcePackParseTask::executeTask()
-{
-    switch (m_resource_pack.type()) {
+    switch (pack.type()) {
         case ResourceType::FOLDER:
-            processAsFolder();
-            break;
+            ResourcePackUtils::processFolder(pack);
+            return true;
         case ResourceType::ZIPFILE:
-            processAsZip();
-            break;
+            ResourcePackUtils::processZIP(pack);
+            return true;
         default:
             qWarning() << "Invalid type for resource pack parse task!";
-            emitFailed(tr("Invalid type."));
-    }
-
-    if (isFinished())
-        return;
-
-    if (m_aborted)
-        emitAborted();
-    else
-        emitSucceeded();
-}
-
-// https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
-void LocalResourcePackParseTask::processMCMeta(QByteArray&& raw_data)
-{
-    try {
-        auto json_doc = QJsonDocument::fromJson(raw_data);
-        auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});
-
-        m_resource_pack.setPackFormat(Json::ensureInteger(pack_obj, "pack_format", 0));
-        m_resource_pack.setDescription(Json::ensureString(pack_obj, "description", ""));
-    } catch (Json::JsonException& e) {
-        qWarning() << "JsonException: " << e.what() << e.cause();
-        emitFailed(tr("Failed to process .mcmeta file."));
+            return false;
     }
 }
 
-void LocalResourcePackParseTask::processPackPNG(QByteArray&& raw_data)
+void processFolder(ResourcePack& pack)
 {
-    auto img = QImage::fromData(raw_data);
-    if (!img.isNull()) {
-        m_resource_pack.setImage(img);
-    } else {
-        qWarning() << "Failed to parse pack.png.";
-    }
-}
+    Q_ASSERT(pack.type() == ResourceType::FOLDER);
 
-void LocalResourcePackParseTask::processAsFolder()
-{
-    QFileInfo mcmeta_file_info(FS::PathCombine(m_resource_pack.fileinfo().filePath(), "pack.mcmeta"));
+    QFileInfo mcmeta_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.mcmeta"));
     if (mcmeta_file_info.isFile()) {
         QFile mcmeta_file(mcmeta_file_info.filePath());
         if (!mcmeta_file.open(QIODevice::ReadOnly))
@@ -74,12 +53,12 @@ void LocalResourcePackParseTask::processAsFolder()
 
         auto data = mcmeta_file.readAll();
 
-        processMCMeta(std::move(data));
+        ResourcePackUtils::processMCMeta(pack, std::move(data));
 
         mcmeta_file.close();
     }
 
-    QFileInfo image_file_info(FS::PathCombine(m_resource_pack.fileinfo().filePath(), "pack.png"));
+    QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
     if (image_file_info.isFile()) {
         QFile mcmeta_file(image_file_info.filePath());
         if (!mcmeta_file.open(QIODevice::ReadOnly))
@@ -87,15 +66,17 @@ void LocalResourcePackParseTask::processAsFolder()
 
         auto data = mcmeta_file.readAll();
 
-        processPackPNG(std::move(data));
+        ResourcePackUtils::processPackPNG(pack, std::move(data));
 
         mcmeta_file.close();
     }
 }
 
-void LocalResourcePackParseTask::processAsZip()
+void processZIP(ResourcePack& pack)
 {
-    QuaZip zip(m_resource_pack.fileinfo().filePath());
+    Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
+
+    QuaZip zip(pack.fileinfo().filePath());
     if (!zip.open(QuaZip::mdUnzip))
         return;
 
@@ -110,7 +91,7 @@ void LocalResourcePackParseTask::processAsZip()
 
         auto data = file.readAll();
 
-        processMCMeta(std::move(data));
+        ResourcePackUtils::processMCMeta(pack, std::move(data));
 
         file.close();
     }
@@ -124,10 +105,58 @@ void LocalResourcePackParseTask::processAsZip()
 
         auto data = file.readAll();
 
-        processPackPNG(std::move(data));
+        ResourcePackUtils::processPackPNG(pack, std::move(data));
 
         file.close();
     }
 
     zip.close();
+}
+
+// https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
+void processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
+{
+    try {
+        auto json_doc = QJsonDocument::fromJson(raw_data);
+        auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});
+
+        pack.setPackFormat(Json::ensureInteger(pack_obj, "pack_format", 0));
+        pack.setDescription(Json::ensureString(pack_obj, "description", ""));
+    } catch (Json::JsonException& e) {
+        qWarning() << "JsonException: " << e.what() << e.cause();
+    }
+}
+
+void processPackPNG(ResourcePack& pack, QByteArray&& raw_data)
+{
+    auto img = QImage::fromData(raw_data);
+    if (!img.isNull()) {
+        pack.setImage(img);
+    } else {
+        qWarning() << "Failed to parse pack.png.";
+    }
+}
+}  // namespace ResourcePackUtils
+
+LocalResourcePackParseTask::LocalResourcePackParseTask(int token, ResourcePack& rp)
+    : Task(nullptr, false), m_token(token), m_resource_pack(rp)
+{}
+
+bool LocalResourcePackParseTask::abort()
+{
+    m_aborted = true;
+    return true;
+}
+
+void LocalResourcePackParseTask::executeTask()
+{
+    Q_ASSERT(m_resource_pack.valid());
+
+    if (!ResourcePackUtils::process(m_resource_pack))
+        return;
+
+    if (m_aborted)
+        emitAborted();
+    else
+        emitSucceeded();
 }

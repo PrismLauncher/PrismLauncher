@@ -10,7 +10,6 @@ class Version;
 
 /* TODO:
  *
- * Store pack.png
  * Store localized descriptions
  * */
 
