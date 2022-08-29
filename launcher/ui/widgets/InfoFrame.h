@@ -39,6 +39,7 @@ class InfoFrame : public QFrame {
 
     void updateWithMod(Mod const& m);
     void updateWithResource(Resource const& resource);
+    void updateWithResourcePack(ResourcePack const& rp);
 
    public slots:
     void descriptionEllipsisHandler(QString link);

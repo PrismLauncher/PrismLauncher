@@ -61,4 +61,15 @@ public:
         return !m_instance->traits().contains("no-texturepacks") &&
                !m_instance->traits().contains("texturepacks");
     }
+
+   public slots:
+    bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override
+    {
+        auto sourceCurrent = m_filterModel->mapToSource(current);
+        int row = sourceCurrent.row();
+        auto& rp = static_cast<ResourcePack&>(m_model->at(row));
+        ui->frame->updateWithResourcePack(rp);
+
+        return true;
+    }
 };
