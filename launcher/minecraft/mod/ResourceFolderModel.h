@@ -145,7 +145,7 @@ class ResourceFolderModel : public QAbstractListModel {
      *  This task should load and parse all heavy info needed by a resource, such as parsing a manifest. It gets executed
      *  in the background, so it slowly updates the UI as tasks get done.
      */
-    [[nodiscard]] virtual Task* createParseTask(Resource const&) { return nullptr; };
+    [[nodiscard]] virtual Task* createParseTask(Resource&) { return nullptr; };
 
     /** Standard implementation of the model update logic.
      *

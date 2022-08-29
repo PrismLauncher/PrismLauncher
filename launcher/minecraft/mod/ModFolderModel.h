@@ -82,7 +82,7 @@ public:
     int columnCount(const QModelIndex &parent) const override;
 
     [[nodiscard]] Task* createUpdateTask() override;
-    [[nodiscard]] Task* createParseTask(Resource const&) override;
+    [[nodiscard]] Task* createParseTask(Resource&) override;
 
     bool installMod(QString file_path) { return ResourceFolderModel::installResource(file_path); }
     bool uninstallMod(const QString& filename, bool preserve_metadata = false);

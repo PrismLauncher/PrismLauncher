@@ -336,6 +336,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/tasks/LocalModParseTask.cpp
     minecraft/mod/tasks/LocalModUpdateTask.h
     minecraft/mod/tasks/LocalModUpdateTask.cpp
+    minecraft/mod/tasks/LocalResourcePackParseTask.h
+    minecraft/mod/tasks/LocalResourcePackParseTask.cpp
 
     # Assets
     minecraft/AssetsUtils.h

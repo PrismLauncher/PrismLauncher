@@ -156,7 +156,7 @@ Task* ModFolderModel::createUpdateTask()
     return task;
 }
 
-Task* ModFolderModel::createParseTask(Resource const& resource)
+Task* ModFolderModel::createParseTask(Resource& resource)
 {
     return new LocalModParseTask(m_next_resolution_ticket, resource.type(), resource.fileinfo());
 }
