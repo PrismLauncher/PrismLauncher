@@ -21,6 +21,7 @@ class LocalResourcePackParseTask : public Task {
 
    private:
     void processMCMeta(QByteArray&& raw_data);
+    void processPackPNG(QByteArray&& raw_data);
 
     void processAsFolder();
     void processAsZip();

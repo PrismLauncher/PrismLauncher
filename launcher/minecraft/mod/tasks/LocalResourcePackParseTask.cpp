@@ -54,6 +54,16 @@ void LocalResourcePackParseTask::processMCMeta(QByteArray&& raw_data)
     }
 }
 
+void LocalResourcePackParseTask::processPackPNG(QByteArray&& raw_data)
+{
+    auto img = QImage::fromData(raw_data);
+    if (!img.isNull()) {
+        m_resource_pack.setImage(img);
+    } else {
+        qWarning() << "Failed to parse pack.png.";
+    }
+}
+
 void LocalResourcePackParseTask::processAsFolder()
 {
     QFileInfo mcmeta_file_info(FS::PathCombine(m_resource_pack.fileinfo().filePath(), "pack.mcmeta"));
@@ -63,10 +73,23 @@ void LocalResourcePackParseTask::processAsFolder()
             return;
 
         auto data = mcmeta_file.readAll();
-        if (data.isEmpty() || data.isNull())
-            return;
 
         processMCMeta(std::move(data));
+
+        mcmeta_file.close();
+    }
+
+    QFileInfo image_file_info(FS::PathCombine(m_resource_pack.fileinfo().filePath(), "pack.png"));
+    if (image_file_info.isFile()) {
+        QFile mcmeta_file(image_file_info.filePath());
+        if (!mcmeta_file.open(QIODevice::ReadOnly))
+            return;
+
+        auto data = mcmeta_file.readAll();
+
+        processPackPNG(std::move(data));
+
+        mcmeta_file.close();
     }
 }
 
@@ -90,6 +113,21 @@ void LocalResourcePackParseTask::processAsZip()
         processMCMeta(std::move(data));
 
         file.close();
-        zip.close();
     }
+
+    if (zip.setCurrentFile("pack.png")) {
+        if (!file.open(QIODevice::ReadOnly)) {
+            qCritical() << "Failed to open file in zip.";
+            zip.close();
+            return;
+        }
+
+        auto data = file.readAll();
+
+        processPackPNG(std::move(data));
+
+        file.close();
+    }
+
+    zip.close();
 }

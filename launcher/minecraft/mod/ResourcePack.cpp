@@ -35,6 +35,15 @@ void ResourcePack::setDescription(QString new_description)
     m_description = new_description;
 }
 
+void ResourcePack::setImage(QImage new_image)
+{
+    QMutexLocker locker(&m_data_lock);
+
+    Q_ASSERT(!new_image.isNull());
+
+    m_pack_image = new_image;
+}
+
 std::pair<Version, Version> ResourcePack::compatibleVersions() const
 {
     if (!s_pack_format_versions.contains(m_pack_format)) {

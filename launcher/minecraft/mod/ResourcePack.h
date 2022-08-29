@@ -2,7 +2,9 @@
 
 #include "Resource.h"
 
+#include <QImage>
 #include <QMutex>
+#include <QPixmap>
 
 class Version;
 
@@ -28,11 +30,18 @@ class ResourcePack : public Resource {
     /** Gets the description of the resource pack. */
     [[nodiscard]] QString description() const { return m_description; }
 
+    /** Gets the image of the resource pack, converted to a QPixmap for drawing, and scaled to size. */
+    [[nodiscard]] QPixmap image(QSize size) const { return QPixmap::fromImage(m_pack_image).scaled(size); }
+    [[nodiscard]] QSize image_size() const { return m_pack_image.size(); }
+
     /** Thread-safe. */
     void setPackFormat(int new_format_id);
 
     /** Thread-safe. */
     void setDescription(QString new_description);
+
+    /** Thread-safe. */
+    void setImage(QImage new_image);
 
     [[nodiscard]] auto compare(Resource const& other, SortType type) const -> std::pair<int, bool> override;
     [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
@@ -48,4 +57,9 @@ class ResourcePack : public Resource {
     /** The resource pack's description, as defined in the pack.mcmeta file.
      */
     QString m_description;
+
+    /** The resource pack's image, as per the pack.png file.
+     *  TODO: This could probably be just a key into a static image cache.
+     */
+    QImage m_pack_image;
 };
