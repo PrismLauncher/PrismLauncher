@@ -388,6 +388,10 @@ ecm_add_test(minecraft/Library_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VER
 ecm_add_test(minecraft/mod/ResourceFolderModel_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
     TEST_NAME ResourceFolderModel)
 
+ecm_add_test(minecraft/mod/ResourcePackParse_test.cpp
+    LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
+    TEST_NAME ResourcePackParse)
+
 ecm_add_test(minecraft/ParseUtils_test.cpp LINK_LIBRARIES Launcher_logic Qt${QT_VERSION_MAJOR}::Test
     TEST_NAME ParseUtils)
 

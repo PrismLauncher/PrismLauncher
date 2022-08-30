@@ -146,7 +146,8 @@ slots:
         for (auto mod : model.allMods())
             qDebug() << mod->name();
 
-        QCOMPARE(model.size(), 2);
+        // FIXME: It considers every file in the directory as a mod, but we should probably filter that out somehow.
+        QCOMPARE(model.size(), 4);
 
         model.stopWatching();
 
