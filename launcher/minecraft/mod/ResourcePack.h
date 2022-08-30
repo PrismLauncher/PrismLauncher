@@ -5,6 +5,7 @@
 #include <QImage>
 #include <QMutex>
 #include <QPixmap>
+#include <QPixmapCache>
 
 class Version;
 
@@ -30,8 +31,7 @@ class ResourcePack : public Resource {
     [[nodiscard]] QString description() const { return m_description; }
 
     /** Gets the image of the resource pack, converted to a QPixmap for drawing, and scaled to size. */
-    [[nodiscard]] QPixmap image(QSize size) const { return QPixmap::fromImage(m_pack_image).scaled(size); }
-    [[nodiscard]] QSize image_size() const { return m_pack_image.size(); }
+    [[nodiscard]] QPixmap image(QSize size);
 
     /** Thread-safe. */
     void setPackFormat(int new_format_id);
@@ -57,8 +57,13 @@ class ResourcePack : public Resource {
      */
     QString m_description;
 
-    /** The resource pack's image, as per the pack.png file.
-     *  TODO: This could probably be just a key into a static image cache.
+    /** The resource pack's image file cache key, for access in the QPixmapCache global instance.
+     *
+     *  The 'was_ever_used' state simply identifies whether the key was never inserted on the cache (true),
+     *  so as to tell whether a cache entry is inexistent or if it was just evicted from the cache.
      */
-    QImage m_pack_image;
+    struct {
+        QPixmapCache::Key key;
+        bool was_ever_used = false;
+    } m_pack_image_cache_key;
 };

@@ -6,6 +6,8 @@
 
 #include "Version.h"
 
+#include "minecraft/mod/tasks/LocalResourcePackParseTask.h"
+
 // Values taken from:
 // https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
 static const QMap<int, std::pair<Version, Version>> s_pack_format_versions = {
@@ -41,7 +43,29 @@ void ResourcePack::setImage(QImage new_image)
 
     Q_ASSERT(!new_image.isNull());
 
-    m_pack_image = new_image;
+    if (m_pack_image_cache_key.key.isValid())
+        QPixmapCache::remove(m_pack_image_cache_key.key);
+
+    m_pack_image_cache_key.key = QPixmapCache::insert(QPixmap::fromImage(new_image));
+    m_pack_image_cache_key.was_ever_used = true;
+}
+
+QPixmap ResourcePack::image(QSize size)
+{
+    QPixmap cached_image;
+    if (QPixmapCache::find(m_pack_image_cache_key.key, &cached_image)) {
+        if (size.isNull())
+            return cached_image;
+        return cached_image.scaled(size);
+    }
+
+    // No valid image we can get
+    if (!m_pack_image_cache_key.was_ever_used)
+        return {};
+
+    // Imaged got evicted from the cache. Re-process it and retry.
+    ResourcePackUtils::process(*this);
+    return image(size);
 }
 
 std::pair<Version, Version> ResourcePack::compatibleVersions() const

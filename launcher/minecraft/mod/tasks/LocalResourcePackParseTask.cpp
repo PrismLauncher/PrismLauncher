@@ -24,6 +24,8 @@
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
+#include <QCryptographicHash>
+
 namespace ResourcePackUtils {
 
 bool process(ResourcePack& pack)

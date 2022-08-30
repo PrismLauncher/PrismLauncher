@@ -105,7 +105,7 @@ static const QMap<QChar, QString> s_value_to_color = {
     {'f', "#FFFFFF"}
 };
 
-void InfoFrame::updateWithResourcePack(const ResourcePack& resource_pack)
+void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
 {
     setName(resource_pack.name());
 
