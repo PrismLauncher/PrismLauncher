@@ -49,7 +49,7 @@ class Download : public NetAction {
 
    public:
     using Ptr = shared_qobject_ptr<class Download>;
-    enum class Option { NoOptions = 0, AcceptLocalFiles = 1 };
+    enum class Option { NoOptions = 0, AcceptLocalFiles = 1, MakeEternal = 2 };
     Q_DECLARE_FLAGS(Options, Option)
 
    protected:

@@ -63,11 +63,12 @@ void FMLLibrariesTask::executeTask()
     setStatus(tr("Downloading FML libraries..."));
     auto dljob = new NetJob("FML libraries", APPLICATION->network());
     auto metacache = APPLICATION->metacache();
+    Net::Download::Options options = Net::Download::Option::MakeEternal;
     for (auto &lib : fmlLibsToProcess)
     {
         auto entry = metacache->resolveEntry("fmllibs", lib.filename);
         QString urlString = BuildConfig.FMLLIBS_BASE_URL + lib.filename;
-        dljob->addNetAction(Net::Download::makeCached(QUrl(urlString), entry));
+        dljob->addNetAction(Net::Download::makeCached(QUrl(urlString), entry, options));
     }
 
     connect(dljob, &NetJob::succeeded, this, &FMLLibrariesTask::fmllibsFinished);
