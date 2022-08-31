@@ -60,7 +60,7 @@ auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Down
     dl->m_url = url;
     dl->m_options = options;
     auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
-    auto cachedNode = new MetaCacheSink(entry, md5Node);
+    auto cachedNode = new MetaCacheSink(entry, md5Node, options.testFlag(Option::MakeEternal));
     dl->m_sink.reset(cachedNode);
     return dl;
 }

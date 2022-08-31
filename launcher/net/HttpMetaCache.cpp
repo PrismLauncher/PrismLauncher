@@ -229,8 +229,13 @@ void HttpMetaCache::Load()
         foo->etag = Json::ensureString(element_obj, "etag");
         foo->local_changed_timestamp = Json::ensureDouble(element_obj, "last_changed_timestamp");
         foo->remote_changed_timestamp = Json::ensureString(element_obj, "remote_changed_timestamp");
-        foo->current_age = Json::ensureDouble(element_obj, "current_age");
-        foo->max_age = Json::ensureDouble(element_obj, "max_age");
+
+        foo->makeEternal(Json::ensureBoolean(element_obj, "eternal", false));
+        if (!foo->isEternal()) {
+            foo->current_age = Json::ensureDouble(element_obj, "current_age");
+            foo->max_age = Json::ensureDouble(element_obj, "max_age");
+        }
+
         // presumed innocent until closer examination
         foo->stale = false;
 
@@ -271,8 +276,12 @@ void HttpMetaCache::SaveNow()
             entryObj.insert("last_changed_timestamp", QJsonValue(double(entry->local_changed_timestamp)));
             if (!entry->remote_changed_timestamp.isEmpty())
                 entryObj.insert("remote_changed_timestamp", QJsonValue(entry->remote_changed_timestamp));
-            entryObj.insert("current_age", QJsonValue(double(entry->current_age)));
-            entryObj.insert("max_age", QJsonValue(double(entry->max_age)));
+            if (entry->isEternal()) {
+                entryObj.insert("eternal", true);
+            } else {
+                entryObj.insert("current_age", QJsonValue(double(entry->current_age)));
+                entryObj.insert("max_age", QJsonValue(double(entry->max_age)));
+            }
             entriesArr.append(entryObj);
         }
     }
