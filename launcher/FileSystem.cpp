@@ -467,6 +467,7 @@ bool overrideFolder(QString overwritten_path, QString override_path)
     for (auto file : listFolderPaths(root_override)) {
         QString destination = file;
         destination.replace(override_path, overwritten_path);
+        ensureFilePathExists(destination);
 
         qDebug() << QString("Applying override %1 in %2").arg(file, destination);
 
