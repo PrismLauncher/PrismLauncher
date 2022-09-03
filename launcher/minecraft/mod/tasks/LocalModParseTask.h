@@ -39,5 +39,5 @@ private:
     QFileInfo m_modFile;
     ResultPtr m_result;
 
-    bool m_aborted = false;
+    std::atomic<bool> m_aborted = false;
 };

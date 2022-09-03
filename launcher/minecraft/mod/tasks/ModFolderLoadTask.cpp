@@ -38,8 +38,8 @@
 
 #include "minecraft/mod/MetadataHandler.h"
 
-ModFolderLoadTask::ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan, QObject* parent)
-    : Task(parent, false), m_mods_dir(mods_dir), m_index_dir(index_dir), m_is_indexed(is_indexed), m_clean_orphan(clean_orphan), m_result(new Result())
+ModFolderLoadTask::ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan)
+    : Task(nullptr, false), m_mods_dir(mods_dir), m_index_dir(index_dir), m_is_indexed(is_indexed), m_clean_orphan(clean_orphan), m_result(new Result())
 {}
 
 void ModFolderLoadTask::executeTask()
@@ -96,7 +96,10 @@ void ModFolderLoadTask::executeTask()
         }
     }
 
-    emitSucceeded();
+    if (m_aborted)
+        emit finished();
+    else
+        emitSucceeded();
 }
 
 void ModFolderLoadTask::getFromMetadata()

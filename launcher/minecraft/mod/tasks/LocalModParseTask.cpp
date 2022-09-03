@@ -499,7 +499,7 @@ void LocalModParseTask::processAsLitemod()
 
 bool LocalModParseTask::abort()
 {
-    m_aborted = true;
+    m_aborted.store(true);
     return true;
 }
 
@@ -521,7 +521,7 @@ void LocalModParseTask::executeTask()
     }
 
     if (m_aborted)
-        emitAborted();
+        emit finished();
     else
         emitSucceeded();
 }

@@ -24,6 +24,7 @@ class ResourceFolderModel : public QAbstractListModel {
     Q_OBJECT
    public:
     ResourceFolderModel(QDir, QObject* parent = nullptr);
+    ~ResourceFolderModel() override;
 
     /** Starts watching the paths for changes.
      *
@@ -197,8 +198,7 @@ class ResourceFolderModel : public QAbstractListModel {
     QMap<QString, int> m_resources_index;
 
     QMap<int, Task::Ptr> m_active_parse_tasks;
-    int m_next_resolution_ticket = 0;
-    QMutex m_ticket_mutex;
+    std::atomic<int> m_next_resolution_ticket = 0;
 };
 
 /* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */

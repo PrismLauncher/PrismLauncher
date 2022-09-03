@@ -57,7 +57,15 @@ public:
     }
 
 public:
-    ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan = false, QObject* parent = nullptr);
+    ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan = false);
+
+    [[nodiscard]] bool canAbort() const override { return true; }
+    bool abort() override
+    {
+        m_aborted.store(true);
+        return true;
+    }
+
 
     void executeTask() override;
 
@@ -69,4 +77,6 @@ private:
     bool m_is_indexed;
     bool m_clean_orphan;
     ResultPtr m_result;
+
+    std::atomic<bool> m_aborted = false;
 };

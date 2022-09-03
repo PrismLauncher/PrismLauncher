@@ -36,7 +36,7 @@ class BasicFolderLoadTask : public Task {
     [[nodiscard]] bool canAbort() const override { return true; }
     bool abort() override
     {
-        m_aborted = true;
+        m_aborted.store(true);
         return true;
     }
 
@@ -49,7 +49,7 @@ class BasicFolderLoadTask : public Task {
         }
 
         if (m_aborted)
-            emitAborted();
+            emit finished();
         else
             emitSucceeded();
     }
@@ -58,7 +58,7 @@ private:
     QDir m_dir;
     ResultPtr m_result;
 
-    bool m_aborted = false;
+    std::atomic<bool> m_aborted = false;
 
     std::function<Resource*(QFileInfo const&)> m_create_func;
 };
