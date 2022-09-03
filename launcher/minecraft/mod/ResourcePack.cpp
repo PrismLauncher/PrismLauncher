@@ -23,8 +23,7 @@ void ResourcePack::setPackFormat(int new_format_id)
     QMutexLocker locker(&m_data_lock);
 
     if (!s_pack_format_versions.contains(new_format_id)) {
-        qCritical() << "Error: Pack format '%1' is not a recognized resource pack id.";
-        return;
+        qWarning() << "Pack format '%1' is not a recognized resource pack id!";
     }
 
     m_pack_format = new_format_id;
@@ -71,10 +70,6 @@ QPixmap ResourcePack::image(QSize size)
 std::pair<Version, Version> ResourcePack::compatibleVersions() const
 {
     if (!s_pack_format_versions.contains(m_pack_format)) {
-        // Not having a valid pack format is fine if we didn't yet parse the .mcmeta file,
-        // but if we did and we still don't have a valid pack format, that's a bit concerning.
-        Q_ASSERT(!isResolved());
-
         return { {}, {} };
     }
 
