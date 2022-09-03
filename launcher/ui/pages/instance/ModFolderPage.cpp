@@ -135,6 +135,16 @@ bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelI
     return true;
 }
 
+void ModFolderPage::removeItem()
+{
+
+    if (!m_controlsEnabled)
+        return;
+
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->deleteMods(selection.indexes());
+}
+
 void ModFolderPage::installMods()
 {
     if (!m_controlsEnabled)
