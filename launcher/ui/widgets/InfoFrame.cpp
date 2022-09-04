@@ -105,10 +105,7 @@ static const QMap<QChar, QString> s_value_to_color = {
     {'f', "#FFFFFF"}
 };
 
-void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
-{
-    setName(resource_pack.name());
-
+QString InfoFrame::renderColorCodes(QString input) {
     // We have to manually set the colors for use.
     //
     // A color is set using §x, with x = a hex number from 0 to f.
@@ -119,37 +116,47 @@ void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
     // TODO: Make the same logic for font formatting too.
     // TODO: Wrap links inside <a> tags
 
-    auto description = resource_pack.description();
-
-    QString description_parsed("<html>");
+    QString html("<html>");
     bool in_div = false;
 
-    auto desc_it = description.constBegin();
-    while (desc_it != description.constEnd()) {
-        if (*desc_it == u'§') {
+    auto it = input.constBegin();
+    while (it != input.constEnd()) {
+        if (*it == u'§') {
             if (in_div)
-                description_parsed += "</span>";
+                html += "</span>";
 
-            auto const& num = *(++desc_it);
-            description_parsed += QString("<span style=\"color: %1;\">").arg(s_value_to_color.constFind(num).value());
+            auto const& num = *(++it);
+            html += QString("<span style=\"color: %1;\">").arg(s_value_to_color.constFind(num).value());
 
             in_div = true;
 
-            desc_it++;
+            it++;
         }
 
-        description_parsed += *desc_it;
-        desc_it++;
+        html += *it;
+        it++;
     }
 
     if (in_div)
-        description_parsed += "</span>";
-    description_parsed += "</html>";
+        html += "</span>";
+    html += "</html>";
 
-    description_parsed.replace("\n", "<br>");
+    html.replace("\n", "<br>");
+    return html;
+}
 
-    setDescription(description_parsed);
+void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
+{
+    setName(resource_pack.name());
+    setDescription(renderColorCodes(resource_pack.description()));
     setImage(resource_pack.image({64, 64}));
+}
+
+void InfoFrame::updateWithTexturePack(TexturePack& texture_pack)
+{
+    setName(texture_pack.name());
+    setDescription(texture_pack.description());
+    setImage(texture_pack.image({64, 64}));
 }
 
 void InfoFrame::clear()

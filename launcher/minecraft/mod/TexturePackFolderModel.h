@@ -8,4 +8,6 @@ class TexturePackFolderModel : public ResourceFolderModel
 
 public:
     explicit TexturePackFolderModel(const QString &dir);
+    [[nodiscard]] Task* createUpdateTask() override;
+    [[nodiscard]] Task* createParseTask(Resource&) override;
 };
