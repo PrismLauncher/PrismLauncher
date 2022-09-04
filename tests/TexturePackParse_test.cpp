@@ -21,8 +21,8 @@
 
 #include "FileSystem.h"
 
-#include "TexturePack.h"
-#include "tasks/LocalTexturePackParseTask.h"
+#include "minecraft/mod/TexturePack.h"
+#include "minecraft/mod/tasks/LocalTexturePackParseTask.h"
 
 class TexturePackParseTest : public QObject {
     Q_OBJECT
@@ -30,7 +30,7 @@ class TexturePackParseTest : public QObject {
     private slots:
     void test_parseZIP()
     {
-        QString source = QFINDTESTDATA("testdata");
+        QString source = QFINDTESTDATA("testdata/TexturePackParse");
 
         QString zip_rp = FS::PathCombine(source, "test_texture_pack_idk.zip");
         TexturePack pack { QFileInfo(zip_rp) };
@@ -42,7 +42,7 @@ class TexturePackParseTest : public QObject {
 
     void test_parseFolder()
     {
-        QString source = QFINDTESTDATA("testdata");
+        QString source = QFINDTESTDATA("testdata/TexturePackParse");
 
         QString folder_rp = FS::PathCombine(source, "test_texturefolder");
         TexturePack pack { QFileInfo(folder_rp) };
@@ -54,7 +54,7 @@ class TexturePackParseTest : public QObject {
 
     void test_parseFolder2()
     {
-        QString source = QFINDTESTDATA("testdata");
+        QString source = QFINDTESTDATA("testdata/TexturePackParse");
 
         QString folder_rp = FS::PathCombine(source, "another_test_texturefolder");
         TexturePack pack { QFileInfo(folder_rp) };
