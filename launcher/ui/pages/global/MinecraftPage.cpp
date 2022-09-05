@@ -122,6 +122,16 @@ void MinecraftPage::loadSettings()
     ui->perfomanceGroupBox->setVisible(false);
 #endif
 
+    if (!(APPLICATION->capabilities() & Application::SupportsGameMode)) {
+        ui->enableFeralGamemodeCheck->setDisabled(true);
+        ui->enableFeralGamemodeCheck->setToolTip(tr("Feral Interactive's GameMode could not be found on your system."));
+    }
+
+    if (!(APPLICATION->capabilities() & Application::SupportsMangoHud)) {
+        ui->enableMangoHud->setDisabled(true);
+        ui->enableMangoHud->setToolTip(tr("MangoHud could not be found on your system."));
+    }
+
     ui->showGameTime->setChecked(s->get("ShowGameTime").toBool());
     ui->showGlobalGameTime->setChecked(s->get("ShowGlobalGameTime").toBool());
     ui->recordGameTime->setChecked(s->get("RecordGameTime").toBool());

@@ -162,7 +162,7 @@ void LauncherPartLaunch::executeTask()
     }
 
 #ifdef Q_OS_LINUX
-    if (instance->settings()->get("EnableFeralGamemode").toBool())
+    if (instance->settings()->get("EnableFeralGamemode").toBool() && APPLICATION->capabilities() & Application::SupportsGameMode)
     {
         auto pid = m_process.processId();
         if (pid)

@@ -157,7 +157,7 @@ QList<BasePage *> NewInstanceDialog::getPages()
     pages.append(new VanillaPage(this));
     pages.append(importPage);
     pages.append(new AtlPage(this));
-    if (APPLICATION->currentCapabilities() & Application::SupportsFlame)
+    if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(new FlamePage(this));
     pages.append(new FtbPage(this));
     pages.append(new LegacyFTB::Page(this));
