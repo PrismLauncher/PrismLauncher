@@ -570,11 +570,6 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
     if(!profile)
         return QString();
 
-    for (auto cp : getClassPath())
-    {
-        launchScript += "classPath " + cp + "\n";
-    }
-
     auto mainClass = getMainClass();
     if (!mainClass.isEmpty())
     {
