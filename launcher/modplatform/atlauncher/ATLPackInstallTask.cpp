@@ -136,7 +136,7 @@ void PackInstallTask::onDownloadSucceeded()
 
     default:
         emitFailed(tr("Unsupported installation mode"));
-        break;
+        return;
     }
 
     // Display message if one exists
