@@ -27,7 +27,6 @@ jobs:
             qt_host: linux
             qt_version: '6.2.4'
             qt_modules: 'qt5compat qtimageformats'
-            qt_path: /home/runner/work/PolyMC/Qt
 
           - os: windows-2022
             name: "Windows-Legacy"
@@ -45,7 +44,6 @@ jobs:
             qt_host: mac
             qt_version: '6.3.0'
             qt_modules: 'qt5compat qtimageformats'
-            qt_path: /Users/runner/work/PolyMC/Qt
 
     runs-on: ${{ matrix.os }}
 
@@ -141,24 +139,16 @@ jobs:
         run: |
           sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
  
-      - name: Cache Qt (macOS and AppImage)
-        id: cache-qt
-        if: matrix.qt_ver == 6 && runner.os != 'Windows'
-        uses: actions/cache@v3
-        with:
-          path: '${{ matrix.qt_path }}/${{ matrix.qt_version }}'
-          key: ${{ matrix.qt_host }}-${{ matrix.qt_version }}-"${{ matrix.qt_modules }}"-qt_cache
-
       - name: Install Qt (macOS and AppImage)
         if: matrix.qt_ver == 6 && runner.os != 'Windows'
-        uses: jurplel/install-qt-action@v2
+        uses: jurplel/install-qt-action@v3
         with:
            version: ${{ matrix.qt_version }}
            host: ${{ matrix.qt_host }}
            target: 'desktop'
            modules: ${{ matrix.qt_modules }}
-           cached: ${{ steps.cache-qt.outputs.cache-hit }}
-           aqtversion: ==2.1.*
+           cache: true
+           cache-key-prefix: ${{ matrix.qt_host }}-${{ matrix.qt_version }}-"${{ matrix.qt_modules }}"-qt_cache
 
       - name: Prepare AppImage (Linux)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
