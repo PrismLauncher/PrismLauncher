@@ -37,7 +37,8 @@ void ConcurrentTask::executeTask()
 {
     m_total_size = m_queue.size();
 
-    int num_starts = std::min(m_total_max_size, m_total_size);
+    // Start the least amount of tasks needed, but at least one
+    int num_starts = std::max(1, std::min(m_total_max_size, m_total_size));
     for (int i = 0; i < num_starts; i++) {
         QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
     }
