@@ -140,6 +140,13 @@ VersionPtr VersionList::getVersion(const QString &version)
     return out;
 }
 
+bool VersionList::hasVersion(QString version) const
+{
+    auto ver = std::find_if(m_versions.constBegin(), m_versions.constEnd(),
+            [&](Meta::VersionPtr const& a){ return a->version() == version; });
+    return (ver != m_versions.constEnd());
+}
+
 void VersionList::setName(const QString &name)
 {
     m_name = name;

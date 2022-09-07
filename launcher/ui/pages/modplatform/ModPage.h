@@ -21,7 +21,17 @@ class ModPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api);
+    template<typename T>
+    static T* create(ModDownloadDialog* dialog, BaseInstance* instance)
+    {
+        auto page = new T(dialog, instance);
+
+        auto filter_widget = ModFilterWidget::create(static_cast<MinecraftInstance*>(instance)->getPackProfile()->getComponentVersion("net.minecraft"), page);
+        page->setFilterWidget(filter_widget);
+
+        return page;
+    }
+
     ~ModPage() override;
 
     /* Affects what the user sees */
@@ -51,6 +61,8 @@ class ModPage : public QWidget, public BasePage {
     /** Programatically set the term in the search bar. */
     void setSearchTerm(QString);
 
+    void setFilterWidget(unique_qobject_ptr<ModFilterWidget>&);
+
     auto getCurrent() -> ModPlatform::IndexedPack& { return current; }
     void updateModVersions(int prev_count = -1);
 
@@ -60,6 +72,7 @@ class ModPage : public QWidget, public BasePage {
     BaseInstance* m_instance;
 
    protected:
+    ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api);
     void updateSelectionButton();
 
    protected slots:
@@ -73,7 +86,7 @@ class ModPage : public QWidget, public BasePage {
     Ui::ModPage* ui = nullptr;
     ModDownloadDialog* dialog = nullptr;
 
-    ModFilterWidget filter_widget;
+    unique_qobject_ptr<ModFilterWidget> m_filter_widget;
     std::shared_ptr<ModFilterWidget::Filter> m_filter;
 
     ProgressWidget m_fetch_progress;

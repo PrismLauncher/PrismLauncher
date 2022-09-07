@@ -4,6 +4,10 @@
 #include <QButtonGroup>
 
 #include "Version.h"
+
+#include "meta/Index.h"
+#include "meta/VersionList.h"
+
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
@@ -34,18 +38,22 @@ public:
     std::shared_ptr<Filter> m_filter;
 
 public:
-    explicit ModFilterWidget(Version def, QWidget* parent = nullptr);
+    static unique_qobject_ptr<ModFilterWidget> create(Version default_version, QWidget* parent = nullptr);
     ~ModFilterWidget();
 
     void setInstance(MinecraftInstance* instance);
 
     /// By default all buttons are enabled
-    void disableVersionButton(VersionButtonID);
+    void disableVersionButton(VersionButtonID, QString reason = {});
 
     auto getFilter() -> std::shared_ptr<Filter>;
     auto changed() const -> bool { return m_last_version_id != m_version_id; }
 
+    Meta::VersionListPtr versionList() { return m_version_list; }
+
 private:
+    ModFilterWidget(Version def, QWidget* parent = nullptr);
+
     inline auto mcVersionStr() const -> QString { return m_instance ? m_instance->getPackProfile()->getComponentVersion("net.minecraft") : ""; }
     inline auto mcVersion() const -> Version { return { mcVersionStr() }; }
 
@@ -61,7 +69,11 @@ private:
 
     MinecraftInstance* m_instance = nullptr;
 
+
+/* Version stuff */
     QButtonGroup m_mcVersion_buttons;
+
+    Meta::VersionListPtr m_version_list;
 
     /* Used to tell if the filter was changed since the last getFilter() call */
     VersionButtonID m_last_version_id = VersionButtonID::Strict;

@@ -1,6 +1,39 @@
 #include "ModFilterWidget.h"
 #include "ui_ModFilterWidget.h"
 
+#include "Application.h"
+
+unique_qobject_ptr<ModFilterWidget> ModFilterWidget::create(Version default_version, QWidget* parent)
+{
+    auto filter_widget = new ModFilterWidget(default_version, parent);
+
+    if (!filter_widget->versionList()->isLoaded()) {
+        QEventLoop load_version_list_loop;
+
+        QTimer time_limit_for_list_load;
+        time_limit_for_list_load.setTimerType(Qt::TimerType::CoarseTimer);
+        time_limit_for_list_load.setSingleShot(true);
+        time_limit_for_list_load.callOnTimeout(&load_version_list_loop, &QEventLoop::quit);
+        time_limit_for_list_load.start(4000);
+
+        auto task = filter_widget->versionList()->getLoadTask();
+
+        connect(task.get(), &Task::failed, [filter_widget]{
+            filter_widget->disableVersionButton(VersionButtonID::Major, tr("failed to get version index"));
+        });
+        connect(task.get(), &Task::finished, &load_version_list_loop, &QEventLoop::quit);
+
+        if (!task->isRunning())
+            task->start();
+
+        load_version_list_loop.exec();
+        if (time_limit_for_list_load.isActive())
+            time_limit_for_list_load.stop();
+    }
+
+    return unique_qobject_ptr<ModFilterWidget>(filter_widget);
+}
+
 ModFilterWidget::ModFilterWidget(Version def, QWidget* parent)
     : QTabWidget(parent), m_filter(new Filter()),  ui(new Ui::ModFilterWidget)
 {
@@ -16,6 +49,7 @@ ModFilterWidget::ModFilterWidget(Version def, QWidget* parent)
 
     m_filter->versions.push_front(def);
 
+    m_version_list = APPLICATION->metadataIndex()->get("net.minecraft");
     setHidden(true);
 }
 
@@ -51,23 +85,29 @@ auto ModFilterWidget::getFilter() -> std::shared_ptr<Filter>
     return m_filter;
 }
 
-void ModFilterWidget::disableVersionButton(VersionButtonID id)
+void ModFilterWidget::disableVersionButton(VersionButtonID id, QString reason)
 {
+    QAbstractButton* btn = nullptr;
+
     switch(id){
     case(VersionButtonID::Strict):
-        ui->strictVersionButton->setEnabled(false);
+        btn = ui->strictVersionButton;
         break;
     case(VersionButtonID::Major):
-        ui->majorVersionButton->setEnabled(false);
+        btn = ui->majorVersionButton;
         break;
     case(VersionButtonID::All):
-        ui->allVersionsButton->setEnabled(false);
+        btn = ui->allVersionsButton;
         break;
     case(VersionButtonID::Between):
-    //    ui->betweenVersionsButton->setEnabled(false);
-        break;
     default:
         break;
+    }
+
+    if (btn) {
+        btn->setEnabled(false);
+        if (!reason.isEmpty())
+            btn->setText(btn->text() + QString(" (%1)").arg(reason));
     }
 }
 
@@ -76,7 +116,7 @@ void ModFilterWidget::onVersionFilterChanged(int id)
     //ui->lowerVersionComboBox->setEnabled(id == VersionButtonID::Between);
     //ui->upperVersionComboBox->setEnabled(id == VersionButtonID::Between);
 
-    int index = 0;
+    int index = 1;
 
     auto cast_id = (VersionButtonID) id;
     if (cast_id != m_version_id) {
@@ -93,10 +133,15 @@ void ModFilterWidget::onVersionFilterChanged(int id)
         break;
     case(VersionButtonID::Major): {
         auto versionSplit = mcVersionStr().split(".");
-        for(auto i = Version(QString("%1.%2").arg(versionSplit[0], versionSplit[1])); i <= mcVersion(); index++){
-            m_filter->versions.push_front(i);
-            i = Version(QString("%1.%2.%3").arg(versionSplit[0], versionSplit[1], QString("%1").arg(index)));
+
+        auto major_version = QString("%1.%2").arg(versionSplit[0], versionSplit[1]);
+        QString version_str = major_version;
+
+        while (m_version_list->hasVersion(version_str)) {
+            m_filter->versions.emplace_back(version_str);
+            version_str = QString("%1.%2").arg(major_version, QString::number(index++));
         }
+
         break;
     }
     case(VersionButtonID::All):
