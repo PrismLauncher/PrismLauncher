@@ -9,7 +9,9 @@ class ConcurrentTask : public Task {
     Q_OBJECT
 public:
     explicit ConcurrentTask(QObject* parent = nullptr, QString task_name = "", int max_concurrent = 6);
-    virtual ~ConcurrentTask();
+    ~ConcurrentTask() override;
+
+    bool canAbort() const override { return true; }
 
     inline auto isMultiStep() const -> bool override { return m_queue.size() > 1; };
     auto getStepProgress() const -> qint64 override;

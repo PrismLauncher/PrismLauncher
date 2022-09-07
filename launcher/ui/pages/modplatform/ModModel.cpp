@@ -230,10 +230,11 @@ void ListModel::searchRequestFinished(QJsonDocument& doc)
 
 void ListModel::searchRequestFailed(QString reason)
 {
-    if (!jobPtr->first()->m_reply) {
+    auto failed_action = jobPtr->getFailedActions().at(0);
+    if (!failed_action->m_reply) {
         // Network error
         QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load mods."));
-    } else if (jobPtr->first()->m_reply && jobPtr->first()->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
+    } else if (failed_action->m_reply && failed_action->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
         // 409 Gone, notify user to update
         QMessageBox::critical(nullptr, tr("Error"),
                               //: %1 refers to the launcher itself

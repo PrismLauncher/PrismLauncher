@@ -39,64 +39,40 @@
 
 #include <QObject>
 #include "NetAction.h"
-#include "tasks/Task.h"
+#include "tasks/ConcurrentTask.h"
 
 // Those are included so that they are also included by anyone using NetJob
 #include "net/Download.h"
 #include "net/HttpMetaCache.h"
 
-class NetJob : public Task {
+class NetJob : public ConcurrentTask {
     Q_OBJECT
 
    public:
     using Ptr = shared_qobject_ptr<NetJob>;
 
-    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network) : Task(), m_network(network)
-    {
-        setObjectName(job_name);
-    }
-    virtual ~NetJob() = default;
+    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network) : ConcurrentTask(nullptr, job_name), m_network(network) {}
+    ~NetJob() override = default;
 
-    void executeTask() override;
+    void startNext() override;
+
+    auto size() const -> int;
 
     auto canAbort() const -> bool override;
-
     auto addNetAction(NetAction::Ptr action) -> bool;
 
-    auto operator[](int index) -> NetAction::Ptr { return m_downloads[index]; }
-    auto at(int index) -> const NetAction::Ptr { return m_downloads.at(index); }
-    auto size() const -> int { return m_downloads.size(); }
-    auto first() -> NetAction::Ptr { return m_downloads.size() != 0 ? m_downloads[0] : NetAction::Ptr{}; }
-
-    auto getFailedFiles() -> QStringList;
+    auto getFailedActions() -> QList<NetAction*>;
+    auto getFailedFiles() -> QList<QString>;
 
    public slots:
     // Qt can't handle auto at the start for some reason?
     bool abort() override;
 
-   private slots:
-    void startMoreParts();
-
-    void partProgress(int index, qint64 bytesReceived, qint64 bytesTotal);
-    void partSucceeded(int index);
-    void partFailed(int index);
-    void partAborted(int index);
+   protected:
+    void updateState() override;
 
    private:
     shared_qobject_ptr<QNetworkAccessManager> m_network;
 
-    struct part_info {
-        qint64 current_progress = 0;
-        qint64 total_progress = 1;
-        int failures = 0;
-    };
-
-    QList<NetAction::Ptr> m_downloads;
-    QList<part_info> m_parts_progress;
-    QQueue<int> m_todo;
-    QSet<int> m_doing;
-    QSet<int> m_done;
-    QSet<int> m_failed;
-    qint64 m_current_progress = 0;
-    bool m_aborted = false;
+    int m_try = 1;
 };

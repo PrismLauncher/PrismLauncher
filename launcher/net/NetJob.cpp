@@ -35,28 +35,34 @@
  */
 
 #include "NetJob.h"
-#include "Download.h"
 
 auto NetJob::addNetAction(NetAction::Ptr action) -> bool
 {
-    action->m_index_within_job = m_downloads.size();
-    m_downloads.append(action);
-    part_info pi;
-    m_parts_progress.append(pi);
+    action->m_index_within_job = m_queue.size();
+    m_queue.append(action);
 
-    partProgress(m_parts_progress.count() - 1, action->getProgress(), action->getTotalProgress());
-
-    if (action->isRunning()) {
-        connect(action.get(), &NetAction::succeeded, [this, action]{ partSucceeded(action->index()); });
-        connect(action.get(), &NetAction::failed, [this, action](QString){ partFailed(action->index()); });
-        connect(action.get(), &NetAction::aborted, [this, action](){ partAborted(action->index()); });
-        connect(action.get(), &NetAction::progress, [this, action](qint64 done, qint64 total) { partProgress(action->index(), done, total); });
-        connect(action.get(), &NetAction::status, this, &NetJob::status);
-    } else {
-        m_todo.append(m_parts_progress.size() - 1);
-    }
+    action->setNetwork(m_network);
 
     return true;
+}
+
+void NetJob::startNext()
+{
+    if (m_queue.isEmpty() && m_doing.isEmpty()) {
+        // We're finished, check for failures and retry if we can (up to 3 times)
+        if (!m_failed.isEmpty() && m_try < 3) {
+            m_try += 1;
+            while (!m_failed.isEmpty())
+                m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
+        }
+    }
+
+    ConcurrentTask::startNext();
+}
+
+auto NetJob::size() const -> int
+{
+    return m_queue.size() + m_doing.size() + m_done.size();
 }
 
 auto NetJob::canAbort() const -> bool
@@ -64,33 +70,14 @@ auto NetJob::canAbort() const -> bool
     bool canFullyAbort = true;
 
     // can abort the downloads on the queue?
-    for (auto index : m_todo) {
-        auto part = m_downloads[index];
+    for (auto part : m_queue)
         canFullyAbort &= part->canAbort();
-    }
+
     // can abort the active downloads?
-    for (auto index : m_doing) {
-        auto part = m_downloads[index];
+    for (auto part : m_doing)
         canFullyAbort &= part->canAbort();
-    }
 
     return canFullyAbort;
-}
-
-void NetJob::executeTask()
-{
-    // hack that delays early failures so they can be caught easier
-    QMetaObject::invokeMethod(this, "startMoreParts", Qt::QueuedConnection);
-}
-
-auto NetJob::getFailedFiles() -> QStringList
-{
-    QStringList failed;
-    for (auto index : m_failed) {
-        failed.push_back(m_downloads[index]->url().toString());
-    }
-    failed.sort();
-    return failed;
 }
 
 auto NetJob::abort() -> bool
@@ -98,141 +85,40 @@ auto NetJob::abort() -> bool
     bool fullyAborted = true;
 
     // fail all downloads on the queue
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    QSet<int> todoSet(m_todo.begin(), m_todo.end());
-    m_failed.unite(todoSet);
-#else
-    m_failed.unite(m_todo.toSet());
-#endif
-    m_todo.clear();
+    for (auto task : m_queue)
+        m_failed.insert(task.get(), task);
+    m_queue.clear();
 
     // abort active downloads
     auto toKill = m_doing.values();
-    for (auto index : toKill) {
-        auto part = m_downloads[index];
+    for (auto part : toKill) {
         fullyAborted &= part->abort();
     }
 
     return fullyAborted;
 }
 
-void NetJob::partSucceeded(int index)
+auto NetJob::getFailedActions() -> QList<NetAction*>
 {
-    // do progress. all slots are 1 in size at least
-    auto& slot = m_parts_progress[index];
-    partProgress(index, slot.total_progress, slot.total_progress);
-
-    m_doing.remove(index);
-    m_done.insert(index);
-    m_downloads[index].get()->disconnect(this);
-
-    startMoreParts();
+    QList<NetAction*> failed;
+    for (auto index : m_failed) {
+        failed.push_back(dynamic_cast<NetAction*>(index.get()));
+    }
+    return failed;
 }
 
-void NetJob::partFailed(int index)
+auto NetJob::getFailedFiles() -> QList<QString>
 {
-    m_doing.remove(index);
-
-    auto& slot = m_parts_progress[index];
-    // Can try 3 times before failing by definitive
-    if (slot.failures == 3) {
-        m_failed.insert(index);
-    } else {
-        slot.failures++;
-        m_todo.enqueue(index);
+    QList<QString> failed;
+    for (auto index : m_failed) {
+        failed.append(static_cast<NetAction*>(index.get())->url().toString());
     }
-
-    m_downloads[index].get()->disconnect(this);
-
-    startMoreParts();
+    return failed;
 }
 
-void NetJob::partAborted(int index)
+void NetJob::updateState()
 {
-    m_aborted = true;
-
-    m_doing.remove(index);
-    m_failed.insert(index);
-    m_downloads[index].get()->disconnect(this);
-
-    startMoreParts();
-}
-
-void NetJob::partProgress(int index, qint64 bytesReceived, qint64 bytesTotal)
-{
-    auto& slot = m_parts_progress[index];
-    slot.current_progress = bytesReceived;
-    slot.total_progress = bytesTotal;
-
-    int done = m_done.size();
-    int doing = m_doing.size();
-    int all = m_parts_progress.size();
-
-    qint64 bytesAll = 0;
-    qint64 bytesTotalAll = 0;
-    for (auto& partIdx : m_doing) {
-        auto part = m_parts_progress[partIdx];
-        // do not count parts with unknown/nonsensical total size
-        if (part.total_progress <= 0) {
-            continue;
-        }
-        bytesAll += part.current_progress;
-        bytesTotalAll += part.total_progress;
-    }
-
-    qint64 inprogress = (bytesTotalAll == 0) ? 0 : (bytesAll * 1000) / bytesTotalAll;
-    auto current = done * 1000 + doing * inprogress;
-    auto current_total = all * 1000;
-    // HACK: make sure it never jumps backwards.
-    // FAIL: This breaks if the size is not known (or is it something else?) and jumps to 1000, so if it is 1000 reset it to inprogress
-    if (m_current_progress == 1000) {
-        m_current_progress = inprogress;
-    }
-    if (m_current_progress > current) {
-        current = m_current_progress;
-    }
-    m_current_progress = current;
-    setProgress(current, current_total);
-}
-
-void NetJob::startMoreParts()
-{
-    if (!isRunning()) {
-        // this actually makes sense. You can put running m_downloads into a NetJob and then not start it until much later.
-        return;
-    }
-
-    // OK. We are actively processing tasks, proceed.
-    // Check for final conditions if there's nothing in the queue.
-    if (!m_todo.size()) {
-        if (!m_doing.size()) {
-            if (!m_failed.size()) {
-                emitSucceeded();
-            } else if (m_aborted) {
-                emitAborted();
-            } else {
-                emitFailed(tr("Job '%1' failed to process:\n%2").arg(objectName()).arg(getFailedFiles().join("\n")));
-            }
-        }
-        return;
-    }
-
-    // There's work to do, try to start more parts, to a maximum of 6 concurrent ones.
-    while (m_doing.size() < 6) {
-        if (m_todo.size() == 0)
-            return;
-        int doThis = m_todo.dequeue();
-        m_doing.insert(doThis);
-
-        auto part = m_downloads[doThis];
-
-        // connect signals :D
-        connect(part.get(), &NetAction::succeeded, this, [this, part]{ partSucceeded(part->index()); });
-        connect(part.get(), &NetAction::failed, this, [this, part](QString){ partFailed(part->index()); });
-        connect(part.get(), &NetAction::aborted, this, [this, part]{ partAborted(part->index()); });
-        connect(part.get(), &NetAction::progress, this, [this, part](qint64 done, qint64 total) { partProgress(part->index(), done, total); });
-        connect(part.get(), &NetAction::status, this, &NetJob::status);
-
-        part->startAction(m_network);
-    }
+    emit progress(m_done.count(), m_total_size);
+    setStatus(tr("Executing %1 task(s) (%2 out of %3 are done)")
+                  .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(m_total_size)));
 }

@@ -2,107 +2,21 @@
 
 #include <QDebug>
 
-SequentialTask::SequentialTask(QObject* parent, const QString& task_name) : Task(parent), m_name(task_name), m_currentIndex(-1) {}
-
-SequentialTask::~SequentialTask()
-{
-    for(auto task : m_queue){
-        if(task)
-            task->deleteLater();
-    }
-}
-
-auto SequentialTask::getStepProgress() const -> qint64
-{
-    return m_stepProgress;
-}
-
-auto SequentialTask::getStepTotalProgress() const -> qint64
-{
-    return m_stepTotalProgress;
-}
-
-void SequentialTask::addTask(Task::Ptr task)
-{
-    m_queue.append(task);
-}
-
-void SequentialTask::executeTask()
-{
-    m_currentIndex = -1;
-    startNext();
-}
-
-bool SequentialTask::abort()
-{
-    if(m_currentIndex == -1 || m_currentIndex >= m_queue.size()) {
-        if(m_currentIndex == -1) {
-            // Don't call emitAborted() here, we want to bypass the 'is the task running' check
-            emit aborted();
-            emit finished();
-        }
-
-        m_aborted = true;
-        return true;
-    }
-
-    bool succeeded = m_queue[m_currentIndex]->abort();
-    m_aborted = succeeded;
-
-    if (succeeded)
-        emitAborted();
-
-    return succeeded;
-}
+SequentialTask::SequentialTask(QObject* parent, QString task_name) : ConcurrentTask(parent, task_name, 1) {}
 
 void SequentialTask::startNext()
 {
-    if (m_aborted)
-        return;
-
-    if (m_currentIndex != -1 && m_currentIndex < m_queue.size()) {
-        Task::Ptr previous = m_queue.at(m_currentIndex);
-        disconnect(previous.get(), 0, this, 0);
-    }
-
-    m_currentIndex++;
-    if (m_queue.isEmpty() || m_currentIndex >= m_queue.size()) {
-        emitSucceeded();
-        return;
-    }
-    Task::Ptr next = m_queue[m_currentIndex];
-
-    connect(next.get(), SIGNAL(failed(QString)), this, SLOT(subTaskFailed(QString)));
-    connect(next.get(), SIGNAL(succeeded()), this, SLOT(startNext()));
-
-    connect(next.get(), SIGNAL(status(QString)), this, SLOT(subTaskStatus(QString)));
-    connect(next.get(), SIGNAL(stepStatus(QString)), this, SLOT(subTaskStatus(QString)));
-    
-    connect(next.get(), SIGNAL(progress(qint64, qint64)), this, SLOT(subTaskProgress(qint64, qint64)));
-
-    setStatus(tr("Executing task %1 out of %2").arg(m_currentIndex + 1).arg(m_queue.size()));
-    setStepStatus(next->isMultiStep() ? next->getStepStatus() : next->getStatus());
-
-    setProgress(m_currentIndex + 1, m_queue.count());
-
-    next->start();
-}
-
-void SequentialTask::subTaskFailed(const QString& msg)
-{
-    emitFailed(msg);
-}
-void SequentialTask::subTaskStatus(const QString& msg)
-{
-    setStepStatus(msg);
-}
-void SequentialTask::subTaskProgress(qint64 current, qint64 total)
-{
-    if (total == 0) {
-        setProgress(0, 100);
+    if (m_failed.size() > 0) {
+        emitFailed(tr("One of the tasks failed!"));
+        qWarning() << m_failed.constBegin()->get()->failReason();
         return;
     }
 
-    m_stepProgress = current;
-    m_stepTotalProgress = total;
+    ConcurrentTask::startNext();
+}
+
+void SequentialTask::updateState()
+{
+    setProgress(m_done.count(), m_total_size);
+    setStatus(tr("Executing task %1 out of %2").arg(QString::number(m_doing.count() + m_done.count()), QString::number(m_total_size)));
 }
