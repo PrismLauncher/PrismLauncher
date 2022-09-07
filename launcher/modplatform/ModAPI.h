@@ -73,7 +73,7 @@ class ModAPI {
     };
 
     virtual void searchMods(CallerType* caller, SearchArgs&& args) const = 0;
-    virtual void getModInfo(CallerType* caller, ModPlatform::IndexedPack& pack) = 0;
+    virtual void getModInfo(ModPlatform::IndexedPack& pack, std::function<void(QJsonDocument&, ModPlatform::IndexedPack&)> callback) = 0;
 
     virtual auto getProject(QString addonId, QByteArray* response) const -> NetJob* = 0;
     virtual auto getProjects(QStringList addonIds, QByteArray* response) const -> NetJob* = 0;
@@ -85,7 +85,7 @@ class ModAPI {
         ModLoaderTypes loaders;
     };
 
-    virtual void getVersions(CallerType* caller, VersionSearchArgs&& args) const = 0;
+    virtual void getVersions(VersionSearchArgs&& args, std::function<void(QJsonDocument&, QString)> callback) const = 0;
 
     static auto getModLoaderString(ModLoaderType type) -> const QString {
         switch (type) {

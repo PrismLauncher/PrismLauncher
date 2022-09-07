@@ -1,10 +1,15 @@
 #include "ReviewMessageBox.h"
 #include "ui_ReviewMessageBox.h"
 
+#include <QPushButton>
+
 ReviewMessageBox::ReviewMessageBox(QWidget* parent, QString const& title, QString const& icon)
     : QDialog(parent), ui(new Ui::ReviewMessageBox)
 {
     ui->setupUi(this);
+
+    auto back_button = ui->buttonBox->button(QDialogButtonBox::Cancel);
+    back_button->setText(tr("Back"));
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ReviewMessageBox::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ReviewMessageBox::reject);

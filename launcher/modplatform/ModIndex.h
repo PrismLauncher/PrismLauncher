@@ -75,6 +75,8 @@ struct ExtraPackData {
     QString sourceUrl;
     QString wikiUrl;
     QString discordUrl;
+
+    QString body;
 };
 
 struct IndexedPack {

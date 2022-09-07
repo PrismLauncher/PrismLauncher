@@ -2,7 +2,6 @@
 
 #include <QAbstractListModel>
 
-#include "modplatform/ModAPI.h"
 #include "modplatform/ModIndex.h"
 #include "net/NetJob.h"
 
@@ -19,7 +18,7 @@ class ListModel : public QAbstractListModel {
 
    public:
     ListModel(ModPage* parent);
-    ~ListModel() override = default;
+    ~ListModel() override;
 
     inline auto rowCount(const QModelIndex& parent) const -> int override { return modpacks.size(); };
     inline auto columnCount(const QModelIndex& parent) const -> int override { return 1; };
@@ -29,15 +28,17 @@ class ListModel : public QAbstractListModel {
 
     /* Retrieve information from the model at a given index with the given role */
     auto data(const QModelIndex& index, int role) const -> QVariant override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
     inline void setActiveJob(NetJob::Ptr ptr) { jobPtr = ptr; }
+    inline NetJob* activeJob() { return jobPtr.get(); }
 
     /* Ask the API for more information */
     void fetchMore(const QModelIndex& parent) override;
     void refresh();
     void searchWithTerm(const QString& term, const int sort, const bool filter_changed);
-    void requestModInfo(ModPlatform::IndexedPack& current);
-    void requestModVersions(const ModPlatform::IndexedPack& current);
+    void requestModInfo(ModPlatform::IndexedPack& current, QModelIndex index);
+    void requestModVersions(const ModPlatform::IndexedPack& current, QModelIndex index);
 
     virtual void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) {};
@@ -51,9 +52,9 @@ class ListModel : public QAbstractListModel {
     void searchRequestFinished(QJsonDocument& doc);
     void searchRequestFailed(QString reason);
 
-    void infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack);
+    void infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index);
 
-    void versionRequestSucceeded(QJsonDocument doc, QString addonId);
+    void versionRequestSucceeded(QJsonDocument doc, QString addonId, const QModelIndex& index);
 
    protected slots:
 

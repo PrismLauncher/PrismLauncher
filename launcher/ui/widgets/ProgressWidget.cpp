@@ -1,66 +1,104 @@
 // Licensed under the Apache-2.0 license. See README.md for details.
 
 #include "ProgressWidget.h"
-#include <QProgressBar>
-#include <QLabel>
-#include <QVBoxLayout>
 #include <QEventLoop>
+#include <QLabel>
+#include <QProgressBar>
+#include <QVBoxLayout>
 
 #include "tasks/Task.h"
 
-ProgressWidget::ProgressWidget(QWidget *parent)
-    : QWidget(parent)
+ProgressWidget::ProgressWidget(QWidget* parent, bool show_label) : QWidget(parent)
 {
-    m_label = new QLabel(this);
-    m_label->setWordWrap(true);
+    auto* layout = new QVBoxLayout(this);
+
+    if (show_label) {
+        m_label = new QLabel(this);
+        m_label->setWordWrap(true);
+        layout->addWidget(m_label);
+    }
+
     m_bar = new QProgressBar(this);
     m_bar->setMinimum(0);
     m_bar->setMaximum(100);
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->addWidget(m_label);
     layout->addWidget(m_bar);
-    layout->addStretch();
+
     setLayout(layout);
 }
 
-void ProgressWidget::start(std::shared_ptr<Task> task)
+void ProgressWidget::reset()
 {
-    if (m_task)
-    {
-        disconnect(m_task.get(), 0, this, 0);
-    }
-    m_task = task;
-    connect(m_task.get(), &Task::finished, this, &ProgressWidget::handleTaskFinish);
-    connect(m_task.get(), &Task::status, this, &ProgressWidget::handleTaskStatus);
-    connect(m_task.get(), &Task::progress, this, &ProgressWidget::handleTaskProgress);
-    connect(m_task.get(), &Task::destroyed, this, &ProgressWidget::taskDestroyed);
-    if (!m_task->isRunning())
-    {
-        QMetaObject::invokeMethod(m_task.get(), "start", Qt::QueuedConnection);
-    }
+    m_bar->reset();
 }
+
+void ProgressWidget::progressFormat(QString format)
+{
+    if (format.isEmpty())
+        m_bar->setTextVisible(false);
+    else
+        m_bar->setFormat(format);
+}
+
+void ProgressWidget::watch(Task* task)
+{
+    if (!task)
+        return;
+
+    if (m_task)
+        disconnect(m_task, nullptr, this, nullptr);
+
+    m_task = task;
+
+    connect(m_task, &Task::finished, this, &ProgressWidget::handleTaskFinish);
+    connect(m_task, &Task::status, this, &ProgressWidget::handleTaskStatus);
+    connect(m_task, &Task::progress, this, &ProgressWidget::handleTaskProgress);
+    connect(m_task, &Task::destroyed, this, &ProgressWidget::taskDestroyed);
+
+    show();
+}
+
+void ProgressWidget::start(Task* task)
+{
+    watch(task);
+    if (!m_task->isRunning())
+        QMetaObject::invokeMethod(m_task, "start", Qt::QueuedConnection);
+}
+
 bool ProgressWidget::exec(std::shared_ptr<Task> task)
 {
     QEventLoop loop;
+
     connect(task.get(), &Task::finished, &loop, &QEventLoop::quit);
-    start(task);
+
+    start(task.get());
+
     if (task->isRunning())
-    {
         loop.exec();
-    }
+
     return task->wasSuccessful();
+}
+
+void ProgressWidget::show()
+{
+    setHidden(false);
+}
+void ProgressWidget::hide()
+{
+    setHidden(true);
 }
 
 void ProgressWidget::handleTaskFinish()
 {
-    if (!m_task->wasSuccessful())
-    {
+    if (!m_task->wasSuccessful() && m_label)
         m_label->setText(m_task->failReason());
-    }
+
+    if (m_hide_if_inactive)
+        hide();
 }
-void ProgressWidget::handleTaskStatus(const QString &status)
+void ProgressWidget::handleTaskStatus(const QString& status)
 {
-    m_label->setText(status);
+    if (m_label)
+        m_label->setText(status);
 }
 void ProgressWidget::handleTaskProgress(qint64 current, qint64 total)
 {

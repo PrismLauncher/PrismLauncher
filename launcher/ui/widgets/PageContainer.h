@@ -95,6 +95,10 @@ private:
 public slots:
     void help();
 
+signals:
+    /** Emitted when the currently selected page is changed */
+    void selectedPageChanged(BasePage* previous, BasePage* selected);
+
 private slots:
     void currentChanged(const QModelIndex &current);
     void showPage(int row);

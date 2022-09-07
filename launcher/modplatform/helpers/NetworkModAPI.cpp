@@ -31,48 +31,48 @@ void NetworkModAPI::searchMods(CallerType* caller, SearchArgs&& args) const
     netJob->start();
 }
 
-void NetworkModAPI::getModInfo(CallerType* caller, ModPlatform::IndexedPack& pack)
+void NetworkModAPI::getModInfo(ModPlatform::IndexedPack& pack, std::function<void(QJsonDocument&, ModPlatform::IndexedPack&)> callback)
 {
     auto response = new QByteArray();
     auto job = getProject(pack.addonId.toString(), response);
 
-    QObject::connect(job, &NetJob::succeeded, caller, [caller, &pack, response] {
+    QObject::connect(job, &NetJob::succeeded, [callback, &pack, response] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from " << caller->debugName() << " at " << parse_error.offset
+            qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
             qWarning() << *response;
             return;
         }
 
-        caller->infoRequestFinished(doc, pack);
+        callback(doc, pack);
     });
 
     job->start();
 }
 
-void NetworkModAPI::getVersions(CallerType* caller, VersionSearchArgs&& args) const
+void NetworkModAPI::getVersions(VersionSearchArgs&& args, std::function<void(QJsonDocument&, QString)> callback) const
 {
-    auto netJob = new NetJob(QString("%1::ModVersions(%2)").arg(caller->debugName()).arg(args.addonId), APPLICATION->network());
+    auto netJob = new NetJob(QString("ModVersions(%2)").arg(args.addonId), APPLICATION->network());
     auto response = new QByteArray();
 
     netJob->addNetAction(Net::Download::makeByteArray(getVersionsURL(args), response));
 
-    QObject::connect(netJob, &NetJob::succeeded, caller, [response, caller, args] {
+    QObject::connect(netJob, &NetJob::succeeded, [response, callback, args] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from " << caller->debugName() << " at " << parse_error.offset
+            qWarning() << "Error while parsing JSON response for getting versions at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
             qWarning() << *response;
             return;
         }
 
-        caller->versionRequestSucceeded(doc, args.addonId);
+        callback(doc, args.addonId);
     });
 
-    QObject::connect(netJob, &NetJob::finished, caller, [response, netJob] {
+    QObject::connect(netJob, &NetJob::finished, [response, netJob] {
         netJob->deleteLater();
         delete response;
     });

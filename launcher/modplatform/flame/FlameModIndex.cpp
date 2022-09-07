@@ -4,10 +4,9 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "net/NetJob.h"
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
 static FlameAPI api;
+static ModPlatform::ProviderCapabilities ProviderCaps;
 
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
@@ -31,10 +30,11 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
         pack.authors.append(packAuthor);
     }
 
-    loadExtraPackData(pack, obj);
+    pack.extraDataLoaded = false;
+    loadURLs(pack, obj);
 }
 
-void FlameMod::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& obj)
+void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     auto links_obj = Json::ensureObject(obj, "links");
 
@@ -50,7 +50,16 @@ void FlameMod::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
     if(pack.extraData.wikiUrl.endsWith('/'))
         pack.extraData.wikiUrl.chop(1);
 
-    pack.extraDataLoaded = true;
+    if (!pack.extraData.body.isEmpty())
+        pack.extraDataLoaded = true;
+}
+
+void FlameMod::loadBody(ModPlatform::IndexedPack& pack, QJsonObject& obj)
+{
+    pack.extraData.body  = api.getModDescription(pack.addonId.toInt());
+
+    if (!pack.extraData.issuesUrl.isEmpty() || !pack.extraData.sourceUrl.isEmpty() || !pack.extraData.wikiUrl.isEmpty())
+        pack.extraDataLoaded = true;
 }
 
 static QString enumToString(int hash_algorithm)

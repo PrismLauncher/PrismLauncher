@@ -244,7 +244,14 @@ void PageContainer::help()
 
 void PageContainer::currentChanged(const QModelIndex &current)
 {
-    showPage(current.isValid() ? m_proxyModel->mapToSource(current).row() : -1);
+    int selected_index = current.isValid() ? m_proxyModel->mapToSource(current).row() : -1;
+
+    auto* selected = m_model->pages().at(selected_index);
+    auto* previous = m_currentPage;
+
+    emit selectedPageChanged(previous, selected);
+
+    showPage(selected_index);
 }
 
 bool PageContainer::prepareToClose()

@@ -896,6 +896,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/PageContainer.cpp
     ui/widgets/PageContainer.h
     ui/widgets/PageContainer_p.h
+    ui/widgets/ProjectItem.h
+    ui/widgets/ProjectItem.cpp
     ui/widgets/VersionListView.cpp
     ui/widgets/VersionListView.h
     ui/widgets/VersionSelectWidget.cpp
