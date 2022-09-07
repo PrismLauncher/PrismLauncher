@@ -1,17 +1,37 @@
-/* Copyright 2013-2021 MultiMC Contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+*  PolyMC - Minecraft Launcher
+*  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+*
+*  This program is free software: you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation, version 3.
+*
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*
+* This file incorporates work covered by the following copyright and
+* permission notice:
+*
+*      Copyright 2013-2021 MultiMC Contributors
+*
+*      Licensed under the Apache License, Version 2.0 (the "License");
+*      you may not use this file except in compliance with the License.
+*      You may obtain a copy of the License at
+*
+*          http://www.apache.org/licenses/LICENSE-2.0
+*
+*      Unless required by applicable law or agreed to in writing, software
+*      distributed under the License is distributed on an "AS IS" BASIS,
+*      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*      See the License for the specific language governing permissions and
+*      limitations under the License.
+*/
 
 #include <QMessageBox>
 
@@ -67,17 +87,76 @@ void InfoFrame::updateWithMod(Mod const& m)
     {
         setDescription(m.description());
     }
+
+    setImage();
 }
 
 void InfoFrame::updateWithResource(const Resource& resource)
 {
     setName(resource.name());
+    setImage();
+}
+
+// https://www.sportskeeda.com/minecraft-wiki/color-codes
+static const QMap<QChar, QString> s_value_to_color = {
+    {'0', "#000000"}, {'1', "#0000AA"}, {'2', "#00AA00"}, {'3', "#00AAAA"}, {'4', "#AA0000"},
+    {'5', "#AA00AA"}, {'6', "#FFAA00"}, {'7', "#AAAAAA"}, {'8', "#555555"}, {'9', "#5555FF"},
+    {'a', "#55FF55"}, {'b', "#55FFFF"}, {'c', "#FF5555"}, {'d', "#FF55FF"}, {'e', "#FFFF55"},
+    {'f', "#FFFFFF"}
+};
+
+void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
+{
+    setName(resource_pack.name());
+
+    // We have to manually set the colors for use.
+    //
+    // A color is set using §x, with x = a hex number from 0 to f.
+    //
+    // We traverse the description and, when one of those is found, we create
+    // a span element with that color set.
+    //
+    // TODO: Make the same logic for font formatting too.
+    // TODO: Wrap links inside <a> tags
+
+    auto description = resource_pack.description();
+
+    QString description_parsed("<html>");
+    bool in_div = false;
+
+    auto desc_it = description.constBegin();
+    while (desc_it != description.constEnd()) {
+        if (*desc_it == u'§') {
+            if (in_div)
+                description_parsed += "</span>";
+
+            auto const& num = *(++desc_it);
+            description_parsed += QString("<span style=\"color: %1;\">").arg(s_value_to_color.constFind(num).value());
+
+            in_div = true;
+
+            desc_it++;
+        }
+
+        description_parsed += *desc_it;
+        desc_it++;
+    }
+
+    if (in_div)
+        description_parsed += "</span>";
+    description_parsed += "</html>";
+
+    description_parsed.replace("\n", "<br>");
+
+    setDescription(description_parsed);
+    setImage(resource_pack.image({64, 64}));
 }
 
 void InfoFrame::clear()
 {
     setName();
     setDescription();
+    setImage();
 }
 
 void InfoFrame::updateHiddenState()
@@ -146,10 +225,20 @@ void InfoFrame::setDescription(QString text)
     }
     else
     {
-        ui->descriptionLabel->setTextFormat(Qt::TextFormat::PlainText);
+        ui->descriptionLabel->setTextFormat(Qt::TextFormat::AutoText);
         labeltext.append(finaltext);
     }
     ui->descriptionLabel->setText(labeltext);
+}
+
+void InfoFrame::setImage(QPixmap img)
+{
+    if (img.isNull()) {
+        ui->iconLabel->setHidden(true);
+    } else {
+        ui->iconLabel->setHidden(false);
+        ui->iconLabel->setPixmap(img);
+    }
 }
 
 void InfoFrame::descriptionEllipsisHandler(QString link)

@@ -151,12 +151,12 @@ int ModFolderModel::columnCount(const QModelIndex &parent) const
 Task* ModFolderModel::createUpdateTask()
 {
     auto index_dir = indexDir();
-    auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load, this);
+    auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load);
     m_first_folder_load = false;
     return task;
 }
 
-Task* ModFolderModel::createParseTask(Resource const& resource)
+Task* ModFolderModel::createParseTask(Resource& resource)
 {
     return new LocalModParseTask(m_next_resolution_ticket, resource.type(), resource.fileinfo());
 }
@@ -259,15 +259,6 @@ void ModFolderModel::onUpdateSucceeded()
 #endif
 
     applyUpdates(current_set, new_set, new_mods);
-    
-    m_current_update_task.reset();
-
-    if (m_scheduled_update) {
-        m_scheduled_update = false;
-        update();
-    } else {
-        emit updateFinished();
-    }
 }
 
 void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)

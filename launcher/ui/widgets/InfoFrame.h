@@ -34,11 +34,13 @@ class InfoFrame : public QFrame {
 
     void setName(QString text = {});
     void setDescription(QString text = {});
+    void setImage(QPixmap img = {});
 
     void clear();
 
     void updateWithMod(Mod const& m);
     void updateWithResource(Resource const& resource);
+    void updateWithResourcePack(ResourcePack& rp);
 
    public slots:
     void descriptionEllipsisHandler(QString link);

@@ -1,5 +1,6 @@
 #include "ResourceFolderModel.h"
 
+#include <QCoreApplication>
 #include <QDebug>
 #include <QMimeData>
 #include <QThreadPool>
@@ -17,6 +18,12 @@ ResourceFolderModel::ResourceFolderModel(QDir dir, QObject* parent) : QAbstractL
     m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &ResourceFolderModel::directoryChanged);
+}
+
+ResourceFolderModel::~ResourceFolderModel()
+{
+    while (!QThreadPool::globalInstance()->waitForDone(100))
+        QCoreApplication::processEvents();
 }
 
 bool ResourceFolderModel::startWatching(const QStringList paths)
@@ -229,9 +236,17 @@ bool ResourceFolderModel::update()
     connect(m_current_update_task.get(), &Task::succeeded, this, &ResourceFolderModel::onUpdateSucceeded,
             Qt::ConnectionType::QueuedConnection);
     connect(m_current_update_task.get(), &Task::failed, this, &ResourceFolderModel::onUpdateFailed, Qt::ConnectionType::QueuedConnection);
+    connect(m_current_update_task.get(), &Task::finished, this, [=] {
+        m_current_update_task.reset();
+        if (m_scheduled_update) {
+            m_scheduled_update = false;
+            update();
+        } else {
+            emit updateFinished();
+        }
+    }, Qt::ConnectionType::QueuedConnection);
 
-    auto* thread_pool = QThreadPool::globalInstance();
-    thread_pool->start(m_current_update_task.get());
+    QThreadPool::globalInstance()->start(m_current_update_task.get());
 
     return true;
 }
@@ -246,10 +261,7 @@ void ResourceFolderModel::resolveResource(Resource::Ptr res)
     if (!task)
         return;
 
-    m_ticket_mutex.lock();
-    int ticket = m_next_resolution_ticket;
-    m_next_resolution_ticket += 1;
-    m_ticket_mutex.unlock();
+    int ticket = m_next_resolution_ticket.fetch_add(1);
 
     res->setResolving(true, ticket);
     m_active_parse_tasks.insert(ticket, task);
@@ -261,8 +273,7 @@ void ResourceFolderModel::resolveResource(Resource::Ptr res)
     connect(
         task, &Task::finished, this, [=] { m_active_parse_tasks.remove(ticket); }, Qt::ConnectionType::QueuedConnection);
 
-    auto* thread_pool = QThreadPool::globalInstance();
-    thread_pool->start(task);
+    QThreadPool::globalInstance()->start(task);
 }
 
 void ResourceFolderModel::onUpdateSucceeded()
@@ -283,15 +294,6 @@ void ResourceFolderModel::onUpdateSucceeded()
 #endif
 
     applyUpdates(current_set, new_set, new_resources);
-
-    m_current_update_task.reset();
-
-    if (m_scheduled_update) {
-        m_scheduled_update = false;
-        update();
-    } else {
-        emit updateFinished();
-    }
 }
 
 void ResourceFolderModel::onParseSucceeded(int ticket, QString resource_id)

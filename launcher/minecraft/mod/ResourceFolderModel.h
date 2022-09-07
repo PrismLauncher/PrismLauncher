@@ -24,6 +24,7 @@ class ResourceFolderModel : public QAbstractListModel {
     Q_OBJECT
    public:
     ResourceFolderModel(QDir, QObject* parent = nullptr);
+    ~ResourceFolderModel() override;
 
     /** Starts watching the paths for changes.
      *
@@ -145,7 +146,7 @@ class ResourceFolderModel : public QAbstractListModel {
      *  This task should load and parse all heavy info needed by a resource, such as parsing a manifest. It gets executed
      *  in the background, so it slowly updates the UI as tasks get done.
      */
-    [[nodiscard]] virtual Task* createParseTask(Resource const&) { return nullptr; };
+    [[nodiscard]] virtual Task* createParseTask(Resource&) { return nullptr; };
 
     /** Standard implementation of the model update logic.
      *
@@ -197,8 +198,7 @@ class ResourceFolderModel : public QAbstractListModel {
     QMap<QString, int> m_resources_index;
 
     QMap<int, Task::Ptr> m_active_parse_tasks;
-    int m_next_resolution_ticket = 0;
-    QMutex m_ticket_mutex;
+    std::atomic<int> m_next_resolution_ticket = 0;
 };
 
 /* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
@@ -257,8 +257,11 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             // If the resource is resolving, but something about it changed, we don't want to
             // continue the resolving.
             if (current_resource->isResolving()) {
-                auto task = (*m_active_parse_tasks.find(current_resource->resolutionTicket())).get();
-                task->abort();
+                auto ticket = current_resource->resolutionTicket();
+                if (m_active_parse_tasks.contains(ticket)) {
+                    auto task = (*m_active_parse_tasks.find(ticket)).get();
+                    task->abort();
+                }
             }
 
             m_resources[row].reset(new_resource);
@@ -285,8 +288,11 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             Q_ASSERT(removed_set.contains(removed_it->get()->internal_id()));
 
             if ((*removed_it)->isResolving()) {
-                auto task = (*m_active_parse_tasks.find((*removed_it)->resolutionTicket())).get();
-                task->abort();
+                auto ticket = (*removed_it)->resolutionTicket();
+                if (m_active_parse_tasks.contains(ticket)) {
+                    auto task = (*m_active_parse_tasks.find(ticket)).get();
+                    task->abort();
+                }
             }
 
             beginRemoveRows(QModelIndex(), removed_index, removed_index);

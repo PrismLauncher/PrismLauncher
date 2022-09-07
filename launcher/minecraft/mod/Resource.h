@@ -20,6 +20,7 @@ enum class SortType {
     DATE,
     VERSION,
     ENABLED,
+    PACK_FORMAT
 };
 
 enum class EnableAction {
@@ -80,6 +81,7 @@ class Resource : public QObject {
 
     [[nodiscard]] auto shouldResolve() const -> bool { return !m_is_resolving && !m_is_resolved; }
     [[nodiscard]] auto isResolving() const -> bool { return m_is_resolving; }
+    [[nodiscard]] auto isResolved() const -> bool { return m_is_resolved; }
     [[nodiscard]] auto resolutionTicket() const -> int { return m_resolution_ticket; }
 
     void setResolving(bool resolving, int resolutionTicket)

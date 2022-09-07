@@ -58,7 +58,7 @@
     QVERIFY2(expire_timer.isActive(), "Timer has expired. The update never finished."); \
     expire_timer.stop();                                                                \
                                                                                         \
-    disconnect(&model, nullptr, nullptr, nullptr);
+    disconnect(&model, nullptr, &loop, nullptr);
 
 class ResourceFolderModelTest : public QObject
 {
@@ -146,14 +146,10 @@ slots:
         for (auto mod : model.allMods())
             qDebug() << mod->name();
 
-        QCOMPARE(model.size(), 2);
+        // FIXME: It considers every file in the directory as a mod, but we should probably filter that out somehow.
+        QCOMPARE(model.size(), 4);
 
         model.stopWatching();
-
-        while (model.hasPendingParseTasks()) {
-            QTest::qSleep(20);
-            QCoreApplication::processEvents();
-        }
     }
 
     void test_removeResource()
@@ -206,11 +202,6 @@ slots:
         qDebug() << "Removed second mod.";
 
         model.stopWatching();
-
-        while (model.hasPendingParseTasks()) {
-            QTest::qSleep(20);
-            QCoreApplication::processEvents();
-        }
     }
 
     void test_enable_disable()
@@ -262,11 +253,6 @@ slots:
         QVERIFY(!res_2.enable(initial_enabled_res_2 ? EnableAction::ENABLE : EnableAction::DISABLE));
         QVERIFY(res_2.enabled() == initial_enabled_res_2);
         QVERIFY(res_2.internal_id() == id_2);
-
-        while (model.hasPendingParseTasks()) {
-            QTest::qSleep(20);
-            QCoreApplication::processEvents();
-        }
     }
 };
 
