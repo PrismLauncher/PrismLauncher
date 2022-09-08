@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -131,7 +132,7 @@ void processPackPNG(TexturePack& pack, QByteArray&& raw_data)
 }  // namespace TexturePackUtils
 
 LocalTexturePackParseTask::LocalTexturePackParseTask(int token, TexturePack& rp)
-    : Task(nullptr, false), m_token(token), m_resource_pack(rp)
+    : Task(nullptr, false), m_token(token), m_texture_pack(rp)
 {}
 
 bool LocalTexturePackParseTask::abort()
@@ -142,9 +143,9 @@ bool LocalTexturePackParseTask::abort()
 
 void LocalTexturePackParseTask::executeTask()
 {
-    Q_ASSERT(m_resource_pack.valid());
+    Q_ASSERT(m_texture_pack.valid());
 
-    if (!TexturePackUtils::process(m_resource_pack))
+    if (!TexturePackUtils::process(m_texture_pack))
         return;
 
     if (m_aborted)
