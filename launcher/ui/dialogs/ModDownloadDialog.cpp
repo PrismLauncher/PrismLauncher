@@ -121,9 +121,9 @@ QList<BasePage *> ModDownloadDialog::getPages()
 {
     QList<BasePage *> pages;
 
-    pages.append(new ModrinthModPage(this, m_instance));
+    pages.append(ModrinthModPage::create(this, m_instance));
     if (APPLICATION->currentCapabilities() & Application::SupportsFlame)
-        pages.append(new FlameModPage(this, m_instance));
+        pages.append(FlameModPage::create(this, m_instance));
 
     return pages;
 }
