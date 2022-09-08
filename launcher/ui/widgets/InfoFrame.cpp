@@ -155,7 +155,7 @@ void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
 void InfoFrame::updateWithTexturePack(TexturePack& texture_pack)
 {
     setName(texture_pack.name());
-    setDescription(texture_pack.description());
+    setDescription(renderColorCodes(texture_pack.description()));
     setImage(texture_pack.image({64, 64}));
 }
 
