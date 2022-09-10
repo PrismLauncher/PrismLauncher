@@ -74,6 +74,7 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthPage::onVersionSelectionChanged);
 
     ui->packView->setItemDelegate(new ProjectItemDelegate(this));
+    ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
 ModrinthPage::~ModrinthPage()
