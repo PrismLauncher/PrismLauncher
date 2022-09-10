@@ -14,7 +14,7 @@
    <item row="1" column="0" colspan="4">
     <layout class="QGridLayout" name="gridLayout_3">
      <item row="1" column="2">
-      <widget class="QTextBrowser" name="packDescription">
+      <widget class="ProjectDescriptionPage" name="packDescription">
        <property name="openExternalLinks">
         <bool>true</bool>
        </property>
@@ -98,6 +98,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ProjectDescriptionPage</class>
+   <extends>QTextBrowser</extends>
+   <header>ui/widgets/ProjectDescriptionPage.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>searchEdit</tabstop>
   <tabstop>searchButton</tabstop>

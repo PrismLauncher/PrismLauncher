@@ -59,6 +59,8 @@ ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance* instan
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthModPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthModPage::onVersionSelectionChanged);
     connect(ui->modSelectionButton, &QPushButton::clicked, this, &ModrinthModPage::onModSelected);
+
+    ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
 auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders) const -> bool
