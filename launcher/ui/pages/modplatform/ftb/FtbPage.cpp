@@ -73,6 +73,8 @@ FtbPage::FtbPage(NewInstanceDialog* dialog, QWidget *parent)
     connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &FtbPage::onSortingSelectionChanged);
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FtbPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FtbPage::onVersionSelectionChanged);
+
+    ui->packDescription->setMetaEntry("FTBPacks");
 }
 
 FtbPage::~FtbPage()
