@@ -20,7 +20,7 @@
 #include <QTemporaryDir>
 #include <QTest>
 
-#include "Packwiz.h"
+#include <modplatform/packwiz/Packwiz.h>
 
 class PackwizTest : public QObject {
     Q_OBJECT
@@ -29,7 +29,7 @@ class PackwizTest : public QObject {
    // Files taken from https://github.com/packwiz/packwiz-example-pack
    void loadFromFile_Modrinth()
    {
-        QString source = QFINDTESTDATA("testdata");
+        QString source = QFINDTESTDATA("testdata/Packwiz");
 
         QDir index_dir(source);
         QString slug_mod("borderless-mining");
@@ -55,7 +55,7 @@ class PackwizTest : public QObject {
 
     void loadFromFile_Curseforge()
     {
-        QString source = QFINDTESTDATA("testdata");
+        QString source = QFINDTESTDATA("testdata/Packwiz");
 
         QDir index_dir(source);
         QString name_mod("screenshot-to-clipboard-fabric.pw.toml");

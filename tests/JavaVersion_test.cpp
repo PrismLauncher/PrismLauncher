@@ -1,6 +1,6 @@
 #include <QTest>
 
-#include "java/JavaVersion.h"
+#include <java/JavaVersion.h>
 
 class JavaVersionTest : public QObject
 {

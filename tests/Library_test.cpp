@@ -1,10 +1,10 @@
 #include <QTest>
 
-#include "minecraft/MojangVersionFormat.h"
-#include "minecraft/OneSixVersionFormat.h"
-#include "minecraft/Library.h"
-#include "net/HttpMetaCache.h"
-#include "FileSystem.h"
+#include <minecraft/MojangVersionFormat.h>
+#include <minecraft/OneSixVersionFormat.h>
+#include <minecraft/Library.h>
+#include <net/HttpMetaCache.h>
+#include <FileSystem.h>
 
 class LibraryTest : public QObject
 {
@@ -30,7 +30,7 @@ slots:
     {
         cache.reset(new HttpMetaCache());
         cache->addBase("libraries", QDir("libraries").absolutePath());
-        dataDir = QDir(QFINDTESTDATA("testdata")).absolutePath();
+        dataDir = QDir(QFINDTESTDATA("testdata/Library")).absolutePath();
     }
     void test_legacy()
     {
@@ -72,14 +72,14 @@ slots:
         QCOMPARE(test.isNative(), false);
         QStringList failedFiles;
         test.setHint("local");
-        auto downloads = test.getDownloads(currentSystem, cache.get(), failedFiles, QFINDTESTDATA("testdata"));
+        auto downloads = test.getDownloads(currentSystem, cache.get(), failedFiles, QFINDTESTDATA("testdata/Library"));
         QCOMPARE(downloads.size(), 0);
         qDebug() << failedFiles;
         QCOMPARE(failedFiles.size(), 0);
 
         QStringList jar, native, native32, native64;
-        test.getApplicableFiles(currentSystem, jar, native, native32, native64, QFINDTESTDATA("testdata"));
-        QCOMPARE(jar, {QFileInfo(QFINDTESTDATA("testdata/codecwav-20101023.jar")).absoluteFilePath()});
+        test.getApplicableFiles(currentSystem, jar, native, native32, native64, QFINDTESTDATA("testdata/Library"));
+        QCOMPARE(jar, {QFileInfo(QFINDTESTDATA("testdata/Library/codecwav-20101023.jar")).absoluteFilePath()});
         QCOMPARE(native, {});
         QCOMPARE(native32, {});
         QCOMPARE(native64, {});
@@ -165,20 +165,20 @@ slots:
         test.setRepositoryURL("file://foo/bar");
         {
             QStringList jar, native, native32, native64;
-            test.getApplicableFiles(Os_Linux, jar, native, native32, native64, QFINDTESTDATA("testdata"));
+            test.getApplicableFiles(Os_Linux, jar, native, native32, native64, QFINDTESTDATA("testdata/Library"));
             QCOMPARE(jar, {});
             QCOMPARE(native, {});
-            QCOMPARE(native32, {QFileInfo(QFINDTESTDATA("testdata/testname-testversion-linux-32.jar")).absoluteFilePath()});
-            QCOMPARE(native64, {QFileInfo(QFINDTESTDATA("testdata") + "/testname-testversion-linux-64.jar").absoluteFilePath()});
+            QCOMPARE(native32, {QFileInfo(QFINDTESTDATA("testdata/Library/testname-testversion-linux-32.jar")).absoluteFilePath()});
+            QCOMPARE(native64, {QFileInfo(QFINDTESTDATA("testdata/Library") + "/testname-testversion-linux-64.jar").absoluteFilePath()});
             QStringList failedFiles;
-            auto dls = test.getDownloads(Os_Linux, cache.get(), failedFiles, QFINDTESTDATA("testdata"));
+            auto dls = test.getDownloads(Os_Linux, cache.get(), failedFiles, QFINDTESTDATA("testdata/Library"));
             QCOMPARE(dls.size(), 0);
-            QCOMPARE(failedFiles, {QFileInfo(QFINDTESTDATA("testdata") + "/testname-testversion-linux-64.jar").absoluteFilePath()});
+            QCOMPARE(failedFiles, {QFileInfo(QFINDTESTDATA("testdata/Library") + "/testname-testversion-linux-64.jar").absoluteFilePath()});
         }
     }
     void test_onenine()
     {
-        auto test = readMojangJson(QFINDTESTDATA("testdata/lib-simple.json"));
+        auto test = readMojangJson(QFINDTESTDATA("testdata/Library/lib-simple.json"));
         {
             QStringList jar, native, native32, native64;
             test->getApplicableFiles(Os_OSX, jar, native, native32, native64, QString());
@@ -197,41 +197,41 @@ slots:
         test->setHint("local");
         {
             QStringList jar, native, native32, native64;
-            test->getApplicableFiles(Os_OSX, jar, native, native32, native64, QFINDTESTDATA("testdata"));
-            QCOMPARE(jar, {QFileInfo(QFINDTESTDATA("testdata/codecwav-20101023.jar")).absoluteFilePath()});
+            test->getApplicableFiles(Os_OSX, jar, native, native32, native64, QFINDTESTDATA("testdata/Library"));
+            QCOMPARE(jar, {QFileInfo(QFINDTESTDATA("testdata/Library/codecwav-20101023.jar")).absoluteFilePath()});
             QCOMPARE(native, {});
             QCOMPARE(native32, {});
             QCOMPARE(native64, {});
         }
         {
             QStringList failedFiles;
-            auto dls = test->getDownloads(Os_Linux, cache.get(), failedFiles, QFINDTESTDATA("testdata"));
+            auto dls = test->getDownloads(Os_Linux, cache.get(), failedFiles, QFINDTESTDATA("testdata/Library"));
             QCOMPARE(dls.size(), 0);
             QCOMPARE(failedFiles, {});
         }
     }
     void test_onenine_local_override()
     {
-        auto test = readMojangJson(QFINDTESTDATA("testdata/lib-simple.json"));
+        auto test = readMojangJson(QFINDTESTDATA("testdata/Library/lib-simple.json"));
         test->setHint("local");
         {
             QStringList jar, native, native32, native64;
-            test->getApplicableFiles(Os_OSX, jar, native, native32, native64, QFINDTESTDATA("testdata"));
-            QCOMPARE(jar, {QFileInfo(QFINDTESTDATA("testdata/codecwav-20101023.jar")).absoluteFilePath()});
+            test->getApplicableFiles(Os_OSX, jar, native, native32, native64, QFINDTESTDATA("testdata/Library"));
+            QCOMPARE(jar, {QFileInfo(QFINDTESTDATA("testdata/Library/codecwav-20101023.jar")).absoluteFilePath()});
             QCOMPARE(native, {});
             QCOMPARE(native32, {});
             QCOMPARE(native64, {});
         }
         {
             QStringList failedFiles;
-            auto dls = test->getDownloads(Os_Linux, cache.get(), failedFiles, QFINDTESTDATA("testdata"));
+            auto dls = test->getDownloads(Os_Linux, cache.get(), failedFiles, QFINDTESTDATA("testdata/Library"));
             QCOMPARE(dls.size(), 0);
             QCOMPARE(failedFiles, {});
         }
     }
     void test_onenine_native()
     {
-        auto test = readMojangJson(QFINDTESTDATA("testdata/lib-native.json"));
+        auto test = readMojangJson(QFINDTESTDATA("testdata/Library/lib-native.json"));
         QStringList jar, native, native32, native64;
         test->getApplicableFiles(Os_OSX, jar, native, native32, native64, QString());
         QCOMPARE(jar, QStringList());
@@ -246,7 +246,7 @@ slots:
     }
     void test_onenine_native_arch()
     {
-        auto test = readMojangJson(QFINDTESTDATA("testdata/lib-native-arch.json"));
+        auto test = readMojangJson(QFINDTESTDATA("testdata/Library/lib-native-arch.json"));
         QStringList jar, native, native32, native64;
         test->getApplicableFiles(Os_Windows, jar, native, native32, native64, QString());
         QCOMPARE(jar, {});

@@ -1,6 +1,6 @@
 #include <QTest>
 
-#include "minecraft/GradleSpecifier.h"
+#include <minecraft/GradleSpecifier.h>
 
 class GradleSpecifierTest : public QObject
 {

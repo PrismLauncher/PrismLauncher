@@ -1,6 +1,6 @@
 #include <QTest>
 
-#include "GZip.h"
+#include <GZip.h>
 #include <random>
 
 void fib(int &prev, int &cur)

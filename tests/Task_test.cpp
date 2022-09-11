@@ -1,9 +1,9 @@
 #include <QTest>
 
-#include "ConcurrentTask.h"
-#include "MultipleOptionsTask.h"
-#include "SequentialTask.h"
-#include "Task.h"
+#include <tasks/ConcurrentTask.h>
+#include <tasks/MultipleOptionsTask.h>
+#include <tasks/SequentialTask.h>
+#include <tasks/Task.h>
 
 /* Does nothing. Only used for testing. */
 class BasicTask : public Task {

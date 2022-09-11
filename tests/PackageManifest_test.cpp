@@ -1,7 +1,7 @@
 #include <QTest>
 #include <QDebug>
 
-#include "mojang/PackageManifest.h"
+#include <mojang/PackageManifest.h>
 
 using namespace mojang_files;
 
@@ -82,14 +82,14 @@ void PackageManifestTest::test_parse()
 }
 
 void PackageManifestTest::test_parse_file() {
-    auto path = QFINDTESTDATA("testdata/1.8.0_202-x64.json");
+    auto path = QFINDTESTDATA("testdata/PackageManifest/1.8.0_202-x64.json");
     auto manifest = Package::fromManifestFile(path);
     QVERIFY(manifest.valid == true);
 }
 
 
 void PackageManifestTest::test_inspect() {
-    auto path = QFINDTESTDATA("testdata/inspect_win/");
+    auto path = QFINDTESTDATA("testdata/PackageManifest/inspect_win/");
     auto manifest = Package::fromInspectedFolder(path);
     QVERIFY(manifest.valid == true);
     QVERIFY(manifest.files.size() == 2);
@@ -112,7 +112,7 @@ void PackageManifestTest::test_inspect() {
 
 #ifndef Q_OS_WIN32
 void PackageManifestTest::test_inspect_symlinks() {
-    auto path = QFINDTESTDATA("testdata/inspect/");
+    auto path = QFINDTESTDATA("testdata/PackageManifest/inspect/");
     auto manifest = Package::fromInspectedFolder(path);
     QVERIFY(manifest.valid == true);
     QVERIFY(manifest.files.size() == 1);

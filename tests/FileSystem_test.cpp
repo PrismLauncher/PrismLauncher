@@ -2,7 +2,7 @@
 #include <QTemporaryDir>
 #include <QStandardPaths>
 
-#include "FileSystem.h"
+#include <FileSystem.h>
 
 class FileSystemTest : public QObject
 {
@@ -80,7 +80,7 @@ slots:
 
     void test_copy()
     {
-        QString folder = QFINDTESTDATA("testdata/test_folder");
+        QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]()
         {
             QTemporaryDir tempDir;

@@ -1,6 +1,6 @@
 #include <QTest>
 
-#include "minecraft/ParseUtils.h"
+#include <minecraft/ParseUtils.h>
 
 class ParseUtilsTest : public QObject
 {
