@@ -913,9 +913,11 @@ bool InstanceList::commitStagedInstance(QString path, InstanceName const& instan
                 qWarning() << "Failed to move" << path << "to" << destination;
                 return false;
             }
+
+            m_instanceGroupIndex[instID] = groupName;
+            m_groupNameCache.insert(groupName);
         }
-        m_instanceGroupIndex[instID] = groupName;
-        m_groupNameCache.insert(groupName);
+
         instanceSet.insert(instID);
 
         emit instancesChanged();
