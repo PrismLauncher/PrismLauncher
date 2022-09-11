@@ -28,27 +28,27 @@
   <screenshots>
     <screenshot type="default">
       <caption>The main PolyMC window</caption>
-      <image type="source" width="578" height="452">https://polymc.org/img/screenshots/LauncherDark.png</image>
+      <image type="source" width="976" height="764">https://polymc.org/img/screenshots/LauncherDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Modpack installation</caption>
-      <image type="source" width="523" height="452">https://polymc.org/img/screenshots/ModpackInstallDark.png</image>
+      <image type="source" width="1103" height="954">https://polymc.org/img/screenshots/ModpackInstallDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Mod installation</caption>
-      <image type="source" width="654" height="452">https://polymc.org/img/screenshots/ModInstallDark.png</image>
+      <image type="source" width="1000" height="692">https://polymc.org/img/screenshots/ModInstallDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Mod updating</caption>
-      <image type="source" width="490" height="452">https://polymc.org/img/screenshots/ModUpdateDark.png</image>
+      <image type="source" width="930" height="858">https://polymc.org/img/screenshots/ModUpdateDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Instance management</caption>
-      <image type="source" width="667" height="452">https://polymc.org/img/screenshots/PropertiesDark.png</image>
+      <image type="source" width="1083" height="735">https://polymc.org/img/screenshots/PropertiesDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Cat :)</caption>
-      <image type="source" width="555" height="452">https://polymc.org/img/screenshots/LauncherCatDark.png</image>
+      <image type="source" width="931" height="759">https://polymc.org/img/screenshots/LauncherCatDark.png</image>
     </screenshot>
   </screenshots>
   <releases>
