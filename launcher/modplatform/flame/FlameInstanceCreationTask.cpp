@@ -15,8 +15,8 @@
 
 #include "settings/INISettingsObject.h"
 
-#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/BlockedModsDialog.h"
+#include "ui/dialogs/CustomMessageBox.h"
 
 const static QMap<QString, QString> forgemap = { { "1.2.5", "3.4.9.171" },
                                                  { "1.4.2", "6.0.1.355" },
@@ -348,12 +348,20 @@ bool FlameCreationTask::createInstance()
 
     bool did_succeed = getError().isEmpty();
 
+    // Update information of the already installed instance, if any.
     if (m_instance && did_succeed) {
         setAbortable(false);
         auto inst = m_instance.value();
 
+        // Only change the name if it didn't use a custom name, so that the previous custom name
+        // is preserved, but if we're using the original one, we update the version string.
+        // NOTE: This needs to come before the copyManagedPack call!
+        if (inst->name().contains(inst->getManagedPackVersionName())) {
+            if (askForChangingInstanceName(m_parent, inst->name(), instance.name()) == InstanceNameChange::ShouldChange)
+                inst->setName(instance.name());
+        }
+
         inst->copyManagedPack(instance);
-        inst->setName(instance.name());
     }
 
     return did_succeed;

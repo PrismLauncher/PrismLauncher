@@ -908,11 +908,6 @@ bool InstanceList::commitStagedInstance(QString path, InstanceName const& instan
                 qWarning() << "Failed to override" << path << "to" << destination;
                 return false;
             }
-
-            if (!inst)
-                inst = getInstanceById(instID);
-            if (inst)
-                inst->setName(instanceName.name());
         } else {
             if (!dir.rename(path, destination)) {
                 qWarning() << "Failed to move" << path << "to" << destination;

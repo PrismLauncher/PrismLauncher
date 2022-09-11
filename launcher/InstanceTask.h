@@ -3,6 +3,10 @@
 #include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
+/* Helpers */
+enum class InstanceNameChange { ShouldChange, ShouldKeep };
+[[nodiscard]] InstanceNameChange askForChangingInstanceName(QWidget* parent, QString old_name, QString new_name);
+
 struct InstanceName {
    public:
     InstanceName() = default;
