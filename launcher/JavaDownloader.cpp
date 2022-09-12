@@ -71,7 +71,7 @@ void JavaDownloader::downloadMojangJavaList(const QString& OS, bool isLegacy)
 void JavaDownloader::parseMojangManifest(bool isLegacy, const QJsonArray& versionArray)
 {
     setStatus(tr("Downloading java from Mojang"));
-    auto url = versionArray[0].toObject()["manifest"].toObject()["url"].toString();
+    auto url = Json::ensureString(Json::ensureObject(Json::ensureObject(versionArray[0]), "manifest"), "url");
     auto download = new NetJob(QString("JRE::DownloadJava"), APPLICATION->network());
     auto files = new QByteArray();
 
@@ -103,22 +103,22 @@ void JavaDownloader::downloadMojangJava(bool isLegacy, const QJsonDocument& doc)
     auto output = FS::PathCombine(QString("java"), (isLegacy ? "java-legacy" : "java-current"));
     FS::ensureFolderPathExists(output);
     std::vector<File> toDownload;
-    auto list = doc.object()["files"].toObject();
+    auto list = Json::ensureObject(Json::ensureObject(doc.object()), "files");
     for (const auto& paths : list.keys()) {
         auto file = FS::PathCombine(output, paths);
 
-        auto type = list[paths].toObject()["type"].toString();
+        auto type = Json::requireString(Json::requireObject(list, paths), "type");
         if (type == "directory") {
             FS::ensureFolderPathExists(file);
         } else if (type == "link") {
             // this is linux only !
-            auto target = FS::PathCombine(file, "../" + list[paths].toObject()["target"].toString());
+            auto target = FS::PathCombine(file, "../" + Json::requireString(Json::requireObject(list, paths), "target"));
             QFile(target).link(file);
         } else if (type == "file") {
             // TODO download compressed version if it exists ?
-            auto raw = list[paths].toObject()["downloads"].toObject()["raw"].toObject();
-            auto isExec = list[paths].toObject()["executable"].toBool();
-            auto f = File{ file, raw["url"].toString(), QByteArray::fromHex(raw["sha1"].toString().toLatin1()), isExec };
+            auto raw = Json::requireObject(Json::requireObject(Json::requireObject(list, paths), "downloads"), "raw");
+            auto isExec = Json::ensureBoolean(Json::requireObject(list, paths), "executable", false);
+            auto f = File{ file, Json::requireString(raw, "url"), QByteArray::fromHex(Json::ensureString(raw, "sha1").toLatin1()), isExec };
             toDownload.push_back(f);
         }
     }
@@ -183,7 +183,7 @@ void JavaDownloader::downloadAzulMeta(const QString& OS, bool isLegacy, const Ne
             qWarning() << *metaResponse;
             return;
         }
-        auto array = doc.array();
+        auto array = Json::ensureArray(doc.array());
         if (!array.empty()) {
             downloadAzulJava(isLegacy, array);
         } else {
