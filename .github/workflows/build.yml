@@ -249,10 +249,8 @@ jobs:
           cmake --install ${{ env.BUILD_DIR }}
 
           cd ${{ env.INSTALL_DIR }}
-          if [ "${{ matrix.msystem }}" == "mingw32" ]; then
+          if [ "${{ matrix.qt_ver }}" == "5" ]; then
             cp /mingw32/bin/libcrypto-1_1.dll /mingw32/bin/libssl-1_1.dll ./
-          elif [ "${{ matrix.msystem }}" == "mingw64" ]; then
-            cp /mingw64/bin/libcrypto-1_1-x64.dll /mingw64/bin/libssl-1_1-x64.dll ./
           fi
 
       - name: Package (Windows, portable)
