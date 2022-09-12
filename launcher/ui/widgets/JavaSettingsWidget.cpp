@@ -118,7 +118,7 @@ void JavaSettingsWidget::setupUi()
 
     m_verticalLayout->addWidget(m_memoryGroupBox);
 
-    m_javaDownloadBtn = new QPushButton("Download Java",this);
+    m_javaDownloadBtn = new QPushButton(tr("Download Java"), this);
 
     m_verticalLayout->addWidget(m_javaDownloadBtn);
 

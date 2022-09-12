@@ -1,6 +1,7 @@
 #include "JavaDownloader.h"
 #include <QMessageBox>
 #include <QPushButton>
+#include <memory>
 #include "Application.h"
 #include "FileSystem.h"
 #include "Json.h"
@@ -127,6 +128,11 @@ void JavaDownloader::executeTask()
                 azulOS = "linux";
                 arch = "arm";
                 bitness = "32";
+            } else if (OS == "linux"){
+                // linux x86 64 (used for debugging, should never reach here)
+                azulOS = "linux";
+                arch = "x86";
+                bitness = "64";
             }
             auto metaResponse = new QByteArray();
             auto downloadJob = new NetJob(QString("JRE::QueryAzulMeta"), APPLICATION->network());
@@ -161,19 +167,20 @@ void JavaDownloader::executeTask()
                     setStatus(tr("Downloading java from Azul"));
                     auto downloadURL = QUrl(array[0].toObject()["url"].toString());
                     auto download = new NetJob(QString("JRE::DownloadJava"), APPLICATION->network());
-                    const QString path = downloadURL.host() + '/' + downloadURL.path();
-                    auto entry = APPLICATION->metacache()->resolveEntry("general", path);
-                    entry->setStale(true);
-                    download->addNetAction(Net::Download::makeCached(downloadURL, entry));
-                    auto zippath = entry->getFullPath();
+                    auto temp = std::make_unique<QTemporaryFile>(FS::PathCombine(APPLICATION->root(), "temp", "XXXXXX.zip"));
+                    FS::ensureFolderPathExists(FS::PathCombine(APPLICATION->root(),"temp"));
+                    // Have to open at least once to generate path
+                    temp->open();
+                    temp->close();
+                    download->addNetAction(Net::Download::makeFile(downloadURL, temp->fileName()));
                     QObject::connect(download, &NetJob::finished, [download] { download->deleteLater(); });
                     QObject::connect(download, &NetJob::progress, this, &JavaDownloader::progress);
-                    QObject::connect(download, &NetJob::succeeded, [isLegacy, zippath, downloadURL, this] {
+                    QObject::connect(download, &NetJob::succeeded, [isLegacy, file = std::move(temp), downloadURL, this] {
                         setStatus(tr("Extracting java"));
                         auto output = FS::PathCombine(FS::PathCombine(QCoreApplication::applicationDirPath(), "java"),
                                                       isLegacy ? "java-legacy" : "java-current");
                         // This should do all of the extracting and creating folders
-                        MMCZip::extractDir(zippath, downloadURL.fileName().chopped(4), output);
+                        MMCZip::extractDir(file->fileName(), downloadURL.fileName().chopped(4), output);
                         emitSucceeded();
                     });
                     download->start();
