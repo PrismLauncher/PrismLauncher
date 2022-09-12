@@ -95,6 +95,11 @@ auto NetJob::abort() -> bool
         fullyAborted &= part->abort();
     }
 
+    if (fullyAborted)
+        emitAborted();
+    else
+        emitFailed(tr("Failed to abort all tasks in the NetJob!"));
+
     return fullyAborted;
 }
 
