@@ -1,7 +1,7 @@
 #include <QTest>
 
-#include "meta/Index.h"
-#include "meta/VersionList.h"
+#include <meta/Index.h>
+#include <meta/VersionList.h>
 
 class IndexTest : public QObject
 {

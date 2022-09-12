@@ -67,7 +67,7 @@ find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
 include(CTest)
 include(ECMAddTests)
-if (BUILD_TESTING)
+if(BUILD_TESTING)
     enable_testing()
 endif()
 
@@ -321,5 +321,8 @@ add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
 
 add_subdirectory(buildconfig)
 
+if(BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
 # NOTE: this must always be last to appease the CMake deity of quirky install command evaluation order.
 add_subdirectory(launcher)

@@ -1,6 +1,6 @@
 #include <QTest>
 
-#include "settings/INIFile.h"
+#include <settings/INIFile.h>
 
 class IniFileTest : public QObject
 {
