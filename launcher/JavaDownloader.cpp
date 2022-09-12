@@ -24,17 +24,29 @@ void JavaDownloader::executeTask()
 {
     auto OS = m_OS;
     auto isLegacy = m_isLegacy;
+
     auto netJob = new NetJob(QString("JRE::QueryVersions"), APPLICATION->network());
     auto response = new QByteArray();
     setStatus(tr("Querying mojang meta"));
     netJob->addNetAction(Net::Download::makeByteArray(
         QUrl("https://piston-meta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json"), response));
-    QObject::connect(netJob, &NetJob::finished, [netJob, response] {
+
+    QObject::connect(this, &Task::aborted, [isLegacy]{
+        QDir(FS::PathCombine("java",(isLegacy ? "java-legacy" : "java-current"))).removeRecursively();
+    });
+
+    QObject::connect(netJob, &NetJob::finished, [netJob, response, this] {
+        //delete so that it's not called on a deleted job
+        QObject::disconnect(this, &Task::aborted, netJob, &NetJob::abort);
         netJob->deleteLater();
         delete response;
     });
     QObject::connect(netJob, &NetJob::progress, this, &JavaDownloader::progress);
-    QObject::connect(netJob, &NetJob::succeeded, [response, OS, isLegacy, this] {
+    QObject::connect(netJob, &NetJob::failed, this, &JavaDownloader::emitFailed);
+
+    QObject::connect(this, &Task::aborted, netJob, &NetJob::abort);
+
+    QObject::connect(netJob, &NetJob::succeeded, [response, OS, isLegacy, this, netJob] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -51,12 +63,16 @@ void JavaDownloader::executeTask()
 
             download->addNetAction(Net::Download::makeByteArray(QUrl(url), files));
 
-            QObject::connect(download, &NetJob::finished, [download, files] {
+            QObject::connect(download, &NetJob::finished, [download, files, this] {
+                QObject::disconnect(this, &Task::aborted, download, &NetJob::abort);
                 download->deleteLater();
                 delete files;
             });
             QObject::connect(download, &NetJob::progress, this, &JavaDownloader::progress);
-            QObject::connect(download, &NetJob::succeeded, [files, isLegacy, this] {
+            QObject::connect(download, &NetJob::failed, this, &JavaDownloader::emitFailed);
+            QObject::connect(this, &Task::aborted, download, &NetJob::abort);
+
+            QObject::connect(download, &NetJob::succeeded, [download, files, isLegacy, this] {
                 QJsonParseError parse_error{};
                 QJsonDocument doc = QJsonDocument::fromJson(*files, &parse_error);
                 if (parse_error.error != QJsonParseError::NoError) {
@@ -99,8 +115,15 @@ void JavaDownloader::executeTask()
                     }
                     elementDownload->addNetAction(dl);
                 }
-                QObject::connect(elementDownload, &NetJob::finished, [elementDownload] { elementDownload->deleteLater(); });
+                QObject::connect(elementDownload, &NetJob::finished, [elementDownload, this] {
+                    QObject::disconnect(this, &Task::aborted, elementDownload, &NetJob::abort);
+                    elementDownload->deleteLater();
+                });
                 QObject::connect(elementDownload, &NetJob::progress, this, &JavaDownloader::progress);
+                QObject::connect(elementDownload, &NetJob::failed, this, &JavaDownloader::emitFailed);
+
+
+                QObject::connect(this, &Task::aborted, elementDownload, &NetJob::abort);
                 QObject::connect(elementDownload, &NetJob::succeeded, [this] { emitSucceeded(); });
                 elementDownload->start();
             });
@@ -148,12 +171,15 @@ void JavaDownloader::executeTask()
                                                      )
                                                  .arg(javaVersion, azulOS, arch, bitness),
                                              metaResponse));
-            QObject::connect(downloadJob, &NetJob::finished, [downloadJob, metaResponse] {
+            QObject::connect(downloadJob, &NetJob::finished, [downloadJob, metaResponse, this] {
+                QObject::disconnect(this, &Task::aborted, downloadJob, &NetJob::abort);
                 downloadJob->deleteLater();
                 delete metaResponse;
             });
+            QObject::connect(this, &Task::aborted, downloadJob, &NetJob::abort);
+            QObject::connect(netJob, &NetJob::failed, this, &JavaDownloader::emitFailed);
             QObject::connect(downloadJob, &NetJob::progress, this, &JavaDownloader::progress);
-            QObject::connect(downloadJob, &NetJob::succeeded, [metaResponse, isLegacy, this] {
+            QObject::connect(downloadJob, &NetJob::succeeded, [metaResponse, isLegacy, this, downloadJob] {
                 QJsonParseError parse_error{};
                 QJsonDocument doc = QJsonDocument::fromJson(*metaResponse, &parse_error);
                 if (parse_error.error != QJsonParseError::NoError) {
@@ -173,8 +199,13 @@ void JavaDownloader::executeTask()
                     temp->open();
                     temp->close();
                     download->addNetAction(Net::Download::makeFile(downloadURL, temp->fileName()));
-                    QObject::connect(download, &NetJob::finished, [download] { download->deleteLater(); });
+                    QObject::connect(download, &NetJob::finished, [download, this] {
+                        QObject::disconnect(this, &Task::aborted, download, &NetJob::abort);
+                        download->deleteLater();
+                    });
                     QObject::connect(download, &NetJob::progress, this, &JavaDownloader::progress);
+                    QObject::connect(download, &NetJob::failed, this, &JavaDownloader::emitFailed);
+                    QObject::connect(this, &Task::aborted, download, &NetJob::abort);
                     QObject::connect(download, &NetJob::succeeded, [isLegacy, file = std::move(temp), downloadURL, this] {
                         setStatus(tr("Extracting java"));
                         auto output = FS::PathCombine(FS::PathCombine(QCoreApplication::applicationDirPath(), "java"),
@@ -193,6 +224,14 @@ void JavaDownloader::executeTask()
     });
 
     netJob->start();
+}
+void JavaDownloader::abortNetJob(NetJob* elementDownload)
+{
+    if(elementDownload->isRunning()){
+        elementDownload->abort();
+    }else{
+        emit elementDownload->aborted();
+    }
 }
 void JavaDownloader::showPrompts(QWidget* parent)
 {
@@ -261,10 +300,12 @@ void JavaDownloader::showPrompts(QWidget* parent)
 
     auto down = new JavaDownloader(isLegacy, version);
     ProgressDialog dialog(parent);
-    dialog.execWithTask(down);
-    if (box.clickedButton() == both) {
+    dialog.setSkipButton(true, tr("Abort"));
+
+    if (dialog.execWithTask(down) && box.clickedButton() == both) {
         auto dwn = new JavaDownloader(false, version);
         ProgressDialog dg(parent);
+        dg.setSkipButton(true, tr("Abort"));
         dg.execWithTask(dwn);
     }
 }
