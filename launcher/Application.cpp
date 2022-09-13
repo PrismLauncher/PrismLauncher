@@ -240,7 +240,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
     }
 
-
     // error if --launch is missing with --server or --profile
     if((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty())
     {

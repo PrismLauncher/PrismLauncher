@@ -106,4 +106,5 @@ private: /* data */
 
     //FIXME: nuke
     QWidget* m_parent;
+    void downloadFromUrl();
 };
