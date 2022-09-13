@@ -106,14 +106,21 @@ void InstanceImportTask::executeTask()
             connect(req, &NetJob::failed, this, &InstanceImportTask::downloadFailed);
             connect(req, &NetJob::succeeded, [array, this] {
                 auto doc = Json::requireDocument(*array);
-                // Have to use ensureString then use QUrl to get proper url encoding
-                m_sourceUrl = QUrl(
-                    Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "downloadUrl", "", "downloadUrl"));
-                if (!m_sourceUrl.isValid()) {
-                    emitFailed(tr("The modpack is blocked ! Please download it manually"));
-                    return;
+                // No way to find out if it's a mod or a modpack before here
+                // And also we need to check if it ends with .zip, instead of any better way
+                auto fileName = Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "fileName");
+                if (fileName.endsWith(".zip")) {
+                    // Have to use ensureString then use QUrl to get proper url encoding
+                    m_sourceUrl = QUrl(
+                        Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "downloadUrl", "", "downloadUrl"));
+                    if (!m_sourceUrl.isValid()) {
+                        emitFailed(tr("The modpack is blocked ! Please download it manually"));
+                        return;
+                    }
+                    downloadFromUrl();
+                } else {
+                    emitFailed(tr("This url isn't a valid modpack !"));
                 }
-                downloadFromUrl();
             });
             connect(req, &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);
             connect(req, &NetJob::stepProgress, this, &InstanceImportTask::propogateStepProgress);            
