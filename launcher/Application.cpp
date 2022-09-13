@@ -258,6 +258,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_zipToImport = parser.value("import");
     m_instanceIdToShowWindowOf = parser.value("show");
 
+    if(args.contains("0")){
+        m_zipToImport = args["0"].toUrl();
+    }
+
     // error if --launch is missing with --server or --profile
     if((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty())
     {

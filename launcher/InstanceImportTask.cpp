@@ -47,6 +47,8 @@
 #include "modplatform/technic/TechnicPackProcessor.h"
 #include "modplatform/modrinth/ModrinthInstanceCreationTask.h"
 #include "modplatform/flame/FlameInstanceCreationTask.h"
+// FIXME : move this over to FlameInstanceCreationTask
+#include "Json.h"
 
 #include "settings/INISettingsObject.h"
 
@@ -84,22 +86,53 @@ void InstanceImportTask::executeTask()
         setStatus(tr("Downloading modpack:\n%1").arg(m_sourceUrl.toString()));
         m_downloadRequired = true;
 
-        const QString path(m_sourceUrl.host() + '/' + m_sourceUrl.path());
-
-        auto entry = APPLICATION->metacache()->resolveEntry("general", path);
-        entry->setStale(true);
-        m_archivePath = entry->getFullPath();
-
-        m_filesNetJob = new NetJob(tr("Modpack download"), APPLICATION->network());
-        m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
-
-        connect(m_filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
-        connect(m_filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);
-        connect(m_filesNetJob.get(), &NetJob::failed, this, &InstanceImportTask::downloadFailed);
-        connect(m_filesNetJob.get(), &NetJob::aborted, this, &InstanceImportTask::downloadAborted);
-
-        m_filesNetJob->start();
+        if (m_sourceUrl.scheme() == "curseforge") {
+            // need to find the download link for the modpack
+            // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
+            QUrlQuery query(m_sourceUrl);
+            auto addonId = query.allQueryItemValues("addonId")[0];
+            auto fileId = query.allQueryItemValues("fileId")[0];
+            auto array = new QByteArray();
+            auto req = new NetJob("Curseforge Meta", APPLICATION->network());
+            req->addNetAction(
+                Net::Download::makeByteArray(QUrl(QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(addonId, fileId)), array));
+            connect(req, &NetJob::finished, [array, req] {
+                req->deleteLater();
+                delete array;
+            });
+            connect(req, &NetJob::failed, this, &InstanceImportTask::downloadFailed);
+            connect(req, &NetJob::succeeded, [array, this] {
+                auto doc = Json::requireDocument(*array);
+                // Have to use ensureString then use QUrl to get proper url encoding
+                m_sourceUrl = QUrl(
+                    Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "downloadUrl", "", "downloadUrl"));
+                if (!m_sourceUrl.isValid()) {
+                    emitFailed(tr("The modpack is blocked ! Please download it manually"));
+                    return;
+                }
+                downloadFromUrl();
+            });
+            connect(req, &NetJob::aborted, this, &InstanceImportTask::downloadAborted);
+            req->start();
+        } else {
+            downloadFromUrl();
+        }
     }
+}
+void InstanceImportTask::downloadFromUrl()
+{
+    const QString path = m_sourceUrl.host() + '/' + m_sourceUrl.path();
+    auto entry = APPLICATION->metacache()->resolveEntry("general", path);
+    entry->setStale(true);
+    m_filesNetJob = new NetJob(tr("Modpack download"), APPLICATION->network());
+    m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
+    m_archivePath = entry->getFullPath();
+
+    connect(m_filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
+    connect(m_filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);
+    connect(m_filesNetJob.get(), &NetJob::failed, this, &InstanceImportTask::downloadFailed);
+    connect(m_filesNetJob.get(), &NetJob::aborted, this, &InstanceImportTask::downloadAborted);
+    m_filesNetJob->start();
 }
 
 void InstanceImportTask::downloadSucceeded()
@@ -268,7 +301,7 @@ void InstanceImportTask::processFlame()
     inst_creation_task->setName(*this);
     inst_creation_task->setIcon(m_instIcon);
     inst_creation_task->setGroup(m_instGroup);
-    
+
     connect(inst_creation_task, &Task::succeeded, this, [this, inst_creation_task] {
         setOverride(inst_creation_task->shouldOverride());
         emitSucceeded();
@@ -332,7 +365,7 @@ void InstanceImportTask::processModrinth()
     inst_creation_task->setName(*this);
     inst_creation_task->setIcon(m_instIcon);
     inst_creation_task->setGroup(m_instGroup);
-    
+
     connect(inst_creation_task, &Task::succeeded, this, [this, inst_creation_task] {
         setOverride(inst_creation_task->shouldOverride());
         emitSucceeded();
