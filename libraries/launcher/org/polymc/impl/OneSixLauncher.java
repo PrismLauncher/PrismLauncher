@@ -24,8 +24,8 @@ import java.applet.Applet;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,10 +58,10 @@ public final class OneSixLauncher implements Launcher {
     public OneSixLauncher(Parameters params) {
         classLoader = ClassLoader.getSystemClassLoader();
 
-        mcParams = params.allSafe("param", Collections.<String>emptyList());
+        mcParams = params.allSafe("param", new ArrayList<String>());
         mainClass = params.firstSafe("mainClass", "net.minecraft.client.Minecraft");
         appletClass = params.firstSafe("appletClass", "net.minecraft.client.MinecraftApplet");
-        traits = params.allSafe("traits", Collections.<String>emptyList());
+        traits = params.allSafe("traits", new ArrayList<String>());
 
         userName = params.first("userName");
         sessionId = params.first("sessionId");
