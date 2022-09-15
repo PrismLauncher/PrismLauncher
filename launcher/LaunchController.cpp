@@ -376,7 +376,7 @@ void LaunchController::launchInstance()
         }
         m_launcher->prependStep(new TextPrint(m_launcher.get(), resolved_servers, MessageLevel::Launcher));
     } else {
-        online_mode = "offline";
+        online_mode = m_demo ? "demo" : "offline";
     }
 
     m_launcher->prependStep(new TextPrint(m_launcher.get(), "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
