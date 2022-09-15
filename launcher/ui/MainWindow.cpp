@@ -793,7 +793,6 @@ public:
 
         instanceToolBar->addAction(actionLaunchInstance);
         instanceToolBar->addAction(actionLaunchInstanceOffline);
-        instanceToolBar->addAction(actionLaunchInstanceDemo);
         instanceToolBar->addAction(actionKillInstance);
 
         instanceToolBar->addSeparator();
@@ -1199,7 +1198,6 @@ void MainWindow::updateToolsMenu()
 {
     QToolButton *launchButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstance));
     QToolButton *launchOfflineButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstanceOffline));
-    QToolButton *launchDemoButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstanceDemo));
 
     bool currentInstanceRunning = m_selectedInstance && m_selectedInstance->isRunning();
 
@@ -1209,10 +1207,8 @@ void MainWindow::updateToolsMenu()
 
     QMenu *launchMenu = ui->actionLaunchInstance->menu();
     QMenu *launchOfflineMenu = ui->actionLaunchInstanceOffline->menu();
-    QMenu *launchDemoMenu = ui->actionLaunchInstanceDemo->menu();
     launchButton->setPopupMode(QToolButton::MenuButtonPopup);
     launchOfflineButton->setPopupMode(QToolButton::MenuButtonPopup);
-    launchDemoButton->setPopupMode(QToolButton::MenuButtonPopup);
     if (launchMenu)
     {
         launchMenu->clear();
@@ -1228,21 +1224,13 @@ void MainWindow::updateToolsMenu()
     {
         launchOfflineMenu = new QMenu(this);
     }
-    if (launchDemoMenu) {
-        launchDemoMenu->clear();
-    }
-    else
-    {
-        launchDemoMenu = new QMenu(this);
-    }
 
     QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
     normalLaunch->setShortcut(QKeySequence::Open);
     QAction *normalLaunchOffline = launchOfflineMenu->addAction(tr("Launch Offline"));
     normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
-    QAction *normalLaunchDemo = launchDemoMenu->addAction(tr("Launch Demo"));
+    QAction *normalLaunchDemo = launchOfflineMenu->addAction(tr("Launch Demo"));
     normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
-
     if (m_selectedInstance)
     {
         normalLaunch->setEnabled(m_selectedInstance->canLaunch());
@@ -1268,28 +1256,23 @@ void MainWindow::updateToolsMenu()
     QString profilersTitle = tr("Profilers");
     launchMenu->addSeparator()->setText(profilersTitle);
     launchOfflineMenu->addSeparator()->setText(profilersTitle);
-    launchDemoMenu->addSeparator()->setText(profilersTitle);
     for (auto profiler : APPLICATION->profilers().values())
     {
         QAction *profilerAction = launchMenu->addAction(profiler->name());
         QAction *profilerOfflineAction = launchOfflineMenu->addAction(profiler->name());
-        QAction *profilerDemoAction = launchDemoMenu->addAction(profiler->name());
         QString error;
         if (!profiler->check(&error))
         {
             profilerAction->setDisabled(true);
             profilerOfflineAction->setDisabled(true);
-            profilerDemoAction->setDisabled(true);
             QString profilerToolTip = tr("Profiler not setup correctly. Go into settings, \"External Tools\".");
             profilerAction->setToolTip(profilerToolTip);
             profilerOfflineAction->setToolTip(profilerToolTip);
-            profilerDemoAction->setToolTip(profilerToolTip);
         }
         else if (m_selectedInstance)
         {
             profilerAction->setEnabled(m_selectedInstance->canLaunch());
             profilerOfflineAction->setEnabled(m_selectedInstance->canLaunch());
-            profilerDemoAction->setEnabled(m_selectedInstance->canLaunch());
 
             connect(profilerAction, &QAction::triggered, [this, profiler]()
                     {
@@ -1299,21 +1282,15 @@ void MainWindow::updateToolsMenu()
                     {
                         APPLICATION->launch(m_selectedInstance, false, false, profiler.get());
                     });
-            connect(profilerDemoAction, &QAction::triggered, [this, profiler]()
-                    {
-                        APPLICATION->launch(m_selectedInstance, false, true, profiler.get());
-                    });
         }
         else
         {
             profilerAction->setDisabled(true);
             profilerOfflineAction->setDisabled(true);
-            profilerDemoAction->setDisabled(true);
         }
     }
     ui->actionLaunchInstance->setMenu(launchMenu);
     ui->actionLaunchInstanceOffline->setMenu(launchOfflineMenu);
-    ui->actionLaunchInstanceDemo->setMenu(launchDemoMenu);
 }
 
 void MainWindow::repopulateAccountsMenu()
