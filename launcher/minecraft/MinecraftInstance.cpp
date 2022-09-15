@@ -245,6 +245,14 @@ QString MinecraftInstance::getLocalLibraryPath() const
     return libraries_dir.absolutePath();
 }
 
+bool MinecraftInstance::supportsDemo() const
+{
+    Version instance_ver { getPackProfile()->getComponentVersion("net.minecraft") };
+    // Demo mode was introduced in 1.3.1: https://minecraft.fandom.com/wiki/Demo_mode#History
+    // FIXME: Due to Version constraints atm, this can't handle well non-release versions
+    return instance_ver >= Version("1.3.1");
+}
+
 QString MinecraftInstance::jarModsDir() const
 {
     QDir jarmods_dir(FS::PathCombine(instanceRoot(), "jarmods/"));

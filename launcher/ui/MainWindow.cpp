@@ -1253,6 +1253,13 @@ void MainWindow::updateToolsMenu()
         normalLaunchOffline->setDisabled(true);
         normalLaunchDemo->setDisabled(true);
     }
+
+    // Disable demo-mode if not available.
+    auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
+    if (instance) {
+        normalLaunchDemo->setEnabled(instance->supportsDemo());
+    }
+
     QString profilersTitle = tr("Profilers");
     launchMenu->addSeparator()->setText(profilersTitle);
     launchOfflineMenu->addSeparator()->setText(profilersTitle);
@@ -2164,6 +2171,13 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
         ui->actionLaunchInstanceOffline->setEnabled(m_selectedInstance->canLaunch());
         ui->actionLaunchInstanceDemo->setEnabled(m_selectedInstance->canLaunch());
+
+        // Disable demo-mode if not available.
+        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
+        if (instance) {
+             ui->actionLaunchInstanceDemo->setEnabled(instance->supportsDemo());
+        }
+
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
         ui->renameButton->setText(m_selectedInstance->name());

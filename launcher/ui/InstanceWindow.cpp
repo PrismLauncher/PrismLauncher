@@ -166,7 +166,13 @@ void InstanceWindow::updateLaunchButtons()
     else
     {
         m_launchOfflineButton->setEnabled(true);
-        m_launchDemoButton->setEnabled(true);
+
+        // Disable demo-mode if not available.
+        auto instance = dynamic_cast<MinecraftInstance*>(m_instance.get());
+        if (instance) {
+            m_launchDemoButton->setEnabled(instance->supportsDemo());
+        }
+
         m_killButton->setText(tr("Launch"));
         m_killButton->setObjectName("launchButton");
         m_killButton->setToolTip(tr("Launch the instance"));
