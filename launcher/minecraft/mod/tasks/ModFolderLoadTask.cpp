@@ -99,7 +99,7 @@ void ModFolderLoadTask::executeTask()
     // Remove orphan metadata to prevent issues
     // See https://github.com/PolyMC/PolyMC/issues/996
     if (m_clean_orphan) {
-        QMutableMapIterator<QString, Mod::Ptr> iter(m_result->mods);
+        QMutableMapIterator iter(m_result->mods);
         while (iter.hasNext()) {
             auto mod = iter.next().value();
             if (mod->status() == ModStatus::NotInstalled) {

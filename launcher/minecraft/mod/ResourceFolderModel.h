@@ -68,7 +68,7 @@ class ResourceFolderModel : public QAbstractListModel {
     virtual bool update();
 
     /** Creates a new parse task, if needed, for 'res' and start it.*/
-    virtual void resolveResource(Resource::Ptr res);
+    virtual void resolveResource(Resource* res);
 
     [[nodiscard]] size_t size() const { return m_resources.size(); };
     [[nodiscard]] bool empty() const { return size() == 0; }
@@ -265,7 +265,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             }
 
             m_resources[row].reset(new_resource);
-            resolveResource(m_resources.at(row));
+            resolveResource(m_resources[row].get());
             emit dataChanged(index(row, 0), index(row, columnCount(QModelIndex()) - 1));
         }
     }
@@ -313,7 +313,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             for (auto& added : added_set) {
                 auto res = new_resources[added];
                 m_resources.append(res);
-                resolveResource(res);
+                resolveResource(m_resources.last().get());
             }
 
             endInsertRows();
