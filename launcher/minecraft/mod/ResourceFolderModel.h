@@ -247,7 +247,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             auto row = row_it.value();
 
             auto& new_resource = new_resources[kept];
-            auto const& current_resource = m_resources[row];
+            auto const& current_resource = m_resources.at(row);
 
             if (new_resource->dateTimeChanged() == current_resource->dateTimeChanged()) {
                 // no significant change, ignore...
@@ -265,7 +265,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             }
 
             m_resources[row].reset(new_resource);
-            resolveResource(m_resources[row].get());
+            resolveResource(m_resources.at(row).get());
             emit dataChanged(index(row, 0), index(row, columnCount(QModelIndex()) - 1));
         }
     }
@@ -324,7 +324,7 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
     {
         m_resources_index.clear();
         int idx = 0;
-        for (auto const& mod : m_resources) {
+        for (auto const& mod : qAsConst(m_resources)) {
             m_resources_index[mod->internal_id()] = idx;
             idx++;
         }
