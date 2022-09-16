@@ -57,6 +57,8 @@ void ModFolderLoadTask::executeTask()
         if (mod->enabled()) {
             if (m_result->mods.contains(mod->internal_id())) {
                 m_result->mods[mod->internal_id()]->setStatus(ModStatus::Installed);
+                // Delete the object we just created, since a valid one is already in the mods list.
+                delete mod;
             }
             else {
                 m_result->mods[mod->internal_id()] = mod;
