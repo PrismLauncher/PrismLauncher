@@ -38,12 +38,23 @@
 
 #include "minecraft/mod/MetadataHandler.h"
 
+#include <QThread>
+
 ModFolderLoadTask::ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan)
-    : Task(nullptr, false), m_mods_dir(mods_dir), m_index_dir(index_dir), m_is_indexed(is_indexed), m_clean_orphan(clean_orphan), m_result(new Result())
+    : Task(nullptr, false)
+    , m_mods_dir(mods_dir)
+    , m_index_dir(index_dir)
+    , m_is_indexed(is_indexed)
+    , m_clean_orphan(clean_orphan)
+    , m_result(new Result())
+    , m_thread_to_spawn_into(thread())
 {}
 
 void ModFolderLoadTask::executeTask()
 {
+    if (thread() != m_thread_to_spawn_into)
+        connect(this, &Task::finished, this->thread(), &QThread::quit);
+
     if (m_is_indexed) {
         // Read metadata first
         getFromMetadata();
@@ -97,6 +108,9 @@ void ModFolderLoadTask::executeTask()
             }
         }
     }
+
+    for (auto mod : m_result->mods)
+        mod->moveToThread(m_thread_to_spawn_into);
 
     if (m_aborted)
         emit finished();
