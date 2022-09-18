@@ -137,7 +137,8 @@ public final class OneSixLauncher implements Launcher {
                         winSizeH,
                         maximize,
                         serverAddress,
-                        serverPort
+                        serverPort,
+                        mcParams.contains("--demo")
                 );
 
                 return;

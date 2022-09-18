@@ -63,6 +63,10 @@ public:
         m_online = online;
     }
 
+    void setDemo(bool demo) {
+        m_demo = demo;
+    }
+
     void setProfiler(BaseProfilerFactory *profiler) {
         m_profiler = profiler;
     }
@@ -101,6 +105,7 @@ private slots:
 private:
     BaseProfilerFactory *m_profiler = nullptr;
     bool m_online = true;
+    bool m_demo = false;
     InstancePtr m_instance;
     QWidget * m_parentWidget = nullptr;
     InstanceWindow *m_console = nullptr;

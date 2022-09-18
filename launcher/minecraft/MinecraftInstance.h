@@ -69,6 +69,8 @@ public:
     // where the instance-local libraries should be
     QString getLocalLibraryPath() const;
 
+    /** Returns whether the instance, with its version, has support for demo mode. */
+    [[nodiscard]] bool supportsDemo() const;
 
     //////  Profile management //////
     std::shared_ptr<PackProfile> getPackProfile() const;

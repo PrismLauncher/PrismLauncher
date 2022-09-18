@@ -95,8 +95,14 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
         m_launchOfflineButton = new QPushButton();
         horizontalLayout->addWidget(m_launchOfflineButton);
         m_launchOfflineButton->setText(tr("Launch Offline"));
+
+        m_launchDemoButton = new QPushButton();
+        horizontalLayout->addWidget(m_launchDemoButton);
+        m_launchDemoButton->setText(tr("Launch Demo"));
+
         updateLaunchButtons();
         connect(m_launchOfflineButton, SIGNAL(clicked(bool)), SLOT(on_btnLaunchMinecraftOffline_clicked()));
+        connect(m_launchDemoButton, SIGNAL(clicked(bool)), SLOT(on_btnLaunchMinecraftDemo_clicked()));
 
         m_closeButton = new QPushButton();
         m_closeButton->setText(tr("Close"));
@@ -143,6 +149,7 @@ void InstanceWindow::updateLaunchButtons()
     if(m_instance->isRunning())
     {
         m_launchOfflineButton->setEnabled(false);
+        m_launchDemoButton->setEnabled(false);
         m_killButton->setText(tr("Kill"));
         m_killButton->setObjectName("killButton");
         m_killButton->setToolTip(tr("Kill the running instance"));
@@ -150,6 +157,7 @@ void InstanceWindow::updateLaunchButtons()
     else if(!m_instance->canLaunch())
     {
         m_launchOfflineButton->setEnabled(false);
+        m_launchDemoButton->setEnabled(false);
         m_killButton->setText(tr("Launch"));
         m_killButton->setObjectName("launchButton");
         m_killButton->setToolTip(tr("Launch the instance"));
@@ -158,6 +166,13 @@ void InstanceWindow::updateLaunchButtons()
     else
     {
         m_launchOfflineButton->setEnabled(true);
+
+        // Disable demo-mode if not available.
+        auto instance = dynamic_cast<MinecraftInstance*>(m_instance.get());
+        if (instance) {
+            m_launchDemoButton->setEnabled(instance->supportsDemo());
+        }
+
         m_killButton->setText(tr("Launch"));
         m_killButton->setObjectName("launchButton");
         m_killButton->setToolTip(tr("Launch the instance"));
@@ -169,7 +184,12 @@ void InstanceWindow::updateLaunchButtons()
 
 void InstanceWindow::on_btnLaunchMinecraftOffline_clicked()
 {
-    APPLICATION->launch(m_instance, false, nullptr);
+    APPLICATION->launch(m_instance, false, false, nullptr);
+}
+
+void InstanceWindow::on_btnLaunchMinecraftDemo_clicked()
+{
+    APPLICATION->launch(m_instance, false, true, nullptr);
 }
 
 void InstanceWindow::instanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc)
@@ -223,7 +243,7 @@ void InstanceWindow::on_btnKillMinecraft_clicked()
     }
     else
     {
-        APPLICATION->launch(m_instance, true, nullptr);
+        APPLICATION->launch(m_instance, true, false, nullptr);
     }
 }
 

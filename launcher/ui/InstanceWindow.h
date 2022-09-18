@@ -74,6 +74,7 @@ slots:
     void on_closeButton_clicked();
     void on_btnKillMinecraft_clicked();
     void on_btnLaunchMinecraftOffline_clicked();
+    void on_btnLaunchMinecraftDemo_clicked();
 
     void instanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc);
     void runningStateChanged(bool running);
@@ -93,4 +94,5 @@ private:
     QPushButton *m_closeButton = nullptr;
     QPushButton *m_killButton = nullptr;
     QPushButton *m_launchOfflineButton = nullptr;
+    QPushButton *m_launchDemoButton = nullptr;
 };

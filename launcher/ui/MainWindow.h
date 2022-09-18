@@ -140,6 +140,8 @@ private slots:
 
     void on_actionLaunchInstanceOffline_triggered();
 
+    void on_actionLaunchInstanceDemo_triggered();
+
     void on_actionKillInstance_triggered();
 
     void on_actionDeleteInstance_triggered();
