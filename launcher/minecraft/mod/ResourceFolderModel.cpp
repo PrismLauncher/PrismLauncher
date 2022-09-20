@@ -251,7 +251,7 @@ bool ResourceFolderModel::update()
     return true;
 }
 
-void ResourceFolderModel::resolveResource(Resource::Ptr res)
+void ResourceFolderModel::resolveResource(Resource* res)
 {
     if (!res->shouldResolve()) {
         return;

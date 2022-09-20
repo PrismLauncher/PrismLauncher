@@ -714,7 +714,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
         {
             out << QString("%1:").arg(label);
             auto modList = model.allMods();
-            std::sort(modList.begin(), modList.end(), [](Mod::Ptr a, Mod::Ptr b) {
+            std::sort(modList.begin(), modList.end(), [](auto a, auto b) {
                 auto aName = a->fileinfo().completeBaseName();
                 auto bName = b->fileinfo().completeBaseName();
                 return aName.localeAwareCompare(bName) < 0;
