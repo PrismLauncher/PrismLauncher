@@ -160,14 +160,14 @@ QString InfoFrame::renderColorCodes(QString input) {
 
 void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
 {
-    setName(resource_pack.name());
+    setName(renderColorCodes(resource_pack.name()));
     setDescription(renderColorCodes(resource_pack.description()));
     setImage(resource_pack.image({64, 64}));
 }
 
 void InfoFrame::updateWithTexturePack(TexturePack& texture_pack)
 {
-    setName(texture_pack.name());
+    setName(renderColorCodes(texture_pack.name()));
     setDescription(renderColorCodes(texture_pack.description()));
     setImage(texture_pack.image({64, 64}));
 }
