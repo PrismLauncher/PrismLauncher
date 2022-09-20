@@ -39,7 +39,7 @@ jobs:
             qt_ver: 6
 
           - os: macos-12
-            macosx_deployment_target: 10.14
+            macosx_deployment_target: 10.15
             qt_ver: 6
             qt_host: mac
             qt_version: '6.3.0'

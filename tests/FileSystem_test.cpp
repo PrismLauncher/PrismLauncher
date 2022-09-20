@@ -4,6 +4,8 @@
 
 #include <FileSystem.h>
 
+#include <pathmatcher/RegexpMatcher.h>
+
 class FileSystemTest : public QObject
 {
     Q_OBJECT
@@ -98,6 +100,40 @@ slots:
                 qDebug() << entry;
             }
             QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
+            QVERIFY(target_dir.entryList().contains("assets"));
+        };
+
+        // first try variant without trailing /
+        QVERIFY(!folder.endsWith('/'));
+        f();
+
+        // then variant with trailing /
+        folder.append('/');
+        QVERIFY(folder.endsWith('/'));
+        f();
+    }
+
+    void test_copy_with_blacklist()
+    {
+        QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
+        auto f = [&folder]()
+        {
+            QTemporaryDir tempDir;
+            tempDir.setAutoRemove(true);
+            qDebug() << "From:" << folder << "To:" << tempDir.path();
+
+            QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
+            qDebug() << tempDir.path();
+            qDebug() << target_dir.path();
+            FS::copy c(folder, target_dir.path());
+            c.blacklist(new RegexpMatcher("[.]?mcmeta"));
+            c();
+
+            for(auto entry: target_dir.entryList())
+            {
+                qDebug() << entry;
+            }
+            QVERIFY(!target_dir.entryList().contains("pack.mcmeta"));
             QVERIFY(target_dir.entryList().contains("assets"));
         };
 
