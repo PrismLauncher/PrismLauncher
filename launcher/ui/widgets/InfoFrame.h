@@ -19,6 +19,7 @@
 
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/ResourcePack.h"
+#include "minecraft/mod/TexturePack.h"
 
 namespace Ui
 {
@@ -41,6 +42,9 @@ class InfoFrame : public QFrame {
     void updateWithMod(Mod const& m);
     void updateWithResource(Resource const& resource);
     void updateWithResourcePack(ResourcePack& rp);
+    void updateWithTexturePack(TexturePack& tp);
+
+    static QString renderColorCodes(QString input);
 
    public slots:
     void descriptionEllipsisHandler(QString link);
