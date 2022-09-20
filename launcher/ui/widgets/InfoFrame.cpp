@@ -97,14 +97,6 @@ void InfoFrame::updateWithResource(const Resource& resource)
     setImage();
 }
 
-// https://www.sportskeeda.com/minecraft-wiki/color-codes
-static const QMap<QChar, QString> s_value_to_color = {
-    {'0', "#000000"}, {'1', "#0000AA"}, {'2', "#00AA00"}, {'3', "#00AAAA"}, {'4', "#AA0000"},
-    {'5', "#AA00AA"}, {'6', "#FFAA00"}, {'7', "#AAAAAA"}, {'8', "#555555"}, {'9', "#5555FF"},
-    {'a', "#55FF55"}, {'b', "#55FFFF"}, {'c', "#FF5555"}, {'d', "#FF55FF"}, {'e', "#FFFF55"},
-    {'f', "#FFFFFF"}
-};
-
 QString InfoFrame::renderColorCodes(QString input) {
     // We have to manually set the colors for use.
     //
@@ -113,32 +105,53 @@ QString InfoFrame::renderColorCodes(QString input) {
     // We traverse the description and, when one of those is found, we create
     // a span element with that color set.
     //
-    // TODO: Make the same logic for font formatting too.
     // TODO: Wrap links inside <a> tags
 
+    // https://minecraft.fandom.com/wiki/Formatting_codes#Color_codes
+    const QMap<QChar, QString> color_codes_map = {
+        {'0', "#000000"}, {'1', "#0000AA"}, {'2', "#00AA00"}, {'3', "#00AAAA"}, {'4', "#AA0000"},
+        {'5', "#AA00AA"}, {'6', "#FFAA00"}, {'7', "#AAAAAA"}, {'8', "#555555"}, {'9', "#5555FF"},
+        {'a', "#55FF55"}, {'b', "#55FFFF"}, {'c', "#FF5555"}, {'d', "#FF55FF"}, {'e', "#FFFF55"},
+        {'f', "#FFFFFF"}
+    };
+    // https://minecraft.fandom.com/wiki/Formatting_codes#Formatting_codes
+    const QMap<QChar, QString> formatting_codes_map = {
+        {'l', "b"}, {'m', "s"}, {'n', "u"}, {'o', "i"}
+    };
+
     QString html("<html>");
-    bool in_div = false;
+    QList<QString> tags{};
 
     auto it = input.constBegin();
     while (it != input.constEnd()) {
-        if (*it == u'§') {
-            if (in_div)
-                html += "</span>";
+        // is current char § and is there a following char
+        if (*it == u'§' && (it + 1) != input.constEnd()) {
+            auto const& code = *(++it);  // incrementing here!
 
-            auto const& num = *(++it);
-            html += QString("<span style=\"color: %1;\">").arg(s_value_to_color.constFind(num).value());
+            auto const color_entry = color_codes_map.constFind(code);
+            auto const tag_entry = formatting_codes_map.constFind(code);
 
-            in_div = true;
-
-            it++;
+            if (color_entry != color_codes_map.constEnd()) {  // color code
+                html += QString("<span style=\"color: %1;\">").arg(color_entry.value());
+                tags << "span";
+            } else if (tag_entry != formatting_codes_map.constEnd()) {  // formatting code
+                html += QString("<%1>").arg(tag_entry.value());
+                tags << tag_entry.value();
+            } else if (code == 'r') {  // reset all formatting
+                while (!tags.isEmpty()) {
+                    html += QString("</%1>").arg(tags.takeLast());
+                }
+            } else {  // pass unknown codes through
+                html += QString("§%1").arg(code);
+            }
+        } else {
+            html += *it;
         }
-
-        html += *it;
         it++;
     }
-
-    if (in_div)
-        html += "</span>";
+    while (!tags.isEmpty()) {
+        html += QString("</%1>").arg(tags.takeLast());
+    }
     html += "</html>";
 
     html.replace("\n", "<br>");
