@@ -171,7 +171,7 @@ void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallbac
 
 void ListModel::requestLogo(QString logo, QString url)
 {
-    if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo)) {
+    if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo) || url.isEmpty()) {
         return;
     }
 

@@ -227,7 +227,7 @@ void ModpackListModel::getLogo(const QString& logo, const QString& logoUrl, Logo
 
 void ModpackListModel::requestLogo(QString logo, QString url)
 {
-    if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo)) {
+    if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo) || url.isEmpty()) {
         return;
     }
 
