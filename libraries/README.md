@@ -44,17 +44,17 @@ Java launcher part for Minecraft.
 
 It:
 
-* Starts a process
-* Waits for a launch script on stdin
-* Consumes the launch script you feed it
-* Proceeds with launch when it gets the `launcher` command
+- Starts a process
+- Waits for a launch script on stdin
+- Consumes the launch script you feed it
+- Proceeds with launch when it gets the `launcher` command
 
 This means the process is essentially idle until the final command is sent. You can, for example, attach a profiler before you send it.
 
 A `legacy` and `onesix` launchers are available.
 
-* `legacy` is intended for use with Minecraft versions < 1.6 and is deprecated.
-* `onesix` can handle launching any Minecraft version, at the cost of some extra features `legacy` enables (custom window icon and title).
+- `legacy` is intended for use with Minecraft versions < 1.6 and is deprecated.
+- `onesix` can handle launching any Minecraft version, at the cost of some extra features `legacy` enables (custom window icon and title).
 
 Example (some parts have been censored):
 
@@ -177,11 +177,11 @@ A PolyMC-specific library for probing system information.
 
 Apache 2.0
 
-## tomlc99
+## tomlplusplus
 
 A TOML language parser. Used by Forge 1.14+ to store mod metadata.
 
-See [github repo](https://github.com/cktan/tomlc99).
+See [github repo](https://github.com/marzer/tomlplusplus).
 
 Licenced under the MIT licence.
 

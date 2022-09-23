@@ -965,7 +965,7 @@ target_link_libraries(Launcher_logic
     Launcher_murmur2
     nbt++
     ${ZLIB_LIBRARIES}
-    tomlc99
+    tomlplusplus::tomlplusplus
     BuildConfig
     Katabasis
     Qt${QT_VERSION_MAJOR}::Widgets
