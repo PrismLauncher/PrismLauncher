@@ -62,11 +62,7 @@ auto ListModel::data(const QModelIndex& index, int role) const -> QVariant
         }
         case Qt::DecorationRole: {
             if (m_logoMap.contains(pack.logoName)) {
-                auto icon = m_logoMap.value(pack.logoName);
-                // FIXME: This doesn't really belong here, but Qt doesn't offer a good way right now ;(
-                auto icon_scaled = QIcon(icon.pixmap(48, 48).scaledToWidth(48));
-
-                return icon_scaled;
+                return m_logoMap.value(pack.logoName);
             }
             QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
             // un-const-ify this
