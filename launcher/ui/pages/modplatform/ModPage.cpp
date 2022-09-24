@@ -60,6 +60,7 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
 
     connect(ui->searchButton, &QPushButton::clicked, this, &ModPage::triggerSearch);
     connect(ui->modFilterButton, &QPushButton::clicked, this, &ModPage::filterMods);
+    connect(ui->packView, &QListView::doubleClicked, this, &ModPage::onModSelected);
 
     m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
     m_search_timer.setSingleShot(true);
