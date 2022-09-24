@@ -398,7 +398,7 @@ void TranslationsModel::reloadLocalFiles()
                 return false;
             }
         }
-        return a.key < b.key;
+        return a.languageName().toLower() < b.languageName().toLower();
     });
     endInsertRows();
 }
