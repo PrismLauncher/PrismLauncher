@@ -86,6 +86,10 @@ struct Language
         else {
             result = locale.nativeLanguageName();
         }
+
+        if (result.isEmpty()) {
+            result = key;
+        }
         return result;
     }
 
