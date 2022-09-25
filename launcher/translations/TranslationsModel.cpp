@@ -86,6 +86,10 @@ struct Language
         else {
             result = locale.nativeLanguageName();
         }
+
+        if (result.isEmpty()) {
+            result = key;
+        }
         return result;
     }
 
@@ -394,7 +398,7 @@ void TranslationsModel::reloadLocalFiles()
                 return false;
             }
         }
-        return a.key < b.key;
+        return a.languageName().toLower() < b.languageName().toLower();
     });
     endInsertRows();
 }
