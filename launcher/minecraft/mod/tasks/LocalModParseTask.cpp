@@ -93,7 +93,6 @@ ModDetails ReadMCModTOML(QByteArray contents)
 {
     ModDetails details;
 
-    // auto tomlData = toml::parse(contents.toStdString());
     toml::table tomlData;
 #if TOML_EXCEPTIONS
     try {
