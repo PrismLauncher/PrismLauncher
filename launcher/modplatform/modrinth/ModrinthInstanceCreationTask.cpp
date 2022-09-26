@@ -238,11 +238,12 @@ bool ModrinthCreationTask::createInstance()
         if (!file.downloads.empty()) {
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
-            connect(dl.get(), &NetAction::failed, [this, &file, path, dl] {
-                auto dl = Net::Download::makeFile(file.downloads.dequeue(), path);
-                dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
-                m_files_job->addNetAction(dl);
-                dl->succeeded();
+            auto param = dl.toWeakRef();
+            connect(dl.get(), &NetAction::failed, [this, &file, path, param] {
+                auto ndl = Net::Download::makeFile(file.downloads.dequeue(), path);
+                ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
+                m_files_job->addNetAction(ndl);
+                if (auto shared = param.lock()) shared->succeeded();
             });
         }
     }
