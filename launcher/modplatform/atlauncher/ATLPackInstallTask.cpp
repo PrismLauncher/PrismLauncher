@@ -90,6 +90,7 @@ void PackInstallTask::executeTask()
 
     QObject::connect(netJob, &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     QObject::connect(netJob, &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
+    QObject::connect(netJob, &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
 }
 
 void PackInstallTask::onDownloadSucceeded()
@@ -167,6 +168,12 @@ void PackInstallTask::onDownloadFailed(QString reason)
     qDebug() << "PackInstallTask::onDownloadFailed: " << QThread::currentThreadId();
     jobPtr.reset();
     emitFailed(reason);
+}
+
+void PackInstallTask::onDownloadAborted()
+{
+    jobPtr.reset();
+    emitAborted();
 }
 
 void PackInstallTask::deleteExistingFiles()
@@ -675,6 +682,11 @@ void PackInstallTask::installConfigs()
         abortable = true;
         setProgress(current, total);
     });
+    connect(jobPtr.get(), &NetJob::aborted, [&]{
+        abortable = false;
+        jobPtr.reset();
+        emitAborted();
+    });
 
     jobPtr->start();
 }
@@ -830,6 +842,12 @@ void PackInstallTask::downloadMods()
     {
         abortable = true;
         setProgress(current, total);
+    });
+    connect(jobPtr.get(), &NetJob::aborted, [&]
+    {
+        abortable = false;
+        jobPtr.reset();
+        emitAborted();
     });
 
     jobPtr->start();
@@ -1005,7 +1023,7 @@ void PackInstallTask::install()
 
     components->saveNow();
 
-    instance.setName(m_instName);
+    instance.setName(name());
     instance.setIconKey(m_instIcon);
     instance.setManagedPack("atlauncher", m_pack_safe_name, m_pack_name, m_version_name, m_version_name);
     instanceSettings->resumeSave();

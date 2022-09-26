@@ -1,40 +1,56 @@
 #include "InstanceCreationTask.h"
-#include "settings/INISettingsObject.h"
-#include "FileSystem.h"
 
-//FIXME: remove this
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
+#include <QDebug>
+#include <QFile>
 
-InstanceCreationTask::InstanceCreationTask(BaseVersionPtr version)
-{
-    m_version = version;
-    m_usingLoader = false;
-}
-
-InstanceCreationTask::InstanceCreationTask(BaseVersionPtr version, QString loader, BaseVersionPtr loaderVersion)
-{
-    m_version = version;
-    m_usingLoader = true;
-    m_loader = loader;
-    m_loaderVersion = loaderVersion;
-}
+InstanceCreationTask::InstanceCreationTask() = default;
 
 void InstanceCreationTask::executeTask()
 {
-    setStatus(tr("Creating instance from version %1").arg(m_version->name()));
-    {
-        auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
-        instanceSettings->suspendSave();
-        MinecraftInstance inst(m_globalSettings, instanceSettings, m_stagingPath);
-        auto components = inst.getPackProfile();
-        components->buildingFromScratch();
-        components->setComponentVersion("net.minecraft", m_version->descriptor(), true);
-        if(m_usingLoader)
-            components->setComponentVersion(m_loader, m_loaderVersion->descriptor());
-        inst.setName(m_instName);
-        inst.setIconKey(m_instIcon);
-        instanceSettings->resumeSave();
+    setAbortable(true);
+
+    if (updateInstance()) {
+        emitSucceeded();
+        return;
     }
+
+    // When the user aborted in the update stage.
+    if (m_abort) {
+        emitAborted();
+        return;
+    }
+
+    if (!createInstance()) {
+        if (m_abort)
+            return;
+
+        qWarning() << "Instance creation failed!";
+        if (!m_error_message.isEmpty())
+            qWarning() << "Reason: " << m_error_message;
+        emitFailed(tr("Error while creating new instance."));
+        return;
+    }
+
+    // If this is set, it means we're updating an instance. So, we now need to remove the
+    // files scheduled to, and we'd better not let the user abort in the middle of it, since it'd
+    // put the instance in an invalid state.
+    if (shouldOverride()) {
+        setAbortable(false);
+        setStatus(tr("Removing old conflicting files..."));
+        qDebug() << "Removing old files";
+
+        for (auto path : m_files_to_remove) {
+            if (!QFile::exists(path))
+                continue;
+            qDebug() << "Removing" << path;
+            if (!QFile::remove(path)) {
+                qCritical() << "Couldn't remove the old conflicting files.";
+                emitFailed(tr("Failed to remove old conflicting files."));
+                return;
+            }
+        }
+    }
+
     emitSucceeded();
+    return;
 }

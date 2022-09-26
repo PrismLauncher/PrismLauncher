@@ -38,6 +38,7 @@ private slots:
     void onDownloadSucceeded();
     void onDownloadFailed(QString reason);
     void onDownloadProgress(qint64 current, qint64 total);
+    void onDownloadAborted();
 
     void onUnzipFinished();
     void onUnzipCanceled();

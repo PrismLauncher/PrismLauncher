@@ -183,3 +183,26 @@ auto FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const -> 
 
     return netJob;
 }
+
+auto FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response) const -> NetJob*
+{
+    auto* netJob = new NetJob(QString("Flame::GetFiles"), APPLICATION->network());
+
+    QJsonObject body_obj;
+    QJsonArray files_arr;
+    for (auto& fileId : fileIds) {
+        files_arr.append(fileId);
+    }
+
+    body_obj["fileIds"] = files_arr;
+
+    QJsonDocument body(body_obj);
+    auto body_raw = body.toJson();
+
+    netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/mods/files"), response, body_raw));
+
+    QObject::connect(netJob, &NetJob::finished, [response, netJob] { delete response; netJob->deleteLater(); });
+    QObject::connect(netJob, &NetJob::failed, [body_raw] { qDebug() << body_raw; });
+
+    return netJob;
+}

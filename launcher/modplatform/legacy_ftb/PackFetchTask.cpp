@@ -59,6 +59,7 @@ void PackFetchTask::fetch()
 
     QObject::connect(jobPtr.get(), &NetJob::succeeded, this, &PackFetchTask::fileDownloadFinished);
     QObject::connect(jobPtr.get(), &NetJob::failed, this, &PackFetchTask::fileDownloadFailed);
+    QObject::connect(jobPtr.get(), &NetJob::aborted, this, &PackFetchTask::fileDownloadAborted);
 
     jobPtr->start();
 }
@@ -92,6 +93,14 @@ void PackFetchTask::fetchPrivate(const QStringList & toFetch)
         QObject::connect(job, &NetJob::failed, this, [this, job, packCode, data](QString reason)
         {
             emit privateFileDownloadFailed(reason, packCode);
+            job->deleteLater();
+
+            data->clear();
+            delete data;
+        });
+
+        QObject::connect(job, &NetJob::aborted, this, [this, job, data]{
+            emit aborted();
             job->deleteLater();
 
             data->clear();
@@ -202,6 +211,11 @@ void PackFetchTask::fileDownloadFailed(QString reason)
 {
     qWarning() << "Fetching FTBPacks failed:" << reason;
     emit failed(reason);
+}
+
+void PackFetchTask::fileDownloadAborted()
+{
+    emit aborted();
 }
 
 }

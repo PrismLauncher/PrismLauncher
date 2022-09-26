@@ -44,7 +44,7 @@ void InstanceCopyTask::copyFinished()
     auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
 
     InstancePtr inst(new NullInstance(m_globalSettings, instanceSettings, m_stagingPath));
-    inst->setName(m_instName);
+    inst->setName(name());
     inst->setIconKey(m_instIcon);
     if(!m_keepPlaytime) {
         inst->resetTimePlayed();

@@ -297,6 +297,8 @@ set(MINECRAFT_SOURCES
     minecraft/Library.cpp
     minecraft/Library.h
     minecraft/MojangDownloadInfo.h
+    minecraft/VanillaInstanceCreationTask.cpp
+    minecraft/VanillaInstanceCreationTask.h
     minecraft/VersionFile.cpp
     minecraft/VersionFile.h
     minecraft/VersionFilterData.h
@@ -459,6 +461,8 @@ set(API_SOURCES
     modplatform/helpers/NetworkModAPI.cpp
     modplatform/helpers/HashUtils.h
     modplatform/helpers/HashUtils.cpp
+    modplatform/helpers/OverrideUtils.h
+    modplatform/helpers/OverrideUtils.cpp
 )
 
 set(FTB_SOURCES
@@ -484,6 +488,8 @@ set(FLAME_SOURCES
     modplatform/flame/FileResolvingTask.cpp
     modplatform/flame/FlameCheckUpdate.cpp
     modplatform/flame/FlameCheckUpdate.h
+    modplatform/flame/FlameInstanceCreationTask.h
+    modplatform/flame/FlameInstanceCreationTask.cpp
 )
 
 set(MODRINTH_SOURCES
@@ -493,6 +499,8 @@ set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthPackManifest.h
     modplatform/modrinth/ModrinthCheckUpdate.cpp
     modplatform/modrinth/ModrinthCheckUpdate.h
+    modplatform/modrinth/ModrinthInstanceCreationTask.cpp
+    modplatform/modrinth/ModrinthInstanceCreationTask.h
 )
 
 set(MODPACKSCH_SOURCES

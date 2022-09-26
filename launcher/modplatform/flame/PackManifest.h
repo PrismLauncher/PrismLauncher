@@ -35,18 +35,18 @@
 
 #pragma once
 
-#include <QString>
-#include <QVector>
-#include <QMap>
-#include <QUrl>
 #include <QJsonObject>
+#include <QMap>
+#include <QString>
+#include <QUrl>
+#include <QVector>
 
 namespace Flame
 {
 struct File
 {
     // NOTE: throws JSONValidationError
-    bool parseFromObject(const QJsonObject& object);
+    bool parseFromObject(const QJsonObject& object, bool throw_on_blocked = true);
 
     int projectId = 0;
     int fileId = 0;
@@ -97,6 +97,8 @@ struct Manifest
     //File id -> File
     QMap<int,Flame::File> files;
     QString overrides;
+
+    bool is_loaded = false;
 };
 
 void loadManifest(Flame::Manifest & m, const QString &filepath);

@@ -127,7 +127,7 @@ void FtbPage::suggestCurrent()
         return;
     }
 
-    dialog->setSuggestedPack(selected.name + " " + selectedVersion, new ModpacksCH::PackInstallTask(selected, selectedVersion, this));
+    dialog->setSuggestedPack(selected.name, selectedVersion, new ModpacksCH::PackInstallTask(selected, selectedVersion, this));
     for(auto art : selected.art) {
         if(art.type == "square") {
             QString editedLogoName;

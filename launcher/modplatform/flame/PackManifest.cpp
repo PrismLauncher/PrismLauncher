@@ -29,21 +29,29 @@ static void loadMinecraftV1(Flame::Minecraft& m, QJsonObject& minecraft)
     }
 }
 
-static void loadManifestV1(Flame::Manifest& m, QJsonObject& manifest)
+static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
 {
     auto mc = Json::requireObject(manifest, "minecraft");
-    loadMinecraftV1(m.minecraft, mc);
-    m.name = Json::ensureString(manifest, QString("name"), "Unnamed");
-    m.version = Json::ensureString(manifest, QString("version"), QString());
-    m.author = Json::ensureString(manifest, QString("author"), "Anonymous");
+
+    loadMinecraftV1(pack.minecraft, mc);
+
+    pack.name = Json::ensureString(manifest, QString("name"), "Unnamed");
+    pack.version = Json::ensureString(manifest, QString("version"), QString());
+    pack.author = Json::ensureString(manifest, QString("author"), "Anonymous");
+
     auto arr = Json::ensureArray(manifest, "files", QJsonArray());
-    for (QJsonValueRef item : arr) {
+    for (auto item : arr) {
         auto obj = Json::requireObject(item);
+
         Flame::File file;
         loadFileV1(file, obj);
-        m.files.insert(file.fileId,file);
+
+        pack.files.insert(file.fileId,file);
     }
-    m.overrides = Json::ensureString(manifest, "overrides", "overrides");
+
+    pack.overrides = Json::ensureString(manifest, "overrides", "overrides");
+
+    pack.is_loaded = true;
 }
 
 void Flame::loadManifest(Flame::Manifest& m, const QString& filepath)
@@ -61,7 +69,7 @@ void Flame::loadManifest(Flame::Manifest& m, const QString& filepath)
     loadManifestV1(m, obj);
 }
 
-bool Flame::File::parseFromObject(const QJsonObject& obj)
+bool Flame::File::parseFromObject(const QJsonObject& obj,  bool throw_on_blocked)
 {
     fileName = Json::requireString(obj, "fileName");
     // This is a piece of a Flame project JSON pulled out into the file metadata (here) for convenience
@@ -91,7 +99,7 @@ bool Flame::File::parseFromObject(const QJsonObject& obj)
     // may throw, if the project is blocked
     QString rawUrl = Json::ensureString(obj, "downloadUrl");
     url = QUrl(rawUrl, QUrl::TolerantMode);
-    if (!url.isValid()) {
+    if (!url.isValid() && throw_on_blocked) {
         throw JSONValidationError(QString("Invalid URL: %1").arg(rawUrl));
     }
 

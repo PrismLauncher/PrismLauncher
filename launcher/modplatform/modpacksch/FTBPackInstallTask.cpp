@@ -65,9 +65,8 @@ bool PackInstallTask::abort()
     if (m_mod_id_resolver_task)
         aborted &= m_mod_id_resolver_task->abort();
 
-    // FIXME: This should be 'emitAborted()', but InstanceStaging doesn't connect to the abort signal yet...
     if (aborted)
-        emitFailed(tr("Aborted"));
+        emitAborted();
 
     return aborted;
 }
@@ -335,7 +334,7 @@ void PackInstallTask::install()
 
     components->saveNow();
 
-    instance.setName(m_instName);
+    instance.setName(name());
     instance.setIconKey(m_instIcon);
     instance.setManagedPack("modpacksch", QString::number(m_pack.id), m_pack.name, QString::number(m_version.id), m_version.name);
     instanceSettings->resumeSave();
