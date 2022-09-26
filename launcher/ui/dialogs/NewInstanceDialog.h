@@ -60,8 +60,8 @@ public:
 
     void updateDialogState();
 
-    void setSuggestedPack(QString name = QString(), InstanceTask * task = nullptr);
-    void setSuggestedPack(QString name, QString version, InstanceTask * task = nullptr);
+    void setSuggestedPack(const QString& name = QString(), InstanceTask * task = nullptr);
+    void setSuggestedPack(const QString& name, QString version, InstanceTask * task = nullptr);
     void setSuggestedIconFromFile(const QString &path, const QString &name);
     void setSuggestedIcon(const QString &key);
 

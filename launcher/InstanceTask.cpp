@@ -2,7 +2,7 @@
 
 #include "ui/dialogs/CustomMessageBox.h"
 
-InstanceNameChange askForChangingInstanceName(QWidget* parent, QString old_name, QString new_name)
+InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& old_name, const QString& new_name)
 {
     auto dialog =
         CustomMessageBox::selectable(parent, QObject::tr("Change instance name"),

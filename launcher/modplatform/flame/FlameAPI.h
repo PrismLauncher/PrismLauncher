@@ -12,7 +12,7 @@ class FlameAPI : public NetworkModAPI {
     auto getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion;
 
     auto getProjects(QStringList addonIds, QByteArray* response) const -> NetJob* override;
-    auto getFiles(QStringList fileIds, QByteArray* response) const -> NetJob*;
+    auto getFiles(const QStringList& fileIds, QByteArray* response) const -> NetJob*;
 
    private:
     inline auto getSortFieldInt(QString sortString) const -> int

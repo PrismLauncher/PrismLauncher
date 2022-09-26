@@ -2,10 +2,12 @@
 
 #include "InstanceCreationTask.h"
 
+#include <utility>
+
 class VanillaCreationTask final : public InstanceCreationTask {
     Q_OBJECT
    public:
-    VanillaCreationTask(BaseVersionPtr version) : InstanceCreationTask(), m_version(version) {}
+    VanillaCreationTask(BaseVersionPtr version) : InstanceCreationTask(), m_version(std::move(version)) {}
     VanillaCreationTask(BaseVersionPtr version, QString loader, BaseVersionPtr loader_version);
 
     bool createInstance() override;

@@ -5,7 +5,7 @@
 
 /* Helpers */
 enum class InstanceNameChange { ShouldChange, ShouldKeep };
-[[nodiscard]] InstanceNameChange askForChangingInstanceName(QWidget* parent, QString old_name, QString new_name);
+[[nodiscard]] InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& old_name, const QString& new_name);
 
 struct InstanceName {
    public:

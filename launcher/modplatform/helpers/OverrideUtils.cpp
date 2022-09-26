@@ -6,7 +6,7 @@
 
 namespace Override {
 
-void createOverrides(QString name, QString parent_folder, QString override_path)
+void createOverrides(const QString& name, const QString& parent_folder, const QString& override_path)
 {
     QString file_path(FS::PathCombine(parent_folder, name + ".txt"));
     if (QFile::exists(file_path))
@@ -33,7 +33,7 @@ void createOverrides(QString name, QString parent_folder, QString override_path)
     file.close();
 }
 
-QStringList readOverrides(QString name, QString parent_folder)
+QStringList readOverrides(const QString& name, const QString& parent_folder)
 {
     QString file_path(FS::PathCombine(parent_folder, name + ".txt"));
 

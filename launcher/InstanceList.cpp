@@ -535,7 +535,7 @@ InstancePtr InstanceList::getInstanceById(QString instId) const
     return InstancePtr();
 }
 
-InstancePtr InstanceList::getInstanceByManagedName(QString managed_name) const
+InstancePtr InstanceList::getInstanceByManagedName(const QString& managed_name) const
 {
     if (managed_name.isEmpty())
         return {};
@@ -880,7 +880,7 @@ QString InstanceList::getStagedInstancePath()
     return path;
 }
 
-bool InstanceList::commitStagedInstance(QString path, InstanceName const& instanceName, QString groupName, bool should_override)
+bool InstanceList::commitStagedInstance(const QString& path, InstanceName const& instanceName, const QString& groupName, bool should_override)
 {
     QDir dir;
     QString instID;

@@ -184,7 +184,7 @@ auto FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const -> 
     return netJob;
 }
 
-auto FlameAPI::getFiles(QStringList fileIds, QByteArray* response) const -> NetJob*
+auto FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response) const -> NetJob*
 {
     auto* netJob = new NetJob(QString("Flame::GetFiles"), APPLICATION->network());
 

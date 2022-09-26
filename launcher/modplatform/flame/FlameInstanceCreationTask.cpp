@@ -126,7 +126,7 @@ bool FlameCreationTask::updateInstance()
         // TODO: Currently 'overrides' will always override the stuff on update. How do we preserve unchanged overrides?
         // FIXME: We may want to do something about disabled mods.
         auto old_overrides = Override::readOverrides("overrides", old_index_folder);
-        for (auto entry : old_overrides) {
+        for (const auto& entry : old_overrides) {
             if (entry.isEmpty())
                 continue;
             qDebug() << "Scheduling" << entry << "for removal";
@@ -320,7 +320,7 @@ bool FlameCreationTask::createInstance()
         qDebug() << "Found jarmods:";
         QDir jarmodsDir(jarmodsPath);
         QStringList jarMods;
-        for (auto info : jarmodsDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files)) {
+        for (const auto& info : jarmodsDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files)) {
             qDebug() << info.fileName();
             jarMods.push_back(info.absoluteFilePath());
         }

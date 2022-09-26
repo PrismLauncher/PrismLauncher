@@ -14,7 +14,7 @@ class FlameCreationTask final : public InstanceCreationTask {
     Q_OBJECT
 
    public:
-    FlameCreationTask(QString staging_path, SettingsObjectPtr global_settings, QWidget* parent)
+    FlameCreationTask(const QString& staging_path, SettingsObjectPtr global_settings, QWidget* parent)
         : InstanceCreationTask(), m_parent(parent)
     {
         setStagingPath(staging_path);

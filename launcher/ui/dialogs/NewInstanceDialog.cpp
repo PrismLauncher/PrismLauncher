@@ -51,6 +51,7 @@
 #include <QFileDialog>
 #include <QValidator>
 #include <QDialogButtonBox>
+#include <utility>
 
 #include "ui/widgets/PageContainer.h"
 #include "ui/pages/modplatform/VanillaPage.h"
@@ -177,7 +178,7 @@ NewInstanceDialog::~NewInstanceDialog()
     delete ui;
 }
 
-void NewInstanceDialog::setSuggestedPack(QString name, InstanceTask* task)
+void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task)
 {
     creationTask.reset(task);
 
@@ -193,12 +194,12 @@ void NewInstanceDialog::setSuggestedPack(QString name, InstanceTask* task)
     m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
-void NewInstanceDialog::setSuggestedPack(QString name, QString version, InstanceTask* task)
+void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, InstanceTask* task)
 {
     creationTask.reset(task);
 
     ui->instNameTextBox->setPlaceholderText(name);
-    importVersion = version;
+    importVersion = std::move(version);
 
     if (!task) {
         ui->iconButton->setIcon(APPLICATION->icons()->getIcon("default"));

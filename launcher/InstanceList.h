@@ -104,7 +104,7 @@ public:
     /* O(n) */
     InstancePtr getInstanceById(QString id) const;
     /* O(n) */
-    InstancePtr getInstanceByManagedName(QString managed_name) const;
+    InstancePtr getInstanceByManagedName(const QString& managed_name) const;
     QModelIndex getInstanceIndexById(const QString &id) const;
     QStringList getGroups();
     bool isGroupCollapsed(const QString &groupName);
@@ -133,7 +133,7 @@ public:
      * should_override is used when another similar instance already exists, and we want to override it
      * - for instance, when updating it.
      */
-    bool commitStagedInstance(QString keyPath, const InstanceName& instanceName, QString groupName, bool should_override);
+    bool commitStagedInstance(const QString& keyPath, const InstanceName& instanceName, const QString& groupName, bool should_override);
 
     /**
      * Destroy a previously created staging area given by @keyPath - used when creation fails.

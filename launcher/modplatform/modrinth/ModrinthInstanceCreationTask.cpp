@@ -121,7 +121,7 @@ bool ModrinthCreationTask::updateInstance()
         // TODO: Currently 'overrides' will always override the stuff on update. How do we preserve unchanged overrides?
         // FIXME: We may want to do something about disabled mods.
         auto old_overrides = Override::readOverrides("overrides", old_index_folder);
-        for (auto entry : old_overrides) {
+        for (const auto& entry : old_overrides) {
             if (entry.isEmpty())
                 continue;
             qDebug() << "Scheduling" << entry << "for removal";
@@ -129,7 +129,7 @@ bool ModrinthCreationTask::updateInstance()
         }
 
         auto old_client_overrides = Override::readOverrides("client-overrides", old_index_folder);
-        for (auto entry : old_overrides) {
+        for (const auto& entry : old_overrides) {
             if (entry.isEmpty())
                 continue;
             qDebug() << "Scheduling" << entry << "for removal";
@@ -235,7 +235,7 @@ bool ModrinthCreationTask::createInstance()
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         m_files_job->addNetAction(dl);
 
-        if (file.downloads.size() > 0) {
+        if (!file.downloads.empty()) {
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             connect(dl.get(), &NetAction::failed, [this, &file, path, dl] {
@@ -281,7 +281,7 @@ bool ModrinthCreationTask::createInstance()
     return ended_well;
 }
 
-bool ModrinthCreationTask::parseManifest(QString index_path, std::vector<Modrinth::File>& files, bool set_managed_info, bool show_optional_dialog)
+bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<Modrinth::File>& files, bool set_managed_info, bool show_optional_dialog)
 {
     try {
         auto doc = Json::requireDocument(index_path);
@@ -300,7 +300,7 @@ bool ModrinthCreationTask::parseManifest(QString index_path, std::vector<Modrint
 
             auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
             bool had_optional = false;
-            for (auto modInfo : jsonFiles) {
+            for (const auto& modInfo : jsonFiles) {
                 Modrinth::File file;
                 file.path = Json::requireString(modInfo, "path");
 
