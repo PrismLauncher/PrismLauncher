@@ -21,6 +21,7 @@
 , self
 , version
 , libnbtplusplus
+, tomlplusplus
 , enableLTO ? false
 }:
 
@@ -59,6 +60,11 @@ stdenv.mkDerivation rec {
     mkdir source/libraries/libnbtplusplus
     cp -a ${libnbtplusplus}/* source/libraries/libnbtplusplus
     chmod a+r+w source/libraries/libnbtplusplus/*
+    # Copy tomlplusplus
+    rm -rf source/libraries/tomlplusplus
+    mkdir source/libraries/tomlplusplus
+    cp -a ${tomlplusplus}/* source/libraries/tomlplusplus
+    chmod a+r+w source/libraries/tomlplusplus/*
   '';
 
   cmakeFlags = [

@@ -52,7 +52,24 @@
       "inputs": {
         "flake-compat": "flake-compat",
         "libnbtplusplus": "libnbtplusplus",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "tomlplusplus": "tomlplusplus"
+      }
+    },
+    "tomlplusplus": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1664034574,
+        "narHash": "sha256-EFMAl6tsTvkgK0DWC/pZfOIq06b2e5SnxJa1ngGRIQA=",
+        "owner": "marzer",
+        "repo": "tomlplusplus",
+        "rev": "8aa5c8b2a4ff2c440d4630addf64fa4f62146170",
+        "type": "github"
+      },
+      "original": {
+        "owner": "marzer",
+        "repo": "tomlplusplus",
+        "type": "github"
       }
     }
   },
