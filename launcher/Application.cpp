@@ -136,10 +136,6 @@
 
 static const QLatin1String liveCheckFile("live.check");
 
-#define MACOS_HINT "If you are on macOS Sierra, you might have to move the app to your /Applications or ~/Applications folder. "\
-    "This usually fixes the problem and you can move the application elsewhere afterwards.\n"\
-    "\n"
-
 namespace {
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -330,9 +326,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             QString(
                 "The launcher data folder could not be created.\n"
                 "\n"
-#if defined(Q_OS_MAC)
-                MACOS_HINT
-#endif
                 "Make sure you have the right permissions to the launcher data folder and any folder needed to access it.\n"
                 "(%1)\n"
                 "\n"
@@ -348,9 +341,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             QString(
                 "The launcher data folder could not be opened.\n"
                 "\n"
-#if defined(Q_OS_MAC)
-                MACOS_HINT
-#endif
                 "Make sure you have the right permissions to the launcher data folder.\n"
                 "(%1)\n"
                 "\n"
@@ -431,9 +421,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 QString(
                     "The launcher couldn't create a log file - the data folder is not writable.\n"
                     "\n"
-    #if defined(Q_OS_MAC)
-                    MACOS_HINT
-    #endif
                     "Make sure you have write permissions to the data folder.\n"
                     "(%1)\n"
                     "\n"
