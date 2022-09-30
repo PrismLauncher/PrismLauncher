@@ -1,17 +1,17 @@
 #include "LocalModParseTask.h"
 
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonValue>
-#include <QString>
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
-#include <toml.h>
+#include <toml++/toml.h>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QString>
 
+#include "FileSystem.h"
 #include "Json.h"
 #include "settings/INIFile.h"
-#include "FileSystem.h"
 
 namespace {
 
@@ -22,8 +22,7 @@ namespace {
 // https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/5bf6a2d05145ec79387acc0d45c958642fb049fc
 ModDetails ReadMCModInfo(QByteArray contents)
 {
-    auto getInfoFromArray = [&](QJsonArray arr) -> ModDetails
-    {
+    auto getInfoFromArray = [&](QJsonArray arr) -> ModDetails {
         if (!arr.at(0).isObject()) {
             return {};
         }
@@ -32,16 +31,14 @@ ModDetails ReadMCModInfo(QByteArray contents)
         details.mod_id = firstObj.value("modid").toString();
         auto name = firstObj.value("name").toString();
         // NOTE: ignore stupid example mods copies where the author didn't even bother to change the name
-        if(name != "Example Mod") {
+        if (name != "Example Mod") {
             details.name = name;
         }
         details.version = firstObj.value("version").toString();
         auto homeurl = firstObj.value("url").toString().trimmed();
-        if(!homeurl.isEmpty())
-        {
+        if (!homeurl.isEmpty()) {
             // fix up url.
-            if (!homeurl.startsWith("http://") && !homeurl.startsWith("https://") && !homeurl.startsWith("ftp://"))
-            {
+            if (!homeurl.startsWith("http://") && !homeurl.startsWith("https://") && !homeurl.startsWith("ftp://")) {
                 homeurl.prepend("http://");
             }
         }
@@ -53,8 +50,7 @@ ModDetails ReadMCModInfo(QByteArray contents)
             authors = firstObj.value("authors").toArray();
         }
 
-        for (auto author: authors)
-        {
+        for (auto author : authors) {
             details.authors.append(author.toString());
         }
         return details;
@@ -62,14 +58,11 @@ ModDetails ReadMCModInfo(QByteArray contents)
     QJsonParseError jsonError;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
     // this is the very old format that had just the array
-    if (jsonDoc.isArray())
-    {
+    if (jsonDoc.isArray()) {
         return getInfoFromArray(jsonDoc.array());
-    }
-    else if (jsonDoc.isObject())
-    {
+    } else if (jsonDoc.isObject()) {
         auto val = jsonDoc.object().value("modinfoversion");
-        if(val.isUndefined()) {
+        if (val.isUndefined()) {
             val = jsonDoc.object().value("modListVersion");
         }
 
@@ -79,18 +72,16 @@ ModDetails ReadMCModInfo(QByteArray contents)
         if (version < 0)
             version = Json::ensureString(val, "").toInt();
 
-        if (version != 2)
-        {
+        if (version != 2) {
             qCritical() << "BAD stuff happened to mod json:";
             qCritical() << contents;
             return {};
         }
         auto arrVal = jsonDoc.object().value("modlist");
-        if(arrVal.isUndefined()) {
+        if (arrVal.isUndefined()) {
             arrVal = jsonDoc.object().value("modList");
         }
-        if (arrVal.isArray())
-        {
+        if (arrVal.isArray()) {
             return getInfoFromArray(arrVal.toArray());
         }
     }
@@ -102,108 +93,75 @@ ModDetails ReadMCModTOML(QByteArray contents)
 {
     ModDetails details;
 
-    char errbuf[200];
-    // top-level table
-    toml_table_t* tomlData = toml_parse(contents.data(), errbuf, sizeof(errbuf));
-
-    if(!tomlData)
-    {
+    toml::table tomlData;
+#if TOML_EXCEPTIONS
+    try {
+        tomlData = toml::parse(contents.toStdString());
+    } catch (const toml::parse_error& err) {
         return {};
     }
+#else
+    tomlData = toml::parse(contents.toStdString());
+    if (!tomlData) {
+        return {};
+    }
+#endif
 
     // array defined by [[mods]]
-    toml_array_t* tomlModsArr = toml_array_in(tomlData, "mods");
-    if(!tomlModsArr)
-    {
+    auto tomlModsArr = tomlData["mods"].as_array();
+    if (!tomlModsArr) {
         qWarning() << "Corrupted mods.toml? Couldn't find [[mods]] array!";
         return {};
     }
 
     // we only really care about the first element, since multiple mods in one file is not supported by us at the moment
-    toml_table_t* tomlModsTable0 = toml_table_at(tomlModsArr, 0);
-    if(!tomlModsTable0)
-    {
+    auto tomlModsTable0 = tomlModsArr->get(0);
+    if (!tomlModsTable0) {
         qWarning() << "Corrupted mods.toml? [[mods]] didn't have an element at index 0!";
+        return {};
+    }
+    auto modsTable = tomlModsTable0->as_table();
+    if (!tomlModsTable0) {
+        qWarning() << "Corrupted mods.toml? [[mods]] was not a table!";
         return {};
     }
 
     // mandatory properties - always in [[mods]]
-    toml_datum_t modIdDatum = toml_string_in(tomlModsTable0, "modId");
-    if(modIdDatum.ok)
-    {
-        details.mod_id = modIdDatum.u.s;
-        // library says this is required for strings
-        free(modIdDatum.u.s);
+    if (auto modIdDatum = (*modsTable)["modId"].as_string()) {
+        details.mod_id = QString::fromStdString(modIdDatum->get());
     }
-    toml_datum_t versionDatum = toml_string_in(tomlModsTable0, "version");
-    if(versionDatum.ok)
-    {
-        details.version = versionDatum.u.s;
-        free(versionDatum.u.s);
+    if (auto versionDatum = (*modsTable)["version"].as_string()) {
+        details.version = QString::fromStdString(versionDatum->get());
     }
-    toml_datum_t displayNameDatum = toml_string_in(tomlModsTable0, "displayName");
-    if(displayNameDatum.ok)
-    {
-        details.name = displayNameDatum.u.s;
-        free(displayNameDatum.u.s);
+    if (auto displayNameDatum = (*modsTable)["displayName"].as_string()) {
+        details.name = QString::fromStdString(displayNameDatum->get());
     }
-    toml_datum_t descriptionDatum = toml_string_in(tomlModsTable0, "description");
-    if(descriptionDatum.ok)
-    {
-        details.description = descriptionDatum.u.s;
-        free(descriptionDatum.u.s);
+    if (auto descriptionDatum = (*modsTable)["description"].as_string()) {
+        details.description = QString::fromStdString(descriptionDatum->get());
     }
 
     // optional properties - can be in the root table or [[mods]]
-    toml_datum_t authorsDatum = toml_string_in(tomlData, "authors");
     QString authors = "";
-    if(authorsDatum.ok)
-    {
-        authors = authorsDatum.u.s;
-        free(authorsDatum.u.s);
+    if (auto authorsDatum = tomlData["authors"].as_string()) {
+        authors = QString::fromStdString(authorsDatum->get());
+    } else if (auto authorsDatum = (*modsTable)["authors"].as_string()) {
+        authors = QString::fromStdString(authorsDatum->get());
     }
-    else
-    {
-        authorsDatum = toml_string_in(tomlModsTable0, "authors");
-        if(authorsDatum.ok)
-        {
-            authors = authorsDatum.u.s;
-            free(authorsDatum.u.s);
-        }
-    }
-    if(!authors.isEmpty())
-    {
+    if (!authors.isEmpty()) {
         details.authors.append(authors);
     }
 
-    toml_datum_t homeurlDatum = toml_string_in(tomlData, "displayURL");
     QString homeurl = "";
-    if(homeurlDatum.ok)
-    {
-        homeurl = homeurlDatum.u.s;
-        free(homeurlDatum.u.s);
+    if (auto homeurlDatum = tomlData["displayURL"].as_string()) {
+        homeurl = QString::fromStdString(homeurlDatum->get());
+    } else if (auto homeurlDatum = (*modsTable)["displayURL"].as_string()) {
+        homeurl = QString::fromStdString(homeurlDatum->get());
     }
-    else
-    {
-        homeurlDatum = toml_string_in(tomlModsTable0, "displayURL");
-        if(homeurlDatum.ok)
-        {
-            homeurl = homeurlDatum.u.s;
-            free(homeurlDatum.u.s);
-        }
-    }
-    if(!homeurl.isEmpty())
-    {
-        // fix up url.
-        if (!homeurl.startsWith("http://") && !homeurl.startsWith("https://") && !homeurl.startsWith("ftp://"))
-        {
-            homeurl.prepend("http://");
-        }
+    // fix up url.
+    if (!homeurl.isEmpty() && !homeurl.startsWith("http://") && !homeurl.startsWith("https://") && !homeurl.startsWith("ftp://")) {
+        homeurl.prepend("http://");
     }
     details.homeurl = homeurl;
-
-    // this seems to be recursive, so it should free everything
-    toml_free(tomlData);
 
     return details;
 }
@@ -224,25 +182,20 @@ ModDetails ReadFabricModInfo(QByteArray contents)
     details.name = object.contains("name") ? object.value("name").toString() : details.mod_id;
     details.description = object.value("description").toString();
 
-    if (schemaVersion >= 1)
-    {
+    if (schemaVersion >= 1) {
         QJsonArray authors = object.value("authors").toArray();
-        for (auto author: authors)
-        {
-            if(author.isObject()) {
+        for (auto author : authors) {
+            if (author.isObject()) {
                 details.authors.append(author.toObject().value("name").toString());
-            }
-            else {
+            } else {
                 details.authors.append(author.toString());
             }
         }
 
-        if (object.contains("contact"))
-        {
+        if (object.contains("contact")) {
             QJsonObject contact = object.value("contact").toObject();
 
-            if (contact.contains("homepage"))
-            {
+            if (contact.contains("homepage")) {
                 details.homeurl = contact.value("homepage").toString();
             }
         }
@@ -261,8 +214,7 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
     ModDetails details;
 
     // https://github.com/QuiltMC/rfcs/blob/be6ba280d785395fefa90a43db48e5bfc1d15eb4/specification/0002-quilt.mod.json.md
-    if (schemaVersion == 1)
-    {
+    if (schemaVersion == 1) {
         auto modInfo = Json::requireObject(object.value("quilt_loader"), "Quilt mod info");
 
         details.mod_id = Json::requireString(modInfo.value("id"), "Mod ID");
@@ -280,8 +232,7 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
 
         auto modContact = Json::ensureObject(modMetadata.value("contact"));
 
-        if (modContact.contains("homepage"))
-        {
+        if (modContact.contains("homepage")) {
             details.homeurl = Json::requireString(modContact.value("homepage"));
         }
     }
@@ -314,21 +265,17 @@ ModDetails ReadLiteModInfo(QByteArray contents)
     QJsonParseError jsonError;
     QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
     auto object = jsonDoc.object();
-    if (object.contains("name"))
-    {
+    if (object.contains("name")) {
         details.mod_id = details.name = object.value("name").toString();
     }
-    if (object.contains("version"))
-    {
+    if (object.contains("version")) {
         details.version = object.value("version").toString("");
-    }
-    else
-    {
+    } else {
         details.version = object.value("revision").toString("");
     }
     details.mcversion = object.value("mcversion").toString();
     auto author = object.value("author").toString();
-    if(!author.isEmpty()) {
+    if (!author.isEmpty()) {
         details.authors.append(author);
     }
     details.description = object.value("description").toString();
@@ -336,14 +283,10 @@ ModDetails ReadLiteModInfo(QByteArray contents)
     return details;
 }
 
-}
+}  // namespace
 
-LocalModParseTask::LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile):
-    Task(nullptr, false),
-    m_token(token),
-    m_type(type),
-    m_modFile(modFile),
-    m_result(new Result())
+LocalModParseTask::LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile)
+    : Task(nullptr, false), m_token(token), m_type(type), m_modFile(modFile), m_result(new Result())
 {}
 
 void LocalModParseTask::processAsZip()
@@ -354,10 +297,8 @@ void LocalModParseTask::processAsZip()
 
     QuaZipFile file(&zip);
 
-    if (zip.setCurrentFile("META-INF/mods.toml"))
-    {
-        if (!file.open(QIODevice::ReadOnly))
-        {
+    if (zip.setCurrentFile("META-INF/mods.toml")) {
+        if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
             return;
         }
@@ -366,12 +307,9 @@ void LocalModParseTask::processAsZip()
         file.close();
 
         // to replace ${file.jarVersion} with the actual version, as needed
-        if (m_result->details.version == "${file.jarVersion}")
-        {
-            if (zip.setCurrentFile("META-INF/MANIFEST.MF"))
-            {
-                if (!file.open(QIODevice::ReadOnly))
-                {
+        if (m_result->details.version == "${file.jarVersion}") {
+            if (zip.setCurrentFile("META-INF/MANIFEST.MF")) {
+                if (!file.open(QIODevice::ReadOnly)) {
                     zip.close();
                     return;
                 }
@@ -379,10 +317,8 @@ void LocalModParseTask::processAsZip()
                 // quick and dirty line-by-line parser
                 auto manifestLines = file.readAll().split('\n');
                 QString manifestVersion = "";
-                for (auto &line : manifestLines)
-                {
-                    if (QString(line).startsWith("Implementation-Version: "))
-                    {
+                for (auto& line : manifestLines) {
+                    if (QString(line).startsWith("Implementation-Version: ")) {
                         manifestVersion = QString(line).remove("Implementation-Version: ");
                         break;
                     }
@@ -390,8 +326,7 @@ void LocalModParseTask::processAsZip()
 
                 // some mods use ${projectversion} in their build.gradle, causing this mess to show up in MANIFEST.MF
                 // also keep with forge's behavior of setting the version to "NONE" if none is found
-                if (manifestVersion.contains("task ':jar' property 'archiveVersion'") || manifestVersion == "")
-                {
+                if (manifestVersion.contains("task ':jar' property 'archiveVersion'") || manifestVersion == "") {
                     manifestVersion = "NONE";
                 }
 
@@ -403,11 +338,8 @@ void LocalModParseTask::processAsZip()
 
         zip.close();
         return;
-    }
-    else if (zip.setCurrentFile("mcmod.info"))
-    {
-        if (!file.open(QIODevice::ReadOnly))
-        {
+    } else if (zip.setCurrentFile("mcmod.info")) {
+        if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
             return;
         }
@@ -416,11 +348,8 @@ void LocalModParseTask::processAsZip()
         file.close();
         zip.close();
         return;
-    }
-    else if (zip.setCurrentFile("quilt.mod.json"))
-    {
-        if (!file.open(QIODevice::ReadOnly))
-        {
+    } else if (zip.setCurrentFile("quilt.mod.json")) {
+        if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
             return;
         }
@@ -429,11 +358,8 @@ void LocalModParseTask::processAsZip()
         file.close();
         zip.close();
         return;
-    }
-    else if (zip.setCurrentFile("fabric.mod.json"))
-    {
-        if (!file.open(QIODevice::ReadOnly))
-        {
+    } else if (zip.setCurrentFile("fabric.mod.json")) {
+        if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
             return;
         }
@@ -442,11 +368,8 @@ void LocalModParseTask::processAsZip()
         file.close();
         zip.close();
         return;
-    }
-    else if (zip.setCurrentFile("forgeversion.properties"))
-    {
-        if (!file.open(QIODevice::ReadOnly))
-        {
+    } else if (zip.setCurrentFile("forgeversion.properties")) {
+        if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
             return;
         }
@@ -463,8 +386,7 @@ void LocalModParseTask::processAsZip()
 void LocalModParseTask::processAsFolder()
 {
     QFileInfo mcmod_info(FS::PathCombine(m_modFile.filePath(), "mcmod.info"));
-    if (mcmod_info.isFile())
-    {
+    if (mcmod_info.isFile()) {
         QFile mcmod(mcmod_info.filePath());
         if (!mcmod.open(QIODevice::ReadOnly))
             return;
@@ -483,10 +405,8 @@ void LocalModParseTask::processAsLitemod()
 
     QuaZipFile file(&zip);
 
-    if (zip.setCurrentFile("litemod.json"))
-    {
-        if (!file.open(QIODevice::ReadOnly))
-        {
+    if (zip.setCurrentFile("litemod.json")) {
+        if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
             return;
         }
@@ -505,8 +425,7 @@ bool LocalModParseTask::abort()
 
 void LocalModParseTask::executeTask()
 {
-    switch(m_type)
-    {
+    switch (m_type) {
         case ResourceType::ZIPFILE:
             processAsZip();
             break;

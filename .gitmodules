@@ -1,8 +1,9 @@
 [submodule "depends/libnbtplusplus"]
     path = libraries/libnbtplusplus
     url = https://github.com/PolyMC/libnbtplusplus.git
-    pushurl = git@github.com:PolyMC/libnbtplusplus.git
-
 [submodule "libraries/quazip"]
 	path = libraries/quazip
 	url = https://github.com/stachenov/quazip.git
+[submodule "libraries/tomlplusplus"]
+	path = libraries/tomlplusplus
+	url = https://github.com/marzer/tomlplusplus.git

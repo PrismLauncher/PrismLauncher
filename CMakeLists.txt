@@ -192,6 +192,11 @@ if (Qt5_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
+# Find toml++
+if(NOT Launcher_FORCE_BUNDLED_LIBS)
+    find_package(tomlplusplus 3.2.0 QUIET)
+endif()
+
 ####################################### Program Info #######################################
 
 set(Launcher_APP_BINARY_NAME "polymc" CACHE STRING "Name of the Launcher binary")
@@ -312,7 +317,12 @@ endif()
 add_subdirectory(libraries/rainbow) # Qt extension for colors
 add_subdirectory(libraries/LocalPeer) # fork of a library from Qt solutions
 add_subdirectory(libraries/classparser) # class parser library
-add_subdirectory(libraries/tomlc99) # toml parser
+if(NOT tomlplusplus_FOUND)
+    message(STATUS "Using bundled tomlplusplus")
+    add_subdirectory(libraries/tomlplusplus) # toml parser
+else()
+    message(STATUS "Using system tomlplusplus")
+endif()
 add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too much
 add_subdirectory(libraries/gamemode)
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API

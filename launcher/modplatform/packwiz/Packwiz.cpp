@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-*  PolyMC - Minecraft Launcher
-*  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
-*
-*  This program is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation, version 3.
-*
-*  This program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include "Packwiz.h"
 
@@ -22,9 +22,7 @@
 #include <QDir>
 #include <QObject>
 
-#include "toml.h"
-#include "FileSystem.h"
-
+#include <toml++/toml.h>
 #include "minecraft/mod/Mod.h"
 #include "modplatform/ModIndex.h"
 
@@ -44,7 +42,7 @@ auto getRealIndexName(QDir& index_dir, QString normalized_fname, bool should_fin
             }
         }
 
-        if(should_find_match && !QString::compare(normalized_fname, real_fname, Qt::CaseSensitive)){
+        if (should_find_match && !QString::compare(normalized_fname, real_fname, Qt::CaseSensitive)) {
             qCritical() << "Could not find a match for a valid metadata file!";
             qCritical() << "File: " << normalized_fname;
             return {};
@@ -57,7 +55,7 @@ auto getRealIndexName(QDir& index_dir, QString normalized_fname, bool should_fin
 // Helpers
 static inline auto indexFileName(QString const& mod_slug) -> QString
 {
-    if(mod_slug.endsWith(".pw.toml"))
+    if (mod_slug.endsWith(".pw.toml"))
         return mod_slug;
     return QString("%1.pw.toml").arg(mod_slug);
 }
@@ -65,31 +63,27 @@ static inline auto indexFileName(QString const& mod_slug) -> QString
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
 // Helper functions for extracting data from the TOML file
-auto stringEntry(toml_table_t* parent, const char* entry_name) -> QString
+auto stringEntry(toml::table table, const std::string entry_name) -> QString
 {
-    toml_datum_t var = toml_string_in(parent, entry_name);
-    if (!var.ok) {
-        qCritical() << QString("Failed to read str property '%1' in mod metadata.").arg(entry_name);
+    auto node = table[entry_name];
+    if (!node) {
+        qCritical() << QString::fromStdString("Failed to read str property '" + entry_name + "' in mod metadata.");
         return {};
     }
 
-    QString tmp = var.u.s;
-    free(var.u.s);
-
-    return tmp;
+    return QString::fromStdString(node.value_or(""));
 }
 
-auto intEntry(toml_table_t* parent, const char* entry_name) -> int
+auto intEntry(toml::table table, const std::string entry_name) -> int
 {
-    toml_datum_t var = toml_int_in(parent, entry_name);
-    if (!var.ok) {
-        qCritical() << QString("Failed to read int property '%1' in mod metadata.").arg(entry_name);
+    auto node = table[entry_name];
+    if (!node) {
+        qCritical() << QString::fromStdString("Failed to read int property '" + entry_name + "' in mod metadata.");
         return {};
     }
 
-    return var.u.i;
+    return node.value_or(0);
 }
-
 
 auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod
 {
@@ -99,10 +93,9 @@ auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Mo
     mod.name = mod_pack.name;
     mod.filename = mod_version.fileName;
 
-    if(mod_pack.provider == ModPlatform::Provider::FLAME){
+    if (mod_pack.provider == ModPlatform::Provider::FLAME) {
         mod.mode = "metadata:curseforge";
-    }
-    else {
+    } else {
         mod.mode = "url";
         mod.url = mod_version.downloadUrl;
     }
@@ -120,8 +113,8 @@ auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Mo
 auto V1::createModFormat(QDir& index_dir, ::Mod& internal_mod, QString slug) -> Mod
 {
     // Try getting metadata if it exists
-    Mod mod { getIndexForMod(index_dir, slug) };
-    if(mod.isValid())
+    Mod mod{ getIndexForMod(index_dir, slug) };
+    if (mod.isValid())
         return mod;
 
     qWarning() << QString("Tried to create mod metadata with a Mod without metadata!");
@@ -131,7 +124,7 @@ auto V1::createModFormat(QDir& index_dir, ::Mod& internal_mod, QString slug) -> 
 
 void V1::updateModIndex(QDir& index_dir, Mod& mod)
 {
-    if(!mod.isValid()){
+    if (!mod.isValid()) {
         qCritical() << QString("Tried to update metadata of an invalid mod!");
         return;
     }
@@ -150,7 +143,9 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
     // TODO: We should do more stuff here, as the user is likely trying to
     // override a file. In this case, check versions and ask the user what
     // they want to do!
-    if (index_file.exists()) { index_file.remove(); }
+    if (index_file.exists()) {
+        index_file.remove();
+    }
 
     if (!index_file.open(QIODevice::ReadWrite)) {
         qCritical() << QString("Could not open file %1!").arg(indexFileName(mod.name));
@@ -174,15 +169,15 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
 
         in_stream << QString("\n[update]\n");
         in_stream << QString("[update.%1]\n").arg(ProviderCaps.name(mod.provider));
-        switch(mod.provider){
-        case(ModPlatform::Provider::FLAME):
-            in_stream << QString("file-id = %1\n").arg(mod.file_id.toString());
-            in_stream << QString("project-id = %1\n").arg(mod.project_id.toString());
-            break;
-        case(ModPlatform::Provider::MODRINTH):
-            addToStream("mod-id", mod.mod_id().toString());
-            addToStream("version", mod.version().toString());
-            break;
+        switch (mod.provider) {
+            case (ModPlatform::Provider::FLAME):
+                in_stream << QString("file-id = %1\n").arg(mod.file_id.toString());
+                in_stream << QString("project-id = %1\n").arg(mod.project_id.toString());
+                break;
+            case (ModPlatform::Provider::MODRINTH):
+                addToStream("mod-id", mod.mod_id().toString());
+                addToStream("version", mod.version().toString());
+                break;
         }
     }
 
@@ -230,27 +225,25 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
     if (real_fname.isEmpty())
         return {};
 
-    QFile index_file(index_dir.absoluteFilePath(real_fname));
-
-    if (!index_file.open(QIODevice::ReadOnly)) {
-        qWarning() << QString("Failed to open mod metadata for %1").arg(slug);
+    toml::table table;
+#if TOML_EXCEPTIONS
+    try {
+        table = toml::parse_file(index_dir.absoluteFilePath(real_fname).toStdString());
+    } catch (const toml::parse_error& err) {
+        qWarning() << QString("Could not open file %1!").arg(normalized_fname);
+        qWarning() << "Reason: " << QString(err.what());
         return {};
     }
-
-    toml_table_t* table = nullptr;
-
-    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    char errbuf[200];
-    auto file_bytearray = index_file.readAll();
-    table = toml_parse(file_bytearray.data(), errbuf, sizeof(errbuf));
-
-    index_file.close();
-
+#else
+    table = toml::parse_file(index_dir.absoluteFilePath(real_fname).toStdString());
     if (!table) {
         qWarning() << QString("Could not open file %1!").arg(normalized_fname);
-        qWarning() << "Reason: " << QString(errbuf);
+        qWarning() << "Reason: " << QString(table.error().what());
         return {};
     }
+#endif
+
+    // index_file.close();
 
     mod.slug = slug;
 
@@ -261,44 +254,41 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
     }
 
     {  // [download] info
-        toml_table_t* download_table = toml_table_in(table, "download");
+        auto download_table = table["download"].as_table();
         if (!download_table) {
             qCritical() << QString("No [download] section found on mod metadata!");
             return {};
         }
 
-        mod.mode = stringEntry(download_table, "mode");
-        mod.url = stringEntry(download_table, "url");
-        mod.hash_format = stringEntry(download_table, "hash-format");
-        mod.hash = stringEntry(download_table, "hash");
+        mod.mode = stringEntry(*download_table, "mode");
+        mod.url = stringEntry(*download_table, "url");
+        mod.hash_format = stringEntry(*download_table, "hash-format");
+        mod.hash = stringEntry(*download_table, "hash");
     }
 
-    { // [update] info
+    {  // [update] info
         using Provider = ModPlatform::Provider;
 
-        toml_table_t* update_table = toml_table_in(table, "update");
-        if (!update_table) {
+        auto update_table = table["update"];
+        if (!update_table || !update_table.is_table()) {
             qCritical() << QString("No [update] section found on mod metadata!");
             return {};
         }
 
-        toml_table_t* mod_provider_table = nullptr;
-        if ((mod_provider_table = toml_table_in(update_table, ProviderCaps.name(Provider::FLAME)))) {
+        toml::table* mod_provider_table = nullptr;
+        if ((mod_provider_table = update_table[ProviderCaps.name(Provider::FLAME)].as_table())) {
             mod.provider = Provider::FLAME;
-            mod.file_id = intEntry(mod_provider_table, "file-id");
-            mod.project_id = intEntry(mod_provider_table, "project-id");
-        } else if ((mod_provider_table = toml_table_in(update_table, ProviderCaps.name(Provider::MODRINTH)))) {
+            mod.file_id = intEntry(*mod_provider_table, "file-id");
+            mod.project_id = intEntry(*mod_provider_table, "project-id");
+        } else if ((mod_provider_table = update_table[ProviderCaps.name(Provider::MODRINTH)].as_table())) {
             mod.provider = Provider::MODRINTH;
-            mod.mod_id() = stringEntry(mod_provider_table, "mod-id");
-            mod.version() = stringEntry(mod_provider_table, "version");
+            mod.mod_id() = stringEntry(*mod_provider_table, "mod-id");
+            mod.version() = stringEntry(*mod_provider_table, "version");
         } else {
             qCritical() << QString("No mod provider on mod metadata!");
             return {};
         }
-        
     }
-
-    toml_free(table);
 
     return mod;
 }
