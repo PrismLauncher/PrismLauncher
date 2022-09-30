@@ -27,8 +27,6 @@ public:
 
 protected:
     QVariant data(const QModelIndex & index, int role) const override;
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
-    bool subSortLessThan(const QModelIndex &left, const QModelIndex &right) const;
 
 private:
     QCollator m_naturalSort;

@@ -22,8 +22,6 @@
 #include "IconPickerDialog.h"
 #include "ui_IconPickerDialog.h"
 
-#include "ui/instanceview/InstanceDelegate.h"
-
 #include "icons/IconList.h"
 #include "icons/IconUtils.h"
 #include <DesktopServices.h>
@@ -48,8 +46,7 @@ IconPickerDialog::IconPickerDialog(QWidget *parent)
     contentsWidget->setTextElideMode(Qt::ElideRight);
     contentsWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     contentsWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    contentsWidget->setItemDelegate(new ListViewDelegate());
+   contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     // contentsWidget->setAcceptDrops(true);
     contentsWidget->setDropIndicatorShown(true);

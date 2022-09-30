@@ -872,16 +872,7 @@ SET(LAUNCHER_SOURCES
     # GUI - instance group view
     ui/instanceview/InstanceProxyModel.cpp
     ui/instanceview/InstanceProxyModel.h
-    ui/instanceview/AccessibleInstanceView.cpp
-    ui/instanceview/AccessibleInstanceView.h
-    ui/instanceview/AccessibleInstanceView_p.h
-    ui/instanceview/InstanceView.cpp
-    ui/instanceview/InstanceView.h
-    ui/instanceview/InstanceDelegate.cpp
-    ui/instanceview/InstanceDelegate.h
-    ui/instanceview/VisualGroup.cpp
-    ui/instanceview/VisualGroup.h
-)
+        ui/instanceview/InstanceView.cpp ui/instanceview/InstanceView.h)
 
 if(WIN32)
     set(LAUNCHER_SOURCES

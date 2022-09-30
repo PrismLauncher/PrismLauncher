@@ -56,9 +56,9 @@ class QToolButton;
 class InstanceProxyModel;
 class LabeledToolButton;
 class QLabel;
+class InstanceView;
 class MinecraftLauncher;
 class BaseProfilerFactory;
-class InstanceView;
 class KonamiCode;
 class InstanceTask;
 
@@ -170,13 +170,11 @@ private slots:
 
     void updateToolsMenu();
 
-    void instanceActivated(QModelIndex);
+    void instanceActivated(InstancePtr inst);
 
-    void instanceChanged(const QModelIndex &current, const QModelIndex &previous);
+    void instanceChanged(InstancePtr current, InstancePtr previous);
 
     void instanceSelectRequest(QString id);
-
-    void instanceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
     void selectionBad();
 
@@ -228,7 +226,6 @@ private:
 
     // these are managed by Qt's memory management model!
     InstanceView *view = nullptr;
-    InstanceProxyModel *proxymodel = nullptr;
     QToolButton *newsLabel = nullptr;
     QLabel *m_statusLeft = nullptr;
     QLabel *m_statusCenter = nullptr;

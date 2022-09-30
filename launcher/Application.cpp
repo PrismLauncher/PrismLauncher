@@ -41,8 +41,6 @@
 #include "ui/MainWindow.h"
 #include "ui/InstanceWindow.h"
 
-#include "ui/instanceview/AccessibleInstanceView.h"
-
 #include "ui/pages/BasePageProvider.h"
 #include "ui/pages/global/LauncherPage.h"
 #include "ui/pages/global/MinecraftPage.h"
@@ -694,10 +692,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         }
         qDebug() << "<> Settings loaded.";
     }
-
-#ifndef QT_NO_ACCESSIBILITY
-    QAccessible::installFactory(groupViewAccessibleFactory);
-#endif /* !QT_NO_ACCESSIBILITY */
 
     // initialize network access and proxy setup
     {

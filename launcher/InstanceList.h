@@ -16,7 +16,7 @@
 #pragma once
 
 #include <QObject>
-#include <QAbstractListModel>
+#include <QAbstractTableModel>
 #include <QSet>
 #include <QList>
 #include <QStack>
@@ -55,7 +55,7 @@ struct TrashHistoryItem {
     QString groupName;
 };
 
-class InstanceList : public QAbstractListModel
+class InstanceList : public QAbstractTableModel
 {
     Q_OBJECT
 
@@ -64,12 +64,25 @@ public:
     virtual ~InstanceList();
 
 public:
-    QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-    bool setData(const QModelIndex & index, const QVariant & value, int role) override;
+   bool setData(const QModelIndex & index, const QVariant & value, int role) override;
+
+   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+
+   enum Column
+   {
+      Icon = 0,
+      Name,
+      GameVersion,
+      LastPlayed,
+      PlayTime,
+
+      ColumnCount
+   };
 
     enum AdditionalRoles
     {
@@ -152,8 +165,7 @@ public:
     bool dropMimeData(const QMimeData * data, Qt::DropAction action, int row, int column, const QModelIndex & parent) override;
 
     QStringList mimeTypes() const override;
-    QMimeData *mimeData(const QModelIndexList &indexes) const override;
-
+   QMimeData *mimeData(const QModelIndexList &indexes) const override;
 signals:
     void dataIsInvalid();
     void instancesChanged();

@@ -90,9 +90,7 @@
 #include "JavaCommon.h"
 #include "LaunchController.h"
 
-#include "ui/instanceview/InstanceProxyModel.h"
 #include "ui/instanceview/InstanceView.h"
-#include "ui/instanceview/InstanceDelegate.h"
 #include "ui/widgets/LabeledToolButton.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/NewsDialog.h"
@@ -872,30 +870,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     // Create the instance list widget
     {
-        view = new InstanceView(ui->centralWidget);
-
-        view->setSelectionMode(QAbstractItemView::SingleSelection);
-        // FIXME: leaks ListViewDelegate
-        view->setItemDelegate(new ListViewDelegate(this));
-        view->setFrameShape(QFrame::NoFrame);
-        // do not show ugly blue border on the mac
-        view->setAttribute(Qt::WA_MacShowFocusRect, false);
+        view = new InstanceView(ui->centralWidget, APPLICATION->instances().get());
 
         view->installEventFilter(this);
         view->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(view, &QWidget::customContextMenuRequested, this, &MainWindow::showInstanceContextMenu);
-        connect(view, &InstanceView::droppedURLs, this, &MainWindow::droppedURLs, Qt::QueuedConnection);
 
-        proxymodel = new InstanceProxyModel(this);
-        proxymodel->setSourceModel(APPLICATION->instances().get());
-        proxymodel->sort(0);
-        connect(proxymodel, &InstanceProxyModel::dataChanged, this, &MainWindow::instanceDataChanged);
-
-        view->setModel(proxymodel);
-        view->setSourceOfGroupCollapseStatus([](const QString & groupName)->bool {
-            return APPLICATION->instances()->isGroupCollapsed(groupName);
-        });
-        connect(view, &InstanceView::groupStateChanged, APPLICATION->instances().get(), &InstanceList::on_GroupStateChanged);
         ui->horizontalLayout->addWidget(view);
     }
     // The cat background
@@ -907,10 +887,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         setCatBackground(cat_enable);
     }
     // start instance when double-clicked
-    connect(view, &InstanceView::activated, this, &MainWindow::instanceActivated);
+    connect(view, &InstanceView::instanceActivated, this, &MainWindow::instanceActivated);
 
     // track the selection -- update the instance toolbar
-    connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::instanceChanged);
+    connect(view, &InstanceView::currentInstanceChanged, this, &MainWindow::instanceChanged);
 
     // track icon changes and update the toolbar!
     connect(APPLICATION->icons().get(), &IconList::iconUpdated, this, &MainWindow::iconUpdated);
@@ -1074,7 +1054,7 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
     QAction *actionSep = new QAction("", this);
     actionSep->setSeparator(true);
 
-    bool onInstance = view->indexAt(pos).isValid();
+    bool onInstance = view->currentView()->indexAt(pos).isValid();
     if (onInstance)
     {
         actions = ui->instanceToolBar->actions();
@@ -1090,42 +1070,6 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
         QAction *actionVoid = new QAction(m_selectedInstance->name(), this);
         actionVoid->setEnabled(false);
         actions.prepend(actionVoid);
-    }
-    else
-    {
-        auto group = view->groupNameAt(pos);
-
-        QAction *actionVoid = new QAction(BuildConfig.LAUNCHER_DISPLAYNAME, this);
-        actionVoid->setEnabled(false);
-
-        QAction *actionCreateInstance = new QAction(tr("Create instance"), this);
-        actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
-        if(!group.isNull())
-        {
-            QVariantMap data;
-            data["group"] = group;
-            actionCreateInstance->setData(data);
-        }
-
-        connect(actionCreateInstance, SIGNAL(triggered(bool)), SLOT(on_actionAddInstance_triggered()));
-
-        actions.prepend(actionSep);
-        actions.prepend(actionVoid);
-        actions.append(actionCreateInstance);
-        if(!group.isNull())
-        {
-            QAction *actionDeleteGroup = new QAction(tr("Delete group '%1'").arg(group), this);
-            QVariantMap data;
-            data["group"] = group;
-            actionDeleteGroup->setData(data);
-            connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(deleteGroup()));
-            actions.append(actionDeleteGroup);
-        }
-
-        QAction *actionUndoTrashInstance = new QAction("Undo last trash instance", this);
-        connect(actionUndoTrashInstance, SIGNAL(triggered(bool)), SLOT(undoTrashInstance()));
-        actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        actions.append(actionUndoTrashInstance);
     }
     QMenu myMenu;
     myMenu.addActions(actions);
@@ -1626,7 +1570,6 @@ void MainWindow::on_actionCopyInstance_triggered()
 
 void MainWindow::finalizeInstance(InstancePtr inst)
 {
-    view->updateGeometries();
     setSelectedInstanceById(inst->id());
     if (APPLICATION->accounts()->anyAccountIsValid())
     {
@@ -1763,15 +1706,7 @@ void MainWindow::updateInstanceToolIcon(QString new_icon)
 
 void MainWindow::setSelectedInstanceById(const QString &id)
 {
-    if (id.isNull())
-        return;
-    const QModelIndex index = APPLICATION->instances()->getInstanceIndexById(id);
-    if (index.isValid())
-    {
-        QModelIndex selectionIndex = proxymodel->mapFromSource(index);
-        view->selectionModel()->setCurrentIndex(selectionIndex, QItemSelectionModel::ClearAndSelect);
-        updateStatusCenter();
-    }
+    //TODO
 }
 
 void MainWindow::on_actionChangeInstGroup_triggered()
@@ -1861,8 +1796,8 @@ void MainWindow::globalSettingsClosed()
 {
     // FIXME: quick HACK to make this work. improve, optimize.
     APPLICATION->instances()->loadList();
-    proxymodel->invalidate();
-    proxymodel->sort(0);
+    //proxymodel->invalidate();  // TODO!
+    //proxymodel->sort(0);
     updateMainToolBar();
     updateToolsMenu();
     updateStatusCenter();
@@ -1957,7 +1892,7 @@ void MainWindow::on_actionRenameInstance_triggered()
 {
     if (m_selectedInstance)
     {
-        view->edit(view->currentIndex());
+        // FIXME
     }
 }
 
@@ -1988,12 +1923,8 @@ void MainWindow::changeEvent(QEvent* event)
     QMainWindow::changeEvent(event);
 }
 
-void MainWindow::instanceActivated(QModelIndex index)
+void MainWindow::instanceActivated(InstancePtr inst)
 {
-    if (!index.isValid())
-        return;
-    QString id = index.data(InstanceList::InstanceIDRole).toString();
-    InstancePtr inst = APPLICATION->instances()->getInstanceById(id);
     if (!inst)
         return;
 
@@ -2053,9 +1984,9 @@ void MainWindow::startTask(Task *task)
     task->start();
 }
 
-void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &previous)
+void MainWindow::instanceChanged(InstancePtr current, InstancePtr previous)
 {
-    if (!current.isValid())
+    if (!current)
     {
         APPLICATION->settings()->set("SelectedInstance", QString());
         selectionBad();
@@ -2064,8 +1995,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
     if (m_selectedInstance) {
         disconnect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
     }
-    QString id = current.data(InstanceList::InstanceIDRole).toString();
-    m_selectedInstance = APPLICATION->instances()->getInstanceById(id);
+    m_selectedInstance = current;
     if (m_selectedInstance)
     {
         ui->instanceToolBar->setEnabled(true);
@@ -2110,16 +2040,6 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 void MainWindow::instanceSelectRequest(QString id)
 {
     setSelectedInstanceById(id);
-}
-
-void MainWindow::instanceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
-{
-    auto current = view->selectionModel()->currentIndex();
-    QItemSelection test(topLeft, bottomRight);
-    if (test.contains(current))
-    {
-        instanceChanged(current, current);
-    }
 }
 
 void MainWindow::selectionBad()
@@ -2189,6 +2109,6 @@ void MainWindow::updateStatusCenter()
 
 void MainWindow::refreshCurrentInstance(bool running)
 {
-    auto current = view->selectionModel()->currentIndex();
+    auto current = view->currentInstance();
     instanceChanged(current, current);
 }

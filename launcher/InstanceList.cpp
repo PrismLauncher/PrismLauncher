@@ -33,7 +33,6 @@
  *      limitations under the License.
  */
 
-#include <QDebug>
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
@@ -42,13 +41,10 @@
 #include <QJsonDocument>
 #include <QMimeData>
 #include <QSet>
-#include <QStack>
 #include <QPair>
-#include <QTextStream>
 #include <QThread>
 #include <QTimer>
 #include <QUuid>
-#include <QXmlStreamReader>
 
 #include "BaseInstance.h"
 #include "ExponentialSeries.h"
@@ -59,6 +55,7 @@
 #include "WatchLock.h"
 #include "minecraft/MinecraftInstance.h"
 #include "settings/INISettingsObject.h"
+#include "MMCTime.h"
 
 #ifdef Q_OS_WIN32
 #include <Windows.h>
@@ -67,7 +64,7 @@
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
 InstanceList::InstanceList(SettingsObjectPtr settings, const QString& instDir, QObject* parent)
-    : QAbstractListModel(parent), m_globalSettings(settings)
+   : QAbstractTableModel(parent), m_globalSettings(settings)
 {
     resumeWatch();
     // Create aand normalize path
@@ -114,14 +111,14 @@ bool InstanceList::dropMimeData(const QMimeData* data, Qt::DropAction action, in
 
 QStringList InstanceList::mimeTypes() const
 {
-    auto types = QAbstractListModel::mimeTypes();
+   auto types = QAbstractTableModel::mimeTypes();
     types.push_back("application/x-instanceid");
     return types;
 }
 
 QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
 {
-    auto mimeData = QAbstractListModel::mimeData(indexes);
+   auto mimeData = QAbstractTableModel::mimeData(indexes);
     if (indexes.size() == 1) {
         auto instanceId = data(indexes[0], InstanceIDRole).toString();
         mimeData->setData("application/x-instanceid", instanceId.toUtf8());
@@ -135,55 +132,63 @@ int InstanceList::rowCount(const QModelIndex& parent) const
     return m_instances.count();
 }
 
-QModelIndex InstanceList::index(int row, int column, const QModelIndex& parent) const
-{
-    Q_UNUSED(parent);
-    if (row < 0 || row >= m_instances.size())
-        return QModelIndex();
-    return createIndex(row, column, (void*)m_instances.at(row).get());
+QVariant InstanceList::headerData(int section, Qt::Orientation orientation, int role) const {
+   if (role != Qt::DisplayRole) {
+      return QVariant();
+   }
+
+   switch(static_cast<Column>(section)) {
+      case Icon: return tr("Icon");
+      case Name: return tr("Name");
+      case GameVersion: return tr("Game Version");
+      case LastPlayed: return tr("Last played");
+      case PlayTime: return tr("Play time");
+      default: return QVariant();
+   }
 }
 
-QVariant InstanceList::data(const QModelIndex& index, int role) const
-{
+QVariant InstanceList::data(const QModelIndex& index, int role) const {
     if (!index.isValid()) {
         return QVariant();
     }
-    BaseInstance *pdata = static_cast<BaseInstance *>(index.internalPointer());
-    switch (role)
-    {
-    case InstancePointerRole:
-    {
-        QVariant v = QVariant::fromValue((void *)pdata);
-        return v;
-    }
-    case InstanceIDRole:
-    {
-        return pdata->id();
-    }
-    case Qt::EditRole:
-    case Qt::DisplayRole:
-    {
-        return pdata->name();
-    }
-    case Qt::AccessibleTextRole:
-    {
-        return tr("%1 Instance").arg(pdata->name());
-    }
-    case Qt::ToolTipRole:
-    {
-        return pdata->instanceRoot();
-    }
-    case Qt::DecorationRole:
-    {
-        return pdata->iconKey();
-    }
-    // HACK: see InstanceView.h in gui!
-    case GroupRole:
-    {
-        return getInstanceGroup(pdata->id());
-    }
-    default:
-        break;
+    const InstancePtr inst = m_instances[index.row()];
+    switch (static_cast<Column>(index.column())) {
+        case Icon:
+            if (role == Qt::DecorationRole) {
+                return inst->iconKey();
+            }
+            break;
+        case Name:
+            if (role == Qt::DisplayRole || role == Qt::EditRole)
+                return inst->name();
+            if (role == Qt::AccessibleTextRole)
+                return tr("%1 Instance").arg(inst->name());
+            if (role == Qt::ToolTipRole)
+                return inst->instanceRoot();
+            break;
+        case GameVersion: {
+            if (role == Qt::DisplayRole)
+                return "Minecraft <something>";
+        }
+        case LastPlayed: {
+            QString foo = Time::prettifyDuration(inst->lastTimePlayed());
+            QDateTime bar = QDateTime::fromMSecsSinceEpoch(inst->lastLaunch());
+            if (role == Qt::DisplayRole)
+                return bar;
+            if (role == Qt::ToolTipRole)
+                return tr("Last played for %1").arg(foo);
+            break;
+        }
+        case PlayTime: {
+            QString foo = Time::prettifyDuration(inst->totalTimePlayed());
+            if (role == Qt::DisplayRole)
+                return foo;
+            if (role == Qt::ToolTipRole)
+                return tr("Total played for %1").arg(foo);
+            break;
+        }
+        default:
+            break;
     }
     return QVariant();
 }
@@ -196,20 +201,28 @@ bool InstanceList::setData(const QModelIndex& index, const QVariant& value, int 
     if (role != Qt::EditRole) {
         return false;
     }
-    BaseInstance* pdata = static_cast<BaseInstance*>(index.internalPointer());
+    InstancePtr inst = m_instances.at(index.row());
     auto newName = value.toString();
-    if (pdata->name() == newName) {
+    if (inst->name() == newName) {
         return true;
     }
-    pdata->setName(newName);
-    return true;
+    inst->setName(newName);
+   return true;
+}
+
+int InstanceList::columnCount(const QModelIndex &parent) const
+{
+   return ColumnCount;
 }
 
 Qt::ItemFlags InstanceList::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags f;
     if (index.isValid()) {
-        f |= (Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
+        f |= (Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+        if (index.column() == Name) {
+            f |= Qt::ItemIsEditable;  // FIXME: bad UX! User can only use rename, if they selected the name column
+        }
     }
     return f;
 }
@@ -250,7 +263,7 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
     if (changed) {
         m_groupNameCache.insert(name);
         auto idx = getInstIndex(inst.get());
-        emit dataChanged(index(idx), index(idx), { GroupRole });
+      emit dataChanged(index(idx, Name), index(idx, Name), { GroupRole });
         saveGroupList();
     }
 }
@@ -273,7 +286,7 @@ void InstanceList::deleteGroup(const QString& name)
             removed = true;
             auto idx = getInstIndex(instance.get());
             if (idx > 0) {
-                emit dataChanged(index(idx), index(idx), { GroupRole });
+            emit dataChanged(index(idx, Name), index(idx, Name), { GroupRole });
             }
         }
     }
@@ -311,7 +324,7 @@ bool InstanceList::trashInstance(const InstanceId& id)
 
     qDebug() << "Instance" << id << "has been trashed by the launcher.";
     m_trashHistory.push({id, inst->instanceRoot(), trashedLoc, cachedGroupId});
-    
+
     return true;
 }
 
@@ -550,7 +563,7 @@ InstancePtr InstanceList::getInstanceByManagedName(const QString& managed_name) 
 
 QModelIndex InstanceList::getInstanceIndexById(const QString &id) const
 {
-    return index(getInstIndex(getInstanceById(id).get()));
+   return index(getInstIndex(getInstanceById(id).get()), Name);
 }
 
 int InstanceList::getInstIndex(BaseInstance* inst) const
@@ -568,7 +581,7 @@ void InstanceList::propertiesChanged(BaseInstance* inst)
 {
     int i = getInstIndex(inst);
     if (i != -1) {
-        emit dataChanged(index(i), index(i));
+      emit dataChanged(index(i, Icon), index(i, ColumnCount - 1));
         updateTotalPlayTime();
     }
 }
