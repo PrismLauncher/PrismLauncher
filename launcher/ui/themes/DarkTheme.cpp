@@ -1,5 +1,7 @@
 #include "DarkTheme.h"
 
+#include <QObject>
+
 QString DarkTheme::id()
 {
     return "dark";
