@@ -161,3 +161,35 @@ QModelIndex InstanceView::mappedIndex(const QModelIndex& index) const
 {
     return m_proxy->mapToSource(index);
 }
+
+void InstanceView::setCatDisplayed(bool enabled)
+{
+    if (enabled) {
+        QDateTime now = QDateTime::currentDateTime();
+        QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
+        QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
+        QString cat;
+        if (std::abs(now.daysTo(xmas)) <= 4) {
+            cat = "catmas";
+        } else if (std::abs(now.daysTo(birthday)) <= 12) {
+            cat = "cattiversary";
+        } else {
+            cat = "kitteh";
+        }
+        setStyleSheet(QString(R"(
+*
+{
+    background-image: url(:/backgrounds/%1);
+    background-attachment: fixed;
+    background-clip: padding;
+    background-position: bottom right;
+    background-repeat: none;
+    background-color:palette(base);
+})")
+                          .arg(cat));
+        m_table->setAlternatingRowColors(false);
+    } else {
+        setStyleSheet(QString());
+        m_table->setAlternatingRowColors(true);
+    }
+}

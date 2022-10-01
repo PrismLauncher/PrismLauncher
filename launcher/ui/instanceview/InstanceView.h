@@ -39,6 +39,8 @@ class InstanceView : public QStackedWidget {
     // save state of current view
     void storeState();
 
+    void setCatDisplayed(bool enabled);
+
    signals:
     void instanceActivated(InstancePtr inst);
     void currentInstanceChanged(InstancePtr current, InstancePtr previous);
