@@ -25,6 +25,7 @@ InstanceProxyModel::InstanceProxyModel(QObject* parent) : QSortFilterProxyModel(
     m_naturalSort.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
     // FIXME: use loaded translation as source of locale instead, hook this up to translation changes
     m_naturalSort.setLocale(QLocale::system());
+    setSortRole(InstanceList::SortRole);
 }
 
 QVariant InstanceProxyModel::data(const QModelIndex& index, int role) const

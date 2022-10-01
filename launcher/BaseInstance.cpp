@@ -252,7 +252,7 @@ void BaseInstance::setRunning(bool running)
     emit runningStatusChanged(running);
 }
 
-int64_t BaseInstance::totalTimePlayed() const
+quint64 BaseInstance::totalTimePlayed() const
 {
     qint64 current = m_settings->get("totalTimePlayed").toLongLong();
     if(m_isRunning)
@@ -263,7 +263,7 @@ int64_t BaseInstance::totalTimePlayed() const
     return current;
 }
 
-int64_t BaseInstance::lastTimePlayed() const
+quint64 BaseInstance::lastTimePlayed() const
 {
     if(m_isRunning)
     {
@@ -306,12 +306,12 @@ bool BaseInstance::reloadSettings()
     return m_settings->reload();
 }
 
-qint64 BaseInstance::lastLaunch() const
+quint64 BaseInstance::lastLaunch() const
 {
-    return m_settings->get("lastLaunchTime").value<qint64>();
+    return m_settings->get("lastLaunchTime").value<quint64>();
 }
 
-void BaseInstance::setLastLaunch(qint64 val)
+void BaseInstance::setLastLaunch(quint64 val)
 {
     //FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("lastLaunchTime", val);

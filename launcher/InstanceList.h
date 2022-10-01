@@ -86,9 +86,10 @@ public:
 
     enum AdditionalRoles
     {
-        GroupRole = Qt::UserRole,
-        InstancePointerRole = 0x34B1CB48, ///< Return pointer to real instance
-        InstanceIDRole = 0x34B1CB49 ///< Return id if the instance
+        SortRole = Qt::UserRole + 1,
+        GroupRole,
+        InstancePointerRole, ///< Return pointer to real instance
+        InstanceIDRole ///< Return id if the instance
     };
     /*!
      * \brief Error codes returned by functions in the InstanceList class.

@@ -199,6 +199,18 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const {
                 return tr("%1 Instance").arg(inst->name());
             break;
         }
+
+        case SortRole: {
+            switch (index.column()) {
+                case PlayTimeColumn:
+                    return QVariant(inst->totalTimePlayed());
+                case LastPlayedColumn:
+                    return QVariant(inst->lastLaunch());
+                default:
+                    return data(index, Qt::DisplayRole);
+            }
+            break;
+        }
     }
     return QVariant();
 }
