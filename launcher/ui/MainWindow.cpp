@@ -105,7 +105,6 @@
 #include "ui/dialogs/ExportInstanceDialog.h"
 
 #include "UpdateController.h"
-#include "KonamiCode.h"
 
 #include "InstanceImportTask.h"
 #include "InstanceCopyTask.h"
@@ -848,12 +847,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         connect(q, SIGNAL(activated()), qApp, SLOT(quit()));
     }
 
-    // Konami Code
-    {
-        secretEventFilter = new KonamiCode(this);
-        connect(secretEventFilter, &KonamiCode::triggered, this, &MainWindow::konamiTriggered);
-    }
-
     // Add the news label to the news toolbar.
     {
         m_newsChecker.reset(new NewsChecker(APPLICATION->network(), BuildConfig.NEWS_RSS_URL));
@@ -1038,11 +1031,6 @@ QMenu * MainWindow::createPopupMenu()
     QMenu* filteredMenu = QMainWindow::createPopupMenu();
     filteredMenu->removeAction( ui->mainToolBar->toggleViewAction() );
     return filteredMenu;
-}
-
-void MainWindow::konamiTriggered()
-{
-    qDebug() << "Super Secret Mode ACTIVATED!";
 }
 
 void MainWindow::showInstanceContextMenu(const QPoint &pos, InstancePtr inst)
@@ -1330,7 +1318,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
     {
         if (ev->type() == QEvent::KeyPress)
         {
-            secretEventFilter->input(ev);
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(ev);
             switch (keyEvent->key())
             {

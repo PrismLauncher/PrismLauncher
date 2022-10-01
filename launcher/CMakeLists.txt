@@ -588,10 +588,6 @@ SET(LAUNCHER_SOURCES
     VersionProxyModel.cpp
     HoeDown.h
 
-    # Super secret!
-    KonamiCode.h
-    KonamiCode.cpp
-
     # Bundled resources
     resources/backgrounds/backgrounds.qrc
     resources/multimc/multimc.qrc

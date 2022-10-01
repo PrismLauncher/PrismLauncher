@@ -59,7 +59,6 @@ class QLabel;
 class InstanceView;
 class MinecraftLauncher;
 class BaseProfilerFactory;
-class KonamiCode;
 class InstanceTask;
 
 class MainWindow : public QMainWindow
@@ -197,8 +196,6 @@ private slots:
      */
     void downloadUpdates(GoUpdate::Status status);
 
-    void konamiTriggered();
-
     void globalSettingsClosed();
 
 #ifndef Q_OS_MAC
@@ -230,7 +227,6 @@ private:
     QLabel *m_statusCenter = nullptr;
     QMenu *accountMenu = nullptr;
     QToolButton *accountMenuButton = nullptr;
-    KonamiCode * secretEventFilter = nullptr;
 
     unique_qobject_ptr<NewsChecker> m_newsChecker;
 
