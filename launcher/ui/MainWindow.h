@@ -211,7 +211,6 @@ private:
     void activateInstance(InstancePtr instance);
     void updateInstanceToolIcon(QString new_icon);
     void setSelectedInstanceById(const QString &id);
-    void updateStatusCenter();
 
     void runModalTask(Task *task);
     void instanceFromInstanceTask(InstanceTask *task);
@@ -223,8 +222,6 @@ private:
     // these are managed by Qt's memory management model!
     InstanceView *view = nullptr;
     QToolButton *newsLabel = nullptr;
-    QLabel *m_statusLeft = nullptr;
-    QLabel *m_statusCenter = nullptr;
     QMenu *accountMenu = nullptr;
     QToolButton *accountMenuButton = nullptr;
 

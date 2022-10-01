@@ -179,7 +179,7 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
                 case PlayTimeColumn:
                     return Time::prettifyDuration(inst->totalTimePlayed());
                 case LastPlayedColumn:
-                    return QDateTime::fromMSecsSinceEpoch(inst->lastLaunch());
+                    return QDateTime::fromMSecsSinceEpoch(inst->lastLaunch());  // FIXME: Qt does not retranslate this?
             }
             break;
         }

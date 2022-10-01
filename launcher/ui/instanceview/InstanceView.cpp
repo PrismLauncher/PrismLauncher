@@ -86,8 +86,12 @@ void InstanceView::createTable()
     header->setSectionResizeMode(InstanceList::LastPlayedColumn, QHeaderView::Interactive);
     m_table->verticalHeader()->setDefaultSectionSize(m_rowHeight + 1 + 1);  // padding top and bottom
 
+    m_table->setColumnWidth(InstanceList::GameVersionColumn, 96 + 3 + 3);
+    m_table->setColumnWidth(InstanceList::PlayTimeColumn, 96 + 3 + 3);
+    m_table->setColumnWidth(InstanceList::LastPlayedColumn, 128 + 3 + 3);
+
     if (!APPLICATION->settings()->contains("InstanceViewTableHeaderState"))
-        m_table->sortByColumn(InstanceList::LastPlayedColumn, Qt::AscendingOrder);
+        m_table->sortByColumn(InstanceList::LastPlayedColumn, Qt::DescendingOrder);
 
     connect(m_table, &QAbstractItemView::doubleClicked, this, &InstanceView::activateInstance);
     connect(m_table->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstanceView::currentRowChanged);

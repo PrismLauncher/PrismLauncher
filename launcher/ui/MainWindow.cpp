@@ -55,7 +55,6 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QMainWindow>
-#include <QStatusBar>
 #include <QToolBar>
 #include <QWidget>
 #include <QMenu>
@@ -263,7 +262,6 @@ public:
 
     QWidget *centralWidget = nullptr;
     QHBoxLayout *horizontalLayout = nullptr;
-    QStatusBar *statusBar = nullptr;
 
     QMenuBar *menuBar = nullptr;
     QMenu *fileMenu;
@@ -588,13 +586,6 @@ public:
         actionCopyInstance->setEnabled(enabled);
     }
 
-    void createStatusBar(QMainWindow *MainWindow)
-    {
-        statusBar = new QStatusBar(MainWindow);
-        statusBar->setObjectName(QStringLiteral("statusBar"));
-        MainWindow->setStatusBar(statusBar);
-    }
-
     void createNewsToolbar(QMainWindow *MainWindow)
     {
         newsToolBar = TranslatedToolbar(MainWindow);
@@ -795,7 +786,6 @@ public:
         horizontalLayout->setContentsMargins(0, 0, 0, 0);
         MainWindow->setCentralWidget(centralWidget);
 
-        createStatusBar(MainWindow);
         createNewsToolbar(MainWindow);
         createInstanceToolbar(MainWindow);
 
@@ -824,12 +814,6 @@ public:
         // submenu buttons
         foldersMenuButton->setText(tr("Folders"));
         helpMenuButton->setText(tr("Help"));
-
-        // playtime counter
-        if (MainWindow->m_statusCenter)
-        {
-            MainWindow->updateStatusCenter();
-        }
     } // retranslateUi
 };
 
@@ -894,11 +878,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     // When the global settings page closes, we want to know about it and update our state
     connect(APPLICATION, &Application::globalSettingsClosed, this, &MainWindow::globalSettingsClosed);
-
-    m_statusLeft = new QLabel(tr("No instance selected"), this);
-    m_statusCenter = new QLabel(tr("Total playtime: 0s"), this);
-    statusBar()->addPermanentWidget(m_statusLeft, 1);
-    statusBar()->addPermanentWidget(m_statusCenter, 0);
 
     // Add "manage accounts" button, right align
     QWidget *spacer = new QWidget();
@@ -1011,12 +990,6 @@ void MainWindow::retranslateUi()
     }
     else {
         accountMenuButton->setText(tr("Profiles"));
-    }
-
-    if (m_selectedInstance) {
-        m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
-    } else {
-        m_statusLeft->setText(tr("No instance selected"));
     }
 
     ui->retranslateUi(this);
@@ -1738,7 +1711,6 @@ void MainWindow::globalSettingsClosed()
     //proxymodel->sort(0);
     updateMainToolBar();
     updateToolsMenu();
-    updateStatusCenter();
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
     // but Prism Launcher exits abnormally, causing the window state to never be saved:
     APPLICATION->settings()->set("MainWindowState", saveState().toBase64());
@@ -1952,8 +1924,6 @@ void MainWindow::instanceChanged(InstancePtr current, InstancePtr previous)
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
         ui->renameButton->setText(m_selectedInstance->name());
-        m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
-        updateStatusCenter();
         updateInstanceToolIcon(m_selectedInstance->iconKey());
 
         updateToolsMenu();
@@ -1986,7 +1956,6 @@ void MainWindow::selectionBad()
     // start by reseting everything...
     m_selectedInstance = nullptr;
 
-    statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
     ui->setInstanceActionsEnabled(false);
     updateToolsMenu();
@@ -2033,16 +2002,6 @@ void MainWindow::checkInstancePathForProblems()
         warning.setInformativeText(tempFolderText);
         warning.setDefaultButton(QMessageBox::Ok);
         warning.exec();
-    }
-}
-
-void MainWindow::updateStatusCenter()
-{
-    m_statusCenter->setVisible(APPLICATION->settings()->get("ShowGlobalGameTime").toBool());
-
-    int timePlayed = APPLICATION->instances()->getTotalPlayTime();
-    if (timePlayed > 0) {
-        m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
     }
 }
 

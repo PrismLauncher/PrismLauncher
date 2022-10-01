@@ -54,10 +54,6 @@ public:
     {
         setSpecificSettingsLoaded(true);
     }
-    QString getStatusbarDescription() override
-    {
-        return tr("Unknown instance type");
-    };
     QString getMainVersion() override
     {
         return tr("Unknown");

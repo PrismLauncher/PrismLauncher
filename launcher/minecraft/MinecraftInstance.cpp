@@ -880,26 +880,6 @@ QString MinecraftInstance::getLogFileRoot()
     return gameRoot();
 }
 
-QString MinecraftInstance::getStatusbarDescription()
-{
-    QString description = getMainVersion();
-    if(m_settings->get("ShowGameTime").toBool())
-    {
-        if (lastTimePlayed() > 0) {
-            description.append(tr(", last played for %1").arg(Time::prettifyDuration(lastTimePlayed())));
-        }
-
-        if (totalTimePlayed() > 0) {
-            description.append(tr(", total played for %1").arg(Time::prettifyDuration(totalTimePlayed())));
-        }
-    }
-    if(hasCrashed())
-    {
-        description.append(tr(", has crashed."));
-    }
-    return description;
-}
-
 QString MinecraftInstance::getMainVersion() {
     QString mcVersion = m_components->getComponentVersion("net.minecraft");
     if (mcVersion.isEmpty())

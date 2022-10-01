@@ -211,8 +211,6 @@ public:
      */
     virtual QString getLogFileRoot() = 0;
 
-    virtual QString getStatusbarDescription() = 0;
-
     virtual QString getMainVersion() = 0;
 
     /// FIXME: this really should be elsewhere...
