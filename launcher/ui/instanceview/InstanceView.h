@@ -43,6 +43,7 @@ signals:
     void currentInstanceChanged(InstancePtr current, InstancePtr previous);
 
 private slots:
+    void activateInstance(const QModelIndex& index);
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     void selectNameColumn(const QModelIndex& current, const QModelIndex& previous);
     // emits currentRowChanged if a data update affected the current instance
@@ -51,6 +52,7 @@ private slots:
 private:
     void createTable();
     void prepareModel();
+    QModelIndex mappedIndex(const QModelIndex& index) const;
 
     int m_rowHeight = 48;
 

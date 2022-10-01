@@ -23,6 +23,7 @@
  */
 
 #include "InstanceView.h"
+#include <qabstractitemmodel.h>
 
 #include "InstanceList.h"
 #include "ui/instanceview/InstanceProxyModel.h"
@@ -76,33 +77,38 @@ void InstanceView::createTable() {
     m_table->setColumnWidth(InstanceList::Icon, m_rowHeight + 3 + 3);  // padding left and right
     m_table->verticalHeader()->setDefaultSectionSize(m_rowHeight + 1 + 1);  // padding top and bottom
 
-    connect(m_table, &QTableView::doubleClicked, this, [&](const QModelIndex &idx) {
-        int row = m_proxy->mapToSource(idx).row();
-        emit instanceActivated(m_instances->at(row));
-    });
+    connect(m_table, &QTableView::doubleClicked, this, &InstanceView::activateInstance);
     connect(m_table->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstanceView::currentRowChanged);
     connect(m_table->selectionModel(), &QItemSelectionModel::currentColumnChanged, this, &InstanceView::selectNameColumn);
 }
 
 InstancePtr InstanceView::currentInstance() {
     auto current = m_table->selectionModel()->currentIndex();
-    int row = m_proxy->mapToSource(current).row();
-    return m_instances->at(row);
+    if (current.isValid()) {
+        int row = mappedIndex(current).row();
+        return m_instances->at(row);
+    }
+    return nullptr;
+}
+
+void InstanceView::activateInstance(const QModelIndex &index) {
+    if (index.isValid()) {
+        int row = mappedIndex(index).row();
+        emit instanceActivated(m_instances->at(row));
+    }
 }
 
 void InstanceView::currentRowChanged(const QModelIndex &current, const QModelIndex &previous) {
-    {
-        InstancePtr inst1, inst2;
-        if (current.isValid()) {
-            int row = m_proxy->mapToSource(current).row();
-            inst1 = m_instances->at(row);
-        }
-        if (previous.isValid()) {
-            int row = m_proxy->mapToSource(previous).row();
-            inst2 = m_instances->at(row);
-        }
-        emit currentInstanceChanged(inst1, inst2);
+    InstancePtr inst1, inst2;
+    if (current.isValid()) {
+        int row = mappedIndex(current).row();
+        inst1 = m_instances->at(row);
     }
+    if (previous.isValid()) {
+        int row = mappedIndex(previous).row();
+        inst2 = m_instances->at(row);
+    }
+    emit currentInstanceChanged(inst1, inst2);
 }
 
 void InstanceView::selectNameColumn(const QModelIndex &current, const QModelIndex &previous) {
@@ -116,8 +122,12 @@ void InstanceView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bo
 
     QItemSelection foo(topLeft, bottomRight);
     if (foo.contains(current)) {
-        int row = m_proxy->mapToSource(current).row();
+        int row = mappedIndex(current).row();
         InstancePtr inst = m_instances->at(row);
         emit currentInstanceChanged(inst, inst);
     }
+}
+
+QModelIndex InstanceView::mappedIndex(const QModelIndex& index) const {
+    return m_proxy->mapToSource(index);
 }
