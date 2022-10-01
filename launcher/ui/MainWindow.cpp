@@ -1910,6 +1910,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     // Save the window state and geometry.
     APPLICATION->settings()->set("MainWindowState", saveState().toBase64());
     APPLICATION->settings()->set("MainWindowGeometry", saveGeometry().toBase64());
+    view->storeState();
     event->accept();
     emit isClosing();
 }

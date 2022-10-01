@@ -27,7 +27,7 @@ class InstanceProxyModel;
 class InstanceList;
 
 class InstanceView : public QStackedWidget {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     explicit InstanceView(QWidget *parent = nullptr, InstanceList* instances = nullptr);
@@ -37,6 +37,9 @@ public:
     }
 
     InstancePtr currentInstance();
+
+    // save state of current view
+    void storeState();
 
 signals:
     void instanceActivated(InstancePtr inst);

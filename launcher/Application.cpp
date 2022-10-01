@@ -617,6 +617,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("MainWindowState", "");
         m_settings->registerSetting("MainWindowGeometry", "");
 
+        m_settings->registerSetting("InstanceViewTableHeaderState", "");
+
         m_settings->registerSetting("ConsoleWindowState", "");
         m_settings->registerSetting("ConsoleWindowGeometry", "");
 

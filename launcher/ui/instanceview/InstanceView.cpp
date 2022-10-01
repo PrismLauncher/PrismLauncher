@@ -22,8 +22,8 @@
  * or later.
  */
 
+#include "Application.h"
 #include "InstanceView.h"
-#include <qabstractitemmodel.h>
 
 #include "InstanceList.h"
 #include "ui/instanceview/InstanceProxyModel.h"
@@ -37,6 +37,10 @@ InstanceView::InstanceView(QWidget *parent, InstanceList *instances) : QStackedW
 
     addWidget(m_table);
     setCurrentWidget(m_table);
+}
+
+void InstanceView::storeState() {
+    APPLICATION->settings()->set("InstanceViewTableHeaderState", m_table->horizontalHeader()->saveState().toBase64());
 }
 
 void InstanceView::prepareModel() {
@@ -68,6 +72,8 @@ void InstanceView::createTable() {
     m_table->verticalHeader()->hide();
 
     QHeaderView *header = m_table->horizontalHeader();
+    header->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("InstanceViewTableHeaderState").toByteArray()));
+
     header->setSectionsMovable(true);
     header->setSectionResizeMode(InstanceList::Icon, QHeaderView::Fixed);
     header->setSectionResizeMode(InstanceList::Name, QHeaderView::Stretch);
@@ -76,6 +82,9 @@ void InstanceView::createTable() {
     header->setSectionResizeMode(InstanceList::PlayTime, QHeaderView::Interactive);
     m_table->setColumnWidth(InstanceList::Icon, m_rowHeight + 3 + 3);  // padding left and right
     m_table->verticalHeader()->setDefaultSectionSize(m_rowHeight + 1 + 1);  // padding top and bottom
+
+    if (!APPLICATION->settings()->contains("InstanceViewTableHeaderState"))
+        m_table->sortByColumn(InstanceList::LastPlayed, Qt::AscendingOrder);
 
     connect(m_table, &QTableView::doubleClicked, this, &InstanceView::activateInstance);
     connect(m_table->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstanceView::currentRowChanged);
