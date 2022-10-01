@@ -463,7 +463,7 @@ QList<InstanceId> InstanceList::discoverInstances()
     return out;
 }
 
-InstanceList::InstListError InstanceList::loadList()
+void InstanceList::loadList()
 {
     auto existingIds = getIdMapping(m_instances);
 
@@ -523,7 +523,6 @@ InstanceList::InstListError InstanceList::loadList()
     }
     m_dirty = false;
     updateTotalPlayTime();
-    return NoError;
 }
 
 void InstanceList::updateTotalPlayTime()

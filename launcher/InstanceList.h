@@ -32,10 +32,6 @@ using InstanceId = QString;
 using GroupId = QString;
 using InstanceLocator = std::pair<InstancePtr, int>;
 
-enum class InstCreateError { NoCreateError = 0, NoSuchVersion, UnknownCreateError, InstExists, CantCreateDir };
-
-enum class GroupsState { NotLoaded, Steady, Dirty };
-
 struct TrashHistoryItem {
     QString id;
     QString polyPath;
@@ -71,18 +67,12 @@ class InstanceList : public QAbstractTableModel {
     };
 
     enum AdditionalRoles { SortRole = Qt::UserRole + 1, GroupRole, InstanceIDRole };
-    /*!
-     * \brief Error codes returned by functions in the InstanceList class.
-     * NoError Indicates that no error occurred.
-     * UnknownError indicates that an unspecified error occurred.
-     */
-    enum InstListError { NoError = 0, UnknownError };
 
     InstancePtr at(int i) const { return m_instances.at(i); }
 
     int count() const { return m_instances.count(); }
 
-    InstListError loadList();
+    void loadList();
     void saveNow();
 
     /* O(n) */
