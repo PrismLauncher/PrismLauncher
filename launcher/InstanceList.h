@@ -88,8 +88,7 @@ public:
     {
         SortRole = Qt::UserRole + 1,
         GroupRole,
-        InstancePointerRole, ///< Return pointer to real instance
-        InstanceIDRole ///< Return id if the instance
+        InstanceIDRole
     };
     /*!
      * \brief Error codes returned by functions in the InstanceList class.

@@ -211,6 +211,14 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const {
             }
             break;
         }
+
+        case InstanceIDRole: {
+            return inst->id();
+        }
+
+        case GroupRole: {
+            return getInstanceGroup(inst->id());
+        }
     }
     return QVariant();
 }
