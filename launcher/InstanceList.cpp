@@ -132,22 +132,34 @@ int InstanceList::rowCount(const QModelIndex& parent) const
     return m_instances.count();
 }
 
-QVariant InstanceList::headerData(int section, Qt::Orientation orientation, int role) const {
-   if (role != Qt::DisplayRole) {
-      return QVariant();
-   }
-
-   switch(static_cast<Column>(section)) {
-      case IconColumn: return tr("Icon");
-      case NameColumn: return tr("Name");
-      case GameVersionColumn: return tr("Game Version");
-      case PlayTimeColumn: return tr("Play time");
-      case LastPlayedColumn: return tr("Last played");
-      default: return QVariant();
-   }
+int InstanceList::columnCount(const QModelIndex &parent) const
+{
+    return ColumnCount;
 }
 
-QVariant InstanceList::data(const QModelIndex& index, int role) const {
+QVariant InstanceList::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role != Qt::DisplayRole) {
+        return QVariant();
+    }
+
+    switch (section) {
+        case IconColumn:
+            return tr("Icon");
+        case NameColumn:
+            return tr("Name");
+        case GameVersionColumn:
+            return tr("Game Version");
+        case PlayTimeColumn:
+            return tr("Play time");
+        case LastPlayedColumn:
+            return tr("Last played");
+    }
+    return QVariant();
+}
+
+QVariant InstanceList::data(const QModelIndex& index, int role) const
+{
     if (!index.isValid()) {
         return QVariant();
     }
@@ -240,16 +252,12 @@ bool InstanceList::setData(const QModelIndex& index, const QVariant& value, int 
    return true;
 }
 
-int InstanceList::columnCount(const QModelIndex &parent) const
-{
-   return ColumnCount;
-}
-
 Qt::ItemFlags InstanceList::flags(const QModelIndex& index) const
 {
-    Qt::ItemFlags f;
+    Qt::ItemFlags f = QAbstractTableModel::flags(index) | Qt::ItemIsEnabled;
     if (index.isValid()) {
-        f |= (Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+        f |= Qt::ItemIsSelectable;
+
         if (index.column() == NameColumn) {
             f |= Qt::ItemIsEditable;  // FIXME: bad UX! User can only use rename, if they selected the name column
         }
