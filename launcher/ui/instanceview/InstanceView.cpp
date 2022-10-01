@@ -85,7 +85,7 @@ void InstanceView::createTable()
     header->setSectionResizeMode(InstanceList::LastPlayedColumn, QHeaderView::Interactive);
     m_table->verticalHeader()->setDefaultSectionSize(m_rowHeight + 1 + 1);  // padding top and bottom
 
-    if (!APPLICATION->settings()->contains("InstanceViewTableHeaderState")) {
+    if (APPLICATION->settings()->get("InstanceViewTableHeaderState").toString().isEmpty()) {
         m_table->setColumnWidth(InstanceList::GameVersionColumn, 96 + 3 + 3);
         m_table->setColumnWidth(InstanceList::PlayTimeColumn, 96 + 3 + 3);
         m_table->setColumnWidth(InstanceList::LastPlayedColumn, 128 + 3 + 3);
