@@ -40,8 +40,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMimeData>
-#include <QSet>
 #include <QPair>
+#include <QSet>
 #include <QThread>
 #include <QTimer>
 #include <QUuid>
@@ -51,11 +51,11 @@
 #include "FileSystem.h"
 #include "InstanceList.h"
 #include "InstanceTask.h"
+#include "MMCTime.h"
 #include "NullInstance.h"
 #include "WatchLock.h"
 #include "minecraft/MinecraftInstance.h"
 #include "settings/INISettingsObject.h"
-#include "MMCTime.h"
 
 #ifdef Q_OS_WIN32
 #include <Windows.h>
@@ -64,7 +64,7 @@
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
 InstanceList::InstanceList(SettingsObjectPtr settings, const QString& instDir, QObject* parent)
-   : QAbstractTableModel(parent), m_globalSettings(settings)
+    : QAbstractTableModel(parent), m_globalSettings(settings)
 {
     resumeWatch();
     // Create aand normalize path
@@ -111,14 +111,14 @@ bool InstanceList::dropMimeData(const QMimeData* data, Qt::DropAction action, in
 
 QStringList InstanceList::mimeTypes() const
 {
-   auto types = QAbstractTableModel::mimeTypes();
+    auto types = QAbstractTableModel::mimeTypes();
     types.push_back("application/x-instanceid");
     return types;
 }
 
 QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
 {
-   auto mimeData = QAbstractTableModel::mimeData(indexes);
+    auto mimeData = QAbstractTableModel::mimeData(indexes);
     if (indexes.size() == 1) {
         auto instanceId = data(indexes[0], InstanceIDRole).toString();
         mimeData->setData("application/x-instanceid", instanceId.toUtf8());
@@ -132,7 +132,7 @@ int InstanceList::rowCount(const QModelIndex& parent) const
     return m_instances.count();
 }
 
-int InstanceList::columnCount(const QModelIndex &parent) const
+int InstanceList::columnCount(const QModelIndex& parent) const
 {
     return ColumnCount;
 }
@@ -249,7 +249,7 @@ bool InstanceList::setData(const QModelIndex& index, const QVariant& value, int 
         return true;
     }
     inst->setName(newName);
-   return true;
+    return true;
 }
 
 Qt::ItemFlags InstanceList::flags(const QModelIndex& index) const
@@ -301,7 +301,7 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
     if (changed) {
         m_groupNameCache.insert(name);
         auto idx = getInstIndex(inst.get());
-      emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), {GroupRole });
+        emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), { GroupRole });
         saveGroupList();
     }
 }
@@ -324,7 +324,7 @@ void InstanceList::deleteGroup(const QString& name)
             removed = true;
             auto idx = getInstIndex(instance.get());
             if (idx > 0) {
-            emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), {GroupRole });
+                emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), { GroupRole });
             }
         }
     }
@@ -361,16 +361,18 @@ bool InstanceList::trashInstance(const InstanceId& id)
     }
 
     qDebug() << "Instance" << id << "has been trashed by the launcher.";
-    m_trashHistory.push({id, inst->instanceRoot(), trashedLoc, cachedGroupId});
+    m_trashHistory.push({ id, inst->instanceRoot(), trashedLoc, cachedGroupId });
 
     return true;
 }
 
-bool InstanceList::trashedSomething() {
+bool InstanceList::trashedSomething()
+{
     return !m_trashHistory.empty();
 }
 
-void InstanceList::undoTrashInstance() {
+void InstanceList::undoTrashInstance()
+{
     if (m_trashHistory.empty()) {
         qWarning() << "Nothing to recover from trash.";
         return;
@@ -599,9 +601,9 @@ InstancePtr InstanceList::getInstanceByManagedName(const QString& managed_name) 
     return {};
 }
 
-QModelIndex InstanceList::getInstanceIndexById(const QString &id) const
+QModelIndex InstanceList::getInstanceIndexById(const QString& id) const
 {
-   return index(getInstIndex(getInstanceById(id).get()), NameColumn);
+    return index(getInstIndex(getInstanceById(id).get()), NameColumn);
 }
 
 int InstanceList::getInstIndex(BaseInstance* inst) const
@@ -619,7 +621,7 @@ void InstanceList::propertiesChanged(BaseInstance* inst)
 {
     int i = getInstIndex(inst);
     if (i != -1) {
-      emit dataChanged(index(i, IconColumn), index(i, ColumnCount - 1));
+        emit dataChanged(index(i, IconColumn), index(i, ColumnCount - 1));
         updateTotalPlayTime();
     }
 }
@@ -638,13 +640,11 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
 
     QString inst_type = instanceSettings->get("InstanceType").toString();
 
-    // NOTE: Some PolyMC versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a OneSix instance
-    if (inst_type == "OneSix" || inst_type.isEmpty())
-    {
+    // NOTE: Some PolyMC versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a OneSix
+    // instance
+    if (inst_type == "OneSix" || inst_type.isEmpty()) {
         inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
-    }
-    else
-    {
+    } else {
         inst.reset(new NullInstance(m_globalSettings, instanceSettings, instanceRoot));
     }
     qDebug() << "Loaded instance " << inst->name() << " from " << inst->instanceRoot();
@@ -828,9 +828,14 @@ class InstanceStaging : public Task {
     Q_OBJECT
     const unsigned minBackoff = 1;
     const unsigned maxBackoff = 16;
+
    public:
     InstanceStaging(InstanceList* parent, InstanceTask* child, QString stagingPath, InstanceName const& instanceName, QString groupName)
-        : m_parent(parent), backoff(minBackoff, maxBackoff), m_stagingPath(std::move(stagingPath)), m_instance_name(std::move(instanceName)), m_groupName(std::move(groupName))
+        : m_parent(parent)
+        , backoff(minBackoff, maxBackoff)
+        , m_stagingPath(std::move(stagingPath))
+        , m_instance_name(std::move(instanceName))
+        , m_groupName(std::move(groupName))
     {
         m_child.reset(child);
         connect(child, &Task::succeeded, this, &InstanceStaging::childSucceded);
@@ -854,10 +859,7 @@ class InstanceStaging : public Task {
 
         return Task::abort();
     }
-    bool canAbort() const override
-    {
-        return (m_child && m_child->canAbort());
-    }
+    bool canAbort() const override { return (m_child && m_child->canAbort()); }
 
    protected:
     virtual void executeTask() override { m_child->start(); }
@@ -867,8 +869,7 @@ class InstanceStaging : public Task {
     void childSucceded()
     {
         unsigned sleepTime = backoff();
-        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, m_child->shouldOverride()))
-        {
+        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, m_child->shouldOverride())) {
             emitSucceeded();
             return;
         }
@@ -886,13 +887,10 @@ class InstanceStaging : public Task {
         emitFailed(reason);
     }
 
-    void childAborted()
-    {
-        emitAborted();
-    }
+    void childAborted() { emitAborted(); }
 
-private:
-    InstanceList * m_parent;
+   private:
+    InstanceList* m_parent;
     /*
      * WHY: the whole reason why this uses an exponential backoff retry scheme is antivirus on Windows.
      * Basically, it starts messing things up while the launcher is extracting/creating instances
@@ -931,7 +929,10 @@ QString InstanceList::getStagedInstancePath()
     return path;
 }
 
-bool InstanceList::commitStagedInstance(const QString& path, InstanceName const& instanceName, const QString& groupName, bool should_override)
+bool InstanceList::commitStagedInstance(const QString& path,
+                                        InstanceName const& instanceName,
+                                        const QString& groupName,
+                                        bool should_override)
 {
     QDir dir;
     QString instID;
