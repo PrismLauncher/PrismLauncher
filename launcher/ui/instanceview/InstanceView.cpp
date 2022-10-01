@@ -80,13 +80,11 @@ void InstanceView::createTable()
     header->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("InstanceViewTableHeaderState").toByteArray()));
 
     header->setSectionsMovable(true);
-    header->setSectionResizeMode(InstanceList::IconColumn, QHeaderView::Fixed);
     header->setSectionResizeMode(InstanceList::NameColumn, QHeaderView::Stretch);
     header->setSectionResizeMode(InstanceList::GameVersionColumn, QHeaderView::Interactive);
     header->setSectionResizeMode(InstanceList::PlayTimeColumn, QHeaderView::Interactive);
     header->setSectionResizeMode(InstanceList::LastPlayedColumn, QHeaderView::Interactive);
-    m_table->setColumnWidth(InstanceList::IconColumn, m_rowHeight + 3 + 3);  // padding left and right
-    m_table->verticalHeader()->setDefaultSectionSize(m_rowHeight + 1 + 1);   // padding top and bottom
+    m_table->verticalHeader()->setDefaultSectionSize(m_rowHeight + 1 + 1);  // padding top and bottom
 
     if (!APPLICATION->settings()->contains("InstanceViewTableHeaderState"))
         m_table->sortByColumn(InstanceList::LastPlayedColumn, Qt::AscendingOrder);

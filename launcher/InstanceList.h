@@ -57,7 +57,6 @@ class InstanceList : public QAbstractTableModel {
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
     enum Column {
-        IconColumn = 0,
         NameColumn,
         GameVersionColumn,
         PlayTimeColumn,

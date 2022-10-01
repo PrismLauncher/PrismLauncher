@@ -144,8 +144,6 @@ QVariant InstanceList::headerData(int section, Qt::Orientation orientation, int 
     }
 
     switch (section) {
-        case IconColumn:
-            return tr("Icon");
         case NameColumn:
             return tr("Name");
         case GameVersionColumn:
@@ -167,7 +165,7 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
 
     switch (role) {
         case Qt::DecorationRole: {
-            if (index.column() == IconColumn)
+            if (index.column() == NameColumn)
                 return inst->iconKey();
             break;
         }
@@ -620,7 +618,7 @@ void InstanceList::propertiesChanged(BaseInstance* inst)
 {
     int i = getInstIndex(inst);
     if (i != -1) {
-        emit dataChanged(index(i, IconColumn), index(i, ColumnCount - 1));
+        emit dataChanged(index(i, NameColumn), index(i, ColumnCount - 1));
         updateTotalPlayTime();
     }
 }

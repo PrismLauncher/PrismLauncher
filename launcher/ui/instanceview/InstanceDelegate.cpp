@@ -24,8 +24,10 @@ InstanceDelegate::InstanceDelegate(QObject* parent) : QStyledItemDelegate(parent
 void InstanceDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
 {
     QStyledItemDelegate::initStyleOption(option, index);
-    if (index.column() == InstanceList::IconColumn) {
+    if (index.column() == InstanceList::NameColumn) {
         // make decoration fill cell, subtract default margins
-        option->decorationSize = option->rect.size().shrunkBy(QMargins(3, 1, 3, 1));
+        QSize decorationSize = QSize(option->rect.height(), option->rect.height());
+        decorationSize -= QSize(2, 2);  // subtract 1px margin
+        option->decorationSize = decorationSize;
     }
 }
