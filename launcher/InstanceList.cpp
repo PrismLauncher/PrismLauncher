@@ -152,6 +152,7 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const {
         return QVariant();
     }
     const InstancePtr inst = m_instances[index.row()];
+
     switch (static_cast<Column>(index.column())) {
         case Icon:
             if (role == Qt::DecorationRole) {
@@ -168,7 +169,8 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const {
             break;
         case GameVersion: {
             if (role == Qt::DisplayRole)
-                return "Minecraft <something>";
+                return inst->getMainVersion();
+            break;
         }
         case LastPlayed: {
             QString foo = Time::prettifyDuration(inst->lastTimePlayed());

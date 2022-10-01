@@ -58,6 +58,10 @@ public:
     {
         return tr("Unknown instance type");
     };
+    QString getMainVersion() override
+    {
+        return tr("Unknown");
+    };
     QSet< QString > traits() const override
     {
         return {};
