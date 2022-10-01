@@ -141,8 +141,8 @@ QVariant InstanceList::headerData(int section, Qt::Orientation orientation, int 
       case Icon: return tr("Icon");
       case Name: return tr("Name");
       case GameVersion: return tr("Game Version");
-      case LastPlayed: return tr("Last played");
       case PlayTime: return tr("Play time");
+      case LastPlayed: return tr("Last played");
       default: return QVariant();
    }
 }
@@ -172,6 +172,14 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const {
                 return inst->getMainVersion();
             break;
         }
+        case PlayTime: {
+            QString foo = Time::prettifyDuration(inst->totalTimePlayed());
+            if (role == Qt::DisplayRole)
+                return foo;
+            if (role == Qt::ToolTipRole)
+                return tr("Total played for %1").arg(foo);
+            break;
+        }
         case LastPlayed: {
             QString foo = Time::prettifyDuration(inst->lastTimePlayed());
             QDateTime bar = QDateTime::fromMSecsSinceEpoch(inst->lastLaunch());
@@ -179,14 +187,6 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const {
                 return bar;
             if (role == Qt::ToolTipRole)
                 return tr("Last played for %1").arg(foo);
-            break;
-        }
-        case PlayTime: {
-            QString foo = Time::prettifyDuration(inst->totalTimePlayed());
-            if (role == Qt::DisplayRole)
-                return foo;
-            if (role == Qt::ToolTipRole)
-                return tr("Total played for %1").arg(foo);
             break;
         }
         default:

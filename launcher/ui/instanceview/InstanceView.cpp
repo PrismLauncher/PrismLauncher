@@ -78,8 +78,8 @@ void InstanceView::createTable() {
     header->setSectionResizeMode(InstanceList::Icon, QHeaderView::Fixed);
     header->setSectionResizeMode(InstanceList::Name, QHeaderView::Stretch);
     header->setSectionResizeMode(InstanceList::GameVersion, QHeaderView::Interactive);
-    header->setSectionResizeMode(InstanceList::LastPlayed, QHeaderView::Interactive);
     header->setSectionResizeMode(InstanceList::PlayTime, QHeaderView::Interactive);
+    header->setSectionResizeMode(InstanceList::LastPlayed, QHeaderView::Interactive);
     m_table->setColumnWidth(InstanceList::Icon, m_rowHeight + 3 + 3);  // padding left and right
     m_table->verticalHeader()->setDefaultSectionSize(m_rowHeight + 1 + 1);  // padding top and bottom
 

@@ -78,8 +78,8 @@ public:
       Icon = 0,
       Name,
       GameVersion,
-      LastPlayed,
       PlayTime,
+      LastPlayed,
 
       ColumnCount
    };
