@@ -138,11 +138,11 @@ QVariant InstanceList::headerData(int section, Qt::Orientation orientation, int 
    }
 
    switch(static_cast<Column>(section)) {
-      case Icon: return tr("Icon");
-      case Name: return tr("Name");
-      case GameVersion: return tr("Game Version");
-      case PlayTime: return tr("Play time");
-      case LastPlayed: return tr("Last played");
+      case IconColumn: return tr("Icon");
+      case NameColumn: return tr("Name");
+      case GameVersionColumn: return tr("Game Version");
+      case PlayTimeColumn: return tr("Play time");
+      case LastPlayedColumn: return tr("Last played");
       default: return QVariant();
    }
 }
@@ -154,12 +154,12 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const {
     const InstancePtr inst = m_instances[index.row()];
 
     switch (static_cast<Column>(index.column())) {
-        case Icon:
+        case IconColumn:
             if (role == Qt::DecorationRole) {
                 return inst->iconKey();
             }
             break;
-        case Name:
+        case NameColumn:
             if (role == Qt::DisplayRole || role == Qt::EditRole)
                 return inst->name();
             if (role == Qt::AccessibleTextRole)
@@ -167,12 +167,12 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const {
             if (role == Qt::ToolTipRole)
                 return inst->instanceRoot();
             break;
-        case GameVersion: {
+        case GameVersionColumn: {
             if (role == Qt::DisplayRole)
                 return inst->getMainVersion();
             break;
         }
-        case PlayTime: {
+        case PlayTimeColumn: {
             QString foo = Time::prettifyDuration(inst->totalTimePlayed());
             if (role == Qt::DisplayRole)
                 return foo;
@@ -180,7 +180,7 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const {
                 return tr("Total played for %1").arg(foo);
             break;
         }
-        case LastPlayed: {
+        case LastPlayedColumn: {
             QString foo = Time::prettifyDuration(inst->lastTimePlayed());
             QDateTime bar = QDateTime::fromMSecsSinceEpoch(inst->lastLaunch());
             if (role == Qt::DisplayRole)
@@ -222,7 +222,7 @@ Qt::ItemFlags InstanceList::flags(const QModelIndex& index) const
     Qt::ItemFlags f;
     if (index.isValid()) {
         f |= (Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-        if (index.column() == Name) {
+        if (index.column() == NameColumn) {
             f |= Qt::ItemIsEditable;  // FIXME: bad UX! User can only use rename, if they selected the name column
         }
     }
@@ -265,7 +265,7 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
     if (changed) {
         m_groupNameCache.insert(name);
         auto idx = getInstIndex(inst.get());
-      emit dataChanged(index(idx, Name), index(idx, Name), { GroupRole });
+      emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), {GroupRole });
         saveGroupList();
     }
 }
@@ -288,7 +288,7 @@ void InstanceList::deleteGroup(const QString& name)
             removed = true;
             auto idx = getInstIndex(instance.get());
             if (idx > 0) {
-            emit dataChanged(index(idx, Name), index(idx, Name), { GroupRole });
+            emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), {GroupRole });
             }
         }
     }
@@ -565,7 +565,7 @@ InstancePtr InstanceList::getInstanceByManagedName(const QString& managed_name) 
 
 QModelIndex InstanceList::getInstanceIndexById(const QString &id) const
 {
-   return index(getInstIndex(getInstanceById(id).get()), Name);
+   return index(getInstIndex(getInstanceById(id).get()), NameColumn);
 }
 
 int InstanceList::getInstIndex(BaseInstance* inst) const
@@ -583,7 +583,7 @@ void InstanceList::propertiesChanged(BaseInstance* inst)
 {
     int i = getInstIndex(inst);
     if (i != -1) {
-      emit dataChanged(index(i, Icon), index(i, ColumnCount - 1));
+      emit dataChanged(index(i, IconColumn), index(i, ColumnCount - 1));
         updateTotalPlayTime();
     }
 }

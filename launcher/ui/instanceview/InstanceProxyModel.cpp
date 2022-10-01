@@ -36,7 +36,7 @@ QVariant InstanceProxyModel::data(const QModelIndex& index, int role) const
     }
 
     switch (index.column()) {
-        case InstanceList::LastPlayed: {
+        case InstanceList::LastPlayedColumn: {
             if (role == Qt::DisplayRole) {
                 QDateTime foo = data.toDateTime();
                 if (foo.isNull() || !foo.isValid() || foo.toMSecsSinceEpoch() == 0)

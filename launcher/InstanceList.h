@@ -75,11 +75,11 @@ public:
 
    enum Column
    {
-      Icon = 0,
-      Name,
-      GameVersion,
-      PlayTime,
-      LastPlayed,
+      IconColumn = 0,
+      NameColumn,
+      GameVersionColumn,
+      PlayTimeColumn,
+      LastPlayedColumn,
 
       ColumnCount
    };

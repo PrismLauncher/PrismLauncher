@@ -80,16 +80,16 @@ void InstanceView::createTable()
     header->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("InstanceViewTableHeaderState").toByteArray()));
 
     header->setSectionsMovable(true);
-    header->setSectionResizeMode(InstanceList::Icon, QHeaderView::Fixed);
-    header->setSectionResizeMode(InstanceList::Name, QHeaderView::Stretch);
-    header->setSectionResizeMode(InstanceList::GameVersion, QHeaderView::Interactive);
-    header->setSectionResizeMode(InstanceList::PlayTime, QHeaderView::Interactive);
-    header->setSectionResizeMode(InstanceList::LastPlayed, QHeaderView::Interactive);
-    m_table->setColumnWidth(InstanceList::Icon, m_rowHeight + 3 + 3);       // padding left and right
+    header->setSectionResizeMode(InstanceList::IconColumn, QHeaderView::Fixed);
+    header->setSectionResizeMode(InstanceList::NameColumn, QHeaderView::Stretch);
+    header->setSectionResizeMode(InstanceList::GameVersionColumn, QHeaderView::Interactive);
+    header->setSectionResizeMode(InstanceList::PlayTimeColumn, QHeaderView::Interactive);
+    header->setSectionResizeMode(InstanceList::LastPlayedColumn, QHeaderView::Interactive);
+    m_table->setColumnWidth(InstanceList::IconColumn, m_rowHeight + 3 + 3);       // padding left and right
     m_table->verticalHeader()->setDefaultSectionSize(m_rowHeight + 1 + 1);  // padding top and bottom
 
     if (!APPLICATION->settings()->contains("InstanceViewTableHeaderState"))
-        m_table->sortByColumn(InstanceList::LastPlayed, Qt::AscendingOrder);
+        m_table->sortByColumn(InstanceList::LastPlayedColumn, Qt::AscendingOrder);
 
     connect(m_table, &QTableView::doubleClicked, this, &InstanceView::activateInstance);
     connect(m_table->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstanceView::currentRowChanged);
@@ -132,7 +132,7 @@ void InstanceView::currentRowChanged(const QModelIndex& current, const QModelInd
 void InstanceView::selectNameColumn(const QModelIndex& current, const QModelIndex& previous)
 {
     // Make sure Name column is always selected
-    m_table->setCurrentIndex(current.siblingAtColumn(InstanceList::Name));
+    m_table->setCurrentIndex(current.siblingAtColumn(InstanceList::NameColumn));
 }
 
 void InstanceView::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
