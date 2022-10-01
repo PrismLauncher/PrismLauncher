@@ -15,7 +15,7 @@
 
 #include "InstanceProxyModel.h"
 
-#include "InstanceView.h"
+#include "InstanceList.h"
 #include "Application.h"
 #include <icons/IconList.h>
 
@@ -33,6 +33,17 @@ QVariant InstanceProxyModel::data(const QModelIndex & index, int role) const
     {
         if (!data.toString().isEmpty())
             return APPLICATION->icons()->getIcon(data.toString()); //FIXME: Needs QStyledItemDelegate
+    }
+
+    switch (index.column()) {
+        case InstanceList::LastPlayed: {
+            if (role == Qt::DisplayRole) {
+                QDateTime foo = data.toDateTime();
+                if (foo.isNull() || !foo.isValid() || foo.toMSecsSinceEpoch() == 0)
+                    return tr("Never");
+            }
+            break;
+        }
     }
     return data;
 }
