@@ -872,9 +872,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     {
         view = new InstanceView(ui->centralWidget, APPLICATION->instances().get());
 
-        view->installEventFilter(this);
-        view->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(view, &QWidget::customContextMenuRequested, this, &MainWindow::showInstanceContextMenu);
+        connect(view, &InstanceView::showContextMenu, this, &MainWindow::showInstanceContextMenu);
 
         ui->horizontalLayout->addWidget(view);
     }
@@ -1047,30 +1045,27 @@ void MainWindow::konamiTriggered()
     qDebug() << "Super Secret Mode ACTIVATED!";
 }
 
-void MainWindow::showInstanceContextMenu(const QPoint &pos)
+void MainWindow::showInstanceContextMenu(const QPoint &pos, InstancePtr inst)
 {
     QList<QAction *> actions;
 
     QAction *actionSep = new QAction("", this);
     actionSep->setSeparator(true);
 
-    bool onInstance = view->currentView()->indexAt(pos).isValid();
-    if (onInstance)
-    {
-        actions = ui->instanceToolBar->actions();
+    actions = ui->instanceToolBar->actions();
 
-        // replace the change icon widget with an actual action
-        actions.replace(0, ui->actionChangeInstIcon);
+    // replace the change icon widget with an actual action
+    actions.replace(0, ui->actionChangeInstIcon);
 
-        // replace the rename widget with an actual action
-        actions.replace(1, ui->actionRenameInstance);
+    // replace the rename widget with an actual action
+    actions.replace(1, ui->actionRenameInstance);
 
-        // add header
-        actions.prepend(actionSep);
-        QAction *actionVoid = new QAction(m_selectedInstance->name(), this);
-        actionVoid->setEnabled(false);
-        actions.prepend(actionVoid);
-    }
+    // add header
+    actions.prepend(actionSep);
+    QAction *actionVoid = new QAction(m_selectedInstance->name(), this);
+    actionVoid->setEnabled(false);
+    actions.prepend(actionVoid);
+
     QMenu myMenu;
     myMenu.addActions(actions);
     /*

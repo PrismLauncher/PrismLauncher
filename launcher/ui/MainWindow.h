@@ -164,7 +164,7 @@ private slots:
      */
     void iconUpdated(QString);
 
-    void showInstanceContextMenu(const QPoint &);
+    void showInstanceContextMenu(const QPoint &pos, InstancePtr inst);
 
     void updateMainToolBar();
 

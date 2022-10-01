@@ -89,6 +89,7 @@ void InstanceView::createTable() {
     connect(m_table, &QTableView::doubleClicked, this, &InstanceView::activateInstance);
     connect(m_table->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstanceView::currentRowChanged);
     connect(m_table->selectionModel(), &QItemSelectionModel::currentColumnChanged, this, &InstanceView::selectNameColumn);
+    connect(m_table, &QWidget::customContextMenuRequested, this, &InstanceView::contextMenuRequested);
 }
 
 InstancePtr InstanceView::currentInstance() {
@@ -134,6 +135,16 @@ void InstanceView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bo
         int row = mappedIndex(current).row();
         InstancePtr inst = m_instances->at(row);
         emit currentInstanceChanged(inst, inst);
+    }
+}
+
+void InstanceView::contextMenuRequested(const QPoint pos) {
+    QModelIndex index = m_table->indexAt(pos);
+
+    if (index.isValid()) {
+        int row = mappedIndex(index).row();
+        InstancePtr inst = m_instances->at(row);
+        emit showContextMenu(m_table->mapToParent(pos), inst);
     }
 }
 

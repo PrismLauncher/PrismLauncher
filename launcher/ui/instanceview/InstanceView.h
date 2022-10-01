@@ -44,6 +44,7 @@ public:
 signals:
     void instanceActivated(InstancePtr inst);
     void currentInstanceChanged(InstancePtr current, InstancePtr previous);
+    void showContextMenu(const QPoint pos, InstancePtr inst);
 
 private slots:
     void activateInstance(const QModelIndex& index);
@@ -51,6 +52,7 @@ private slots:
     void selectNameColumn(const QModelIndex& current, const QModelIndex& previous);
     // emits currentRowChanged if a data update affected the current instance
     void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+    void contextMenuRequested(const QPoint pos);
 
 private:
     void createTable();
