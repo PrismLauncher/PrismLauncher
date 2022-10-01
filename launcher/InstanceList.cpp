@@ -153,44 +153,52 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const {
     }
     const InstancePtr inst = m_instances[index.row()];
 
-    switch (static_cast<Column>(index.column())) {
-        case IconColumn:
-            if (role == Qt::DecorationRole) {
+    switch (role) {
+        case Qt::DecorationRole: {
+            if (index.column() == IconColumn)
                 return inst->iconKey();
+            break;
+        }
+
+        case Qt::DisplayRole: {
+            switch (index.column()) {
+                case NameColumn:
+                    return inst->name();
+                case GameVersionColumn:
+                    return inst->getMainVersion();
+                case PlayTimeColumn:
+                    return Time::prettifyDuration(inst->totalTimePlayed());
+                case LastPlayedColumn:
+                    return QDateTime::fromMSecsSinceEpoch(inst->lastLaunch());
             }
             break;
-        case NameColumn:
-            if (role == Qt::DisplayRole || role == Qt::EditRole)
-                return inst->name();
-            if (role == Qt::AccessibleTextRole)
+        }
+
+        case Qt::ToolTipRole: {
+            switch (index.column()) {
+                case NameColumn:
+                    return inst->instanceRoot();
+                case GameVersionColumn:
+                    return inst->getMainVersion();
+                case PlayTimeColumn:
+                    return tr("Total played for %1").arg(Time::prettifyDuration(inst->totalTimePlayed()));
+                case LastPlayedColumn:
+                    return tr("Last played for %1").arg(Time::prettifyDuration(inst->lastTimePlayed()));
+            }
+            break;
+        }
+
+        case Qt::EditRole: {
+            if (index.column() == NameColumn)
+                return data(index, Qt::DisplayRole);
+            break;
+        }
+
+        case Qt::AccessibleTextRole: {
+            if (index.column() == NameColumn)
                 return tr("%1 Instance").arg(inst->name());
-            if (role == Qt::ToolTipRole)
-                return inst->instanceRoot();
-            break;
-        case GameVersionColumn: {
-            if (role == Qt::DisplayRole)
-                return inst->getMainVersion();
             break;
         }
-        case PlayTimeColumn: {
-            QString foo = Time::prettifyDuration(inst->totalTimePlayed());
-            if (role == Qt::DisplayRole)
-                return foo;
-            if (role == Qt::ToolTipRole)
-                return tr("Total played for %1").arg(foo);
-            break;
-        }
-        case LastPlayedColumn: {
-            QString foo = Time::prettifyDuration(inst->lastTimePlayed());
-            QDateTime bar = QDateTime::fromMSecsSinceEpoch(inst->lastLaunch());
-            if (role == Qt::DisplayRole)
-                return bar;
-            if (role == Qt::ToolTipRole)
-                return tr("Last played for %1").arg(foo);
-            break;
-        }
-        default:
-            break;
     }
     return QVariant();
 }
