@@ -25,6 +25,7 @@
 #include "InstanceView.h"
 #include "Application.h"
 
+#include "InstanceDelegate.h"
 #include "InstanceList.h"
 #include "ui/instanceview/InstanceProxyModel.h"
 
@@ -57,6 +58,7 @@ void InstanceView::createTable()
 {
     m_table = new QTableView(this);
     m_table->setModel(m_proxy);
+    m_table->setItemDelegate(new InstanceDelegate(this));
 
     m_table->setTabKeyNavigation(false);
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);

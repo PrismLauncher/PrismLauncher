@@ -32,7 +32,7 @@ QVariant InstanceProxyModel::data(const QModelIndex& index, int role) const
     QVariant data = QSortFilterProxyModel::data(index, role);
     if (role == Qt::DecorationRole) {
         if (!data.toString().isEmpty())
-            return APPLICATION->icons()->getIcon(data.toString());  // FIXME: Needs QStyledItemDelegate
+            return APPLICATION->icons()->getIcon(data.toString());
     }
 
     switch (index.column()) {

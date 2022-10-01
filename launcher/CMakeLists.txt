@@ -872,6 +872,8 @@ SET(LAUNCHER_SOURCES
     # GUI - instance group view
     ui/instanceview/InstanceProxyModel.cpp
     ui/instanceview/InstanceProxyModel.h
+    ui/instanceview/InstanceDelegate.h
+    ui/instanceview/InstanceDelegate.cpp
     ui/instanceview/InstanceView.h
     ui/instanceview/InstanceView.cpp
 )
