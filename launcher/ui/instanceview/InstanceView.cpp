@@ -51,7 +51,7 @@ void InstanceView::prepareModel()
     m_proxy = new InstanceProxyModel(this);
     m_proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
     m_proxy->setSourceModel(m_instances);
-    connect(m_proxy, &InstanceProxyModel::dataChanged, this, &InstanceView::dataChanged);
+    connect(m_proxy, &QAbstractItemModel::dataChanged, this, &InstanceView::dataChanged);
 }
 
 void InstanceView::createTable()
@@ -85,13 +85,13 @@ void InstanceView::createTable()
     header->setSectionResizeMode(InstanceList::GameVersionColumn, QHeaderView::Interactive);
     header->setSectionResizeMode(InstanceList::PlayTimeColumn, QHeaderView::Interactive);
     header->setSectionResizeMode(InstanceList::LastPlayedColumn, QHeaderView::Interactive);
-    m_table->setColumnWidth(InstanceList::IconColumn, m_rowHeight + 3 + 3);       // padding left and right
-    m_table->verticalHeader()->setDefaultSectionSize(m_rowHeight + 1 + 1);  // padding top and bottom
+    m_table->setColumnWidth(InstanceList::IconColumn, m_rowHeight + 3 + 3);  // padding left and right
+    m_table->verticalHeader()->setDefaultSectionSize(m_rowHeight + 1 + 1);   // padding top and bottom
 
     if (!APPLICATION->settings()->contains("InstanceViewTableHeaderState"))
         m_table->sortByColumn(InstanceList::LastPlayedColumn, Qt::AscendingOrder);
 
-    connect(m_table, &QTableView::doubleClicked, this, &InstanceView::activateInstance);
+    connect(m_table, &QAbstractItemView::doubleClicked, this, &InstanceView::activateInstance);
     connect(m_table->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstanceView::currentRowChanged);
     connect(m_table->selectionModel(), &QItemSelectionModel::currentColumnChanged, this, &InstanceView::selectNameColumn);
     connect(m_table, &QWidget::customContextMenuRequested, this, &InstanceView::contextMenuRequested);
