@@ -22,8 +22,8 @@
  * or later.
  */
 
-#include "Application.h"
 #include "InstanceView.h"
+#include "Application.h"
 
 #include "InstanceList.h"
 #include "ui/instanceview/InstanceProxyModel.h"
@@ -31,7 +31,8 @@
 #include <QHeaderView>
 #include <QSize>
 
-InstanceView::InstanceView(QWidget *parent, InstanceList *instances) : QStackedWidget(parent), m_instances(instances) {
+InstanceView::InstanceView(QWidget* parent, InstanceList* instances) : QStackedWidget(parent), m_instances(instances)
+{
     prepareModel();
     createTable();
 
@@ -39,19 +40,21 @@ InstanceView::InstanceView(QWidget *parent, InstanceList *instances) : QStackedW
     setCurrentWidget(m_table);
 }
 
-void InstanceView::storeState() {
+void InstanceView::storeState()
+{
     APPLICATION->settings()->set("InstanceViewTableHeaderState", m_table->horizontalHeader()->saveState().toBase64());
 }
 
-void InstanceView::prepareModel() {
+void InstanceView::prepareModel()
+{
     m_proxy = new InstanceProxyModel(this);
     m_proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
     m_proxy->setSourceModel(m_instances);
     connect(m_proxy, &InstanceProxyModel::dataChanged, this, &InstanceView::dataChanged);
 }
 
-void InstanceView::createTable() {
-
+void InstanceView::createTable()
+{
     m_table = new QTableView(this);
     m_table->setModel(m_proxy);
 
@@ -71,7 +74,7 @@ void InstanceView::createTable() {
 
     m_table->verticalHeader()->hide();
 
-    QHeaderView *header = m_table->horizontalHeader();
+    QHeaderView* header = m_table->horizontalHeader();
     header->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("InstanceViewTableHeaderState").toByteArray()));
 
     header->setSectionsMovable(true);
@@ -80,7 +83,7 @@ void InstanceView::createTable() {
     header->setSectionResizeMode(InstanceList::GameVersion, QHeaderView::Interactive);
     header->setSectionResizeMode(InstanceList::PlayTime, QHeaderView::Interactive);
     header->setSectionResizeMode(InstanceList::LastPlayed, QHeaderView::Interactive);
-    m_table->setColumnWidth(InstanceList::Icon, m_rowHeight + 3 + 3);  // padding left and right
+    m_table->setColumnWidth(InstanceList::Icon, m_rowHeight + 3 + 3);       // padding left and right
     m_table->verticalHeader()->setDefaultSectionSize(m_rowHeight + 1 + 1);  // padding top and bottom
 
     if (!APPLICATION->settings()->contains("InstanceViewTableHeaderState"))
@@ -92,7 +95,8 @@ void InstanceView::createTable() {
     connect(m_table, &QWidget::customContextMenuRequested, this, &InstanceView::contextMenuRequested);
 }
 
-InstancePtr InstanceView::currentInstance() {
+InstancePtr InstanceView::currentInstance()
+{
     auto current = m_table->selectionModel()->currentIndex();
     if (current.isValid()) {
         int row = mappedIndex(current).row();
@@ -101,14 +105,16 @@ InstancePtr InstanceView::currentInstance() {
     return nullptr;
 }
 
-void InstanceView::activateInstance(const QModelIndex &index) {
+void InstanceView::activateInstance(const QModelIndex& index)
+{
     if (index.isValid()) {
         int row = mappedIndex(index).row();
         emit instanceActivated(m_instances->at(row));
     }
 }
 
-void InstanceView::currentRowChanged(const QModelIndex &current, const QModelIndex &previous) {
+void InstanceView::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
+{
     InstancePtr inst1, inst2;
     if (current.isValid()) {
         int row = mappedIndex(current).row();
@@ -121,12 +127,14 @@ void InstanceView::currentRowChanged(const QModelIndex &current, const QModelInd
     emit currentInstanceChanged(inst1, inst2);
 }
 
-void InstanceView::selectNameColumn(const QModelIndex &current, const QModelIndex &previous) {
+void InstanceView::selectNameColumn(const QModelIndex& current, const QModelIndex& previous)
+{
     // Make sure Name column is always selected
     m_table->setCurrentIndex(current.siblingAtColumn(InstanceList::Name));
 }
 
-void InstanceView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight) {
+void InstanceView::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
     // Notify others if data of the current instance changed
     auto current = m_table->selectionModel()->currentIndex();
 
@@ -138,7 +146,8 @@ void InstanceView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bo
     }
 }
 
-void InstanceView::contextMenuRequested(const QPoint pos) {
+void InstanceView::contextMenuRequested(const QPoint pos)
+{
     QModelIndex index = m_table->indexAt(pos);
 
     if (index.isValid()) {
@@ -148,6 +157,7 @@ void InstanceView::contextMenuRequested(const QPoint pos) {
     }
 }
 
-QModelIndex InstanceView::mappedIndex(const QModelIndex& index) const {
+QModelIndex InstanceView::mappedIndex(const QModelIndex& index) const
+{
     return m_proxy->mapToSource(index);
 }

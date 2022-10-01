@@ -17,8 +17,8 @@
  */
 #pragma once
 
-#include <QStackedWidget>
 #include <QAbstractItemView>
+#include <QStackedWidget>
 #include <QTableView>
 
 #include "BaseInstance.h"
@@ -29,32 +29,30 @@ class InstanceList;
 class InstanceView : public QStackedWidget {
     Q_OBJECT
 
-public:
-    explicit InstanceView(QWidget *parent = nullptr, InstanceList* instances = nullptr);
+   public:
+    explicit InstanceView(QWidget* parent = nullptr, InstanceList* instances = nullptr);
 
-    QAbstractItemView* currentView() {
-        return m_table;
-    }
+    QAbstractItemView* currentView() { return m_table; }
 
     InstancePtr currentInstance();
 
     // save state of current view
     void storeState();
 
-signals:
+   signals:
     void instanceActivated(InstancePtr inst);
     void currentInstanceChanged(InstancePtr current, InstancePtr previous);
     void showContextMenu(const QPoint pos, InstancePtr inst);
 
-private slots:
+   private slots:
     void activateInstance(const QModelIndex& index);
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     void selectNameColumn(const QModelIndex& current, const QModelIndex& previous);
     // emits currentRowChanged if a data update affected the current instance
-    void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+    void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
     void contextMenuRequested(const QPoint pos);
 
-private:
+   private:
     void createTable();
     void prepareModel();
     QModelIndex mappedIndex(const QModelIndex& index) const;

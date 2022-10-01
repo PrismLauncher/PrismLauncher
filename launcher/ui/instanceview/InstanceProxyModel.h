@@ -15,19 +15,18 @@
 
 #pragma once
 
-#include <QSortFilterProxyModel>
 #include <QCollator>
+#include <QSortFilterProxyModel>
 
-class InstanceProxyModel : public QSortFilterProxyModel
-{
+class InstanceProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
-public:
-    InstanceProxyModel(QObject *parent = 0);
+   public:
+    InstanceProxyModel(QObject* parent = 0);
 
-protected:
-    QVariant data(const QModelIndex & index, int role) const override;
+   protected:
+    QVariant data(const QModelIndex& index, int role) const override;
 
-private:
+   private:
     QCollator m_naturalSort;
 };
