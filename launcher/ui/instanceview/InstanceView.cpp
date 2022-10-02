@@ -41,7 +41,6 @@ InstanceView::InstanceView(QWidget* parent, InstanceList* instances) : QStackedW
 
     addWidget(m_table);
     addWidget(m_grid);
-    switchDisplayMode(InstanceView::GridMode);
 }
 
 void InstanceView::storeState()

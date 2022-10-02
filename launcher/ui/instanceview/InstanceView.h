@@ -31,9 +31,9 @@ class InstanceList;
 class InstanceView : public QStackedWidget {
     Q_OBJECT
 
+   public:
     enum DisplayMode { TableMode = 0, GridMode };
 
-   public:
     explicit InstanceView(QWidget* parent = nullptr, InstanceList* instances = nullptr);
 
     void switchDisplayMode(DisplayMode mode);

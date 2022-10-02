@@ -229,6 +229,8 @@ public:
     TranslatedAction actionViewSelectedInstFolder;
     TranslatedAction actionDeleteInstance;
     TranslatedAction actionCAT;
+    TranslatedAction actionTableMode;
+    TranslatedAction actionGridMode;
     TranslatedAction actionCopyInstance;
     TranslatedAction actionLaunchInstanceOffline;
     TranslatedAction actionLaunchInstanceDemo;
@@ -408,6 +410,24 @@ public:
         actionCAT->setPriority(QAction::LowPriority);
         all_actions.append(&actionCAT);
 
+        actionTableMode = TranslatedAction(MainWindow);
+        actionTableMode->setObjectName(QStringLiteral("actionTableMode"));
+        actionTableMode->setCheckable(true);
+        actionTableMode->setIcon(APPLICATION->getThemedIcon("view-list-symbolic")); // FIXME: add custom icon
+        actionTableMode.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Table View"));
+        actionTableMode.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Display instances in a table"));
+        actionTableMode->setPriority(QAction::LowPriority);
+        all_actions.append(&actionTableMode);
+
+        actionGridMode = TranslatedAction(MainWindow);
+        actionGridMode->setObjectName(QStringLiteral("actionGridMode"));
+        actionGridMode->setCheckable(true);
+        actionGridMode->setIcon(APPLICATION->getThemedIcon("view-grid-symbolic")); // FIXME: add custom icon
+        actionGridMode.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Grid View"));
+        actionGridMode.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Display instances in a grid"));
+        actionGridMode->setPriority(QAction::LowPriority);
+        all_actions.append(&actionGridMode);
+
         // profile menu and its actions
         actionManageAccounts = TranslatedAction(MainWindow);
         actionManageAccounts->setObjectName(QStringLiteral("actionManageAccounts"));
@@ -484,6 +504,9 @@ public:
 
         mainToolBar->addAction(actionCAT);
 
+        mainToolBar->addAction(actionTableMode);
+        mainToolBar->addAction(actionGridMode);
+
         all_toolbars.append(&mainToolBar);
         MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
     }
@@ -518,6 +541,8 @@ public:
         viewMenu = menuBar->addMenu(tr("&View"));
         viewMenu->setSeparatorsCollapsible(false);
         viewMenu->addAction(actionCAT);
+        viewMenu->addAction(actionTableMode);
+        viewMenu->addAction(actionGridMode);
         viewMenu->addSeparator();
 
         menuBar->addMenu(foldersMenu);
@@ -860,6 +885,36 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         // NOTE: calling the operator like that is an ugly hack to appease ancient gcc...
         connect(ui->actionCAT.operator->(), SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
         view->setCatDisplayed(cat_enable);
+    }
+    // Table/Grid mode
+    {
+        int displayMode = APPLICATION->settings()->get("InstanceDisplayMode").toInt();
+        ui->actionTableMode->setChecked(false);
+        ui->actionGridMode->setChecked(false);
+        if (displayMode == InstanceView::TableMode) {
+            ui->actionTableMode->setChecked(true);
+        } else {
+            ui->actionGridMode->setChecked(true);
+        }
+        view->switchDisplayMode(displayMode == InstanceView::TableMode ? InstanceView::TableMode : InstanceView::GridMode);
+
+        connect(ui->actionTableMode, &QAction::triggered, this, [this](bool state){
+            if (!state) {
+                ui->actionTableMode->setChecked(true);
+            }
+            ui->actionGridMode->setChecked(false);
+            view->switchDisplayMode(InstanceView::TableMode);
+            APPLICATION->settings()->set("InstanceDisplayMode", InstanceView::TableMode);
+        });
+
+        connect(ui->actionGridMode, &QAction::triggered, this, [this](bool state){
+            if (!state) {
+                ui->actionGridMode->setChecked(true);
+            }
+            ui->actionTableMode->setChecked(false);
+            view->switchDisplayMode(InstanceView::GridMode);
+            APPLICATION->settings()->set("InstanceDisplayMode", InstanceView::GridMode);
+        });
     }
     // start instance when double-clicked
     connect(view, &InstanceView::instanceActivated, this, &MainWindow::instanceActivated);

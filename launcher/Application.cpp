@@ -40,6 +40,7 @@
 #include "net/PasteUpload.h"
 #include "ui/MainWindow.h"
 #include "ui/InstanceWindow.h"
+#include "ui/instanceview/InstanceView.h"
 
 #include "ui/pages/BasePageProvider.h"
 #include "ui/pages/global/LauncherPage.h"
@@ -609,6 +610,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // The cat
         m_settings->registerSetting("TheCat", false);
+        m_settings->registerSetting("InstanceDisplayMode", InstanceView::TableMode);
 
         m_settings->registerSetting("InstSortMode", "Name");
         m_settings->registerSetting("SelectedInstance", QString());
