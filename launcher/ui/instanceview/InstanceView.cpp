@@ -67,6 +67,7 @@ void InstanceView::prepareModel()
     connect(m_tableProxy, &QAbstractItemModel::dataChanged, this, &InstanceView::dataChanged);
     m_gridProxy = new InstanceGridProxyModel(this);
     m_gridProxy->setSourceModel(m_instances);
+    m_gridProxy->sort(InstanceList::LastPlayedColumn, Qt::DescendingOrder);
     connect(m_tableProxy, &QAbstractItemModel::dataChanged, this, &InstanceView::dataChanged);
 }
 
