@@ -19,12 +19,24 @@
 #include "InstanceDelegate.h"
 #include "InstanceList.h"
 
-InstanceDelegate::InstanceDelegate(QObject* parent, int iconSize) : QStyledItemDelegate(parent), m_iconSize(iconSize) {}
+InstanceDelegate::InstanceDelegate(QObject* parent, int iconSize, bool isGrid)
+    : QStyledItemDelegate(parent), m_iconSize(iconSize), m_isGrid(isGrid)
+{}
 
 void InstanceDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
 {
     QStyledItemDelegate::initStyleOption(option, index);
     if (index.column() == InstanceList::NameColumn) {
         option->decorationSize = QSize(m_iconSize, m_iconSize);
+        if (m_isGrid)  // FIXME: kinda hacky way to add vertical padding. This assumes that the icon is square in the first place
+            option->decorationSize.rheight() += 8;
     }
+}
+
+QSize InstanceDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    QSize s = QStyledItemDelegate::sizeHint(option, index);
+    if (m_isGrid)
+        return s.expandedTo(QSize(m_iconSize * 2, m_iconSize * 2));
+    return s;
 }

@@ -74,7 +74,7 @@ void InstanceView::createTable()
 {
     m_table = new QTableView(this);
     m_table->setModel(m_tableProxy);
-    m_table->setItemDelegate(new InstanceDelegate(this));
+    m_table->setItemDelegate(new InstanceDelegate(this, m_iconSize, false));
 
     m_table->setTabKeyNavigation(false);
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -121,7 +121,7 @@ void InstanceView::createGrid()
     m_grid = new QListView(this);
     m_grid->setModel(m_gridProxy);
     m_grid->setModelColumn(InstanceList::NameColumn);
-    m_grid->setItemDelegate(new InstanceDelegate(this));
+    m_grid->setItemDelegate(new InstanceDelegate(this, m_iconSize, true));
 
     m_grid->setSelectionMode(QAbstractItemView::SingleSelection);
     m_grid->setSelectionBehavior(QAbstractItemView::SelectRows);
