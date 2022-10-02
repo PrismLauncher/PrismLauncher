@@ -16,18 +16,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "InstanceGridProxyModel.h"
 
-#include <QStyledItemDelegate>
+#include <icons/IconList.h>
+#include "Application.h"
+#include "InstanceList.h"
 
-class InstanceDelegate : public QStyledItemDelegate {
-    Q_OBJECT
-
-   public:
-    InstanceDelegate(QObject* parent = 0, int iconSize = 48);
-
-    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override;
-
-   private:
-    int m_iconSize;
-};
+// Placeholder model, as we might need this in the future
+InstanceGridProxyModel::InstanceGridProxyModel(QObject* parent) : InstanceTableProxyModel(parent) {}

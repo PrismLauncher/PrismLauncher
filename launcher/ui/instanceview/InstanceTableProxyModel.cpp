@@ -13,22 +13,21 @@
  * limitations under the License.
  */
 
-#include "InstanceProxyModel.h"
+#include "InstanceTableProxyModel.h"
 
 #include <icons/IconList.h>
 #include "Application.h"
 #include "InstanceList.h"
 
-InstanceProxyModel::InstanceProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
+InstanceTableProxyModel::InstanceTableProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
 {
     m_naturalSort.setNumericMode(true);
     m_naturalSort.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
     // FIXME: use loaded translation as source of locale instead, hook this up to translation changes
     m_naturalSort.setLocale(QLocale::system());
-    setSortRole(InstanceList::SortRole);
 }
 
-QVariant InstanceProxyModel::data(const QModelIndex& index, int role) const
+QVariant InstanceTableProxyModel::data(const QModelIndex& index, int role) const
 {
     QVariant data = QSortFilterProxyModel::data(index, role);
     if (role == Qt::DecorationRole) {

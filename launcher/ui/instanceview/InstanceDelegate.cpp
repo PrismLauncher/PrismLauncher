@@ -19,15 +19,12 @@
 #include "InstanceDelegate.h"
 #include "InstanceList.h"
 
-InstanceDelegate::InstanceDelegate(QObject* parent) : QStyledItemDelegate(parent) {}
+InstanceDelegate::InstanceDelegate(QObject* parent, int iconSize) : QStyledItemDelegate(parent), m_iconSize(iconSize) {}
 
 void InstanceDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
 {
     QStyledItemDelegate::initStyleOption(option, index);
     if (index.column() == InstanceList::NameColumn) {
-        // make decoration fill cell, subtract default margins
-        QSize decorationSize = QSize(option->rect.height(), option->rect.height());
-        decorationSize -= QSize(2, 2);  // subtract 1px margin
-        option->decorationSize = decorationSize;
+        option->decorationSize = QSize(m_iconSize, m_iconSize);;
     }
 }

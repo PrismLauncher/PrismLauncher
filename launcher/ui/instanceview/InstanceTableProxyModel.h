@@ -18,11 +18,11 @@
 #include <QCollator>
 #include <QSortFilterProxyModel>
 
-class InstanceProxyModel : public QSortFilterProxyModel {
+class InstanceTableProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
    public:
-    InstanceProxyModel(QObject* parent = 0);
+    InstanceTableProxyModel(QObject* parent = 0);
 
    protected:
     QVariant data(const QModelIndex& index, int role) const override;

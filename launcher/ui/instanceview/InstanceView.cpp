@@ -27,7 +27,8 @@
 
 #include "InstanceDelegate.h"
 #include "InstanceList.h"
-#include "ui/instanceview/InstanceProxyModel.h"
+#include "ui/instanceview/InstanceTableProxyModel.h"
+#include "ui/instanceview/InstanceGridProxyModel.h"
 
 #include <QHeaderView>
 #include <QSize>
@@ -36,9 +37,11 @@ InstanceView::InstanceView(QWidget* parent, InstanceList* instances) : QStackedW
 {
     prepareModel();
     createTable();
+    createGrid();
 
     addWidget(m_table);
-    setCurrentWidget(m_table);
+    addWidget(m_grid);
+    switchDisplayMode(InstanceView::GridMode);
 }
 
 void InstanceView::storeState()
@@ -46,18 +49,33 @@ void InstanceView::storeState()
     APPLICATION->settings()->set("InstanceViewTableHeaderState", m_table->horizontalHeader()->saveState().toBase64());
 }
 
+void InstanceView::switchDisplayMode(InstanceView::DisplayMode mode)
+{
+    m_displayMode = mode;
+    if (mode == DisplayMode::TableMode) {
+        setCurrentWidget(m_table);
+    } else {
+        setCurrentWidget(m_grid);
+    }
+}
+
+
 void InstanceView::prepareModel()
 {
-    m_proxy = new InstanceProxyModel(this);
-    m_proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
-    m_proxy->setSourceModel(m_instances);
-    connect(m_proxy, &QAbstractItemModel::dataChanged, this, &InstanceView::dataChanged);
+    m_tableProxy = new InstanceTableProxyModel(this);
+    m_tableProxy->setSortCaseSensitivity(Qt::CaseInsensitive);
+    m_tableProxy->setSourceModel(m_instances);
+    m_tableProxy->setSortRole(InstanceList::SortRole);
+    connect(m_tableProxy, &QAbstractItemModel::dataChanged, this, &InstanceView::dataChanged);
+    m_gridProxy = new InstanceGridProxyModel(this);
+    m_gridProxy->setSourceModel(m_instances);
+    connect(m_tableProxy, &QAbstractItemModel::dataChanged, this, &InstanceView::dataChanged);
 }
 
 void InstanceView::createTable()
 {
     m_table = new QTableView(this);
-    m_table->setModel(m_proxy);
+    m_table->setModel(m_tableProxy);
     m_table->setItemDelegate(new InstanceDelegate(this));
 
     m_table->setTabKeyNavigation(false);
@@ -83,7 +101,7 @@ void InstanceView::createTable()
     header->setSectionResizeMode(InstanceList::GameVersionColumn, QHeaderView::Interactive);
     header->setSectionResizeMode(InstanceList::PlayTimeColumn, QHeaderView::Interactive);
     header->setSectionResizeMode(InstanceList::LastPlayedColumn, QHeaderView::Interactive);
-    m_table->verticalHeader()->setDefaultSectionSize(m_rowHeight + 1 + 1);  // padding top and bottom
+    m_table->verticalHeader()->setDefaultSectionSize(m_iconSize + 1 + 1);  // padding top and bottom
 
     if (APPLICATION->settings()->get("InstanceViewTableHeaderState").toString().isEmpty()) {
         m_table->setColumnWidth(InstanceList::GameVersionColumn, 96 + 3 + 3);
@@ -100,9 +118,34 @@ void InstanceView::createTable()
     connect(m_table, &QWidget::customContextMenuRequested, this, &InstanceView::contextMenuRequested);
 }
 
+void InstanceView::createGrid()
+{
+    m_grid = new QListView(this);
+    m_grid->setModel(m_gridProxy);
+    m_grid->setModelColumn(InstanceList::NameColumn);
+    m_grid->setItemDelegate(new InstanceDelegate(this));
+
+    m_grid->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_grid->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_grid->setEditTriggers(QAbstractItemView::EditKeyPressed);
+    m_grid->setCurrentIndex(QModelIndex());
+    m_grid->setContextMenuPolicy(Qt::CustomContextMenu);
+    m_grid->setWordWrap(true);
+    m_grid->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_grid->setViewMode(QListView::IconMode);
+    m_grid->setMovement(QListView::Static);
+    m_grid->setResizeMode(QListView::Adjust);
+    m_grid->setFrameStyle(QFrame::NoFrame);
+    m_grid->setGridSize(QSize(m_iconSize * 2, m_iconSize * 2));
+
+    connect(m_grid, &QAbstractItemView::doubleClicked, this, &InstanceView::activateInstance);
+    connect(m_grid->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstanceView::currentRowChanged);
+    connect(m_grid, &QWidget::customContextMenuRequested, this, &InstanceView::contextMenuRequested);
+}
+
 InstancePtr InstanceView::currentInstance()
 {
-    auto current = m_table->selectionModel()->currentIndex();
+    auto current = currentView()->selectionModel()->currentIndex();
     if (current.isValid()) {
         int row = mappedIndex(current).row();
         return m_instances->at(row);
@@ -135,13 +178,13 @@ void InstanceView::currentRowChanged(const QModelIndex& current, const QModelInd
 void InstanceView::selectNameColumn(const QModelIndex& current, const QModelIndex& previous)
 {
     // Make sure Name column is always selected
-    m_table->setCurrentIndex(current.siblingAtColumn(InstanceList::NameColumn));
+    currentView()->setCurrentIndex(current.siblingAtColumn(InstanceList::NameColumn));
 }
 
 void InstanceView::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
     // Notify others if data of the current instance changed
-    auto current = m_table->selectionModel()->currentIndex();
+    auto current = currentView()->selectionModel()->currentIndex();
 
     QItemSelection foo(topLeft, bottomRight);
     if (foo.contains(current)) {
@@ -153,18 +196,21 @@ void InstanceView::dataChanged(const QModelIndex& topLeft, const QModelIndex& bo
 
 void InstanceView::contextMenuRequested(const QPoint pos)
 {
-    QModelIndex index = m_table->indexAt(pos);
+    QModelIndex index = currentView()->indexAt(pos);
 
     if (index.isValid()) {
         int row = mappedIndex(index).row();
         InstancePtr inst = m_instances->at(row);
-        emit showContextMenu(m_table->mapToParent(pos), inst);
+        emit showContextMenu(currentView()->mapToParent(pos), inst);
     }
 }
 
 QModelIndex InstanceView::mappedIndex(const QModelIndex& index) const
 {
-    return m_proxy->mapToSource(index);
+    if (m_displayMode == DisplayMode::GridMode) {
+        return m_gridProxy->mapToSource(index);
+    }
+    return m_tableProxy->mapToSource(index);
 }
 
 void InstanceView::setCatDisplayed(bool enabled)

@@ -53,7 +53,6 @@
 class LaunchController;
 class NewsChecker;
 class QToolButton;
-class InstanceProxyModel;
 class LabeledToolButton;
 class QLabel;
 class InstanceView;

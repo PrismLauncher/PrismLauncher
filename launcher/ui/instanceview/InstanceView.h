@@ -18,21 +18,32 @@
 #pragma once
 
 #include <QAbstractItemView>
+#include <QListView>
 #include <QStackedWidget>
 #include <QTableView>
 
 #include "BaseInstance.h"
 
-class InstanceProxyModel;
+class InstanceTableProxyModel;
+class InstanceGridProxyModel;
 class InstanceList;
 
 class InstanceView : public QStackedWidget {
     Q_OBJECT
 
+    enum DisplayMode { TableMode = 0, GridMode };
+
    public:
     explicit InstanceView(QWidget* parent = nullptr, InstanceList* instances = nullptr);
 
-    QAbstractItemView* currentView() { return m_table; }
+    void switchDisplayMode(DisplayMode mode);
+
+    QAbstractItemView* currentView()
+    {
+        if (m_displayMode == GridMode)
+            return m_grid;
+        return m_table;
+    }
 
     InstancePtr currentInstance();
 
@@ -56,12 +67,16 @@ class InstanceView : public QStackedWidget {
 
    private:
     void createTable();
+    void createGrid();
     void prepareModel();
     QModelIndex mappedIndex(const QModelIndex& index) const;
 
-    int m_rowHeight = 48;
+    int m_iconSize = 48;
+    DisplayMode m_displayMode = TableMode;
 
     QTableView* m_table;
-    InstanceProxyModel* m_proxy;
+    QListView* m_grid;
+    InstanceTableProxyModel* m_tableProxy;
+    InstanceGridProxyModel* m_gridProxy;
     InstanceList* m_instances;
 };

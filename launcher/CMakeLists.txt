@@ -866,8 +866,10 @@ SET(LAUNCHER_SOURCES
     ui/widgets/WideBar.cpp
 
     # GUI - instance group view
-    ui/instanceview/InstanceProxyModel.cpp
-    ui/instanceview/InstanceProxyModel.h
+    ui/instanceview/InstanceTableProxyModel.cpp
+    ui/instanceview/InstanceTableProxyModel.h
+    ui/instanceview/InstanceGridProxyModel.cpp
+    ui/instanceview/InstanceGridProxyModel.h
     ui/instanceview/InstanceDelegate.h
     ui/instanceview/InstanceDelegate.cpp
     ui/instanceview/InstanceView.h
