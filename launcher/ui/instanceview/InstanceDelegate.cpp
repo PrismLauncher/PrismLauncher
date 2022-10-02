@@ -28,8 +28,12 @@ void InstanceDelegate::initStyleOption(QStyleOptionViewItem* option, const QMode
     QStyledItemDelegate::initStyleOption(option, index);
     if (index.column() == InstanceList::NameColumn) {
         option->decorationSize = QSize(m_iconSize, m_iconSize);
-        if (m_isGrid)  // FIXME: kinda hacky way to add vertical padding. This assumes that the icon is square in the first place
+        if (m_isGrid) {
+            option->decorationAlignment = Qt::AlignCenter;
+            option->displayAlignment = Qt::AlignHCenter | Qt::AlignTop;
+            // FIXME: kinda hacky way to add vertical padding. This assumes that the icon is square in the first place
             option->decorationSize.rheight() += 8;
+        }
     }
 }
 
@@ -37,6 +41,6 @@ QSize InstanceDelegate::sizeHint(const QStyleOptionViewItem& option, const QMode
 {
     QSize s = QStyledItemDelegate::sizeHint(option, index);
     if (m_isGrid)
-        return s.expandedTo(QSize(m_iconSize * 2, m_iconSize * 2));
+        s.rheight() = std::max(s.height(), m_iconSize * 2);
     return s;
 }
