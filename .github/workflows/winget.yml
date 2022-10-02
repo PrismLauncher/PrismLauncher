@@ -7,8 +7,9 @@ jobs:
   publish:
     runs-on: windows-latest
     steps:
-      - uses: vedantmgoyal2009/winget-releaser@latest
+      - uses: vedantmgoyal2009/winget-releaser@v1
         with:
           identifier: PolyMC.PolyMC
+          version: ${{ github.event.release.tag_name }}
           installers-regex: 'PolyMC-Windows-Setup-.+\.exe$'
           token: ${{ secrets.WINGET_TOKEN }}
