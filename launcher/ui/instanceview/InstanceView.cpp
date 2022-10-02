@@ -27,8 +27,8 @@
 
 #include "InstanceDelegate.h"
 #include "InstanceList.h"
-#include "ui/instanceview/InstanceTableProxyModel.h"
 #include "ui/instanceview/InstanceGridProxyModel.h"
+#include "ui/instanceview/InstanceTableProxyModel.h"
 
 #include <QHeaderView>
 #include <QSize>
@@ -58,7 +58,6 @@ void InstanceView::switchDisplayMode(InstanceView::DisplayMode mode)
         setCurrentWidget(m_grid);
     }
 }
-
 
 void InstanceView::prepareModel()
 {
@@ -217,7 +216,7 @@ void InstanceView::setCatDisplayed(bool enabled)
 {
     if (enabled) {
         QDateTime now = QDateTime::currentDateTime();
-        QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
+        QDateTime birthday(QDate(now.date().year(), 12, 28), QTime(0, 0));
         QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
         QString cat;
         if (std::abs(now.daysTo(xmas)) <= 4) {
@@ -228,14 +227,13 @@ void InstanceView::setCatDisplayed(bool enabled)
             cat = "kitteh";
         }
         setStyleSheet(QString(R"(
-*
-{
+* {
     background-image: url(:/backgrounds/%1);
     background-attachment: fixed;
     background-clip: padding;
     background-position: bottom right;
     background-repeat: none;
-    background-color:palette(base);
+    background-color: palette(base);
 })")
                           .arg(cat));
         m_table->setAlternatingRowColors(false);

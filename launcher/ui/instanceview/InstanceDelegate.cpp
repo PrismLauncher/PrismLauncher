@@ -25,6 +25,6 @@ void InstanceDelegate::initStyleOption(QStyleOptionViewItem* option, const QMode
 {
     QStyledItemDelegate::initStyleOption(option, index);
     if (index.column() == InstanceList::NameColumn) {
-        option->decorationSize = QSize(m_iconSize, m_iconSize);;
+        option->decorationSize = QSize(m_iconSize, m_iconSize);
     }
 }
