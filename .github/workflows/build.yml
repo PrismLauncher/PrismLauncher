@@ -68,6 +68,7 @@ jobs:
         if: runner.os == 'Linux' && matrix.qt_ver == 6
         uses: github/codeql-action/init@v2
         with:
+          queries: security-and-quality
           languages: cpp, java
 
       - name: 'Setup MSYS2'
