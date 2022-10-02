@@ -68,6 +68,7 @@ jobs:
         if: runner.os == 'Linux' && matrix.qt_ver == 6
         uses: github/codeql-action/init@v2
         with:
+          config-file: ./.github/codeql/codeql-config.yml
           queries: security-and-quality
           languages: cpp, java
 
