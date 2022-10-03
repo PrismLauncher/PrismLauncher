@@ -55,6 +55,7 @@ class NewsChecker;
 class QToolButton;
 class LabeledToolButton;
 class QLabel;
+class QLineEdit;
 class InstanceView;
 class MinecraftLauncher;
 class BaseProfilerFactory;
@@ -220,6 +221,7 @@ private:
 
     // these are managed by Qt's memory management model!
     InstanceView *view = nullptr;
+    QLineEdit *filterView = nullptr;
     QToolButton *newsLabel = nullptr;
     QMenu *accountMenu = nullptr;
     QToolButton *accountMenuButton = nullptr;

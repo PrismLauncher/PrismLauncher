@@ -51,6 +51,7 @@ class InstanceView : public QStackedWidget {
     void storeState();
 
     void setCatDisplayed(bool enabled);
+    void setFilterQuery(const QString& query);
 
     void editSelected(InstanceList::Column targetColumn = InstanceList::NameColumn);
 

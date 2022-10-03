@@ -52,7 +52,6 @@
 
 #include <QApplication>
 #include <QButtonGroup>
-#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QMainWindow>
 #include <QToolBar>
@@ -61,11 +60,13 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QLineEdit>
 #include <QLabel>
 #include <QToolButton>
 #include <QWidgetAction>
 #include <QProgressDialog>
 #include <QShortcut>
+#include <QVBoxLayout>
 
 #include <BaseInstance.h>
 #include <InstanceList.h>
@@ -263,7 +264,7 @@ public:
     QVector<TranslatedToolButton *> all_toolbuttons;
 
     QWidget *centralWidget = nullptr;
-    QHBoxLayout *horizontalLayout = nullptr;
+    QVBoxLayout *verticalLayout = nullptr;
 
     QMenuBar *menuBar = nullptr;
     QMenu *fileMenu;
@@ -804,11 +805,11 @@ public:
 
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
-        horizontalLayout = new QHBoxLayout(centralWidget);
-        horizontalLayout->setSpacing(0);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        horizontalLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
-        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+        verticalLayout = new QVBoxLayout(centralWidget);
+        verticalLayout->setSpacing(0);
+        verticalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        verticalLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+        verticalLayout->setContentsMargins(0, 0, 0, 0);
         MainWindow->setCentralWidget(centralWidget);
 
         createNewsToolbar(MainWindow);
@@ -870,13 +871,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         updateNewsLabel();
     }
 
+    // Create instance list filter box
+    {
+        filterView = new QLineEdit(ui->centralWidget);
+
+        ui->verticalLayout->addWidget(filterView);
+    }
+
     // Create the instance list widget
     {
         view = new InstanceView(ui->centralWidget, APPLICATION->instances().get());
 
         connect(view, &InstanceView::showContextMenu, this, &MainWindow::showInstanceContextMenu);
+        connect(filterView, &QLineEdit::textEdited, view, &InstanceView::setFilterQuery);
 
-        ui->horizontalLayout->addWidget(view);
+        ui->verticalLayout->addWidget(view);
     }
     // The cat background
     {
