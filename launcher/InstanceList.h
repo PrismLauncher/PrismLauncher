@@ -58,6 +58,7 @@ class InstanceList : public QAbstractTableModel {
 
     enum Column {
         NameColumn,
+        CategoryColumn,
         GameVersionColumn,
         PlayTimeColumn,
         LastPlayedColumn,
@@ -83,6 +84,10 @@ class InstanceList : public QAbstractTableModel {
 
     GroupId getInstanceGroup(const InstanceId& id) const;
     void setInstanceGroup(const InstanceId& id, const GroupId& name);
+    void setInstanceGroup(const InstancePtr inst, const GroupId& name);
+
+    void setInstanceName(const InstanceId& id, const QString name);
+    void setInstanceName(const InstancePtr inst, const QString name);
 
     void deleteGroup(const GroupId& name);
     bool trashInstance(const InstanceId& id);

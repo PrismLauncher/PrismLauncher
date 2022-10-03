@@ -23,10 +23,10 @@
 #include <QTableView>
 
 #include "BaseInstance.h"
+#include "InstanceList.h"
 
 class InstanceTableProxyModel;
 class InstanceGridProxyModel;
-class InstanceList;
 
 class InstanceView : public QStackedWidget {
     Q_OBJECT
@@ -52,7 +52,7 @@ class InstanceView : public QStackedWidget {
 
     void setCatDisplayed(bool enabled);
 
-    void editSelected();
+    void editSelected(InstanceList::Column targetColumn = InstanceList::NameColumn);
 
    signals:
     void instanceActivated(InstancePtr inst);

@@ -19,6 +19,9 @@
 #include "Application.h"
 #include "InstanceList.h"
 
+#include <QFont>
+#include <QVariant>
+
 InstanceTableProxyModel::InstanceTableProxyModel(QObject* parent) : QSortFilterProxyModel(parent)
 {
     m_naturalSort.setNumericMode(true);
@@ -30,19 +33,48 @@ InstanceTableProxyModel::InstanceTableProxyModel(QObject* parent) : QSortFilterP
 QVariant InstanceTableProxyModel::data(const QModelIndex& index, int role) const
 {
     QVariant data = QSortFilterProxyModel::data(index, role);
-    if (role == Qt::DecorationRole) {
-        if (!data.toString().isEmpty())
-            return APPLICATION->icons()->getIcon(data.toString());
-    }
+    QVariant displayData = data;
+    if (role != Qt::DisplayRole)
+        displayData = QSortFilterProxyModel::data(index, Qt::DisplayRole);
 
-    switch (index.column()) {
-        case InstanceList::LastPlayedColumn: {
-            if (role == Qt::DisplayRole) {
-                QDateTime foo = data.toDateTime();
-                if (foo.isNull() || !foo.isValid() || foo.toMSecsSinceEpoch() == 0)
-                    return tr("Never");
+    switch (role) {
+        case Qt::DecorationRole: {
+            if (!data.toString().isEmpty())
+                return APPLICATION->icons()->getIcon(data.toString());
+            break;
+        }
+        case Qt::DisplayRole: {
+            switch (index.column()) {
+                case InstanceList::CategoryColumn: {
+                    if (data.toString().isEmpty())
+                        return tr("None");
+                    break;
+                }
+                case InstanceList::LastPlayedColumn: {
+                    QDateTime foo = data.toDateTime();
+                    if (foo.isNull() || !foo.isValid() || foo.toMSecsSinceEpoch() == 0)
+                        return tr("Never");
+                    break;
+                }
             }
             break;
+        }
+        case Qt::FontRole: {
+            QFont font = data.value<QFont>();
+            switch (index.column()) {
+                case InstanceList::CategoryColumn: {
+                    if (displayData.toString().isEmpty())
+                        font.setItalic(true);
+                    break;
+                }
+                case InstanceList::LastPlayedColumn: {
+                    QDateTime foo = data.toDateTime();
+                    if (foo.isNull() || !foo.isValid() || foo.toMSecsSinceEpoch() == 0)
+                        font.setItalic(true);
+                    break;
+                }
+            }
+            return font;
         }
     }
     return data;

@@ -146,6 +146,8 @@ QVariant InstanceList::headerData(int section, Qt::Orientation orientation, int 
     switch (section) {
         case NameColumn:
             return tr("Name");
+        case CategoryColumn:
+            return tr("Category");
         case GameVersionColumn:
             return tr("Game Version");
         case PlayTimeColumn:
@@ -163,6 +165,10 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
     }
     const InstancePtr inst = m_instances[index.row()];
 
+    QString instanceGroup = getInstanceGroup(inst->id());
+
+
+
     switch (role) {
         case Qt::DecorationRole: {
             if (index.column() == NameColumn)
@@ -174,6 +180,8 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
             switch (index.column()) {
                 case NameColumn:
                     return inst->name();
+                case CategoryColumn:
+                    return instanceGroup;
                 case GameVersionColumn:
                     return inst->getMainVersion();
                 case PlayTimeColumn:
@@ -199,8 +207,11 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
         }
 
         case Qt::EditRole: {
-            if (index.column() == NameColumn)
-                return data(index, Qt::DisplayRole);
+            switch (index.column()) {
+                case NameColumn:
+                case CategoryColumn:
+                    return data(index, Qt::DisplayRole);
+            }
             break;
         }
 
@@ -227,7 +238,7 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
         }
 
         case GroupRole: {
-            return getInstanceGroup(inst->id());
+            return instanceGroup;
         }
     }
     return QVariant();
@@ -242,12 +253,17 @@ bool InstanceList::setData(const QModelIndex& index, const QVariant& value, int 
         return false;
     }
     InstancePtr inst = m_instances.at(index.row());
-    auto newName = value.toString();
-    if (inst->name() == newName) {
+    auto newValue = value.toString();
+
+    if (index.column() == NameColumn) {
+        setInstanceName(inst, newValue);
         return true;
     }
-    inst->setName(newName);
-    return true;
+    if (index.column() == CategoryColumn) {
+        setInstanceGroup(inst, newValue);
+        return true;
+    }
+    return false;
 }
 
 Qt::ItemFlags InstanceList::flags(const QModelIndex& index) const
@@ -256,7 +272,7 @@ Qt::ItemFlags InstanceList::flags(const QModelIndex& index) const
     if (index.isValid()) {
         f |= Qt::ItemIsSelectable;
 
-        if (index.column() == NameColumn) {
+        if (index.column() == NameColumn || index.column() == CategoryColumn) {
             f |= Qt::ItemIsEditable;  // NOTE: instance view forces focus on NameColumn
         }
     }
@@ -283,7 +299,11 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
         qDebug() << "Attempt to set a null instance's group";
         return;
     }
+    setInstanceGroup(inst, name);
+}
 
+void InstanceList::setInstanceGroup(const InstancePtr inst, const GroupId& name)
+{
     bool changed = false;
     auto iter = m_instanceGroupIndex.find(inst->id());
     if (iter != m_instanceGroupIndex.end()) {
@@ -293,7 +313,7 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
         }
     } else {
         changed = true;
-        m_instanceGroupIndex[id] = name;
+        m_instanceGroupIndex[inst->id()] = name;
     }
 
     if (changed) {
@@ -301,6 +321,23 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
         auto idx = getInstIndex(inst.get());
         emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), { GroupRole });
         saveGroupList();
+    }
+}
+
+void InstanceList::setInstanceName(const InstanceId& id, const QString name)
+{
+    auto inst = getInstanceById(id);
+    if (!inst) {
+        qDebug() << "Attempt to set a null instance's name";
+        return;
+    }
+    setInstanceName(inst, name);
+}
+
+void InstanceList::setInstanceName(const InstancePtr inst, const QString name)
+{
+    if (inst->name() != name) {
+        inst->setName(name);
     }
 }
 

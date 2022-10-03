@@ -58,11 +58,11 @@ void InstanceView::switchDisplayMode(InstanceView::DisplayMode mode)
     }
 }
 
-void InstanceView::editSelected()
+void InstanceView::editSelected(InstanceList::Column targetColumn)
 {
     auto current = currentView()->selectionModel()->currentIndex();
     if (current.isValid()) {
-        currentView()->edit(current);
+        currentView()->edit(current.siblingAtColumn(targetColumn));
     }
 }
 
@@ -185,7 +185,8 @@ void InstanceView::currentRowChanged(const QModelIndex& current, const QModelInd
 void InstanceView::selectNameColumn(const QModelIndex& current, const QModelIndex& previous)
 {
     // Make sure Name column is always selected
-    currentView()->setCurrentIndex(current.siblingAtColumn(InstanceList::NameColumn));
+    if (current.column() != InstanceList::NameColumn && current.column() != InstanceList::CategoryColumn)
+        currentView()->setCurrentIndex(current.siblingAtColumn(InstanceList::NameColumn));
 }
 
 void InstanceView::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
