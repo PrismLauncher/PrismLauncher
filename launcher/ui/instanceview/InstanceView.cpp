@@ -58,6 +58,14 @@ void InstanceView::switchDisplayMode(InstanceView::DisplayMode mode)
     }
 }
 
+void InstanceView::editSelected()
+{
+    auto current = currentView()->selectionModel()->currentIndex();
+    if (current.isValid()) {
+        currentView()->edit(current);
+    }
+}
+
 void InstanceView::prepareModel()
 {
     m_tableProxy = new InstanceTableProxyModel(this);

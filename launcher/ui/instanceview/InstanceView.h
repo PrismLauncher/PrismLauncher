@@ -52,6 +52,8 @@ class InstanceView : public QStackedWidget {
 
     void setCatDisplayed(bool enabled);
 
+    void editSelected();
+
    signals:
     void instanceActivated(InstancePtr inst);
     void currentInstanceChanged(InstancePtr current, InstancePtr previous);
