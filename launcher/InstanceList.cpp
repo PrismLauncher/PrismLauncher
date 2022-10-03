@@ -257,7 +257,7 @@ Qt::ItemFlags InstanceList::flags(const QModelIndex& index) const
         f |= Qt::ItemIsSelectable;
 
         if (index.column() == NameColumn) {
-            f |= Qt::ItemIsEditable;  // FIXME: bad UX! User can only use rename, if they selected the name column
+            f |= Qt::ItemIsEditable;  // NOTE: instance view forces focus on NameColumn
         }
     }
     return f;
