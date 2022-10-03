@@ -331,11 +331,6 @@ void InstanceList::deleteGroup(const QString& name)
     }
 }
 
-bool InstanceList::isGroupCollapsed(const QString& group)
-{
-    return m_collapsedGroups.contains(group);
-}
-
 bool InstanceList::trashInstance(const InstanceId& id)
 {
     auto inst = getInstanceById(id);
@@ -685,7 +680,7 @@ void InstanceList::saveGroupList()
         auto name = iter.key();
         QJsonObject groupObj;
         QJsonArray instanceArr;
-        groupObj.insert("hidden", QJsonValue(m_collapsedGroups.contains(name)));
+        groupObj.insert("hidden", false);  // preserve compatiblity with older versions
         for (auto item : list) {
             instanceArr.append(QJsonValue(item));
         }
@@ -774,11 +769,6 @@ void InstanceList::loadGroupList()
         // keep a list/set of groups for choosing
         groupSet.insert(groupName);
 
-        auto hidden = groupObj.value("hidden").toBool(false);
-        if (hidden) {
-            m_collapsedGroups.insert(groupName);
-        }
-
         // Iterate through the list of instances in the group.
         QJsonArray instancesArray = groupObj.value("instances").toArray();
 
@@ -808,17 +798,6 @@ void InstanceList::on_InstFolderChanged(const Setting& setting, QVariant value)
         m_groupsLoaded = false;
         emit instancesChanged();
     }
-}
-
-void InstanceList::on_GroupStateChanged(const QString& group, bool collapsed)
-{
-    qDebug() << "Group" << group << (collapsed ? "collapsed" : "expanded");
-    if (collapsed) {
-        m_collapsedGroups.insert(group);
-    } else {
-        m_collapsedGroups.remove(group);
-    }
-    saveGroupList();
 }
 
 class InstanceStaging : public Task {

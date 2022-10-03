@@ -80,7 +80,6 @@ class InstanceList : public QAbstractTableModel {
     InstancePtr getInstanceByManagedName(const QString& managed_name) const;
     QModelIndex getInstanceIndexById(const QString& id) const;
     QStringList getGroups();
-    bool isGroupCollapsed(const QString& groupName);
 
     GroupId getInstanceGroup(const InstanceId& id) const;
     void setInstanceGroup(const InstanceId& id, const GroupId& name);
@@ -134,7 +133,6 @@ class InstanceList : public QAbstractTableModel {
 
    public slots:
     void on_InstFolderChanged(const Setting& setting, QVariant value);
-    void on_GroupStateChanged(const QString& group, bool collapsed);
 
    private slots:
     void propertiesChanged(BaseInstance* inst);
@@ -162,8 +160,6 @@ class InstanceList : public QAbstractTableModel {
     SettingsObjectPtr m_globalSettings;
     QString m_instDir;
     QFileSystemWatcher* m_watcher;
-    // FIXME: this is so inefficient that looking at it is almost painful.
-    QSet<QString> m_collapsedGroups;
     QMap<InstanceId, GroupId> m_instanceGroupIndex;
     QSet<InstanceId> instanceSet;
     bool m_groupsLoaded = false;
