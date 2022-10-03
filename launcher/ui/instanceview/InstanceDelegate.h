@@ -27,7 +27,6 @@ class InstanceDelegate : public QStyledItemDelegate {
     InstanceDelegate(QObject* parent = 0, int iconSize = 48, bool isGrid = false);
 
     void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override;
-    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
    private:
     int m_iconSize;
