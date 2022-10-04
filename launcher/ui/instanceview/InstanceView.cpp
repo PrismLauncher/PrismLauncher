@@ -223,10 +223,8 @@ QModelIndex InstanceView::mappedIndex(const QModelIndex& index) const
 
 void InstanceView::setFilterQuery(const QString& query)
 {
-    if (m_displayMode == DisplayMode::GridMode) {
-        return m_gridProxy->setFilterQuery(query);
-    }
-    return m_tableProxy->setFilterQuery(query);
+    m_gridProxy->setFilterQuery(query);
+    m_tableProxy->setFilterQuery(query);
 }
 
 void InstanceView::setCatDisplayed(bool enabled)
