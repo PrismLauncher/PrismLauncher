@@ -113,7 +113,7 @@ bool InstanceTableProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex&
 
 QList<InstanceFilterQuery> InstanceTableProxyModel::parseFilterQuery(QString query)
 {
-    const QRegularExpression pattern = QRegularExpression("(?:(?<prefix>\\S+):)?(?:(?<content1>\\S+)|\"(?<content2>.+)\")");
+    const QRegularExpression pattern = QRegularExpression("(?:(?<prefix>\\S+):)?(?:\"(?<content1>.+)\"|(?<content2>\\S+))");
     QList<InstanceFilterQuery> queries;
 
     QRegularExpressionMatchIterator it = pattern.globalMatch(query);
