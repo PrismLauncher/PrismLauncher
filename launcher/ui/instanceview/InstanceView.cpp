@@ -32,6 +32,7 @@
 
 #include <QHeaderView>
 #include <QSize>
+#include <QSortFilterProxyModel>
 
 InstanceView::InstanceView(QWidget* parent, InstanceList* instances) : QStackedWidget(parent), m_instances(instances)
 {
@@ -170,6 +171,14 @@ void InstanceView::activateInstance(const QModelIndex& index)
 
 void InstanceView::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
 {
+    // don't fire event, if row changed in inactive model
+    QSortFilterProxyModel* m = m_tableProxy;
+    if (m_displayMode == GridMode)
+        m = m_gridProxy;
+
+    if (current.model() != m)
+        return;
+
     InstancePtr inst1, inst2;
     if (current.isValid()) {
         int row = mappedIndex(current).row();
@@ -215,10 +224,11 @@ void InstanceView::contextMenuRequested(const QPoint pos)
 
 QModelIndex InstanceView::mappedIndex(const QModelIndex& index) const
 {
-    if (m_displayMode == DisplayMode::GridMode) {
+    if (index.model() == m_tableProxy)
+        return m_tableProxy->mapToSource(index);
+    if (index.model() == m_gridProxy)
         return m_gridProxy->mapToSource(index);
-    }
-    return m_tableProxy->mapToSource(index);
+    return index;
 }
 
 void InstanceView::setFilterQuery(const QString& query)
