@@ -56,7 +56,7 @@ class QToolButton;
 class LabeledToolButton;
 class QLabel;
 class QLineEdit;
-class InstanceView;
+class InstancesView;
 class MinecraftLauncher;
 class BaseProfilerFactory;
 class InstanceTask;
@@ -220,7 +220,7 @@ private:
     std::unique_ptr<Ui> ui;
 
     // these are managed by Qt's memory management model!
-    InstanceView *view = nullptr;
+    InstancesView*view = nullptr;
     QLineEdit *filterView = nullptr;
     QToolButton *newsLabel = nullptr;
     QMenu *accountMenu = nullptr;
@@ -234,4 +234,3 @@ private:
     // managed by the application object
     Task *m_versionLoadTask = nullptr;
 };
-

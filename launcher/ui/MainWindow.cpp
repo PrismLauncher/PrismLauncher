@@ -90,19 +90,19 @@
 #include "JavaCommon.h"
 #include "LaunchController.h"
 
-#include "ui/instanceview/InstanceView.h"
-#include "ui/widgets/LabeledToolButton.h"
+#include "ui/dialogs/AboutDialog.h"
+#include "ui/dialogs/CopyInstanceDialog.h"
+#include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/EditAccountDialog.h"
+#include "ui/dialogs/ExportInstanceDialog.h"
+#include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
-#include "ui/dialogs/AboutDialog.h"
-#include "ui/dialogs/VersionSelectDialog.h"
-#include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/IconPickerDialog.h"
-#include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/UpdateDialog.h"
-#include "ui/dialogs/EditAccountDialog.h"
-#include "ui/dialogs/ExportInstanceDialog.h"
+#include "ui/dialogs/VersionSelectDialog.h"
+#include "ui/instanceview/InstancesView.h"
+#include "ui/widgets/LabeledToolButton.h"
 
 #include "UpdateController.h"
 
@@ -880,10 +880,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     // Create the instance list widget
     {
-        view = new InstanceView(ui->centralWidget, APPLICATION->instances().get());
+        view = new InstancesView(ui->centralWidget, APPLICATION->instances().get());
 
-        connect(view, &InstanceView::showContextMenu, this, &MainWindow::showInstanceContextMenu);
-        connect(filterView, &QLineEdit::textEdited, view, &InstanceView::setFilterQuery);
+        connect(view, &InstancesView::showContextMenu, this, &MainWindow::showInstanceContextMenu);
+        connect(filterView, &QLineEdit::textEdited, view, &InstancesView::setFilterQuery);
 
         ui->verticalLayout->addWidget(view);
     }
@@ -900,20 +900,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         int displayMode = APPLICATION->settings()->get("InstanceDisplayMode").toInt();
         ui->actionTableMode->setChecked(false);
         ui->actionGridMode->setChecked(false);
-        if (displayMode == InstanceView::TableMode) {
+        if (displayMode == InstancesView::TableMode) {
             ui->actionTableMode->setChecked(true);
         } else {
             ui->actionGridMode->setChecked(true);
         }
-        view->switchDisplayMode(displayMode == InstanceView::TableMode ? InstanceView::TableMode : InstanceView::GridMode);
+        view->switchDisplayMode(displayMode == InstancesView::TableMode ? InstancesView::TableMode : InstancesView::GridMode);
 
         connect(ui->actionTableMode, &QAction::triggered, this, [this](bool state){
             if (!state) {
                 ui->actionTableMode->setChecked(true);
             }
             ui->actionGridMode->setChecked(false);
-            view->switchDisplayMode(InstanceView::TableMode);
-            APPLICATION->settings()->set("InstanceDisplayMode", InstanceView::TableMode);
+            view->switchDisplayMode(InstancesView::TableMode);
+            APPLICATION->settings()->set("InstanceDisplayMode", InstancesView::TableMode);
         });
 
         connect(ui->actionGridMode, &QAction::triggered, this, [this](bool state){
@@ -921,15 +921,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
                 ui->actionGridMode->setChecked(true);
             }
             ui->actionTableMode->setChecked(false);
-            view->switchDisplayMode(InstanceView::GridMode);
-            APPLICATION->settings()->set("InstanceDisplayMode", InstanceView::GridMode);
+            view->switchDisplayMode(InstancesView::GridMode);
+            APPLICATION->settings()->set("InstanceDisplayMode", InstancesView::GridMode);
         });
     }
     // start instance when double-clicked
-    connect(view, &InstanceView::instanceActivated, this, &MainWindow::instanceActivated);
+    connect(view, &InstancesView::instanceActivated, this, &MainWindow::instanceActivated);
 
     // track the selection -- update the instance toolbar
-    connect(view, &InstanceView::currentInstanceChanged, this, &MainWindow::instanceChanged);
+    connect(view, &InstancesView::currentInstanceChanged, this, &MainWindow::instanceChanged);
 
     // track icon changes and update the toolbar!
     connect(APPLICATION->icons().get(), &IconList::iconUpdated, this, &MainWindow::iconUpdated);

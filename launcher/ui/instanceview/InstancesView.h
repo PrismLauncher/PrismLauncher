@@ -28,13 +28,13 @@
 class InstanceTableProxyModel;
 class InstanceGridProxyModel;
 
-class InstanceView : public QStackedWidget {
+class InstancesView : public QStackedWidget {
     Q_OBJECT
 
    public:
     enum DisplayMode { TableMode = 0, GridMode };
 
-    explicit InstanceView(QWidget* parent = nullptr, InstanceList* instances = nullptr);
+    explicit InstancesView(QWidget* parent = nullptr, InstanceList* instances = nullptr);
 
     void switchDisplayMode(DisplayMode mode);
 

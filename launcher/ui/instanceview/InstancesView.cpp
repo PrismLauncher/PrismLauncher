@@ -22,7 +22,7 @@
  * or later.
  */
 
-#include "InstanceView.h"
+#include "InstancesView.h"
 #include "Application.h"
 
 #include "InstanceDelegate.h"
@@ -34,7 +34,7 @@
 #include <QSize>
 #include <QSortFilterProxyModel>
 
-InstanceView::InstanceView(QWidget* parent, InstanceList* instances) : QStackedWidget(parent), m_instances(instances)
+InstancesView::InstancesView(QWidget* parent, InstanceList* instances) : QStackedWidget(parent), m_instances(instances)
 {
     prepareModel();
     createTable();
@@ -44,12 +44,12 @@ InstanceView::InstanceView(QWidget* parent, InstanceList* instances) : QStackedW
     addWidget(m_grid);
 }
 
-void InstanceView::storeState()
+void InstancesView::storeState()
 {
     APPLICATION->settings()->set("InstanceViewTableHeaderState", m_table->horizontalHeader()->saveState().toBase64());
 }
 
-void InstanceView::switchDisplayMode(InstanceView::DisplayMode mode)
+void InstancesView::switchDisplayMode(InstancesView::DisplayMode mode)
 {
     m_displayMode = mode;
     if (mode == DisplayMode::TableMode) {
@@ -59,7 +59,7 @@ void InstanceView::switchDisplayMode(InstanceView::DisplayMode mode)
     }
 }
 
-void InstanceView::editSelected(InstanceList::Column targetColumn)
+void InstancesView::editSelected(InstanceList::Column targetColumn)
 {
     auto current = currentView()->selectionModel()->currentIndex();
     if (current.isValid()) {
@@ -67,20 +67,20 @@ void InstanceView::editSelected(InstanceList::Column targetColumn)
     }
 }
 
-void InstanceView::prepareModel()
+void InstancesView::prepareModel()
 {
     m_tableProxy = new InstanceTableProxyModel(this);
     m_tableProxy->setSortCaseSensitivity(Qt::CaseInsensitive);
     m_tableProxy->setSourceModel(m_instances);
     m_tableProxy->setSortRole(InstanceList::SortRole);
-    connect(m_tableProxy, &QAbstractItemModel::dataChanged, this, &InstanceView::dataChanged);
+    connect(m_tableProxy, &QAbstractItemModel::dataChanged, this, &InstancesView::dataChanged);
     m_gridProxy = new InstanceGridProxyModel(this);
     m_gridProxy->setSourceModel(m_instances);
     m_gridProxy->sort(InstanceList::LastPlayedColumn, Qt::DescendingOrder);
-    connect(m_tableProxy, &QAbstractItemModel::dataChanged, this, &InstanceView::dataChanged);
+    connect(m_tableProxy, &QAbstractItemModel::dataChanged, this, &InstancesView::dataChanged);
 }
 
-void InstanceView::createTable()
+void InstancesView::createTable()
 {
     m_table = new QTableView(this);
     m_table->setModel(m_tableProxy);
@@ -120,13 +120,13 @@ void InstanceView::createTable()
         header->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("InstanceViewTableHeaderState").toByteArray()));
     }
 
-    connect(m_table, &QAbstractItemView::doubleClicked, this, &InstanceView::activateInstance);
-    connect(m_table->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstanceView::currentRowChanged);
-    connect(m_table->selectionModel(), &QItemSelectionModel::currentColumnChanged, this, &InstanceView::selectNameColumn);
-    connect(m_table, &QWidget::customContextMenuRequested, this, &InstanceView::contextMenuRequested);
+    connect(m_table, &QAbstractItemView::doubleClicked, this, &InstancesView::activateInstance);
+    connect(m_table->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstancesView::currentRowChanged);
+    connect(m_table->selectionModel(), &QItemSelectionModel::currentColumnChanged, this, &InstancesView::selectNameColumn);
+    connect(m_table, &QWidget::customContextMenuRequested, this, &InstancesView::contextMenuRequested);
 }
 
-void InstanceView::createGrid()
+void InstancesView::createGrid()
 {
     m_grid = new QListView(this);
     m_grid->setModel(m_gridProxy);
@@ -146,12 +146,12 @@ void InstanceView::createGrid()
     m_grid->setFrameStyle(QFrame::NoFrame);
     m_grid->setGridSize(QSize(m_iconSize * 2, m_iconSize * 2));
 
-    connect(m_grid, &QAbstractItemView::doubleClicked, this, &InstanceView::activateInstance);
-    connect(m_grid->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstanceView::currentRowChanged);
-    connect(m_grid, &QWidget::customContextMenuRequested, this, &InstanceView::contextMenuRequested);
+    connect(m_grid, &QAbstractItemView::doubleClicked, this, &InstancesView::activateInstance);
+    connect(m_grid->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstancesView::currentRowChanged);
+    connect(m_grid, &QWidget::customContextMenuRequested, this, &InstancesView::contextMenuRequested);
 }
 
-InstancePtr InstanceView::currentInstance()
+InstancePtr InstancesView::currentInstance()
 {
     auto current = currentView()->selectionModel()->currentIndex();
     if (current.isValid()) {
@@ -161,7 +161,7 @@ InstancePtr InstanceView::currentInstance()
     return nullptr;
 }
 
-void InstanceView::activateInstance(const QModelIndex& index)
+void InstancesView::activateInstance(const QModelIndex& index)
 {
     if (index.isValid()) {
         int row = mappedIndex(index).row();
@@ -169,7 +169,7 @@ void InstanceView::activateInstance(const QModelIndex& index)
     }
 }
 
-void InstanceView::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
+void InstancesView::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
 {
     // don't fire event, if row changed in inactive model
     QSortFilterProxyModel* m = m_tableProxy;
@@ -191,14 +191,14 @@ void InstanceView::currentRowChanged(const QModelIndex& current, const QModelInd
     emit currentInstanceChanged(inst1, inst2);
 }
 
-void InstanceView::selectNameColumn(const QModelIndex& current, const QModelIndex& previous)
+void InstancesView::selectNameColumn(const QModelIndex& current, const QModelIndex& previous)
 {
     // Make sure Name column is always selected
     if (current.column() != InstanceList::NameColumn && current.column() != InstanceList::CategoryColumn)
         currentView()->setCurrentIndex(current.siblingAtColumn(InstanceList::NameColumn));
 }
 
-void InstanceView::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+void InstancesView::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
     // Notify others if data of the current instance changed
     auto current = currentView()->selectionModel()->currentIndex();
@@ -211,7 +211,7 @@ void InstanceView::dataChanged(const QModelIndex& topLeft, const QModelIndex& bo
     }
 }
 
-void InstanceView::contextMenuRequested(const QPoint pos)
+void InstancesView::contextMenuRequested(const QPoint pos)
 {
     QModelIndex index = currentView()->indexAt(pos);
 
@@ -222,7 +222,7 @@ void InstanceView::contextMenuRequested(const QPoint pos)
     }
 }
 
-QModelIndex InstanceView::mappedIndex(const QModelIndex& index) const
+QModelIndex InstancesView::mappedIndex(const QModelIndex& index) const
 {
     if (index.model() == m_tableProxy)
         return m_tableProxy->mapToSource(index);
@@ -231,13 +231,13 @@ QModelIndex InstanceView::mappedIndex(const QModelIndex& index) const
     return index;
 }
 
-void InstanceView::setFilterQuery(const QString& query)
+void InstancesView::setFilterQuery(const QString& query)
 {
     m_gridProxy->setFilterQuery(query);
     m_tableProxy->setFilterQuery(query);
 }
 
-void InstanceView::setCatDisplayed(bool enabled)
+void InstancesView::setCatDisplayed(bool enabled)
 {
     if (enabled) {
         QDateTime now = QDateTime::currentDateTime();
