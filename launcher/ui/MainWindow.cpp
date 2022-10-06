@@ -874,6 +874,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     // Create instance list filter box
     {
         filterView = new QLineEdit(ui->centralWidget);
+        filterView->setPlaceholderText(tr("Search and filter..."));
 
         ui->verticalLayout->addWidget(filterView);
     }
