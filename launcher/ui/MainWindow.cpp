@@ -703,8 +703,8 @@ public:
 
         actionChangeInstGroup = TranslatedAction(MainWindow);
         actionChangeInstGroup->setObjectName(QStringLiteral("actionChangeInstGroup"));
-        actionChangeInstGroup.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Change Group..."));
-        actionChangeInstGroup.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the selected instance's group."));
+        actionChangeInstGroup.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Change category..."));
+        actionChangeInstGroup.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the selected instance's category."));
         actionChangeInstGroup->setShortcut(QKeySequence(tr("Ctrl+G")));
         actionChangeInstGroup->setIcon(APPLICATION->getThemedIcon("tag"));
         all_actions.append(&actionChangeInstGroup);
@@ -1694,7 +1694,7 @@ void MainWindow::on_actionChangeInstGroup_triggered()
     groups.sort(Qt::CaseInsensitive);
     int foo = groups.indexOf(name);
 
-    name = QInputDialog::getItem(this, tr("Group name"), tr("Enter a new group name."), groups, foo, true, &ok);
+    name = QInputDialog::getItem(this, tr("Category name"), tr("Enter a new category name."), groups, foo, true, &ok);
     name = name.simplified();
     if (ok)
     {
@@ -1716,7 +1716,7 @@ void MainWindow::deleteGroup()
     QString groupName = map["group"].toString();
     if(!groupName.isEmpty())
     {
-        auto reply = QMessageBox::question(this, tr("Delete group"), tr("Are you sure you want to delete the group %1?")
+        auto reply = QMessageBox::question(this, tr("Delete category"), tr("Are you sure you want to delete the category %1?")
             .arg(groupName), QMessageBox::Yes | QMessageBox::No);
         if(reply == QMessageBox::Yes)
         {
