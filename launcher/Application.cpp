@@ -859,12 +859,13 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         qDebug() << "<> Application theme set.";
     }
 
+    updateCapabilities();
+
     if(createSetupWizard())
     {
         return;
     }
 
-    updateCapabilities();
     performMainStartupAction();
 }
 
