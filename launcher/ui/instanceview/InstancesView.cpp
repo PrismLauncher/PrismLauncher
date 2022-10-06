@@ -51,12 +51,18 @@ void InstancesView::storeState()
 
 void InstancesView::switchDisplayMode(InstancesView::DisplayMode mode)
 {
-    m_displayMode = mode;
+    const QModelIndex index = currentView()->currentIndex();
+    const QModelIndex sourceIndex = mappedIndex(index);
     if (mode == DisplayMode::TableMode) {
+        m_table->selectionModel()->setCurrentIndex(m_tableProxy->mapFromSource(sourceIndex),
+                                                   QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
         setCurrentWidget(m_table);
     } else {
+        m_grid->selectionModel()->setCurrentIndex(m_gridProxy->mapFromSource(sourceIndex),
+                                                  QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
         setCurrentWidget(m_grid);
     }
+    m_displayMode = mode;
 }
 
 void InstancesView::editSelected(InstanceList::Column targetColumn)
@@ -171,14 +177,6 @@ void InstancesView::activateInstance(const QModelIndex& index)
 
 void InstancesView::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
 {
-    // don't fire event, if row changed in inactive model
-    QSortFilterProxyModel* m = m_tableProxy;
-    if (m_displayMode == GridMode)
-        m = m_gridProxy;
-
-    if (current.model() != m)
-        return;
-
     InstancePtr inst1, inst2;
     if (current.isValid()) {
         int row = mappedIndex(current).row();
