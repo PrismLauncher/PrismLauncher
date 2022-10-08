@@ -82,17 +82,6 @@ uint64_t Sys::getSystemRam()
     return 0; // nothing found
 }
 
-bool Sys::isCPU64bit()
-{
-    return isSystem64bit();
-}
-
-bool Sys::isSystem64bit()
-{
-    // kernel build arch on linux
-    return QSysInfo::currentCpuArchitecture() == "x86_64";
-}
-
 Sys::DistributionInfo Sys::getDistributionInfo()
 {
     DistributionInfo systemd_info = read_os_release();

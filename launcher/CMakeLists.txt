@@ -26,6 +26,7 @@ set(CORE_SOURCES
     MMCZip.cpp
     MMCStrings.h
     MMCStrings.cpp
+    RuntimeContext.h
 
     # Basic instance manipulation tasks (derived from InstanceTask)
     InstanceCreationTask.h
@@ -288,8 +289,6 @@ set(MINECRAFT_SOURCES
     minecraft/Rule.h
     minecraft/OneSixVersionFormat.cpp
     minecraft/OneSixVersionFormat.h
-    minecraft/OpSys.cpp
-    minecraft/OpSys.h
     minecraft/ParseUtils.cpp
     minecraft/ParseUtils.h
     minecraft/ProfileUtils.cpp

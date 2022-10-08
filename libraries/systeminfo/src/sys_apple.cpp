@@ -55,18 +55,6 @@ uint64_t Sys::getSystemRam()
     }
 }
 
-bool Sys::isCPU64bit()
-{
-    // not even going to pretend I'm going to support anything else
-    return true;
-}
-
-bool Sys::isSystem64bit()
-{
-    // yep. maybe when we have 128bit CPUs on consumer devices.
-    return true;
-}
-
 Sys::DistributionInfo Sys::getDistributionInfo()
 {
     DistributionInfo result;

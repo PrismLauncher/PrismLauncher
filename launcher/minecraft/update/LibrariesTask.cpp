@@ -34,7 +34,7 @@ void LibrariesTask::executeTask()
                 emitFailed(tr("Null jar is specified in the metadata, aborting."));
                 return false;
             }
-            auto dls = lib->getDownloads(currentSystem, metacache.get(), errors, localPath);
+            auto dls = lib->getDownloads(inst->runtimeContext(), metacache.get(), errors, localPath);
             for(auto dl : dls)
             {
                 downloadJob->addNetAction(dl);

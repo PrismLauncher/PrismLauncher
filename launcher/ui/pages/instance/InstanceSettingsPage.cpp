@@ -274,6 +274,9 @@ void InstanceSettingsPage::applySettings()
     {
         m_settings->reset("JoinServerOnLaunchAddress");
     }
+
+    // FIXME: This should probably be called by a signal instead
+    m_instance->updateRuntimeContext();
 }
 
 void InstanceSettingsPage::loadSettings()
