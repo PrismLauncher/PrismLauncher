@@ -43,6 +43,8 @@
 #include "InstanceImportTask.h"
 #include "Json.h"
 
+#include "ui/widgets/ProjectItem.h"
+
 #include <HoeDown.h>
 
 #include <QComboBox>
@@ -70,6 +72,8 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthPage::onVersionSelectionChanged);
+
+    ui->packView->setItemDelegate(new ProjectItemDelegate(this));
 }
 
 ModrinthPage::~ModrinthPage()
