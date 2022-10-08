@@ -144,6 +144,8 @@ QVariant InstanceList::headerData(int section, Qt::Orientation orientation, int 
     }
 
     switch (section) {
+        case StatusColumn:
+            return tr("Status");
         case NameColumn:
             return tr("Name");
         case CategoryColumn:
@@ -167,12 +169,19 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
 
     QString instanceGroup = getInstanceGroup(inst->id());
 
-
-
     switch (role) {
         case Qt::DecorationRole: {
-            if (index.column() == NameColumn)
-                return inst->iconKey();
+            switch (index.column()) {
+                case StatusColumn: {
+                    if (inst->isRunning())
+                        return "status-running";
+                    else if (inst->hasCrashed() || inst->hasVersionBroken())
+                        return "status-bad";
+                    return QVariant();
+                }
+                case NameColumn:
+                    return inst->iconKey();
+            }
             break;
         }
 
@@ -194,6 +203,15 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
 
         case Qt::ToolTipRole: {
             switch (index.column()) {
+                case StatusColumn: {
+                    if (inst->isRunning())
+                        return tr("Running");
+                    else if (inst->hasCrashed())
+                        return tr("Crashed");
+                    else if (inst->hasVersionBroken())
+                        return tr("Broken");
+                    return tr("Inactive");
+                }
                 case NameColumn:
                     return inst->instanceRoot();
                 case GameVersionColumn:

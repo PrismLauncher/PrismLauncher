@@ -126,6 +126,8 @@ void InstancesView::createTable()
         header->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("InstanceViewTableHeaderState").toByteArray()));
     }
 
+    m_table->setColumnHidden(InstanceList::StatusColumn, true);
+
     connect(m_table, &QAbstractItemView::doubleClicked, this, &InstancesView::activateInstance);
     connect(m_table->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstancesView::currentRowChanged);
     connect(m_table->selectionModel(), &QItemSelectionModel::currentColumnChanged, this, &InstancesView::selectNameColumn);

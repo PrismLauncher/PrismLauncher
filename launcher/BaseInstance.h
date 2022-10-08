@@ -240,19 +240,6 @@ public:
         }
     }
 
-    bool hasUpdateAvailable() const
-    {
-        return m_hasUpdate;
-    }
-    void setUpdateAvailable(bool value)
-    {
-        if(m_hasUpdate != value)
-        {
-            m_hasUpdate = value;
-            emit propertiesChanged(this);
-        }
-    }
-
     bool hasCrashed() const
     {
         return m_crashed;
@@ -317,7 +304,6 @@ protected: /* data */
 private: /* data */
     Status m_status = Status::Present;
     bool m_crashed = false;
-    bool m_hasUpdate = false;
     bool m_hasBrokenVersion = false;
 
     SettingsObjectWeakPtr m_global_settings;
