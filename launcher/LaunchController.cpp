@@ -93,8 +93,8 @@ void LaunchController::decideAccount()
         auto reply = CustomMessageBox::selectable(
             m_parentWidget,
             tr("No Accounts"),
-            tr("In order to play Minecraft, you must have at least one Mojang or Microsoft "
-               "account logged in. "
+            tr("In order to play Minecraft, you must have at least one Microsoft or Mojang "
+               "account logged in. Mojang accounts can only be used offline. "
                "Would you like to open the account manager to add an account now?"),
             QMessageBox::Information,
             QMessageBox::Yes | QMessageBox::No
