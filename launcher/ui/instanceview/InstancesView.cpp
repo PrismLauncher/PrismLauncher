@@ -31,6 +31,7 @@
 #include "ui/instanceview/InstanceTableProxyModel.h"
 
 #include <QHeaderView>
+#include <QKeyEvent>
 #include <QSize>
 #include <QSortFilterProxyModel>
 
@@ -89,6 +90,7 @@ void InstancesView::prepareModel()
 void InstancesView::createTable()
 {
     m_table = new QTableView(this);
+    m_table->installEventFilter(this);
     m_table->setModel(m_tableProxy);
     m_table->setItemDelegate(new InstanceDelegate(this, m_iconSize, false));
 
@@ -137,6 +139,7 @@ void InstancesView::createTable()
 void InstancesView::createGrid()
 {
     m_grid = new QListView(this);
+    m_grid->installEventFilter(this);
     m_grid->setModel(m_gridProxy);
     m_grid->setModelColumn(InstanceList::NameColumn);
     m_grid->setItemDelegate(new InstanceDelegate(this, m_iconSize, true));
@@ -167,6 +170,20 @@ InstancePtr InstancesView::currentInstance()
         return m_instances->at(row);
     }
     return nullptr;
+}
+
+bool InstancesView::eventFilter(QObject* obj, QEvent* event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        switch (keyEvent->key()) {
+            case Qt::Key_Return:
+            case Qt::Key_Enter:
+                activateInstance(currentView()->selectionModel()->currentIndex());
+                return true;
+        }
+    }
+    return QObject::eventFilter(obj, event);
 }
 
 void InstancesView::activateInstance(const QModelIndex& index)

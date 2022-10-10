@@ -68,6 +68,9 @@ class InstancesView : public QStackedWidget {
     void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
     void contextMenuRequested(const QPoint pos);
 
+   protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
    private:
     void createTable();
     void createGrid();
