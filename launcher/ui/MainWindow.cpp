@@ -792,7 +792,6 @@ public:
         instanceToolBar->addSeparator();
 
         instanceToolBar->addAction(actionLaunchInstance);
-        instanceToolBar->addAction(actionLaunchInstanceOffline);
         instanceToolBar->addAction(actionKillInstance);
 
         instanceToolBar->addSeparator();
@@ -1197,7 +1196,6 @@ void MainWindow::updateMainToolBar()
 void MainWindow::updateToolsMenu()
 {
     QToolButton *launchButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstance));
-    QToolButton *launchOfflineButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstanceOffline));
 
     bool currentInstanceRunning = m_selectedInstance && m_selectedInstance->isRunning();
 
@@ -1206,9 +1204,7 @@ void MainWindow::updateToolsMenu()
     ui->actionLaunchInstanceDemo->setDisabled(!m_selectedInstance || currentInstanceRunning);
 
     QMenu *launchMenu = ui->actionLaunchInstance->menu();
-    QMenu *launchOfflineMenu = ui->actionLaunchInstanceOffline->menu();
     launchButton->setPopupMode(QToolButton::MenuButtonPopup);
-    launchOfflineButton->setPopupMode(QToolButton::MenuButtonPopup);
     if (launchMenu)
     {
         launchMenu->clear();
@@ -1217,19 +1213,12 @@ void MainWindow::updateToolsMenu()
     {
         launchMenu = new QMenu(this);
     }
-    if (launchOfflineMenu) {
-        launchOfflineMenu->clear();
-    }
-    else
-    {
-        launchOfflineMenu = new QMenu(this);
-    }
 
     QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
     normalLaunch->setShortcut(QKeySequence::Open);
-    QAction *normalLaunchOffline = launchOfflineMenu->addAction(tr("Launch Offline"));
+    QAction *normalLaunchOffline = launchMenu->addAction(tr("Launch Offline"));
     normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
-    QAction *normalLaunchDemo = launchOfflineMenu->addAction(tr("Launch Demo"));
+    QAction *normalLaunchDemo = launchMenu->addAction(tr("Launch Demo"));
     normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
     if (m_selectedInstance)
     {
@@ -1262,11 +1251,10 @@ void MainWindow::updateToolsMenu()
 
     QString profilersTitle = tr("Profilers");
     launchMenu->addSeparator()->setText(profilersTitle);
-    launchOfflineMenu->addSeparator()->setText(profilersTitle);
     for (auto profiler : APPLICATION->profilers().values())
     {
         QAction *profilerAction = launchMenu->addAction(profiler->name());
-        QAction *profilerOfflineAction = launchOfflineMenu->addAction(profiler->name());
+        QAction *profilerOfflineAction = launchMenu->addAction(tr("%1 Offline").arg(profiler->name()));
         QString error;
         if (!profiler->check(&error))
         {
@@ -1297,7 +1285,6 @@ void MainWindow::updateToolsMenu()
         }
     }
     ui->actionLaunchInstance->setMenu(launchMenu);
-    ui->actionLaunchInstanceOffline->setMenu(launchOfflineMenu);
 }
 
 void MainWindow::repopulateAccountsMenu()
