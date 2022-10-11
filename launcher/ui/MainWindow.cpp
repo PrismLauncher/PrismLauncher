@@ -1254,7 +1254,7 @@ void MainWindow::updateToolsMenu()
     for (auto profiler : APPLICATION->profilers().values())
     {
         QAction *profilerAction = launchMenu->addAction(profiler->name());
-        QAction *profilerOfflineAction = launchMenu->addAction(profiler->name() + " Offline");
+        QAction *profilerOfflineAction = launchMenu->addAction(tr("%1 Offline").arg(profiler->name()));
         QString error;
         if (!profiler->check(&error))
         {
