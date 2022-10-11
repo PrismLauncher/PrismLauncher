@@ -284,6 +284,7 @@ void ModrinthPage::updateUI()
     text += h.process(current.extra.body.toUtf8());
 
     ui->packDescription->setHtml(text + current.description);
+    ui->packDescription->flush();
 }
 
 void ModrinthPage::suggestCurrent()

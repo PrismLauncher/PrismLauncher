@@ -15,3 +15,9 @@ void ProjectDescriptionPage::setMetaEntry(QString entry)
     if (m_image_text_object)
         m_image_text_object->setMetaEntry(entry);
 }
+
+void ProjectDescriptionPage::flush()
+{
+    if (m_image_text_object)
+        m_image_text_object->flush();
+}

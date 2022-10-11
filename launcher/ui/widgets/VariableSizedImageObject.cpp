@@ -66,6 +66,11 @@ void VariableSizedImageObject::drawObject(QPainter* painter,
     painter->drawImage(rect, image);
 }
 
+void VariableSizedImageObject::flush()
+{
+    m_fetching_images.clear();
+}
+
 void VariableSizedImageObject::parseImage(QTextDocument* doc, QImage image, int posInDocument)
 {
     QTextCursor cursor(doc);
@@ -85,7 +90,7 @@ void VariableSizedImageObject::parseImage(QTextDocument* doc, QImage image, int 
 
 void VariableSizedImageObject::loadImage(QTextDocument* doc, const QUrl& source, int posInDocument)
 {
-    m_fetching_images.append(source);
+    m_fetching_images.insert(source);
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(
         m_meta_entry,
@@ -99,6 +104,10 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, const QUrl& source,
     connect(job, &NetJob::succeeded, [this, doc, full_entry_path, source_url, posInDocument] {
         qDebug() << "Loaded resource at" << full_entry_path;
 
+        // If we flushed, don't proceed.
+        if (!m_fetching_images.contains(source_url))
+            return;
+
         QImage image(full_entry_path);
         doc->addResource(QTextDocument::ImageResource, source_url, image);
 
@@ -110,7 +119,7 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, const QUrl& source,
         doc->adjustSize();
         doc->setPageSize(size);
 
-        m_fetching_images.removeOne(source_url);
+        m_fetching_images.remove(source_url);
     });
     connect(job, &NetJob::finished, job, &NetJob::deleteLater);
 

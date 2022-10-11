@@ -350,4 +350,5 @@ void ModPage::updateUi()
 
     HoeDown h;
     ui->packDescription->setHtml(text + (current.extraData.body.isEmpty() ? current.description : h.process(current.extraData.body.toUtf8())));
+    ui->packDescription->flush();
 }
