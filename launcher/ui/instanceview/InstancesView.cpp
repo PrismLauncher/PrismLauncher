@@ -181,6 +181,9 @@ bool InstancesView::eventFilter(QObject* obj, QEvent* event)
             case Qt::Key_Enter:
                 activateInstance(currentView()->selectionModel()->currentIndex());
                 return true;
+            case Qt::Key_F5:
+                emit refreshInstances();
+                return true;
         }
     }
     return QObject::eventFilter(obj, event);

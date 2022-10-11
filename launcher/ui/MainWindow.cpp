@@ -884,6 +884,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         view = new InstancesView(ui->centralWidget, APPLICATION->instances().get());
 
         connect(view, &InstancesView::showContextMenu, this, &MainWindow::showInstanceContextMenu);
+        connect(view, &InstancesView::refreshInstances, this, &MainWindow::refreshInstances);
         connect(filterView, &QLineEdit::textEdited, view, &InstancesView::setFilterQuery);
 
         ui->verticalLayout->addWidget(view);

@@ -59,6 +59,7 @@ class InstancesView : public QStackedWidget {
     void instanceActivated(InstancePtr inst);
     void currentInstanceChanged(InstancePtr current, InstancePtr previous);
     void showContextMenu(const QPoint pos, InstancePtr inst);
+    void refreshInstances();
 
    private slots:
     void activateInstance(const QModelIndex& index);
