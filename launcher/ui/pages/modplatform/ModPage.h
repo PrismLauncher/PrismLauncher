@@ -51,6 +51,7 @@ class ModPage : public QWidget, public BasePage {
 
     auto shouldDisplay() const -> bool override = 0;
     virtual auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders = ModAPI::Unspecified) const -> bool = 0;
+    virtual bool optedOut(ModPlatform::IndexedVersion& ver) const { return false; };
 
     auto apiProvider() -> ModAPI* { return api.get(); };
     auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }

@@ -61,6 +61,7 @@ class FlameModPage : public ModPage {
     inline auto metaEntryBase() const -> QString override { return "FlameMods"; };
 
     auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders = ModAPI::Unspecified) const -> bool override;
+    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
 
     auto shouldDisplay() const -> bool override;
 };
