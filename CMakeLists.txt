@@ -323,6 +323,7 @@ endif()
 add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too much
 add_subdirectory(libraries/gamemode)
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
+add_subdirectory(libraries/filesystem) # Implementation of std::filesystem for old C++, for usage in old macOS
 
 ############################### Built Artifacts ###############################
 

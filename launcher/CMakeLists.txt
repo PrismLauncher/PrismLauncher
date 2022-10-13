@@ -976,6 +976,7 @@ target_link_libraries(Launcher_logic
     BuildConfig
     Katabasis
     Qt${QT_VERSION_MAJOR}::Widgets
+    ghc_filesystem
 )
 
 if (UNIX AND NOT CYGWIN AND NOT APPLE)

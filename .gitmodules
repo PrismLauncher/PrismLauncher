@@ -7,3 +7,6 @@
 [submodule "libraries/tomlplusplus"]
 	path = libraries/tomlplusplus
 	url = https://github.com/marzer/tomlplusplus.git
+[submodule "libraries/filesystem"]
+	path = libraries/filesystem
+	url = https://github.com/gulrak/filesystem
