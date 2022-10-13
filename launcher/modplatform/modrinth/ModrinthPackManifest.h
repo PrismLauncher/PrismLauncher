@@ -80,6 +80,7 @@ struct ModpackExtra {
 struct ModpackVersion {
     QString name;
     QString version;
+    QString changelog;
 
     QString id;
     QString project_id;

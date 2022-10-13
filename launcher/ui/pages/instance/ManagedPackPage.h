@@ -81,6 +81,10 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
 
    public slots:
     void suggestVersion() override;
+
+   private:
+    Modrinth::Modpack m_pack;
+    ModrinthAPI m_api;
 };
 
 class FlameManagedPackPage final : public ManagedPackPage {

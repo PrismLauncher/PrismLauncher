@@ -5,6 +5,10 @@
 #include <QProxyStyle>
 
 #include "Application.h"
+#include "BuildConfig.h"
+#include "Json.h"
+
+#include "modplatform/modrinth/ModrinthPackManifest.h"
 
 /** This is just to override the combo box popup behavior so that the combo box doesn't take the whole screen.
  *  ... thanks Qt.
@@ -96,6 +100,48 @@ ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, QWidget* pa
 
 void ModrinthManagedPackPage::parseManagedPack()
 {
+    qDebug() << "Parsing Modrinth pack";
+
+    auto netJob = new NetJob(QString("Modrinth::PackVersions(%1)").arg(m_inst->getManagedPackName()), APPLICATION->network());
+    auto response = new QByteArray();
+
+    QString id = m_inst->getManagedPackID();
+
+    netJob->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
+
+    QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
+        QJsonParseError parse_error{};
+        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+        if (parse_error.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Modrinth at " << parse_error.offset
+                       << " reason: " << parse_error.errorString();
+            qWarning() << *response;
+            return;
+        }
+
+        try {
+            Modrinth::loadIndexedVersions(m_pack, doc);
+        } catch (const JSONValidationError& e) {
+            qDebug() << *response;
+            qWarning() << "Error while reading modrinth modpack version: " << e.cause();
+        }
+
+        for (auto version : m_pack.versions) {
+            if (!version.name.contains(version.version))
+                ui->versionsComboBox->addItem(QString("%1 — %2").arg(version.name, version.version), QVariant(version.id));
+            else
+                ui->versionsComboBox->addItem(version.name, QVariant(version.id));
+        }
+
+        suggestVersion();
+
+        m_loaded = true;
+    });
+    QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
+        netJob->deleteLater();
+        delete response;
+    });
+    netJob->start();
 }
 
 QString ModrinthManagedPackPage::url() const
@@ -105,6 +151,10 @@ QString ModrinthManagedPackPage::url() const
 
 void ModrinthManagedPackPage::suggestVersion()
 {
+    auto index = ui->versionsComboBox->currentIndex();
+    auto version = m_pack.versions.at(index);
+
+    ui->changelogTextBrowser->setText(version.changelog);
 }
 
 FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, QWidget* parent) : ManagedPackPage(inst, parent)
