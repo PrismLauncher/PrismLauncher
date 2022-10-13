@@ -73,8 +73,8 @@ bool PackInstallTask::abort()
 
 void PackInstallTask::executeTask()
 {
-    setAbortable(true);
     setStatus(tr("Getting the manifest..."));
+    setAbortable(false);
 
     // Find pack version
     auto version_it = std::find_if(m_pack.versions.constBegin(), m_pack.versions.constEnd(),
@@ -94,10 +94,12 @@ void PackInstallTask::executeTask()
 
     QObject::connect(netJob, &NetJob::succeeded, this, &PackInstallTask::onManifestDownloadSucceeded);
     QObject::connect(netJob, &NetJob::failed, this, &PackInstallTask::onManifestDownloadFailed);
+    QObject::connect(netJob, &NetJob::aborted, this, &PackInstallTask::abort);
     QObject::connect(netJob, &NetJob::progress, this, &PackInstallTask::setProgress);
 
     m_net_job = netJob;
 
+    setAbortable(true);
     netJob->start();
 }
 
@@ -130,8 +132,8 @@ void PackInstallTask::onManifestDownloadSucceeded()
 
 void PackInstallTask::resolveMods()
 {
-    setAbortable(true);
     setStatus(tr("Resolving mods..."));
+    setAbortable(false);
     setProgress(0, 100);
 
     m_file_id_map.clear();
@@ -164,7 +166,10 @@ void PackInstallTask::resolveMods()
 
     connect(m_mod_id_resolver_task.get(), &Flame::FileResolvingTask::succeeded, this, &PackInstallTask::onResolveModsSucceeded);
     connect(m_mod_id_resolver_task.get(), &Flame::FileResolvingTask::failed, this, &PackInstallTask::onResolveModsFailed);
+    connect(m_mod_id_resolver_task.get(), &Flame::FileResolvingTask::aborted, this, &PackInstallTask::abort);
     connect(m_mod_id_resolver_task.get(), &Flame::FileResolvingTask::progress, this, &PackInstallTask::setProgress);
+
+    setAbortable(true);
 
     m_mod_id_resolver_task->start();
 }
@@ -279,9 +284,8 @@ void PackInstallTask::onCreateInstanceSucceeded()
 
 void PackInstallTask::downloadPack()
 {
-    setAbortable(true);
-
     setStatus(tr("Downloading mods..."));
+    setAbortable(false);
 
     auto* jobPtr = new NetJob(tr("Mod download"), APPLICATION->network());
     for (auto const& file : m_version.files) {
@@ -304,9 +308,12 @@ void PackInstallTask::downloadPack()
 
     connect(jobPtr, &NetJob::succeeded, this, &PackInstallTask::onModDownloadSucceeded);
     connect(jobPtr, &NetJob::failed, this, &PackInstallTask::onModDownloadFailed);
+    connect(jobPtr, &NetJob::aborted, this, &PackInstallTask::abort);
     connect(jobPtr, &NetJob::progress, this, &PackInstallTask::setProgress);
 
     m_net_job = jobPtr;
+
+    setAbortable(true);
     jobPtr->start();
 }
 

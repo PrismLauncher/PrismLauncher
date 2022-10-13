@@ -105,7 +105,7 @@ void FtbPage::retranslate()
 
 void FtbPage::openedImpl()
 {
-    if(!initialised)
+    if(!initialised || listModel->wasAborted())
     {
         listModel->request();
         initialised = true;

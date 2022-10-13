@@ -52,6 +52,7 @@ public:
     void getLogo(const QString &logo, const QString &logoUrl, LogoCallback callback);
 
     [[nodiscard]] bool isMakingRequest() const { return jobPtr.get(); }
+    [[nodiscard]] bool wasAborted() const { return m_aborted; }
 
 private slots:
     void requestFinished();
