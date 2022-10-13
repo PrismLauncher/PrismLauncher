@@ -56,7 +56,6 @@ public:
     explicit PackInstallTask(Modpack pack, QString version, QWidget* parent = nullptr);
     ~PackInstallTask() override = default;
 
-    bool canAbort() const override { return m_abortable; }
     bool abort() override;
 
 protected:
@@ -65,20 +64,20 @@ protected:
 private slots:
     void onManifestDownloadSucceeded();
     void onResolveModsSucceeded();
+    void onCreateInstanceSucceeded();
     void onModDownloadSucceeded();
 
     void onManifestDownloadFailed(QString reason);
     void onResolveModsFailed(QString reason);
+    void onCreateInstanceFailed(QString reason);
     void onModDownloadFailed(QString reason);
 
 private:
     void resolveMods();
+    void createInstance();
     void downloadPack();
-    void install();
 
 private:
-    bool m_abortable = true;
-
     NetJob::Ptr m_net_job = nullptr;
     shared_qobject_ptr<Flame::FileResolvingTask> m_mod_id_resolver_task = nullptr;
 

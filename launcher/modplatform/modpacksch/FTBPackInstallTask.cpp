@@ -58,6 +58,9 @@ PackInstallTask::PackInstallTask(Modpack pack, QString version, QWidget* parent)
 
 bool PackInstallTask::abort()
 {
+    if (!canAbort())
+        return false;
+
     bool aborted = true;
 
     if (m_net_job)
@@ -65,14 +68,12 @@ bool PackInstallTask::abort()
     if (m_mod_id_resolver_task)
         aborted &= m_mod_id_resolver_task->abort();
 
-    if (aborted)
-        emitAborted();
-
-    return aborted;
+    return aborted ? InstanceTask::abort() : false;
 }
 
 void PackInstallTask::executeTask()
 {
+    setAbortable(true);
     setStatus(tr("Getting the manifest..."));
 
     // Find pack version
@@ -129,6 +130,7 @@ void PackInstallTask::onManifestDownloadSucceeded()
 
 void PackInstallTask::resolveMods()
 {
+    setAbortable(true);
     setStatus(tr("Resolving mods..."));
     setProgress(0, 100);
 
@@ -169,8 +171,6 @@ void PackInstallTask::resolveMods()
 
 void PackInstallTask::onResolveModsSucceeded()
 {
-    m_abortable = false;
-
     QString text;
     QList<QUrl> urls;
     auto anyBlocked = false;
@@ -209,94 +209,23 @@ void PackInstallTask::onResolveModsSucceeded()
                                                    urls);
 
         if (message_dialog->exec() == QDialog::Accepted)
-            downloadPack();
+            createInstance();
         else
             abort();
     } else {
-        downloadPack();
+        createInstance();
     }
 }
 
-void PackInstallTask::downloadPack()
+void PackInstallTask::createInstance()
 {
-    setStatus(tr("Downloading mods..."));
+    setAbortable(false);
 
-    auto* jobPtr = new NetJob(tr("Mod download"), APPLICATION->network());
-    for (auto const& file : m_version.files) {
-        if (file.serverOnly || file.url.isEmpty())
-            continue;
-
-        QFileInfo file_info(file.name);
-        auto cacheName = file_info.completeBaseName() + "-" + file.sha1 + "." + file_info.suffix();
-
-        auto entry = APPLICATION->metacache()->resolveEntry("ModpacksCHPacks", cacheName);
-        entry->setStale(true);
-
-        auto relpath = FS::PathCombine("minecraft", file.path, file.name);
-        auto path = FS::PathCombine(m_stagingPath, relpath);
-
-        if (m_files_to_copy.contains(path)) {
-            qWarning() << "Ignoring" << file.url << "as a file of that path is already downloading.";
-            continue;
-        }
-
-        qDebug() << "Will download" << file.url << "to" << path;
-        m_files_to_copy[path] = entry->getFullPath();
-
-        auto dl = Net::Download::makeCached(file.url, entry);
-        if (!file.sha1.isEmpty()) {
-            auto rawSha1 = QByteArray::fromHex(file.sha1.toLatin1());
-            dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
-        }
-
-        jobPtr->addNetAction(dl);
-    }
-
-    connect(jobPtr, &NetJob::succeeded, this, &PackInstallTask::onModDownloadSucceeded);
-    connect(jobPtr, &NetJob::failed, this, &PackInstallTask::onModDownloadFailed);
-    connect(jobPtr, &NetJob::progress, this, &PackInstallTask::setProgress);
-
-    m_net_job = jobPtr;
-    jobPtr->start();
-
-    m_abortable = true;
-}
-
-void PackInstallTask::onModDownloadSucceeded()
-{
-    m_net_job.reset();
-    install();
-}
-
-void PackInstallTask::install()
-{
-    setStatus(tr("Copying modpack files..."));
-    setProgress(0, m_files_to_copy.size());
-    QCoreApplication::processEvents();
-
-    m_abortable = false;
-
-    int i = 0;
-    for (auto iter = m_files_to_copy.constBegin(); iter != m_files_to_copy.constEnd(); iter++) {
-        auto& to = iter.key();
-        auto& from = iter.value();
-        FS::copy fileCopyOperation(from, to);
-        if (!fileCopyOperation()) {
-            qWarning() << "Failed to copy" << from << "to" << to;
-            emitFailed(tr("Failed to copy files"));
-            return;
-        }
-
-        setProgress(i++, m_files_to_copy.size());
-        QCoreApplication::processEvents();
-    }
-
-    setStatus(tr("Installing modpack..."));
+    setStatus(tr("Creating the instance..."));
     QCoreApplication::processEvents();
 
     auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(instanceConfigPath);
-    instanceSettings->suspendSave();
 
     MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
     auto components = instance.getPackProfile();
@@ -337,8 +266,53 @@ void PackInstallTask::install()
     instance.setName(name());
     instance.setIconKey(m_instIcon);
     instance.setManagedPack("modpacksch", QString::number(m_pack.id), m_pack.name, QString::number(m_version.id), m_version.name);
-    instanceSettings->resumeSave();
 
+    instance.saveNow();
+
+    onCreateInstanceSucceeded();
+}
+
+void PackInstallTask::onCreateInstanceSucceeded()
+{
+    downloadPack();
+}
+
+void PackInstallTask::downloadPack()
+{
+    setAbortable(true);
+
+    setStatus(tr("Downloading mods..."));
+
+    auto* jobPtr = new NetJob(tr("Mod download"), APPLICATION->network());
+    for (auto const& file : m_version.files) {
+        if (file.serverOnly || file.url.isEmpty())
+            continue;
+
+        auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path, file.name);
+        qDebug() << "Will try to download" << file.url << "to" << path;
+
+        QFileInfo file_info(file.name);
+
+        auto dl = Net::Download::makeFile(file.url, path);
+        if (!file.sha1.isEmpty()) {
+            auto rawSha1 = QByteArray::fromHex(file.sha1.toLatin1());
+            dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
+        }
+
+        jobPtr->addNetAction(dl);
+    }
+
+    connect(jobPtr, &NetJob::succeeded, this, &PackInstallTask::onModDownloadSucceeded);
+    connect(jobPtr, &NetJob::failed, this, &PackInstallTask::onModDownloadFailed);
+    connect(jobPtr, &NetJob::progress, this, &PackInstallTask::setProgress);
+
+    m_net_job = jobPtr;
+    jobPtr->start();
+}
+
+void PackInstallTask::onModDownloadSucceeded()
+{
+    m_net_job.reset();
     emitSucceeded();
 }
 
@@ -350,6 +324,10 @@ void PackInstallTask::onManifestDownloadFailed(QString reason)
 void PackInstallTask::onResolveModsFailed(QString reason)
 {
     m_net_job.reset();
+    emitFailed(reason);
+}
+void PackInstallTask::onCreateInstanceFailed(QString reason)
+{
     emitFailed(reason);
 }
 void PackInstallTask::onModDownloadFailed(QString reason)
