@@ -127,10 +127,19 @@ void ModrinthManagedPackPage::parseManagedPack()
         }
 
         for (auto version : m_pack.versions) {
+            QString name;
+
             if (!version.name.contains(version.version))
-                ui->versionsComboBox->addItem(QString("%1 — %2").arg(version.name, version.version), QVariant(version.id));
+                name = QString("%1 — %2").arg(version.name, version.version);
             else
-                ui->versionsComboBox->addItem(version.name, QVariant(version.id));
+                name = version.name;
+
+            // NOTE: the id from version isn't the same id in the modpack format spec...
+            // e.g. HexMC's 4.4.0 has versionId 4.0.0 in the modpack index..............
+            if (version.version == m_inst->getManagedPackVersionName())
+                name.append(tr(" (Current)"));
+
+            ui->versionsComboBox->addItem(name, QVariant(version.id));
         }
 
         suggestVersion();
