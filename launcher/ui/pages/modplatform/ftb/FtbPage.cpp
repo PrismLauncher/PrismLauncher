@@ -114,6 +114,12 @@ void FtbPage::openedImpl()
     suggestCurrent();
 }
 
+void FtbPage::closedImpl()
+{
+    if (listModel->isMakingRequest())
+        listModel->abortRequest();
+}
+
 void FtbPage::suggestCurrent()
 {
     if(!isOpened)

@@ -139,6 +139,10 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
 void NewInstanceDialog::reject()
 {
     APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+
+    // This is just so that the pages get the close() call and can react to it, if needed.
+    m_container->prepareToClose();
+
     QDialog::reject();
 }
 
@@ -146,6 +150,10 @@ void NewInstanceDialog::accept()
 {
     APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
     importIconNow();
+
+    // This is just so that the pages get the close() call and can react to it, if needed.
+    m_container->prepareToClose();
+
     QDialog::accept();
 }
 
