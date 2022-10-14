@@ -194,6 +194,9 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
     find_package(tomlplusplus 3.2.0 QUIET)
 endif()
 
+# Workaround ghc::filesystem bug
+set(GHC_FILESYSTEM_WITH_INSTALL OFF)
+
 ####################################### Program Info #######################################
 
 set(Launcher_APP_BINARY_NAME "polymc" CACHE STRING "Name of the Launcher binary")
