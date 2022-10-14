@@ -49,23 +49,10 @@ bool ModrinthCreationTask::updateInstance()
     auto version_name = inst->getManagedPackVersionName();
     auto version_str = !version_name.isEmpty() ? tr(" (version %1)").arg(version_name) : "";
 
-    auto info = CustomMessageBox::selectable(
-        m_parent, tr("Similar modpack was found!"),
-        tr("One or more of your instances are from this same modpack%1. Do you want to create a "
-           "separate instance, or update the existing one?\n\nNOTE: Make sure you made a backup of your important instance data before "
-           "updating, as worlds can be corrupted and some configuration may be lost (due to pack overrides).")
-            .arg(version_str),
-        QMessageBox::Information, QMessageBox::Ok | QMessageBox::Reset | QMessageBox::Abort);
-    info->setButtonText(QMessageBox::Ok, tr("Create new instance"));
-    info->setButtonText(QMessageBox::Abort, tr("Update existing instance"));
-    info->setButtonText(QMessageBox::Reset, tr("Cancel"));
-
-    info->exec();
-
-    if (info->clickedButton() == info->button(QMessageBox::Ok))
+    auto should_update = askIfShouldUpdate(m_parent, version_str);
+    if (should_update == ShouldUpdate::SkipUpdating)
         return false;
-
-    if (info->clickedButton() == info->button(QMessageBox::Reset)) {
+    if (should_update == ShouldUpdate::Cancel) {
         m_abort = true;
         return false;
     }

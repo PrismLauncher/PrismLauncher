@@ -6,6 +6,8 @@
 /* Helpers */
 enum class InstanceNameChange { ShouldChange, ShouldKeep };
 [[nodiscard]] InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& old_name, const QString& new_name);
+enum class ShouldUpdate { Update, SkipUpdating, Cancel };
+[[nodiscard]] ShouldUpdate askIfShouldUpdate(QWidget* parent, QString original_version_name);
 
 struct InstanceName {
    public:
