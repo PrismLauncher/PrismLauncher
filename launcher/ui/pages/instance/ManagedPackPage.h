@@ -13,6 +13,9 @@ namespace Ui {
 class ManagedPackPage;
 }
 
+class InstanceTask;
+class InstanceWindow;
+
 class ManagedPackPage : public QWidget, public BasePage {
     Q_OBJECT
 
@@ -45,15 +48,28 @@ class ManagedPackPage : public QWidget, public BasePage {
      */
     [[nodiscard]] virtual QString url() const { return {}; };
 
+    void setInstanceWindow(InstanceWindow* window) { m_instance_window = window; }
+
    public slots:
     /** Gets the current version selection and update the changelog.
      */
     virtual void suggestVersion() {};
 
-   protected:
-    ManagedPackPage(BaseInstance* inst, QWidget* parent = nullptr);
+    virtual void update() {};
 
    protected:
+    ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent = nullptr);
+
+    /** Run the InstanceTask, with a progress dialog and all.
+     *  Similar to MainWindow::instanceFromInstanceTask
+     *
+     *  Returns whether the task was successful.
+     */
+    bool runUpdateTask(InstanceTask*);
+
+   protected:
+    InstanceWindow* m_instance_window = nullptr;
+
     Ui::ManagedPackPage* ui;
     BaseInstance* m_inst;
 
@@ -65,7 +81,7 @@ class GenericManagedPackPage final : public ManagedPackPage {
     Q_OBJECT
 
    public:
-    GenericManagedPackPage(BaseInstance* inst, QWidget* parent = nullptr) : ManagedPackPage(inst, parent) {}
+    GenericManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent = nullptr) : ManagedPackPage(inst, instance_window, parent) {}
     ~GenericManagedPackPage() override = default;
 };
 
@@ -73,7 +89,7 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
     Q_OBJECT
 
    public:
-    ModrinthManagedPackPage(BaseInstance* inst, QWidget* parent = nullptr);
+    ModrinthManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent = nullptr);
     ~ModrinthManagedPackPage() override = default;
 
     void parseManagedPack() override;
@@ -81,6 +97,8 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
 
    public slots:
     void suggestVersion() override;
+
+    void update() override;
 
    private:
     Modrinth::Modpack m_pack;
@@ -91,7 +109,7 @@ class FlameManagedPackPage final : public ManagedPackPage {
     Q_OBJECT
 
    public:
-    FlameManagedPackPage(BaseInstance* inst, QWidget* parent = nullptr);
+    FlameManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent = nullptr);
     ~FlameManagedPackPage() override = default;
 
     void parseManagedPack() override;

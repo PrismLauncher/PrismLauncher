@@ -132,6 +132,12 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
     {
         connect(m_instance.get(), &BaseInstance::statusChanged, this, &InstanceWindow::on_instanceStatusChanged);
     }
+
+    // add ourself as the modpack page's instance window
+    {
+        static_cast<ManagedPackPage*>(m_container->getPage("managed_pack"))->setInstanceWindow(this);
+    }
+
     show();
 }
 

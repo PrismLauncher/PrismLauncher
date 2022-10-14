@@ -6,9 +6,16 @@
 
 #include "Application.h"
 #include "BuildConfig.h"
+#include "InstanceImportTask.h"
+#include "InstanceList.h"
+#include "InstanceTask.h"
 #include "Json.h"
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
+
+#include "ui/InstanceWindow.h"
+#include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ProgressDialog.h"
 
 /** This is just to override the combo box popup behavior so that the combo box doesn't take the whole screen.
  *  ... thanks Qt.
@@ -33,14 +40,15 @@ class NoBigComboBoxStyle : public QProxyStyle {
 ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, QString type, QWidget* parent)
 {
     if (type == "modrinth")
-        return new ModrinthManagedPackPage(inst, parent);
+        return new ModrinthManagedPackPage(inst, nullptr, parent);
     if (type == "flame")
-        return new FlameManagedPackPage(inst, parent);
+        return new FlameManagedPackPage(inst, nullptr, parent);
 
-    return new GenericManagedPackPage(inst, parent);
+    return new GenericManagedPackPage(inst, nullptr, parent);
 }
 
-ManagedPackPage::ManagedPackPage(BaseInstance* inst, QWidget* parent) : QWidget(parent), ui(new Ui::ManagedPackPage), m_inst(inst)
+ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
+    : QWidget(parent), m_instance_window(instance_window), ui(new Ui::ManagedPackPage), m_inst(inst)
 {
     Q_ASSERT(inst);
 
@@ -92,10 +100,37 @@ bool ManagedPackPage::shouldDisplay() const
     return m_inst->isManagedPack();
 }
 
-ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, QWidget* parent) : ManagedPackPage(inst, parent)
+bool ManagedPackPage::runUpdateTask(InstanceTask* task)
+{
+    Q_ASSERT(task);
+
+    unique_qobject_ptr<Task> wrapped_task(APPLICATION->instances()->wrapInstanceTask(task));
+
+    connect(task, &Task::failed,
+            [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+    connect(task, &Task::succeeded, [this, task]() {
+        QStringList warnings = task->warnings();
+        if (warnings.count())
+            CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+    });
+    connect(task, &Task::aborted, [this] {
+        CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."), QMessageBox::Information)
+            ->show();
+    });
+
+    ProgressDialog loadDialog(this);
+    loadDialog.setSkipButton(true, tr("Abort"));
+    loadDialog.execWithTask(task);
+
+    return task->wasSuccessful();
+}
+
+ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
+    : ManagedPackPage(inst, instance_window, parent)
 {
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
+    connect(ui->updateButton, &QPushButton::pressed, this, &ModrinthManagedPackPage::update);
 }
 
 void ModrinthManagedPackPage::parseManagedPack()
@@ -166,15 +201,35 @@ void ModrinthManagedPackPage::suggestVersion()
     ui->changelogTextBrowser->setText(version.changelog);
 }
 
-FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, QWidget* parent) : ManagedPackPage(inst, parent)
+void ModrinthManagedPackPage::update()
+{
+    auto index = ui->versionsComboBox->currentIndex();
+    auto version = m_pack.versions.at(index);
+
+    auto extracted = new InstanceImportTask(version.download_url, this);
+
+    InstanceName inst_name(m_inst->getManagedPackName(), version.version);
+    inst_name.setName(m_inst->name().replace(m_inst->getManagedPackVersionName(), version.version));
+    extracted->setName(inst_name);
+
+    extracted->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
+    extracted->setIcon(m_inst->iconKey());
+    extracted->setConfirmUpdate(false);
+
+    auto did_succeed = runUpdateTask(extracted);
+
+    if (m_instance_window && did_succeed)
+        m_instance_window->close();
+}
+
+FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
+    : ManagedPackPage(inst, instance_window, parent)
 {
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
 }
 
-void FlameManagedPackPage::parseManagedPack()
-{
-}
+void FlameManagedPackPage::parseManagedPack() {}
 
 QString FlameManagedPackPage::url() const
 {
