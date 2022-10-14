@@ -680,6 +680,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/GameOptionsPage.h
     ui/pages/instance/VersionPage.cpp
     ui/pages/instance/VersionPage.h
+    ui/pages/instance/ManagedPackPage.cpp
+    ui/pages/instance/ManagedPackPage.h
     ui/pages/instance/TexturePackPage.h
     ui/pages/instance/ResourcePackPage.h
     ui/pages/instance/ShaderPackPage.h
@@ -919,6 +921,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/instance/OtherLogsPage.ui
     ui/pages/instance/InstanceSettingsPage.ui
     ui/pages/instance/VersionPage.ui
+    ui/pages/instance/ManagedPackPage.ui
     ui/pages/instance/WorldListPage.ui
     ui/pages/instance/ScreenshotsPage.ui
     ui/pages/modplatform/atlauncher/AtlOptionalModDialog.ui
