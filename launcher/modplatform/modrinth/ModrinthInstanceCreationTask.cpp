@@ -49,12 +49,14 @@ bool ModrinthCreationTask::updateInstance()
     auto version_name = inst->getManagedPackVersionName();
     auto version_str = !version_name.isEmpty() ? tr(" (version %1)").arg(version_name) : "";
 
-    auto should_update = askIfShouldUpdate(m_parent, version_str);
-    if (should_update == ShouldUpdate::SkipUpdating)
-        return false;
-    if (should_update == ShouldUpdate::Cancel) {
-        m_abort = true;
-        return false;
+    if (shouldConfirmUpdate()) {
+        auto should_update = askIfShouldUpdate(m_parent, version_str);
+        if (should_update == ShouldUpdate::SkipUpdating)
+            return false;
+        if (should_update == ShouldUpdate::Cancel) {
+            m_abort = true;
+            return false;
+        }
     }
 
     // Remove repeated files, we don't need to download them!

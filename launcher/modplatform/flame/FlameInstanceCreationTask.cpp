@@ -102,12 +102,14 @@ bool FlameCreationTask::updateInstance()
     auto version_id = inst->getManagedPackVersionName();
     auto version_str = !version_id.isEmpty() ? tr(" (version %1)").arg(version_id) : "";
 
-    auto should_update = askIfShouldUpdate(m_parent, version_str);
-    if (should_update == ShouldUpdate::SkipUpdating)
-        return false;
-    if (should_update == ShouldUpdate::Cancel) {
-        m_abort = true;
-        return false;
+    if (shouldConfirmUpdate()) {
+        auto should_update = askIfShouldUpdate(m_parent, version_str);
+        if (should_update == ShouldUpdate::SkipUpdating)
+            return false;
+        if (should_update == ShouldUpdate::Cancel) {
+            m_abort = true;
+            return false;
+        }
     }
 
     QDir old_inst_dir(inst->instanceRoot());

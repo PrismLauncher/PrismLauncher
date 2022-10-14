@@ -44,6 +44,9 @@ class InstanceTask : public Task, public InstanceName {
     void setGroup(const QString& group) { m_instGroup = group; }
     QString group() const { return m_instGroup; }
 
+    [[nodiscard]] bool shouldConfirmUpdate() const { return m_confirm_update; }
+    void setConfirmUpdate(bool confirm) { m_confirm_update = confirm; }
+
     bool shouldOverride() const { return m_override_existing; }
 
    protected:
@@ -56,4 +59,5 @@ class InstanceTask : public Task, public InstanceName {
     QString m_stagingPath;
 
     bool m_override_existing = false;
+    bool m_confirm_update = true;
 };
