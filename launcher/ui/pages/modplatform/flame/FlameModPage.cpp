@@ -67,6 +67,11 @@ auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString min
     return ver.mcVersion.contains(mineVer) && !ver.downloadUrl.isEmpty();
 }
 
+bool FlameModPage::optedOut(ModPlatform::IndexedVersion& ver) const
+{
+    return ver.downloadUrl.isEmpty();
+}
+
 // I don't know why, but doing this on the parent class makes it so that
 // other mod providers start loading before being selected, at least with
 // my Qt, so we need to implement this in every derived class...
