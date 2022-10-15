@@ -5,6 +5,7 @@
 , ninja
 , jdk8
 , jdk
+, ghc_filesystem
 , zlib
 , file
 , wrapQtAppsHook
@@ -49,7 +50,7 @@ stdenv.mkDerivation rec {
 
   src = lib.cleanSource self;
 
-  nativeBuildInputs = [ cmake extra-cmake-modules ninja jdk file wrapQtAppsHook ];
+  nativeBuildInputs = [ cmake extra-cmake-modules ninja jdk ghc_filesystem file wrapQtAppsHook ];
   buildInputs = [ qtbase quazip zlib ];
 
   dontWrapQtApps = true;
