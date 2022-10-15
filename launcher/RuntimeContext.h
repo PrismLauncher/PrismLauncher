@@ -28,7 +28,8 @@ struct RuntimeContext {
     QString javaPath;
     QString system;
 
-    QString mappedJavaRealArchitecture() const {
+    QString mappedJavaRealArchitecture() const
+    {
         if (javaRealArchitecture == "amd64")
             return "x86_64";
         if (javaRealArchitecture == "i386" || javaRealArchitecture == "i686")
@@ -40,24 +41,25 @@ struct RuntimeContext {
         return javaRealArchitecture;
     }
 
-    void updateFromInstanceSettings(SettingsObjectPtr instanceSettings) {
+    void updateFromInstanceSettings(SettingsObjectPtr instanceSettings)
+    {
         javaArchitecture = instanceSettings->get("JavaArchitecture").toString();
         javaRealArchitecture = instanceSettings->get("JavaRealArchitecture").toString();
         javaPath = instanceSettings->get("JavaPath").toString();
         system = currentSystem();
     }
 
-    QString getClassifier() const {
-        return system + "-" + mappedJavaRealArchitecture();
-    }
+    QString getClassifier() const { return system + "-" + mappedJavaRealArchitecture(); }
 
     // "Legacy" refers to the fact that Mojang assumed that these are the only two architectures
-    bool isLegacyArch() const {
+    bool isLegacyArch() const
+    {
         const QString mapped = mappedJavaRealArchitecture();
         return mapped == "x86_64" || mapped == "x86";
     }
 
-    bool classifierMatches(QString target) const {
+    bool classifierMatches(QString target) const
+    {
         // try to match precise classifier "[os]-[arch]"
         bool x = target == getClassifier();
         // try to match imprecise classifier on legacy architectures "[os]"
@@ -67,7 +69,8 @@ struct RuntimeContext {
         return x;
     }
 
-    static QString currentSystem() {
+    static QString currentSystem()
+    {
 #if defined(Q_OS_LINUX)
         return "linux";
 #elif defined(Q_OS_MACOS)
