@@ -33,9 +33,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 set(CMAKE_CXX_FLAGS "-Wall -pedantic -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
-if(UNIX AND APPLE)
-    set(CMAKE_CXX_FLAGS "-stdlib=libc++ ${CMAKE_CXX_FLAGS}")
-endif()
 
 # Fix build with Qt 5.13
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
@@ -192,9 +189,12 @@ if (Qt5_POSITION_INDEPENDENT_CODE)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-# Find toml++
 if(NOT Launcher_FORCE_BUNDLED_LIBS)
+    # Find toml++
     find_package(tomlplusplus 3.2.0 QUIET)
+
+    # Find ghc_filesystem
+    find_package(ghc_filesystem QUIET)
 endif()
 
 ####################################### Program Info #######################################
@@ -326,6 +326,14 @@ endif()
 add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too much
 add_subdirectory(libraries/gamemode)
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
+if (NOT ghc_filesystem_FOUND)
+    message(STATUS "Using bundled ghc_filesystem")
+    set(GHC_FILESYSTEM_WITH_INSTALL OFF) # Workaround ghc::filesystem bug
+    add_subdirectory(libraries/filesystem) # Implementation of std::filesystem for old C++, for usage in old macOS
+    add_library(ghcFilesystem::ghc_filesystem ALIAS ghc_filesystem)
+else()
+    message(STATUS "Using system ghc_filesystem")
+endif()
 
 ############################### Built Artifacts ###############################
 

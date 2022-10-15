@@ -59,7 +59,24 @@
 #include <utime.h>
 #endif
 
+// Snippet from https://github.com/gulrak/filesystem#using-it-as-single-file-header
+
+#ifdef __APPLE__
+#include <Availability.h> // for deployment target to support pre-catalina targets without std::fs
+#endif // __APPLE__
+
+#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || (defined(__cplusplus) && __cplusplus >= 201703L)) && defined(__has_include)
+#if __has_include(<filesystem>) && (!defined(__MAC_OS_X_VERSION_MIN_REQUIRED) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 101500)
+#define GHC_USE_STD_FS
 #include <filesystem>
+namespace fs = std::filesystem;
+#endif // MacOS min version check
+#endif // Other OSes version check
+
+#ifndef GHC_USE_STD_FS
+#include <ghc/filesystem.hpp>
+namespace fs = ghc::filesystem;
+#endif
 
 #if defined Q_OS_WIN32
 
@@ -147,7 +164,7 @@ bool ensureFolderPathExists(QString foldernamepath)
 
 bool copy::operator()(const QString& offset)
 {
-    using copy_opts = std::filesystem::copy_options;
+    using copy_opts = fs::copy_options;
 
 // NOTE always deep copy on windows. the alternatives are too messy.
 #if defined Q_OS_WIN32
@@ -159,7 +176,7 @@ bool copy::operator()(const QString& offset)
 
     std::error_code err;
 
-    std::filesystem::copy_options opt = copy_opts::none;
+    fs::copy_options opt = copy_opts::none;
 
     // The default behavior is to follow symlinks
     if (!m_followSymlinks)
@@ -182,7 +199,7 @@ bool copy::operator()(const QString& offset)
         auto dst_path = PathCombine(dst, relative_path);
         ensureFilePathExists(dst_path);
 
-        std::filesystem::copy(toStdString(src_path), toStdString(dst_path), opt, err);
+        fs::copy(toStdString(src_path), toStdString(dst_path), opt, err);
         if (err) {
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
@@ -197,7 +214,7 @@ bool deletePath(QString path)
 {
     std::error_code err;
 
-    std::filesystem::remove_all(toStdString(path), err);
+    fs::remove_all(toStdString(path), err);
 
     if (err) {
         qWarning() << "Failed to remove files:" << QString::fromStdString(err.message());
@@ -376,15 +393,15 @@ bool createShortCut(QString location, QString dest, QStringList args, QString na
 
 bool overrideFolder(QString overwritten_path, QString override_path)
 {
-    using copy_opts = std::filesystem::copy_options;
+    using copy_opts = fs::copy_options;
 
     if (!FS::ensureFolderPathExists(overwritten_path))
         return false;
 
     std::error_code err;
-    std::filesystem::copy_options opt = copy_opts::recursive | copy_opts::overwrite_existing;
+    fs::copy_options opt = copy_opts::recursive | copy_opts::overwrite_existing;
 
-    std::filesystem::copy(toStdString(override_path), toStdString(overwritten_path), opt, err);
+    fs::copy(toStdString(override_path), toStdString(overwritten_path), opt, err);
 
     if (err) {
         qCritical() << QString("Failed to apply override from %1 to %2").arg(override_path, overwritten_path);
