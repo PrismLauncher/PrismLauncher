@@ -968,7 +968,6 @@ add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHE
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Launcher_logic
     systeminfo
-    Launcher_classparser
     Launcher_murmur2
     nbt++
     ${ZLIB_LIBRARIES}

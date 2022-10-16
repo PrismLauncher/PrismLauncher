@@ -305,7 +305,6 @@ add_subdirectory(libraries/systeminfo) # system information library
 add_subdirectory(libraries/hoedown) # markdown parser
 add_subdirectory(libraries/launcher) # java based launcher part for Minecraft
 add_subdirectory(libraries/javacheck) # java compatibility checker
-add_subdirectory(libraries/xz-embedded) # xz compression
 if (FORCE_BUNDLED_QUAZIP)
     message(STATUS "Using bundled QuaZip")
     set(BUILD_SHARED_LIBS 0)  # link statically to avoid conflicts.
@@ -316,7 +315,6 @@ else()
 endif()
 add_subdirectory(libraries/rainbow) # Qt extension for colors
 add_subdirectory(libraries/LocalPeer) # fork of a library from Qt solutions
-add_subdirectory(libraries/classparser) # class parser library
 if(NOT tomlplusplus_FOUND)
     message(STATUS "Using bundled tomlplusplus")
     add_subdirectory(libraries/tomlplusplus) # toml parser
