@@ -3,15 +3,15 @@
 <img src="./program_info/polymc-header.svg#gh-dark-mode-only" alt="PolyMC logo" width="50%"/>
 </p>
 
-PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
+PlaceholderMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.
 
 This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC.
-If you want to read about why this fork was created, check out [our FAQ page](https://polymc.org/wiki/overview/faq/).
+<!-- if you want to read about why this fork was created, check out [our FAQ page](https://placeholdermc.org/wiki/overview/faq/). --> TODO
 <br>
 
 # Installation
 
-- All downloads and instructions for PolyMC can be found [here](https://todo)
+- All downloads and instructions for PlaceholderMC can be found [here](https://todo)
 - Last build status: <https://github.com/PlaceholderMC/PlaceHolderMC/actions>
 
 ## Development Builds
@@ -20,8 +20,8 @@ There are per-commit development builds available [here](https://github.com/Plac
 Portable builds are provided for AppImage on Linux, Windows, and macOS.
 
 For Debian and Arch, you can use these packages for the latest development versions:  
-[![polymc-git](https://img.shields.io/badge/aur-polymc--git-blue)](https://aur.archlinux.org/packages/todo)
-[![polymc-git](https://img.shields.io/badge/mpr-polymc--git-orange)](https://mpr.makedeb.org/packages/todo)  
+<!-- [![polymc-git](https://img.shields.io/badge/aur-polymc--git-blue)](https://aur.archlinux.org/packages/todo) --> TODO
+<!-- [![polymc-git](https://img.shields.io/badge/mpr-polymc--git-orange)](https://mpr.makedeb.org/packages/todo)  --> TODO
 For flatpak, you can use [flathub-beta](https://discourse.flathub.org/t/how-to-use-flathub-beta/2111)
 
 # Help & Support
