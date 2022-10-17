@@ -19,4 +19,6 @@ Portable builds are provided for AppImage on Linux, Windows, and macOS.
 - Join the [Discord Server](https://discord.gg/hX4g537UNE) for now. 
 We have a vanity url https://discord.gg/placeholdermc
 
+### License
+
 All launcher code is available under the GPL-3.0-only license.
