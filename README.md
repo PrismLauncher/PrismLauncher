@@ -47,7 +47,7 @@ If there are any issues with the space or you are using a client that does not s
 
 We also have a subreddit you can post your issues and suggestions on:
 
-[r/PlaceholderMCLauncher](https://www.reddit.com/r/PlaceholderMCLauncher/)
+[r/PlaceholderMCLauncher](https://www.reddit.com/r/PlaceholderMC/)
 
 # Development
 
