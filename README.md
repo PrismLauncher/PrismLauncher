@@ -11,7 +11,7 @@ We are working on a website and other media, for more info we have a [Discord se
 
 ### Development Builds
 
-There are development builds available [here](https://github.com/PrismLauncher/PrismLauncher/actions). These have debug information in the binaries, so their file sizes are relatively larger.
+There are development builds available [here](https://nightly.link/PrismLauncher/PrismLauncher/workflows/trigger_builds/develop). These have debug information in the binaries, so their file sizes are relatively larger.
 
 Portable builds are provided for AppImage on Linux, Windows, and macOS.
 
