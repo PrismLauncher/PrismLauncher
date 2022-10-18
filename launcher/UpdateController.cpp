@@ -358,7 +358,7 @@ void UpdateController::fail()
             msg = QObject::tr(
                 "Couldn't replace file %1. Changes will be reverted.\n"
                 "See the %2 log file for details."
-            ).arg(m_failedFile, BuildConfig.LAUNCHER_NAME);
+            ).arg(m_failedFile, BuildConfig.LAUNCHER_DISPLAYNAME);
             doRollback = true;
             QMessageBox::critical(m_parent, failTitle, msg);
             break;
@@ -368,7 +368,7 @@ void UpdateController::fail()
             msg = QObject::tr(
                 "Couldn't remove file %1. Changes will be reverted.\n"
                 "See the %2 log file for details."
-            ).arg(m_failedFile, BuildConfig.LAUNCHER_NAME);
+            ).arg(m_failedFile, BuildConfig.LAUNCHER_DISPLAYNAME);
             doRollback = true;
             QMessageBox::critical(m_parent, failTitle, msg);
             break;
@@ -399,7 +399,7 @@ void UpdateController::fail()
         {
             msg = QObject::tr("The rollback failed too.\n"
                 "You will have to repair %1 manually.\n"
-                "Please let us know why and how this happened.").arg(BuildConfig.LAUNCHER_NAME);
+                "Please let us know why and how this happened.").arg(BuildConfig.LAUNCHER_DISPLAYNAME);
             QMessageBox::critical(m_parent, rollFailTitle, msg);
             qApp->quit();
         }

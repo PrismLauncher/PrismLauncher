@@ -224,9 +224,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         consoleAttached = true;
     }
 #endif
-    setOrganizationName(BuildConfig.LAUNCHER_NAME);
+    setOrganizationName(BuildConfig.LAUNCHER_DISPLAYNAME);
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
-    setApplicationName(BuildConfig.LAUNCHER_NAME);
+    setApplicationName(BuildConfig.LAUNCHER_DISPLAYNAME);
     setApplicationDisplayName(QString("%1 %2").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString()));
     setApplicationVersion(BuildConfig.printableVersionString());
     setDesktopFileName(BuildConfig.LAUNCHER_DESKTOPFILENAME);
@@ -237,7 +237,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // Commandline parsing
     QCommandLineParser parser;
-    parser.setApplicationDescription(BuildConfig.LAUNCHER_NAME);
+    parser.setApplicationDescription(BuildConfig.LAUNCHER_DISPLAYNAME);
 
     parser.addOptions({
         {{"d", "dir"}, "Use a custom path as application root (use '.' for current directory)", "directory"},
@@ -1157,7 +1157,7 @@ void Application::setIconTheme(const QString& name)
 QIcon Application::getThemedIcon(const QString& name)
 {
     if(name == "logo") {
-        return QIcon(":/org.polymc.PolyMC.svg");
+        return QIcon(":/org.prismlauncher.PrismLauncher.svg");  // FIXME: Make this a BuildConfig variable
     }
     return QIcon::fromTheme(name);
 }

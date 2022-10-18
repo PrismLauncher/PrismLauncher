@@ -279,7 +279,7 @@ void LogPage::on_btnPaste_clicked()
         MessageLevel::Launcher,
         QString("%2: Log upload triggered at: %1").arg(
             QDateTime::currentDateTime().toString(Qt::RFC2822Date),
-            BuildConfig.LAUNCHER_NAME
+            BuildConfig.LAUNCHER_DISPLAYNAME
         )
     );
     auto url = GuiUtil::uploadPaste(m_model->toPlainText(), this);
@@ -289,7 +289,7 @@ void LogPage::on_btnPaste_clicked()
             MessageLevel::Launcher,
             QString("%2: Log uploaded to: %1").arg(
                 url,
-                BuildConfig.LAUNCHER_NAME
+                BuildConfig.LAUNCHER_DISPLAYNAME
             )
         );
     }
@@ -297,7 +297,7 @@ void LogPage::on_btnPaste_clicked()
     {
         m_model->append(
             MessageLevel::Error,
-            QString("%1: Log upload failed!").arg(BuildConfig.LAUNCHER_NAME)
+            QString("%1: Log upload failed!").arg(BuildConfig.LAUNCHER_DISPLAYNAME)
         );
     }
 }

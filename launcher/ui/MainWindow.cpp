@@ -161,7 +161,7 @@ public:
             QString result;
             result = QApplication::translate("MainWindow", m_text);
             if(result.contains("%1")) {
-                result = result.arg(BuildConfig.LAUNCHER_NAME);
+                result = result.arg(BuildConfig.LAUNCHER_DISPLAYNAME);
             }
             m_contained->setText(result);
         }
@@ -170,7 +170,7 @@ public:
             QString result;
             result = QApplication::translate("MainWindow", m_tooltip);
             if(result.contains("%1")) {
-                result = result.arg(BuildConfig.LAUNCHER_NAME);
+                result = result.arg(BuildConfig.LAUNCHER_DISPLAYNAME);
             }
             m_contained->setToolTip(result);
         }
@@ -829,7 +829,7 @@ public:
         MainWindow->setWindowIcon(APPLICATION->getThemedIcon("logo"));
         MainWindow->setWindowTitle(APPLICATION->applicationDisplayName());
 #ifndef QT_NO_ACCESSIBILITY
-        MainWindow->setAccessibleName(BuildConfig.LAUNCHER_NAME);
+        MainWindow->setAccessibleName(BuildConfig.LAUNCHER_DISPLAYNAME);
 #endif
 
         createMainToolbarActions(MainWindow);
@@ -1146,7 +1146,7 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
     {
         auto group = view->groupNameAt(pos);
 
-        QAction *actionVoid = new QAction(BuildConfig.LAUNCHER_NAME, this);
+        QAction *actionVoid = new QAction(BuildConfig.LAUNCHER_DISPLAYNAME, this);
         actionVoid->setEnabled(false);
 
         QAction *actionCreateInstance = new QAction(tr("Create instance"), this);
@@ -2239,7 +2239,7 @@ void MainWindow::checkInstancePathForProblems()
                 "You have now two options: <br/>"
                 " - change the instance folder in the settings <br/>"
                 " - move this installation of %1 to a different folder"
-            ).arg(BuildConfig.LAUNCHER_NAME)
+            ).arg(BuildConfig.LAUNCHER_DISPLAYNAME)
         );
         warning.setDefaultButton(QMessageBox::Ok);
         warning.exec();

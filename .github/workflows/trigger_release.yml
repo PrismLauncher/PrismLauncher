@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: 'true'
-          path: 'PolyMC-source'
+          path: 'PrismLauncher-source'
       - name: Download artifacts
         uses: actions/download-artifact@v3
       - name: Grab and store version
@@ -34,26 +34,26 @@ jobs:
           echo "VERSION=$tag_name" >> $GITHUB_ENV
       - name: Package artifacts properly
         run: |
-          mv ${{ github.workspace }}/PolyMC-source PolyMC-${{ env.VERSION }}
-          mv PolyMC-Linux-Qt6-Portable*/PolyMC-portable.tar.gz PolyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-          mv PolyMC-Linux-Qt6*/PolyMC.tar.gz PolyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz          
-          mv PolyMC-Linux-Portable*/PolyMC-portable.tar.gz PolyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
-          mv PolyMC-Linux*/PolyMC.tar.gz PolyMC-Linux-${{ env.VERSION }}.tar.gz
-          mv PolyMC-*.AppImage/PolyMC-*.AppImage PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
-          mv PolyMC-macOS-Legacy*/PolyMC.tar.gz PolyMC-macOS-Legacy-${{ env.VERSION }}.tar.gz
-          mv PolyMC-macOS*/PolyMC.tar.gz PolyMC-macOS-${{ env.VERSION }}.tar.gz
+          mv ${{ github.workspace }}/PrismLauncher-source PrismLauncher-${{ env.VERSION }}
+          mv PrismLauncher-Linux-Qt6-Portable*/PrismLauncher-portable.tar.gz PrismLauncher-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
+          mv PrismLauncher-Linux-Qt6*/PrismLauncher.tar.gz PrismLauncher-Linux-Qt6-${{ env.VERSION }}.tar.gz          
+          mv PrismLauncher-Linux-Portable*/PrismLauncher-portable.tar.gz PrismLauncher-Linux-Portable-${{ env.VERSION }}.tar.gz
+          mv PrismLauncher-Linux*/PrismLauncher.tar.gz PrismLauncher-Linux-${{ env.VERSION }}.tar.gz
+          mv PrismLauncher-*.AppImage/PrismLauncher-*.AppImage PrismLauncher-Linux-${{ env.VERSION }}-x86_64.AppImage
+          mv PrismLauncher-macOS-Legacy*/PrismLauncher.tar.gz PrismLauncher-macOS-Legacy-${{ env.VERSION }}.tar.gz
+          mv PrismLauncher-macOS*/PrismLauncher.tar.gz PrismLauncher-macOS-${{ env.VERSION }}.tar.gz
 
-          tar -czf PolyMC-${{ env.VERSION }}.tar.gz PolyMC-${{ env.VERSION }}
+          tar -czf PrismLauncher-${{ env.VERSION }}.tar.gz PrismLauncher-${{ env.VERSION }}
 
-          for d in PolyMC-Windows-*; do
+          for d in PrismLauncher-Windows-*; do
             cd "${d}" || continue
             LEGACY="$(echo -n ${d} | grep -o Legacy || true)"
             INST="$(echo -n ${d} | grep -o Setup || true)"
             PORT="$(echo -n ${d} | grep -o Portable || true)"
-            NAME="PolyMC-Windows"
+            NAME="PrismLauncher-Windows"
             test -z "${LEGACY}" || NAME="${NAME}-Legacy"
             test -z "${PORT}" || NAME="${NAME}-Portable"
-            test -z "${INST}" || mv PolyMC-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
+            test -z "${INST}" || mv PrismLauncher-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
             test -n "${INST}" || zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *
             cd ..
           done
@@ -65,21 +65,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          name: PolyMC ${{ env.VERSION }}
+          name: PrismLauncher ${{ env.VERSION }}
           draft: true
           prerelease: false
           files: |
-            PolyMC-Linux-${{ env.VERSION }}.tar.gz
-            PolyMC-Linux-Portable-${{ env.VERSION }}.tar.gz
-            PolyMC-Linux-${{ env.VERSION }}-x86_64.AppImage
-            PolyMC-Windows-Legacy-${{ env.VERSION }}.zip
-            PolyMC-Linux-Qt6-${{ env.VERSION }}.tar.gz
-            PolyMC-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-            PolyMC-Windows-Legacy-Portable-${{ env.VERSION }}.zip
-            PolyMC-Windows-Legacy-Setup-${{ env.VERSION }}.exe
-            PolyMC-Windows-${{ env.VERSION }}.zip
-            PolyMC-Windows-Portable-${{ env.VERSION }}.zip
-            PolyMC-Windows-Setup-${{ env.VERSION }}.exe
-            PolyMC-macOS-${{ env.VERSION }}.tar.gz
-            PolyMC-macOS-Legacy-${{ env.VERSION }}.tar.gz
-            PolyMC-${{ env.VERSION }}.tar.gz
+            PrismLauncher-Linux-${{ env.VERSION }}.tar.gz
+            PrismLauncher-Linux-Portable-${{ env.VERSION }}.tar.gz
+            PrismLauncher-Linux-${{ env.VERSION }}-x86_64.AppImage
+            PrismLauncher-Windows-Legacy-${{ env.VERSION }}.zip
+            PrismLauncher-Linux-Qt6-${{ env.VERSION }}.tar.gz
+            PrismLauncher-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
+            PrismLauncher-Windows-Legacy-Portable-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-Legacy-Setup-${{ env.VERSION }}.exe
+            PrismLauncher-Windows-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-Portable-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-Setup-${{ env.VERSION }}.exe
+            PrismLauncher-macOS-${{ env.VERSION }}.tar.gz
+            PrismLauncher-macOS-Legacy-${{ env.VERSION }}.tar.gz
+            PrismLauncher-${{ env.VERSION }}.tar.gz

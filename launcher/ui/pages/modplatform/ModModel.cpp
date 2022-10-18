@@ -265,7 +265,7 @@ void ListModel::searchRequestFailed(QString reason)
                               //: %1 refers to the launcher itself
                               QString("%1 %2")
                                   .arg(m_parent->displayName())
-                                  .arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_NAME)));
+                                  .arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_DISPLAYNAME)));
     }
     jobPtr.reset();
 

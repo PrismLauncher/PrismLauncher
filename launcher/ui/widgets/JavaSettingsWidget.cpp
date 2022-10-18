@@ -159,7 +159,7 @@ JavaSettingsWidget::ValidationStatus JavaSettingsWidget::validate()
                     "Do you wish to proceed without any Java?"
                     "\n\n"
                     "You can change the Java version in the settings later.\n"
-                ).arg(BuildConfig.LAUNCHER_NAME),
+                ).arg(BuildConfig.LAUNCHER_DISPLAYNAME),
                 QMessageBox::Warning,
                 QMessageBox::Yes | QMessageBox::No,
                 QMessageBox::NoButton
