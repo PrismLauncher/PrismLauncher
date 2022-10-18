@@ -167,7 +167,7 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
             tr(
                 "Microsoft accounts are only usable on macOS 10.13 or newer, with fully updated %1.\n\n"
                 "Please update both your operating system and %1."
-            ).arg(BuildConfig.LAUNCHER_NAME),
+            ).arg(BuildConfig.LAUNCHER_DISPLAYNAME),
             QMessageBox::Warning
         )->exec();
         return;

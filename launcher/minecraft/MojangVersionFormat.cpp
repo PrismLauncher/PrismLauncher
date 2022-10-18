@@ -214,7 +214,7 @@ void MojangVersionFormat::readVersionProperties(const QJsonObject &in, VersionFi
                 QObject::tr("The 'minimumLauncherVersion' value of this version (%1) is higher than supported by %3 (%2). It might not work properly!")
                     .arg(out->minimumLauncherVersion)
                     .arg(CURRENT_MINIMUM_LAUNCHER_VERSION)
-                    .arg(BuildConfig.LAUNCHER_NAME)
+                    .arg(BuildConfig.LAUNCHER_DISPLAYNAME)
             );
         }
     }
