@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
-    libnbtplusplus = { url = "github:PlaceholderMC/libnbtplusplus"; flake = false; };
+    libnbtplusplus = { url = "github:PrismLauncher/libnbtplusplus"; flake = false; };
     tomlplusplus = { url = "github:marzer/tomlplusplus"; flake = false; };
   };
 
