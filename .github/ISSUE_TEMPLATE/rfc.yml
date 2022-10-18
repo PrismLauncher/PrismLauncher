@@ -6,7 +6,7 @@ body:
 - type: markdown
   attributes:
     value: |
-      ### Use this form to suggest a larger change for PolyMC.
+      ### Use this form to suggest a larger change for PrismLauncher.
 - type: textarea
   attributes:
     label: Goal
@@ -18,7 +18,7 @@ body:
   attributes:
     label: Motivation
     description: |
-      Introduce the topic. If this is a not-well-known section of PolyMC, a detailed explanation of the background is recommended.
+      Introduce the topic. If this is a not-well-known section of PrismLauncher, a detailed explanation of the background is recommended.
       Some example points of discussion:
        - What specific problems are you facing right now that you're trying to address?
        - Are there any previous discussions? Link to them and summarize them (don't force your readers to read them though!).
