@@ -117,6 +117,10 @@ void ModFolderPage::runningStateChanged(bool running)
     ExternalResourcesPage::runningStateChanged(running);
     ui->actionDownloadItem->setEnabled(!running);
     ui->actionUpdateItem->setEnabled(!running);
+    ui->actionAddItem->setEnabled(!running);
+    ui->actionEnableItem->setEnabled(!running);
+    ui->actionDisableItem->setEnabled(!running);
+    ui->actionRemoveItem->setEnabled(!running);
 }
 
 bool ModFolderPage::shouldDisplay() const

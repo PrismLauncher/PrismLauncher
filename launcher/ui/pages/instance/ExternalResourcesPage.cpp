@@ -103,10 +103,6 @@ void ExternalResourcesPage::runningStateChanged(bool running)
         return;
     
     m_controlsEnabled = !running;
-    ui->actionAddItem->setEnabled(m_controlsEnabled);
-    ui->actionDisableItem->setEnabled(m_controlsEnabled);
-    ui->actionEnableItem->setEnabled(m_controlsEnabled);
-    ui->actionRemoveItem->setEnabled(m_controlsEnabled);
 }
 
 bool ExternalResourcesPage::shouldDisplay() const
