@@ -23,20 +23,24 @@ This guide will mostly mention dependant packages by their Debian naming.
 - `extra-cmake-modules`.
 - zlib (`zlib1g-dev` on Debian 11 or Debian-based distributions).
 - Java Development Kit (Java JDK) (`openjdk-17-jdk` on Debian 11 or Debian-based distributions).
-- Mesa GL headers (libgl1-mesa-dev on Debian 11 or Debian-based distributions).
+- Mesa GL headers (`libgl1-mesa-dev` on Debian 11 or Debian-based distributions).
 - (Optional) `scdoc` to generate man pages.
 
 <h3>Compiling</h3>
-<h4>BUilding and installing on the system</h4>
+<h4>Building and installing on the system</h4>
+
 ```
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/usr" -DENABLE_LTO=ON
 cmake --build build -j$(nproc)
 sudo cmake --install build
 ```
+
 <h4>Building a portable binary</h4>
+
 ```
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX=install
 cmake --build build -j$(nproc)
 cmake --install build
 cmake --install build --component portable
 ```
+
