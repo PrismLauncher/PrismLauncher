@@ -17,7 +17,6 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * This file incorporates work covered by the following copyright and
- * permission notice:
  *
  *      Copyright 2013-2021 MultiMC Contributors
  *
@@ -489,7 +488,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     // Initialize application settings
     {
         // Provide a fallback for migration from PolyMC
-        m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg" }, this));
+        m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this));
         // Updates
         // Multiple channels are separated by spaces
         m_settings->registerSetting("UpdateChannel", BuildConfig.VERSION_CHANNEL);
