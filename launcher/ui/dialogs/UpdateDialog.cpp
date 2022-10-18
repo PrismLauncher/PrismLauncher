@@ -73,12 +73,12 @@ void UpdateDialog::loadChangelog()
     QString url;
     if(channel == "stable")
     {
-        url = QString("https://raw.githubusercontent.com/PolyMC/PolyMC/%1/changelog.md").arg(channel);
+        url = QString("https://raw.githubusercontent.com/PrismLauncher/PrismLauncher/%1/changelog.md").arg(channel);
         m_changelogType = CHANGELOG_MARKDOWN;
     }
     else
     {
-        url = QString("https://api.github.com/repos/PolyMC/PolyMC/compare/%1...%2").arg(BuildConfig.GIT_COMMIT, channel);
+        url = QString("https://api.github.com/repos/PrismLauncher/PrismLauncher/compare/%1...%2").arg(BuildConfig.GIT_COMMIT, channel);
         m_changelogType = CHANGELOG_COMMITS;
     }
     dljob->addNetAction(Net::Download::makeByteArray(QUrl(url), &changelogData));
@@ -93,7 +93,7 @@ QString reprocessMarkdown(QByteArray markdown)
     QString output = hoedown.process(markdown);
 
     // HACK: easier than customizing hoedown
-    output.replace(QRegularExpression("GH-([0-9]+)"), "<a href=\"https://github.com/PolyMC/PolyMC/issues/\\1\">GH-\\1</a>");
+    output.replace(QRegularExpression("GH-([0-9]+)"), "<a href=\"https://github.com/PrismLauncher/PrismLauncher/issues/\\1\">GH-\\1</a>");
     qDebug() << output;
     return output;
 }
@@ -135,7 +135,7 @@ QString reprocessCommits(QByteArray json)
                 result += "<tr><td>";
                 if(issuenr.length())
                 {
-                    result += QString("<a href=\"https://github.com/PolyMC/PolyMC/issues/%1\">GH-%2</a>").arg(issuenr, issuenr);
+                    result += QString("<a href=\"https://github.com/PrismLauncher/PrismLauncher/issues/%1\">GH-%2</a>").arg(issuenr, issuenr);
                 }
                 else if(prefix.length())
                 {

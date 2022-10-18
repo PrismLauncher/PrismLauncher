@@ -62,19 +62,19 @@ public: /* methods */
     void applyTo(LaunchProfile* profile, const RuntimeContext & runtimeContext);
 
 public: /* data */
-    /// PolyMC: order hint for this version file if no explicit order is set
+    /// Prism Launcher: order hint for this version file if no explicit order is set
     int order = 0;
 
-    /// PolyMC: human readable name of this package
+    /// Prism Launcher: human readable name of this package
     QString name;
 
-    /// PolyMC: package ID of this package
+    /// Prism Launcher: package ID of this package
     QString uid;
 
-    /// PolyMC: version of this package
+    /// Prism Launcher: version of this package
     QString version;
 
-    /// PolyMC: DEPRECATED dependency on a Minecraft version
+    /// Prism Launcher: DEPRECATED dependency on a Minecraft version
     QString dependsOnMinecraftVersion;
 
     /// Mojang: DEPRECATED used to version the Mojang version format
@@ -86,13 +86,13 @@ public: /* data */
     /// Mojang: class to launch Minecraft with
     QString mainClass;
 
-    /// PolyMC: class to launch legacy Minecraft with (embed in a custom window)
+    /// Prism Launcher: class to launch legacy Minecraft with (embed in a custom window)
     QString appletClass;
 
     /// Mojang: Minecraft launch arguments (may contain placeholders for variable substitution)
     QString minecraftArguments;
 
-    /// PolyMC: Additional JVM launch arguments
+    /// Prism Launcher: Additional JVM launch arguments
     QStringList addnJvmArguments;
 
     /// Mojang: list of compatible java majors
@@ -110,38 +110,38 @@ public: /* data */
     /// Mojang: DEPRECATED asset group to be used with Minecraft
     QString assets;
 
-    /// PolyMC: list of tweaker mod arguments for launchwrapper
+    /// Prism Launcher: list of tweaker mod arguments for launchwrapper
     QStringList addTweakers;
 
     /// Mojang: list of libraries to add to the version
     QList<LibraryPtr> libraries;
 
-    /// PolyMC: list of maven files to put in the libraries folder, but not in classpath
+    /// Prism Launcher: list of maven files to put in the libraries folder, but not in classpath
     QList<LibraryPtr> mavenFiles;
 
-    /// PolyMC: list of agents to add to JVM arguments
+    /// Prism Launcher: list of agents to add to JVM arguments
     QList<AgentPtr> agents;
 
     /// The main jar (Minecraft version library, normally)
     LibraryPtr mainJar;
 
-    /// PolyMC: list of attached traits of this version file - used to enable features
+    /// Prism Launcher: list of attached traits of this version file - used to enable features
     QSet<QString> traits;
 
-    /// PolyMC: list of jar mods added to this version
+    /// Prism Launcher: list of jar mods added to this version
     QList<LibraryPtr> jarMods;
 
-    /// PolyMC: list of mods added to this version
+    /// Prism Launcher: list of mods added to this version
     QList<LibraryPtr> mods;
 
     /**
-     * PolyMC: set of packages this depends on
+     * Prism Launcher: set of packages this depends on
      * NOTE: this is shared with the meta format!!!
      */
     Meta::RequireSet requires;
 
     /**
-     * PolyMC: set of packages this conflicts with
+     * Prism Launcher: set of packages this conflicts with
      * NOTE: this is shared with the meta format!!!
      */
     Meta::RequireSet conflicts;

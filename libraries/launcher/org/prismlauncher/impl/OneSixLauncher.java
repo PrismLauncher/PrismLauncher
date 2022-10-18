@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-package org.polymc.impl;
+package org.prismlauncher.impl;
 
-import org.polymc.Launcher;
-import org.polymc.applet.LegacyFrame;
-import org.polymc.utils.Parameters;
-import org.polymc.utils.Utils;
+import org.prismlauncher.Launcher;
+import org.prismlauncher.applet.LegacyFrame;
+import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.Utils;
 
 import java.applet.Applet;
 import java.io.File;

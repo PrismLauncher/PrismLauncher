@@ -69,7 +69,7 @@ QString getCreditsHtml()
 #endif
     stream << "<center>\n";
 
-    //: %1 is the name of the launcher, determined at build time, e.g. "PolyMC Developers"
+    //: %1 is the name of the launcher, determined at build time, e.g. "Prism Launcher Developers"
     stream << "<h3>" << QObject::tr("%1 Developers", "About Credits").arg(BuildConfig.LAUNCHER_DISPLAYNAME) << "</h3>\n";
     stream << QString("<p>Sefa Eyeoglu (Scrumplex) %1</p>\n")   .arg(getWebsite("https://scrumplex.net"));
     stream << QString("<p>dada513 %1</p>\n")                    .arg(getGitHub("dada513"));
@@ -79,7 +79,7 @@ QString getCreditsHtml()
     stream << QString("<p>cozyGalvinism %1</p>\n")              .arg(getGitHub("cozyGalvinism"));
     stream << "<br />\n";
 
-    //: %1 is the name of the launcher, determined at build time, e.g. "PolyMC Contributors"
+    //: %1 is the name of the launcher, determined at build time, e.g. "Prism Launcher Contributors"
     stream << "<h3>" << QObject::tr("%1 Contributors", "About Credits").arg(BuildConfig.LAUNCHER_DISPLAYNAME) << "</h3>\n";
     stream << QString("<p>DioEgizio %1</p>\n")                      .arg(getGitHub("DioEgizio"));
     stream << QString("<p>flowln %1</p>\n")                      .arg(getGitHub("flowln"));
@@ -87,7 +87,7 @@ QString getCreditsHtml()
     stream << "<br />\n";
 
     // TODO: possibly retrieve from git history at build time?
-    //: %1 is the name of the launcher, determined at build time, e.g. "PolyMC Developers"
+    //: %1 is the name of the launcher, determined at build time, e.g. "Prism Launcher Developers"
     stream << "<h3>" << QObject::tr("%1 Developers", "About Credits").arg("MultiMC") << "</h3>\n";
     stream << "<p>Andrew Okin &lt;<a href='mailto:forkk@forkk.net'>forkk@forkk.net</a>&gt;</p>\n";
     stream << QString("<p>Petr Mrázek &lt;<a href='mailto:peterix@gmail.com'>peterix@gmail.com</a>&gt;</p>\n");
@@ -102,7 +102,7 @@ QString getCreditsHtml()
     stream << "<p>Kilobyte &lt;<a href='mailto:stiepen22@gmx.de'>stiepen22@gmx.de</a>&gt;</p>\n";
     stream << "<p>Rootbear75 &lt;<a href='https://twitter.com/rootbear75'>@rootbear75</a>&gt;</p>\n";
     stream << "<p>Zeker Zhayard &lt;<a href='https://twitter.com/zeker_zhayard'>@Zeker_Zhayard</a>&gt;</p>\n";
-    stream << "<p>Everyone else who <a href='https://github.com/PolyMC/PolyMC/graphs/contributors'>contributed</a>!</p>\n";
+    stream << "<p>Everyone else who <a href='https://github.com/PrismLauncher/PrismLauncher/graphs/contributors'>contributed</a>!</p>\n";
     stream << "<br />\n";
 
     stream << "</center>\n";
