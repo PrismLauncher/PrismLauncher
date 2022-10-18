@@ -14,10 +14,10 @@ cd PrismLauncher
 
 <h2>Linux</h2>
 
-This guide will mostly mention dependant packages by their Debian naming.
+This guide will mostly mention dependant packages by their Debian naming and commands are done by a user in the sudoers file.
 <h3>Dependencies</h3>
 
-- A C++ compiler capable of building C++17 code.
+- A C++ compiler capable of building C++17 code (can be found in the package `build-essential`).
 - Qt Development tools 5.12 or newer (on Debian 11 or Debian-based distributions, `qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5`).
 - `cmake` 3.15 or newer.
 - `extra-cmake-modules`.
@@ -26,8 +26,15 @@ This guide will mostly mention dependant packages by their Debian naming.
 - Mesa GL headers (`libgl1-mesa-dev` on Debian 11 or Debian-based distributions).
 - (Optional) `scdoc` to generate man pages.
 
+In conclusion, to check if all you need is installed (including optional):
+
+```
+sudo apt install build-essential qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5 cmake extra-cmake-modules zlib1g-dev openjdk-17-jdk libgl1-mesa-dev scdoc
+```
+
 <h3>Compiling</h3>
 <h4>Building and installing on the system</h4>
+This is usually the suggested way to build the client.
 
 ```
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/usr" -DENABLE_LTO=ON
