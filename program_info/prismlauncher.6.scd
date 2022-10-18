@@ -21,13 +21,13 @@ Here are the current features of Prism Launcher.
 # OPTIONS
 
 *-d, --dir*=DIRECTORY
-	Use DIRECTORY as the PrismLauncher root.
+	Use DIRECTORY as the Prism Launcher root.
 
 *-l, --launch*=INSTANCE_ID
 	Launch the instance specified by INSTANCE_ID.
 
 *--alive*
-	Write a small 'live.check' file after PrismLauncher starts.
+	Write a small 'live.check' file after Prism Launcher starts.
 
 *-h, --help*
 	Display help text and exit.
