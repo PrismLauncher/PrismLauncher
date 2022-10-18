@@ -311,6 +311,6 @@
 
         <file>scalable/instances/fox.svg</file>
         <file>scalable/instances/bee.svg</file>
-        <file>scalable/instances/polymc.svg</file>
+        <file>scalable/instances/prismlauncher.svg</file>
     </qresource>
 </RCC>
