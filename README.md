@@ -17,7 +17,7 @@ Portable builds are provided for AppImage on Linux, Windows, and macOS.
 
 ## Help & Support
 
-[![Support server invite](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner3)](https://discord.gg/hX4g537UNE)
+[![Join the Discord Server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner3)](https://discord.gg/hX4g537UNE)
 
 ## License
 
