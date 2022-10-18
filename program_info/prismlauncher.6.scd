@@ -1,33 +1,33 @@
-polymc(6)
+prismlauncher(6)
 
 
 # NAME
 
-polymc - a launcher and instance manager for Minecraft.
+prismlauncher - a launcher and instance manager for Minecraft.
 
 
 # SYNOPSIS
 
-*polymc* [OPTIONS...]
+*prismlauncher* [OPTIONS...]
 
 
 # DESCRIPTION
 
-PolyMC is a custom launcher for Minecraft that allows you to easily manage
+Prism Launcher is a custom launcher for Minecraft that allows you to easily manage
 multiple installations of Minecraft at once. It also allows you to easily
 install and remove mods by simply dragging and dropping.
-Here are the current features of PolyMC.
+Here are the current features of Prism Launcher.
 
 # OPTIONS
 
 *-d, --dir*=DIRECTORY
-	Use DIRECTORY as the PolyMC root.
+	Use DIRECTORY as the PrismLauncher root.
 
 *-l, --launch*=INSTANCE_ID
 	Launch the instance specified by INSTANCE_ID.
 
 *--alive*
-	Write a small 'live.check' file after PolyMC starts.
+	Write a small 'live.check' file after PrismLauncher starts.
 
 *-h, --help*
 	Display help text and exit.
@@ -48,14 +48,14 @@ Here are the current features of PolyMC.
 
 # BUGS
 
-https://github.com/PolyMC/PolyMC/issues
+https://github.com/PrismLauncher/PolyMC/issues
 
 # RESOURCES
 
-GitHub: https://github.com/PolyMC/PolyMC
+GitHub: https://github.com/PrismLauncher/PolyMC
 
-Main website: https://polymc.org
+Main website: https://prismlauncher.org
 
 # AUTHORS
 
-PolyMC Contributors
+Prism Launcher Contributors
