@@ -112,11 +112,7 @@ private slots:
 
     void on_actionViewInstanceFolder_triggered();
 
-    void on_actionConfig_Folder_triggered();
-
     void on_actionViewSelectedInstFolder_triggered();
-
-    void on_actionViewSelectedMCFolder_triggered();
 
     void refreshInstances();
 
@@ -129,6 +125,8 @@ private slots:
     void on_actionManageAccounts_triggered();
 
     void on_actionReportBug_triggered();
+
+    void on_actionClearMetadata_triggered();
 
     void on_actionOpenWiki_triggered();
 
@@ -158,14 +156,6 @@ private slots:
     }
 
     void on_actionEditInstance_triggered();
-
-    void on_actionEditInstNotes_triggered();
-
-    void on_actionMods_triggered();
-
-    void on_actionWorlds_triggered();
-
-    void on_actionScreenshots_triggered();
 
     void taskEnd();
 
