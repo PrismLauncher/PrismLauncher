@@ -23,14 +23,16 @@ INISettingsObject::INISettingsObject(QStringList paths, QObject *parent)
     : SettingsObject(parent)
 {
     auto first_path = paths.constFirst();
-    auto path = paths.takeFirst();
-    while (!QFile::exists(path))
-        path = paths.takeFirst();
+    for (auto path : paths) {
+        if (!QFile::exists(path))
+            continue;
 
-    if (path != first_path && QFile::exists(path)) {
-        // Copy the fallback to the preferred path.
-        QFile::copy(path, first_path);
-        qDebug() << "Copied settings from" << path << "to" << first_path;
+        if (path != first_path && QFile::exists(path)) {
+            // Copy the fallback to the preferred path.
+            QFile::copy(path, first_path);
+            qDebug() << "Copied settings from" << path << "to" << first_path;
+            break;
+        }
     }
 
     m_filePath = first_path;
