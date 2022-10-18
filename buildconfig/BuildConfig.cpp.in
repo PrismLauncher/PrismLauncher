@@ -46,6 +46,7 @@ Config::Config()
     LAUNCHER_COPYRIGHT = "@Launcher_Copyright@";
     LAUNCHER_DOMAIN = "@Launcher_Domain@";
     LAUNCHER_CONFIGFILE = "@Launcher_ConfigFile@";
+    LAUNCHER_CONFIGFILEALT = "@Launcher_ConfigFileAlt@";
     LAUNCHER_GIT = "@Launcher_Git@";
     LAUNCHER_DESKTOPFILENAME = "@Launcher_DesktopFileName@";
 
