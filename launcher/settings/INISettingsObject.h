@@ -28,7 +28,10 @@ class INISettingsObject : public SettingsObject
 {
     Q_OBJECT
 public:
-    explicit INISettingsObject(const QString &path, QObject *parent = 0);
+    /** 'paths' is a list of INI files to try, in order, for fallback support. */
+    explicit INISettingsObject(QStringList paths, QObject* parent = nullptr);
+
+    explicit INISettingsObject(QString path, QObject*  parent = nullptr);
 
     /*!
      * \brief Gets the path to the INI file.
