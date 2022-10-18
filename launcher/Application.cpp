@@ -224,9 +224,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         consoleAttached = true;
     }
 #endif
-    setOrganizationName(BuildConfig.LAUNCHER_DISPLAYNAME);
+    setOrganizationName(BuildConfig.LAUNCHER_NAME);
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
-    setApplicationName(BuildConfig.LAUNCHER_DISPLAYNAME);
+    setApplicationName(BuildConfig.LAUNCHER_NAME);
     setApplicationDisplayName(QString("%1 %2").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString()));
     setApplicationVersion(BuildConfig.printableVersionString());
     setDesktopFileName(BuildConfig.LAUNCHER_DESKTOPFILENAME);
@@ -300,6 +300,12 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
         dataPath = foo.absolutePath();
         adjustedBy = "Persistent data path";
+
+        QDir polymcData(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation), "PolyMC"));
+        if (polymcData.exists()) {
+            dataPath = polymcData.absolutePath();
+            adjustedBy = "PolyMC data path";
+        }
 
 #ifdef Q_OS_LINUX
         // TODO: this should be removed in a future version
