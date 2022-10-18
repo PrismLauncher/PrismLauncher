@@ -2,7 +2,7 @@
 
 Prism Launcher is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.
 
-We are working on a website and other media, for more info we have a [Discord server](https://discord.gg/prismlauncher). Logo and branding are also coming soon.
+We are working on a website and other media, for more info we have a [Discord Server](https://discord.gg/prismlauncher). Logo and branding are also coming soon.
 
 ## Installation
 
