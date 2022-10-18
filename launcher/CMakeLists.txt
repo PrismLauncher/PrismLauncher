@@ -1018,22 +1018,22 @@ endif()
 
 target_link_libraries(Launcher_logic)
 
-add_executable(${Launcher_Name} MACOSX_BUNDLE WIN32 main.cpp ${LAUNCHER_RCS})
-target_link_libraries(${Launcher_Name} Launcher_logic)
+add_executable("${Launcher_Name}" MACOSX_BUNDLE WIN32 main.cpp ${LAUNCHER_RCS})
+target_link_libraries("${Launcher_Name}" Launcher_logic)
 
 if(DEFINED Launcher_APP_BINARY_NAME)
-    set_target_properties(${Launcher_Name} PROPERTIES OUTPUT_NAME "${Launcher_APP_BINARY_NAME}")
+    set_target_properties("${Launcher_Name}" PROPERTIES OUTPUT_NAME "${Launcher_APP_BINARY_NAME}")
 endif()
 if(DEFINED Launcher_BINARY_RPATH)
-    SET_TARGET_PROPERTIES(${Launcher_Name} PROPERTIES INSTALL_RPATH "${Launcher_BINARY_RPATH}")
+    SET_TARGET_PROPERTIES("${Launcher_Name}" PROPERTIES INSTALL_RPATH "${Launcher_BINARY_RPATH}")
 endif()
 
 if(DEFINED Launcher_APP_BINARY_DEFS)
-    target_compile_definitions(${Launcher_Name} PRIVATE ${Launcher_APP_BINARY_DEFS})
+    target_compile_definitions("${Launcher_Name}" PRIVATE ${Launcher_APP_BINARY_DEFS})
     target_compile_definitions(Launcher_logic PRIVATE ${Launcher_APP_BINARY_DEFS})
 endif()
 
-install(TARGETS ${Launcher_Name}
+install(TARGETS "${Launcher_Name}"
     BUNDLE DESTINATION "." COMPONENT Runtime
     LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
     RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
