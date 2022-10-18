@@ -1,5 +1,5 @@
-![Fancy logo](./docs/branding/logo_ondark-60px.png#gh-dark-mode-only)
-![Fancy logo](./docs/branding/logo_onlight-60px.png#gh-light-mode-only)
+![Prism Launcher](./docs/branding/logo_ondark-60px.png#gh-dark-mode-only)
+![Prism Launcher](./docs/branding/logo_onlight-60px.png#gh-light-mode-only)
 
 Prism Launcher is a custom launcher that will be the continuation of the now dead PolyMC.
 
