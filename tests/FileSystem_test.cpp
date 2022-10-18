@@ -147,6 +147,42 @@ slots:
         f();
     }
 
+    void test_copy_with_dot_hidden()
+    {
+        QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
+        auto f = [&folder]()
+        {
+            QTemporaryDir tempDir;
+            tempDir.setAutoRemove(true);
+            qDebug() << "From:" << folder << "To:" << tempDir.path();
+
+            QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
+            qDebug() << tempDir.path();
+            qDebug() << target_dir.path();
+            FS::copy c(folder, target_dir.path());
+            c();
+
+            auto filter = QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden;
+
+            for (auto entry: target_dir.entryList(filter)) {
+                qDebug() << entry;
+            }
+
+            QVERIFY(target_dir.entryList(filter).contains(".secret_folder"));
+            target_dir.cd(".secret_folder");
+            QVERIFY(target_dir.entryList(filter).contains(".secret_file.txt"));
+        };
+
+        // first try variant without trailing /
+        QVERIFY(!folder.endsWith('/'));
+        f();
+
+        // then variant with trailing /
+        folder.append('/');
+        QVERIFY(folder.endsWith('/'));
+        f();
+    }
+
     void test_getDesktop()
     {
         QCOMPARE(FS::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
