@@ -1,6 +1,6 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
-    <qresource prefix="/icons/flat">
+    <qresource prefix="/icons/flat_white">
         <file>index.theme</file>
         <file>scalable/about.svg</file>
         <file>scalable/accounts.svg</file>
