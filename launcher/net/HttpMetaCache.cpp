@@ -162,6 +162,18 @@ auto HttpMetaCache::evictEntry(MetaEntryPtr entry) -> bool
     return true;
 }
 
+void HttpMetaCache::evictAll()
+{
+    for (QString& base : m_entries.keys()) {
+        EntryMap& map = m_entries[base];
+        qDebug() << "Evicting base" << base;
+        for (MetaEntryPtr entry : map.entry_list) {
+            if (!evictEntry(entry))
+                qWarning() << "Unexpected missing cache entry" << entry->basePath;
+        }
+    }
+}
+
 auto HttpMetaCache::staleEntry(QString base, QString resource_path) -> MetaEntryPtr
 {
     auto foo = new MetaEntry();

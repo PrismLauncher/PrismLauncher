@@ -258,6 +258,7 @@ public:
 
     QMenu * helpMenu = nullptr;
     TranslatedToolButton helpMenuButton;
+    TranslatedAction actionClearMetadata;
     TranslatedAction actionReportBug;
     TranslatedAction actionDISCORD;
     TranslatedAction actionMATRIX;
@@ -346,6 +347,13 @@ public:
         actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
         actionUndoTrashInstance->setShortcut(QKeySequence("Ctrl+Z"));
         all_actions.append(&actionUndoTrashInstance);
+
+        actionClearMetadata = TranslatedAction(MainWindow);
+        actionClearMetadata->setObjectName(QStringLiteral("actionClearMetadata"));
+        actionClearMetadata->setIcon(APPLICATION->getThemedIcon("refresh"));
+        actionClearMetadata.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Clear Metadata Cache"));
+        actionClearMetadata.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Clear cached metadata"));
+        all_actions.append(&actionClearMetadata);
 
         if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
             actionReportBug = TranslatedAction(MainWindow);
@@ -445,6 +453,8 @@ public:
         helpMenu = new QMenu(MainWindow);
         helpMenu->setToolTipsVisible(true);
 
+        helpMenu->addAction(actionClearMetadata);
+
         if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
             helpMenu->addAction(actionReportBug);
         }
@@ -537,6 +547,8 @@ public:
 
         helpMenu = menuBar->addMenu(tr("&Help"));
         helpMenu->setSeparatorsCollapsible(false);
+        helpMenu->addAction(actionClearMetadata);
+        helpMenu->addSeparator();
         helpMenu->addAction(actionAbout);
         helpMenu->addAction(actionOpenWiki);
         helpMenu->addAction(actionNewsMenuBar);
@@ -1965,6 +1977,11 @@ void MainWindow::on_actionManageAccounts_triggered()
 void MainWindow::on_actionReportBug_triggered()
 {
     DesktopServices::openUrl(QUrl(BuildConfig.BUG_TRACKER_URL));
+}
+
+void MainWindow::on_actionClearMetadata_triggered()
+{
+    APPLICATION->metacache()->evictAll();
 }
 
 void MainWindow::on_actionOpenWiki_triggered()
