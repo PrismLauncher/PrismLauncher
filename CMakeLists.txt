@@ -99,7 +99,7 @@ set(Launcher_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can g
 set(Launcher_BUG_TRACKER_URL "https://github.com/PrismLauncher/PrismLauncher/issues" CACHE STRING "URL for the bug tracker.")
 
 # Translations Platform URL
-set(Launcher_TRANSLATIONS_URL "https://hosted.weblate.org/projects/prismlauncher/prismlauncher/" CACHE STRING "URL for the translations platform.")
+set(Launcher_TRANSLATIONS_URL "https://hosted.weblate.org/projects/prismlauncher/launcher/" CACHE STRING "URL for the translations platform.")
 
 # Matrix Space
 set(Launcher_MATRIX_URL "https://matrix.to/#/#prismlauncher:matrix.org" CACHE STRING "URL to the Matrix Space")
