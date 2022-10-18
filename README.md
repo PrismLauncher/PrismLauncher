@@ -17,7 +17,7 @@ Portable builds are provided for AppImage on Linux, Windows, and macOS.
 ## Help & Support
 
 - Join the [Discord Server](https://discord.gg/hX4g537UNE) for now. 
-We have a vanity url https://discord.gg/placeholdermc
+We have a vanity url https://discord.gg/prismlauncher
 
 ### License
 
