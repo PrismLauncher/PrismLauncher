@@ -91,8 +91,8 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
         }
 
         // On the bottom, aligned to the left after the icon, and featuring at most two lines of text (with some margin space to spare)
-        painter->drawText(rect.x(), rect.y() + rect.height() - 2.2 * opt.fontMetrics.height(), remaining_width,
-                          2 * opt.fontMetrics.height(), Qt::TextWordWrap, description);
+        painter->drawText(rect.x(), rect.y() + rect.height() - 2.0 * opt.fontMetrics.height(), remaining_width,
+                          4 * opt.fontMetrics.height(), Qt::TextWordWrap, description);
     }
 
     painter->restore();
