@@ -7,7 +7,7 @@ We are working on a website and other media, for more info we have a [Discord Se
 ## Installation
 
 - All downloads and instructions for Prism Launcher will soon be available.
-- Last build status: <https://github.com/PrismLauncher/PrismLauncher/actions>
+- Last build status can be found [here](https://github.com/PrismLauncher/PrismLauncher/actions).
 
 ### Development Builds
 
