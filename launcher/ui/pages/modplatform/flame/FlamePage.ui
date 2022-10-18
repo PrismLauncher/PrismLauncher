@@ -19,7 +19,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Note: CurseForge allows creators to block access to third-party tools like PolyMC. As such, you may need to manually download some mods to be able to install a modpack.</string>
+      <string>Note: CurseForge allows creators to block access to third-party tools like Prism Launcher. As such, you may need to manually download some mods to be able to install a modpack.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

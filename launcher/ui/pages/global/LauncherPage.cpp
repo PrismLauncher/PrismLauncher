@@ -151,7 +151,7 @@ void LauncherPage::on_instDirBrowseBtn_clicked()
                             "This is known to cause problems. "
                             "After a restart the launcher might break, "
                             "because it will no longer have access to that directory.\n\n"
-                            "Granting PolyMC access to it via Flatseal is recommended."));
+                            "Granting %1 access to it via Flatseal is recommended.").arg(BuildConfig.LAUNCHER_DISPLAYNAME));
             warning.setInformativeText(
              tr("Do you want to proceed anyway?"));
             warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);

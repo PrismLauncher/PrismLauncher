@@ -1,6 +1,6 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/">
-        <file>org.polymc.PolyMC.svg</file>
+        <file>org.prismlauncher.PrismLauncher.svg</file>
     </qresource>
 </RCC>

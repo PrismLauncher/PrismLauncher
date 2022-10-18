@@ -60,7 +60,7 @@
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>- PolyMC / MultiMC exported instances (ZIP)</string>
+        <string>- Prism Launcher, PolyMC or MultiMC exported instances (ZIP)</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

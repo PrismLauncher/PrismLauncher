@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
-  <assemblyIdentity name="PolyMC.Application.1" type="win32" version="@Launcher_VERSION_NAME4@" />
+  <assemblyIdentity name="PrismLauncher.Application.1" type="win32" version="@Launcher_VERSION_NAME4@" />
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
     <security>
       <requestedPrivileges>

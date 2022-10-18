@@ -38,14 +38,14 @@ let
     libGL
   ];
 
-  # This variable will be passed to Minecraft by PolyMC
+  # This variable will be passed to Minecraft by Prism Launcher
   gameLibraryPath = libpath + ":/run/opengl-driver/lib";
 
   javaPaths = lib.makeSearchPath "bin/java" ([ jdk jdk8 ] ++ extraJDKs);
 in
 
 stdenv.mkDerivation rec {
-  pname = "polymc";
+  pname = "prismlauncher";
   inherit version;
 
   src = lib.cleanSource self;
@@ -77,17 +77,17 @@ stdenv.mkDerivation rec {
   # we have to check if the system is NixOS before adding stdenv.cc.cc.lib (#923)
   postInstall = ''
     # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
-    wrapQtApp $out/bin/polymc \
+    wrapQtApp $out/bin/prismlauncher \
       --run '[ -f /etc/NIXOS ] && export LD_LIBRARY_PATH="${stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"' \
       --prefix LD_LIBRARY_PATH : ${gameLibraryPath} \
-      --prefix POLYMC_JAVA_PATHS : ${javaPaths} \
+      --prefix PRISMLAUNCHER_JAVA_PATHS : ${javaPaths} \
       --prefix PATH : ${lib.makeBinPath [ xorg.xrandr ]}
   '';
 
   meta = with lib; {
-    homepage = "https://polymc.org/";
-    downloadPage = "https://polymc.org/download/";
-    changelog = "https://github.com/PolyMC/PolyMC/releases";
+    homepage = "https://prismlauncher.org/";
+    downloadPage = "https://prismlauncher.org/download/";
+    changelog = "https://github.com/PrismLauncher/PrismLauncher/releases";
     description = "A free, open source launcher for Minecraft";
     longDescription = ''
       Allows you to have multiple, separate instances of Minecraft (each with

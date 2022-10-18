@@ -3,8 +3,8 @@
 #endif
 #include <windows.h>
 
-IDI_ICON1               ICON    DISCARDABLE     "polymc.ico"
-1 RT_MANIFEST "polymc.manifest"
+IDI_ICON1               ICON    DISCARDABLE     "prismlauncher.ico"
+1 RT_MANIFEST "prismlauncher.manifest"
 
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION     @Launcher_VERSION_NAME4_COMMA@
@@ -15,10 +15,10 @@ BEGIN
         BEGIN
                 BLOCK "000004b0"
                 BEGIN
-                        VALUE "CompanyName", "MultiMC & PolyMC Contributors"
-                        VALUE "FileDescription", "PolyMC"
+                        VALUE "CompanyName", "MultiMC & Prism Launcher Contributors"
+                        VALUE "FileDescription", "Prism Launcher"
                         VALUE "FileVersion", "@Launcher_VERSION_NAME4@"
-                        VALUE "ProductName", "PolyMC"
+                        VALUE "ProductName", "Prism Launcher"
                         VALUE "ProductVersion", "@Launcher_VERSION_NAME4@"
                 END
         END

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-  <id>org.polymc.PolyMC</id>
+  <id>org.prismlauncher.PrismLauncher</id>
   <provides>
-    <id>org.polymc.PolyMC</id>
+    <id>org.prismlauncher.PrismLauncher</id>
   </provides>
-  <launchable type="desktop-id">org.polymc.PolyMC.desktop</launchable>
-  <name>PolyMC</name>
-  <developer_name>PolyMC</developer_name>
+  <launchable type="desktop-id">org.prismlauncher.PrismLauncher.desktop</launchable>
+  <name>PrismLauncher</name>
+  <developer_name>PrismLauncher</developer_name>
   <summary>A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
-  <url type="homepage">https://polymc.org/</url>
-  <url type="help">https://polymc.org/wiki/</url>
+  <url type="homepage">https://prismlauncher.org/</url>
+  <url type="help">https://prismlauncher.org/wiki/</url>
   <description>
-    <p>PolyMC is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.</p>
+    <p>PrismLauncher is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.</p>
     <p>Features:</p>
     <ul>
       <li>Easily install game modifications, such as Fabric, Forge and Quilt</li>
@@ -27,28 +27,28 @@
   </description>
   <screenshots>
     <screenshot type="default">
-      <caption>The main PolyMC window</caption>
-      <image type="source" width="976" height="764">https://polymc.org/img/screenshots/LauncherDark.png</image>
+      <caption>The main PrismLauncher window</caption>
+      <image type="source" width="976" height="764">https://prismlauncher.org/img/screenshots/LauncherDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Modpack installation</caption>
-      <image type="source" width="1103" height="954">https://polymc.org/img/screenshots/ModpackInstallDark.png</image>
+      <image type="source" width="1103" height="954">https://prismlauncher.org/img/screenshots/ModpackInstallDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Mod installation</caption>
-      <image type="source" width="1000" height="692">https://polymc.org/img/screenshots/ModInstallDark.png</image>
+      <image type="source" width="1000" height="692">https://prismlauncher.org/img/screenshots/ModInstallDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Mod updating</caption>
-      <image type="source" width="930" height="858">https://polymc.org/img/screenshots/ModUpdateDark.png</image>
+      <image type="source" width="930" height="858">https://prismlauncher.org/img/screenshots/ModUpdateDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Instance management</caption>
-      <image type="source" width="1083" height="735">https://polymc.org/img/screenshots/PropertiesDark.png</image>
+      <image type="source" width="1083" height="735">https://prismlauncher.org/img/screenshots/PropertiesDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Cat :)</caption>
-      <image type="source" width="931" height="759">https://polymc.org/img/screenshots/LauncherCatDark.png</image>
+      <image type="source" width="931" height="759">https://prismlauncher.org/img/screenshots/LauncherCatDark.png</image>
     </screenshot>
   </screenshots>
   <releases>

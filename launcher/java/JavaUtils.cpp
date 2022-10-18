@@ -174,7 +174,7 @@ JavaInstallPtr JavaUtils::GetDefaultJava()
 
 QStringList addJavasFromEnv(QList<QString> javas)
 {
-    auto env = qEnvironmentVariable("POLYMC_JAVA_PATHS");
+    auto env = qEnvironmentVariable("PRISMLAUNCHER_JAVA_PATHS");  // FIXME: use launcher name from buildconfig
 #if defined(Q_OS_WIN32)
     QList<QString> javaPaths = env.replace("\\", "/").split(QLatin1String(";"));
     
