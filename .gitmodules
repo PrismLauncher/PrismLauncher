@@ -9,4 +9,4 @@
 	url = https://github.com/gulrak/filesystem
 [submodule "libraries/libnbtplusplus"]
 	path = libraries/libnbtplusplus
-	url = https://github.com/PlaceholderMC/libnbtplusplus.git
+	url = https://github.com/PrismLauncher/libnbtplusplus.git
