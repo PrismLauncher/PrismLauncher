@@ -1,5 +1,42 @@
 # Build Instructions
 
-Build instructions are available on [the website](https://prismlauncher.org/wiki/development/build-instructions/).
+Full build instructions will are available on [the website](https://prismlauncher.org/wiki/development/build-instructions/).
 
-If you would like to contribute or fix an issue with the Build instructions you can do so [here](https://github.com/PlaceholderMC/website/blob/master/src/wiki/development/build-instructions.md).
+If you would like to contribute or fix an issue with the Build instructions you will be able to do so [here](https://github.com/PlaceholderMC/website/blob/master/src/wiki/development/build-instructions.md).
+
+<h2>Getting the source</h2>
+
+Clone the source code using git, and grab all the submodules. This is generic for all platforms you want to build on.
+```
+git clone --recursive https://github.com/PlaceholderMC/PrismLauncher
+cd PrismLauncher
+```
+
+<h2>Linux</h2>
+
+This guide will mostly mention dependant packages by their Debian naming.
+<h3>Dependencies</h3>
+
+- A C++ compiler capable of building C++17 code.
+- Qt Development tools 5.12 or newer (on Debian 11 or Debian-based distributions, `qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5`).
+- `cmake` 3.15 or newer.
+- `extra-cmake-modules`.
+- zlib (`zlib1g-dev` on Debian 11 or Debian-based distributions).
+- Java Development Kit (Java JDK) (`openjdk-17-jdk` on Debian 11 or Debian-based distributions).
+- Mesa GL headers (libgl1-mesa-dev on Debian 11 or Debian-based distributions).
+- (Optional) `scdoc` to generate man pages.
+
+<h3>Compiling</h3>
+<h4>BUilding and installing on the system</h4>
+```
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/usr" -DENABLE_LTO=ON
+cmake --build build -j$(nproc)
+sudo cmake --install build
+```
+<h4>Building a portable binary</h4>
+```
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX=install
+cmake --build build -j$(nproc)
+cmake --install build
+cmake --install build --component portable
+```
