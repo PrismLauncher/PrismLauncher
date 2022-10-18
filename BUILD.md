@@ -2,13 +2,13 @@
 
 Full build instructions will be available on [the website](https://prismlauncher.org/wiki/development/build-instructions/).
 
-If you would like to contribute or fix an issue with the Build instructions you will be able to do so [here](https://github.com/PlaceholderMC/website/blob/master/src/wiki/development/build-instructions.md).
+If you would like to contribute or fix an issue with the Build instructions you will be able to do so [here](https://github.com/PrismLauncher/website/blob/master/src/wiki/development/build-instructions.md).
 
 <h2>Getting the source</h2>
 
 Clone the source code using git, and grab all the submodules. This is generic for all platforms you want to build on.
 ```
-git clone --recursive https://github.com/PlaceholderMC/PrismLauncher
+git clone --recursive https://github.com/PrismLauncher/PrismLauncher
 cd PrismLauncher
 ```
 
