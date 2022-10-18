@@ -51,6 +51,8 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
     auto remaining_width = rect.width() - icon_width - 2 * icon_x_margin;
     rect.setRect(rect.x() + icon_width + 2 * icon_x_margin, rect.y(), remaining_width, rect.height());
 
+    int title_height = 0;
+
     {  // Title painting
         auto title = index.data(UserDataTypes::TITLE).toString();
 
@@ -66,8 +68,10 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
         font.setPointSize(font.pointSize() + 2);
         painter->setFont(font);
 
+        title_height = QFontMetrics(font).height();
+
         // On the top, aligned to the left after the icon
-        painter->drawText(rect.x(), rect.y() + QFontMetrics(font).height(), title);
+        painter->drawText(rect.x(), rect.y() + title_height, title);
 
         painter->restore();
     }
@@ -90,9 +94,19 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
                 description += cut_text.at(1).second;
         }
 
+        int description_x = rect.x();
+
+        // Have the y-value be set based on the number of lines in the description, to centralize the
+        // description text with the space between the base and the title.
+        int description_y = rect.y() + title_height + (rect.height() - title_height) / 2;
+        if (cut_text.size() == 1)
+            description_y -= opt.fontMetrics.height() / 2;
+        else
+            description_y -= opt.fontMetrics.height();
+
         // On the bottom, aligned to the left after the icon, and featuring at most two lines of text (with some margin space to spare)
-        painter->drawText(rect.x(), rect.y() + rect.height() - 2.0 * opt.fontMetrics.height(), remaining_width,
-                          4 * opt.fontMetrics.height(), Qt::TextWordWrap, description);
+        painter->drawText(description_x, description_y, remaining_width,
+                          cut_text.size() * opt.fontMetrics.height(), Qt::TextWordWrap, description);
     }
 
     painter->restore();
