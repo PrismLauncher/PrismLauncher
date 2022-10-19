@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="48" height="48" version="1.1" viewBox="0 0 12.7 12.7" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+ <title>Prism Launcher Logo</title>
+ <rect x="9.5367e-8" y="9.5367e-8" width="12.7" height="12.7" fill="#14191e" stroke-width=".26458"/>
+ <g transform="matrix(.90909 0 0 .90909 .57737 .57727)">
+  <g stroke-width=".26458">
+   <path d="m6.35 6.35" fill="#99cd61"/>
+   <path d="m6.35 0.52917-2.5208 4.3656 2.5208 1.4552 2.5203-1.4552 0.10955-3.0996c-1.1511-0.66459-2.3388-1.2661-2.6298-1.2661z" fill="#df6277"/>
+   <path d="m8.9798 1.7952-2.6298 4.5548 2.5203 1.4552 2.5208-4.3656c-0.14552-0.25205-1.2601-0.97975-2.4112-1.6443z" fill="#fb9168"/>
+   <path d="m11.391 3.4396-5.041 2.9104 2.5203 1.4552 2.7389-1.4552c0-1.3292-0.07255-2.6584-0.21808-2.9104z" fill="#f3db6c"/>
+   <path d="m6.35 6.35v2.9104h5.041c0.14552-0.25205 0.21807-1.5812 0.21808-2.9104z" fill="#7ab392"/>
+   <path d="m6.35 6.35v2.9104l2.6298 1.6443c1.1511-0.66459 2.2657-1.3923 2.4112-1.6443z" fill="#4b7cbc"/>
+   <path d="m6.35 6.35-2.5208 1.4552 2.5208 4.3656c0.29104 0 1.4787-0.60148 2.6298-1.2661z" fill="#6f488c"/>
+   <path d="m3.8292 4.8948-2.5203 4.3656c0.29104 0.5041 4.459 2.9104 5.041 2.9104v-5.8208z" fill="#4d3f33"/>
+   <path d="m1.309 3.4396c-0.29104 0.5041-0.29104 5.3167 0 5.8208l5.041-2.9104v-2.9104z" fill="#7a573b"/>
+   <path d="m6.35 0.52917c-0.58208-2e-8 -4.75 2.4063-5.041 2.9104l5.041 2.9104z" fill="#99cd61"/>
+  </g>
+  <g transform="matrix(.88 0 0 .88 -10.906 -1.2421)">
+   <g transform="translate(13.26 2.2776)">
+    <path transform="matrix(.96975 0 0 .96975 .1921 .1921)" d="m6.3498 2.9393c-0.34105 0-2.7827 1.4099-2.9532 1.7052l2.9532 5.1157 2.9538-5.1157c-0.17052-0.29535-2.6127-1.7052-2.9538-1.7052z" fill="#fff" stroke-width=".26458"/>
+   </g>
+   <path d="m16.746 6.9737 2.8639 4.9609c0.33073 0 2.6991-1.3672 2.8644-1.6536 0.16536-0.28642 0.16536-3.0209 0-3.3073l-2.8644 1.6536z" fill="#dfdfdf" stroke-width=".26458"/>
+  </g>
+  <path d="m3.8299 4.8948c-0.14551 0.25205-0.14553 2.6584 0 2.9104 0.14553 0.25204 2.2292 1.4552 2.5203 1.4552v-2.9104z" fill="#d6d2d2" stroke-width=".26458"/>
+ </g>
+ <metadata>
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:title>Prism Launcher Logo</dc:title>
+    <dc:date>19/10/2022</dc:date>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Prism Launcher</dc:title>
+     </cc:Agent>
+    </dc:creator>
+    <dc:contributor>
+     <cc:Agent>
+      <dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title>
+     </cc:Agent>
+    </dc:contributor>
+    <dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source>
+    <dc:publisher>
+     <cc:Agent>
+      <dc:title>Prism Launcher</dc:title>
+     </cc:Agent>
+    </dc:publisher>
+    <cc:license rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/"/>
+   </cc:Work>
+   <cc:License rdf:about="http://creativecommons.org/licenses/by-sa/4.0/">
+    <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+    <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+    <cc:requires rdf:resource="http://creativecommons.org/ns#Notice"/>
+    <cc:requires rdf:resource="http://creativecommons.org/ns#Attribution"/>
+    <cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
+    <cc:requires rdf:resource="http://creativecommons.org/ns#ShareAlike"/>
+   </cc:License>
+  </rdf:RDF>
+ </metadata>
+</svg>
