@@ -47,8 +47,12 @@ public:
     QVariant data(const QModelIndex &index, int role) const override;
 
     void request();
+    void abortRequest();
 
     void getLogo(const QString &logo, const QString &logoUrl, LogoCallback callback);
+
+    [[nodiscard]] bool isMakingRequest() const { return jobPtr.get(); }
+    [[nodiscard]] bool wasAborted() const { return m_aborted; }
 
 private slots:
     void requestFinished();
@@ -65,6 +69,8 @@ private:
     void requestLogo(QString file, QString url);
 
 private:
+    bool m_aborted = false;
+
     QList<ModpacksCH::Modpack> modpacks;
     LogoMap m_logoMap;
 

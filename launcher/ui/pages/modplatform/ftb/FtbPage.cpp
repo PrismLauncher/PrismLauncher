@@ -105,13 +105,19 @@ void FtbPage::retranslate()
 
 void FtbPage::openedImpl()
 {
-    if(!initialised)
+    if(!initialised || listModel->wasAborted())
     {
         listModel->request();
         initialised = true;
     }
 
     suggestCurrent();
+}
+
+void FtbPage::closedImpl()
+{
+    if (listModel->isMakingRequest())
+        listModel->abortRequest();
 }
 
 void FtbPage::suggestCurrent()

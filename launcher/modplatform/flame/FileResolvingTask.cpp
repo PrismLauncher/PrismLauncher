@@ -9,9 +9,10 @@ Flame::FileResolvingTask::FileResolvingTask(const shared_qobject_ptr<QNetworkAcc
 
 bool Flame::FileResolvingTask::abort()
 {
+    bool aborted = true;
     if (m_dljob)
-        return m_dljob->abort();
-    return true;
+        aborted &= m_dljob->abort();
+    return aborted ? Task::abort() : false;
 }
 
 void Flame::FileResolvingTask::executeTask()
