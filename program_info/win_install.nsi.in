@@ -104,8 +104,8 @@ OutFile "../@Launcher_CommonName@-Setup.exe"
 ; Version info
 VIProductVersion "@Launcher_VERSION_NAME4@"
 VIFileVersion "@Launcher_VERSION_NAME4@"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "@Launcher_CommonName@"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "@Launcher_CommonName@ Installer"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "@Launcher_DisplayName@"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "@Launcher_DisplayName@ Installer"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "@Launcher_Copyright@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "@Launcher_VERSION_NAME4@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@"
@@ -139,12 +139,12 @@ Section "@Launcher_CommonName@"
   ${GetOptions} $R0 "/NoUninstaller" $R1
   ${If} ${Errors}
     !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\@Launcher_CommonName@"
-    WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "@Launcher_CommonName@"
+    WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "@Launcher_DisplayName@"
     WriteRegStr HKCU "${UNINST_KEY}" "DisplayIcon" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe"
     WriteRegStr HKCU "${UNINST_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe"'
     WriteRegStr HKCU "${UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
     WriteRegStr HKCU "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
-    WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "@Launcher_CommonName@ Contributors"
+    WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "@Launcher_DisplayName@ Contributors"
     WriteRegStr HKCU "${UNINST_KEY}" "Version" "@Launcher_VERSION_NAME4@"
     WriteRegStr HKCU "${UNINST_KEY}" "DisplayVersion" "@Launcher_VERSION_NAME@"
     WriteRegStr HKCU "${UNINST_KEY}" "VersionMajor" "@Launcher_VERSION_MAJOR@"
@@ -161,13 +161,13 @@ SectionEnd
 
 Section "Start Menu Shortcut" SM_SHORTCUTS
 
-  CreateShortcut "$SMPROGRAMS\@Launcher_CommonName@.lnk" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" 0
+  CreateShortcut "$SMPROGRAMS\@Launcher_DisplayName@.lnk" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" 0
 
 SectionEnd
 
 Section /o "Desktop Shortcut" DESKTOP_SHORTCUTS
 
-  CreateShortcut "$DESKTOP\@Launcher_CommonName@.lnk" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" 0
+  CreateShortcut "$DESKTOP\@Launcher_DisplayName@.lnk" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" 0
 
 SectionEnd
 
@@ -195,8 +195,8 @@ Section "Uninstall"
   RMDir /r $INSTDIR\styles
   RMDir /r $INSTDIR\tls
 
-  Delete "$SMPROGRAMS\@Launcher_CommonName@.lnk"
-  Delete "$DESKTOP\@Launcher_CommonName@.lnk"
+  Delete "$SMPROGRAMS\@Launcher_DisplayName@.lnk"
+  Delete "$DESKTOP\@Launcher_DisplayName@.lnk"
 
   RMDir "$INSTDIR"
 
