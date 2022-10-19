@@ -1,16 +1,1 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 18.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
-<g>
-	<polygon fill="#3366CC" points="18.5,22.5 18.5,12.5 12,12.5 12,15 14.5,15 14.5,22.5 12,22.5 12,25 21,25 21,22.5 	"/>
-	<g id="_x38__8_">
-		<g>
-			<path fill="#3366CC" d="M16,0C7.2,0,0,7.2,0,16c0,8.8,7.2,16,16,16c8.8,0,16-7.2,16-16C32,7.2,24.8,0,16,0z M16,30
-				C8.3,30,2,23.7,2,16C2,8.3,8.3,2,16,2c7.7,0,14,6.3,14,14C30,23.7,23.7,30,16,30z"/>
-		</g>
-	</g>
-	<circle fill="#3366CC" cx="16.5" cy="8.5" r="2"/>
-</g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="Calque_1" x="0" y="0" enable-background="new 0 0 32 32" version="1.1" viewBox="0 0 32 32" xml:space="preserve"><g><polygon fill="#36C" points="18.5 22.5 18.5 12.5 12 12.5 12 15 14.5 15 14.5 22.5 12 22.5 12 25 21 25 21 22.5"/><g id="_x38__8_"><g><path fill="#36C" d="M16,0C7.2,0,0,7.2,0,16c0,8.8,7.2,16,16,16c8.8,0,16-7.2,16-16C32,7.2,24.8,0,16,0z M16,30 C8.3,30,2,23.7,2,16C2,8.3,8.3,2,16,2c7.7,0,14,6.3,14,14C30,23.7,23.7,30,16,30z"/></g></g><circle cx="16.5" cy="8.5" r="2" fill="#36C"/></g></svg>
