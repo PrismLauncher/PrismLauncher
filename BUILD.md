@@ -61,7 +61,8 @@ To build Prism on macOS, you will need to do the following:
 - Install JDK 17 (for example, [Temurin Open JDK](https://adoptium.net/temurin/releases/?version=17))
 - Install Qt 5.12 or newer, or any version of Qt6 (recommended)
   - If you're installing through an official [Qt Online Installer](https://www.qt.io/download), selecting `macOS` component in `Qt > Qt<version> > macOS` should be enough.
-  - Also, if you're building on Qt6, you will need to install Qt5 Compatibility Module (which is located in `Qt > Qt6.x.x > Qt5 Compatibility Module`.
+  - Also, if you're building on Qt6, you will need to install Qt5 Compatibility Module (which is located in `Qt > Qt6.x.x > Qt5 Compatibility Module`).
+  - If you're installing Qt via Homebrew, no extra steps are necessary, as Homebrew builds of Qt already contain all the necessary libraries.
 
 If you're using Homebrew, you can install all the dependencies above by using this command:
 If you want to build with Qt6:
