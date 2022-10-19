@@ -27,7 +27,7 @@ body:
   attributes:
     label: Version of Prism Launcher
     description: The version of Prism Launcher used in the bug report.
-    placeholder: PrismLauncher 1.4.1
+    placeholder: Prism Launcher 5.0
   validations:
     required: true
 - type: textarea
