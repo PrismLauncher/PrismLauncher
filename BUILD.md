@@ -123,3 +123,6 @@ make install
 ```
 
 After the build (can take a few minutes), you will find `PrismLauncher.app` in the folder that you've specified in `CMAKE_INSTALL_PREFIX` (by default this is `dist/` subfolder).
+
+**Note:** The final app bundle may not run due to code signing issues, which
+need to be fixed with `codesign -fs -`
