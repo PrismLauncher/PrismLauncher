@@ -74,6 +74,7 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthPage::onVersionSelectionChanged);
 
     ui->packView->setItemDelegate(new ProjectItemDelegate(this));
+    ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
 ModrinthPage::~ModrinthPage()
@@ -283,6 +284,7 @@ void ModrinthPage::updateUI()
     text += h.process(current.extra.body.toUtf8());
 
     ui->packDescription->setHtml(text + current.description);
+    ui->packDescription->flush();
 }
 
 void ModrinthPage::suggestCurrent()
