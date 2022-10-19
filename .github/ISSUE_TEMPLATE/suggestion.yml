@@ -5,25 +5,25 @@ body:
 - type: markdown
   attributes:
     value: |
-      ### Use this form to suggest a feature for PolyMC.
+      ### Use this form to suggest a feature for PrismLauncher.
 - type: input
   attributes:
     label: Role
-    description: In what way do you use PolyMC that needs this feature?
+    description: In what way do you use PrismLauncher that needs this feature?
     placeholder: I play modded Minecraft.
   validations:
     required: true
 - type: input
   attributes:
     label: Suggestion
-    description: What do you want PolyMC to do?
+    description: What do you want PrismLauncher to do?
     placeholder: I want the cat button to meow.
   validations:
     required: true
 - type: input
   attributes:
     label: Benefit
-    description: Why do you need PolyMC to do this?
+    description: Why do you need PrismLauncher to do this?
     placeholder: so that I can always hear a cat when I need to.
   validations:
     required: true
