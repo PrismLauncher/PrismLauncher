@@ -26,7 +26,7 @@ void EntitlementsStep::perform() {
     AuthRequest *requestor = new AuthRequest(this);
     connect(requestor, &AuthRequest::finished, this, &EntitlementsStep::onRequestDone);
     requestor->get(request);
-    qDebug() << "Getting entitlements...";
+    qCDebug(LAUNCHER_LOG) << "Getting entitlements...";
 }
 
 void EntitlementsStep::rehydrate() {
@@ -42,7 +42,7 @@ void EntitlementsStep::onRequestDone(
     requestor->deleteLater();
 
 #ifndef NDEBUG
-    qDebug() << data;
+    qCDebug(LAUNCHER_LOG) << data;
 #endif
 
     // TODO: check presence of same entitlementsRequestId?

@@ -46,6 +46,7 @@
 #include <QFile>
 #include <QUrl>
 #include <QDebug>
+#include "launcherlog.h"
 
 ImgurUpload::ImgurUpload(ScreenShot::Ptr shot) : NetAction(), m_shot(shot)
 {
@@ -97,10 +98,10 @@ void ImgurUpload::executeTask()
 }
 void ImgurUpload::downloadError(QNetworkReply::NetworkError error)
 {
-    qCritical() << "ImgurUpload failed with error" << m_reply->errorString() << "Server reply:\n" << m_reply->readAll();
+    qCCritical(LAUNCHER_LOG) << "ImgurUpload failed with error" << m_reply->errorString() << "Server reply:\n" << m_reply->readAll();
     if(finished)
     {
-        qCritical() << "Double finished ImgurUpload!";
+        qCCritical(LAUNCHER_LOG) << "Double finished ImgurUpload!";
         return;
     }
     m_state = Task::State::Failed;
@@ -112,7 +113,7 @@ void ImgurUpload::downloadFinished()
 {
     if(finished)
     {
-        qCritical() << "Double finished ImgurUpload!";
+        qCCritical(LAUNCHER_LOG) << "Double finished ImgurUpload!";
         return;
     }
     QByteArray data = m_reply->readAll();
@@ -121,7 +122,7 @@ void ImgurUpload::downloadFinished()
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if (jsonError.error != QJsonParseError::NoError)
     {
-        qDebug() << "imgur server did not reply with JSON" << jsonError.errorString();
+        qCDebug(LAUNCHER_LOG) << "imgur server did not reply with JSON" << jsonError.errorString();
         finished = true;
         m_reply.reset();
         emitFailed();
@@ -130,7 +131,7 @@ void ImgurUpload::downloadFinished()
     auto object = doc.object();
     if (!object.value("success").toBool())
     {
-        qDebug() << "Screenshot upload not successful:" << doc.toJson();
+        qCDebug(LAUNCHER_LOG) << "Screenshot upload not successful:" << doc.toJson();
         finished = true;
         m_reply.reset();
         emitFailed();

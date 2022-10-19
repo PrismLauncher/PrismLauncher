@@ -18,6 +18,7 @@
 #include "settings/OverrideSetting.h"
 #include "PassthroughSetting.h"
 #include <QDebug>
+#include "launcherlog.h"
 
 #include <QVariant>
 
@@ -35,7 +36,7 @@ std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Settin
 {
     if (contains(original->id()))
     {
-        qCritical() << QString("Failed to register setting %1. ID already exists.")
+        qCCritical(LAUNCHER_LOG) << QString("Failed to register setting %1. ID already exists.")
                    .arg(original->id());
         return nullptr; // Fail
     }
@@ -51,7 +52,7 @@ std::shared_ptr<Setting> SettingsObject::registerPassthrough(std::shared_ptr<Set
 {
     if (contains(original->id()))
     {
-        qCritical() << QString("Failed to register setting %1. ID already exists.")
+        qCCritical(LAUNCHER_LOG) << QString("Failed to register setting %1. ID already exists.")
                    .arg(original->id());
         return nullptr; // Fail
     }
@@ -68,7 +69,7 @@ std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, Q
         return nullptr;
     if (contains(synonyms.first()))
     {
-        qCritical() << QString("Failed to register setting %1. ID already exists.")
+        qCCritical(LAUNCHER_LOG) << QString("Failed to register setting %1. ID already exists.")
                    .arg(synonyms.first());
         return nullptr; // Fail
     }
@@ -99,7 +100,7 @@ bool SettingsObject::set(const QString &id, QVariant value)
     auto setting = getSetting(id);
     if (!setting)
     {
-        qCritical() << QString("Error changing setting %1. Setting doesn't exist.").arg(id);
+        qCCritical(LAUNCHER_LOG) << QString("Error changing setting %1. Setting doesn't exist.").arg(id);
         return false;
     }
     else

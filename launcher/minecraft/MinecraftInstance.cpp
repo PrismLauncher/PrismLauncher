@@ -188,7 +188,7 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
 
-    qDebug() << "Instance-type specific settings were loaded!";
+    qCDebug(LAUNCHER_LOG) << "Instance-type specific settings were loaded!";
 
     setSpecificSettingsLoaded(true);
 
@@ -648,7 +648,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
         launchScript += "traits " + trait + "\n";
     }
     launchScript += "launcher onesix\n";
-    // qDebug() << "Generated launch script:" << launchScript;
+    // qCDebug(LAUNCHER_LOG) << "Generated launch script:" << launchScript;
     return launchScript;
 }
 

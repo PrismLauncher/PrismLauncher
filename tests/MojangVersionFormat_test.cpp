@@ -1,5 +1,6 @@
 #include <QTest>
 #include <QDebug>
+#include "launcherlog.h"
 
 #include <minecraft/MojangVersionFormat.h>
 
@@ -20,7 +21,7 @@ class MojangVersionFormatTest : public QObject
         QFile jsonFile(file);
         jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
         auto data = doc.toJson(QJsonDocument::Indented);
-        qDebug() << QString::fromUtf8(data);
+        qCDebug(LAUNCHER_LOG) << QString::fromUtf8(data);
         jsonFile.write(data);
         jsonFile.close();
     }

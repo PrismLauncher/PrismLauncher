@@ -17,6 +17,7 @@
 #include "ui_ProgressDialog.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QKeyEvent>
 
 #include "tasks/Task.h"
@@ -64,7 +65,7 @@ int ProgressDialog::execWithTask(Task* task)
     this->task = task;
 
     if (!task) {
-        qDebug() << "Programmer error: Progress dialog created with null task.";
+        qCDebug(LAUNCHER_LOG) << "Programmer error: Progress dialog created with null task.";
         return QDialog::DialogCode::Accepted;
     }
 

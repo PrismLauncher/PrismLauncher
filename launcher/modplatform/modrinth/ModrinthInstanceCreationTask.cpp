@@ -92,7 +92,7 @@ bool ModrinthCreationTask::updateInstance()
                 auto const& old_file = *old_files_iterator;
 
                 if (old_file.hash == file.hash) {
-                    qDebug() << "Removed file at" << file.path << "from list of downloads";
+                    qCDebug(LAUNCHER_LOG) << "Removed file at" << file.path << "from list of downloads";
                     files_iterator = m_files.erase(files_iterator);
                     old_files_iterator = old_files.erase(old_files_iterator);
                     goto begin;  // Sorry :c
@@ -112,7 +112,7 @@ bool ModrinthCreationTask::updateInstance()
             for (auto const& file : old_files) {
                 if (file.path.isEmpty())
                     continue;
-                qDebug() << "Scheduling" << file.path << "for removal";
+                qCDebug(LAUNCHER_LOG) << "Scheduling" << file.path << "for removal";
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path));
             }
         }
@@ -124,7 +124,7 @@ bool ModrinthCreationTask::updateInstance()
         for (const auto& entry : old_overrides) {
             if (entry.isEmpty())
                 continue;
-            qDebug() << "Scheduling" << entry << "for removal";
+            qCDebug(LAUNCHER_LOG) << "Scheduling" << entry << "for removal";
             m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
 
@@ -132,7 +132,7 @@ bool ModrinthCreationTask::updateInstance()
         for (const auto& entry : old_overrides) {
             if (entry.isEmpty())
                 continue;
-            qDebug() << "Scheduling" << entry << "for removal";
+            qCDebug(LAUNCHER_LOG) << "Scheduling" << entry << "for removal";
             m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
     } else {
@@ -150,7 +150,7 @@ bool ModrinthCreationTask::updateInstance()
 
 
     setOverride(true);
-    qDebug() << "Will override instance!";
+    qCDebug(LAUNCHER_LOG) << "Will override instance!";
 
     m_instance = inst;
 
@@ -230,7 +230,7 @@ bool ModrinthCreationTask::createInstance()
 
     for (auto file : m_files) {
         auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path);
-        qDebug() << "Will try to download" << file.downloads.front() << "to" << path;
+        qCDebug(LAUNCHER_LOG) << "Will try to download" << file.downloads.front() << "to" << path;
         auto dl = Net::Download::makeFile(file.downloads.dequeue(), path);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         m_files_job->addNetAction(dl);
@@ -351,13 +351,13 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
 
                 auto download_arr = Json::ensureArray(modInfo, "downloads");
                 for (auto download : download_arr) {
-                    qWarning() << download.toString();
+                    qCWarning(LAUNCHER_LOG) << download.toString();
                     bool is_last = download.toString() == download_arr.last().toString();
 
                     auto download_url = QUrl(download.toString());
 
                     if (!download_url.isValid()) {
-                        qDebug()
+                        qCDebug(LAUNCHER_LOG)
                             << QString("Download URL (%1) for %2 is not a correctly formatted URL").arg(download_url.toString(), file.path);
                         if (is_last && file.downloads.isEmpty())
                             throw JSONValidationError(tr("Download URL for %1 is not a correctly formatted URL").arg(file.path));

@@ -50,11 +50,11 @@ void PackFetchTask::fetch()
     jobPtr = new NetJob("LegacyFTB::ModpackFetch", m_network);
 
     QUrl publicPacksUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/modpacks.xml");
-    qDebug() << "Downloading public version info from" << publicPacksUrl.toString();
+    qCDebug(LAUNCHER_LOG) << "Downloading public version info from" << publicPacksUrl.toString();
     jobPtr->addNetAction(Net::Download::makeByteArray(publicPacksUrl, &publicModpacksXmlFileData));
 
     QUrl thirdPartyUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/thirdparty.xml");
-    qDebug() << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
+    qCDebug(LAUNCHER_LOG) << "Downloading thirdparty version info from" << thirdPartyUrl.toString();
     jobPtr->addNetAction(Net::Download::makeByteArray(thirdPartyUrl, &thirdPartyModpacksXmlFileData));
 
     QObject::connect(jobPtr.get(), &NetJob::succeeded, this, &PackFetchTask::fileDownloadFinished);
@@ -148,7 +148,7 @@ bool PackFetchTask::parseAndAddPacks(QByteArray &data, PackType packType, Modpac
     if(!doc.setContent(data, false, &errorMsg, &errorLine, &errorCol))
     {
         auto fullErrMsg = QString("Failed to fetch modpack data: %1 %2:%3!").arg(errorMsg).arg(errorLine).arg(errorCol);
-        qWarning() << fullErrMsg;
+        qCWarning(LAUNCHER_LOG) << fullErrMsg;
         data.clear();
         return false;
     }
@@ -176,7 +176,7 @@ bool PackFetchTask::parseAndAddPacks(QByteArray &data, PackType packType, Modpac
             {
                 modpack.oldVersions.removeAll(curr);
                 modpack.bugged = true;
-                qWarning() << "Removed some empty versions from" << modpack.name;
+                qCWarning(LAUNCHER_LOG) << "Removed some empty versions from" << modpack.name;
             }
         }
 
@@ -185,12 +185,12 @@ bool PackFetchTask::parseAndAddPacks(QByteArray &data, PackType packType, Modpac
             if(!modpack.currentVersion.isNull() && !modpack.currentVersion.isEmpty())
             {
                 modpack.oldVersions.append(modpack.currentVersion);
-                qWarning() << "Added current version to oldVersions because oldVersions was empty! (" + modpack.name + ")";
+                qCWarning(LAUNCHER_LOG) << "Added current version to oldVersions because oldVersions was empty! (" + modpack.name + ")";
             }
             else
             {
                 modpack.broken = true;
-                qWarning() << "Broken pack:" << modpack.name << " => No valid version!";
+                qCWarning(LAUNCHER_LOG) << "Broken pack:" << modpack.name << " => No valid version!";
             }
         }
 
@@ -209,7 +209,7 @@ bool PackFetchTask::parseAndAddPacks(QByteArray &data, PackType packType, Modpac
 
 void PackFetchTask::fileDownloadFailed(QString reason)
 {
-    qWarning() << "Fetching FTBPacks failed:" << reason;
+    qCWarning(LAUNCHER_LOG) << "Fetching FTBPacks failed:" << reason;
     emit failed(reason);
 }
 

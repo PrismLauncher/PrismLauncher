@@ -133,8 +133,8 @@ void ListModel::requestFinished()
     QJsonParseError parse_error {};
     QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if(parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ModpacksCH at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << response;
+        qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from ModpacksCH at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qCWarning(LAUNCHER_LOG) << response;
         return;
     }
 
@@ -180,8 +180,8 @@ void ListModel::packRequestFinished()
     QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
 
     if(parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ModpacksCH at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << response;
+        qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from ModpacksCH at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qCWarning(LAUNCHER_LOG) << response;
         return;
     }
 
@@ -194,8 +194,8 @@ void ListModel::packRequestFinished()
     }
     catch (const JSONValidationError &e)
     {
-        qDebug() << QString::fromUtf8(response);
-        qWarning() << "Error while reading pack manifest from ModpacksCH: " << e.cause();
+        qCDebug(LAUNCHER_LOG) << QString::fromUtf8(response);
+        qCWarning(LAUNCHER_LOG) << "Error while reading pack manifest from ModpacksCH: " << e.cause();
         return;
     }
 
@@ -203,7 +203,7 @@ void ListModel::packRequestFinished()
     // ignore those "dud" packs.
     if (pack.versions.empty())
     {
-        qWarning() << "ModpacksCH Pack " << pack.id << " ignored. reason: lacking any versions";
+        qCWarning(LAUNCHER_LOG) << "ModpacksCH Pack " << pack.id << " ignored. reason: lacking any versions";
     }
     else
     {

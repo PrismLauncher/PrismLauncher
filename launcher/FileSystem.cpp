@@ -36,6 +36,7 @@
 #include "FileSystem.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
@@ -201,9 +202,9 @@ bool copy::operator()(const QString& offset)
 
         fs::copy(toStdString(src_path), toStdString(dst_path), opt, err);
         if (err) {
-            qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
-            qDebug() << "Source file:" << src_path;
-            qDebug() << "Destination file:" << dst_path;
+            qCWarning(LAUNCHER_LOG) << "Failed to copy files:" << QString::fromStdString(err.message());
+            qCDebug(LAUNCHER_LOG) << "Source file:" << src_path;
+            qCDebug(LAUNCHER_LOG) << "Destination file:" << dst_path;
         }
     }
 
@@ -217,7 +218,7 @@ bool deletePath(QString path)
     fs::remove_all(toStdString(path), err);
 
     if (err) {
-        qWarning() << "Failed to remove files:" << QString::fromStdString(err.message());
+        qCWarning(LAUNCHER_LOG) << "Failed to remove files:" << QString::fromStdString(err.message());
     }
 
     return err.value() == 0;
@@ -404,8 +405,8 @@ bool overrideFolder(QString overwritten_path, QString override_path)
     fs::copy(toStdString(override_path), toStdString(overwritten_path), opt, err);
 
     if (err) {
-        qCritical() << QString("Failed to apply override from %1 to %2").arg(override_path, overwritten_path);
-        qCritical() << "Reason:" << QString::fromStdString(err.message());
+        qCCritical(LAUNCHER_LOG) << QString("Failed to apply override from %1 to %2").arg(override_path, overwritten_path);
+        qCCritical(LAUNCHER_LOG) << "Reason:" << QString::fromStdString(err.message());
     }
 
     return err.value() == 0;

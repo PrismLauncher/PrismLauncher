@@ -40,6 +40,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QDebug>
+#include "launcherlog.h"
 #include <QSaveFile>
 #include <QUuid>
 #include <QTimer>
@@ -161,20 +162,20 @@ static bool savePackProfile(const QString & filename, const ComponentContainer &
     QSaveFile outFile(filename);
     if (!outFile.open(QFile::WriteOnly))
     {
-        qCritical() << "Couldn't open" << outFile.fileName()
+        qCCritical(LAUNCHER_LOG) << "Couldn't open" << outFile.fileName()
                      << "for writing:" << outFile.errorString();
         return false;
     }
     auto data = QJsonDocument(obj).toJson(QJsonDocument::Indented);
     if(outFile.write(data) != data.size())
     {
-        qCritical() << "Couldn't write all the data into" << outFile.fileName()
+        qCCritical(LAUNCHER_LOG) << "Couldn't write all the data into" << outFile.fileName()
                      << "because:" << outFile.errorString();
         return false;
     }
     if(!outFile.commit())
     {
-        qCritical() << "Couldn't save" << outFile.fileName()
+        qCCritical(LAUNCHER_LOG) << "Couldn't save" << outFile.fileName()
                      << "because:" << outFile.errorString();
     }
     return true;
@@ -186,14 +187,14 @@ static bool loadPackProfile(PackProfile * parent, const QString & filename, cons
     QFile componentsFile(filename);
     if (!componentsFile.exists())
     {
-        qWarning() << "Components file doesn't exist. This should never happen.";
+        qCWarning(LAUNCHER_LOG) << "Components file doesn't exist. This should never happen.";
         return false;
     }
     if (!componentsFile.open(QFile::ReadOnly))
     {
-        qCritical() << "Couldn't open" << componentsFile.fileName()
+        qCCritical(LAUNCHER_LOG) << "Couldn't open" << componentsFile.fileName()
                      << " for reading:" << componentsFile.errorString();
-        qWarning() << "Ignoring overriden order";
+        qCWarning(LAUNCHER_LOG) << "Ignoring overriden order";
         return false;
     }
 
@@ -202,8 +203,8 @@ static bool loadPackProfile(PackProfile * parent, const QString & filename, cons
     QJsonDocument doc = QJsonDocument::fromJson(componentsFile.readAll(), &error);
     if (error.error != QJsonParseError::NoError)
     {
-        qCritical() << "Couldn't parse" << componentsFile.fileName() << ":" << error.errorString();
-        qWarning() << "Ignoring overriden order";
+        qCCritical(LAUNCHER_LOG) << "Couldn't parse" << componentsFile.fileName() << ":" << error.errorString();
+        qCWarning(LAUNCHER_LOG) << "Ignoring overriden order";
         return false;
     }
 
@@ -227,7 +228,7 @@ static bool loadPackProfile(PackProfile * parent, const QString & filename, cons
     }
     catch (const JSONValidationError &err)
     {
-        qCritical() << "Couldn't parse" << componentsFile.fileName() << ": bad file format";
+        qCCritical(LAUNCHER_LOG) << "Couldn't parse" << componentsFile.fileName() << ": bad file format";
         container.clear();
         return false;
     }
@@ -262,13 +263,13 @@ void PackProfile::scheduleSave()
 {
     if(!d->loaded)
     {
-        qDebug() << "Component list should never save if it didn't successfully load, instance:" << d->m_instance->name();
+        qCDebug(LAUNCHER_LOG) << "Component list should never save if it didn't successfully load, instance:" << d->m_instance->name();
         return;
     }
     if(!d->dirty)
     {
         d->dirty = true;
-        qDebug() << "Component list save is scheduled for" << d->m_instance->name();
+        qCDebug(LAUNCHER_LOG) << "Component list save is scheduled for" << d->m_instance->name();
     }
     d->m_saveTimer.start();
 }
@@ -295,7 +296,7 @@ QString PackProfile::patchFilePathForUid(const QString& uid) const
 
 void PackProfile::save_internal()
 {
-    qDebug() << "Component list save performed now for" << d->m_instance->name();
+    qCDebug(LAUNCHER_LOG) << "Component list save performed now for" << d->m_instance->name();
     auto filename = componentsFilePath();
     savePackProfile(filename, d->components);
     d->dirty = false;
@@ -309,7 +310,7 @@ bool PackProfile::load()
     ComponentContainer newComponents;
     if(!loadPackProfile(this, filename, patchesPattern(), newComponents))
     {
-        qCritical() << "Failed to load the component config for instance" << d->m_instance->name();
+        qCCritical(LAUNCHER_LOG) << "Failed to load the component config for instance" << d->m_instance->name();
         return false;
     }
     else
@@ -327,7 +328,7 @@ bool PackProfile::load()
         {
             if(d->componentIndex.contains(component->m_uid))
             {
-                qWarning() << "Ignoring duplicate component entry" << component->m_uid;
+                qCWarning(LAUNCHER_LOG) << "Ignoring duplicate component entry" << component->m_uid;
                 continue;
             }
             connect(component.get(), &Component::dataChanged, this, &PackProfile::componentDataChanged);
@@ -378,14 +379,14 @@ void PackProfile::resolve(Net::Mode netmode)
 
 void PackProfile::updateSucceeded()
 {
-    qDebug() << "Component list update/resolve task succeeded for" << d->m_instance->name();
+    qCDebug(LAUNCHER_LOG) << "Component list update/resolve task succeeded for" << d->m_instance->name();
     d->m_updateTask.reset();
     invalidateLaunchProfile();
 }
 
 void PackProfile::updateFailed(const QString& error)
 {
-    qDebug() << "Component list update/resolve task failed for" << d->m_instance->name() << "Reason:" << error;
+    qCDebug(LAUNCHER_LOG) << "Component list update/resolve task failed for" << d->m_instance->name() << "Reason:" << error;
     d->m_updateTask.reset();
     invalidateLaunchProfile();
 }
@@ -402,12 +403,12 @@ void PackProfile::insertComponent(size_t index, ComponentPtr component)
     auto id = component->getID();
     if(id.isEmpty())
     {
-        qWarning() << "Attempt to add a component with empty ID!";
+        qCWarning(LAUNCHER_LOG) << "Attempt to add a component with empty ID!";
         return;
     }
     if(d->componentIndex.contains(id))
     {
-        qWarning() << "Attempt to add a component that is already present!";
+        qCWarning(LAUNCHER_LOG) << "Attempt to add a component that is already present!";
         return;
     }
     beginInsertRows(QModelIndex(), index, index);
@@ -423,7 +424,7 @@ void PackProfile::componentDataChanged()
     auto objPtr = qobject_cast<Component *>(sender());
     if(!objPtr)
     {
-        qWarning() << "PackProfile got dataChenged signal from a non-Component!";
+        qCWarning(LAUNCHER_LOG) << "PackProfile got dataChenged signal from a non-Component!";
         return;
     }
     if(objPtr->getID() == "net.minecraft") {
@@ -441,7 +442,7 @@ void PackProfile::componentDataChanged()
         }
         index++;
     }
-    qWarning() << "PackProfile got dataChenged signal from a Component which does not belong to it!";
+    qCWarning(LAUNCHER_LOG) << "PackProfile got dataChenged signal from a Component which does not belong to it!";
 }
 
 bool PackProfile::remove(const int index)
@@ -449,13 +450,13 @@ bool PackProfile::remove(const int index)
     auto patch = getComponent(index);
     if (!patch->isRemovable())
     {
-        qWarning() << "Patch" << patch->getID() << "is non-removable";
+        qCWarning(LAUNCHER_LOG) << "Patch" << patch->getID() << "is non-removable";
         return false;
     }
 
     if(!removeComponent_internal(patch))
     {
-        qCritical() << "Patch" << patch->getID() << "could not be removed";
+        qCCritical(LAUNCHER_LOG) << "Patch" << patch->getID() << "could not be removed";
         return false;
     }
 
@@ -487,12 +488,12 @@ bool PackProfile::customize(int index)
     auto patch = getComponent(index);
     if (!patch->isCustomizable())
     {
-        qDebug() << "Patch" << patch->getID() << "is not customizable";
+        qCDebug(LAUNCHER_LOG) << "Patch" << patch->getID() << "is not customizable";
         return false;
     }
     if(!patch->customize())
     {
-        qCritical() << "Patch" << patch->getID() << "could not be customized";
+        qCCritical(LAUNCHER_LOG) << "Patch" << patch->getID() << "could not be customized";
         return false;
     }
     invalidateLaunchProfile();
@@ -505,12 +506,12 @@ bool PackProfile::revertToBase(int index)
     auto patch = getComponent(index);
     if (!patch->isRevertible())
     {
-        qDebug() << "Patch" << patch->getID() << "is not revertible";
+        qCDebug(LAUNCHER_LOG) << "Patch" << patch->getID() << "is not revertible";
         return false;
     }
     if(!patch->revert())
     {
-        qCritical() << "Patch" << patch->getID() << "could not be reverted";
+        qCCritical(LAUNCHER_LOG) << "Patch" << patch->getID() << "could not be reverted";
         return false;
     }
     invalidateLaunchProfile();
@@ -753,7 +754,7 @@ bool PackProfile::installEmpty(const QString& uid, const QString& name)
     QFile file(patchFileName);
     if (!file.open(QFile::WriteOnly))
     {
-        qCritical() << "Error opening" << file.fileName()
+        qCCritical(LAUNCHER_LOG) << "Error opening" << file.fileName()
                     << "for reading:" << file.errorString();
         return false;
     }
@@ -776,7 +777,7 @@ bool PackProfile::removeComponent_internal(ComponentPtr patch)
         QFile patchFile(fileName);
         if(patchFile.exists() && !patchFile.remove())
         {
-            qCritical() << "File" << fileName << "could not be removed because:" << patchFile.errorString();
+            qCCritical(LAUNCHER_LOG) << "File" << fileName << "could not be removed because:" << patchFile.errorString();
             return false;
         }
     }
@@ -796,7 +797,7 @@ bool PackProfile::removeComponent_internal(ComponentPtr patch)
             QFile jarModFile(jar[0]);
             if(!jarModFile.remove())
             {
-                qCritical() << "File" << jar[0] << "could not be removed because:" << jarModFile.errorString();
+                qCCritical(LAUNCHER_LOG) << "File" << jar[0] << "could not be removed because:" << jarModFile.errorString();
                 return false;
             }
             return true;
@@ -864,7 +865,7 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
         QFile file(patchFileName);
         if (!file.open(QFile::WriteOnly))
         {
-            qCritical() << "Error opening" << file.fileName()
+            qCCritical(LAUNCHER_LOG) << "Error opening" << file.fileName()
                         << "for reading:" << file.errorString();
             return false;
         }
@@ -925,7 +926,7 @@ bool PackProfile::installCustomJar_internal(QString filepath)
     QFile file(patchFileName);
     if (!file.open(QFile::WriteOnly))
     {
-        qCritical() << "Error opening" << file.fileName()
+        qCCritical(LAUNCHER_LOG) << "Error opening" << file.fileName()
                     << "for reading:" << file.errorString();
         return false;
     }
@@ -948,14 +949,14 @@ std::shared_ptr<LaunchProfile> PackProfile::getProfile() const
             auto profile = std::make_shared<LaunchProfile>();
             for(auto file: d->components)
             {
-                qDebug() << "Applying" << file->getID() << (file->getProblemSeverity() == ProblemSeverity::Error ? "ERROR" : "GOOD");
+                qCDebug(LAUNCHER_LOG) << "Applying" << file->getID() << (file->getProblemSeverity() == ProblemSeverity::Error ? "ERROR" : "GOOD");
                 file->applyTo(profile.get());
             }
             d->m_profile = profile;
         }
         catch (const Exception &error)
         {
-            qWarning() << "Couldn't apply profile patches because: " << error.cause();
+            qCWarning(LAUNCHER_LOG) << "Couldn't apply profile patches because: " << error.cause();
         }
     }
     return d->m_profile;

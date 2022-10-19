@@ -36,7 +36,7 @@ void LauncherLoginStep::perform() {
     AuthRequest *requestor = new AuthRequest(this);
     connect(requestor, &AuthRequest::finished, this, &LauncherLoginStep::onRequestDone);
     requestor->post(request, requestBody.toUtf8());
-    qDebug() << "Getting Minecraft access token...";
+    qCDebug(LAUNCHER_LOG) << "Getting Minecraft access token...";
 }
 
 void LauncherLoginStep::rehydrate() {
@@ -52,12 +52,12 @@ void LauncherLoginStep::onRequestDone(
     requestor->deleteLater();
 
 #ifndef NDEBUG
-    qDebug() << data;
+    qCDebug(LAUNCHER_LOG) << data;
 #endif
     if (error != QNetworkReply::NoError) {
-        qWarning() << "Reply error:" << error;
+        qCWarning(LAUNCHER_LOG) << "Reply error:" << error;
 #ifndef NDEBUG
-        qDebug() << data;
+        qCDebug(LAUNCHER_LOG) << data;
 #endif
         if (Net::isApplicationError(error)) {
             emit finished(
@@ -75,9 +75,9 @@ void LauncherLoginStep::onRequestDone(
     }
 
     if(!Parsers::parseMojangResponse(data, m_data->yggdrasilToken)) {
-        qWarning() << "Could not parse login_with_xbox response...";
+        qCWarning(LAUNCHER_LOG) << "Could not parse login_with_xbox response...";
 #ifndef NDEBUG
-        qDebug() << data;
+        qCDebug(LAUNCHER_LOG) << data;
 #endif
         emit finished(
             AccountTaskState::STATE_FAILED_SOFT,

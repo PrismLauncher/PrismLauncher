@@ -38,6 +38,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDebug>
+#include "launcherlog.h"
 #include <QUuid>
 #include <QRegularExpression>
 
@@ -154,7 +155,7 @@ MinecraftProfile profileFromJSONV3(const QJsonObject &parent, const char * token
         auto idV = tokenObject.value("id");
         auto nameV = tokenObject.value("name");
         if(!idV.isString() || !nameV.isString()) {
-            qWarning() << "mandatory profile attributes are missing or of unexpected type";
+            qCWarning(LAUNCHER_LOG) << "mandatory profile attributes are missing or of unexpected type";
             return MinecraftProfile();
         }
         out.name = nameV.toString();
@@ -164,7 +165,7 @@ MinecraftProfile profileFromJSONV3(const QJsonObject &parent, const char * token
     {
         auto skinV = tokenObject.value("skin");
         if(!skinV.isObject()) {
-            qWarning() << "skin is missing";
+            qCWarning(LAUNCHER_LOG) << "skin is missing";
             return MinecraftProfile();
         }
         auto skinObj = skinV.toObject();
@@ -172,7 +173,7 @@ MinecraftProfile profileFromJSONV3(const QJsonObject &parent, const char * token
         auto urlV = skinObj.value("url");
         auto variantV = skinObj.value("variant");
         if(!idV.isString() || !urlV.isString() || !variantV.isString()) {
-            qWarning() << "mandatory skin attributes are missing or of unexpected type";
+            qCWarning(LAUNCHER_LOG) << "mandatory skin attributes are missing or of unexpected type";
             return MinecraftProfile();
         }
         out.skin.id = idV.toString();
@@ -186,7 +187,7 @@ MinecraftProfile profileFromJSONV3(const QJsonObject &parent, const char * token
             out.skin.data = QByteArray::fromBase64(dataV.toString().toLatin1());
         }
         else if (!dataV.isUndefined()) {
-            qWarning() << "skin data is something unexpected";
+            qCWarning(LAUNCHER_LOG) << "skin data is something unexpected";
             return MinecraftProfile();
         }
     }
@@ -194,13 +195,13 @@ MinecraftProfile profileFromJSONV3(const QJsonObject &parent, const char * token
     {
         auto capesV = tokenObject.value("capes");
         if(!capesV.isArray()) {
-            qWarning() << "capes is not an array!";
+            qCWarning(LAUNCHER_LOG) << "capes is not an array!";
             return MinecraftProfile();
         }
         auto capesArray = capesV.toArray();
         for(auto capeV: capesArray) {
             if(!capeV.isObject()) {
-                qWarning() << "cape is not an object!";
+                qCWarning(LAUNCHER_LOG) << "cape is not an object!";
                 return MinecraftProfile();
             }
             auto capeObj = capeV.toObject();
@@ -208,7 +209,7 @@ MinecraftProfile profileFromJSONV3(const QJsonObject &parent, const char * token
             auto urlV = capeObj.value("url");
             auto aliasV = capeObj.value("alias");
             if(!idV.isString() || !urlV.isString() || !aliasV.isString()) {
-                qWarning() << "mandatory skin attributes are missing or of unexpected type";
+                qCWarning(LAUNCHER_LOG) << "mandatory skin attributes are missing or of unexpected type";
                 return MinecraftProfile();
             }
             Cape cape;
@@ -223,7 +224,7 @@ MinecraftProfile profileFromJSONV3(const QJsonObject &parent, const char * token
                 cape.data = QByteArray::fromBase64(dataV.toString().toLatin1());
             }
             else if (!dataV.isUndefined()) {
-                qWarning() << "cape data is something unexpected";
+                qCWarning(LAUNCHER_LOG) << "cape data is something unexpected";
                 return MinecraftProfile();
             }
             out.capes[cape.id] = cape;
@@ -262,7 +263,7 @@ bool entitlementFromJSONV3(const QJsonObject &parent, MinecraftEntitlement & out
         auto ownsMinecraftV = entitlementObject.value("ownsMinecraft");
         auto canPlayMinecraftV = entitlementObject.value("canPlayMinecraft");
         if(!ownsMinecraftV.isBool() || !canPlayMinecraftV.isBool()) {
-            qWarning() << "mandatory attributes are missing or of unexpected type";
+            qCWarning(LAUNCHER_LOG) << "mandatory attributes are missing or of unexpected type";
             return false;
         }
         out.canPlayMinecraft = canPlayMinecraftV.toBool(false);
@@ -278,7 +279,7 @@ bool AccountData::resumeStateFromV2(QJsonObject data) {
     // The JSON object must at least have a username for it to be valid.
     if (!data.value("username").isString())
     {
-        qCritical() << "Can't load Mojang account info from JSON object. Username field is missing or of the wrong type.";
+        qCCritical(LAUNCHER_LOG) << "Can't load Mojang account info from JSON object. Username field is missing or of the wrong type.";
         return false;
     }
 
@@ -289,7 +290,7 @@ bool AccountData::resumeStateFromV2(QJsonObject data) {
     QJsonArray profileArray = data.value("profiles").toArray();
     if (profileArray.size() < 1)
     {
-        qCritical() << "Can't load Mojang account with username \"" << userName << "\". No profiles found.";
+        qCCritical(LAUNCHER_LOG) << "Can't load Mojang account with username \"" << userName << "\". No profiles found.";
         return false;
     }
 
@@ -313,7 +314,7 @@ bool AccountData::resumeStateFromV2(QJsonObject data) {
         bool legacy = profileObject.value("legacy").toBool(false);
         if (id.isEmpty() || name.isEmpty())
         {
-            qWarning() << "Unable to load a profile" << name << "because it was missing an ID or a name.";
+            qCWarning(LAUNCHER_LOG) << "Unable to load a profile" << name << "because it was missing an ID or a name.";
             continue;
         }
         if(id == currentProfile) {
@@ -342,7 +343,7 @@ bool AccountData::resumeStateFromV2(QJsonObject data) {
 bool AccountData::resumeStateFromV3(QJsonObject data) {
     auto typeV = data.value("type");
     if(!typeV.isString()) {
-        qWarning() << "Failed to parse account data: type is missing.";
+        qCWarning(LAUNCHER_LOG) << "Failed to parse account data: type is missing.";
         return false;
     }
     auto typeS = typeV.toString();
@@ -353,7 +354,7 @@ bool AccountData::resumeStateFromV3(QJsonObject data) {
     } else if (typeS == "Offline") {
         type = AccountType::Offline;
     } else {
-        qWarning() << "Failed to parse account data: type is not recognized.";
+        qCWarning(LAUNCHER_LOG) << "Failed to parse account data: type is not recognized.";
         return false;
     }
 

@@ -1057,7 +1057,7 @@ QMenu * MainWindow::createPopupMenu()
 
 void MainWindow::konamiTriggered()
 {
-    qDebug() << "Super Secret Mode ACTIVATED!";
+    qCDebug(LAUNCHER_LOG) << "Super Secret Mode ACTIVATED!";
 }
 
 void MainWindow::showInstanceContextMenu(const QPoint &pos)
@@ -1449,7 +1449,7 @@ void MainWindow::updateAvailable(GoUpdate::Status status)
     switch (action)
     {
     case UPDATE_LATER:
-        qDebug() << "Update will be installed later.";
+        qCDebug(LAUNCHER_LOG) << "Update will be installed later.";
         break;
     case UPDATE_NOW:
         downloadUpdates(status);
@@ -1493,7 +1493,7 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
     {
         return;
     }
-    qDebug() << "Downloading updates.";
+    qCDebug(LAUNCHER_LOG) << "Downloading updates.";
     ProgressDialog updateDlg(this);
     status.rootPath = APPLICATION->root();
 
@@ -1841,7 +1841,7 @@ void MainWindow::checkForUpdates()
     }
     else
     {
-        qWarning() << "Updater not set up. Cannot check for updates.";
+        qCWarning(LAUNCHER_LOG) << "Updater not set up. Cannot check for updates.";
     }
 }
 

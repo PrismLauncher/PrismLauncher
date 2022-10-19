@@ -43,7 +43,7 @@ void XboxProfileStep::perform() {
     AuthRequest *requestor = new AuthRequest(this);
     connect(requestor, &AuthRequest::finished, this, &XboxProfileStep::onRequestDone);
     requestor->get(request);
-    qDebug() << "Getting Xbox profile...";
+    qCDebug(LAUNCHER_LOG) << "Getting Xbox profile...";
 }
 
 void XboxProfileStep::onRequestDone(
@@ -55,9 +55,9 @@ void XboxProfileStep::onRequestDone(
     requestor->deleteLater();
 
     if (error != QNetworkReply::NoError) {
-        qWarning() << "Reply error:" << error;
+        qCWarning(LAUNCHER_LOG) << "Reply error:" << error;
 #ifndef NDEBUG
-        qDebug() << data;
+        qCDebug(LAUNCHER_LOG) << data;
 #endif
         if (Net::isApplicationError(error)) {
             emit finished(
@@ -75,7 +75,7 @@ void XboxProfileStep::onRequestDone(
     }
 
 #ifndef NDEBUG
-    qDebug() << "XBox profile: " << data;
+    qCDebug(LAUNCHER_LOG) << "XBox profile: " << data;
 #endif
 
     emit finished(AccountTaskState::STATE_WORKING, tr("Got Xbox profile"));

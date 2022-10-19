@@ -38,6 +38,7 @@
 #include "minecraft/OneSixVersionFormat.h"
 #include "Json.h"
 #include <QDebug>
+#include "launcherlog.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -54,14 +55,14 @@ bool readOverrideOrders(QString path, PatchOrder &order)
     QFile orderFile(path);
     if (!orderFile.exists())
     {
-        qWarning() << "Order file doesn't exist. Ignoring.";
+        qCWarning(LAUNCHER_LOG) << "Order file doesn't exist. Ignoring.";
         return false;
     }
     if (!orderFile.open(QFile::ReadOnly))
     {
-        qCritical() << "Couldn't open" << orderFile.fileName()
+        qCCritical(LAUNCHER_LOG) << "Couldn't open" << orderFile.fileName()
                      << " for reading:" << orderFile.errorString();
-        qWarning() << "Ignoring overriden order";
+        qCWarning(LAUNCHER_LOG) << "Ignoring overriden order";
         return false;
     }
 
@@ -70,8 +71,8 @@ bool readOverrideOrders(QString path, PatchOrder &order)
     QJsonDocument doc = QJsonDocument::fromJson(orderFile.readAll(), &error);
     if (error.error != QJsonParseError::NoError)
     {
-        qCritical() << "Couldn't parse" << orderFile.fileName() << ":" << error.errorString();
-        qWarning() << "Ignoring overriden order";
+        qCCritical(LAUNCHER_LOG) << "Couldn't parse" << orderFile.fileName() << ":" << error.errorString();
+        qCWarning(LAUNCHER_LOG) << "Ignoring overriden order";
         return false;
     }
 
@@ -94,8 +95,8 @@ bool readOverrideOrders(QString path, PatchOrder &order)
     }
     catch (const JSONValidationError &err)
     {
-        qCritical() << "Couldn't parse" << orderFile.fileName() << ": bad file format";
-        qWarning() << "Ignoring overriden order";
+        qCCritical(LAUNCHER_LOG) << "Couldn't parse" << orderFile.fileName() << ": bad file format";
+        qCWarning(LAUNCHER_LOG) << "Ignoring overriden order";
         order.clear();
         return false;
     }
@@ -164,13 +165,13 @@ bool saveJsonFile(const QJsonDocument doc, const QString & filename)
     if(!jsonFile.open(QIODevice::WriteOnly))
     {
         jsonFile.cancelWriting();
-        qWarning() << "Couldn't open" << filename << "for writing";
+        qCWarning(LAUNCHER_LOG) << "Couldn't open" << filename << "for writing";
         return false;
     }
     jsonFile.write(data);
     if(!jsonFile.commit())
     {
-        qWarning() << "Couldn't save" << filename;
+        qCWarning(LAUNCHER_LOG) << "Couldn't save" << filename;
         return false;
     }
     return true;

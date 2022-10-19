@@ -20,6 +20,7 @@
 
 #include <QCryptographicHash>
 #include <QDebug>
+#include "launcherlog.h"
 #include <QIODevice>
 
 namespace ModPlatform {
@@ -71,7 +72,7 @@ auto ProviderCapabilities::hash(Provider p, QIODevice* device, QString type) -> 
 
     QCryptographicHash hash(algo);
     if(!hash.addData(device))
-        qCritical() << "Failed to read JAR to create hash!";
+        qCCritical(LAUNCHER_LOG) << "Failed to read JAR to create hash!";
 
     Q_ASSERT(hash.result().length() == hash.hashLength(algo));
     return { hash.result().toHex() };

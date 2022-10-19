@@ -43,7 +43,7 @@
 QByteArray getVariant(SkinUpload::Model model) {
     switch (model) {
         default:
-            qDebug() << "Unknown skin type!";
+            qCDebug(LAUNCHER_LOG) << "Unknown skin type!";
         case SkinUpload::STEVE:
             return "CLASSIC";
         case SkinUpload::ALEX:
@@ -90,7 +90,7 @@ void SkinUpload::executeTask()
 void SkinUpload::downloadError(QNetworkReply::NetworkError error)
 {
     // error happened during download.
-    qCritical() << "Network error: " << error;
+    qCCritical(LAUNCHER_LOG) << "Network error: " << error;
     emitFailed(m_reply->errorString());
 }
 

@@ -21,6 +21,7 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/widgets/VersionSelectWidget.h"

@@ -36,9 +36,9 @@ ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info)
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from FlameCheckUpdate at " << parse_error.offset
+            qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from FlameCheckUpdate at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
-            qWarning() << *response;
+            qCWarning(LAUNCHER_LOG) << *response;
             return;
         }
 
@@ -47,8 +47,8 @@ ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info)
             auto data_obj = Json::requireObject(doc_obj, "data");
             FlameMod::loadIndexedPack(pack, data_obj);
         } catch (Json::JsonException& e) {
-            qWarning() << e.cause();
-            qDebug() << doc;
+            qCWarning(LAUNCHER_LOG) << e.cause();
+            qCDebug(LAUNCHER_LOG) << doc;
         }
     });
 
@@ -80,9 +80,9 @@ ModPlatform::IndexedVersion getFileInfo(int addonId, int fileId)
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from FlameCheckUpdate at " << parse_error.offset
+            qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from FlameCheckUpdate at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
-            qWarning() << *response;
+            qCWarning(LAUNCHER_LOG) << *response;
             return;
         }
 
@@ -91,8 +91,8 @@ ModPlatform::IndexedVersion getFileInfo(int addonId, int fileId)
             auto data_obj = Json::requireObject(doc_obj, "data");
             ver = FlameMod::loadIndexedPackVersion(data_obj);
         } catch (Json::JsonException& e) {
-            qWarning() << e.cause();
-            qDebug() << doc;
+            qCWarning(LAUNCHER_LOG) << e.cause();
+            qCDebug(LAUNCHER_LOG) << doc;
         }
     });
 

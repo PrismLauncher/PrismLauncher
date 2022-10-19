@@ -38,6 +38,7 @@
 #include <QApplication>
 #include <memory>
 #include <QDebug>
+#include "launcherlog.h"
 #include <QFlag>
 #include <QIcon>
 #include <QDateTime>

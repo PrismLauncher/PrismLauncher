@@ -48,6 +48,7 @@
 #include <QTimer>
 
 #include <QDebug>
+#include "launcherlog.h"
 
 #include <FileSystem.h>
 #include <QSaveFile>
@@ -112,7 +113,7 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
     // NOTE: Do not allow adding something that's already there. We shouldn't let it continue
     // because of the signal / slot connections after this.
     if (m_accounts.contains(account)) {
-        qDebug() << "Tried to add account that's already on the accounts list!";
+        qCDebug(LAUNCHER_LOG) << "Tried to add account that's already on the accounts list!";
         return;
     }
 
@@ -125,7 +126,7 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
     if(profileId.size()) {
         auto existingAccount = findAccountByProfileId(profileId);
         if(existingAccount != -1) {
-            qDebug() << "Replacing old account with a new one with the same profile ID!";
+            qCDebug(LAUNCHER_LOG) << "Replacing old account with a new one with the same profile ID!";
 
             MinecraftAccountPtr existingAccountPtr = m_accounts[existingAccount];
             m_accounts[existingAccount] = account;
@@ -142,7 +143,7 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
 
     // if we don't have this profileId yet, add the account to the end
     int row = m_accounts.count();
-    qDebug() << "Inserting account at index" << row;
+    qCDebug(LAUNCHER_LOG) << "Inserting account at index" << row;
 
     beginInsertRows(QModelIndex(), row, row);
     m_accounts.append(account);
@@ -453,7 +454,7 @@ bool AccountList::loadList()
 {
     if (m_listFilePath.isEmpty())
     {
-        qCritical() << "Can't load Mojang account list. No file path given and no default set.";
+        qCCritical(LAUNCHER_LOG) << "Can't load Mojang account list. No file path given and no default set.";
         return false;
     }
 
@@ -463,7 +464,7 @@ bool AccountList::loadList()
     // TODO: We should probably report this error to the user.
     if (!file.open(QIODevice::ReadOnly))
     {
-        qCritical() << QString("Failed to read the account list file (%1).").arg(m_listFilePath).toUtf8();
+        qCCritical(LAUNCHER_LOG) << QString("Failed to read the account list file (%1).").arg(m_listFilePath).toUtf8();
         return false;
     }
 
@@ -477,7 +478,7 @@ bool AccountList::loadList()
     // Fail if the JSON is invalid.
     if (parseError.error != QJsonParseError::NoError)
     {
-        qCritical() << QString("Failed to parse account list file: %1 at offset %2")
+        qCCritical(LAUNCHER_LOG) << QString("Failed to parse account list file: %1 at offset %2")
                             .arg(parseError.errorString(), QString::number(parseError.offset))
                             .toUtf8();
         return false;
@@ -486,7 +487,7 @@ bool AccountList::loadList()
     // Make sure the root is an object.
     if (!jsonDoc.isObject())
     {
-        qCritical() << "Invalid account list JSON: Root should be an array.";
+        qCCritical(LAUNCHER_LOG) << "Invalid account list JSON: Root should be an array.";
         return false;
     }
 
@@ -505,7 +506,7 @@ bool AccountList::loadList()
         break;
         default: {
             QString newName = "accounts-old.json";
-            qWarning() << "Unknown format version when loading account list. Existing one will be renamed to" << newName;
+            qCWarning(LAUNCHER_LOG) << "Unknown format version when loading account list. Existing one will be renamed to" << newName;
             // Attempt to rename the old version.
             file.rename(newName);
             return false;
@@ -539,7 +540,7 @@ bool AccountList::loadV2(QJsonObject& root) {
         }
         else
         {
-            qWarning() << "Failed to load an account.";
+            qCWarning(LAUNCHER_LOG) << "Failed to load an account.";
         }
     }
     endResetModel();
@@ -570,7 +571,7 @@ bool AccountList::loadV3(QJsonObject& root) {
         }
         else
         {
-            qWarning() << "Failed to load an account.";
+            qCWarning(LAUNCHER_LOG) << "Failed to load an account.";
         }
     }
     endResetModel();
@@ -582,7 +583,7 @@ bool AccountList::saveList()
 {
     if (m_listFilePath.isEmpty())
     {
-        qCritical() << "Can't save Mojang account list. No file path given and no default set.";
+        qCCritical(LAUNCHER_LOG) << "Can't save Mojang account list. No file path given and no default set.";
         return false;
     }
 
@@ -598,16 +599,16 @@ bool AccountList::saveList()
         badDir.removeRecursively();
     }
 
-    qDebug() << "Writing account list to" << m_listFilePath;
+    qCDebug(LAUNCHER_LOG) << "Writing account list to" << m_listFilePath;
 
-    qDebug() << "Building JSON data structure.";
+    qCDebug(LAUNCHER_LOG) << "Building JSON data structure.";
     // Build the JSON document to write to the list file.
     QJsonObject root;
 
     root.insert("formatVersion", AccountListVersion::MojangMSA);
 
     // Build a list of accounts.
-    qDebug() << "Building account array.";
+    qCDebug(LAUNCHER_LOG) << "Building account array.";
     QJsonArray accounts;
     for (MinecraftAccountPtr account : m_accounts)
     {
@@ -625,14 +626,14 @@ bool AccountList::saveList()
     QJsonDocument doc(root);
 
     // Now that we're done building the JSON object, we can write it to the file.
-    qDebug() << "Writing account list to file.";
+    qCDebug(LAUNCHER_LOG) << "Writing account list to file.";
     QSaveFile file(m_listFilePath);
 
     // Try to open the file and fail if we can't.
     // TODO: We should probably report this error to the user.
     if (!file.open(QIODevice::WriteOnly))
     {
-        qCritical() << QString("Failed to read the account list file (%1).").arg(m_listFilePath).toUtf8();
+        qCCritical(LAUNCHER_LOG) << QString("Failed to read the account list file (%1).").arg(m_listFilePath).toUtf8();
         return false;
     }
 
@@ -640,11 +641,11 @@ bool AccountList::saveList()
     file.write(doc.toJson());
     file.setPermissions(QFile::ReadOwner|QFile::WriteOwner|QFile::ReadUser|QFile::WriteUser);
     if(file.commit()) {
-        qDebug() << "Saved account list to" << m_listFilePath;
+        qCDebug(LAUNCHER_LOG) << "Saved account list to" << m_listFilePath;
         return true;
     }
     else {
-        qDebug() << "Failed to save accounts to" << m_listFilePath;
+        qCDebug(LAUNCHER_LOG) << "Failed to save accounts to" << m_listFilePath;
         return false;
     }
 }
@@ -671,7 +672,7 @@ void AccountList::fillQueue() {
     if(m_defaultAccount && m_defaultAccount->shouldRefresh()) {
         auto idToRefresh = m_defaultAccount->internalId();
         m_refreshQueue.push_back(idToRefresh);
-        qDebug() << "AccountList: Queued default account with internal ID " << idToRefresh << " to refresh first";
+        qCDebug(LAUNCHER_LOG) << "AccountList: Queued default account with internal ID " << idToRefresh << " to refresh first";
     }
 
     for(int i = 0; i < count(); i++) {
@@ -694,7 +695,7 @@ void AccountList::requestRefresh(QString accountId) {
         m_refreshQueue.removeAt(index);
     }
     m_refreshQueue.push_front(accountId);
-    qDebug() << "AccountList: Pushed account with internal ID " << accountId << " to the front of the queue";
+    qCDebug(LAUNCHER_LOG) << "AccountList: Pushed account with internal ID " << accountId << " to the front of the queue";
     if(!isActive()) {
         tryNext();
     }
@@ -705,7 +706,7 @@ void AccountList::queueRefresh(QString accountId) {
         return;
     }
     m_refreshQueue.push_back(accountId);
-    qDebug() << "AccountList: Queued account with internal ID " << accountId << " to refresh";
+    qCDebug(LAUNCHER_LOG) << "AccountList: Queued account with internal ID " << accountId << " to refresh";
 }
 
 
@@ -721,25 +722,25 @@ void AccountList::tryNext() {
                     connect(m_currentTask.get(), &AccountTask::succeeded, this, &AccountList::authSucceeded);
                     connect(m_currentTask.get(), &AccountTask::failed, this, &AccountList::authFailed);
                     m_currentTask->start();
-                    qDebug() << "RefreshSchedule: Processing account " << account->accountDisplayString() << " with internal ID " << accountId;
+                    qCDebug(LAUNCHER_LOG) << "RefreshSchedule: Processing account " << account->accountDisplayString() << " with internal ID " << accountId;
                     return;
                 }
             }
         }
-        qDebug() << "RefreshSchedule: Account with with internal ID " << accountId << " not found.";
+        qCDebug(LAUNCHER_LOG) << "RefreshSchedule: Account with with internal ID " << accountId << " not found.";
     }
     // if we get here, no account needed refreshing. Schedule refresh in an hour.
     m_refreshTimer->start(1000 * 3600);
 }
 
 void AccountList::authSucceeded() {
-    qDebug() << "RefreshSchedule: Background account refresh succeeded";
+    qCDebug(LAUNCHER_LOG) << "RefreshSchedule: Background account refresh succeeded";
     m_currentTask.reset();
     m_nextTimer->start(1000 * 20);
 }
 
 void AccountList::authFailed(QString reason) {
-    qDebug() << "RefreshSchedule: Background account refresh failed: " << reason;
+    qCDebug(LAUNCHER_LOG) << "RefreshSchedule: Background account refresh failed: " << reason;
     m_currentTask.reset();
     m_nextTimer->start(1000 * 20);
 }
@@ -758,7 +759,7 @@ void AccountList::beginActivity() {
 
 void AccountList::endActivity() {
     if(m_activityCount == 0) {
-        qWarning() << m_name << " - Activity count would become below zero";
+        qCWarning(LAUNCHER_LOG) << m_name << " - Activity count would become below zero";
         return;
     }
     bool deactivating = m_activityCount == 1;

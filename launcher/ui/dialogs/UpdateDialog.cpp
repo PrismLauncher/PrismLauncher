@@ -36,6 +36,7 @@
 #include "UpdateDialog.h"
 #include "ui_UpdateDialog.h"
 #include <QDebug>
+#include "launcherlog.h"
 #include "Application.h"
 #include <settings/SettingsObject.h>
 #include <Json.h>
@@ -94,7 +95,7 @@ QString reprocessMarkdown(QByteArray markdown)
 
     // HACK: easier than customizing hoedown
     output.replace(QRegularExpression("GH-([0-9]+)"), "<a href=\"https://github.com/PrismLauncher/PrismLauncher/issues/\\1\">GH-\\1</a>");
-    qDebug() << output;
+    qCDebug(LAUNCHER_LOG) << output;
     return output;
 }
 
@@ -173,8 +174,8 @@ QString reprocessCommits(QByteArray json)
     }
     catch (const JSONValidationError &e)
     {
-        qWarning() << "Got an unparseable commit log from github:" << e.what();
-        qDebug() << json;
+        qCWarning(LAUNCHER_LOG) << "Got an unparseable commit log from github:" << e.what();
+        qCDebug(LAUNCHER_LOG) << json;
     }
     return QString();
 }

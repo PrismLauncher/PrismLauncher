@@ -19,6 +19,7 @@
 #pragma once
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QObject>
 
 #include "minecraft/mod/ResourcePack.h"

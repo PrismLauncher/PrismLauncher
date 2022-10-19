@@ -40,6 +40,7 @@
 #include <QApplication>
 #include <QtMath>
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "InstanceView.h"
 #include "BaseInstance.h"

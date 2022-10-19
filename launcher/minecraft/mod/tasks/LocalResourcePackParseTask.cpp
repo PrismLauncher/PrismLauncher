@@ -38,7 +38,7 @@ bool process(ResourcePack& pack)
             ResourcePackUtils::processZIP(pack);
             return true;
         default:
-            qWarning() << "Invalid type for resource pack parse task!";
+            qCWarning(LAUNCHER_LOG) << "Invalid type for resource pack parse task!";
             return false;
     }
 }
@@ -86,7 +86,7 @@ void processZIP(ResourcePack& pack)
 
     if (zip.setCurrentFile("pack.mcmeta")) {
         if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "Failed to open file in zip.";
+            qCCritical(LAUNCHER_LOG) << "Failed to open file in zip.";
             zip.close();
             return;
         }
@@ -100,7 +100,7 @@ void processZIP(ResourcePack& pack)
 
     if (zip.setCurrentFile("pack.png")) {
         if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "Failed to open file in zip.";
+            qCCritical(LAUNCHER_LOG) << "Failed to open file in zip.";
             zip.close();
             return;
         }
@@ -125,7 +125,7 @@ void processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
         pack.setPackFormat(Json::ensureInteger(pack_obj, "pack_format", 0));
         pack.setDescription(Json::ensureString(pack_obj, "description", ""));
     } catch (Json::JsonException& e) {
-        qWarning() << "JsonException: " << e.what() << e.cause();
+        qCWarning(LAUNCHER_LOG) << "JsonException: " << e.what() << e.cause();
     }
 }
 
@@ -135,7 +135,7 @@ void processPackPNG(ResourcePack& pack, QByteArray&& raw_data)
     if (!img.isNull()) {
         pack.setImage(img);
     } else {
-        qWarning() << "Failed to parse pack.png.";
+        qCWarning(LAUNCHER_LOG) << "Failed to parse pack.png.";
     }
 }
 }  // namespace ResourcePackUtils

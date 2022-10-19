@@ -41,7 +41,7 @@ void XboxUserStep::perform() {
     auto *requestor = new AuthRequest(this);
     connect(requestor, &AuthRequest::finished, this, &XboxUserStep::onRequestDone);
     requestor->post(request, xbox_auth_data.toUtf8());
-    qDebug() << "First layer of XBox auth ... commencing.";
+    qCDebug(LAUNCHER_LOG) << "First layer of XBox auth ... commencing.";
 }
 
 void XboxUserStep::onRequestDone(
@@ -53,7 +53,7 @@ void XboxUserStep::onRequestDone(
     requestor->deleteLater();
 
     if (error != QNetworkReply::NoError) {
-        qWarning() << "Reply error:" << error;
+        qCWarning(LAUNCHER_LOG) << "Reply error:" << error;
         if (Net::isApplicationError(error)) {
             emit finished(AccountTaskState::STATE_FAILED_SOFT,
                 tr("XBox user authentication failed: %1").arg(requestor->errorString_)
@@ -70,7 +70,7 @@ void XboxUserStep::onRequestDone(
 
     Katabasis::Token temp;
     if(!Parsers::parseXTokenResponse(data, temp, "UToken")) {
-        qWarning() << "Could not parse user authentication response...";
+        qCWarning(LAUNCHER_LOG) << "Could not parse user authentication response...";
         emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication response could not be understood."));
         return;
     }

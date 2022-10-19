@@ -1,6 +1,7 @@
 #include "InstanceCreationTask.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QFile>
 
 InstanceCreationTask::InstanceCreationTask() = default;
@@ -24,9 +25,9 @@ void InstanceCreationTask::executeTask()
         if (m_abort)
             return;
 
-        qWarning() << "Instance creation failed!";
+        qCWarning(LAUNCHER_LOG) << "Instance creation failed!";
         if (!m_error_message.isEmpty())
-            qWarning() << "Reason: " << m_error_message;
+            qCWarning(LAUNCHER_LOG) << "Reason: " << m_error_message;
         emitFailed(tr("Error while creating new instance."));
         return;
     }
@@ -37,14 +38,14 @@ void InstanceCreationTask::executeTask()
     if (shouldOverride()) {
         setAbortable(false);
         setStatus(tr("Removing old conflicting files..."));
-        qDebug() << "Removing old files";
+        qCDebug(LAUNCHER_LOG) << "Removing old files";
 
         for (auto path : m_files_to_remove) {
             if (!QFile::exists(path))
                 continue;
-            qDebug() << "Removing" << path;
+            qCDebug(LAUNCHER_LOG) << "Removing" << path;
             if (!QFile::remove(path)) {
-                qCritical() << "Couldn't remove the old conflicting files.";
+                qCCritical(LAUNCHER_LOG) << "Couldn't remove the old conflicting files.";
                 emitFailed(tr("Failed to remove old conflicting files."));
                 return;
             }

@@ -3,6 +3,7 @@
 #include "VariableSizedImageObject.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 
 ProjectDescriptionPage::ProjectDescriptionPage(QWidget* parent) : QTextBrowser(parent), m_image_text_object(new VariableSizedImageObject)
 {

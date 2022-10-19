@@ -26,7 +26,7 @@ static bool readThemeJson(const QString &path, QPalette &palette, double &fadeAm
                     QColor color(colorValue);
                     if(!color.isValid())
                     {
-                        qWarning() << "Color value" << colorValue << "for" << colorName << "was not recognized.";
+                        qCWarning(LAUNCHER_LOG) << "Color value" << colorValue << "for" << colorName << "was not recognized.";
                         return QColor();
                     }
                     return color;
@@ -42,7 +42,7 @@ static bool readThemeJson(const QString &path, QPalette &palette, double &fadeAm
                 }
                 else
                 {
-                    qDebug() << "Color value for" << colorName << "was not present.";
+                    qCDebug(LAUNCHER_LOG) << "Color value for" << colorName << "was not present.";
                 }
             };
 
@@ -68,13 +68,13 @@ static bool readThemeJson(const QString &path, QPalette &palette, double &fadeAm
         }
         catch (const Exception &e)
         {
-            qWarning() << "Couldn't load theme json: " << e.cause();
+            qCWarning(LAUNCHER_LOG) << "Couldn't load theme json: " << e.cause();
             return false;
         }
     }
     else
     {
-        qDebug() << "No theme json present.";
+        qCDebug(LAUNCHER_LOG) << "No theme json present.";
         return false;
     }
     return true;
@@ -119,7 +119,7 @@ static bool writeThemeJson(const QString &path, const QPalette &palette, double 
     }
     catch (const Exception &e)
     {
-        qWarning() << "Failed to write theme json to" << path;
+        qCWarning(LAUNCHER_LOG) << "Failed to write theme json to" << path;
         return false;
     }
 }
@@ -130,11 +130,11 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QString folder)
     QString path = FS::PathCombine("themes", m_id);
     QString pathResources = FS::PathCombine("themes", m_id, "resources");
 
-    qDebug() << "Loading theme" << m_id;
+    qCDebug(LAUNCHER_LOG) << "Loading theme" << m_id;
 
     if(!FS::ensureFolderPathExists(path) || !FS::ensureFolderPathExists(pathResources))
     {
-        qWarning() << "couldn't create folder for theme!";
+        qCWarning(LAUNCHER_LOG) << "couldn't create folder for theme!";
         m_palette = baseTheme->colorScheme();
         m_styleSheet = baseTheme->appStyleSheet();
         return;
@@ -173,13 +173,13 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QString folder)
         }
         catch (const Exception &e)
         {
-            qWarning() << "Couldn't load css:" << e.cause() << "from" << cssFilePath;
+            qCWarning(LAUNCHER_LOG) << "Couldn't load css:" << e.cause() << "from" << cssFilePath;
             m_styleSheet = baseTheme->appStyleSheet();
         }
     }
     else
     {
-        qDebug() << "No theme css present.";
+        qCDebug(LAUNCHER_LOG) << "No theme css present.";
         m_styleSheet = baseTheme->appStyleSheet();
         try
         {
@@ -187,7 +187,7 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QString folder)
         }
         catch (const Exception &e)
         {
-            qWarning() << "Couldn't write css:" << e.cause() << "to" << cssFilePath;
+            qCWarning(LAUNCHER_LOG) << "Couldn't write css:" << e.cause() << "to" << cssFilePath;
         }
     }
 }

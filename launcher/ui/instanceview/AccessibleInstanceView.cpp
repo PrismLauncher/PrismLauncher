@@ -1,6 +1,7 @@
 #include "InstanceView.h"
 #include "AccessibleInstanceView.h"
 #include "AccessibleInstanceView_p.h"
+#include "launcherlog.h"
 
 #include <qvariant.h>
 #include <qaccessible.h>
@@ -61,7 +62,7 @@ QAccessibleInterface *AccessibleInstanceView::cellAt(int row, int column) const
 
     QModelIndex index = view()->model()->index(row, column, view()->rootIndex());
     if (Q_UNLIKELY(!index.isValid())) {
-        qWarning() << "AccessibleInstanceView::cellAt: invalid index: " << index << " for " << view();
+        qCWarning(LAUNCHER_LOG) << "AccessibleInstanceView::cellAt: invalid index: " << index << " for " << view();
         return 0;
     }
 
@@ -396,7 +397,7 @@ int AccessibleInstanceView::indexOfChild(const QAccessibleInterface *iface) cons
     } else if (iface->role() == QAccessible::Pane) {
         return 0; // corner button
     } else {
-        qWarning() << "AccessibleInstanceView::indexOfChild has a child with unknown role..." << iface->role() << iface->text(QAccessible::Name);
+        qCWarning(LAUNCHER_LOG) << "AccessibleInstanceView::indexOfChild has a child with unknown role..." << iface->role() << iface->text(QAccessible::Name);
     }
     // FIXME: we are in denial of our children. this should stop.
     return -1;
@@ -536,7 +537,7 @@ AccessibleInstanceViewItem::AccessibleInstanceViewItem(QAbstractItemView *view_,
     : view(view_), m_index(index_)
 {
     if (Q_UNLIKELY(!index_.isValid()))
-        qWarning() << "AccessibleInstanceViewItem::AccessibleInstanceViewItem with invalid index: " << index_;
+        qCWarning(LAUNCHER_LOG) << "AccessibleInstanceViewItem::AccessibleInstanceViewItem with invalid index: " << index_;
 }
 
 void *AccessibleInstanceViewItem::interface_cast(QAccessible::InterfaceType t)

@@ -42,6 +42,7 @@
 #include <QFileSystemWatcher>
 #include <QSet>
 #include <QDebug>
+#include "launcherlog.h"
 
 #define MAX_SIZE 1024
 
@@ -78,7 +79,7 @@ IconList::IconList(const QStringList &builtinPaths, QString path, QObject *paren
 
 void IconList::sortIconList()
 {
-    qDebug() << "Sorting icon list...";
+    qCDebug(LAUNCHER_LOG) << "Sorting icon list...";
     std::sort(icons.begin(), icons.end(), [](const MMCIcon& a, const MMCIcon& b) {
         return a.m_key.localeAwareCompare(b.m_key) < 0;
     });
@@ -132,7 +133,7 @@ void IconList::directoryChanged(const QString &path)
 
     for (auto remove : to_remove)
     {
-        qDebug() << "Removing " << remove;
+        qCDebug(LAUNCHER_LOG) << "Removing " << remove;
         QFileInfo rmfile(remove);
         QString key = rmfile.completeBaseName();
 
@@ -162,7 +163,7 @@ void IconList::directoryChanged(const QString &path)
 
     for (auto add : to_add)
     {
-        qDebug() << "Adding " << add;
+        qCDebug(LAUNCHER_LOG) << "Adding " << add;
 
         QFileInfo addfile(add);
         QString key = addfile.completeBaseName();
@@ -184,7 +185,7 @@ void IconList::directoryChanged(const QString &path)
 
 void IconList::fileChanged(const QString &path)
 {
-    qDebug() << "Checking " << path;
+    qCDebug(LAUNCHER_LOG) << "Checking " << path;
     QFileInfo checkfile(path);
     if (!checkfile.exists())
         return;
@@ -216,11 +217,11 @@ void IconList::startWatching()
     is_watching = m_watcher->addPath(abs_path);
     if (is_watching)
     {
-        qDebug() << "Started watching " << abs_path;
+        qCDebug(LAUNCHER_LOG) << "Started watching " << abs_path;
     }
     else
     {
-        qDebug() << "Failed to start watching " << abs_path;
+        qCDebug(LAUNCHER_LOG) << "Failed to start watching " << abs_path;
     }
 }
 

@@ -39,6 +39,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QDebug>
+#include "launcherlog.h"
 #include <QRegularExpression>
 
 #include "settings/INISettingsObject.h"
@@ -172,7 +173,7 @@ int BaseInstance::getConsoleMaxLines() const
     if(!conversionOk)
     {
         maxLines = lineSetting->defValue().toInt();
-        qWarning() << "ConsoleMaxLines has nonsensical value, defaulting to" << maxLines;
+        qCWarning(LAUNCHER_LOG) << "ConsoleMaxLines has nonsensical value, defaulting to" << maxLines;
     }
     return maxLines;
 }
@@ -193,7 +194,7 @@ void BaseInstance::iconUpdated(QString key)
 void BaseInstance::invalidate()
 {
     changeStatus(Status::Gone);
-    qDebug() << "Instance" << id() << "has been invalidated.";
+    qCDebug(LAUNCHER_LOG) << "Instance" << id() << "has been invalidated.";
 }
 
 void BaseInstance::changeStatus(BaseInstance::Status newStatus)

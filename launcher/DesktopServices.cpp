@@ -37,6 +37,7 @@
 #include <QDesktopServices>
 #include <QProcess>
 #include <QDebug>
+#include "launcherlog.h"
 #include "Application.h"
 
 /**
@@ -62,7 +63,7 @@ bool IndirectOpen(T callable, qint64 *pid_forked = nullptr)
     }
     if(pid == -1)
     {
-        qWarning() << "IndirectOpen failed to fork: " << errno;
+        qCWarning(LAUNCHER_LOG) << "IndirectOpen failed to fork: " << errno;
         return false;
     }
     // child - do the stuff
@@ -107,7 +108,7 @@ bool IndirectOpen(T callable, qint64 *pid_forked = nullptr)
 namespace DesktopServices {
 bool openDirectory(const QString &path, bool ensureExists)
 {
-    qDebug() << "Opening directory" << path;
+    qCDebug(LAUNCHER_LOG) << "Opening directory" << path;
     QDir parentPath;
     QDir dir(path);
     if (!dir.exists())
@@ -134,7 +135,7 @@ bool openDirectory(const QString &path, bool ensureExists)
 
 bool openFile(const QString &path)
 {
-    qDebug() << "Opening file" << path;
+    qCDebug(LAUNCHER_LOG) << "Opening file" << path;
     auto f = [&]()
     {
         return QDesktopServices::openUrl(QUrl::fromLocalFile(path));
@@ -155,7 +156,7 @@ bool openFile(const QString &path)
 
 bool openFile(const QString &application, const QString &path, const QString &workingDirectory, qint64 *pid)
 {
-    qDebug() << "Opening file" << path << "using" << application;
+    qCDebug(LAUNCHER_LOG) << "Opening file" << path << "using" << application;
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
     // FIXME: the pid here is fake. So if something depends on it, it will likely misbehave
     if(!APPLICATION->isFlatpak())
@@ -176,7 +177,7 @@ bool openFile(const QString &application, const QString &path, const QString &wo
 
 bool run(const QString &application, const QStringList &args, const QString &workingDirectory, qint64 *pid)
 {
-    qDebug() << "Running" << application << "with args" << args.join(' ');
+    qCDebug(LAUNCHER_LOG) << "Running" << application << "with args" << args.join(' ');
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
     if(!APPLICATION->isFlatpak())
     {
@@ -197,7 +198,7 @@ bool run(const QString &application, const QStringList &args, const QString &wor
 
 bool openUrl(const QUrl &url)
 {
-    qDebug() << "Opening URL" << url.toString();
+    qCDebug(LAUNCHER_LOG) << "Opening URL" << url.toString();
     auto f = [&]()
     {
         return QDesktopServices::openUrl(url);

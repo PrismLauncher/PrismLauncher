@@ -1,6 +1,7 @@
 #include "MultipleOptionsTask.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 
 MultipleOptionsTask::MultipleOptionsTask(QObject* parent, const QString& task_name) : SequentialTask(parent, task_name) {}
 
@@ -13,7 +14,7 @@ void MultipleOptionsTask::startNext()
 
     if (m_queue.isEmpty()) {
         emitFailed(tr("All attempts have failed!"));
-        qWarning() << "All attempts have failed!";
+        qCWarning(LAUNCHER_LOG) << "All attempts have failed!";
         return;
     }
 

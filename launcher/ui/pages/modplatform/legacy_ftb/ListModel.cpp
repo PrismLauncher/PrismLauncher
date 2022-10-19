@@ -70,7 +70,7 @@ bool FilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) co
     }
 
     //UHM, some inavlid value set?!
-    qWarning() << "Invalid sorting set!";
+    qCWarning(LAUNCHER_LOG) << "Invalid sorting set!";
     return true;
 }
 
@@ -119,7 +119,7 @@ QString ListModel::translatePackType(PackType type) const
         case PackType::Private:
             return tr("Private Modpack");
     }
-    qWarning() << "Unknown FTB modpack type:" << int(type);
+    qCWarning(LAUNCHER_LOG) << "Unknown FTB modpack type:" << int(type);
     return QString();
 }
 
@@ -222,7 +222,7 @@ void ListModel::remove(int row)
 {
     if(row < 0 || row >= modpacks.size())
     {
-        qWarning() << "Attempt to remove FTB modpacks with invalid row" << row;
+        qCWarning(LAUNCHER_LOG) << "Attempt to remove FTB modpacks with invalid row" << row;
         return;
     }
     beginRemoveRows(QModelIndex(), row, row);

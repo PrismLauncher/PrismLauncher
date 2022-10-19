@@ -1,6 +1,7 @@
 #include "HashUtils.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QFile>
 
 #include "FileSystem.h"
@@ -19,7 +20,7 @@ Hasher::Ptr createHasher(QString file_path, ModPlatform::Provider provider)
         case ModPlatform::Provider::FLAME:
             return createFlameHasher(file_path);
         default:
-            qCritical() << "[Hashing]"
+            qCCritical(LAUNCHER_LOG) << "[Hashing]"
                         << "Unrecognized mod platform!";
             return nullptr;
     }
@@ -42,8 +43,8 @@ void ModrinthHasher::executeTask()
     try {
         file.open(QFile::ReadOnly);
     } catch (FS::FileSystemException& e) {
-        qCritical() << QString("Failed to open JAR file in %1").arg(m_path);
-        qCritical() << QString("Reason: ") << e.cause();
+        qCCritical(LAUNCHER_LOG) << QString("Failed to open JAR file in %1").arg(m_path);
+        qCCritical(LAUNCHER_LOG) << QString("Reason: ") << e.cause();
 
         emitFailed("Failed to open file for hashing.");
         return;

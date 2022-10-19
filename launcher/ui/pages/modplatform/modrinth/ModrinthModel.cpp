@@ -61,7 +61,7 @@ void ModpackListModel::fetchMore(const QModelIndex& parent)
     if (parent.isValid())
         return;
     if (nextSearchOffset == 0) {
-        qWarning() << "fetchMore with 0 offset is wrong...";
+        qCWarning(LAUNCHER_LOG) << "fetchMore with 0 offset is wrong...";
         return;
     }
     performPaginatedSearch();
@@ -148,9 +148,9 @@ void ModpackListModel::performPaginatedSearch()
 
         QJsonDocument doc_all = QJsonDocument::fromJson(m_all_response, &parse_error_all);
         if (parse_error_all.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parse_error_all.offset
+            qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from " << debugName() << " at " << parse_error_all.offset
                        << " reason: " << parse_error_all.errorString();
-            qWarning() << m_all_response;
+            qCWarning(LAUNCHER_LOG) << m_all_response;
             return;
         }
 
@@ -288,7 +288,7 @@ void ModpackListModel::searchRequestFinished(QJsonDocument& doc_all)
             Modrinth::loadIndexedPack(pack, packObj);
             newList.append(pack);
         } catch (const JSONValidationError& e) {
-            qWarning() << "Error while loading mod from " << m_parent->debugName() << ": " << e.cause();
+            qCWarning(LAUNCHER_LOG) << "Error while loading mod from " << m_parent->debugName() << ": " << e.cause();
             continue;
         }
     }

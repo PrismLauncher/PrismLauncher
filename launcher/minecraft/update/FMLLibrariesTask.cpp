@@ -129,7 +129,7 @@ bool FMLLibrariesTask::abort()
     }
     else
     {
-        qWarning() << "Prematurely aborted FMLLibrariesTask";
+        qCWarning(LAUNCHER_LOG) << "Prematurely aborted FMLLibrariesTask";
     }
     return true;
 }

@@ -60,7 +60,7 @@ void Technic::SingleZipPackInstallTask::downloadSucceeded()
 
     setStatus(tr("Extracting modpack"));
     QDir extractDir(FS::PathCombine(m_stagingPath, ".minecraft"));
-    qDebug() << "Attempting to create instance from" << m_archivePath;
+    qCDebug(LAUNCHER_LOG) << "Attempting to create instance from" << m_archivePath;
 
     // open the zip and find relevant files in it
     m_packZip.reset(new QuaZip(m_archivePath));
@@ -99,7 +99,7 @@ void Technic::SingleZipPackInstallTask::extractFinished()
     }
     QDir extractDir(m_stagingPath);
 
-    qDebug() << "Fixing permissions for extracted pack files...";
+    qCDebug(LAUNCHER_LOG) << "Fixing permissions for extracted pack files...";
     QDirIterator it(extractDir, QDirIterator::Subdirectories);
     while (it.hasNext())
     {
@@ -125,7 +125,7 @@ void Technic::SingleZipPackInstallTask::extractFinished()
             }
             else
             {
-                qDebug() << "Fixed" << filepath;
+                qCDebug(LAUNCHER_LOG) << "Fixed" << filepath;
             }
         }
     }

@@ -73,8 +73,8 @@ ModDetails ReadMCModInfo(QByteArray contents)
             version = Json::ensureString(val, "").toInt();
 
         if (version != 2) {
-            qCritical() << "BAD stuff happened to mod json:";
-            qCritical() << contents;
+            qCCritical(LAUNCHER_LOG) << "BAD stuff happened to mod json:";
+            qCCritical(LAUNCHER_LOG) << contents;
             return {};
         }
         auto arrVal = jsonDoc.object().value("modlist");
@@ -110,19 +110,19 @@ ModDetails ReadMCModTOML(QByteArray contents)
     // array defined by [[mods]]
     auto tomlModsArr = tomlData["mods"].as_array();
     if (!tomlModsArr) {
-        qWarning() << "Corrupted mods.toml? Couldn't find [[mods]] array!";
+        qCWarning(LAUNCHER_LOG) << "Corrupted mods.toml? Couldn't find [[mods]] array!";
         return {};
     }
 
     // we only really care about the first element, since multiple mods in one file is not supported by us at the moment
     auto tomlModsTable0 = tomlModsArr->get(0);
     if (!tomlModsTable0) {
-        qWarning() << "Corrupted mods.toml? [[mods]] didn't have an element at index 0!";
+        qCWarning(LAUNCHER_LOG) << "Corrupted mods.toml? [[mods]] didn't have an element at index 0!";
         return {};
     }
     auto modsTable = tomlModsTable0->as_table();
     if (!tomlModsTable0) {
-        qWarning() << "Corrupted mods.toml? [[mods]] was not a table!";
+        qCWarning(LAUNCHER_LOG) << "Corrupted mods.toml? [[mods]] was not a table!";
         return {};
     }
 

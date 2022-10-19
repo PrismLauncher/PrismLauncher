@@ -1,6 +1,7 @@
 #include "GameOptions.h"
 #include "FileSystem.h"
 #include <QDebug>
+#include "launcherlog.h"
 #include <QSaveFile>
 
 namespace {
@@ -10,7 +11,7 @@ bool load(const QString& path, std::vector<GameOptionItem> &contents, int & vers
     QFile file(path);
     if (!file.open(QFile::ReadOnly))
     {
-        qWarning() << "Failed to read options file.";
+        qCWarning(LAUNCHER_LOG) << "Failed to read options file.";
         return false;
     }
     version = 0;
@@ -28,7 +29,7 @@ bool load(const QString& path, std::vector<GameOptionItem> &contents, int & vers
         }
         auto key = QString::fromUtf8(line.data(), separatorIndex);
         auto value = QString::fromUtf8(line.data() + separatorIndex + 1, line.size() - 1 - separatorIndex);
-        qDebug() << "!!" << key << "!!";
+        qCDebug(LAUNCHER_LOG) << "!!" << key << "!!";
         if(key == "version")
         {
             version = value.toInt();
@@ -36,7 +37,7 @@ bool load(const QString& path, std::vector<GameOptionItem> &contents, int & vers
         }
         contents.emplace_back(GameOptionItem{key, value});
     }
-    qDebug() << "Loaded" << path << "with version:" << version;
+    qCDebug(LAUNCHER_LOG) << "Loaded" << path << "with version:" << version;
     return true;
 }
 bool save(const QString& path, std::vector<GameOptionItem> &mapping, int version)

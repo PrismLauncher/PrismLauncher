@@ -174,13 +174,13 @@ void ModDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* select
 {
     auto* prev_page = dynamic_cast<ModPage*>(previous);
     if (!prev_page) {
-        qCritical() << "Page '" << previous->displayName() << "' in ModDownloadDialog is not a ModPage!";
+        qCCritical(LAUNCHER_LOG) << "Page '" << previous->displayName() << "' in ModDownloadDialog is not a ModPage!";
         return;
     }
 
     auto* selected_page = dynamic_cast<ModPage*>(selected);
     if (!selected_page) {
-        qCritical() << "Page '" << selected->displayName() << "' in ModDownloadDialog is not a ModPage!";
+        qCCritical(LAUNCHER_LOG) << "Page '" << selected->displayName() << "' in ModDownloadDialog is not a ModPage!";
         return;
     }
 

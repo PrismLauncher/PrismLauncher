@@ -56,7 +56,7 @@ void LocalModUpdateTask::executeTask()
         Metadata::update(m_index_dir, pw_mod);
         emitSucceeded();
     } else {
-        qCritical() << "Tried to update an invalid mod!";
+        qCCritical(LAUNCHER_LOG) << "Tried to update an invalid mod!";
         emitFailed(tr("Invalid metadata"));
     }
 }

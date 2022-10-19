@@ -121,7 +121,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     current = listModel->data(curr, Qt::UserRole).value<Flame::IndexedPack>();
 
     if (current.versionsLoaded == false) {
-        qDebug() << "Loading flame modpack versions";
+        qCDebug(LAUNCHER_LOG) << "Loading flame modpack versions";
         auto netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name), APPLICATION->network());
         auto response = new QByteArray();
         int addonId = current.addonId;
@@ -134,17 +134,17 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             QJsonParseError parse_error;
             QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
             if (parse_error.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response from CurseForge at " << parse_error.offset
+                qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from CurseForge at " << parse_error.offset
                            << " reason: " << parse_error.errorString();
-                qWarning() << *response;
+                qCWarning(LAUNCHER_LOG) << *response;
                 return;
             }
             auto arr = Json::ensureArray(doc.object(), "data");
             try {
                 Flame::loadIndexedPackVersions(current, arr);
             } catch (const JSONValidationError& e) {
-                qDebug() << *response;
-                qWarning() << "Error while reading flame modpack version: " << e.cause();
+                qCDebug(LAUNCHER_LOG) << *response;
+                qCWarning(LAUNCHER_LOG) << "Error while reading flame modpack version: " << e.cause();
             }
 
             for (auto version : current.versions) {
@@ -155,7 +155,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             current_updated.setValue(current);
 
             if (!listModel->setData(curr, current_updated, Qt::UserRole))
-                qWarning() << "Failed to cache versions for the current pack!";
+                qCWarning(LAUNCHER_LOG) << "Failed to cache versions for the current pack!";
 
             // TODO: Check whether it's a connection issue or the project disabled 3rd-party distribution.
             if (current.versionsLoaded && ui->versionSelectionBox->count() < 1) {

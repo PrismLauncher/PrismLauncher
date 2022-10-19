@@ -44,6 +44,7 @@
 #include <QByteArray>
 
 #include <QDebug>
+#include "launcherlog.h"
 
 AccountTask::AccountTask(AccountData *data, QObject *parent)
     : Task(parent), m_data(data)

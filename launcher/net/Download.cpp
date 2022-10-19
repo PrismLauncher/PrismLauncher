@@ -93,7 +93,7 @@ void Download::executeTask()
     setStatus(tr("Downloading %1").arg(m_url.toString()));
 
     if (getState() == Task::State::AbortedByUser) {
-        qWarning() << "Attempt to start an aborted Download:" << m_url.toString();
+        qCWarning(LAUNCHER_LOG) << "Attempt to start an aborted Download:" << m_url.toString();
         emitAborted();
         return;
     }
@@ -103,10 +103,10 @@ void Download::executeTask()
     switch (m_state) {
         case State::Succeeded:
             emit succeeded();
-            qDebug() << "Download cache hit " << m_url.toString();
+            qCDebug(LAUNCHER_LOG) << "Download cache hit " << m_url.toString();
             return;
         case State::Running:
-            qDebug() << "Downloading " << m_url.toString();
+            qCDebug(LAUNCHER_LOG) << "Downloading " << m_url.toString();
             break;
         case State::Inactive:
         case State::Failed:
@@ -145,7 +145,7 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 void Download::downloadError(QNetworkReply::NetworkError error)
 {
     if (error == QNetworkReply::OperationCanceledError) {
-        qCritical() << "Aborted " << m_url.toString();
+        qCCritical(LAUNCHER_LOG) << "Aborted " << m_url.toString();
         m_state = State::AbortedByUser;
     } else {
         if (m_options & Option::AcceptLocalFiles) {
@@ -155,7 +155,7 @@ void Download::downloadError(QNetworkReply::NetworkError error)
             }
         }
         // error happened during download.
-        qCritical() << "Failed " << m_url.toString() << " with reason " << error;
+        qCCritical(LAUNCHER_LOG) << "Failed " << m_url.toString() << " with reason " << error;
         m_state = State::Failed;
     }
 }
@@ -164,9 +164,9 @@ void Download::sslErrors(const QList<QSslError>& errors)
 {
     int i = 1;
     for (auto error : errors) {
-        qCritical() << "Download" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
+        qCCritical(LAUNCHER_LOG) << "Download" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
         auto cert = error.certificate();
-        qCritical() << "Certificate in question:\n" << cert.toText();
+        qCCritical(LAUNCHER_LOG) << "Certificate in question:\n" << cert.toText();
         i++;
     }
 }
@@ -209,17 +209,17 @@ auto Download::handleRedirect() -> bool
          */
         redirect = QUrl(redirectStr, QUrl::TolerantMode);
         if (!redirect.isValid()) {
-            qWarning() << "Failed to parse redirect URL:" << redirectStr;
+            qCWarning(LAUNCHER_LOG) << "Failed to parse redirect URL:" << redirectStr;
             downloadError(QNetworkReply::ProtocolFailure);
             return false;
         }
-        qDebug() << "Fixed location header:" << redirect;
+        qCDebug(LAUNCHER_LOG) << "Fixed location header:" << redirect;
     } else {
-        qDebug() << "Location header:" << redirect;
+        qCDebug(LAUNCHER_LOG) << "Location header:" << redirect;
     }
 
     m_url = QUrl(redirect.toString());
-    qDebug() << "Following redirect to " << m_url.toString();
+    qCDebug(LAUNCHER_LOG) << "Following redirect to " << m_url.toString();
     startAction(m_network);
 
     return true;
@@ -229,26 +229,26 @@ void Download::downloadFinished()
 {
     // handle HTTP redirection first
     if (handleRedirect()) {
-        qDebug() << "Download redirected:" << m_url.toString();
+        qCDebug(LAUNCHER_LOG) << "Download redirected:" << m_url.toString();
         return;
     }
 
     // if the download failed before this point ...
     if (m_state == State::Succeeded)  // pretend to succeed so we continue processing :)
     {
-        qDebug() << "Download failed but we are allowed to proceed:" << m_url.toString();
+        qCDebug(LAUNCHER_LOG) << "Download failed but we are allowed to proceed:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit succeeded();
         return;
     } else if (m_state == State::Failed) {
-        qDebug() << "Download failed in previous step:" << m_url.toString();
+        qCDebug(LAUNCHER_LOG) << "Download failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit failed("");
         return;
     } else if (m_state == State::AbortedByUser) {
-        qDebug() << "Download aborted in previous step:" << m_url.toString();
+        qCDebug(LAUNCHER_LOG) << "Download aborted in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit aborted();
@@ -258,14 +258,14 @@ void Download::downloadFinished()
     // make sure we got all the remaining data, if any
     auto data = m_reply->readAll();
     if (data.size()) {
-        qDebug() << "Writing extra" << data.size() << "bytes";
+        qCDebug(LAUNCHER_LOG) << "Writing extra" << data.size() << "bytes";
         m_state = m_sink->write(data);
     }
 
     // otherwise, finalize the whole graph
     m_state = m_sink->finalize(*m_reply.get());
     if (m_state != State::Succeeded) {
-        qDebug() << "Download failed to finalize:" << m_url.toString();
+        qCDebug(LAUNCHER_LOG) << "Download failed to finalize:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit failed("");
@@ -273,7 +273,7 @@ void Download::downloadFinished()
     }
 
     m_reply.reset();
-    qDebug() << "Download succeeded:" << m_url.toString();
+    qCDebug(LAUNCHER_LOG) << "Download succeeded:" << m_url.toString();
     emit succeeded();
 }
 
@@ -283,11 +283,11 @@ void Download::downloadReadyRead()
         auto data = m_reply->readAll();
         m_state = m_sink->write(data);
         if (m_state == State::Failed) {
-            qCritical() << "Failed to process response chunk";
+            qCCritical(LAUNCHER_LOG) << "Failed to process response chunk";
         }
-        // qDebug() << "Download" << m_url.toString() << "gained" << data.size() << "bytes";
+        // qCDebug(LAUNCHER_LOG) << "Download" << m_url.toString() << "gained" << data.size() << "bytes";
     } else {
-        qCritical() << "Cannot write download data! illegal status " << m_status;
+        qCCritical(LAUNCHER_LOG) << "Cannot write download data! illegal status " << m_status;
     }
 }
 

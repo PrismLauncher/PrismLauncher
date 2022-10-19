@@ -129,7 +129,7 @@ void InstanceImportTask::processZipPack()
 {
     setStatus(tr("Extracting modpack"));
     QDir extractDir(m_stagingPath);
-    qDebug() << "Attempting to create instance from" << m_archivePath;
+    qCDebug(LAUNCHER_LOG) << "Attempting to create instance from" << m_archivePath;
 
     // open the zip and find relevant files in it
     m_packZip.reset(new QuaZip(m_archivePath));
@@ -151,13 +151,13 @@ void InstanceImportTask::processZipPack()
     if(modrinthFound)
     {
         // process as Modrinth pack
-        qDebug() << "Modrinth:" << modrinthFound;
+        qCDebug(LAUNCHER_LOG) << "Modrinth:" << modrinthFound;
         m_modpackType = ModpackType::Modrinth;
     }
     else if (technicFound)
     {
         // process as Technic pack
-        qDebug() << "Technic:" << technicFound;
+        qCDebug(LAUNCHER_LOG) << "Technic:" << technicFound;
         extractDir.mkpath(".minecraft");
         extractDir.cd(".minecraft");
         m_modpackType = ModpackType::Technic;
@@ -170,14 +170,14 @@ void InstanceImportTask::processZipPack()
         if (!mmcRoot.isNull())
         {
             // process as MultiMC instance/pack
-            qDebug() << "MultiMC:" << mmcRoot;
+            qCDebug(LAUNCHER_LOG) << "MultiMC:" << mmcRoot;
             root = mmcRoot;
             m_modpackType = ModpackType::MultiMC;
         }
         else if(!flameRoot.isNull())
         {
             // process as Flame pack
-            qDebug() << "Flame:" << flameRoot;
+            qCDebug(LAUNCHER_LOG) << "Flame:" << flameRoot;
             root = flameRoot;
             m_modpackType = ModpackType::Flame;
         }
@@ -205,7 +205,7 @@ void InstanceImportTask::extractFinished()
     }
     QDir extractDir(m_stagingPath);
 
-    qDebug() << "Fixing permissions for extracted pack files...";
+    qCDebug(LAUNCHER_LOG) << "Fixing permissions for extracted pack files...";
     QDirIterator it(extractDir, QDirIterator::Subdirectories);
     while (it.hasNext())
     {
@@ -231,7 +231,7 @@ void InstanceImportTask::extractFinished()
             }
             else
             {
-                qDebug() << "Fixed" << filepath;
+                qCDebug(LAUNCHER_LOG) << "Fixed" << filepath;
             }
         }
     }

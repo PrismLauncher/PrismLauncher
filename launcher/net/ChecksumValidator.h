@@ -36,6 +36,7 @@
 #pragma once
 
 #include "Validator.h"
+#include "launcherlog.h"
 
 #include <QCryptographicHash>
 #include <QFile>
@@ -65,7 +66,7 @@ class ChecksumValidator : public Validator {
     auto validate(QNetworkReply&) -> bool override
     {
         if (m_expected.size() && m_expected != hash()) {
-            qWarning() << "Checksum mismatch, download is bad.";
+            qCWarning(LAUNCHER_LOG) << "Checksum mismatch, download is bad.";
             return false;
         }
         return true;

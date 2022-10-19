@@ -17,6 +17,7 @@
 #include "FtbFilterModel.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "modplatform/modpacksch/FTBPackManifest.h"
 #include <MMCStrings.h>
@@ -85,7 +86,7 @@ bool FilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) co
     }
 
     // Invalid sorting set, somehow...
-    qWarning() << "Invalid sorting set!";
+    qCWarning(LAUNCHER_LOG) << "Invalid sorting set!";
     return true;
 }
 

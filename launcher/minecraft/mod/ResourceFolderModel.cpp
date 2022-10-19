@@ -2,6 +2,7 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include "launcherlog.h"
 #include <QMimeData>
 #include <QThreadPool>
 #include <QUrl>
@@ -36,9 +37,9 @@ bool ResourceFolderModel::startWatching(const QStringList paths)
     auto couldnt_be_watched = m_watcher.addPaths(paths);
     for (auto path : paths) {
         if (couldnt_be_watched.contains(path))
-            qDebug() << "Failed to start watching " << path;
+            qCDebug(LAUNCHER_LOG) << "Failed to start watching " << path;
         else
-            qDebug() << "Started watching " << path;
+            qCDebug(LAUNCHER_LOG) << "Started watching " << path;
     }
 
     update();
@@ -55,9 +56,9 @@ bool ResourceFolderModel::stopWatching(const QStringList paths)
     auto couldnt_be_stopped = m_watcher.removePaths(paths);
     for (auto path : paths) {
         if (couldnt_be_stopped.contains(path))
-            qDebug() << "Failed to stop watching " << path;
+            qCDebug(LAUNCHER_LOG) << "Failed to stop watching " << path;
         else
-            qDebug() << "Stopped watching " << path;
+            qCDebug(LAUNCHER_LOG) << "Stopped watching " << path;
     }
 
     m_is_watching = !m_is_watching;
@@ -75,20 +76,20 @@ bool ResourceFolderModel::installResource(QString original_path)
     QFileInfo file_info(original_path);
 
     if (!file_info.exists() || !file_info.isReadable()) {
-        qWarning() << "Caught attempt to install non-existing file or file-like object:" << original_path;
+        qCWarning(LAUNCHER_LOG) << "Caught attempt to install non-existing file or file-like object:" << original_path;
         return false;
     }
-    qDebug() << "Installing: " << file_info.absoluteFilePath();
+    qCDebug(LAUNCHER_LOG) << "Installing: " << file_info.absoluteFilePath();
 
     Resource resource(file_info);
     if (!resource.valid()) {
-        qWarning() << original_path << "is not a valid resource. Ignoring it.";
+        qCWarning(LAUNCHER_LOG) << original_path << "is not a valid resource. Ignoring it.";
         return false;
     }
 
     auto new_path = FS::NormalizePath(m_dir.filePath(file_info.fileName()));
     if (original_path == new_path) {
-        qWarning() << "Overwriting the mod (" << original_path << ") with itself makes no sense...";
+        qCWarning(LAUNCHER_LOG) << "Overwriting the mod (" << original_path << ") with itself makes no sense...";
         return false;
     }
 
@@ -98,14 +99,14 @@ bool ResourceFolderModel::installResource(QString original_path)
         case ResourceType::LITEMOD: {
             if (QFile::exists(new_path) || QFile::exists(new_path + QString(".disabled"))) {
                 if (!QFile::remove(new_path)) {
-                    qCritical() << "Cleaning up new location (" << new_path << ") was unsuccessful!";
+                    qCCritical(LAUNCHER_LOG) << "Cleaning up new location (" << new_path << ") was unsuccessful!";
                     return false;
                 }
-                qDebug() << new_path << "has been deleted.";
+                qCDebug(LAUNCHER_LOG) << new_path << "has been deleted.";
             }
 
             if (!QFile::copy(original_path, new_path)) {
-                qCritical() << "Copy from" << original_path << "to" << new_path << "has failed.";
+                qCCritical(LAUNCHER_LOG) << "Copy from" << original_path << "to" << new_path << "has failed.";
                 return false;
             }
 
@@ -121,12 +122,12 @@ bool ResourceFolderModel::installResource(QString original_path)
         }
         case ResourceType::FOLDER: {
             if (QFile::exists(new_path)) {
-                qDebug() << "Ignoring folder '" << original_path << "', it would merge with" << new_path;
+                qCDebug(LAUNCHER_LOG) << "Ignoring folder '" << original_path << "', it would merge with" << new_path;
                 return false;
             }
 
             if (!FS::copy(original_path, new_path)()) {
-                qWarning() << "Copy of folder from" << original_path << "to" << new_path << "has (potentially partially) failed.";
+                qCWarning(LAUNCHER_LOG) << "Copy of folder from" << original_path << "to" << new_path << "has (potentially partially) failed.";
                 return false;
             }
 

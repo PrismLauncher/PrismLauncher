@@ -18,6 +18,7 @@
 
 #include <QItemSelectionModel>
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "SkinUtils.h"
 #include "Application.h"
@@ -70,7 +71,7 @@ ProfileSelectDialog::ProfileSelectDialog(const QString &message, int flags, QWid
     // Flags...
     ui->globalDefaultCheck->setVisible(flags & GlobalDefaultCheckbox);
     ui->instDefaultCheck->setVisible(flags & InstanceDefaultCheckbox);
-    qDebug() << flags;
+    qCDebug(LAUNCHER_LOG) << flags;
 
     // Select the first entry in the list.
     ui->listView->setCurrentIndex(ui->listView->model()->index(0, 0));

@@ -1,5 +1,6 @@
 #include <QTest>
 #include <QDebug>
+#include "launcherlog.h"
 
 #include <mojang/PackageManifest.h>
 
@@ -127,7 +128,7 @@ void PackageManifestTest::test_inspect_symlinks() {
     QVERIFY(manifest.folders.count(Path("a/b")));
     QVERIFY(manifest.symlinks.size() == 1);
     QVERIFY(manifest.symlinks.count(Path("a/b/b.txt")));
-    qDebug() << manifest.symlinks[Path("a/b/b.txt")];
+    qCDebug(LAUNCHER_LOG) << manifest.symlinks[Path("a/b/b.txt")];
     QVERIFY(manifest.symlinks[Path("a/b/b.txt")] == Path("../b.txt"));
 }
 #endif

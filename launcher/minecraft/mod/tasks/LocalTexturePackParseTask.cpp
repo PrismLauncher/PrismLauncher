@@ -38,7 +38,7 @@ bool process(TexturePack& pack)
             TexturePackUtils::processZIP(pack);
             return true;
         default:
-            qWarning() << "Invalid type for resource pack parse task!";
+            qCWarning(LAUNCHER_LOG) << "Invalid type for resource pack parse task!";
             return false;
     }
 }
@@ -86,7 +86,7 @@ void processZIP(TexturePack& pack)
 
     if (zip.setCurrentFile("pack.txt")) {
         if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "Failed to open file in zip.";
+            qCCritical(LAUNCHER_LOG) << "Failed to open file in zip.";
             zip.close();
             return;
         }
@@ -100,7 +100,7 @@ void processZIP(TexturePack& pack)
 
     if (zip.setCurrentFile("pack.png")) {
         if (!file.open(QIODevice::ReadOnly)) {
-            qCritical() << "Failed to open file in zip.";
+            qCCritical(LAUNCHER_LOG) << "Failed to open file in zip.";
             zip.close();
             return;
         }
@@ -126,7 +126,7 @@ void processPackPNG(TexturePack& pack, QByteArray&& raw_data)
     if (!img.isNull()) {
         pack.setImage(img);
     } else {
-        qWarning() << "Failed to parse pack.png.";
+        qCWarning(LAUNCHER_LOG) << "Failed to parse pack.png.";
     }
 }
 }  // namespace TexturePackUtils

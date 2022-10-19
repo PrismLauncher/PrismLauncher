@@ -19,6 +19,7 @@
 #include "Packwiz.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QDir>
 #include <QObject>
 
@@ -43,8 +44,8 @@ auto getRealIndexName(QDir& index_dir, QString normalized_fname, bool should_fin
         }
 
         if (should_find_match && !QString::compare(normalized_fname, real_fname, Qt::CaseSensitive)) {
-            qCritical() << "Could not find a match for a valid metadata file!";
-            qCritical() << "File: " << normalized_fname;
+            qCCritical(LAUNCHER_LOG) << "Could not find a match for a valid metadata file!";
+            qCCritical(LAUNCHER_LOG) << "File: " << normalized_fname;
             return {};
         }
     }
@@ -67,7 +68,7 @@ auto stringEntry(toml::table table, const std::string entry_name) -> QString
 {
     auto node = table[entry_name];
     if (!node) {
-        qCritical() << QString::fromStdString("Failed to read str property '" + entry_name + "' in mod metadata.");
+        qCCritical(LAUNCHER_LOG) << QString::fromStdString("Failed to read str property '" + entry_name + "' in mod metadata.");
         return {};
     }
 
@@ -78,7 +79,7 @@ auto intEntry(toml::table table, const std::string entry_name) -> int
 {
     auto node = table[entry_name];
     if (!node) {
-        qCritical() << QString::fromStdString("Failed to read int property '" + entry_name + "' in mod metadata.");
+        qCCritical(LAUNCHER_LOG) << QString::fromStdString("Failed to read int property '" + entry_name + "' in mod metadata.");
         return {};
     }
 
@@ -117,7 +118,7 @@ auto V1::createModFormat(QDir& index_dir, ::Mod& internal_mod, QString slug) -> 
     if (mod.isValid())
         return mod;
 
-    qWarning() << QString("Tried to create mod metadata with a Mod without metadata!");
+    qCWarning(LAUNCHER_LOG) << QString("Tried to create mod metadata with a Mod without metadata!");
 
     return {};
 }
@@ -125,7 +126,7 @@ auto V1::createModFormat(QDir& index_dir, ::Mod& internal_mod, QString slug) -> 
 void V1::updateModIndex(QDir& index_dir, Mod& mod)
 {
     if (!mod.isValid()) {
-        qCritical() << QString("Tried to update metadata of an invalid mod!");
+        qCCritical(LAUNCHER_LOG) << QString("Tried to update metadata of an invalid mod!");
         return;
     }
 
@@ -148,7 +149,7 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
     }
 
     if (!index_file.open(QIODevice::ReadWrite)) {
-        qCritical() << QString("Could not open file %1!").arg(indexFileName(mod.name));
+        qCCritical(LAUNCHER_LOG) << QString("Could not open file %1!").arg(indexFileName(mod.name));
         return;
     }
 
@@ -195,12 +196,12 @@ void V1::deleteModIndex(QDir& index_dir, QString& mod_slug)
     QFile index_file(index_dir.absoluteFilePath(real_fname));
 
     if (!index_file.exists()) {
-        qWarning() << QString("Tried to delete non-existent mod metadata for %1!").arg(mod_slug);
+        qCWarning(LAUNCHER_LOG) << QString("Tried to delete non-existent mod metadata for %1!").arg(mod_slug);
         return;
     }
 
     if (!index_file.remove()) {
-        qWarning() << QString("Failed to remove metadata for mod %1!").arg(mod_slug);
+        qCWarning(LAUNCHER_LOG) << QString("Failed to remove metadata for mod %1!").arg(mod_slug);
     }
 }
 
@@ -230,15 +231,15 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
     try {
         table = toml::parse_file(index_dir.absoluteFilePath(real_fname).toStdString());
     } catch (const toml::parse_error& err) {
-        qWarning() << QString("Could not open file %1!").arg(normalized_fname);
-        qWarning() << "Reason: " << QString(err.what());
+        qCWarning(LAUNCHER_LOG) << QString("Could not open file %1!").arg(normalized_fname);
+        qCWarning(LAUNCHER_LOG) << "Reason: " << QString(err.what());
         return {};
     }
 #else
     table = toml::parse_file(index_dir.absoluteFilePath(real_fname).toStdString());
     if (!table) {
-        qWarning() << QString("Could not open file %1!").arg(normalized_fname);
-        qWarning() << "Reason: " << QString(table.error().what());
+        qCWarning(LAUNCHER_LOG) << QString("Could not open file %1!").arg(normalized_fname);
+        qCWarning(LAUNCHER_LOG) << "Reason: " << QString(table.error().what());
         return {};
     }
 #endif
@@ -256,7 +257,7 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
     {  // [download] info
         auto download_table = table["download"].as_table();
         if (!download_table) {
-            qCritical() << QString("No [download] section found on mod metadata!");
+            qCCritical(LAUNCHER_LOG) << QString("No [download] section found on mod metadata!");
             return {};
         }
 
@@ -271,7 +272,7 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
 
         auto update_table = table["update"];
         if (!update_table || !update_table.is_table()) {
-            qCritical() << QString("No [update] section found on mod metadata!");
+            qCCritical(LAUNCHER_LOG) << QString("No [update] section found on mod metadata!");
             return {};
         }
 
@@ -285,7 +286,7 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
             mod.mod_id() = stringEntry(*mod_provider_table, "mod-id");
             mod.version() = stringEntry(*mod_provider_table, "version");
         } else {
-            qCritical() << QString("No mod provider on mod metadata!");
+            qCCritical(LAUNCHER_LOG) << QString("No mod provider on mod metadata!");
             return {};
         }
     }

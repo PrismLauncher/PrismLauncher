@@ -36,6 +36,7 @@
 #include <QDir>
 #include <QString>
 #include <QDebug>
+#include "launcherlog.h"
 #include <QSaveFile>
 #include <QDirIterator>
 #include "World.h"
@@ -145,7 +146,7 @@ std::unique_ptr <nbt::tag_compound> parseLevelDat(QByteArray data)
     }
     catch (const nbt::io::input_error &e)
     {
-        qWarning() << "Unable to parse level.dat:" << e.what();
+        qCWarning(LAUNCHER_LOG) << "Unable to parse level.dat:" << e.what();
         return nullptr;
     }
 }
@@ -408,13 +409,13 @@ optional<QString> read_string (nbt::value& parent, const char * name)
     catch (const std::out_of_range &e)
     {
         // fallback for old world formats
-        qWarning() << "String NBT tag" << name << "could not be found.";
+        qCWarning(LAUNCHER_LOG) << "String NBT tag" << name << "could not be found.";
         return nullopt;
     }
     catch (const std::bad_cast &e)
     {
         // type mismatch
-        qWarning() << "NBT tag" << name << "could not be converted to string.";
+        qCWarning(LAUNCHER_LOG) << "NBT tag" << name << "could not be converted to string.";
         return nullopt;
     }
 }
@@ -434,13 +435,13 @@ optional<int64_t> read_long (nbt::value& parent, const char * name)
     catch (const std::out_of_range &e)
     {
         // fallback for old world formats
-        qWarning() << "Long NBT tag" << name << "could not be found.";
+        qCWarning(LAUNCHER_LOG) << "Long NBT tag" << name << "could not be found.";
         return nullopt;
     }
     catch (const std::bad_cast &e)
     {
         // type mismatch
-        qWarning() << "NBT tag" << name << "could not be converted to long.";
+        qCWarning(LAUNCHER_LOG) << "NBT tag" << name << "could not be converted to long.";
         return nullopt;
     }
 }
@@ -460,13 +461,13 @@ optional<int> read_int (nbt::value& parent, const char * name)
     catch (const std::out_of_range &e)
     {
         // fallback for old world formats
-        qWarning() << "Int NBT tag" << name << "could not be found.";
+        qCWarning(LAUNCHER_LOG) << "Int NBT tag" << name << "could not be found.";
         return nullopt;
     }
     catch (const std::bad_cast &e)
     {
         // type mismatch
-        qWarning() << "NBT tag" << name << "could not be converted to int.";
+        qCWarning(LAUNCHER_LOG) << "NBT tag" << name << "could not be converted to int.";
         return nullopt;
     }
 }
@@ -491,7 +492,7 @@ void World::loadFromLevelDat(QByteArray data)
         valPtr = &levelData->at("Data");
     }
     catch (const std::out_of_range &e) {
-        qWarning() << "Unable to read NBT tags from " << m_folderName << ":" << e.what();
+        qCWarning(LAUNCHER_LOG) << "Unable to read NBT tags from " << m_folderName << ":" << e.what();
         is_valid = false;
         return;
     }
@@ -520,13 +521,13 @@ void World::loadFromLevelDat(QByteArray data)
     }
     m_randomSeed = randomSeed ? *randomSeed : 0;
 
-    qDebug() << "World Name:" << m_actualName;
-    qDebug() << "Last Played:" << m_lastPlayed.toString();
+    qCDebug(LAUNCHER_LOG) << "World Name:" << m_actualName;
+    qCDebug(LAUNCHER_LOG) << "Last Played:" << m_lastPlayed.toString();
     if(randomSeed) {
-        qDebug() << "Seed:" << *randomSeed;
+        qCDebug(LAUNCHER_LOG) << "Seed:" << *randomSeed;
     }
-    qDebug() << "Size:" << m_size;
-    qDebug() << "GameType:" << m_gameType.toLogString();
+    qCDebug(LAUNCHER_LOG) << "Size:" << m_size;
+    qCDebug(LAUNCHER_LOG) << "GameType:" << m_gameType.toLogString();
 }
 
 bool World::replace(World &with)

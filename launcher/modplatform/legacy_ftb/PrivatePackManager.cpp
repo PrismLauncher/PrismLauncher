@@ -36,6 +36,7 @@
 #include "PrivatePackManager.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "FileSystem.h"
 
@@ -57,7 +58,7 @@ void PrivatePackManager::load()
     catch(...)
     {
         currentPacks = {};
-        qWarning() << "Failed to read third party FTB pack codes from" << m_filename;
+        qCWarning(LAUNCHER_LOG) << "Failed to read third party FTB pack codes from" << m_filename;
     }
 }
 
@@ -75,7 +76,7 @@ void PrivatePackManager::save() const
     }
     catch(...)
     {
-        qWarning() << "Failed to write third party FTB pack codes to" << m_filename;
+        qCWarning(LAUNCHER_LOG) << "Failed to write third party FTB pack codes to" << m_filename;
     }
 }
 

@@ -41,6 +41,7 @@
 #include "java/JavaChecker.h"
 #include "tasks/Task.h"
 #include <QDebug>
+#include "launcherlog.h"
 #include <QDir>
 #include <QEventLoop>
 #include <QRegularExpression>

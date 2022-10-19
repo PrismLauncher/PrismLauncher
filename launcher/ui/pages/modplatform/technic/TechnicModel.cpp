@@ -149,8 +149,8 @@ void Technic::ListModel::searchRequestFinished()
     QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if(parse_error.error != QJsonParseError::NoError)
     {
-        qWarning() << "Error while parsing JSON response from Technic at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << response;
+        qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from Technic at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qCWarning(LAUNCHER_LOG) << response;
         return;
     }
 
@@ -213,7 +213,7 @@ void Technic::ListModel::searchRequestFinished()
     }
     catch (const JSONValidationError &err)
     {
-        qCritical() << "Couldn't parse technic search results:" << err.cause() ;
+        qCCritical(LAUNCHER_LOG) << "Couldn't parse technic search results:" << err.cause() ;
         return;
     }
     searchState = Finished;

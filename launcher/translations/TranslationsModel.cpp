@@ -42,6 +42,7 @@
 #include <QDir>
 #include <QLibraryInfo>
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "FileSystem.h"
 #include "net/NetJob.h"
@@ -208,7 +209,7 @@ TranslationsModel::~TranslationsModel()
 
 void TranslationsModel::translationDirChanged(const QString& path)
 {
-    qDebug() << "Dir changed:" << path;
+    qCDebug(LAUNCHER_LOG) << "Dir changed:" << path;
     if (!d->no_language_set)
     {
         reloadLocalFiles();
@@ -218,7 +219,7 @@ void TranslationsModel::translationDirChanged(const QString& path)
 
 void TranslationsModel::indexReceived()
 {
-    qDebug() << "Got translations index!";
+    qCDebug(LAUNCHER_LOG) << "Got translations index!";
     d->m_index_job.reset();
 
     if (d->no_language_set)
@@ -255,7 +256,7 @@ void readIndex(const QString & path, QMap<QString, Language>& languages)
     }
     catch (const Exception &e)
     {
-        qCritical() << "Translations Download Failed: index file not readable";
+        qCCritical(LAUNCHER_LOG) << "Translations Download Failed: index file not readable";
         return;
     }
 
@@ -267,13 +268,13 @@ void readIndex(const QString & path, QMap<QString, Language>& languages)
         auto file_type = Json::requireString(doc, "file_type");
         if(file_type != "MMC-TRANSLATION-INDEX")
         {
-            qCritical() << "Translations Download Failed: index file is of unknown file type" << file_type;
+            qCCritical(LAUNCHER_LOG) << "Translations Download Failed: index file is of unknown file type" << file_type;
             return;
         }
         auto version = Json::requireInteger(doc, "version");
         if(version > 2)
         {
-            qCritical() << "Translations Download Failed: index file is of unknown format version" << file_type;
+            qCCritical(LAUNCHER_LOG) << "Translations Download Failed: index file is of unknown format version" << file_type;
             return;
         }
         auto langObjs = Json::requireObject(doc, "languages");
@@ -297,7 +298,7 @@ void readIndex(const QString & path, QMap<QString, Language>& languages)
     }
     catch (Json::JsonException & e)
     {
-        qCritical() << "Translations Download Failed: index file could not be parsed as json";
+        qCCritical(LAUNCHER_LOG) << "Translations Download Failed: index file could not be parsed as json";
     }
 }
 }
@@ -523,7 +524,7 @@ bool TranslationsModel::selectLanguage(QString key)
 
     if(!langPtr)
     {
-        qWarning() << "Selected invalid language" << key << ", defaulting to" << defaultLangCode;
+        qCWarning(LAUNCHER_LOG) << "Selected invalid language" << key << ", defaulting to" << defaultLangCode;
         langCode = defaultLangCode;
     }
     else
@@ -564,10 +565,10 @@ bool TranslationsModel::selectLanguage(QString key)
     d->m_qt_translator.reset(new QTranslator());
     if (d->m_qt_translator->load("qt_" + langCode, QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
     {
-        qDebug() << "Loading Qt Language File for" << langCode.toLocal8Bit().constData() << "...";
+        qCDebug(LAUNCHER_LOG) << "Loading Qt Language File for" << langCode.toLocal8Bit().constData() << "...";
         if (!QCoreApplication::installTranslator(d->m_qt_translator.get()))
         {
-            qCritical() << "Loading Qt Language File failed.";
+            qCCritical(LAUNCHER_LOG) << "Loading Qt Language File failed.";
             d->m_qt_translator.reset();
         }
         else
@@ -582,14 +583,14 @@ bool TranslationsModel::selectLanguage(QString key)
 
     if(langPtr->localFileType == FileType::PO)
     {
-        qDebug() << "Loading Application Language File for" << langCode.toLocal8Bit().constData() << "...";
+        qCDebug(LAUNCHER_LOG) << "Loading Application Language File for" << langCode.toLocal8Bit().constData() << "...";
         auto poTranslator = new POTranslator(FS::PathCombine(d->m_dir.path(), langCode + ".po"));
         if(!poTranslator->isEmpty())
         {
             if (!QCoreApplication::installTranslator(poTranslator))
             {
                 delete poTranslator;
-                qCritical() << "Installing Application Language File failed.";
+                qCCritical(LAUNCHER_LOG) << "Installing Application Language File failed.";
             }
             else
             {
@@ -599,7 +600,7 @@ bool TranslationsModel::selectLanguage(QString key)
         }
         else
         {
-            qCritical() << "Loading Application Language File failed.";
+            qCCritical(LAUNCHER_LOG) << "Loading Application Language File failed.";
             d->m_app_translator.reset();
         }
     }
@@ -608,10 +609,10 @@ bool TranslationsModel::selectLanguage(QString key)
         d->m_app_translator.reset(new QTranslator());
         if (d->m_app_translator->load("mmc_" + langCode, d->m_dir.path()))
         {
-            qDebug() << "Loading Application Language File for" << langCode.toLocal8Bit().constData() << "...";
+            qCDebug(LAUNCHER_LOG) << "Loading Application Language File for" << langCode.toLocal8Bit().constData() << "...";
             if (!QCoreApplication::installTranslator(d->m_app_translator.get()))
             {
-                qCritical() << "Installing Application Language File failed.";
+                qCCritical(LAUNCHER_LOG) << "Installing Application Language File failed.";
                 d->m_app_translator.reset();
             }
             else
@@ -654,7 +655,7 @@ void TranslationsModel::downloadIndex()
     {
         return;
     }
-    qDebug() << "Downloading Translations Index...";
+    qCDebug(LAUNCHER_LOG) << "Downloading Translations Index...";
     d->m_index_job = new NetJob("Translations Index", APPLICATION->network());
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
@@ -669,13 +670,13 @@ void TranslationsModel::updateLanguage(QString key)
 {
     if(key == defaultLangCode)
     {
-        qWarning() << "Cannot update builtin language" << key;
+        qCWarning(LAUNCHER_LOG) << "Cannot update builtin language" << key;
         return;
     }
     auto found = findLanguage(key);
     if(!found)
     {
-        qWarning() << "Cannot update invalid language" << key;
+        qCWarning(LAUNCHER_LOG) << "Cannot update invalid language" << key;
         return;
     }
     if(!found->updated)
@@ -694,7 +695,7 @@ void TranslationsModel::downloadTranslation(QString key)
     auto lang = findLanguage(key);
     if(!lang)
     {
-        qWarning() << "Will not download an unknown translation" << key;
+        qCWarning(LAUNCHER_LOG) << "Will not download an unknown translation" << key;
         return;
     }
 
@@ -727,14 +728,14 @@ void TranslationsModel::downloadNext()
 
 void TranslationsModel::dlFailed(QString reason)
 {
-    qCritical() << "Translations Download Failed:" << reason;
+    qCCritical(LAUNCHER_LOG) << "Translations Download Failed:" << reason;
     d->m_dl_job.reset();
     downloadNext();
 }
 
 void TranslationsModel::dlGood()
 {
-    qDebug() << "Got translation:" << d->m_downloadingTranslation;
+    qCDebug(LAUNCHER_LOG) << "Got translation:" << d->m_downloadingTranslation;
 
     if(d->m_downloadingTranslation == d->m_selectedLanguage)
     {
@@ -746,6 +747,6 @@ void TranslationsModel::dlGood()
 
 void TranslationsModel::indexFailed(QString reason)
 {
-    qCritical() << "Translations Index Download Failed:" << reason;
+    qCCritical(LAUNCHER_LOG) << "Translations Index Download Failed:" << reason;
     d->m_index_job.reset();
 }

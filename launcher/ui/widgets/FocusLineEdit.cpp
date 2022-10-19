@@ -1,5 +1,6 @@
 #include "FocusLineEdit.h"
 #include <QDebug>
+#include "launcherlog.h"
 
 FocusLineEdit::FocusLineEdit(QWidget *parent) : QLineEdit(parent)
 {
@@ -21,5 +22,5 @@ void FocusLineEdit::mousePressEvent(QMouseEvent *me)
         selectAll();
         _selectOnMousePress = false;
     }
-    qDebug() << selectedText();
+    qCDebug(LAUNCHER_LOG) << selectedText();
 }

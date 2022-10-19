@@ -111,7 +111,7 @@ void MinecraftUpdate::next()
     // if the task is already finished by the time we look at it, skip it
     if(task->isFinished())
     {
-        qCritical() << "MinecraftUpdate: Skipping finished subtask" << m_currentTask << ":" << task.get();
+        qCCritical(LAUNCHER_LOG) << "MinecraftUpdate: Skipping finished subtask" << m_currentTask << ":" << task.get();
         next();
     }
     connect(task.get(), &Task::succeeded, this, &MinecraftUpdate::subtaskSucceeded);
@@ -130,14 +130,14 @@ void MinecraftUpdate::subtaskSucceeded()
 {
     if(isFinished())
     {
-        qCritical() << "MinecraftUpdate: Subtask" << sender() << "succeeded, but work was already done!";
+        qCCritical(LAUNCHER_LOG) << "MinecraftUpdate: Subtask" << sender() << "succeeded, but work was already done!";
         return;
     }
     auto senderTask = QObject::sender();
     auto currentTask = m_tasks[m_currentTask].get();
     if(senderTask != currentTask)
     {
-        qDebug() << "MinecraftUpdate: Subtask" << sender() << "succeeded out of order.";
+        qCDebug(LAUNCHER_LOG) << "MinecraftUpdate: Subtask" << sender() << "succeeded out of order.";
         return;
     }
     next();
@@ -147,14 +147,14 @@ void MinecraftUpdate::subtaskFailed(QString error)
 {
     if(isFinished())
     {
-        qCritical() << "MinecraftUpdate: Subtask" << sender() << "failed, but work was already done!";
+        qCCritical(LAUNCHER_LOG) << "MinecraftUpdate: Subtask" << sender() << "failed, but work was already done!";
         return;
     }
     auto senderTask = QObject::sender();
     auto currentTask = m_tasks[m_currentTask].get();
     if(senderTask != currentTask)
     {
-        qDebug() << "MinecraftUpdate: Subtask" << sender() << "failed out of order.";
+        qCDebug(LAUNCHER_LOG) << "MinecraftUpdate: Subtask" << sender() << "failed out of order.";
         m_failed_out_of_order = true;
         m_fail_reason = error;
         return;

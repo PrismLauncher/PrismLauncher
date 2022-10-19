@@ -21,6 +21,7 @@
 #include <icons/IconList.h>
 
 #include <QDebug>
+#include "launcherlog.h"
 
 InstanceProxyModel::InstanceProxyModel(QObject *parent) : QSortFilterProxyModel(parent) {
     m_naturalSort.setNumericMode(true);

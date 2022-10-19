@@ -20,6 +20,7 @@
 #include "TexturePack.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QMap>
 #include <QRegularExpression>
 

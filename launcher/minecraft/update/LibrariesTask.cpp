@@ -13,7 +13,7 @@ LibrariesTask::LibrariesTask(MinecraftInstance * inst)
 void LibrariesTask::executeTask()
 {
     setStatus(tr("Getting the library files from Mojang..."));
-    qDebug() << m_inst->name() << ": downloading libraries";
+    qCDebug(LAUNCHER_LOG) << m_inst->name() << ": downloading libraries";
     MinecraftInstance *inst = (MinecraftInstance *)m_inst;
 
     // Build a list of URLs that will need to be downloaded.
@@ -91,7 +91,7 @@ bool LibrariesTask::abort()
     }
     else
     {
-        qWarning() << "Prematurely aborted LibrariesTask";
+        qCWarning(LAUNCHER_LOG) << "Prematurely aborted LibrariesTask";
     }
     return true;
 }

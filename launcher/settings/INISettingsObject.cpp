@@ -17,6 +17,7 @@
 #include "Setting.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QFile>
 
 INISettingsObject::INISettingsObject(QStringList paths, QObject *parent)
@@ -30,7 +31,7 @@ INISettingsObject::INISettingsObject(QStringList paths, QObject *parent)
         if (path != first_path && QFile::exists(path)) {
             // Copy the fallback to the preferred path.
             QFile::copy(path, first_path);
-            qDebug() << "Copied settings from" << path << "to" << first_path;
+            qCDebug(LAUNCHER_LOG) << "Copied settings from" << path << "to" << first_path;
             break;
         }
     }

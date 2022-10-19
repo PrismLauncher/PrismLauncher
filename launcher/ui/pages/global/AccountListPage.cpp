@@ -41,6 +41,7 @@
 #include <QMenu>
 
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "net/NetJob.h"
 

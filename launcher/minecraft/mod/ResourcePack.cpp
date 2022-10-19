@@ -1,6 +1,7 @@
 #include "ResourcePack.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QMap>
 #include <QRegularExpression>
 
@@ -23,7 +24,7 @@ void ResourcePack::setPackFormat(int new_format_id)
     QMutexLocker locker(&m_data_lock);
 
     if (!s_pack_format_versions.contains(new_format_id)) {
-        qWarning() << "Pack format '%1' is not a recognized resource pack id!";
+        qCWarning(LAUNCHER_LOG) << "Pack format '%1' is not a recognized resource pack id!";
     }
 
     m_pack_format = new_format_id;

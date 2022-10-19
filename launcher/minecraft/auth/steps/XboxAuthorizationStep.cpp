@@ -47,7 +47,7 @@ void XboxAuthorizationStep::perform() {
     AuthRequest *requestor = new AuthRequest(this);
     connect(requestor, &AuthRequest::finished, this, &XboxAuthorizationStep::onRequestDone);
     requestor->post(request, xbox_auth_data.toUtf8());
-    qDebug() << "Getting authorization token for " << m_relyingParty;
+    qCDebug(LAUNCHER_LOG) << "Getting authorization token for " << m_relyingParty;
 }
 
 void XboxAuthorizationStep::onRequestDone(
@@ -59,10 +59,10 @@ void XboxAuthorizationStep::onRequestDone(
     requestor->deleteLater();
 
 #ifndef NDEBUG
-    qDebug() << data;
+    qCDebug(LAUNCHER_LOG) << data;
 #endif
     if (error != QNetworkReply::NoError) {
-        qWarning() << "Reply error:" << error;
+        qCWarning(LAUNCHER_LOG) << "Reply error:" << error;
         if (Net::isApplicationError(error)) {
             if(!processSTSError(error, data, headers)) {
                 emit finished(
@@ -118,7 +118,7 @@ bool XboxAuthorizationStep::processSTSError(
         QJsonParseError jsonError;
         QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
         if(jsonError.error) {
-            qWarning() << "Cannot parse error XSTS response as JSON: " << jsonError.errorString();
+            qCWarning(LAUNCHER_LOG) << "Cannot parse error XSTS response as JSON: " << jsonError.errorString();
             emit finished(
                 AccountTaskState::STATE_FAILED_SOFT,
                 tr("Cannot parse %1 authorization error response as JSON: %2").arg(m_authorizationKind, jsonError.errorString())

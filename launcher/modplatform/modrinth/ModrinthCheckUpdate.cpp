@@ -77,9 +77,9 @@ void ModrinthCheckUpdate::executeTask()
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from ModrinthCheckUpdate at " << parse_error.offset
+            qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from ModrinthCheckUpdate at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
-            qWarning() << *response;
+            qCWarning(LAUNCHER_LOG) << *response;
 
             failed(parse_error.errorString());
             return;
@@ -95,8 +95,8 @@ void ModrinthCheckUpdate::executeTask()
                 // If the returned project is empty, but we have Modrinth metadata,
                 // it means this specific version is not available
                 if (project_obj.isEmpty()) {
-                    qDebug() << "Mod " << mappings.find(hash).value()->name() << " got an empty response.";
-                    qDebug() << "Hash: " << hash;
+                    qCDebug(LAUNCHER_LOG) << "Mod " << mappings.find(hash).value()->name() << " got an empty response.";
+                    qCDebug(LAUNCHER_LOG) << "Hash: " << hash;
 
                     emit checkFailed(
                         mappings.find(hash).value(),
@@ -123,8 +123,8 @@ void ModrinthCheckUpdate::executeTask()
 
                 auto project_ver = Modrinth::loadIndexedPackVersion(project_obj, best_hash_type, loader_filter);
                 if (project_ver.downloadUrl.isEmpty()) {
-                    qCritical() << "Modrinth mod without download url!";
-                    qCritical() << project_ver.fileName;
+                    qCCritical(LAUNCHER_LOG) << "Modrinth mod without download url!";
+                    qCCritical(LAUNCHER_LOG) << project_ver.fileName;
 
                     emit checkFailed(mappings.find(hash).value(), tr("Mod has an empty download URL"));
 
@@ -133,7 +133,7 @@ void ModrinthCheckUpdate::executeTask()
 
                 auto mod_iter = mappings.find(hash);
                 if (mod_iter == mappings.end()) {
-                    qCritical() << "Failed to remap mod from Modrinth!";
+                    qCCritical(LAUNCHER_LOG) << "Failed to remap mod from Modrinth!";
                     continue;
                 }
                 auto mod = *mod_iter;

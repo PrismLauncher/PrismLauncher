@@ -103,8 +103,8 @@ void ListModel::requestFinished()
     QJsonParseError parse_error;
     QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if(parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ATL at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << response;
+        qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from ATL at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qCWarning(LAUNCHER_LOG) << response;
         return;
     }
 
@@ -120,8 +120,8 @@ void ListModel::requestFinished()
             ATLauncher::loadIndexedPack(pack, packObj);
         }
         catch (const JSONValidationError &e) {
-            qDebug() << QString::fromUtf8(response);
-            qWarning() << "Error while reading pack manifest from ATLauncher: " << e.cause();
+            qCDebug(LAUNCHER_LOG) << QString::fromUtf8(response);
+            qCWarning(LAUNCHER_LOG) << "Error while reading pack manifest from ATLauncher: " << e.cause();
             return;
         }
 

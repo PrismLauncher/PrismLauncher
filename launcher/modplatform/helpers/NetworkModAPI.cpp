@@ -19,9 +19,9 @@ void NetworkModAPI::searchMods(CallerType* caller, SearchArgs&& args) const
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from " << caller->debugName() << " at " << parse_error.offset
+            qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from " << caller->debugName() << " at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
-            qWarning() << *response;
+            qCWarning(LAUNCHER_LOG) << *response;
             return;
         }
 
@@ -40,9 +40,9 @@ void NetworkModAPI::getModInfo(ModPlatform::IndexedPack& pack, std::function<voi
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
+            qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response for mod info at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
-            qWarning() << *response;
+            qCWarning(LAUNCHER_LOG) << *response;
             return;
         }
 
@@ -63,9 +63,9 @@ void NetworkModAPI::getVersions(VersionSearchArgs&& args, std::function<void(QJs
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for getting versions at " << parse_error.offset
+            qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response for getting versions at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
-            qWarning() << *response;
+            qCWarning(LAUNCHER_LOG) << *response;
             return;
         }
 

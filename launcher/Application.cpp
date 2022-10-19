@@ -87,6 +87,7 @@
 #include <QList>
 #include <QStringList>
 #include <QDebug>
+#include "launcherlog.h"
 #include <QStyleFactory>
 #include <QWindow>
 #include <QIcon>
@@ -436,36 +437,36 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             return;
         }
         qInstallMessageHandler(appDebugOutput);
-        qDebug() << "<> Log initialized.";
+        qCDebug(LAUNCHER_LOG) << "<> Log initialized.";
     }
 
     {
 
-        qDebug() << BuildConfig.LAUNCHER_DISPLAYNAME << ", (c) 2013-2021 " << BuildConfig.LAUNCHER_COPYRIGHT;
-        qDebug() << "Version                    : " << BuildConfig.printableVersionString();
-        qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
-        qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
+        qCDebug(LAUNCHER_LOG) << BuildConfig.LAUNCHER_DISPLAYNAME << ", (c) 2013-2021 " << BuildConfig.LAUNCHER_COPYRIGHT;
+        qCDebug(LAUNCHER_LOG) << "Version                    : " << BuildConfig.printableVersionString();
+        qCDebug(LAUNCHER_LOG) << "Git commit                 : " << BuildConfig.GIT_COMMIT;
+        qCDebug(LAUNCHER_LOG) << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
         if (adjustedBy.size())
         {
-            qDebug() << "Work dir before adjustment : " << origcwdPath;
-            qDebug() << "Work dir after adjustment  : " << QDir::currentPath();
-            qDebug() << "Adjusted by                : " << adjustedBy;
+            qCDebug(LAUNCHER_LOG) << "Work dir before adjustment : " << origcwdPath;
+            qCDebug(LAUNCHER_LOG) << "Work dir after adjustment  : " << QDir::currentPath();
+            qCDebug(LAUNCHER_LOG) << "Adjusted by                : " << adjustedBy;
         }
         else
         {
-            qDebug() << "Work dir                   : " << QDir::currentPath();
+            qCDebug(LAUNCHER_LOG) << "Work dir                   : " << QDir::currentPath();
         }
-        qDebug() << "Binary path                : " << binPath;
-        qDebug() << "Application root path      : " << m_rootPath;
+        qCDebug(LAUNCHER_LOG) << "Binary path                : " << binPath;
+        qCDebug(LAUNCHER_LOG) << "Application root path      : " << m_rootPath;
         if(!m_instanceIdToLaunch.isEmpty())
         {
-            qDebug() << "ID of instance to launch   : " << m_instanceIdToLaunch;
+            qCDebug(LAUNCHER_LOG) << "ID of instance to launch   : " << m_instanceIdToLaunch;
         }
         if(!m_serverToJoin.isEmpty())
         {
-            qDebug() << "Address of server to join  :" << m_serverToJoin;
+            qCDebug(LAUNCHER_LOG) << "Address of server to join  :" << m_serverToJoin;
         }
-        qDebug() << "<> Paths set.";
+        qCDebug(LAUNCHER_LOG) << "<> Paths set.";
     }
 
     if(m_liveCheck)
@@ -478,11 +479,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             {
                 check.close();
             } else {
-                qWarning() << "Could not write into" << liveCheckFile << "!";
+                qCWarning(LAUNCHER_LOG) << "Could not write into" << liveCheckFile << "!";
                 check.remove();  // also closes file!
             }
         } else {
-            qWarning() << "Could not open" << liveCheckFile << "for writing!";
+            qCWarning(LAUNCHER_LOG) << "Could not open" << liveCheckFile << "for writing!";
         }
     }
 
@@ -523,7 +524,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         QFontInfo consoleFontInfo(consoleFont);
         QString resolvedDefaultMonospace = consoleFontInfo.family();
         QFont resolvedFont(resolvedDefaultMonospace);
-        qDebug() << "Detected default console font:" << resolvedDefaultMonospace
+        qCDebug(LAUNCHER_LOG) << "Detected default console font:" << resolvedDefaultMonospace
             << ", substitutions:" << resolvedFont.substitutions().join(',');
 
         m_settings->registerSetting("ConsoleFont", resolvedDefaultMonospace);
@@ -690,7 +691,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<AccountListPage>();
             m_globalSettingsProvider->addPage<APIPage>();
         }
-        qDebug() << "<> Settings loaded.";
+        qCDebug(LAUNCHER_LOG) << "<> Settings loaded.";
     }
 
 #ifndef QT_NO_ACCESSIBILITY
@@ -706,7 +707,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         QString user = settings()->get("ProxyUser").toString();
         QString pass = settings()->get("ProxyPass").toString();
         updateProxySettings(proxyTypeStr, addr, port, user, pass);
-        qDebug() << "<> Network done.";
+        qCDebug(LAUNCHER_LOG) << "<> Network done.";
     }
 
     // load translations
@@ -714,8 +715,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_translations.reset(new TranslationsModel("translations"));
         auto bcp47Name = m_settings->get("Language").toString();
         m_translations->selectLanguage(bcp47Name);
-        qDebug() << "Your language is" << bcp47Name;
-        qDebug() << "<> Translations loaded.";
+        qCDebug(LAUNCHER_LOG) << "Your language is" << bcp47Name;
+        qCDebug(LAUNCHER_LOG) << "<> Translations loaded.";
     }
 
     // initialize the updater
@@ -723,9 +724,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     {
         auto platform = getIdealPlatform(BuildConfig.BUILD_PLATFORM);
         auto channelUrl = BuildConfig.UPDATER_BASE + platform + "/channels.json";
-        qDebug() << "Initializing updater with platform: " << platform << " -- " << channelUrl;
+        qCDebug(LAUNCHER_LOG) << "Initializing updater with platform: " << platform << " -- " << channelUrl;
         m_updateChecker.reset(new UpdateChecker(m_network, channelUrl, BuildConfig.VERSION_CHANNEL));
-        qDebug() << "<> Updater started.";
+        qCDebug(LAUNCHER_LOG) << "<> Updater started.";
     }
 
     // Instance icons
@@ -743,7 +744,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         {
             m_icons->directoryChanged(value.toString());
         });
-        qDebug() << "<> Instance icons intialized.";
+        qCDebug(LAUNCHER_LOG) << "<> Instance icons intialized.";
     }
 
     // Icon themes
@@ -753,7 +754,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         auto searchPaths = QIcon::themeSearchPaths();
         searchPaths.append("iconthemes");
         QIcon::setThemeSearchPaths(searchPaths);
-        qDebug() << "<> Icon themes initialized.";
+        qCDebug(LAUNCHER_LOG) << "<> Icon themes initialized.";
     }
 
     // Initialize widget themes
@@ -767,7 +768,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         insertTheme(darkTheme);
         insertTheme(new BrightTheme());
         insertTheme(new CustomTheme(darkTheme, "custom"));
-        qDebug() << "<> Widget themes initialized.";
+        qCDebug(LAUNCHER_LOG) << "<> Widget themes initialized.";
     }
 
     // initialize and load all instances
@@ -776,26 +777,26 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // instance path: check for problems with '!' in instance path and warn the user in the log
         // and remember that we have to show him a dialog when the gui starts (if it does so)
         QString instDir = InstDirSetting->get().toString();
-        qDebug() << "Instance path              : " << instDir;
+        qCDebug(LAUNCHER_LOG) << "Instance path              : " << instDir;
         if (FS::checkProblemticPathJava(QDir(instDir)))
         {
-            qWarning() << "Your instance path contains \'!\' and this is known to cause java problems!";
+            qCWarning(LAUNCHER_LOG) << "Your instance path contains \'!\' and this is known to cause java problems!";
         }
         m_instances.reset(new InstanceList(m_settings, instDir, this));
         connect(InstDirSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
-        qDebug() << "Loading Instances...";
+        qCDebug(LAUNCHER_LOG) << "Loading Instances...";
         m_instances->loadList();
-        qDebug() << "<> Instances loaded.";
+        qCDebug(LAUNCHER_LOG) << "<> Instances loaded.";
     }
 
     // and accounts
     {
         m_accounts.reset(new AccountList(this));
-        qDebug() << "Loading accounts...";
+        qCDebug(LAUNCHER_LOG) << "Loading accounts...";
         m_accounts->setListFilePath("accounts.json", true);
         m_accounts->loadList();
         m_accounts->fillQueue();
-        qDebug() << "<> Accounts loaded.";
+        qCDebug(LAUNCHER_LOG) << "<> Accounts loaded.";
     }
 
     // init the http meta cache
@@ -822,7 +823,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_metacache->addBase("icons", QDir("cache/icons").absolutePath());
         m_metacache->addBase("meta", QDir("meta").absolutePath());
         m_metacache->Load();
-        qDebug() << "<> Cache initialized.";
+        qCDebug(LAUNCHER_LOG) << "<> Cache initialized.";
     }
 
     // now we have network, download translation updates
@@ -862,9 +863,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     {
         setIconTheme(settings()->get("IconTheme").toString());
-        qDebug() << "<> Icon theme set.";
+        qCDebug(LAUNCHER_LOG) << "<> Icon theme set.";
         setApplicationTheme(settings()->get("ApplicationTheme").toString(), true);
-        qDebug() << "<> Application theme set.";
+        qCDebug(LAUNCHER_LOG) << "<> Application theme set.";
     }
 
     updateCapabilities();
@@ -950,7 +951,7 @@ bool Application::event(QEvent* event) {
 
 void Application::setupWizardFinished(int status)
 {
-    qDebug() << "Wizard result =" << status;
+    qCDebug(LAUNCHER_LOG) << "Wizard result =" << status;
     performMainStartupAction();
 }
 
@@ -965,12 +966,12 @@ void Application::performMainStartupAction()
             MinecraftServerTargetPtr serverToJoin = nullptr;
             MinecraftAccountPtr accountToUse = nullptr;
 
-            qDebug() << "<> Instance" << m_instanceIdToLaunch << "launching";
+            qCDebug(LAUNCHER_LOG) << "<> Instance" << m_instanceIdToLaunch << "launching";
             if(!m_serverToJoin.isEmpty())
             {
                 // FIXME: validate the server string
                 serverToJoin.reset(new MinecraftServerTarget(MinecraftServerTarget::parse(m_serverToJoin)));
-                qDebug() << "   Launching with server" << m_serverToJoin;
+                qCDebug(LAUNCHER_LOG) << "   Launching with server" << m_serverToJoin;
             }
 
             if(!m_profileToUse.isEmpty())
@@ -979,7 +980,7 @@ void Application::performMainStartupAction()
                 if(!accountToUse) {
                     return;
                 }
-                qDebug() << "   Launching with account" << m_profileToUse;
+                qCDebug(LAUNCHER_LOG) << "   Launching with account" << m_profileToUse;
             }
 
             launch(inst, true, false, nullptr, serverToJoin, accountToUse);
@@ -990,11 +991,11 @@ void Application::performMainStartupAction()
     {
         // normal main window
         showMainWindow(false);
-        qDebug() << "<> Main window shown.";
+        qCDebug(LAUNCHER_LOG) << "<> Main window shown.";
     }
     if(!m_zipToImport.isEmpty())
     {
-        qDebug() << "<> Importing instance from zip:" << m_zipToImport;
+        qCDebug(LAUNCHER_LOG) << "<> Importing instance from zip:" << m_zipToImport;
         m_mainWindow->droppedURLs({ m_zipToImport });
     }
 }
@@ -1027,7 +1028,7 @@ void Application::messageReceived(const QByteArray& message)
 {
     if(status() != Initialized)
     {
-        qDebug() << "Received message" << message << "while still initializing. It will be ignored.";
+        qCDebug(LAUNCHER_LOG) << "Received message" << message << "while still initializing. It will be ignored.";
         return;
     }
 
@@ -1045,7 +1046,7 @@ void Application::messageReceived(const QByteArray& message)
         QString path = received.args["path"];
         if(path.isEmpty())
         {
-            qWarning() << "Received" << command << "message without a zip path/URL.";
+            qCWarning(LAUNCHER_LOG) << "Received" << command << "message without a zip path/URL.";
             return;
         }
         m_mainWindow->droppedURLs({ QUrl(path) });
@@ -1060,12 +1061,12 @@ void Application::messageReceived(const QByteArray& message)
         if(!id.isEmpty()) {
             instance = instances()->getInstanceById(id);
             if(!instance) {
-                qWarning() << "Launch command requires an valid instance ID. " << id << "resolves to nothing.";
+                qCWarning(LAUNCHER_LOG) << "Launch command requires an valid instance ID. " << id << "resolves to nothing.";
                 return;
             }
         }
         else {
-            qWarning() << "Launch command called without an instance ID...";
+            qCWarning(LAUNCHER_LOG) << "Launch command called without an instance ID...";
             return;
         }
 
@@ -1078,7 +1079,7 @@ void Application::messageReceived(const QByteArray& message)
         if(!profile.isEmpty()) {
             accountObject = accounts()->getAccountByProfileName(profile);
             if(!accountObject) {
-                qWarning() << "Launch command requires the specified profile to be valid. " << profile << "does not resolve to any account.";
+                qCWarning(LAUNCHER_LOG) << "Launch command requires the specified profile to be valid. " << profile << "does not resolve to any account.";
                 return;
             }
         }
@@ -1094,7 +1095,7 @@ void Application::messageReceived(const QByteArray& message)
     }
     else
     {
-        qWarning() << "Received invalid message" << message;
+        qCWarning(LAUNCHER_LOG) << "Received invalid message" << message;
     }
 }
 
@@ -1153,7 +1154,7 @@ void Application::setApplicationTheme(const QString& name, bool initial)
     }
     else
     {
-        qWarning() << "Tried to set invalid theme:" << name;
+        qCWarning(LAUNCHER_LOG) << "Tried to set invalid theme:" << name;
     }
 }
 
@@ -1194,7 +1195,7 @@ bool Application::launch(
 ) {
     if(m_updateRunning)
     {
-        qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
+        qCDebug(LAUNCHER_LOG) << "Cannot launch instances while an update is running. Please try again when updates are completed.";
     }
     else if(instance->canLaunch())
     {
@@ -1249,7 +1250,7 @@ bool Application::kill(InstancePtr instance)
 {
     if (!instance->isRunning())
     {
-        qWarning() << "Attempted to kill instance" << instance->id() << ", which isn't running.";
+        qCWarning(LAUNCHER_LOG) << "Attempted to kill instance" << instance->id() << ", which isn't running.";
         return false;
     }
     auto & extras = m_instanceExtras[instance->id()];
@@ -1281,7 +1282,7 @@ void Application::subRunningInstance()
 {
     if(m_runningInstances == 0)
     {
-        qCritical() << "Something went really wrong and we now have less than 0 running instances... WTF";
+        qCCritical(LAUNCHER_LOG) << "Something went really wrong and we now have less than 0 running instances... WTF";
         return;
     }
     m_runningInstances --;
@@ -1485,14 +1486,14 @@ void Application::updateProxySettings(QString proxyTypeStr, QString addr, int po
         QNetworkProxyFactory::setUseSystemConfiguration(true);
     }
 
-    qDebug() << "Detecting proxy settings...";
+    qCDebug(LAUNCHER_LOG) << "Detecting proxy settings...";
     QNetworkProxy proxy = QNetworkProxy::applicationProxy();
     m_network->setProxy(proxy);
 
     QString proxyDesc;
     if (proxy.type() == QNetworkProxy::NoProxy)
     {
-        qDebug() << "Using no proxy is an option!";
+        qCDebug(LAUNCHER_LOG) << "Using no proxy is an option!";
         return;
     }
     switch (proxy.type())
@@ -1519,7 +1520,7 @@ void Application::updateProxySettings(QString proxyTypeStr, QString addr, int po
     proxyDesc += QString("%1:%2")
                      .arg(proxy.hostName())
                      .arg(proxy.port());
-    qDebug() << proxyDesc;
+    qCDebug(LAUNCHER_LOG) << proxyDesc;
 }
 
 shared_qobject_ptr< HttpMetaCache > Application::metacache()

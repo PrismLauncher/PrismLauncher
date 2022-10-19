@@ -36,6 +36,7 @@
 #include <cassert>
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QTimer>
 #include <QBuffer>
 #include <QUrlQuery>
@@ -92,7 +93,7 @@ void AuthRequest::onRequestFinished() {
 }
 
 void AuthRequest::onRequestError(QNetworkReply::NetworkError error) {
-    qWarning() << "AuthRequest::onRequestError: Error" << (int)error;
+    qCWarning(LAUNCHER_LOG) << "AuthRequest::onRequestError: Error" << (int)error;
     if (status_ == Idle) {
         return;
     }
@@ -102,8 +103,8 @@ void AuthRequest::onRequestError(QNetworkReply::NetworkError error) {
     errorString_ = reply_->errorString();
     httpStatus_ = reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     error_ = error;
-    qWarning() << "AuthRequest::onRequestError: Error string: " << errorString_;
-    qWarning() << "AuthRequest::onRequestError: HTTP status" << httpStatus_ << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+    qCWarning(LAUNCHER_LOG) << "AuthRequest::onRequestError: Error string: " << errorString_;
+    qCWarning(LAUNCHER_LOG) << "AuthRequest::onRequestError: HTTP status" << httpStatus_ << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
 
     // QTimer::singleShot(10, this, SLOT(finish()));
 }
@@ -111,16 +112,16 @@ void AuthRequest::onRequestError(QNetworkReply::NetworkError error) {
 void AuthRequest::onSslErrors(QList<QSslError> errors) {
     int i = 1;
     for (auto error : errors) {
-        qCritical() << "LOGIN SSL Error #" << i << " : " << error.errorString();
+        qCCritical(LAUNCHER_LOG) << "LOGIN SSL Error #" << i << " : " << error.errorString();
         auto cert = error.certificate();
-        qCritical() << "Certificate in question:\n" << cert.toText();
+        qCCritical(LAUNCHER_LOG) << "Certificate in question:\n" << cert.toText();
         i++;
     }
 }
 
 void AuthRequest::onUploadProgress(qint64 uploaded, qint64 total) {
     if (status_ == Idle) {
-        qWarning() << "AuthRequest::onUploadProgress: No pending request";
+        qCWarning(LAUNCHER_LOG) << "AuthRequest::onUploadProgress: No pending request";
         return;
     }
     if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
@@ -155,7 +156,7 @@ void AuthRequest::setup(const QNetworkRequest &req, QNetworkAccessManager::Opera
 void AuthRequest::finish() {
     QByteArray data;
     if (status_ == Idle) {
-        qWarning() << "AuthRequest::finish: No pending request";
+        qCWarning(LAUNCHER_LOG) << "AuthRequest::finish: No pending request";
         return;
     }
     data = reply_->readAll();

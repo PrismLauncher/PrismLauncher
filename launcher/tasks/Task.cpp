@@ -36,6 +36,7 @@
 #include "Task.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 
 Task::Task(QObject *parent, bool show_debug) : QObject(parent), m_show_debug(show_debug)
 {
@@ -65,31 +66,31 @@ void Task::start()
         case State::Inactive:
         {
             if (m_show_debug)
-                qDebug() << "Task" << describe() << "starting for the first time";
+                qCDebug(LAUNCHER_LOG) << "Task" << describe() << "starting for the first time";
             break;
         }
         case State::AbortedByUser:
         {
             if (m_show_debug)
-                qDebug() << "Task" << describe() << "restarting for after being aborted by user";
+                qCDebug(LAUNCHER_LOG) << "Task" << describe() << "restarting for after being aborted by user";
             break;
         }
         case State::Failed:
         {
             if (m_show_debug)
-                qDebug() << "Task" << describe() << "restarting for after failing at first";
+                qCDebug(LAUNCHER_LOG) << "Task" << describe() << "restarting for after failing at first";
             break;
         }
         case State::Succeeded:
         {
             if (m_show_debug)
-                qDebug() << "Task" << describe() << "restarting for after succeeding at first";
+                qCDebug(LAUNCHER_LOG) << "Task" << describe() << "restarting for after succeeding at first";
             break;
         }
         case State::Running:
         {
             if (m_show_debug)
-                qWarning() << "The launcher tried to start task" << describe() << "while it was already running!";
+                qCWarning(LAUNCHER_LOG) << "The launcher tried to start task" << describe() << "while it was already running!";
             return;
         }
     }
@@ -104,12 +105,12 @@ void Task::emitFailed(QString reason)
     // Don't fail twice.
     if (!isRunning())
     {
-        qCritical() << "Task" << describe() << "failed while not running!!!!: " << reason;
+        qCCritical(LAUNCHER_LOG) << "Task" << describe() << "failed while not running!!!!: " << reason;
         return;
     }
     m_state = State::Failed;
     m_failReason = reason;
-    qCritical() << "Task" << describe() << "failed: " << reason;
+    qCCritical(LAUNCHER_LOG) << "Task" << describe() << "failed: " << reason;
     emit failed(reason);
     emit finished();
 }
@@ -119,13 +120,13 @@ void Task::emitAborted()
     // Don't abort twice.
     if (!isRunning())
     {
-        qCritical() << "Task" << describe() << "aborted while not running!!!!";
+        qCCritical(LAUNCHER_LOG) << "Task" << describe() << "aborted while not running!!!!";
         return;
     }
     m_state = State::AbortedByUser;
     m_failReason = "Aborted.";
     if (m_show_debug)
-        qDebug() << "Task" << describe() << "aborted.";
+        qCDebug(LAUNCHER_LOG) << "Task" << describe() << "aborted.";
     emit aborted();
     emit finished();
 }
@@ -135,12 +136,12 @@ void Task::emitSucceeded()
     // Don't succeed twice.
     if (!isRunning())
     {
-        qCritical() << "Task" << describe() << "succeeded while not running!!!!";
+        qCCritical(LAUNCHER_LOG) << "Task" << describe() << "succeeded while not running!!!!";
         return;
     }
     m_state = State::Succeeded;
     if (m_show_debug)
-        qDebug() << "Task" << describe() << "succeeded";
+        qCDebug(LAUNCHER_LOG) << "Task" << describe() << "succeeded";
     emit succeeded();
     emit finished();
 }
@@ -186,7 +187,7 @@ QString Task::failReason() const
 
 void Task::logWarning(const QString& line)
 {
-    qWarning() << line;
+    qCWarning(LAUNCHER_LOG) << line;
     m_Warnings.append(line);
 }
 

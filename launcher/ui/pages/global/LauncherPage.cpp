@@ -223,7 +223,7 @@ void LauncherPage::refreshUpdateChannelList()
         // the combo box to it.
         if (entry.id == m_currentUpdateChannel)
         {
-            qDebug() << "Selected index" << i << "channel id" << m_currentUpdateChannel;
+            qCDebug(LAUNCHER_LOG) << "Selected index" << i << "channel id" << m_currentUpdateChannel;
             selection = i;
         }
     }

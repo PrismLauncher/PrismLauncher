@@ -35,7 +35,7 @@ QString findBestIconIn(const QString &folder, const QString & iconKey) {
         for(int i = 0; i < best_found; i++) {
             if(extension == validIconExtensions[i]) {
                 best_found = i;
-                qDebug() << i << " : " << fileInfo.fileName();
+                qCDebug(LAUNCHER_LOG) << i << " : " << fileInfo.fileName();
                 best_filename = fileInfo.fileName();
             }
         }

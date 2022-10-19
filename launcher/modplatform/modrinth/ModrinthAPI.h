@@ -24,6 +24,7 @@
 #include "modplatform/helpers/NetworkModAPI.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 
 class ModrinthAPI : public NetworkModAPI {
    public:
@@ -81,7 +82,7 @@ class ModrinthAPI : public NetworkModAPI {
     inline auto getModSearchURL(SearchArgs& args) const -> QString override
     {
         if (!validateModLoaders(args.loaders)) {
-            qWarning() << "Modrinth only have Forge and Fabric-compatible mods!";
+            qCWarning(LAUNCHER_LOG) << "Modrinth only have Forge and Fabric-compatible mods!";
             return "";
         }
 

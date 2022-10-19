@@ -38,6 +38,7 @@
 #include <QJsonDocument>
 
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "minecraft/VersionFile.h"
 #include "minecraft/Library.h"

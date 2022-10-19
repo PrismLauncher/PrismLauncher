@@ -214,7 +214,7 @@ void VersionList::merge(const VersionListPtr &other)
     m_versions.clear();
     if(other->m_versions.isEmpty())
     {
-        qWarning() << "Empty list loaded ...";
+        qCWarning(LAUNCHER_LOG) << "Empty list loaded ...";
     }
     for (const VersionPtr &version : other->m_versions)
     {

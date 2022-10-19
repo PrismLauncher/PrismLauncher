@@ -2,6 +2,7 @@
 
 #include <MurmurHash2.h>
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "Json.h"
 
@@ -89,14 +90,14 @@ void EnsureMetadataTask::executeTask()
 
     for (auto* mod : m_mods) {
         if (!mod->valid()) {
-            qDebug() << "Mod" << mod->name() << "is invalid!";
+            qCDebug(LAUNCHER_LOG) << "Mod" << mod->name() << "is invalid!";
             emitFail(mod);
             continue;
         }
 
         // They already have the right metadata :o
         if (mod->status() != ModStatus::NoMetadata && mod->metadata() && mod->metadata()->provider == m_provider) {
-            qDebug() << "Mod" << mod->name() << "already has metadata!";
+            qCDebug(LAUNCHER_LOG) << "Mod" << mod->name() << "already has metadata!";
             emitReady(mod);
             continue;
         }
@@ -171,14 +172,14 @@ void EnsureMetadataTask::executeTask()
 void EnsureMetadataTask::emitReady(Mod* m, QString key, RemoveFromList remove)
 {
     if (!m) {
-        qCritical() << "Tried to mark a null mod as ready.";
+        qCCritical(LAUNCHER_LOG) << "Tried to mark a null mod as ready.";
         if (!key.isEmpty())
             m_mods.remove(key);
 
         return;
     }
 
-    qDebug() << QString("Generated metadata for %1").arg(m->name());
+    qCDebug(LAUNCHER_LOG) << QString("Generated metadata for %1").arg(m->name());
     emit metadataReady(m);
 
     if (remove == RemoveFromList::Yes) {
@@ -191,14 +192,14 @@ void EnsureMetadataTask::emitReady(Mod* m, QString key, RemoveFromList remove)
 void EnsureMetadataTask::emitFail(Mod* m, QString key, RemoveFromList remove)
 {
     if (!m) {
-        qCritical() << "Tried to mark a null mod as failed.";
+        qCCritical(LAUNCHER_LOG) << "Tried to mark a null mod as failed.";
         if (!key.isEmpty())
             m_mods.remove(key);
 
         return;
     }
 
-    qDebug() << QString("Failed to generate metadata for %1").arg(m->name());
+    qCDebug(LAUNCHER_LOG) << QString("Failed to generate metadata for %1").arg(m->name());
     emit metadataFailed(m);
 
     if (remove == RemoveFromList::Yes) {
@@ -225,9 +226,9 @@ NetJob::Ptr EnsureMetadataTask::modrinthVersionsTask()
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at " << parse_error.offset
+            qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from Modrinth::CurrentVersions at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
-            qWarning() << *response;
+            qCWarning(LAUNCHER_LOG) << *response;
 
             failed(parse_error.errorString());
             return;
@@ -241,19 +242,19 @@ NetJob::Ptr EnsureMetadataTask::modrinthVersionsTask()
                     auto entry = Json::requireObject(entries, hash);
 
                     setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod->name()));
-                    qDebug() << "Getting version for" << mod->name() << "from Modrinth";
+                    qCDebug(LAUNCHER_LOG) << "Getting version for" << mod->name() << "from Modrinth";
 
                     m_temp_versions.insert(hash, Modrinth::loadIndexedPackVersion(entry));
                 } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
+                    qCDebug(LAUNCHER_LOG) << e.cause();
+                    qCDebug(LAUNCHER_LOG) << entries;
 
                     emitFail(mod);
                 }
             }
         } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+            qCDebug(LAUNCHER_LOG) << e.cause();
+            qCDebug(LAUNCHER_LOG) << doc;
         }
     });
 
@@ -270,7 +271,7 @@ NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
     NetJob::Ptr proj_task;
 
     if (addonIds.isEmpty()) {
-        qWarning() << "No addonId found!";
+        qCWarning(LAUNCHER_LOG) << "No addonId found!";
     } else if (addonIds.size() == 1) {
         proj_task = modrinth_api.getProject(*addonIds.keyBegin(), response);
     } else {
@@ -285,9 +286,9 @@ NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
         QJsonParseError parse_error{};
         auto doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at " << parse_error.offset
+            qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from Modrinth projects task at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
-            qWarning() << *response;
+            qCWarning(LAUNCHER_LOG) << *response;
             return;
         }
 
@@ -308,7 +309,7 @@ NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
 
                 auto mod_iter = m_mods.find(hash);
                 if (mod_iter == m_mods.end()) {
-                    qWarning() << "Invalid project id from the API response.";
+                    qCWarning(LAUNCHER_LOG) << "Invalid project id from the API response.";
                     continue;
                 }
 
@@ -319,15 +320,15 @@ NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
 
                     modrinthCallback(pack, m_temp_versions.find(hash).value(), mod);
                 } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
+                    qCDebug(LAUNCHER_LOG) << e.cause();
+                    qCDebug(LAUNCHER_LOG) << entries;
 
                     emitFail(mod);
                 }
             }
         } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+            qCDebug(LAUNCHER_LOG) << e.cause();
+            qCDebug(LAUNCHER_LOG) << doc;
         }
     });
 
@@ -350,9 +351,9 @@ NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at " << parse_error.offset
+            qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from Modrinth::CurrentVersions at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
-            qWarning() << *response;
+            qCWarning(LAUNCHER_LOG) << *response;
 
             failed(parse_error.errorString());
             return;
@@ -364,7 +365,7 @@ NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
             auto data_arr = Json::requireArray(data_obj, "exactMatches");
 
             if (data_arr.isEmpty()) {
-                qWarning() << "No matches found for fingerprint search!";
+                qCWarning(LAUNCHER_LOG) << "No matches found for fingerprint search!";
 
                 return;
             }
@@ -374,7 +375,7 @@ NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
                 auto file_obj = Json::ensureObject(match_obj, "file", {});
 
                 if (match_obj.isEmpty() || file_obj.isEmpty()) {
-                    qWarning() << "Fingerprint match is empty!";
+                    qCWarning(LAUNCHER_LOG) << "Fingerprint match is empty!";
 
                     return;
                 }
@@ -382,7 +383,7 @@ NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
                 auto fingerprint = QString::number(Json::ensureVariant(file_obj, "fileFingerprint").toUInt());
                 auto mod = m_mods.find(fingerprint);
                 if (mod == m_mods.end()) {
-                    qWarning() << "Invalid fingerprint from the API response.";
+                    qCWarning(LAUNCHER_LOG) << "Invalid fingerprint from the API response.";
                     continue;
                 }
 
@@ -392,8 +393,8 @@ NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
             }
 
         } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+            qCDebug(LAUNCHER_LOG) << e.cause();
+            qCDebug(LAUNCHER_LOG) << doc;
         }
     });
 
@@ -417,7 +418,7 @@ NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
     NetJob::Ptr proj_task;
 
     if (addonIds.isEmpty()) {
-        qWarning() << "No addonId found!";
+        qCWarning(LAUNCHER_LOG) << "No addonId found!";
     } else if (addonIds.size() == 1) {
         proj_task = flame_api.getProject(*addonIds.keyBegin(), response);
     } else {
@@ -432,9 +433,9 @@ NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
         QJsonParseError parse_error{};
         auto doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at " << parse_error.offset
+            qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from Modrinth projects task at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
-            qWarning() << *response;
+            qCWarning(LAUNCHER_LOG) << *response;
             return;
         }
 
@@ -460,15 +461,15 @@ NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
 
                     flameCallback(pack, m_temp_versions.find(hash).value(), mod);
                 } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
+                    qCDebug(LAUNCHER_LOG) << e.cause();
+                    qCDebug(LAUNCHER_LOG) << entries;
 
                     emitFail(mod);
                 }
             }
         } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+            qCDebug(LAUNCHER_LOG) << e.cause();
+            qCDebug(LAUNCHER_LOG) << doc;
         }
     });
 
@@ -498,7 +499,7 @@ void EnsureMetadataTask::modrinthCallback(ModPlatform::IndexedPack& pack, ModPla
 
     auto metadata = Metadata::get(tmp_index_dir, pack.slug);
     if (!metadata.isValid()) {
-        qCritical() << "Failed to generate metadata at last step!";
+        qCCritical(LAUNCHER_LOG) << "Failed to generate metadata at last step!";
         emitFail(mod);
         return;
     }
@@ -532,7 +533,7 @@ void EnsureMetadataTask::flameCallback(ModPlatform::IndexedPack& pack, ModPlatfo
 
         auto metadata = Metadata::get(tmp_index_dir, pack.slug);
         if (!metadata.isValid()) {
-            qCritical() << "Failed to generate metadata at last step!";
+            qCCritical(LAUNCHER_LOG) << "Failed to generate metadata at last step!";
             emitFail(mod);
             return;
         }
@@ -541,7 +542,7 @@ void EnsureMetadataTask::flameCallback(ModPlatform::IndexedPack& pack, ModPlatfo
 
         emitReady(mod);
     } catch (Json::JsonException& e) {
-        qDebug() << e.cause();
+        qCDebug(LAUNCHER_LOG) << e.cause();
 
         emitFail(mod);
     }

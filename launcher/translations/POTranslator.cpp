@@ -1,6 +1,7 @@
 #include "POTranslator.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 #include "FileSystem.h"
 
 struct POEntry
@@ -40,17 +41,17 @@ public:
         bool escape = false;
         if(size() < 2)
         {
-            qDebug() << "String fragment is too short";
+            qCDebug(LAUNCHER_LOG) << "String fragment is too short";
             return false;
         }
         if(!startsWith('"'))
         {
-            qDebug() << "String fragment does not start with \"";
+            qCDebug(LAUNCHER_LOG) << "String fragment does not start with \"";
             return false;
         }
         if(!endsWith('"'))
         {
-            qDebug() << "String fragment does not end with \", instead, there is" << at(size() - 1);
+            qCDebug(LAUNCHER_LOG) << "String fragment does not end with \", instead, there is" << at(size() - 1);
             return false;
         }
         for(int i = 1; i < size() - 1; i++)
@@ -102,7 +103,7 @@ public:
                             i++;
                             if (i == length() - 1)
                             {
-                                qDebug() << "Something went bad while parsing an octal escape string...";
+                                qCDebug(LAUNCHER_LOG) << "Something went bad while parsing an octal escape string...";
                                 return false;
                             }
                         }
@@ -119,7 +120,7 @@ public:
                             i++;
                             if (i == length() - 1)
                             {
-                                qDebug() << "Something went bad while parsing a hex escape string...";
+                                qCDebug(LAUNCHER_LOG) << "Something went bad while parsing a hex escape string...";
                                 return false;
                             }
                         }
@@ -128,7 +129,7 @@ public:
                     }
                     default:
                     {
-                        qDebug() << "Invalid escape sequence character:" << c;
+                        qCDebug(LAUNCHER_LOG) << "Invalid escape sequence character:" << c;
                         return false;
                     }
                 }
@@ -145,7 +146,7 @@ public:
         }
         if(escape)
         {
-            qDebug() << "Unterminated escape sequence...";
+            qCDebug(LAUNCHER_LOG) << "Unterminated escape sequence...";
             return false;
         }
         appendHere += msg;
@@ -158,7 +159,7 @@ void POTranslatorPrivate::reload()
     QFile file(filename);
     if(!file.open(QFile::OpenMode::enum_type::ReadOnly | QFile::OpenMode::enum_type::Text))
     {
-        qDebug() << "Failed to open PO file:" << filename;
+        qCDebug(LAUNCHER_LOG) << "Failed to open PO file:" << filename;
         return;
     }
 
@@ -231,7 +232,7 @@ void POTranslatorPrivate::reload()
             switch(mode)
             {
                 case Mode::First:
-                    qDebug() << "Unexpected escaped string during initial state... line:" << lineNumber;
+                    qCDebug(LAUNCHER_LOG) << "Unexpected escaped string during initial state... line:" << lineNumber;
                     return;
                 case Mode::MessageString:
                     out = &str;
@@ -245,7 +246,7 @@ void POTranslatorPrivate::reload()
             }
             if(!line.chompString(*out))
             {
-                qDebug() << "Badly formatted string on line:" << lineNumber;
+                qCDebug(LAUNCHER_LOG) << "Badly formatted string on line:" << lineNumber;
                 return;
             }
         }
@@ -260,7 +261,7 @@ void POTranslatorPrivate::reload()
                     break;
                 case Mode::MessageContext:
                 case Mode::MessageId:
-                    qDebug() << "Unexpected msgctxt line:" << lineNumber;
+                    qCDebug(LAUNCHER_LOG) << "Unexpected msgctxt line:" << lineNumber;
                     return;
             }
             if(line.chompString(context))
@@ -285,7 +286,7 @@ void POTranslatorPrivate::reload()
                     endEntry();
                     break;
                 case Mode::MessageId:
-                    qDebug() << "Unexpected msgid line:" << lineNumber;
+                    qCDebug(LAUNCHER_LOG) << "Unexpected msgid line:" << lineNumber;
                     return;
             }
             if(line.chompString(id))
@@ -300,7 +301,7 @@ void POTranslatorPrivate::reload()
                 case Mode::First:
                 case Mode::MessageString:
                 case Mode::MessageContext:
-                    qDebug() << "Unexpected msgstr line:" << lineNumber;
+                    qCDebug(LAUNCHER_LOG) << "Unexpected msgstr line:" << lineNumber;
                     return;
                 case Mode::MessageId:
                     break;
@@ -312,7 +313,7 @@ void POTranslatorPrivate::reload()
         }
         else
         {
-            qDebug() << "I did not understand line: " << lineNumber << ":" << QString::fromUtf8(line);
+            qCDebug(LAUNCHER_LOG) << "I did not understand line: " << lineNumber << ":" << QString::fromUtf8(line);
         }
         lineNumber++;
     }
@@ -345,11 +346,11 @@ QString POTranslator::translate(const char* context, const char* sourceText, con
             auto & entry = *iter;
             if(entry.text.isEmpty())
             {
-                qDebug() << "Translation entry has no content:" << disambiguationKey;
+                qCDebug(LAUNCHER_LOG) << "Translation entry has no content:" << disambiguationKey;
             }
             if(entry.fuzzy)
             {
-                qDebug() << "Translation entry is fuzzy:" << disambiguationKey << "->" << entry.text;
+                qCDebug(LAUNCHER_LOG) << "Translation entry is fuzzy:" << disambiguationKey << "->" << entry.text;
             }
             return entry.text;
         }
@@ -361,11 +362,11 @@ QString POTranslator::translate(const char* context, const char* sourceText, con
         auto & entry = *iter;
         if(entry.text.isEmpty())
         {
-            qDebug() << "Translation entry has no content:" << key;
+            qCDebug(LAUNCHER_LOG) << "Translation entry has no content:" << key;
         }
         if(entry.fuzzy)
         {
-            qDebug() << "Translation entry is fuzzy:" << key << "->" << entry.text;
+            qCDebug(LAUNCHER_LOG) << "Translation entry is fuzzy:" << key << "->" << entry.text;
         }
         return entry.text;
     }

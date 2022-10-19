@@ -91,7 +91,7 @@ void CapeChange::executeTask()
 void CapeChange::downloadError(QNetworkReply::NetworkError error)
 {
     // error happened during download.
-    qCritical() << "Network error: " << error;
+    qCCritical(LAUNCHER_LOG) << "Network error: " << error;
     emitFailed(m_reply->errorString());
 }
 

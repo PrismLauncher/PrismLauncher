@@ -39,6 +39,7 @@
 #include <QProcess>
 #include <QMap>
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "JavaUtils.h"
 #include "FileSystem.h"
@@ -55,7 +56,7 @@ void JavaChecker::performCheck()
 
     if (checkerJar.isEmpty())
     {
-        qDebug() << "Java checker library could not be found. Please check your installation.";
+        qCDebug(LAUNCHER_LOG) << "Java checker library could not be found. Please check your installation.";
         return;
     }
 
@@ -85,7 +86,7 @@ void JavaChecker::performCheck()
     process->setProgram(m_path);
     process->setProcessChannelMode(QProcess::SeparateChannels);
     process->setProcessEnvironment(CleanEnviroment());
-    qDebug() << "Running java checker: " + m_path + args.join(" ");;
+    qCDebug(LAUNCHER_LOG) << "Running java checker: " + m_path + args.join(" ");;
 
     connect(process.get(), SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(finished(int, QProcess::ExitStatus)));
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -130,9 +131,9 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     }
     result.errorLog = m_stderr;
     result.outLog = m_stdout;
-    qDebug() << "STDOUT" << m_stdout;
-    qWarning() << "STDERR" << m_stderr;
-    qDebug() << "Java checker finished with status " << status << " exit code " << exitcode;
+    qCDebug(LAUNCHER_LOG) << "STDOUT" << m_stdout;
+    qCWarning(LAUNCHER_LOG) << "STDERR" << m_stderr;
+    qCDebug(LAUNCHER_LOG) << "Java checker finished with status " << status << " exit code " << exitcode;
 
     if (status == QProcess::CrashExit || exitcode == 1)
     {
@@ -192,7 +193,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     result.realPlatform = os_arch;
     result.javaVersion = java_version;
     result.javaVendor = java_vendor;
-    qDebug() << "Java checker succeeded.";
+    qCDebug(LAUNCHER_LOG) << "Java checker succeeded.";
     emit checkFinished(result);
 }
 
@@ -200,11 +201,11 @@ void JavaChecker::error(QProcess::ProcessError err)
 {
     if(err == QProcess::FailedToStart)
     {
-        qDebug() << "Java checker has failed to start.";
-        qDebug() << "Process environment:";
-        qDebug() << process->environment();
-        qDebug() << "Native environment:";
-        qDebug() << QProcessEnvironment::systemEnvironment().toStringList();
+        qCDebug(LAUNCHER_LOG) << "Java checker has failed to start.";
+        qCDebug(LAUNCHER_LOG) << "Process environment:";
+        qCDebug(LAUNCHER_LOG) << process->environment();
+        qCDebug(LAUNCHER_LOG) << "Native environment:";
+        qCDebug(LAUNCHER_LOG) << QProcessEnvironment::systemEnvironment().toStringList();
         killTimer.stop();
         JavaCheckResult result;
         {
@@ -222,7 +223,7 @@ void JavaChecker::timeout()
     // NO MERCY. NO ABUSE.
     if(process)
     {
-        qDebug() << "Java checker has been killed by timeout.";
+        qCDebug(LAUNCHER_LOG) << "Java checker has been killed by timeout.";
         process->kill();
     }
 }

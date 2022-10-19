@@ -38,6 +38,7 @@
 #include <QRunnable>
 
 #include "QObjectPtr.h"
+#include "launcherlog.h"
 
 class Task : public QObject, public QRunnable {
     Q_OBJECT

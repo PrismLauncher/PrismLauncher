@@ -1,6 +1,7 @@
 #include "ConcurrentTask.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QCoreApplication>
 
 ConcurrentTask::ConcurrentTask(QObject* parent, QString task_name, int max_concurrent)
@@ -30,7 +31,7 @@ void ConcurrentTask::addTask(Task::Ptr task)
     if (!isRunning())
         m_queue.append(task);
     else
-        qWarning() << "Tried to add a task to a running concurrent task!";
+        qCWarning(LAUNCHER_LOG) << "Tried to add a task to a running concurrent task!";
 }
 
 void ConcurrentTask::executeTask()

@@ -106,7 +106,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
         else
         {
             // FIXME: evaluate if we don't want to throw exceptions here instead
-            qCritical() << filename << "doesn't contain an order field";
+            qCCritical(LAUNCHER_LOG) << filename << "doesn't contain an order field";
         }
     }
 

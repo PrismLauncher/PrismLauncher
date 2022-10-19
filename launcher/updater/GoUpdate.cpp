@@ -1,5 +1,6 @@
 #include "GoUpdate.h"
 #include <QDebug>
+#include "launcherlog.h"
 #include <QDomDocument>
 #include <QFile>
 #include <FileSystem.h>
@@ -19,14 +20,14 @@ bool parseVersionInfo(const QByteArray &data, VersionFileList &list, QString &er
         error = QString("Failed to parse version info JSON: %1 at %2")
                     .arg(jsonError.errorString())
                     .arg(jsonError.offset);
-        qCritical() << error;
+        qCCritical(LAUNCHER_LOG) << error;
         return false;
     }
 
     QJsonObject json = jsonDoc.object();
 
-    qDebug() << data;
-    qDebug() << "Loading version info from JSON.";
+    qCDebug(LAUNCHER_LOG) << data;
+    qCDebug(LAUNCHER_LOG) << "Loading version info from JSON.";
     QJsonArray filesArray = json.value("Files").toArray();
     for (QJsonValue fileValue : filesArray)
     {
@@ -36,7 +37,7 @@ bool parseVersionInfo(const QByteArray &data, VersionFileList &list, QString &er
 
         VersionFileEntry file{file_path,        fileObj.value("Perms").toVariant().toInt(),
                               FileSourceList(), fileObj.value("MD5").toString(), };
-        qDebug() << "File" << file.path << "with perms" << file.mode;
+        qCDebug(LAUNCHER_LOG) << "File" << file.path << "with perms" << file.mode;
 
         QJsonArray sourceArray = fileObj.value("Sources").toArray();
         for (QJsonValue val : sourceArray)
@@ -50,11 +51,11 @@ bool parseVersionInfo(const QByteArray &data, VersionFileList &list, QString &er
             }
             else
             {
-                qWarning() << "Unknown source type" << type << "ignored.";
+                qCWarning(LAUNCHER_LOG) << "Unknown source type" << type << "ignored.";
             }
         }
 
-        qDebug() << "Loaded info for" << file.path;
+        qCDebug(LAUNCHER_LOG) << "Loaded info for" << file.path;
 
         list.append(file);
     }
@@ -79,7 +80,7 @@ bool processFileLists
         QFileInfo toDelete(FS::PathCombine(rootPath, entry.path));
         if (!toDelete.exists())
         {
-            qCritical() << "Expected file " << toDelete.absoluteFilePath()
+            qCCritical(LAUNCHER_LOG) << "Expected file " << toDelete.absoluteFilePath()
                          << " doesn't exist!";
         }
         bool keep = false;
@@ -89,7 +90,7 @@ bool processFileLists
         {
             if (newEntry.path == entry.path)
             {
-                qDebug() << "Not deleting" << entry.path
+                qCDebug(LAUNCHER_LOG) << "Not deleting" << entry.path
                              << "because it is still present in the new version.";
                 keep = true;
                 break;
@@ -124,17 +125,17 @@ bool processFileLists
             bool pass = true;
             if (!entryInfo.isReadable())
             {
-                qCritical() << "File " << realEntryPath << " is not readable.";
+                qCCritical(LAUNCHER_LOG) << "File " << realEntryPath << " is not readable.";
                 pass = false;
             }
             if (!entryInfo.isWritable())
             {
-                qCritical() << "File " << realEntryPath << " is not writable.";
+                qCCritical(LAUNCHER_LOG) << "File " << realEntryPath << " is not writable.";
                 pass = false;
             }
             if (!entryFile.open(QFile::ReadOnly))
             {
-                qCritical() << "File " << realEntryPath << " cannot be opened for reading.";
+                qCCritical(LAUNCHER_LOG) << "File " << realEntryPath << " cannot be opened for reading.";
                 pass = false;
             }
             if (!pass)
@@ -153,9 +154,9 @@ bool processFileLists
             fileMD5 = hash.result().toHex();
             if ((fileMD5 != entry.md5))
             {
-                qDebug() << "MD5Sum does not match!";
-                qDebug() << "Expected:'" << entry.md5 << "'";
-                qDebug() << "Got:     '" << fileMD5 << "'";
+                qCDebug(LAUNCHER_LOG) << "MD5Sum does not match!";
+                qCDebug(LAUNCHER_LOG) << "Expected:'" << entry.md5 << "'";
+                qCDebug(LAUNCHER_LOG) << "Got:     '" << fileMD5 << "'";
                 needs_upgrade = true;
             }
         }
@@ -163,12 +164,12 @@ bool processFileLists
         // skip file. it doesn't need an upgrade.
         if (!needs_upgrade)
         {
-            qDebug() << "File" << realEntryPath << " does not need updating.";
+            qCDebug(LAUNCHER_LOG) << "File" << realEntryPath << " does not need updating.";
             continue;
         }
 
         // yep. this file actually needs an upgrade. PROCEED.
-        qDebug() << "Found file" << realEntryPath << " that needs updating.";
+        qCDebug(LAUNCHER_LOG) << "Found file" << realEntryPath << " that needs updating.";
 
         // Go through the sources list and find one to use.
         // TODO: Make a NetAction that takes a source list and tries each of them until one
@@ -178,7 +179,7 @@ bool processFileLists
             if (source.type != "http")
                 continue;
 
-            qDebug() << "Will download" << entry.path << "from" << source.url;
+            qCDebug(LAUNCHER_LOG) << "Will download" << entry.path << "from" << source.url;
 
             // Download it to updatedir/<filepath>-<md5> where filepath is the file's
             // path with slashes replaced by underscores.

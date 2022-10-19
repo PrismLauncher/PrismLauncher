@@ -41,6 +41,7 @@
 #include <settings/Setting.h>
 
 #include <QDebug>
+#include "launcherlog.h"
 #include "java/JavaUtils.h"
 #include "java/JavaInstallList.h"
 #include "FileSystem.h"
@@ -65,7 +66,7 @@ QString stripVariableEntries(QString name, QString target, QString remove)
     for (QString item : toRemove) {
         bool removed = targetItems.removeOne(item);
         if (!removed)
-            qWarning() << "Entry" << item
+            qCWarning(LAUNCHER_LOG) << "Entry" << item
                 << "could not be stripped from variable" << name;
     }
     return targetItems.join(delimiter);
@@ -104,7 +105,7 @@ QProcessEnvironment CleanEnviroment()
         // filter out dangerous java crap
         if(ignored.contains(key))
         {
-            qDebug() << "Env: ignoring" << key << value;
+            qCDebug(LAUNCHER_LOG) << "Env: ignoring" << key << value;
             continue;
         }
 
@@ -113,14 +114,14 @@ QProcessEnvironment CleanEnviroment()
         // remove all values in "LAUNCHER_LD_LIBRARY_PATH" from "LD_LIBRARY_PATH"
         if(key.startsWith("LAUNCHER_"))
         {
-            qDebug() << "Env: ignoring" << key << value;
+            qCDebug(LAUNCHER_LOG) << "Env: ignoring" << key << value;
             continue;
         }
         if(stripped.contains(key))
         {
             QString newValue = stripVariableEntries(key, value, rawenv.value("LAUNCHER_" + key));
 
-            qDebug() << "Env: stripped" << key << value << "to" << newValue;
+            qCDebug(LAUNCHER_LOG) << "Env: stripped" << key << value << "to" << newValue;
         }
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
         // Strip IBus
@@ -129,10 +130,10 @@ QProcessEnvironment CleanEnviroment()
         {
             QString save = value;
             value.replace(IBUS, "");
-            qDebug() << "Env: stripped" << IBUS << "from" << save << ":" << value;
+            qCDebug(LAUNCHER_LOG) << "Env: stripped" << IBUS << "from" << save << ":" << value;
         }
 #endif
-        // qDebug() << "Env: " << key << value;
+        // qCDebug(LAUNCHER_LOG) << "Env: " << key << value;
         env.insert(key, value);
     }
 #ifdef Q_OS_LINUX
@@ -408,7 +409,7 @@ QList<QString> JavaUtils::FindJavaPaths()
 #elif defined(Q_OS_LINUX)
 QList<QString> JavaUtils::FindJavaPaths()
 {
-    qDebug() << "Linux Java detection incomplete - defaulting to \"java\"";
+    qCDebug(LAUNCHER_LOG) << "Linux Java detection incomplete - defaulting to \"java\"";
 
     QList<QString> javas;
     javas.append(this->GetDefaultJava()->path);
@@ -453,7 +454,7 @@ QList<QString> JavaUtils::FindJavaPaths()
 #else
 QList<QString> JavaUtils::FindJavaPaths()
 {
-    qDebug() << "Unknown operating system build - defaulting to \"java\"";
+    qCDebug(LAUNCHER_LOG) << "Unknown operating system build - defaulting to \"java\"";
 
     QList<QString> javas;
     javas.append(this->GetDefaultJava()->path);

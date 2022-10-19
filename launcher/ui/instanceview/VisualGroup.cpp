@@ -40,6 +40,7 @@
 #include <QtMath>
 #include <QApplication>
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "InstanceView.h"
 
@@ -108,7 +109,7 @@ QPair<int, int> VisualGroup::positionOf(const QModelIndex &index) const
         }
         y++;
     }
-    qWarning() << "Item" << index.row() << index.data(Qt::DisplayRole).toString() << "not found in visual group" << text;
+    qCWarning(LAUNCHER_LOG) << "Item" << index.row() << index.data(Qt::DisplayRole).toString() << "not found in visual group" << text;
     return qMakePair(0, 0);
 }
 

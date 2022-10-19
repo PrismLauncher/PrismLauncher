@@ -49,6 +49,7 @@
 
 #include "VisualGroup.h"
 #include <QDebug>
+#include "launcherlog.h"
 
 #include <Application.h>
 #include <InstanceList.h>

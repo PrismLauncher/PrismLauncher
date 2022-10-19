@@ -50,7 +50,7 @@ void Flame::FileResolvingTask::netJobFinished()
         try {
            out.parseFromObject(Json::requireObject(file));
         } catch (const JSONValidationError& e) {
-            qDebug() << "Blocked mod on curseforge" << out.fileName;
+            qCDebug(LAUNCHER_LOG) << "Blocked mod on curseforge" << out.fileName;
             auto hash = out.hash;
             if(!hash.isEmpty()) {
                 auto url = QString("https://api.modrinth.com/v2/version_file/%1?algorithm=sha1").arg(hash);
@@ -73,7 +73,7 @@ void Flame::FileResolvingTask::netJobFinished()
 
 void Flame::FileResolvingTask::modrinthCheckFinished() {
     setProgress(2, 3);
-    qDebug() << "Finished with blocked mods : " << blockedProjects.size();
+    qCDebug(LAUNCHER_LOG) << "Finished with blocked mods : " << blockedProjects.size();
 
     for (auto it = blockedProjects.keyBegin(); it != blockedProjects.keyEnd(); it++) {
         auto &out = *it;
@@ -90,7 +90,7 @@ void Flame::FileResolvingTask::modrinthCheckFinished() {
             auto primary = Json::requireBoolean(fileObj,"primary");
             if (primary) {
                 out->url = Json::requireUrl(fileObj,"url");
-                qDebug() << "Found alternative on modrinth " << out->fileName;
+                qCDebug(LAUNCHER_LOG) << "Found alternative on modrinth " << out->fileName;
                 break;
             }
         }

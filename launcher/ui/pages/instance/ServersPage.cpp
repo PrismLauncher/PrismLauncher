@@ -497,12 +497,12 @@ public:
 public slots:
     void dirChanged(const QString& path)
     {
-        qDebug() << "Changed:" << path;
+        qCDebug(LAUNCHER_LOG) << "Changed:" << path;
         load();
     }
     void fileChanged(const QString& path)
     {
-        qDebug() << "Changed:" << path;
+        qCDebug(LAUNCHER_LOG) << "Changed:" << path;
     }
 
 private slots:
@@ -510,7 +510,7 @@ private slots:
     {
         cancelSave();
         QString path = serversPath();
-        qDebug() << "Server list about to be saved to" << path;
+        qCDebug(LAUNCHER_LOG) << "Server list about to be saved to" << path;
 
         nbt::tag_compound out;
         nbt::tag_list list;
@@ -524,7 +524,7 @@ private slots:
 
         if(!serializeServerDat(path, &out))
         {
-            qDebug() << "Failed to save server list:" << path << "Will try again.";
+            qCDebug(LAUNCHER_LOG) << "Failed to save server list:" << path << "Will try again.";
             scheduleSave();
         }
     }
@@ -534,13 +534,13 @@ private:
     {
         if(!m_loaded)
         {
-            qDebug() << "Server list should never save if it didn't successfully load, path:" << m_path;
+            qCDebug(LAUNCHER_LOG) << "Server list should never save if it didn't successfully load, path:" << m_path;
             return;
         }
         if(!m_dirty)
         {
             m_dirty = true;
-            qDebug() << "Server list save is scheduled for" << m_path;
+            qCDebug(LAUNCHER_LOG) << "Server list save is scheduled for" << m_path;
         }
         m_saveTimer.start();
     }
@@ -563,10 +563,10 @@ private:
         {
             if(!observingFS)
             {
-                qWarning() << "Will watch" << m_path;
+                qCWarning(LAUNCHER_LOG) << "Will watch" << m_path;
                 if(!m_watcher->addPath(m_path))
                 {
-                    qWarning() << "Failed to start watching" << m_path;
+                    qCWarning(LAUNCHER_LOG) << "Failed to start watching" << m_path;
                 }
             }
         }
@@ -574,10 +574,10 @@ private:
         {
             if(observingFS)
             {
-                qWarning() << "Will stop watching" << m_path;
+                qCWarning(LAUNCHER_LOG) << "Will stop watching" << m_path;
                 if(!m_watcher->removePath(m_path))
                 {
-                    qWarning() << "Failed to stop watching" << m_path;
+                    qCWarning(LAUNCHER_LOG) << "Failed to stop watching" << m_path;
                 }
             }
         }

@@ -39,6 +39,7 @@
 #include <QDomDocument>
 
 #include <QDebug>
+#include "launcherlog.h"
 
 NewsChecker::NewsChecker(shared_qobject_ptr<QNetworkAccessManager> network, const QString& feedUrl)
 {
@@ -51,11 +52,11 @@ void NewsChecker::reloadNews()
     // Start a netjob to download the RSS feed and call rssDownloadFinished() when it's done.
     if (isLoadingNews())
     {
-        qDebug() << "Ignored request to reload news. Currently reloading already.";
+        qCDebug(LAUNCHER_LOG) << "Ignored request to reload news. Currently reloading already.";
         return;
     }
 
-    qDebug() << "Reloading news.";
+    qCDebug(LAUNCHER_LOG) << "Reloading news.";
 
     NetJob* job = new NetJob("News RSS Feed", m_network);
     job->addNetAction(Net::Download::makeByteArray(m_feedUrl, &newsData));
@@ -68,7 +69,7 @@ void NewsChecker::reloadNews()
 void NewsChecker::rssDownloadFinished()
 {
     // Parse the XML file and process the RSS feed entries.
-    qDebug() << "Finished loading RSS feed.";
+    qCDebug(LAUNCHER_LOG) << "Finished loading RSS feed.";
 
     m_newsNetJob.reset();
     QDomDocument doc;
@@ -100,12 +101,12 @@ void NewsChecker::rssDownloadFinished()
         QString errorMsg = "An unknown error occurred.";
         if (NewsEntry::fromXmlElement(element, entry.get(), &errorMsg))
         {
-            qDebug() << "Loaded news entry" << entry->title;
+            qCDebug(LAUNCHER_LOG) << "Loaded news entry" << entry->title;
             m_newsEntries.append(entry);
         }
         else
         {
-            qWarning() << "Failed to load news entry at index" << i << ":" << errorMsg;
+            qCWarning(LAUNCHER_LOG) << "Failed to load news entry at index" << i << ":" << errorMsg;
         }
     }
 
@@ -137,7 +138,7 @@ QString NewsChecker::getLastLoadErrorMsg() const
 void NewsChecker::succeed()
 {
     m_lastLoadError = "";
-    qDebug() << "News loading succeeded.";
+    qCDebug(LAUNCHER_LOG) << "News loading succeeded.";
     m_newsNetJob.reset();
     emit newsLoaded();
 }
@@ -145,7 +146,7 @@ void NewsChecker::succeed()
 void NewsChecker::fail(const QString& errorMsg)
 {
     m_lastLoadError = errorMsg;
-    qDebug() << "Failed to load news:" << errorMsg;
+    qCDebug(LAUNCHER_LOG) << "Failed to load news:" << errorMsg;
     m_newsNetJob.reset();
     emit newsLoadingFailed(errorMsg);
 }

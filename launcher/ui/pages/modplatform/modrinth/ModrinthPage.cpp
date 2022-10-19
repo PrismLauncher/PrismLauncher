@@ -121,7 +121,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     auto name = current.name;
 
     if (!current.extraInfoLoaded) {
-        qDebug() << "Loading modrinth modpack information";
+        qCDebug(LAUNCHER_LOG) << "Loading modrinth modpack information";
 
         auto netJob = new NetJob(QString("Modrinth::PackInformation(%1)").arg(current.name), APPLICATION->network());
         auto response = new QByteArray();
@@ -138,9 +138,9 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             QJsonParseError parse_error;
             QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
             if (parse_error.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response from Modrinth at " << parse_error.offset
+                qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from Modrinth at " << parse_error.offset
                            << " reason: " << parse_error.errorString();
-                qWarning() << *response;
+                qCWarning(LAUNCHER_LOG) << *response;
                 return;
             }
 
@@ -149,8 +149,8 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             try {
                 Modrinth::loadIndexedInfo(current, obj);
             } catch (const JSONValidationError& e) {
-                qDebug() << *response;
-                qWarning() << "Error while reading modrinth modpack version: " << e.cause();
+                qCDebug(LAUNCHER_LOG) << *response;
+                qCWarning(LAUNCHER_LOG) << "Error while reading modrinth modpack version: " << e.cause();
             }
 
             updateUI();
@@ -159,7 +159,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             current_updated.setValue(current);
 
             if (!m_model->setData(curr, current_updated, Qt::UserRole))
-                qWarning() << "Failed to cache extra info for the current pack!";
+                qCWarning(LAUNCHER_LOG) << "Failed to cache extra info for the current pack!";
 
             suggestCurrent();
         });
@@ -172,7 +172,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         updateUI();
 
     if (!current.versionsLoaded) {
-        qDebug() << "Loading modrinth modpack versions";
+        qCDebug(LAUNCHER_LOG) << "Loading modrinth modpack versions";
 
         auto netJob = new NetJob(QString("Modrinth::PackVersions(%1)").arg(current.name), APPLICATION->network());
         auto response = new QByteArray();
@@ -190,17 +190,17 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             QJsonParseError parse_error;
             QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
             if (parse_error.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response from Modrinth at " << parse_error.offset
+                qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from Modrinth at " << parse_error.offset
                            << " reason: " << parse_error.errorString();
-                qWarning() << *response;
+                qCWarning(LAUNCHER_LOG) << *response;
                 return;
             }
 
             try {
                 Modrinth::loadIndexedVersions(current, doc);
             } catch (const JSONValidationError& e) {
-                qDebug() << *response;
-                qWarning() << "Error while reading modrinth modpack version: " << e.cause();
+                qCDebug(LAUNCHER_LOG) << *response;
+                qCWarning(LAUNCHER_LOG) << "Error while reading modrinth modpack version: " << e.cause();
             }
 
             for (auto version : current.versions) {
@@ -214,7 +214,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             current_updated.setValue(current);
 
             if (!m_model->setData(curr, current_updated, Qt::UserRole))
-                qWarning() << "Failed to cache versions for the current pack!";
+                qCWarning(LAUNCHER_LOG) << "Failed to cache versions for the current pack!";
 
             suggestCurrent();
         });

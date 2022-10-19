@@ -42,6 +42,7 @@
 #include <QUrl>
 #include <QStringList>
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "BuildConfig.h"
 #include "Application.h"
@@ -82,7 +83,7 @@ void ImgurAlbumCreation::executeTask()
 }
 void ImgurAlbumCreation::downloadError(QNetworkReply::NetworkError error)
 {
-    qDebug() << m_reply->errorString();
+    qCDebug(LAUNCHER_LOG) << m_reply->errorString();
     m_state = State::Failed;
 }
 void ImgurAlbumCreation::downloadFinished()
@@ -95,14 +96,14 @@ void ImgurAlbumCreation::downloadFinished()
         QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
         if (jsonError.error != QJsonParseError::NoError)
         {
-            qDebug() << jsonError.errorString();
+            qCDebug(LAUNCHER_LOG) << jsonError.errorString();
             emitFailed();
             return;
         }
         auto object = doc.object();
         if (!object.value("success").toBool())
         {
-            qDebug() << doc.toJson();
+            qCDebug(LAUNCHER_LOG) << doc.toJson();
             emitFailed();
             return;
         }
@@ -114,7 +115,7 @@ void ImgurAlbumCreation::downloadFinished()
     }
     else
     {
-        qDebug() << m_reply->readAll();
+        qCDebug(LAUNCHER_LOG) << m_reply->readAll();
         m_reply.reset();
         emitFailed();
         return;

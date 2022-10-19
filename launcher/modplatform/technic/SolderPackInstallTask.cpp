@@ -88,8 +88,8 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     QJsonParseError parse_error {};
     QJsonDocument doc = QJsonDocument::fromJson(m_response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Solder at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << m_response;
+        qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from Solder at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qCWarning(LAUNCHER_LOG) << m_response;
         return;
     }
     auto obj = doc.object();
@@ -188,7 +188,7 @@ void Technic::SolderPackInstallTask::extractFinished()
     }
     QDir extractDir(m_stagingPath);
 
-    qDebug() << "Fixing permissions for extracted pack files...";
+    qCDebug(LAUNCHER_LOG) << "Fixing permissions for extracted pack files...";
     QDirIterator it(extractDir, QDirIterator::Subdirectories);
     while (it.hasNext())
     {
@@ -214,7 +214,7 @@ void Technic::SolderPackInstallTask::extractFinished()
             }
             else
             {
-                qDebug() << "Fixed" << filepath;
+                qCDebug(LAUNCHER_LOG) << "Fixed" << filepath;
             }
         }
     }

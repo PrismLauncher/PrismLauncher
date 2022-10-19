@@ -2,6 +2,7 @@
 #include <QString>
 #include "ParseUtils.h"
 #include <QDebug>
+#include "launcherlog.h"
 #include <cstdlib>
 
 QDateTime timeFromS3Time(QString str)

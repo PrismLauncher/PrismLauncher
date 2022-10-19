@@ -87,17 +87,17 @@ slots:
         {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
-            qDebug() << "From:" << folder << "To:" << tempDir.path();
+            qCDebug(LAUNCHER_LOG) << "From:" << folder << "To:" << tempDir.path();
 
             QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
-            qDebug() << tempDir.path();
-            qDebug() << target_dir.path();
+            qCDebug(LAUNCHER_LOG) << tempDir.path();
+            qCDebug(LAUNCHER_LOG) << target_dir.path();
             FS::copy c(folder, target_dir.path());
             c();
 
             for(auto entry: target_dir.entryList())
             {
-                qDebug() << entry;
+                qCDebug(LAUNCHER_LOG) << entry;
             }
             QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
             QVERIFY(target_dir.entryList().contains("assets"));
@@ -120,18 +120,18 @@ slots:
         {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
-            qDebug() << "From:" << folder << "To:" << tempDir.path();
+            qCDebug(LAUNCHER_LOG) << "From:" << folder << "To:" << tempDir.path();
 
             QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
-            qDebug() << tempDir.path();
-            qDebug() << target_dir.path();
+            qCDebug(LAUNCHER_LOG) << tempDir.path();
+            qCDebug(LAUNCHER_LOG) << target_dir.path();
             FS::copy c(folder, target_dir.path());
             c.blacklist(new RegexpMatcher("[.]?mcmeta"));
             c();
 
             for(auto entry: target_dir.entryList())
             {
-                qDebug() << entry;
+                qCDebug(LAUNCHER_LOG) << entry;
             }
             QVERIFY(!target_dir.entryList().contains("pack.mcmeta"));
             QVERIFY(target_dir.entryList().contains("assets"));
@@ -154,18 +154,18 @@ slots:
         {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
-            qDebug() << "From:" << folder << "To:" << tempDir.path();
+            qCDebug(LAUNCHER_LOG) << "From:" << folder << "To:" << tempDir.path();
 
             QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
-            qDebug() << tempDir.path();
-            qDebug() << target_dir.path();
+            qCDebug(LAUNCHER_LOG) << tempDir.path();
+            qCDebug(LAUNCHER_LOG) << target_dir.path();
             FS::copy c(folder, target_dir.path());
             c();
 
             auto filter = QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden;
 
             for (auto entry: target_dir.entryList(filter)) {
-                qDebug() << entry;
+                qCDebug(LAUNCHER_LOG) << entry;
             }
 
             QVERIFY(target_dir.entryList(filter).contains(".secret_folder"));

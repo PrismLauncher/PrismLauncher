@@ -42,6 +42,7 @@
 #include <QJsonObject>
 #include <QVariant>
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "AssetsUtils.h"
 #include "FileSystem.h"
@@ -71,7 +72,7 @@ QSet<QString> collectPathsFromDir(QString dirPath)
         if(info.isFile())
         {
             out.insert(value);
-            qDebug() << value;
+            qCDebug(LAUNCHER_LOG) << value;
         }
     }
     return out;
@@ -107,7 +108,7 @@ bool loadAssetsIndexJson(const QString &assetsId, const QString &path, AssetsInd
     // TODO: We should probably report this error to the user.
     if (!file.open(QIODevice::ReadOnly))
     {
-        qCritical() << "Failed to read assets index file" << path;
+        qCCritical(LAUNCHER_LOG) << "Failed to read assets index file" << path;
         return false;
     }
     index.id = assetsId;
@@ -122,7 +123,7 @@ bool loadAssetsIndexJson(const QString &assetsId, const QString &path, AssetsInd
     // Fail if the JSON is invalid.
     if (parseError.error != QJsonParseError::NoError)
     {
-        qCritical() << "Failed to parse assets index file:" << parseError.errorString()
+        qCCritical(LAUNCHER_LOG) << "Failed to parse assets index file:" << parseError.errorString()
                      << "at offset " << QString::number(parseError.offset);
         return false;
     }
@@ -130,7 +131,7 @@ bool loadAssetsIndexJson(const QString &assetsId, const QString &path, AssetsInd
     // Make sure the root is an object.
     if (!jsonDoc.isObject())
     {
-        qCritical() << "Invalid assets index JSON: Root should be an array.";
+        qCCritical(LAUNCHER_LOG) << "Invalid assets index JSON: Root should be an array.";
         return false;
     }
 
@@ -153,7 +154,7 @@ bool loadAssetsIndexJson(const QString &assetsId, const QString &path, AssetsInd
 
     for (QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter)
     {
-        // qDebug() << iter.key();
+        // qCDebug(LAUNCHER_LOG) << iter.key();
 
         QVariant variant = iter.value();
         QVariantMap nested_objects = variant.toMap();
@@ -163,7 +164,7 @@ bool loadAssetsIndexJson(const QString &assetsId, const QString &path, AssetsInd
         for (QVariantMap::const_iterator nested_iter = nested_objects.begin();
              nested_iter != nested_objects.end(); ++nested_iter)
         {
-            // qDebug() << nested_iter.key() << nested_iter.value().toString();
+            // qCDebug(LAUNCHER_LOG) << nested_iter.key() << nested_iter.value().toString();
             QString key = nested_iter.key();
             QVariant value = nested_iter.value();
 
@@ -197,14 +198,14 @@ QDir getAssetsDir(const QString &assetsId, const QString &resourcesFolder)
 
     if (!indexFile.exists())
     {
-        qCritical() << "No assets index file" << indexPath << "; can't determine assets path!";
+        qCCritical(LAUNCHER_LOG) << "No assets index file" << indexPath << "; can't determine assets path!";
         return virtualRoot;
     }
 
     AssetsIndex index;
     if(!AssetsUtils::loadAssetsIndexJson(assetsId, indexPath, index))
     {
-        qCritical() << "Failed to load asset index file" << indexPath << "; can't determine assets path!";
+        qCCritical(LAUNCHER_LOG) << "Failed to load asset index file" << indexPath << "; can't determine assets path!";
         return virtualRoot;
     }
 
@@ -234,16 +235,16 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
 
     if (!indexFile.exists())
     {
-        qCritical() << "No assets index file" << indexPath << "; can't reconstruct assets!";
+        qCCritical(LAUNCHER_LOG) << "No assets index file" << indexPath << "; can't reconstruct assets!";
         return false;
     }
 
-    qDebug() << "reconstructAssets" << assetsDir.path() << indexDir.path() << objectDir.path() << virtualDir.path() << virtualRoot.path();
+    qCDebug(LAUNCHER_LOG) << "reconstructAssets" << assetsDir.path() << indexDir.path() << objectDir.path() << virtualDir.path() << virtualRoot.path();
 
     AssetsIndex index;
     if(!AssetsUtils::loadAssetsIndexJson(assetsId, indexPath, index))
     {
-        qCritical() << "Failed to load asset index file" << indexPath << "; can't reconstruct assets!";
+        qCCritical(LAUNCHER_LOG) << "Failed to load asset index file" << indexPath << "; can't reconstruct assets!";
         return false;
     }
 
@@ -253,12 +254,12 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
     {
         targetPath = virtualRoot.path();
         removeLeftovers = true;
-        qDebug() << "Reconstructing virtual assets folder at" << targetPath;
+        qCDebug(LAUNCHER_LOG) << "Reconstructing virtual assets folder at" << targetPath;
     }
     else if(index.mapToResources)
     {
         targetPath = resourcesFolder;
-        qDebug() << "Reconstructing resources folder at" << targetPath;
+        qCDebug(LAUNCHER_LOG) << "Reconstructing resources folder at" << targetPath;
     }
 
     if (!targetPath.isNull())
@@ -284,11 +285,11 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
                 QFileInfo info(target_path);
                 QDir target_dir = info.dir();
 
-                qDebug() << target_dir.path();
+                qCDebug(LAUNCHER_LOG) << target_dir.path();
                 FS::ensureFolderPathExists(target_dir.path());
 
                 bool couldCopy = original.copy(target_path);
-                qDebug() << " Copying" << original_path << "to" << target_path << QString::number(couldCopy);
+                qCDebug(LAUNCHER_LOG) << " Copying" << original_path << "to" << target_path << QString::number(couldCopy);
             }
         }
 
@@ -297,7 +298,7 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
         {
             for(auto & file: presentFiles)
             {
-                qDebug() << "Would remove" << file;
+                qCDebug(LAUNCHER_LOG) << "Would remove" << file;
             }
         }
     }

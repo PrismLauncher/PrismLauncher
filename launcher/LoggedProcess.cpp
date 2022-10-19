@@ -35,6 +35,7 @@
 
 #include "LoggedProcess.h"
 #include <QDebug>
+#include "launcherlog.h"
 #include <QTextDecoder>
 #include "MessageLevel.h"
 
@@ -169,7 +170,7 @@ void LoggedProcess::on_stateChange(QProcess::ProcessState state)
         {
             if(m_state != LoggedProcess::NotRunning)
             {
-                qWarning() << "Wrong state change for process from state" << m_state << "to" << (int) LoggedProcess::Starting;
+                qCWarning(LAUNCHER_LOG) << "Wrong state change for process from state" << m_state << "to" << (int) LoggedProcess::Starting;
             }
             changeState(LoggedProcess::Starting);
             return;
@@ -178,7 +179,7 @@ void LoggedProcess::on_stateChange(QProcess::ProcessState state)
         {
             if(m_state != LoggedProcess::Starting)
             {
-                qWarning() << "Wrong state change for process from state" << m_state << "to" << (int) LoggedProcess::Running;
+                qCWarning(LAUNCHER_LOG) << "Wrong state change for process from state" << m_state << "to" << (int) LoggedProcess::Running;
             }
             changeState(LoggedProcess::Running);
             return;

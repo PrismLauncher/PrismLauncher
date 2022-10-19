@@ -38,6 +38,7 @@
 
 #include <FileSystem.h>
 #include <QDebug>
+#include "launcherlog.h"
 #include <QFileSystemWatcher>
 #include <QMimeData>
 #include <QString>

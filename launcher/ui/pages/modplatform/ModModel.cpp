@@ -36,7 +36,7 @@ void ListModel::fetchMore(const QModelIndex& parent)
     if (parent.isValid())
         return;
     if (nextSearchOffset == 0) {
-        qWarning() << "fetchMore with 0 offset is wrong...";
+        qCWarning(LAUNCHER_LOG) << "fetchMore with 0 offset is wrong...";
         return;
     }
     performPaginatedSearch();
@@ -232,7 +232,7 @@ void ListModel::searchRequestFinished(QJsonDocument& doc)
             loadIndexedPack(pack, packObj);
             newList.append(pack);
         } catch (const JSONValidationError& e) {
-            qWarning() << "Error while loading mod from " << m_parent->debugName() << ": " << e.cause();
+            qCWarning(LAUNCHER_LOG) << "Error while loading mod from " << m_parent->debugName() << ": " << e.cause();
             continue;
         }
     }
@@ -283,14 +283,14 @@ void ListModel::searchRequestFailed(QString reason)
 
 void ListModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
 {
-    qDebug() << "Loading mod info";
+    qCDebug(LAUNCHER_LOG) << "Loading mod info";
 
     try {
         auto obj = Json::requireObject(doc);
         loadExtraPackInfo(pack, obj);
     } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << debugName() << " mod info: " << e.cause();
+        qCDebug(LAUNCHER_LOG) << doc;
+        qCWarning(LAUNCHER_LOG) << "Error while reading " << debugName() << " mod info: " << e.cause();
     }
 
     // Check if the index is still valid for this mod or not
@@ -299,7 +299,7 @@ void ListModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack
         QVariant new_pack;
         new_pack.setValue(pack);
         if (!setData(index, new_pack, Qt::UserRole)) {
-            qWarning() << "Failed to cache mod info!";
+            qCWarning(LAUNCHER_LOG) << "Failed to cache mod info!";
         }
     }
 
@@ -318,15 +318,15 @@ void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId, cons
     try {
         loadIndexedPackVersions(current, arr);
     } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << debugName() << " mod version: " << e.cause();
+        qCDebug(LAUNCHER_LOG) << doc;
+        qCWarning(LAUNCHER_LOG) << "Error while reading " << debugName() << " mod version: " << e.cause();
     }
 
     // Cache info :^)
     QVariant new_pack;
     new_pack.setValue(current);
     if (!setData(index, new_pack, Qt::UserRole)) {
-        qWarning() << "Failed to cache mod versions!";
+        qCWarning(LAUNCHER_LOG) << "Failed to cache mod versions!";
     }
 
 

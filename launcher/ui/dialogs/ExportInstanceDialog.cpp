@@ -43,6 +43,7 @@
 
 #include <QSortFilterProxyModel>
 #include <QDebug>
+#include "launcherlog.h"
 #include <qstack.h>
 #include <QSaveFile>
 #include "MMCStrings.h"
@@ -199,7 +200,7 @@ public:
             if (!blocked.remove(blockedPath))
             {
                 auto cover = blocked.cover(blockedPath);
-                qDebug() << "Blocked by cover" << cover;
+                qCDebug(LAUNCHER_LOG) << "Blocked by cover" << cover;
                 // uncover
                 blocked.remove(cover);
                 // block all contents, except for any cover
@@ -505,7 +506,7 @@ void ExportInstanceDialog::savePackIgnore()
     }
     catch (const Exception &e)
     {
-        qWarning() << e.cause();
+        qCWarning(LAUNCHER_LOG) << e.cause();
     }
 }
 

@@ -110,7 +110,7 @@ bool FlameCreationTask::updateInstance()
             if (old_file != old_files.end()) {
                 // We found a match, but is it a different version?
                 if (old_file->fileId == file->fileId) {
-                    qDebug() << "Removed file at" << file->targetFolder << "with id" << file->fileId << "from list of downloads";
+                    qCDebug(LAUNCHER_LOG) << "Removed file at" << file->targetFolder << "with id" << file->fileId << "from list of downloads";
 
                     old_files.remove(file.key());
                     files_iterator = files.erase(files_iterator);
@@ -129,7 +129,7 @@ bool FlameCreationTask::updateInstance()
         for (const auto& entry : old_overrides) {
             if (entry.isEmpty())
                 continue;
-            qDebug() << "Scheduling" << entry << "for removal";
+            qCDebug(LAUNCHER_LOG) << "Scheduling" << entry << "for removal";
             m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
 
@@ -150,9 +150,9 @@ bool FlameCreationTask::updateInstance()
             QJsonParseError parse_error{};
             auto doc = QJsonDocument::fromJson(*raw_response, &parse_error);
             if (parse_error.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response from Flame files task at " << parse_error.offset
+                qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from Flame files task at " << parse_error.offset
                            << " reason: " << parse_error.errorString();
-                qWarning() << *raw_response;
+                qCWarning(LAUNCHER_LOG) << *raw_response;
                 return;
             }
 
@@ -174,7 +174,7 @@ bool FlameCreationTask::updateInstance()
                     old_files.insert(id, file);
                 }
             } catch (Json::JsonException& e) {
-                qCritical() << e.cause() << e.what();
+                qCCritical(LAUNCHER_LOG) << e.cause() << e.what();
             }
 
             // Delete the files
@@ -183,7 +183,7 @@ bool FlameCreationTask::updateInstance()
                     continue;
 
                 QString relative_path(FS::PathCombine(file.targetFolder, file.fileName));
-                qDebug() << "Scheduling" << relative_path << "for removal";
+                qCDebug(LAUNCHER_LOG) << "Scheduling" << relative_path << "for removal";
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
             }
         });
@@ -209,7 +209,7 @@ bool FlameCreationTask::updateInstance()
     }
 
     setOverride(true);
-    qDebug() << "Will override instance!";
+    qCDebug(LAUNCHER_LOG) << "Will override instance!";
 
     m_instance = inst;
 
@@ -317,11 +317,11 @@ bool FlameCreationTask::createInstance()
     QFileInfo jarmodsInfo(jarmodsPath);
     if (jarmodsInfo.isDir()) {
         // install all the jar mods
-        qDebug() << "Found jarmods:";
+        qCDebug(LAUNCHER_LOG) << "Found jarmods:";
         QDir jarmodsDir(jarmodsPath);
         QStringList jarMods;
         for (const auto& info : jarmodsDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files)) {
-            qDebug() << info.fileName();
+            qCDebug(LAUNCHER_LOG) << info.fileName();
             jarMods.push_back(info.absoluteFilePath());
         }
         auto profile = instance.getPackProfile();
@@ -383,7 +383,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         }
     }
     if (anyBlocked) {
-        qWarning() << "Blocked mods found, displaying mod list";
+        qCWarning(LAUNCHER_LOG) << "Blocked mods found, displaying mod list";
 
         auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked mods found"),
                                                    tr("The following mods were blocked on third party launchers.<br/>"
@@ -424,7 +424,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
             case Flame::File::Type::SingleFile:
             case Flame::File::Type::Mod: {
                 if (!result.url.isEmpty()) {
-                    qDebug() << "Will download" << result.url << "to" << path;
+                    qCDebug(LAUNCHER_LOG) << "Will download" << result.url << "to" << path;
                     auto dl = Net::Download::makeFile(result.url, path);
                     m_files_job->addNetAction(dl);
                 }

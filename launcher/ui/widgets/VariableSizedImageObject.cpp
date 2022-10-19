@@ -20,6 +20,7 @@
 
 #include <QAbstractTextDocumentLayout>
 #include <QDebug>
+#include "launcherlog.h"
 #include <QPainter>
 #include <QTextObject>
 
@@ -102,7 +103,7 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, const QUrl& source,
     auto full_entry_path = entry->getFullPath();
     auto source_url = source;
     connect(job, &NetJob::succeeded, [this, doc, full_entry_path, source_url, posInDocument] {
-        qDebug() << "Loaded resource at" << full_entry_path;
+        qCDebug(LAUNCHER_LOG) << "Loaded resource at" << full_entry_path;
 
         // If we flushed, don't proceed.
         if (!m_fetching_images.contains(source_url))

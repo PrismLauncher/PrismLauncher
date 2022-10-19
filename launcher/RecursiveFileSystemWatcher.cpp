@@ -2,6 +2,7 @@
 
 #include <QRegularExpression>
 #include <QDebug>
+#include "launcherlog.h"
 
 RecursiveFileSystemWatcher::RecursiveFileSystemWatcher(QObject *parent)
     : QObject(parent), m_watcher(new QFileSystemWatcher(this))

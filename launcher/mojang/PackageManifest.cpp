@@ -4,6 +4,7 @@
 #include <QDirIterator>
 #include <QCryptographicHash>
 #include <QDebug>
+#include "launcherlog.h"
 
 #ifndef Q_OS_WIN32
 #include <unistd.h>
@@ -161,7 +162,7 @@ Package Package::fromManifestContents(const QByteArray& contents)
     }
     catch (const Exception &e)
     {
-        qDebug() << QString("Unable to parse manifest: %1").arg(e.cause());
+        qCDebug(LAUNCHER_LOG) << QString("Unable to parse manifest: %1").arg(e.cause());
         out.valid = false;
         return out;
     }
@@ -177,7 +178,7 @@ Package Package::fromManifestFile(const QString & filename) {
     }
     catch (const Exception &e)
     {
-        qDebug() << QString("Unable to parse manifest file %1: %2").arg(filename, e.cause());
+        qCDebug(LAUNCHER_LOG) << QString("Unable to parse manifest file %1: %2").arg(filename, e.cause());
         out.valid = false;
         return out;
     }
@@ -247,7 +248,7 @@ Package Package::fromInspectedFolder(const QString& folderPath)
         if(fileInfo.isSymLink()) {
             Path targetPath;
             if(!actually_read_symlink_target(fileInfo.filePath(), targetPath)) {
-                qCritical() << "Folder inspection: Unknown filesystem object:" << fileInfo.absoluteFilePath();
+                qCCritical(LAUNCHER_LOG) << "Folder inspection: Unknown filesystem object:" << fileInfo.absoluteFilePath();
                 out.valid = false;
             }
             out.addLink(relPath, targetPath);
@@ -264,7 +265,7 @@ Package Package::fromInspectedFolder(const QString& folderPath)
             // FIXME: async / optimize the hashing
             QFile input(fileInfo.absoluteFilePath());
             if(!input.open(QIODevice::ReadOnly)) {
-                qCritical() << "Folder inspection: Failed to open file:" << fileInfo.absoluteFilePath();
+                qCCritical(LAUNCHER_LOG) << "Folder inspection: Failed to open file:" << fileInfo.absoluteFilePath();
                 out.valid = false;
                 break;
             }
@@ -273,7 +274,7 @@ Package Package::fromInspectedFolder(const QString& folderPath)
         }
         else {
             // Something else... oh my
-            qCritical() << "Folder inspection: Unknown filesystem object:" << fileInfo.absoluteFilePath();
+            qCCritical(LAUNCHER_LOG) << "Folder inspection: Unknown filesystem object:" << fileInfo.absoluteFilePath();
             out.valid = false;
             break;
         }

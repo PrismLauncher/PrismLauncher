@@ -122,7 +122,7 @@ slots:
         test.setHint("local");
         auto downloads = test.getDownloads(r, cache.get(), failedFiles, QFINDTESTDATA("testdata/Library"));
         QCOMPARE(downloads.size(), 0);
-        qDebug() << failedFiles;
+        qCDebug(LAUNCHER_LOG) << failedFiles;
         QCOMPARE(failedFiles.size(), 0);
 
         QStringList jar, native, native32, native64;

@@ -144,7 +144,7 @@ slots:
         EXEC_UPDATE_TASK(model.startWatching(), )
 
         for (auto mod : model.allMods())
-            qDebug() << mod->name();
+            qCDebug(LAUNCHER_LOG) << mod->name();
 
         QCOMPARE(model.size(), 4);
 
@@ -167,28 +167,28 @@ slots:
         }
 
         QCOMPARE(model.size(), 1);
-        qDebug() << "Added first mod.";
+        qCDebug(LAUNCHER_LOG) << "Added first mod.";
 
         {
             EXEC_UPDATE_TASK(model.startWatching(), )
         }
 
         QCOMPARE(model.size(), 1);
-        qDebug() << "Started watching the temp folder.";
+        qCDebug(LAUNCHER_LOG) << "Started watching the temp folder.";
         
         {
             EXEC_UPDATE_TASK(model.installResource(folder_resource), QVERIFY)
         }
 
         QCOMPARE(model.size(), 2);
-        qDebug() << "Added second mod.";
+        qCDebug(LAUNCHER_LOG) << "Added second mod.";
 
         {
             EXEC_UPDATE_TASK(model.uninstallResource("supercoolmod.jar"), QVERIFY);
         }
 
         QCOMPARE(model.size(), 1);
-        qDebug() << "Removed first mod.";
+        qCDebug(LAUNCHER_LOG) << "Removed first mod.";
 
         QString mod_file_name {model.at(0).fileinfo().fileName()};
         QVERIFY(!mod_file_name.isEmpty());
@@ -198,7 +198,7 @@ slots:
         }
 
         QCOMPARE(model.size(), 0);
-        qDebug() << "Removed second mod.";
+        qCDebug(LAUNCHER_LOG) << "Removed second mod.";
 
         model.stopWatching();
     }
@@ -221,7 +221,7 @@ slots:
         }
 
         for (auto res : model.all())
-            qDebug() << res->name();
+            qCDebug(LAUNCHER_LOG) << res->name();
 
         QCOMPARE(model.size(), 2);
 
@@ -233,21 +233,21 @@ slots:
         bool initial_enabled_res_1 =  res_1.enabled();
 
         QVERIFY(res_1.type() != ResourceType::FOLDER && res_1.type() != ResourceType::UNKNOWN);
-        qDebug() << "res_1 is of the correct type.";
+        qCDebug(LAUNCHER_LOG) << "res_1 is of the correct type.";
         QVERIFY(res_1.enabled());
-        qDebug() << "res_1 is initially enabled.";
+        qCDebug(LAUNCHER_LOG) << "res_1 is initially enabled.";
 
         QVERIFY(res_1.enable(EnableAction::TOGGLE));
 
         QVERIFY(res_1.enabled() == !initial_enabled_res_1);
-        qDebug() << "res_1 got successfully toggled.";
+        qCDebug(LAUNCHER_LOG) << "res_1 got successfully toggled.";
 
         QVERIFY(res_1.enable(EnableAction::TOGGLE));
-        qDebug() << "res_1 got successfully toggled again.";
+        qCDebug(LAUNCHER_LOG) << "res_1 got successfully toggled again.";
 
         QVERIFY(res_1.enabled() == initial_enabled_res_1);
         QVERIFY(res_1.internal_id() == id_1);
-        qDebug() << "res_1 got back to its initial state.";
+        qCDebug(LAUNCHER_LOG) << "res_1 got back to its initial state.";
 
         QVERIFY(!res_2.enable(initial_enabled_res_2 ? EnableAction::ENABLE : EnableAction::DISABLE));
         QVERIFY(res_2.enabled() == initial_enabled_res_2);

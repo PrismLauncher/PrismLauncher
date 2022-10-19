@@ -44,7 +44,7 @@ void MinecraftProfileStepMojang::onRequestDone(
     requestor->deleteLater();
 
 #ifndef NDEBUG
-    qDebug() << data;
+    qCDebug(LAUNCHER_LOG) << data;
 #endif
     if (error == QNetworkReply::ContentNotFoundError) {
         // NOTE: Succeed even if we do not have a profile. This is a valid account state.
@@ -60,13 +60,13 @@ void MinecraftProfileStepMojang::onRequestDone(
         return;
     }
     if (error != QNetworkReply::NoError) {
-        qWarning() << "Error getting profile:";
-        qWarning() << " HTTP Status:        " << requestor->httpStatus_;
-        qWarning() << " Internal error no.: " << error;
-        qWarning() << " Error string:       " << requestor->errorString_;
+        qCWarning(LAUNCHER_LOG) << "Error getting profile:";
+        qCWarning(LAUNCHER_LOG) << " HTTP Status:        " << requestor->httpStatus_;
+        qCWarning(LAUNCHER_LOG) << " Internal error no.: " << error;
+        qCWarning(LAUNCHER_LOG) << " Error string:       " << requestor->errorString_;
 
-        qWarning() << " Response:";
-        qWarning() << QString::fromUtf8(data);
+        qCWarning(LAUNCHER_LOG) << " Response:";
+        qCWarning(LAUNCHER_LOG) << QString::fromUtf8(data);
 
         if (Net::isApplicationError(error)) {
             emit finished(

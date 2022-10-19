@@ -3,28 +3,29 @@
 #include <QStyle>
 #include <QStyleFactory>
 #include <QDebug>
+#include "launcherlog.h"
 
 SystemTheme::SystemTheme()
 {
-    qDebug() << "Determining System Theme...";
+    qCDebug(LAUNCHER_LOG) << "Determining System Theme...";
     const auto & style = QApplication::style();
     systemPalette = style->standardPalette();
     QString lowerThemeName = style->objectName();
-    qDebug() << "System theme seems to be:" << lowerThemeName;
+    qCDebug(LAUNCHER_LOG) << "System theme seems to be:" << lowerThemeName;
     QStringList styles = QStyleFactory::keys();
     for(auto &st: styles)
     {
-        qDebug() << "Considering theme from theme factory:" << st.toLower();
+        qCDebug(LAUNCHER_LOG) << "Considering theme from theme factory:" << st.toLower();
         if(st.toLower() == lowerThemeName)
         {
             systemTheme = st;
-            qDebug() << "System theme has been determined to be:" << systemTheme;
+            qCDebug(LAUNCHER_LOG) << "System theme has been determined to be:" << systemTheme;
             return;
         }
     }
     // fall back to fusion if we can't find the current theme.
     systemTheme = "Fusion";
-    qDebug() << "System theme not found, defaulted to Fusion";
+    qCDebug(LAUNCHER_LOG) << "System theme not found, defaulted to Fusion";
 }
 
 void SystemTheme::apply(bool initial)

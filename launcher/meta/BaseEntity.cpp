@@ -59,7 +59,7 @@ public: /* methods */
         }
         catch (const Exception &e)
         {
-            qWarning() << "Unable to parse response:" << e.cause();
+            qCWarning(LAUNCHER_LOG) << "Unable to parse response:" << e.cause();
             return false;
         }
     }
@@ -104,7 +104,7 @@ bool Meta::BaseEntity::loadLocalFile()
     }
     catch (const Exception &e)
     {
-        qDebug() << QString("Unable to parse file %1: %2").arg(fname, e.cause());
+        qCDebug(LAUNCHER_LOG) << QString("Unable to parse file %1: %2").arg(fname, e.cause());
         // just make sure it's gone and we never consider it again.
         QFile::remove(fname);
         return false;

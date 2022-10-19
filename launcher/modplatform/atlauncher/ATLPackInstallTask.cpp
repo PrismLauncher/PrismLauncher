@@ -80,7 +80,7 @@ bool PackInstallTask::abort()
 
 void PackInstallTask::executeTask()
 {
-    qDebug() << "PackInstallTask::executeTask: " << QThread::currentThreadId();
+    qCDebug(LAUNCHER_LOG) << "PackInstallTask::executeTask: " << QThread::currentThreadId();
     auto *netJob = new NetJob("ATLauncher::VersionFetch", APPLICATION->network());
     auto searchUrl = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json")
             .arg(m_pack_safe_name).arg(m_version_name);
@@ -95,14 +95,14 @@ void PackInstallTask::executeTask()
 
 void PackInstallTask::onDownloadSucceeded()
 {
-    qDebug() << "PackInstallTask::onDownloadSucceeded: " << QThread::currentThreadId();
+    qCDebug(LAUNCHER_LOG) << "PackInstallTask::onDownloadSucceeded: " << QThread::currentThreadId();
     jobPtr.reset();
 
     QJsonParseError parse_error {};
     QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if(parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ATLauncher at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << response;
+        qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from ATLauncher at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qCWarning(LAUNCHER_LOG) << response;
         return;
     }
     auto obj = doc.object();
@@ -165,7 +165,7 @@ void PackInstallTask::onDownloadSucceeded()
 
 void PackInstallTask::onDownloadFailed(QString reason)
 {
-    qDebug() << "PackInstallTask::onDownloadFailed: " << QThread::currentThreadId();
+    qCDebug(LAUNCHER_LOG) << "PackInstallTask::onDownloadFailed: " << QThread::currentThreadId();
     jobPtr.reset();
     emitFailed(reason);
 }
@@ -215,7 +215,7 @@ void PackInstallTask::deleteExistingFiles()
             return FS::PathCombine(minecraftPath, "config");
         }
         else {
-            qWarning() << "Unrecognised base path" << base;
+            qCWarning(LAUNCHER_LOG) << "Unrecognised base path" << base;
             return minecraftPath;
         }
     };
@@ -324,7 +324,7 @@ QString PackInstallTask::getDirForModType(ModType type, QString raw)
         case ModType::ShaderPack:
             return "shaderpacks";
         case ModType::Millenaire:
-            qWarning() << "Unsupported mod type: " + raw;
+            qCWarning(LAUNCHER_LOG) << "Unsupported mod type: " + raw;
             return Q_NULLPTR;
         case ModType::Unknown:
             emitFailed(tr("Unknown mod type: %1").arg(raw));
@@ -545,7 +545,7 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
     QFile file(patchFileName);
     if (!file.open(QFile::WriteOnly))
     {
-        qCritical() << "Error opening" << file.fileName()
+        qCCritical(LAUNCHER_LOG) << "Error opening" << file.fileName()
                     << "for reading:" << file.errorString();
         return false;
     }
@@ -634,7 +634,7 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<
     QFile file(patchFileName);
     if (!file.open(QFile::WriteOnly))
     {
-        qCritical() << "Error opening" << file.fileName()
+        qCCritical(LAUNCHER_LOG) << "Error opening" << file.fileName()
                     << "for reading:" << file.errorString();
         return false;
     }
@@ -647,7 +647,7 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<
 
 void PackInstallTask::installConfigs()
 {
-    qDebug() << "PackInstallTask::installConfigs: " << QThread::currentThreadId();
+    qCDebug(LAUNCHER_LOG) << "PackInstallTask::installConfigs: " << QThread::currentThreadId();
     setStatus(tr("Downloading configs..."));
     jobPtr = new NetJob(tr("Config download"), APPLICATION->network());
 
@@ -693,7 +693,7 @@ void PackInstallTask::installConfigs()
 
 void PackInstallTask::extractConfigs()
 {
-    qDebug() << "PackInstallTask::extractConfigs: " << QThread::currentThreadId();
+    qCDebug(LAUNCHER_LOG) << "PackInstallTask::extractConfigs: " << QThread::currentThreadId();
     setStatus(tr("Extracting configs..."));
 
     QDir extractDir(m_stagingPath);
@@ -723,7 +723,7 @@ void PackInstallTask::extractConfigs()
 
 void PackInstallTask::downloadMods()
 {
-    qDebug() << "PackInstallTask::installMods: " << QThread::currentThreadId();
+    qCDebug(LAUNCHER_LOG) << "PackInstallTask::installMods: " << QThread::currentThreadId();
 
     QVector<ATLauncher::VersionMod> optionalMods;
     for (const auto& mod : m_version.mods) {
@@ -816,17 +816,17 @@ void PackInstallTask::downloadMods()
                     continue;
                 }
 
-                qDebug() << "Jarmod: " + path;
+                qCDebug(LAUNCHER_LOG) << "Jarmod: " + path;
                 jarmods.push_back(path);
             }
 
             if(mod.type == ModType::Jar) {
-                qDebug() << "Jarmod: " + path;
+                qCDebug(LAUNCHER_LOG) << "Jarmod: " + path;
                 jarmods.push_back(path);
             }
 
             // Download after Forge handling, to avoid downloading Forge twice.
-            qDebug() << "Will download" << url << "to" << path;
+            qCDebug(LAUNCHER_LOG) << "Will download" << url << "to" << path;
             modsToCopy[entry->getFullPath()] = path;
         }
     }
@@ -856,7 +856,7 @@ void PackInstallTask::downloadMods()
 void PackInstallTask::onModsDownloaded() {
     abortable = false;
 
-    qDebug() << "PackInstallTask::onModsDownloaded: " << QThread::currentThreadId();
+    qCDebug(LAUNCHER_LOG) << "PackInstallTask::onModsDownloaded: " << QThread::currentThreadId();
     jobPtr.reset();
 
     if(!modsToExtract.empty() || !modsToDecomp.empty() || !modsToCopy.empty()) {
@@ -878,7 +878,7 @@ void PackInstallTask::onModsDownloaded() {
 }
 
 void PackInstallTask::onModsExtracted() {
-    qDebug() << "PackInstallTask::onModsExtracted: " << QThread::currentThreadId();
+    qCDebug(LAUNCHER_LOG) << "PackInstallTask::onModsExtracted: " << QThread::currentThreadId();
     if(m_modExtractFuture.result()) {
         install();
     }
@@ -892,7 +892,7 @@ bool PackInstallTask::extractMods(
     const QMap<QString, VersionMod> &toDecomp,
     const QMap<QString, QString> &toCopy
 ) {
-    qDebug() << "PackInstallTask::extractMods: " << QThread::currentThreadId();
+    qCDebug(LAUNCHER_LOG) << "PackInstallTask::extractMods: " << QThread::currentThreadId();
 
     setStatus(tr("Extracting mods..."));
     for (auto iter = toExtract.begin(); iter != toExtract.end(); iter++) {
@@ -919,7 +919,7 @@ bool PackInstallTask::extractMods(
             folderToExtract.remove(QRegularExpression("^/"));
         }
 
-        qDebug() << "Extracting " + mod.file + " to " + extractToDir;
+        qCDebug(LAUNCHER_LOG) << "Extracting " + mod.file + " to " + extractToDir;
         if(!MMCZip::extractDir(modPath, folderToExtract, extractToPath)) {
             // assume error
             return false;
@@ -934,9 +934,9 @@ bool PackInstallTask::extractMods(
         QDir extractDir(m_stagingPath);
         auto extractToPath = FS::PathCombine(extractDir.absolutePath(), "minecraft", extractToDir, mod.decompFile);
 
-        qDebug() << "Extracting " + mod.decompFile + " to " + extractToDir;
+        qCDebug(LAUNCHER_LOG) << "Extracting " + mod.decompFile + " to " + extractToDir;
         if(!MMCZip::extractFile(modPath, mod.decompFile, extractToPath)) {
-            qWarning() << "Failed to extract" << mod.decompFile;
+            qCWarning(LAUNCHER_LOG) << "Failed to extract" << mod.decompFile;
             return false;
         }
     }
@@ -950,14 +950,14 @@ bool PackInstallTask::extractMods(
         QFileInfo fileInfo(to);
         if (fileInfo.exists()) {
             if (!QFile::remove(to)) {
-                qWarning() << "Failed to delete" << to;
+                qCWarning(LAUNCHER_LOG) << "Failed to delete" << to;
                 return false;
             }
         }
 
         FS::copy fileCopyOperation(from, to);
         if(!fileCopyOperation()) {
-            qWarning() << "Failed to copy" << from << "to" << to;
+            qCWarning(LAUNCHER_LOG) << "Failed to copy" << from << "to" << to;
             return false;
         }
     }
@@ -966,7 +966,7 @@ bool PackInstallTask::extractMods(
 
 void PackInstallTask::install()
 {
-    qDebug() << "PackInstallTask::install: " << QThread::currentThreadId();
+    qCDebug(LAUNCHER_LOG) << "PackInstallTask::install: " << QThread::currentThreadId();
     setStatus(tr("Installing modpack"));
 
     auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");

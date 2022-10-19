@@ -188,7 +188,7 @@ void ModPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     current = listModel->data(curr, Qt::UserRole).value<ModPlatform::IndexedPack>();
 
     if (!current.versionsLoaded) {
-        qDebug() << QString("Loading %1 mod versions").arg(debugName());
+        qCDebug(LAUNCHER_LOG) << QString("Loading %1 mod versions").arg(debugName());
 
         ui->modSelectionButton->setText(tr("Loading versions..."));
         ui->modSelectionButton->setEnabled(false);
@@ -204,7 +204,7 @@ void ModPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     }
 
     if(!current.extraDataLoaded){
-        qDebug() << QString("Loading %1 mod info").arg(debugName());
+        qCDebug(LAUNCHER_LOG) << QString("Loading %1 mod info").arg(debugName());
 
         listModel->requestModInfo(current, curr);
     }

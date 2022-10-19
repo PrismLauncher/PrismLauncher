@@ -41,6 +41,7 @@
 #include <QRegularExpressionValidator>
 #include <QJsonDocument>
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "ui/dialogs/ProgressDialog.h"
 
@@ -269,7 +270,7 @@ void ProfileSetupDialog::setupProfileFinished(
         auto parsedError = MojangError::fromJSON(data);
         ui->errorLabel->setVisible(true);
         ui->errorLabel->setText(tr("The server returned the following error:") + "\n\n" + parsedError.errorMessage);
-        qDebug() << parsedError.rawError;
+        qCDebug(LAUNCHER_LOG) << parsedError.rawError;
         auto button = ui->buttonBox->button(QDialogButtonBox::Cancel);
         button->setEnabled(true);
     }

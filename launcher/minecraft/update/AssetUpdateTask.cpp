@@ -33,7 +33,7 @@ void AssetUpdateTask::executeTask()
     auto entry = metacache->resolveEntry("asset_indexes", localPath);
     entry->setStale(true);
     auto hexSha1 = assets->sha1.toLatin1();
-    qDebug() << "Asset index SHA1:" << hexSha1;
+    qCDebug(LAUNCHER_LOG) << "Asset index SHA1:" << hexSha1;
     auto dl = Net::Download::makeCached(indexUrl, entry);
     auto rawSha1 = QByteArray::fromHex(assets->sha1.toLatin1());
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
@@ -46,7 +46,7 @@ void AssetUpdateTask::executeTask()
     connect(downloadJob.get(), &NetJob::aborted, this, [this]{ emitFailed(tr("Aborted")); });
     connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
 
-    qDebug() << m_inst->name() << ": Starting asset index download";
+    qCDebug(LAUNCHER_LOG) << m_inst->name() << ": Starting asset index download";
     downloadJob->start();
 }
 
@@ -58,7 +58,7 @@ bool AssetUpdateTask::canAbort() const
 void AssetUpdateTask::assetIndexFinished()
 {
     AssetsIndex index;
-    qDebug() << m_inst->name() << ": Finished asset index download";
+    qCDebug(LAUNCHER_LOG) << m_inst->name() << ": Finished asset index download";
 
     auto components = m_inst->getPackProfile();
     auto profile = components->getProfile();
@@ -91,7 +91,7 @@ void AssetUpdateTask::assetIndexFinished()
 
 void AssetUpdateTask::assetIndexFailed(QString reason)
 {
-    qDebug() << m_inst->name() << ": Failed asset index download";
+    qCDebug(LAUNCHER_LOG) << m_inst->name() << ": Failed asset index download";
     emitFailed(tr("Failed to download the assets index:\n%1").arg(reason));
 }
 
@@ -108,7 +108,7 @@ bool AssetUpdateTask::abort()
     }
     else
     {
-        qWarning() << "Prematurely aborted AssetUpdateTask";
+        qCWarning(LAUNCHER_LOG) << "Prematurely aborted AssetUpdateTask";
     }
     return true;
 }

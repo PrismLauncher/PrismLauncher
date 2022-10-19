@@ -44,6 +44,7 @@
 #include <QString>
 #include <QFileSystemWatcher>
 #include <QDebug>
+#include "launcherlog.h"
 
 WorldList::WorldList(const QString &dir)
     : QAbstractListModel(), m_dir(dir)
@@ -67,11 +68,11 @@ void WorldList::startWatching()
     is_watching = m_watcher->addPath(m_dir.absolutePath());
     if (is_watching)
     {
-        qDebug() << "Started watching " << m_dir.absolutePath();
+        qCDebug(LAUNCHER_LOG) << "Started watching " << m_dir.absolutePath();
     }
     else
     {
-        qDebug() << "Failed to start watching " << m_dir.absolutePath();
+        qCDebug(LAUNCHER_LOG) << "Failed to start watching " << m_dir.absolutePath();
     }
 }
 
@@ -84,11 +85,11 @@ void WorldList::stopWatching()
     is_watching = !m_watcher->removePath(m_dir.absolutePath());
     if (!is_watching)
     {
-        qDebug() << "Stopped watching " << m_dir.absolutePath();
+        qCDebug(LAUNCHER_LOG) << "Stopped watching " << m_dir.absolutePath();
     }
     else
     {
-        qDebug() << "Failed to stop watching " << m_dir.absolutePath();
+        qCDebug(LAUNCHER_LOG) << "Failed to stop watching " << m_dir.absolutePath();
     }
 }
 
@@ -333,7 +334,7 @@ protected:
             if(!world.isValid() || !world.isOnFS())
                 continue;
             QString worldPath = world.container().absoluteFilePath();
-            qDebug() << worldPath;
+            qCDebug(LAUNCHER_LOG) << worldPath;
             urls.append(QUrl::fromLocalFile(worldPath));
         }
         const_cast<WorldMimeData*>(this)->setUrls(urls);
@@ -389,7 +390,7 @@ Qt::DropActions WorldList::supportedDropActions() const
 
 void WorldList::installWorld(QFileInfo filename)
 {
-    qDebug() << "installing: " << filename.absoluteFilePath();
+    qCDebug(LAUNCHER_LOG) << "installing: " << filename.absoluteFilePath();
     World w(filename);
     if(!w.isValid())
     {

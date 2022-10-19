@@ -51,12 +51,12 @@ PageDialog::PageDialog(BasePageProvider *pageProvider, QString defaultId, QWidge
 
 void PageDialog::closeEvent(QCloseEvent *event)
 {
-    qDebug() << "Paged dialog close requested";
+    qCDebug(LAUNCHER_LOG) << "Paged dialog close requested";
     if (m_container->prepareToClose())
     {
-        qDebug() << "Paged dialog close approved";
+        qCDebug(LAUNCHER_LOG) << "Paged dialog close approved";
         APPLICATION->settings()->set("PagedGeometry", saveGeometry().toBase64());
-        qDebug() << "Paged dialog geometry saved";
+        qCDebug(LAUNCHER_LOG) << "Paged dialog geometry saved";
         QDialog::closeEvent(event);
     }
 }

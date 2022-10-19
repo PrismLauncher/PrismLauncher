@@ -138,7 +138,7 @@ void ListModel::fetchMore(const QModelIndex& parent)
     if (parent.isValid())
         return;
     if (nextSearchOffset == 0) {
-        qWarning() << "fetchMore with 0 offset is wrong...";
+        qCWarning(LAUNCHER_LOG) << "fetchMore with 0 offset is wrong...";
         return;
     }
     performPaginatedSearch();
@@ -195,9 +195,9 @@ void Flame::ListModel::searchRequestFinished()
     QJsonParseError parse_error;
     QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from CurseForge at " << parse_error.offset
+        qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from CurseForge at " << parse_error.offset
                    << " reason: " << parse_error.errorString();
-        qWarning() << response;
+        qCWarning(LAUNCHER_LOG) << response;
         return;
     }
 
@@ -211,7 +211,7 @@ void Flame::ListModel::searchRequestFinished()
             Flame::loadIndexedPack(pack, packObj);
             newList.append(pack);
         } catch (const JSONValidationError& e) {
-            qWarning() << "Error while loading pack from CurseForge: " << e.cause();
+            qCWarning(LAUNCHER_LOG) << "Error while loading pack from CurseForge: " << e.cause();
             continue;
         }
     }

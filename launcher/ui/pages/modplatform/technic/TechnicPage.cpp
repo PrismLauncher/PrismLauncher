@@ -158,13 +158,13 @@ void TechnicPage::suggestCurrent()
         QJsonObject obj = doc.object();
         if(parse_error.error != QJsonParseError::NoError)
         {
-            qWarning() << "Error while parsing JSON response from Technic at " << parse_error.offset << " reason: " << parse_error.errorString();
-            qWarning() << *response;
+            qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from Technic at " << parse_error.offset << " reason: " << parse_error.errorString();
+            qCWarning(LAUNCHER_LOG) << *response;
             return;
         }
         if (!obj.contains("url"))
         {
-            qWarning() << "Json doesn't contain an url key";
+            qCWarning(LAUNCHER_LOG) << "Json doesn't contain an url key";
             return;
         }
         QJsonValueRef url = obj["url"];
@@ -176,7 +176,7 @@ void TechnicPage::suggestCurrent()
         {
             if (!obj.contains("solder"))
             {
-                qWarning() << "Json doesn't contain a valid url or solder key";
+                qCWarning(LAUNCHER_LOG) << "Json doesn't contain a valid url or solder key";
                 return;
             }
             QJsonValueRef solderUrl = obj["solder"];
@@ -187,7 +187,7 @@ void TechnicPage::suggestCurrent()
             }
             else
             {
-                qWarning() << "Json doesn't contain a valid url or solder key";
+                qCWarning(LAUNCHER_LOG) << "Json doesn't contain a valid url or solder key";
                 return;
             }
         }
@@ -294,8 +294,8 @@ void TechnicPage::onSolderLoaded() {
     QJsonParseError parse_error {};
     auto doc = QJsonDocument::fromJson(response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from Solder at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << response;
+        qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from Solder at " << parse_error.offset << " reason: " << parse_error.errorString();
+        qCWarning(LAUNCHER_LOG) << response;
         fallback();
         return;
     }
@@ -306,7 +306,7 @@ void TechnicPage::onSolderLoaded() {
         TechnicSolder::loadPack(pack, obj);
     }
     catch (const JSONValidationError& err) {
-        qCritical() << "Couldn't parse Solder pack metadata:" << err.cause();
+        qCCritical(LAUNCHER_LOG) << "Couldn't parse Solder pack metadata:" << err.cause();
         fallback();
         return;
     }

@@ -24,6 +24,7 @@
 #include <QByteArray>
 
 #include <QDebug>
+#include "launcherlog.h"
 
 #include "Application.h"
 
@@ -167,9 +168,9 @@ void Yggdrasil::abortByTimeout() {
 void Yggdrasil::sslErrors(QList<QSslError> errors) {
     int i = 1;
     for (auto error : errors) {
-        qCritical() << "LOGIN SSL Error #" << i << " : " << error.errorString();
+        qCCritical(LAUNCHER_LOG) << "LOGIN SSL Error #" << i << " : " << error.errorString();
         auto cert = error.certificate();
-        qCritical() << "Certificate in question:\n" << cert.toText();
+        qCCritical(LAUNCHER_LOG) << "Certificate in question:\n" << cert.toText();
         i++;
     }
 }
@@ -177,9 +178,9 @@ void Yggdrasil::sslErrors(QList<QSslError> errors) {
 void Yggdrasil::processResponse(QJsonObject responseData) {
     // Read the response data. We need to get the client token, access token, and the selected
     // profile.
-    qDebug() << "Processing authentication response.";
+    qCDebug(LAUNCHER_LOG) << "Processing authentication response.";
 
-    // qDebug() << responseData;
+    // qCDebug(LAUNCHER_LOG) << responseData;
     // If we already have a client token, make sure the one the server gave us matches our
     // existing one.
     QString clientToken = responseData.value("clientToken").toString("");
@@ -197,7 +198,7 @@ void Yggdrasil::processResponse(QJsonObject responseData) {
     }
 
     // Now, we set the access token.
-    qDebug() << "Getting access token.";
+    qCDebug(LAUNCHER_LOG) << "Getting access token.";
     QString accessToken = responseData.value("accessToken").toString("");
     if (accessToken.isEmpty()) {
         // Fail if the server didn't give us an access token.
@@ -233,7 +234,7 @@ void Yggdrasil::processResponse(QJsonObject responseData) {
 
     // We've made it through the minefield of possible errors. Return true to indicate that
     // we've succeeded.
-    qDebug() << "Finished reading authentication response.";
+    qCDebug(LAUNCHER_LOG) << "Finished reading authentication response.";
     changeState(AccountTaskState::STATE_SUCCEEDED);
 }
 
@@ -304,7 +305,7 @@ void Yggdrasil::processReply() {
                 AccountTaskState::STATE_FAILED_SOFT,
                 tr("Failed to parse authentication server response JSON response: %1 at offset %2.").arg(jsonError.errorString()).arg(jsonError.offset)
             );
-            qCritical() << replyData;
+            qCCritical(LAUNCHER_LOG) << replyData;
         }
         return;
     }
@@ -317,13 +318,13 @@ void Yggdrasil::processReply() {
         // We were able to parse the server's response. Woo!
         // Call processError. If a subclass has overridden it then they'll handle their
         // stuff there.
-        qDebug() << "The request failed, but the server gave us an error message. Processing error.";
+        qCDebug(LAUNCHER_LOG) << "The request failed, but the server gave us an error message. Processing error.";
         processError(doc.object());
     }
     else {
         // The server didn't say anything regarding the error. Give the user an unknown
         // error.
-        qDebug() << "The request failed and the server gave no error message. Unknown error.";
+        qCDebug(LAUNCHER_LOG) << "The request failed and the server gave no error message. Unknown error.";
         changeState(
             AccountTaskState::STATE_FAILED_SOFT,
             tr("An unknown error occurred when trying to communicate with the authentication server: %1").arg(m_netReply->errorString())

@@ -126,7 +126,7 @@ void ModUpdateDialog::checkCandidates()
     if (m_modrinth_check_task) {
         auto modrinth_updates = m_modrinth_check_task->getUpdatable();
         for (auto& updatable : modrinth_updates) {
-            qDebug() << QString("Mod %1 has an update available!").arg(updatable.name);
+            qCDebug(LAUNCHER_LOG) << QString("Mod %1 has an update available!").arg(updatable.name);
 
             appendMod(updatable);
             m_tasks.insert(updatable.name, updatable.download);
@@ -137,7 +137,7 @@ void ModUpdateDialog::checkCandidates()
     if (m_flame_check_task) {
         auto flame_updates = m_flame_check_task->getUpdatable();
         for (auto& updatable : flame_updates) {
-            qDebug() << QString("Mod %1 has an update available!").arg(updatable.name);
+            qCDebug(LAUNCHER_LOG) << QString("Mod %1 has an update available!").arg(updatable.name);
 
             appendMod(updatable);
             m_tasks.insert(updatable.name, updatable.download);
@@ -152,7 +152,7 @@ void ModUpdateDialog::checkCandidates()
             const auto& reason = std::get<1>(failed);
             const auto& recover_url = std::get<2>(failed);
 
-            qDebug() << mod->name() << " failed to check for updates!";
+            qCDebug(LAUNCHER_LOG) << mod->name() << " failed to check for updates!";
 
             text += tr("Mod name: %1").arg(mod->name()) + "<br>";
             if (!reason.isEmpty())

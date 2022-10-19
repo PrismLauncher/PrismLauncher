@@ -409,7 +409,7 @@ void VersionPage::on_actionChange_version_triggered()
     if (!vselect.exec() || !vselect.selectedVersion())
         return;
 
-    qDebug() << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
+    qCDebug(LAUNCHER_LOG) << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
     bool important = false;
     if(uid == "net.minecraft")
     {
@@ -540,8 +540,8 @@ void VersionPage::on_actionAdd_Empty_triggered()
     compdialog.setBlacklist(blacklist);
     if (compdialog.exec())
     {
-        qDebug() << "name:" << compdialog.name();
-        qDebug() << "uid:" << compdialog.uid();
+        qCDebug(LAUNCHER_LOG) << "name:" << compdialog.name();
+        qCDebug(LAUNCHER_LOG) << "uid:" << compdialog.uid();
         m_profile->installEmpty(compdialog.uid(), compdialog.name());
     }
 }
@@ -665,7 +665,7 @@ void VersionPage::on_actionEdit_triggered()
     auto filename = version->getFilename();
     if(!QFileInfo::exists(filename))
     {
-        qWarning() << "file" << filename << "can't be opened for editing, doesn't exist!";
+        qCWarning(LAUNCHER_LOG) << "file" << filename << "can't be opened for editing, doesn't exist!";
         return;
     }
     APPLICATION->openJsonEditor(filename);

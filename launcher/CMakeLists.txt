@@ -568,6 +568,23 @@ set(LOGIC_SOURCES
     ${ATLAUNCHER_SOURCES}
 )
 
+ecm_qt_declare_logging_category(LOGIC_SOURCES
+    HEADER launcherlog.h
+    IDENTIFIER LAUNCHER_LOG
+    CATEGORY_NAME ${Launcher_LoggingCategory}
+    DEFAULT_SEVERITY Info
+    EXPORT "${Launcher_Name}"
+    DESCRIPTION "The ${Launcher_DisplayName} for Minecraft"
+)
+
+if(UNIX AND NOT APPLE)
+    # lil bonus for Plasma users, kdebugsettings compatibility
+    ecm_qt_install_logging_categories(
+        EXPORT "${Launcher_Name}"
+        DESTINATION ${KDE_INSTALL_LOGGINGCATEGORIESDIR}
+    )
+endif()
+
 if(APPLE)
     set (LOGIC_SOURCES ${LOGIC_SOURCES} ${MAC_UPDATE_SOURCES})
 endif()

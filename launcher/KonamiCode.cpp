@@ -2,6 +2,7 @@
 
 #include <array>
 #include <QDebug>
+#include "launcherlog.h"
 
 namespace {
 const std::array<Qt::Key, 10> konamiCode =

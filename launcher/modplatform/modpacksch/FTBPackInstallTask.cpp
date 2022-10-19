@@ -110,9 +110,9 @@ void PackInstallTask::onManifestDownloadSucceeded()
     QJsonParseError parse_error{};
     QJsonDocument doc = QJsonDocument::fromJson(m_response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ModpacksCH at " << parse_error.offset
+        qCWarning(LAUNCHER_LOG) << "Error while parsing JSON response from ModpacksCH at " << parse_error.offset
                    << " reason: " << parse_error.errorString();
-        qWarning() << m_response;
+        qCWarning(LAUNCHER_LOG) << m_response;
         return;
     }
 
@@ -205,7 +205,7 @@ void PackInstallTask::onResolveModsSucceeded()
     m_mod_id_resolver_task.reset();
 
     if (anyBlocked) {
-        qDebug() << "Blocked files found, displaying file list";
+        qCDebug(LAUNCHER_LOG) << "Blocked files found, displaying file list";
 
         auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked files found"),
                                                    tr("The following files are not available for download in third party launchers.<br/>"
@@ -293,7 +293,7 @@ void PackInstallTask::downloadPack()
             continue;
 
         auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path, file.name);
-        qDebug() << "Will try to download" << file.url << "to" << path;
+        qCDebug(LAUNCHER_LOG) << "Will try to download" << file.url << "to" << path;
 
         QFileInfo file_info(file.name);
 

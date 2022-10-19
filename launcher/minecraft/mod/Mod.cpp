@@ -37,6 +37,7 @@
 #include "Mod.h"
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QDir>
 #include <QString>
 #include <QRegularExpression>
@@ -112,7 +113,7 @@ bool Mod::applyFilter(QRegularExpression filter) const
 auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
 {
     if (!preserve_metadata) {
-        qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
+        qCDebug(LAUNCHER_LOG) << QString("Destroying metadata for '%1' on purpose").arg(name());
 
         if (metadata()) {
             Metadata::remove(index_dir, metadata()->slug);

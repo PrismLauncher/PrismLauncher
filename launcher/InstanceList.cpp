@@ -34,6 +34,7 @@
  */
 
 #include <QDebug>
+#include "launcherlog.h"
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
@@ -231,7 +232,7 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
 {
     auto inst = getInstanceById(id);
     if (!inst) {
-        qDebug() << "Attempt to set a null instance's group";
+        qCDebug(LAUNCHER_LOG) << "Attempt to set a null instance's group";
         return;
     }
 
@@ -263,13 +264,13 @@ QStringList InstanceList::getGroups()
 void InstanceList::deleteGroup(const QString& name)
 {
     bool removed = false;
-    qDebug() << "Delete group" << name;
+    qCDebug(LAUNCHER_LOG) << "Delete group" << name;
     for (auto& instance : m_instances) {
         const auto& instID = instance->id();
         auto instGroupName = getInstanceGroup(instID);
         if (instGroupName == name) {
             m_instanceGroupIndex.remove(instID);
-            qDebug() << "Remove" << instID << "from group" << name;
+            qCDebug(LAUNCHER_LOG) << "Remove" << instID << "from group" << name;
             removed = true;
             auto idx = getInstIndex(instance.get());
             if (idx > 0) {
@@ -291,13 +292,13 @@ bool InstanceList::trashInstance(const InstanceId& id)
 {
     auto inst = getInstanceById(id);
     if (!inst) {
-        qDebug() << "Cannot trash instance" << id << ". No such instance is present (deleted externally?).";
+        qCDebug(LAUNCHER_LOG) << "Cannot trash instance" << id << ". No such instance is present (deleted externally?).";
         return false;
     }
 
     auto cachedGroupId = m_instanceGroupIndex[id];
 
-    qDebug() << "Will trash instance" << id;
+    qCDebug(LAUNCHER_LOG) << "Will trash instance" << id;
     QString trashedLoc;
 
     if (m_instanceGroupIndex.remove(id)) {
@@ -305,11 +306,11 @@ bool InstanceList::trashInstance(const InstanceId& id)
     }
 
     if (!FS::trash(inst->instanceRoot(), &trashedLoc)) {
-        qDebug() << "Trash of instance" << id << "has not been completely successfully...";
+        qCDebug(LAUNCHER_LOG) << "Trash of instance" << id << "has not been completely successfully...";
         return false;
     }
 
-    qDebug() << "Instance" << id << "has been trashed by the launcher.";
+    qCDebug(LAUNCHER_LOG) << "Instance" << id << "has been trashed by the launcher.";
     m_trashHistory.push({id, inst->instanceRoot(), trashedLoc, cachedGroupId});
     
     return true;
@@ -321,7 +322,7 @@ bool InstanceList::trashedSomething() {
 
 void InstanceList::undoTrashInstance() {
     if (m_trashHistory.empty()) {
-        qWarning() << "Nothing to recover from trash.";
+        qCWarning(LAUNCHER_LOG) << "Nothing to recover from trash.";
         return;
     }
 
@@ -332,7 +333,7 @@ void InstanceList::undoTrashInstance() {
         top.polyPath += "1";
     }
 
-    qDebug() << "Moving" << top.trashPath << "back to" << top.polyPath;
+    qCDebug(LAUNCHER_LOG) << "Moving" << top.trashPath << "back to" << top.polyPath;
     QFile(top.trashPath).rename(top.polyPath);
 
     m_instanceGroupIndex[top.id] = top.groupName;
@@ -346,7 +347,7 @@ void InstanceList::deleteInstance(const InstanceId& id)
 {
     auto inst = getInstanceById(id);
     if (!inst) {
-        qDebug() << "Cannot delete instance" << id << ". No such instance is present (deleted externally?).";
+        qCDebug(LAUNCHER_LOG) << "Cannot delete instance" << id << ". No such instance is present (deleted externally?).";
         return;
     }
 
@@ -354,13 +355,13 @@ void InstanceList::deleteInstance(const InstanceId& id)
         saveGroupList();
     }
 
-    qDebug() << "Will delete instance" << id;
+    qCDebug(LAUNCHER_LOG) << "Will delete instance" << id;
     if (!FS::deletePath(inst->instanceRoot())) {
-        qWarning() << "Deletion of instance" << id << "has not been completely successful ...";
+        qCWarning(LAUNCHER_LOG) << "Deletion of instance" << id << "has not been completely successful ...";
         return;
     }
 
-    qDebug() << "Instance" << id << "has been deleted by the launcher.";
+    qCDebug(LAUNCHER_LOG) << "Instance" << id << "has been deleted by the launcher.";
 }
 
 static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstancePtr>& list)
@@ -370,7 +371,7 @@ static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstancePtr>& 
     for (auto& item : list) {
         auto id = item->id();
         if (out.contains(id)) {
-            qWarning() << "Duplicate ID" << id << "in instance list";
+            qCWarning(LAUNCHER_LOG) << "Duplicate ID" << id << "in instance list";
         }
         out[id] = std::make_pair(item, i);
         i++;
@@ -380,7 +381,7 @@ static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstancePtr>& 
 
 QList<InstanceId> InstanceList::discoverInstances()
 {
-    qDebug() << "Discovering instances in" << m_instDir;
+    qCDebug(LAUNCHER_LOG) << "Discovering instances in" << m_instDir;
     QList<InstanceId> out;
     QDirIterator iter(m_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
     while (iter.hasNext()) {
@@ -393,13 +394,13 @@ QList<InstanceId> InstanceList::discoverInstances()
             QFileInfo targetInfo(dirInfo.symLinkTarget());
             QFileInfo instDirInfo(m_instDir);
             if (targetInfo.canonicalPath() == instDirInfo.canonicalFilePath()) {
-                qDebug() << "Ignoring symlink" << subDir << "that leads into the instances folder";
+                qCDebug(LAUNCHER_LOG) << "Ignoring symlink" << subDir << "that leads into the instances folder";
                 continue;
             }
         }
         auto id = dirInfo.fileName();
         out.append(id);
-        qDebug() << "Found instance ID" << id;
+        qCDebug(LAUNCHER_LOG) << "Found instance ID" << id;
     }
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     instanceSet = QSet<QString>(out.begin(), out.end());
@@ -420,7 +421,7 @@ InstanceList::InstListError InstanceList::loadList()
         if (existingIds.contains(id)) {
             auto instPair = existingIds[id];
             existingIds.remove(id);
-            qDebug() << "Should keep and soft-reload" << id;
+            qCDebug(LAUNCHER_LOG) << "Should keep and soft-reload" << id;
         } else {
             InstancePtr instPtr = loadInstance(id);
             if (instPtr) {
@@ -501,7 +502,7 @@ void InstanceList::add(const QList<InstancePtr>& t)
 void InstanceList::resumeWatch()
 {
     if (m_watchLevel > 0) {
-        qWarning() << "Bad suspend level resume in instance list";
+        qCWarning(LAUNCHER_LOG) << "Bad suspend level resume in instance list";
         return;
     }
     m_watchLevel++;
@@ -596,15 +597,15 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
     {
         inst.reset(new NullInstance(m_globalSettings, instanceSettings, instanceRoot));
     }
-    qDebug() << "Loaded instance " << inst->name() << " from " << inst->instanceRoot();
+    qCDebug(LAUNCHER_LOG) << "Loaded instance " << inst->name() << " from " << inst->instanceRoot();
     return inst;
 }
 
 void InstanceList::saveGroupList()
 {
-    qDebug() << "Will save group list now.";
+    qCDebug(LAUNCHER_LOG) << "Will save group list now.";
     if (!m_instancesProbed) {
-        qDebug() << "Group saving prevented because we don't know the full list of instances yet.";
+        qCDebug(LAUNCHER_LOG) << "Group saving prevented because we don't know the full list of instances yet.";
         return;
     }
     WatchLock foo(m_watcher, m_instDir);
@@ -616,7 +617,7 @@ void InstanceList::saveGroupList()
         if (group.isEmpty())
             continue;
         if (!instanceSet.contains(id)) {
-            qDebug() << "Skipping saving missing instance" << id << "to groups list.";
+            qCDebug(LAUNCHER_LOG) << "Skipping saving missing instance" << id << "to groups list.";
             continue;
         }
 
@@ -648,15 +649,15 @@ void InstanceList::saveGroupList()
     QJsonDocument doc(toplevel);
     try {
         FS::write(groupFileName, doc.toJson());
-        qDebug() << "Group list saved.";
+        qCDebug(LAUNCHER_LOG) << "Group list saved.";
     } catch (const FS::FileSystemException& e) {
-        qCritical() << "Failed to write instance group file :" << e.cause();
+        qCCritical(LAUNCHER_LOG) << "Failed to write instance group file :" << e.cause();
     }
 }
 
 void InstanceList::loadGroupList()
 {
-    qDebug() << "Will load group list now.";
+    qCDebug(LAUNCHER_LOG) << "Will load group list now.";
 
     QString groupFileName = m_instDir + "/instgroups.json";
 
@@ -668,7 +669,7 @@ void InstanceList::loadGroupList()
     try {
         jsonData = FS::read(groupFileName);
     } catch (const FS::FileSystemException& e) {
-        qCritical() << "Failed to read instance group file :" << e.cause();
+        qCCritical(LAUNCHER_LOG) << "Failed to read instance group file :" << e.cause();
         return;
     }
 
@@ -677,7 +678,7 @@ void InstanceList::loadGroupList()
 
     // if the json was bad, fail
     if (error.error != QJsonParseError::NoError) {
-        qCritical() << QString("Failed to parse instance group file: %1 at offset %2")
+        qCCritical(LAUNCHER_LOG) << QString("Failed to parse instance group file: %1 at offset %2")
                            .arg(error.errorString(), QString::number(error.offset))
                            .toUtf8();
         return;
@@ -685,7 +686,7 @@ void InstanceList::loadGroupList()
 
     // if the root of the json wasn't an object, fail
     if (!jsonDoc.isObject()) {
-        qWarning() << "Invalid group file. Root entry should be an object.";
+        qCWarning(LAUNCHER_LOG) << "Invalid group file. Root entry should be an object.";
         return;
     }
 
@@ -697,7 +698,7 @@ void InstanceList::loadGroupList()
 
     // Get the groups. if it's not an object, fail
     if (!rootObj.value("groups").isObject()) {
-        qWarning() << "Invalid group list JSON: 'groups' should be an object.";
+        qCWarning(LAUNCHER_LOG) << "Invalid group list JSON: 'groups' should be an object.";
         return;
     }
 
@@ -711,13 +712,13 @@ void InstanceList::loadGroupList()
 
         // If not an object, complain and skip to the next one.
         if (!iter.value().isObject()) {
-            qWarning() << QString("Group '%1' in the group list should be an object.").arg(groupName).toUtf8();
+            qCWarning(LAUNCHER_LOG) << QString("Group '%1' in the group list should be an object.").arg(groupName).toUtf8();
             continue;
         }
 
         QJsonObject groupObj = iter.value().toObject();
         if (!groupObj.value("instances").isArray()) {
-            qWarning() << QString("Group '%1' in the group list is invalid. It should contain an array called 'instances'.")
+            qCWarning(LAUNCHER_LOG) << QString("Group '%1' in the group list is invalid. It should contain an array called 'instances'.")
                               .arg(groupName)
                               .toUtf8();
             continue;
@@ -740,7 +741,7 @@ void InstanceList::loadGroupList()
     }
     m_groupsLoaded = true;
     m_groupNameCache.unite(groupSet);
-    qDebug() << "Group list loaded.";
+    qCDebug(LAUNCHER_LOG) << "Group list loaded.";
 }
 
 void InstanceList::instanceDirContentsChanged(const QString& path)
@@ -764,7 +765,7 @@ void InstanceList::on_InstFolderChanged(const Setting& setting, QVariant value)
 
 void InstanceList::on_GroupStateChanged(const QString& group, bool collapsed)
 {
-    qDebug() << "Group" << group << (collapsed ? "collapsed" : "expanded");
+    qCDebug(LAUNCHER_LOG) << "Group" << group << (collapsed ? "collapsed" : "expanded");
     if (collapsed) {
         m_collapsedGroups.insert(group);
     } else {
@@ -826,7 +827,7 @@ class InstanceStaging : public Task {
             emitFailed(tr("Failed to commit instance, even after multiple retries. It is being blocked by something."));
             return;
         }
-        qDebug() << "Failed to commit instance" << m_instance_name.name() << "Initiating backoff:" << sleepTime;
+        qCDebug(LAUNCHER_LOG) << "Failed to commit instance" << m_instance_name.name() << "Initiating backoff:" << sleepTime;
         m_backoffTimer.start(sleepTime * 500);
     }
     void childFailed(const QString& reason)
@@ -905,12 +906,12 @@ bool InstanceList::commitStagedInstance(const QString& path, InstanceName const&
 
         if (should_override) {
             if (!FS::overrideFolder(destination, path)) {
-                qWarning() << "Failed to override" << path << "to" << destination;
+                qCWarning(LAUNCHER_LOG) << "Failed to override" << path << "to" << destination;
                 return false;
             }
         } else {
             if (!dir.rename(path, destination)) {
-                qWarning() << "Failed to move" << path << "to" << destination;
+                qCWarning(LAUNCHER_LOG) << "Failed to move" << path << "to" << destination;
                 return false;
             }
 

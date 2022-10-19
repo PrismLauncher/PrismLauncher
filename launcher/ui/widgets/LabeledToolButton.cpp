@@ -40,6 +40,7 @@
 #include "LabeledToolButton.h"
 #include <QApplication>
 #include <QDebug>
+#include "launcherlog.h"
 
 /*
  * 

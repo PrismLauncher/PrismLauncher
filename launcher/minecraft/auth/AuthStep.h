@@ -6,6 +6,7 @@
 #include "QObjectPtr.h"
 #include "minecraft/auth/AccountData.h"
 #include "AccountTask.h"
+#include "launcherlog.h"
 
 class AuthStep : public QObject {
     Q_OBJECT

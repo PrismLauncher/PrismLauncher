@@ -4,6 +4,7 @@
 
 #include <QString>
 #include <QDebug>
+#include "launcherlog.h"
 #include <exception>
 
 class Exception : public std::exception
@@ -11,7 +12,7 @@ class Exception : public std::exception
 public:
     Exception(const QString &message) : std::exception(), m_message(message)
     {
-        qCritical() << "Exception:" << message;
+        qCCritical(LAUNCHER_LOG) << "Exception:" << message;
     }
     Exception(const Exception &other)
         : std::exception(), m_message(other.cause())

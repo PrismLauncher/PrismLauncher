@@ -360,7 +360,7 @@ LibraryPtr MojangVersionFormat::libraryFromJson(ProblemContainer & problems, con
         {
             if (!it.value().isString())
             {
-                qWarning() << filename << "contains an invalid native (skipping)";
+                qCWarning(LAUNCHER_LOG) << filename << "contains an invalid native (skipping)";
             }
             // FIXME: Skip unknown platforms
             out->m_nativeClassifiers[it.key()] = it.value().toString();

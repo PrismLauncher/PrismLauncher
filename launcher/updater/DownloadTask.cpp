@@ -51,7 +51,7 @@ void DownloadTask::loadVersionInfo()
 
     // Find the index URL.
     QUrl newIndexUrl = QUrl(m_status.newRepoUrl).resolved(QString::number(m_status.newVersionId) + ".json");
-    qDebug() << m_status.newRepoUrl << " turns into " << newIndexUrl;
+    qCDebug(LAUNCHER_LOG) << m_status.newRepoUrl << " turns into " << newIndexUrl;
 
     netJob->addNetAction(m_newVersionFileListDownload = Net::Download::makeByteArray(newIndexUrl, &newVersionFileListData));
 
@@ -60,7 +60,7 @@ void DownloadTask::loadVersionInfo()
     {
         QUrl cIndexUrl = QUrl(m_status.currentRepoUrl).resolved(QString::number(m_status.currentVersionId) + ".json");
         netJob->addNetAction(m_currentVersionFileListDownload = Net::Download::makeByteArray(cIndexUrl, &currentVersionFileListData));
-        qDebug() << m_status.currentRepoUrl << " turns into " << cIndexUrl;
+        qCDebug(LAUNCHER_LOG) << m_status.currentRepoUrl << " turns into " << cIndexUrl;
     }
 
     // connect signals and start the job
@@ -81,7 +81,7 @@ void DownloadTask::vinfoDownloadFailed()
     }
 
     // TODO: Give a more detailed error message.
-    qCritical() << "Failed to download version info files.";
+    qCCritical(LAUNCHER_LOG) << "Failed to download version info files.";
     emitFailed(tr("Failed to download version info files."));
 }
 
@@ -91,11 +91,11 @@ void DownloadTask::processDownloadedVersionInfo()
     VersionFileList m_newVersionFileList;
 
     setStatus(tr("Reading file list for new version..."));
-    qDebug() << "Reading file list for new version...";
+    qCDebug(LAUNCHER_LOG) << "Reading file list for new version...";
     QString error;
     if (!parseVersionInfo(newVersionFileListData, m_newVersionFileList, error))
     {
-        qCritical() << error;
+        qCCritical(LAUNCHER_LOG) << error;
         emitFailed(error);
         return;
     }
@@ -104,12 +104,12 @@ void DownloadTask::processDownloadedVersionInfo()
     if (m_currentVersionFileListDownload && m_currentVersionFileListDownload->wasSuccessful())
     {
         setStatus(tr("Reading file list for current version..."));
-        qDebug() << "Reading file list for current version...";
+        qCDebug(LAUNCHER_LOG) << "Reading file list for current version...";
         // if this fails, it's not a complete loss.
         QString error;
         if(!parseVersionInfo( currentVersionFileListData, m_currentVersionFileList, error))
         {
-            qDebug() << error << "This is not a fatal error.";
+            qCDebug(LAUNCHER_LOG) << error << "This is not a fatal error.";
         }
     }
 
@@ -143,7 +143,7 @@ void DownloadTask::processDownloadedVersionInfo()
     {
         setStatus(tr("Downloading %1 update files.").arg(QString::number(netJob->size())));
     }
-    qDebug() << "Begin downloading update files to" << m_updateFilesDir.path();
+    qCDebug(LAUNCHER_LOG) << "Begin downloading update files to" << m_updateFilesDir.path();
     m_filesNetJob = netJob;
     m_filesNetJob->start();
 }
@@ -155,7 +155,7 @@ void DownloadTask::fileDownloadFinished()
 
 void DownloadTask::fileDownloadFailed(QString reason)
 {
-    qCritical() << "Failed to download update files:" << reason;
+    qCCritical(LAUNCHER_LOG) << "Failed to download update files:" << reason;
     emitFailed(tr("Failed to download update files: %1").arg(reason));
 }
 

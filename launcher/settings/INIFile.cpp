@@ -41,6 +41,7 @@
 #include <QStringList>
 #include <QSaveFile>
 #include <QDebug>
+#include "launcherlog.h"
 
 INIFile::INIFile()
 {
@@ -116,7 +117,7 @@ bool INIFile::saveFile(QString fileName)
     }
     catch (const Exception &e)
     {
-        qCritical() << e.what();
+        qCCritical(LAUNCHER_LOG) << e.what();
         return false;
     }
 
