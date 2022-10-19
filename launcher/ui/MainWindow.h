@@ -128,6 +128,8 @@ private slots:
 
     void on_actionClearMetadata_triggered();
 
+    void on_actionAddToPATH_triggered();
+
     void on_actionOpenWiki_triggered();
 
     void on_actionMoreNews_triggered();

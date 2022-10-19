@@ -61,6 +61,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QFileDialog>
 #include <QInputDialog>
 #include <QLabel>
 #include <QToolButton>
@@ -253,6 +254,7 @@ public:
     QMenu * helpMenu = nullptr;
     TranslatedToolButton helpMenuButton;
     TranslatedAction actionClearMetadata;
+    TranslatedAction actionAddToPATH;
     TranslatedAction actionReportBug;
     TranslatedAction actionDISCORD;
     TranslatedAction actionMATRIX;
@@ -347,6 +349,14 @@ public:
         actionClearMetadata.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Clear Metadata Cache"));
         actionClearMetadata.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Clear cached metadata"));
         all_actions.append(&actionClearMetadata);
+
+        #ifdef Q_OS_MAC
+        actionAddToPATH = TranslatedAction(MainWindow);
+        actionAddToPATH->setObjectName(QStringLiteral("actionAddToPATH"));
+        actionAddToPATH.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Add to &PATH"));
+        actionAddToPATH.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Add the prism binary to PATH."));
+        all_actions.append(&actionAddToPATH);
+        #endif
 
         if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
             actionReportBug = TranslatedAction(MainWindow);
@@ -448,6 +458,10 @@ public:
 
         helpMenu->addAction(actionClearMetadata);
 
+        #ifdef Q_OS_MAC
+        helpMenu->addAction(actionAddToPATH);
+        #endif
+
         if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
             helpMenu->addAction(actionReportBug);
         }
@@ -533,6 +547,9 @@ public:
         helpMenu = menuBar->addMenu(tr("&Help"));
         helpMenu->setSeparatorsCollapsible(false);
         helpMenu->addAction(actionClearMetadata);
+        #ifdef Q_OS_MAC
+        helpMenu->addAction(actionAddToPATH);
+        #endif
         helpMenu->addSeparator();
         helpMenu->addAction(actionAbout);
         helpMenu->addAction(actionOpenWiki);
@@ -1900,6 +1917,18 @@ void MainWindow::on_actionReportBug_triggered()
 void MainWindow::on_actionClearMetadata_triggered()
 {
     APPLICATION->metacache()->evictAll();
+}
+
+void MainWindow::on_actionAddToPATH_triggered() {
+    auto binaryPath = APPLICATION->arguments().first();
+
+    auto outcome = FS::symlink(binaryPath, "/usr/local/bin/prism");
+
+    if (!outcome) {
+        QMessageBox::critical(this, tr("Failed to add Prism to PATH"), tr(""));
+    } else {
+        QMessageBox::information(this, tr("Added Prism to PATH"), tr("Prism was successfully added to your PATH."));
+    }
 }
 
 void MainWindow::on_actionOpenWiki_triggered()
