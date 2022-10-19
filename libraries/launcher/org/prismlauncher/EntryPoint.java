@@ -50,10 +50,10 @@
  *      limitations under the License.
  */
 
-package org.polymc;
+package org.prismlauncher;
 
-import org.polymc.exception.ParseException;
-import org.polymc.utils.Parameters;
+import org.prismlauncher.exception.ParseException;
+import org.prismlauncher.utils.Parameters;
 
 import java.io.BufferedReader;
 import java.io.IOException;
