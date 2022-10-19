@@ -17,7 +17,9 @@ Portable builds are provided for AppImage on Linux, Windows, and macOS.
 
 ## Help & Support
 
-- Join the [Discord server](https://discord.gg/prismlauncher) for now. 
+
+[![Join the Discord Server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner3)](https://discord.gg/hX4g537UNE)
+
 
 ## License
 
