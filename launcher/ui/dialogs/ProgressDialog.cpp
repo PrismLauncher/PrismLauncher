@@ -136,11 +136,13 @@ void ProgressDialog::onTaskStarted() {}
 void ProgressDialog::onTaskFailed(QString failure)
 {
     reject();
+    hide();
 }
 
 void ProgressDialog::onTaskSucceeded()
 {
     accept();
+    hide();
 }
 
 void ProgressDialog::changeStatus(const QString& status)
