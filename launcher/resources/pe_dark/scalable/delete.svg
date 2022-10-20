@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   id="Calque_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 32 32"
+   enable-background="new 0 0 32 32"
+   xml:space="preserve"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs21">
+</defs>
+<rect
+   style="fill:#f2f2f2;stroke:none;stroke-width:4;stroke-linejoin:round;fill-opacity:1"
+   id="rect12419"
+   width="18"
+   height="15"
+   x="7"
+   y="13" /><path
+   id="path10"
+   style="stroke-width:0.999996;fill:#000000"
+   d="M 11.244141 0 C 9.0387543 0 7.234375 1.8696839 7.234375 4.1542969 L 7.234375 9 L 2 9 C 0.89200111 9 0 9.8920011 0 11 C 0 12.107999 0.89200111 13 2 13 L 3 13 L 3 26 C 3 29.299997 5.7000033 32 9 32 L 23 32 C 26.299997 32 29 29.299997 29 26 L 29 13 L 30 13 C 31.107999 13 32 12.107999 32 11 C 32 9.8920011 31.107999 9 30 9 L 24.609375 9 L 24.609375 4.1542969 C 24.609375 1.8696839 22.804995 0 20.599609 0 L 11.244141 0 z M 7 13 L 25 13 L 25 26 C 25 27.099999 24.099999 28 23 28 L 9 28 C 7.9000011 28 7 27.099999 7 26 L 7 13 z " />
+</svg>

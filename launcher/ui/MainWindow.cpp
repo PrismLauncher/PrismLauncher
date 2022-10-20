@@ -643,6 +643,7 @@ public:
         actionRenameInstance->setObjectName(QStringLiteral("actionRenameInstance"));
         actionRenameInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Rename"));
         actionRenameInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Rename the selected instance."));
+        actionRenameInstance->setIcon(APPLICATION->getThemedIcon("rename"));
         all_actions.append(&actionRenameInstance);
 
         // the rename label is inside the rename tool button
@@ -675,6 +676,7 @@ public:
         actionKillInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Kill"));
         actionKillInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Kill the running instance"));
         actionKillInstance->setShortcut(QKeySequence(tr("Ctrl+K")));
+        actionKillInstance->setIcon(APPLICATION->getThemedIcon("status-bad"));
         all_actions.append(&actionKillInstance);
 
         actionEditInstance = TranslatedAction(MainWindow);
@@ -682,6 +684,7 @@ public:
         actionEditInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Edit..."));
         actionEditInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the instance settings, mods and versions."));
         actionEditInstance->setShortcut(QKeySequence(tr("Ctrl+I")));
+        actionEditInstance->setIcon(APPLICATION->getThemedIcon("settings-configure"));
         all_actions.append(&actionEditInstance);
 
         actionChangeInstGroup = TranslatedAction(MainWindow);
@@ -689,12 +692,14 @@ public:
         actionChangeInstGroup.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Change Group..."));
         actionChangeInstGroup.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the selected instance's group."));
         actionChangeInstGroup->setShortcut(QKeySequence(tr("Ctrl+G")));
+        actionChangeInstGroup->setIcon(APPLICATION->getThemedIcon("tag"));
         all_actions.append(&actionChangeInstGroup);
 
         actionViewSelectedInstFolder = TranslatedAction(MainWindow);
         actionViewSelectedInstFolder->setObjectName(QStringLiteral("actionViewSelectedInstFolder"));
         actionViewSelectedInstFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Folder"));
         actionViewSelectedInstFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's root folder in a file browser."));
+        actionViewSelectedInstFolder->setIcon(APPLICATION->getThemedIcon("viewfolder"));
         all_actions.append(&actionViewSelectedInstFolder);
 
         actionExportInstance = TranslatedAction(MainWindow);
@@ -702,6 +707,7 @@ public:
         actionExportInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "E&xport..."));
         actionExportInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Export the selected instance as a zip file."));
         actionExportInstance->setShortcut(QKeySequence(tr("Ctrl+E")));
+        actionExportInstance->setIcon(APPLICATION->getThemedIcon("export"));
         all_actions.append(&actionExportInstance);
 
         actionDeleteInstance = TranslatedAction(MainWindow);
@@ -710,14 +716,15 @@ public:
         actionDeleteInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Delete the selected instance."));
         actionDeleteInstance->setShortcuts({QKeySequence(tr("Backspace")), QKeySequence::Delete});
         actionDeleteInstance->setAutoRepeat(false);
+        actionDeleteInstance->setIcon(APPLICATION->getThemedIcon("delete"));
         all_actions.append(&actionDeleteInstance);
 
         actionCopyInstance = TranslatedAction(MainWindow);
         actionCopyInstance->setObjectName(QStringLiteral("actionCopyInstance"));
-        actionCopyInstance->setIcon(APPLICATION->getThemedIcon("copy"));
         actionCopyInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Cop&y..."));
         actionCopyInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Copy the selected instance."));
         actionCopyInstance->setShortcut(QKeySequence(tr("Ctrl+D")));
+        actionCopyInstance->setIcon(APPLICATION->getThemedIcon("copy"));
         all_actions.append(&actionCopyInstance);
 
         setInstanceActionsEnabled(false);
