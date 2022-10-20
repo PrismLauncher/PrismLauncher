@@ -86,20 +86,25 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
 
         // Get first line unconditionally
         description = cut_text.first().second;
+        auto num_lines = 1;
+
         // Get second line, elided if needed
-        if (cut_text.size() > 1) {
-            if (cut_text.size() > 2)
+        if (cut_text.size() > 1 && rect.height() - title_height > opt.fontMetrics.height() * 2) {
+            if (cut_text.size() > 2) {
                 description += opt.fontMetrics.elidedText(cut_text.at(1).second, opt.textElideMode, cut_text.at(1).first);
-            else
+            } else {
                 description += cut_text.at(1).second;
+            }
+            num_lines += 1;
         }
 
         int description_x = rect.x();
+        
 
         // Have the y-value be set based on the number of lines in the description, to centralize the
         // description text with the space between the base and the title.
         int description_y = rect.y() + title_height + (rect.height() - title_height) / 2;
-        if (cut_text.size() == 1)
+        if (num_lines == 1)
             description_y -= opt.fontMetrics.height() / 2;
         else
             description_y -= opt.fontMetrics.height();
