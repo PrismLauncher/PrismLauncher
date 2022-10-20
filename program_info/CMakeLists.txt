@@ -14,7 +14,7 @@ set(Launcher_DisplayName "Prism Launcher")
 set(Launcher_Name "${Launcher_CommonName}" PARENT_SCOPE)
 set(Launcher_DisplayName "${Launcher_DisplayName}" PARENT_SCOPE)
 
-set(Launcher_Copyright "Prism Launcher Contributors\\n © 2021-2022 PolyMC Contributors \\n© 2012-2021 MultiMC Contributors")
+set(Launcher_Copyright "Prism Launcher Contributors\\n© 2021-2022 PolyMC Contributors \\n© 2012-2021 MultiMC Contributors")
 set(Launcher_Copyright "${Launcher_Copyright}" PARENT_SCOPE)
 set(Launcher_Domain "prismlauncher.org" PARENT_SCOPE)
 set(Launcher_UserAgent "${Launcher_CommonName}/${Launcher_VERSION_NAME}" PARENT_SCOPE)
