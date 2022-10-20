@@ -89,13 +89,19 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
         auto num_lines = 1;
 
         // Get second line, elided if needed
-        if (cut_text.size() > 1 && rect.height() - title_height > opt.fontMetrics.height() * 2) {
-            if (cut_text.size() > 2) {
-                description += opt.fontMetrics.elidedText(cut_text.at(1).second, opt.textElideMode, cut_text.at(1).first);
+        if (cut_text.size() > 1) {
+            // 2.5x so because there should be some margin left from the 2x so things don't get too squishy.
+            if (rect.height() - title_height <= 2.5 * opt.fontMetrics.height()) {
+                // If there's not enough space, show only a single line, elided.
+                description = opt.fontMetrics.elidedText(description, opt.textElideMode, cut_text.at(0).first);
             } else {
-                description += cut_text.at(1).second;
+                if (cut_text.size() > 2) {
+                    description += opt.fontMetrics.elidedText(cut_text.at(1).second, opt.textElideMode, cut_text.at(1).first);
+                } else {
+                    description += cut_text.at(1).second;
+                }
+                num_lines += 1;
             }
-            num_lines += 1;
         }
 
         int description_x = rect.x();
