@@ -1,39 +1,73 @@
-#/bin/bash
+#!/bin/bash
 
-# ICO
+svg2png() {
+    input_file="$1"
+    output_file="$2"
+    width="$3"
+    height="$4"
 
-inkscape -w 16 -h 16 -o prismlauncher_16.png org.prismlauncher.PrismLauncher.svg
-inkscape -w 24 -h 24 -o prismlauncher_24.png org.prismlauncher.PrismLauncher.svg
-inkscape -w 32 -h 32 -o prismlauncher_32.png org.prismlauncher.PrismLauncher.svg
-inkscape -w 48 -h 48 -o prismlauncher_48.png org.prismlauncher.PrismLauncher.svg
-inkscape -w 64 -h 64 -o prismlauncher_64.png org.prismlauncher.PrismLauncher.svg
-inkscape -w 128 -h 128 -o prismlauncher_128.png org.prismlauncher.PrismLauncher.svg
+    inkscape -w "$width" -h "$height" -o "$output_file" "$input_file"
+}
 
-convert prismlauncher_128.png prismlauncher_64.png prismlauncher_48.png prismlauncher_32.png prismlauncher_24.png prismlauncher_16.png prismlauncher.ico
+sipsresize() {
+    input_file="$1"
+    output_file="$2"
+    width="$3"
+    height="$4"
 
-rm -f prismlauncher_*.png
+    sips -z "$width" "$height" "$input_file" --out "$output_file"
+}
 
-inkscape -w 1024 -h 1024 -o prismlauncher_1024.png org.prismlauncher.PrismLauncher.bigsur.svg
+if command -v "inkscape" && command -v "icotool"; then
+    # Windows ICO
+    d=$(mktemp -d)
 
-mkdir prismlauncher.iconset
+    svg2png org.prismlauncher.PrismLauncher.svg "$d/prismlauncher_16.png" 16 16
+    svg2png org.prismlauncher.PrismLauncher.svg "$d/prismlauncher_24.png" 24 24
+    svg2png org.prismlauncher.PrismLauncher.svg "$d/prismlauncher_32.png" 32 32
+    svg2png org.prismlauncher.PrismLauncher.svg "$d/prismlauncher_48.png" 48 48
+    svg2png org.prismlauncher.PrismLauncher.svg "$d/prismlauncher_64.png" 64 64
+    svg2png org.prismlauncher.PrismLauncher.svg "$d/prismlauncher_128.png" 128 128
+    svg2png org.prismlauncher.PrismLauncher.svg "$d/prismlauncher_256.png" 256 256
 
-sips -z 16 16     prismlauncher_1024.png --out prismlauncher.iconset/icon_16x16.png
-sips -z 32 32     prismlauncher_1024.png --out prismlauncher.iconset/icon_16x16@2x.png
-sips -z 32 32     prismlauncher_1024.png --out prismlauncher.iconset/icon_32x32.png
-sips -z 64 64     prismlauncher_1024.png --out prismlauncher.iconset/icon_32x32@2x.png
-sips -z 128 128   prismlauncher_1024.png --out prismlauncher.iconset/icon_128x128.png
-sips -z 256 256   prismlauncher_1024.png --out prismlauncher.iconset/icon_128x128@2x.png
-sips -z 256 256   prismlauncher_1024.png --out prismlauncher.iconset/icon_256x256.png
-sips -z 512 512   prismlauncher_1024.png --out prismlauncher.iconset/icon_256x256@2x.png
-sips -z 512 512   prismlauncher_1024.png --out prismlauncher.iconset/icon_512x512.png
-cp prismlauncher_1024.png prismlauncher.iconset/icon_512x512@2x.png
+    rm prismlauncher.ico && icotool -o prismlauncher.ico -c \
+        "$d/prismlauncher_256.png"  \
+        "$d/prismlauncher_128.png"  \
+        "$d/prismlauncher_64.png"   \
+        "$d/prismlauncher_48.png"   \
+        "$d/prismlauncher_32.png"   \
+        "$d/prismlauncher_24.png"   \
+        "$d/prismlauncher_16.png"
+else
+    echo "ERROR: Windows icons were NOT generated!" >&2
+    echo "ERROR: requires inkscape and icotool in PATH"
+fi
 
-iconutil -c icns prismlauncher.iconset
+if command -v "inkscape" && command -v "sips" && command -v "iconutil"; then
+    # macOS ICNS
+    d=$(mktemp -d)
 
-rm -f prismlauncher_*.png
-rm -rf prismlauncher.iconset
+    d="$d/prismlauncher.iconset"
 
+    mkdir -p "$d"
+
+    svg2png org.prismlauncher.PrismLauncher.bigsur.svg "$d/icon_512x512@2x.png" 1024 1024
+    sipsresize "$d/icon_512x512@2.png" "$d/icon_16x16.png" 16 16
+    sipsresize "$d/icon_512x512@2.png" "$d/icon_16x16@2.png" 32 32
+    sipsresize "$d/icon_512x512@2.png" "$d/icon_32x32.png" 32 32
+    sipsresize "$d/icon_512x512@2.png" "$d/icon_32x32@2.png" 64 64
+    sipsresize "$d/icon_512x512@2.png" "$d/icon_128x128.png" 128 128
+    sipsresize "$d/icon_512x512@2.png" "$d/icon_128x128@2.png" 256 256
+    sipsresize "$d/icon_512x512@2.png" "$d/icon_256x256.png" 256 256
+    sipsresize "$d/icon_512x512@2.png" "$d/icon_256x256@2.png" 512 512
+    iconutil -c icns "$d"
+else
+    echo "ERROR: macOS icons were NOT generated!" >&2
+    echo "ERROR: requires inkscape, sips and iconutil in PATH"
+fi
+
+# replace icon in themes
 for dir in ../launcher/resources/*/scalable
 do
-    cp -v org.prismlauncher.PrismLauncher.svg $dir/launcher.svg
+    cp -v org.prismlauncher.PrismLauncher.svg "$dir/launcher.svg"
 done
