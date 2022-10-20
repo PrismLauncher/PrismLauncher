@@ -1,33 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
   <id>org.prismlauncher.PrismLauncher</id>
-  <provides>
-    <id>org.prismlauncher.PrismLauncher</id>
-  </provides>
   <launchable type="desktop-id">org.prismlauncher.PrismLauncher.desktop</launchable>
-  <name>PrismLauncher</name>
-  <developer_name>PrismLauncher</developer_name>
+  <name>Prism Launcher</name>
+  <developer_name>Prism Launcher Contributors</developer_name>
   <summary>A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
   <url type="homepage">https://prismlauncher.org/</url>
   <url type="help">https://prismlauncher.org/wiki/</url>
+  <url type="bugtracker">https://github.com/PrismLauncher/PrismLauncher/issues</url>
+  <url type="contact">https://discord.gg/prismlauncher</url>
+  <url type="vcs-browser">https://github.com/PrismLauncher/PrismLauncher</url>
+  <url type="contribute">https://github.com/PrismLauncher/PrismLauncher/blob/develop/CONTRIBUTING.md</url>
+  <url type="translate">https://hosted.weblate.org/projects/prismlauncher/launcher</url>
   <description>
-    <p>PrismLauncher is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.</p>
+    <p>Prism Launcher is a custom launcher for Minecraft that focuses on predictability, long term stability and simplicity.</p>
     <p>Features:</p>
     <ul>
       <li>Easily install game modifications, such as Fabric, Forge and Quilt</li>
-      <li>Control your java settings</li>
+      <li>Control your Java settings</li>
       <li>Manage worlds and resource packs from the launcher</li>
       <li>See logs and other details easily</li>
       <li>Kill Minecraft in case of a crash/freeze</li>
-      <li>Isolate minecraft instances to keep everything clean</li>
+      <li>Isolate Minecraft instances to keep everything clean</li>
       <li>Install and update mods directly from the launcher</li>
     </ul>
   </description>
   <screenshots>
     <screenshot type="default">
-      <caption>The main PrismLauncher window</caption>
+      <caption>The main Prism Launcher window</caption>
       <image type="source" width="976" height="764">https://prismlauncher.org/img/screenshots/LauncherDark.png</image>
     </screenshot>
     <screenshot>
@@ -36,7 +38,7 @@
     </screenshot>
     <screenshot>
       <caption>Mod installation</caption>
-      <image type="source" width="1000" height="692">https://prismlauncher.org/img/screenshots/ModInstallDark.png</image>
+      <image type="source" width="1036" height="700">https://prismlauncher.org/img/screenshots/ModInstallDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Mod updating</caption>

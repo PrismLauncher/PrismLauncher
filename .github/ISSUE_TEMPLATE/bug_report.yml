@@ -8,9 +8,9 @@ body:
       If you need help with running Minecraft, please visit us on our Discord before making a bug report.
 
       Before submitting a bug report, please make sure you have read this *entire* form, and that:
-      * You have read the [PolyMC wiki](https://polymc.org/wiki/) and it has not answered your question.
+      * You have read the [Prism Launcher wiki](https://prismlauncher.org/wiki/) and it has not answered your question.
       * Your bug is not caused by Minecraft or any mods you have installed.
-      * Your issue has not been reported before, [make sure to use the search function!](https://github.com/PolyMC/PolyMC/issues)
+      * Your issue has not been reported before, [make sure to use the search function!](https://github.com/PrismLauncher/PrismLauncher/issues)
 
       **Do not forget to give your issue a descriptive title.** "Bug in the instance screen" makes it hard to distinguish issues at a glance.
 - type: dropdown
@@ -25,15 +25,15 @@ body:
     - Other
 - type: textarea
   attributes:
-    label: Version of PolyMC
-    description: The version of PolyMC used in the bug report.
-    placeholder: PolyMC 1.4.1
+    label: Version of Prism Launcher
+    description: The version of Prism Launcher used in the bug report.
+    placeholder: Prism Launcher 5.0
   validations:
     required: true
 - type: textarea
   attributes:
     label: Version of Qt
-    description: The version of Qt used in the bug report. You can find it in Help -> About PolyMC -> About Qt.
+    description: The version of Qt used in the bug report. You can find it in Help -> About Prism Launcher -> About Qt.
     placeholder: Qt 6.3.0
   validations:
     required: true
