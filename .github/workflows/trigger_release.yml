@@ -65,7 +65,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          name: PrismLauncher ${{ env.VERSION }}
+          name: Prism Launcher ${{ env.VERSION }}
           draft: true
           prerelease: false
           files: |
