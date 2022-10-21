@@ -104,7 +104,7 @@ jobs:
 
       - name: Setup ccache
         if: runner.os != 'Windows' && inputs.build_type == 'Debug'
-        uses: hendrikmuhs/ccache-action@v1.2.1
+        uses: hendrikmuhs/ccache-action@v1.2.3
         with:
           key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}
 
