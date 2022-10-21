@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   id="Calque_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 24 24"
+   enable-background="new 0 0 24 24"
+   xml:space="preserve"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs11868" />
+<rect
+   fill="none"
+   width="24"
+   height="24"
+   id="rect11854" />
+<g
+   id="g15058"
+   transform="matrix(1.2018036,0,0,1.2018036,9.1890033,-5.9659463)"
+   style="stroke-width:0.832083"><path
+     style="fill:#cccccc;fill-opacity:1;stroke:#585858;stroke-width:0.832083;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+     d="m -4.635309,18.83508 -1.6867847,4.775149 4.7751492,-1.686784 z"
+     id="path14640" /><path
+     style="fill:#f2f2f2;fill-opacity:1;stroke:#585858;stroke-width:0.832083;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+     d="M 7.6468491,6.2880897 -3.1410372,17.075975 0.21216023,20.429172 11.000046,9.6412872 Z"
+     id="rect291" /></g></svg>
