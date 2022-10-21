@@ -245,7 +245,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         {{"s", "server"}, "Join the specified server on launch (only valid in combination with --launch)", "address"},
         {{"a", "profile"}, "Use the account specified by its profile name (only valid in combination with --launch)", "profile"},
         {"alive", "Write a small '" + liveCheckFile + "' file after the launcher starts"},
-        {{"I", "import"}, "Import instance from specified zip (local path or URL)", "file"}
+        {{"I", "import"}, "Import instance from specified zip (local path or URL)", "file"},
+        {"show", "Opens the window for the specified instance (by instance ID)", "show"}
     });
     parser.addHelpOption();
     parser.addVersionOption();
@@ -257,6 +258,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_profileToUse = parser.value("profile");
     m_liveCheck = parser.isSet("alive");
     m_zipToImport = parser.value("import");
+    m_instanceIdToShowWindowOf = parser.value("show");
 
     // error if --launch is missing with --server or --profile
     if((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty())
@@ -983,6 +985,16 @@ void Application::performMainStartupAction()
             }
 
             launch(inst, true, false, nullptr, serverToJoin, accountToUse);
+            return;
+        }
+    }
+    if(!m_instanceIdToShowWindowOf.isEmpty())
+    {
+        auto inst = instances()->getInstanceById(m_instanceIdToShowWindowOf);
+        if(inst)
+        {
+            qDebug() << "<> Showing window of instance " << m_instanceIdToShowWindowOf;
+            showInstanceWindow(inst);
             return;
         }
     }
