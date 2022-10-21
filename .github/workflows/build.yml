@@ -126,7 +126,7 @@ jobs:
 
       - name: Retrieve ccache cache (Windows)
         if: runner.os == 'Windows' && inputs.build_type == 'Debug'
-        uses: actions/cache@v3.0.2
+        uses: actions/cache@v3.0.11
         with:
           path: '${{ github.workspace }}\.ccache'
           key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}
