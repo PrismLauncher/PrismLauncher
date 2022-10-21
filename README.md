@@ -5,7 +5,7 @@
 
 Prism Launcher is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.
 
-This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC.
+This is a **fork** of the PolyMC Launcher which is a fork of Multimc and is not endorsed by PolyMC or Multimc.
 
 ## Installation
 
