@@ -59,20 +59,20 @@ stdenv.mkDerivation rec {
     # Copy libnbtplusplus
     rm -rf source/libraries/libnbtplusplus
     mkdir source/libraries/libnbtplusplus
-    cp -a ${libnbtplusplus}/* source/libraries/libnbtplusplus
-    chmod a+r+w source/libraries/libnbtplusplus/*
+    ln -s ${libnbtplusplus}/* source/libraries/libnbtplusplus
+    chmod -R +r+w source/libraries/libnbtplusplus
     # Copy tomlplusplus
     rm -rf source/libraries/tomlplusplus
     mkdir source/libraries/tomlplusplus
-    cp -a ${tomlplusplus}/* source/libraries/tomlplusplus
-    chmod a+r+w source/libraries/tomlplusplus/*
+    ln -s ${tomlplusplus}/* source/libraries/tomlplusplus
+    chmod -R +r+w source/libraries/tomlplusplus
   '';
 
   cmakeFlags = [
     "-GNinja"
     "-DLauncher_QT_VERSION_MAJOR=${lib.versions.major qtbase.version}"
   ] ++ lib.optionals enableLTO [ "-DENABLE_LTO=on" ]
-    ++ lib.optionals (msaClientID != "") [ "-DLauncher_MSA_CLIENT_ID=${msaClientID}" ];
+  ++ lib.optionals (msaClientID != "") [ "-DLauncher_MSA_CLIENT_ID=${msaClientID}" ];
 
   # we have to check if the system is NixOS before adding stdenv.cc.cc.lib (#923)
   postInstall = ''
@@ -96,6 +96,6 @@ stdenv.mkDerivation rec {
     '';
     platforms = platforms.unix;
     license = licenses.gpl3Only;
-    maintainers = with maintainers; [ starcraft66 kloenk ];
+    maintainers = with maintainers; [ minion3665 Scrumplex ];
   };
 }
