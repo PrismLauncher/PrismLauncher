@@ -302,6 +302,11 @@
             </item>
             <item>
              <property name="text">
+              <string>Flat (White)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>Legacy</string>
              </property>
             </item>

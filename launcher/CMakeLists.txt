@@ -602,6 +602,7 @@ SET(LAUNCHER_SOURCES
     resources/OSX/OSX.qrc
     resources/iOS/iOS.qrc
     resources/flat/flat.qrc
+    resources/flat_white/flat_white.qrc
     resources/documents/documents.qrc
     ../${Launcher_Branding_LogoQRC}
 
