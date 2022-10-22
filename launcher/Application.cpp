@@ -301,22 +301,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         dataPath = foo.absolutePath();
         adjustedBy = "Persistent data path";
 
-        QDir polymcData(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation), "PolyMC"));
-        if (polymcData.exists()) {
-            dataPath = polymcData.absolutePath();
-            adjustedBy = "PolyMC data path";
-        }
-
-#ifdef Q_OS_LINUX
-        // TODO: this should be removed in a future version
-        // TODO: provide a migration path similar to macOS migration
-        QDir bar(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation), "polymc"));
-        if (bar.exists()) {
-            dataPath = bar.absolutePath();
-            adjustedBy = "Legacy data path";
-        }
-#endif
-
 #ifndef Q_OS_MACOS
         if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
             dataPath = m_rootPath;
