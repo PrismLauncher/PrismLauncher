@@ -97,6 +97,7 @@ set(PATHMATCHER_SOURCES
     pathmatcher/IPathMatcher.h
     pathmatcher/MultiMatcher.h
     pathmatcher/RegexpMatcher.h
+    pathmatcher/SimplePrefixMatcher.h
 )
 
 set(NET_SOURCES
