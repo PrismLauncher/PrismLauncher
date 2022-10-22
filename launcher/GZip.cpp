@@ -72,7 +72,7 @@ bool GZip::unzip(const QByteArray &compressedBytes, QByteArray &uncompressedByte
             uncompLength *= 2;
         }
 
-        strm.next_out = (Bytef *)(uncompressedBytes.data() + strm.total_out);
+        strm.next_out = reinterpret_cast<Bytef *>((uncompressedBytes.data() + strm.total_out));
         strm.avail_out = uncompLength - strm.total_out;
 
         // Inflate another chunk.
@@ -129,7 +129,7 @@ bool GZip::zip(const QByteArray &uncompressedBytes, QByteArray &compressedBytes)
         {
             compressedBytes.resize(compressedBytes.size() * 2);
         }
-        zs.next_out = (Bytef *) (compressedBytes.data() + offset);
+        zs.next_out = reinterpret_cast<Bytef*>((compressedBytes.data() + offset));
         temp = zs.avail_out = compressedBytes.size() - offset;
         ret = deflate(&zs, Z_FINISH);
         offset += temp - zs.avail_out;
