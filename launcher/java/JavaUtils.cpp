@@ -379,9 +379,9 @@ QList<QString> JavaUtils::FindJavaPaths()
         }
     }
 
-    javas = addJavasFromEnv(javas);
-    javas.removeDuplicates();
-    return javas;
+    candidates = addJavasFromEnv(candidates);
+    candidates.removeDuplicates();
+    return candidates;
 }
 
 #elif defined(Q_OS_MAC)
