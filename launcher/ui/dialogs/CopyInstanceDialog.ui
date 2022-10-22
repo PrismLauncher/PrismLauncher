@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>345</width>
-    <height>323</height>
+    <width>265</width>
+    <height>425</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>60</width>
          <height>20</height>
         </size>
        </property>
@@ -124,6 +124,50 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="copyGameOptionsCheckbox">
+     <property name="toolTip">
+      <string>Copy the in-game options like FOV, max framerate, etc.</string>
+     </property>
+     <property name="text">
+      <string>Copy game options</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="copyResPacksCheckbox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="text">
+      <string>Copy resource packs</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="copyShaderPacksCheckbox">
+     <property name="text">
+      <string>Copy shader packs</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="copyServersCheckbox">
+     <property name="text">
+      <string>Copy servers</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="copyModsCheckbox">
+     <property name="toolTip">
+      <string>Disabling this will still keep the mod loader (ex: Fabric, Quilt, etc.) but erase the mods folder and their configs.</string>
+     </property>
+     <property name="text">
+      <string>Copy mods</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -153,8 +197,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>254</x>
+     <y>316</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -169,8 +213,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>322</x>
+     <y>316</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

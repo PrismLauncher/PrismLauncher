@@ -41,6 +41,11 @@ public:
     QString iconKey() const;
     bool shouldCopySaves() const;
     bool shouldKeepPlaytime() const;
+    bool shouldCopyGameOptions() const;
+    bool shouldCopyResourcePacks() const;
+    bool shouldCopyShaderPacks() const;
+    bool shouldCopyServers() const;
+    bool shouldCopyMods() const;
 
 private
 slots:
@@ -48,6 +53,11 @@ slots:
     void on_instNameTextBox_textChanged(const QString &arg1);
     void on_copySavesCheckbox_stateChanged(int state);
     void on_keepPlaytimeCheckbox_stateChanged(int state);
+    void on_copyGameOptionsCheckbox_stateChanged(int state);
+    void on_copyResPacksCheckbox_stateChanged(int state);
+    void on_copyShaderPacksCheckbox_stateChanged(int state);
+    void on_copyServersCheckbox_stateChanged(int state);
+    void on_copyModsCheckbox_stateChanged(int state);
 
 private:
     Ui::CopyInstanceDialog *ui;
@@ -55,4 +65,9 @@ private:
     InstancePtr m_original;
     bool m_copySaves = true;
     bool m_keepPlaytime = true;
+    bool m_copyGameOptions = true;
+    bool m_copyResourcePacks = true;
+    bool m_copyShaderPacks = true;
+    bool m_copyServers = true;
+    bool m_copyMods = true;
 };

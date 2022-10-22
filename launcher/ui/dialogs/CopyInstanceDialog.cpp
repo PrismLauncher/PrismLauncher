@@ -80,6 +80,11 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
     ui->copySavesCheckbox->setChecked(m_copySaves);
     ui->keepPlaytimeCheckbox->setChecked(m_keepPlaytime);
+    ui->copyGameOptionsCheckbox->setChecked(m_copyGameOptions);
+    ui->copyResPacksCheckbox->setChecked(m_copyResourcePacks);
+    ui->copyShaderPacksCheckbox->setChecked(m_copyShaderPacks);
+    ui->copyServersCheckbox->setChecked(m_copyServers);
+    ui->copyModsCheckbox->setChecked(m_copyMods);
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()
@@ -166,5 +171,90 @@ void CopyInstanceDialog::on_keepPlaytimeCheckbox_stateChanged(int state)
     else if(state == Qt::Checked)
     {
         m_keepPlaytime = true;
+    }
+}
+
+bool CopyInstanceDialog::shouldCopyGameOptions() const
+{
+    return m_copyGameOptions;
+}
+
+void CopyInstanceDialog::on_copyGameOptionsCheckbox_stateChanged(int state)
+{
+    if(state == Qt::Unchecked)
+    {
+        m_copyGameOptions = false;
+    }
+    else if(state == Qt::Checked)
+    {
+        m_copyGameOptions = true;
+    }
+}
+
+bool CopyInstanceDialog::shouldCopyResourcePacks() const
+{
+    return m_copyResourcePacks;
+}
+
+void CopyInstanceDialog::on_copyResPacksCheckbox_stateChanged(int state)
+{
+    if(state == Qt::Unchecked)
+    {
+        m_copyResourcePacks = false;
+    }
+    else if(state == Qt::Checked)
+    {
+        m_copyResourcePacks = true;
+    }
+}
+
+bool CopyInstanceDialog::shouldCopyShaderPacks() const
+{
+    return m_copyShaderPacks;
+}
+
+void CopyInstanceDialog::on_copyShaderPacksCheckbox_stateChanged(int state)
+{
+    if(state == Qt::Unchecked)
+    {
+        m_copyShaderPacks = false;
+    }
+    else if(state == Qt::Checked)
+    {
+        m_copyShaderPacks = true;
+    }
+}
+
+bool CopyInstanceDialog::shouldCopyServers() const
+{
+    return m_copyServers;
+}
+
+void CopyInstanceDialog::on_copyServersCheckbox_stateChanged(int state)
+{
+    if(state == Qt::Unchecked)
+    {
+        m_copyServers = false;
+    }
+    else if(state == Qt::Checked)
+    {
+        m_copyServers = true;
+    }
+}
+
+bool CopyInstanceDialog::shouldCopyMods() const
+{
+    return m_copyMods;
+}
+
+void CopyInstanceDialog::on_copyModsCheckbox_stateChanged(int state)
+{
+    if(state == Qt::Unchecked)
+    {
+        m_copyMods = false;
+    }
+    else if(state == Qt::Checked)
+    {
+        m_copyMods = true;
     }
 }

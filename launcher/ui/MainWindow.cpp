@@ -1616,7 +1616,17 @@ void MainWindow::on_actionCopyInstance_triggered()
     if (!copyInstDlg.exec())
         return;
 
-    auto copyTask = new InstanceCopyTask(m_selectedInstance, copyInstDlg.shouldCopySaves(), copyInstDlg.shouldKeepPlaytime());
+    auto copyTask = new InstanceCopyTask(
+        m_selectedInstance,
+        InstanceCopyPrefs {
+            copyInstDlg.shouldCopySaves(),
+            copyInstDlg.shouldKeepPlaytime(),
+            copyInstDlg.shouldCopyGameOptions(),
+            copyInstDlg.shouldCopyResourcePacks(),
+            copyInstDlg.shouldCopyShaderPacks(),
+            copyInstDlg.shouldCopyServers(),
+            copyInstDlg.shouldCopyMods()
+        });
     copyTask->setName(copyInstDlg.instName());
     copyTask->setGroup(copyInstDlg.instGroup());
     copyTask->setIcon(copyInstDlg.iconKey());

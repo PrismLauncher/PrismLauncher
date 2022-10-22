@@ -5,18 +5,66 @@
 #include "pathmatcher/RegexpMatcher.h"
 #include <QtConcurrentRun>
 
-InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, bool copySaves, bool keepPlaytime)
+InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, InstanceCopyPrefs prefs)
 {
     m_origInstance = origInstance;
-    m_keepPlaytime = keepPlaytime;
+    m_keepPlaytime = prefs.keepPlaytime;
+    QString filter;
 
-    if(!copySaves)
+    if(!prefs.copySaves)
     {
-        // FIXME: get this from the original instance type...
-        auto matcherReal = new RegexpMatcher("[.]?minecraft/saves");
-        matcherReal->caseSensitive(false);
-        m_matcher.reset(matcherReal);
+        appendToFilter(filter, "saves");
     }
+
+    if(!prefs.copyGameOptions) {
+        appendToFilter(filter, "options.txt");
+    }
+
+    if(!prefs.copyResourcePacks)
+    {
+        appendToFilter(filter, "resourcepacks");
+        appendToFilter(filter, "texturepacks");
+    }
+
+    if(!prefs.copyShaderPacks)
+    {
+        appendToFilter(filter, "shaderpacks");
+    }
+
+    if(!prefs.copyServers)
+    {
+        appendToFilter(filter, "servers.dat");
+        appendToFilter(filter, "servers.dat_old");
+        appendToFilter(filter, "server-resource-packs");
+    }
+
+    if(!prefs.copyMods)
+    {
+        appendToFilter(filter, "coremods");
+        appendToFilter(filter, "mods");
+        appendToFilter(filter, "config");
+    }
+
+    if (!filter.isEmpty())
+    {
+        resetFromMatcher(filter);
+    }
+}
+
+void InstanceCopyTask::appendToFilter(QString& filter, const QString &append)
+{
+    if (!filter.isEmpty())
+        filter.append('|'); // OR regex
+
+    filter.append("[.]?minecraft/" + append);
+}
+
+void InstanceCopyTask::resetFromMatcher(const QString& regexp)
+{
+    // FIXME: get this from the original instance type...
+    auto matcherReal = new RegexpMatcher(regexp);
+    matcherReal->caseSensitive(false);
+    m_matcher.reset(matcherReal);
 }
 
 void InstanceCopyTask::executeTask()
