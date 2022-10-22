@@ -26,7 +26,7 @@ void InstanceCopyTask::executeTask()
     setStatus(tr("Copying instance %1").arg(m_origInstance->name()));
 
     FS::copy folderCopy(m_origInstance->instanceRoot(), m_stagingPath);
-    folderCopy.followSymlinks(false).blacklist(m_matcher.get());
+    folderCopy.followSymlinks(false).matcher(m_matcher.get());
 
     m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), folderCopy);
     connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &InstanceCopyTask::copyFinished);

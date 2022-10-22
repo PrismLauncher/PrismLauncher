@@ -88,9 +88,14 @@ class copy {
         m_followSymlinks = follow;
         return *this;
     }
-    copy& blacklist(const IPathMatcher* filter)
+    copy& matcher(const IPathMatcher* filter)
     {
-        m_blacklist = filter;
+        m_matcher = filter;
+        return *this;
+    }
+    copy& whitelist(bool whitelist)
+    {
+        m_whitelist = whitelist;
         return *this;
     }
     bool operator()() { return operator()(QString()); }
@@ -100,7 +105,8 @@ class copy {
 
    private:
     bool m_followSymlinks = true;
-    const IPathMatcher* m_blacklist = nullptr;
+    const IPathMatcher* m_matcher = nullptr;
+    bool m_whitelist = false;
     QDir m_src;
     QDir m_dst;
 };
