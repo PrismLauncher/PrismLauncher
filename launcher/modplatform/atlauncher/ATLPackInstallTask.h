@@ -62,7 +62,7 @@ public:
     /**
      * Requests a user interaction to select which optional mods should be installed.
      */
-    virtual QVector<QString> chooseOptionalMods(PackVersion version, QVector<ATLauncher::VersionMod> mods) = 0;
+    virtual std::optional<QVector<QString>> chooseOptionalMods(PackVersion version, QVector<ATLauncher::VersionMod> mods) = 0;
 
     /**
      * Requests a user interaction to select a component version from a given version list
