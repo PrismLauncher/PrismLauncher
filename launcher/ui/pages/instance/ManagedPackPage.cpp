@@ -4,6 +4,8 @@
 #include <QListView>
 #include <QProxyStyle>
 
+#include <HoeDown.h>
+
 #include "Application.h"
 #include "BuildConfig.h"
 #include "InstanceImportTask.h"
@@ -198,7 +200,8 @@ void ModrinthManagedPackPage::suggestVersion()
     auto index = ui->versionsComboBox->currentIndex();
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setText(version.changelog);
+    HoeDown md_parser;
+    ui->changelogTextBrowser->setHtml(md_parser.process(version.changelog.toUtf8()));
 }
 
 void ModrinthManagedPackPage::update()
