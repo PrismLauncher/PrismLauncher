@@ -331,7 +331,7 @@ AtlOptionalModDialog::AtlOptionalModDialog(QWidget* parent, ATLauncher::PackVers
     connect(ui->clearAllButton, &QPushButton::clicked,
             listModel, &AtlOptionalModListModel::clearAll);
     connect(ui->installButton, &QPushButton::clicked,
-            this, &QDialog::close);
+            this, &QDialog::accept);
 }
 
 AtlOptionalModDialog::~AtlOptionalModDialog() {
