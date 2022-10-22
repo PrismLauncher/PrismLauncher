@@ -30,8 +30,9 @@ protected slots:
 private: /* data */
     shared_qobject_ptr<QNetworkAccessManager> m_network;
     Flame::Manifest m_toProcess;
-    std::shared_ptr<QByteArray> result;
+	std::shared_ptr<QByteArray> result;
     NetJob::Ptr m_dljob;
+	NetJob::Ptr m_checkJob;
 
     void modrinthCheckFinished();
 
