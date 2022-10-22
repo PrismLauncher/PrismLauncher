@@ -379,7 +379,9 @@ QList<QString> JavaUtils::FindJavaPaths()
         }
     }
 
-    return addJavasFromEnv(candidates);
+    candidates = addJavasFromEnv(candidates);
+    candidates.removeDuplicates();
+    return candidates;
 }
 
 #elif defined(Q_OS_MAC)
@@ -402,7 +404,9 @@ QList<QString> JavaUtils::FindJavaPaths()
         javas.append(systemLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Home/bin/java");
         javas.append(systemLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Commands/java");
     }
-    return addJavasFromEnv(javas);
+    javas = addJavasFromEnv(javas);
+    javas.removeDuplicates();
+    return javas;
 }
 
 #elif defined(Q_OS_LINUX)
@@ -448,7 +452,9 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDir("/opt/jdks");
     // flatpak
     scanJavaDir("/app/jdk");
-    return addJavasFromEnv(javas);
+    javas = addJavasFromEnv(javas);
+    javas.removeDuplicates();
+    return javas;
 }
 #else
 QList<QString> JavaUtils::FindJavaPaths()
