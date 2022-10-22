@@ -943,6 +943,13 @@ bool Application::event(QEvent* event) {
             emit clickedOnDock();
         }
         m_prevAppState = ev->applicationState();
+        return true;
+    }
+
+    if (event->type() == QEvent::FileOpen) {
+        auto ev = static_cast<QFileOpenEvent*>(event);
+        m_mainWindow->droppedURLs({ ev->url() });
+        return true;
     }
 #endif
     return QApplication::event(event);
