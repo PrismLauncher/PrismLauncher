@@ -40,6 +40,7 @@
 
 #include <QDir>
 #include <QFlags>
+#include <QObject>
 
 namespace FS {
 
@@ -76,9 +77,10 @@ bool ensureFilePathExists(QString filenamepath);
 bool ensureFolderPathExists(QString filenamepath);
 
 /// @brief Copies a directory and it's contents from src to dest
-class copy {
+class copy : public QObject {
+    Q_OBJECT
    public:
-    copy(const QString& src, const QString& dst)
+    copy(const QString& src, const QString& dst, QObject* parent = nullptr) : QObject(parent)
     {
         m_src.setPath(src);
         m_dst.setPath(dst);
@@ -98,10 +100,17 @@ class copy {
         m_whitelist = whitelist;
         return *this;
     }
-    bool operator()() { return operator()(QString()); }
+
+    bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
+
+    int totalCopied() { return m_copied; }
+
+   signals:
+    void fileCopied(const QString& relativeName);
+    // TODO: maybe add a "shouldCopy" signal in the future?
 
    private:
-    bool operator()(const QString& offset);
+    bool operator()(const QString& offset, bool dryRun = false);
 
    private:
     bool m_followSymlinks = true;
@@ -109,6 +118,7 @@ class copy {
     bool m_whitelist = false;
     QDir m_src;
     QDir m_dst;
+    int m_copied;
 };
 
 /**
