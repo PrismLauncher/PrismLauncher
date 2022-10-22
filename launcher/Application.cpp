@@ -38,10 +38,14 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
+#include "DataMigrationTask.h"
 #include "net/PasteUpload.h"
+#include "pathmatcher/MultiMatcher.h"
+#include "pathmatcher/SimplePrefixMatcher.h"
 #include "ui/MainWindow.h"
 #include "ui/InstanceWindow.h"
 
+#include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/AccessibleInstanceView.h"
 
 #include "ui/pages/BasePageProvider.h"
@@ -421,6 +425,15 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         }
         qInstallMessageHandler(appDebugOutput);
         qDebug() << "<> Log initialized.";
+    }
+
+    {
+        bool migrated = false;
+
+        if (!migrated)
+            migrated = handleDataMigration(dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../PolyMC"), "PolyMC", "polymc.cfg");
+        if (!migrated)
+            migrated = handleDataMigration(dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../multimc"), "MultiMC", "multimc.cfg");
     }
 
     {
@@ -1588,4 +1601,90 @@ int Application::suitableMaxMem()
         maxMemoryAlloc = 4096;
 
     return maxMemoryAlloc;
+}
+
+bool Application::handleDataMigration(const QString& currentData,
+                                      const QString& oldData,
+                                      const QString& name,
+                                      const QString& configFile) const
+{
+    QString nomigratePath = FS::PathCombine(oldData, BuildConfig.LAUNCHER_NAME + "_nomigrate.txt");
+    QStringList configPaths = { FS::PathCombine(oldData, configFile), FS::PathCombine(oldData, BuildConfig.LAUNCHER_CONFIGFILE) };
+
+    QDir dir;  // helper for QDir::exists
+    QLocale locale;
+
+    // Is there a valid config at the old location?
+    bool configExists = false;
+    for (QString configPath : configPaths) {
+        configExists |= QFileInfo::exists(configPath);
+    }
+
+    if (!configExists || QFileInfo::exists(nomigratePath)) {
+        qDebug() << "<> No migration needed from" << name;
+        return false;
+    }
+
+    QString message;
+    bool currentExists = QFileInfo::exists(FS::PathCombine(currentData, BuildConfig.LAUNCHER_CONFIGFILE));
+
+    if (currentExists) {
+        message = tr("Old data from %1 was found, but you already have existing data for %2. Sadly you will need to migrate yourself. Do "
+                     "you want to be reminded of the pending data migration next time you start %2?")
+                      .arg(name, BuildConfig.LAUNCHER_DISPLAYNAME);
+    } else {
+        message = tr("It looks like you used %1 before. Do you want to migrate your data to the new location of %2?")
+                      .arg(name, BuildConfig.LAUNCHER_DISPLAYNAME);
+
+        QFileInfo logInfo(FS::PathCombine(oldData, name + "-0.log"));
+        if (logInfo.exists()) {
+            QString lastModified = logInfo.lastModified().toString(locale.dateFormat());
+            message = tr("It looks like you used %1 on %2 before. Do you want to migrate your data to the new location of %3?")
+                          .arg(name, lastModified, BuildConfig.LAUNCHER_DISPLAYNAME);
+        }
+    }
+
+    QMessageBox::StandardButton askMoveDialogue =
+        QMessageBox::question(nullptr, BuildConfig.LAUNCHER_DISPLAYNAME, message, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+    auto setDoNotMigrate = [&nomigratePath] {
+        QFile file(nomigratePath);
+        file.open(QIODevice::WriteOnly);
+    };
+
+    // create no-migrate file if user doesn't want to migrate
+    if (askMoveDialogue != QMessageBox::Yes) {
+        qDebug() << "<> Migration declined for" << name;
+        setDoNotMigrate();
+        return currentExists;  // cancel further migrations, if we already have a data directory
+    }
+
+    if (!currentExists) {
+        // Migrate!
+        auto matcher = std::make_shared<MultiMatcher>();
+        matcher->add(std::make_shared<SimplePrefixMatcher>(configFile));
+        matcher->add(std::make_shared<SimplePrefixMatcher>(
+            BuildConfig.LAUNCHER_CONFIGFILE));  // it's possible that we already used that directory before
+        matcher->add(std::make_shared<SimplePrefixMatcher>("accounts.json"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("accounts/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("assets/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("icons/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("instances/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("libraries/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("mods/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("themes/"));
+
+        ProgressDialog diag = ProgressDialog();
+        DataMigrationTask task(nullptr, oldData, currentData, matcher);
+        if (diag.execWithTask(&task)) {
+            qDebug() << "<> Migration succeeded";
+            setDoNotMigrate();
+        } else {
+            QString reason = task.failReason();
+            QMessageBox::critical(nullptr, BuildConfig.LAUNCHER_DISPLAYNAME, tr("Migration failed! Reason: %1").arg(reason));
+        }
+    } else {
+        qWarning() << "<> Migration was skipped, due to existing data";
+    }
+    return true;
 }

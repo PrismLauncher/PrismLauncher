@@ -576,6 +576,8 @@ SET(LAUNCHER_SOURCES
     # Application base
     Application.h
     Application.cpp
+    DataMigrationTask.h
+    DataMigrationTask.cpp
     UpdateController.cpp
     UpdateController.h
     ApplicationMessage.h
