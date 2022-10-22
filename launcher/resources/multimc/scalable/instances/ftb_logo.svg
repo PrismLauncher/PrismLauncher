@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   version="1.1"
+   viewBox="0 0 32 32"
+   id="svg168"
+   xml:space="preserve"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"><defs
+     id="defs172" /><title
+     id="title132">Prism Launcher Logo</title><metadata
+     id="metadata166"><rdf:RDF><cc:Work
+         rdf:about=""><dc:title>Prism Launcher Logo</dc:title><dc:date>19/10/2022</dc:date><dc:creator><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:creator><dc:contributor><cc:Agent><dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title></cc:Agent></dc:contributor><dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source><dc:rights><cc:Agent><dc:title>CC BY-SA 4.0</dc:title></cc:Agent></dc:rights><dc:publisher><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:publisher></cc:Work></rdf:RDF></metadata><g
+     id="i_ftb_logo"
+     transform="translate(-320)"><path
+       id="path15348"
+       style="opacity:1;fill:#df6277;fill-opacity:1;stroke:none;stroke-width:0.579672;paint-order:stroke markers fill;stop-color:#000000"
+       d="m 338,13 v 2 10 h 2 5 l 2,-2 v -3 l -2,-2 1,-1 v -2 l -2,-2 h -4 z m 3,3 h 2 v 2 h -2 z m 0,4 h 3 v 2 h -3 z" /><path
+       style="opacity:1;fill:#4b7cbc;fill-opacity:1;stroke:none;stroke-width:0.579672;paint-order:stroke markers fill;stop-color:#000000"
+       d="m 325,13 v 12 h 3 v -4 h 3 v -3 h -3 v -2 h 5 v -3 h -6 z"
+       id="path15342" /><path
+       style="opacity:1;fill:#99cd61;fill-opacity:1;stroke:none;stroke-width:0.579672;paint-order:stroke markers fill;stop-color:#000000"
+       d="m 331,9 v 3 h 3 v 9 h 3 v -9 h 3 V 9 Z"
+       id="rect10933" /><rect
+       style="fill:#ffffff;fill-opacity:0;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
+       id="rect128412-8-2"
+       width="32"
+       height="32"
+       x="320"
+       y="0" /></g></svg>

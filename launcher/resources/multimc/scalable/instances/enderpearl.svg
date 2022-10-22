@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   version="1.1"
+   viewBox="0 0 32 32"
+   id="svg168"
+   xml:space="preserve"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"><defs
+     id="defs172" /><title
+     id="title132">Prism Launcher Logo</title><metadata
+     id="metadata166"><rdf:RDF><cc:Work
+         rdf:about=""><dc:title>Prism Launcher Logo</dc:title><dc:date>19/10/2022</dc:date><dc:creator><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:creator><dc:contributor><cc:Agent><dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title></cc:Agent></dc:contributor><dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source><dc:rights><cc:Agent><dc:title>CC BY-SA 4.0</dc:title></cc:Agent></dc:rights><dc:publisher><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:publisher></cc:Work></rdf:RDF></metadata><g
+     id="i_enderpearl"
+     transform="translate(-256)"><circle
+       style="fill:#3a7a81;fill-opacity:1;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
+       id="path78788"
+       cx="272"
+       cy="16"
+       r="12" /><circle
+       style="fill:#27414e;fill-opacity:1;stroke-width:0.187413;paint-order:stroke markers fill;stop-color:#000000"
+       id="circle81814"
+       cx="272"
+       cy="16"
+       r="8.5" /><path
+       id="circle80343-2"
+       style="fill:#62b397;fill-opacity:1;stroke-width:0.220486;paint-order:stroke markers fill;stop-color:#000000"
+       d="m 272,7 c -4.97057,0 -9,4.029438 -9,9 0,4.970562 4.02943,9 9,9 4.97056,0 9,-4.029438 9,-9 0,-4.970562 -4.02944,-9 -9,-9 z m 0,4 c 2.76142,0 5,2.238576 5,5 0,2.761424 -2.23858,5 -5,5 -2.76142,0 -5,-2.238576 -5,-5 0,-2.761424 2.23858,-5 5,-5 z" /><path
+       id="circle80343"
+       style="fill:#ffffff;fill-opacity:1;stroke-width:0.220486;paint-order:stroke markers fill;stop-color:#000000"
+       d="m 272,6 c -5.52284,0 -10,4.477158 -10,10 h 3 c 0,-3.865989 3.13401,-7 7,-7 z" /><rect
+       style="fill:#ffffff;fill-opacity:0;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
+       id="rect128412-4"
+       width="32"
+       height="32"
+       x="256"
+       y="0" /></g></svg>

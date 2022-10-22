@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   version="1.1"
+   viewBox="0 0 32 32"
+   id="svg168"
+   xml:space="preserve"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"><defs
+     id="defs172" /><title
+     id="title132">Prism Launcher Logo</title><metadata
+     id="metadata166"><rdf:RDF><cc:Work
+         rdf:about=""><dc:title>Prism Launcher Logo</dc:title><dc:date>19/10/2022</dc:date><dc:creator><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:creator><dc:contributor><cc:Agent><dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title></cc:Agent></dc:contributor><dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source><dc:rights><cc:Agent><dc:title>CC BY-SA 4.0</dc:title></cc:Agent></dc:rights><dc:publisher><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:publisher></cc:Work></rdf:RDF></metadata><g
+     id="i_flame"
+     transform="translate(-288)"><path
+       id="path5010"
+       style="fill:#e36e55;fill-opacity:1;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
+       d="m 297,10 v 2 h -8 c 0,4.99999 10,5 10,5 v 1 l 3,3 v 1 c -1.10457,0 -2,0.895433 -2,2 v 2 h 11 v -2 c 0,-1.104567 -0.89543,-2 -2,-2 v -1 l 2,-2 c 0,-3.865985 3.13401,-7 7,-7 v -2 z m 9.70312,2.585938 c 0.0659,-6.35e-4 0.12852,0.0021 0.1875,0.0078 -0.99172,0.110204 -1.50585,0.993004 -1.05468,1.955078 0.28737,0.612746 0.72435,0.914523 0.85156,1.416016 -0.42362,0.03157 -0.54603,0.22612 -0.53711,0.589844 0.006,0.272261 0.63837,0.665899 0.73828,-0.111329 0.29363,0.605874 -0.0609,0.962922 -0.2539,1.25 -0.44541,0.662601 -0.0259,1.351954 0.52734,0.826172 0.23858,-0.226756 0.40411,-0.646164 0.10156,-1.330078 0.55701,0.443815 1.12564,1.635323 0.22656,2.667969 -0.43881,0.50404 -1.73686,0.348333 -1.88671,1.142578 -0.77018,-1.404816 -1.27707,-0.298776 -2.86133,-1.736328 -0.6179,-0.560667 -0.86298,-2.20469 0.52539,-2.707031 -0.63112,1.393144 1.00661,1.962509 1.39648,1.166015 0.17717,-0.361998 0.39956,-1.028667 -0.24609,-1.486328 -0.34786,-0.246573 -0.48139,-0.97836 -0.18359,-1.384766 0.0959,0.3022 0.39821,0.624717 0.97851,0.384766 -1.15246,-1.907113 0.50155,-2.640873 1.49023,-2.65039 z" /><rect
+       style="fill:#ffffff;fill-opacity:0;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
+       id="rect128412-7-9"
+       width="32"
+       height="32"
+       x="288"
+       y="0" /></g></svg>
