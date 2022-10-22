@@ -488,7 +488,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // Initialize application settings
     {
-        m_settings.reset(new INISettingsObject(BuildConfig.LAUNCHER_CONFIGFILE, this));
+        // Provide a fallback for migration from PolyMC
+        m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this));
         // Updates
         // Multiple channels are separated by spaces
         m_settings->registerSetting("UpdateChannel", BuildConfig.VERSION_CHANNEL);
@@ -815,6 +816,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_metacache->addBase("FlamePacks", QDir("cache/FlamePacks").absolutePath());
         m_metacache->addBase("FlameMods", QDir("cache/FlameMods").absolutePath());
         m_metacache->addBase("ModrinthPacks", QDir("cache/ModrinthPacks").absolutePath());
+        m_metacache->addBase("ModrinthModpacks", QDir("cache/ModrinthModpacks").absolutePath());
         m_metacache->addBase("root", QDir::currentPath());
         m_metacache->addBase("translations", QDir("translations").absolutePath());
         m_metacache->addBase("icons", QDir("cache/icons").absolutePath());
@@ -1569,7 +1571,7 @@ QString Application::getJarPath(QString jarFile)
 {
     QStringList potentialPaths = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-        FS::PathCombine(m_rootPath, "share/jars"),
+        FS::PathCombine(m_rootPath, "share/" + BuildConfig.LAUNCHER_APP_BINARY_NAME),
 #endif
         FS::PathCombine(m_rootPath, "jars"),
         FS::PathCombine(applicationDirPath(), "jars")

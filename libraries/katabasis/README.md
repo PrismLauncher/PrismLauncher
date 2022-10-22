@@ -10,7 +10,7 @@ Notes to contributors:
 
 * Please follow the coding style of the existing source, where reasonable
 * Code contributions are released under Simplified BSD License, as specified in LICENSE. Do not contribute if this license does not suit your code
-* If you are interested in working on this, come to the PolyMC Discord server and talk first
+* If you are interested in working on this, come to the Prism Launcher Discord server and talk first
 
 ## Installation
 

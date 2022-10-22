@@ -173,7 +173,7 @@ Available either under LGPL version 2.1 or later.
 
 ## systeminfo
 
-A PolyMC-specific library for probing system information.
+A Prism Launcher-specific library for probing system information.
 
 Apache 2.0
 

@@ -49,7 +49,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QTextBrowser" name="currentArticleContentBrowser">
+        <widget class="ProjectDescriptionPage" name="currentArticleContentBrowser">
          <property name="textInteractionFlags">
           <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
          </property>
@@ -91,6 +91,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ProjectDescriptionPage</class>
+   <extends>QTextBrowser</extends>
+   <header>ui/widgets/ProjectDescriptionPage.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

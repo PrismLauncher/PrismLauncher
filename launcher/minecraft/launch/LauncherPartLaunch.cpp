@@ -154,7 +154,7 @@ void LauncherPartLaunch::executeTask()
 #else
     args << classPath.join(':');
 #endif
-    args << "org.polymc.EntryPoint";
+    args << "org.prismlauncher.EntryPoint";
 
     qDebug() << args.join(' ');
 

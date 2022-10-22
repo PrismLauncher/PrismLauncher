@@ -9,9 +9,12 @@ Flame::FileResolvingTask::FileResolvingTask(const shared_qobject_ptr<QNetworkAcc
 
 bool Flame::FileResolvingTask::abort()
 {
+    bool aborted = true;
     if (m_dljob)
-        return m_dljob->abort();
-    return true;
+        aborted &= m_dljob->abort();
+    if (m_checkJob)
+        aborted &= m_checkJob->abort();
+    return aborted ? Task::abort() : false;
 }
 
 void Flame::FileResolvingTask::executeTask()
@@ -39,7 +42,7 @@ void Flame::FileResolvingTask::netJobFinished()
     setProgress(1, 3);
     int index = 0;
     // job to check modrinth for blocked projects
-    auto job = new NetJob("Modrinth check", m_network);
+    m_checkJob = new NetJob("Modrinth check", m_network);
     blockedProjects = QMap<File *,QByteArray *>();
     auto doc = Json::requireDocument(*result);
     auto array = Json::requireArray(doc.object()["data"]);
@@ -59,15 +62,15 @@ void Flame::FileResolvingTask::netJobFinished()
                     out.resolved = true;
                 });
 
-                job->addNetAction(dl);
+                m_checkJob->addNetAction(dl);
                 blockedProjects.insert(&out, output);
             }
         }
         index++;
     }
-    connect(job, &NetJob::finished, this, &Flame::FileResolvingTask::modrinthCheckFinished);
+    connect(m_checkJob.get(), &NetJob::finished, this, &Flame::FileResolvingTask::modrinthCheckFinished);
 
-    job->start();
+    m_checkJob->start();
 }
 
 void Flame::FileResolvingTask::modrinthCheckFinished() {

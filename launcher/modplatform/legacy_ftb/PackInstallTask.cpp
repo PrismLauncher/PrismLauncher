@@ -65,48 +65,42 @@ void PackInstallTask::executeTask()
 void PackInstallTask::downloadPack()
 {
     setStatus(tr("Downloading zip for %1").arg(m_pack.name));
+    setAbortable(false);
 
-    auto packoffset = QString("%1/%2/%3").arg(m_pack.dir, m_version.replace(".", "_"), m_pack.file);
-    auto entry = APPLICATION->metacache()->resolveEntry("FTBPacks", packoffset);
+    archivePath = QString("%1/%2/%3").arg(m_pack.dir, m_version.replace(".", "_"), m_pack.file);
+
     netJobContainer = new NetJob("Download FTB Pack", m_network);
-
-    entry->setStale(true);
     QString url;
-    if(m_pack.type == PackType::Private)
-    {
-        url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "privatepacks/%1").arg(packoffset);
+    if (m_pack.type == PackType::Private) {
+        url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "privatepacks/%1").arg(archivePath);
+    } else {
+        url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "modpacks/%1").arg(archivePath);
     }
-    else
-    {
-        url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "modpacks/%1").arg(packoffset);
-    }
-    netJobContainer->addNetAction(Net::Download::makeCached(url, entry));
-    archivePath = entry->getFullPath();
+    netJobContainer->addNetAction(Net::Download::makeFile(url, archivePath));
 
     connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
     connect(netJobContainer.get(), &NetJob::progress, this, &PackInstallTask::onDownloadProgress);
     connect(netJobContainer.get(), &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
+
     netJobContainer->start();
 
+    setAbortable(true);
     progress(1, 4);
 }
 
 void PackInstallTask::onDownloadSucceeded()
 {
-    abortable = false;
     unzip();
 }
 
 void PackInstallTask::onDownloadFailed(QString reason)
 {
-    abortable = false;
     emitFailed(reason);
 }
 
 void PackInstallTask::onDownloadProgress(qint64 current, qint64 total)
 {
-    abortable = true;
     progress(current, total * 4);
     setStatus(tr("Downloading zip for %1 (%2%)").arg(m_pack.name).arg(current / 10));
 }
@@ -118,8 +112,10 @@ void PackInstallTask::onDownloadAborted()
 
 void PackInstallTask::unzip()
 {
-    progress(2, 4);
     setStatus(tr("Extracting modpack"));
+    setAbortable(false);
+    progress(2, 4);
+
     QDir extractDir(m_stagingPath);
 
     m_packZip.reset(new QuaZip(archivePath));
@@ -151,8 +147,8 @@ void PackInstallTask::onUnzipCanceled()
 
 void PackInstallTask::install()
 {
-    progress(3, 4);
     setStatus(tr("Installing modpack"));
+    progress(3, 4);
     QDir unzipMcDir(m_stagingPath + "/unzip/minecraft");
     if(unzipMcDir.exists())
     {
@@ -247,11 +243,12 @@ void PackInstallTask::install()
 
 bool PackInstallTask::abort()
 {
-    if(abortable)
-    {
-        return netJobContainer->abort();
+    if (!canAbort()) {
+        return false;
     }
-    return false;
+
+    netJobContainer->abort();
+    return InstanceTask::abort();
 }
 
 }

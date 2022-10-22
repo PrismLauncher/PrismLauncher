@@ -69,7 +69,7 @@ QString getCreditsHtml()
 #endif
     stream << "<center>\n";
 
-    //: %1 is the name of the launcher, determined at build time, e.g. "PolyMC Developers"
+    //: %1 is the name of the launcher, determined at build time, e.g. "Prism Launcher Developers"
     stream << "<h3>" << QObject::tr("%1 Developers", "About Credits").arg(BuildConfig.LAUNCHER_DISPLAYNAME) << "</h3>\n";
     stream << QString("<p>Sefa Eyeoglu (Scrumplex) %1</p>\n")   .arg(getWebsite("https://scrumplex.net"));
     stream << QString("<p>dada513 %1</p>\n")                    .arg(getGitHub("dada513"));
@@ -79,15 +79,15 @@ QString getCreditsHtml()
     stream << QString("<p>cozyGalvinism %1</p>\n")              .arg(getGitHub("cozyGalvinism"));
     stream << "<br />\n";
 
-    //: %1 is the name of the launcher, determined at build time, e.g. "PolyMC Contributors"
+    //: %1 is the name of the launcher, determined at build time, e.g. "Prism Launcher Contributors"
     stream << "<h3>" << QObject::tr("%1 Contributors", "About Credits").arg(BuildConfig.LAUNCHER_DISPLAYNAME) << "</h3>\n";
-    stream << QString("<p>DioEgizio %1</p>\n")                      .arg(getGitHub("DioEgizio"));
-    stream << QString("<p>flowln %1</p>\n")                      .arg(getGitHub("flowln"));
-    stream << QString("<p>swirl %1</p>\n")                      .arg(getWebsite("https://swurl.xyz/"));
+    stream << QString("<p>DioEgizio %1</p>\n")      .arg(getGitHub("DioEgizio"));
+    stream << QString("<p>flowln %1</p>\n")         .arg(getGitHub("flowln"));
+    stream << QString("<p>swirl %1</p>\n")          .arg(getWebsite("https://swurl.xyz/"));
     stream << "<br />\n";
 
     // TODO: possibly retrieve from git history at build time?
-    //: %1 is the name of the launcher, determined at build time, e.g. "PolyMC Developers"
+    //: %1 is the name of the launcher, determined at build time, e.g. "Prism Launcher Developers"
     stream << "<h3>" << QObject::tr("%1 Developers", "About Credits").arg("MultiMC") << "</h3>\n";
     stream << "<p>Andrew Okin &lt;<a href='mailto:forkk@forkk.net'>forkk@forkk.net</a>&gt;</p>\n";
     stream << QString("<p>Petr Mrázek &lt;<a href='mailto:peterix@gmail.com'>peterix@gmail.com</a>&gt;</p>\n");
@@ -97,12 +97,20 @@ QString getCreditsHtml()
     stream << "<br />\n";
 
     stream << "<h3>" << QObject::tr("With thanks to", "About Credits") << "</h3>\n";
+    stream << QString("<p>Boba %1</p>\n")           .arg(getWebsite("https://cmdplusv.neocities.org/"));
+    stream << QString("<p>Davi Rafael %1</p>\n")    .arg(getWebsite("https://auti.one/"));
+    stream << QString("<p>Fulmine %1</p>\n")        .arg(getWebsite("https://www.fulmine.xyz/"));
+    stream << QString("<p>ely %1</p>\n")            .arg(getGitHub("elyrodso"));
+    stream << QString("<p>gon sawa %1</p>\n")       .arg(getGitHub("gonsawa"));
+    stream << QString("<p>Pankakes</p>\n");
+    stream << QString("<p>tobimori %1</p>\n")       .arg(getGitHub("tobimori"));
     stream << "<p>Orochimarufan &lt;<a href='mailto:orochimarufan.x3@gmail.com'>orochimarufan.x3@gmail.com</a>&gt;</p>\n";
     stream << "<p>TakSuyu &lt;<a href='mailto:taksuyu@gmail.com'>taksuyu@gmail.com</a>&gt;</p>\n";
     stream << "<p>Kilobyte &lt;<a href='mailto:stiepen22@gmx.de'>stiepen22@gmx.de</a>&gt;</p>\n";
     stream << "<p>Rootbear75 &lt;<a href='https://twitter.com/rootbear75'>@rootbear75</a>&gt;</p>\n";
     stream << "<p>Zeker Zhayard &lt;<a href='https://twitter.com/zeker_zhayard'>@Zeker_Zhayard</a>&gt;</p>\n";
-    stream << "<p>Everyone else who <a href='https://github.com/PolyMC/PolyMC/graphs/contributors'>contributed</a>!</p>\n";
+    stream << "<p>Everyone who helped establish our branding!</p>\n";
+    stream << "<p>And everyone else who <a href='https://github.com/PrismLauncher/PrismLauncher/graphs/contributors'>contributed</a>!</p>\n";
     stream << "<br />\n";
 
     stream << "</center>\n";
@@ -164,7 +172,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AboutDia
     QString urlText("<html><head/><body><p><a href=\"%1\">%1</a></p></body></html>");
     ui->urlLabel->setText(urlText.arg(BuildConfig.LAUNCHER_GIT));
 
-    QString copyText("© 2021-2022 %1");
+    QString copyText("© 2022 %1");
     ui->copyLabel->setText(copyText.arg(BuildConfig.LAUNCHER_COPYRIGHT));
 
     connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));

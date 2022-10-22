@@ -34,5 +34,9 @@
         <file>scalable/status-yellow.svg</file>
         <file>scalable/viewfolder.svg</file>
         <file>scalable/worlds.svg</file>
+        <file>scalable/delete.svg</file>
+        <file>scalable/tag.svg</file>
+        <file>scalable/export.svg</file>
+        <file>scalable/rename.svg</file>
     </qresource>
 </RCC>

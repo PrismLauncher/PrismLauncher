@@ -25,6 +25,7 @@ ProgressDialog::ProgressDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Pr
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setAttribute(Qt::WidgetAttribute::WA_QuitOnClose, true);
     setSkipButton(false);
     changeProgress(0, 100);
 }
@@ -67,7 +68,7 @@ int ProgressDialog::execWithTask(Task* task)
         return QDialog::DialogCode::Accepted;
     }
 
-    QDialog::DialogCode result;
+    QDialog::DialogCode result {};
     if (handleImmediateResult(result)) {
         return result;
     }
@@ -80,7 +81,7 @@ int ProgressDialog::execWithTask(Task* task)
     connect(task, &Task::stepStatus, this, &ProgressDialog::changeStatus);
     connect(task, &Task::progress, this, &ProgressDialog::changeProgress);
 
-    connect(task, &Task::aborted, [this] { QDialog::reject(); });
+    connect(task, &Task::aborted, this, &ProgressDialog::hide);
     connect(task, &Task::abortStatusChanged, ui->skipButton, &QPushButton::setEnabled);
 
     m_is_multi_step = task->isMultiStep();
@@ -135,11 +136,13 @@ void ProgressDialog::onTaskStarted() {}
 void ProgressDialog::onTaskFailed(QString failure)
 {
     reject();
+    hide();
 }
 
 void ProgressDialog::onTaskSucceeded()
 {
     accept();
+    hide();
 }
 
 void ProgressDialog::changeStatus(const QString& status)

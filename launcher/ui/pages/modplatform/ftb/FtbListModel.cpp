@@ -103,6 +103,8 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
 
 void ListModel::request()
 {
+    m_aborted = false;
+
     beginResetModel();
     modpacks.clear();
     endResetModel();
@@ -115,6 +117,12 @@ void ListModel::request()
 
     QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::requestFinished);
     QObject::connect(netJob, &NetJob::failed, this, &ListModel::requestFailed);
+}
+
+void ListModel::abortRequest()
+{
+    m_aborted = jobPtr->abort();
+    jobPtr.reset();
 }
 
 void ListModel::requestFinished()
@@ -162,6 +170,9 @@ void ListModel::requestPack()
 
 void ListModel::packRequestFinished()
 {
+    if (!jobPtr || m_aborted)
+        return;
+
     jobPtr.reset();
     remainingPacks.removeOne(currentPack);
 

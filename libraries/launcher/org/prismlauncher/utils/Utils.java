@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.polymc.utils;
+package org.prismlauncher.utils;
 
 import java.io.File;
 import java.lang.reflect.Field;

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="144"
+   height="48"
+   version="1.1"
+   viewBox="0 0 38.1 12.7"
+   id="svg66"
+   sodipodi:docname="org.prismlauncher.PrismLauncher.logo-dark.svg"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs70" />
+  <sodipodi:namedview
+     id="namedview68"
+     pagecolor="#000000"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#000000"
+     showgrid="false"
+     inkscape:zoom="8.9305556"
+     inkscape:cx="65.001555"
+     inkscape:cy="23.962675"
+     inkscape:window-width="2560"
+     inkscape:window-height="1386"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg66" />
+  <title
+     id="title2">Prism Launcher Logo</title>
+  <g
+     stroke-width=".26458"
+     id="g24">
+    <path
+       d="m6.35 6.35"
+       fill="#99cd61"
+       id="path4" />
+    <path
+       d="m6.35 0.52917-2.5208 4.3656 2.5208 1.4552 2.5203-1.4552 0.10955-3.0996c-1.1511-0.66459-2.3388-1.2661-2.6298-1.2661z"
+       fill="#df6277"
+       id="path6" />
+    <path
+       d="m8.9798 1.7952-2.6298 4.5548 2.5203 1.4552 2.5208-4.3656c-0.14552-0.25205-1.2601-0.97975-2.4112-1.6443z"
+       fill="#fb9168"
+       id="path8" />
+    <path
+       d="m11.391 3.4396-5.041 2.9104 2.5203 1.4552 2.7389-1.4552c0-1.3292-0.07255-2.6584-0.21808-2.9104z"
+       fill="#f3db6c"
+       id="path10" />
+    <path
+       d="m6.35 6.35v2.9104h5.041c0.14552-0.25205 0.21807-1.5812 0.21808-2.9104z"
+       fill="#7ab392"
+       id="path12" />
+    <path
+       d="m6.35 6.35v2.9104l2.6298 1.6443c1.1511-0.66459 2.2657-1.3923 2.4112-1.6443z"
+       fill="#4b7cbc"
+       id="path14" />
+    <path
+       d="m6.35 6.35-2.5208 1.4552 2.5208 4.3656c0.29104 0 1.4787-0.60148 2.6298-1.2661z"
+       fill="#6f488c"
+       id="path16" />
+    <path
+       d="m3.8292 4.8948-2.5203 4.3656c0.29104 0.5041 4.459 2.9104 5.041 2.9104v-5.8208z"
+       fill="#4d3f33"
+       id="path18" />
+    <path
+       d="m1.309 3.4396c-0.29104 0.5041-0.29104 5.3167 0 5.8208l5.041-2.9104v-2.9104z"
+       fill="#7a573b"
+       id="path20" />
+    <path
+       d="m6.35 0.52917c-0.58208-2e-8 -4.75 2.4063-5.041 2.9104l5.041 2.9104z"
+       fill="#99cd61"
+       id="path22" />
+  </g>
+  <g
+     transform="matrix(.88 0 0 .88 -10.906 -1.2421)"
+     id="g32">
+    <g
+       transform="translate(13.26 2.2776)"
+       id="g28">
+      <path
+         transform="matrix(.96975 0 0 .96975 .1921 .1921)"
+         d="m6.3498 2.9393c-0.34105 0-2.7827 1.4099-2.9532 1.7052l2.9532 5.1157 2.9538-5.1157c-0.17052-0.29535-2.6127-1.7052-2.9538-1.7052z"
+         fill="#fff"
+         stroke-width=".26458"
+         id="path26" />
+    </g>
+    <path
+       d="m16.746 6.9737 2.8639 4.9609c0.33073 0 2.6991-1.3672 2.8644-1.6536 0.16536-0.28642 0.16536-3.0209 0-3.3073l-2.8644 1.6536z"
+       fill="#dfdfdf"
+       stroke-width=".26458"
+       id="path30" />
+  </g>
+  <path
+     d="m3.8299 4.8948c-0.14551 0.25205-0.14553 2.6584 0 2.9104 0.14553 0.25204 2.2292 1.4552 2.5203 1.4552v-2.9104z"
+     fill="#d6d2d2"
+     stroke-width=".26458"
+     id="path34" />
+  <g
+     fill="#14191e"
+     stroke-width=".26458"
+     aria-label="Prism Launcher"
+     id="g62"
+     style="fill:#ffffff;fill-opacity:1">
+    <path
+       d="m15.669 3.991h-0.44291v-0.8382h0.44291c0.32385 0 0.46196 0.16192 0.46196 0.4191 0 0.25718-0.13811 0.4191-0.46196 0.4191zm1.2906-0.4191c0-0.61436-0.40958-1.0763-1.2287-1.0763h-1.3192v3.3433h0.81439v-1.2001h0.50482c0.85249 0 1.2287-0.51435 1.2287-1.0668z"
+       id="path36"
+       style="fill:#ffffff;fill-opacity:1" />
+    <path
+       d="m18.198 4.6053c0-0.4572 0.22384-0.59055 0.6096-0.59055h0.22384v-0.86201c-0.35719 0-0.6477 0.1905-0.83344 0.47149v-0.44291h-0.81439v2.6575h0.81439z"
+       id="path38"
+       style="fill:#ffffff;fill-opacity:1" />
+    <path
+       d="m19.421 3.1813v2.6575h0.81439v-2.6575zm0.40958-0.27622c0.28575 0 0.48101-0.19526 0.48101-0.43815 0-0.24765-0.19526-0.44291-0.48101-0.44291-0.29051 0-0.48578 0.19526-0.48578 0.44291 0 0.24289 0.19526 0.43815 0.48578 0.43815z"
+       id="path40"
+       style="fill:#ffffff;fill-opacity:1" />
+    <path
+       d="m21.908 5.8769c0.66675 0 1.0763-0.34766 1.0763-0.80962-0.01429-0.9906-1.4526-0.69056-1.4526-1.1144 0-0.12859 0.10478-0.20479 0.29528-0.20479 0.2286 0 0.36671 0.11906 0.39052 0.30004h0.75248c-0.052387-0.52388-0.43339-0.90487-1.1192-0.90487-0.69532 0-1.0811 0.37147-1.0811 0.82391 0 0.97631 1.4478 0.66675 1.4478 1.0954 0 0.11906-0.10954 0.21431-0.31909 0.21431-0.22384 0-0.39052-0.12382-0.40958-0.30956h-0.80486c0.0381 0.51435 0.51435 0.90964 1.224 0.90964z"
+       id="path42"
+       style="fill:#ffffff;fill-opacity:1" />
+    <path
+       d="m27.146 4.3958v1.443h0.80962v-1.5526c0-0.71438-0.42386-1.1335-1.0811-1.1335-0.38576 0-0.71914 0.21431-0.89535 0.4953-0.18098-0.31909-0.50482-0.4953-0.90488-0.4953-0.34766 0-0.61912 0.14764-0.77629 0.36195v-0.33337h-0.81439v2.6575h0.81439v-1.443c0-0.34766 0.20002-0.53816 0.50959-0.53816 0.30956 0 0.50959 0.1905 0.50959 0.53816v1.443h0.80962v-1.443c0-0.34766 0.20002-0.53816 0.50959-0.53816 0.30956 0 0.50959 0.1905 0.50959 0.53816z"
+       id="path44"
+       style="fill:#ffffff;fill-opacity:1" />
+    <path
+       d="m15.226 7.258h-0.81439v3.3433h1.8812v-0.62865h-1.0668z"
+       id="path46"
+       style="fill:#ffffff;fill-opacity:1" />
+    <path
+       d="m16.521 9.2678c0 0.8382 0.51911 1.3716 1.1668 1.3716 0.39529 0 0.67628-0.18098 0.82391-0.41434v0.37624h0.81439v-2.6575h-0.81439v0.37624c-0.14288-0.23336-0.42386-0.41434-0.81915-0.41434-0.65246 0-1.1716 0.52387-1.1716 1.3621zm1.9907 0.00476c0 0.42386-0.27146 0.65722-0.58102 0.65722-0.3048 0-0.58102-0.23812-0.58102-0.66199s0.27622-0.65246 0.58102-0.65246c0.30956 0 0.58102 0.23336 0.58102 0.65722z"
+       id="path48"
+       style="fill:#ffffff;fill-opacity:1" />
+    <path
+       d="m22.541 10.601v-2.6575h-0.81439v1.443c0 0.36195-0.20002 0.56198-0.51435 0.56198-0.3048 0-0.50959-0.20002-0.50959-0.56198v-1.443h-0.80962v1.5526c0 0.70961 0.41434 1.1335 1.0287 1.1335 0.35719 0 0.64294-0.16192 0.80486-0.39052v0.36195z"
+       id="path50"
+       style="fill:#ffffff;fill-opacity:1" />
+    <path
+       d="m24.96 9.1583v1.443h0.80962v-1.5526c0-0.71438-0.40958-1.1335-1.0239-1.1335-0.35719 0-0.64294 0.15716-0.80486 0.381v-0.35242h-0.81439v2.6575h0.81439v-1.443c0-0.36195 0.20002-0.56198 0.50959-0.56198 0.30956 0 0.50959 0.20002 0.50959 0.56198z"
+       id="path52"
+       style="fill:#ffffff;fill-opacity:1" />
+    <path
+       d="m26.175 9.2726c0 0.84296 0.55245 1.3668 1.3335 1.3668 0.66675 0 1.1382-0.38576 1.2764-1.0001h-0.86678c-0.07144 0.19526-0.20002 0.3048-0.42386 0.3048-0.29051 0-0.49054-0.2286-0.49054-0.67151s0.20002-0.67151 0.49054-0.67151c0.22384 0 0.35719 0.11906 0.42386 0.3048h0.86678c-0.13811-0.63341-0.6096-1.0001-1.2764-1.0001-0.78105 0-1.3335 0.52864-1.3335 1.3668z"
+       id="path54"
+       style="fill:#ffffff;fill-opacity:1" />
+    <path
+       d="m29.218 7.0771v3.5243h0.81439v-1.443c0-0.36195 0.20002-0.56198 0.50959-0.56198 0.30956 0 0.50959 0.20002 0.50959 0.56198v1.443h0.80962v-1.5526c0-0.71438-0.40481-1.1335-1.0096-1.1335-0.36671 0-0.65722 0.15716-0.81915 0.38576v-1.224z"
+       id="path56"
+       style="fill:#ffffff;fill-opacity:1" />
+    <path
+       d="m33.599 8.5582c0.27146 0 0.50006 0.16669 0.50006 0.4572h-1.0192c0.04762-0.29528 0.25241-0.4572 0.51911-0.4572zm1.2716 1.162h-0.86678c-0.06667 0.14288-0.19526 0.25718-0.42386 0.25718-0.26194 0-0.47625-0.16192-0.50482-0.50959h1.8431c0.0095-0.080963 0.01429-0.16192 0.01429-0.23812 0-0.80962-0.54769-1.324-1.324-1.324-0.79058 0-1.343 0.52387-1.343 1.3668 0 0.84296 0.56198 1.3668 1.343 1.3668 0.66199 0 1.1335-0.40005 1.2621-0.91916z"
+       id="path58"
+       style="fill:#ffffff;fill-opacity:1" />
+    <path
+       d="m36.176 9.3678c0-0.4572 0.22384-0.59055 0.6096-0.59055h0.22384v-0.86201c-0.35719 0-0.6477 0.1905-0.83344 0.47149v-0.44291h-0.81439v2.6575h0.81439z"
+       id="path60"
+       style="fill:#ffffff;fill-opacity:1" />
+  </g>
+  <metadata
+     id="metadata64">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>Prism Launcher Logo</dc:title>
+        <dc:date>19/10/2022</dc:date>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Prism Launcher</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:contributor>
+          <cc:Agent>
+            <dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title>
+          </cc:Agent>
+        </dc:contributor>
+        <dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source>
+        <dc:publisher>
+          <cc:Agent>
+            <dc:title>Prism Launcher</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/4.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>

@@ -71,7 +71,7 @@ endif()
 ##################################### Set Application options #####################################
 
 ######## Set URLs ########
-set(Launcher_NEWS_RSS_URL "https://prismlauncher.org/feed/feed.xml" CACHE STRING "URL to fetch PrismLauncher's news RSS feed from.")
+set(Launcher_NEWS_RSS_URL "https://prismlauncher.org/feed/feed.xml" CACHE STRING "URL to fetch Prism Launcher's news RSS feed from.")
 set(Launcher_NEWS_OPEN_URL "https://prismlauncher.org/news" CACHE STRING "URL that gets opened when the user clicks 'More News'")
 set(Launcher_HELP_URL "https://prismlauncher.org/wiki/help-pages/%1" CACHE STRING "URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help")
 
@@ -99,7 +99,7 @@ set(Launcher_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can g
 set(Launcher_BUG_TRACKER_URL "https://github.com/PrismLauncher/PrismLauncher/issues" CACHE STRING "URL for the bug tracker.")
 
 # Translations Platform URL
-set(Launcher_TRANSLATIONS_URL "https://hosted.weblate.org/projects/prismlauncher/prismlauncher/" CACHE STRING "URL for the translations platform.")
+set(Launcher_TRANSLATIONS_URL "https://hosted.weblate.org/projects/prismlauncher/launcher/" CACHE STRING "URL for the translations platform.")
 
 # Matrix Space
 set(Launcher_MATRIX_URL "https://matrix.to/#/#prismlauncher:matrix.org" CACHE STRING "URL to the Matrix Space")
@@ -249,7 +249,7 @@ if(UNIX AND APPLE)
 elseif(UNIX)
     set(BINARY_DEST_DIR "bin")
     set(LIBRARY_DEST_DIR "lib${LIB_SUFFIX}")
-    set(JARS_DEST_DIR "share/jars")
+    set(JARS_DEST_DIR "share/${Launcher_APP_BINARY_NAME}")
     set(LAUNCHER_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
     set(LAUNCHER_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
     set(LAUNCHER_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")

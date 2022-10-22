@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.polymc.applet;
+package org.prismlauncher.applet;
 
 import net.minecraft.Launcher;
 
