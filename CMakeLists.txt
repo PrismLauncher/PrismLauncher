@@ -211,19 +211,19 @@ if(NOT (UNIX AND APPLE))
 endif()
 
 if(UNIX AND APPLE)
-    set(BINARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
-    set(LIBRARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
-    set(PLUGIN_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
-    set(FRAMEWORK_DEST_DIR "${Launcher_Name}.app/Contents/Frameworks")
-    set(RESOURCES_DEST_DIR "${Launcher_Name}.app/Contents/Resources")
-    set(JARS_DEST_DIR "${Launcher_Name}.app/Contents/MacOS/jars")
+    set(BINARY_DEST_DIR "${Launcher_DisplayName}.app/Contents/MacOS")
+    set(LIBRARY_DEST_DIR "${Launcher_DisplayName}.app/Contents/MacOS")
+    set(PLUGIN_DEST_DIR "${Launcher_DisplayName}.app/Contents/MacOS")
+    set(FRAMEWORK_DEST_DIR "${Launcher_DisplayName}.app/Contents/Frameworks")
+    set(RESOURCES_DEST_DIR "${Launcher_DisplayName}.app/Contents/Resources")
+    set(JARS_DEST_DIR "${Launcher_DisplayName}.app/Contents/MacOS/jars")
 
     # Apps to bundle
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_Name}.app")
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_DisplayName}.app")
 
     # Mac bundle settings
-    set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_Name}")
-    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_Name}: A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.")
+    set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_DisplayName}")
+    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_DisplayName}: A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.")
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.prismlauncher.${Launcher_Name}")
     set(MACOSX_BUNDLE_BUNDLE_VERSION "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${Launcher_VERSION_NAME}")
