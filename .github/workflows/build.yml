@@ -249,8 +249,8 @@ jobs:
           cmake --install ${{ env.BUILD_DIR }}
 
           cd ${{ env.INSTALL_DIR }}
-          chmod +x "PrismLauncher.app/Contents/MacOS/prismlauncher"
-          sudo codesign --sign - --deep --force --entitlements "../program_info/App.entitlements" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
+          chmod +x "Prism Launcher.app/Contents/MacOS/prismlauncher"
+          sudo codesign --sign - --deep --force --entitlements "../program_info/App.entitlements" --options runtime "Prism Launcher.app/Contents/MacOS/prismlauncher"
           tar -czf ../PrismLauncher.tar.gz *
 
       - name: Make Sparkle signature (macOS)
