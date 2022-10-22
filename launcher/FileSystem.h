@@ -156,4 +156,9 @@ QString getDesktopDir();
 // Overrides one folder with the contents of another, preserving items exclusive to the first folder
 // Equivalent to doing QDir::rename, but allowing for overrides
 bool overrideFolder(QString overwritten_path, QString override_path);
+
+/**
+ * Creates a shortcut to the specified target file at the specified destination path.
+ */
+bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon);
 }

@@ -39,6 +39,7 @@
 
 #include "Application.h"
 #include "BuildConfig.h"
+#include "FileSystem.h"
 
 #include "MainWindow.h"
 
@@ -739,9 +740,9 @@ public:
 
         actionCreateInstanceShortcut = TranslatedAction(MainWindow);
         actionCreateInstanceShortcut->setObjectName(QStringLiteral("actionCreateInstanceShortcut"));
-        actionCreateInstanceShortcut.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Create shortcut"));
+        actionCreateInstanceShortcut.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Create Shortcut"));
         actionCreateInstanceShortcut.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Creates a shortcut on your desktop to launch the selected instance."));
-        actionCreateInstanceShortcut->setShortcut(QKeySequence(tr("Ctrl+D")));
+        //actionCreateInstanceShortcut->setShortcut(QKeySequence(tr("Ctrl+D")));     // TODO
         //actionCreateInstanceShortcut->setIcon(APPLICATION->getThemedIcon("copy")); // TODO
         all_actions.append(&actionCreateInstanceShortcut);
 
@@ -793,7 +794,7 @@ public:
             }
         }
 
-        instanceToolBar->addAction(actionCreateInstanceShortcut);
+        instanceToolBar->addAction(actionCreateInstanceShortcut); // TODO find better position for this
 
         all_toolbars.append(&instanceToolBar);
         MainWindow->addToolBar(Qt::RightToolBarArea, instanceToolBar);
@@ -2087,76 +2088,39 @@ void MainWindow::on_actionKillInstance_triggered()
     }
 }
 
-#ifdef Q_OS_WIN
-#define WIN32_LEAN_AND_MEAN
-#include "windows.h"
-#include "winnls.h"
-#include "shobjidl.h"
-#include "objbase.h"
-#include "objidl.h"
-#include "shlguid.h"
-#endif
-
 void MainWindow::on_actionCreateInstanceShortcut_triggered()
 {
     if (m_selectedInstance)
     {
-        auto desktopDir = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
-        if (desktopDir.isEmpty()) {
+        auto desktopPath = FS::getDesktopDir();
+        if (desktopPath.isEmpty()) {
             // TODO come up with an alternative solution (open "save file" dialog)
-            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Couldn't find desktop!"));
+            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Couldn't find desktop?!"));
             return;
         }
 
-#if defined(Q_OS_WIN)
-        // Windows
-        WCHAR wsz[MAX_PATH];
-
-        // ...yes, you need to initialize the entire COM stack to make a shortcut in Windows.
-        // I hate it.
-        CoInitialize(nullptr);
-
-        HRESULT hres;
-        IShellLink* psl;
-
-        hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&psl);
-        if (SUCCEEDED(hres))
-        {
-            IPersistFile* ppf;
-
-            QApplication::applicationFilePath().left(MAX_PATH - 1).toWCharArray(wsz);
-            psl->SetPath(wsz);
-
-            wmemset(wsz, 0, MAX_PATH);
-            QStringLiteral("--launch %1").arg(m_selectedInstance->id()).left(MAX_PATH - 1).toWCharArray(wsz);
-            psl->SetArguments(wsz);
-
-            // TODO set icon
-
-            hres = psl->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf);
-
-            if (SUCCEEDED(hres))
-            {
-                wmemset(wsz, 0, MAX_PATH);
-
-                desktopDir
-                        .append('/')
-                        .append(QStringLiteral("%1.lnk").arg(m_selectedInstance->name()))
-                        .left(MAX_PATH - 1).toWCharArray(wsz);
-
-                hres = ppf->Save(wsz, TRUE);
-                ppf->Release();
-            }
-            psl->Release();
-        }
-
-        CoUninitialize();
-#elif defined(Q_OS_LINUX)
-        // Linux
-#elif defined(Q_OS_MACOS)
+#if defined(Q_OS_MACOS)
         // macOSX
         // TODO actually write this path
         QMessageBox::critical(this, tr("Create instance shortcut"), tr("Not supported on macOSX yet!"));
+#else
+        QString iconPath;
+
+#if defined(Q_OS_WIN)
+        // TODO
+        // need to convert icon to ICO format and save it somewhere...
+        iconPath = "";
+#elif defined(Q_OS_UNIX)
+        iconPath = ""; // TODO get instance icon path
+#endif
+        if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
+                           QApplication::applicationFilePath(), { "--launch", m_selectedInstance->id() }, m_selectedInstance->name(), iconPath)) {
+            QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
+        }
+        else
+        {
+            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
+        }
 #endif
     }
 }

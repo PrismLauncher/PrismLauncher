@@ -49,6 +49,7 @@
 #include "StringUtils.h"
 
 #if defined Q_OS_WIN32
+#define WIN32_LEAN_AND_MEAN
 #include <objbase.h>
 #include <objidl.h>
 #include <shlguid.h>
@@ -339,12 +340,12 @@ QString getDesktopDir()
 }
 
 // Cross-platform Shortcut creation
-bool createShortCut(QString location, QString dest, QStringList args, QString name, QString icon)
+bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon)
 {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-    location = PathCombine(location, name + ".desktop");
+    destination = PathCombine(destination, name + ".desktop");
 
-    QFile f(location);
+    QFile f(destination);
     f.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream stream(&f);
 
@@ -356,10 +357,13 @@ bool createShortCut(QString location, QString dest, QStringList args, QString na
            << "\n";
     stream << "Type=Application"
            << "\n";
-    stream << "TryExec=" << dest.toLocal8Bit() << "\n";
-    stream << "Exec=" << dest.toLocal8Bit() << argstring.toLocal8Bit() << "\n";
+    stream << "TryExec=" << target.toLocal8Bit() << "\n";
+    stream << "Exec=" << target.toLocal8Bit() << argstring.toLocal8Bit() << "\n";
     stream << "Name=" << name.toLocal8Bit() << "\n";
-    stream << "Icon=" << icon.toLocal8Bit() << "\n";
+    if (!icon.isEmpty())
+    {
+        stream << "Icon=" << icon.toLocal8Bit() << "\n";
+    }
 
     stream.flush();
     f.close();
@@ -368,24 +372,121 @@ bool createShortCut(QString location, QString dest, QStringList args, QString na
 
     return true;
 #elif defined Q_OS_WIN
-    // TODO: Fix
-    //    QFile file(PathCombine(location, name + ".lnk"));
-    //    WCHAR *file_w;
-    //    WCHAR *dest_w;
-    //    WCHAR *args_w;
-    //    file.fileName().toWCharArray(file_w);
-    //    dest.toWCharArray(dest_w);
+    QFileInfo targetInfo(target);
 
-    //    QString argStr;
-    //    for (int i = 0; i < args.count(); i++)
-    //    {
-    //        argStr.append(args[i]);
-    //        argStr.append(" ");
-    //    }
-    //    argStr.toWCharArray(args_w);
+    if (!targetInfo.exists())
+    {
+        qWarning() << "Target file does not exist!";
+        return false;
+    }
 
-    //    return SUCCEEDED(CreateLink(file_w, dest_w, args_w));
-    return false;
+    target = targetInfo.absoluteFilePath();
+
+    if (target.length() >= MAX_PATH)
+    {
+        qWarning() << "Target file path is too long!";
+        return false;
+    }
+
+    if (!icon.isEmpty() && icon.length() >= MAX_PATH)
+    {
+        qWarning() << "Icon path is too long!";
+        return false;
+    }
+
+    destination += ".lnk";
+
+    if (destination.length() >= MAX_PATH)
+    {
+        qWarning() << "Destination path is too long!";
+        return false;
+    }
+
+    QString argStr;
+    int argCount = args.count();
+    for (int i = 0; i < argCount; i++)
+    {
+        if (args[i].contains(' '))
+        {
+            argStr.append('"').append(args[i]).append('"');
+        }
+        else
+        {
+            argStr.append(args[i]);
+        }
+
+        if (i < argCount - 1)
+        {
+            argStr.append(" ");
+        }
+    }
+
+    if (argStr.length() >= MAX_PATH)
+    {
+        qWarning() << "Arguments string is too long!";
+        return false;
+    }
+
+    WCHAR wsz[MAX_PATH];
+
+    // ...yes, you need to initialize the entire COM stack to make a shortcut in Windows
+    CoInitialize(nullptr);
+
+    HRESULT hres;
+    IShellLink* psl;
+
+    hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&psl);
+    if (SUCCEEDED(hres))
+    {
+        wmemset(wsz, 0, MAX_PATH);
+        target.toWCharArray(wsz);
+        psl->SetPath(wsz);
+
+        wmemset(wsz, 0, MAX_PATH);
+        argStr.toWCharArray(wsz);
+        psl->SetArguments(wsz);
+
+        wmemset(wsz, 0, MAX_PATH);
+        targetInfo.absolutePath().toWCharArray(wsz);
+        psl->SetWorkingDirectory(wsz);
+
+        if (!icon.isEmpty())
+        {
+            wmemset(wsz, 0, MAX_PATH);
+            icon.toWCharArray(wsz);
+            psl->SetIconLocation(wsz, 0);
+        }
+
+        IPersistFile* ppf;
+        hres = psl->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf);
+        if (SUCCEEDED(hres))
+        {
+            wmemset(wsz, 0, MAX_PATH);
+            destination.toWCharArray(wsz);
+            hres = ppf->Save(wsz, TRUE);
+            if (FAILED(hres))
+            {
+                qWarning() << "IPresistFile->Save() failed";
+                qWarning() << "hres = " << hres;
+            }
+            ppf->Release();
+        }
+        else
+        {
+            qWarning() << "Failed to query IPersistFile interface from IShellLink instance";
+            qWarning() << "hres = " << hres;
+        }
+        psl->Release();
+    }
+    else
+    {
+        qWarning() << "Failed to create IShellLink instance";
+        qWarning() << "hres = " << hres;
+    }
+
+    CoUninitialize();
+
+    return SUCCEEDED(hres);
 #else
     qWarning("Desktop Shortcuts not supported on your platform!");
     return false;
