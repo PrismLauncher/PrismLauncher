@@ -120,9 +120,11 @@ public:
 
     void setIconTheme(const QString& name);
 
+    void applyCurrentlySelectedTheme();
+
     QList<ITheme*> getValidApplicationThemes();
 
-    void setApplicationTheme(const QString& name, bool initial);
+    void setApplicationTheme(const QString& name);
 
     shared_qobject_ptr<UpdateChecker> updateChecker() {
         return m_updateChecker;

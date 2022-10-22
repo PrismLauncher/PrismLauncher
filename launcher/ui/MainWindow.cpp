@@ -1346,7 +1346,7 @@ void MainWindow::updateThemeMenu()
         themeAction->setActionGroup(themesGroup);
 
         connect(themeAction, &QAction::triggered, [theme]() {
-            APPLICATION->setApplicationTheme(theme->id(),false);
+            APPLICATION->setApplicationTheme(theme->id());
             APPLICATION->settings()->set("ApplicationTheme", theme->id());
         });
     }

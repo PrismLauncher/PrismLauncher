@@ -41,11 +41,12 @@ class ThemeManager {
     QList<ITheme*> getValidApplicationThemes();
     void setIconTheme(const QString& name);
     void applyCurrentlySelectedTheme();
-    void setApplicationTheme(const QString& name, bool initial);
+    void setApplicationTheme(const QString& name);
 
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     MainWindow* m_mainWindow;
+    bool m_firstThemeInitialized;
 
     QString AddTheme(std::unique_ptr<ITheme> theme);
     ITheme* GetTheme(QString themeId);

@@ -683,6 +683,8 @@ SET(LAUNCHER_SOURCES
     ui/setupwizard/LanguageWizardPage.h
     ui/setupwizard/PasteWizardPage.cpp
     ui/setupwizard/PasteWizardPage.h
+    ui/setupwizard/ThemeWizardPage.cpp
+    ui/setupwizard/ThemeWizardPage.h
 
     # GUI - themes
     ui/themes/FusionTheme.cpp
@@ -922,6 +924,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/ProgressWidget.cpp
     ui/widgets/WideBar.h
     ui/widgets/WideBar.cpp
+    ui/widgets/ThemeCustomizationWidget.h
+    ui/widgets/ThemeCustomizationWidget.cpp
 
     # GUI - instance group view
     ui/instanceview/InstanceProxyModel.cpp
@@ -939,6 +943,7 @@ SET(LAUNCHER_SOURCES
 
 qt_wrap_ui(LAUNCHER_UI
     ui/setupwizard/PasteWizardPage.ui
+    ui/setupwizard/ThemeWizardPage.ui
     ui/pages/global/AccountListPage.ui
     ui/pages/global/JavaPage.ui
     ui/pages/global/LauncherPage.ui
@@ -971,6 +976,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/widgets/CustomCommands.ui
     ui/widgets/InfoFrame.ui
     ui/widgets/ModFilterWidget.ui
+    ui/widgets/ThemeCustomizationWidget.ui
     ui/dialogs/CopyInstanceDialog.ui
     ui/dialogs/ProfileSetupDialog.ui
     ui/dialogs/ProgressDialog.ui

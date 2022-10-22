@@ -62,14 +62,9 @@ SystemTheme::SystemTheme()
     themeDebugLog() << "System theme not found, defaulted to Fusion";
 }
 
-void SystemTheme::apply(bool initial)
+void SystemTheme::apply()
 {
-    // if we are applying the system theme as the first theme, just don't touch anything. it's for the better...
-    if(initial)
-    {
-        return;
-    }
-    ITheme::apply(initial);
+    ITheme::apply();
 }
 
 QString SystemTheme::id()
