@@ -66,7 +66,11 @@ void Flame::FileResolvingTask::netJobFinished()
         }
         index++;
     }
-    connect(job, &NetJob::finished, this, &Flame::FileResolvingTask::modrinthCheckFinished);
+    connect(job, &NetJob::finished, this,
+        [this, &job] {
+            modrinthCheckFinished();
+            job->deleteLater();
+        });
 
     job->start();
 }
