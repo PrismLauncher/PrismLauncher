@@ -6,6 +6,9 @@
 #define LAUNCHER_INSTANCECOPYPREFS_H
 
 struct InstanceCopyPrefs {
+    explicit InstanceCopyPrefs(bool setAll);
+    ~InstanceCopyPrefs() = default;
+
     bool copySaves;
     bool keepPlaytime;
     bool copyGameOptions;

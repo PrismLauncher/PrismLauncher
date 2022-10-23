@@ -32,6 +32,7 @@ set(CORE_SOURCES
     InstanceCreationTask.h
     InstanceCreationTask.cpp
     InstanceCopyPrefs.h
+    InstanceCopyPrefs.cpp
     InstanceCopyTask.h
     InstanceCopyTask.cpp
     InstanceImportTask.h

@@ -5,7 +5,7 @@
 #include "pathmatcher/RegexpMatcher.h"
 #include <QtConcurrentRun>
 
-InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, InstanceCopyPrefs prefs)
+InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, const InstanceCopyPrefs& prefs)
 {
     m_origInstance = origInstance;
     m_keepPlaytime = prefs.keepPlaytime;
@@ -51,7 +51,7 @@ InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, InstanceCopyPrefs p
     }
 }
 
-void InstanceCopyTask::appendToFilter(QString& filter, const QString &append)
+void InstanceCopyTask::appendToFilter(QString& filter, const QString& append)
 {
     if (!filter.isEmpty())
         filter.append('|'); // OR regex

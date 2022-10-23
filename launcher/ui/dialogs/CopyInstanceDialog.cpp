@@ -78,13 +78,13 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     }
     ui->groupBox->setCurrentIndex(index);
     ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
-    ui->copySavesCheckbox->setChecked(m_copySaves);
-    ui->keepPlaytimeCheckbox->setChecked(m_keepPlaytime);
-    ui->copyGameOptionsCheckbox->setChecked(m_copyGameOptions);
-    ui->copyResPacksCheckbox->setChecked(m_copyResourcePacks);
-    ui->copyShaderPacksCheckbox->setChecked(m_copyShaderPacks);
-    ui->copyServersCheckbox->setChecked(m_copyServers);
-    ui->copyModsCheckbox->setChecked(m_copyMods);
+    ui->copySavesCheckbox->setChecked(m_selectedOptions.copySaves);
+    ui->keepPlaytimeCheckbox->setChecked(m_selectedOptions.keepPlaytime);
+    ui->copyGameOptionsCheckbox->setChecked(m_selectedOptions.copyGameOptions);
+    ui->copyResPacksCheckbox->setChecked(m_selectedOptions.copyResourcePacks);
+    ui->copyShaderPacksCheckbox->setChecked(m_selectedOptions.copyShaderPacks);
+    ui->copyServersCheckbox->setChecked(m_selectedOptions.copyServers);
+    ui->copyModsCheckbox->setChecked(m_selectedOptions.copyMods);
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()
@@ -139,26 +139,47 @@ void CopyInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
     updateDialogState();
 }
 
-bool CopyInstanceDialog::shouldCopySaves() const
+const InstanceCopyPrefs& CopyInstanceDialog::getChosenOptions() const
 {
-    return m_copySaves;
+    return m_selectedOptions;
+}
+
+void CopyInstanceDialog::on_selectAllCheckbox_stateChanged(int state)
+{
+    bool checked;
+    if(state == Qt::Unchecked)
+    {
+        checked = false;
+    }
+    else if(state == Qt::Checked)
+    {
+        checked = true;
+    }
+
+    checkAllCheckboxes(checked);
+}
+
+void CopyInstanceDialog::checkAllCheckboxes(bool b)
+{
+    ui->keepPlaytimeCheckbox->setChecked(b);
+    ui->copySavesCheckbox->setChecked(b);
+    ui->copyGameOptionsCheckbox->setChecked(b);
+    ui->copyResPacksCheckbox->setChecked(b);
+    ui->copyShaderPacksCheckbox->setChecked(b);
+    ui->copyServersCheckbox->setChecked(b);
+    ui->copyModsCheckbox->setChecked(b);
 }
 
 void CopyInstanceDialog::on_copySavesCheckbox_stateChanged(int state)
 {
     if(state == Qt::Unchecked)
     {
-        m_copySaves = false;
+        m_selectedOptions.copySaves = false;
     }
     else if(state == Qt::Checked)
     {
-        m_copySaves = true;
+        m_selectedOptions.copySaves = true;
     }
-}
-
-bool CopyInstanceDialog::shouldKeepPlaytime() const
-{
-    return m_keepPlaytime;
 }
 
 
@@ -166,95 +187,70 @@ void CopyInstanceDialog::on_keepPlaytimeCheckbox_stateChanged(int state)
 {
     if(state == Qt::Unchecked)
     {
-        m_keepPlaytime = false;
+        m_selectedOptions.keepPlaytime = false;
     }
     else if(state == Qt::Checked)
     {
-        m_keepPlaytime = true;
+        m_selectedOptions.keepPlaytime = true;
     }
-}
-
-bool CopyInstanceDialog::shouldCopyGameOptions() const
-{
-    return m_copyGameOptions;
 }
 
 void CopyInstanceDialog::on_copyGameOptionsCheckbox_stateChanged(int state)
 {
     if(state == Qt::Unchecked)
     {
-        m_copyGameOptions = false;
+        m_selectedOptions.copyGameOptions = false;
     }
     else if(state == Qt::Checked)
     {
-        m_copyGameOptions = true;
+        m_selectedOptions.copyGameOptions = true;
     }
-}
-
-bool CopyInstanceDialog::shouldCopyResourcePacks() const
-{
-    return m_copyResourcePacks;
 }
 
 void CopyInstanceDialog::on_copyResPacksCheckbox_stateChanged(int state)
 {
     if(state == Qt::Unchecked)
     {
-        m_copyResourcePacks = false;
+        m_selectedOptions.copyResourcePacks = false;
     }
     else if(state == Qt::Checked)
     {
-        m_copyResourcePacks = true;
+        m_selectedOptions.copyResourcePacks = true;
     }
-}
-
-bool CopyInstanceDialog::shouldCopyShaderPacks() const
-{
-    return m_copyShaderPacks;
 }
 
 void CopyInstanceDialog::on_copyShaderPacksCheckbox_stateChanged(int state)
 {
     if(state == Qt::Unchecked)
     {
-        m_copyShaderPacks = false;
+        m_selectedOptions.copyShaderPacks = false;
     }
     else if(state == Qt::Checked)
     {
-        m_copyShaderPacks = true;
+        m_selectedOptions.copyShaderPacks = true;
     }
-}
-
-bool CopyInstanceDialog::shouldCopyServers() const
-{
-    return m_copyServers;
 }
 
 void CopyInstanceDialog::on_copyServersCheckbox_stateChanged(int state)
 {
     if(state == Qt::Unchecked)
     {
-        m_copyServers = false;
+        m_selectedOptions.copyServers = false;
     }
     else if(state == Qt::Checked)
     {
-        m_copyServers = true;
+        m_selectedOptions.copyServers = true;
     }
-}
-
-bool CopyInstanceDialog::shouldCopyMods() const
-{
-    return m_copyMods;
 }
 
 void CopyInstanceDialog::on_copyModsCheckbox_stateChanged(int state)
 {
     if(state == Qt::Unchecked)
     {
-        m_copyMods = false;
+        m_selectedOptions.copyMods = false;
     }
     else if(state == Qt::Checked)
     {
-        m_copyMods = true;
+        m_selectedOptions.copyMods = true;
     }
 }

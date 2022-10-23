@@ -15,7 +15,7 @@ class InstanceCopyTask : public InstanceTask
 {
     Q_OBJECT
 public:
-    explicit InstanceCopyTask(InstancePtr origInstance, InstanceCopyPrefs prefs);
+    explicit InstanceCopyTask(InstancePtr origInstance, const InstanceCopyPrefs& prefs);
 
 protected:
     //! Entry point for tasks.
