@@ -47,7 +47,9 @@ slots:
     void on_instNameTextBox_textChanged(const QString &arg1);
 
     // Checkbox options:
-    void checkAllCheckboxes(bool b);
+    void checkAllCheckboxes(const bool& b);
+    void checkBool(bool& b, const int& state);
+
     void on_selectAllCheckbox_stateChanged(int state);
     void on_copySavesCheckbox_stateChanged(int state);
     void on_keepPlaytimeCheckbox_stateChanged(int state);
@@ -61,5 +63,5 @@ private:
     Ui::CopyInstanceDialog *ui;
     QString InstIconKey;
     InstancePtr m_original;
-    InstanceCopyPrefs m_selectedOptions = InstanceCopyPrefs(true); // Default to all options as true
+    InstanceCopyPrefs m_selectedOptions;
 };

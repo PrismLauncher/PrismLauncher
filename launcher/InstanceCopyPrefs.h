@@ -6,16 +6,15 @@
 #define LAUNCHER_INSTANCECOPYPREFS_H
 
 struct InstanceCopyPrefs {
-    explicit InstanceCopyPrefs(bool setAll);
-    ~InstanceCopyPrefs() = default;
+    bool copySaves = true;
+    bool keepPlaytime = true;
+    bool copyGameOptions = true;
+    bool copyResourcePacks = true;
+    bool copyShaderPacks = true;
+    bool copyServers = true;
+    bool copyMods = true;
 
-    bool copySaves;
-    bool keepPlaytime;
-    bool copyGameOptions;
-    bool copyResourcePacks;
-    bool copyShaderPacks;
-    bool copyServers;
-    bool copyMods;
+    bool allTrue() const;
 };
 
 #endif  // LAUNCHER_INSTANCECOPYPREFS_H

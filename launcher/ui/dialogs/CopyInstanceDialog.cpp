@@ -122,6 +122,40 @@ QString CopyInstanceDialog::instGroup() const
     return ui->groupBox->currentText();
 }
 
+const InstanceCopyPrefs& CopyInstanceDialog::getChosenOptions() const
+{
+    return m_selectedOptions;
+}
+
+void CopyInstanceDialog::checkAllCheckboxes(const bool& b)
+{
+    ui->keepPlaytimeCheckbox->setChecked(b);
+    ui->copySavesCheckbox->setChecked(b);
+    ui->copyGameOptionsCheckbox->setChecked(b);
+    ui->copyResPacksCheckbox->setChecked(b);
+    ui->copyShaderPacksCheckbox->setChecked(b);
+    ui->copyServersCheckbox->setChecked(b);
+    ui->copyModsCheckbox->setChecked(b);
+}
+
+// Sets b to true if state is a checked checkbox
+void CopyInstanceDialog::checkBool(bool& b, const int& state)
+{
+    if(state == Qt::Unchecked)
+    {
+        b = false;
+    }
+    else if(state == Qt::Checked)
+    {
+        b = true;
+    }
+
+    // Have "Select all" checkbox checked if all options are already checked:
+    ui->selectAllCheckbox->blockSignals(true);
+    ui->selectAllCheckbox->setChecked(m_selectedOptions.allTrue());
+    ui->selectAllCheckbox->blockSignals(false);
+}
+
 void CopyInstanceDialog::on_iconButton_clicked()
 {
     IconPickerDialog dlg(this);
@@ -134,123 +168,51 @@ void CopyInstanceDialog::on_iconButton_clicked()
     }
 }
 
+
 void CopyInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
 {
     updateDialogState();
 }
 
-const InstanceCopyPrefs& CopyInstanceDialog::getChosenOptions() const
-{
-    return m_selectedOptions;
-}
-
 void CopyInstanceDialog::on_selectAllCheckbox_stateChanged(int state)
 {
     bool checked;
-    if(state == Qt::Unchecked)
-    {
-        checked = false;
-    }
-    else if(state == Qt::Checked)
-    {
-        checked = true;
-    }
-
+    checkBool(checked, state);
     checkAllCheckboxes(checked);
-}
-
-void CopyInstanceDialog::checkAllCheckboxes(bool b)
-{
-    ui->keepPlaytimeCheckbox->setChecked(b);
-    ui->copySavesCheckbox->setChecked(b);
-    ui->copyGameOptionsCheckbox->setChecked(b);
-    ui->copyResPacksCheckbox->setChecked(b);
-    ui->copyShaderPacksCheckbox->setChecked(b);
-    ui->copyServersCheckbox->setChecked(b);
-    ui->copyModsCheckbox->setChecked(b);
 }
 
 void CopyInstanceDialog::on_copySavesCheckbox_stateChanged(int state)
 {
-    if(state == Qt::Unchecked)
-    {
-        m_selectedOptions.copySaves = false;
-    }
-    else if(state == Qt::Checked)
-    {
-        m_selectedOptions.copySaves = true;
-    }
+    checkBool(m_selectedOptions.copySaves, state);
 }
 
 
 void CopyInstanceDialog::on_keepPlaytimeCheckbox_stateChanged(int state)
 {
-    if(state == Qt::Unchecked)
-    {
-        m_selectedOptions.keepPlaytime = false;
-    }
-    else if(state == Qt::Checked)
-    {
-        m_selectedOptions.keepPlaytime = true;
-    }
+    checkBool(m_selectedOptions.keepPlaytime, state);
 }
 
 void CopyInstanceDialog::on_copyGameOptionsCheckbox_stateChanged(int state)
 {
-    if(state == Qt::Unchecked)
-    {
-        m_selectedOptions.copyGameOptions = false;
-    }
-    else if(state == Qt::Checked)
-    {
-        m_selectedOptions.copyGameOptions = true;
-    }
+    checkBool(m_selectedOptions.copyGameOptions, state);
 }
 
 void CopyInstanceDialog::on_copyResPacksCheckbox_stateChanged(int state)
 {
-    if(state == Qt::Unchecked)
-    {
-        m_selectedOptions.copyResourcePacks = false;
-    }
-    else if(state == Qt::Checked)
-    {
-        m_selectedOptions.copyResourcePacks = true;
-    }
+    checkBool(m_selectedOptions.copyResourcePacks, state);
 }
 
 void CopyInstanceDialog::on_copyShaderPacksCheckbox_stateChanged(int state)
 {
-    if(state == Qt::Unchecked)
-    {
-        m_selectedOptions.copyShaderPacks = false;
-    }
-    else if(state == Qt::Checked)
-    {
-        m_selectedOptions.copyShaderPacks = true;
-    }
+    checkBool(m_selectedOptions.copyShaderPacks, state);
 }
 
 void CopyInstanceDialog::on_copyServersCheckbox_stateChanged(int state)
 {
-    if(state == Qt::Unchecked)
-    {
-        m_selectedOptions.copyServers = false;
-    }
-    else if(state == Qt::Checked)
-    {
-        m_selectedOptions.copyServers = true;
-    }
+    checkBool(m_selectedOptions.copyServers, state);
 }
 
 void CopyInstanceDialog::on_copyModsCheckbox_stateChanged(int state)
 {
-    if(state == Qt::Unchecked)
-    {
-        m_selectedOptions.copyMods = false;
-    }
-    else if(state == Qt::Checked)
-    {
-        m_selectedOptions.copyMods = true;
-    }
+    checkBool(m_selectedOptions.copyMods, state);
 }
