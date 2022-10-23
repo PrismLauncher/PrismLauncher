@@ -445,7 +445,7 @@ void DeviceFlow::onRefreshError(QNetworkReply::NetworkError error, QNetworkReply
     if(refreshReply) {
         refreshReply->deleteLater();
     }
-    qDebug() << "DeviceFlow::onRefreshFinished: Error" << (int)error << " - " << errorString;
+    qDebug() << "DeviceFlow::onRefreshFinished: Error" << static_cast<int>(error) << " - " << errorString;
 }
 
 }

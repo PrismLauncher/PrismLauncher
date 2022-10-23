@@ -153,7 +153,7 @@ QString Task::describe()
     auto name = objectName();
     if(name.isEmpty())
     {
-        out << QString("0x%1").arg((quintptr)this, 0, 16);
+        out << QString("0x%1").arg(reinterpret_cast<quintptr>(this), 0, 16);
     }
     else
     {
