@@ -41,12 +41,17 @@ void DataMigrationTask::dryRunFinished()
         return;
     }
 
-    setStatus(tr("Migrating..."));
-
     // 2. Copy
     // Actually copy all files now.
     m_toCopy = m_copy.totalCopied();
-    connect(&m_copy, &FS::copy::fileCopied, [&, this] { setProgress(m_copy.totalCopied(), m_toCopy); });
+    connect(&m_copy, &FS::copy::fileCopied, [&, this](const QString& relativeName) {
+        QString shortenedName = relativeName;
+        // shorten the filename to hopefully fit into one line
+        if (shortenedName.length() > 50)
+            shortenedName = relativeName.left(20) + "…" + relativeName.right(29);
+        setProgress(m_copy.totalCopied(), m_toCopy);
+        setStatus(tr("Copying %1…").arg(shortenedName));
+    });
     m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [&] {
         return m_copy(false);  // actually copy now
     });
