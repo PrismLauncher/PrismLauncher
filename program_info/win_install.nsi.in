@@ -140,12 +140,14 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@
 
 !macroend
 
-!macro APP_ASSOCIATE EXT APP_ID APP_EXE  
+!macro APP_ASSOCIATE EXT APP_ID APP_EXE OVERWIRTE
   ; Backup the previously associated file class
+  ${If} ${OVERWIRTE} == true
   ReadRegStr $R0 ShCtx "Software\Classes\${EXT}" ""
   WriteRegStr ShCtx "Software\Classes\${EXT}" "${APP_ID}_backup" "$R0"
-
   WriteRegStr ShCtx "Software\Classes\${EXT}" "" "${APP_ID}"
+  ${EndIf}
+
   WriteRegNone ShCtx "Software\Classes\${EXT}\OpenWithList" "${APP_EXE}" ; Win2000+
   WriteRegNone ShCtx "Software\Classes\${EXT}\OpenWithProgids" "${APP_ID}" ; WinXP+
 
@@ -161,8 +163,13 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@
   # Unregister file type
   ClearErrors
   ; restore backup
-  ReadRegStr $R0 ShCtx "Software\Classes\${EXT}" `${APP_ID}_backup`
-  WriteRegStr ShCtx "Software\Classes\${EXT}" "" "$R0"
+  ReadRegStr $R1 ShCtx "Software\Classes\${EXT}" ""
+  ${If} $R1 == "${APP_ID}"
+    ReadRegStr $R0 ShCtx "Software\Classes\${EXT}" `${APP_ID}_backup`
+    WriteRegStr ShCtx "Software\Classes\${EXT}" "" "$R0"
+  ${Else}
+    ReadRegStr $R0 ShCtx "Software\Classes\${EXT}" ""
+  ${EndIf}
 
   DeleteRegKey /IfEmpty ShCtx "Software\Classes\${APP_ID}"
   ${IfNot} ${Errors}
@@ -308,14 +315,14 @@ SectionEnd
 !define APP_NAME "@Launcher_DisplayName@"
 !define APP_CMD_TEXT "Prism Launcher instance"
 
-;!define REGISTER_DEFAULTPROGRAMS "on" ; value doesn't matter
+!define REGISTER_DEFAULTPROGRAMS ; value doesn't matter
 
 Section -ShellAssoc
 
-  !insertmacro APP_SETUP `${APP_DESCRIPTION}` `${APP_ICON}` `${APP_ID}` `${APP_CMD_TEXT}` `${APP_EXE}` `${APP_CMD_TEXT}` '$INSTDIR\${APP_EXE} "%1"'
+  !insertmacro APP_SETUP `${APP_DESCRIPTION}` `${APP_ICON}` `${APP_ID}` `${APP_CMD_TEXT}` `${APP_EXE}` `${APP_CMD_TEXT}` '$INSTDIR\${APP_EXE} -I "%1"'
   
-  !insertmacro APP_ASSOCIATE ".zip" `${APP_ID}` `${APP_EXE}`
-  !insertmacro APP_ASSOCIATE ".mrpack" `${APP_ID}` `${APP_EXE}` 
+  !insertmacro APP_ASSOCIATE ".zip" `${APP_ID}` `${APP_EXE}` false
+  !insertmacro APP_ASSOCIATE ".mrpack" `${APP_ID}` `${APP_EXE}` true
 
   !insertmacro NotifyShell_AssocChanged
 SectionEnd
