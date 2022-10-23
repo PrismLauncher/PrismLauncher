@@ -55,12 +55,12 @@ uint32_t MurmurHash2(std::ifstream&& file_stream, std::size_t buffer_size, std::
 
             // Mix 4 bytes at a time into the hash
             if (index == 0)
-                FourBytes_MurmurHash2((unsigned char*)&data, info);
+                FourBytes_MurmurHash2(reinterpret_cast<unsigned char*>(&data), info);
         }
     } while (!file_stream.eof());
 
     // Do one last bit shuffle in the hash
-    FourBytes_MurmurHash2((unsigned char*)&data, info);
+    FourBytes_MurmurHash2(reinterpret_cast<unsigned char*>(&data), info);
 
     delete[] buffer;
 
@@ -72,7 +72,7 @@ void FourBytes_MurmurHash2(const unsigned char* data, IncrementalHashInfo& prev)
 {
     if (prev.len >= 4) {
         // Not the final mix
-        uint32_t k = *(uint32_t*)data;
+        uint32_t k = *reinterpret_cast<const uint32_t*>(data);
 
         k *= m;
         k ^= k >> r;
