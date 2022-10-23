@@ -253,6 +253,7 @@ jobs:
           sudo codesign --sign - --deep --force --entitlements "../program_info/App.entitlements" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
           mv "PrismLauncher.app" "Prism Launcher.app"
           tar -czf ../PrismLauncher.tar.gz *
+          zip -r ../PrismLauncher.zip .
 
       - name: Make Sparkle signature (macOS)
         if: matrix.name == 'macOS'
@@ -355,6 +356,13 @@ jobs:
         with:
           name: PrismLauncher-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PrismLauncher.tar.gz
+      
+      - name: Upload binary zip (macOS)
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v3
+        with:
+          name: PrismLauncher-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}-zip
+          path: PrismLauncher.zip
 
       - name: Upload binary zip (Windows)
         if: runner.os == 'Windows'
