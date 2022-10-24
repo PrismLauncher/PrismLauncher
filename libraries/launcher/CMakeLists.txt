@@ -10,7 +10,9 @@ set(SRC
     org/prismlauncher/EntryPoint.java
     org/prismlauncher/Launcher.java
     org/prismlauncher/LauncherFactory.java
-    org/prismlauncher/impl/OneSixLauncher.java
+    org/prismlauncher/impl/AbstractLauncher.java
+    org/prismlauncher/impl/LegacyLauncher.java
+    org/prismlauncher/impl/StandardLauncher.java
     org/prismlauncher/applet/LegacyFrame.java
     org/prismlauncher/exception/ParameterNotFoundException.java
     org/prismlauncher/exception/ParseException.java

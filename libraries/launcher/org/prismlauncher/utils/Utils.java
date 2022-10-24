@@ -29,7 +29,7 @@ public final class Utils {
      *
      * @param clazz the class to scan
      */
-    public static Field getMinecraftBaseDirField(Class<?> clazz) {
+    public static Field getMinecraftGameDirField(Class<?> clazz) {
         for (Field f : clazz.getDeclaredFields()) {
             // Has to be File
             if (f.getType() != File.class)

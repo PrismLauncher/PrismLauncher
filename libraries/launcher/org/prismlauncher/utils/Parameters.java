@@ -25,22 +25,22 @@ import java.util.Map;
 
 public final class Parameters {
 
-    private final Map<String, List<String>> paramsMap = new HashMap<>();
+    private final Map<String, List<String>> map = new HashMap<>();
 
     public void add(String key, String value) {
-        List<String> params = paramsMap.get(key);
+        List<String> params = map.get(key);
 
         if (params == null) {
             params = new ArrayList<>();
 
-            paramsMap.put(key, params);
+            map.put(key, params);
         }
 
         params.add(value);
     }
 
     public List<String> all(String key) throws ParameterNotFoundException {
-        List<String> params = paramsMap.get(key);
+        List<String> params = map.get(key);
 
         if (params == null)
             throw new ParameterNotFoundException(key);
@@ -49,7 +49,7 @@ public final class Parameters {
     }
 
     public List<String> allSafe(String key, List<String> def) {
-        List<String> params = paramsMap.get(key);
+        List<String> params = map.get(key);
 
         if (params == null || params.isEmpty())
             return def;
@@ -67,7 +67,7 @@ public final class Parameters {
     }
 
     public String firstSafe(String key, String def) {
-        List<String> params = paramsMap.get(key);
+        List<String> params = map.get(key);
 
         if (params == null || params.isEmpty())
             return def;

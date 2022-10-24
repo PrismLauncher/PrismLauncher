@@ -3,6 +3,7 @@
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -647,7 +648,17 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
     {
         launchScript += "traits " + trait + "\n";
     }
-    launchScript += "launcher onesix\n";
+
+    launchScript += "launcher ";
+
+    // use legacy launcher if the traits are set
+    if (profile->getTraits().contains("legacyLaunch") || profile->getTraits().contains("alphaLaunch"))
+        launchScript += "legacy";
+    else
+        launchScript += "standard";
+
+    launchScript += "\n";
+
     // qDebug() << "Generated launch script:" << launchScript;
     return launchScript;
 }

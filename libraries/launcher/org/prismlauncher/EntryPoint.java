@@ -81,33 +81,35 @@ public final class EntryPoint {
     }
 
     private Action parseLine(String inData) throws ParseException {
-        String[] tokens = inData.split("\\s+", 2);
-
-        if (tokens.length == 0)
+        if (inData.length() == 0)
             throw new ParseException("Unexpected empty string!");
 
-        switch (tokens[0]) {
-            case "launch": {
-                return Action.Launch;
-            }
+        String first = inData;
+        String second = null;
+        int splitPoint = inData.indexOf(' ');
 
-            case "abort": {
-                return Action.Abort;
-            }
+        if (splitPoint != -1) {
+            first = first.substring(0, splitPoint);
+            second = inData.substring(splitPoint + 1);
+        }
 
-            default: {
-                if (tokens.length != 2)
+        switch (first) {
+            case "launch":
+                return Action.LAUNCH;
+            case "abort":
+                return Action.ABORT;
+            default:
+                if (second == null || second.isEmpty())
                     throw new ParseException("Error while parsing:" + inData);
 
-                params.add(tokens[0], tokens[1]);
+                params.add(first, second);
 
-                return Action.Proceed;
-            }
+                return Action.PROCEED;
         }
     }
 
     public int listen() {
-        Action action = Action.Proceed;
+        Action action = Action.PROCEED;
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
                 System.in,
@@ -115,21 +117,21 @@ public final class EntryPoint {
         ))) {
             String line;
 
-            while (action == Action.Proceed) {
+            while (action == Action.PROCEED) {
                 if ((line = reader.readLine()) != null) {
                     action = parseLine(line);
                 } else {
-                    action = Action.Abort;
+                    action = Action.ABORT;
                 }
             }
         } catch (IOException | ParseException e) {
-            LOGGER.log(Level.SEVERE, "Launcher ABORT due to exception:", e);
+            LOGGER.log(Level.SEVERE, "Launcher abort due to exception:", e);
 
             return 1;
         }
 
         // Main loop
-        if (action == Action.Abort) {
+        if (action == Action.ABORT) {
             LOGGER.info("Launch aborted by the launcher.");
 
             return 1;
@@ -138,7 +140,7 @@ public final class EntryPoint {
         try {
             Launcher launcher =
                     LauncherFactory
-                            .getInstance()
+                            .INSTANCE
                             .createLauncher(params);
 
             launcher.launch();
@@ -148,7 +150,7 @@ public final class EntryPoint {
             LOGGER.log(Level.SEVERE, "Wrong argument.", e);
 
             return 1;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.log(Level.SEVERE, "Exception caught from launcher.", e);
 
             return 1;
@@ -156,9 +158,9 @@ public final class EntryPoint {
     }
 
     private enum Action {
-        Proceed,
-        Launch,
-        Abort
+        PROCEED,
+        LAUNCH,
+        ABORT
     }
 
 }

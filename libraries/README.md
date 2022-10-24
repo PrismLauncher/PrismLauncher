@@ -51,10 +51,10 @@ It:
 
 This means the process is essentially idle until the final command is sent. You can, for example, attach a profiler before you send it.
 
-A `legacy` and `onesix` launchers are available.
+A `legacy` and `standard` launchers are available.
 
 - `legacy` is intended for use with Minecraft versions < 1.6 and is deprecated.
-- `onesix` can handle launching any Minecraft version, at the cost of some extra features `legacy` enables (custom window icon and title).
+- `standard` can handle launching any Minecraft version, at the cost of some extra features `legacy` enables (custom window icon and title).
 
 Example (some parts have been censored):
 
@@ -132,7 +132,7 @@ ext /home/peterix/minecraft/FTB/libraries/org/lwjgl/lwjgl/lwjgl-platform/2.9.1/l
 ext /home/peterix/minecraft/FTB/libraries/net/java/jinput/jinput-platform/2.0.5/jinput-platform-2.0.5-natives-linux.jar
 natives /home/peterix/minecraft/FTB/17ForgeTest/natives
 cp /home/peterix/minecraft/FTB/versions/1.7.10/1.7.10.jar
-launcher onesix
+launcher standard
 ```
 
 Available under `GPL-3.0-only` (with classpath exception), sublicensed from its original `Apache-2.0` codebase

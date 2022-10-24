@@ -18,6 +18,6 @@ package org.prismlauncher;
 
 public interface Launcher {
 
-    void launch() throws Exception;
+    void launch() throws Throwable;
 
 }
