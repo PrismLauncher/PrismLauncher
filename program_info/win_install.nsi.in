@@ -4,7 +4,7 @@
 
 Unicode true
 
-Name "@Launcher_CommonName@"
+Name "@Launcher_DisplayName@"
 InstallDir "$LOCALAPPDATA\Programs\@Launcher_CommonName@"
 InstallDirRegKey HKCU "Software\@Launcher_CommonName@" "InstallDir"
 RequestExecutionLevel user
@@ -113,7 +113,7 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@
 ;--------------------------------
 
 ; The stuff to install
-Section "@Launcher_CommonName@"
+Section "@Launcher_DisplayName@"
 
   SectionIn RO
 
