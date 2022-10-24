@@ -15,6 +15,7 @@ void NetworkModAPI::searchMods(CallerType* caller, SearchArgs&& args) const
 
     QObject::connect(netJob, &NetJob::started, caller, [caller, netJob] { caller->setActiveJob(netJob); });
     QObject::connect(netJob, &NetJob::failed, caller, &CallerType::searchRequestFailed);
+    QObject::connect(netJob, &NetJob::aborted, caller, &CallerType::searchRequestAborted);
     QObject::connect(netJob, &NetJob::succeeded, caller, [caller, response] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
