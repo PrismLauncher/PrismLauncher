@@ -176,8 +176,7 @@ void PackInstallTask::resolveMods()
 
 void PackInstallTask::onResolveModsSucceeded()
 {
-    QString text;
-    QList<QUrl> urls;
+    QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
 
     Flame::Manifest results = m_mod_id_resolver_task->getResults();
@@ -191,11 +190,19 @@ void PackInstallTask::onResolveModsSucceeded()
 
         // First check for blocked mods
         if (!results_file.resolved || results_file.url.isEmpty()) {
-            QString type(local_file.type);
+            // QString type(local_file.type);
 
-            type[0] = type[0].toUpper();
-            text += QString("%1: %2 - <a href='%3'>%3</a><br/>").arg(type, local_file.name, results_file.websiteUrl);
-            urls.append(QUrl(results_file.websiteUrl));
+            // type[0] = type[0].toUpper();
+
+            BlockedMod blocked_mod;
+            blocked_mod.name = local_file.name;
+            blocked_mod.websiteUrl = results_file.websiteUrl;
+            blocked_mod.hash = results_file.hash;
+            blocked_mod.matched = false;
+            blocked_mod.localPath = "";
+
+            blocked_mods.append(blocked_mod);
+
             anyBlocked = true;
         } else {
             local_file.url = results_file.url.toString();
@@ -210,8 +217,7 @@ void PackInstallTask::onResolveModsSucceeded()
         auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked files found"),
                                                    tr("The following files are not available for download in third party launchers.<br/>"
                                                       "You will need to manually download them and add them to the instance."),
-                                                   text,
-                                                   urls);
+                                                   blocked_mods);
 
         if (message_dialog->exec() == QDialog::Accepted)
             createInstance();

@@ -372,13 +372,20 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     auto results = m_mod_id_resolver->getResults();
 
     // first check for blocked mods
-    QString text;
-    QList<QUrl> urls;
+    QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
     for (const auto& result : results.files.values()) {
         if (!result.resolved || result.url.isEmpty()) {
-            text += QString("%1: <a href='%2'>%2</a><br/>").arg(result.fileName, result.websiteUrl);
-            urls.append(QUrl(result.websiteUrl));
+
+            BlockedMod blocked_mod;
+            blocked_mod.name = result.fileName;
+            blocked_mod.websiteUrl = result.websiteUrl;
+            blocked_mod.hash = result.hash;
+            blocked_mod.matched = false;
+            blocked_mod.localPath = "";
+
+            blocked_mods.append(blocked_mod);
+
             anyBlocked = true;
         }
     }
@@ -388,8 +395,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked mods found"),
                                                    tr("The following mods were blocked on third party launchers.<br/>"
                                                       "You will need to manually download them and add them to the modpack"),
-                                                   text,
-                                                   urls);
+                                                   blocked_mods);
         message_dialog->setModal(true);
 
         if (message_dialog->exec()) {
