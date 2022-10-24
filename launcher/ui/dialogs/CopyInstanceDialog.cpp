@@ -141,14 +141,7 @@ void CopyInstanceDialog::checkAllCheckboxes(const bool& b)
 // Sets b to true if state is a checked checkbox
 void CopyInstanceDialog::checkBool(bool& b, const int& state)
 {
-    if(state == Qt::Unchecked)
-    {
-        b = false;
-    }
-    else if(state == Qt::Checked)
-    {
-        b = true;
-    }
+    b = (state == Qt::Checked);
 
     // Have "Select all" checkbox checked if all options are already checked:
     ui->selectAllCheckbox->blockSignals(true);
