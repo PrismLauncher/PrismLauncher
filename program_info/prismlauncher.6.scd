@@ -26,6 +26,9 @@ Here are the current features of Prism Launcher.
 *-l, --launch*=INSTANCE_ID
 	Launch the instance specified by INSTANCE_ID.
 
+*--show*=INSTANCE_ID
+	Show the configuration window of the instance specified by INSTANCE_ID.
+
 *--alive*
 	Write a small 'live.check' file after Prism Launcher starts.
 
