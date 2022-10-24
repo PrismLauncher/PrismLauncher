@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Sefa Eyeoglu <contact@scrumplex.net>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include "DataMigrationTask.h"
 
 #include "FileSystem.h"
