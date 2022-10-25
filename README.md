@@ -19,8 +19,8 @@ There are development builds available [here](https://github.com/PrismLauncher/P
 Portable builds are provided for on Linux, Windows, and macOS.
 
 For Debian and Arch, you can use these packages for the latest development versions:  
-[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-blue)](https://aur.archlinux.org/packages/prismlauncher-git/)
-[![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-orange)](https://mpr.makedeb.org/packages/prismlauncher-git)  
+[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-blue?style=for-the-badge&logo=appveyor)](https://aur.archlinux.org/packages/prismlauncher-git/)
+[![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-orange?style=for-the-badge&logo=appveyor)](https://mpr.makedeb.org/packages/prismlauncher-git)  
 ## Help & Support
 
 Feel free to create an issue if you need help. However, you might find it easier to ask in the Discord server.
@@ -30,7 +30,7 @@ Feel free to create an issue if you need help. However, you might find it easier
 We will also soon be opening up our Matrix channels.
 You can already join our Matrix space:
 
-[![PrismLauncher Space](https://img.shields.io/matrix/prismlauncher:matrix.org?label=PrismLauncher%20space)](https://matrix.to/#/#prismlauncher:matrix.org)
+[![PrismLauncher Space](https://img.shields.io/matrix/prismlauncher:matrix.org?label=PrismLauncher%20space?style=for-the-badge&logo=appveyor)](https://matrix.to/#/#prismlauncher:matrix.org)
 
 We also have a subreddit you can post your issues and suggestions on:
 
