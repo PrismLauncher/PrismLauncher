@@ -211,15 +211,15 @@ if(NOT (UNIX AND APPLE))
 endif()
 
 if(UNIX AND APPLE)
-    set(BINARY_DEST_DIR "${Launcher_DisplayName}.app/Contents/MacOS")
-    set(LIBRARY_DEST_DIR "${Launcher_DisplayName}.app/Contents/MacOS")
-    set(PLUGIN_DEST_DIR "${Launcher_DisplayName}.app/Contents/MacOS")
-    set(FRAMEWORK_DEST_DIR "${Launcher_DisplayName}.app/Contents/Frameworks")
-    set(RESOURCES_DEST_DIR "${Launcher_DisplayName}.app/Contents/Resources")
-    set(JARS_DEST_DIR "${Launcher_DisplayName}.app/Contents/MacOS/jars")
+    set(BINARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
+    set(LIBRARY_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
+    set(PLUGIN_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
+    set(FRAMEWORK_DEST_DIR "${Launcher_Name}.app/Contents/Frameworks")
+    set(RESOURCES_DEST_DIR "${Launcher_Name}.app/Contents/Resources")
+    set(JARS_DEST_DIR "${Launcher_Name}.app/Contents/MacOS/jars")
 
     # Apps to bundle
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_DisplayName}.app")
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_Name}.app")
 
     # Mac bundle settings
     set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_DisplayName}")
@@ -229,7 +229,7 @@ if(UNIX AND APPLE)
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_LONG_VERSION_STRING "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_ICON_FILE ${Launcher_Name}.icns)
-    set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2021-2022 ${Launcher_Copyright}")
+    set(MACOSX_BUNDLE_COPYRIGHT "© 2021-2022 ${Launcher_Copyright_Mac}")
     set(MACOSX_SPARKLE_UPDATE_PUBLIC_KEY "v55ZWWD6QlPoXGV6VLzOTZxZUggWeE51X8cRQyQh6vA=")
     set(MACOSX_SPARKLE_UPDATE_FEED_URL "https://prismlauncher.org/feed/appcast.xml")
 
