@@ -2104,6 +2104,8 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         // TODO actually write this path
         QMessageBox::critical(this, tr("Create instance shortcut"), tr("Not supported on macOSX yet!"));
 #else
+        auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
+
         QString iconPath;
 
 #if defined(Q_OS_WIN)
@@ -2111,7 +2113,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         // need to convert icon to ICO format and save it somewhere...
         iconPath = "";
 #elif defined(Q_OS_UNIX)
-        iconPath = ""; // TODO get instance icon path
+        iconPath = icon->getFilePath();
 #endif
         if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
                            QApplication::applicationFilePath(), { "--launch", m_selectedInstance->id() }, m_selectedInstance->name(), iconPath)) {
