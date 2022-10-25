@@ -203,6 +203,8 @@ private slots:
 
     void globalSettingsClosed();
 
+    void lockToolbars(bool);
+
 #ifndef Q_OS_MAC
     void keyReleaseEvent(QKeyEvent *event) override;
 #endif
