@@ -1,7 +1,14 @@
 #pragma once
 
 #include <QDialog>
+#include <QString>
+#include <QList>
 
+#include <QFileSystemWatcher>
+
+#include "modplatform/helpers/HashUtils.h"
+
+#include "tasks/ConcurrentTask.h"
 
 struct BlockedMod {
     QString name;
@@ -20,15 +27,27 @@ class BlockedModsDialog : public QDialog {
 Q_OBJECT
 
 public:
-    BlockedModsDialog(QWidget *parent, const QString &title, const QString &text, const QList<BlockedMod> &mods);
+    BlockedModsDialog(QWidget *parent, const QString &title, const QString &text, QList<BlockedMod> &mods);
 
     ~BlockedModsDialog() override;
 
 
 private:
     Ui::BlockedModsDialog *ui;
-    const QList<BlockedMod> &mods;
+    QList<BlockedMod> &mods;
+    QFileSystemWatcher watcher;
+    shared_qobject_ptr<ConcurrentTask> hashing_task;
+    QSet<QString> checked_paths;
+
     void openAll();
     void update();
+    void directoryChanged(QString path);
+    void setupWatch();
+    void scanPaths(bool init);
+    void scanPath(QString path, bool init);
+    void checkMatchHash(QString hash, QString path);
+
+    bool checkValidPath(QString path);
+    bool allModsMatched();
 };
 
