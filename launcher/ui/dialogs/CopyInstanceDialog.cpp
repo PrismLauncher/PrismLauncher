@@ -138,12 +138,9 @@ void CopyInstanceDialog::checkAllCheckboxes(const bool& b)
     ui->copyModsCheckbox->setChecked(b);
 }
 
-// Sets b to true if state is a checked checkbox
-void CopyInstanceDialog::checkBool(bool& b, const int& state)
+// Check the "Select all" checkbox checked if all options are already checked:
+void CopyInstanceDialog::updateSelectAllCheckbox()
 {
-    b = (state == Qt::Checked);
-
-    // Have "Select all" checkbox checked if all options are already checked:
     ui->selectAllCheckbox->blockSignals(true);
     ui->selectAllCheckbox->setChecked(m_selectedOptions.allTrue());
     ui->selectAllCheckbox->blockSignals(false);
@@ -170,42 +167,49 @@ void CopyInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
 void CopyInstanceDialog::on_selectAllCheckbox_stateChanged(int state)
 {
     bool checked;
-    checkBool(checked, state);
+    checked = (state == Qt::Checked);
     checkAllCheckboxes(checked);
 }
 
 void CopyInstanceDialog::on_copySavesCheckbox_stateChanged(int state)
 {
-    checkBool(m_selectedOptions.copySaves, state);
+    m_selectedOptions.copySaves = (state == Qt::Checked);
+    updateSelectAllCheckbox();
 }
 
 
 void CopyInstanceDialog::on_keepPlaytimeCheckbox_stateChanged(int state)
 {
-    checkBool(m_selectedOptions.keepPlaytime, state);
+    m_selectedOptions.keepPlaytime = (state == Qt::Checked);
+    updateSelectAllCheckbox();
 }
 
 void CopyInstanceDialog::on_copyGameOptionsCheckbox_stateChanged(int state)
 {
-    checkBool(m_selectedOptions.copyGameOptions, state);
+    m_selectedOptions.copyGameOptions = (state == Qt::Checked);
+    updateSelectAllCheckbox();
 }
 
 void CopyInstanceDialog::on_copyResPacksCheckbox_stateChanged(int state)
 {
-    checkBool(m_selectedOptions.copyResourcePacks, state);
+    m_selectedOptions.copyResourcePacks = (state == Qt::Checked);
+    updateSelectAllCheckbox();
 }
 
 void CopyInstanceDialog::on_copyShaderPacksCheckbox_stateChanged(int state)
 {
-    checkBool(m_selectedOptions.copyShaderPacks, state);
+    m_selectedOptions.copyShaderPacks = (state == Qt::Checked);
+    updateSelectAllCheckbox();
 }
 
 void CopyInstanceDialog::on_copyServersCheckbox_stateChanged(int state)
 {
-    checkBool(m_selectedOptions.copyServers, state);
+    m_selectedOptions.copyServers = (state == Qt::Checked);
+    updateSelectAllCheckbox();
 }
 
 void CopyInstanceDialog::on_copyModsCheckbox_stateChanged(int state)
 {
-    checkBool(m_selectedOptions.copyMods, state);
+    m_selectedOptions.copyMods = (state == Qt::Checked);
+    updateSelectAllCheckbox();
 }

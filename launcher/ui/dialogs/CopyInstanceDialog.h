@@ -45,11 +45,7 @@ private
 slots:
     void on_iconButton_clicked();
     void on_instNameTextBox_textChanged(const QString &arg1);
-
-    // Checkbox options:
-    void checkAllCheckboxes(const bool& b);
-    void checkBool(bool& b, const int& state);
-
+    // Checkboxes
     void on_selectAllCheckbox_stateChanged(int state);
     void on_copySavesCheckbox_stateChanged(int state);
     void on_keepPlaytimeCheckbox_stateChanged(int state);
@@ -60,6 +56,9 @@ slots:
     void on_copyModsCheckbox_stateChanged(int state);
 
 private:
+    void checkAllCheckboxes(const bool& b);
+    void updateSelectAllCheckbox();
+    /* data */
     Ui::CopyInstanceDialog *ui;
     QString InstIconKey;
     InstancePtr m_original;
