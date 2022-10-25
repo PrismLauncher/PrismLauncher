@@ -51,3 +51,4 @@ private:
     bool allModsMatched();
 };
 
+QDebug operator<<(QDebug debug, const BlockedMod &m);

@@ -31,6 +31,7 @@ BlockedModsDialog::BlockedModsDialog(QWidget *parent, const QString &title, cons
 
     this->setWindowTitle(title);
     ui->label->setText(text);
+    ui->labelModsFound->setText("Please download the missing mods.");
     update();
 }
 
@@ -60,6 +61,12 @@ void BlockedModsDialog::update() {
     }
 
     ui->textBrowser->setText(text);
+
+    if (allModsMatched()) {
+        ui->labelModsFound->setText("All mods found ✔");
+    } else {
+        ui->labelModsFound->setText("Please download the missing mods.");
+    }
 }
 
 void BlockedModsDialog::directoryChanged(QString path) {

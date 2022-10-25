@@ -75,6 +75,8 @@ bool ensureFilePathExists(QString filenamepath);
  */
 bool ensureFolderPathExists(QString filenamepath);
 
+bool copyFile(QString &src, QString &dst);
+
 class copy {
    public:
     copy(const QString& src, const QString& dst)

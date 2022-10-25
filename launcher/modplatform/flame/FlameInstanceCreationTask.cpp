@@ -399,6 +399,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         message_dialog->setModal(true);
 
         if (message_dialog->exec()) {
+            copyBlockedMods(blocked_mods);
             setupDownloadJob(loop);
         } else {
             m_mod_id_resolver.reset();
@@ -408,6 +409,36 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     } else {
         setupDownloadJob(loop);
     }
+}
+
+void FlameCreationTask::copyBlockedMods(QList<BlockedMod> blocked_mods) {
+
+    setStatus(tr("Copying Blocked Mods..."));
+    setAbortable(false);
+    int i = 0;
+    int total = blocked_mods.length();
+    setProgress(i, total);
+    for (auto mod = blocked_mods.begin(); mod != blocked_mods.end(); mod++, i++) {
+
+        if (!mod->matched) {
+            qDebug() << mod->name << "was not matched to a local file, skipping copy";
+            continue;
+        }
+
+        auto dest_path = FS::PathCombine(m_stagingPath, "minecraft", "mods", mod->name);
+
+        setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
+
+        qDebug() << "Will try to copy" << mod->localPath << "to" << dest_path;
+
+        if (!FS::copyFile(mod->localPath, dest_path)) {
+            qDebug() << "Copy of" << mod->localPath << "to" << dest_path << "Failed";
+        } 
+
+        setProgress(i+1, total);
+    }
+
+    setAbortable(true);
 }
 
 void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
@@ -455,7 +486,9 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         m_files_job.reset();
         setError(reason);
     });
-    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { setProgress(current, total); });
+    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { 
+        setProgress(current, total); 
+    });
     connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
 
     setStatus(tr("Downloading mods..."));

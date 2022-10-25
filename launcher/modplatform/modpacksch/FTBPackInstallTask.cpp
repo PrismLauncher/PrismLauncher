@@ -176,7 +176,6 @@ void PackInstallTask::resolveMods()
 
 void PackInstallTask::onResolveModsSucceeded()
 {
-    QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
 
     Flame::Manifest results = m_mod_id_resolver_task->getResults();
@@ -201,7 +200,7 @@ void PackInstallTask::onResolveModsSucceeded()
             blocked_mod.matched = false;
             blocked_mod.localPath = "";
 
-            blocked_mods.append(blocked_mod);
+            m_blocked_mods.append(blocked_mod);
 
             anyBlocked = true;
         } else {
@@ -217,12 +216,16 @@ void PackInstallTask::onResolveModsSucceeded()
         auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked files found"),
                                                    tr("The following files are not available for download in third party launchers.<br/>"
                                                       "You will need to manually download them and add them to the instance."),
-                                                   blocked_mods);
+                                                   m_blocked_mods);
 
-        if (message_dialog->exec() == QDialog::Accepted)
+        if (message_dialog->exec() == QDialog::Accepted) {
+            qDebug() << "Post dialog mods list: " << m_blocked_mods;
             createInstance();
-        else
+        }  
+        else {
             abort();
+        }
+            
     } else {
         createInstance();
     }
@@ -326,6 +329,9 @@ void PackInstallTask::downloadPack()
 void PackInstallTask::onModDownloadSucceeded()
 {
     m_net_job.reset();
+    if (m_blocked_mods.length() > 0) {
+        copyBlockedMods();
+    }
     emitSucceeded();
 }
 
@@ -347,6 +353,36 @@ void PackInstallTask::onModDownloadFailed(QString reason)
 {
     m_net_job.reset();
     emitFailed(reason);
+}
+
+void PackInstallTask::copyBlockedMods() {
+
+    setStatus(tr("Copying Blocked Mods..."));
+    setAbortable(false);
+    int i = 0;
+    int total = m_blocked_mods.length();
+    setProgress(i, total);
+    for (auto mod = m_blocked_mods.begin(); mod != m_blocked_mods.end(); mod++, i++) {
+
+        if (!mod->matched) {
+            qDebug() << mod->name << "was not matched to a local file, skipping copy";
+            continue;
+        }
+
+        auto dest_path = FS::PathCombine(m_stagingPath, ".minecraft", "mods", mod->name);
+
+        setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
+
+        qDebug() << "Will try to copy" << mod->localPath << "to" << dest_path;
+
+        if (!FS::copyFile(mod->localPath, dest_path)) {
+            qDebug() << "Copy of" << mod->localPath << "to" << dest_path << "Failed";
+        } 
+
+        setProgress(i+1, total);
+    }
+
+    setAbortable(true);
 }
 
 }  // namespace ModpacksCH

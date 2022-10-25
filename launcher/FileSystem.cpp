@@ -163,6 +163,28 @@ bool ensureFolderPathExists(QString foldernamepath)
     return success;
 }
 
+bool copyFile(QString &src, QString &dst) {
+    using copy_opts = fs::copy_options;
+
+    std::error_code err;
+
+    fs::copy_options opt = copy_opts::none;
+    // The default behavior is to follow symlinks
+    opt |= copy_opts::copy_symlinks;
+
+    ensureFilePathExists(dst);
+
+    fs::copy(toStdString(src), toStdString(dst), opt, err);
+    if (err) {
+        qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
+        qDebug() << "Source file:" << src;
+        qDebug() << "Destination file:" << dst;
+    }
+
+    return err.value() == 0;
+
+}
+
 bool copy::operator()(const QString& offset)
 {
     using copy_opts = fs::copy_options;
