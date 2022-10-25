@@ -7,25 +7,6 @@ Prism Launcher is a custom launcher for Minecraft that allows you to easily mana
 
 This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC.
 
-### Table of Contents
-<details>
- <summary><strong>Click to Expand</strong>
-</summary>
-
-- [Table of Contents](#table-of-contents)
- - [Installation](#installation)
-   - [Development Builds](#development-builds)
- - [Help & Support](#help--support)
-   - [Discord](#join-our-discord-server)
-   - [Matrix](#join-our-matrix-space)
-   - [Reddit](#join-our-subreddit)
- - [Building](#building)
- - [Translations](#translations)
- - [Forking/Redistributing](#forkingredistributingcustom-builds-policy)
- - [Sponsors & Partners](#sponsors--partners)
- - [License](#license)
-</details>
-
 ## Installation
 
 - All downloads and instructions for Prism Launcher can be found [on our website](https://prismlauncher.org/download/).
