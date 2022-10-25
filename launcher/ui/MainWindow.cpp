@@ -2112,7 +2112,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         // TODO
         // need to convert icon to ICO format and save it somewhere...
         iconPath = "";
-#elif defined(Q_OS_UNIX)
+#else
         iconPath = icon->getFilePath();
 #endif
         if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
