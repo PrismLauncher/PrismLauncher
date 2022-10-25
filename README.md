@@ -1,4 +1,4 @@
-<p align="center">
+## <p align="center">
 <img src="./program_info/org.prismlauncher.PrismLauncher.logo.svg#gh-light-mode-only" alt="Prism Launcher logo" width="50%"/>
 <img src="./program_info/org.prismlauncher.PrismLauncher.logo-darkmode.svg#gh-dark-mode-only" alt="Prism Launcher logo" width="50%"/>
 </p>
@@ -6,6 +6,25 @@
 Prism Launcher is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.
 
 This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC.
+
+### Table of Contents
+<details>
+ <summary><strong>Click to Expand</strong>
+</summary>
+
+- [Table of Contents](#table-of-contents)
+ - [Installation](#installation)
+   - [Development Builds](#development-builds)
+ - [Help & Support](#help--support)
+   - [Discord](#join-our-discord-server)
+   - [Matrix](#join-our-matrix-space)
+   - [Reddit](#join-our-subreddit)
+ - [Building](#building)
+ - [Translations](#translations)
+ - [Forking/Redistributing](#forkingredistributingcustom-builds-policy)
+ - [Sponsors & Partners](#sponsors--partners)
+ - [License](#license)
+</details>
 
 ## Installation
 
@@ -16,25 +35,24 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC.
 
 There are development builds available [here](https://github.com/PrismLauncher/PrismLauncher/actions). These have debug information in the binaries, so their file sizes are relatively larger.
 
-Portable builds are provided for on Linux, Windows, and macOS.
+Portable builds are provided for Linux, Windows, and macOS.
 
-For Debian and Arch, you can use these packages for the latest development versions:  
-[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-blue?style=for-the-badge&logo=appveyor)](https://aur.archlinux.org/packages/prismlauncher-git/)
-[![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-orange?style=for-the-badge&logo=appveyor)](https://mpr.makedeb.org/packages/prismlauncher-git)  
+For Debian and Arch, you can use these packages to get compiled development versions:  
+
+[![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-orange?style=flat-square&logo=appveyor)](https://mpr.makedeb.org/packages/prismlauncher-git)  [![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-blue?style=flat-square&logo=appveyor)](https://aur.archlinux.org/packages/prismlauncher-git/)
+
 ## Help & Support
 
-Feel free to create an issue if you need help. However, you might find it easier to ask in the Discord server.
+Feel free to create an issue if you need help.
 
+#### Join our Discord server:
 [![Prism Launcher Discord server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner3)](https://discord.gg/prismlauncher)
 
-We will also soon be opening up our Matrix channels.
-You can already join our Matrix space:
+#### Join our Matrix space:
+[![PrismLauncher Space](https://img.shields.io/matrix/prismlauncher:matrix.org?style=for-the-badge&logo=appveyor)](https://matrix.to/#/#prismlauncher:matrix.org)
 
-[![PrismLauncher Space](https://img.shields.io/matrix/prismlauncher:matrix.org?label=PrismLauncher%20space?style=for-the-badge&logo=appveyor)](https://matrix.to/#/#prismlauncher:matrix.org)
-
-We also have a subreddit you can post your issues and suggestions on:
-
-[r/PrismLauncher](https://www.reddit.com/r/PrismLauncher/)
+#### Join our SubReddit:
+[![r/PrismLauncher](https://img.shields.io/reddit/subreddit-subscribers/prismlauncher?style=for-the-badge&logo=appveyor)](https://www.reddit.com/r/PrismLauncher/)
 
 ## Building
 
@@ -60,13 +78,11 @@ Be aware that if you build this software without removing the provided API keys 
 
 If you do not agree with these terms and conditions, then remove the associated API keys from the [CMakeLists.txt](CMakeLists.txt) file by setting them to an empty string (`""`).
 
-## License
+## Sponsors & Partners
 
-All launcher code is available under the GPL-3.0-only license.
-  
-The logo and related assets are under the CC BY-SA 4.0 license.
+We thank all the wonderful backers over at Open Collective! Support Prism Launcher by [becoming a backer](https://opencollective.com/prismlauncher).
 
-## Sponsors
+[![OpenCollective Backers](https://opencollective.com/prismlauncher/backers.svg?width=890&limit=1000)](https://opencollective.com/prismlauncher#backers)
 
 Thanks to JetBrains for providing us a few licenses for all their products, as part of their [Open Source program](https://www.jetbrains.com/opensource/).
 
@@ -85,3 +101,12 @@ Thanks to Netlify for providing us their excellent web services, as part of thei
 Thanks to the awesome people over at [MacStadium](https://www.macstadium.com/), for providing M1-Macs for development purposes!
 
 <a href="https://www.macstadium.com"><img src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" alt="Powered by MacStadium" width="300"></a>
+
+
+## License
+
+All launcher code is available under the GPL-3.0-only license.
+
+![https://github.com/PrismLauncher/PrismLauncher/blob/develop/LICENSE](https://img.shields.io/github/license/PrismLauncher/PrismLauncher?style=for-the-badge)
+
+The logo and related assets are under the CC BY-SA 4.0 license.
