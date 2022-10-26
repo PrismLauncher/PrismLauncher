@@ -411,6 +411,8 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     }
 }
 
+/// @brief copy the matched blocked mods to the instance staging area
+/// @param blocked_mods list of the blocked mods and their matched paths
 void FlameCreationTask::copyBlockedMods(QList<BlockedMod> blocked_mods) {
 
     setStatus(tr("Copying Blocked Mods..."));

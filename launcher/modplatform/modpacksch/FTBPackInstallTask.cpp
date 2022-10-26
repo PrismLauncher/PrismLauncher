@@ -189,9 +189,6 @@ void PackInstallTask::onResolveModsSucceeded()
 
         // First check for blocked mods
         if (!results_file.resolved || results_file.url.isEmpty()) {
-            // QString type(local_file.type);
-
-            // type[0] = type[0].toUpper();
 
             BlockedMod blocked_mod;
             blocked_mod.name = local_file.name;
@@ -355,6 +352,7 @@ void PackInstallTask::onModDownloadFailed(QString reason)
     emitFailed(reason);
 }
 
+/// @brief copy the matched blocked mods to the instance staging area
 void PackInstallTask::copyBlockedMods() {
 
     setStatus(tr("Copying Blocked Mods..."));

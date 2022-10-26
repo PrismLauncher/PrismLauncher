@@ -163,6 +163,10 @@ bool ensureFolderPathExists(QString foldernamepath)
     return success;
 }
 
+/// @brief Copy file at src to dest, ensures the full filepath exsists
+/// @param src srouce file path
+/// @param dst destination file path
+/// @return boolean: was there an error during the filecopy?
 bool copyFile(QString &src, QString &dst) {
     using copy_opts = fs::copy_options;
 
@@ -185,6 +189,9 @@ bool copyFile(QString &src, QString &dst) {
 
 }
 
+/// @brief Copies a directory and it's contents from src to dest
+/// @param offset subdirectory form src to copy to dest
+/// @return if there was an error during the filecopy
 bool copy::operator()(const QString& offset)
 {
     using copy_opts = fs::copy_options;

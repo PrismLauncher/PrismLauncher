@@ -37,14 +37,13 @@ private:
     QList<BlockedMod> &mods;
     QFileSystemWatcher watcher;
     shared_qobject_ptr<ConcurrentTask> hashing_task;
-    QSet<QString> checked_paths;
 
     void openAll();
     void update();
     void directoryChanged(QString path);
     void setupWatch();
-    void scanPaths(bool init);
-    void scanPath(QString path, bool init);
+    void scanPaths();
+    void scanPath(QString path);
     void checkMatchHash(QString hash, QString path);
 
     bool checkValidPath(QString path);

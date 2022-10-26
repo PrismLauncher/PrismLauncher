@@ -1,5 +1,3 @@
-#include <qfileinfo.h>
-#include <qnamespace.h>
 #include "Application.h"
 #include "BlockedModsDialog.h"
 #include "ui_BlockedModsDialog.h"
@@ -27,7 +25,7 @@ BlockedModsDialog::BlockedModsDialog(QWidget *parent, const QString &title, cons
     qDebug() << "Mods List: " << mods;
 
     setupWatch();
-    scanPaths(true);
+    scanPaths();
 
     this->setWindowTitle(title);
     ui->label->setText(text);
@@ -45,6 +43,7 @@ void BlockedModsDialog::openAll() {
     }
 }
 
+/// @brief update UI with current status of the blocked mod detection
 void BlockedModsDialog::update() {
     QString text;
     QString span;
@@ -69,12 +68,15 @@ void BlockedModsDialog::update() {
     }
 }
 
+/// @brief Signal fired when a watched direcotry has changed
+/// @param path the path to the changed directory
 void BlockedModsDialog::directoryChanged(QString path) {
     qDebug() << "Directory changed: " << path;
-    scanPath(path, false);
+    scanPath(path);
 }
 
 
+/// @brief add the user downloads folder and the global mods folder to the filesystem watcher
 void BlockedModsDialog::setupWatch() {
     const QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
     const QString modsFolder = APPLICATION->settings()->get("CentralModsDir").toString();
@@ -82,22 +84,23 @@ void BlockedModsDialog::setupWatch() {
     watcher.addPath(modsFolder);
 }
 
-void BlockedModsDialog::scanPaths(bool init) {
+
+/// @brief scan all watched folder
+void BlockedModsDialog::scanPaths() {
     for (auto &dir : watcher.directories()) {
-        scanPath(dir, init);
+        scanPath(dir);
     }
 }
 
-void BlockedModsDialog::scanPath(QString path, bool init) {
+/// @brief Scan the directory at path, skip paths that do not contain a file name 
+///        of a blocked mod we are looking for
+/// @param path the directory to scan
+void BlockedModsDialog::scanPath(QString path) {
 
     QDir scan_dir(path);
     QDirIterator scan_it(path, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::NoIteratorFlags);
     while (scan_it.hasNext()) {
         QString file = scan_it.next();
-
-        if (checked_paths.contains(file)){
-            continue;
-        }
 
         if (!checkValidPath(file)) {
             continue;
@@ -113,10 +116,6 @@ void BlockedModsDialog::scanPath(QString path, bool init) {
         connect(hash_task.get(), &Task::failed, [this, hash_task, file] { 
             qDebug() << "Failed to hash path: " << file;
         });
-
-        if (init) {
-            checked_paths.insert(file);
-        }
         
         hashing_task->addTask(hash_task);
     }
@@ -125,6 +124,10 @@ void BlockedModsDialog::scanPath(QString path, bool init) {
 
 }
 
+/// @brief check if the conputed hash for the provided path matches a blocked
+///        mod we are looking for
+/// @param hash the computed hash for the provided path
+/// @param path the path to the local file being compared
 void BlockedModsDialog::checkMatchHash(QString hash, QString path) {
     bool match = false;
 
@@ -150,6 +153,9 @@ void BlockedModsDialog::checkMatchHash(QString hash, QString path) {
     }
 }
 
+/// @brief Check if the name of the file at path matches the naem of a blocked mod we are searching for
+/// @param path the path to check
+/// @return boolean: did the path match the name of a blocked mod?
 bool BlockedModsDialog::checkValidPath(QString path) {
 
     QFileInfo file = QFileInfo(path);
@@ -165,6 +171,8 @@ bool BlockedModsDialog::checkValidPath(QString path) {
     return false;
 }
 
+/// @brief have we found all the mods we're lookign for?
+/// @return boolean
 bool BlockedModsDialog::allModsMatched() {
     for (auto &mod : mods) {
         if (!mod.matched)
@@ -173,7 +181,7 @@ bool BlockedModsDialog::allModsMatched() {
     return true;
 }
 
-
+/// qDebug print support for the BlockedMod struct
 QDebug operator<<(QDebug debug, const BlockedMod &m) {
     QDebugStateSaver saver(debug);
 
