@@ -27,11 +27,37 @@ set(CMAKE_C_STANDARD_REQUIRED true)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
-set(CMAKE_CXX_FLAGS "-Wall -pedantic -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
+if(MSVC)
+    # Use /W4 as /Wall includes unnesserey warnings such as added padding to structs
+    # /permissive- specify standards-conforming compiler behavior, also enabled by Qt6, default on with std:c++20
+    # /GS Adds buffer security checks, default on but incuded anyway to mirror gcc's fstack-protector flag
+    set(CMAKE_CXX_FLAGS "/W4 /permissive- /GS ${CMAKE_CXX_FLAGS}")
 
-# ATL's packlist needs more than the default 1 Mib stack on windows
-if(WIN32)
-    set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+    # LINK accepts /SUBSYSTEM whics sets if we are a WINDOWS (gui) or a CONSOLE programs
+    # This implicitly selects an entrypoint specific to the subsystem selected
+    # qtmain/QtEntryPointLib provides the correct entrypoint (wWinMain) for gui programs
+    # Additinaly LINK autodetects we use a GUI so we can omit /SUBSYSTEM
+    # This allows tests to still use have console without using seperate linker flags
+    # /MANIFEST:NO disables generating a manifest file, we instead provide our own
+    # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
+    set(CMAKE_EXE_LINKER_FLAGS "/MANIFEST:NO /STACK:8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+
+    # See https://github.com/ccache/ccache/issues/1040
+    # Note, CMake 3.25 replaces this with CMAKE_MSVC_DEBUG_INFORMATION_FORMAT
+    # See https://cmake.org/cmake/help/v3.25/variable/CMAKE_MSVC_DEBUG_INFORMATION_FORMAT.html
+    foreach(config DEBUG RELWITHDEBINFO)
+        foreach(lang C CXX)
+            set(flags_var "CMAKE_${lang}_FLAGS_${config}")
+            string(REGEX REPLACE "/Z[Ii]" "/Z7" ${flags_var} "${${flags_var}}")
+        endforeach()
+    endforeach()
+else()
+    set(CMAKE_CXX_FLAGS "-Wall -pedantic -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
+
+    # ATL's pack list needs more than the default 1 Mib stack on windows
+    if(WIN32)
+        set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+    endif()
 endif()
 
 # Fix build with Qt 5.13
