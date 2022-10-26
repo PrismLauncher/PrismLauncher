@@ -539,9 +539,6 @@ set(ATLAUNCHER_SOURCES
 
 ################################ COMPILE ################################
 
-# we need zlib
-find_package(ZLIB REQUIRED)
-
 set(LOGIC_SOURCES
     ${CORE_SOURCES}
     ${PATHMATCHER_SOURCES}
