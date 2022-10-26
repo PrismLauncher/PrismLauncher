@@ -5,6 +5,8 @@
 #ifndef LAUNCHER_INSTANCECOPYPREFS_H
 #define LAUNCHER_INSTANCECOPYPREFS_H
 
+#include <QStringList>
+
 struct InstanceCopyPrefs {
     bool copySaves = true;
     bool keepPlaytime = true;
@@ -14,7 +16,8 @@ struct InstanceCopyPrefs {
     bool copyServers = true;
     bool copyMods = true;
 
-    bool allTrue() const;
+    [[nodiscard]] bool allTrue() const;
+    [[nodiscard]] QString getSelectedFiltersAsRegex() const;
 };
 
 #endif  // LAUNCHER_INSTANCECOPYPREFS_H

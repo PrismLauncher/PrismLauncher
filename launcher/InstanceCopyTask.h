@@ -24,10 +24,6 @@ protected:
     void copyAborted();
 
 private:
-    // Helper functions to avoid repeating code
-    static void appendToFilter(QString &filter, const QString &append);
-    void resetFromMatcher(const QString &regexp);
-
     /* data */
     InstancePtr m_origInstance;
     QFuture<bool> m_copyFuture;

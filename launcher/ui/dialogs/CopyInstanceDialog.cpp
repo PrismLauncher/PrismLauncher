@@ -44,7 +44,6 @@
 
 #include "BaseVersion.h"
 #include "icons/IconList.h"
-#include "tasks/Task.h"
 #include "BaseInstance.h"
 #include "InstanceList.h"
 
@@ -138,7 +137,7 @@ void CopyInstanceDialog::checkAllCheckboxes(const bool& b)
     ui->copyModsCheckbox->setChecked(b);
 }
 
-// Check the "Select all" checkbox checked if all options are already checked:
+// Check the "Select all" checkbox if all options are already selected:
 void CopyInstanceDialog::updateSelectAllCheckbox()
 {
     ui->selectAllCheckbox->blockSignals(true);
