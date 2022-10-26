@@ -27,6 +27,7 @@ jobs:
             qt_host: linux
             qt_version: '6.2.4'
             qt_modules: 'qt5compat qtimageformats'
+            qt_tools: ''
 
           - os: windows-2022
             name: "Windows-Legacy"
@@ -38,6 +39,24 @@ jobs:
             msystem: clang64
             qt_ver: 6
 
+          - os: windows-2022
+            name: "Windows-Legacy-MSVC"
+            msystem: ''
+            qt_ver: 5
+            qt_host: windows
+            qt_version: '5.15.2'
+            qt_modules: ''
+            qt_tools: 'tools_openssl_x86'
+
+          - os: windows-2022
+            name: "Windows-MSVC"
+            msystem: ''
+            qt_ver: 6
+            qt_host: windows
+            qt_version: '6.4.0'
+            qt_modules: 'qt5compat qtimageformats'
+            qt_tools: ''
+
           - os: macos-12
             name: macOS
             macosx_deployment_target: 10.15
@@ -45,6 +64,7 @@ jobs:
             qt_host: mac
             qt_version: '6.3.0'
             qt_modules: 'qt5compat qtimageformats'
+            qt_tools: ''
 
           - os: macos-12
             name: macOS-Legacy
@@ -53,6 +73,7 @@ jobs:
             qt_host: mac
             qt_version: '5.15.2'
             qt_modules: ''
+            qt_tools: ''
 
     runs-on: ${{ matrix.os }}
 
@@ -82,7 +103,7 @@ jobs:
           languages: cpp, java
 
       - name: 'Setup MSYS2'
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && matrix.msystem != ''
         uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.msystem }}
@@ -102,14 +123,23 @@ jobs:
             ccache:p
             ${{ matrix.qt_ver == 6 && 'qt6-5compat:p' || '' }}
 
+      - name: 'Setup MSVC for Ninja'
+        if: runner.os == 'Windows' && matrix.msystem == ''
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Force newer ccache
+        if: runner.os == 'Windows' && matrix.msystem == '' && inputs.build_type == 'Debug'
+        run: |
+          choco install ccache --version 4.7.1
+
       - name: Setup ccache
-        if: runner.os != 'Windows' && inputs.build_type == 'Debug'
+        if: (runner.os != 'Windows' || matrix.msystem == '') && inputs.build_type == 'Debug'
         uses: hendrikmuhs/ccache-action@v1.2.5
         with:
           key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}
 
-      - name: Setup ccache (Windows)
-        if: runner.os == 'Windows' && inputs.build_type == 'Debug'
+      - name: Setup ccache (Windows MinGW-w64)
+        if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
         shell: msys2 {0}
         run: |
           ccache --set-config=cache_dir='${{ github.workspace }}\.ccache'
@@ -124,8 +154,8 @@ jobs:
         run: |
           echo "CCACHE_VAR=ccache" >> $GITHUB_ENV
 
-      - name: Retrieve ccache cache (Windows)
-        if: runner.os == 'Windows' && inputs.build_type == 'Debug'
+      - name: Retrieve ccache cache (Windows MinGW-w64)
+        if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
         uses: actions/cache@v3.0.11
         with:
           path: '${{ github.workspace }}\.ccache'
@@ -156,14 +186,15 @@ jobs:
         run: |
           sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
  
-      - name: Install Qt (macOS and AppImage)
-        if: runner.os == 'Linux' && matrix.qt_ver == 6 || runner.os == 'macOS'
+      - name: Install Qt (macOS, AppImage & Windows MSVC)
+        if: runner.os == 'Linux' && matrix.qt_ver == 6 || runner.os == 'macOS' || (runner.os == 'Windows' && matrix.msystem == '')
         uses: jurplel/install-qt-action@v3
         with:
            version: ${{ matrix.qt_version }}
            host: ${{ matrix.qt_host }}
            target: 'desktop'
            modules: ${{ matrix.qt_modules }}
+           tools: ${{ matrix.qt_tools }}
            cache: true
            cache-key-prefix: ${{ matrix.qt_host }}-${{ matrix.qt_version }}-"${{ matrix.qt_modules }}"-qt_cache
 
@@ -190,11 +221,16 @@ jobs:
         run: |
           cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DMACOSX_SPARKLE_UPDATE_PUBLIC_KEY="" -DMACOSX_SPARKLE_UPDATE_FEED_URL="" -G Ninja
 
-      - name: Configure CMake (Windows)
-        if: runner.os == 'Windows'
+      - name: Configure CMake (Windows MinGW-w64)
+        if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
         run: |
           cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_OBJDUMP=/mingw64/bin/objdump.exe -G Ninja
+
+      - name: Configure CMake (Windows MSVC)
+        if: runner.os == 'Windows' && matrix.msystem == ''
+        run: |
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -G Ninja
 
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
@@ -206,12 +242,12 @@ jobs:
       ##
 
       - name: Build
-        if: runner.os != 'Windows'
+        if: runner.os != 'Windows' || matrix.msystem == ''
         run: |
           cmake --build ${{ env.BUILD_DIR }}
 
-      - name: Build (Windows)
-        if: runner.os == 'Windows'
+      - name: Build (Windows MinGW-w64)
+        if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
         run: |
           cmake --build ${{ env.BUILD_DIR }}
@@ -221,12 +257,12 @@ jobs:
       ##
 
       - name: Test
-        if: runner.os != 'Windows'
+        if: runner.os != 'Windows' || matrix.msystem == ''
         run: |
           ctest -E "^example64|example$" --test-dir build --output-on-failure
 
-      - name: Test (Windows)
-        if: runner.os == 'Windows'
+      - name: Test (Windows MinGW-w64)
+        if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
         run: |
           ctest -E "^example64|example$" --test-dir build --output-on-failure
@@ -273,8 +309,8 @@ jobs:
           EOF
           fi
 
-      - name: Package (Windows)
-        if: runner.os == 'Windows'
+      - name: Package (Windows MinGW-w64)
+        if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
         run: |
           cmake --install ${{ env.BUILD_DIR }}
@@ -284,9 +320,27 @@ jobs:
             cp /clang32/bin/libcrypto-1_1.dll /clang32/bin/libssl-1_1.dll ./
           fi
 
-      - name: Package (Windows, portable)
-        if: runner.os == 'Windows'
+      - name: Package (Windows MSVC)
+        if: runner.os == 'Windows' && matrix.msystem == ''
+        run: |
+          cmake --install ${{ env.BUILD_DIR }}
+
+          cd ${{ env.INSTALL_DIR }}
+          if ("${{ matrix.qt_ver }}" -eq "5")
+          {
+            Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libcrypto-1_1.dll -Destination libcrypto-1_1.dll
+            Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll -Destination libssl-1_1.dll
+          }
+
+      - name: Package (Windows MinGW-w64, portable)
+        if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
+        run: |
+          cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
+          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+
+      - name: Package (Windows MSVC, portable)
+        if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
           cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
