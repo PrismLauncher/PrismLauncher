@@ -3,9 +3,11 @@
 <img src="./program_info/org.prismlauncher.PrismLauncher.logo-darkmode.svg#gh-dark-mode-only" alt="Prism Launcher logo" width="50%"/>
 </p>
 
+
 Prism Launcher is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.
 
 This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC.
+
 
 ## Installation
 
@@ -18,9 +20,9 @@ There are development builds available [here](https://github.com/PrismLauncher/P
 
 Portable builds are provided for Linux, Windows, and macOS.
 
-For Debian and Arch, you can use these packages to get compiled development versions:  
+For Arch, Debian and Gentoo, respectively, you can use these packages to get compiled development versions:
 
-[![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-orange?style=flat-square&logo=appveyor)](https://mpr.makedeb.org/packages/prismlauncher-git)  [![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-blue?style=flat-square&logo=appveyor)](https://aur.archlinux.org/packages/prismlauncher-git/)
+[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-blue?style=flat-square&logo=appveyor)](https://aur.archlinux.org/packages/prismlauncher-qt5-git/) [![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--qt5--git-blue?style=flat-square&logo=appveyor)](https://aur.archlinux.org/packages/prismlauncher-git/) [![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-orange?style=flat-square&logo=appveyor)](https://mpr.makedeb.org/packages/prismlauncher-git) [![prismlauncher-9999](https://img.shields.io/badge/gentoo-prismlauncher--9999-purple?style=flat-square&logo=appveyor)](https://packages.gentoo.org/packages/games-action/prismlauncher)
 
 ## Help & Support
 
