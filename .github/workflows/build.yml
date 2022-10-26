@@ -223,13 +223,13 @@ jobs:
       - name: Test
         if: runner.os != 'Windows'
         run: |
-          ctest --test-dir build --output-on-failure
+          ctest -E "^example64|example$" --test-dir build --output-on-failure
 
       - name: Test (Windows)
         if: runner.os == 'Windows'
         shell: msys2 {0}
         run: |
-          ctest --test-dir build --output-on-failure
+          ctest -E "^example64|example$" --test-dir build --output-on-failure
 
       ##
       # CODE SCAN
