@@ -1127,7 +1127,7 @@ if(INSTALL_BUNDLE STREQUAL "full")
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
             REGEX "minimal|linuxfb|offscreen" EXCLUDE
-            REGEX "d\\." EXCLUDE
+            REGEX "[^2]d\\." EXCLUDE
             REGEX "_debug\\." EXCLUDE
             REGEX "\\.dSYM" EXCLUDE
         )
@@ -1148,6 +1148,7 @@ if(INSTALL_BUNDLE STREQUAL "full")
                 DIRECTORY "${QT_PLUGINS_DIR}/tls"
                 DESTINATION ${PLUGIN_DEST_DIR}
                 COMPONENT Runtime
+                REGEX "dd\\." EXCLUDE
                 REGEX "_debug\\." EXCLUDE
                 REGEX "\\.dSYM" EXCLUDE
             )
