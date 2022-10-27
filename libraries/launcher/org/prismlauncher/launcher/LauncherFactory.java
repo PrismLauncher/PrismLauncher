@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 icelimetea, <fr3shtea@outlook.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -33,11 +33,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher;
+package org.prismlauncher.launcher;
 
 
-import org.prismlauncher.impl.LegacyLauncher;
-import org.prismlauncher.impl.StandardLauncher;
+import org.prismlauncher.launcher.impl.LegacyLauncher;
+import org.prismlauncher.launcher.impl.StandardLauncher;
 import org.prismlauncher.utils.Parameters;
 
 import java.util.HashMap;
@@ -65,7 +65,7 @@ public final class LauncherFactory {
     }
     
     public static Launcher createLauncher(Parameters parameters) {
-        String name = parameters.first("launcher");
+        String name = parameters.getString("launcher");
         
         LauncherProvider launcherProvider = launcherRegistry.get(name);
         
@@ -74,11 +74,4 @@ public final class LauncherFactory {
         
         return launcherProvider.provide(parameters);
     }
-    
-    public interface LauncherProvider {
-        
-        Launcher provide(Parameters parameters);
-        
-    }
-    
 }

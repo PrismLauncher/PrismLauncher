@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.prismlauncher;
+package org.prismlauncher.launcher;
+
 
 public interface Launcher {
-
     void launch() throws Throwable;
-
 }

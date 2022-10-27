@@ -8,16 +8,17 @@ set(CMAKE_JAVA_COMPILE_FLAGS -target 7 -source 7 -Xlint:deprecation -Xlint:unche
 
 set(SRC
     org/prismlauncher/EntryPoint.java
-    org/prismlauncher/Launcher.java
-    org/prismlauncher/LauncherFactory.java
-    org/prismlauncher/impl/AbstractLauncher.java
-    org/prismlauncher/impl/LegacyLauncher.java
-    org/prismlauncher/impl/StandardLauncher.java
+    org/prismlauncher/launcher/Launcher.java
+    org/prismlauncher/launcher/LauncherFactory.java
+    org/prismlauncher/launcher/LauncherProvider.java
+    org/prismlauncher/launcher/impl/AbstractLauncher.java
+    org/prismlauncher/launcher/impl/LegacyLauncher.java
+    org/prismlauncher/launcher/impl/StandardLauncher.java
     org/prismlauncher/applet/LegacyFrame.java
     org/prismlauncher/exception/ParameterNotFoundException.java
     org/prismlauncher/exception/ParseException.java
     org/prismlauncher/utils/Parameters.java
-    org/prismlauncher/utils/Utils.java
+    org/prismlauncher/utils/LegacyUtils.java
     net/minecraft/Launcher.java
 )
 add_jar(NewLaunch ${SRC})

@@ -16,34 +16,39 @@
 
 package org.prismlauncher.utils;
 
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-public final class Utils {
 
-    private Utils() {}
-
+public final class LegacyUtils {
+    
+    private LegacyUtils() {
+    }
+    
     /**
      * Finds a field that looks like a Minecraft base folder in a supplied class
      *
      * @param clazz the class to scan
      */
     public static Field getMinecraftGameDirField(Class<?> clazz) {
-        for (Field f : clazz.getDeclaredFields()) {
+        // Field we're looking for is always
+        // private static File obfuscatedName = null;
+        for (Field field : clazz.getDeclaredFields()) {
             // Has to be File
-            if (f.getType() != File.class)
+            if (field.getType() != File.class)
                 continue;
-
+            
             // And Private Static.
-            if (!Modifier.isStatic(f.getModifiers()) || !Modifier.isPrivate(f.getModifiers()))
+            if (!Modifier.isStatic(field.getModifiers()) || !Modifier.isPrivate(field.getModifiers()))
                 continue;
-
-            return f;
+            
+            return field;
         }
-
+        
         return null;
     }
-
+    
 }
 

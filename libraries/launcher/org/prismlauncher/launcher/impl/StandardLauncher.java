@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.prismlauncher.impl;
+package org.prismlauncher.launcher.impl;
 
 import org.prismlauncher.utils.Parameters;
 

@@ -13,7 +13,12 @@
  * limitations under the License.
  */
 
-package org.prismlauncher.impl;
+package org.prismlauncher.launcher.impl;
+
+
+import org.prismlauncher.applet.LegacyFrame;
+import org.prismlauncher.utils.LegacyUtils;
+import org.prismlauncher.utils.Parameters;
 
 import java.applet.Applet;
 import java.io.File;
@@ -25,10 +30,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.prismlauncher.applet.LegacyFrame;
-import org.prismlauncher.utils.Parameters;
-import org.prismlauncher.utils.Utils;
 
 @SuppressWarnings("removal")
 public final class LegacyLauncher extends AbstractLauncher {
@@ -44,22 +45,22 @@ public final class LegacyLauncher extends AbstractLauncher {
 
     public LegacyLauncher(Parameters params) {
         super(params);
-
-        user = params.first("userName");
-        session = params.first("sessionId");
-        title = params.firstSafe("windowTitle", "Minecraft");
-        appletClass = params.firstSafe("appletClass", "net.minecraft.client.MinecraftApplet");
-
-        List<String> traits = params.allSafe("traits", Collections.<String>emptyList());
+    
+        user = params.getString("userName");
+        session = params.getString("sessionId");
+        title = params.getString("windowTitle", "Minecraft");
+        appletClass = params.getString("appletClass", "net.minecraft.client.MinecraftApplet");
+    
+        List<String> traits = params.getList("traits", Collections.<String>emptyList());
         noApplet = traits.contains("noapplet");
-
+    
         cwd = System.getProperty("user.dir");
     }
 
     @Override
     public void launch() throws Throwable {
         Class<?> main = loadMain();
-        Field gameDirField = Utils.getMinecraftGameDirField(main);
+        Field gameDirField = LegacyUtils.getMinecraftGameDirField(main);
 
         if (gameDirField == null) {
             LOGGER.warning("Could not find Mineraft path field.");

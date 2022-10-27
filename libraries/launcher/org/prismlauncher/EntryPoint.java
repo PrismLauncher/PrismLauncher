@@ -53,6 +53,8 @@
 package org.prismlauncher;
 
 import org.prismlauncher.exception.ParseException;
+import org.prismlauncher.launcher.Launcher;
+import org.prismlauncher.launcher.LauncherFactory;
 import org.prismlauncher.utils.Parameters;
 
 import java.io.BufferedReader;
@@ -81,7 +83,7 @@ public final class EntryPoint {
     }
 
     private Action parseLine(String inData) throws ParseException {
-        if (inData.length() == 0)
+        if (inData.isEmpty())
             throw new ParseException("Unexpected empty string!");
 
         String first = inData;

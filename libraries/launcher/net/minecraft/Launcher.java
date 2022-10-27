@@ -16,157 +16,167 @@
 
 package net.minecraft;
 
+
 import java.applet.Applet;
 import java.applet.AppletStub;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
+
 
 /*
  * WARNING: This class is reflectively accessed by legacy Forge versions.
  * Changing field and method declarations without further testing is not recommended.
  */
 public final class Launcher extends Applet implements AppletStub {
-
+    
     private final Map<String, String> params = new TreeMap<>();
-
+    
     private Applet wrappedApplet;
-
-    private URL documentBase;
-
+    
+    private final URL documentBase;
+    
     private boolean active = false;
-
+    
     public Launcher(Applet applet) {
         this(applet, null);
     }
-
+    
     public Launcher(Applet applet, URL documentBase) {
         this.setLayout(new BorderLayout());
-
+        
         this.add(applet, "Center");
-
+        
         this.wrappedApplet = applet;
-
+        
         try {
             if (documentBase != null) {
                 this.documentBase = documentBase;
             } else if (applet.getClass().getPackage().getName().startsWith("com.mojang")) {
                 // Special case only for Classic versions
-
+    
+                // TODO: 2022-10-27 Can this be changed to https
                 this.documentBase = new URL("http", "www.minecraft.net", 80, "/game/");
             } else {
+                // TODO: 2022-10-27 Can this be changed to https?
                 this.documentBase = new URL("http://www.minecraft.net/game/");
             }
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
-
+    
     public void replace(Applet applet) {
         this.wrappedApplet = applet;
-
+        
         applet.setStub(this);
         applet.setSize(getWidth(), getHeight());
-
+        
         this.setLayout(new BorderLayout());
         this.add(applet, "Center");
-
+        
         applet.init();
-
+        
         active = true;
-
+        
         applet.start();
-
+        
         validate();
     }
-
-    public void setParameter(String name, String value) {
-        params.put(name, value);
-    }
-
-    @Override
-    public String getParameter(String name) {
-        String param = params.get(name);
-
-        if (param != null)
-            return param;
-
-        try {
-            return super.getParameter(name);
-        } catch (Exception ignored) {}
-
-        return null;
-    }
-
+    
     @Override
     public boolean isActive() {
         return active;
     }
-
+    
     @Override
-    public void appletResize(int width, int height) {
-        wrappedApplet.resize(width, height);
+    public URL getDocumentBase() {
+        return documentBase;
     }
-
-    @Override
-    public void resize(int width, int height) {
-        wrappedApplet.resize(width, height);
-    }
-
-    @Override
-    public void resize(Dimension d) {
-        wrappedApplet.resize(d);
-    }
-
-    @Override
-    public void init() {
-        if (wrappedApplet != null)
-            wrappedApplet.init();
-    }
-
-    @Override
-    public void start() {
-        wrappedApplet.start();
-
-        active = true;
-    }
-
-    @Override
-    public void stop() {
-        wrappedApplet.stop();
-
-        active = false;
-    }
-
-    public void destroy() {
-        wrappedApplet.destroy();
-    }
-
+    
     @Override
     public URL getCodeBase() {
         try {
+            // TODO: 2022-10-27 Can this be changed to https?
             return new URL("http://www.minecraft.net/game/");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
-
+    
     @Override
-    public URL getDocumentBase() {
-        return documentBase;
+    public String getParameter(String name) {
+        String param = params.get(name);
+        
+        if (param != null)
+            return param;
+        
+        try {
+            return super.getParameter(name);
+        } catch (Exception ignored) {
+        }
+        
+        return null;
     }
-
+    
+    @Override
+    public void resize(int width, int height) {
+        wrappedApplet.resize(width, height);
+    }
+    
+    @Override
+    public void resize(Dimension d) {
+        wrappedApplet.resize(d);
+    }
+    
+    @Override
+    public void init() {
+        if (wrappedApplet != null)
+            wrappedApplet.init();
+    }
+    
+    @Override
+    public void start() {
+        wrappedApplet.start();
+        
+        active = true;
+    }
+    
+    @Override
+    public void stop() {
+        wrappedApplet.stop();
+        
+        active = false;
+    }
+    
+    public void destroy() {
+        wrappedApplet.destroy();
+    }
+    
+    @Override
+    public void appletResize(int width, int height) {
+        wrappedApplet.resize(width, height);
+    }
+    
     @Override
     public void setVisible(boolean b) {
         super.setVisible(b);
-
+        
         wrappedApplet.setVisible(b);
     }
-
-    public void update(Graphics paramGraphics) {}
-
-    public void paint(Graphics paramGraphics) {}
-
+    
+    public void paint(Graphics paramGraphics) {
+    }
+    
+    public void update(Graphics paramGraphics) {
+    }
+    
+    public void setParameter(String name, String value) {
+        params.put(name, value);
+    }
+    
 }
