@@ -60,8 +60,20 @@ endif()
 
 option(BUILD_TESTING "Build the testing tree." ON)
 
-find_package(ECM REQUIRED NO_MODULE)
-set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
+find_package(ECM QUIET NO_MODULE)
+if(NOT ECM_FOUND)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/CMakeLists.txt")
+        message(STATUS "Using bundled ECM")
+        set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/modules;${CMAKE_MODULE_PATH}")
+    else()
+        message(FATAL_ERROR
+            " Could not find ECM\n \n"
+            " Either install ECM using the system package manager or clone submodules\n"
+            " Submodules can be cloned with 'git submodule update --init --recursive'")
+    endif()
+else()
+    set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
+endif()
 include(CTest)
 include(ECMAddTests)
 if(BUILD_TESTING)
