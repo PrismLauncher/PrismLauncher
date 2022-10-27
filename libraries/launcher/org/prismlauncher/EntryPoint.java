@@ -138,10 +138,7 @@ public final class EntryPoint {
         }
 
         try {
-            Launcher launcher =
-                    LauncherFactory
-                            .INSTANCE
-                            .createLauncher(params);
+            Launcher launcher = LauncherFactory.createLauncher(params);
 
             launcher.launch();
 
