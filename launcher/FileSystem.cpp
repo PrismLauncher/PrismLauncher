@@ -401,6 +401,7 @@ bool overrideFolder(QString overwritten_path, QString override_path)
     std::error_code err;
     fs::copy_options opt = copy_opts::recursive | copy_opts::overwrite_existing;
 
+    // FIXME: hello traveller! Apparently std::copy does NOT overwrite existing files on GNU libstdc++ on Windows?
     fs::copy(toStdString(override_path), toStdString(overwritten_path), opt, err);
 
     if (err) {
