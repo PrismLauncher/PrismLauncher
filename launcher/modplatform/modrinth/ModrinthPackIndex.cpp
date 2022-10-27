@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-*  PolyMC - Minecraft Launcher
-*  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
-*
-*  This program is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation, version 3.
-*
-*  This program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include "ModrinthPackIndex.h"
 #include "ModrinthAPI.h"
@@ -35,7 +35,7 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 
     pack.provider = ModPlatform::Provider::MODRINTH;
     pack.name = Json::requireString(obj, "title");
-    
+
     pack.slug = Json::ensureString(obj, "slug", "");
     if (!pack.slug.isEmpty())
         pack.websiteUrl = "https://modrinth.com/mod/" + pack.slug;
@@ -59,23 +59,23 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.extraData.issuesUrl = Json::ensureString(obj, "issues_url");
-    if(pack.extraData.issuesUrl.endsWith('/'))
+    if (pack.extraData.issuesUrl.endsWith('/'))
         pack.extraData.issuesUrl.chop(1);
 
     pack.extraData.sourceUrl = Json::ensureString(obj, "source_url");
-    if(pack.extraData.sourceUrl.endsWith('/'))
+    if (pack.extraData.sourceUrl.endsWith('/'))
         pack.extraData.sourceUrl.chop(1);
 
     pack.extraData.wikiUrl = Json::ensureString(obj, "wiki_url");
-    if(pack.extraData.wikiUrl.endsWith('/'))
+    if (pack.extraData.wikiUrl.endsWith('/'))
         pack.extraData.wikiUrl.chop(1);
 
     pack.extraData.discordUrl = Json::ensureString(obj, "discord_url");
-    if(pack.extraData.discordUrl.endsWith('/'))
+    if (pack.extraData.discordUrl.endsWith('/'))
         pack.extraData.discordUrl.chop(1);
 
     auto donate_arr = Json::ensureArray(obj, "donation_urls");
-    for(auto d : donate_arr){
+    for (auto d : donate_arr) {
         auto d_obj = Json::requireObject(d);
 
         ModPlatform::DonationData donate;
@@ -104,7 +104,7 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         auto obj = versionIter.toObject();
         auto file = loadIndexedPackVersion(obj);
 
-        if(file.fileId.isValid()) // Heuristic to check if the returned value is valid
+        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
     }
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
@@ -116,7 +116,8 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
     pack.versionsLoaded = true;
 }
 
-auto Modrinth::loadIndexedPackVersion(QJsonObject &obj, QString preferred_hash_type, QString preferred_file_name) -> ModPlatform::IndexedVersion
+auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_type, QString preferred_file_name)
+    -> ModPlatform::IndexedVersion
 {
     ModPlatform::IndexedVersion file;
 
@@ -140,6 +141,12 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject &obj, QString preferred_hash_t
 
     auto files = Json::requireArray(obj, "files");
     int i = 0;
+
+    if (files.empty()) {
+        // This should not happen normally, but check just in case
+        qWarning() << "Modrinth returned an unexpected empty list of files:" << obj;
+        return {};
+    }
 
     // Find correct file (needed in cases where one version may have multiple files)
     // Will default to the last one if there's no primary (though I think Modrinth requires that
@@ -167,7 +174,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject &obj, QString preferred_hash_t
         file.fileName = Json::requireString(parent, "filename");
         file.is_preferred = Json::requireBoolean(parent, "primary") || (files.count() == 1);
         auto hash_list = Json::requireObject(parent, "hashes");
-        
+
         if (hash_list.contains(preferred_hash_type)) {
             file.hash = Json::requireString(hash_list, preferred_hash_type);
             file.hash_type = preferred_hash_type;
