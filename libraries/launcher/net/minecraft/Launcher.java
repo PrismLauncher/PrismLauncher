@@ -28,8 +28,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 
-/*
+/**
  * WARNING: This class is reflectively accessed by legacy Forge versions.
+ * <p>
  * Changing field and method declarations without further testing is not recommended.
  */
 public final class Launcher extends Applet implements AppletStub {
@@ -47,6 +48,7 @@ public final class Launcher extends Applet implements AppletStub {
     }
     
     public Launcher(Applet applet, URL documentBase) {
+        super();
         this.setLayout(new BorderLayout());
         
         this.add(applet, "Center");
@@ -153,6 +155,7 @@ public final class Launcher extends Applet implements AppletStub {
         active = false;
     }
     
+    @Override
     public void destroy() {
         wrappedApplet.destroy();
     }
@@ -163,15 +166,17 @@ public final class Launcher extends Applet implements AppletStub {
     }
     
     @Override
-    public void setVisible(boolean b) {
-        super.setVisible(b);
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
         
-        wrappedApplet.setVisible(b);
+        wrappedApplet.setVisible(visible);
     }
     
+    @Override
     public void paint(Graphics paramGraphics) {
     }
     
+    @Override
     public void update(Graphics paramGraphics) {
     }
     
