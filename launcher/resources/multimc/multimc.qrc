@@ -309,8 +309,54 @@
 
         <file>50x50/instances/enderman.png</file>
 
-        <file>scalable/instances/fox.svg</file>
-        <file>scalable/instances/bee.svg</file>
         <file>scalable/instances/prismlauncher.svg</file>
+
+        <file>scalable/instances/block_craftingtable.svg</file>
+        <file>scalable/instances/block_grass.svg</file>
+        <file>scalable/instances/mob_allay.svg</file>
+        <file>scalable/instances/mob_axolotl_blue.svg</file>
+        <file>scalable/instances/mob_axolotl_brown.svg</file>
+        <file>scalable/instances/mob_axolotl_cyan.svg</file>
+        <file>scalable/instances/mob_axolotl_gold.svg</file>
+        <file>scalable/instances/mob_axolotl_leucistic.svg</file>
+        <file>scalable/instances/mob_chicken.svg</file>
+        <file>scalable/instances/mob_creeper.svg</file>
+        <file>scalable/instances/mob_enderman.svg</file>
+        <file>scalable/instances/mob_fox_arctic.svg</file>
+        <file>scalable/instances/mob_fox.svg</file>
+        <file>scalable/instances/mob_frog_desert.svg</file>
+        <file>scalable/instances/mob_frog_snow.svg</file>
+        <file>scalable/instances/mob_frog_swamp.svg</file>
+        <file>scalable/instances/mob_husk.svg</file>
+        <file>scalable/instances/mob_magmacube.svg</file>
+        <file>scalable/instances/mob_mooshroom.svg</file>
+        <file>scalable/instances/mob_piglinbrute.svg</file>
+        <file>scalable/instances/mob_piglin.svg</file>
+        <file>scalable/instances/mob_pig.svg</file>
+        <file>scalable/instances/mob_polarbear.svg</file>
+        <file>scalable/instances/mob_pufferfish.svg</file>
+        <file>scalable/instances/mob_sheep.svg</file>
+        <file>scalable/instances/mob_skeleton.svg</file>
+        <file>scalable/instances/mob_slime.svg</file>
+        <file>scalable/instances/mob_spider.svg</file>
+        <file>scalable/instances/mob_stray.svg</file>
+        <file>scalable/instances/mob_strider.svg</file>
+        <file>scalable/instances/mob_villager.svg</file>
+        <file>scalable/instances/mob_witherskeleton.svg</file>
+        <file>scalable/instances/mob_zombie.svg</file>
+        <file>scalable/instances/mod_bee_angry.svg</file>
+        <file>scalable/instances/mod_bee.svg</file>
+        <file>scalable/instances/mod_cow.svg</file>
+        <file>scalable/instances/player_alex.svg</file>
+        <file>scalable/instances/player_ari.svg</file>
+        <file>scalable/instances/player_efe.svg</file>
+        <file>scalable/instances/player_herobrine.svg</file>
+        <file>scalable/instances/player_kai.svg</file>
+        <file>scalable/instances/player_makena.svg</file>
+        <file>scalable/instances/player_noor.svg</file>
+        <file>scalable/instances/player_steve.svg</file>
+        <file>scalable/instances/player_sunny.svg</file>
+        <file>scalable/instances/player_technoblade.svg</file>
+        <file>scalable/instances/player_zuri.svg</file>
     </qresource>
 </RCC>
