@@ -222,14 +222,14 @@ if(UNIX AND APPLE)
     set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_Name}.app")
 
     # Mac bundle settings
-    set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_Name}")
-    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_Name}: A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.")
+    set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_DisplayName}")
+    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_DisplayName}: A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.")
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.prismlauncher.${Launcher_Name}")
     set(MACOSX_BUNDLE_BUNDLE_VERSION "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_LONG_VERSION_STRING "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_ICON_FILE ${Launcher_Name}.icns)
-    set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2021-2022 ${Launcher_Copyright}")
+    set(MACOSX_BUNDLE_COPYRIGHT "© 2022 ${Launcher_Copyright_Mac}")
     set(MACOSX_SPARKLE_UPDATE_PUBLIC_KEY "v55ZWWD6QlPoXGV6VLzOTZxZUggWeE51X8cRQyQh6vA=")
     set(MACOSX_SPARKLE_UPDATE_FEED_URL "https://prismlauncher.org/feed/appcast.xml")
 

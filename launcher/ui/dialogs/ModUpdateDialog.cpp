@@ -366,32 +366,27 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
     auto changelog = new QTreeWidgetItem(changelog_item);
     auto changelog_area = new QTextBrowser();
 
+    QString text = info.changelog;
     switch (info.provider) {
         case ModPlatform::Provider::MODRINTH: {
             HoeDown h;
             // HoeDown bug?: \n aren't converted to <br>
-            auto text = h.process(info.changelog.toUtf8());
+            text = h.process(info.changelog.toUtf8());
 
             // Don't convert if there's an HTML tag right after (Qt rendering weirdness)
             text.remove(QRegularExpression("(\n+)(?=<)"));
             text.replace('\n', "<br>");
 
-            changelog_area->setHtml(text);
             break;
         }
-        case ModPlatform::Provider::FLAME: {
-            changelog_area->setHtml(info.changelog);
+        default:
             break;
-        }
     }
 
+    changelog_area->setHtml(text);
     changelog_area->setOpenExternalLinks(true);
-    changelog_area->setLineWrapMode(QTextBrowser::LineWrapMode::NoWrap);
+    changelog_area->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     changelog_area->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
-
-    // HACK: Is there a better way of achieving this?
-    auto font_height = QFontMetrics(changelog_area->font()).height();
-    changelog_area->setMaximumHeight((changelog_area->toPlainText().count(QRegularExpression("\n|<br>")) + 2) * font_height);
 
     ui->modTreeWidget->setItemWidget(changelog, 0, changelog_area);
 

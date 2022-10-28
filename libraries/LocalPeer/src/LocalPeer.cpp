@@ -210,7 +210,7 @@ void LocalPeer::receiveConnection()
         return;
     }
 
-    while (socket->bytesAvailable() < (int)sizeof(quint32))
+    while (socket->bytesAvailable() < static_cast<int>(sizeof(quint32)))
     {
         socket->waitForReadyRead();
     }
