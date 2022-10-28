@@ -656,6 +656,7 @@ public:
         actionLaunchInstance->setObjectName(QStringLiteral("actionLaunchInstance"));
         actionLaunchInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Launch"));
         actionLaunchInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Launch the selected instance."));
+        actionLaunchInstance->setIcon(APPLICATION->getThemedIcon("launch"));
         all_actions.append(&actionLaunchInstance);
 
         actionLaunchInstanceOffline = TranslatedAction(MainWindow);
@@ -741,7 +742,9 @@ public:
         // See https://github.com/PolyMC/PolyMC/issues/493
         connect(instanceToolBar, &QToolBar::orientationChanged, [=](Qt::Orientation){ instanceToolBar->setOrientation(Qt::Vertical); });
         instanceToolBar->setAllowedAreas(Qt::LeftToolBarArea | Qt::RightToolBarArea);
-        instanceToolBar->setToolButtonStyle(Qt::ToolButtonTextOnly);
+        instanceToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        instanceToolBar->setIconSize(QSize(16, 16));
+
         instanceToolBar->setFloatable(false);
         instanceToolBar->setWindowTitle(QT_TRANSLATE_NOOP("MainWindow", "Instance Toolbar"));
 
@@ -761,8 +764,18 @@ public:
         instanceToolBar->addAction(actionViewSelectedInstFolder);
 
         instanceToolBar->addAction(actionExportInstance);
-        instanceToolBar->addAction(actionDeleteInstance);
         instanceToolBar->addAction(actionCopyInstance);
+        instanceToolBar->addAction(actionDeleteInstance);
+
+        QLayout * lay = instanceToolBar->layout();
+        for(int i = 0; i < lay->count(); i++)
+        {
+            QLayoutItem * item = lay->itemAt(i);
+            if (item->widget()->metaObject()->className() == QString("QToolButton"))
+            {
+                item->setAlignment(Qt::AlignLeft);
+            }
+        }
 
         all_toolbars.append(&instanceToolBar);
         MainWindow->addToolBar(Qt::RightToolBarArea, instanceToolBar);
