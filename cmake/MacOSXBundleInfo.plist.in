@@ -48,21 +48,21 @@
     <array>
         <dict>
             <key>CFBundleTypeExtensions</key>
-			<array>
-				<string>zip</string>
+            <array>
+                <string>zip</string>
                 <string>mrpack</string>
-			</array>
-			<key>CFBundleTypeName</key>
-			<string>Prism Launcher instance</string>
-			<key>CFBundleTypeOSTypes</key>
-			<array>
-				<string>TEXT</string>
-				<string>utxt</string>
-				<string>TUTX</string>
-				<string>****</string>
-			</array>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
+            </array>
+            <key>CFBundleTypeName</key>
+            <string>Prism Launcher instance</string>
+            <key>CFBundleTypeOSTypes</key>
+            <array>
+                <string>TEXT</string>
+                <string>utxt</string>
+                <string>TUTX</string>
+                <string>****</string>
+            </array>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
             <key>LSHandlerRank</key>
             <string>Alternate</string>
         </dict>
