@@ -427,14 +427,21 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
         return false;
     }
 
+    HRESULT hres;
+
+    // ...yes, you need to initialize the entire COM stack just to make a shortcut
+    hres = CoInitialize(nullptr);
+    if (FAILED(hres))
+    {
+        qWarning() << "Failed to initialize COM!";
+        return false;
+    }
+
     WCHAR wsz[MAX_PATH];
 
-    // ...yes, you need to initialize the entire COM stack to make a shortcut in Windows
-    CoInitialize(nullptr);
-
-    HRESULT hres;
     IShellLink* psl;
 
+    // create an IShellLink instance - this stores the shortcut's attributes
     hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&psl);
     if (SUCCEEDED(hres))
     {
@@ -448,7 +455,7 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
 
         wmemset(wsz, 0, MAX_PATH);
         targetInfo.absolutePath().toWCharArray(wsz);
-        psl->SetWorkingDirectory(wsz);
+        psl->SetWorkingDirectory(wsz); // "Starts in" attribute
 
         if (!icon.isEmpty())
         {
@@ -457,6 +464,8 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
             psl->SetIconLocation(wsz, 0);
         }
 
+        // query an IPersistFile interface from our IShellLink instance
+        // this is the interface that will actually let us save the shortcut to disk!
         IPersistFile* ppf;
         hres = psl->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf);
         if (SUCCEEDED(hres))
@@ -484,6 +493,7 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
         qWarning() << "hres = " << hres;
     }
 
+    // go away COM, nobody likes you
     CoUninitialize();
 
     return SUCCEEDED(hres);
