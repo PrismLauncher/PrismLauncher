@@ -2112,6 +2112,10 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
 #if defined(Q_OS_WIN)
         iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.ico");
 
+        // part of fix for weird bug involving the window icon being replaced
+        // dunno why it happens, but this 2-line fix seems to be enough, so w/e
+        auto appIcon = QGuiApplication::windowIcon();
+
         QFile iconFile(iconPath);
         if (!iconFile.open(QFile::WriteOnly))
         {
@@ -2129,6 +2133,9 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
 
         iconFile.close();
         iconGenerated = true;
+
+        // restore original window icon
+        QGuiApplication::setWindowIcon(appIcon);
 #else
         iconPath = icon->getFilePath();
 #endif
