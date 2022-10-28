@@ -123,10 +123,6 @@ jobs:
             ccache:p
             ${{ matrix.qt_ver == 6 && 'qt6-5compat:p' || '' }}
 
-      - name: 'Setup MSVC for Ninja'
-        if: runner.os == 'Windows' && matrix.msystem == ''
-        uses: ilammy/msvc-dev-cmd@v1
-
       - name: Force newer ccache
         if: runner.os == 'Windows' && matrix.msystem == '' && inputs.build_type == 'Debug'
         run: |
@@ -230,7 +226,17 @@ jobs:
       - name: Configure CMake (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }}
+          # https://github.com/ccache/ccache/wiki/MS-Visual-Studio (I coudn't figure out the compiler prefix)
+          if ("${{ env.CCACHE_VAR }}")
+          {
+            Copy-Item C:/ProgramData/chocolatey/lib/ccache/tools/ccache-4.7.1-windows-x86_64/ccache.exe -Destination C:/ProgramData/chocolatey/lib/ccache/tools/ccache-4.7.1-windows-x86_64/cl.exe
+            echo "CLToolExe=cl.exe" >> $env:GITHUB_ENV
+            echo "CLToolPath=C:/ProgramData/chocolatey/lib/ccache/tools/ccache-4.7.1-windows-x86_64/" >> $env:GITHUB_ENV
+            echo "TrackFileAccess=false" >> $env:GITHUB_ENV
+          }
+          # Needed for ccache, but also speeds up compile
+          echo "UseMultiToolTask=true" >> $env:GITHUB_ENV
 
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
@@ -242,7 +248,7 @@ jobs:
       ##
 
       - name: Build
-        if: runner.os != 'Windows' || matrix.msystem == ''
+        if: runner.os != 'Windows'
         run: |
           cmake --build ${{ env.BUILD_DIR }}
 
@@ -252,12 +258,17 @@ jobs:
         run: |
           cmake --build ${{ env.BUILD_DIR }}
 
+      - name: Build (Windows MSVC)
+        if: runner.os == 'Windows' && matrix.msystem == ''
+        run: |
+          cmake --build ${{ env.BUILD_DIR }} --config ${{ inputs.build_type }}
+
       ##
       # TEST
       ##
 
       - name: Test
-        if: runner.os != 'Windows' || matrix.msystem == ''
+        if: runner.os != 'Windows'
         run: |
           ctest -E "^example64|example$" --test-dir build --output-on-failure
 
@@ -266,6 +277,11 @@ jobs:
         shell: msys2 {0}
         run: |
           ctest -E "^example64|example$" --test-dir build --output-on-failure
+
+      - name: Test (Windows MSVC)
+        if: runner.os == 'Windows' && matrix.msystem == ''
+        run: |
+          ctest -E "^example64|example$" --test-dir build --output-on-failure -C ${{ inputs.build_type }} 
 
       ##
       # CODE SCAN
@@ -323,7 +339,7 @@ jobs:
       - name: Package (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
-          cmake --install ${{ env.BUILD_DIR }}
+          cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build_type }}
 
           cd ${{ env.INSTALL_DIR }}
           if ("${{ matrix.qt_ver }}" -eq "5")
