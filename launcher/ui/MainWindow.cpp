@@ -2107,11 +2107,28 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
 
         QString iconPath;
+        bool iconGenerated = false;
 
 #if defined(Q_OS_WIN)
-        // TODO
-        // need to convert icon to ICO format and save it somewhere...
-        iconPath = "";
+        iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.ico");
+
+        QFile iconFile(iconPath);
+        if (!iconFile.open(QFile::WriteOnly))
+        {
+            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
+            return;
+        }
+
+        if (!icon->icon().pixmap(64, 64).save(&iconFile, "ICO"))
+        {
+            iconFile.close();
+            iconFile.remove();
+            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
+            return;
+        }
+
+        iconFile.close();
+        iconGenerated = true;
 #else
         iconPath = icon->getFilePath();
 #endif
@@ -2121,6 +2138,10 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
         else
         {
+            if (iconGenerated)
+            {
+                QFile::remove(iconPath);
+            }
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
         }
 #endif
