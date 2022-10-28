@@ -37,17 +37,21 @@
      </cc:Agent>
     </dc:contributor>
     <dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source>
-    <dc:rights>
-     <cc:Agent>
-      <dc:title>CC BY-SA 4.0</dc:title>
-     </cc:Agent>
-    </dc:rights>
     <dc:publisher>
      <cc:Agent>
       <dc:title>Prism Launcher</dc:title>
      </cc:Agent>
     </dc:publisher>
+    <cc:license rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/"/>
    </cc:Work>
+   <cc:License rdf:about="http://creativecommons.org/licenses/by-sa/4.0/">
+    <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+    <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+    <cc:requires rdf:resource="http://creativecommons.org/ns#Notice"/>
+    <cc:requires rdf:resource="http://creativecommons.org/ns#Attribution"/>
+    <cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
+    <cc:requires rdf:resource="http://creativecommons.org/ns#ShareAlike"/>
+   </cc:License>
   </rdf:RDF>
  </metadata>
 </svg>
