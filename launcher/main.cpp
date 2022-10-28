@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
         Q_INIT_RESOURCE(OSX);
         Q_INIT_RESOURCE(iOS);
         Q_INIT_RESOURCE(flat);
+        Q_INIT_RESOURCE(flat_white);
         return app.exec();
     }
     case Application::Failed:

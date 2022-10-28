@@ -310,9 +310,12 @@ void LauncherPage::applySettings()
         s->set("IconTheme", "flat");
         break;
     case 7:
-        s->set("IconTheme", "multimc");
+        s->set("IconTheme", "flat_white");
         break;
     case 8:
+        s->set("IconTheme", "multimc");
+        break;
+    case 9:
         s->set("IconTheme", "custom");
         break;
     }
@@ -408,13 +411,17 @@ void LauncherPage::loadSettings()
     {
         ui->themeComboBox->setCurrentIndex(6);
     }
-    else if (theme == "multimc")
+    else if (theme == "flat_white")
     {
         ui->themeComboBox->setCurrentIndex(7);
     }
-    else if (theme == "custom")
+    else if (theme == "multimc")
     {
         ui->themeComboBox->setCurrentIndex(8);
+    }
+    else if (theme == "custom")
+    {
+        ui->themeComboBox->setCurrentIndex(9);
     }
 
     {
