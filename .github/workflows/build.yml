@@ -35,7 +35,7 @@ jobs:
 
           - os: windows-2022
             name: "Windows"
-            msystem: clang32
+            msystem: clang64
             qt_ver: 6
 
           - os: macos-12
