@@ -1165,7 +1165,7 @@ void Application::setIconTheme(const QString& name)
 QIcon Application::getThemedIcon(const QString& name)
 {
     if(name == "logo") {
-        return QIcon(":/org.prismlauncher.PrismLauncher.svg");  // FIXME: Make this a BuildConfig variable
+        return QIcon(":/" + BuildConfig.LAUNCHER_SVGFILENAME);
     }
     return QIcon::fromTheme(name);
 }
