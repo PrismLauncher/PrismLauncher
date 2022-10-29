@@ -650,6 +650,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/ITheme.h
     ui/themes/SystemTheme.cpp
     ui/themes/SystemTheme.h
+    ui/themes/ThemeManager.cpp
+    ui/themes/ThemeManager.h
 
     # Processes
     LaunchController.h

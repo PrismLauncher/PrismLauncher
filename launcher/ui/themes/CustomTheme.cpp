@@ -1,12 +1,49 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher
+ *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Authors: Andrew Okin
+ *               Peterix
+ *               Orochimarufan <orochimarufan.x3@gmail.com>
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
 #include "CustomTheme.h"
-#include <QDir>
 #include <Json.h>
 #include <FileSystem.h>
+#include "ThemeManager.h"
 
 const char * themeFile = "theme.json";
-const char * styleFile = "themeStyle.css";
 
-static bool readThemeJson(const QString &path, QPalette &palette, double &fadeAmount, QColor &fadeColor, QString &name, QString &widgets)
+static bool readThemeJson(const QString &path, QPalette &palette, double &fadeAmount, QColor &fadeColor, QString &name, QString &widgets, QString &qssFilePath, bool &dataIncomplete)
 {
     QFileInfo pathInfo(path);
     if(pathInfo.exists() && pathInfo.isFile())
@@ -15,8 +52,11 @@ static bool readThemeJson(const QString &path, QPalette &palette, double &fadeAm
         {
             auto doc = Json::requireDocument(path, "Theme JSON file");
             const QJsonObject root = doc.object();
+            dataIncomplete = !root.contains("qssFilePath");
             name = Json::requireString(root, "name", "Theme name");
             widgets = Json::requireString(root, "widgets", "Qt widget theme");
+            qssFilePath = Json::ensureString(root, "qssFilePath", "themeStyle.css");
+            //auto colorFileList = Json::ensureArray(root, "colorFiles");
             auto colorsRoot = Json::requireObject(root, "colors", "colors object");
             auto readColor = [&](QString colorName) -> QColor
             {
@@ -26,7 +66,7 @@ static bool readThemeJson(const QString &path, QPalette &palette, double &fadeAm
                     QColor color(colorValue);
                     if(!color.isValid())
                     {
-                        qWarning() << "Color value" << colorValue << "for" << colorName << "was not recognized.";
+                        themeWarningLog << "Color value" << colorValue << "for" << colorName << "was not recognized.";
                         return QColor();
                     }
                     return color;
@@ -42,7 +82,7 @@ static bool readThemeJson(const QString &path, QPalette &palette, double &fadeAm
                 }
                 else
                 {
-                    qDebug() << "Color value for" << colorName << "was not present.";
+                    themeDebugLog << "Color value for" << colorName << "was not present.";
                 }
             };
 
@@ -68,23 +108,24 @@ static bool readThemeJson(const QString &path, QPalette &palette, double &fadeAm
         }
         catch (const Exception &e)
         {
-            qWarning() << "Couldn't load theme json: " << e.cause();
+            themeWarningLog << "Couldn't load theme json: " << e.cause();
             return false;
         }
     }
     else
     {
-        qDebug() << "No theme json present.";
+        themeDebugLog << "No theme json present.";
         return false;
     }
     return true;
 }
 
-static bool writeThemeJson(const QString &path, const QPalette &palette, double fadeAmount, QColor fadeColor, QString name, QString widgets)
+static bool writeThemeJson(const QString &path, const QPalette &palette, double fadeAmount, QColor fadeColor, QString name, QString widgets, QString qssFilePath)
 {
     QJsonObject rootObj;
     rootObj.insert("name", name);
     rootObj.insert("widgets", widgets);
+    rootObj.insert("qssFilePath", qssFilePath);
 
     QJsonObject colorsObj;
     auto insertColor = [&](QPalette::ColorRole role, QString colorName)
@@ -119,75 +160,112 @@ static bool writeThemeJson(const QString &path, const QPalette &palette, double 
     }
     catch (const Exception &e)
     {
-        qWarning() << "Failed to write theme json to" << path;
+        themeWarningLog << "Failed to write theme json to" << path;
         return false;
     }
 }
 
-CustomTheme::CustomTheme(ITheme* baseTheme, QString folder)
+/// @brief 
+/// @param baseTheme Base Theme
+/// @param fileInfo FileInfo object for file to load
+/// @param isManifest whether to load a theme manifest or a qss file
+CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest)
 {
-    m_id = folder;
-    QString path = FS::PathCombine("themes", m_id);
-    QString pathResources = FS::PathCombine("themes", m_id, "resources");
+    if (isManifest) {
+        m_id = fileInfo.dir().dirName();
 
-    qDebug() << "Loading theme" << m_id;
+        QString path = FS::PathCombine("themes", m_id);
+        QString pathResources = FS::PathCombine("themes", m_id, "resources");
 
-    if(!FS::ensureFolderPathExists(path) || !FS::ensureFolderPathExists(pathResources))
-    {
-        qWarning() << "couldn't create folder for theme!";
-        m_palette = baseTheme->colorScheme();
-        m_styleSheet = baseTheme->appStyleSheet();
-        return;
-    }
-
-    auto themeFilePath = FS::PathCombine(path, themeFile);
-
-    m_palette = baseTheme->colorScheme();
-    if (!readThemeJson(themeFilePath, m_palette, m_fadeAmount, m_fadeColor, m_name, m_widgets))
-    {
-        m_name = "Custom";
-        m_palette = baseTheme->colorScheme();
-        m_fadeColor = baseTheme->fadeColor();
-        m_fadeAmount = baseTheme->fadeAmount();
-        m_widgets = baseTheme->qtTheme();
-
-        QFileInfo info(themeFilePath);
-        if(!info.exists())
+        if(!FS::ensureFolderPathExists(path) || !FS::ensureFolderPathExists(pathResources))
         {
-            writeThemeJson(themeFilePath, m_palette, m_fadeAmount, m_fadeColor, "Custom", m_widgets);
-        }
-    }
-    else
-    {
-        m_palette = fadeInactive(m_palette, m_fadeAmount, m_fadeColor);
-    }
-
-    auto cssFilePath = FS::PathCombine(path, styleFile);
-    QFileInfo info (cssFilePath);
-    if(info.isFile())
-    {
-        try
-        {
-            // TODO: validate css?
-            m_styleSheet = QString::fromUtf8(FS::read(cssFilePath));
-        }
-        catch (const Exception &e)
-        {
-            qWarning() << "Couldn't load css:" << e.cause() << "from" << cssFilePath;
+            themeWarningLog << "X couldn't create folder for theme!";
+            m_palette = baseTheme->colorScheme();
             m_styleSheet = baseTheme->appStyleSheet();
+            return;
         }
-    }
-    else
-    {
-        qDebug() << "No theme css present.";
-        m_styleSheet = baseTheme->appStyleSheet();
+
+        auto themeFilePath = FS::PathCombine(path, themeFile);
+
+        bool jsonDataIncomplete = false;
+
+        m_palette = baseTheme->colorScheme();
+        if (!readThemeJson(themeFilePath, m_palette, m_fadeAmount, m_fadeColor, m_name, m_widgets, m_qssFilePath, jsonDataIncomplete))
+        {
+            themeDebugLog << "Did not read theme json file correctly, writing new one to: " << themeFilePath;
+            m_name = "Custom";
+            m_palette = baseTheme->colorScheme();
+            m_fadeColor = baseTheme->fadeColor();
+            m_fadeAmount = baseTheme->fadeAmount();
+            m_widgets = baseTheme->qtTheme();
+            m_qssFilePath = "themeStyle.css";
+
+            QFileInfo info(themeFilePath);
+        }
+        else
+        {
+            m_palette = fadeInactive(m_palette, m_fadeAmount, m_fadeColor);
+        }
+
+        if(jsonDataIncomplete)
+        {
+            writeThemeJson(fileInfo.absoluteFilePath(), m_palette, m_fadeAmount, m_fadeColor, m_name, m_widgets, m_qssFilePath);
+        }
+
+        auto cssFilePath = FS::PathCombine(path, m_qssFilePath);
+        QFileInfo info (cssFilePath);
+        if(info.isFile())
+        {
+            try
+            {
+                // TODO: validate css?
+                m_styleSheet = QString::fromUtf8(FS::read(cssFilePath));
+            }
+            catch (const Exception &e)
+            {
+                themeWarningLog << "X Couldn't load css:" << e.cause() << "from" << cssFilePath;
+                m_styleSheet = baseTheme->appStyleSheet();
+            }
+        }
+        else
+        {
+            themeDebugLog << "X No theme css present.";
+            m_styleSheet = baseTheme->appStyleSheet();
+            try
+            {
+                FS::write(cssFilePath, m_styleSheet.toUtf8());
+            }
+            catch (const Exception &e)
+            {
+                themeWarningLog << "X Couldn't write css:" << e.cause() << "to" << cssFilePath;
+            }
+        }
+    } else {
+        m_id = fileInfo.fileName();
+        m_name = fileInfo.baseName();
+        QString path = fileInfo.filePath();
+        //themeDebugLog << "Theme ID: " << m_id;
+        //themeDebugLog << "Theme Name: " << m_name;
+        //themeDebugLog << "Theme Path: " << path;
+
+        if(!FS::ensureFilePathExists(path))
+        {
+            themeWarningLog << m_name << " Theme file path doesn't exist!";
+            m_palette = baseTheme->colorScheme();
+            m_styleSheet = baseTheme->appStyleSheet();
+            return;
+        }
+
+        m_palette = baseTheme->colorScheme();
         try
         {
-            FS::write(cssFilePath, m_styleSheet.toUtf8());
+            // TODO: validate qss?
+            m_styleSheet = QString::fromUtf8(FS::read(path));
         }
         catch (const Exception &e)
         {
-            qWarning() << "Couldn't write css:" << e.cause() << "to" << cssFilePath;
+            themeWarningLog << "Couldn't load qss:" << e.cause() << "from" << path;
+            m_styleSheet = baseTheme->appStyleSheet();
         }
     }
 }

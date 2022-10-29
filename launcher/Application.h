@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 Tayou <tayou@gmx.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,6 +44,8 @@
 #include <QDateTime>
 #include <QUrl>
 #include <updater/GoUpdate.h>
+
+#include "ui/themes/ThemeManager.h"
 
 #include <BaseInstance.h>
 
@@ -198,6 +201,8 @@ public:
 
     void ShowGlobalSettings(class QWidget * parent, QString open_page = QString());
 
+    ThemeManager* getThemeManager();
+
 signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
@@ -255,9 +260,9 @@ private:
     std::shared_ptr<JavaInstallList> m_javalist;
     std::shared_ptr<TranslationsModel> m_translations;
     std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
-    std::map<QString, std::unique_ptr<ITheme>> m_themes;
     std::unique_ptr<MCEditTool> m_mcedit;
     QSet<QString> m_features;
+    ThemeManager* m_themeManager;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 

@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *
+ *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -53,12 +56,6 @@
 #include "ui/pages/global/AccountListPage.h"
 #include "ui/pages/global/APIPage.h"
 #include "ui/pages/global/CustomCommandsPage.h"
-
-#include "ui/themes/ITheme.h"
-#include "ui/themes/SystemTheme.h"
-#include "ui/themes/DarkTheme.h"
-#include "ui/themes/BrightTheme.h"
-#include "ui/themes/CustomTheme.h"
 
 #ifdef Q_OS_WIN
 #include "ui/WinDarkmode.h"
@@ -749,28 +746,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         qDebug() << "<> Instance icons intialized.";
     }
 
-    // Icon themes
+    // Themes
     {
-        // TODO: icon themes and instance icons do not mesh well together. Rearrange and fix discrepancies!
-        // set icon theme search path!
-        auto searchPaths = QIcon::themeSearchPaths();
-        searchPaths.append("iconthemes");
-        QIcon::setThemeSearchPaths(searchPaths);
-        qDebug() << "<> Icon themes initialized.";
-    }
+        m_themeManager = new ThemeManager(m_mainWindow);
 
-    // Initialize widget themes
-    {
-        auto insertTheme = [this](ITheme * theme)
-        {
-            m_themes.insert(std::make_pair(theme->id(), std::unique_ptr<ITheme>(theme)));
-        };
-        auto darkTheme = new DarkTheme();
-        insertTheme(new SystemTheme());
-        insertTheme(darkTheme);
-        insertTheme(new BrightTheme());
-        insertTheme(new CustomTheme(darkTheme, "custom"));
-        qDebug() << "<> Widget themes initialized.";
+        m_themeManager->InitializeThemes();
     }
 
     // initialize and load all instances
@@ -878,6 +858,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
 
     performMainStartupAction();
+}
+
+ThemeManager* Application::getThemeManager() {
+    return Application::m_themeManager;
 }
 
 bool Application::createSetupWizard()
@@ -1127,43 +1111,17 @@ std::shared_ptr<JavaInstallList> Application::javalist()
 
 std::vector<ITheme *> Application::getValidApplicationThemes()
 {
-    std::vector<ITheme *> ret;
-    auto iter = m_themes.cbegin();
-    while (iter != m_themes.cend())
-    {
-        ret.push_back((*iter).second.get());
-        iter++;
-    }
-    return ret;
+    return m_themeManager->getValidApplicationThemes();
 }
 
 void Application::setApplicationTheme(const QString& name, bool initial)
 {
-    auto systemPalette = qApp->palette();
-    auto themeIter = m_themes.find(name);
-    if(themeIter != m_themes.end())
-    {
-        auto & theme = (*themeIter).second;
-        theme->apply(initial);
-#ifdef Q_OS_WIN
-        if (m_mainWindow && IsWindows10OrGreater()) {
-            if (QString::compare(theme->id(), "dark") == 0) {
-                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-            } else {
-                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
-            }
-        }
-#endif
-    }
-    else
-    {
-        qWarning() << "Tried to set invalid theme:" << name;
-    }
+    m_themeManager->setApplicationTheme(name, initial);
 }
 
 void Application::setIconTheme(const QString& name)
 {
-    QIcon::setThemeName(name);
+    m_themeManager->setIconTheme(name);
 }
 
 QIcon Application::getThemedIcon(const QString& name)
