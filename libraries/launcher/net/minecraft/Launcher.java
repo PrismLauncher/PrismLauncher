@@ -93,7 +93,7 @@ public final class Launcher extends Applet implements AppletStub {
         try {
             if (documentBase != null) {
                 this.documentBase = documentBase;
-            } else if (applet.getClass().getPackage().getName().startsWith("com.mojang")) {
+            } else if (applet.getClass().getPackage().getName().startsWith("com.mojang.")) {
                 // Special case only for Classic versions
 
                 // TODO: 2022-10-27 Can this be changed to https
