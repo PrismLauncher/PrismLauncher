@@ -70,7 +70,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@SuppressWarnings("removal")
+/**
+ * Used to launch old versions that support applets.
+ */
 public final class LegacyLauncher extends AbstractLauncher {
 
     private static final Logger LOGGER = Logger.getLogger("LegacyLauncher");

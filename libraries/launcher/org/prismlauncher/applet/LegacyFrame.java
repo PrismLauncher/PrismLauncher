@@ -74,19 +74,18 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@SuppressWarnings("removal")
 public final class LegacyFrame extends Frame {
 
     private static final Logger LOGGER = Logger.getLogger("LegacyFrame");
 
-    private final Launcher appletWrap;
+    private final Launcher launcher;
 
-    public LegacyFrame(String title, Applet mcApplet) {
+    public LegacyFrame(String title, Applet applet) {
         super(title);
 
-        appletWrap = new Launcher(mcApplet);
+        launcher = new Launcher(applet);
 
-        mcApplet.setStub(appletWrap);
+        applet.setStub(launcher);
 
         try {
             setIconImage(ImageIO.read(new File("icon.png")));
@@ -100,8 +99,8 @@ public final class LegacyFrame extends Frame {
     public void start (
         String user,
         String session,
-        int winSizeW,
-        int winSizeH,
+        int width,
+        int height,
         boolean maximize,
         String serverAddress,
         String serverPort,
@@ -130,9 +129,9 @@ public final class LegacyFrame extends Frame {
                     LOGGER.warning("Mpticket file is corrupted!");
                 } else {
                     // Assumes parameters are valid and in the correct order
-                    appletWrap.setParameter("server", lines.get(0));
-                    appletWrap.setParameter("port", lines.get(1));
-                    appletWrap.setParameter("mppass", lines.get(2));
+                    launcher.setParameter("server", lines.get(0));
+                    launcher.setParameter("port", lines.get(1));
+                    launcher.setParameter("mppass", lines.get(2));
                 }
             } catch (IOException e) {
                 LOGGER.log(Level.WARNING, "Unable to read mpticket file!", e);
@@ -140,20 +139,20 @@ public final class LegacyFrame extends Frame {
         }
 
         if (serverAddress != null) {
-            appletWrap.setParameter("server", serverAddress);
-            appletWrap.setParameter("port", serverPort);
+            launcher.setParameter("server", serverAddress);
+            launcher.setParameter("port", serverPort);
         }
 
-        appletWrap.setParameter("username", user);
-        appletWrap.setParameter("sessionid", session);
-        appletWrap.setParameter("stand-alone", "true"); // Show the quit button. TODO: why won't this work?
-        appletWrap.setParameter("haspaid", "true"); // Some old versions need this for world saves to work.
-        appletWrap.setParameter("demo", isDemo ? "true" : "false");
-        appletWrap.setParameter("fullscreen", "false");
+        launcher.setParameter("username", user);
+        launcher.setParameter("sessionid", session);
+        launcher.setParameter("stand-alone", "true"); // Show the quit button. TODO: why won't this work?
+        launcher.setParameter("haspaid", "true"); // Some old versions need this for world saves to work.
+        launcher.setParameter("demo", isDemo ? "true" : "false");
+        launcher.setParameter("fullscreen", "false");
 
-        add(appletWrap);
+        add(launcher);
 
-        appletWrap.setPreferredSize(new Dimension(winSizeW, winSizeH));
+        launcher.setPreferredSize(new Dimension(width, height));
 
         pack();
 
@@ -165,8 +164,8 @@ public final class LegacyFrame extends Frame {
 
         validate();
 
-        appletWrap.init();
-        appletWrap.start();
+        launcher.init();
+        launcher.start();
 
         setVisible(true);
     }
@@ -174,14 +173,14 @@ public final class LegacyFrame extends Frame {
     private final class ForceExitHandler extends WindowAdapter {
 
         @Override
-        public void windowClosing(WindowEvent e) {
+        public void windowClosing(WindowEvent event) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         Thread.sleep(30000L);
-                    } catch (InterruptedException localInterruptedException) {
-                        localInterruptedException.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
 
                     LOGGER.info("Forcing exit!");
@@ -190,9 +189,9 @@ public final class LegacyFrame extends Frame {
                 }
             }).start();
 
-            if (appletWrap != null) {
-                appletWrap.stop();
-                appletWrap.destroy();
+            if (launcher != null) {
+                launcher.stop();
+                launcher.destroy();
             }
 
             // old minecraft versions can hang without this >_<

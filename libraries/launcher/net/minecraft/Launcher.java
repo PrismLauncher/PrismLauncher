@@ -84,7 +84,6 @@ public final class Launcher extends Applet implements AppletStub {
     }
 
     public Launcher(Applet applet, URL documentBase) {
-        super();
         this.setLayout(new BorderLayout());
 
         this.add(applet, "Center");
@@ -167,8 +166,8 @@ public final class Launcher extends Applet implements AppletStub {
     }
 
     @Override
-    public void resize(Dimension d) {
-        wrappedApplet.resize(d);
+    public void resize(Dimension size) {
+        wrappedApplet.resize(size);
     }
 
     @Override
@@ -209,11 +208,11 @@ public final class Launcher extends Applet implements AppletStub {
     }
 
     @Override
-    public void paint(Graphics paramGraphics) {
+    public void paint(Graphics graphics) {
     }
 
     @Override
-    public void update(Graphics paramGraphics) {
+    public void update(Graphics graphics) {
     }
 
     public void setParameter(String name, String value) {
