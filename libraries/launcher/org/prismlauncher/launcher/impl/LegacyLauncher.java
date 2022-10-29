@@ -56,7 +56,6 @@
 package org.prismlauncher.launcher.impl;
 
 import org.prismlauncher.applet.LegacyFrame;
-import org.prismlauncher.utils.LegacyUtils;
 import org.prismlauncher.utils.Parameters;
 
 import java.applet.Applet;
@@ -65,6 +64,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -101,7 +101,7 @@ public final class LegacyLauncher extends AbstractLauncher {
     @Override
     public void launch() throws Throwable {
         Class<?> main = loadMain();
-        Field gameDirField = LegacyUtils.getMinecraftGameDirField(main);
+        Field gameDirField = getMinecraftGameDirField(main);
 
         if (gameDirField == null) {
             LOGGER.warning("Could not find Mineraft path field.");
@@ -141,6 +141,29 @@ public final class LegacyLauncher extends AbstractLauncher {
         }
 
         invokeMain(main);
+    }
+
+    /**
+     * Finds a field that looks like a Minecraft base folder in a supplied class
+     * @param clazz the class to scan
+     * @return The found field.
+     */
+    private static Field getMinecraftGameDirField(Class<?> clazz) {
+        // Field we're looking for is always
+        // private static File obfuscatedName = null;
+        for (Field field : clazz.getDeclaredFields()) {
+            // Has to be File
+            if (field.getType() != File.class)
+                continue;
+
+            // And Private Static.
+            if (!Modifier.isStatic(field.getModifiers()) || !Modifier.isPrivate(field.getModifiers()))
+                continue;
+
+            return field;
+        }
+
+        return null;
     }
 
 }
