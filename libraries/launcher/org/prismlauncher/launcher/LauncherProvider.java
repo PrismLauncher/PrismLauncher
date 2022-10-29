@@ -35,10 +35,10 @@
 
 package org.prismlauncher.launcher;
 
-
 import org.prismlauncher.utils.Parameters;
 
-
 public interface LauncherProvider {
+
     Launcher provide(Parameters parameters);
+
 }

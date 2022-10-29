@@ -16,7 +16,6 @@
 
 package net.minecraft;
 
-
 import java.applet.Applet;
 import java.applet.AppletStub;
 import java.awt.BorderLayout;
@@ -27,40 +26,39 @@ import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
 
-
 /**
  * WARNING: This class is reflectively accessed by legacy Forge versions.
  * <p>
  * Changing field and method declarations without further testing is not recommended.
  */
 public final class Launcher extends Applet implements AppletStub {
-    
+
     private final Map<String, String> params = new TreeMap<>();
-    
+
     private Applet wrappedApplet;
-    
+
     private final URL documentBase;
-    
+
     private boolean active = false;
-    
+
     public Launcher(Applet applet) {
         this(applet, null);
     }
-    
+
     public Launcher(Applet applet, URL documentBase) {
         super();
         this.setLayout(new BorderLayout());
-        
+
         this.add(applet, "Center");
-        
+
         this.wrappedApplet = applet;
-        
+
         try {
             if (documentBase != null) {
                 this.documentBase = documentBase;
             } else if (applet.getClass().getPackage().getName().startsWith("com.mojang")) {
                 // Special case only for Classic versions
-    
+
                 // TODO: 2022-10-27 Can this be changed to https
                 this.documentBase = new URL("http", "www.minecraft.net", 80, "/game/");
             } else {
@@ -71,35 +69,35 @@ public final class Launcher extends Applet implements AppletStub {
             throw new RuntimeException(e);
         }
     }
-    
+
     public void replace(Applet applet) {
         this.wrappedApplet = applet;
-        
+
         applet.setStub(this);
         applet.setSize(getWidth(), getHeight());
-        
+
         this.setLayout(new BorderLayout());
         this.add(applet, "Center");
-        
+
         applet.init();
-        
+
         active = true;
-        
+
         applet.start();
-        
+
         validate();
     }
-    
+
     @Override
     public boolean isActive() {
         return active;
     }
-    
+
     @Override
     public URL getDocumentBase() {
         return documentBase;
     }
-    
+
     @Override
     public URL getCodeBase() {
         try {
@@ -109,79 +107,79 @@ public final class Launcher extends Applet implements AppletStub {
             throw new RuntimeException(e);
         }
     }
-    
+
     @Override
     public String getParameter(String name) {
         String param = params.get(name);
-        
+
         if (param != null)
             return param;
-        
+
         try {
             return super.getParameter(name);
         } catch (Exception ignored) {
         }
-        
+
         return null;
     }
-    
+
     @Override
     public void resize(int width, int height) {
         wrappedApplet.resize(width, height);
     }
-    
+
     @Override
     public void resize(Dimension d) {
         wrappedApplet.resize(d);
     }
-    
+
     @Override
     public void init() {
         if (wrappedApplet != null)
             wrappedApplet.init();
     }
-    
+
     @Override
     public void start() {
         wrappedApplet.start();
-        
+
         active = true;
     }
-    
+
     @Override
     public void stop() {
         wrappedApplet.stop();
-        
+
         active = false;
     }
-    
+
     @Override
     public void destroy() {
         wrappedApplet.destroy();
     }
-    
+
     @Override
     public void appletResize(int width, int height) {
         wrappedApplet.resize(width, height);
     }
-    
+
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
-        
+
         wrappedApplet.setVisible(visible);
     }
-    
+
     @Override
     public void paint(Graphics paramGraphics) {
     }
-    
+
     @Override
     public void update(Graphics paramGraphics) {
     }
-    
+
     public void setParameter(String name, String value) {
         params.put(name, value);
     }
-    
+
 }

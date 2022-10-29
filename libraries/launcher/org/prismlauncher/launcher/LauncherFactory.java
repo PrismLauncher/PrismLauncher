@@ -35,7 +35,6 @@
 
 package org.prismlauncher.launcher;
 
-
 import org.prismlauncher.launcher.impl.LegacyLauncher;
 import org.prismlauncher.launcher.impl.StandardLauncher;
 import org.prismlauncher.utils.Parameters;
@@ -43,10 +42,10 @@ import org.prismlauncher.utils.Parameters;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public final class LauncherFactory {
+
     private static final Map<String, LauncherProvider> launcherRegistry = new HashMap<>();
-    
+
     static {
         launcherRegistry.put("standard", new LauncherProvider() {
             @Override
@@ -63,15 +62,15 @@ public final class LauncherFactory {
     }
     private LauncherFactory() {
     }
-    
+
     public static Launcher createLauncher(Parameters parameters) {
         String name = parameters.getString("launcher");
-        
+
         LauncherProvider launcherProvider = launcherRegistry.get(name);
-        
+
         if (launcherProvider == null)
             throw new IllegalArgumentException("Invalid launcher type: " + name);
-        
+
         return launcherProvider.provide(parameters);
     }
 }

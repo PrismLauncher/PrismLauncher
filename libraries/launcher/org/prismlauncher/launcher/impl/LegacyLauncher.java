@@ -15,7 +15,6 @@
 
 package org.prismlauncher.launcher.impl;
 
-
 import org.prismlauncher.applet.LegacyFrame;
 import org.prismlauncher.utils.LegacyUtils;
 import org.prismlauncher.utils.Parameters;
@@ -45,15 +44,15 @@ public final class LegacyLauncher extends AbstractLauncher {
 
     public LegacyLauncher(Parameters params) {
         super(params);
-    
+
         user = params.getString("userName");
         session = params.getString("sessionId");
         title = params.getString("windowTitle", "Minecraft");
         appletClass = params.getString("appletClass", "net.minecraft.client.MinecraftApplet");
-    
+
         List<String> traits = params.getList("traits", Collections.<String>emptyList());
         noApplet = traits.contains("noapplet");
-    
+
         cwd = System.getProperty("user.dir");
     }
 

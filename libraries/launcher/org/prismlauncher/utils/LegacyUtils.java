@@ -16,17 +16,15 @@
 
 package org.prismlauncher.utils;
 
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-
 public final class LegacyUtils {
-    
+
     private LegacyUtils() {
     }
-    
+
     /**
      * Finds a field that looks like a Minecraft base folder in a supplied class
      *
@@ -39,16 +37,16 @@ public final class LegacyUtils {
             // Has to be File
             if (field.getType() != File.class)
                 continue;
-            
+
             // And Private Static.
             if (!Modifier.isStatic(field.getModifiers()) || !Modifier.isPrivate(field.getModifiers()))
                 continue;
-            
+
             return field;
         }
-        
+
         return null;
     }
-    
+
 }
 

@@ -15,7 +15,6 @@
 
 package org.prismlauncher.launcher.impl;
 
-
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.utils.Parameters;
@@ -26,9 +25,8 @@ import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public abstract class AbstractLauncher implements Launcher {
-    
+
     private static final int DEFAULT_WINDOW_WIDTH = 854;
     private static final int DEFAULT_WINDOW_HEIGHT = 480;
 
@@ -44,21 +42,21 @@ public abstract class AbstractLauncher implements Launcher {
     protected final String serverAddress, serverPort;
 
     protected final ClassLoader classLoader;
-    
+
     protected AbstractLauncher(Parameters params) {
         classLoader = ClassLoader.getSystemClassLoader();
-        
+
         mcParams = params.getList("param", new ArrayList<String>());
         mainClass = params.getString("mainClass", "net.minecraft.client.Minecraft");
-        
+
         serverAddress = params.getString("serverAddress", null);
         serverPort = params.getString("serverPort", null);
-        
+
         String windowParams = params.getString("windowParams", null);
-        
+
         if ("max".equals(windowParams) || windowParams == null) {
             maximize = windowParams != null;
-            
+
             width = DEFAULT_WINDOW_WIDTH;
             height = DEFAULT_WINDOW_HEIGHT;
         } else {
@@ -82,7 +80,7 @@ public abstract class AbstractLauncher implements Launcher {
     protected Class<?> loadMain() throws ClassNotFoundException {
         return classLoader.loadClass(mainClass);
     }
-    
+
     protected void loadAndInvokeMain() throws Throwable {
         invokeMain(loadMain());
     }

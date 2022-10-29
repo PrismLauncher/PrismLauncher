@@ -52,7 +52,6 @@
 
 package org.prismlauncher;
 
-
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.LauncherFactory;
@@ -65,37 +64,37 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public final class EntryPoint {
+
     private static final Logger LOGGER = Logger.getLogger("EntryPoint");
-    
+
     private final Parameters params = new Parameters();
-    
+
     public static void main(String[] args) {
         EntryPoint listener = new EntryPoint();
-        
+
         ExitCode exitCode = listener.listen();
-        
+
         if (exitCode != ExitCode.NORMAL) {
             LOGGER.warning("Exiting with " + exitCode);
-            
+
             System.exit(exitCode.numericalCode);
         }
     }
-    
+
     private static PreLaunchAction parseLine(String inData, Parameters params) throws ParseException {
         if (inData.isEmpty())
             throw new ParseException("Unexpected empty string!");
-        
+
         String first = inData;
         String second = null;
         int splitPoint = inData.indexOf(' ');
-        
+
         if (splitPoint != -1) {
             first = first.substring(0, splitPoint);
             second = inData.substring(splitPoint + 1);
         }
-        
+
         switch (first) {
             case "launch":
                 return PreLaunchAction.LAUNCH;
@@ -104,22 +103,22 @@ public final class EntryPoint {
             default:
                 if (second == null || second.isEmpty())
                     throw new ParseException("Error while parsing:" + inData);
-                
+
                 params.add(first, second);
-                
+
                 return PreLaunchAction.PROCEED;
         }
     }
-    
+
     public ExitCode listen() {
         PreLaunchAction preLaunchAction = PreLaunchAction.PROCEED;
-        
+
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
                 System.in,
                 StandardCharsets.UTF_8
         ))) {
             String line;
-            
+
             while (preLaunchAction == PreLaunchAction.PROCEED) {
                 if ((line = reader.readLine()) != null) {
                     preLaunchAction = parseLine(line, this.params);
@@ -129,50 +128,49 @@ public final class EntryPoint {
             }
         } catch (IOException | ParseException e) {
             LOGGER.log(Level.SEVERE, "Launcher abort due to exception:", e);
-            
+
             return ExitCode.ERROR;
         }
-        
+
         // Main loop
         if (preLaunchAction == PreLaunchAction.ABORT) {
             LOGGER.info("Launch aborted by the launcher.");
-            
+
             return ExitCode.ERROR;
         }
-        
+
         try {
             Launcher launcher = LauncherFactory.createLauncher(params);
-            
+
             launcher.launch();
-            
+
             return ExitCode.NORMAL;
         } catch (IllegalArgumentException e) {
             LOGGER.log(Level.SEVERE, "Wrong argument.", e);
-            
+
             return ExitCode.ERROR;
         } catch (Throwable e) {
             LOGGER.log(Level.SEVERE, "Exception caught from launcher.", e);
-            
+
             return ExitCode.ERROR;
         }
     }
-    
+
     private enum PreLaunchAction {
         PROCEED,
         LAUNCH,
         ABORT
     }
-    
-    
+
     private enum ExitCode {
         NORMAL(0),
         ERROR(1);
-        
+
         private final int numericalCode;
-        
+
         ExitCode(int numericalCode) {
             this.numericalCode = numericalCode;
         }
     }
-    
+
 }
