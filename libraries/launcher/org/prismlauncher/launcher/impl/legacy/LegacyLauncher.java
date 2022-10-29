@@ -53,9 +53,9 @@
  *      limitations under the License.
  */
 
-package org.prismlauncher.launcher.impl;
+package org.prismlauncher.launcher.impl.legacy;
 
-import org.prismlauncher.applet.LegacyFrame;
+import org.prismlauncher.launcher.impl.AbstractLauncher;
 import org.prismlauncher.utils.Parameters;
 
 import java.applet.Applet;

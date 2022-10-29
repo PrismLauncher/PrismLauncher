@@ -11,14 +11,13 @@ set(SRC
     org/prismlauncher/launcher/Launcher.java
     org/prismlauncher/launcher/LauncherFactory.java
     org/prismlauncher/launcher/LauncherProvider.java
+    org/prismlauncher/launcher/impl/legacy/LegacyFrame.java
+    org/prismlauncher/launcher/impl/legacy/LegacyLauncher.java
     org/prismlauncher/launcher/impl/AbstractLauncher.java
-    org/prismlauncher/launcher/impl/LegacyLauncher.java
     org/prismlauncher/launcher/impl/StandardLauncher.java
-    org/prismlauncher/applet/LegacyFrame.java
     org/prismlauncher/exception/ParameterNotFoundException.java
     org/prismlauncher/exception/ParseException.java
     org/prismlauncher/utils/Parameters.java
-    org/prismlauncher/utils/LegacyUtils.java
     net/minecraft/Launcher.java
 )
 add_jar(NewLaunch ${SRC})

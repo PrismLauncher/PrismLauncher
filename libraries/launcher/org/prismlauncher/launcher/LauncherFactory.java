@@ -56,8 +56,8 @@
 
 package org.prismlauncher.launcher;
 
-import org.prismlauncher.launcher.impl.LegacyLauncher;
 import org.prismlauncher.launcher.impl.StandardLauncher;
+import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
 import org.prismlauncher.utils.Parameters;
 
 import java.util.HashMap;

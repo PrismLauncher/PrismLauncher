@@ -54,7 +54,7 @@
  *      limitations under the License.
  */
 
-package org.prismlauncher.applet;
+package org.prismlauncher.launcher.impl.legacy;
 
 import net.minecraft.Launcher;
 
