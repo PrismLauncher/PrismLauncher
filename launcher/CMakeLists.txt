@@ -1059,97 +1059,95 @@ if(INSTALL_BUNDLE STREQUAL "full")
         COMPONENT Runtime
     )
     # Bundle plugins
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-        # Image formats
+    # Image formats
+    install(
+        DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+        CONFIGURATIONS Debug RelWithDebInfo
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "tga|tiff|mng" EXCLUDE
+    )
+    install(
+        DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+        CONFIGURATIONS Release MinSizeRel
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "tga|tiff|mng" EXCLUDE
+        REGEX "d\\." EXCLUDE
+        REGEX "_debug\\." EXCLUDE
+        REGEX "\\.dSYM" EXCLUDE
+    )
+    # Icon engines
+    install(
+        DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
+        CONFIGURATIONS Debug RelWithDebInfo
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "fontawesome" EXCLUDE
+    )
+    install(
+        DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
+        CONFIGURATIONS Release MinSizeRel
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "fontawesome" EXCLUDE
+        REGEX "d\\." EXCLUDE
+        REGEX "_debug\\." EXCLUDE
+        REGEX "\\.dSYM" EXCLUDE
+    )
+    # Platform plugins
+    install(
+        DIRECTORY "${QT_PLUGINS_DIR}/platforms"
+        CONFIGURATIONS Debug RelWithDebInfo
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "minimal|linuxfb|offscreen" EXCLUDE
+    )
+    install(
+        DIRECTORY "${QT_PLUGINS_DIR}/platforms"
+        CONFIGURATIONS Release MinSizeRel
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "minimal|linuxfb|offscreen" EXCLUDE
+        REGEX "[^2]d\\." EXCLUDE
+        REGEX "_debug\\." EXCLUDE
+        REGEX "\\.dSYM" EXCLUDE
+    )
+    # Style plugins
+    if(EXISTS "${QT_PLUGINS_DIR}/styles")
         install(
-            DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
+            DIRECTORY "${QT_PLUGINS_DIR}/styles"
+            CONFIGURATIONS Debug RelWithDebInfo
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            REGEX "tga|tiff|mng" EXCLUDE
         )
-        # Icon engines
         install(
-            DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
+            DIRECTORY "${QT_PLUGINS_DIR}/styles"
+            CONFIGURATIONS Release MinSizeRel
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            REGEX "fontawesome" EXCLUDE
-        )
-        # Platform plugins
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            REGEX "minimal|linuxfb|offscreen" EXCLUDE
-        )
-        # Style plugins
-        if(EXISTS "${QT_PLUGINS_DIR}/styles")
-            install(
-                DIRECTORY "${QT_PLUGINS_DIR}/styles"
-                DESTINATION ${PLUGIN_DEST_DIR}
-                COMPONENT Runtime
-            )
-        endif()
-        # TLS plugins (Qt 6 only)
-        if(EXISTS "${QT_PLUGINS_DIR}/tls")
-            install(
-                DIRECTORY "${QT_PLUGINS_DIR}/tls"
-                DESTINATION ${PLUGIN_DEST_DIR}
-                COMPONENT Runtime
-            )
-        endif()
-    else()
-        # Image formats
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            REGEX "tga|tiff|mng" EXCLUDE
             REGEX "d\\." EXCLUDE
             REGEX "_debug\\." EXCLUDE
             REGEX "\\.dSYM" EXCLUDE
         )
-        # Icon engines
+    endif()
+    # TLS plugins (Qt 6 only)
+    if(EXISTS "${QT_PLUGINS_DIR}/tls")
         install(
-            DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
+            DIRECTORY "${QT_PLUGINS_DIR}/tls"
+            CONFIGURATIONS Debug RelWithDebInfo
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            REGEX "fontawesome" EXCLUDE
-            REGEX "d\\." EXCLUDE
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/tls"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
             REGEX "_debug\\." EXCLUDE
             REGEX "\\.dSYM" EXCLUDE
         )
-        # Platform plugins
-        install(
-            DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-            DESTINATION ${PLUGIN_DEST_DIR}
-            COMPONENT Runtime
-            REGEX "minimal|linuxfb|offscreen" EXCLUDE
-            REGEX "[^2]d\\." EXCLUDE
-            REGEX "_debug\\." EXCLUDE
-            REGEX "\\.dSYM" EXCLUDE
-        )
-        # Style plugins
-        if(EXISTS "${QT_PLUGINS_DIR}/styles")
-            install(
-                DIRECTORY "${QT_PLUGINS_DIR}/styles"
-                DESTINATION ${PLUGIN_DEST_DIR}
-                COMPONENT Runtime
-                REGEX "d\\." EXCLUDE
-                REGEX "_debug\\." EXCLUDE
-                REGEX "\\.dSYM" EXCLUDE
-            )
-        endif()
-        # TLS plugins (Qt 6 only)
-        if(EXISTS "${QT_PLUGINS_DIR}/tls")
-            install(
-                DIRECTORY "${QT_PLUGINS_DIR}/tls"
-                DESTINATION ${PLUGIN_DEST_DIR}
-                COMPONENT Runtime
-                REGEX "dd\\." EXCLUDE
-                REGEX "_debug\\." EXCLUDE
-                REGEX "\\.dSYM" EXCLUDE
-            )
-        endif()
     endif()
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
