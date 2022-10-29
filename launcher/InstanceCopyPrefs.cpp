@@ -47,3 +47,75 @@ QString InstanceCopyPrefs::getSelectedFiltersAsRegex() const
 
     return {};
 }
+
+// ======= Getters =======
+bool InstanceCopyPrefs::isCopySavesEnabled() const
+{
+    return copySaves;
+}
+
+bool InstanceCopyPrefs::isKeepPlaytimeEnabled() const
+{
+    return keepPlaytime;
+}
+
+bool InstanceCopyPrefs::isCopyGameOptionsEnabled() const
+{
+    return copyGameOptions;
+}
+
+bool InstanceCopyPrefs::isCopyResourcePacksEnabled() const
+{
+    return copyResourcePacks;
+}
+
+bool InstanceCopyPrefs::isCopyShaderPacksEnabled() const
+{
+    return copyShaderPacks;
+}
+
+bool InstanceCopyPrefs::isCopyServersEnabled() const
+{
+    return copyServers;
+}
+
+bool InstanceCopyPrefs::isCopyModsEnabled() const
+{
+    return copyMods;
+}
+
+// ======= Setters =======
+void InstanceCopyPrefs::enableCopySaves(bool b)
+{
+    copySaves = b;
+}
+
+void InstanceCopyPrefs::enableKeepPlaytime(bool b)
+{
+    keepPlaytime = b;
+}
+
+void InstanceCopyPrefs::enableCopyGameOptions(bool b)
+{
+    copyGameOptions = b;
+}
+
+void InstanceCopyPrefs::enableCopyResourcePacks(bool b)
+{
+    copyResourcePacks = b;
+}
+
+void InstanceCopyPrefs::enableCopyShaderPacks(bool b)
+{
+    copyShaderPacks = b;
+}
+
+void InstanceCopyPrefs::enableCopyServers(bool b)
+{
+    copyServers = b;
+}
+
+void InstanceCopyPrefs::enableCopyMods(bool b)
+{
+    copyMods = b;
+}

@@ -8,7 +8,7 @@
 InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, const InstanceCopyPrefs& prefs)
 {
     m_origInstance = origInstance;
-    m_keepPlaytime = prefs.keepPlaytime;
+    m_keepPlaytime = prefs.isKeepPlaytimeEnabled();
 
     QString filters = prefs.getSelectedFiltersAsRegex();
     if (!filters.isEmpty())
