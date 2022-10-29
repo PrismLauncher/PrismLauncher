@@ -149,6 +149,15 @@ jobs:
         with:
           key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}-${{ matrix.architecture }}
 
+      - name: Retrieve ccache cache (Windows MinGW-w64)
+        if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
+        uses: actions/cache@v3.2.4
+        with:
+          path: '${{ github.workspace }}\.ccache'
+          key: ${{ matrix.os }}-mingw-w64
+          restore-keys: |
+              ${{ matrix.os }}-mingw-w64
+
       - name: Setup ccache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
         shell: msys2 {0}
@@ -164,15 +173,6 @@ jobs:
         shell: bash
         run: |
           echo "CCACHE_VAR=ccache" >> $GITHUB_ENV
-
-      - name: Retrieve ccache cache (Windows MinGW-w64)
-        if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
-        uses: actions/cache@v3.2.4
-        with:
-          path: '${{ github.workspace }}\.ccache'
-          key: ${{ matrix.os }}-mingw-w64
-          restore-keys: |
-              ${{ matrix.os }}-mingw-w64
 
       - name: Set short version
         shell: bash
