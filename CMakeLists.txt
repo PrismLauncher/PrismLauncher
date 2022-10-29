@@ -51,6 +51,11 @@ if(MSVC)
             string(REGEX REPLACE "/Z[Ii]" "/Z7" ${flags_var} "${${flags_var}}")
         endforeach()
     endforeach()
+
+    if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDLL")
+        set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release "")
+        set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release "")
+    endif()
 else()
     set(CMAKE_CXX_FLAGS "-Wall -pedantic -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
 
