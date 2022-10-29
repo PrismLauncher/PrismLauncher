@@ -11,6 +11,10 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC.
 
 ## Installation
 
+<a href="https://repology.org/project/prismlauncher/versions">
+    <img src="https://repology.org/badge/vertical-allrepos/prismlauncher.svg" alt="Packaging status" align="right">
+</a>
+
 - All downloads and instructions for Prism Launcher can be found [on our website](https://prismlauncher.org/download/).
 - Last build status can be found [here](https://github.com/PrismLauncher/PrismLauncher/actions).
 
