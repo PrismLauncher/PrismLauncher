@@ -154,9 +154,9 @@ jobs:
         uses: actions/cache@v3.2.4
         with:
           path: '${{ github.workspace }}\.ccache'
-          key: ${{ matrix.os }}-mingw-w64
+          key: ${{ matrix.os }}-mingw-w64-ccache-${{ github.run_id }}
           restore-keys: |
-              ${{ matrix.os }}-mingw-w64
+              ${{ matrix.os }}-mingw-w64-ccache
 
       - name: Setup ccache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
