@@ -51,6 +51,7 @@ class Config {
     QString LAUNCHER_CONFIGFILE;
     QString LAUNCHER_GIT;
     QString LAUNCHER_DESKTOPFILENAME;
+    QString LAUNCHER_SVGFILENAME;
 
     /// The major version number.
     int VERSION_MAJOR;

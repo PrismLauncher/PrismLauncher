@@ -22,6 +22,7 @@ set(Launcher_UserAgent "${Launcher_CommonName}/${Launcher_VERSION_NAME}" PARENT_
 set(Launcher_ConfigFile "prismlauncher.cfg" PARENT_SCOPE)
 set(Launcher_Git "https://github.com/PrismLauncher/PrismLauncher" PARENT_SCOPE)
 set(Launcher_DesktopFileName "org.prismlauncher.PrismLauncher.desktop" PARENT_SCOPE)
+set(Launcher_SVGFileName "org.prismlauncher.PrismLauncher.svg" PARENT_SCOPE)
 
 set(Launcher_Desktop "program_info/org.prismlauncher.PrismLauncher.desktop" PARENT_SCOPE)
 set(Launcher_MetaInfo "program_info/org.prismlauncher.PrismLauncher.metainfo.xml" PARENT_SCOPE)
