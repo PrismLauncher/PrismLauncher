@@ -44,6 +44,7 @@
 #include <QStandardPaths>
 #include <QTextStream>
 #include <QUrl>
+#include "DesktopServices.h"
 
 #if defined Q_OS_WIN32
 #include <objbase.h>
@@ -228,6 +229,9 @@ bool trash(QString path, QString *pathInTrash = nullptr)
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     return false;
 #else
+    // FIXME: Figure out trash in Flatpak. Qt seemingly doesn't use the Trash portal
+    if (DesktopServices::isFlatpak())
+        return false;
     return QFile::moveToTrash(path, pathInTrash);
 #endif
 }
