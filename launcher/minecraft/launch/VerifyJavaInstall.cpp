@@ -71,5 +71,7 @@ void VerifyJavaInstall::executeTask() {
     {
         emit logLine(tr("Java version %1").arg(major), MessageLevel::Error);
     }
+    emit logLine(tr("If you are sure your version will work, go to instance settings and check \"Skip Java compatibility checks\"."), MessageLevel::Error);
+
     emitFailed(QString("Incompatible Java major version"));
 }
