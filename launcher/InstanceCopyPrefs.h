@@ -18,6 +18,7 @@ struct InstanceCopyPrefs {
     [[nodiscard]] bool isCopyShaderPacksEnabled() const;
     [[nodiscard]] bool isCopyServersEnabled() const;
     [[nodiscard]] bool isCopyModsEnabled() const;
+    [[nodiscard]] bool isCopyScreenshotsEnabled() const;
     // Setters
     void enableCopySaves(bool b);
     void enableKeepPlaytime(bool b);
@@ -26,6 +27,7 @@ struct InstanceCopyPrefs {
     void enableCopyShaderPacks(bool b);
     void enableCopyServers(bool b);
     void enableCopyMods(bool b);
+    void enableCopyScreenshots(bool b);
 
    protected: // data
     bool copySaves = true;
@@ -35,4 +37,5 @@ struct InstanceCopyPrefs {
     bool copyShaderPacks = true;
     bool copyServers = true;
     bool copyMods = true;
+    bool copyScreenshots = true;
 };

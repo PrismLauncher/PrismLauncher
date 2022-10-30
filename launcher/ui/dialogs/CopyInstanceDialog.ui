@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>341</width>
-    <height>385</height>
+    <height>399</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -113,24 +113,30 @@
     </layout>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="selectAllButtonLayout">
+     <item>
+      <widget class="QCheckBox" name="selectAllCheckbox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="text">
+        <string>Select all</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QGridLayout" name="copyOptionsLayout">
-     <item row="3" column="0">
-      <widget class="QCheckBox" name="copySavesCheckbox">
-       <property name="text">
-        <string>Copy saves</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QCheckBox" name="copyResPacksCheckbox">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Copy resource packs</string>
-       </property>
-      </widget>
-     </item>
      <item row="6" column="1">
       <widget class="QCheckBox" name="copyModsCheckbox">
        <property name="toolTip">
@@ -151,17 +157,10 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
-      <widget class="QCheckBox" name="copyServersCheckbox">
+     <item row="3" column="0">
+      <widget class="QCheckBox" name="copySavesCheckbox">
        <property name="text">
-        <string>Copy servers</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QCheckBox" name="keepPlaytimeCheckbox">
-       <property name="text">
-        <string>Keep play time</string>
+        <string>Copy saves</string>
        </property>
       </widget>
      </item>
@@ -172,10 +171,34 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QCheckBox" name="selectAllCheckbox">
+     <item row="5" column="1">
+      <widget class="QCheckBox" name="copyServersCheckbox">
        <property name="text">
-        <string>Select all</string>
+        <string>Copy servers</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QCheckBox" name="copyResPacksCheckbox">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Copy resource packs</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QCheckBox" name="keepPlaytimeCheckbox">
+       <property name="text">
+        <string>Keep play time</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QCheckBox" name="copyScreenshotsCheckbox">
+       <property name="text">
+        <string>Copy screenshots</string>
        </property>
       </widget>
      </item>

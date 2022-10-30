@@ -12,7 +12,8 @@ bool InstanceCopyPrefs::allTrue() const
         copyResourcePacks &&
         copyShaderPacks &&
         copyServers &&
-        copyMods;
+        copyMods &&
+        copyScreenshots;
 }
 
 // Returns a single RegEx string of the selected folders/files to filter out (ex: ".minecraft/saves|.minecraft/server.dat")
@@ -37,6 +38,9 @@ QString InstanceCopyPrefs::getSelectedFiltersAsRegex() const
 
     if(!copyMods)
         filters << "coremods" << "mods" << "config";
+
+    if(!copyScreenshots)
+        filters << "screenshots";
 
     // If we have any filters to add, join them as a single regex string to return:
     if (!filters.isEmpty()) {
@@ -84,6 +88,11 @@ bool InstanceCopyPrefs::isCopyModsEnabled() const
     return copyMods;
 }
 
+bool InstanceCopyPrefs::isCopyScreenshotsEnabled() const
+{
+    return copyScreenshots;
+}
+
 // ======= Setters =======
 void InstanceCopyPrefs::enableCopySaves(bool b)
 {
@@ -118,4 +127,9 @@ void InstanceCopyPrefs::enableCopyServers(bool b)
 void InstanceCopyPrefs::enableCopyMods(bool b)
 {
     copyMods = b;
+}
+
+void InstanceCopyPrefs::enableCopyScreenshots(bool b)
+{
+    copyScreenshots = b;
 }

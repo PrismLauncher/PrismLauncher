@@ -84,6 +84,7 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     ui->copyShaderPacksCheckbox->setChecked(m_selectedOptions.isCopyShaderPacksEnabled());
     ui->copyServersCheckbox->setChecked(m_selectedOptions.isCopyServersEnabled());
     ui->copyModsCheckbox->setChecked(m_selectedOptions.isCopyModsEnabled());
+    ui->copyScreenshotsCheckbox->setChecked(m_selectedOptions.isCopyScreenshotsEnabled());
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()
@@ -135,6 +136,7 @@ void CopyInstanceDialog::checkAllCheckboxes(const bool& b)
     ui->copyShaderPacksCheckbox->setChecked(b);
     ui->copyServersCheckbox->setChecked(b);
     ui->copyModsCheckbox->setChecked(b);
+    ui->copyScreenshotsCheckbox->setChecked(b);
 }
 
 // Check the "Select all" checkbox if all options are already selected:
@@ -210,5 +212,11 @@ void CopyInstanceDialog::on_copyServersCheckbox_stateChanged(int state)
 void CopyInstanceDialog::on_copyModsCheckbox_stateChanged(int state)
 {
     m_selectedOptions.enableCopyMods(state == Qt::Checked);
+    updateSelectAllCheckbox();
+}
+
+void CopyInstanceDialog::on_copyScreenshotsCheckbox_stateChanged(int state)
+{
+    m_selectedOptions.enableCopyScreenshots(state == Qt::Checked);
     updateSelectAllCheckbox();
 }
