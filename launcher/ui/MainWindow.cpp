@@ -335,11 +335,10 @@ public:
         all_actions.append(&actionSettings);
 
         actionUndoTrashInstance = TranslatedAction(MainWindow);
-        connect(actionUndoTrashInstance, SIGNAL(triggered(bool)), MainWindow, SLOT(undoTrashInstance()));
         actionUndoTrashInstance->setObjectName(QStringLiteral("actionUndoTrashInstance"));
         actionUndoTrashInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Undo Last Instance Deletion"));
         actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        actionUndoTrashInstance->setShortcut(QKeySequence("Ctrl+Z"));
+        actionUndoTrashInstance->setShortcut(QKeySequence::Undo);
         all_actions.append(&actionUndoTrashInstance);
 
         actionClearMetadata = TranslatedAction(MainWindow);
@@ -1022,6 +1021,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
                     &MainWindow::updatesAllowedChanged);
         }
     }
+
+    connect(ui->actionUndoTrashInstance.operator->(), &QAction::triggered, this, &MainWindow::undoTrashInstance);
 
     setSelectedInstanceById(APPLICATION->settings()->get("SelectedInstance").toString());
 
