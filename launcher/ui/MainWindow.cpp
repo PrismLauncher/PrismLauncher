@@ -1134,11 +1134,6 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
             connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(deleteGroup()));
             actions.append(actionDeleteGroup);
         }
-
-        QAction *actionUndoTrashInstance = new QAction("Undo last trash instance", this);
-        connect(actionUndoTrashInstance, SIGNAL(triggered(bool)), SLOT(undoTrashInstance()));
-        actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        actions.append(actionUndoTrashInstance);
     }
     QMenu myMenu;
     myMenu.addActions(actions);
@@ -1834,6 +1829,7 @@ void MainWindow::deleteGroup()
 void MainWindow::undoTrashInstance()
 {
     APPLICATION->instances()->undoTrashInstance();
+    ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
 }
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
@@ -1940,6 +1936,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
     auto id = m_selectedInstance->id();
     if (APPLICATION->instances()->trashInstance(id)) {
+        ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
         return;
     }
     
