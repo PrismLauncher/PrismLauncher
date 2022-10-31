@@ -384,46 +384,8 @@ void LauncherPage::loadSettings()
     m_currentUpdateChannel = s->get("UpdateChannel").toString();
     //FIXME: make generic
     auto theme = s->get("IconTheme").toString();
-    if (theme == "pe_colored")
-    {
-        ui->themeComboBox->setCurrentIndex(0);
-    }
-    else if (theme == "pe_light")
-    {
-        ui->themeComboBox->setCurrentIndex(1);
-    }
-    else if (theme == "pe_dark")
-    {
-        ui->themeComboBox->setCurrentIndex(2);
-    }
-    else if (theme == "pe_blue")
-    {
-        ui->themeComboBox->setCurrentIndex(3);
-    }
-    else if (theme == "OSX")
-    {
-        ui->themeComboBox->setCurrentIndex(4);
-    }
-    else if (theme == "iOS")
-    {
-        ui->themeComboBox->setCurrentIndex(5);
-    }
-    else if (theme == "flat")
-    {
-        ui->themeComboBox->setCurrentIndex(6);
-    }
-    else if (theme == "flat_white")
-    {
-        ui->themeComboBox->setCurrentIndex(7);
-    }
-    else if (theme == "multimc")
-    {
-        ui->themeComboBox->setCurrentIndex(8);
-    }
-    else if (theme == "custom")
-    {
-        ui->themeComboBox->setCurrentIndex(9);
-    }
+    QStringList iconThemeOptions{"pe_colored", "pe_light", "pe_dark", "pe_blue", "OSX", "iOS", "flat", "flat_white", "multimc", "custom"};
+    ui->themeComboBox->setCurrentIndex(iconThemeOptions.indexOf(theme));
 
     {
         auto currentTheme = s->get("ApplicationTheme").toString();
