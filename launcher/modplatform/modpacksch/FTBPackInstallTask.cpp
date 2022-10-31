@@ -326,7 +326,7 @@ void PackInstallTask::downloadPack()
 void PackInstallTask::onModDownloadSucceeded()
 {
     m_net_job.reset();
-    if (m_blocked_mods.length() > 0) {
+    if (!m_blocked_mods.isEmpty()) {
         copyBlockedMods();
     }
     emitSucceeded();

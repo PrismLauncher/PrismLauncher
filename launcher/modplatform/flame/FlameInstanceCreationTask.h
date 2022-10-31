@@ -31,7 +31,7 @@ class FlameCreationTask final : public InstanceCreationTask {
    private slots:
     void idResolverSucceeded(QEventLoop&);
     void setupDownloadJob(QEventLoop&);
-    void copyBlockedMods(QList<BlockedMod> blocked_mods);
+    void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
 
    private:
     QWidget* m_parent = nullptr;

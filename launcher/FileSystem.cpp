@@ -167,7 +167,7 @@ bool ensureFolderPathExists(QString foldernamepath)
 /// @param src srouce file path
 /// @param dst destination file path
 /// @return boolean: was there an error during the filecopy?
-bool copyFile(QString &src, QString &dst) {
+bool copyFile(QString const& src, QString const& dst) {
     using copy_opts = fs::copy_options;
 
     std::error_code err;

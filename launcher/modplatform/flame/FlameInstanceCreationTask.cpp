@@ -413,31 +413,32 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
 
 /// @brief copy the matched blocked mods to the instance staging area
 /// @param blocked_mods list of the blocked mods and their matched paths
-void FlameCreationTask::copyBlockedMods(QList<BlockedMod> blocked_mods) {
+void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods) {
 
     setStatus(tr("Copying Blocked Mods..."));
     setAbortable(false);
     int i = 0;
     int total = blocked_mods.length();
     setProgress(i, total);
-    for (auto mod = blocked_mods.begin(); mod != blocked_mods.end(); mod++, i++) {
+    for (auto &mod : blocked_mods) {
 
-        if (!mod->matched) {
-            qDebug() << mod->name << "was not matched to a local file, skipping copy";
+        if (!mod.matched) {
+            qDebug() << mod.name << "was not matched to a local file, skipping copy";
             continue;
         }
 
-        auto dest_path = FS::PathCombine(m_stagingPath, "minecraft", "mods", mod->name);
+        auto dest_path = FS::PathCombine(m_stagingPath, "minecraft", "mods", mod.name);
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 
-        qDebug() << "Will try to copy" << mod->localPath << "to" << dest_path;
+        qDebug() << "Will try to copy" << mod.localPath << "to" << dest_path;
 
-        if (!FS::copyFile(mod->localPath, dest_path)) {
-            qDebug() << "Copy of" << mod->localPath << "to" << dest_path << "Failed";
+        if (!FS::copyFile(mod.localPath, dest_path)) { // FIXME: use FS::copy once #333 is merged
+            qDebug() << "Copy of" << mod.localPath << "to" << dest_path << "Failed";
         } 
 
-        setProgress(i+1, total);
+        i++;
+        setProgress(i, total);
     }
 
     setAbortable(true);
@@ -488,9 +489,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         m_files_job.reset();
         setError(reason);
     });
-    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { 
-        setProgress(current, total); 
-    });
+    connect(m_files_job.get(), &NetJob::progress, this, &FlameCreationTask::setProgress);
     connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
 
     setStatus(tr("Downloading mods..."));
