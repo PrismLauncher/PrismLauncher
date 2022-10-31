@@ -44,6 +44,7 @@ jobs:
             name: "Windows-Legacy-MSVC"
             msystem: ''
             architecture: 'win32'
+            vcvars_arch: 'amd64_x86'
             qt_ver: 5
             qt_host: windows
             qt_arch: 'win32_msvc2019'
@@ -55,6 +56,7 @@ jobs:
             name: "Windows-MSVC"
             msystem: ''
             architecture: 'x64'
+            vcvars_arch: 'amd64'
             qt_ver: 6
             qt_host: windows
             qt_arch: ''
@@ -331,6 +333,12 @@ jobs:
           - :warning: Sparkle Signature (ed25519): No private key available (likely a pull request or fork)
           EOF
           fi
+
+      - name: Add VC Enviroment Variables
+        if: runner.os == 'Windows' && matrix.msystem == ''
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.vcvars_arch }}
 
       - name: Package (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != ''
