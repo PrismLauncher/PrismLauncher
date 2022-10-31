@@ -83,6 +83,12 @@ struct Language
         else if(key == "es_UY") {
             result = u8"español de Latinoamérica";
         }
+        else if(key == "en@pirate") {
+            result = u8"Tongue of the High Seas";
+        }
+        else if(key == "en@uwu") {
+            result = u8"Cute Engwish";
+        }
         else {
             result = locale.nativeLanguageName();
         }
