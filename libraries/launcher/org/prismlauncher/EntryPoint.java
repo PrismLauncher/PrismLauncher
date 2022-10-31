@@ -54,10 +54,12 @@
 
 package org.prismlauncher;
 
+
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.LauncherFactory;
 import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -66,58 +68,47 @@ import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 public final class EntryPoint {
-
     private static final Logger LOGGER = Logger.getLogger("EntryPoint");
-
+    
     public static void main(String[] args) {
         ExitCode exitCode = listen();
-
+        
         if (exitCode != ExitCode.NORMAL) {
             LOGGER.warning("Exiting with " + exitCode);
-
+            
             System.exit(exitCode.numericalCode);
         }
     }
-
-    private static PreLaunchAction parseLine(String inData, Parameters params) throws ParseException {
-        if (inData.isEmpty())
+    
+    private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException {
+        if (input.isEmpty())
             throw new ParseException("Unexpected empty string!");
-
-        String first = inData;
-        String second = null;
-        int splitPoint = inData.indexOf(' ');
-
-        if (splitPoint != -1) {
-            first = first.substring(0, splitPoint);
-            second = inData.substring(splitPoint + 1);
-        }
-
-        switch (first) {
-            case "launch":
-                return PreLaunchAction.LAUNCH;
-            case "abort":
-                return PreLaunchAction.ABORT;
-            default:
-                if (second == null || second.isEmpty())
-                    throw new ParseException("Error while parsing:" + inData);
-
-                params.add(first, second);
-
-                return PreLaunchAction.PROCEED;
+        
+        
+        if ("launch".equalsIgnoreCase(input)) {
+            return PreLaunchAction.LAUNCH;
+        } else if ("abort".equalsIgnoreCase(input)) {
+            return PreLaunchAction.ABORT;
+        } else {
+            String[] pair = StringUtils.splitStringPair(' ', input);
+            if (pair == null)
+                throw new ParseException("Error while parsing:" + input);
+            
+            params.add(pair[0], pair[1]);
+            
+            return PreLaunchAction.PROCEED;
         }
     }
-
+    
     private static ExitCode listen() {
         Parameters parameters = new Parameters();
         PreLaunchAction preLaunchAction = PreLaunchAction.PROCEED;
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                System.in,
-                StandardCharsets.UTF_8
-        ))) {
+        
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
             String line;
-
+            
             while (preLaunchAction == PreLaunchAction.PROCEED) {
                 if ((line = reader.readLine()) != null) {
                     preLaunchAction = parseLine(line, parameters);
@@ -127,49 +118,50 @@ public final class EntryPoint {
             }
         } catch (IOException | ParseException e) {
             LOGGER.log(Level.SEVERE, "Launcher abort due to exception:", e);
-
+            
             return ExitCode.ERROR;
         }
-
+        
         // Main loop
         if (preLaunchAction == PreLaunchAction.ABORT) {
             LOGGER.info("Launch aborted by the launcher.");
-
+    
             return ExitCode.ERROR;
         }
-
+        
         try {
             Launcher launcher = LauncherFactory.createLauncher(parameters);
-
+            
             launcher.launch();
-
+            
             return ExitCode.NORMAL;
         } catch (IllegalArgumentException e) {
             LOGGER.log(Level.SEVERE, "Wrong argument.", e);
-
+            
             return ExitCode.ERROR;
         } catch (Throwable e) {
             LOGGER.log(Level.SEVERE, "Exception caught from launcher.", e);
-
+            
             return ExitCode.ERROR;
         }
     }
-
+    
     private enum PreLaunchAction {
         PROCEED,
         LAUNCH,
         ABORT
     }
-
+    
+    
     private enum ExitCode {
         NORMAL(0),
         ERROR(1);
-
+        
         private final int numericalCode;
-
+        
         ExitCode(int numericalCode) {
             this.numericalCode = numericalCode;
         }
     }
-
+    
 }

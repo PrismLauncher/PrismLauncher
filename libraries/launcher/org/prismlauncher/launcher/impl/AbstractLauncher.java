@@ -58,6 +58,7 @@ package org.prismlauncher.launcher.impl;
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.StringUtils;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -101,13 +102,13 @@ public abstract class AbstractLauncher implements Launcher {
             height = DEFAULT_WINDOW_HEIGHT;
         } else {
             maximize = false;
-
-            int byIndex = windowParams.indexOf('x');
-
-            if (byIndex != -1) {
+    
+            String[] sizePair = StringUtils.splitStringPair('x', windowParams);
+    
+            if (sizePair != null) {
                 try {
-                    width = Integer.parseInt(windowParams.substring(0, byIndex));
-                    height = Integer.parseInt(windowParams.substring(byIndex + 1));
+                    width = Integer.parseInt(sizePair[0]);
+                    height = Integer.parseInt(sizePair[1]);
                     return;
                 } catch (NumberFormatException ignored) {
                 }
