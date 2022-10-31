@@ -29,7 +29,7 @@ BlockedModsDialog::BlockedModsDialog(QWidget *parent, const QString &title, cons
 
     this->setWindowTitle(title);
     ui->label->setText(text);
-    ui->labelModsFound->setText("Please download the missing mods.");
+    ui->labelModsFound->setText(tr("Please download the missing mods."));
     update();
 }
 
@@ -51,20 +51,20 @@ void BlockedModsDialog::update() {
     for (auto &mod : mods) {
         if (mod.matched) {
             // &#x2714; -> html for HEAVY CHECK MARK : ✔
-            span = QString("<span style=\"color:green\"> &#x2714; Found at %1 </span>").arg(mod.localPath);
+            span = QString(tr("<span style=\"color:green\"> &#x2714; Found at %1 </span>")).arg(mod.localPath);
         } else {
             // &#x2718; -> html for HEAVY BALLOT X : ✘
-            span = QString("<span style=\"color:red\"> &#x2718; Not Found </span>");
+            span = QString(tr("<span style=\"color:red\"> &#x2718; Not Found </span>"));
         }
-        text += QString("%1: <a href='%2'>%2</a> <p>Hash: %3 %4</p> <br/>").arg(mod.name, mod.websiteUrl, mod.hash, span);
+        text += QString(tr("%1: <a href='%2'>%2</a> <p>Hash: %3 %4</p> <br/>")).arg(mod.name, mod.websiteUrl, mod.hash, span);
     }
 
     ui->textBrowser->setText(text);
 
     if (allModsMatched()) {
-        ui->labelModsFound->setText("All mods found ✔");
+        ui->labelModsFound->setText(tr("All mods found ✔"));
     } else {
-        ui->labelModsFound->setText("Please download the missing mods.");
+        ui->labelModsFound->setText(tr("Please download the missing mods."));
     }
 }
 
@@ -124,7 +124,7 @@ void BlockedModsDialog::scanPath(QString path) {
 
 }
 
-/// @brief check if the conputed hash for the provided path matches a blocked
+/// @brief check if the computed hash for the provided path matches a blocked
 ///        mod we are looking for
 /// @param hash the computed hash for the provided path
 /// @param path the path to the local file being compared
@@ -153,7 +153,7 @@ void BlockedModsDialog::checkMatchHash(QString hash, QString path) {
     }
 }
 
-/// @brief Check if the name of the file at path matches the naem of a blocked mod we are searching for
+/// @brief Check if the name of the file at path matches the name of a blocked mod we are searching for
 /// @param path the path to check
 /// @return boolean: did the path match the name of a blocked mod?
 bool BlockedModsDialog::checkValidPath(QString path) {
@@ -171,8 +171,6 @@ bool BlockedModsDialog::checkValidPath(QString path) {
     return false;
 }
 
-/// @brief have we found all the mods we're lookign for?
-/// @return boolean
 bool BlockedModsDialog::allModsMatched() {
     for (auto &mod : mods) {
         if (!mod.matched)
