@@ -54,10 +54,28 @@
 
 package org.prismlauncher.exception;
 
+
+@SuppressWarnings("serial")
 public final class ParameterNotFoundException extends IllegalArgumentException {
 
-    public ParameterNotFoundException(String key) {
-        super("Unknown parameter name: " + key);
+    public ParameterNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ParameterNotFoundException(Throwable cause) {
+        super(cause);
+    }
+
+    public ParameterNotFoundException(String message) {
+        super(message);
+    }
+
+    public ParameterNotFoundException() {
+        super();
+    }
+
+    public static ParameterNotFoundException forParameterName(String parameterName) {
+        return new ParameterNotFoundException(String.format("Unknown parameter name '%s'", parameterName));
     }
 
 }

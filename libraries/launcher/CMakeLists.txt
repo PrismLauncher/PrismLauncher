@@ -18,6 +18,7 @@ set(SRC
     org/prismlauncher/exception/ParameterNotFoundException.java
     org/prismlauncher/exception/ParseException.java
     org/prismlauncher/utils/Parameters.java
+    org/prismlauncher/utils/ReflectionUtils.java
     net/minecraft/Launcher.java
 )
 add_jar(NewLaunch ${SRC})

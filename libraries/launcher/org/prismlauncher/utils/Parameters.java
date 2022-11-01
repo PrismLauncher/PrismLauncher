@@ -83,7 +83,7 @@ public final class Parameters {
         List<String> params = map.get(key);
 
         if (params == null)
-            throw new ParameterNotFoundException(key);
+            throw ParameterNotFoundException.forParameterName(key);
 
         return params;
     }
@@ -101,7 +101,7 @@ public final class Parameters {
         List<String> list = getList(key);
 
         if (list.isEmpty())
-            throw new ParameterNotFoundException(key);
+            throw ParameterNotFoundException.forParameterName(key);
 
         return list.get(0);
     }

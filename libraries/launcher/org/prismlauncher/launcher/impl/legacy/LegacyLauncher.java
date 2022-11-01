@@ -60,14 +60,11 @@ import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.LauncherProvider;
 import org.prismlauncher.launcher.impl.AbstractLauncher;
 import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.ReflectionUtils;
 
-import java.applet.Applet;
 import java.io.File;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -87,7 +84,7 @@ public final class LegacyLauncher extends AbstractLauncher {
 
     private final String appletClass;
 
-    private final boolean noApplet;
+    private final boolean usesApplet;
 
     private final String cwd;
 
@@ -100,8 +97,9 @@ public final class LegacyLauncher extends AbstractLauncher {
         appletClass = params.getString("appletClass", "net.minecraft.client.MinecraftApplet");
 
         List<String> traits = params.getList("traits", Collections.<String>emptyList());
-        noApplet = traits.contains("noapplet");
+        usesApplet = !traits.contains("noapplet");
 
+        //noinspection AccessOfSystemProperties
         cwd = System.getProperty("user.dir");
     }
 
@@ -109,74 +107,40 @@ public final class LegacyLauncher extends AbstractLauncher {
         return new LegacyLauncherProvider();
     }
 
-    /**
-     * Finds a field that looks like a Minecraft base folder in a supplied class
-     *
-     * @param clazz the class to scan
-     *
-     * @return The found field.
-     */
-    private static Field getMinecraftGameDirField(Class<?> clazz) {
-        // Field we're looking for is always
-        // private static File obfuscatedName = null;
-        for (Field field : clazz.getDeclaredFields()) {
-            // Has to be File
-            if (field.getType() != File.class)
-                continue;
-
-            // And Private Static.
-            if (!Modifier.isStatic(field.getModifiers()) || !Modifier.isPrivate(field.getModifiers()))
-                continue;
-
-            return field;
-        }
-
-        return null;
-    }
-
     @Override
     public void launch() throws Throwable {
-        Class<?> main = loadMain();
-        Field gameDirField = getMinecraftGameDirField(main);
+        Class<?> main = ClassLoader.getSystemClassLoader().loadClass(this.mainClassName);
+        Field gameDirField = ReflectionUtils.getMinecraftGameDirField(main);
 
         if (gameDirField == null) {
-            LOGGER.warning("Could not find Mineraft path field.");
+            LOGGER.warning("Could not find Minecraft path field");
         } else {
             gameDirField.setAccessible(true);
-            gameDirField.set(null, new File(cwd));
+            gameDirField.set(null /* field is static, so instance is null */, new File(cwd));
         }
 
-        if (!noApplet) {
-            LOGGER.info("Launching with applet wrapper...");
+        if (this.usesApplet) {
+            LOGGER.info("Launching legacy minecraft using applet wrapper...");
 
             try {
-                Class<?> appletClass = classLoader.loadClass(this.appletClass);
-
-                MethodHandle constructor = MethodHandles.lookup().findConstructor(appletClass, MethodType.methodType(void.class));
-                Applet applet = (Applet) constructor.invoke();
-
-                LegacyFrame window = new LegacyFrame(title, applet);
+                LegacyFrame window = new LegacyFrame(title, ReflectionUtils.createAppletClass(this.appletClass));
 
                 window.start(
-                        user,
-                        session,
-                        width,
-                        height,
-                        maximize,
-                        serverAddress,
-                        serverPort,
-                        mcParams.contains("--demo")
+                        this.user,
+                        this.session,
+                        this.width, this.height, this.maximize,
+                        this.serverAddress, this.serverPort,
+                        this.mcParams.contains("--demo")
                             );
-
-                return;
             } catch (Throwable e) {
-                LOGGER.log(Level.SEVERE, "Applet wrapper failed:", e);
-
-                LOGGER.warning("Falling back to using main class.");
+                LOGGER.log(Level.SEVERE, "Running applet wrapper failed with exception", e);
             }
-        }
+        } else {
+            LOGGER.info("Launching legacy minecraft using the main class entrypoint");
+            MethodHandle method = ReflectionUtils.findMainEntrypoint(main);
 
-        invokeMain(main);
+            method.invokeExact((Object[]) mcParams.toArray(new String[0]));
+        }
     }
 
 

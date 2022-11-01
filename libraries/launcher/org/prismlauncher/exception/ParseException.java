@@ -54,10 +54,31 @@
 
 package org.prismlauncher.exception;
 
+
+@SuppressWarnings({ "serial", "unused" })
 public final class ParseException extends IllegalArgumentException {
 
     public ParseException(String message) {
         super(message);
     }
 
+    public ParseException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ParseException(Throwable cause) {
+        super(cause);
+    }
+
+    public ParseException() {
+        super();
+    }
+
+    public static ParseException forInputString(String inputString) {
+        return new ParseException(String.format("Could not parse input string '%s'", inputString));
+    }
+
+    public static ParseException forInputString(String inputString, Throwable cause) {
+        return new ParseException(String.format("Could not parse input string '%s'", inputString), cause);
+    }
 }

@@ -58,9 +58,17 @@ package org.prismlauncher.launcher.impl;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.LauncherProvider;
 import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.ReflectionUtils;
+
+import java.lang.invoke.MethodHandle;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
 
 public final class StandardLauncher extends AbstractLauncher {
+    private static final Logger LOGGER = Logger.getLogger("LegacyLauncher");
+
 
     public StandardLauncher(Parameters params) {
         super(params);
@@ -78,21 +86,27 @@ public final class StandardLauncher extends AbstractLauncher {
         // the following often breaks linux screen setups
         // mcparams.add("--fullscreen");
 
-        if (!maximize) {
-            mcParams.add("--width");
-            mcParams.add(Integer.toString(width));
-            mcParams.add("--height");
-            mcParams.add(Integer.toString(height));
+        List<String> launchParameters = new ArrayList<>(this.mcParams);
+
+        if (!this.maximize) {
+            launchParameters.add("--width");
+            launchParameters.add(Integer.toString(width));
+            launchParameters.add("--height");
+            launchParameters.add(Integer.toString(height));
         }
 
-        if (serverAddress != null) {
-            mcParams.add("--server");
-            mcParams.add(serverAddress);
-            mcParams.add("--port");
-            mcParams.add(serverPort);
+        if (this.serverAddress != null) {
+            launchParameters.add("--server");
+            launchParameters.add(serverAddress);
+            launchParameters.add("--port");
+            launchParameters.add(serverPort);
         }
 
-        loadAndInvokeMain();
+        LOGGER.info("Launching minecraft using the main class entrypoint");
+
+        MethodHandle method = ReflectionUtils.findMainEntrypoint(this.mainClassName);
+
+        method.invokeExact((Object[]) launchParameters.toArray(new String[0]));
     }
 
 
