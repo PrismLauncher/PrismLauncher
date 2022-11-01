@@ -43,9 +43,9 @@
 #include <QKeyEvent>
 #include <QClipboard>
 #include <QMessageBox>
+#include <QSortFilterProxyModel>
 #include <QTreeView>
 #include <QInputDialog>
-#include <QProcess>
 #include <Qt>
 
 #include "tools/MCEditTool.h"

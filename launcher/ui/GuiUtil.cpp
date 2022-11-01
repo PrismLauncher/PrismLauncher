@@ -39,6 +39,7 @@
 #include <QClipboard>
 #include <QApplication>
 #include <QFileDialog>
+#include <QStandardPaths>
 
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"

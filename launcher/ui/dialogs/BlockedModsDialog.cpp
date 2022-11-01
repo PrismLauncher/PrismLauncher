@@ -1,14 +1,18 @@
 #include "BlockedModsDialog.h"
-#include <QDesktopServices>
-#include <QDialogButtonBox>
-#include <QPushButton>
-#include "Application.h"
 #include "ui_BlockedModsDialog.h"
 
+#include "Application.h"
+
 #include <QDebug>
+#include <QDesktopServices>
+#include <QDialogButtonBox>
+#include <QDir>
+#include <QDirIterator>
 #include <QDragEnterEvent>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMimeData>
+#include <QPushButton>
 #include <QStandardPaths>
 
 BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods)
