@@ -71,22 +71,26 @@ import java.util.logging.Logger;
 
 public final class EntryPoint {
     private static final Logger LOGGER = Logger.getLogger("EntryPoint");
-    
+
+    private EntryPoint() {
+    }
+
     public static void main(String[] args) {
         ExitCode exitCode = listen();
-        
+
         if (exitCode != ExitCode.NORMAL) {
             LOGGER.warning("Exiting with " + exitCode);
-            
+
+            //noinspection CallToSystemExit
             System.exit(exitCode.numericalCode);
         }
     }
-    
+
     private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException {
-        if (input.isEmpty())
-            throw new ParseException("Unexpected empty string!");
-        
-        
+        if (input.isEmpty()) // TODO: 2022-11-01 Should we just ignore this?
+            throw new ParseException("Unexpected empty string! You should not pass empty newlines to stdin.");
+
+
         if ("launch".equalsIgnoreCase(input)) {
             return PreLaunchAction.LAUNCH;
         } else if ("abort".equalsIgnoreCase(input)) {
@@ -94,22 +98,26 @@ public final class EntryPoint {
         } else {
             String[] pair = StringUtils.splitStringPair(' ', input);
             if (pair == null)
-                throw new ParseException("Error while parsing:" + input);
-            
+                throw new ParseException(String.format(
+                        "Could not split input string '%s' by space. All input provided from stdin must be either 'launch', 'abort', or " +
+                        "in the format '[param name] [param]'.",
+                        input));
+
             params.add(pair[0], pair[1]);
-            
+
             return PreLaunchAction.PROCEED;
         }
     }
-    
+
     private static ExitCode listen() {
         Parameters parameters = new Parameters();
         PreLaunchAction preLaunchAction = PreLaunchAction.PROCEED;
-        
+
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
             String line;
-            
+
             while (preLaunchAction == PreLaunchAction.PROCEED) {
+                //noinspection NestedAssignment
                 if ((line = reader.readLine()) != null) {
                     preLaunchAction = parseLine(line, parameters);
                 } else {
@@ -117,51 +125,58 @@ public final class EntryPoint {
                 }
             }
         } catch (IOException | ParseException e) {
-            LOGGER.log(Level.SEVERE, "Launcher abort due to exception:", e);
-            
-            return ExitCode.ERROR;
+            LOGGER.log(Level.SEVERE, "Launcher abort due to exception", e);
+
+            return ExitCode.ILLEGAL_ARGUMENT;
         }
-        
+
         // Main loop
         if (preLaunchAction == PreLaunchAction.ABORT) {
             LOGGER.info("Launch aborted by the launcher.");
-    
-            return ExitCode.ERROR;
+
+            return ExitCode.ABORT;
         }
-        
+
         try {
             Launcher launcher = LauncherFactory.createLauncher(parameters);
-            
+
             launcher.launch();
-            
+
             return ExitCode.NORMAL;
         } catch (IllegalArgumentException e) {
             LOGGER.log(Level.SEVERE, "Wrong argument.", e);
-            
-            return ExitCode.ERROR;
+
+            return ExitCode.ILLEGAL_ARGUMENT;
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
+            LOGGER.log(Level.SEVERE, "Caught reflection exception from launcher", e);
+
+            return ExitCode.REFLECTION_EXCEPTION;
         } catch (Throwable e) {
-            LOGGER.log(Level.SEVERE, "Exception caught from launcher.", e);
-            
+            LOGGER.log(Level.SEVERE, "Exception caught from launcher", e);
+
             return ExitCode.ERROR;
         }
     }
-    
+
     private enum PreLaunchAction {
         PROCEED,
         LAUNCH,
         ABORT
     }
-    
-    
+
+
     private enum ExitCode {
         NORMAL(0),
-        ERROR(1);
-        
+        ABORT(1),
+        ERROR(2),
+        ILLEGAL_ARGUMENT(3),
+        REFLECTION_EXCEPTION(4);
+
         private final int numericalCode;
-        
+
         ExitCode(int numericalCode) {
             this.numericalCode = numericalCode;
         }
     }
-    
+
 }
