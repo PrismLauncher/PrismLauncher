@@ -73,7 +73,8 @@ void JavaCommon::javaWasOk(QWidget *parent, JavaCheckResult result)
     QString text;
     text += QObject::tr("Java test succeeded!<br />Platform reported: %1<br />Java version "
         "reported: %2<br />Java vendor "
-        "reported: %3<br />").arg(result.realPlatform, result.javaVersion.toString(), result.javaVendor);
+        "reported: %3<br />64-bit "
+        "reported: %4<br />").arg(result.realPlatform, result.javaVersion.toString(), result.javaVendor, result.is_64bit ? "Yes" : "No");
     if (result.errorLog.size())
     {
         auto htmlError = result.errorLog;

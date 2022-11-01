@@ -3,7 +3,8 @@ public final class JavaCheck {
     private static final String[] CHECKED_PROPERTIES = new String[] {
             "os.arch",
             "java.version",
-            "java.vendor"
+            "java.vendor",
+            "sun.arch.data.model"
     };
 
     public static void main(String[] args) {

@@ -173,7 +173,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
         }
     }
 
-    if(!results.contains("os.arch") || !results.contains("java.version") || !results.contains("java.vendor") || !success)
+    if(!results.contains("os.arch") || !results.contains("java.version") || !results.contains("java.vendor") || !results.contains("sun.arch.data.model") || !success)
     {
         result.validity = JavaCheckResult::Validity::ReturnedInvalidData;
         emit checkFinished(result);
@@ -183,7 +183,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     auto os_arch = results["os.arch"];
     auto java_version = results["java.version"];
     auto java_vendor = results["java.vendor"];
-    bool is_64 = os_arch == "x86_64" || os_arch == "amd64" || os_arch == "aarch64" || os_arch == "arm64";
+    bool is_64 = results["sun.arch.data.model"] == "64";
 
 
     result.validity = JavaCheckResult::Validity::Valid;
