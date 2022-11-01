@@ -353,31 +353,31 @@ void PackInstallTask::onModDownloadFailed(QString reason)
 }
 
 /// @brief copy the matched blocked mods to the instance staging area
-void PackInstallTask::copyBlockedMods() {
-
+void PackInstallTask::copyBlockedMods()
+{
     setStatus(tr("Copying Blocked Mods..."));
     setAbortable(false);
     int i = 0;
     int total = m_blocked_mods.length();
     setProgress(i, total);
-    for (auto mod = m_blocked_mods.begin(); mod != m_blocked_mods.end(); mod++, i++) {
-
-        if (!mod->matched) {
-            qDebug() << mod->name << "was not matched to a local file, skipping copy";
+    for (auto const& mod : m_blocked_mods) {
+        if (!mod.matched) {
+            qDebug() << mod.name << "was not matched to a local file, skipping copy";
             continue;
         }
 
-        auto dest_path = FS::PathCombine(m_stagingPath, ".minecraft", "mods", mod->name);
+        auto dest_path = FS::PathCombine(m_stagingPath, ".minecraft", "mods", mod.name);
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 
-        qDebug() << "Will try to copy" << mod->localPath << "to" << dest_path;
+        qDebug() << "Will try to copy" << mod.localPath << "to" << dest_path;
 
-        if (!FS::copy(mod->localPath, dest_path)()) {
-            qDebug() << "Copy of" << mod->localPath << "to" << dest_path << "Failed";
-        } 
+        if (!FS::copy(mod.localPath, dest_path)()) {
+            qDebug() << "Copy of" << mod.localPath << "to" << dest_path << "Failed";
+        }
 
-        setProgress(i+1, total);
+        i++;
+        setProgress(i, total);
     }
 
     setAbortable(true);
