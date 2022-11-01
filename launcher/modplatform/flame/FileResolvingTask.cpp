@@ -3,6 +3,8 @@
 #include "Json.h"
 #include "net/Upload.h"
 
+#include "modplatform/modrinth/ModrinthPackIndex.h"
+
 Flame::FileResolvingTask::FileResolvingTask(const shared_qobject_ptr<QNetworkAccessManager>& network, Flame::Manifest& toProcess)
     : m_network(network), m_toProcess(toProcess)
 {}
@@ -84,18 +86,21 @@ void Flame::FileResolvingTask::modrinthCheckFinished() {
             delete bytes;
             continue;
         }
+
         QJsonDocument doc = QJsonDocument::fromJson(*bytes);
         auto obj = doc.object();
-        auto array = Json::requireArray(obj,"files");
-        for (auto file: array) {
-            auto fileObj = Json::requireObject(file);
-            auto primary = Json::requireBoolean(fileObj,"primary");
-            if (primary) {
-                out->url = Json::requireUrl(fileObj,"url");
-                qDebug() << "Found alternative on modrinth " << out->fileName;
-                break;
-            }
+        auto file = Modrinth::loadIndexedPackVersion(obj);
+
+        // If there's more than one mod loader for this version, we can't know for sure
+        // which file is relative to each loader, so it's best to not use any one and
+        // let the user download it manually.
+        if (file.loaders.size() <= 1) {
+            out->url = file.downloadUrl;
+            qDebug() << "Found alternative on modrinth " << out->fileName;
+        } else {
+            out->resolved = false;
         }
+
         delete bytes;
     }
     //copy to an output list and filter out projects found on modrinth
