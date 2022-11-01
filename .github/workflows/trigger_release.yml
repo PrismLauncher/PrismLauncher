@@ -47,10 +47,12 @@ jobs:
 
           for d in PrismLauncher-Windows-*; do
             cd "${d}" || continue
+            MSVC="$(echo -n ${d} | grep -o MSVC || true)"
             LEGACY="$(echo -n ${d} | grep -o Legacy || true)"
             INST="$(echo -n ${d} | grep -o Setup || true)"
             PORT="$(echo -n ${d} | grep -o Portable || true)"
             NAME="PrismLauncher-Windows"
+            test -z "${MSVC}" && NAME="${NAME}-MinGW" || NAME="${NAME}-MSVC"
             test -z "${LEGACY}" || NAME="${NAME}-Legacy"
             test -z "${PORT}" || NAME="${NAME}-Portable"
             test -z "${INST}" || mv PrismLauncher-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
@@ -72,14 +74,20 @@ jobs:
             PrismLauncher-Linux-${{ env.VERSION }}.tar.gz
             PrismLauncher-Linux-Portable-${{ env.VERSION }}.tar.gz
             PrismLauncher-Linux-${{ env.VERSION }}-x86_64.AppImage
-            PrismLauncher-Windows-Legacy-${{ env.VERSION }}.zip
             PrismLauncher-Linux-Qt6-${{ env.VERSION }}.tar.gz
             PrismLauncher-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-            PrismLauncher-Windows-Legacy-Portable-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-Legacy-Setup-${{ env.VERSION }}.exe
-            PrismLauncher-Windows-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-Portable-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-Setup-${{ env.VERSION }}.exe
+            PrismLauncher-Windows-MinGW-Legacy-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-MinGW-Legacy-Portable-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-MinGW-Legacy-Setup-${{ env.VERSION }}.exe
+            PrismLauncher-Windows-MinGW-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-MinGW-Portable-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-MinGW-Setup-${{ env.VERSION }}.exe
+            PrismLauncher-Windows-MSVC-Legacy-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-MSVC-Legacy-Portable-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-MSVC-Legacy-Setup-${{ env.VERSION }}.exe
+            PrismLauncher-Windows-MSVC-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-MSVC-Portable-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-MSVC-Setup-${{ env.VERSION }}.exe
             PrismLauncher-macOS-${{ env.VERSION }}.tar.gz
             PrismLauncher-macOS-Legacy-${{ env.VERSION }}.tar.gz
             PrismLauncher-${{ env.VERSION }}.tar.gz
