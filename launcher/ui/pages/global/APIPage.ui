@@ -179,7 +179,7 @@
           <item>
            <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Enter a custom client ID for Microsoft Authentication here. </string>
+             <string>Enter a custom client ID for Microsoft Authentication here.</string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
