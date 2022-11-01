@@ -287,12 +287,15 @@ void ModPage::openUrl(const QUrl& url)
             newPage->ui->searchEdit->setText(slug);
             newPage->triggerSearch();
 
-            connect(newPage->listModel->activeJob(), &Task::finished, [slug, newPage] {
-                for (int row = 0; row < newPage->listModel->rowCount({}); row++) {
-                    QModelIndex index = newPage->listModel->index(row);
-                    auto pack = newPage->listModel->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+            ModPlatform::ListModel* model = newPage->listModel;
+            QListView* view = newPage->ui->packView;
+
+            connect(model->activeJob(), &Task::finished, [slug, model, view] {
+                for (int row = 0; row < model->rowCount({}); row++) {
+                    QModelIndex index = model->index(row);
+                    ModPlatform::IndexedPack pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
                     if (pack.slug == slug) {
-                        newPage->ui->packView->setCurrentIndex(index);
+                        view->setCurrentIndex(index);
                         break;
                     }
                 }
