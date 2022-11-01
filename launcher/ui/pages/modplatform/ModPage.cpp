@@ -282,11 +282,13 @@ void ModPage::openUrl(const QUrl& url)
         // intended to view in their web browser
         if (!slug.isEmpty() && !slug.contains('/') && slug != current.slug) {
             dialog->selectPage(page);
-            ui->searchEdit->setText(slug);
 
-            triggerSearch();
-            connect(listModel->activeJob(), &Task::finished, [this] {
-                ui->packView->setCurrentIndex(listModel->index(0));
+            ModPage* newPage = dialog->getSelectedPage();
+            newPage->ui->searchEdit->setText(slug);
+            newPage->triggerSearch();
+
+            connect(newPage->listModel->activeJob(), &Task::finished, [newPage] {
+                newPage->ui->packView->setCurrentIndex(newPage->listModel->index(0));
             });
 
             return;

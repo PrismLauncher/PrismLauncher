@@ -25,6 +25,7 @@
 #include "ModDownloadTask.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "ui/pages/BasePageProvider.h"
+#include "ui/pages/modplatform/ModPage.h"
 
 namespace Ui
 {
@@ -56,6 +57,8 @@ public:
 
     bool selectPage(QString pageId);
 
+    ModPage* getSelectedPage();
+
 public slots:
     void confirm();
     void accept() override;
@@ -69,6 +72,7 @@ private:
     PageContainer * m_container = nullptr;
     QDialogButtonBox * m_buttons = nullptr;
     QVBoxLayout *m_verticalLayout = nullptr;
+    ModPage *m_selected_page = nullptr;
 
     QHash<QString, ModDownloadTask*> modTask;
     BaseInstance *m_instance;
