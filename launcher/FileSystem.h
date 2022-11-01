@@ -75,9 +75,6 @@ bool ensureFilePathExists(QString filenamepath);
  */
 bool ensureFolderPathExists(QString filenamepath);
 
-// TODO: remove in favor of FS::copy once #333 is merged
-bool copyFile(QString const& src, QString const& dst);
-
 /// @brief Copies a directory and it's contents from src to dest
 class copy {
    public:

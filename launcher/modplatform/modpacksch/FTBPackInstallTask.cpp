@@ -373,7 +373,7 @@ void PackInstallTask::copyBlockedMods() {
 
         qDebug() << "Will try to copy" << mod->localPath << "to" << dest_path;
 
-        if (!FS::copyFile(mod->localPath, dest_path)) { // FIXME: use FS::copy once #333 is merged
+        if (!FS::copy(mod->localPath, dest_path)()) {
             qDebug() << "Copy of" << mod->localPath << "to" << dest_path << "Failed";
         } 
 

@@ -163,32 +163,6 @@ bool ensureFolderPathExists(QString foldernamepath)
     return success;
 }
 
-/// @brief Copy file at src to dest, ensures the full filepath exsists
-/// @param src srouce file path
-/// @param dst destination file path
-/// @return boolean: was there an error during the filecopy?
-bool copyFile(QString const& src, QString const& dst) {
-    using copy_opts = fs::copy_options;
-
-    std::error_code err;
-
-    fs::copy_options opt = copy_opts::none;
-    // The default behavior is to follow symlinks
-    opt |= copy_opts::copy_symlinks;
-
-    ensureFilePathExists(dst);
-
-    fs::copy(toStdString(src), toStdString(dst), opt, err);
-    if (err) {
-        qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
-        qDebug() << "Source file:" << src;
-        qDebug() << "Destination file:" << dst;
-    }
-
-    return err.value() == 0;
-
-}
-
 /// @brief Copies a directory and it's contents from src to dest
 /// @param offset subdirectory form src to copy to dest
 /// @return if there was an error during the filecopy
