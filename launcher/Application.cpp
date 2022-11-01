@@ -2,10 +2,8 @@
 /*
  *  Prism Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 Tayou <tayou@gmx.net>
- *
- *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
+ *  Copyright (C) 2022 Tayou <tayou@gmx.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -70,6 +68,8 @@
 #include "ui/dialogs/CustomMessageBox.h"
 
 #include "ui/pagedialog/PageDialog.h"
+
+#include "ui/themes/ThemeManager.h"
 
 #include "ApplicationMessage.h"
 
@@ -747,11 +747,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
 
     // Themes
-    {
-        m_themeManager = new ThemeManager(m_mainWindow);
-
-        m_themeManager->InitializeThemes();
-    }
+    m_themeManager = std::make_unique<ThemeManager>(m_mainWindow);
 
     // initialize and load all instances
     {
@@ -858,10 +854,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
 
     performMainStartupAction();
-}
-
-ThemeManager* Application::getThemeManager() {
-    return Application::m_themeManager;
 }
 
 bool Application::createSetupWizard()
@@ -1109,7 +1101,7 @@ std::shared_ptr<JavaInstallList> Application::javalist()
     return m_javalist;
 }
 
-std::vector<ITheme *> Application::getValidApplicationThemes()
+QList<ITheme*> Application::getValidApplicationThemes()
 {
     return m_themeManager->getValidApplicationThemes();
 }

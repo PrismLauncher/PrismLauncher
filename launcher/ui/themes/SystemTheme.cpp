@@ -45,25 +45,25 @@
 
 SystemTheme::SystemTheme()
 {
-    themeDebugLog << "Determining System Theme...";
+    themeDebugLog() << "Determining System Theme...";
     const auto & style = QApplication::style();
     systemPalette = style->standardPalette();
     QString lowerThemeName = style->objectName();
-    themeDebugLog << "System theme seems to be:" << lowerThemeName;
+    themeDebugLog() << "System theme seems to be:" << lowerThemeName;
     QStringList styles = QStyleFactory::keys();
     for(auto &st: styles)
     {
-        themeDebugLog << "Considering theme from theme factory:" << st.toLower();
+        themeDebugLog() << "Considering theme from theme factory:" << st.toLower();
         if(st.toLower() == lowerThemeName)
         {
             systemTheme = st;
-            themeDebugLog << "System theme has been determined to be:" << systemTheme;
+            themeDebugLog() << "System theme has been determined to be:" << systemTheme;
             return;
         }
     }
     // fall back to fusion if we can't find the current theme.
     systemTheme = "Fusion";
-    themeDebugLog << "System theme not found, defaulted to Fusion";
+    themeDebugLog() << "System theme not found, defaulted to Fusion";
 }
 
 void SystemTheme::apply(bool initial)

@@ -15,21 +15,28 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
 
 #include <QString>
 
 #include "ui/themes/ITheme.h"
 #include "ui/MainWindow.h"
 
-#define themeDebugLog qDebug() << "[Themes]"
-#define themeWarningLog qWarning() << "[Themes]"
+inline auto themeDebugLog() {
+  return qDebug() << "[Theme]";
+}
+inline auto themeWarningLog() {
+  return qWarning() << "[Theme]";
+}
 
 class ThemeManager {
 public:
     ThemeManager(MainWindow* mainWindow);
+
+    // maybe make private? Or put in ctor?
     void InitializeThemes();
 
-    std::vector<ITheme *> getValidApplicationThemes();
+    QList<ITheme*> getValidApplicationThemes();
     void setIconTheme(const QString& name);
     void applyCurrentlySelectedTheme();
     void setApplicationTheme(const QString& name, bool initial);
@@ -38,7 +45,7 @@ private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     MainWindow* m_mainWindow;
 
-    QString AddTheme(ITheme * theme);
+    QString AddTheme(std::unique_ptr<ITheme> theme);
     ITheme* GetTheme(QString themeId);
 };
 

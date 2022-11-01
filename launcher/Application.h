@@ -45,8 +45,6 @@
 #include <QUrl>
 #include <updater/GoUpdate.h>
 
-#include "ui/themes/ThemeManager.h"
-
 #include <BaseInstance.h>
 
 #include "minecraft/launch/MinecraftServerTarget.h"
@@ -71,6 +69,7 @@ class BaseDetachedToolFactory;
 class TranslationsModel;
 class ITheme;
 class MCEditTool;
+class ThemeManager;
 
 namespace Meta {
     class Index;
@@ -121,7 +120,7 @@ public:
 
     void setIconTheme(const QString& name);
 
-    std::vector<ITheme *> getValidApplicationThemes();
+    QList<ITheme*> getValidApplicationThemes();
 
     void setApplicationTheme(const QString& name, bool initial);
 
@@ -201,8 +200,6 @@ public:
 
     void ShowGlobalSettings(class QWidget * parent, QString open_page = QString());
 
-    ThemeManager* getThemeManager();
-
 signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
@@ -262,7 +259,7 @@ private:
     std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
     std::unique_ptr<MCEditTool> m_mcedit;
     QSet<QString> m_features;
-    ThemeManager* m_themeManager;
+    std::unique_ptr<ThemeManager> m_themeManager;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 

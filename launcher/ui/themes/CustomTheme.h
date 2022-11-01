@@ -39,8 +39,7 @@
 #pragma once
 
 #include "ITheme.h"
-#include <QFile>
-#include <QDir>
+#include <QFileInfo>
 
 class CustomTheme: public ITheme
 {
