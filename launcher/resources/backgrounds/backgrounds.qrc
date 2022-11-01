@@ -4,6 +4,6 @@
         <file alias="kitteh">catbgrnd2.png</file>
         <file alias="catmas">catmas.png</file>
         <file alias="cattiversary">cattiversary.png</file>
-             <file alias="cattoween">cattoween.png</file>
+        <file alias="cattoween">cattoween.png</file>
     </qresource>
 </RCC>
