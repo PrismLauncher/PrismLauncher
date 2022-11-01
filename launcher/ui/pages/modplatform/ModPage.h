@@ -82,6 +82,7 @@ class ModPage : public QWidget, public BasePage {
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);
     void onModSelected();
+    virtual void openUrl(const QUrl& url);
 
    protected:
     Ui::ModPage* ui = nullptr;

@@ -187,3 +187,8 @@ void ModDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* select
     // Same effect as having a global search bar
     selected_page->setSearchTerm(prev_page->getSearchTerm());
 }
+
+bool ModDownloadDialog::selectPage(QString pageId)
+{
+    return m_container->selectPage(pageId);
+}

@@ -53,6 +53,8 @@ public:
     const QList<ModDownloadTask*> getTasks();
     const std::shared_ptr<ModFolderModel> &mods;
 
+    bool selectPage(QString pageId);
+
 public slots:
     void confirm();
     void accept() override;

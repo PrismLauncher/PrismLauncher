@@ -39,7 +39,7 @@
 #include "FlameModModel.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
-FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance) 
+FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance)
     : ModPage(dialog, instance, new FlameAPI())
 {
     listModel = new FlameMod::ListModel(this);
@@ -53,7 +53,7 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance)
     ui->sortByBox->addItem(tr("Sort by Author"));
     ui->sortByBox->addItem(tr("Sort by Downloads"));
 
-    // sometimes Qt just ignores virtual slots and doesn't work as intended it seems, 
+    // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's contructor...
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameModPage::onSelectionChanged);
@@ -78,3 +78,18 @@ bool FlameModPage::optedOut(ModPlatform::IndexedVersion& ver) const
 // other mod providers start loading before being selected, at least with
 // my Qt, so we need to implement this in every derived class...
 auto FlameModPage::shouldDisplay() const -> bool { return true; }
+
+void FlameModPage::openUrl(const QUrl& url)
+{
+    if (url.scheme().isEmpty()) {
+        QString query = url.query(QUrl::FullyDecoded);
+        if (query.startsWith("remoteUrl=")) {
+            // attempt to resolve url from warning page
+            query.remove(0, 10);
+            ModPage::openUrl({QUrl::fromPercentEncoding(query.toUtf8())}); // double decoding is necessary
+            return;
+        }
+    }
+
+    ModPage::openUrl(url);
+}

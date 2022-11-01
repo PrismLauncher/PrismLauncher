@@ -64,4 +64,6 @@ class FlameModPage : public ModPage {
     bool optedOut(ModPlatform::IndexedVersion& ver) const override;
 
     auto shouldDisplay() const -> bool override;
+
+    void openUrl(const QUrl& url) override;
 };
