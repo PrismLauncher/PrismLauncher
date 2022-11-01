@@ -261,8 +261,7 @@ void ModPage::openUrl(const QUrl& url)
             && url.path().startsWith("/mod/")) {
         prefixLength = 5;
         page = "modrinth";
-    }
-    else if (APPLICATION->capabilities() & Application::SupportsFlame
+    } else if (APPLICATION->capabilities() & Application::SupportsFlame
             && url.host() == "www.curseforge.com"
             && url.path().toLower().startsWith("/minecraft/mc-mods/")) {
         prefixLength = 19;
@@ -282,9 +281,14 @@ void ModPage::openUrl(const QUrl& url)
         // and the user isn't opening the same mod; they probably
         // intended to view in their web browser
         if (!slug.isEmpty() && !slug.contains('/') && slug != current.slug) {
-            ui->searchEdit->setText(slug);
             dialog->selectPage(page);
+            ui->searchEdit->setText(slug);
+
             triggerSearch();
+            connect(listModel->activeJob(), &Task::finished, [this] {
+                ui->packView->setCurrentIndex(listModel->index(0));
+            });
+
             return;
         }
     }
