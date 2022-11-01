@@ -183,6 +183,32 @@ slots:
         f();
     }
 
+    void test_copy_single_file()
+    {
+        QTemporaryDir tempDir;
+        tempDir.setAutoRemove(true);
+
+        {
+            QString file = QFINDTESTDATA("testdata/FileSystem/test_folder/pack.mcmeta");
+
+            qDebug() << "From:" << file << "To:" << tempDir.path();
+
+            QDir target_dir(FS::PathCombine(tempDir.path(), "pack.mcmeta"));
+            qDebug() << tempDir.path();
+            qDebug() << target_dir.path();
+            FS::copy c(file, target_dir.filePath("pack.mcmeta"));
+            c();
+
+            auto filter = QDir::Filter::Files;
+
+            for (auto entry: target_dir.entryList(filter)) {
+                qDebug() << entry;
+            }
+
+            QVERIFY(target_dir.entryList(filter).contains("pack.mcmeta"));
+        }
+    }
+
     void test_getDesktop()
     {
         QCOMPARE(FS::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
