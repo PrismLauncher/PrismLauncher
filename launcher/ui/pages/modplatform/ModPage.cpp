@@ -262,7 +262,7 @@ void ModPage::openUrl(const QUrl& url)
         prefixLength = 5;
         page = "modrinth";
     } else if (APPLICATION->capabilities() & Application::SupportsFlame
-            && url.host() == "www.curseforge.com"
+            && (url.host() == "curseforge.com" || url.host() == "www.curseforge.com")
             && url.path().toLower().startsWith("/minecraft/mc-mods/")) {
         prefixLength = 19;
         page = "curseforge";
@@ -287,8 +287,15 @@ void ModPage::openUrl(const QUrl& url)
             newPage->ui->searchEdit->setText(slug);
             newPage->triggerSearch();
 
-            connect(newPage->listModel->activeJob(), &Task::finished, [newPage] {
-                newPage->ui->packView->setCurrentIndex(newPage->listModel->index(0));
+            connect(newPage->listModel->activeJob(), &Task::finished, [slug, newPage] {
+                for (int row = 0; row < newPage->listModel->rowCount({}); row++) {
+                    QModelIndex index = newPage->listModel->index(row);
+                    auto pack = newPage->listModel->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+                    if (pack.slug == slug) {
+                        newPage->ui->packView->setCurrentIndex(index);
+                        break;
+                    }
+                }
             });
 
             return;
