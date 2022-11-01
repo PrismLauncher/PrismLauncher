@@ -501,6 +501,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // Theming
         m_settings->registerSetting("IconTheme", QString("pe_colored"));
         m_settings->registerSetting("ApplicationTheme", QString("system"));
+        m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
         // Remembered state
         m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
