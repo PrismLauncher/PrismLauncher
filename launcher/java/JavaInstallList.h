@@ -42,7 +42,7 @@ public:
 
     Task::Ptr getLoadTask() override;
     bool isLoaded() override;
-    const BaseVersionPtr at(int i) const override;
+    const BaseVersion::Ptr at(int i) const override;
     int count() const override;
     void sortVersions() override;
 
@@ -50,7 +50,7 @@ public:
     RoleList providesRoles() const override;
 
 public slots:
-    void updateListData(QList<BaseVersionPtr> versions) override;
+    void updateListData(QList<BaseVersion::Ptr> versions) override;
 
 protected:
     void load();
@@ -59,7 +59,7 @@ protected:
 protected:
     Status m_status = Status::NotDone;
     shared_qobject_ptr<JavaListLoadTask> m_loadTask;
-    QList<BaseVersionPtr> m_vlist;
+    QList<BaseVersion::Ptr> m_vlist;
 };
 
 class JavaListLoadTask : public Task

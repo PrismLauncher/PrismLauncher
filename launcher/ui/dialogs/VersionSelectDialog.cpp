@@ -120,7 +120,7 @@ void VersionSelectDialog::selectRecommended()
     m_versionWidget->selectRecommended();
 }
 
-BaseVersionPtr VersionSelectDialog::selectedVersion() const
+BaseVersion::Ptr VersionSelectDialog::selectedVersion() const
 {
     return m_versionWidget->selectedVersion();
 }

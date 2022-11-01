@@ -40,7 +40,7 @@ public:
     void loadList();
 
     bool hasVersions() const;
-    BaseVersionPtr selectedVersion() const;
+    BaseVersion::Ptr selectedVersion() const;
     void selectRecommended();
     void selectCurrent();
 
@@ -54,7 +54,7 @@ public:
     void setResizeOn(int column);
 
 signals:
-    void selectedVersionChanged(BaseVersionPtr version);
+    void selectedVersionChanged(BaseVersion::Ptr version);
 
 protected:
     virtual void closeEvent ( QCloseEvent* );
