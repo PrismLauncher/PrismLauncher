@@ -290,15 +290,18 @@ void ModPage::openUrl(const QUrl& url)
             ModPlatform::ListModel* model = newPage->listModel;
             QListView* view = newPage->ui->packView;
 
-            connect(model->activeJob(), &Task::finished, [slug, model, view] {
+            connect(model->activeJob(), &Task::finished, [url, slug, model, view] {
                 for (int row = 0; row < model->rowCount({}); row++) {
                     QModelIndex index = model->index(row);
                     ModPlatform::IndexedPack pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
                     if (pack.slug == slug) {
                         view->setCurrentIndex(index);
-                        break;
+                        return;
                     }
                 }
+
+                // The final fallback.
+                QDesktopServices::openUrl(url);
             });
 
             return;
