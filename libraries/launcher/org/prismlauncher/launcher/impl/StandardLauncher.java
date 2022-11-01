@@ -54,15 +54,23 @@
 
 package org.prismlauncher.launcher.impl;
 
+
+import org.prismlauncher.launcher.Launcher;
+import org.prismlauncher.launcher.LauncherProvider;
 import org.prismlauncher.utils.Parameters;
+
 
 public final class StandardLauncher extends AbstractLauncher {
 
-	public StandardLauncher(Parameters params) {
-		super(params);
-	}
+    public StandardLauncher(Parameters params) {
+        super(params);
+    }
 
-	@Override
+    public static LauncherProvider getProvider() {
+        return new StandardLauncherProvider();
+    }
+
+    @Override
     public void launch() throws Throwable {
         // window size, title and state
 
@@ -87,4 +95,11 @@ public final class StandardLauncher extends AbstractLauncher {
         loadAndInvokeMain();
     }
 
+
+    private static class StandardLauncherProvider implements LauncherProvider {
+        @Override
+        public Launcher provide(Parameters parameters) {
+            return new StandardLauncher(parameters);
+        }
+    }
 }

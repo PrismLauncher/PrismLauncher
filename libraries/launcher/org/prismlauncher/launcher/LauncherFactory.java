@@ -56,43 +56,42 @@
 
 package org.prismlauncher.launcher;
 
+
 import org.prismlauncher.launcher.impl.StandardLauncher;
 import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
 import org.prismlauncher.utils.Parameters;
 
-import java.util.HashMap;
-import java.util.Map;
 
 public final class LauncherFactory {
-
-    private static final Map<String, LauncherProvider> launcherRegistry = new HashMap<>();
-
-    static {
-        launcherRegistry.put("standard", new LauncherProvider() {
-            @Override
-            public Launcher provide(Parameters parameters) {
-                return new StandardLauncher(parameters);
-            }
-        });
-        launcherRegistry.put("legacy", new LauncherProvider() {
-            @Override
-            public Launcher provide(Parameters parameters) {
-                return new LegacyLauncher(parameters);
-            }
-        });
-    }
     private LauncherFactory() {
     }
 
-    public static Launcher createLauncher(Parameters parameters) {
-        String name = parameters.getString("launcher");
+    public static Launcher createLauncher(String launcherType, Parameters parameters) {
+        return createLauncher(LauncherType.valueOf(launcherType.toUpperCase()), parameters);
+    }
 
-        LauncherProvider launcherProvider = launcherRegistry.get(name);
-
-        if (launcherProvider == null)
-            throw new IllegalArgumentException("Invalid launcher type: " + name);
+    public static Launcher createLauncher(LauncherType launcherType, Parameters parameters) {
+        LauncherProvider launcherProvider = launcherType.getLauncherProvider();
 
         return launcherProvider.provide(parameters);
     }
 
+    public static Launcher createLauncher(Parameters parameters) {
+        return createLauncher(parameters.getString("launcher"), parameters);
+    }
+
+    public enum LauncherType {
+        STANDARD(StandardLauncher.getProvider()),
+        LEGACY(LegacyLauncher.getProvider());
+
+        private final LauncherProvider launcherProvider;
+
+        LauncherType(LauncherProvider launcherProvider) {
+            this.launcherProvider = launcherProvider;
+        }
+
+        public LauncherProvider getLauncherProvider() {
+            return launcherProvider;
+        }
+    }
 }

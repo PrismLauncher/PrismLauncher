@@ -55,6 +55,9 @@
 
 package org.prismlauncher.launcher.impl.legacy;
 
+
+import org.prismlauncher.launcher.Launcher;
+import org.prismlauncher.launcher.LauncherProvider;
 import org.prismlauncher.launcher.impl.AbstractLauncher;
 import org.prismlauncher.utils.Parameters;
 
@@ -70,6 +73,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 /**
  * Used to launch old versions that support applets.
  */
@@ -78,10 +82,13 @@ public final class LegacyLauncher extends AbstractLauncher {
     private static final Logger LOGGER = Logger.getLogger("LegacyLauncher");
 
     private final String user, session;
+
     private final String title;
+
     private final String appletClass;
 
     private final boolean noApplet;
+
     private final String cwd;
 
     public LegacyLauncher(Parameters params) {
@@ -96,6 +103,35 @@ public final class LegacyLauncher extends AbstractLauncher {
         noApplet = traits.contains("noapplet");
 
         cwd = System.getProperty("user.dir");
+    }
+
+    public static LauncherProvider getProvider() {
+        return new LegacyLauncherProvider();
+    }
+
+    /**
+     * Finds a field that looks like a Minecraft base folder in a supplied class
+     *
+     * @param clazz the class to scan
+     *
+     * @return The found field.
+     */
+    private static Field getMinecraftGameDirField(Class<?> clazz) {
+        // Field we're looking for is always
+        // private static File obfuscatedName = null;
+        for (Field field : clazz.getDeclaredFields()) {
+            // Has to be File
+            if (field.getType() != File.class)
+                continue;
+
+            // And Private Static.
+            if (!Modifier.isStatic(field.getModifiers()) || !Modifier.isPrivate(field.getModifiers()))
+                continue;
+
+            return field;
+        }
+
+        return null;
     }
 
     @Override
@@ -130,7 +166,7 @@ public final class LegacyLauncher extends AbstractLauncher {
                         serverAddress,
                         serverPort,
                         mcParams.contains("--demo")
-                );
+                            );
 
                 return;
             } catch (Throwable e) {
@@ -143,27 +179,11 @@ public final class LegacyLauncher extends AbstractLauncher {
         invokeMain(main);
     }
 
-    /**
-     * Finds a field that looks like a Minecraft base folder in a supplied class
-     * @param clazz the class to scan
-     * @return The found field.
-     */
-    private static Field getMinecraftGameDirField(Class<?> clazz) {
-        // Field we're looking for is always
-        // private static File obfuscatedName = null;
-        for (Field field : clazz.getDeclaredFields()) {
-            // Has to be File
-            if (field.getType() != File.class)
-                continue;
 
-            // And Private Static.
-            if (!Modifier.isStatic(field.getModifiers()) || !Modifier.isPrivate(field.getModifiers()))
-                continue;
-
-            return field;
+    private static class LegacyLauncherProvider implements LauncherProvider {
+        @Override
+        public Launcher provide(Parameters parameters) {
+            return new LegacyLauncher(parameters);
         }
-
-        return null;
     }
-
 }
