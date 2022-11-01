@@ -335,11 +335,10 @@ public:
         all_actions.append(&actionSettings);
 
         actionUndoTrashInstance = TranslatedAction(MainWindow);
-        connect(actionUndoTrashInstance, SIGNAL(triggered(bool)), MainWindow, SLOT(undoTrashInstance()));
         actionUndoTrashInstance->setObjectName(QStringLiteral("actionUndoTrashInstance"));
         actionUndoTrashInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Undo Last Instance Deletion"));
         actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        actionUndoTrashInstance->setShortcut(QKeySequence("Ctrl+Z"));
+        actionUndoTrashInstance->setShortcut(QKeySequence::Undo);
         all_actions.append(&actionUndoTrashInstance);
 
         actionClearMetadata = TranslatedAction(MainWindow);
@@ -1023,6 +1022,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         }
     }
 
+    connect(ui->actionUndoTrashInstance.operator->(), &QAction::triggered, this, &MainWindow::undoTrashInstance);
+
     setSelectedInstanceById(APPLICATION->settings()->get("SelectedInstance").toString());
 
     // removing this looks stupid
@@ -1134,11 +1135,6 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
             connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(deleteGroup()));
             actions.append(actionDeleteGroup);
         }
-
-        QAction *actionUndoTrashInstance = new QAction("Undo last trash instance", this);
-        connect(actionUndoTrashInstance, SIGNAL(triggered(bool)), SLOT(undoTrashInstance()));
-        actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        actions.append(actionUndoTrashInstance);
     }
     QMenu myMenu;
     myMenu.addActions(actions);
@@ -1834,6 +1830,7 @@ void MainWindow::deleteGroup()
 void MainWindow::undoTrashInstance()
 {
     APPLICATION->instances()->undoTrashInstance();
+    ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
 }
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
@@ -1940,6 +1937,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
     auto id = m_selectedInstance->id();
     if (APPLICATION->instances()->trashInstance(id)) {
+        ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
         return;
     }
     

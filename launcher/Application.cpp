@@ -62,6 +62,7 @@
 
 #ifdef Q_OS_WIN
 #include "ui/WinDarkmode.h"
+#include <versionhelpers.h>
 #endif
 
 #include "ui/setupwizard/SetupWizard.h"
@@ -1136,15 +1137,6 @@ std::vector<ITheme *> Application::getValidApplicationThemes()
     return ret;
 }
 
-bool Application::isFlatpak()
-{
-    #ifdef Q_OS_LINUX
-    return QFile::exists("/.flatpak-info");
-    #else
-    return false;
-    #endif
-}
-
 void Application::setApplicationTheme(const QString& name, bool initial)
 {
     auto systemPalette = qApp->palette();
@@ -1154,7 +1146,7 @@ void Application::setApplicationTheme(const QString& name, bool initial)
         auto & theme = (*themeIter).second;
         theme->apply(initial);
 #ifdef Q_OS_WIN
-        if (m_mainWindow) {
+        if (m_mainWindow && IsWindows10OrGreater()) {
             if (QString::compare(theme->id(), "dark") == 0) {
                     WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
             } else {
@@ -1395,10 +1387,13 @@ MainWindow* Application::showMainWindow(bool minimized)
         m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
         m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
 #ifdef Q_OS_WIN
-        if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
-            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-        } else {
-            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+        if (IsWindows10OrGreater())
+        {
+            if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
+                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
+            } else {
+                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+            }
         }
 #endif
         if(minimized)
