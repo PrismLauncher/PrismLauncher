@@ -1562,8 +1562,6 @@ void MainWindow::setCatBackground(bool enabled)
         QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
         QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
 
-        qDebug() << "The choosen cat is " << cat << ".";
-
         if(non_stupid_abs(now.daysTo(xmas)) <= 4) {
             cat += "-xmas";
         }
