@@ -1562,7 +1562,6 @@ void MainWindow::setCatBackground(bool enabled)
         QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
         QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
         QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
-
         if(non_stupid_abs(now.daysTo(xmas)) <= 4) {
             cat += "-xmas";
         }
