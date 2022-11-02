@@ -282,27 +282,31 @@ void ModPage::openUrl(const QUrl& url)
             dialog->selectPage(page);
 
             ModPage* newPage = dialog->getSelectedPage();
-            newPage->ui->searchEdit->setText(slug);
-            newPage->triggerSearch();
+            QLineEdit* searchEdit = newPage->ui->searchEdit;
 
-            ModPlatform::ListModel* model = newPage->listModel;
-            QListView* view = newPage->ui->packView;
+            if (searchEdit->text() != slug) {
+                searchEdit->setText(slug);
+                newPage->triggerSearch();
 
-            connect(model->activeJob(), &Task::finished, [url, slug, model, view] {
-                for (int row = 0; row < model->rowCount({}); row++) {
-                    QModelIndex index = model->index(row);
-                    auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
-                    if (pack.slug == slug) {
-                        view->setCurrentIndex(index);
-                        return;
+                ModPlatform::ListModel* model = newPage->listModel;
+                QListView* view = newPage->ui->packView;
+
+                connect(model->activeJob(), &Task::finished, [url, slug, model, view] {
+                    for (int row = 0; row < model->rowCount({}); row++) {
+                        QModelIndex index = model->index(row);
+                        auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+                        if (pack.slug == slug) {
+                            view->setCurrentIndex(index);
+                            return;
+                        }
                     }
-                }
 
-                // The final fallback.
-                QDesktopServices::openUrl(url);
-            });
+                    // The final fallback.
+                    QDesktopServices::openUrl(url);
+                });
 
-            return;
+                return;
+            }
         }
     }
 
