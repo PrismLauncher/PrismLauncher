@@ -205,6 +205,8 @@ add_subdirectory(program_info)
 
 ####################################### Install layout #######################################
 
+find_package(SharedMimeInfo)
+
 if(NOT (UNIX AND APPLE))
     # Install "portable.txt" if selected component is "portable"
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_Portable_File}" DESTINATION "." COMPONENT portable EXCLUDE_FROM_ALL)
@@ -262,6 +264,10 @@ elseif(UNIX)
     SET(Launcher_BINARY_RPATH "$ORIGIN/")
 
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
+    if(SharedMimeInfo_FOUND)
+      install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_mrpack_MIMEInfo} DESTINATION ${KDE_INSTALL_MIMEDIR})
+      update_xdg_mimetypes(${KDE_INSTALL_MIMEDIR})
+    endif(SharedMimeInfo_FOUND)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${LAUNCHER_ICON_DEST_DIR})
 
