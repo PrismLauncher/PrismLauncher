@@ -257,17 +257,15 @@ void ModPage::openUrl(const QUrl& url)
     int prefixLength;
     const char* page;
 
-    if ((url.host() == "modrinth.com" || url.host() == "www.modrinth.com")
-            && url.path().startsWith("/mod/")) {
+    if ((url.host() == "modrinth.com" || url.host() == "www.modrinth.com") && url.path().startsWith("/mod/")) {
         prefixLength = 5;
         page = "modrinth";
-    } else if (APPLICATION->capabilities() & Application::SupportsFlame
-            && (url.host() == "curseforge.com" || url.host() == "www.curseforge.com")
-            && url.path().toLower().startsWith("/minecraft/mc-mods/")) {
+    } else if (APPLICATION->capabilities() & Application::SupportsFlame &&
+               (url.host() == "curseforge.com" || url.host() == "www.curseforge.com") &&
+               url.path().toLower().startsWith("/minecraft/mc-mods/")) {
         prefixLength = 19;
         page = "curseforge";
-    }
-    else
+    } else
         prefixLength = 0;
 
     if (prefixLength != 0) {
@@ -311,7 +309,6 @@ void ModPage::openUrl(const QUrl& url)
     // open in the user's web browser
     QDesktopServices::openUrl(url);
 }
-
 
 /******** Make changes to the UI ********/
 

@@ -25,7 +25,6 @@
 #include "ModDownloadTask.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "ui/pages/BasePageProvider.h"
-#include "ui/pages/modplatform/ModPage.h"
 
 namespace Ui
 {
@@ -34,13 +33,14 @@ class ModDownloadDialog;
 
 class PageContainer;
 class QDialogButtonBox;
+class ModPage;
 class ModrinthModPage;
 
 class ModDownloadDialog final : public QDialog, public BasePageProvider
 {
     Q_OBJECT
 
-public:
+   public:
     explicit ModDownloadDialog(const std::shared_ptr<ModFolderModel>& mods, QWidget* parent, BaseInstance* instance);
     ~ModDownloadDialog() override = default;
 
@@ -53,27 +53,26 @@ public:
     bool isModSelected(QString name) const;
 
     const QList<ModDownloadTask*> getTasks();
-    const std::shared_ptr<ModFolderModel> &mods;
+    const std::shared_ptr<ModFolderModel>& mods;
 
     bool selectPage(QString pageId);
-
     ModPage* getSelectedPage();
 
-public slots:
+   public slots:
     void confirm();
     void accept() override;
     void reject() override;
 
-private slots:
+   private slots:
     void selectedPageChanged(BasePage* previous, BasePage* selected);
 
-private:
-    Ui::ModDownloadDialog *ui = nullptr;
-    PageContainer * m_container = nullptr;
-    QDialogButtonBox * m_buttons = nullptr;
-    QVBoxLayout *m_verticalLayout = nullptr;
-    ModPage *m_selected_page = nullptr;
+   private:
+    Ui::ModDownloadDialog* ui = nullptr;
+    PageContainer* m_container = nullptr;
+    QDialogButtonBox* m_buttons = nullptr;
+    QVBoxLayout* m_verticalLayout = nullptr;
+    ModPage* m_selectedPage = nullptr;
 
     QHash<QString, ModDownloadTask*> modTask;
-    BaseInstance *m_instance;
+    BaseInstance* m_instance;
 };

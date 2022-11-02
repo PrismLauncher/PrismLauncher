@@ -132,7 +132,7 @@ QList<BasePage*> ModDownloadDialog::getPages()
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(FlameModPage::create(this, m_instance));
 
-    m_selected_page = dynamic_cast<ModPage*>(pages[0]);
+    m_selectedPage = dynamic_cast<ModPage*>(pages[0]);
 
     return pages;
 }
@@ -181,14 +181,14 @@ void ModDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* select
         return;
     }
 
-    m_selected_page = dynamic_cast<ModPage*>(selected);
-    if (!m_selected_page) {
+    m_selectedPage = dynamic_cast<ModPage*>(selected);
+    if (!m_selectedPage) {
         qCritical() << "Page '" << selected->displayName() << "' in ModDownloadDialog is not a ModPage!";
         return;
     }
 
     // Same effect as having a global search bar
-    m_selected_page->setSearchTerm(prev_page->getSearchTerm());
+    m_selectedPage->setSearchTerm(prev_page->getSearchTerm());
 }
 
 bool ModDownloadDialog::selectPage(QString pageId)
@@ -198,5 +198,5 @@ bool ModDownloadDialog::selectPage(QString pageId)
 
 ModPage* ModDownloadDialog::getSelectedPage()
 {
-    return m_selected_page;
+    return m_selectedPage;
 }
