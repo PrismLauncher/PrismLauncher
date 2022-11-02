@@ -343,7 +343,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>Cat</string>
+             <string>C&amp;at</string>
             </property>
             <property name="buddy">
              <cstring>themeBackgroundCat</cstring>
