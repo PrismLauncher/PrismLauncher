@@ -303,6 +303,9 @@ public:
     {
         beginResetModel();
         blocked.clear();
+        // ensure that the log dirs are always blocked, ensuring that the logs (and session id) aren't leaked if the instance is exported
+        paths.append(QString(".minecraft/logs"));
+        paths.append(QString(".minecraft/crash-reports"));
         blocked.insert(paths);
         endResetModel();
     }
