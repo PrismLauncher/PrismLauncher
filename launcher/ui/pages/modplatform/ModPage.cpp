@@ -308,9 +308,8 @@ void ModPage::openUrl(const QUrl& url)
 
             if (!model->activeJob())
                 jump();
-            else {
+            else
                 connect(model->activeJob(), &Task::finished, jump);
-            }
 
             return;
         }
