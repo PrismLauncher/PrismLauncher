@@ -42,7 +42,6 @@
 
 #include "MainWindow.h"
 
-#include <string.h>
 #include <QVariant>
 #include <QUrl>
 #include <QDir>
@@ -1567,7 +1566,7 @@ void MainWindow::setCatBackground(bool enabled)
         if(non_stupid_abs(now.daysTo(xmas)) <= 4) {
             cat += "-xmas";
         }
-        else if (strcmp(cat, "kitteh") == 0 && non_stupid_abs(now.daysTo(halloween)) <= 4) {
+        else if (cat == "kitteh" && non_stupid_abs(now.daysTo(halloween)) <= 4) {
             cat += "-ween";
         }
         else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
