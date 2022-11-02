@@ -254,19 +254,20 @@ void ModPage::openUrl(const QUrl& url)
     }
 
     // detect mod URLs and search instead
-    int prefixLength;
+    int prefixLength = 0;
     const char* page;
 
     if ((url.host() == "modrinth.com" || url.host() == "www.modrinth.com") && url.path().startsWith("/mod/")) {
         prefixLength = 5;
         page = "modrinth";
     } else if (APPLICATION->capabilities() & Application::SupportsFlame &&
-               (url.host() == "curseforge.com" || url.host() == "www.curseforge.com") &&
-               url.path().toLower().startsWith("/minecraft/mc-mods/")) {
-        prefixLength = 19;
+               (url.host() == "curseforge.com" || url.host().endsWith(".curseforge.com"))) {
+        if (url.path().toLower().startsWith("/minecraft/mc-mods/"))
+            prefixLength = 19;
+        else if (url.path().toLower().startsWith("/projects/"))
+            prefixLength = 10;
         page = "curseforge";
-    } else
-        prefixLength = 0;
+    }
 
     if (prefixLength != 0) {
         QString slug = url.path().mid(prefixLength);
@@ -282,31 +283,36 @@ void ModPage::openUrl(const QUrl& url)
             dialog->selectPage(page);
 
             ModPage* newPage = dialog->getSelectedPage();
+
             QLineEdit* searchEdit = newPage->ui->searchEdit;
+            ModPlatform::ListModel* model = newPage->listModel;
+            QListView* view = newPage->ui->packView;
 
-            if (searchEdit->text() != slug) {
-                searchEdit->setText(slug);
-                newPage->triggerSearch();
+            auto jump = [url, slug, model, view] {
+                for (int row = 0; row < model->rowCount({}); row++) {
+                    QModelIndex index = model->index(row);
+                    auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
 
-                ModPlatform::ListModel* model = newPage->listModel;
-                QListView* view = newPage->ui->packView;
-
-                connect(model->activeJob(), &Task::finished, [url, slug, model, view] {
-                    for (int row = 0; row < model->rowCount({}); row++) {
-                        QModelIndex index = model->index(row);
-                        auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
-                        if (pack.slug == slug) {
-                            view->setCurrentIndex(index);
-                            return;
-                        }
+                    if (pack.slug == slug) {
+                        view->setCurrentIndex(index);
+                        return;
                     }
+                }
 
-                    // The final fallback.
-                    QDesktopServices::openUrl(url);
-                });
+                // The final fallback.
+                QDesktopServices::openUrl(url);
+            };
 
-                return;
+            searchEdit->setText(slug);
+            newPage->triggerSearch();
+
+            if (!model->activeJob())
+                jump();
+            else {
+                connect(model->activeJob(), &Task::finished, jump);
             }
+
+            return;
         }
     }
 
