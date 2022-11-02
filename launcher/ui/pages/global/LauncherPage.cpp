@@ -334,6 +334,18 @@ void LauncherPage::applySettings()
         APPLICATION->setApplicationTheme(newAppTheme, false);
     }
 
+    switch (ui->themeBackgroundCat->currentIndex()) {
+    case 0: // original cat
+        s->set("BackgroundCat", "kitteh");
+        break;
+    case 1: // rory the cat
+        s->set("BackgroundCat", "rory");
+        break;
+    case 2: // rory the cat flat edition
+        s->set("BackgroundCat", "rory-flat");
+        break;
+    }
+
     s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
 
     // Console settings
@@ -423,6 +435,15 @@ void LauncherPage::loadSettings()
     else if (theme == "custom")
     {
         ui->themeComboBox->setCurrentIndex(9);
+    }
+
+    auto cat = s->get("BackgroundCat").toString();
+    if (cat == "kitteh") {
+        ui->themeBackgroundCat->setCurrentIndex(0);
+    } else if (cat == "rory") {
+        ui->themeBackgroundCat->setCurrentIndex(1);
+    } else if (cat == "rory-flat") {
+        ui->themeBackgroundCat->setCurrentIndex(2);
     }
 
     {
