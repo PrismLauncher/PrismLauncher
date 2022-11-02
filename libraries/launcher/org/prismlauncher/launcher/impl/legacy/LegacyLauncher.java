@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher
+ *
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
  *  Copyright (C) 2022 flow <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher
+ *
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 flow <flowlnlnln@gmail.com>
@@ -56,11 +57,13 @@
 
 package org.prismlauncher.launcher.impl.legacy;
 
+
 import net.minecraft.Launcher;
 
 import javax.imageio.ImageIO;
 import java.applet.Applet;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
