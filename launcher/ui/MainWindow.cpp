@@ -1561,19 +1561,16 @@ void MainWindow::setCatBackground(bool enabled)
         QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
         QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
         QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
-        QString cat;
-        
+        QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
+
         if(non_stupid_abs(now.daysTo(xmas)) <= 4) {
-            cat = "catmas";
+            cat += "-xmas";
         }
         else if (non_stupid_abs(now.daysTo(halloween)) <= 4) {
-            cat = "cattoween";
+            cat += "-ween";
         }
         else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
-            cat = "cattiversary";
-        }
-        else {
-            cat = "kitteh";
+            cat += "-bday";
         }
         view->setStyleSheet(QString(R"(
 InstanceView
@@ -1581,10 +1578,11 @@ InstanceView
     background-image: url(:/backgrounds/%1);
     background-attachment: fixed;
     background-clip: padding;
-    background-position: top right;
+    background-position: bottom left;
     background-repeat: none;
     background-color:palette(base);
-})").arg(cat));
+})")
+                                .arg(cat));
     }
     else
     {
