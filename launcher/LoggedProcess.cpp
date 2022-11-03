@@ -68,6 +68,15 @@ QStringList reprocess(const QByteArray& data, QTextDecoder& decoder)
 #else
     auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, Qt::SkipEmptyParts);
 #endif
+    int i = 0;
+    while (i < lines.size()) {
+        auto line = lines[i];
+        if (line.contains("(Session ID is token:")) {
+            lines.removeAt(i);
+            i--; // because everything shifts
+        }
+        i++;
+    }
     return lines;
 }
 
