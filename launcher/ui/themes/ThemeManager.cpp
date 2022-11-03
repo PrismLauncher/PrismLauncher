@@ -17,26 +17,27 @@
  */
 #include "ThemeManager.h"
 
-#include "ui/themes/SystemTheme.h"
-#include "ui/themes/DarkTheme.h"
-#include "ui/themes/BrightTheme.h"
-#include "ui/themes/CustomTheme.h"
+#include <QApplication>
 #include <QDir>
 #include <QDirIterator>
 #include <QIcon>
-#include <QApplication>
+#include "ui/themes/BrightTheme.h"
+#include "ui/themes/CustomTheme.h"
+#include "ui/themes/DarkTheme.h"
+#include "ui/themes/SystemTheme.h"
 
 #include "Application.h"
 
 #ifdef Q_OS_WIN
-#include <windows.h> 
-// this is needed for versionhelpers.h, it is also included in WinDarkmode, but we can't rely on that. 
+#include <windows.h>
+// this is needed for versionhelpers.h, it is also included in WinDarkmode, but we can't rely on that.
 // Ultimately this should be included in versionhelpers, but that is outside of the project.
 #include "ui/WinDarkmode.h"
 #include <versionhelpers.h>
 #endif
 
-ThemeManager::ThemeManager(MainWindow* mainWindow) {
+ThemeManager::ThemeManager(MainWindow* mainWindow)
+{
     m_mainWindow = mainWindow;
     InitializeThemes();
 }
@@ -44,7 +45,8 @@ ThemeManager::ThemeManager(MainWindow* mainWindow) {
 /// @brief Adds the Theme to the list of themes
 /// @param theme The Theme to add
 /// @return Theme ID
-QString ThemeManager::AddTheme(std::unique_ptr<ITheme> theme) {
+QString ThemeManager::AddTheme(std::unique_ptr<ITheme> theme)
+{
     QString id = theme->id();
     m_themes.emplace(id, std::move(theme));
     return id;
@@ -53,13 +55,13 @@ QString ThemeManager::AddTheme(std::unique_ptr<ITheme> theme) {
 /// @brief Gets the Theme from the List via ID
 /// @param themeId Theme ID of theme to fetch
 /// @return Theme at themeId
-ITheme* ThemeManager::GetTheme(QString themeId) {
+ITheme* ThemeManager::GetTheme(QString themeId)
+{
     return m_themes[themeId].get();
 }
 
-void ThemeManager::InitializeThemes() {
-    
-
+void ThemeManager::InitializeThemes()
+{
     // Icon themes
     {
         // TODO: icon themes and instance icons do not mesh well together. Rearrange and fix discrepancies!
@@ -78,7 +80,8 @@ void ThemeManager::InitializeThemes() {
         themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
         themeDebugLog() << "Loading Built-in Theme:" << AddTheme(std::make_unique<BrightTheme>());
 
-        // TODO: need some way to differentiate same name themes in different subdirectories (maybe smaller grey text next to theme name in dropdown?)
+        // TODO: need some way to differentiate same name themes in different subdirectories (maybe smaller grey text next to theme name in
+        // dropdown?)
         QString themeFolder = QDir("./themes/").absoluteFilePath("");
         themeDebugLog() << "Theme Folder Path: " << themeFolder;
 
@@ -92,7 +95,7 @@ void ThemeManager::InitializeThemes() {
                 AddTheme(std::make_unique<CustomTheme>(GetTheme(darkThemeId), themeJson, true));
             } else {
                 // Load pure QSS Themes
-                QDirIterator stylesheetFileIterator(dir.absoluteFilePath(""), {"*.qss", "*.css"}, QDir::Files);
+                QDirIterator stylesheetFileIterator(dir.absoluteFilePath(""), { "*.qss", "*.css" }, QDir::Files);
                 while (stylesheetFileIterator.hasNext()) {
                     QFile customThemeFile(stylesheetFileIterator.next());
                     QFileInfo customThemeFileInfo(customThemeFile);
@@ -121,7 +124,8 @@ void ThemeManager::setIconTheme(const QString& name)
     QIcon::setThemeName(name);
 }
 
-void ThemeManager::applyCurrentlySelectedTheme() {
+void ThemeManager::applyCurrentlySelectedTheme()
+{
     setIconTheme(APPLICATION->settings()->get("IconTheme").toString());
     themeDebugLog() << "<> Icon theme set.";
     setApplicationTheme(APPLICATION->settings()->get("ApplicationTheme").toString(), true);
@@ -132,23 +136,20 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
 {
     auto systemPalette = qApp->palette();
     auto themeIter = m_themes.find(name);
-    if(themeIter != m_themes.end())
-    {
-        auto & theme = themeIter->second;
+    if (themeIter != m_themes.end()) {
+        auto& theme = themeIter->second;
         themeDebugLog() << "applying theme" << theme->name();
         theme->apply(initial);
 #ifdef Q_OS_WIN
         if (m_mainWindow && IsWindows10OrGreater()) {
             if (QString::compare(theme->id(), "dark") == 0) {
-                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
+                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
             } else {
-                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
             }
         }
 #endif
-    }
-    else
-    {
+    } else {
         themeWarningLog() << "Tried to set invalid theme:" << name;
     }
 }

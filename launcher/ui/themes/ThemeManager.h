@@ -19,18 +19,20 @@
 
 #include <QString>
 
-#include "ui/themes/ITheme.h"
 #include "ui/MainWindow.h"
+#include "ui/themes/ITheme.h"
 
-inline auto themeDebugLog() {
-  return qDebug() << "[Theme]";
+inline auto themeDebugLog()
+{
+    return qDebug() << "[Theme]";
 }
-inline auto themeWarningLog() {
-  return qWarning() << "[Theme]";
+inline auto themeWarningLog()
+{
+    return qWarning() << "[Theme]";
 }
 
 class ThemeManager {
-public:
+   public:
     ThemeManager(MainWindow* mainWindow);
 
     // maybe make private? Or put in ctor?
@@ -41,11 +43,10 @@ public:
     void applyCurrentlySelectedTheme();
     void setApplicationTheme(const QString& name, bool initial);
 
-private:
+   private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     MainWindow* m_mainWindow;
 
     QString AddTheme(std::unique_ptr<ITheme> theme);
     ITheme* GetTheme(QString themeId);
 };
-
