@@ -303,9 +303,6 @@ public:
     {
         beginResetModel();
         blocked.clear();
-        // ensure that the log dirs are always blocked, ensuring that the logs (and session id) aren't leaked if the instance is exported
-        paths.append(QString(".minecraft/logs"));
-        paths.append(QString(".minecraft/crash-reports"));
         blocked.insert(paths);
         endResetModel();
     }
@@ -423,12 +420,17 @@ bool ExportInstanceDialog::doExport()
     }
 
     SaveIcon(m_instance);
-
     auto & blocked = proxyModel->blockedPaths();
-    using std::placeholders::_1;
     auto files = QFileInfoList();
+    auto f_name = [blocked](const QString & str){
+        if (str.contains("/logs/") || str.contains("/crash-reports/")) {
+            return true;
+        }
+        // delegate to blockedPaths
+        return blocked.covers(str);
+    };
     if (!MMCZip::collectFileListRecursively(m_instance->instanceRoot(), nullptr, &files,
-                                    std::bind(&SeparatorPrefixTree<'/'>::covers, blocked, _1))) {
+                                            f_name)) {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
         return false;
     }
