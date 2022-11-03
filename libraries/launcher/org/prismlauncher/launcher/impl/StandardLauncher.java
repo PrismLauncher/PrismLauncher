@@ -79,24 +79,22 @@ public final class StandardLauncher extends AbstractLauncher {
         // the following often breaks linux screen setups
         // mcparams.add("--fullscreen");
 
-        List<String> launchParameters = new ArrayList<>(this.mcParams);
-
         if (!this.maximize) {
-            launchParameters.add("--width");
-            launchParameters.add(Integer.toString(width));
-            launchParameters.add("--height");
-            launchParameters.add(Integer.toString(height));
+            mcParams.add("--width");
+            mcParams.add(Integer.toString(width));
+            mcParams.add("--height");
+            mcParams.add(Integer.toString(height));
         }
 
         if (this.serverAddress != null) {
-            launchParameters.add("--server");
-            launchParameters.add(serverAddress);
-            launchParameters.add("--port");
-            launchParameters.add(serverPort);
+            mcParams.add("--server");
+            mcParams.add(serverAddress);
+            mcParams.add("--port");
+            mcParams.add(serverPort);
         }
 
         MethodHandle method = ReflectionUtils.findMainMethod(this.mainClassName);
-        method.invokeExact(launchParameters.toArray(new String[0]));
+        method.invokeExact(mcParams.toArray(new String[0]));
     }
 
     private static class StandardLauncherProvider implements LauncherProvider {

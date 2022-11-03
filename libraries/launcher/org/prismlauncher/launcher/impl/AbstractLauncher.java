@@ -82,7 +82,7 @@ public abstract class AbstractLauncher implements Launcher {
 
     protected AbstractLauncher(Parameters params)
     {
-        this.mcParams = Collections.unmodifiableList(params.getList("param", new ArrayList<String>()));
+        this.mcParams = params.getList("param", new ArrayList<String>());
         this.mainClassName = params.getString("mainClass", "net.minecraft.client.Minecraft");
 
         this.serverAddress = params.getString("serverAddress", null);
