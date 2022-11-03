@@ -5,14 +5,26 @@
 namespace StringUtils {
 
 #if defined Q_OS_WIN32
-inline std::wstring toStdString(QString s)
+using string = std::wstring;
+
+inline string toStdString(QString s)
 {
     return s.toStdWString();
 }
+inline QString fromStdString(string s)
+{
+    return QString::fromStdWString(s);
+}
 #else
-inline std::string toStdString(QString s)
+using string = std::string;
+
+inline string toStdString(QString s)
 {
     return s.toStdString();
+}
+inline QString fromStdString(string s)
+{
+    return QString::fromStdString(s);
 }
 #endif
 
