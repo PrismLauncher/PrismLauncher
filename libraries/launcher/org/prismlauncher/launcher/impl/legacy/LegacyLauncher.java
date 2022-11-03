@@ -56,8 +56,6 @@
 
 package org.prismlauncher.launcher.impl.legacy;
 
-import org.prismlauncher.launcher.Launcher;
-import org.prismlauncher.launcher.LauncherProvider;
 import org.prismlauncher.launcher.impl.AbstractLauncher;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.ReflectionUtils;
@@ -98,8 +96,6 @@ public final class LegacyLauncher extends AbstractLauncher {
         cwd = System.getProperty("user.dir");
     }
 
-    public static LauncherProvider getProvider() { return new LegacyLauncherProvider(); }
-
     @Override
     public void launch() throws Throwable
     {
@@ -130,11 +126,6 @@ public final class LegacyLauncher extends AbstractLauncher {
 
         MethodHandle method = ReflectionUtils.findMainEntrypoint(main);
         method.invokeExact(mcParams.toArray(new String[0]));
-    }
-
-    private static class LegacyLauncherProvider implements LauncherProvider {
-        @Override
-        public Launcher provide(Parameters parameters) { return new LegacyLauncher(parameters); }
     }
 
 }

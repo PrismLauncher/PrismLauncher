@@ -57,7 +57,8 @@ package org.prismlauncher;
 
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
-import org.prismlauncher.launcher.LauncherFactory;
+import org.prismlauncher.launcher.impl.StandardLauncher;
+import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.StringUtils;
 
@@ -137,7 +138,19 @@ public final class EntryPoint {
         }
 
         try {
-            Launcher launcher = LauncherFactory.createLauncher(parameters);
+            Launcher launcher;
+            String type = parameters.getString("launcher");
+
+            switch (type) {
+                case "standard":
+                    launcher = new StandardLauncher(parameters);
+                    break;
+                case "legacy":
+                    launcher = new LegacyLauncher(parameters);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid launcher type: " + type);
+            }
 
             launcher.launch();
 

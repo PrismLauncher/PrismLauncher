@@ -55,8 +55,6 @@
 
 package org.prismlauncher.launcher.impl;
 
-import org.prismlauncher.launcher.Launcher;
-import org.prismlauncher.launcher.LauncherProvider;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.ReflectionUtils;
 
@@ -65,8 +63,6 @@ import java.lang.invoke.MethodHandle;
 public final class StandardLauncher extends AbstractLauncher {
 
     public StandardLauncher(Parameters params) { super(params); }
-
-    public static LauncherProvider getProvider() { return new StandardLauncherProvider(); }
 
     @Override
     public void launch() throws Throwable
@@ -93,11 +89,6 @@ public final class StandardLauncher extends AbstractLauncher {
 
         MethodHandle method = ReflectionUtils.findMainMethod(this.mainClassName);
         method.invokeExact(mcParams.toArray(new String[0]));
-    }
-
-    private static class StandardLauncherProvider implements LauncherProvider {
-        @Override
-        public Launcher provide(Parameters parameters) { return new StandardLauncher(parameters); }
     }
 
 }

@@ -9,8 +9,6 @@ set(CMAKE_JAVA_COMPILE_FLAGS -target 7 -source 7 -Xlint:deprecation -Xlint:unche
 set(SRC
     org/prismlauncher/EntryPoint.java
     org/prismlauncher/launcher/Launcher.java
-    org/prismlauncher/launcher/LauncherFactory.java
-    org/prismlauncher/launcher/LauncherProvider.java
     org/prismlauncher/launcher/impl/legacy/LegacyFrame.java
     org/prismlauncher/launcher/impl/legacy/LegacyLauncher.java
     org/prismlauncher/launcher/impl/AbstractLauncher.java
