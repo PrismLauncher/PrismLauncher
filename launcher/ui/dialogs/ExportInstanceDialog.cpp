@@ -39,13 +39,12 @@
 #include <MMCZip.h>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <qfilesystemmodel.h>
+#include <QFileSystemModel>
 
 #include <QSortFilterProxyModel>
 #include <QDebug>
-#include <qstack.h>
 #include <QSaveFile>
-#include "MMCStrings.h"
+#include "StringUtils.h"
 #include "SeparatorPrefixTree.h"
 #include "Application.h"
 #include <icons/IconList.h>
@@ -85,7 +84,7 @@ public:
         // sort and proxy model breaks the original model...
         if (sortColumn() == 0)
         {
-            return Strings::naturalCompare(leftFileInfo.fileName(), rightFileInfo.fileName(),
+            return StringUtils::naturalCompare(leftFileInfo.fileName(), rightFileInfo.fileName(),
                                            Qt::CaseInsensitive) < 0;
         }
         if (sortColumn() == 1)
@@ -94,7 +93,7 @@ public:
             auto rightSize = rightFileInfo.size();
             if ((leftSize == rightSize) || (leftFileInfo.isDir() && rightFileInfo.isDir()))
             {
-                return Strings::naturalCompare(leftFileInfo.fileName(),
+                return StringUtils::naturalCompare(leftFileInfo.fileName(),
                                                rightFileInfo.fileName(),
                                                Qt::CaseInsensitive) < 0
                            ? asc

@@ -1,4 +1,4 @@
-#include "MMCStrings.h"
+#include "StringUtils.h"
 
 /// TAKEN FROM Qt, because it doesn't expose it intelligently
 static inline QChar getNextChar(const QString &s, int location)
@@ -7,7 +7,7 @@ static inline QChar getNextChar(const QString &s, int location)
 }
 
 /// TAKEN FROM Qt, because it doesn't expose it intelligently
-int Strings::naturalCompare(const QString &s1, const QString &s2, Qt::CaseSensitivity cs)
+int StringUtils::naturalCompare(const QString &s1, const QString &s2, Qt::CaseSensitivity cs)
 {
     for (int l1 = 0, l2 = 0; l1 <= s1.count() && l2 <= s2.count(); ++l1, ++l2)
     {

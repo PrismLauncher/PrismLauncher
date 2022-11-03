@@ -3,7 +3,6 @@
 #include "Application.h"
 #include "ui/widgets/ProjectItem.h"
 
-#include <MMCStrings.h>
 #include <Version.h>
 
 #include <QtMath>
