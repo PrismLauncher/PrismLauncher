@@ -629,21 +629,6 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
         launchScript += "sessionId " + session->session + "\n";
     }
 
-    // libraries and class path.
-    {
-        QStringList jars, nativeJars;
-        profile->getLibraryFiles(runtimeContext(), jars, nativeJars, getLocalLibraryPath(), binRoot());
-        for(auto file: jars)
-        {
-            launchScript += "cp " + file + "\n";
-        }
-        for(auto file: nativeJars)
-        {
-            launchScript += "ext " + file + "\n";
-        }
-        launchScript += "natives " + getNativePath() + "\n";
-    }
-
     for (auto trait : profile->getTraits())
     {
         launchScript += "traits " + trait + "\n";

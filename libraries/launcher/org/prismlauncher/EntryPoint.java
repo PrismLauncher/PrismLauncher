@@ -81,7 +81,6 @@ public final class EntryPoint {
         if (exitCode != ExitCode.NORMAL) {
             LOGGER.warning("Exiting with " + exitCode);
 
-            // noinspection CallToSystemExit
             System.exit(exitCode.numericalCode);
         }
     }
@@ -97,6 +96,7 @@ public final class EntryPoint {
             return PreLaunchAction.ABORT;
         else {
             String[] pair = StringUtils.splitStringPair(' ', input);
+
             if (pair == null)
                 throw new ParseException(String.format(
                         "Could not split input string '%s' by space. All input provided from stdin must be either 'launch', 'abort', or "
