@@ -125,14 +125,14 @@ public final class LegacyLauncher extends AbstractLauncher {
                         this.width, this.height, this.maximize,
                         this.serverAddress, this.serverPort,
                         this.mcParams.contains("--demo")
-                            );
+                );
             } catch (Throwable e) {
                 LOGGER.log(Level.SEVERE, "Running applet wrapper failed with exception; falling back to main class", e);
             }
         }
 
         MethodHandle method = ReflectionUtils.findMainEntrypoint(main);
-        method.invokeExact((Object[]) mcParams.toArray(new String[0]));
+        method.invokeExact(mcParams.toArray(new String[0]));
     }
 
     private static class LegacyLauncherProvider implements LauncherProvider {

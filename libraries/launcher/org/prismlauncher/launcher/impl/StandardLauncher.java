@@ -63,7 +63,6 @@ import org.prismlauncher.utils.ReflectionUtils;
 import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 public final class StandardLauncher extends AbstractLauncher {
 
@@ -100,7 +99,7 @@ public final class StandardLauncher extends AbstractLauncher {
         }
 
         MethodHandle method = ReflectionUtils.findMainMethod(this.mainClassName);
-        method.invokeExact((Object[]) launchParameters.toArray(new String[0]));
+        method.invokeExact(launchParameters.toArray(new String[0]));
     }
 
     private static class StandardLauncherProvider implements LauncherProvider {
