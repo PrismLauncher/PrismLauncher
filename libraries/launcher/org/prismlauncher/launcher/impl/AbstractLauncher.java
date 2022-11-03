@@ -80,7 +80,8 @@ public abstract class AbstractLauncher implements Launcher {
 
     protected final String mainClassName;
 
-    protected AbstractLauncher(Parameters params) {
+    protected AbstractLauncher(Parameters params)
+    {
         this.mcParams = Collections.unmodifiableList(params.getList("param", new ArrayList<String>()));
         this.mainClassName = params.getString("mainClass", "net.minecraft.client.Minecraft");
 
@@ -99,10 +100,12 @@ public abstract class AbstractLauncher implements Launcher {
                     this.width = Integer.parseInt(sizePair[0]);
                     this.height = Integer.parseInt(sizePair[1]);
                 } catch (NumberFormatException e) {
-                    throw new ParseException(String.format("Could not parse window parameters from '%s'", windowParams), e);
+                    throw new ParseException(String.format("Could not parse window parameters from '%s'", windowParams),
+                            e);
                 }
             } else {
-                throw new ParseException(String.format("Invalid window size parameters '%s'. Format: [height]x[width]", windowParams));
+                throw new ParseException(
+                        String.format("Invalid window size parameters '%s'. Format: [height]x[width]", windowParams));
             }
         } else {
             this.width = DEFAULT_WINDOW_WIDTH;

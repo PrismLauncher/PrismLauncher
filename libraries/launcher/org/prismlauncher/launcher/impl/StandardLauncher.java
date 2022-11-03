@@ -66,16 +66,13 @@ import java.util.List;
 
 public final class StandardLauncher extends AbstractLauncher {
 
-    public StandardLauncher(Parameters params) {
-        super(params);
-    }
+    public StandardLauncher(Parameters params) { super(params); }
 
-    public static LauncherProvider getProvider() {
-        return new StandardLauncherProvider();
-    }
+    public static LauncherProvider getProvider() { return new StandardLauncherProvider(); }
 
     @Override
-    public void launch() throws Throwable {
+    public void launch() throws Throwable
+    {
         // window size, title and state
 
         // FIXME: there is no good way to maximize the minecraft window from here.
@@ -104,9 +101,7 @@ public final class StandardLauncher extends AbstractLauncher {
 
     private static class StandardLauncherProvider implements LauncherProvider {
         @Override
-        public Launcher provide(Parameters parameters) {
-            return new StandardLauncher(parameters);
-        }
+        public Launcher provide(Parameters parameters) { return new StandardLauncher(parameters); }
     }
 
 }

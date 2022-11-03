@@ -46,36 +46,31 @@ import org.prismlauncher.utils.Parameters;
 
 public final class LauncherFactory {
 
-    private LauncherFactory() {
-    }
+    private LauncherFactory()
+    {}
 
-    public static Launcher createLauncher(String launcherType, Parameters parameters) {
-        return createLauncher(LauncherType.valueOf(launcherType.toUpperCase()), parameters);
-    }
+    public static Launcher createLauncher(String launcherType, Parameters parameters)
+    { return createLauncher(LauncherType.valueOf(launcherType.toUpperCase()), parameters); }
 
-    public static Launcher createLauncher(LauncherType launcherType, Parameters parameters) {
+    public static Launcher createLauncher(LauncherType launcherType, Parameters parameters)
+    {
         LauncherProvider launcherProvider = launcherType.getLauncherProvider();
 
         return launcherProvider.provide(parameters);
     }
 
-    public static Launcher createLauncher(Parameters parameters) {
-        return createLauncher(parameters.getString("launcher"), parameters);
-    }
+    public static Launcher createLauncher(Parameters parameters)
+    { return createLauncher(parameters.getString("launcher"), parameters); }
 
     public enum LauncherType {
-        STANDARD(StandardLauncher.getProvider()),
-        LEGACY(LegacyLauncher.getProvider());
+        STANDARD(StandardLauncher.getProvider()), LEGACY(LegacyLauncher.getProvider());
 
         private final LauncherProvider launcherProvider;
 
-        LauncherType(LauncherProvider launcherProvider) {
-            this.launcherProvider = launcherProvider;
-        }
+        LauncherType(LauncherProvider launcherProvider) { this.launcherProvider = launcherProvider; }
 
-        public LauncherProvider getLauncherProvider() {
-            return launcherProvider;
-        }
+        public LauncherProvider getLauncherProvider() { return launcherProvider; }
+
     }
 
 }

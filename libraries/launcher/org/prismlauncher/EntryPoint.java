@@ -71,24 +71,24 @@ import java.util.logging.Logger;
 public final class EntryPoint {
     private static final Logger LOGGER = Logger.getLogger("EntryPoint");
 
-    private EntryPoint() {
-    }
+    private EntryPoint() {}
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         ExitCode exitCode = listen();
 
         if (exitCode != ExitCode.NORMAL) {
             LOGGER.warning("Exiting with " + exitCode);
 
-            //noinspection CallToSystemExit
+            // noinspection CallToSystemExit
             System.exit(exitCode.numericalCode);
         }
     }
 
-    private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException {
+    private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException
+    {
         if (input.isEmpty()) // TODO: 2022-11-01 Should we just ignore this?
             throw new ParseException("Unexpected empty string! You should not pass empty newlines to stdin.");
-
 
         if ("launch".equalsIgnoreCase(input))
             return PreLaunchAction.LAUNCH;
@@ -98,8 +98,8 @@ public final class EntryPoint {
             String[] pair = StringUtils.splitStringPair(' ', input);
             if (pair == null)
                 throw new ParseException(String.format(
-                        "Could not split input string '%s' by space. All input provided from stdin must be either 'launch', 'abort', or " +
-                        "in the format '[param name] [param]'.",
+                        "Could not split input string '%s' by space. All input provided from stdin must be either 'launch', 'abort', or "
+                                + "in the format '[param name] [param]'.",
                         input));
 
             params.add(pair[0], pair[1]);
@@ -108,7 +108,8 @@ public final class EntryPoint {
         }
     }
 
-    private static ExitCode listen() {
+    private static ExitCode listen()
+    {
         Parameters parameters = new Parameters();
         PreLaunchAction preLaunchAction = PreLaunchAction.PROCEED;
 
@@ -116,7 +117,7 @@ public final class EntryPoint {
             String line;
 
             while (preLaunchAction == PreLaunchAction.PROCEED) {
-                //noinspection NestedAssignment
+                // noinspection NestedAssignment
                 if ((line = reader.readLine()) != null)
                     preLaunchAction = parseLine(line, parameters);
                 else
@@ -157,23 +158,15 @@ public final class EntryPoint {
     }
 
     private enum PreLaunchAction {
-        PROCEED,
-        LAUNCH,
-        ABORT
+        PROCEED, LAUNCH, ABORT
     }
 
     private enum ExitCode {
-        NORMAL(0),
-        ABORT(1),
-        ERROR(2),
-        ILLEGAL_ARGUMENT(3),
-        REFLECTION_EXCEPTION(4);
+        NORMAL(0), ABORT(1), ERROR(2), ILLEGAL_ARGUMENT(3), REFLECTION_EXCEPTION(4);
 
         private final int numericalCode;
 
-        ExitCode(int numericalCode) {
-            this.numericalCode = numericalCode;
-        }
+        ExitCode(int numericalCode) { this.numericalCode = numericalCode; }
     }
 
 }

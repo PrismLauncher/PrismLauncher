@@ -83,7 +83,8 @@ public final class LegacyLauncher extends AbstractLauncher {
     private final boolean usesApplet;
     private final String cwd;
 
-    public LegacyLauncher(Parameters params) {
+    public LegacyLauncher(Parameters params)
+    {
         super(params);
 
         user = params.getString("userName");
@@ -97,12 +98,11 @@ public final class LegacyLauncher extends AbstractLauncher {
         cwd = System.getProperty("user.dir");
     }
 
-    public static LauncherProvider getProvider() {
-        return new LegacyLauncherProvider();
-    }
+    public static LauncherProvider getProvider() { return new LegacyLauncherProvider(); }
 
     @Override
-    public void launch() throws Throwable {
+    public void launch() throws Throwable
+    {
         Class<?> main = ClassLoader.getSystemClassLoader().loadClass(this.mainClassName);
         Field gameDirField = ReflectionUtils.getMinecraftGameDirField(main);
 
@@ -119,13 +119,8 @@ public final class LegacyLauncher extends AbstractLauncher {
             try {
                 LegacyFrame window = new LegacyFrame(title, ReflectionUtils.createAppletClass(this.appletClass));
 
-                window.start(
-                        this.user,
-                        this.session,
-                        this.width, this.height, this.maximize,
-                        this.serverAddress, this.serverPort,
-                        this.mcParams.contains("--demo")
-                );
+                window.start(this.user, this.session, this.width, this.height, this.maximize, this.serverAddress,
+                        this.serverPort, this.mcParams.contains("--demo"));
             } catch (Throwable e) {
                 LOGGER.log(Level.SEVERE, "Running applet wrapper failed with exception; falling back to main class", e);
             }
@@ -137,9 +132,7 @@ public final class LegacyLauncher extends AbstractLauncher {
 
     private static class LegacyLauncherProvider implements LauncherProvider {
         @Override
-        public Launcher provide(Parameters parameters) {
-            return new LegacyLauncher(parameters);
-        }
+        public Launcher provide(Parameters parameters) { return new LegacyLauncher(parameters); }
     }
 
 }
