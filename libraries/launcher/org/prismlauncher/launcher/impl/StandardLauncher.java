@@ -55,7 +55,6 @@
 
 package org.prismlauncher.launcher.impl;
 
-
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.LauncherProvider;
 import org.prismlauncher.utils.Parameters;
@@ -66,10 +65,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-
 public final class StandardLauncher extends AbstractLauncher {
-    private static final Logger LOGGER = Logger.getLogger("LegacyLauncher");
 
+    private static final Logger LOGGER = Logger.getLogger("LegacyLauncher");
 
     public StandardLauncher(Parameters params) {
         super(params);
@@ -105,11 +103,9 @@ public final class StandardLauncher extends AbstractLauncher {
 
         LOGGER.info("Launching minecraft using the main class entrypoint");
 
-        MethodHandle method = ReflectionUtils.findMainEntrypoint(this.mainClassName);
-
+        MethodHandle method = ReflectionUtils.findMainMethod(this.mainClassName);
         method.invokeExact((Object[]) launchParameters.toArray(new String[0]));
     }
-
 
     private static class StandardLauncherProvider implements LauncherProvider {
         @Override
@@ -117,4 +113,5 @@ public final class StandardLauncher extends AbstractLauncher {
             return new StandardLauncher(parameters);
         }
     }
+
 }

@@ -57,7 +57,6 @@
 
 package org.prismlauncher.launcher.impl.legacy;
 
-
 import net.minecraft.Launcher;
 
 import javax.imageio.ImageIO;
@@ -77,7 +76,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class LegacyFrame extends Frame {
+public final class LegacyFrame extends Frame /* TODO consider JFrame */ {
 
     private static final Logger LOGGER = Logger.getLogger("LegacyFrame");
 
@@ -163,7 +162,7 @@ public final class LegacyFrame extends Frame {
         setResizable(true);
 
         if (maximize)
-            this.setExtendedState(MAXIMIZED_BOTH);
+            setExtendedState(MAXIMIZED_BOTH);
 
         validate();
 

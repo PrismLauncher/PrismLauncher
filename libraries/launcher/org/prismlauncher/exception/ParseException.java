@@ -5,6 +5,8 @@
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Samisafool <thenerdiestguy@gmail.com>
+ *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,9 +40,9 @@
 
 package org.prismlauncher.exception;
 
-
-@SuppressWarnings({ "serial", "unused" })
 public final class ParseException extends IllegalArgumentException {
+
+    private static final long serialVersionUID = 1L;
 
     public ParseException(String message) {
         super(message);
@@ -65,4 +67,5 @@ public final class ParseException extends IllegalArgumentException {
     public static ParseException forInputString(String inputString, Throwable cause) {
         return new ParseException(String.format("Could not parse input string '%s'", inputString), cause);
     }
+
 }

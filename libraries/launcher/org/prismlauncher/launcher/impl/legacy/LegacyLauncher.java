@@ -56,7 +56,6 @@
 
 package org.prismlauncher.launcher.impl.legacy;
 
-
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.LauncherProvider;
 import org.prismlauncher.launcher.impl.AbstractLauncher;
@@ -71,7 +70,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  * Used to launch old versions that support applets.
  */
@@ -80,13 +78,9 @@ public final class LegacyLauncher extends AbstractLauncher {
     private static final Logger LOGGER = Logger.getLogger("LegacyLauncher");
 
     private final String user, session;
-
     private final String title;
-
     private final String appletClass;
-
     private final boolean usesApplet;
-
     private final String cwd;
 
     public LegacyLauncher(Parameters params) {
@@ -100,7 +94,6 @@ public final class LegacyLauncher extends AbstractLauncher {
         List<String> traits = params.getList("traits", Collections.<String>emptyList());
         usesApplet = !traits.contains("noapplet");
 
-        //noinspection AccessOfSystemProperties
         cwd = System.getProperty("user.dir");
     }
 
@@ -113,9 +106,9 @@ public final class LegacyLauncher extends AbstractLauncher {
         Class<?> main = ClassLoader.getSystemClassLoader().loadClass(this.mainClassName);
         Field gameDirField = ReflectionUtils.getMinecraftGameDirField(main);
 
-        if (gameDirField == null) {
+        if (gameDirField == null)
             LOGGER.warning("Could not find Minecraft path field");
-        } else {
+        else {
             gameDirField.setAccessible(true);
             gameDirField.set(null /* field is static, so instance is null */, new File(cwd));
         }
@@ -144,11 +137,11 @@ public final class LegacyLauncher extends AbstractLauncher {
         }
     }
 
-
     private static class LegacyLauncherProvider implements LauncherProvider {
         @Override
         public Launcher provide(Parameters parameters) {
             return new LegacyLauncher(parameters);
         }
     }
+
 }

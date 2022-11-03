@@ -49,8 +49,8 @@ import java.lang.reflect.Modifier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public final class ReflectionUtils {
+
     private static final Logger LOGGER = Logger.getLogger("ReflectionUtils");
 
     private ReflectionUtils() {
@@ -160,10 +160,9 @@ public final class ReflectionUtils {
      * @throws NoSuchMethodException  If no method matching the correct signature can be found
      * @throws IllegalAccessException If method handles cannot access the entrypoint
      */
-    public static MethodHandle findMainEntrypoint(String entrypointClassName) throws
-                                                                              ClassNotFoundException,
-                                                                              NoSuchMethodException,
-                                                                              IllegalAccessException {
+    public static MethodHandle findMainMethod(String entrypointClassName)
+            throws ClassNotFoundException,  NoSuchMethodException, IllegalAccessException {
         return findMainEntrypoint(ClassLoader.getSystemClassLoader().loadClass(entrypointClassName));
     }
+
 }

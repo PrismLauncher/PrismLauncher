@@ -40,13 +40,12 @@
 
 package org.prismlauncher.launcher;
 
-
 import org.prismlauncher.launcher.impl.StandardLauncher;
 import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
 import org.prismlauncher.utils.Parameters;
 
-
 public final class LauncherFactory {
+
     private LauncherFactory() {
     }
 
@@ -78,4 +77,5 @@ public final class LauncherFactory {
             return launcherProvider;
         }
     }
+
 }

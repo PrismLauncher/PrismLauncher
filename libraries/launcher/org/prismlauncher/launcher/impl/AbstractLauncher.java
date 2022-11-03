@@ -56,7 +56,6 @@
 
 package org.prismlauncher.launcher.impl;
 
-
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.utils.Parameters;
@@ -66,26 +65,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 public abstract class AbstractLauncher implements Launcher {
 
     private static final int DEFAULT_WINDOW_WIDTH = 854;
-
     private static final int DEFAULT_WINDOW_HEIGHT = 480;
 
     // parameters, separated from ParamBucket
     protected final List<String> mcParams;
 
     // secondary parameters
-    protected final int width;
-
-    protected final int height;
-
+    protected final int width, height;
     protected final boolean maximize;
-
-    protected final String serverAddress;
-
-    protected final String serverPort;
+    protected final String serverAddress, serverPort;
 
     protected final String mainClassName;
 
@@ -118,4 +109,5 @@ public abstract class AbstractLauncher implements Launcher {
             this.height = DEFAULT_WINDOW_HEIGHT;
         }
     }
+
 }

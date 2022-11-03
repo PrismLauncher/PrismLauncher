@@ -55,7 +55,6 @@
 
 package org.prismlauncher;
 
-
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.LauncherFactory;
@@ -68,7 +67,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 public final class EntryPoint {
     private static final Logger LOGGER = Logger.getLogger("EntryPoint");
@@ -92,11 +90,11 @@ public final class EntryPoint {
             throw new ParseException("Unexpected empty string! You should not pass empty newlines to stdin.");
 
 
-        if ("launch".equalsIgnoreCase(input)) {
+        if ("launch".equalsIgnoreCase(input))
             return PreLaunchAction.LAUNCH;
-        } else if ("abort".equalsIgnoreCase(input)) {
+        else if ("abort".equalsIgnoreCase(input))
             return PreLaunchAction.ABORT;
-        } else {
+        else {
             String[] pair = StringUtils.splitStringPair(' ', input);
             if (pair == null)
                 throw new ParseException(String.format(
@@ -119,11 +117,10 @@ public final class EntryPoint {
 
             while (preLaunchAction == PreLaunchAction.PROCEED) {
                 //noinspection NestedAssignment
-                if ((line = reader.readLine()) != null) {
+                if ((line = reader.readLine()) != null)
                     preLaunchAction = parseLine(line, parameters);
-                } else {
+                else
                     preLaunchAction = PreLaunchAction.ABORT;
-                }
             }
         } catch (IOException | ParseException e) {
             LOGGER.log(Level.SEVERE, "Launcher abort due to exception", e);
@@ -164,7 +161,6 @@ public final class EntryPoint {
         LAUNCH,
         ABORT
     }
-
 
     private enum ExitCode {
         NORMAL(0),

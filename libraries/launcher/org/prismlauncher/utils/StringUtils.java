@@ -36,8 +36,8 @@
 
 package org.prismlauncher.utils;
 
-
 public final class StringUtils {
+
     private StringUtils() {
     }
 
@@ -46,6 +46,7 @@ public final class StringUtils {
         if (splitPoint == -1)
             return null;
 
-        return new String[]{ input.substring(0, splitPoint), input.substring(splitPoint + 1) };
+        return new String[] { input.substring(0, splitPoint), input.substring(splitPoint + 1) };
     }
+
 }

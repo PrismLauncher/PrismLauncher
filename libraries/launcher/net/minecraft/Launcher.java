@@ -72,12 +72,12 @@ import java.util.TreeMap;
  */
 public final class Launcher extends Applet implements AppletStub {
 
+    private static final long serialVersionUID = 1L;
+
     private final Map<String, String> params = new TreeMap<>();
 
     private Applet wrappedApplet;
-
     private final URL documentBase;
-
     private boolean active = false;
 
     public Launcher(Applet applet) {
@@ -85,11 +85,11 @@ public final class Launcher extends Applet implements AppletStub {
     }
 
     public Launcher(Applet applet, URL documentBase) {
-        this.setLayout(new BorderLayout());
+        setLayout(new BorderLayout());
 
         this.add(applet, "Center");
 
-        this.wrappedApplet = applet;
+        wrappedApplet = applet;
 
         try {
             if (documentBase != null) {
@@ -109,12 +109,12 @@ public final class Launcher extends Applet implements AppletStub {
     }
 
     public void replace(Applet applet) {
-        this.wrappedApplet = applet;
+        wrappedApplet = applet;
 
         applet.setStub(this);
         applet.setSize(getWidth(), getHeight());
 
-        this.setLayout(new BorderLayout());
+        setLayout(new BorderLayout());
         this.add(applet, "Center");
 
         applet.init();
