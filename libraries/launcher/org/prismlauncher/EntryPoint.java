@@ -87,8 +87,8 @@ public final class EntryPoint {
 
     private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException
     {
-        if (input.isEmpty()) // TODO: 2022-11-01 Should we just ignore this?
-            throw new ParseException("Unexpected empty string! You should not pass empty newlines to stdin.");
+        if (input.isEmpty())
+            return PreLaunchAction.PROCEED;
 
         if ("launch".equalsIgnoreCase(input))
             return PreLaunchAction.LAUNCH;
