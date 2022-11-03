@@ -61,8 +61,6 @@ import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.ReflectionUtils;
 
 import java.lang.invoke.MethodHandle;
-import java.util.ArrayList;
-import java.util.List;
 
 public final class StandardLauncher extends AbstractLauncher {
 

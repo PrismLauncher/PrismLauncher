@@ -62,7 +62,6 @@ import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public abstract class AbstractLauncher implements Launcher {

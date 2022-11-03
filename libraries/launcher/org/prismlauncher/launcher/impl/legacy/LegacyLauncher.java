@@ -121,6 +121,8 @@ public final class LegacyLauncher extends AbstractLauncher {
 
                 window.start(this.user, this.session, this.width, this.height, this.maximize, this.serverAddress,
                         this.serverPort, this.mcParams.contains("--demo"));
+
+                return;
             } catch (Throwable e) {
                 LOGGER.log(Level.SEVERE, "Running applet wrapper failed with exception; falling back to main class", e);
             }
