@@ -81,8 +81,7 @@ public final class LegacyLauncher extends AbstractLauncher {
     private final boolean usesApplet;
     private final String cwd;
 
-    public LegacyLauncher(Parameters params)
-    {
+    public LegacyLauncher(Parameters params) {
         super(params);
 
         user = params.getString("userName");
@@ -97,8 +96,7 @@ public final class LegacyLauncher extends AbstractLauncher {
     }
 
     @Override
-    public void launch() throws Throwable
-    {
+    public void launch() throws Throwable {
         Class<?> main = ClassLoader.getSystemClassLoader().loadClass(this.mainClassName);
         Field gameDirField = ReflectionUtils.getMinecraftGameDirField(main);
 

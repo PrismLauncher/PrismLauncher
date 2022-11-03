@@ -62,11 +62,12 @@ import java.lang.invoke.MethodHandle;
 
 public final class StandardLauncher extends AbstractLauncher {
 
-    public StandardLauncher(Parameters params) { super(params); }
+    public StandardLauncher(Parameters params) {
+        super(params);
+    }
 
     @Override
-    public void launch() throws Throwable
-    {
+    public void launch() throws Throwable {
         // window size, title and state
 
         // FIXME: there is no good way to maximize the minecraft window from here.

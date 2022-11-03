@@ -38,10 +38,10 @@ package org.prismlauncher.utils;
 
 public final class StringUtils {
 
-    private StringUtils() {}
+    private StringUtils() {
+    }
 
-    public static String[] splitStringPair(char splitChar, String input)
-    {
+    public static String[] splitStringPair(char splitChar, String input) {
         int splitPoint = input.indexOf(splitChar);
         if (splitPoint == -1)
             return null;

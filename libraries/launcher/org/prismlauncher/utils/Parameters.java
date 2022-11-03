@@ -68,8 +68,7 @@ public final class Parameters {
 
     private final Map<String, List<String>> map = new HashMap<>();
 
-    public void add(String key, String value)
-    {
+    public void add(String key, String value) {
         List<String> params = map.get(key);
 
         if (params == null) {
@@ -81,8 +80,7 @@ public final class Parameters {
         params.add(value);
     }
 
-    public List<String> getList(String key) throws ParameterNotFoundException
-    {
+    public List<String> getList(String key) throws ParameterNotFoundException {
         List<String> params = map.get(key);
 
         if (params == null)
@@ -91,8 +89,7 @@ public final class Parameters {
         return params;
     }
 
-    public List<String> getList(String key, List<String> def)
-    {
+    public List<String> getList(String key, List<String> def) {
         List<String> params = map.get(key);
 
         if (params == null || params.isEmpty())
@@ -101,8 +98,7 @@ public final class Parameters {
         return params;
     }
 
-    public String getString(String key) throws ParameterNotFoundException
-    {
+    public String getString(String key) throws ParameterNotFoundException {
         List<String> list = getList(key);
 
         if (list.isEmpty())
@@ -111,8 +107,7 @@ public final class Parameters {
         return list.get(0);
     }
 
-    public String getString(String key, String def)
-    {
+    public String getString(String key, String def) {
         List<String> params = map.get(key);
 
         if (params == null || params.isEmpty())

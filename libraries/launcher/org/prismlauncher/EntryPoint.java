@@ -72,10 +72,10 @@ import java.util.logging.Logger;
 public final class EntryPoint {
     private static final Logger LOGGER = Logger.getLogger("EntryPoint");
 
-    private EntryPoint() {}
+    private EntryPoint() {
+    }
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         ExitCode exitCode = listen();
 
         if (exitCode != ExitCode.NORMAL) {
@@ -85,8 +85,7 @@ public final class EntryPoint {
         }
     }
 
-    private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException
-    {
+    private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException {
         if (input.isEmpty())
             return PreLaunchAction.PROCEED;
 
@@ -109,8 +108,7 @@ public final class EntryPoint {
         }
     }
 
-    private static ExitCode listen()
-    {
+    private static ExitCode listen() {
         Parameters parameters = new Parameters();
         PreLaunchAction preLaunchAction = PreLaunchAction.PROCEED;
 
@@ -179,7 +177,10 @@ public final class EntryPoint {
 
         private final int numericalCode;
 
-        ExitCode(int numericalCode) { this.numericalCode = numericalCode; }
+        ExitCode(int numericalCode) {
+            this.numericalCode = numericalCode;
+        }
+
     }
 
 }
