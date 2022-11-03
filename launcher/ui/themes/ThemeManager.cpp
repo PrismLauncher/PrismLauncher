@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Tayou <tayou@gmx.net>
  *
  *  This program is free software: you can redistribute it and/or modify

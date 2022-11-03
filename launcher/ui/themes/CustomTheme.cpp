@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Tayou <tayou@gmx.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,10 +19,6 @@
  * permission notice:
  *
  *      Copyright 2013-2021 MultiMC Contributors
- *
- *      Authors: Andrew Okin
- *               Peterix
- *               Orochimarufan <orochimarufan.x3@gmail.com>
  *
  *      Licensed under the Apache License, Version 2.0 (the "License");
  *      you may not use this file except in compliance with the License.
@@ -56,7 +52,6 @@ static bool readThemeJson(const QString &path, QPalette &palette, double &fadeAm
             name = Json::requireString(root, "name", "Theme name");
             widgets = Json::requireString(root, "widgets", "Qt widget theme");
             qssFilePath = Json::ensureString(root, "qssFilePath", "themeStyle.css");
-            //auto colorFileList = Json::ensureArray(root, "colorFiles");
             auto colorsRoot = Json::requireObject(root, "colors", "colors object");
             auto readColor = [&](QString colorName) -> QColor
             {
@@ -165,7 +160,6 @@ static bool writeThemeJson(const QString &path, const QPalette &palette, double 
     }
 }
 
-/// @brief 
 /// @param baseTheme Base Theme
 /// @param fileInfo FileInfo object for file to load
 /// @param isManifest whether to load a theme manifest or a qss file
@@ -199,8 +193,6 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
             m_fadeAmount = baseTheme->fadeAmount();
             m_widgets = baseTheme->qtTheme();
             m_qssFilePath = "themeStyle.css";
-
-            QFileInfo info(themeFilePath);
         }
         else
         {
@@ -212,18 +204,18 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
             writeThemeJson(fileInfo.absoluteFilePath(), m_palette, m_fadeAmount, m_fadeColor, m_name, m_widgets, m_qssFilePath);
         }
 
-        auto cssFilePath = FS::PathCombine(path, m_qssFilePath);
-        QFileInfo info (cssFilePath);
+        auto qssFilePath = FS::PathCombine(path, m_qssFilePath);
+        QFileInfo info (qssFilePath);
         if(info.isFile())
         {
             try
             {
                 // TODO: validate css?
-                m_styleSheet = QString::fromUtf8(FS::read(cssFilePath));
+                m_styleSheet = QString::fromUtf8(FS::read(qssFilePath));
             }
             catch (const Exception &e)
             {
-                themeWarningLog() << "Couldn't load css:" << e.cause() << "from" << cssFilePath;
+                themeWarningLog() << "Couldn't load css:" << e.cause() << "from" << qssFilePath;
                 m_styleSheet = baseTheme->appStyleSheet();
             }
         }
@@ -233,11 +225,11 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
             m_styleSheet = baseTheme->appStyleSheet();
             try
             {
-                FS::write(cssFilePath, m_styleSheet.toUtf8());
+                FS::write(qssFilePath, m_styleSheet.toUtf8());
             }
             catch (const Exception &e)
             {
-                themeWarningLog() << "Couldn't write css:" << e.cause() << "to" << cssFilePath;
+                themeWarningLog() << "Couldn't write css:" << e.cause() << "to" << qssFilePath;
             }
         }
     } else {
