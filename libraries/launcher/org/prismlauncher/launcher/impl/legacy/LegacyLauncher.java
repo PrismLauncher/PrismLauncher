@@ -127,14 +127,12 @@ public final class LegacyLauncher extends AbstractLauncher {
                         this.mcParams.contains("--demo")
                             );
             } catch (Throwable e) {
-                LOGGER.log(Level.SEVERE, "Running applet wrapper failed with exception", e);
+                LOGGER.log(Level.SEVERE, "Running applet wrapper failed with exception; falling back to main class", e);
             }
-        } else {
-            LOGGER.info("Launching legacy minecraft using the main class entrypoint");
-            MethodHandle method = ReflectionUtils.findMainEntrypoint(main);
-
-            method.invokeExact((Object[]) mcParams.toArray(new String[0]));
         }
+
+        MethodHandle method = ReflectionUtils.findMainEntrypoint(main);
+        method.invokeExact((Object[]) mcParams.toArray(new String[0]));
     }
 
     private static class LegacyLauncherProvider implements LauncherProvider {

@@ -67,8 +67,6 @@ import java.util.logging.Logger;
 
 public final class StandardLauncher extends AbstractLauncher {
 
-    private static final Logger LOGGER = Logger.getLogger("LegacyLauncher");
-
     public StandardLauncher(Parameters params) {
         super(params);
     }
@@ -100,8 +98,6 @@ public final class StandardLauncher extends AbstractLauncher {
             launchParameters.add("--port");
             launchParameters.add(serverPort);
         }
-
-        LOGGER.info("Launching minecraft using the main class entrypoint");
 
         MethodHandle method = ReflectionUtils.findMainMethod(this.mainClassName);
         method.invokeExact((Object[]) launchParameters.toArray(new String[0]));
