@@ -70,6 +70,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class EntryPoint {
+
     private static final Logger LOGGER = Logger.getLogger("EntryPoint");
 
     private EntryPoint() {
@@ -116,7 +117,6 @@ public final class EntryPoint {
             String line;
 
             while (preLaunchAction == PreLaunchAction.PROCEED) {
-                // noinspection NestedAssignment
                 if ((line = reader.readLine()) != null)
                     preLaunchAction = parseLine(line, parameters);
                 else

@@ -80,6 +80,7 @@ import java.util.logging.Logger;
 public final class LegacyFrame extends JFrame {
 
     private static final Logger LOGGER = Logger.getLogger("LegacyFrame");
+    private static final long serialVersionUID = 1L;
 
     private final Launcher launcher;
 
