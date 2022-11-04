@@ -130,7 +130,7 @@ public final class EntryPoint {
 
         // Main loop
         if (preLaunchAction == PreLaunchAction.ABORT) {
-            LOGGER.info("Launch aborted by the launcher.");
+            LOGGER.info("Launch aborted by the launcher");
 
             return ExitCode.ABORT;
         }
@@ -154,7 +154,7 @@ public final class EntryPoint {
 
             return ExitCode.NORMAL;
         } catch (IllegalArgumentException e) {
-            LOGGER.log(Level.SEVERE, "Wrong argument.", e);
+            LOGGER.log(Level.SEVERE, "Wrong argument", e);
 
             return ExitCode.ILLEGAL_ARGUMENT;
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {

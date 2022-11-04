@@ -94,7 +94,7 @@ public final class LegacyFrame extends JFrame {
         try {
             setIconImage(ImageIO.read(new File("icon.png")));
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Unable to read Minecraft icon!", e);
+            LOGGER.log(Level.WARNING, "Unable to read Minecraft icon", e);
         }
 
         addWindowListener(new ForceExitHandler());
