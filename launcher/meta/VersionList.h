@@ -20,10 +20,10 @@
 #include <QJsonObject>
 #include <memory>
 
+#include "meta/Version.h"
+
 namespace Meta
 {
-using VersionPtr = std::shared_ptr<class Version>;
-using VersionListPtr = std::shared_ptr<class VersionList>;
 
 class VersionList : public BaseVersionList, public BaseEntity
 {
@@ -32,6 +32,8 @@ class VersionList : public BaseVersionList, public BaseEntity
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
 public:
     explicit VersionList(const QString &uid, QObject *parent = nullptr);
+
+    using Ptr = std::shared_ptr<VersionList>;
 
     enum Roles
     {
@@ -43,11 +45,11 @@ public:
 
     Task::Ptr getLoadTask() override;
     bool isLoaded() override;
-    const BaseVersionPtr at(int i) const override;
+    const BaseVersion::Ptr at(int i) const override;
     int count() const override;
     void sortVersions() override;
 
-    BaseVersionPtr getRecommended() const override;
+    BaseVersion::Ptr getRecommended() const override;
 
     QVariant data(const QModelIndex &index, int role) const override;
     RoleList providesRoles() const override;
@@ -65,38 +67,38 @@ public:
     }
     QString humanReadable() const;
 
-    VersionPtr getVersion(const QString &version);
+    Version::Ptr getVersion(const QString &version);
     bool hasVersion(QString version) const;
 
-    QVector<VersionPtr> versions() const
+    QVector<Version::Ptr> versions() const
     {
         return m_versions;
     }
 
 public: // for usage only by parsers
     void setName(const QString &name);
-    void setVersions(const QVector<VersionPtr> &versions);
-    void merge(const VersionListPtr &other);
-    void mergeFromIndex(const VersionListPtr &other);
+    void setVersions(const QVector<Version::Ptr> &versions);
+    void merge(const VersionList::Ptr &other);
+    void mergeFromIndex(const VersionList::Ptr &other);
     void parse(const QJsonObject &obj) override;
 
 signals:
     void nameChanged(const QString &name);
 
 protected slots:
-    void updateListData(QList<BaseVersionPtr>) override
+    void updateListData(QList<BaseVersion::Ptr>) override
     {
     }
 
 private:
-    QVector<VersionPtr> m_versions;
-    QHash<QString, VersionPtr> m_lookup;
+    QVector<Version::Ptr> m_versions;
+    QHash<QString, Version::Ptr> m_lookup;
     QString m_uid;
     QString m_name;
 
-    VersionPtr m_recommended;
+    Version::Ptr m_recommended;
 
-    void setupAddedVersion(const int row, const VersionPtr &version);
+    void setupAddedVersion(const int row, const Version::Ptr &version);
 };
 }
-Q_DECLARE_METATYPE(Meta::VersionListPtr)
+Q_DECLARE_METATYPE(Meta::VersionList::Ptr)

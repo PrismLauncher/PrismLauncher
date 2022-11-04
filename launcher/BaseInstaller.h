@@ -17,13 +17,14 @@
 
 #include <memory>
 
+#include "BaseVersion.h"
+
 class MinecraftInstance;
 class QDir;
 class QString;
 class QObject;
 class Task;
 class BaseVersion;
-typedef std::shared_ptr<BaseVersion> BaseVersionPtr;
 
 class BaseInstaller
 {
@@ -35,7 +36,7 @@ public:
     virtual bool add(MinecraftInstance *to);
     virtual bool remove(MinecraftInstance *from);
 
-    virtual Task *createInstallTask(MinecraftInstance *instance, BaseVersionPtr version, QObject *parent) = 0;
+    virtual Task *createInstallTask(MinecraftInstance *instance, BaseVersion::Ptr version, QObject *parent) = 0;
 
 protected:
     virtual QString id() const = 0;

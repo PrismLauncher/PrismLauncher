@@ -187,12 +187,12 @@ void VanillaPage::retranslate()
     ui->retranslateUi(this);
 }
 
-BaseVersionPtr VanillaPage::selectedVersion() const
+BaseVersion::Ptr VanillaPage::selectedVersion() const
 {
     return m_selectedVersion;
 }
 
-BaseVersionPtr VanillaPage::selectedLoaderVersion() const
+BaseVersion::Ptr VanillaPage::selectedLoaderVersion() const
 {
     return m_selectedLoaderVersion;
 }
@@ -227,14 +227,14 @@ void VanillaPage::suggestCurrent()
     dialog->setSuggestedIcon("default");
 }
 
-void VanillaPage::setSelectedVersion(BaseVersionPtr version)
+void VanillaPage::setSelectedVersion(BaseVersion::Ptr version)
 {
     m_selectedVersion = version;
     suggestCurrent();
     loaderFilterChanged();
 }
 
-void VanillaPage::setSelectedLoaderVersion(BaseVersionPtr version)
+void VanillaPage::setSelectedLoaderVersion(BaseVersion::Ptr version)
 {
     m_selectedLoaderVersion = version;
     suggestCurrent();
