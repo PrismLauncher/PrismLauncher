@@ -160,7 +160,7 @@ public final class EntryPoint {
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
             LOGGER.log(Level.SEVERE, "Caught reflection exception from launcher", e);
 
-            return ExitCode.REFLECTION_EXCEPTION;
+            return ExitCode.ERROR;
         } catch (Throwable e) {
             LOGGER.log(Level.SEVERE, "Exception caught from launcher", e);
 
@@ -173,7 +173,7 @@ public final class EntryPoint {
     }
 
     private enum ExitCode {
-        NORMAL(0), ABORT(1), ERROR(2), ILLEGAL_ARGUMENT(3), REFLECTION_EXCEPTION(4);
+        NORMAL(0), ABORT(1), ERROR(2), ILLEGAL_ARGUMENT(65);
 
         private final int numericalCode;
 
