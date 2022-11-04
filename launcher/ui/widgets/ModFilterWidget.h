@@ -49,7 +49,7 @@ public:
     auto getFilter() -> std::shared_ptr<Filter>;
     auto changed() const -> bool { return m_last_version_id != m_version_id; }
 
-    Meta::VersionListPtr versionList() { return m_version_list; }
+    Meta::VersionList::Ptr versionList() { return m_version_list; }
 
 private:
     ModFilterWidget(Version def, QWidget* parent = nullptr);
@@ -73,7 +73,7 @@ private:
 /* Version stuff */
     QButtonGroup m_mcVersion_buttons;
 
-    Meta::VersionListPtr m_version_list;
+    Meta::VersionList::Ptr m_version_list;
 
     /* Used to tell if the filter was changed since the last getFilter() call */
     VersionButtonID m_last_version_id = VersionButtonID::Strict;

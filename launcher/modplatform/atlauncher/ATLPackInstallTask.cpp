@@ -58,7 +58,7 @@
 
 namespace ATLauncher {
 
-static Meta::VersionPtr getComponentVersion(const QString& uid, const QString& version);
+static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version);
 
 PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString packName, QString version, InstallMode installMode)
 {
@@ -1037,7 +1037,7 @@ void PackInstallTask::install()
     emitSucceeded();
 }
 
-static Meta::VersionPtr getComponentVersion(const QString& uid, const QString& version)
+static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version)
 {
     auto vlist = APPLICATION->metadataIndex()->get(uid);
     if (!vlist)

@@ -7,16 +7,16 @@
 class VanillaCreationTask final : public InstanceCreationTask {
     Q_OBJECT
    public:
-    VanillaCreationTask(BaseVersionPtr version) : InstanceCreationTask(), m_version(std::move(version)) {}
-    VanillaCreationTask(BaseVersionPtr version, QString loader, BaseVersionPtr loader_version);
+    VanillaCreationTask(BaseVersion::Ptr version) : InstanceCreationTask(), m_version(std::move(version)) {}
+    VanillaCreationTask(BaseVersion::Ptr version, QString loader, BaseVersion::Ptr loader_version);
 
     bool createInstance() override;
 
    private:
     // Version to update to / create of the instance.
-    BaseVersionPtr m_version;
+    BaseVersion::Ptr m_version;
 
     bool m_using_loader = false;
     QString m_loader;
-    BaseVersionPtr m_loader_version;
+    BaseVersion::Ptr m_loader_version;
 };

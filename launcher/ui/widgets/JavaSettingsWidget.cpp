@@ -245,7 +245,7 @@ void JavaSettingsWidget::memoryValueChanged(int)
     }
 }
 
-void JavaSettingsWidget::javaVersionSelected(BaseVersionPtr version)
+void JavaSettingsWidget::javaVersionSelected(BaseVersion::Ptr version)
 {
     auto java = std::dynamic_pointer_cast<JavaInstall>(version);
     if(!java)
