@@ -2103,7 +2103,8 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         // macOSX
         // TODO actually write this path
         QMessageBox::critical(this, tr("Create instance shortcut"), tr("Not supported on macOSX yet!"));
-#else
+		return;
+#endif
         auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
 
         QString iconPath;
@@ -2151,7 +2152,6 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             }
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
         }
-#endif
     }
 }
 
