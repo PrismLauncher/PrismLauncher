@@ -140,6 +140,7 @@ public final class Launcher extends Applet implements AppletStub {
         active = false;
     }
 
+    @Override
     public void destroy() {
         wrappedApplet.destroy();
     }
@@ -165,8 +166,10 @@ public final class Launcher extends Applet implements AppletStub {
         wrappedApplet.setVisible(b);
     }
 
+    @Override
     public void update(Graphics paramGraphics) {}
 
+    @Override
     public void paint(Graphics paramGraphics) {}
 
 }
