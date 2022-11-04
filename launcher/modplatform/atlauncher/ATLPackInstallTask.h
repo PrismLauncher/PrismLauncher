@@ -62,13 +62,13 @@ public:
     /**
      * Requests a user interaction to select which optional mods should be installed.
      */
-    virtual QVector<QString> chooseOptionalMods(PackVersion version, QVector<ATLauncher::VersionMod> mods) = 0;
+    virtual std::optional<QVector<QString>> chooseOptionalMods(PackVersion version, QVector<ATLauncher::VersionMod> mods) = 0;
 
     /**
      * Requests a user interaction to select a component version from a given version list
      * and constrained to a given Minecraft version.
      */
-    virtual QString chooseVersion(Meta::VersionListPtr vlist, QString minecraftVersion) = 0;
+    virtual QString chooseVersion(Meta::VersionList::Ptr vlist, QString minecraftVersion) = 0;
 
     /**
      * Requests a user interaction to display a message.
@@ -137,8 +137,8 @@ private:
 
     QString archivePath;
     QStringList jarmods;
-    Meta::VersionPtr minecraftVersion;
-    QMap<QString, Meta::VersionPtr> componentsToInstall;
+    Meta::Version::Ptr minecraftVersion;
+    QMap<QString, Meta::Version::Ptr> componentsToInstall;
 
     QFuture<std::optional<QStringList>> m_extractFuture;
     QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;

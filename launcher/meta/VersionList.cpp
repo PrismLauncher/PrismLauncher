@@ -40,7 +40,7 @@ bool VersionList::isLoaded()
     return BaseEntity::isLoaded();
 }
 
-const BaseVersionPtr VersionList::at(int i) const
+const BaseVersion::Ptr VersionList::at(int i) const
 {
     return m_versions.at(i);
 }
@@ -52,7 +52,7 @@ int VersionList::count() const
 void VersionList::sortVersions()
 {
     beginResetModel();
-    std::sort(m_versions.begin(), m_versions.end(), [](const VersionPtr &a, const VersionPtr &b)
+    std::sort(m_versions.begin(), m_versions.end(), [](const Version::Ptr &a, const Version::Ptr &b)
     {
         return *a.get() < *b.get();
     });
@@ -66,7 +66,7 @@ QVariant VersionList::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    VersionPtr version = m_versions.at(index.row());
+    Version::Ptr version = m_versions.at(index.row());
 
     switch (role)
     {
@@ -129,9 +129,9 @@ QString VersionList::humanReadable() const
     return m_name.isEmpty() ? m_uid : m_name;
 }
 
-VersionPtr VersionList::getVersion(const QString &version)
+Version::Ptr VersionList::getVersion(const QString &version)
 {
-    VersionPtr out = m_lookup.value(version, nullptr);
+    Version::Ptr out = m_lookup.value(version, nullptr);
     if(!out)
     {
         out = std::make_shared<Version>(m_uid, version);
@@ -143,7 +143,7 @@ VersionPtr VersionList::getVersion(const QString &version)
 bool VersionList::hasVersion(QString version) const
 {
     auto ver = std::find_if(m_versions.constBegin(), m_versions.constEnd(),
-            [&](Meta::VersionPtr const& a){ return a->version() == version; });
+            [&](Meta::Version::Ptr const& a){ return a->version() == version; });
     return (ver != m_versions.constEnd());
 }
 
@@ -153,11 +153,11 @@ void VersionList::setName(const QString &name)
     emit nameChanged(name);
 }
 
-void VersionList::setVersions(const QVector<VersionPtr> &versions)
+void VersionList::setVersions(const QVector<Version::Ptr> &versions)
 {
     beginResetModel();
     m_versions = versions;
-    std::sort(m_versions.begin(), m_versions.end(), [](const VersionPtr &a, const VersionPtr &b)
+    std::sort(m_versions.begin(), m_versions.end(), [](const Version::Ptr &a, const Version::Ptr &b)
     {
         return a->rawTime() > b->rawTime();
     });
@@ -168,7 +168,7 @@ void VersionList::setVersions(const QVector<VersionPtr> &versions)
     }
 
     // FIXME: this is dumb, we have 'recommended' as part of the metadata already...
-    auto recommendedIt = std::find_if(m_versions.constBegin(), m_versions.constEnd(), [](const VersionPtr &ptr) { return ptr->type() == "release"; });
+    auto recommendedIt = std::find_if(m_versions.constBegin(), m_versions.constEnd(), [](const Version::Ptr &ptr) { return ptr->type() == "release"; });
     m_recommended = recommendedIt == m_versions.constEnd() ? nullptr : *recommendedIt;
     endResetModel();
 }
@@ -179,7 +179,7 @@ void VersionList::parse(const QJsonObject& obj)
 }
 
 // FIXME: this is dumb, we have 'recommended' as part of the metadata already...
-static const Meta::VersionPtr &getBetterVersion(const Meta::VersionPtr &a, const Meta::VersionPtr &b)
+static const Meta::Version::Ptr &getBetterVersion(const Meta::Version::Ptr &a, const Meta::Version::Ptr &b)
 {
     if(!a)
         return b;
@@ -194,7 +194,7 @@ static const Meta::VersionPtr &getBetterVersion(const Meta::VersionPtr &a, const
     return (a->type() == "release" ? a : b);
 }
 
-void VersionList::mergeFromIndex(const VersionListPtr &other)
+void VersionList::mergeFromIndex(const VersionList::Ptr &other)
 {
     if (m_name != other->m_name)
     {
@@ -202,7 +202,7 @@ void VersionList::mergeFromIndex(const VersionListPtr &other)
     }
 }
 
-void VersionList::merge(const VersionListPtr &other)
+void VersionList::merge(const VersionList::Ptr &other)
 {
     if (m_name != other->m_name)
     {
@@ -216,7 +216,7 @@ void VersionList::merge(const VersionListPtr &other)
     {
         qWarning() << "Empty list loaded ...";
     }
-    for (const VersionPtr &version : other->m_versions)
+    for (const Version::Ptr &version : other->m_versions)
     {
         // we already have the version. merge the contents
         if (m_lookup.contains(version->version()))
@@ -235,7 +235,7 @@ void VersionList::merge(const VersionListPtr &other)
     endResetModel();
 }
 
-void VersionList::setupAddedVersion(const int row, const VersionPtr &version)
+void VersionList::setupAddedVersion(const int row, const Version::Ptr &version)
 {
     // FIXME: do not disconnect from everythin, disconnect only the lambdas here
     version->disconnect();
@@ -244,7 +244,7 @@ void VersionList::setupAddedVersion(const int row, const VersionPtr &version)
     connect(version.get(), &Version::typeChanged, this, [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << TypeRole); });
 }
 
-BaseVersionPtr VersionList::getRecommended() const
+BaseVersion::Ptr VersionList::getRecommended() const
 {
     return m_recommended;
 }

@@ -62,6 +62,7 @@
 
 #ifdef Q_OS_WIN
 #include "ui/WinDarkmode.h"
+#include <versionhelpers.h>
 #endif
 
 #include "ui/setupwizard/SetupWizard.h"
@@ -245,7 +246,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         {{"s", "server"}, "Join the specified server on launch (only valid in combination with --launch)", "address"},
         {{"a", "profile"}, "Use the account specified by its profile name (only valid in combination with --launch)", "profile"},
         {"alive", "Write a small '" + liveCheckFile + "' file after the launcher starts"},
-        {{"I", "import"}, "Import instance from specified zip (local path or URL)", "file"}
+        {{"I", "import"}, "Import instance from specified zip (local path or URL)", "file"},
+        {"show", "Opens the window for the specified instance (by instance ID)", "show"}
     });
     parser.addHelpOption();
     parser.addVersionOption();
@@ -257,6 +259,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_profileToUse = parser.value("profile");
     m_liveCheck = parser.isSet("alive");
     m_zipToImport = parser.value("import");
+    m_instanceIdToShowWindowOf = parser.value("show");
 
     // error if --launch is missing with --server or --profile
     if((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty())
@@ -498,6 +501,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // Theming
         m_settings->registerSetting("IconTheme", QString("pe_colored"));
         m_settings->registerSetting("ApplicationTheme", QString("system"));
+        m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
         // Remembered state
         m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
@@ -992,6 +996,16 @@ void Application::performMainStartupAction()
             return;
         }
     }
+    if(!m_instanceIdToShowWindowOf.isEmpty())
+    {
+        auto inst = instances()->getInstanceById(m_instanceIdToShowWindowOf);
+        if(inst)
+        {
+            qDebug() << "<> Showing window of instance " << m_instanceIdToShowWindowOf;
+            showInstanceWindow(inst);
+            return;
+        }
+    }
     if(!m_mainWindow)
     {
         // normal main window
@@ -1130,15 +1144,6 @@ std::vector<ITheme *> Application::getValidApplicationThemes()
     return ret;
 }
 
-bool Application::isFlatpak()
-{
-    #ifdef Q_OS_LINUX
-    return QFile::exists("/.flatpak-info");
-    #else
-    return false;
-    #endif
-}
-
 void Application::setApplicationTheme(const QString& name, bool initial)
 {
     auto systemPalette = qApp->palette();
@@ -1148,7 +1153,7 @@ void Application::setApplicationTheme(const QString& name, bool initial)
         auto & theme = (*themeIter).second;
         theme->apply(initial);
 #ifdef Q_OS_WIN
-        if (m_mainWindow) {
+        if (m_mainWindow && IsWindows10OrGreater()) {
             if (QString::compare(theme->id(), "dark") == 0) {
                     WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
             } else {
@@ -1171,7 +1176,7 @@ void Application::setIconTheme(const QString& name)
 QIcon Application::getThemedIcon(const QString& name)
 {
     if(name == "logo") {
-        return QIcon(":/org.prismlauncher.PrismLauncher.svg");  // FIXME: Make this a BuildConfig variable
+        return QIcon(":/" + BuildConfig.LAUNCHER_SVGFILENAME);
     }
     return QIcon::fromTheme(name);
 }
@@ -1389,10 +1394,13 @@ MainWindow* Application::showMainWindow(bool minimized)
         m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
         m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
 #ifdef Q_OS_WIN
-        if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
-            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-        } else {
-            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+        if (IsWindows10OrGreater())
+        {
+            if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
+                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
+            } else {
+                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+            }
         }
 #endif
         if(minimized)
@@ -1577,7 +1585,7 @@ QString Application::getJarPath(QString jarFile)
 {
     QStringList potentialPaths = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-        FS::PathCombine(m_rootPath, "share/jars"),
+        FS::PathCombine(m_rootPath, "share/" + BuildConfig.LAUNCHER_APP_BINARY_NAME),
 #endif
         FS::PathCombine(m_rootPath, "jars"),
         FS::PathCombine(applicationDirPath(), "jars")

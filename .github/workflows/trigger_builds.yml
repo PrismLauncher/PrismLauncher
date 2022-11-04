@@ -3,7 +3,7 @@ name: Build Application
 on:
   push:
     branches-ignore:
-      - 'stable'
+      - 'renovate/**'
     paths-ignore:
       - '**.md'
       - '**/LICENSE'

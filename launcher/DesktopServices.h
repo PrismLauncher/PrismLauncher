@@ -33,4 +33,6 @@ namespace DesktopServices
      * Open the URL, most likely in a browser. Maybe.
      */
     bool openUrl(const QUrl &url);
+
+    bool isFlatpak();
 }

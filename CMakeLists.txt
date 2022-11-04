@@ -34,6 +34,11 @@ set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 set(CMAKE_CXX_FLAGS "-Wall -pedantic -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
 
+# ATL's packlist needs more than the default 1 Mib stack on windows
+if(WIN32)
+    set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+endif()
+
 # Fix build with Qt 5.13
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 
@@ -222,14 +227,14 @@ if(UNIX AND APPLE)
     set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_Name}.app")
 
     # Mac bundle settings
-    set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_Name}")
-    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_Name}: A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.")
+    set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_DisplayName}")
+    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_DisplayName}: A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.")
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.prismlauncher.${Launcher_Name}")
     set(MACOSX_BUNDLE_BUNDLE_VERSION "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_LONG_VERSION_STRING "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_ICON_FILE ${Launcher_Name}.icns)
-    set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2021-2022 ${Launcher_Copyright}")
+    set(MACOSX_BUNDLE_COPYRIGHT "© 2022 ${Launcher_Copyright_Mac}")
     set(MACOSX_SPARKLE_UPDATE_PUBLIC_KEY "v55ZWWD6QlPoXGV6VLzOTZxZUggWeE51X8cRQyQh6vA=")
     set(MACOSX_SPARKLE_UPDATE_FEED_URL "https://prismlauncher.org/feed/appcast.xml")
 
@@ -251,7 +256,7 @@ elseif(UNIX)
 
     set(BINARY_DEST_DIR "bin")
     set(LIBRARY_DEST_DIR "lib${LIB_SUFFIX}")
-    set(JARS_DEST_DIR "share/jars")
+    set(JARS_DEST_DIR "share/${Launcher_APP_BINARY_NAME}")
 
     # install as bundle with no dependencies included
     set(INSTALL_BUNDLE "nodeps")

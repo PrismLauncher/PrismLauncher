@@ -49,6 +49,7 @@
 #include <FileSystem.h>
 #include "Application.h"
 #include "BuildConfig.h"
+#include "DesktopServices.h"
 #include "ui/themes/ITheme.h"
 
 #include <QApplication>
@@ -143,7 +144,7 @@ void LauncherPage::on_instDirBrowseBtn_clicked()
                 ui->instDirTextBox->setText(cooked_dir);
             }
         }
-        else if(APPLICATION->isFlatpak() && raw_dir.startsWith("/run/user"))
+        else if(DesktopServices::isFlatpak() && raw_dir.startsWith("/run/user"))
         {
             QMessageBox warning;
             warning.setText(tr("You're trying to specify an instance folder "
@@ -310,9 +311,12 @@ void LauncherPage::applySettings()
         s->set("IconTheme", "flat");
         break;
     case 7:
-        s->set("IconTheme", "multimc");
+        s->set("IconTheme", "flat_white");
         break;
     case 8:
+        s->set("IconTheme", "multimc");
+        break;
+    case 9:
         s->set("IconTheme", "custom");
         break;
     }
@@ -328,6 +332,18 @@ void LauncherPage::applySettings()
     {
         s->set("ApplicationTheme", newAppTheme);
         APPLICATION->setApplicationTheme(newAppTheme, false);
+    }
+
+    switch (ui->themeBackgroundCat->currentIndex()) {
+    case 0: // original cat
+        s->set("BackgroundCat", "kitteh");
+        break;
+    case 1: // rory the cat
+        s->set("BackgroundCat", "rory");
+        break;
+    case 2: // rory the cat flat edition
+        s->set("BackgroundCat", "rory-flat");
+        break;
     }
 
     s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
@@ -408,13 +424,26 @@ void LauncherPage::loadSettings()
     {
         ui->themeComboBox->setCurrentIndex(6);
     }
-    else if (theme == "multimc")
+    else if (theme == "flat_white")
     {
         ui->themeComboBox->setCurrentIndex(7);
     }
-    else if (theme == "custom")
+    else if (theme == "multimc")
     {
         ui->themeComboBox->setCurrentIndex(8);
+    }
+    else if (theme == "custom")
+    {
+        ui->themeComboBox->setCurrentIndex(9);
+    }
+
+    auto cat = s->get("BackgroundCat").toString();
+    if (cat == "kitteh") {
+        ui->themeBackgroundCat->setCurrentIndex(0);
+    } else if (cat == "rory") {
+        ui->themeBackgroundCat->setCurrentIndex(1);
+    } else if (cat == "rory-flat") {
+        ui->themeBackgroundCat->setCurrentIndex(2);
     }
 
     {

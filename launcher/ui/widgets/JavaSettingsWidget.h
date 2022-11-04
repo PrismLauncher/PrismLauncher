@@ -60,7 +60,7 @@ public:
 protected slots:
     void memoryValueChanged(int);
     void javaPathEdited(const QString &path);
-    void javaVersionSelected(BaseVersionPtr version);
+    void javaVersionSelected(BaseVersion::Ptr version);
     void on_javaBrowseBtn_clicked();
     void on_javaStatusBtn_clicked();
     void checkFinished(JavaCheckResult result);

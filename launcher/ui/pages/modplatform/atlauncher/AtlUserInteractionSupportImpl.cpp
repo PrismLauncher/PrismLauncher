@@ -43,14 +43,17 @@ AtlUserInteractionSupportImpl::AtlUserInteractionSupportImpl(QWidget *parent) : 
 {
 }
 
-QVector<QString> AtlUserInteractionSupportImpl::chooseOptionalMods(ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods)
+std::optional<QVector<QString>> AtlUserInteractionSupportImpl::chooseOptionalMods(ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods)
 {
     AtlOptionalModDialog optionalModDialog(m_parent, version, mods);
-    optionalModDialog.exec();
+    auto result = optionalModDialog.exec();
+    if (result == QDialog::Rejected) {
+        return {};
+    }
     return optionalModDialog.getResult();
 }
 
-QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionListPtr vlist, QString minecraftVersion)
+QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionList::Ptr vlist, QString minecraftVersion)
 {
     VersionSelectDialog vselect(vlist.get(), "Choose Version", m_parent, false);
     if (minecraftVersion != nullptr) {

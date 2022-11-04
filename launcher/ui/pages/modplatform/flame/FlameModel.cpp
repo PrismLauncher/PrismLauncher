@@ -1,6 +1,7 @@
 #include "FlameModel.h"
 #include <Json.h>
 #include "Application.h"
+#include "ui/widgets/ProjectItem.h"
 
 #include <MMCStrings.h>
 #include <Version.h>
@@ -31,29 +32,38 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     }
 
     IndexedPack pack = modpacks.at(pos);
-    if (role == Qt::DisplayRole) {
-        return pack.name;
-    } else if (role == Qt::ToolTipRole) {
-        if (pack.description.length() > 100) {
-            // some magic to prevent to long tooltips and replace html linebreaks
-            QString edit = pack.description.left(97);
-            edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
-            return edit;
+    switch (role) {
+        case Qt::ToolTipRole: {
+            if (pack.description.length() > 100) {
+                // some magic to prevent to long tooltips and replace html linebreaks
+                QString edit = pack.description.left(97);
+                edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
+                return edit;
+            }
+            return pack.description;
+        } case Qt::DecorationRole: {
+            if (m_logoMap.contains(pack.logoName)) {
+                return (m_logoMap.value(pack.logoName));
+            }
+            QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
+            ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
+            return icon;
+        } case Qt::UserRole: {
+            QVariant v;
+            v.setValue(pack);
+            return v;
         }
-        return pack.description;
-    } else if (role == Qt::DecorationRole) {
-        if (m_logoMap.contains(pack.logoName)) {
-            return (m_logoMap.value(pack.logoName));
-        }
-        QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
-        ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
-        return icon;
-    } else if (role == Qt::UserRole) {
-        QVariant v;
-        v.setValue(pack);
-        return v;
+        case Qt::SizeHintRole:
+            return QSize(0, 58);
+        case UserDataTypes::TITLE:
+            return pack.name;
+        case UserDataTypes::DESCRIPTION:
+            return pack.description;
+        case UserDataTypes::SELECTED:
+            return false;
+        default:
+            break;
     }
-
     return QVariant();
 }
 

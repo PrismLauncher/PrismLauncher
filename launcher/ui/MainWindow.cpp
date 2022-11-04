@@ -335,11 +335,10 @@ public:
         all_actions.append(&actionSettings);
 
         actionUndoTrashInstance = TranslatedAction(MainWindow);
-        connect(actionUndoTrashInstance, SIGNAL(triggered(bool)), MainWindow, SLOT(undoTrashInstance()));
         actionUndoTrashInstance->setObjectName(QStringLiteral("actionUndoTrashInstance"));
         actionUndoTrashInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Undo Last Instance Deletion"));
         actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        actionUndoTrashInstance->setShortcut(QKeySequence("Ctrl+Z"));
+        actionUndoTrashInstance->setShortcut(QKeySequence::Undo);
         all_actions.append(&actionUndoTrashInstance);
 
         actionClearMetadata = TranslatedAction(MainWindow);
@@ -527,7 +526,7 @@ public:
 
         menuBar->addMenu(foldersMenu);
 
-        profileMenu = menuBar->addMenu(tr("&Profiles"));
+        profileMenu = menuBar->addMenu(tr("&Accounts"));
         profileMenu->setSeparatorsCollapsible(false);
         profileMenu->addAction(actionManageAccounts);
 
@@ -656,6 +655,7 @@ public:
         actionLaunchInstance->setObjectName(QStringLiteral("actionLaunchInstance"));
         actionLaunchInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Launch"));
         actionLaunchInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Launch the selected instance."));
+        actionLaunchInstance->setIcon(APPLICATION->getThemedIcon("launch"));
         all_actions.append(&actionLaunchInstance);
 
         actionLaunchInstanceOffline = TranslatedAction(MainWindow);
@@ -741,7 +741,9 @@ public:
         // See https://github.com/PolyMC/PolyMC/issues/493
         connect(instanceToolBar, &QToolBar::orientationChanged, [=](Qt::Orientation){ instanceToolBar->setOrientation(Qt::Vertical); });
         instanceToolBar->setAllowedAreas(Qt::LeftToolBarArea | Qt::RightToolBarArea);
-        instanceToolBar->setToolButtonStyle(Qt::ToolButtonTextOnly);
+        instanceToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        instanceToolBar->setIconSize(QSize(16, 16));
+
         instanceToolBar->setFloatable(false);
         instanceToolBar->setWindowTitle(QT_TRANSLATE_NOOP("MainWindow", "Instance Toolbar"));
 
@@ -761,8 +763,18 @@ public:
         instanceToolBar->addAction(actionViewSelectedInstFolder);
 
         instanceToolBar->addAction(actionExportInstance);
-        instanceToolBar->addAction(actionDeleteInstance);
         instanceToolBar->addAction(actionCopyInstance);
+        instanceToolBar->addAction(actionDeleteInstance);
+
+        QLayout * lay = instanceToolBar->layout();
+        for(int i = 0; i < lay->count(); i++)
+        {
+            QLayoutItem * item = lay->itemAt(i);
+            if (item->widget()->metaObject()->className() == QString("QToolButton"))
+            {
+                item->setAlignment(Qt::AlignLeft);
+            }
+        }
 
         all_toolbars.append(&instanceToolBar);
         MainWindow->addToolBar(Qt::RightToolBarArea, instanceToolBar);
@@ -1010,6 +1022,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         }
     }
 
+    connect(ui->actionUndoTrashInstance.operator->(), &QAction::triggered, this, &MainWindow::undoTrashInstance);
+
     setSelectedInstanceById(APPLICATION->settings()->get("SelectedInstance").toString());
 
     // removing this looks stupid
@@ -1039,7 +1053,7 @@ void MainWindow::retranslateUi()
         accountMenuButton->setText(profileLabel);
     }
     else {
-        accountMenuButton->setText(tr("Profiles"));
+        accountMenuButton->setText(tr("Accounts"));
     }
 
     if (m_selectedInstance) {
@@ -1121,11 +1135,6 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
             connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(deleteGroup()));
             actions.append(actionDeleteGroup);
         }
-
-        QAction *actionUndoTrashInstance = new QAction("Undo last trash instance", this);
-        connect(actionUndoTrashInstance, SIGNAL(triggered(bool)), SLOT(undoTrashInstance()));
-        actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        actions.append(actionUndoTrashInstance);
     }
     QMenu myMenu;
     myMenu.addActions(actions);
@@ -1382,7 +1391,7 @@ void MainWindow::defaultAccountChanged()
 
     // Set the icon to the "no account" icon.
     accountMenuButton->setIcon(APPLICATION->getThemedIcon("noaccount"));
-    accountMenuButton->setText(tr("Profiles"));
+    accountMenuButton->setText(tr("Accounts"));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
@@ -1551,15 +1560,13 @@ void MainWindow::setCatBackground(bool enabled)
         QDateTime now = QDateTime::currentDateTime();
         QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
         QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
-        QString cat;
+        QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
+
         if(non_stupid_abs(now.daysTo(xmas)) <= 4) {
-            cat = "catmas";
+            cat += "-xmas";
         }
         else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
-            cat = "cattiversary";
-        }
-        else {
-            cat = "kitteh";
+            cat += "-bday";
         }
         view->setStyleSheet(QString(R"(
 InstanceView
@@ -1567,10 +1574,11 @@ InstanceView
     background-image: url(:/backgrounds/%1);
     background-attachment: fixed;
     background-clip: padding;
-    background-position: top right;
+    background-position: bottom left;
     background-repeat: none;
     background-color:palette(base);
-})").arg(cat));
+})")
+                                .arg(cat));
     }
     else
     {
@@ -1821,6 +1829,7 @@ void MainWindow::deleteGroup()
 void MainWindow::undoTrashInstance()
 {
     APPLICATION->instances()->undoTrashInstance();
+    ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
 }
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
@@ -1927,6 +1936,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
     auto id = m_selectedInstance->id();
     if (APPLICATION->instances()->trashInstance(id)) {
+        ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
         return;
     }
     

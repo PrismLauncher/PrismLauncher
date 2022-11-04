@@ -302,6 +302,11 @@
             </item>
             <item>
              <property name="text">
+              <string>Flat (White)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>Legacy</string>
              </property>
             </item>
@@ -333,6 +338,44 @@
             <property name="focusPolicy">
              <enum>Qt::StrongFocus</enum>
             </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>C&amp;at</string>
+            </property>
+            <property name="buddy">
+             <cstring>themeBackgroundCat</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="themeBackgroundCat">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
+            </property>
+            <item>
+             <property name="text">
+              <string>Background Cat (from MultiMC)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Rory ID 11 (drawn by Ashtaka)</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Rory ID 11 (flat edition, drawn by Ashtaka)</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>

@@ -116,8 +116,6 @@ public:
 
     QIcon getThemedIcon(const QString& name);
 
-    bool isFlatpak();
-
     void setIconTheme(const QString& name);
 
     std::vector<ITheme *> getValidApplicationThemes();
@@ -301,6 +299,7 @@ public:
     QString m_profileToUse;
     bool m_liveCheck = false;
     QUrl m_zipToImport;
+    QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
 };
 

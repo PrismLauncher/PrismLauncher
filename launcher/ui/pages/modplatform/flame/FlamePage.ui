@@ -66,7 +66,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QTextBrowser" name="packDescription">
+      <widget class="ProjectDescriptionPage" name="packDescription">
        <property name="openExternalLinks">
         <bool>true</bool>
        </property>
@@ -99,6 +99,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ProjectDescriptionPage</class>
+   <extends>QTextBrowser</extends>
+   <header>ui/widgets/ProjectDescriptionPage.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>packView</tabstop>
   <tabstop>packDescription</tabstop>

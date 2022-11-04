@@ -44,12 +44,14 @@ class Config {
    public:
     Config();
     QString LAUNCHER_NAME;
+    QString LAUNCHER_APP_BINARY_NAME;
     QString LAUNCHER_DISPLAYNAME;
     QString LAUNCHER_COPYRIGHT;
     QString LAUNCHER_DOMAIN;
     QString LAUNCHER_CONFIGFILE;
     QString LAUNCHER_GIT;
     QString LAUNCHER_DESKTOPFILENAME;
+    QString LAUNCHER_SVGFILENAME;
 
     /// The major version number.
     int VERSION_MAJOR;

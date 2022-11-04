@@ -76,13 +76,13 @@ public:
 
     void openedImpl() override;
 
-    BaseVersionPtr selectedVersion() const;
-    BaseVersionPtr selectedLoaderVersion() const;
+    BaseVersion::Ptr selectedVersion() const;
+    BaseVersion::Ptr selectedLoaderVersion() const;
     QString selectedLoader() const;
 
 public slots:
-    void setSelectedVersion(BaseVersionPtr version);
-    void setSelectedLoaderVersion(BaseVersionPtr version);
+    void setSelectedVersion(BaseVersion::Ptr version);
+    void setSelectedLoaderVersion(BaseVersion::Ptr version);
 
 private slots:
     void filterChanged();
@@ -98,7 +98,7 @@ private:
     NewInstanceDialog *dialog = nullptr;
     Ui::VanillaPage *ui = nullptr;
     bool m_versionSetByUser = false;
-    BaseVersionPtr m_selectedVersion;
-    BaseVersionPtr m_selectedLoaderVersion;
+    BaseVersion::Ptr m_selectedVersion;
+    BaseVersion::Ptr m_selectedLoaderVersion;
     QString m_selectedLoader;
 };

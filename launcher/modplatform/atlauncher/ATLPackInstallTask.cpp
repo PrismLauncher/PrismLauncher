@@ -58,7 +58,7 @@
 
 namespace ATLauncher {
 
-static Meta::VersionPtr getComponentVersion(const QString& uid, const QString& version);
+static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version);
 
 PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString packName, QString version, InstallMode installMode)
 {
@@ -736,7 +736,12 @@ void PackInstallTask::downloadMods()
     QVector<QString> selectedMods;
     if (!optionalMods.isEmpty()) {
         setStatus(tr("Selecting optional mods..."));
-        selectedMods = m_support->chooseOptionalMods(m_version, optionalMods);
+        auto mods = m_support->chooseOptionalMods(m_version, optionalMods);
+        if (!mods.has_value()) {
+            emitAborted();
+            return;
+        }
+        selectedMods = mods.value();
     }
 
     setStatus(tr("Downloading mods..."));
@@ -1032,7 +1037,7 @@ void PackInstallTask::install()
     emitSucceeded();
 }
 
-static Meta::VersionPtr getComponentVersion(const QString& uid, const QString& version)
+static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version)
 {
     auto vlist = APPLICATION->metadataIndex()->get(uid);
     if (!vlist)

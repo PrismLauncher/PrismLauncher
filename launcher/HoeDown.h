@@ -42,7 +42,7 @@ public:
         }
         void put(QByteArray input)
         {
-            hoedown_buffer_put(buf, (uint8_t *) input.data(), input.size());
+            hoedown_buffer_put(buf, reinterpret_cast<uint8_t *>(input.data()), input.size());
         }
         const uint8_t * data() const
         {

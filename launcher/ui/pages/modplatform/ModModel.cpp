@@ -267,18 +267,25 @@ void ListModel::searchRequestFailed(QString reason)
                                   .arg(m_parent->displayName())
                                   .arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_DISPLAYNAME)));
     }
+
+    jobPtr.reset();
+    searchState = Finished;
+}
+
+void ListModel::searchRequestAborted()
+{
+    if (searchState != ResetRequested)
+        qCritical() << "Search task in ModModel aborted by an unknown reason!";
+
+    // Retry fetching
     jobPtr.reset();
 
-    if (searchState == ResetRequested) {
-        beginResetModel();
-        modpacks.clear();
-        endResetModel();
+    beginResetModel();
+    modpacks.clear();
+    endResetModel();
 
-        nextSearchOffset = 0;
-        performPaginatedSearch();
-    } else {
-        searchState = Finished;
-    }
+    nextSearchOffset = 0;
+    performPaginatedSearch();
 }
 
 void ListModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)

@@ -44,6 +44,7 @@
 #include <QStandardPaths>
 #include <QTextStream>
 #include <QUrl>
+#include "DesktopServices.h"
 
 #if defined Q_OS_WIN32
 #include <objbase.h>
@@ -182,6 +183,21 @@ bool copy::operator()(const QString& offset)
     if (!m_followSymlinks)
         opt |= copy_opts::copy_symlinks;
 
+    // Function that'll do the actual copying
+    auto copy_file = [&](QString src_path, QString relative_dst_path) {
+        if (m_blacklist && m_blacklist->matches(relative_dst_path))
+            return;
+
+        auto dst_path = PathCombine(dst, relative_dst_path);
+        ensureFilePathExists(dst_path);
+
+        fs::copy(toStdString(src_path), toStdString(dst_path), opt, err);
+        if (err) {
+            qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
+            qDebug() << "Source file:" << src_path;
+            qDebug() << "Destination file:" << dst_path;
+        }
+    };
 
     // We can't use copy_opts::recursive because we need to take into account the
     // blacklisted paths, so we iterate over the source directory, and if there's no blacklist
@@ -193,19 +209,12 @@ bool copy::operator()(const QString& offset)
         auto src_path = source_it.next();
         auto relative_path = src_dir.relativeFilePath(src_path);
 
-        if (m_blacklist && m_blacklist->matches(relative_path))
-            continue;
-
-        auto dst_path = PathCombine(dst, relative_path);
-        ensureFilePathExists(dst_path);
-
-        fs::copy(toStdString(src_path), toStdString(dst_path), opt, err);
-        if (err) {
-            qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
-            qDebug() << "Source file:" << src_path;
-            qDebug() << "Destination file:" << dst_path;
-        }
+        copy_file(src_path, relative_path);
     }
+
+    // If the root src is not a directory, the previous iterator won't run.
+    if (!fs::is_directory(toStdString(src)))
+        copy_file(src, "");
 
     return err.value() == 0;
 }
@@ -228,6 +237,9 @@ bool trash(QString path, QString *pathInTrash = nullptr)
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     return false;
 #else
+    // FIXME: Figure out trash in Flatpak. Qt seemingly doesn't use the Trash portal
+    if (DesktopServices::isFlatpak())
+        return false;
     return QFile::moveToTrash(path, pathInTrash);
 #endif
 }
@@ -401,6 +413,7 @@ bool overrideFolder(QString overwritten_path, QString override_path)
     std::error_code err;
     fs::copy_options opt = copy_opts::recursive | copy_opts::overwrite_existing;
 
+    // FIXME: hello traveller! Apparently std::copy does NOT overwrite existing files on GNU libstdc++ on Windows?
     fs::copy(toStdString(override_path), toStdString(overwritten_path), opt, err);
 
     if (err) {
