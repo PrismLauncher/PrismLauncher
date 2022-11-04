@@ -566,7 +566,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Memory
         m_settings->registerSetting({"MinMemAlloc", "MinMemoryAlloc"}, 512);
-        m_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, 4096);
+        m_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, suitableMaxMem());
         m_settings->registerSetting("PermGen", 128);
 
         // Java Settings
@@ -1632,4 +1632,18 @@ QString Application::getUserAgentUncached()
     }
 
     return BuildConfig.USER_AGENT_UNCACHED;
+}
+
+int Application::suitableMaxMem()
+{
+    float totalRAM = (float)Sys::getSystemRam() / (float)Sys::mebibyte;
+    int maxMemoryAlloc;
+
+    // If totalRAM < 6GB, use (totalRAM / 1.5), else 4GB
+    if (totalRAM < (4096 * 1.5))
+        maxMemoryAlloc = (int) (totalRAM / 1.5);
+    else
+        maxMemoryAlloc = 4096;
+
+    return maxMemoryAlloc;
 }
