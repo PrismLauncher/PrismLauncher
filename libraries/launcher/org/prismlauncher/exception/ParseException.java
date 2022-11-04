@@ -57,7 +57,6 @@ public final class ParseException extends IllegalArgumentException {
     }
 
     public ParseException() {
-        super();
     }
 
     public static ParseException forInputString(String inputString) {

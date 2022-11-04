@@ -157,7 +157,7 @@ public final class EntryPoint {
             LOGGER.log(Level.SEVERE, "Wrong argument", e);
 
             return ExitCode.ILLEGAL_ARGUMENT;
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
+        } catch (ReflectiveOperationException e) {
             LOGGER.log(Level.SEVERE, "Caught reflection exception from launcher", e);
 
             return ExitCode.ERROR;
