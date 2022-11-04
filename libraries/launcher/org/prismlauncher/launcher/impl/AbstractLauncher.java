@@ -3,7 +3,6 @@
  *  Prism Launcher
  *
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
  *

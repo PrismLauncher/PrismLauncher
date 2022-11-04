@@ -3,9 +3,7 @@
  *  Prism Launcher
  *
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 flow <flowlnlnln@gmail.com>
- *  Copyright (C) 2022 Samisafool <thenerdiestguy@gmail.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
