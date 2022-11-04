@@ -172,7 +172,7 @@ public final class LegacyFrame extends JFrame {
                     try {
                         Thread.sleep(30000L);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        LOGGER.log(Level.SEVERE, "Thread interrupted", e);
                     }
 
                     LOGGER.info("Forcing exit!");
