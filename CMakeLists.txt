@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.15)  # minimum version required by QuaZip
 
-if(WIN32)
-    # In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
-    cmake_policy(SET CMP0020 OLD)
-endif()
-
 project(Launcher)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
@@ -32,11 +27,42 @@ set(CMAKE_C_STANDARD_REQUIRED true)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
-set(CMAKE_CXX_FLAGS "-Wall -pedantic -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
+if(MSVC)
+    # Use /W4 as /Wall includes unnesserey warnings such as added padding to structs
+    # /permissive- specify standards-conforming compiler behavior, also enabled by Qt6, default on with std:c++20
+    # /GS Adds buffer security checks, default on but incuded anyway to mirror gcc's fstack-protector flag
+    set(CMAKE_CXX_FLAGS "/W4 /permissive- /GS ${CMAKE_CXX_FLAGS}")
 
-# ATL's packlist needs more than the default 1 Mib stack on windows
-if(WIN32)
-    set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+    # LINK accepts /SUBSYSTEM whics sets if we are a WINDOWS (gui) or a CONSOLE programs
+    # This implicitly selects an entrypoint specific to the subsystem selected
+    # qtmain/QtEntryPointLib provides the correct entrypoint (wWinMain) for gui programs
+    # Additinaly LINK autodetects we use a GUI so we can omit /SUBSYSTEM
+    # This allows tests to still use have console without using seperate linker flags
+    # /MANIFEST:NO disables generating a manifest file, we instead provide our own
+    # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
+    set(CMAKE_EXE_LINKER_FLAGS "/MANIFEST:NO /STACK:8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+
+    # See https://github.com/ccache/ccache/issues/1040
+    # Note, CMake 3.25 replaces this with CMAKE_MSVC_DEBUG_INFORMATION_FORMAT
+    # See https://cmake.org/cmake/help/v3.25/variable/CMAKE_MSVC_DEBUG_INFORMATION_FORMAT.html
+    foreach(config DEBUG RELWITHDEBINFO)
+        foreach(lang C CXX)
+            set(flags_var "CMAKE_${lang}_FLAGS_${config}")
+            string(REGEX REPLACE "/Z[Ii]" "/Z7" ${flags_var} "${${flags_var}}")
+        endforeach()
+    endforeach()
+
+    if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDLL")
+        set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release "")
+        set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release "")
+    endif()
+else()
+    set(CMAKE_CXX_FLAGS "-Wall -pedantic -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
+
+    # ATL's pack list needs more than the default 1 Mib stack on windows
+    if(WIN32)
+        set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+    endif()
 endif()
 
 # Fix build with Qt 5.13
@@ -53,11 +79,18 @@ if(ENABLE_LTO)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
 
-    if(ipo_supported AND (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel"))
-        message(STATUS "IPO / LTO enabled")
-        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-    elseif(ipo_supported)
-        message(STATUS "Not enabling IPO / LTO on debug builds")
+    if(ipo_supported)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL TRUE)
+        if(CMAKE_BUILD_TYPE)
+            if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+                message(STATUS "IPO / LTO enabled")
+            else()
+                message(STATUS "Not enabling IPO / LTO on debug builds")
+            endif()
+        else()
+            message(STATUS "IPO / LTO will only be enabled for release builds")
+        endif()
     else()
         message(STATUS "IPO / LTO not supported: <${ipo_error}>")
     endif()
@@ -65,8 +98,20 @@ endif()
 
 option(BUILD_TESTING "Build the testing tree." ON)
 
-find_package(ECM REQUIRED NO_MODULE)
-set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
+find_package(ECM QUIET NO_MODULE)
+if(NOT ECM_FOUND)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/CMakeLists.txt")
+        message(STATUS "Using bundled ECM")
+        set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/modules;${CMAKE_MODULE_PATH}")
+    else()
+        message(FATAL_ERROR
+            " Could not find ECM\n \n"
+            " Either install ECM using the system package manager or clone submodules\n"
+            " Submodules can be cloned with 'git submodule update --init --recursive'")
+    endif()
+else()
+    set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
+endif()
 include(CTest)
 include(ECMAddTests)
 if(BUILD_TESTING)
@@ -150,6 +195,10 @@ string(TIMESTAMP TODAY "%Y-%m-%d")
 set(Launcher_BUILD_TIMESTAMP "${TODAY}")
 
 ################################ 3rd Party Libs ################################
+
+if(NOT Launcher_FORCE_BUNDLED_LIBS)
+    find_package(ZLIB QUIET)
+endif()
 
 # Find the required Qt parts
 include(QtVersionlessBackport)
@@ -311,6 +360,21 @@ add_subdirectory(libraries/systeminfo) # system information library
 add_subdirectory(libraries/hoedown) # markdown parser
 add_subdirectory(libraries/launcher) # java based launcher part for Minecraft
 add_subdirectory(libraries/javacheck) # java compatibility checker
+if(NOT ZLIB_FOUND)
+    message(STATUS "Using bundled zlib")
+    set(CMAKE_POLICY_DEFAULT_CMP0069 NEW) # Suppress cmake warnings and allow INTERPROCEDURAL_OPTIMIZATION for zlib
+    set(SKIP_INSTALL_ALL ON)
+    add_subdirectory(libraries/zlib EXCLUDE_FROM_ALL)
+    
+    set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib" "${CMAKE_CURRENT_BINARY_DIR}/libraries/zlib")
+    set_target_properties(zlibstatic PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIR}")
+    add_library(ZLIB::ZLIB ALIAS zlibstatic)
+    set(ZLIB_LIBRARY ZLIB::ZLIB)
+    set(ZLIB_FOUND true)
+    find_package(ZLIB REQUIRED)
+else()
+    message(STATUS "Using system zlib")
+endif()
 if (FORCE_BUNDLED_QUAZIP)
     message(STATUS "Using bundled QuaZip")
     set(BUILD_SHARED_LIBS 0)  # link statically to avoid conflicts.
