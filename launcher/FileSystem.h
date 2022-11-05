@@ -54,11 +54,6 @@ class FileSystemException : public ::Exception {
 void write(const QString& filename, const QByteArray& data);
 
 /**
- * create a symlink
- */
-bool symlink(const QString& target, const QString& link);
-
-/**
  * read data from a file safely\
  */
 QByteArray read(const QString& filename);

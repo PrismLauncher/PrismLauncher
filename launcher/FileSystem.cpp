@@ -163,19 +163,6 @@ bool ensureFolderPathExists(QString foldernamepath)
     return success;
 }
 
-bool symlink(const QString& source, const QString& target)
-{
-    std::error_code err;
-
-    fs::create_symlink(toStdString(source), toStdString(target));
-
-    if (err) {
-        qWarning() << "Failed to symlink files:" << QString::fromStdString(err.message());
-    }
-
-    return err.value() == 0;
-}
-
 bool copy::operator()(const QString& offset)
 {
     using copy_opts = fs::copy_options;
