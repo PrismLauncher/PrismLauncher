@@ -70,7 +70,7 @@ public:
     virtual bool isLoaded() = 0;
 
     //! Gets the version at the given index.
-    virtual const BaseVersionPtr at(int i) const = 0;
+    virtual const BaseVersion::Ptr at(int i) const = 0;
 
     //! Returns the number of versions in the list.
     virtual int count() const = 0;
@@ -90,13 +90,13 @@ public:
      * \return A const pointer to the version with the given descriptor. NULL if
      * one doesn't exist.
      */
-    virtual BaseVersionPtr findVersion(const QString &descriptor);
+    virtual BaseVersion::Ptr findVersion(const QString &descriptor);
 
     /*!
      * \brief Gets the recommended version from this list
      * If the list doesn't support recommended versions, this works exactly as getLatestStable
      */
-    virtual BaseVersionPtr getRecommended() const;
+    virtual BaseVersion::Ptr getRecommended() const;
 
     /*!
      * Sorts the version list.
@@ -117,5 +117,5 @@ slots:
      * then copies the versions and sets their parents correctly.
      * \param versions List of versions whose parents should be set.
      */
-    virtual void updateListData(QList<BaseVersionPtr> versions) = 0;
+    virtual void updateListData(QList<BaseVersion::Ptr> versions) = 0;
 };

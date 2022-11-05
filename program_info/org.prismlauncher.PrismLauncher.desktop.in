@@ -10,3 +10,4 @@ Icon=org.prismlauncher.PrismLauncher
 Categories=Game;ActionGame;AdventureGame;Simulation;
 Keywords=game;minecraft;launcher;mc;multimc;polymc;
 StartupWMClass=PrismLauncher
+MimeType=application/zip;application/x-modrinth-modpack+zip

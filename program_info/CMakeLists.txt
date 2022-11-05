@@ -25,6 +25,7 @@ set(Launcher_DesktopFileName "org.prismlauncher.PrismLauncher.desktop" PARENT_SC
 set(Launcher_SVGFileName "org.prismlauncher.PrismLauncher.svg" PARENT_SCOPE)
 
 set(Launcher_Desktop "program_info/org.prismlauncher.PrismLauncher.desktop" PARENT_SCOPE)
+set(Launcher_mrpack_MIMEInfo "program_info/modrinth-mrpack-mime.xml" PARENT_SCOPE)
 set(Launcher_MetaInfo "program_info/org.prismlauncher.PrismLauncher.metainfo.xml" PARENT_SCOPE)
 set(Launcher_SVG "program_info/org.prismlauncher.PrismLauncher.svg" PARENT_SCOPE)
 set(Launcher_Branding_ICNS "program_info/prismlauncher.icns" PARENT_SCOPE)

@@ -37,11 +37,11 @@ MetadataVersion currentFormatVersion()
 static std::shared_ptr<Index> parseIndexInternal(const QJsonObject &obj)
 {
     const QVector<QJsonObject> objects = requireIsArrayOf<QJsonObject>(obj, "packages");
-    QVector<VersionListPtr> lists;
+    QVector<VersionList::Ptr> lists;
     lists.reserve(objects.size());
     std::transform(objects.begin(), objects.end(), std::back_inserter(lists), [](const QJsonObject &obj)
     {
-        VersionListPtr list = std::make_shared<VersionList>(requireString(obj, "uid"));
+        VersionList::Ptr list = std::make_shared<VersionList>(requireString(obj, "uid"));
         list->setName(ensureString(obj, "name", QString()));
         return list;
     });
@@ -49,9 +49,9 @@ static std::shared_ptr<Index> parseIndexInternal(const QJsonObject &obj)
 }
 
 // Version
-static VersionPtr parseCommonVersion(const QString &uid, const QJsonObject &obj)
+static Version::Ptr parseCommonVersion(const QString &uid, const QJsonObject &obj)
 {
-    VersionPtr version = std::make_shared<Version>(uid, requireString(obj, "version"));
+    Version::Ptr version = std::make_shared<Version>(uid, requireString(obj, "version"));
     version->setTime(QDateTime::fromString(requireString(obj, "releaseTime"), Qt::ISODate).toMSecsSinceEpoch() / 1000);
     version->setType(ensureString(obj, "type", QString()));
     version->setRecommended(ensureBoolean(obj, QString("recommended"), false));
@@ -63,9 +63,9 @@ static VersionPtr parseCommonVersion(const QString &uid, const QJsonObject &obj)
     return version;
 }
 
-static std::shared_ptr<Version> parseVersionInternal(const QJsonObject &obj)
+static Version::Ptr parseVersionInternal(const QJsonObject &obj)
 {
-    VersionPtr version = parseCommonVersion(requireString(obj, "uid"), obj);
+    Version::Ptr version = parseCommonVersion(requireString(obj, "uid"), obj);
 
     version->setData(OneSixVersionFormat::versionFileFromJson(QJsonDocument(obj),
                                            QString("%1/%2.json").arg(version->uid(), version->version()),
@@ -74,12 +74,12 @@ static std::shared_ptr<Version> parseVersionInternal(const QJsonObject &obj)
 }
 
 // Version list / package
-static std::shared_ptr<VersionList> parseVersionListInternal(const QJsonObject &obj)
+static VersionList::Ptr parseVersionListInternal(const QJsonObject &obj)
 {
     const QString uid = requireString(obj, "uid");
 
     const QVector<QJsonObject> versionsRaw = requireIsArrayOf<QJsonObject>(obj, "versions");
-    QVector<VersionPtr> versions;
+    QVector<Version::Ptr> versions;
     versions.reserve(versionsRaw.size());
     std::transform(versionsRaw.begin(), versionsRaw.end(), std::back_inserter(versions), [uid](const QJsonObject &vObj)
     {
@@ -88,7 +88,7 @@ static std::shared_ptr<VersionList> parseVersionListInternal(const QJsonObject &
         return version;
     });
 
-    VersionListPtr list = std::make_shared<VersionList>(uid);
+    VersionList::Ptr list = std::make_shared<VersionList>(uid);
     list->setName(ensureString(obj, "name", QString()));
     list->setVersions(versions);
     return list;

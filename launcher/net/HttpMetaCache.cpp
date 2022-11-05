@@ -242,7 +242,7 @@ void HttpMetaCache::Load()
         foo->local_changed_timestamp = Json::ensureDouble(element_obj, "last_changed_timestamp");
         foo->remote_changed_timestamp = Json::ensureString(element_obj, "remote_changed_timestamp");
 
-        foo->makeEternal(Json::ensureBoolean(element_obj, "eternal", false));
+        foo->makeEternal(Json::ensureBoolean(element_obj, (const QString)QStringLiteral("eternal"), false));
         if (!foo->isEternal()) {
             foo->current_age = Json::ensureDouble(element_obj, "current_age");
             foo->max_age = Json::ensureDouble(element_obj, "max_age");
