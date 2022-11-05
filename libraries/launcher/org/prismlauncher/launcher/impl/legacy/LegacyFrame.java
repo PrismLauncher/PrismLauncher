@@ -60,6 +60,8 @@ import net.minecraft.Launcher;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
+import org.prismlauncher.utils.logging.Log;
+
 import java.applet.Applet;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
@@ -72,12 +74,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public final class LegacyFrame extends JFrame {
 
-    private static final Logger LOGGER = Logger.getLogger("LegacyFrame");
     private static final long serialVersionUID = 1L;
 
     private final Launcher launcher;
@@ -92,7 +91,7 @@ public final class LegacyFrame extends JFrame {
         try {
             this.setIconImage(ImageIO.read(new File("icon.png")));
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Unable to read Minecraft icon", e);
+            Log.error("Unable to read Minecraft icon", e);
         }
 
         this.addWindowListener(new ForceExitHandler());
@@ -116,7 +115,7 @@ public final class LegacyFrame extends JFrame {
                 if (lines.size() < 3) {
                     Files.move(mpticketFile, mpticketFileCorrupt, StandardCopyOption.REPLACE_EXISTING);
 
-                    LOGGER.warning("Mpticket file is corrupted!");
+                    Log.warning("Mpticket file is corrupted!");
                 } else {
                     // Assumes parameters are valid and in the correct order
                     this.launcher.setParameter("server", lines.get(0));
@@ -124,7 +123,7 @@ public final class LegacyFrame extends JFrame {
                     this.launcher.setParameter("mppass", lines.get(2));
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "Unable to read mpticket file!", e);
+                Log.error("Unable to read mpticket file", e);
             }
         }
 
@@ -170,11 +169,10 @@ public final class LegacyFrame extends JFrame {
                     try {
                         Thread.sleep(30000L);
                     } catch (InterruptedException e) {
-                        LOGGER.log(Level.SEVERE, "Thread interrupted", e);
+                        Log.error("Thread interrupted", e);
                     }
 
-                    LOGGER.info("Forcing exit!");
-
+                    Log.warning("Forcing exit");
                     System.exit(0);
                 }
             }).start();

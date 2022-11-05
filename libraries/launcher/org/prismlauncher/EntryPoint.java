@@ -55,23 +55,20 @@
 
 package org.prismlauncher;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.impl.StandardLauncher;
 import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.StringUtils;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.prismlauncher.utils.logging.Log;
 
 public final class EntryPoint {
-
-    private static final Logger LOGGER = Logger.getLogger("EntryPoint");
 
     private EntryPoint() {
     }
@@ -80,7 +77,7 @@ public final class EntryPoint {
         ExitCode exitCode = listen();
 
         if (exitCode != ExitCode.NORMAL) {
-            LOGGER.warning("Exiting with " + exitCode);
+            Log.fatal("Exiting with " + exitCode);
 
             System.exit(exitCode.numericalCode);
         }
@@ -123,14 +120,14 @@ public final class EntryPoint {
                     preLaunchAction = PreLaunchAction.ABORT;
             }
         } catch (IOException | ParseException e) {
-            LOGGER.log(Level.SEVERE, "Launcher abort due to exception", e);
+            Log.fatal("Launcher abort due to exception", e);
 
             return ExitCode.ILLEGAL_ARGUMENT;
         }
 
         // Main loop
         if (preLaunchAction == PreLaunchAction.ABORT) {
-            LOGGER.info("Launch aborted by the launcher");
+            Log.fatal("Launch aborted by the launcher");
 
             return ExitCode.ABORT;
         }
@@ -150,19 +147,22 @@ public final class EntryPoint {
                     throw new IllegalArgumentException("Invalid launcher type: " + type);
             }
 
+            Log.launcher("Using " + type + " launcher");
+            Log.blankLine();
+
             launcher.launch();
 
             return ExitCode.NORMAL;
         } catch (IllegalArgumentException e) {
-            LOGGER.log(Level.SEVERE, "Wrong argument", e);
+            Log.fatal("Wrong argument", e);
 
             return ExitCode.ILLEGAL_ARGUMENT;
         } catch (ReflectiveOperationException e) {
-            LOGGER.log(Level.SEVERE, "Caught reflection exception from launcher", e);
+            Log.fatal("Caught reflection exception from launcher", e);
 
             return ExitCode.ERROR;
         } catch (Throwable e) {
-            LOGGER.log(Level.SEVERE, "Exception caught from launcher", e);
+            Log.fatal("Exception caught from launcher", e);
 
             return ExitCode.ERROR;
         }

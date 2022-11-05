@@ -18,6 +18,8 @@ set(SRC
     org/prismlauncher/utils/Parameters.java
     org/prismlauncher/utils/ReflectionUtils.java
     org/prismlauncher/utils/StringUtils.java
+    org/prismlauncher/utils/logging/Level.java
+    org/prismlauncher/utils/logging/Log.java
     net/minecraft/Launcher.java
 )
 add_jar(NewLaunch ${SRC})

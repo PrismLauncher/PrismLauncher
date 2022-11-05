@@ -59,21 +59,18 @@ package org.prismlauncher.launcher.impl.legacy;
 import org.prismlauncher.launcher.impl.AbstractLauncher;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.ReflectionUtils;
+import org.prismlauncher.utils.logging.Log;
 
 import java.io.File;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Used to launch old versions that support applets.
  */
 public final class LegacyLauncher extends AbstractLauncher {
-
-    private static final Logger LOGGER = Logger.getLogger("LegacyLauncher");
 
     private final String user, session;
     private final String title;
@@ -101,24 +98,23 @@ public final class LegacyLauncher extends AbstractLauncher {
         Field gameDirField = ReflectionUtils.getMinecraftGameDirField(main);
 
         if (gameDirField == null)
-            LOGGER.warning("Could not find Minecraft path field");
+            Log.warning("Could not find Minecraft path field");
         else {
             gameDirField.setAccessible(true);
             gameDirField.set(null /* field is static, so instance is null */, new File(this.cwd));
         }
 
         if (this.usesApplet) {
-            LOGGER.info("Launching legacy minecraft using applet wrapper...");
+            Log.launcher("Launching with applet wrapper...");
 
             try {
                 LegacyFrame window = new LegacyFrame(this.title, ReflectionUtils.createAppletClass(this.appletClass));
 
                 window.start(this.user, this.session, this.width, this.height, this.maximize, this.serverAddress,
                         this.serverPort, this.mcParams.contains("--demo"));
-
                 return;
             } catch (Throwable e) {
-                LOGGER.log(Level.SEVERE, "Running applet wrapper failed with exception; falling back to main class", e);
+                Log.error("Running applet wrapper failed with exception; falling back to main class", e);
             }
         }
 
