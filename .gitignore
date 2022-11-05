@@ -47,3 +47,6 @@ result/
 # Flatpak
 .flatpak-builder
 flatbuild
+
+# Snap
+*.snap
