@@ -85,17 +85,17 @@ public final class LegacyFrame extends JFrame {
     public LegacyFrame(String title, Applet applet) {
         super(title);
 
-        launcher = new Launcher(applet);
+        this.launcher = new Launcher(applet);
 
-        applet.setStub(launcher);
+        applet.setStub(this.launcher);
 
         try {
-            setIconImage(ImageIO.read(new File("icon.png")));
+            this.setIconImage(ImageIO.read(new File("icon.png")));
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Unable to read Minecraft icon", e);
         }
 
-        addWindowListener(new ForceExitHandler());
+        this.addWindowListener(new ForceExitHandler());
     }
 
     public void start(String user, String session, int width, int height, boolean maximize, String serverAddress,
@@ -119,9 +119,9 @@ public final class LegacyFrame extends JFrame {
                     LOGGER.warning("Mpticket file is corrupted!");
                 } else {
                     // Assumes parameters are valid and in the correct order
-                    launcher.setParameter("server", lines.get(0));
-                    launcher.setParameter("port", lines.get(1));
-                    launcher.setParameter("mppass", lines.get(2));
+                    this.launcher.setParameter("server", lines.get(0));
+                    this.launcher.setParameter("port", lines.get(1));
+                    this.launcher.setParameter("mppass", lines.get(2));
                 }
             } catch (IOException e) {
                 LOGGER.log(Level.WARNING, "Unable to read mpticket file!", e);
@@ -129,35 +129,35 @@ public final class LegacyFrame extends JFrame {
         }
 
         if (serverAddress != null) {
-            launcher.setParameter("server", serverAddress);
-            launcher.setParameter("port", serverPort);
+            this.launcher.setParameter("server", serverAddress);
+            this.launcher.setParameter("port", serverPort);
         }
 
-        launcher.setParameter("username", user);
-        launcher.setParameter("sessionid", session);
-        launcher.setParameter("stand-alone", "true"); // Show the quit button. TODO: why won't this work?
-        launcher.setParameter("haspaid", "true"); // Some old versions need this for world saves to work.
-        launcher.setParameter("demo", isDemo ? "true" : "false");
-        launcher.setParameter("fullscreen", "false");
+        this.launcher.setParameter("username", user);
+        this.launcher.setParameter("sessionid", session);
+        this.launcher.setParameter("stand-alone", "true"); // Show the quit button. TODO: why won't this work?
+        this.launcher.setParameter("haspaid", "true"); // Some old versions need this for world saves to work.
+        this.launcher.setParameter("demo", isDemo ? "true" : "false");
+        this.launcher.setParameter("fullscreen", "false");
 
-        add(launcher);
+        this.add(this.launcher);
 
-        launcher.setPreferredSize(new Dimension(width, height));
+        this.launcher.setPreferredSize(new Dimension(width, height));
 
-        pack();
+        this.pack();
 
-        setLocationRelativeTo(null);
-        setResizable(true);
+        this.setLocationRelativeTo(null);
+        this.setResizable(true);
 
         if (maximize)
             setExtendedState(MAXIMIZED_BOTH);
 
-        validate();
+        this.validate();
 
-        launcher.init();
-        launcher.start();
+        this.launcher.init();
+        this.launcher.start();
 
-        setVisible(true);
+        this.setVisible(true);
     }
 
     private final class ForceExitHandler extends WindowAdapter {
@@ -179,9 +179,9 @@ public final class LegacyFrame extends JFrame {
                 }
             }).start();
 
-            if (launcher != null) {
-                launcher.stop();
-                launcher.destroy();
+            if (LegacyFrame.this.launcher != null) {
+                LegacyFrame.this.launcher.stop();
+                LegacyFrame.this.launcher.destroy();
             }
 
             // old minecraft versions can hang without this >_<

@@ -75,21 +75,21 @@ public final class StandardLauncher extends AbstractLauncher {
         // mcparams.add("--fullscreen");
 
         if (!this.maximize) {
-            mcParams.add("--width");
-            mcParams.add(Integer.toString(width));
-            mcParams.add("--height");
-            mcParams.add(Integer.toString(height));
+            this.mcParams.add("--width");
+            this.mcParams.add(Integer.toString(this.width));
+            this.mcParams.add("--height");
+            this.mcParams.add(Integer.toString(this.height));
         }
 
         if (this.serverAddress != null) {
-            mcParams.add("--server");
-            mcParams.add(serverAddress);
-            mcParams.add("--port");
-            mcParams.add(serverPort);
+            this.mcParams.add("--server");
+            this.mcParams.add(this.serverAddress);
+            this.mcParams.add("--port");
+            this.mcParams.add(this.serverPort);
         }
 
         MethodHandle method = ReflectionUtils.findMainMethod(this.mainClassName);
-        method.invokeExact(mcParams.toArray(new String[0]));
+        method.invokeExact(this.mcParams.toArray(new String[0]));
     }
 
 }

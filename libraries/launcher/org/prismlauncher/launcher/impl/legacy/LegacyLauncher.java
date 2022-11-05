@@ -84,15 +84,15 @@ public final class LegacyLauncher extends AbstractLauncher {
     public LegacyLauncher(Parameters params) {
         super(params);
 
-        user = params.getString("userName");
-        session = params.getString("sessionId");
-        title = params.getString("windowTitle", "Minecraft");
-        appletClass = params.getString("appletClass", "net.minecraft.client.MinecraftApplet");
+        this.user = params.getString("userName");
+        this.session = params.getString("sessionId");
+        this.title = params.getString("windowTitle", "Minecraft");
+        this.appletClass = params.getString("appletClass", "net.minecraft.client.MinecraftApplet");
 
         List<String> traits = params.getList("traits", Collections.<String>emptyList());
-        usesApplet = !traits.contains("noapplet");
+        this.usesApplet = !traits.contains("noapplet");
 
-        cwd = System.getProperty("user.dir");
+        this.cwd = System.getProperty("user.dir");
     }
 
     @Override
@@ -104,14 +104,14 @@ public final class LegacyLauncher extends AbstractLauncher {
             LOGGER.warning("Could not find Minecraft path field");
         else {
             gameDirField.setAccessible(true);
-            gameDirField.set(null /* field is static, so instance is null */, new File(cwd));
+            gameDirField.set(null /* field is static, so instance is null */, new File(this.cwd));
         }
 
         if (this.usesApplet) {
             LOGGER.info("Launching legacy minecraft using applet wrapper...");
 
             try {
-                LegacyFrame window = new LegacyFrame(title, ReflectionUtils.createAppletClass(this.appletClass));
+                LegacyFrame window = new LegacyFrame(this.title, ReflectionUtils.createAppletClass(this.appletClass));
 
                 window.start(this.user, this.session, this.width, this.height, this.maximize, this.serverAddress,
                         this.serverPort, this.mcParams.contains("--demo"));
@@ -123,7 +123,7 @@ public final class LegacyLauncher extends AbstractLauncher {
         }
 
         MethodHandle method = ReflectionUtils.findMainEntrypoint(main);
-        method.invokeExact(mcParams.toArray(new String[0]));
+        method.invokeExact(this.mcParams.toArray(new String[0]));
     }
 
 }

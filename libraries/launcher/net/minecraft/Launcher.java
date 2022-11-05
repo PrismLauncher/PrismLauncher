@@ -113,28 +113,28 @@ public final class Launcher extends Applet implements AppletStub {
         wrappedApplet = applet;
 
         applet.setStub(this);
-        applet.setSize(getWidth(), getHeight());
+        applet.setSize(this.getWidth(), this.getHeight());
 
         setLayout(new BorderLayout());
         this.add(applet, "Center");
 
         applet.init();
 
-        active = true;
+        this.active = true;
 
         applet.start();
 
-        validate();
+        this.validate();
     }
 
     @Override
     public boolean isActive() {
-        return active;
+        return this.active;
     }
 
     @Override
     public URL getDocumentBase() {
-        return documentBase;
+        return this.documentBase;
     }
 
     @Override
@@ -149,7 +149,7 @@ public final class Launcher extends Applet implements AppletStub {
 
     @Override
     public String getParameter(String name) {
-        String param = params.get(name);
+        String param = this.params.get(name);
 
         if (param != null)
             return param;
@@ -164,49 +164,49 @@ public final class Launcher extends Applet implements AppletStub {
 
     @Override
     public void resize(int width, int height) {
-        wrappedApplet.resize(width, height);
+        this.wrappedApplet.resize(width, height);
     }
 
     @Override
     public void resize(Dimension size) {
-        wrappedApplet.resize(size);
+        this.wrappedApplet.resize(size);
     }
 
     @Override
     public void init() {
-        if (wrappedApplet != null)
-            wrappedApplet.init();
+        if (this.wrappedApplet != null)
+            this.wrappedApplet.init();
     }
 
     @Override
     public void start() {
-        wrappedApplet.start();
+        this.wrappedApplet.start();
 
-        active = true;
+        this.active = true;
     }
 
     @Override
     public void stop() {
-        wrappedApplet.stop();
+        this.wrappedApplet.stop();
 
-        active = false;
+        this.active = false;
     }
 
     @Override
     public void destroy() {
-        wrappedApplet.destroy();
+        this.wrappedApplet.destroy();
     }
 
     @Override
     public void appletResize(int width, int height) {
-        wrappedApplet.resize(width, height);
+        this.wrappedApplet.resize(width, height);
     }
 
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
 
-        wrappedApplet.setVisible(visible);
+        this.wrappedApplet.setVisible(visible);
     }
 
     @Override
@@ -218,7 +218,7 @@ public final class Launcher extends Applet implements AppletStub {
     }
 
     public void setParameter(String name, String value) {
-        params.put(name, value);
+        this.params.put(name, value);
     }
 
 }
