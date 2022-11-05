@@ -1565,7 +1565,7 @@ void MainWindow::setCatBackground(bool enabled)
         if (non_stupid_abs(now.daysTo(xmas)) <= 4) {
             cat += "-xmas";
         } else if (non_stupid_abs(now.daysTo(halloween)) <= 4) {
-            cat += "-ween";
+            cat += "-spooky";
         } else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
             cat += "-bday";
         }
