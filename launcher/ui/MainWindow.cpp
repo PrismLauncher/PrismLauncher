@@ -254,7 +254,9 @@ public:
     QMenu * helpMenu = nullptr;
     TranslatedToolButton helpMenuButton;
     TranslatedAction actionClearMetadata;
+    #ifdef Q_OS_MAC
     TranslatedAction actionAddToPATH;
+    #endif
     TranslatedAction actionReportBug;
     TranslatedAction actionDISCORD;
     TranslatedAction actionMATRIX;
@@ -1919,6 +1921,7 @@ void MainWindow::on_actionClearMetadata_triggered()
     APPLICATION->metacache()->evictAll();
 }
 
+#ifdef Q_OS_MAC
 void MainWindow::on_actionAddToPATH_triggered() {
     auto binaryPath = APPLICATION->applicationFilePath();
 
@@ -1931,6 +1934,7 @@ void MainWindow::on_actionAddToPATH_triggered() {
         QMessageBox::critical(this, tr("Failed to add Prism to PATH"), tr("Failed to add Prism to PATH :("));
     }
 }
+#endif
 
 void MainWindow::on_actionOpenWiki_triggered()
 {

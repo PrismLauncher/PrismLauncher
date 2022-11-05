@@ -128,7 +128,9 @@ private slots:
 
     void on_actionClearMetadata_triggered();
 
+    #ifdef Q_OS_MAC
     void on_actionAddToPATH_triggered();
+    #endif
 
     void on_actionOpenWiki_triggered();
 
