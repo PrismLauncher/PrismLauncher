@@ -925,6 +925,12 @@ bool Application::event(QEvent* event) {
         m_prevAppState = ev->applicationState();
     }
 #endif
+
+    if (event->type() == QEvent::FileOpen) {
+        auto ev = static_cast<QFileOpenEvent*>(event);
+        m_mainWindow->droppedURLs({ ev->url() });
+    }
+
     return QApplication::event(event);
 }
 

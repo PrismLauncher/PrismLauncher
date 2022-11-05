@@ -301,13 +301,11 @@ if(UNIX AND APPLE)
     install(FILES ${Launcher_Branding_ICNS} DESTINATION ${RESOURCES_DEST_DIR} RENAME ${Launcher_Name}.icns)
 
 elseif(UNIX)
+    include(KDEInstallDirs)
+
     set(BINARY_DEST_DIR "bin")
     set(LIBRARY_DEST_DIR "lib${LIB_SUFFIX}")
     set(JARS_DEST_DIR "share/${Launcher_APP_BINARY_NAME}")
-    set(LAUNCHER_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
-    set(LAUNCHER_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
-    set(LAUNCHER_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
-    set(LAUNCHER_MAN_DEST_DIR "share/man/man6" CACHE STRING "Path to the man page directory")
 
     # install as bundle with no dependencies included
     set(INSTALL_BUNDLE "nodeps")
@@ -315,12 +313,13 @@ elseif(UNIX)
     # Set RPATH
     SET(Launcher_BINARY_RPATH "$ORIGIN/")
 
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${LAUNCHER_ICON_DEST_DIR})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${KDE_INSTALL_APPDIR})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${KDE_INSTALL_METAINFODIR})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION "${KDE_INSTALL_ICONDIR}/hicolor/scalable/apps")
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_mrpack_MIMEInfo} DESTINATION ${KDE_INSTALL_MIMEDIR})
 
     if(Launcher_ManPage)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_ManPage} DESTINATION ${LAUNCHER_MAN_DEST_DIR})
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_ManPage} DESTINATION "${KDE_INSTALL_MANDIR}/man6")
     endif()
 
     # Install basic runner script if component "portable" is selected
