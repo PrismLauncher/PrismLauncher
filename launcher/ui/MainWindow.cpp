@@ -930,7 +930,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     {
         bool toolbarsLocked = APPLICATION->settings()->get("ToolbarsLocked").toBool();
         ui->actionLockToolbars->setChecked(toolbarsLocked);
-        connect(ui->actionLockToolbars.operator->(), SIGNAL(toggled(bool)), SLOT(lockToolbars(bool)));
+        connect(ui->actionLockToolbars, &QAction::toggled, this, &MainWindow::lockToolbars);
         lockToolbars(toolbarsLocked);
     }
     // start instance when double-clicked
