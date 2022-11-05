@@ -1920,14 +1920,15 @@ void MainWindow::on_actionClearMetadata_triggered()
 }
 
 void MainWindow::on_actionAddToPATH_triggered() {
-    auto binaryPath = APPLICATION->arguments().first();
+    auto binaryPath = APPLICATION->applicationFilePath();
 
-    auto outcome = FS::symlink(binaryPath, "/usr/local/bin/prism");
+    qDebug() << "Symlinking" << binaryPath << "to /usr/local/bin/prism";
+    auto outcome = QProcess::execute("/usr/bin/osascript", QStringList()<< "-e" << tr("do shell script \"mkdir -p /usr/local/bin && ln -sf '%1' '/usr/local/bin/prismlauncher'\" with administrator privileges").arg(binaryPath));
 
     if (!outcome) {
-        QMessageBox::critical(this, tr("Failed to add Prism to PATH"), tr(""));
+        QMessageBox::information(this, tr("Added Prism to PATH"), tr("Prism was successfully added to your PATH. You can now run it with `prismlauncher` in your Terminal. Enjoy!"));
     } else {
-        QMessageBox::information(this, tr("Added Prism to PATH"), tr("Prism was successfully added to your PATH."));
+        QMessageBox::critical(this, tr("Failed to add Prism to PATH"), tr("Failed to add Prism to PATH :("));
     }
 }
 
