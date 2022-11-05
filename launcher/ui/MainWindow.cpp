@@ -262,6 +262,8 @@ public:
     TranslatedAction actionNoAccountsAdded;
     TranslatedAction actionNoDefaultAccount;
 
+    TranslatedAction actionLockToolbars;
+
     QVector<TranslatedToolButton *> all_toolbuttons;
 
     QWidget *centralWidget = nullptr;
@@ -420,6 +422,12 @@ public:
         actionManageAccounts->setCheckable(false);
         actionManageAccounts->setIcon(APPLICATION->getThemedIcon("accounts"));
         all_actions.append(&actionManageAccounts);
+
+        actionLockToolbars = TranslatedAction(MainWindow);
+        actionLockToolbars->setObjectName(QStringLiteral("actionLockToolbars"));
+        actionLockToolbars.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Lock Toolbars"));
+        actionLockToolbars->setCheckable(true);
+        all_actions.append(&actionLockToolbars);
     }
 
     void createMainToolbar(QMainWindow *MainWindow)
@@ -427,7 +435,6 @@ public:
         mainToolBar = TranslatedToolbar(MainWindow);
         mainToolBar->setVisible(menuBar->isNativeMenuBar() || !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
-        mainToolBar->setMovable(true);
         mainToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         mainToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         mainToolBar->setFloatable(false);
@@ -524,6 +531,8 @@ public:
         viewMenu->addAction(actionCAT);
         viewMenu->addSeparator();
 
+        viewMenu->addAction(actionLockToolbars);
+
         menuBar->addMenu(foldersMenu);
 
         profileMenu = menuBar->addMenu(tr("&Accounts"));
@@ -601,7 +610,6 @@ public:
     {
         newsToolBar = TranslatedToolbar(MainWindow);
         newsToolBar->setObjectName(QStringLiteral("newsToolBar"));
-        newsToolBar->setMovable(true);
         newsToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         newsToolBar->setIconSize(QSize(16, 16));
         newsToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -736,7 +744,6 @@ public:
         instanceToolBar->setObjectName(QStringLiteral("instanceToolBar"));
         // disabled until we have an instance selected
         instanceToolBar->setEnabled(false);
-        instanceToolBar->setMovable(true);
         // Qt doesn't like vertical moving toolbars, so we have to force them...
         // See https://github.com/PolyMC/PolyMC/issues/493
         connect(instanceToolBar, &QToolBar::orientationChanged, [=](Qt::Orientation){ instanceToolBar->setOrientation(Qt::Vertical); });
@@ -918,6 +925,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         connect(ui->actionCAT.operator->(), SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
         setCatBackground(cat_enable);
     }
+
+    // Lock toolbars
+    {
+        bool toolbarsLocked = APPLICATION->settings()->get("ToolbarsLocked").toBool();
+        ui->actionLockToolbars->setChecked(toolbarsLocked);
+        connect(ui->actionLockToolbars, &QAction::toggled, this, &MainWindow::lockToolbars);
+        lockToolbars(toolbarsLocked);
+    }
     // start instance when double-clicked
     connect(view, &InstanceView::activated, this, &MainWindow::instanceActivated);
 
@@ -1073,8 +1088,19 @@ QMenu * MainWindow::createPopupMenu()
 {
     QMenu* filteredMenu = QMainWindow::createPopupMenu();
     filteredMenu->removeAction( ui->mainToolBar->toggleViewAction() );
+
+    filteredMenu->addAction(ui->actionLockToolbars);
+
     return filteredMenu;
 }
+void MainWindow::lockToolbars(bool state)
+{
+    ui->mainToolBar->setMovable(!state);
+    ui->instanceToolBar->setMovable(!state);
+    ui->newsToolBar->setMovable(!state);
+    APPLICATION->settings()->set("ToolbarsLocked", state);
+}
+
 
 void MainWindow::konamiTriggered()
 {
