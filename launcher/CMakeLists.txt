@@ -31,6 +31,8 @@ set(CORE_SOURCES
     # Basic instance manipulation tasks (derived from InstanceTask)
     InstanceCreationTask.h
     InstanceCreationTask.cpp
+    InstanceCopyPrefs.h
+    InstanceCopyPrefs.cpp
     InstanceCopyTask.h
     InstanceCopyTask.cpp
     InstanceImportTask.h
