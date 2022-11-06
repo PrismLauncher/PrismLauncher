@@ -27,16 +27,17 @@ There are development builds available [here](https://github.com/PrismLauncher/P
 
 Portable builds are provided for Linux, Windows, and macOS.
 
-For Arch, Debian and Gentoo, respectively, you can use these packages to get compiled development versions:
+For Arch, Debian, Fedora or Opensuse and Gentoo, respectively, you can use these packages to get compiled development versions:
 
-[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-blue?style=flat-square)](https://aur.archlinux.org/packages/prismlauncher-qt5-git/) [![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--qt5--git-blue?style=flat-square)](https://aur.archlinux.org/packages/prismlauncher-git/) [![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-orange?style=flat-square)](https://mpr.makedeb.org/packages/prismlauncher-git) [![prismlauncher-9999](https://img.shields.io/badge/gentoo-prismlauncher--9999-purple?style=flat-square)](https://packages.gentoo.org/packages/games-action/prismlauncher)
+[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-blue?style=flat-square)](https://aur.archlinux.org/packages/prismlauncher-qt5-git/) [![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--qt5--git-blue?style=flat-square)](https://aur.archlinux.org/packages/prismlauncher-git/) [![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-orange?style=flat-square)](https://mpr.makedeb.org/packages/prismlauncher-git) [![prismlauncher-nightly](https://img.shields.io/badge/copr-prismlauncher--nightly-blue?style=flat-square)](https://copr.fedorainfracloud.org/coprs/g3tchoo/prismlauncher/) [![prismlauncher-9999](https://img.shields.io/badge/gentoo-prismlauncher--9999-purple?style=flat-square)](https://packages.gentoo.org/packages/games-action/prismlauncher)
 
-## Help & Support
+## Community & Support
 
 Feel free to create an issue if you need help.
+We have multiple communities that can help you.
 
 #### Join our Discord server:
-[![Prism Launcher Discord server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner3)](https://discord.gg/prismlauncher)
+[![Prism Launcher Discord server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner2)](https://discord.gg/prismlauncher)
 
 #### Join our Matrix space:
 [![PrismLauncher Space](https://img.shields.io/matrix/prismlauncher:matrix.org?style=for-the-badge)](https://matrix.to/#/#prismlauncher:matrix.org)
