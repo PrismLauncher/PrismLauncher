@@ -17,6 +17,11 @@ set(SRC
     org/prismlauncher/utils/Parameters.java
     org/prismlauncher/utils/Utils.java
     net/minecraft/Launcher.java
+    org/prismlauncher/log4jinjector/Log4JInjector20.java
 )
-add_jar(NewLaunch ${SRC})
+add_jar(
+        NewLaunch ${SRC}
+        INCLUDE_JARS ${CMAKE_CURRENT_SOURCE_DIR}/compilelibs/log4j-api-2.0-beta9-fixed.jar
+        ${CMAKE_CURRENT_SOURCE_DIR}/compilelibs/log4j-core-2.0-beta9-fixed.jar
+)
 install_jar(NewLaunch "${JARS_DEST_DIR}")
