@@ -312,5 +312,13 @@
         <file>scalable/instances/fox.svg</file>
         <file>scalable/instances/bee.svg</file>
         <file>scalable/instances/prismlauncher.svg</file>
+
+        <!-- delete, tag, rename CC-BY-SA 3.0, Oxygen icons.-->
+        <file>scalable/delete.svg</file>
+        <file>scalable/tag.svg</file>
+        <file>scalable/rename.svg</file>
+
+        <file>scalable/export.svg</file>
+        <file>scalable/launch.svg</file>
     </qresource>
 </RCC>
