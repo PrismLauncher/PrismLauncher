@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
@@ -84,6 +84,7 @@ void FlameModPage::openUrl(const QUrl& url)
 {
     if (url.scheme().isEmpty()) {
         QString query = url.query(QUrl::FullyDecoded);
+
         if (query.startsWith("remoteUrl=")) {
             // attempt to resolve url from warning page
             query.remove(0, 10);

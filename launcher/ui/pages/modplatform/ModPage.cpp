@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
@@ -43,6 +43,7 @@
 #include <memory>
 
 #include <HoeDown.h>
+#include <qregularexpression.h>
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
@@ -254,32 +255,25 @@ void ModPage::openUrl(const QUrl& url)
     }
 
     // detect mod URLs and search instead
-    int prefixLength = 0;
+    static const QRegularExpression modrinth(QRegularExpression::anchoredPattern("(?:www\\.)?modrinth\\.com\\/mod\\/([^\\/]+)\\/?")),
+        curseForge(QRegularExpression::anchoredPattern("(?:www\\.)?curseforge\\.com\\/minecraft\\/mc-mods\\/([^\\/]+)\\/?")),
+        curseForgeOld(QRegularExpression::anchoredPattern("minecraft\\.curseforge\\.com\\/projects\\/([^\\/]+)\\/?"));
+
+    const QString address = url.host() + url.path();
+    QRegularExpressionMatch match;
     const char* page;
 
-    if ((url.host() == "modrinth.com" || url.host() == "www.modrinth.com") && url.path().startsWith("/mod/")) {
-        prefixLength = 5;
+    if ((match = modrinth.match(address)).hasMatch())
         page = "modrinth";
-    } else if (APPLICATION->capabilities() & Application::SupportsFlame &&
-               (url.host() == "curseforge.com" || url.host().endsWith(".curseforge.com"))) {
-        if (url.path().toLower().startsWith("/minecraft/mc-mods/"))
-            prefixLength = 19;
-        else if (url.path().toLower().startsWith("/projects/"))
-            prefixLength = 10;
+    else if (APPLICATION->capabilities() & Application::SupportsFlame &&
+               ((match = curseForge.match(address)).hasMatch() || (match = curseForgeOld.match(address)).hasMatch()))
         page = "curseforge";
-    }
 
-    if (prefixLength != 0) {
-        QString slug = url.path().mid(prefixLength);
+    if (match.hasMatch()) {
+        const QString slug = match.captured(1);
 
-        // remove trailing slash(es)
-        while (slug.endsWith('/'))
-            slug.remove(slug.length() - 1, 1);
-
-        // ensure that the path doesn't contain any further slashes,
-        // and the user isn't opening the same mod; they probably
-        // intended to view in their web browser
-        if (!slug.isEmpty() && !slug.contains('/') && slug != current.slug) {
+        // ensure the user isn't opening the same mod
+        if (slug != current.slug) {
             dialog->selectPage(page);
 
             ModPage* newPage = dialog->getSelectedPage();
@@ -290,8 +284,8 @@ void ModPage::openUrl(const QUrl& url)
 
             auto jump = [url, slug, model, view] {
                 for (int row = 0; row < model->rowCount({}); row++) {
-                    QModelIndex index = model->index(row);
-                    auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+                    const QModelIndex index = model->index(row);
+                    const auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
 
                     if (pack.slug == slug) {
                         view->setCurrentIndex(index);
@@ -306,10 +300,10 @@ void ModPage::openUrl(const QUrl& url)
             searchEdit->setText(slug);
             newPage->triggerSearch();
 
-            if (!model->activeJob())
-                jump();
-            else
+            if (model->activeJob())
                 connect(model->activeJob(), &Task::finished, jump);
+            else
+                jump();
 
             return;
         }
