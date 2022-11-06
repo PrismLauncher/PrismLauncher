@@ -1590,8 +1590,8 @@ void MainWindow::setCatBackground(bool enabled)
         QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
         if (non_stupid_abs(now.daysTo(xmas)) <= 4) {
             cat += "-xmas";
-        } else if (cat == "kitteh" && non_stupid_abs(now.daysTo(halloween)) <= 4) {
-            cat += "-ween";
+        } else if (non_stupid_abs(now.daysTo(halloween)) <= 4) {
+            cat += "-spooky";
         } else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
             cat += "-bday";
         }
