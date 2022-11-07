@@ -67,5 +67,5 @@ body:
   attributes:
     label: This issue occurs on at least the latest stable release
     options:
-    - label: This issue occurs on at least the latest stable version of Prism Launcher
+    - label: I've tried reproducing this issue on the latest stable release.
       required: true
