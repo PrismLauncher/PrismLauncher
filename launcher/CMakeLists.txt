@@ -1066,7 +1066,7 @@ if(INSTALL_BUNDLE STREQUAL "full")
     # Image formats
     install(
         DIRECTORY "${QT_PLUGINS_DIR}/imageformats"
-        CONFIGURATIONS Debug RelWithDebInfo
+        CONFIGURATIONS Debug RelWithDebInfo ""
         DESTINATION ${PLUGIN_DEST_DIR}
         COMPONENT Runtime
         REGEX "tga|tiff|mng" EXCLUDE
@@ -1084,7 +1084,7 @@ if(INSTALL_BUNDLE STREQUAL "full")
     # Icon engines
     install(
         DIRECTORY "${QT_PLUGINS_DIR}/iconengines"
-        CONFIGURATIONS Debug RelWithDebInfo
+        CONFIGURATIONS Debug RelWithDebInfo ""
         DESTINATION ${PLUGIN_DEST_DIR}
         COMPONENT Runtime
         REGEX "fontawesome" EXCLUDE
@@ -1102,7 +1102,7 @@ if(INSTALL_BUNDLE STREQUAL "full")
     # Platform plugins
     install(
         DIRECTORY "${QT_PLUGINS_DIR}/platforms"
-        CONFIGURATIONS Debug RelWithDebInfo
+        CONFIGURATIONS Debug RelWithDebInfo ""
         DESTINATION ${PLUGIN_DEST_DIR}
         COMPONENT Runtime
         REGEX "minimal|linuxfb|offscreen" EXCLUDE
@@ -1121,7 +1121,7 @@ if(INSTALL_BUNDLE STREQUAL "full")
     if(EXISTS "${QT_PLUGINS_DIR}/styles")
         install(
             DIRECTORY "${QT_PLUGINS_DIR}/styles"
-            CONFIGURATIONS Debug RelWithDebInfo
+            CONFIGURATIONS Debug RelWithDebInfo ""
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
         )
@@ -1139,7 +1139,7 @@ if(INSTALL_BUNDLE STREQUAL "full")
     if(EXISTS "${QT_PLUGINS_DIR}/tls")
         install(
             DIRECTORY "${QT_PLUGINS_DIR}/tls"
-            CONFIGURATIONS Debug RelWithDebInfo
+            CONFIGURATIONS Debug RelWithDebInfo ""
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
         )
