@@ -34,7 +34,7 @@ body:
   attributes:
     label: I've tried reproducing this issue on the latest stable release.
     options:
-    - label: I've tried reproducing this issue on the latest stable release
+    - label: This bug occurs on the latest stable release.
       required: true
 - type: input
   attributes:
