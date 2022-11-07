@@ -32,7 +32,7 @@ body:
     required: true
 - type: checkboxes
   attributes:
-    label: I've tried reproducing this issue on the latest stable release.
+    label: I've tried reproducing this issue on the latest stable release
     options:
     - label: I've tried reproducing this issue on the latest stable release.
       required: true
