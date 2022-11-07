@@ -23,18 +23,18 @@ body:
     - macOS
     - Linux
     - Other
-- type: textarea
+- type: input
   attributes:
     label: Version of Prism Launcher
     description: The version of Prism Launcher used in the bug report.
-    placeholder: Prism Launcher 5.0
+    placeholder: Prism Launcher 5.1
   validations:
     required: true
-- type: textarea
+- type: input
   attributes:
     label: Version of Qt
     description: The version of Qt used in the bug report. You can find it in Help -> About Prism Launcher -> About Qt.
-    placeholder: Qt 6.3.0
+    placeholder: Qt 6.4.0
   validations:
     required: true
 - type: textarea
