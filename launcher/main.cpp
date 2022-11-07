@@ -91,5 +91,7 @@ int main(int argc, char *argv[])
         return 1;
     case Application::Succeeded:
         return 0;
+    default:
+        return -1;
     }
 }
