@@ -30,6 +30,12 @@ body:
     placeholder: Prism Launcher 5.1
   validations:
     required: true
+- type: checkboxes
+  attributes:
+    label: I've tried reproducing this issue on the latest stable release.
+    options:
+    - label: I've tried reproducing this issue on the latest stable release.
+      required: true
 - type: input
   attributes:
     label: Version of Qt
@@ -62,10 +68,4 @@ body:
     label: This issue is unique
     options:
     - label: I have searched the issue tracker and did not find an issue describing my bug.
-      required: true
-- type: checkboxes
-  attributes:
-    label: I've tried reproducing this issue on the latest stable release.
-    options:
-    - label: I've tried reproducing this issue on the latest stable release.
       required: true
