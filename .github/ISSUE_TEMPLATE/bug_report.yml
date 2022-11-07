@@ -63,3 +63,9 @@ body:
     options:
     - label: I have searched the issue tracker and did not find an issue describing my bug.
       required: true
+- type: checkboxes
+  attributes:
+    label: This issue occurs on at least the latest stable release
+    options:
+    - label: This issue occurs on at least the latest stable version of Prism Launcher
+      required: true
