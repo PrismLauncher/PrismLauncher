@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher
- *
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
@@ -62,8 +61,10 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
+
+import org.prismlauncher.utils.logging.Log;
 
 /**
  * WARNING: This class is reflectively accessed by legacy Forge versions.
@@ -75,7 +76,7 @@ public final class Launcher extends Applet implements AppletStub {
 
     private static final long serialVersionUID = 1L;
 
-    private final Map<String, String> params = new TreeMap<>();
+    private final Map<String, String> params = new HashMap<>();
 
     private Applet wrappedApplet;
     private final URL documentBase;
@@ -88,75 +89,75 @@ public final class Launcher extends Applet implements AppletStub {
     public Launcher(Applet applet, URL documentBase) {
         setLayout(new BorderLayout());
 
-        this.add(applet, "Center");
+        add(applet, "Center");
 
         wrappedApplet = applet;
 
         try {
-            if (documentBase != null) {
-                this.documentBase = documentBase;
-            } else if (applet.getClass().getPackage().getName().startsWith("com.mojang.")) {
-                // Special case only for Classic versions
-
-                // TODO: 2022-10-27 Can this be changed to https
-                this.documentBase = new URL("http", "www.minecraft.net", 80, "/game/");
-            } else {
-                // TODO: 2022-10-27 Can this be changed to https?
-                this.documentBase = new URL("http://www.minecraft.net/game/");
+            if (documentBase == null) {
+                if (applet.getClass().getPackage().getName().startsWith("com.mojang.")) {
+                    // Special case only for Classic versions
+                    documentBase = new URL("http", "www.minecraft.net", 80, "/game/");
+                } else {
+                    documentBase = new URL("http://www.minecraft.net/game/");
+                }
             }
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            // handle gracefully - it won't happen, but Java requires that it is caught
+            Log.error("Failed to parse document base URL", e);
         }
+
+        this.documentBase = documentBase;
     }
 
     public void replace(Applet applet) {
         wrappedApplet = applet;
 
         applet.setStub(this);
-        applet.setSize(this.getWidth(), this.getHeight());
+        applet.setSize(getWidth(), getHeight());
 
         setLayout(new BorderLayout());
-        this.add(applet, "Center");
+        add(applet, "Center");
 
         applet.init();
 
-        this.active = true;
+        active = true;
 
         applet.start();
 
-        this.validate();
+        validate();
     }
 
     @Override
     public boolean isActive() {
-        return this.active;
+        return active;
     }
 
     @Override
     public URL getDocumentBase() {
-        return this.documentBase;
+        return documentBase;
     }
 
     @Override
     public URL getCodeBase() {
         try {
-            // TODO: 2022-10-27 Can this be changed to https?
             return new URL("http://www.minecraft.net/game/");
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            Log.error("Failed to parse codebase URL", e);
+            return null;
         }
     }
 
     @Override
-    public String getParameter(String name) {
-        String param = this.params.get(name);
+    public String getParameter(String key) {
+        String param = params.get(key);
 
         if (param != null)
             return param;
 
         try {
-            return super.getParameter(name);
-        } catch (Exception ignored) {
+            return super.getParameter(key);
+        } catch (Throwable ignored) {
         }
 
         return null;
@@ -164,49 +165,49 @@ public final class Launcher extends Applet implements AppletStub {
 
     @Override
     public void resize(int width, int height) {
-        this.wrappedApplet.resize(width, height);
+        wrappedApplet.resize(width, height);
     }
 
     @Override
     public void resize(Dimension size) {
-        this.wrappedApplet.resize(size);
+        wrappedApplet.resize(size);
     }
 
     @Override
     public void init() {
-        if (this.wrappedApplet != null)
-            this.wrappedApplet.init();
+        if (wrappedApplet != null)
+            wrappedApplet.init();
     }
 
     @Override
     public void start() {
-        this.wrappedApplet.start();
+        wrappedApplet.start();
 
-        this.active = true;
+        active = true;
     }
 
     @Override
     public void stop() {
-        this.wrappedApplet.stop();
+        wrappedApplet.stop();
 
-        this.active = false;
+        active = false;
     }
 
     @Override
     public void destroy() {
-        this.wrappedApplet.destroy();
+        wrappedApplet.destroy();
     }
 
     @Override
     public void appletResize(int width, int height) {
-        this.wrappedApplet.resize(width, height);
+        wrappedApplet.resize(width, height);
     }
 
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
 
-        this.wrappedApplet.setVisible(visible);
+        wrappedApplet.setVisible(visible);
     }
 
     @Override
@@ -217,8 +218,12 @@ public final class Launcher extends Applet implements AppletStub {
     public void update(Graphics graphics) {
     }
 
-    public void setParameter(String name, String value) {
-        this.params.put(name, value);
+    public void setParameter(String key, String value) {
+        params.put(key, value);
+    }
+
+    public void setParameter(String key, boolean value) {
+        setParameter(key, value ? "true" : "false");
     }
 
 }

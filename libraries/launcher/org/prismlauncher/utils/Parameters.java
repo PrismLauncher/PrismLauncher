@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher
- *
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
@@ -55,40 +54,40 @@
 
 package org.prismlauncher.utils;
 
-import org.prismlauncher.exception.ParameterNotFoundException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.prismlauncher.exception.ParameterNotFoundException;
 
 public final class Parameters {
 
     private final Map<String, List<String>> map = new HashMap<>();
 
     public void add(String key, String value) {
-        List<String> params = this.map.get(key);
+        List<String> params = map.get(key);
 
         if (params == null) {
             params = new ArrayList<>();
 
-            this.map.put(key, params);
+            map.put(key, params);
         }
 
         params.add(value);
     }
 
     public List<String> getList(String key) throws ParameterNotFoundException {
-        List<String> params = this.map.get(key);
+        List<String> params = map.get(key);
 
         if (params == null)
-            throw ParameterNotFoundException.forParameterName(key);
+            throw new ParameterNotFoundException(key);
 
         return params;
     }
 
     public List<String> getList(String key, List<String> def) {
-        List<String> params = this.map.get(key);
+        List<String> params = map.get(key);
 
         if (params == null || params.isEmpty())
             return def;
@@ -97,16 +96,16 @@ public final class Parameters {
     }
 
     public String getString(String key) throws ParameterNotFoundException {
-        List<String> list = this.getList(key);
+        List<String> list = getList(key);
 
         if (list.isEmpty())
-            throw ParameterNotFoundException.forParameterName(key);
+            throw new ParameterNotFoundException(key);
 
         return list.get(0);
     }
 
     public String getString(String key, String def) {
-        List<String> params = this.map.get(key);
+        List<String> params = map.get(key);
 
         if (params == null || params.isEmpty())
             return def;

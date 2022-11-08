@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher
- *
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
@@ -55,21 +54,20 @@
 
 package org.prismlauncher.launcher.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class AbstractLauncher implements Launcher {
 
-    private static final int DEFAULT_WINDOW_WIDTH = 854;
-    private static final int DEFAULT_WINDOW_HEIGHT = 480;
+    private static final int DEFAULT_WINDOW_WIDTH = 854, DEFAULT_WINDOW_HEIGHT = 480;
 
     // parameters, separated from ParamBucket
-    protected final List<String> mcParams;
+    protected final List<String> gameArgs;
 
     // secondary parameters
     protected final int width, height;
@@ -79,34 +77,34 @@ public abstract class AbstractLauncher implements Launcher {
     protected final String mainClassName;
 
     protected AbstractLauncher(Parameters params) {
-        this.mcParams = params.getList("param", new ArrayList<String>());
-        this.mainClassName = params.getString("mainClass", "net.minecraft.client.Minecraft");
+        gameArgs = params.getList("param", new ArrayList<String>());
+        mainClassName = params.getString("mainClass", "net.minecraft.client.Minecraft");
 
-        this.serverAddress = params.getString("serverAddress", null);
-        this.serverPort = params.getString("serverPort", null);
+        serverAddress = params.getString("serverAddress", null);
+        serverPort = params.getString("serverPort", null);
 
         String windowParams = params.getString("windowParams", null);
 
-        this.maximize = "max".equalsIgnoreCase(windowParams);
+        if ("max".equals(windowParams) || windowParams == null) {
+            maximize = windowParams != null;
 
-        if (windowParams != null && !"max".equalsIgnoreCase(windowParams)) {
+            width = DEFAULT_WINDOW_WIDTH;
+            height = DEFAULT_WINDOW_HEIGHT;
+        } else {
+            maximize = false;
+
             String[] sizePair = StringUtils.splitStringPair('x', windowParams);
 
             if (sizePair != null) {
                 try {
-                    this.width = Integer.parseInt(sizePair[0]);
-                    this.height = Integer.parseInt(sizePair[1]);
-                } catch (NumberFormatException e) {
-                    throw new ParseException(String.format("Could not parse window parameters from '%s'", windowParams),
-                            e);
+                    width = Integer.parseInt(sizePair[0]);
+                    height = Integer.parseInt(sizePair[1]);
+                    return;
+                } catch (NumberFormatException ignored) {
                 }
-            } else {
-                throw new ParseException(
-                        String.format("Invalid window size parameters '%s'. Format: [height]x[width]", windowParams));
             }
-        } else {
-            this.width = DEFAULT_WINDOW_WIDTH;
-            this.height = DEFAULT_WINDOW_HEIGHT;
+
+            throw new ParseException(windowParams, "[width]x[height]");
         }
     }
 

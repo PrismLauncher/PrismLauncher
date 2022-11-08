@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -44,36 +44,11 @@ import java.io.PrintStream;
  */
 public final class Log {
 
-    private static final PrintStream ERROR_PREFIX = new PrintStream(System.err) {
-        @Override
-        public void println(String x) {
-            error(x);
-        }
-
-        @Override
-        public void println(Object x) {
-            error(String.valueOf(x));
-        }
-    }, FATAL_PREFIX = new PrintStream(System.err) {
-        @Override
-        public void println(String x) {
-            fatal(x);
-        }
-
-        @Override
-        public void println(Object x) {
-            fatal(String.valueOf(x));
-        }
-    };
-
+    // original before overridden
+    private static final PrintStream OUT = new PrintStream(System.out), ERR = new PrintStream(System.err);
+    private static final PrintStream ERROR_PREFIX = new LogPrintStream(System.err, Level.ERROR),
+            FATAL_PREFIX = new LogPrintStream(System.err, Level.FATAL);
     private static final boolean DEBUG = Boolean.getBoolean("org.prismlauncher.debug");
-
-    private Log() {
-    }
-
-    public static void blankLine() {
-        System.out.println();
-    }
 
     public static void launcher(String message) {
         log(message, Level.LAUNCHER);
@@ -84,14 +59,7 @@ public final class Log {
     }
 
     public static void debug(String message) {
-        if (!DEBUG)
-            return;
-
         log(message, Level.DEBUG);
-    }
-
-    public static void info(String message) {
-        log(message, Level.INFO);
     }
 
     public static void warning(String message) {
@@ -113,12 +81,16 @@ public final class Log {
     }
 
     /**
-     * Logs a message with the prefix !![LEVEL]!.
+     * Logs a message with the prefix <code>!![LEVEL]!</code>. This is picked up by
+     * the log viewer to give it nice colours.
      *
      * @param message The message
      * @param level   The level
      */
     public static void log(String message, Level level) {
+        if (!DEBUG && level == Level.DEBUG)
+            return;
+
         String prefix = "!![" + level.name + "]!";
         // prefix first line
         message = prefix + message;
@@ -126,9 +98,9 @@ public final class Log {
         message = message.replace("\n", "\n" + prefix);
 
         if (level.stderr)
-            System.err.println(message);
+            ERR.println(message);
         else
-            System.out.println(message);
+            OUT.println(message);
     }
 
 }

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher
- *
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
@@ -56,7 +55,6 @@
 package org.prismlauncher;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
@@ -70,63 +68,40 @@ import org.prismlauncher.utils.logging.Log;
 
 public final class EntryPoint {
 
-    private EntryPoint() {
-    }
-
     public static void main(String[] args) {
-        ExitCode exitCode = listen();
+        ExitCode code = listen();
 
-        if (exitCode != ExitCode.NORMAL) {
-            Log.fatal("Exiting with " + exitCode);
+        if (code != ExitCode.NORMAL) {
+            Log.fatal("Exiting with " + code);
 
-            System.exit(exitCode.numericalCode);
-        }
-    }
-
-    private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException {
-        if (input.isEmpty())
-            return PreLaunchAction.PROCEED;
-
-        if ("launch".equalsIgnoreCase(input))
-            return PreLaunchAction.LAUNCH;
-        else if ("abort".equalsIgnoreCase(input))
-            return PreLaunchAction.ABORT;
-        else {
-            String[] pair = StringUtils.splitStringPair(' ', input);
-
-            if (pair == null)
-                throw new ParseException(String.format(
-                        "Could not split input string '%s' by space. All input provided from stdin must be either 'launch', 'abort', or "
-                                + "in the format '[param name] [param]'.",
-                        input));
-
-            params.add(pair[0], pair[1]);
-
-            return PreLaunchAction.PROCEED;
+            System.exit(code.numeric);
         }
     }
 
     private static ExitCode listen() {
-        Parameters parameters = new Parameters();
-        PreLaunchAction preLaunchAction = PreLaunchAction.PROCEED;
+        Parameters params = new Parameters();
+        PreLaunchAction action = PreLaunchAction.PROCEED;
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
             String line;
 
-            while (preLaunchAction == PreLaunchAction.PROCEED) {
+            while (action == PreLaunchAction.PROCEED) {
                 if ((line = reader.readLine()) != null)
-                    preLaunchAction = parseLine(line, parameters);
+                    action = parseLine(line, params);
                 else
-                    preLaunchAction = PreLaunchAction.ABORT;
+                    action = PreLaunchAction.ABORT;
             }
-        } catch (IOException | ParseException e) {
-            Log.fatal("Launcher abort due to exception", e);
+        } catch (IllegalArgumentException e) {
+            Log.fatal("Aborting due to wrong argument", e);
 
             return ExitCode.ILLEGAL_ARGUMENT;
+        } catch (Throwable e) {
+            Log.fatal("Aborting due to exception", e);
+
+            return ExitCode.ABORT;
         }
 
-        // Main loop
-        if (preLaunchAction == PreLaunchAction.ABORT) {
+        if (action == PreLaunchAction.ABORT) {
             Log.fatal("Launch aborted by the launcher");
 
             return ExitCode.ABORT;
@@ -134,38 +109,56 @@ public final class EntryPoint {
 
         try {
             Launcher launcher;
-            String type = parameters.getString("launcher");
+            String type = params.getString("launcher");
 
             switch (type) {
                 case "standard":
-                    launcher = new StandardLauncher(parameters);
+                    launcher = new StandardLauncher(params);
                     break;
+
                 case "legacy":
-                    launcher = new LegacyLauncher(parameters);
+                    launcher = new LegacyLauncher(params);
                     break;
+
                 default:
                     throw new IllegalArgumentException("Invalid launcher type: " + type);
             }
-
-            Log.launcher("Using " + type + " launcher");
-            Log.blankLine();
 
             launcher.launch();
 
             return ExitCode.NORMAL;
         } catch (IllegalArgumentException e) {
-            Log.fatal("Wrong argument", e);
+            Log.fatal("Illegal argument", e);
 
             return ExitCode.ILLEGAL_ARGUMENT;
-        } catch (ReflectiveOperationException e) {
-            Log.fatal("Caught reflection exception from launcher", e);
-
-            return ExitCode.ERROR;
         } catch (Throwable e) {
             Log.fatal("Exception caught from launcher", e);
 
             return ExitCode.ERROR;
         }
+    }
+
+    private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException {
+        switch (input) {
+            case "":
+                break;
+
+            case "launch":
+                return PreLaunchAction.LAUNCH;
+
+            case "abort":
+                return PreLaunchAction.ABORT;
+
+            default:
+                String[] pair = StringUtils.splitStringPair(' ', input);
+
+                if (pair == null)
+                    throw new ParseException(input, "[key] [value]");
+
+                params.add(pair[0], pair[1]);
+        }
+
+        return PreLaunchAction.PROCEED;
     }
 
     private enum PreLaunchAction {
@@ -175,10 +168,10 @@ public final class EntryPoint {
     private enum ExitCode {
         NORMAL(0), ABORT(1), ERROR(2), ILLEGAL_ARGUMENT(65);
 
-        private final int numericalCode;
+        private final int numeric;
 
-        ExitCode(int numericalCode) {
-            this.numericalCode = numericalCode;
+        ExitCode(int numeric) {
+            this.numeric = numeric;
         }
 
     }

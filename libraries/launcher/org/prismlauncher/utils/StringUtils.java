@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher
- *
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -38,15 +37,13 @@ package org.prismlauncher.utils;
 
 public final class StringUtils {
 
-    private StringUtils() {
-    }
+    public static String[] splitStringPair(char splitChar, String str) {
+        int splitPoint = str.indexOf(splitChar);
 
-    public static String[] splitStringPair(char splitChar, String input) {
-        int splitPoint = input.indexOf(splitChar);
         if (splitPoint == -1)
             return null;
 
-        return new String[] { input.substring(0, splitPoint), input.substring(splitPoint + 1) };
+        return new String[] { str.substring(0, splitPoint), str.substring(splitPoint + 1) };
     }
 
 }

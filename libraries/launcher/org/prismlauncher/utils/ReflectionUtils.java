@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher
- *
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
  *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
@@ -67,68 +66,57 @@ import org.prismlauncher.utils.logging.Log;
 
 public final class ReflectionUtils {
 
-    private ReflectionUtils() {
-    }
+    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
+    private static final ClassLoader LOADER = ClassLoader.getSystemClassLoader();
 
     /**
-     * Instantiate an applet class by name
+     * Construct a Java applet by its class name.
      *
-     * @param appletClassName The name of the applet class to resolve
-     *
-     * @return The instantiated applet class
-     *
-     * @throws ClassNotFoundException if the provided class name cannot be found
-     * @throws NoSuchMethodException  if the no-args constructor cannot be found
-     * @throws IllegalAccessException if the constructor cannot be accessed via
-     *                                method handles
-     * @throws Throwable              any exceptions from the class's constructor
+     * @param clazz The class name
+     * @return The applet instance
+     * @throws Throwable
      */
-    public static Applet createAppletClass(String appletClassName) throws Throwable {
-        Class<?> appletClass = ClassLoader.getSystemClassLoader().loadClass(appletClassName);
+    public static Applet createAppletClass(String clazz) throws Throwable {
+        Class<?> appletClass = LOADER.loadClass(clazz);
 
-        MethodHandle appletConstructor = MethodHandles.lookup().findConstructor(appletClass,
-                MethodType.methodType(void.class));
+        MethodHandle appletConstructor = LOOKUP.findConstructor(appletClass, MethodType.methodType(void.class));
         return (Applet) appletConstructor.invoke();
     }
 
     /**
-     * Finds a field that looks like a Minecraft base folder in a supplied class
+     * Best guess of the game directory field within net.minecraft.client.Minecraft.
+     * Designed for legacy versions - newer versions do not use a static field.
      *
-     * @param minecraftMainClass the class to scan
-     *
-     * @return The found field.
+     * @param clazz The class
+     * @return The first field matching criteria
      */
-    public static Field getMinecraftGameDirField(Class<?> minecraftMainClass) {
+    public static Field findMinecraftGameDirField(Class<?> clazz) {
         Log.debug("Resolving minecraft game directory field");
-        // Field we're looking for is always
-        // private static File obfuscatedName = null;
-        for (Field field : minecraftMainClass.getDeclaredFields()) {
-            // Has to be File
+
+        // search for private static File
+        for (Field field : clazz.getDeclaredFields()) {
             if (field.getType() != File.class) {
                 continue;
             }
 
             int fieldModifiers = field.getModifiers();
 
-            // Must be static
             if (!Modifier.isStatic(fieldModifiers)) {
                 Log.debug("Rejecting field " + field.getName() + " because it is not static");
                 continue;
             }
 
-            // Must be private
             if (!Modifier.isPrivate(fieldModifiers)) {
                 Log.debug("Rejecting field " + field.getName() + " because it is not private");
                 continue;
             }
 
-            // Must not be final
             if (Modifier.isFinal(fieldModifiers)) {
                 Log.debug("Rejecting field " + field.getName() + " because it is final");
                 continue;
             }
 
-            Log.debug("Identified field " + field.getName() + " to match conditions for minecraft game directory field");
+            Log.debug("Identified field " + field.getName() + " to match conditions for game directory field");
 
             return field;
         }
@@ -137,51 +125,30 @@ public final class ReflectionUtils {
     }
 
     /**
-     * Resolve main entrypoint and returns method handle for it.
-     * <p>
-     * Resolves a method that matches the following signature <code>
-     * public static void main(String[] args) {
-     * <p>
-     * }
-     * </code>
+     * Gets the main method within a class.
      *
-     * @param entrypointClass The entrypoint class to resolve the method from
-     *
-     * @return The method handle for the resolved entrypoint
-     *
-     * @throws NoSuchMethodException  If no method matching the correct signature
-     *                                can be found
-     * @throws IllegalAccessException If method handles cannot access the entrypoint
+     * @param clazz The class
+     * @return A method matching the descriptor of a main method
+     * @throws ClassNotFoundException
+     * @throws NoSuchMethodException
+     * @throws IllegalAccessException
      */
-    public static MethodHandle findMainEntrypoint(Class<?> entrypointClass)
-            throws NoSuchMethodException, IllegalAccessException {
-        return MethodHandles.lookup().findStatic(entrypointClass, "main",
-                MethodType.methodType(void.class, String[].class));
+    public static MethodHandle findMainMethod(Class<?> clazz) throws NoSuchMethodException, IllegalAccessException {
+        return LOOKUP.findStatic(clazz, "main", MethodType.methodType(void.class, String[].class));
     }
 
     /**
-     * Resolve main entrypoint and returns method handle for it.
-     * <p>
-     * Resolves a method that matches the following signature <code>
-     * public static void main(String[] args) {
-     * <p>
-     * }
-     * </code>
+     * Gets the main method within a class by its name.
      *
-     * @param entrypointClassName The name of the entrypoint class to resolve the
-     *                            method from
-     *
-     * @return The method handle for the resolved entrypoint
-     *
-     * @throws ClassNotFoundException If a class cannot be found with the provided
-     *                                name
-     * @throws NoSuchMethodException  If no method matching the correct signature
-     *                                can be found
-     * @throws IllegalAccessException If method handles cannot access the entrypoint
+     * @param clazz The class name
+     * @return A method matching the descriptor of a main method
+     * @throws ClassNotFoundException
+     * @throws NoSuchMethodException
+     * @throws IllegalAccessException
      */
-    public static MethodHandle findMainMethod(String entrypointClassName)
+    public static MethodHandle findMainMethod(String clazz)
             throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException {
-        return findMainEntrypoint(ClassLoader.getSystemClassLoader().loadClass(entrypointClassName));
+        return findMainMethod(LOADER.loadClass(clazz));
     }
 
 }

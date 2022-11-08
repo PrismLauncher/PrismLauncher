@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
@@ -438,6 +438,17 @@ QStringList MinecraftInstance::javaArguments()
     return args;
 }
 
+QString MinecraftInstance::getLauncher()
+{
+    auto profile = m_components->getProfile();
+
+    // use legacy launcher if the traits are set
+    if (profile->getTraits().contains("legacyLaunch") || profile->getTraits().contains("alphaLaunch"))
+        return "legacy";
+
+    return "standard";
+}
+
 QMap<QString, QString> MinecraftInstance::getVariables()
 {
     QMap<QString, QString> out;
@@ -634,15 +645,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
         launchScript += "traits " + trait + "\n";
     }
 
-    launchScript += "launcher ";
-
-    // use legacy launcher if the traits are set
-    if (profile->getTraits().contains("legacyLaunch") || profile->getTraits().contains("alphaLaunch"))
-        launchScript += "legacy";
-    else
-        launchScript += "standard";
-
-    launchScript += "\n";
+    launchScript += "launcher " + getLauncher() + "\n";
 
     // qDebug() << "Generated launch script:" << launchScript;
     return launchScript;
@@ -778,6 +781,8 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
         auto height = settings->get("MinecraftWinHeight").toInt();
         out << "Window size: " + QString::number(width) + " x " + QString::number(height);
     }
+    out << "";
+    out << "Launcher: " + getLauncher();
     out << "";
     return out;
 }

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher
- *
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
@@ -55,10 +54,10 @@
 
 package org.prismlauncher.launcher.impl;
 
+import java.lang.invoke.MethodHandle;
+
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.ReflectionUtils;
-
-import java.lang.invoke.MethodHandle;
 
 public final class StandardLauncher extends AbstractLauncher {
 
@@ -69,27 +68,24 @@ public final class StandardLauncher extends AbstractLauncher {
     @Override
     public void launch() throws Throwable {
         // window size, title and state
-
-        // FIXME: there is no good way to maximize the minecraft window from here.
-        // the following often breaks linux screen setups
-        // mcparams.add("--fullscreen");
-
-        if (!this.maximize) {
-            this.mcParams.add("--width");
-            this.mcParams.add(Integer.toString(this.width));
-            this.mcParams.add("--height");
-            this.mcParams.add(Integer.toString(this.height));
+        // FIXME doesn't support maximisation
+        if (!maximize) {
+            gameArgs.add("--width");
+            gameArgs.add(Integer.toString(width));
+            gameArgs.add("--height");
+            gameArgs.add(Integer.toString(height));
         }
 
-        if (this.serverAddress != null) {
-            this.mcParams.add("--server");
-            this.mcParams.add(this.serverAddress);
-            this.mcParams.add("--port");
-            this.mcParams.add(this.serverPort);
+        if (serverAddress != null) {
+            gameArgs.add("--server");
+            gameArgs.add(serverAddress);
+            gameArgs.add("--port");
+            gameArgs.add(serverPort);
         }
 
-        MethodHandle method = ReflectionUtils.findMainMethod(this.mainClassName);
-        method.invokeExact(this.mcParams.toArray(new String[0]));
+        // find and invoke the main method
+        MethodHandle method = ReflectionUtils.findMainMethod(mainClassName);
+        method.invokeExact(gameArgs.toArray(new String[0]));
     }
 
 }

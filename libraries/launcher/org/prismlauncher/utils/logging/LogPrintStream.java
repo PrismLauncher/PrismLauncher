@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
- *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,10 +33,67 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.launcher;
+package org.prismlauncher.utils.logging;
 
-public interface Launcher {
+import java.io.OutputStream;
+import java.io.PrintStream;
 
-    void launch() throws Throwable;
+/**
+ * Used to create a print stream that redirects to Log.
+ */
+final class LogPrintStream extends PrintStream {
+
+    private final Level level;
+
+    public LogPrintStream(OutputStream out, Level level) {
+        super(out);
+
+        this.level = level;
+    }
+
+    @Override
+    public void println(String x) {
+        Log.log(x, level);
+    }
+
+    @Override
+    public void println(Object x) {
+        println(String.valueOf(x));
+    }
+
+    @Override
+    public void println(boolean x) {
+        println(String.valueOf(x));
+    }
+
+    @Override
+    public void println(char x) {
+        println(String.valueOf(x));
+    }
+
+    @Override
+    public void println(int x) {
+        println(String.valueOf(x));
+    }
+
+    @Override
+    public void println(long x) {
+        println(String.valueOf(x));
+    }
+
+    @Override
+    public void println(float x) {
+        println(String.valueOf(x));
+    }
+
+    @Override
+    public void println(double x) {
+        println(String.valueOf(x));
+    }
+
+    @Override
+    public void println(char[] x) {
+        println(String.valueOf(x));
+    }
 
 }
