@@ -109,6 +109,7 @@
    <addaction name="separator"/>
    <addaction name="actionAdd_to_Minecraft_jar"/>
    <addaction name="actionReplace_Minecraft_jar"/>
+   <addaction name="actionAdd_Agents"/>
    <addaction name="actionAdd_Empty"/>
    <addaction name="separator"/>
    <addaction name="actionMinecraftFolder"/>
@@ -224,6 +225,14 @@
   <action name="actionReplace_Minecraft_jar">
    <property name="text">
     <string>Replace Minecraft.jar</string>
+   </property>
+  </action>
+  <action name="actionAdd_Agents">
+   <property name="text">
+	<string>Add Agents</string>
+   </property>
+   <property name="toolTip">
+	<string>Add Java agents.</string>
    </property>
   </action>
   <action name="actionAdd_Empty">
