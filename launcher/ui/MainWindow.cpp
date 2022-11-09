@@ -784,6 +784,8 @@ public:
         instanceToolBar->addAction(actionCopyInstance);
         instanceToolBar->addAction(actionDeleteInstance);
 
+        instanceToolBar->addAction(actionCreateInstanceShortcut); // TODO find better position for this
+
         QLayout * lay = instanceToolBar->layout();
         for(int i = 0; i < lay->count(); i++)
         {
@@ -793,8 +795,6 @@ public:
                 item->setAlignment(Qt::AlignLeft);
             }
         }
-
-        instanceToolBar->addAction(actionCreateInstanceShortcut); // TODO find better position for this
 
         all_toolbars.append(&instanceToolBar);
         MainWindow->addToolBar(Qt::RightToolBarArea, instanceToolBar);
