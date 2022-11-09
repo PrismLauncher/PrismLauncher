@@ -60,11 +60,6 @@ struct Require
     QString suggests;
 };
 
-inline Q_DECL_PURE_FUNCTION uint qHash(const Require &key, uint seed = 0) Q_DECL_NOTHROW
-{
-    return qHash(key.uid, seed);
-}
-
 using RequireSet = std::set<Require>;
 
 void parseIndex(const QJsonObject &obj, Index *ptr);
