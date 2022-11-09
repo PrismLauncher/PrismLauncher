@@ -106,14 +106,6 @@ jobs:
         with:
           submodules: 'true'
 
-      - name: Initialize CodeQL
-        if: runner.os == 'Linux' && matrix.qt_ver == 6
-        uses: github/codeql-action/init@v2
-        with:
-          config-file: ./.github/codeql/codeql-config.yml
-          queries: security-and-quality
-          languages: cpp, java
-
       - name: 'Setup MSYS2'
         if: runner.os == 'Windows' && matrix.msystem != ''
         uses: msys2/setup-msys2@v2
@@ -294,14 +286,6 @@ jobs:
         if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
           ctest -E "^example64|example$" --test-dir build --output-on-failure -C ${{ inputs.build_type }} 
-
-      ##
-      # CODE SCAN
-      ##
-
-      - name: Perform CodeQL Analysis
-        if: runner.os == 'Linux' && matrix.qt_ver == 6
-        uses: github/codeql-action/analyze@v2
 
       ##
       # PACKAGE BUILDS
