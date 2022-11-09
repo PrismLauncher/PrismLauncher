@@ -7,6 +7,10 @@ on:
         description: Type of build (Debug, Release, RelWithDebInfo, MinSizeRel)
         type: string
         default: Debug
+      is_qt_cached:
+        description: Enable Qt caching or not
+        type: string
+        default: true
     secrets:
       SPARKLE_ED25519_KEY:
         description: Private key for signing Sparkle updates
@@ -200,8 +204,7 @@ jobs:
            arch: ${{ matrix.qt_arch }}
            modules: ${{ matrix.qt_modules }}
            tools: ${{ matrix.qt_tools }}
-           cache: true
-           cache-key-prefix: ${{ matrix.qt_host }}-${{ matrix.qt_version }}-"${{ matrix.qt_modules }}"-qt_cache
+           cache: ${{ inputs.is_qt_cached }}
 
       - name: Prepare AppImage (Linux)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
