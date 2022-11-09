@@ -104,7 +104,7 @@ public:
 class ImplicitRule : public Rule
 {
 protected:
-    virtual bool applies(const Library *, const RuntimeContext & runtimeContext)
+    virtual bool applies(const Library *, [[maybe_unused]] const RuntimeContext & runtimeContext)
     {
         return true;
     }
