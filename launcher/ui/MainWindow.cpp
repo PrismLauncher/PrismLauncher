@@ -2113,7 +2113,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
 
         // part of fix for weird bug involving the window icon being replaced
         // dunno why it happens, but this 2-line fix seems to be enough, so w/e
-        auto appIcon = Application::getThemedIcon("logo");
+        auto appIcon = APPLICATION->getThemedIcon("logo");
 
         QFile iconFile(iconPath);
         if (!iconFile.open(QFile::WriteOnly))
@@ -2121,20 +2121,22 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
             return;
         }
+        bool success = icon->icon().pixmap(64, 64).save(&iconFile, "ICO");
+        iconFile.close();
 
-        if (!icon->icon().pixmap(64, 64).save(&iconFile, "ICO"))
+        // restore original window icon
+        QGuiApplication::setWindowIcon(appIcon);
+
+        if (success)
         {
-            iconFile.close();
+            iconGenerated = true;
+        }
+        else
+        {
             iconFile.remove();
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
             return;
         }
-
-        iconFile.close();
-        iconGenerated = true;
-
-        // restore original window icon
-        QGuiApplication::setWindowIcon(appIcon);
 #else
         iconPath = icon->getFilePath();
 #endif
