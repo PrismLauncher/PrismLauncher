@@ -342,7 +342,7 @@ QString getDesktopDir()
 // Cross-platform Shortcut creation
 bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon)
 {
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
     destination = PathCombine(destination, name + ".desktop");
 
     QFile f(destination);

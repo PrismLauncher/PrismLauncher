@@ -2099,23 +2099,21 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             return;
         }
 
-#if defined(Q_OS_MACOS)
-        // macOSX
-        // TODO actually write this path
-        QMessageBox::critical(this, tr("Create instance shortcut"), tr("Not supported on macOSX yet!"));
-		return;
+#ifdef Q_OS_MACOS
+        QMessageBox::critical(this, tr("Create instance shortcut"), tr("Not supported on macOS yet!"));
+        return;
 #endif
         auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
 
         QString iconPath;
         bool iconGenerated = false;
 
-#if defined(Q_OS_WIN)
+#ifdef Q_OS_WIN
         iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.ico");
 
         // part of fix for weird bug involving the window icon being replaced
         // dunno why it happens, but this 2-line fix seems to be enough, so w/e
-        auto appIcon = QGuiApplication::windowIcon();
+        auto appIcon = Application::getThemedIcon("logo");
 
         QFile iconFile(iconPath);
         if (!iconFile.open(QFile::WriteOnly))
