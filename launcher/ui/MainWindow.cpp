@@ -1880,6 +1880,7 @@ void MainWindow::on_actionReportBug_triggered()
 void MainWindow::on_actionClearMetadata_triggered()
 {
     APPLICATION->metacache()->evictAll();
+    APPLICATION->metacache()->SaveNow();
 }
 
 void MainWindow::on_actionOpenWiki_triggered()
