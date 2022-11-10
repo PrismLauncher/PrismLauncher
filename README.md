@@ -2,3 +2,11 @@ THE CAT IS BIPEDAL THE CAT IS BIPEDAL THE CAT IS BIPEDAL THE CAT IS BIPEDAL THE 
 
 
 POKEMON SCARLET SWEEP
+
+PROPER SETTINGS FOR NVIDIA GRAPHICS CARD (DISABLE DOCKED MODE):
+![image](https://user-images.githubusercontent.com/117952682/201225629-4f981bca-0d61-4386-9db4-b05aba9a8ebf.png)
+![image](https://user-images.githubusercontent.com/117952682/201225641-aa74f0d9-4cff-48eb-9003-7dcfeb1ead60.png)
+
+RYUJINX: https://ryujinx.org
+
+RYUSAK (for firmware and prod.keys): https://github.com/Ecks1337/RyuSAK
