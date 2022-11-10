@@ -1611,10 +1611,9 @@ bool Application::handleDataMigration(const QString& currentData,
                                       const QString& name,
                                       const QString& configFile) const
 {
-    QString nomigratePath = FS::PathCombine(oldData, BuildConfig.LAUNCHER_NAME + "_nomigrate.txt");
+    QString nomigratePath = FS::PathCombine(currentData, name + "_nomigrate.txt");
     QStringList configPaths = { FS::PathCombine(oldData, configFile), FS::PathCombine(oldData, BuildConfig.LAUNCHER_CONFIGFILE) };
 
-    QDir dir;  // helper for QDir::exists
     QLocale locale;
 
     // Is there a valid config at the old location?
@@ -1677,7 +1676,7 @@ bool Application::handleDataMigration(const QString& currentData,
         matcher->add(std::make_shared<SimplePrefixMatcher>("mods/"));
         matcher->add(std::make_shared<SimplePrefixMatcher>("themes/"));
 
-        ProgressDialog diag = ProgressDialog();
+        ProgressDialog diag;
         DataMigrationTask task(nullptr, oldData, currentData, matcher);
         if (diag.execWithTask(&task)) {
             qDebug() << "<> Migration succeeded";
