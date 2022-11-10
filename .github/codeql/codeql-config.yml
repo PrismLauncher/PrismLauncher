@@ -1,3 +1,0 @@
-query-filters:
-  - exclude:
-      id: cpp/fixme-comment
