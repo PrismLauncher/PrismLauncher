@@ -19,7 +19,8 @@
 #include <QDebug>
 
 #include "modplatform/modpacksch/FTBPackManifest.h"
-#include <MMCStrings.h>
+
+#include "StringUtils.h"
 
 namespace Ftb {
 
@@ -81,7 +82,7 @@ bool FilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) co
         return leftPack.installs < rightPack.installs;
     }
     else if (currentSorting == ByName) {
-        return Strings::naturalCompare(leftPack.name, rightPack.name, Qt::CaseSensitive) >= 0;
+        return StringUtils::naturalCompare(leftPack.name, rightPack.name, Qt::CaseSensitive) >= 0;
     }
 
     // Invalid sorting set, somehow...

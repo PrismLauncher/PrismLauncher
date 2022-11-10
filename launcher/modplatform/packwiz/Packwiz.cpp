@@ -22,9 +22,13 @@
 #include <QDir>
 #include <QObject>
 
-#include <toml++/toml.h>
+#include "FileSystem.h"
+#include "StringUtils.h"
+
 #include "minecraft/mod/Mod.h"
 #include "modplatform/ModIndex.h"
+
+#include <toml++/toml.h>
 
 namespace Packwiz {
 
@@ -63,22 +67,22 @@ static inline auto indexFileName(QString const& mod_slug) -> QString
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
 // Helper functions for extracting data from the TOML file
-auto stringEntry(toml::table table, const std::string entry_name) -> QString
+auto stringEntry(toml::table table, QString entry_name) -> QString
 {
-    auto node = table[entry_name];
+    auto node = table[StringUtils::toStdString(entry_name)];
     if (!node) {
-        qCritical() << QString::fromStdString("Failed to read str property '" + entry_name + "' in mod metadata.");
+        qCritical() << "Failed to read str property '" + entry_name + "' in mod metadata.";
         return {};
     }
 
-    return QString::fromStdString(node.value_or(""));
+    return node.value_or("");
 }
 
-auto intEntry(toml::table table, const std::string entry_name) -> int
+auto intEntry(toml::table table, QString entry_name) -> int
 {
-    auto node = table[entry_name];
+    auto node = table[StringUtils::toStdString(entry_name)];
     if (!node) {
-        qCritical() << QString::fromStdString("Failed to read int property '" + entry_name + "' in mod metadata.");
+        qCritical() << "Failed to read int property '" + entry_name + "' in mod metadata.";
         return {};
     }
 
@@ -145,6 +149,8 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
     // they want to do!
     if (index_file.exists()) {
         index_file.remove();
+    } else {
+        FS::ensureFilePathExists(index_file.fileName());
     }
 
     if (!index_file.open(QIODevice::ReadWrite)) {
@@ -228,14 +234,14 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
     toml::table table;
 #if TOML_EXCEPTIONS
     try {
-        table = toml::parse_file(index_dir.absoluteFilePath(real_fname).toStdString());
+        table = toml::parse_file(StringUtils::toStdString(index_dir.absoluteFilePath(real_fname)));
     } catch (const toml::parse_error& err) {
         qWarning() << QString("Could not open file %1!").arg(normalized_fname);
         qWarning() << "Reason: " << QString(err.what());
         return {};
     }
 #else
-    table = toml::parse_file(index_dir.absoluteFilePath(real_fname).toStdString());
+    table = toml::parse_file(StringUtils::toStdString(index_dir.absoluteFilePath(real_fname)));
     if (!table) {
         qWarning() << QString("Could not open file %1!").arg(normalized_fname);
         qWarning() << "Reason: " << QString(table.error().what());

@@ -24,8 +24,8 @@ set(CORE_SOURCES
     NullInstance.h
     MMCZip.h
     MMCZip.cpp
-    MMCStrings.h
-    MMCStrings.cpp
+    StringUtils.h
+    StringUtils.cpp
     RuntimeContext.h
 
     # Basic instance manipulation tasks (derived from InstanceTask)

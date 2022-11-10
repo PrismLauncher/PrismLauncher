@@ -1,5 +1,6 @@
 #include "JavaVersion.h"
-#include <MMCStrings.h>
+
+#include "StringUtils.h"
 
 #include <QRegularExpression>
 #include <QString>
@@ -98,12 +99,12 @@ bool JavaVersion::operator<(const JavaVersion &rhs)
         else if(thisPre && rhsPre)
         {
             // both are prereleases - use natural compare...
-            return Strings::naturalCompare(m_prerelease, rhs.m_prerelease, Qt::CaseSensitive) < 0;
+            return StringUtils::naturalCompare(m_prerelease, rhs.m_prerelease, Qt::CaseSensitive) < 0;
         }
         // neither is prerelease, so they are the same -> this cannot be less than rhs
         return false;
     }
-    else return Strings::naturalCompare(m_string, rhs.m_string, Qt::CaseSensitive) < 0;
+    else return StringUtils::naturalCompare(m_string, rhs.m_string, Qt::CaseSensitive) < 0;
 }
 
 bool JavaVersion::operator==(const JavaVersion &rhs)
