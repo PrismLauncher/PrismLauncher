@@ -40,10 +40,10 @@
 
 #include <QDesktopServices>
 #include <QKeyEvent>
+#include <QRegularExpression>
 #include <memory>
 
 #include <HoeDown.h>
-#include <qregularexpression.h>
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
@@ -246,6 +246,10 @@ void ModPage::onModSelected()
     ui->packView->adjustSize();
 }
 
+static const QRegularExpression modrinth(QRegularExpression::anchoredPattern("(?:www\\.)?modrinth\\.com\\/mod\\/([^\\/]+)\\/?"));
+static const QRegularExpression curseForge(QRegularExpression::anchoredPattern("(?:www\\.)?curseforge\\.com\\/minecraft\\/mc-mods\\/([^\\/]+)\\/?"));
+static const QRegularExpression curseForgeOld(QRegularExpression::anchoredPattern("minecraft\\.curseforge\\.com\\/projects\\/([^\\/]+)\\/?"));
+
 void ModPage::openUrl(const QUrl& url)
 {
     // do not allow other url schemes for security reasons
@@ -255,19 +259,22 @@ void ModPage::openUrl(const QUrl& url)
     }
 
     // detect mod URLs and search instead
-    static const QRegularExpression modrinth(QRegularExpression::anchoredPattern("(?:www\\.)?modrinth\\.com\\/mod\\/([^\\/]+)\\/?")),
-        curseForge(QRegularExpression::anchoredPattern("(?:www\\.)?curseforge\\.com\\/minecraft\\/mc-mods\\/([^\\/]+)\\/?")),
-        curseForgeOld(QRegularExpression::anchoredPattern("minecraft\\.curseforge\\.com\\/projects\\/([^\\/]+)\\/?"));
 
     const QString address = url.host() + url.path();
     QRegularExpressionMatch match;
     const char* page;
 
-    if ((match = modrinth.match(address)).hasMatch())
+    match = modrinth.match(address);
+    if (match.hasMatch())
         page = "modrinth";
-    else if (APPLICATION->capabilities() & Application::SupportsFlame &&
-               ((match = curseForge.match(address)).hasMatch() || (match = curseForgeOld.match(address)).hasMatch()))
-        page = "curseforge";
+    else if (APPLICATION->capabilities() & Application::SupportsFlame) {
+        match = curseForge.match(address);
+        if (!match.hasMatch())
+            match = curseForgeOld.match(address);
+
+        if (match.hasMatch())
+            page = "curseforge";
+    }
 
     if (match.hasMatch()) {
         const QString slug = match.captured(1);
