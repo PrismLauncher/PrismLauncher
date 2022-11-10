@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -131,6 +132,8 @@ QList<BasePage*> ModDownloadDialog::getPages()
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(FlameModPage::create(this, m_instance));
 
+    m_selectedPage = dynamic_cast<ModPage*>(pages[0]);
+
     return pages;
 }
 
@@ -178,12 +181,22 @@ void ModDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* select
         return;
     }
 
-    auto* selected_page = dynamic_cast<ModPage*>(selected);
-    if (!selected_page) {
+    m_selectedPage = dynamic_cast<ModPage*>(selected);
+    if (!m_selectedPage) {
         qCritical() << "Page '" << selected->displayName() << "' in ModDownloadDialog is not a ModPage!";
         return;
     }
 
     // Same effect as having a global search bar
-    selected_page->setSearchTerm(prev_page->getSearchTerm());
+    m_selectedPage->setSearchTerm(prev_page->getSearchTerm());
+}
+
+bool ModDownloadDialog::selectPage(QString pageId)
+{
+    return m_container->selectPage(pageId);
+}
+
+ModPage* ModDownloadDialog::getSelectedPage()
+{
+    return m_selectedPage;
 }

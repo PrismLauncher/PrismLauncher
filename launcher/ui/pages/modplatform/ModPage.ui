@@ -16,10 +16,10 @@
      <item row="1" column="2">
       <widget class="ProjectDescriptionPage" name="packDescription">
        <property name="openExternalLinks">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="openLinks">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>
