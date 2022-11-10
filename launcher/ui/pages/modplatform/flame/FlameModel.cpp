@@ -2,7 +2,6 @@
 #include <Json.h>
 #include "Application.h"
 
-#include <MMCStrings.h>
 #include <Version.h>
 
 #include <QtMath>
