@@ -1,674 +1,4067 @@
-                    GNU GENERAL PUBLIC LICENSE
-                       Version 3, 29 June 2007
-
- Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
- Everyone is permitted to copy and distribute verbatim copies
- of this license document, but changing it is not allowed.
-
-                            Preamble
-
-  The GNU General Public License is a free, copyleft license for
-software and other kinds of works.
-
-  The licenses for most software and other practical works are designed
-to take away your freedom to share and change the works.  By contrast,
-the GNU General Public License is intended to guarantee your freedom to
-share and change all versions of a program--to make sure it remains free
-software for all its users.  We, the Free Software Foundation, use the
-GNU General Public License for most of our software; it applies also to
-any other work released this way by its authors.  You can apply it to
-your programs, too.
-
-  When we speak of free software, we are referring to freedom, not
-price.  Our General Public Licenses are designed to make sure that you
-have the freedom to distribute copies of free software (and charge for
-them if you wish), that you receive source code or can get it if you
-want it, that you can change the software or use pieces of it in new
-free programs, and that you know you can do these things.
-
-  To protect your rights, we need to prevent others from denying you
-these rights or asking you to surrender the rights.  Therefore, you have
-certain responsibilities if you distribute copies of the software, or if
-you modify it: responsibilities to respect the freedom of others.
-
-  For example, if you distribute copies of such a program, whether
-gratis or for a fee, you must pass on to the recipients the same
-freedoms that you received.  You must make sure that they, too, receive
-or can get the source code.  And you must show them these terms so they
-know their rights.
-
-  Developers that use the GNU GPL protect your rights with two steps:
-(1) assert copyright on the software, and (2) offer you this License
-giving you legal permission to copy, distribute and/or modify it.
-
-  For the developers' and authors' protection, the GPL clearly explains
-that there is no warranty for this free software.  For both users' and
-authors' sake, the GPL requires that modified versions be marked as
-changed, so that their problems will not be attributed erroneously to
-authors of previous versions.
-
-  Some devices are designed to deny users access to install or run
-modified versions of the software inside them, although the manufacturer
-can do so.  This is fundamentally incompatible with the aim of
-protecting users' freedom to change the software.  The systematic
-pattern of such abuse occurs in the area of products for individuals to
-use, which is precisely where it is most unacceptable.  Therefore, we
-have designed this version of the GPL to prohibit the practice for those
-products.  If such problems arise substantially in other domains, we
-stand ready to extend this provision to those domains in future versions
-of the GPL, as needed to protect the freedom of users.
-
-  Finally, every program is threatened constantly by software patents.
-States should not allow patents to restrict development and use of
-software on general-purpose computers, but in those that do, we wish to
-avoid the special danger that patents applied to a free program could
-make it effectively proprietary.  To prevent this, the GPL assures that
-patents cannot be used to render the program non-free.
-
-  The precise terms and conditions for copying, distribution and
-modification follow.
-
-                       TERMS AND CONDITIONS
-
-  0. Definitions.
-
-  "This License" refers to version 3 of the GNU General Public License.
-
-  "Copyright" also means copyright-like laws that apply to other kinds of
-works, such as semiconductor masks.
-
-  "The Program" refers to any copyrightable work licensed under this
-License.  Each licensee is addressed as "you".  "Licensees" and
-"recipients" may be individuals or organizations.
-
-  To "modify" a work means to copy from or adapt all or part of the work
-in a fashion requiring copyright permission, other than the making of an
-exact copy.  The resulting work is called a "modified version" of the
-earlier work or a work "based on" the earlier work.
-
-  A "covered work" means either the unmodified Program or a work based
-on the Program.
-
-  To "propagate" a work means to do anything with it that, without
-permission, would make you directly or secondarily liable for
-infringement under applicable copyright law, except executing it on a
-computer or modifying a private copy.  Propagation includes copying,
-distribution (with or without modification), making available to the
-public, and in some countries other activities as well.
-
-  To "convey" a work means any kind of propagation that enables other
-parties to make or receive copies.  Mere interaction with a user through
-a computer network, with no transfer of a copy, is not conveying.
-
-  An interactive user interface displays "Appropriate Legal Notices"
-to the extent that it includes a convenient and prominently visible
-feature that (1) displays an appropriate copyright notice, and (2)
-tells the user that there is no warranty for the work (except to the
-extent that warranties are provided), that licensees may convey the
-work under this License, and how to view a copy of this License.  If
-the interface presents a list of user commands or options, such as a
-menu, a prominent item in the list meets this criterion.
-
-  1. Source Code.
-
-  The "source code" for a work means the preferred form of the work
-for making modifications to it.  "Object code" means any non-source
-form of a work.
-
-  A "Standard Interface" means an interface that either is an official
-standard defined by a recognized standards body, or, in the case of
-interfaces specified for a particular programming language, one that
-is widely used among developers working in that language.
-
-  The "System Libraries" of an executable work include anything, other
-than the work as a whole, that (a) is included in the normal form of
-packaging a Major Component, but which is not part of that Major
-Component, and (b) serves only to enable use of the work with that
-Major Component, or to implement a Standard Interface for which an
-implementation is available to the public in source code form.  A
-"Major Component", in this context, means a major essential component
-(kernel, window system, and so on) of the specific operating system
-(if any) on which the executable work runs, or a compiler used to
-produce the work, or an object code interpreter used to run it.
-
-  The "Corresponding Source" for a work in object code form means all
-the source code needed to generate, install, and (for an executable
-work) run the object code and to modify the work, including scripts to
-control those activities.  However, it does not include the work's
-System Libraries, or general-purpose tools or generally available free
-programs which are used unmodified in performing those activities but
-which are not part of the work.  For example, Corresponding Source
-includes interface definition files associated with source files for
-the work, and the source code for shared libraries and dynamically
-linked subprograms that the work is specifically designed to require,
-such as by intimate data communication or control flow between those
-subprograms and other parts of the work.
-
-  The Corresponding Source need not include anything that users
-can regenerate automatically from other parts of the Corresponding
-Source.
-
-  The Corresponding Source for a work in source code form is that
-same work.
-
-  2. Basic Permissions.
-
-  All rights granted under this License are granted for the term of
-copyright on the Program, and are irrevocable provided the stated
-conditions are met.  This License explicitly affirms your unlimited
-permission to run the unmodified Program.  The output from running a
-covered work is covered by this License only if the output, given its
-content, constitutes a covered work.  This License acknowledges your
-rights of fair use or other equivalent, as provided by copyright law.
-
-  You may make, run and propagate covered works that you do not
-convey, without conditions so long as your license otherwise remains
-in force.  You may convey covered works to others for the sole purpose
-of having them make modifications exclusively for you, or provide you
-with facilities for running those works, provided that you comply with
-the terms of this License in conveying all material for which you do
-not control copyright.  Those thus making or running the covered works
-for you must do so exclusively on your behalf, under your direction
-and control, on terms that prohibit them from making any copies of
-your copyrighted material outside their relationship with you.
-
-  Conveying under any other circumstances is permitted solely under
-the conditions stated below.  Sublicensing is not allowed; section 10
-makes it unnecessary.
-
-  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
-
-  No covered work shall be deemed part of an effective technological
-measure under any applicable law fulfilling obligations under article
-11 of the WIPO copyright treaty adopted on 20 December 1996, or
-similar laws prohibiting or restricting circumvention of such
-measures.
-
-  When you convey a covered work, you waive any legal power to forbid
-circumvention of technological measures to the extent such circumvention
-is effected by exercising rights under this License with respect to
-the covered work, and you disclaim any intention to limit operation or
-modification of the work as a means of enforcing, against the work's
-users, your or third parties' legal rights to forbid circumvention of
-technological measures.
-
-  4. Conveying Verbatim Copies.
-
-  You may convey verbatim copies of the Program's source code as you
-receive it, in any medium, provided that you conspicuously and
-appropriately publish on each copy an appropriate copyright notice;
-keep intact all notices stating that this License and any
-non-permissive terms added in accord with section 7 apply to the code;
-keep intact all notices of the absence of any warranty; and give all
-recipients a copy of this License along with the Program.
-
-  You may charge any price or no price for each copy that you convey,
-and you may offer support or warranty protection for a fee.
-
-  5. Conveying Modified Source Versions.
-
-  You may convey a work based on the Program, or the modifications to
-produce it from the Program, in the form of source code under the
-terms of section 4, provided that you also meet all of these conditions:
-
-    a) The work must carry prominent notices stating that you modified
-    it, and giving a relevant date.
-
-    b) The work must carry prominent notices stating that it is
-    released under this License and any conditions added under section
-    7.  This requirement modifies the requirement in section 4 to
-    "keep intact all notices".
-
-    c) You must license the entire work, as a whole, under this
-    License to anyone who comes into possession of a copy.  This
-    License will therefore apply, along with any applicable section 7
-    additional terms, to the whole of the work, and all its parts,
-    regardless of how they are packaged.  This License gives no
-    permission to license the work in any other way, but it does not
-    invalidate such permission if you have separately received it.
-
-    d) If the work has interactive user interfaces, each must display
-    Appropriate Legal Notices; however, if the Program has interactive
-    interfaces that do not display Appropriate Legal Notices, your
-    work need not make them do so.
-
-  A compilation of a covered work with other separate and independent
-works, which are not by their nature extensions of the covered work,
-and which are not combined with it such as to form a larger program,
-in or on a volume of a storage or distribution medium, is called an
-"aggregate" if the compilation and its resulting copyright are not
-used to limit the access or legal rights of the compilation's users
-beyond what the individual works permit.  Inclusion of a covered work
-in an aggregate does not cause this License to apply to the other
-parts of the aggregate.
-
-  6. Conveying Non-Source Forms.
-
-  You may convey a covered work in object code form under the terms
-of sections 4 and 5, provided that you also convey the
-machine-readable Corresponding Source under the terms of this License,
-in one of these ways:
-
-    a) Convey the object code in, or embodied in, a physical product
-    (including a physical distribution medium), accompanied by the
-    Corresponding Source fixed on a durable physical medium
-    customarily used for software interchange.
-
-    b) Convey the object code in, or embodied in, a physical product
-    (including a physical distribution medium), accompanied by a
-    written offer, valid for at least three years and valid for as
-    long as you offer spare parts or customer support for that product
-    model, to give anyone who possesses the object code either (1) a
-    copy of the Corresponding Source for all the software in the
-    product that is covered by this License, on a durable physical
-    medium customarily used for software interchange, for a price no
-    more than your reasonable cost of physically performing this
-    conveying of source, or (2) access to copy the
-    Corresponding Source from a network server at no charge.
-
-    c) Convey individual copies of the object code with a copy of the
-    written offer to provide the Corresponding Source.  This
-    alternative is allowed only occasionally and noncommercially, and
-    only if you received the object code with such an offer, in accord
-    with subsection 6b.
-
-    d) Convey the object code by offering access from a designated
-    place (gratis or for a charge), and offer equivalent access to the
-    Corresponding Source in the same way through the same place at no
-    further charge.  You need not require recipients to copy the
-    Corresponding Source along with the object code.  If the place to
-    copy the object code is a network server, the Corresponding Source
-    may be on a different server (operated by you or a third party)
-    that supports equivalent copying facilities, provided you maintain
-    clear directions next to the object code saying where to find the
-    Corresponding Source.  Regardless of what server hosts the
-    Corresponding Source, you remain obligated to ensure that it is
-    available for as long as needed to satisfy these requirements.
-
-    e) Convey the object code using peer-to-peer transmission, provided
-    you inform other peers where the object code and Corresponding
-    Source of the work are being offered to the general public at no
-    charge under subsection 6d.
-
-  A separable portion of the object code, whose source code is excluded
-from the Corresponding Source as a System Library, need not be
-included in conveying the object code work.
-
-  A "User Product" is either (1) a "consumer product", which means any
-tangible personal property which is normally used for personal, family,
-or household purposes, or (2) anything designed or sold for incorporation
-into a dwelling.  In determining whether a product is a consumer product,
-doubtful cases shall be resolved in favor of coverage.  For a particular
-product received by a particular user, "normally used" refers to a
-typical or common use of that class of product, regardless of the status
-of the particular user or of the way in which the particular user
-actually uses, or expects or is expected to use, the product.  A product
-is a consumer product regardless of whether the product has substantial
-commercial, industrial or non-consumer uses, unless such uses represent
-the only significant mode of use of the product.
-
-  "Installation Information" for a User Product means any methods,
-procedures, authorization keys, or other information required to install
-and execute modified versions of a covered work in that User Product from
-a modified version of its Corresponding Source.  The information must
-suffice to ensure that the continued functioning of the modified object
-code is in no case prevented or interfered with solely because
-modification has been made.
-
-  If you convey an object code work under this section in, or with, or
-specifically for use in, a User Product, and the conveying occurs as
-part of a transaction in which the right of possession and use of the
-User Product is transferred to the recipient in perpetuity or for a
-fixed term (regardless of how the transaction is characterized), the
-Corresponding Source conveyed under this section must be accompanied
-by the Installation Information.  But this requirement does not apply
-if neither you nor any third party retains the ability to install
-modified object code on the User Product (for example, the work has
-been installed in ROM).
-
-  The requirement to provide Installation Information does not include a
-requirement to continue to provide support service, warranty, or updates
-for a work that has been modified or installed by the recipient, or for
-the User Product in which it has been modified or installed.  Access to a
-network may be denied when the modification itself materially and
-adversely affects the operation of the network or violates the rules and
-protocols for communication across the network.
-
-  Corresponding Source conveyed, and Installation Information provided,
-in accord with this section must be in a format that is publicly
-documented (and with an implementation available to the public in
-source code form), and must require no special password or key for
-unpacking, reading or copying.
-
-  7. Additional Terms.
-
-  "Additional permissions" are terms that supplement the terms of this
-License by making exceptions from one or more of its conditions.
-Additional permissions that are applicable to the entire Program shall
-be treated as though they were included in this License, to the extent
-that they are valid under applicable law.  If additional permissions
-apply only to part of the Program, that part may be used separately
-under those permissions, but the entire Program remains governed by
-this License without regard to the additional permissions.
-
-  When you convey a copy of a covered work, you may at your option
-remove any additional permissions from that copy, or from any part of
-it.  (Additional permissions may be written to require their own
-removal in certain cases when you modify the work.)  You may place
-additional permissions on material, added by you to a covered work,
-for which you have or can give appropriate copyright permission.
-
-  Notwithstanding any other provision of this License, for material you
-add to a covered work, you may (if authorized by the copyright holders of
-that material) supplement the terms of this License with terms:
-
-    a) Disclaiming warranty or limiting liability differently from the
-    terms of sections 15 and 16 of this License; or
-
-    b) Requiring preservation of specified reasonable legal notices or
-    author attributions in that material or in the Appropriate Legal
-    Notices displayed by works containing it; or
-
-    c) Prohibiting misrepresentation of the origin of that material, or
-    requiring that modified versions of such material be marked in
-    reasonable ways as different from the original version; or
-
-    d) Limiting the use for publicity purposes of names of licensors or
-    authors of the material; or
-
-    e) Declining to grant rights under trademark law for use of some
-    trade names, trademarks, or service marks; or
-
-    f) Requiring indemnification of licensors and authors of that
-    material by anyone who conveys the material (or modified versions of
-    it) with contractual assumptions of liability to the recipient, for
-    any liability that these contractual assumptions directly impose on
-    those licensors and authors.
-
-  All other non-permissive additional terms are considered "further
-restrictions" within the meaning of section 10.  If the Program as you
-received it, or any part of it, contains a notice stating that it is
-governed by this License along with a term that is a further
-restriction, you may remove that term.  If a license document contains
-a further restriction but permits relicensing or conveying under this
-License, you may add to a covered work material governed by the terms
-of that license document, provided that the further restriction does
-not survive such relicensing or conveying.
-
-  If you add terms to a covered work in accord with this section, you
-must place, in the relevant source files, a statement of the
-additional terms that apply to those files, or a notice indicating
-where to find the applicable terms.
-
-  Additional terms, permissive or non-permissive, may be stated in the
-form of a separately written license, or stated as exceptions;
-the above requirements apply either way.
-
-  8. Termination.
-
-  You may not propagate or modify a covered work except as expressly
-provided under this License.  Any attempt otherwise to propagate or
-modify it is void, and will automatically terminate your rights under
-this License (including any patent licenses granted under the third
-paragraph of section 11).
-
-  However, if you cease all violation of this License, then your
-license from a particular copyright holder is reinstated (a)
-provisionally, unless and until the copyright holder explicitly and
-finally terminates your license, and (b) permanently, if the copyright
-holder fails to notify you of the violation by some reasonable means
-prior to 60 days after the cessation.
-
-  Moreover, your license from a particular copyright holder is
-reinstated permanently if the copyright holder notifies you of the
-violation by some reasonable means, this is the first time you have
-received notice of violation of this License (for any work) from that
-copyright holder, and you cure the violation prior to 30 days after
-your receipt of the notice.
-
-  Termination of your rights under this section does not terminate the
-licenses of parties who have received copies or rights from you under
-this License.  If your rights have been terminated and not permanently
-reinstated, you do not qualify to receive new licenses for the same
-material under section 10.
-
-  9. Acceptance Not Required for Having Copies.
-
-  You are not required to accept this License in order to receive or
-run a copy of the Program.  Ancillary propagation of a covered work
-occurring solely as a consequence of using peer-to-peer transmission
-to receive a copy likewise does not require acceptance.  However,
-nothing other than this License grants you permission to propagate or
-modify any covered work.  These actions infringe copyright if you do
-not accept this License.  Therefore, by modifying or propagating a
-covered work, you indicate your acceptance of this License to do so.
-
-  10. Automatic Licensing of Downstream Recipients.
-
-  Each time you convey a covered work, the recipient automatically
-receives a license from the original licensors, to run, modify and
-propagate that work, subject to this License.  You are not responsible
-for enforcing compliance by third parties with this License.
-
-  An "entity transaction" is a transaction transferring control of an
-organization, or substantially all assets of one, or subdividing an
-organization, or merging organizations.  If propagation of a covered
-work results from an entity transaction, each party to that
-transaction who receives a copy of the work also receives whatever
-licenses to the work the party's predecessor in interest had or could
-give under the previous paragraph, plus a right to possession of the
-Corresponding Source of the work from the predecessor in interest, if
-the predecessor has it or can get it with reasonable efforts.
-
-  You may not impose any further restrictions on the exercise of the
-rights granted or affirmed under this License.  For example, you may
-not impose a license fee, royalty, or other charge for exercise of
-rights granted under this License, and you may not initiate litigation
-(including a cross-claim or counterclaim in a lawsuit) alleging that
-any patent claim is infringed by making, using, selling, offering for
-sale, or importing the Program or any portion of it.
-
-  11. Patents.
-
-  A "contributor" is a copyright holder who authorizes use under this
-License of the Program or a work on which the Program is based.  The
-work thus licensed is called the contributor's "contributor version".
-
-  A contributor's "essential patent claims" are all patent claims
-owned or controlled by the contributor, whether already acquired or
-hereafter acquired, that would be infringed by some manner, permitted
-by this License, of making, using, or selling its contributor version,
-but do not include claims that would be infringed only as a
-consequence of further modification of the contributor version.  For
-purposes of this definition, "control" includes the right to grant
-patent sublicenses in a manner consistent with the requirements of
-this License.
-
-  Each contributor grants you a non-exclusive, worldwide, royalty-free
-patent license under the contributor's essential patent claims, to
-make, use, sell, offer for sale, import and otherwise run, modify and
-propagate the contents of its contributor version.
-
-  In the following three paragraphs, a "patent license" is any express
-agreement or commitment, however denominated, not to enforce a patent
-(such as an express permission to practice a patent or covenant not to
-sue for patent infringement).  To "grant" such a patent license to a
-party means to make such an agreement or commitment not to enforce a
-patent against the party.
-
-  If you convey a covered work, knowingly relying on a patent license,
-and the Corresponding Source of the work is not available for anyone
-to copy, free of charge and under the terms of this License, through a
-publicly available network server or other readily accessible means,
-then you must either (1) cause the Corresponding Source to be so
-available, or (2) arrange to deprive yourself of the benefit of the
-patent license for this particular work, or (3) arrange, in a manner
-consistent with the requirements of this License, to extend the patent
-license to downstream recipients.  "Knowingly relying" means you have
-actual knowledge that, but for the patent license, your conveying the
-covered work in a country, or your recipient's use of the covered work
-in a country, would infringe one or more identifiable patents in that
-country that you have reason to believe are valid.
-
-  If, pursuant to or in connection with a single transaction or
-arrangement, you convey, or propagate by procuring conveyance of, a
-covered work, and grant a patent license to some of the parties
-receiving the covered work authorizing them to use, propagate, modify
-or convey a specific copy of the covered work, then the patent license
-you grant is automatically extended to all recipients of the covered
-work and works based on it.
-
-  A patent license is "discriminatory" if it does not include within
-the scope of its coverage, prohibits the exercise of, or is
-conditioned on the non-exercise of one or more of the rights that are
-specifically granted under this License.  You may not convey a covered
-work if you are a party to an arrangement with a third party that is
-in the business of distributing software, under which you make payment
-to the third party based on the extent of your activity of conveying
-the work, and under which the third party grants, to any of the
-parties who would receive the covered work from you, a discriminatory
-patent license (a) in connection with copies of the covered work
-conveyed by you (or copies made from those copies), or (b) primarily
-for and in connection with specific products or compilations that
-contain the covered work, unless you entered into that arrangement,
-or that patent license was granted, prior to 28 March 2007.
-
-  Nothing in this License shall be construed as excluding or limiting
-any implied license or other defenses to infringement that may
-otherwise be available to you under applicable patent law.
-
-  12. No Surrender of Others' Freedom.
-
-  If conditions are imposed on you (whether by court order, agreement or
-otherwise) that contradict the conditions of this License, they do not
-excuse you from the conditions of this License.  If you cannot convey a
-covered work so as to satisfy simultaneously your obligations under this
-License and any other pertinent obligations, then as a consequence you may
-not convey it at all.  For example, if you agree to terms that obligate you
-to collect a royalty for further conveying from those to whom you convey
-the Program, the only way you could satisfy both those terms and this
-License would be to refrain entirely from conveying the Program.
-
-  13. Use with the GNU Affero General Public License.
-
-  Notwithstanding any other provision of this License, you have
-permission to link or combine any covered work with a work licensed
-under version 3 of the GNU Affero General Public License into a single
-combined work, and to convey the resulting work.  The terms of this
-License will continue to apply to the part which is the covered work,
-but the special requirements of the GNU Affero General Public License,
-section 13, concerning interaction through a network will apply to the
-combination as such.
-
-  14. Revised Versions of this License.
-
-  The Free Software Foundation may publish revised and/or new versions of
-the GNU General Public License from time to time.  Such new versions will
-be similar in spirit to the present version, but may differ in detail to
-address new problems or concerns.
-
-  Each version is given a distinguishing version number.  If the
-Program specifies that a certain numbered version of the GNU General
-Public License "or any later version" applies to it, you have the
-option of following the terms and conditions either of that numbered
-version or of any later version published by the Free Software
-Foundation.  If the Program does not specify a version number of the
-GNU General Public License, you may choose any version ever published
-by the Free Software Foundation.
-
-  If the Program specifies that a proxy can decide which future
-versions of the GNU General Public License can be used, that proxy's
-public statement of acceptance of a version permanently authorizes you
-to choose that version for the Program.
-
-  Later license versions may give you additional or different
-permissions.  However, no additional obligations are imposed on any
-author or copyright holder as a result of your choosing to follow a
-later version.
-
-  15. Disclaimer of Warranty.
-
-  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
-APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
-HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
-OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
-IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
-ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
-
-  16. Limitation of Liability.
-
-  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
-WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
-THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
-GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
-USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
-DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
-PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
-EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGES.
-
-  17. Interpretation of Sections 15 and 16.
-
-  If the disclaimer of warranty and limitation of liability provided
-above cannot be given local legal effect according to their terms,
-reviewing courts shall apply local law that most closely approximates
-an absolute waiver of all civil liability in connection with the
-Program, unless a warranty or assumption of liability accompanies a
-copy of the Program in return for a fee.
-
-                     END OF TERMS AND CONDITIONS
-
-            How to Apply These Terms to Your New Programs
-
-  If you develop a new program, and you want it to be of the greatest
-possible use to the public, the best way to achieve this is to make it
-free software which everyone can redistribute and change under these terms.
-
-  To do so, attach the following notices to the program.  It is safest
-to attach them to the start of each source file to most effectively
-state the exclusion of warranty; and each file should have at least
-the "copyright" line and a pointer to where the full notice is found.
-
-    <one line to give the program's name and a brief idea of what it does.>
-    Copyright (C) <year>  <name of author>
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-Also add information on how to contact you by electronic and paper mail.
-
-  If the program does terminal interaction, make it output a short
-notice like this when it starts in an interactive mode:
-
-    <program>  Copyright (C) <year>  <name of author>
-    This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
-    This is free software, and you are welcome to redistribute it
-    under certain conditions; type `show c' for details.
-
-The hypothetical commands `show w' and `show c' should show the appropriate
-parts of the General Public License.  Of course, your program's commands
-might be different; for a GUI interface, you would use an "about box".
-
-  You should also get your employer (if you work as a programmer) or school,
-if any, to sign a "copyright disclaimer" for the program, if necessary.
-For more information on this, and how to apply and follow the GNU GPL, see
-<https://www.gnu.org/licenses/>.
-
-  The GNU General Public License does not permit incorporating your program
-into proprietary programs.  If your program is a subroutine library, you
-may consider it more useful to permit linking proprietary applications with
-the library.  If this is what you want to do, use the GNU Lesser General
-Public License instead of this License.  But first, please read
-<https://www.gnu.org/licenses/why-not-lgpl.html>.
+NARRATOR:
+(Black screen with text; The sound of buzzing bees can be heard)
+According to all known laws
+of aviation,
+ :
+there is no way a bee
+should be able to fly.
+ :
+Its wings are too small to get
+its fat little body off the ground.
+ :
+The bee, of course, flies anyway
+ :
+because bees don't care
+what humans think is impossible.
+BARRY BENSON:
+(Barry is picking out a shirt)
+Yellow, black. Yellow, black.
+Yellow, black. Yellow, black.
+ :
+Ooh, black and yellow!
+Let's shake it up a little.
+JANET BENSON:
+Barry! Breakfast is ready!
+BARRY:
+Coming!
+ :
+Hang on a second.
+(Barry uses his antenna like a phone)
+ :
+Hello?
+ADAM FLAYMAN:
+
+(Through phone)
+- Barry?
+BARRY:
+- Adam?
+ADAM:
+- Can you believe this is happening?
+BARRY:
+- I can't. I'll pick you up.
+(Barry flies down the stairs)
+ :
+MARTIN BENSON:
+Looking sharp.
+JANET:
+Use the stairs. Your father
+paid good money for those.
+BARRY:
+Sorry. I'm excited.
+MARTIN:
+Here's the graduate.
+We're very proud of you, son.
+ :
+A perfect report card, all B's.
+JANET:
+Very proud.
+(Rubs Barry's hair)
+BARRY=
+Ma! I got a thing going here.
+JANET:
+- You got lint on your fuzz.
+BARRY:
+- Ow! That's me!
+
+JANET:
+- Wave to us! We'll be in row 118,000.
+- Bye!
+(Barry flies out the door)
+JANET:
+Barry, I told you,
+stop flying in the house!
+(Barry drives through the hive,and is waved at by Adam who is reading a
+newspaper)
+BARRY==
+- Hey, Adam.
+ADAM:
+- Hey, Barry.
+(Adam gets in Barry's car)
+ :
+- Is that fuzz gel?
+BARRY:
+- A little. Special day, graduation.
+ADAM:
+Never thought I'd make it.
+(Barry pulls away from the house and continues driving)
+BARRY:
+Three days grade school,
+three days high school...
+ADAM:
+Those were awkward.
+BARRY:
+Three days college. I'm glad I took
+a day and hitchhiked around the hive.
+ADAM==
+You did come back different.
+(Barry and Adam pass by Artie, who is jogging)
+ARTIE:
+- Hi, Barry!
+
+BARRY:
+- Artie, growing a mustache? Looks good.
+ADAM:
+- Hear about Frankie?
+BARRY:
+- Yeah.
+ADAM==
+- You going to the funeral?
+BARRY:
+- No, I'm not going to his funeral.
+ :
+Everybody knows,
+sting someone, you die.
+ :
+Don't waste it on a squirrel.
+Such a hothead.
+ADAM:
+I guess he could have
+just gotten out of the way.
+(The car does a barrel roll on the loop-shaped bridge and lands on the
+highway)
+ :
+I love this incorporating
+an amusement park into our regular day.
+BARRY:
+I guess that's why they say we don't need vacations.
+(Barry parallel parks the car and together they fly over the graduating
+students)
+Boy, quite a bit of pomp...
+under the circumstances.
+(Barry and Adam sit down and put on their hats)
+ :
+- Well, Adam, today we are men.
+
+ADAM:
+- We are!
+BARRY=
+- Bee-men.
+=ADAM=
+- Amen!
+BARRY AND ADAM:
+Hallelujah!
+(Barry and Adam both have a happy spasm)
+ANNOUNCER:
+Students, faculty, distinguished bees,
+ :
+please welcome Dean Buzzwell.
+DEAN BUZZWELL:
+Welcome, New Hive Oity
+graduating class of...
+ :
+...9:
+ :
+That concludes our ceremonies.
+ :
+And begins your career
+at Honex Industries!
+ADAM:
+Will we pick our job today?
+(Adam and Barry get into a tour bus)
+BARRY=
+I heard it's just orientation.
+(Tour buses rise out of the ground and the students are automatically
+loaded into the buses)
+TOUR GUIDE:
+Heads up! Here we go.
+
+ANNOUNCER:
+Keep your hands and antennas
+inside the tram at all times.
+BARRY:
+- Wonder what it'll be like?
+ADAM:
+- A little scary.
+TOUR GUIDE==
+Welcome to Honex,
+a division of Honesco
+ :
+and a part of the Hexagon Group.
+Barry:
+This is it!
+BARRY AND ADAM:
+Wow.
+BARRY:
+Wow.
+(The bus drives down a road an on either side are the Bee's massive
+complicated Honey-making machines)
+TOUR GUIDE:
+We know that you, as a bee,
+have worked your whole life
+ :
+to get to the point where you
+can work for your whole life.
+ :
+Honey begins when our valiant Pollen
+Jocks bring the nectar to the hive.
+ :
+Our top-secret formula
+ :
+is automatically color-corrected,
+
+scent-adjusted and bubble-contoured
+ :
+into this soothing sweet syrup
+ :
+with its distinctive
+golden glow you know as...
+EVERYONE ON BUS:
+Honey!
+(The guide has been collecting honey into a bottle and she throws it into
+the crowd on the bus and it is caught by a girl in the back)
+ADAM:
+- That girl was hot.
+BARRY:
+- She's my cousin!
+ADAM==
+- She is?
+BARRY:
+- Yes, we're all cousins.
+ADAM:
+- Right. You're right.
+TOUR GUIDE:
+- At Honex, we constantly strive
+ :
+to improve every aspect
+of bee existence.
+ :
+These bees are stress-testing
+a new helmet technology.
+(The bus passes by a Bee wearing a helmet who is being smashed into the
+ground with fly-swatters, newspapers and boots. He lifts a thumbs up but
+you can hear him groan)
+ :
+ADAM==
+
+- What do you think he makes?
+BARRY:
+- Not enough.
+TOUR GUIDE:
+Here we have our latest advancement,
+the Krelman.
+(They pass by a turning wheel with Bees standing on pegs, who are each
+wearing a finger-shaped hat)
+Barry:
+- Wow, What does that do?
+TOUR GUIDE:
+- Catches that little strand of honey
+ :
+that hangs after you pour it.
+Saves us millions.
+ADAM:
+(Intrigued)
+Can anyone work on the Krelman?
+TOUR GUIDE:
+Of course. Most bee jobs are
+small ones.
+But bees know that every small job,
+if it's done well, means a lot.
+ :
+But choose carefully
+ :
+because you'll stay in the job
+you pick for the rest of your life.
+(Everyone claps except for Barry)
+BARRY:
+The same job the rest of your life?
+I didn't know that.
+ADAM:
+
+What's the difference?
+TOUR GUIDE:
+You'll be happy to know that bees,
+as a species, haven't had one day off
+ :
+in 27 million years.
+BARRY:
+(Upset)
+So you'll just work us to death?
+ :
+We'll sure try.
+(Everyone on the bus laughs except Barry. Barry and Adam are walking back
+home together)
+ADAM:
+Wow! That blew my mind!
+BARRY:
+"What's the difference?"
+How can you say that?
+ :
+One job forever?
+That's an insane choice to have to make.
+ADAM:
+I'm relieved. Now we only have
+to make one decision in life.
+BARRY:
+But, Adam, how could they
+never have told us that?
+ADAM:
+Why would you question anything?
+We're bees.
+ :
+We're the most perfectly
+functioning society on Earth.
+
+BARRY:
+You ever think maybe things
+work a little too well here?
+ADAM:
+Like what? Give me one example.
+(Barry and Adam stop walking and it is revealed to the audience that
+hundreds of cars are speeding by and narrowly missing them in perfect
+unison)
+BARRY:
+I don't know. But you know
+what I'm talking about.
+ANNOUNCER:
+Please clear the gate.
+Royal Nectar Force on approach.
+BARRY:
+Wait a second. Check it out.
+(The Pollen jocks fly in, circle around and landing in line)
+ :
+- Hey, those are Pollen Jocks!
+ADAM:
+- Wow.
+ :
+I've never seen them this close.
+BARRY:
+They know what it's like
+outside the hive.
+ADAM:
+Yeah, but some don't come back.
+GIRL BEES:
+- Hey, Jocks!
+- Hi, Jocks!
+(The Pollen Jocks hook up their backpacks to machines that pump the nectar
+to trucks, which drive away)
+
+LOU LO DUVA:
+You guys did great!
+ :
+You're monsters!
+You're sky freaks!
+I love it!
+(Punching the Pollen Jocks in joy)
+I love it!
+ADAM:
+- I wonder where they were.
+BARRY:
+- I don't know.
+ :
+Their day's not planned.
+ :
+Outside the hive, flying who knows
+where, doing who knows what.
+ :
+You can't just decide to be a Pollen
+Jock. You have to be bred for that.
+ADAM==
+Right.
+(Barry and Adam are covered in some pollen that floated off of the Pollen
+Jocks)
+BARRY:
+Look at that. That's more pollen
+than you and I will see in a lifetime.
+ADAM:
+It's just a status symbol.
+Bees make too much of it.
+BARRY:
+Perhaps. Unless you're wearing it
+and the ladies see you wearing it.
+(Barry waves at 2 girls standing a little away from them)
+
+ADAM==
+Those ladies?
+Aren't they our cousins too?
+BARRY:
+Distant. Distant.
+POLLEN JOCK #1:
+Look at these two.
+POLLEN JOCK #2:
+- Couple of Hive Harrys.
+POLLEN JOCK #1:
+- Let's have fun with them.
+GIRL BEE #1:
+It must be dangerous
+being a Pollen Jock.
+BARRY:
+Yeah. Once a bear pinned me
+against a mushroom!
+ :
+He had a paw on my throat,
+and with the other, he was slapping me!
+(Slaps Adam with his hand to represent his scenario)
+GIRL BEE #2:
+- Oh, my!
+BARRY:
+- I never thought I'd knock him out.
+GIRL BEE #1:
+(Looking at Adam)
+What were you doing during this?
+ADAM:
+Obviously I was trying to alert the authorities.
+BARRY:
+I can autograph that.
+
+(The pollen jocks walk up to Barry and Adam, they pretend that Barry and
+Adam really are pollen jocks.)
+POLLEN JOCK #1:
+A little gusty out there today,
+wasn't it, comrades?
+BARRY:
+Yeah. Gusty.
+POLLEN JOCK #1:
+We're hitting a sunflower patch
+six miles from here tomorrow.
+BARRY:
+- Six miles, huh?
+ADAM:
+- Barry!
+POLLEN JOCK #2:
+A puddle jump for us,
+but maybe you're not up for it.
+BARRY:
+- Maybe I am.
+ADAM:
+- You are not!
+POLLEN JOCK #1:
+We're going 0900 at J-Gate.
+ :
+What do you think, buzzy-boy?
+Are you bee enough?
+BARRY:
+I might be. It all depends
+on what 0900 means.
+(The scene cuts to Barry looking out on the hive-city from his balcony at
+night)
+MARTIN:
+
+Hey, Honex!
+BARRY:
+Dad, you surprised me.
+MARTIN:
+You decide what you're interested in?
+BARRY:
+- Well, there's a lot of choices.
+- But you only get one.
+ :
+Do you ever get bored
+doing the same job every day?
+MARTIN:
+Son, let me tell you about stirring.
+ :
+You grab that stick, and you just
+move it around, and you stir it around.
+ :
+You get yourself into a rhythm.
+It's a beautiful thing.
+BARRY:
+You know, Dad,
+the more I think about it,
+ :
+maybe the honey field
+just isn't right for me.
+MARTIN:
+You were thinking of what,
+making balloon animals?
+ :
+That's a bad job
+for a guy with a stinger.
+ :
+
+Janet, your son's not sure
+he wants to go into honey!
+JANET:
+- Barry, you are so funny sometimes.
+BARRY:
+- I'm not trying to be funny.
+MARTIN:
+You're not funny! You're going
+into honey. Our son, the stirrer!
+JANET:
+- You're gonna be a stirrer?
+BARRY:
+- No one's listening to me!
+MARTIN:
+Wait till you see the sticks I have.
+BARRY:
+I could say anything right now.
+I'm gonna get an ant tattoo!
+(Barry's parents don't listen to him and continue to ramble on)
+MARTIN:
+Let's open some honey and celebrate!
+BARRY:
+Maybe I'll pierce my thorax.
+Shave my antennae.
+ :
+Shack up with a grasshopper. Get
+a gold tooth and call everybody "dawg"!
+JANET:
+I'm so proud.
+(The scene cuts to Barry and Adam waiting in line to get a job)
+ADAM:
+- We're starting work today!
+
+BARRY:
+- Today's the day.
+ADAM:
+Come on! All the good jobs
+will be gone.
+BARRY:
+Yeah, right.
+JOB LISTER:
+Pollen counting, stunt bee, pouring,
+stirrer, front desk, hair removal...
+BEE IN FRONT OF LINE:
+- Is it still available?
+JOB LISTER:
+- Hang on. Two left!
+ :
+One of them's yours! Congratulations!
+Step to the side.
+ADAM:
+- What'd you get?
+BEE IN FRONT OF LINE:
+- Picking crud out. Stellar!
+(He walks away)
+ADAM:
+Wow!
+JOB LISTER:
+Couple of newbies?
+ADAM:
+Yes, sir! Our first day! We are ready!
+JOB LISTER:
+Make your choice.
+(Adam and Barry look up at the job board. There are hundreds of constantly
+changing panels that contain available or unavailable jobs. It looks very
+confusing)
+
+ADAM:
+- You want to go first?
+BARRY:
+- No, you go.
+ADAM:
+Oh, my. What's available?
+JOB LISTER:
+Restroom attendant's open,
+not for the reason you think.
+ADAM:
+- Any chance of getting the Krelman?
+JOB LISTER:
+- Sure, you're on.
+(Puts the Krelman finger-hat on Adam's head)
+(Suddenly the sign for Krelman closes out)
+ :
+I'm sorry, the Krelman just closed out.
+(Takes Adam's hat off)
+Wax monkey's always open.
+ADAM:
+The Krelman opened up again.
+ :
+What happened?
+JOB LISTER:
+A bee died. Makes an opening. See?
+He's dead. Another dead one.
+ :
+Deady. Deadified. Two more dead.
+ :
+Dead from the neck up.
+Dead from the neck down. That's life!
+
+ADAM:
+Oh, this is so hard!
+(Barry remembers what the Pollen Jock offered him and he flies off)
+Heating, cooling,
+stunt bee, pourer, stirrer,
+ :
+humming, inspector number seven,
+lint coordinator, stripe supervisor,
+ :
+mite wrangler. Barry, what
+do you think I should... Barry?
+(Adam turns around and sees Barry flying away)
+ :
+Barry!
+POLLEN JOCK:
+All right, we've got the sunflower patch
+in quadrant nine...
+ADAM:
+(Through phone)
+What happened to you?
+Where are you?
+BARRY:
+- I'm going out.
+ADAM:
+- Out? Out where?
+BARRY:
+- Out there.
+ADAM:
+- Oh, no!
+BARRY:
+I have to, before I go
+to work for the rest of my life.
+ADAM:
+
+You're gonna die! You're crazy!
+(Barry hangs up)
+Hello?
+POLLEN JOCK #2:
+Another call coming in.
+ :
+If anyone's feeling brave,
+there's a Korean deli on 83rd
+ :
+that gets their roses today.
+BARRY:
+Hey, guys.
+POLLEN JOCK #1 ==
+- Look at that.
+POLLEN JOCK #2:
+- Isn't that the kid we saw yesterday?
+LOU LO DUVA:
+Hold it, son, flight deck's restricted.
+POLLEN JOCK #1:
+It's OK, Lou. We're gonna take him up.
+(Puts hand on Barry's shoulder)
+LOU LO DUVA:
+(To Barry) Really? Feeling lucky, are you?
+BEE WITH CLIPBOARD:
+(To Barry) Sign here, here. Just initial that.
+ :
+- Thank you.
+LOU LO DUVA:
+- OK.
+ :
+You got a rain advisory today,
+ :
+
+and as you all know,
+bees cannot fly in rain.
+ :
+So be careful. As always,
+watch your brooms,
+ :
+hockey sticks, dogs,
+birds, bears and bats.
+ :
+Also, I got a couple of reports
+of root beer being poured on us.
+ :
+Murphy's in a home because of it,
+babbling like a cicada!
+BARRY:
+- That's awful.
+LOU LO DUVA:
+(Still talking through megaphone)
+- And a reminder for you rookies,
+ :
+bee law number one,
+absolutely no talking to humans!
+ :
+All right, launch positions!
+POLLEN JOCKS:
+(The Pollen Jocks run into formation)
+ :
+Buzz, buzz, buzz, buzz! Buzz, buzz,
+buzz, buzz! Buzz, buzz, buzz, buzz!
+LOU LU DUVA:
+Black and yellow!
+POLLEN JOCKS:
+
+Hello!
+POLLEN JOCK #1:
+(To Barry)You ready for this, hot shot?
+BARRY:
+Yeah. Yeah, bring it on.
+POLLEN JOCK's:
+Wind, check.
+ :
+- Antennae, check.
+- Nectar pack, check.
+ :
+- Wings, check.
+- Stinger, check.
+BARRY:
+Scared out of my shorts, check.
+LOU LO DUVA:
+OK, ladies,
+ :
+let's move it out!
+ :
+Pound those petunias,
+you striped stem-suckers!
+ :
+All of you, drain those flowers!
+(The pollen jocks fly out of the hive)
+BARRY:
+Wow! I'm out!
+ :
+I can't believe I'm out!
+ :
+So blue.
+
+ :
+I feel so fast and free!
+ :
+Box kite!
+(Barry flies through the kite)
+ :
+Wow!
+ :
+Flowers!
+(A pollen jock puts on some high tech goggles that shows flowers similar to
+heat sink goggles.)
+POLLEN JOCK:
+This is Blue Leader.
+We have roses visual.
+ :
+Bring it around 30 degrees and hold.
+ :
+Roses!
+POLLEN JOCK #1:
+30 degrees, roger. Bringing it around.
+ :
+Stand to the side, kid.
+It's got a bit of a kick.
+(The pollen jock fires a high-tech gun at the flower, shooting tubes that
+suck up the nectar from the flower and collects it into a pouch on the gun)
+BARRY:
+That is one nectar collector!
+POLLEN JOCK #1==
+- Ever see pollination up close?
+BARRY:
+- No, sir.
+POLLEN JOCK #1:
+
+(Barry and the Pollen jock fly over the field, the pollen jock sprinkles
+pollen as he goes)
+ :
+I pick up some pollen here, sprinkle it
+over here. Maybe a dash over there,
+ :
+a pinch on that one.
+See that? It's a little bit of magic.
+BARRY:
+That's amazing. Why do we do that?
+POLLEN JOCK #1:
+That's pollen power. More pollen, more
+flowers, more nectar, more honey for us.
+BARRY:
+Cool.
+POLLEN JOCK #1:
+I'm picking up a lot of bright yellow.
+could be daisies. Don't we need those?
+POLLEN JOCK #2:
+Copy that visual.
+ :
+Wait. One of these flowers
+seems to be on the move.
+POLLEN JOCK #1:
+Say again? You're reporting
+a moving flower?
+POLLEN JOCK #2:
+Affirmative.
+(The Pollen jocks land near the "flowers" which, to the audience are
+obviously just tennis balls)
+KEN:
+(In the distance) That was on the line!
+
+POLLEN JOCK #1:
+This is the coolest. What is it?
+POLLEN JOCK #2:
+I don't know, but I'm loving this color.
+ :
+It smells good.
+Not like a flower, but I like it.
+POLLEN JOCK #1:
+Yeah, fuzzy.
+(Sticks his hand on the ball but it gets stuck)
+POLLEN JOCK #3==
+Chemical-y.
+(The pollen jock finally gets his hand free from the tennis ball)
+POLLEN JOCK #1:
+Careful, guys. It's a little grabby.
+(The pollen jocks turn around and see Barry lying his entire body on top of
+one of the tennis balls)
+POLLEN JOCK #2:
+My sweet lord of bees!
+POLLEN JOCK #3:
+Candy-brain, get off there!
+POLLEN JOCK #1:
+(Pointing upwards)
+Problem!
+(A human hand reaches down and grabs the tennis ball that Barry is stuck
+to)
+BARRY:
+- Guys!
+POLLEN JOCK #2:
+- This could be bad.
+POLLEN JOCK #3:
+Affirmative.
+(Vanessa Bloome starts bouncing the tennis ball, not knowing Barry is stick
+to it)
+
+BARRY==
+Very close.
+ :
+Gonna hurt.
+ :
+Mama's little boy.
+(Barry is being hit back and forth by two humans playing tennis. He is
+still stuck to the ball)
+POLLEN JOCK #1:
+You are way out of position, rookie!
+KEN:
+Coming in at you like a MISSILE!
+(Barry flies past the pollen jocks, still stuck to the ball)
+BARRY:
+(In slow motion)
+Help me!
+POLLEN JOCK #2:
+I don't think these are flowers.
+POLLEN JOCK #3:
+- Should we tell him?
+POLLEN JOCK #1:
+- I think he knows.
+BARRY:
+What is this?!
+KEN:
+Match point!
+ :
+You can start packing up, honey,
+because you're about to EAT IT!
+(A pollen jock coughs which confused Ken and he hits the ball the wrong way
+with Barry stuck to it and it goes flying into the city)
+BARRY:
+
+Yowser!
+(Barry bounces around town and gets stuck in the engine of a car. He flies
+into the air conditioner and sees a bug that was frozen in there)
+BARRY:
+Ew, gross.
+(The man driving the car turns on the air conditioner which blows Barry
+into the car)
+GIRL IN CAR:
+There's a bee in the car!
+ :
+- Do something!
+DAD DRIVING CAR:
+- I'm driving!
+BABY GIRL:
+(Waving at Barry)
+- Hi, bee.
+(Barry smiles and waves at the baby girl)
+GUY IN BACK OF CAR:
+- He's back here!
+ :
+He's going to sting me!
+GIRL IN CAR:
+Nobody move. If you don't move,
+he won't sting you. Freeze!
+(Barry freezes as well, hovering in the middle of the car)
+ :
+GRANDMA IN CAR==
+He blinked!
+(The grandma whips out some bee-spray and sprays everywhere in the car,
+climbing into the front seat, still trying to spray Barry)
+GIRL IN CAR:
+Spray him, Granny!
+DAD DRIVING THE CAR:
+What are you doing?!
+(Barry escapes the car through the air conditioner and is flying high above
+
+the ground, safe.)
+BARRY:
+Wow... the tension level
+out here is unbelievable.
+(Barry sees that storm clouds are gathering and he can see rain clouds
+moving into this direction)
+ :
+I gotta get home.
+ :
+Can't fly in rain.
+ :
+Can't fly in rain.
+(A rain drop hits Barry and one of his wings is damaged)
+ :
+Can't fly in rain.
+(A second rain drop hits Barry again and he spirals downwards)
+Mayday! Mayday! Bee going down!
+(WW2 plane sound effects are played as he plummets, and he crash-lands on a
+plant inside an apartment near the window)
+VANESSA BLOOME:
+Ken, could you close
+the window please?
+KEN==
+Hey, check out my new resume.
+I made it into a fold-out brochure.
+ :
+You see?
+(Folds brochure resume out)
+Folds out.
+(Ken closes the window, trapping Barry inside)
+BARRY:
+Oh, no. More humans. I don't need this.
+(Barry tries to fly away but smashes into the window and falls again)
+ :
+What was that?
+
+(Barry keeps trying to fly out the window but he keeps being knocked back
+because the window is closed)
+Maybe this time. This time. This time.
+This time! This time! This...
+ :
+Drapes!
+(Barry taps the glass. He doesn't understand what it is)
+That is diabolical.
+KEN:
+It's fantastic. It's got all my special
+skills, even my top-ten favorite movies.
+ANDY:
+What's number one? Star Wars?
+KEN:
+Nah, I don't go for that...
+(Ken makes finger guns and makes "pew pew pew" sounds and then stops)
+ :
+...kind of stuff.
+BARRY:
+No wonder we shouldn't talk to them.
+They're out of their minds.
+KEN:
+When I leave a job interview, they're
+flabbergasted, can't believe what I say.
+BARRY:
+(Looking at the light on the ceiling)
+There's the sun. Maybe that's a way out.
+(Starts flying towards the lightbulb)
+ :
+I don't remember the sun
+having a big 75 on it.
+(Barry hits the lightbulb and falls into the dip on the table that the
+humans are sitting at)
+KEN:
+
+I predicted global warming.
+ :
+I could feel it getting hotter.
+At first I thought it was just me.
+(Andy dips a chip into the bowl and scoops up some dip with Barry on it and
+is about to put it in his mouth)
+ :
+Wait! Stop! Bee!
+(Andy drops the chip with Barry in fear and backs away. All the humans
+freak out)
+ :
+Stand back. These are winter boots.
+(Ken has winter boots on his hands and he is about to smash the bee but
+Vanessa saves him last second)
+VANESSA:
+Wait!
+ :
+Don't kill him!
+(Vanessa puts Barry in a glass to protect him)
+KEN:
+You know I'm allergic to them!
+This thing could kill me!
+VANESSA:
+Why does his life have
+less value than yours?
+KEN:
+Why does his life have any less value
+than mine? Is that your statement?
+VANESSA:
+I'm just saying all life has value. You
+don't know what he's capable of feeling.
+(Vanessa picks up Ken's brochure and puts it under the glass so she can
+carry Barry back to the window. Barry looks at Vanessa in amazement)
+KEN:
+
+My brochure!
+VANESSA:
+There you go, little guy.
+(Vanessa opens the window and lets Barry out but Barry stays back and is
+still shocked that a human saved his life)
+KEN:
+I'm not scared of him.
+It's an allergic thing.
+VANESSA:
+Put that on your resume brochure.
+KEN:
+My whole face could puff up.
+ANDY:
+Make it one of your special skills.
+KEN:
+Knocking someone out
+is also a special skill.
+(Ken walks to the door)
+Right. Bye, Vanessa. Thanks.
+ :
+- Vanessa, next week? Yogurt night?
+VANESSA:
+- Sure, Ken. You know, whatever.
+ :
+(Vanessa tries to close door)
+KEN==
+- You could put carob chips on there.
+VANESSA:
+- Bye.
+(Closes door but Ken opens it again)
+KEN:
+- Supposed to be less calories.
+
+VANESSA:
+- Bye.
+(Closes door)
+(Fast forward to the next day, Barry is still inside the house. He flies
+into the kitchen where Vanessa is doing dishes)
+BARRY==
+(Talking to himself)
+I gotta say something.
+ :
+She saved my life.
+I gotta say something.
+ :
+All right, here it goes.
+(Turns back)
+Nah.
+ :
+What would I say?
+ :
+I could really get in trouble.
+ :
+It's a bee law.
+You're not supposed to talk to a human.
+ :
+I can't believe I'm doing this.
+ :
+I've got to.
+(Barry disguises himself as a character on a food can as Vanessa walks by
+again)
+ :
+Oh, I can't do it. Come on!
+ :
+No. Yes. No.
+ :
+Do it. I can't.
+
+ :
+How should I start it?
+(Barry strikes a pose and wiggles his eyebrows)
+"You like jazz?"
+No, that's no good.
+(Vanessa is about to walk past Barry)
+Here she comes! Speak, you fool!
+ :
+...Hi!
+(Vanessa gasps and drops the dishes in fright and notices Barry on the
+counter)
+ :
+I'm sorry.
+VANESSA:
+- You're talking.
+BARRY:
+- Yes, I know.
+VANESSA:
+(Pointing at Barry)
+You're talking!
+BARRY:
+I'm so sorry.
+VANESSA:
+No, it's OK. It's fine.
+I know I'm dreaming.
+ :
+But I don't recall going to bed.
+BARRY:
+Well, I'm sure this
+is very disconcerting.
+VANESSA:
+This is a bit of a surprise to me.
+I mean, you're a bee!
+
+BARRY:
+I am. And I'm not supposed
+to be doing this,
+(Pointing to the living room where Ken tried to kill him last night)
+but they were all trying to kill me.
+ :
+And if it wasn't for you...
+ :
+I had to thank you.
+It's just how I was raised.
+(Vanessa stabs her hand with a fork to test whether she's dreaming or not)
+ :
+That was a little weird.
+VANESSA:
+- I'm talking with a bee.
+BARRY:
+- Yeah.
+VANESSA:
+I'm talking to a bee.
+And the bee is talking to me!
+BARRY:
+I just want to say I'm grateful.
+I'll leave now.
+(Barry turns to leave)
+VANESSA:
+- Wait! How did you learn to do that?
+BARRY:
+(Flying back)
+- What?
+VANESSA:
+The talking...thing.
+BARRY:
+
+Same way you did, I guess.
+"Mama, Dada, honey." You pick it up.
+VANESSA:
+- That's very funny.
+BARRY:
+- Yeah.
+ :
+Bees are funny. If we didn't laugh,
+we'd cry with what we have to deal with.
+ :
+Anyway...
+VANESSA:
+Can I...
+ :
+...get you something?
+BARRY:
+- Like what?
+VANESSA:
+I don't know. I mean...
+I don't know. Coffee?
+BARRY:
+I don't want to put you out.
+VANESSA:
+It's no trouble. It takes two minutes.
+ :
+- It's just coffee.
+BARRY:
+- I hate to impose.
+(Vanessa starts making coffee)
+VANESSA:
+- Don't be ridiculous!
+
+BARRY:
+- Actually, I would love a cup.
+VANESSA:
+Hey, you want rum cake?
+BARRY:
+- I shouldn't.
+VANESSA:
+- Have some.
+BARRY:
+- No, I can't.
+VANESSA:
+- Come on!
+BARRY:
+I'm trying to lose a couple micrograms.
+VANESSA:
+- Where?
+BARRY:
+- These stripes don't help.
+VANESSA:
+You look great!
+BARRY:
+I don't know if you know
+anything about fashion.
+ :
+Are you all right?
+VANESSA:
+(Pouring coffee on the floor and missing the cup completely)
+No.
+(Flash forward in time. Barry and Vanessa are sitting together at a table
+on top of the apartment building drinking coffee)
+
+ :
+BARRY==
+He's making the tie in the cab
+as they're flying up Madison.
+ :
+He finally gets there.
+ :
+He runs up the steps into the church.
+The wedding is on.
+ :
+And he says, "Watermelon?
+I thought you said Guatemalan.
+ :
+Why would I marry a watermelon?"
+(Barry laughs but Vanessa looks confused)
+VANESSA:
+Is that a bee joke?
+BARRY:
+That's the kind of stuff we do.
+VANESSA:
+Yeah, different.
+ :
+So, what are you gonna do, Barry?
+(Barry stands on top of a sugar cube floating in his coffee and paddles it
+around with a straw like it's a gondola)
+BARRY:
+About work? I don't know.
+ :
+I want to do my part for the hive,
+but I can't do it the way they want.
+VANESSA:
+I know how you feel.
+
+BARRY:
+- You do?
+VANESSA:
+- Sure.
+ :
+My parents wanted me to be a lawyer or
+a doctor, but I wanted to be a florist.
+BARRY:
+- Really?
+VANESSA:
+- My only interest is flowers.
+BARRY:
+Our new queen was just elected
+with that same campaign slogan.
+ :
+Anyway, if you look...
+(Barry points to a tree in the middle of Central Park)
+ :
+There's my hive right there. See it?
+VANESSA:
+You're in Sheep Meadow!
+BARRY:
+Yes! I'm right off the Turtle Pond!
+VANESSA:
+No way! I know that area.
+I lost a toe ring there once.
+BARRY:
+- Why do girls put rings on their toes?
+VANESSA:
+- Why not?
+BARRY:
+
+- It's like putting a hat on your knee.
+VANESSA:
+- Maybe I'll try that.
+(A custodian installing a lightbulb looks over at them but to his
+perspective it looks like Vanessa is talking to a cup of coffee on the
+table)
+CUSTODIAN:
+- You all right, ma'am?
+VANESSA:
+- Oh, yeah. Fine.
+ :
+Just having two cups of coffee!
+BARRY:
+Anyway, this has been great.
+Thanks for the coffee.
+VANESSA==
+Yeah, it's no trouble.
+BARRY:
+Sorry I couldn't finish it. If I did,
+I'd be up the rest of my life.
+(Barry points towards the rum cake)
+ :
+Can I take a piece of this with me?
+VANESSA:
+Sure! Here, have a crumb.
+(Vanessa hands Barry a crumb but it is still pretty big for Barry)
+BARRY:
+- Thanks!
+VANESSA:
+- Yeah.
+BARRY:
+All right. Well, then...
+I guess I'll see you around.
+
+ :
+Or not.
+VANESSA:
+OK, Barry...
+BARRY:
+And thank you
+so much again... for before.
+VANESSA:
+Oh, that? That was nothing.
+BARRY:
+Well, not nothing, but... Anyway...
+(Vanessa and Barry hold hands, but Vanessa has to hold out a finger because
+her hands is to big and Barry holds that)
+(The custodian looks over again and it appears Vanessa is laughing at her
+coffee again. The lightbulb that he was screwing in sparks and he falls off
+the ladder)
+(Fast forward in time and we see two Bee Scientists testing out a parachute
+in a Honex wind tunnel)
+BEE SCIENTIST #1:
+This can't possibly work.
+BEE SCIENTIST #2:
+He's all set to go.
+We may as well try it.
+ :
+OK, Dave, pull the chute.
+(Dave pulls the chute and the wind slams him against the wall and he falls
+on his face.The camera pans over and we see Barry and Adam walking
+together)
+ADAM:
+- Sounds amazing.
+BARRY:
+- It was amazing!
+ :
+It was the scariest,
+happiest moment of my life.
+
+ADAM:
+Humans! I can't believe
+you were with humans!
+ :
+Giant, scary humans!
+What were they like?
+BARRY:
+Huge and crazy. They talk crazy.
+ :
+They eat crazy giant things.
+They drive crazy.
+ADAM:
+- Do they try and kill you, like on TV?
+BARRY:
+- Some of them. But some of them don't.
+ADAM:
+- How'd you get back?
+BARRY:
+- Poodle.
+ADAM:
+You did it, and I'm glad. You saw
+whatever you wanted to see.
+ :
+You had your "experience." Now you
+can pick out your job and be normal.
+BARRY:
+- Well...
+ADAM:
+- Well?
+BARRY:
+Well, I met someone.
+
+ADAM:
+You did? Was she Bee-ish?
+ :
+- A wasp?! Your parents will kill you!
+BARRY:
+- No, no, no, not a wasp.
+ADAM:
+- Spider?
+BARRY:
+- I'm not attracted to spiders.
+ :
+I know, for everyone else, it's the hottest thing,
+with the eight legs and all.
+ :
+I can't get by that face.
+ADAM:
+So who is she?
+BARRY:
+She's... human.
+ADAM:
+No, no. That's a bee law.
+You wouldn't break a bee law.
+BARRY:
+- Her name's Vanessa.
+(Adam puts his head in his hands)
+ADAM:
+- Oh, boy.
+BARRY==
+She's so nice. And she's a florist!
+ADAM:
+Oh, no! You're dating a human florist!
+
+BARRY:
+We're not dating.
+ADAM:
+You're flying outside the hive, talking
+to humans that attack our homes
+ :
+with power washers and M-80s!
+That's one-eighth a stick of dynamite!
+BARRY:
+She saved my life!
+And she understands me.
+ADAM:
+This is over!
+BARRY:
+Eat this.
+(Barry gives Adam a piece of the crumb that he got from Vanessa. Adam eats
+it)
+ADAM:
+(Adam's tone changes)
+This is not over! What was that?
+BARRY:
+- They call it a crumb.
+ADAM:
+- It was so stingin' stripey!
+BARRY:
+And that's not what they eat.
+That's what falls off what they eat!
+ :
+- You know what a Cinnabon is?
+ADAM:
+- No.
+(Adam opens a door behind him and he pulls Barry in)
+
+BARRY:
+It's bread and cinnamon and frosting.
+ADAM:
+Be quiet!
+BARRY:
+They heat it up...
+ADAM:
+Sit down!
+(Adam forces Barry to sit down)
+BARRY:
+(Still rambling about Cinnabons)
+...really hot!
+(Adam grabs Barry by the shoulders)
+ADAM:
+- Listen to me!
+ :
+We are not them! We're us.
+There's us and there's them!
+BARRY==
+Yes, but who can deny
+the heart that is yearning?
+ADAM:
+There's no yearning.
+Stop yearning. Listen to me!
+ :
+You have got to start thinking bee,
+my friend. Thinking bee!
+BARRY:
+- Thinking bee.
+WORKER BEE:
+- Thinking bee.
+WORKER BEES AND ADAM:
+Thinking bee! Thinking bee!
+
+Thinking bee! Thinking bee!
+(Flash forward in time; Barry is laying on a raft in a pool full of honey.
+He is wearing sunglasses)
+JANET:
+There he is. He's in the pool.
+MARTIN:
+You know what your problem is, Barry?
+(Barry pulls down his sunglasses and he looks annoyed)
+BARRY:
+(Sarcastic)
+I gotta start thinking bee?
+JANET:
+How much longer will this go on?
+MARTIN:
+It's been three days!
+Why aren't you working?
+(Puts sunglasses back on)
+BARRY:
+I've got a lot of big life decisions
+to think about.
+MARTIN:
+What life? You have no life!
+You have no job. You're barely a bee!
+JANET:
+Would it kill you
+to make a little honey?
+(Barry rolls off the raft and sinks into the honey pool)
+ :
+Barry, come out.
+Your father's talking to you.
+ :
+Martin, would you talk to him?
+MARTIN:
+
+Barry, I'm talking to you!
+(Barry keeps sinking into the honey until he is suddenly in Central Park
+having a picnic with Vanessa)
+(Barry has a cup of honey and he clinks his glass with Vanessas. Suddenly a
+mosquito lands on Vanessa and she slaps it, killing it. They both gasp but
+then burst out laughing)
+VANESSA:
+You coming?
+(The camera pans over and Vanessa is climbing into a small yellow airplane)
+BARRY:
+Got everything?
+VANESSA:
+All set!
+BARRY:
+Go ahead. I'll catch up.
+(Vanessa lifts off and flies ahead)
+VANESSA:
+Don't be too long.
+(Barry catches up with Vanessa and he sticks out his arms like ana irplane.
+He rolls from side to side, and Vanessa copies him with the airplane)
+VANESSA:
+Watch this!
+(Barry stays back and watches as Vanessa draws a heart in the air using
+pink smoke from the plane, but on the last loop-the-loop she suddenly
+crashes into a mountain and the plane explodes. The destroyed plane falls
+into some rocks and explodes a second time)
+BARRY:
+Vanessa!
+(As Barry is yelling his mouth fills with honey and he wakes up,
+discovering that he was just day dreaming. He slowly sinks back into the
+honey pool)
+MARTIN:
+- We're still here.
+
+JANET:
+- I told you not to yell at him.
+ :
+He doesn't respond to yelling!
+MARTIN:
+- Then why yell at me?
+JANET:
+- Because you don't listen!
+MARTIN:
+I'm not listening to this.
+BARRY:
+Sorry, I've gotta go.
+MARTIN:
+- Where are you going?
+BARRY:
+- I'm meeting a friend.
+JANET:
+A girl? Is this why you can't decide?
+BARRY:
+Bye.
+(Barry flies out the door and Martin shakes his head)
+ :
+JANET==
+I just hope she's Bee-ish.
+(Fast forward in time and Barry is sitting on Vanessa's shoulder and she is
+closing up her shop)
+BARRY:
+They have a huge parade
+of flowers every year in Pasadena?
+VANESSA:
+To be in the Tournament of Roses,
+that's every florist's dream!
+
+ :
+Up on a float, surrounded
+by flowers, crowds cheering.
+BARRY:
+A tournament. Do the roses
+compete in athletic events?
+VANESSA:
+No. All right, I've got one.
+How come you don't fly everywhere?
+BARRY:
+It's exhausting. Why don't you
+run everywhere? It's faster.
+VANESSA:
+Yeah, OK, I see, I see.
+All right, your turn.
+BARRY:
+TiVo. You can just freeze live TV?
+That's insane!
+VANESSA:
+You don't have that?
+BARRY:
+We have Hivo, but it's a disease.
+It's a horrible, horrible disease.
+VANESSA:
+Oh, my.
+(A human walks by and Barry narrowly avoids him)
+PASSERBY:
+Dumb bees!
+VANESSA:
+You must want to sting all those jerks.
+BARRY:
+We try not to sting.
+
+It's usually fatal for us.
+VANESSA:
+So you have to watch your temper
+(They walk into a store)
+BARRY:
+Very carefully.
+You kick a wall, take a walk,
+ :
+write an angry letter and throw it out.
+Work through it like any emotion:
+ :
+Anger, jealousy, lust.
+(Suddenly an employee(Hector) hits Barry off of Vanessa's shoulder. Hector
+thinks he's saving Vanessa)
+VANESSA:
+(To Barry)
+Oh, my goodness! Are you OK?
+(Barry is getting up off the floor)
+BARRY:
+Yeah.
+VANESSA:
+(To Hector)
+- What is wrong with you?!
+HECTOR:
+(Confused)
+- It's a bug.
+VANESSA:
+He's not bothering anybody.
+Get out of here, you creep!
+(Vanessa hits Hector across the face with the magazine he had and then hits
+him in the head. Hector backs away covering his head)
+Barry:
+What was that? A Pic 'N' Save circular?
+(Vanessa sets Barry back on her shoulder)
+
+VANESSA:
+Yeah, it was. How did you know?
+BARRY:
+It felt like about 10 pages.
+Seventy-five is pretty much our limit.
+VANESSA:
+You've really got that
+down to a science.
+BARRY:
+- Oh, we have to. I lost a cousin to Italian Vogue.
+VANESSA:
+- I'll bet.
+(Barry looks to his right and notices there is honey for sale in the aisle)
+BARRY:
+What in the name
+of Mighty Hercules is this?
+(Barry looks at all the brands of honey, shocked)
+How did this get here?
+Cute Bee, Golden Blossom,
+ :
+Ray Liotta Private Select?
+(Barry puts his hands up and slowly turns around, a look of disgust on his
+face)
+VANESSA:
+- Is he that actor?
+BARRY:
+- I never heard of him.
+ :
+- Why is this here?
+VANESSA:
+- For people. We eat it.
+BARRY:
+
+You don't have
+enough food of your own?!
+(Hector looks back and notices that Vanessa is talking to Barry)
+VANESSA:
+- Well, yes.
+BARRY:
+- How do you get it?
+VANESSA:
+- Bees make it.
+BARRY:
+- I know who makes it!
+ :
+And it's hard to make it!
+ :
+There's heating, cooling, stirring.
+You need a whole Krelman thing!
+VANESSA:
+- It's organic.
+BARRY:
+- It's our-ganic!
+VANESSA:
+It's just honey, Barry.
+BARRY:
+Just what?!
+ :
+Bees don't know about this!
+This is stealing! A lot of stealing!
+ :
+You've taken our homes, schools,
+hospitals! This is all we have!
+ :
+
+And it's on sale?!
+I'm getting to the bottom of this.
+ :
+I'm getting to the bottom
+of all of this!
+(Flash forward in time; Barry paints his face with black strikes like a
+soldier and sneaks into the storage section of the store)
+(Two men, including Hector, are loading boxes into some trucks)
+ :
+SUPERMARKET EMPLOYEE==
+Hey, Hector.
+ :
+- You almost done?
+HECTOR:
+- Almost.
+(Barry takes a step to peak around the corner)
+(Whispering)
+He is here. I sense it.
+ :
+Well, I guess I'll go home now
+(Hector pretends to walk away by walking in place and speaking loudly)
+ :
+and just leave this nice honey out,
+with no one around.
+BARRY:
+You're busted, box boy!
+HECTOR:
+I knew I heard something!
+So you can talk!
+BARRY:
+I can talk.
+And now you'll start talking!
+ :
+Where you getting the sweet stuff?
+
+Who's your supplier?
+HECTOR:
+I don't understand.
+I thought we were friends.
+ :
+The last thing we want
+to do is upset bees!
+(Hector takes a thumbtack out of the board behind him and sword-fights
+Barry. Barry is using his stinger like a sword)
+ :
+You're too late! It's ours now!
+BARRY:
+You, sir, have crossed
+the wrong sword!
+HECTOR:
+You, sir, will be lunch
+for my iguana, Ignacio!
+(Barry hits the thumbtack out of Hectors hand and Hector surrenders)
+Barry:
+Where is the honey coming from?
+ :
+Tell me where!
+HECTOR:
+(Pointing to leaving truck)
+Honey Farms! It comes from Honey Farms!
+(Barry chases after the truck but it is getting away. He flies onto a
+bicyclists' backpack and he catches up to the truck)
+CAR DRIVER:
+(To bicyclist)
+Crazy person!
+(Barry flies off and lands on the windshield of the Honey farms truck.
+Barry looks around and sees dead bugs splattered everywhere)
+BARRY:
+What horrible thing has happened here?
+
+ :
+These faces, they never knew
+what hit them. And now
+ :
+they're on the road to nowhere!
+(Barry hears a sudden whisper)
+(Barry looks up and sees Mooseblood, a mosquito playing dead)
+MOOSEBLOOD:
+Just keep still.
+BARRY:
+What? You're not dead?
+MOOSEBLOOD:
+Do I look dead? They will wipe anything
+that moves. Where you headed?
+BARRY:
+To Honey Farms.
+I am onto something huge here.
+MOOSEBLOOD:
+I'm going to Alaska. Moose blood,
+crazy stuff. Blows your head off!
+ANOTHER BUG PLAYING DEAD:
+I'm going to Tacoma.
+(Barry looks at another bug)
+BARRY:
+- And you?
+MOOSEBLOOD:
+- He really is dead.
+BARRY:
+All right.
+(Another bug hits the windshield and the drivers notice. They activate the
+windshield wipers)
+MOOSEBLOOD==
+Uh-oh!
+(The windshield wipers are slowly sliding over the dead bugs and wiping
+
+them off)
+BARRY:
+- What is that?!
+MOOSEBLOOD:
+- Oh, no!
+ :
+- A wiper! Triple blade!
+BARRY:
+- Triple blade?
+MOOSEBLOOD:
+Jump on! It's your only chance, bee!
+(Mooseblood and Barry grab onto the wiper and they hold on as it wipes the
+windshield)
+Why does everything have
+to be so doggone clean?!
+ :
+How much do you people need to see?!
+(Bangs on windshield)
+ :
+Open your eyes!
+Stick your head out the window!
+RADIO IN TRUCK:
+From NPR News in Washington,
+I'm Carl Kasell.
+MOOSEBLOOD:
+But don't kill no more bugs!
+(Mooseblood and Barry are washed off by the wipr fluid)
+MOOSEBLOOD:
+- Bee!
+BARRY:
+- Moose blood guy!!
+(Barry starts screaming as he hangs onto the antenna)
+(Suddenly it is revealed that a water bug is also hanging on the antenna.
+
+There is a pause and then Barry and the water bug both start screaming)
+TRUCK DRIVER:
+- You hear something?
+GUY IN TRUCK:
+- Like what?
+TRUCK DRIVER:
+Like tiny screaming.
+GUY IN TRUCK:
+Turn off the radio.
+(The antenna starts to lower until it gets to low and sinks into the truck.
+The water bug flies off and Barry is forced to let go and he is blown away.
+He luckily lands inside a horn on top of the truck where he finds
+Mooseblood, who was blown into the same place)
+MOOSEBLOOD:
+Whassup, bee boy?
+BARRY:
+Hey, Blood.
+(Fast forward in time and we see that Barry is deep in conversation with
+Mooseblood. They have been sitting in this truck for a while)
+BARRY:
+...Just a row of honey jars,
+as far as the eye could see.
+MOOSEBLOOD:
+Wow!
+BARRY:
+I assume wherever this truck goes
+is where they're getting it.
+ :
+I mean, that honey's ours.
+MOOSEBLOOD:
+- Bees hang tight.
+BARRY:
+
+- We're all jammed in.
+ :
+It's a close community.
+MOOSEBLOOD:
+Not us, man. We on our own.
+Every mosquito on his own.
+BARRY:
+- What if you get in trouble?
+MOOSEBLOOD:
+- You a mosquito, you in trouble.
+ :
+Nobody likes us. They just smack.
+See a mosquito, smack, smack!
+BARRY:
+At least you're out in the world.
+You must meet girls.
+MOOSEBLOOD:
+Mosquito girls try to trade up,
+get with a moth, dragonfly.
+ :
+Mosquito girl don't want no mosquito.
+(An ambulance passes by and it has a blood donation sign on it)
+You got to be kidding me!
+ :
+Mooseblood's about to leave
+the building! So long, bee!
+(Mooseblood leaves and flies onto the window of the ambulance where there
+are other mosquito's hanging out)
+ :
+- Hey, guys!
+OTHER MOSQUITO:
+- Mooseblood!
+
+MOOSEBLOOD:
+I knew I'd catch y'all down here.
+Did you bring your crazy straw?
+(The truck goes out of view and Barry notices that the truck he's on is
+pulling into a camp of some sort)
+TRUCK DRIVER:
+We throw it in jars, slap a label on it,
+and it's pretty much pure profit.
+(Barry flies out)
+BARRY:
+What is this place?
+BEEKEEPER 1#:
+A bee's got a brain
+the size of a pinhead.
+BEEKEEPER #2:
+They are pinheads!
+ :
+Pinhead.
+ :
+- Check out the new smoker.
+BEEKEEPER #1:
+- Oh, sweet. That's the one you want.
+ :
+The Thomas 3000!
+BARRY:
+Smoker?
+BEEKEEPER #1:
+Ninety puffs a minute, semi-automatic.
+Twice the nicotine, all the tar.
+ :
+A couple breaths of this
+knocks them right out.
+
+BEEKEEPER #2:
+They make the honey,
+and we make the money.
+BARRY:
+"They make the honey,
+and we make the money"?
+(The Beekeeper sprays hundreds of cheap miniature apartments with the
+smoker. The bees are fainting or passing out)
+Oh, my!
+ :
+What's going on? Are you OK?
+(Barry flies into one of the apartment and helps a Bee couple get off the
+ground. They are coughing and its hard for them to stand)
+BEE IN APARTMENT:
+Yeah. It doesn't last too long.
+BARRY:
+Do you know you're
+in a fake hive with fake walls?
+BEE IN APPARTMENT:
+Our queen was moved here.
+We had no choice.
+(The apartment room is completely empty except for a photo on the wall of
+the "queen" who is obviously a man in women's clothes)
+BARRY:
+This is your queen?
+That's a man in women's clothes!
+ :
+That's a drag queen!
+ :
+What is this?
+(Barry flies out and he discovers that there are hundreds of these
+structures, each housing thousands of Bees)
+Oh, no!
+ :
+There's hundreds of them!
+(Barry takes out his camera and takes pictures of these Bee work camps. The
+beekeepers look very evil in these depictions)
+
+Bee honey.
+ :
+Our honey is being brazenly stolen
+on a massive scale!
+ :
+This is worse than anything bears
+have done! I intend to do something.
+(Flash forward in time and Barry is showing these pictures to his parents)
+JANET:
+Oh, Barry, stop.
+MARTIN:
+Who told you humans are taking
+our honey? That's a rumor.
+BARRY:
+Do these look like rumors?
+(Holds up the pictures)
+UNCLE CARL:
+That's a conspiracy theory.
+These are obviously doctored photos.
+JANET:
+How did you get mixed up in this?
+ADAM:
+He's been talking to humans.
+JANET:
+- What?
+MARTIN:
+- Talking to humans?!
+ADAM:
+He has a human girlfriend.
+And they make out!
+JANET:
+Make out? Barry!
+
+BARRY:
+We do not.
+ADAM:
+- You wish you could.
+MARTIN:
+- Whose side are you on?
+BARRY:
+The bees!
+UNCLE CARL:
+(He has been sitting in the back of the room this entire time)
+I dated a cricket once in San Antonio.
+Those crazy legs kept me up all night.
+JANET:
+Barry, this is what you want
+to do with your life?
+BARRY:
+I want to do it for all our lives.
+Nobody works harder than bees!
+ :
+Dad, I remember you
+coming home so overworked
+ :
+your hands were still stirring.
+You couldn't stop.
+JANET:
+I remember that.
+BARRY:
+What right do they have to our honey?
+ :
+We live on two cups a year. They put it
+in lip balm for no reason whatsoever!
+
+ADAM:
+Even if it's true, what can one bee do?
+BARRY:
+Sting them where it really hurts.
+MARTIN:
+In the face! The eye!
+ :
+- That would hurt.
+BARRY:
+- No.
+MARTIN:
+Up the nose? That's a killer.
+BARRY:
+There's only one place you can sting
+the humans, one place where it matters.
+(Flash forward a bit in time and we are watching the Bee News)
+BEE NEWS NARRATOR:
+Hive at Five, the hive's only
+full-hour action news source.
+BEE PROTESTOR:
+No more bee beards!
+BEE NEWS NARRATOR:
+With Bob Bumble at the anchor desk.
+ :
+Weather with Storm Stinger.
+ :
+Sports with Buzz Larvi.
+ :
+And Jeanette Chung.
+BOB BUMBLE:
+- Good evening. I'm Bob Bumble.
+JEANETTE CHUNG:
+
+- And I'm Jeanette Chung.
+BOB BUMBLE:
+A tri-county bee, Barry Benson,
+ :
+intends to sue the human race
+for stealing our honey,
+ :
+packaging it and profiting
+from it illegally!
+JEANETTE CHUNG:
+Tomorrow night on Bee Larry King,
+ :
+we'll have three former queens here in
+our studio, discussing their new book,
+ :
+Classy Ladies,
+out this week on Hexagon.
+(The scene changes to an interview on the news with Bee version of Larry
+King and Barry)
+BEE LARRY KING:
+Tonight we're talking to Barry Benson.
+ :
+Did you ever think, "I'm a kid
+from the hive. I can't do this"?
+BARRY:
+Bees have never been afraid
+to change the world.
+ :
+What about Bee Columbus?
+Bee Gandhi? Bejesus?
+BEE LARRY KING:
+Where I'm from, we'd never sue humans.
+
+ :
+We were thinking
+of stickball or candy stores.
+BARRY:
+How old are you?
+BEE LARRY KING:
+The bee community
+is supporting you in this case,
+ :
+which will be the trial
+of the bee century.
+BARRY:
+You know, they have a Larry King
+in the human world too.
+BEE LARRY KING:
+It's a common name. Next week...
+BARRY:
+He looks like you and has a show
+and suspenders and colored dots...
+BEE LARRY KING:
+Next week...
+BARRY:
+Glasses, quotes on the bottom from the
+guest even though you just heard 'em.
+BEE LARRY KING:
+Bear Week next week!
+They're scary, hairy and here, live.
+(Bee Larry King gets annoyed and flies away offscreen)
+BARRY:
+Always leans forward, pointy shoulders,
+squinty eyes, very Jewish.
+(Flash forward in time. We see Vanessa enter and Ken enters behind her.
+They are arguing)
+
+KEN:
+In tennis, you attack
+at the point of weakness!
+VANESSA:
+It was my grandmother, Ken. She's 81.
+KEN==
+Honey, her backhand's a joke!
+I'm not gonna take advantage of that?
+BARRY:
+(To Ken)
+Quiet, please.
+Actual work going on here.
+KEN:
+(Pointing at Barry)
+- Is that that same bee?
+VANESSA:
+- Yes, it is!
+ :
+I'm helping him sue the human race.
+BARRY:
+- Hello.
+KEN:
+- Hello, bee.
+VANESSA:
+This is Ken.
+BARRY:
+(Recalling the "Winter Boots" incident earlier)
+Yeah, I remember you. Timberland, size
+ten and a half. Vibram sole, I believe.
+KEN:
+(To Vanessa)
+Why does he talk again?
+VANESSA:
+
+Listen, you better go
+'cause we're really busy working.
+KEN:
+But it's our yogurt night!
+VANESSA:
+(Holding door open for Ken)
+Bye-bye.
+KEN:
+(Yelling)
+Why is yogurt night so difficult?!
+(Ken leaves and Vanessa walks over to Barry. His workplace is a mess)
+VANESSA:
+You poor thing.
+You two have been at this for hours!
+BARRY:
+Yes, and Adam here
+has been a huge help.
+ADAM:
+- Frosting...
+- How many sugars?
+ ==BARRY==
+Just one. I try not
+to use the competition.
+ :
+So why are you helping me?
+VANESSA:
+Bees have good qualities.
+ :
+And it takes my mind off the shop.
+ :
+Instead of flowers, people
+are giving balloon bouquets now.
+BARRY:
+
+Those are great, if you're three.
+VANESSA:
+And artificial flowers.
+BARRY:
+- Oh, those just get me psychotic!
+VANESSA:
+- Yeah, me too.
+ :
+BARRY:
+Bent stingers, pointless pollination.
+ADAM:
+Bees must hate those fake things!
+ :
+Nothing worse
+than a daffodil that's had work done.
+ :
+Maybe this could make up
+for it a little bit.
+VANESSA:
+- This lawsuit's a pretty big deal.
+BARRY:
+- I guess.
+ADAM:
+You sure you want to go through with it?
+BARRY:
+Am I sure? When I'm done with
+the humans, they won't be able
+ :
+to say, "Honey, I'm home,"
+without paying a royalty!
+(Flash forward in time and we are watching the human news. The camera shows
+
+a crowd outside a courthouse)
+NEWS REPORTER:
+It's an incredible scene
+here in downtown Manhattan,
+ :
+where the world anxiously waits,
+because for the first time in history,
+ :
+we will hear for ourselves
+if a honeybee can actually speak.
+(We are no longer watching through a news camera)
+ADAM:
+What have we gotten into here, Barry?
+BARRY:
+It's pretty big, isn't it?
+ADAM==
+(Looking at the hundreds of people around the courthouse)
+I can't believe how many humans
+don't work during the day.
+BARRY:
+You think billion-dollar multinational
+food companies have good lawyers?
+SECURITY GUARD:
+Everybody needs to stay
+behind the barricade.
+(A limousine drives up and a fat man,Layton Montgomery, a honey industry
+owner gets out and walks past Barry)
+ADAM:
+- What's the matter?
+BARRY:
+- I don't know, I just got a chill.
+(Fast forward in time and everyone is in the court)
+MONTGOMERY:
+Well, if it isn't the bee team.
+
+(To Honey Industry lawyers)
+You boys work on this?
+MAN:
+All rise! The Honorable
+Judge Bumbleton presiding.
+JUDGE BUMBLETON:
+All right. Case number 4475,
+ :
+Superior Court of New York,
+Barry Bee Benson v. the Honey Industry
+ :
+is now in session.
+ :
+Mr. Montgomery, you're representing
+the five food companies collectively?
+MONTGOMERY:
+A privilege.
+JUDGE BUMBLETON:
+Mr. Benson... you're representing
+all the bees of the world?
+(Everyone looks closely, they are waiting to see if a Bee can really talk)
+(Barry makes several buzzing sounds to sound like a Bee)
+BARRY:
+I'm kidding. Yes, Your Honor,
+we're ready to proceed.
+JUDGE BUMBLBETON:
+Mr. Montgomery,
+your opening statement, please.
+MONTGOMERY:
+Ladies and gentlemen of the jury,
+ :
+my grandmother was a simple woman.
+ :
+
+Born on a farm, she believed
+it was man's divine right
+ :
+to benefit from the bounty
+of nature God put before us.
+ :
+If we lived in the topsy-turvy world
+Mr. Benson imagines,
+ :
+just think of what would it mean.
+ :
+I would have to negotiate
+with the silkworm
+ :
+for the elastic in my britches!
+ :
+Talking bee!
+(Montgomery walks over and looks closely at Barry)
+ :
+How do we know this isn't some sort of
+ :
+holographic motion-picture-capture
+Hollywood wizardry?
+ :
+They could be using laser beams!
+ :
+Robotics! Ventriloquism!
+Cloning! For all we know,
+ :
+he could be on steroids!
+JUDGE BUMBLETON:
+Mr. Benson?
+
+BARRY:
+Ladies and gentlemen,
+there's no trickery here.
+ :
+I'm just an ordinary bee.
+Honey's pretty important to me.
+ :
+It's important to all bees.
+We invented it!
+ :
+We make it. And we protect it
+with our lives.
+ :
+Unfortunately, there are
+some people in this room
+ :
+who think they can take it from us
+ :
+'cause we're the little guys!
+I'm hoping that, after this is all over,
+ :
+you'll see how, by taking our honey,
+you not only take everything we have
+ :
+but everything we are!
+JANET==
+(To Martin)
+I wish he'd dress like that
+all the time. So nice!
+JUDGE BUMBLETON:
+Call your first witness.
+BARRY:
+So, Mr. Klauss Vanderhayden
+
+of Honey Farms, big company you have.
+KLAUSS VANDERHAYDEN:
+I suppose so.
+BARRY:
+I see you also own
+Honeyburton and Honron!
+KLAUSS:
+Yes, they provide beekeepers
+for our farms.
+BARRY:
+Beekeeper. I find that
+to be a very disturbing term.
+ :
+I don't imagine you employ
+any bee-free-ers, do you?
+KLAUSS:
+(Quietly)
+- No.
+BARRY:
+- I couldn't hear you.
+KLAUSS:
+- No.
+BARRY:
+- No.
+ :
+Because you don't free bees.
+You keep bees. Not only that,
+ :
+it seems you thought a bear would be
+an appropriate image for a jar of honey.
+KLAUSS:
+They're very lovable creatures.
+
+ :
+Yogi Bear, Fozzie Bear, Build-A-Bear.
+BARRY:
+You mean like this?
+(The bear from Over The Hedge barges in through the back door and it is
+roaring and standing on its hind legs. It is thrashing its claws and people
+are screaming. It is being held back by a guard who has the bear on a
+chain)
+ :
+(Pointing to the roaring bear)
+Bears kill bees!
+ :
+How'd you like his head crashing
+through your living room?!
+ :
+Biting into your couch!
+Spitting out your throw pillows!
+JUDGE BUMBLETON:
+OK, that's enough. Take him away.
+(The bear stops roaring and thrashing and walks out)
+BARRY:
+So, Mr. Sting, thank you for being here.
+Your name intrigues me.
+ :
+- Where have I heard it before?
+MR. STING:
+- I was with a band called The Police.
+BARRY:
+But you've never been
+a police officer, have you?
+STING:
+No, I haven't.
+BARRY:
+
+No, you haven't. And so here
+we have yet another example
+ :
+of bee culture casually
+stolen by a human
+ :
+for nothing more than
+a prance-about stage name.
+STING:
+Oh, please.
+BARRY:
+Have you ever been stung, Mr. Sting?
+ :
+Because I'm feeling
+a little stung, Sting.
+ :
+Or should I say... Mr. Gordon M. Sumner!
+MONTGOMERY:
+That's not his real name?! You idiots!
+BARRY:
+Mr. Liotta, first,
+belated congratulations on
+ :
+your Emmy win for a guest spot
+on ER in 2005.
+RAY LIOTTA:
+Thank you. Thank you.
+BARRY:
+I see from your resume
+that you're devilishly handsome
+ :
+with a churning inner turmoil
+
+that's ready to blow.
+RAY LIOTTA:
+I enjoy what I do. Is that a crime?
+BARRY:
+Not yet it isn't. But is this
+what it's come to for you?
+ :
+Exploiting tiny, helpless bees
+so you don't
+ :
+have to rehearse
+your part and learn your lines, sir?
+RAY LIOTTA:
+Watch it, Benson!
+I could blow right now!
+BARRY:
+This isn't a goodfella.
+This is a badfella!
+(Ray Liotta looses it and tries to grab Barry)
+RAY LIOTTA:
+Why doesn't someone just step on
+this creep, and we can all go home?!
+JUDGE BUMBLETON:
+- Order in this court!
+RAY LIOTTA:
+- You're all thinking it!
+(Judge Bumbleton starts banging her gavel)
+JUDGE BUMBLETON:
+Order! Order, I say!
+RAY LIOTTA:
+- Say it!
+MAN:
+
+- Mr. Liotta, please sit down!
+(We see a montage of magazines which feature the court case)
+(Flash forward in time and Barry is back home with Vanessa)
+BARRY:
+I think it was awfully nice
+of that bear to pitch in like that.
+VANESSA:
+I think the jury's on our side.
+BARRY:
+Are we doing everything right,you know, legally?
+VANESSA:
+I'm a florist.
+BARRY:
+Right. Well, here's to a great team.
+VANESSA:
+To a great team!
+(Ken walks in from work. He sees Barry and he looks upset when he sees
+Barry clinking his glass with Vanessa)
+KEN:
+Well, hello.
+VANESSA:
+- Oh, Ken!
+BARRY:
+- Hello!
+VANESSA:
+I didn't think you were coming.
+ :
+No, I was just late.
+I tried to call, but...
+(Ken holds up his phone and flips it open. The phone has no charge)
+...the battery...
+VANESSA:
+
+I didn't want all this to go to waste,
+so I called Barry. Luckily, he was free.
+KEN:
+Oh, that was lucky.
+(Ken sits down at the table across from Barry and Vanessa leaves the room)
+VANESSA:
+There's a little left.
+I could heat it up.
+KEN:
+(Not taking his eyes off Barry)
+Yeah, heat it up, sure, whatever.
+BARRY:
+So I hear you're quite a tennis player.
+ :
+I'm not much for the game myself.
+The ball's a little grabby.
+KEN:
+That's where I usually sit.
+Right...
+(Points to where Barry is sitting)
+there.
+VANESSA:
+(Calling from other room)
+Ken, Barry was looking at your resume,
+ :
+and he agreed with me that eating with
+chopsticks isn't really a special skill.
+KEN:
+(To Barry)
+You think I don't see what you're doing?
+BARRY:
+I know how hard it is to find
+the right job. We have that in common.
+
+KEN:
+Do we?
+BARRY:
+Bees have 100 percent employment,
+but we do jobs like taking the crud out.
+KEN:
+(Menacingly)
+That's just what
+I was thinking about doing.
+(Ken reaches for a fork on the table but knocks if on the floor. He goes to
+pick it up)
+VANESSA:
+Ken, I let Barry borrow your razor
+for his fuzz. I hope that was all right.
+(Ken quickly rises back up after hearing this but hits his head on the
+table and yells)
+BARRY:
+I'm going to drain the old stinger.
+KEN:
+Yeah, you do that.
+(Barry flies past Ken to get to the bathroom and Ken freaks out, splashing
+some of the wine he was using to cool his head in his eyes. He yells in
+anger)
+(Barry looks at the magazines featuring his victories in court)
+BARRY:
+Look at that.
+(Barry flies into the bathroom)
+(He puts his hand on his head but this makes hurts him and makes him even
+madder. He yells again)
+(Barry is washing his hands in the sink but then Ken walks in)
+KEN:
+You know, you know I've just about had it
+(Closes bathroom door behind him)
+with your little mind games.
+(Ken is menacingly rolling up a magazine)
+BARRY:
+
+(Backing away)
+- What's that?
+KEN:
+- Italian Vogue.
+BARRY:
+Mamma mia, that's a lot of pages.
+KEN:
+It's a lot of ads.
+BARRY:
+Remember what Van said, why is
+your life more valuable than mine?
+KEN:
+That's funny, I just can't seem to recall that!
+(Ken smashes everything off the sink with the magazine and Barry narrowly
+escapes)
+(Ken follows Barry around and tries to hit him with the magazine but he
+keeps missing)
+(Ken gets a spray bottle)
+ :
+I think something stinks in here!
+BARRY:
+(Enjoying the spray)
+I love the smell of flowers.
+(Ken holds a lighter in front of the spray bottle)
+KEN:
+How do you like the smell of flames?!
+BARRY:
+Not as much.
+(Ken fires his make-shift flamethrower but misses Barry, burning the
+bathroom. He torches the whole room but looses his footing and falls into
+the bathtub. After getting hit in the head by falling objects 3 times he
+picks up the shower head, revealing a Water bug hiding under it)
+WATER BUG:
+Water bug! Not taking sides!
+
+(Barry gets up out of a pile of bathroom supplies and he is wearing a
+chapstick hat)
+BARRY:
+Ken, I'm wearing a Chapstick hat!
+This is pathetic!
+(Ken switches the shower head to lethal)
+KEN:
+I've got issues!
+(Ken sprays Barry with the shower head and he crash lands into the toilet)
+(Ken menacingly looks down into the toilet at Barry)
+Well, well, well, a royal flush!
+BARRY:
+- You're bluffing.
+KEN:
+- Am I?
+(flushes toilet)
+(Barry grabs a chapstick from the toilet seat and uses it to surf in the
+flushing toilet)
+BARRY:
+Surf's up, dude!
+(Barry flies out of the toilet on the chapstick and sprays Ken's face with
+the toilet water)
+ :
+EW,Poo water!
+BARRY:
+That bowl is gnarly.
+KEN:
+(Aiming a toilet cleaner at Barry)
+Except for those dirty yellow rings!
+(Barry cowers and covers his head and Vanessa runs in and takes the toilet
+cleaner from Ken just before he hits Barry)
+VANESSA:
+Kenneth! What are you doing?!
+KEN==
+(Leaning towards Barry)
+
+You know, I don't even like honey!
+I don't eat it!
+VANESSA:
+We need to talk!
+(Vanessa pulls Ken out of the bathroom)
+ :
+He's just a little bee!
+ :
+And he happens to be
+the nicest bee I've met in a long time!
+KEN:
+Long time? What are you talking about?!
+Are there other bugs in your life?
+VANESSA:
+No, but there are other things bugging
+me in life. And you're one of them!
+KEN:
+Fine! Talking bees, no yogurt night...
+ :
+My nerves are fried from riding
+on this emotional roller coaster!
+VANESSA:
+Goodbye, Ken.
+(Ken huffs and walks out and slams the door. But suddenly he walks back in
+and stares at Barry)
+ :
+And for your information,
+I prefer sugar-free, artificial
+sweeteners MADE BY MAN!
+(Ken leaves again and Vanessa leans in towards Barry)
+VANESSA:
+I'm sorry about all that.
+(Ken walks back in again)
+
+KEN:
+I know it's got
+an aftertaste! I LIKE IT!
+(Ken leaves for the last time)
+VANESSA:
+I always felt there was some kind
+of barrier between Ken and me.
+ :
+I couldn't overcome it.
+Oh, well.
+ :
+Are you OK for the trial?
+BARRY:
+I believe Mr. Montgomery
+is about out of ideas.
+(Flash forward in time and Barry, Adam, and Vanessa are back in court)
+MONTGOMERY--
+We would like to call
+Mr. Barry Benson Bee to the stand.
+ADAM:
+Good idea! You can really see why he's
+considered one of the best lawyers...
+(Barry stares at Adam)
+...Yeah.
+LAWYER:
+Layton, you've
+gotta weave some magic
+with this jury,
+or it's gonna be all over.
+MONTGOMERY:
+Don't worry. The only thing I have
+to do to turn this jury around
+ :
+is to remind them
+of what they don't like about bees.
+(To lawyer)
+
+- You got the tweezers?
+LAWYER:
+- Are you allergic?
+MONTGOMERY:
+Only to losing, son. Only to losing.
+ :
+Mr. Benson Bee, I'll ask you
+what I think we'd all like to know.
+ :
+What exactly is your relationship
+(Points to Vanessa)
+ :
+to that woman?
+BARRY:
+We're friends.
+MONTGOMERY:
+- Good friends?
+BARRY:
+- Yes.
+MONTGOMERY:
+How good? Do you live together?
+ADAM:
+Wait a minute...
+ :
+MONTGOMERY:
+Are you her little...
+ :
+...bedbug?
+(Adam's stinger starts vibrating. He is agitated)
+I've seen a bee documentary or two.
+From what I understand,
+
+ :
+doesn't your queen give birth
+to all the bee children?
+BARRY:
+- Yeah, but...
+MONTGOMERY:
+(Pointing at Janet and Martin)
+- So those aren't your real parents!
+JANET:
+- Oh, Barry...
+BARRY:
+- Yes, they are!
+ADAM:
+Hold me back!
+(Vanessa tries to hold Adam back. He wants to sting Montgomery)
+MONTGOMERY:
+You're an illegitimate bee,
+aren't you, Benson?
+ADAM:
+He's denouncing bees!
+MONTGOMERY:
+Don't y'all date your cousins?
+(Montgomery leans over on the jury stand and stares at Adam)
+VANESSA:
+- Objection!
+(Vanessa raises her hand to object but Adam gets free. He flies straight at
+Montgomery)
+=ADAM:
+- I'm going to pincushion this guy!
+BARRY:
+Adam, don't! It's what he wants!
+(Adam stings Montgomery in the butt and he starts thrashing around)
+
+MONTGOMERY:
+Oh, I'm hit!!
+ :
+Oh, lordy, I am hit!
+JUDGE BUMBLETON:
+(Banging gavel)
+Order! Order!
+MONTGOMERY:
+(Overreacting)
+The venom! The venom
+is coursing through my veins!
+ :
+I have been felled
+by a winged beast of destruction!
+ :
+You see? You can't treat them
+like equals! They're striped savages!
+ :
+Stinging's the only thing
+they know! It's their way!
+BARRY:
+- Adam, stay with me.
+ADAM:
+- I can't feel my legs.
+MONTGOMERY:
+(Overreacting and throwing his body around the room)
+What angel of mercy
+will come forward to suck the poison
+ :
+from my heaving buttocks?
+JUDGE BUMLBETON:
+I will have order in this court. Order!
+
+ :
+Order, please!
+(Flash forward in time and we see a human news reporter)
+NEWS REPORTER:
+The case of the honeybees
+versus the human race
+ :
+took a pointed turn against the bees
+ :
+yesterday when one of their legal
+team stung Layton T. Montgomery.
+(Adam is laying in a hospital bed and Barry flies in to see him)
+BARRY:
+- Hey, buddy.
+ADAM:
+- Hey.
+BARRY:
+- Is there much pain?
+ADAM:
+- Yeah.
+ :
+I...
+ :
+I blew the whole case, didn't I?
+BARRY:
+It doesn't matter. What matters is
+you're alive. You could have died.
+ADAM:
+I'd be better off dead. Look at me.
+(A small plastic sword is replaced as Adam's stinger)
+They got it from the cafeteria
+downstairs, in a tuna sandwich.
+
+ :
+Look, there's
+a little celery still on it.
+(Flicks off the celery and sighs)
+BARRY:
+What was it like to sting someone?
+ADAM:
+I can't explain it. It was all...
+ :
+All adrenaline and then...
+and then ecstasy!
+BARRY:
+...All right.
+ADAM:
+You think it was all a trap?
+BARRY:
+Of course. I'm sorry.
+I flew us right into this.
+ :
+What were we thinking? Look at us. We're
+just a couple of bugs in this world.
+ADAM:
+What will the humans do to us
+if they win?
+BARRY:
+I don't know.
+ADAM:
+I hear they put the roaches in motels.
+That doesn't sound so bad.
+BARRY:
+Adam, they check in,
+but they don't check out!
+
+ADAM:
+Oh, my.
+(Coughs)
+Could you get a nurse
+to close that window?
+BARRY:
+- Why?
+ADAM:
+- The smoke.
+(We can see that two humans are smoking cigarettes outside)
+ :
+Bees don't smoke.
+BARRY:
+Right. Bees don't smoke.
+ :
+Bees don't smoke!
+But some bees are smoking.
+ :
+That's it! That's our case!
+ADAM:
+It is? It's not over?
+BARRY:
+Get dressed. I've gotta go somewhere.
+ :
+Get back to the court and stall.
+Stall any way you can.
+(Flash forward in time and Adam is making a paper boat in the courtroom)
+ADAM:
+And assuming you've done step 29 correctly, you're ready for the tub!
+(We see that the jury have each made their own paper boats after being
+taught how by Adam. They all look confused)
+JUDGE BUMBLETON:
+
+Mr. Flayman.
+ADAM:
+Yes? Yes, Your Honor!
+JUDGE BUMBLETON:
+Where is the rest of your team?
+ADAM:
+(Continues stalling)
+Well, Your Honor, it's interesting.
+ :
+Bees are trained to fly haphazardly,
+ :
+and as a result,
+we don't make very good time.
+ :
+I actually heard a funny story about...
+MONTGOMERY:
+Your Honor,
+haven't these ridiculous bugs
+ :
+taken up enough
+of this court's valuable time?
+ :
+How much longer will we allow
+these absurd shenanigans to go on?
+ :
+They have presented no compelling
+evidence to support their charges
+ :
+against my clients,
+who run legitimate businesses.
+ :
+I move for a complete dismissal
+
+of this entire case!
+JUDGE BUMBLETON:
+Mr. Flayman, I'm afraid I'm going
+ :
+to have to consider
+Mr. Montgomery's motion.
+ADAM:
+But you can't! We have a terrific case.
+MONTGOMERY:
+Where is your proof?
+Where is the evidence?
+ :
+Show me the smoking gun!
+BARRY:
+(Barry flies in through the door)
+Hold it, Your Honor!
+You want a smoking gun?
+ :
+Here is your smoking gun.
+(Vanessa walks in holding a bee smoker. She sets it down on the Judge's
+podium)
+JUDGE BUMBLETON:
+What is that?
+BARRY:
+It's a bee smoker!
+MONTGOMERY:
+(Picks up smoker)
+What, this?
+This harmless little contraption?
+ :
+This couldn't hurt a fly,
+let alone a bee.
+(Montgomery accidentally fires it at the bees in the crowd and they faint
+
+and cough)
+(Dozens of reporters start taking pictures of the suffering bees)
+BARRY:
+Look at what has happened
+ :
+to bees who have never been asked,
+"Smoking or non?"
+ :
+Is this what nature intended for us?
+ :
+To be forcibly addicted
+to smoke machines
+ :
+and man-made wooden slat work camps?
+ :
+Living out our lives as honey slaves
+to the white man?
+(Barry points to the honey industry owners. One of them is an African
+American so he awkwardly separates himself from the others)
+LAWYER:
+- What are we gonna do?
+- He's playing the species card.
+BARRY:
+Ladies and gentlemen, please,
+free these bees!
+ADAM AND VANESSA:
+Free the bees! Free the bees!
+BEES IN CROWD:
+Free the bees!
+HUMAN JURY:
+Free the bees! Free the bees!
+JUDGE BUMBLETON:
+The court finds in favor of the bees!
+
+BARRY:
+Vanessa, we won!
+VANESSA:
+I knew you could do it! High-five!
+(Vanessa hits Barry hard because her hand is too big)
+ :
+Sorry.
+BARRY:
+(Overjoyed)
+I'm OK! You know what this means?
+ :
+All the honey
+will finally belong to the bees.
+ :
+Now we won't have
+to work so hard all the time.
+MONTGOMERY:
+This is an unholy perversion
+of the balance of nature, Benson.
+ :
+You'll regret this.
+(Montgomery leaves and Barry goes outside the courtroom. Several reporters
+start asking Barry questions)
+REPORTER 1#:
+Barry, how much honey is out there?
+BARRY:
+All right. One at a time.
+REPORTER 2#:
+Barry, who are you wearing?
+BARRY:
+My sweater is Ralph Lauren,
+and I have no pants.
+
+(Barry flies outside with the paparazzi and Adam and Vanessa stay back)
+ADAM:
+(To Vanessa)
+- What if Montgomery's right?
+Vanessa:
+- What do you mean?
+ADAM:
+We've been living the bee way
+a long time, 27 million years.
+(Flash forward in time and Barry is talking to a man)
+BUSINESS MAN:
+Congratulations on your victory.
+What will you demand as a settlement?
+BARRY:
+First, we'll demand a complete shutdown
+of all bee work camps.
+(As Barry is talking we see a montage of men putting "closed" tape over the
+work camps and freeing the bees in the crappy apartments)
+Then we want back the honey
+that was ours to begin with,
+ :
+every last drop.
+(Men in suits are pushing all the honey of the aisle and into carts)
+We demand an end to the glorification
+of the bear as anything more
+(We see a statue of a bear-shaped honey container being pulled down by
+bees)
+than a filthy, smelly,
+bad-breath stink machine.
+ :
+We're all aware
+of what they do in the woods.
+(We see Winnie the Pooh sharing his honey with Piglet in the cross-hairs of
+a high-tech sniper rifle)
+BARRY:
+(Looking through binoculars)
+
+Wait for my signal.
+ :
+Take him out.
+(Winnie gets hit by a tranquilizer dart and dramatically falls off the log
+he was standing on, his tongue hanging out. Piglet looks at Pooh in fear
+and the Sniper takes the honey.)
+SNIPER:
+He'll have nausea
+for a few hours, then he'll be fine.
+(Flash forward in time)
+BARRY:
+And we will no longer tolerate
+bee-negative nicknames...
+(Mr. Sting is sitting at home until he is taken out of his house by the men
+in suits)
+STING:
+But it's just a prance-about stage name!
+BARRY:
+...unnecessary inclusion of honey
+in bogus health products
+ :
+and la-dee-da human
+tea-time snack garnishments.
+(An old lady is mixing honey into her tea but suddenly men in suits smash
+her face down on the table and take the honey)
+OLD LADY:
+Can't breathe.
+(A honey truck pulls up to Barry's hive)
+WORKER:
+Bring it in, boys!
+ :
+Hold it right there! Good.
+ :
+Tap it.
+
+(Tons of honey is being pumped into the hive's storage)
+BEE WORKER 1#:
+(Honey overflows from the cup)
+Mr. Buzzwell, we just passed three cups,
+and there's gallons more coming!
+ :
+- I think we need to shut down!
+=BEE WORKER #2=
+- Shut down? We've never shut down.
+ :
+Shut down honey production!
+DEAN BUZZWELL:
+Stop making honey!
+(The bees all leave their stations. Two bees run into a room and they put
+the keys into a machine)
+Turn your key, sir!
+(Two worker bees dramatically turn their keys, which opens the button which
+they press, shutting down the honey-making machines. This is the first time
+this has ever happened)
+BEE:
+...What do we do now?
+(Flash forward in time and a Bee is about to jump into a pool full of
+honey)
+Cannonball!
+(The bee gets stuck in the honey and we get a short montage of Bees leaving
+work)
+(We see the Pollen Jocks flying but one of them gets a call on his antenna)
+LOU LU DUVA:
+(Through "phone")
+We're shutting honey production!
+ :
+Mission abort.
+POLLEN JOCK #1:
+Aborting pollination and nectar detail.
+Returning to base.
+(The Pollen Jocks fly back to the hive)
+
+(We get a time lapse of Central Park slowly wilting away as the bees all
+relax)
+BARRY:
+Adam, you wouldn't believe
+how much honey was out there.
+ADAM:
+Oh, yeah?
+BARRY:
+What's going on? Where is everybody?
+(The entire street is deserted)
+ :
+- Are they out celebrating?
+ADAM:
+- They're home.
+ :
+They don't know what to do.
+Laying out, sleeping in.
+ :
+I heard your Uncle Carl was on his way
+to San Antonio with a cricket.
+BARRY:
+At least we got our honey back.
+ADAM:
+Sometimes I think, so what if humans
+liked our honey? Who wouldn't?
+ :
+It's the greatest thing in the world!
+I was excited to be part of making it.
+ :
+This was my new desk. This was my
+new job. I wanted to do it really well.
+ :
+
+And now...
+ :
+Now I can't.
+(Flash forward in time and Barry is talking to Vanessa)
+BARRY:
+I don't understand
+why they're not happy.
+ :
+I thought their lives would be better!
+ :
+They're doing nothing. It's amazing.
+Honey really changes people.
+VANESSA:
+You don't have any idea
+what's going on, do you?
+BARRY:
+- What did you want to show me?
+(Vanessa takes Barry to the rooftop where they first had coffee and points
+to her store)
+VANESSA:
+- This.
+(Points at her flowers. They are all grey and wilting)
+BARRY:
+What happened here?
+VANESSA:
+That is not the half of it.
+(Small flash forward in time and Vanessa and Barry are on the roof of her
+store and she points to Central Park)
+(We see that Central Park is no longer green and colorful, rather it is
+grey, brown, and dead-like. It is very depressing to look at)
+BARRY:
+Oh, no. Oh, my.
+ :
+
+They're all wilting.
+VANESSA:
+Doesn't look very good, does it?
+BARRY:
+No.
+VANESSA:
+And whose fault do you think that is?
+BARRY:
+You know, I'm gonna guess bees.
+VANESSA==
+(Staring at Barry)
+Bees?
+BARRY:
+Specifically, me.
+ :
+I didn't think bees not needing to make
+honey would affect all these things.
+VANESSA:
+It's not just flowers.
+Fruits, vegetables, they all need bees.
+BARRY:
+That's our whole SAT test right there.
+VANESSA:
+Take away produce, that affects
+the entire animal kingdom.
+ :
+And then, of course...
+BARRY:
+The human species?
+ :
+So if there's no more pollination,
+
+ :
+it could all just go south here,
+couldn't it?
+VANESSA:
+I know this is also partly my fault.
+BARRY:
+How about a suicide pact?
+VANESSA:
+How do we do it?
+BARRY:
+- I'll sting you, you step on me.
+VANESSA:
+- That just kills you twice.
+BARRY:
+Right, right.
+VANESSA:
+Listen, Barry...
+sorry, but I gotta get going.
+(Vanessa leaves)
+BARRY:
+(To himself)
+I had to open my mouth and talk.
+ :
+Vanessa?
+ :
+Vanessa? Why are you leaving?
+Where are you going?
+(Vanessa is getting into a taxi)
+VANESSA:
+To the final Tournament of Roses parade
+in Pasadena.
+ :
+
+They've moved it to this weekend
+because all the flowers are dying.
+ :
+It's the last chance
+I'll ever have to see it.
+BARRY:
+Vanessa, I just wanna say I'm sorry.
+I never meant it to turn out like this.
+VANESSA:
+I know. Me neither.
+(The taxi starts to drive away)
+BARRY:
+Tournament of Roses.
+Roses can't do sports.
+ :
+Wait a minute. Roses. Roses?
+ :
+Roses!
+ :
+Vanessa!
+(Barry flies after the Taxi)
+VANESSA:
+Roses?!
+ :
+Barry?
+(Barry is flying outside the window of the taxi)
+BARRY:
+- Roses are flowers!
+VANESSA:
+- Yes, they are.
+BARRY:
+Flowers, bees, pollen!
+
+VANESSA:
+I know.
+That's why this is the last parade.
+BARRY:
+Maybe not.
+Could you ask him to slow down?
+VANESSA:
+Could you slow down?
+(The taxi driver screeches to a stop and Barry keeps flying forward)
+ :
+Barry!
+(Barry flies back to the window)
+BARRY:
+OK, I made a huge mistake.
+This is a total disaster, all my fault.
+VANESSA:
+Yes, it kind of is.
+BARRY:
+I've ruined the planet.
+I wanted to help you
+ :
+with the flower shop.
+I've made it worse.
+VANESSA:
+Actually, it's completely closed down.
+BARRY:
+I thought maybe you were remodeling.
+ :
+But I have another idea, and it's
+greater than my previous ideas combined.
+VANESSA:
+I don't want to hear it!
+
+BARRY:
+All right, they have the roses,
+the roses have the pollen.
+ :
+I know every bee, plant
+and flower bud in this park.
+ :
+All we gotta do is get what they've got
+back here with what we've got.
+ :
+- Bees.
+VANESSA:
+- Park.
+BARRY:
+- Pollen!
+VANESSA:
+- Flowers.
+BARRY:
+- Re-pollination!
+VANESSA:
+- Across the nation!
+ :
+Tournament of Roses,
+Pasadena, California.
+ :
+They've got nothing
+but flowers, floats and cotton candy.
+ :
+Security will be tight.
+BARRY:
+I have an idea.
+
+(Flash forward in time. Vanessa is about to board a plane which has all the
+Roses on board.
+VANESSA:
+Vanessa Bloome, FTD.
+(Holds out badge)
+ :
+Official floral business. It's real.
+SECURITY GUARD:
+Sorry, ma'am. Nice brooch.
+=VANESSA==
+Thank you. It was a gift.
+(Barry is revealed to be hiding inside the brooch)
+(Flash back in time and Barry and Vanessa are discussing their plan)
+BARRY:
+Once inside,
+we just pick the right float.
+VANESSA:
+How about The Princess and the Pea?
+ :
+I could be the princess,
+and you could be the pea!
+BARRY:
+Yes, I got it.
+ :
+- Where should I sit?
+GUARD:
+- What are you?
+BARRY:
+- I believe I'm the pea.
+GUARD:
+- The pea?
+VANESSA:
+
+It goes under the mattresses.
+GUARD:
+- Not in this fairy tale, sweetheart.
+- I'm getting the marshal.
+VANESSA:
+You do that!
+This whole parade is a fiasco!
+ :
+Let's see what this baby'll do.
+(Vanessa drives the float through traffic)
+GUARD:
+Hey, what are you doing?!
+BARRY==
+Then all we do
+is blend in with traffic...
+ :
+...without arousing suspicion.
+ :
+Once at the airport,
+there's no stopping us.
+(Flash forward in time and Barry and Vanessa are about to get on a plane)
+SECURITY GUARD:
+Stop! Security.
+ :
+- You and your insect pack your float?
+VANESSA:
+- Yes.
+SECURITY GUARD:
+Has it been
+in your possession the entire time?
+VANESSA:
+- Yes.
+
+SECURITY GUARD:
+Would you remove your shoes?
+(To Barry)
+- Remove your stinger.
+BARRY:
+- It's part of me.
+SECURITY GUARD:
+I know. Just having some fun.
+Enjoy your flight.
+(Barry plotting with Vanessa)
+BARRY:
+Then if we're lucky, we'll have
+just enough pollen to do the job.
+(Flash forward in time and Barry and Vanessa are flying on the plane)
+Can you believe how lucky we are? We
+have just enough pollen to do the job!
+VANESSA:
+I think this is gonna work.
+BARRY:
+It's got to work.
+CAPTAIN SCOTT:
+(On intercom)
+Attention, passengers,
+this is Captain Scott.
+ :
+We have a bit of bad weather
+in New York.
+ :
+It looks like we'll experience
+a couple hours delay.
+VANESSA:
+Barry, these are cut flowers
+with no water. They'll never make it.
+BARRY:
+
+I gotta get up there
+and talk to them.
+VANESSA==
+Be careful.
+(Barry flies right outside the cockpit door)
+BARRY:
+Can I get help
+with the Sky Mall magazine?
+I'd like to order the talking
+inflatable nose and ear hair trimmer.
+(The flight attendant opens the door and walks out and Barry flies into the
+cockpit unseen)
+BARRY:
+Captain, I'm in a real situation.
+CAPTAIN SCOTT:
+- What'd you say, Hal?
+CO-PILOT HAL:
+- Nothing.
+(Scott notices Barry and freaks out)
+CAPTAIN SCOTT:
+Bee!
+BARRY:
+No,no,no, Don't freak out! My entire species...
+(Captain Scott gets out of his seat and tries to suck Barry into a handheld
+vacuum)
+HAL:
+(To Scott)
+What are you doing?
+(Barry lands on Hals hair but Scott sees him. He tries to suck up Barry but
+instead he sucks up Hals toupee)
+CAPTAIN SCOTT:
+Uh-oh.
+BARRY:
+- Wait a minute! I'm an attorney!
+
+HAL:
+(Hal doesn't know Barry is on his head)
+- Who's an attorney?
+CAPTAIN SCOTT:
+Don't move.
+(Scott hits Hal in the face with the vacuum in an attempt to hit Barry. Hal
+is knocked out and he falls on the life raft button which launches an
+infalatable boat into Scott, who gets knocked out and falls to the floor.
+They are both uncounscious.)
+BARRY:
+(To himself)
+Oh, Barry.
+BARRY:
+(On intercom, with a Southern accent)
+Good afternoon, passengers.
+This is your captain.
+ :
+Would a Miss Vanessa Bloome in 24B
+please report to the cockpit?
+(Vanessa looks confused)
+(Normal accent)
+...And please hurry!
+(Vanessa opens the door and sees the life raft and the uncounscious pilots)
+VANESSA:
+What happened here?
+BARRY:
+I tried to talk to them, but
+then there was a DustBuster,
+a toupee, a life raft exploded.
+ :
+Now one's bald, one's in a boat,
+and they're both unconscious!
+VANESSA:
+...Is that another bee joke?
+BARRY:
+
+- No!
+ :
+No one's flying the plane!
+BUD DITCHWATER:
+(Through radio on plane)
+This is JFK control tower, Flight 356.
+What's your status?
+VANESSA:
+This is Vanessa Bloome.
+I'm a florist from New York.
+BUD:
+Where's the pilot?
+VANESSA:
+He's unconscious,
+and so is the copilot.
+BUD:
+Not good. Does anyone onboard
+have flight experience?
+BARRY:
+As a matter of fact, there is.
+BUD:
+- Who's that?
+BARRY:
+- Barry Benson.
+BUD:
+From the honey trial?! Oh, great.
+BARRY:
+Vanessa, this is nothing more
+than a big metal bee.
+ :
+It's got giant wings, huge engines.
+
+VANESSA:
+I can't fly a plane.
+BARRY:
+- Why not? Isn't John Travolta a pilot?
+VANESSA:
+- Yes.
+BARRY:
+How hard could it be?
+(Vanessa sits down and flies for a little bit but we see lightning clouds
+outside the window)
+VANESSA:
+Wait, Barry!
+We're headed into some lightning.
+(An ominous lightning storm looms in front of the plane)
+(We are now watching the Bee News)
+BOB BUMBLE:
+This is Bob Bumble. We have some
+late-breaking news from JFK Airport,
+ :
+where a suspenseful scene
+is developing.
+ :
+Barry Benson,
+fresh from his legal victory...
+ADAM:
+That's Barry!
+BOB BUMBLE:
+...is attempting to land a plane,
+loaded with people, flowers
+ :
+and an incapacitated flight crew.
+JANET, MARTIN, UNCLE CAR AND ADAM:
+Flowers?!
+(The scene switches to the human news)
+
+REPORTER:
+(Talking with Bob Bumble)
+We have a storm in the area
+and two individuals at the controls
+ :
+with absolutely no flight experience.
+BOB BUMBLE:
+Just a minute.
+There's a bee on that plane.
+BUD:
+I'm quite familiar with Mr. Benson
+and his no-account compadres.
+ :
+They've done enough damage.
+REPORTER:
+But isn't he your only hope?
+BUD:
+Technically, a bee
+shouldn't be able to fly at all.
+ :
+Their wings are too small...
+BARRY:
+(Through radio)
+Haven't we heard this a million times?
+ :
+"The surface area of the wings
+and body mass make no sense."...
+BOB BUMBLE:
+- Get this on the air!
+BEE:
+- Got it.
+
+BEE NEWS CREW:
+- Stand by.
+BEE NEWS CREW:
+- We're going live!
+BARRY:
+(Through radio on TV)
+...The way we work may be a mystery to you.
+ :
+Making honey takes a lot of bees
+doing a lot of small jobs.
+ :
+But let me tell you about a small job.
+ :
+If you do it well,
+it makes a big difference.
+ :
+More than we realized.
+To us, to everyone.
+ :
+That's why I want to get bees
+back to working together.
+ :
+That's the bee way!
+We're not made of Jell-O.
+ :
+We get behind a fellow.
+ :
+- Black and yellow!
+BEES:
+- Hello!
+(The scene switches and Barry is teaching Vanessa how to fly)
+BARRY:
+
+Left, right, down, hover.
+VANESSA:
+- Hover?
+BARRY:
+- Forget hover.
+VANESSA:
+This isn't so hard.
+(Pretending to honk the horn)
+Beep-beep! Beep-beep!
+(A Lightning bolt hits the plane and autopilot turns off)
+Barry, what happened?!
+BARRY:
+Wait, I think we were
+on autopilot the whole time.
+VANESSA:
+- That may have been helping me.
+BARRY:
+- And now we're not!
+VANESSA:
+So it turns out I cannot fly a plane.
+(The plane plummets but we see Lou Lu Duva and the Pollen Jocks, along with
+multiple other bees flying towards the plane)
+Lou Lu DUva:
+All of you, let's get
+behind this fellow! Move it out!
+ :
+Move out!
+(The scene switches back to Vanessa and Barry in the plane)
+BARRY:
+Our only chance is if I do what I'd do,
+you copy me with the wings of the plane!
+(Barry sticks out his arms like an airplane and flys in front of Vanessa's
+face)
+
+VANESSA:
+Don't have to yell.
+BARRY:
+I'm not yelling!
+We're in a lot of trouble.
+VANESSA:
+It's very hard to concentrate
+with that panicky tone in your voice!
+BARRY:
+It's not a tone. I'm panicking!
+VANESSA:
+I can't do this!
+(Barry slaps Vanessa)
+BARRY:
+Vanessa, pull yourself together.
+You have to snap out of it!
+VANESSA:
+(Slaps Barry)
+You snap out of it.
+BARRY:
+(Slaps Vanessa)
+ :
+You snap out of it.
+VANESSA:
+- You snap out of it!
+BARRY:
+- You snap out of it!
+(We see that all the Pollen Jocks are flying under the plane)
+VANESSA:
+- You snap out of it!
+BARRY:
+- You snap out of it!
+
+VANESSA:
+- You snap out of it!
+BARRY:
+- You snap out of it!
+VANESSA:
+- Hold it!
+BARRY:
+- Why? Come on, it's my turn.
+VANESSA:
+How is the plane flying?
+(The plane is now safely flying)
+VANESSA:
+I don't know.
+(Barry's antennae rings like a phone. Barry picks up)
+BARRY:
+Hello?
+LOU LU DUVA:
+(Through "phone")
+Benson, got any flowers
+for a happy occasion in there?
+(All of the Pollen Jocks are carrying the plane)
+BARRY:
+The Pollen Jocks!
+ :
+They do get behind a fellow.
+LOU LU DUVA:
+- Black and yellow.
+POLLEN JOCKS:
+- Hello.
+LOU LU DUVA:
+All right, let's drop this tin can
+
+on the blacktop.
+BARRY:
+Where? I can't see anything. Can you?
+VANESSA:
+No, nothing. It's all cloudy.
+ :
+Come on. You got to think bee, Barry.
+BARRY:
+- Thinking bee.
+- Thinking bee.
+(On the runway there are millions of bees laying on their backs)
+BEES:
+Thinking bee!
+Thinking bee! Thinking bee!
+BARRY:
+Wait a minute.
+I think I'm feeling something.
+VANESSA:
+- What?
+BARRY:
+- I don't know. It's strong, pulling me.
+ :
+Like a 27-million-year-old instinct.
+ :
+Bring the nose down.
+BEES:
+Thinking bee!
+Thinking bee! Thinking bee!
+CONTROL TOWER OPERATOR:
+- What in the world is on the tarmac?
+BUD:
+- Get some lights on that!
+
+(It is revealed that all the bees are organized into a giant pulsating
+flower formation)
+BEES:
+Thinking bee!
+Thinking bee! Thinking bee!
+BARRY:
+- Vanessa, aim for the flower.
+VANESSA:
+- OK.
+BARRY:
+Out the engines. We're going in
+on bee power. Ready, boys?
+LOU LU DUVA:
+Affirmative!
+BARRY:
+Good. Good. Easy, now. That's it.
+ :
+Land on that flower!
+ :
+Ready? Full reverse!
+ :
+Spin it around!
+(The plane's nose is pointed at a flower painted on a nearby plane)
+- Not that flower! The other one!
+VANESSA:
+- Which one?
+BARRY:
+- That flower.
+(The plane is now pointed at a fat guy in a flowered shirt. He freaks out
+and tries to take a picture of the plane)
+VANESSA:
+- I'm aiming at the flower!
+
+BARRY:
+That's a fat guy in a flowered shirt.
+I mean the giant pulsating flower
+made of millions of bees!
+(The plane hovers over the bee-flower)
+ :
+Pull forward. Nose down. Tail up.
+ :
+Rotate around it.
+VANESSA:
+- This is insane, Barry!
+BARRY:
+- This's the only way I know how to fly.
+BUD:
+Am I koo-koo-kachoo, or is this plane
+flying in an insect-like pattern?
+(The plane is unrealistically hovering and spinning over the bee-flower)
+BARRY:
+Get your nose in there. Don't be afraid.
+Smell it. Full reverse!
+ :
+Just drop it. Be a part of it.
+ :
+Aim for the center!
+ :
+Now drop it in! Drop it in, woman!
+ :
+Come on, already.
+(The bees scatter and the plane safely lands)
+VANESSA:
+Barry, we did it!
+You taught me how to fly!
+
+BARRY:
+- Yes!
+(Vanessa is about to high-five Barry)
+No high-five!
+VANESSA:
+- Right.
+ADAM:
+Barry, it worked!
+Did you see the giant flower?
+BARRY:
+What giant flower? Where? Of course
+I saw the flower! That was genius!
+ADAM:
+- Thank you.
+BARRY:
+- But we're not done yet.
+ :
+Listen, everyone!
+ :
+This runway is covered
+with the last pollen
+ :
+from the last flowers
+available anywhere on Earth.
+ :
+That means this is our last chance.
+ :
+We're the only ones who make honey,
+pollinate flowers and dress like this.
+ :
+If we're gonna survive as a species,
+this is our moment! What do you say?
+
+ :
+Are we going to be bees, or just
+Museum of Natural History keychains?
+BEES:
+We're bees!
+BEE WHO LIKES KEYCHAINS:
+Keychain!
+BARRY:
+Then follow me! Except Keychain.
+POLLEN JOCK #1:
+Hold on, Barry. Here.
+ :
+You've earned this.
+BARRY:
+Yeah!
+ :
+I'm a Pollen Jock! And it's a perfect
+fit. All I gotta do are the sleeves.
+(The Pollen Jocks throw Barry a nectar-collecting gun. Barry catches it)
+Oh, yeah.
+JANET:
+That's our Barry.
+(Barry and the Pollen Jocks get pollen from the flowers on the plane)
+(Flash forward in time and the Pollen Jocks are flying over NYC)
+ :
+(Barry pollinates the flowers in Vanessa's shop and then heads to Central
+Park)
+BOY IN PARK:
+Mom! The bees are back!
+ADAM:
+(Putting on his Krelman hat)
+If anybody needs
+
+to make a call, now's the time.
+ :
+I got a feeling we'll be
+working late tonight!
+(The bee honey factories are back up and running)
+(Meanwhile at Vanessa's shop)
+VANESSA:
+(To customer)
+Here's your change. Have a great
+afternoon! Can I help who's next?
+ :
+Would you like some honey with that?
+It is bee-approved. Don't forget these.
+(There is a room in the shop where Barry does legal work for other animals.
+He is currently talking with a Cow)
+COW:
+Milk, cream, cheese, it's all me.
+And I don't see a nickel!
+ :
+Sometimes I just feel
+like a piece of meat!
+BARRY:
+I had no idea.
+VANESSA:
+Barry, I'm sorry.
+Have you got a moment?
+BARRY:
+Would you excuse me?
+My mosquito associate will help you.
+MOOSEBLOOD:
+Sorry I'm late.
+COW:
+He's a lawyer too?
+
+MOOSEBLOOD:
+Ma'am, I was already a blood-sucking parasite.
+All I needed was a briefcase.
+VANESSA:
+Have a great afternoon!
+ :
+Barry, I just got this huge tulip order,
+and I can't get them anywhere.
+BARRY:
+No problem, Vannie.
+Just leave it to me.
+VANESSA:
+You're a lifesaver, Barry.
+Can I help who's next?
+BARRY:
+All right, scramble, jocks!
+It's time to fly.
+VANESSA:
+Thank you, Barry!
+(Ken walks by on the sidewalk and sees the "bee-approved honey" in
+Vanessa's shop)
+KEN:
+That bee is living my life!!
+ANDY:
+Let it go, Kenny.
+KEN:
+- When will this nightmare end?!
+ANDY:
+- Let it all go.
+BARRY:
+- Beautiful day to fly.
+POLLEN JOCK:
+
+- Sure is.
+BARRY:
+Between you and me,
+I was dying to get out of that office.
+(Barry recreates the scene near the beginning of the movie where he flies
+through the box kite. The movie fades to black and the credits being)
+[--after credits; No scene can be seen but the characters can be heard
+talking over the credits--]
+You have got
+to start thinking bee, my friend!
+ :
+- Thinking bee!
+- Me?
+BARRY:
+(Talking over singer)
+Hold it. Let's just stop
+for a second. Hold it.
+ :
+I'm sorry. I'm sorry, everyone.
+Can we stop here?
+SINGER:
+Oh, BarryBARRY:
+I'm not making a major life decision
+during a production number!
+SINGER:
+All right. Take ten, everybody.
+Wrap it up, guys.
+BARRY:
+I had virtually no rehearsal for that.
+
