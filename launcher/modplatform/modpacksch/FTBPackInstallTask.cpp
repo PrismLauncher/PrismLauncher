@@ -214,7 +214,7 @@ void PackInstallTask::onResolveModsSucceeded()
                                                    tr("The following files are not available for download in third party launchers.<br/>"
                                                       "You will need to manually download them and add them to the instance.<br/><br/>"
                                                       "Your configured global mods folder and default downloads folder<br/>"
-                                                      "are automatically checked for the downloaded mods.<br/>"
+                                                      "are automatically checked for the downloaded mods and they will be copied to the instance if found.<br/>"
                                                       "Optionally, you may drag and drop the downloaded mods onto this dialog or add a folder to watch<br/>"
                                                       "if you did not download the mods to a default location."),
                                                    m_blocked_mods);
