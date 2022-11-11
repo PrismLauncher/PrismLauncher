@@ -168,12 +168,8 @@ void BlockedModsDialog::scanPath(QString path, bool start_task)
 /// @param path the path to the local file being hashed
 void BlockedModsDialog::addHashTask(QString path)
 {
-    if (m_hashing_task->isRunning()) {
-        qDebug() << "[Blocked Mods Dialog] adding a Hash task for" << path << "to the pending set.";
-        m_pending_hash_paths.insert(path);
-    } else {
-        buildHashTask(path);
-    }
+    qDebug() << "[Blocked Mods Dialog] adding a Hash task for" << path << "to the pending set.";
+    m_pending_hash_paths.insert(path);
 }
 
 /// @brief add a hashing task for the file located at path and connect it to check that hash against
@@ -252,6 +248,8 @@ void BlockedModsDialog::validateMatchedMods()
         if (mod.matched) {
             QFileInfo file = QFileInfo(mod.localPath);
             if (!file.exists() || !file.isFile()) {
+                qDebug() << "[Blocked Mods Dialog] File" << mod.localPath << "for mod" << mod.name
+                         << "has vanshed! marking as not matched.";
                 mod.localPath = "";
                 mod.matched = false;
                 changed = true;
@@ -268,7 +266,18 @@ void BlockedModsDialog::runHashTask()
 {
     if (!m_hashing_task->isRunning()) {
         m_rehash_pending = false;
-        m_hashing_task->start();
+
+        if (!m_pending_hash_paths.isEmpty()) {
+            qDebug() << "[Blocked Mods Dialog] there are pending hash tasks, building and running tasks";
+
+            auto path = m_pending_hash_paths.begin();
+            while (path != m_pending_hash_paths.end()) {
+                buildHashTask(*path);
+                path = m_pending_hash_paths.erase(path);
+            }
+
+            m_hashing_task->start();
+        }
     } else {
         qDebug() << "[Blocked Mods Dialog] queueing another run of the hashing task";
         qDebug() << "[Blocked Mods Dialog] pending hash tasks:" << m_pending_hash_paths;
@@ -280,14 +289,7 @@ void BlockedModsDialog::hashTaskFinished()
 {
     qDebug() << "[Blocked Mods Dialog] All hash tasks finished";
     if (m_rehash_pending) {
-        qDebug() << "[Blocked Mods Dialog] there was a pending rehash, building and running tasks";
-
-        auto path = m_pending_hash_paths.begin();
-        while (path != m_pending_hash_paths.end()) {
-            buildHashTask(*path);
-            path = m_pending_hash_paths.erase(path);
-        }
-
+        qDebug() << "[Blocked Mods Dialog] task finished with a rehash pending, rerunning";
         runHashTask();
     }
 }
