@@ -313,7 +313,7 @@ SectionEnd
 !define APP_ICON "$INSTDIR\${APP_EXE},0"
 !define APP_DESCRIPTION "@Launcher_DisplayName@"
 !define APP_NAME "@Launcher_DisplayName@"
-!define APP_CMD_TEXT "Prism Launcher instance"
+!define APP_CMD_TEXT "Minecraft Modpack"
 
 !define REGISTER_DEFAULTPROGRAMS ; value doesn't matter
 
