@@ -383,9 +383,6 @@ QStringList MinecraftInstance::javaArguments()
 {
     QStringList args;
 
-    // custom args go first. we want to override them if we have our own here.
-    args.append(extraArguments());
-
     // OSX dock icon and name
 #ifdef Q_OS_MAC
     args << "-Xdock:icon=icon.png";
@@ -432,6 +429,9 @@ QStringList MinecraftInstance::javaArguments()
     }
 
     args << "-Duser.language=en";
+    
+    // override if any custom arg is set
+    args.append(extraArguments());
 
     return args;
 }
