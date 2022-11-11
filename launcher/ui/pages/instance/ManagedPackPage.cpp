@@ -68,8 +68,8 @@ void ManagedPackPage::openedImpl()
 {
     ui->packName->setText(m_inst->getManagedPackName());
     ui->packVersion->setText(m_inst->getManagedPackVersionName());
-    ui->packOrigin->setText(tr("Website: %1    |    Pack ID: %2    |    Version ID: %3")
-                                .arg(displayName(), m_inst->getManagedPackID(), m_inst->getManagedPackVersionID()));
+    ui->packOrigin->setText(tr("Website: <a href=%1>%2</a>    |    Pack ID: %3    |    Version ID: %4")
+                                .arg(url(), displayName(), m_inst->getManagedPackID(), m_inst->getManagedPackVersionID()));
 
     parseManagedPack();
 }
@@ -224,7 +224,7 @@ void ModrinthManagedPackPage::parseManagedPack()
 
 QString ModrinthManagedPackPage::url() const
 {
-    return {};
+    return "https://modrinth.com/mod/" + m_inst->getManagedPackID();
 }
 
 void ModrinthManagedPackPage::suggestVersion()
