@@ -399,6 +399,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         message_dialog->setModal(true);
 
         if (message_dialog->exec()) {
+            qDebug() << "Post dialog blocked mods list: " << blocked_mods;
             copyBlockedMods(blocked_mods);
             setupDownloadJob(loop);
         } else {

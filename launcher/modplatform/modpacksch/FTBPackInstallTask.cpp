@@ -216,7 +216,7 @@ void PackInstallTask::onResolveModsSucceeded()
                                                    m_blocked_mods);
 
         if (message_dialog->exec() == QDialog::Accepted) {
-            qDebug() << "Post dialog mods list: " << m_blocked_mods;
+            qDebug() << "Post dialog blocked mods list: " << m_blocked_mods;
             createInstance();
         }  
         else {
