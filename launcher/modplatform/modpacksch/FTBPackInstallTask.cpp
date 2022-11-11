@@ -176,8 +176,6 @@ void PackInstallTask::resolveMods()
 
 void PackInstallTask::onResolveModsSucceeded()
 {
-    QString text;
-    QList<QUrl> urls;
     auto anyBlocked = false;
 
     Flame::Manifest results = m_mod_id_resolver_task->getResults();
@@ -191,11 +189,16 @@ void PackInstallTask::onResolveModsSucceeded()
 
         // First check for blocked mods
         if (!results_file.resolved || results_file.url.isEmpty()) {
-            QString type(local_file.type);
 
-            type[0] = type[0].toUpper();
-            text += QString("%1: %2 - <a href='%3'>%3</a><br/>").arg(type, local_file.name, results_file.websiteUrl);
-            urls.append(QUrl(results_file.websiteUrl));
+            BlockedMod blocked_mod;
+            blocked_mod.name = local_file.name;
+            blocked_mod.websiteUrl = results_file.websiteUrl;
+            blocked_mod.hash = results_file.hash;
+            blocked_mod.matched = false;
+            blocked_mod.localPath = "";
+
+            m_blocked_mods.append(blocked_mod);
+
             anyBlocked = true;
         } else {
             local_file.url = results_file.url.toString();
@@ -210,13 +213,16 @@ void PackInstallTask::onResolveModsSucceeded()
         auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked files found"),
                                                    tr("The following files are not available for download in third party launchers.<br/>"
                                                       "You will need to manually download them and add them to the instance."),
-                                                   text,
-                                                   urls);
+                                                   m_blocked_mods);
 
-        if (message_dialog->exec() == QDialog::Accepted)
+        if (message_dialog->exec() == QDialog::Accepted) {
+            qDebug() << "Post dialog blocked mods list: " << m_blocked_mods;
             createInstance();
-        else
+        }  
+        else {
             abort();
+        }
+            
     } else {
         createInstance();
     }
@@ -320,6 +326,9 @@ void PackInstallTask::downloadPack()
 void PackInstallTask::onModDownloadSucceeded()
 {
     m_net_job.reset();
+    if (!m_blocked_mods.isEmpty()) {
+        copyBlockedMods();
+    }
     emitSucceeded();
 }
 
@@ -341,6 +350,37 @@ void PackInstallTask::onModDownloadFailed(QString reason)
 {
     m_net_job.reset();
     emitFailed(reason);
+}
+
+/// @brief copy the matched blocked mods to the instance staging area
+void PackInstallTask::copyBlockedMods()
+{
+    setStatus(tr("Copying Blocked Mods..."));
+    setAbortable(false);
+    int i = 0;
+    int total = m_blocked_mods.length();
+    setProgress(i, total);
+    for (auto const& mod : m_blocked_mods) {
+        if (!mod.matched) {
+            qDebug() << mod.name << "was not matched to a local file, skipping copy";
+            continue;
+        }
+
+        auto dest_path = FS::PathCombine(m_stagingPath, ".minecraft", "mods", mod.name);
+
+        setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
+
+        qDebug() << "Will try to copy" << mod.localPath << "to" << dest_path;
+
+        if (!FS::copy(mod.localPath, dest_path)()) {
+            qDebug() << "Copy of" << mod.localPath << "to" << dest_path << "Failed";
+        }
+
+        i++;
+        setProgress(i, total);
+    }
+
+    setAbortable(true);
 }
 
 }  // namespace ModpacksCH

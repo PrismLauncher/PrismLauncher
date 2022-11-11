@@ -36,6 +36,18 @@ Hasher::Ptr createFlameHasher(QString file_path)
     return new FlameHasher(file_path);
 }
 
+Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::Provider provider)
+{
+    return new BlockedModHasher(file_path, provider);
+}
+
+Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::Provider provider, QString type)
+{
+    auto hasher = new BlockedModHasher(file_path, provider);
+    hasher->useHashType(type);
+    return hasher;
+}
+
 void ModrinthHasher::executeTask()
 {
     QFile file(m_path);
@@ -77,6 +89,52 @@ void FlameHasher::executeTask()
     } else {
         emitSucceeded();
     }
+}
+
+
+BlockedModHasher::BlockedModHasher(QString file_path, ModPlatform::Provider provider) 
+    : Hasher(file_path), provider(provider) { 
+    setObjectName(QString("BlockedModHasher: %1").arg(file_path)); 
+    hash_type = ProviderCaps.hashType(provider).first();
+}
+
+void BlockedModHasher::executeTask()
+{
+    QFile file(m_path);
+
+    try {
+        file.open(QFile::ReadOnly);
+    } catch (FS::FileSystemException& e) {
+        qCritical() << QString("Failed to open JAR file in %1").arg(m_path);
+        qCritical() << QString("Reason: ") << e.cause();
+
+        emitFailed("Failed to open file for hashing.");
+        return;
+    }
+
+    m_hash = ProviderCaps.hash(provider, &file, hash_type);
+
+    file.close();
+
+    if (m_hash.isEmpty()) {
+        emitFailed("Empty hash!");
+    } else {
+        emitSucceeded();
+    }
+}
+
+QStringList BlockedModHasher::getHashTypes() {
+    return ProviderCaps.hashType(provider);
+}
+
+bool BlockedModHasher::useHashType(QString type) {
+    auto types = ProviderCaps.hashType(provider);
+    if (types.contains(type)) {
+        hash_type = type;
+        return true;
+    }
+    qDebug() << "Bad hash type " << type << " for provider";
+    return false;
 }
 
 }  // namespace Hashing
