@@ -31,6 +31,11 @@ public:
 
     ~BlockedModsDialog() override;
 
+protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    // void dragMoveEvent(QDragMoveEvent *event) override;
+    // void dragLeaveEvent(QDragLeaveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
 private:
     Ui::BlockedModsDialog *ui;
@@ -39,12 +44,15 @@ private:
     shared_qobject_ptr<ConcurrentTask> hashing_task;
 
     void openAll();
+    void addDownloadFolder();
     void update();
     void directoryChanged(QString path);
     void setupWatch();
     void scanPaths();
     void scanPath(QString path);
+    void addHashTask(QString path);
     void checkMatchHash(QString hash, QString path);
+    void validateMatchedMods();
 
     bool checkValidPath(QString path);
     bool allModsMatched();

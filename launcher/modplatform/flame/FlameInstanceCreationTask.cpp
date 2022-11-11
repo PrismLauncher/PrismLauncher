@@ -393,8 +393,12 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         qWarning() << "Blocked mods found, displaying mod list";
 
         auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked mods found"),
-                                                   tr("The following mods were blocked on third party launchers.<br/>"
-                                                      "You will need to manually download them and add them to the modpack"),
+                                                   tr("The following files are not available for download in third party launchers.<br/>"
+                                                      "You will need to manually download them and add them to the instance.<br/><br/>"
+                                                      "Your configured global mods folder and default downloads folder<br/>"
+                                                      "are automatically checked for the downloaded mods.<br/>"
+                                                      "Optionally, you may drag and drop the downloaded mods onto this dialog or add a folder to watch<br/>"
+                                                      "if you did not download the mods to a default location."),
                                                    blocked_mods);
         message_dialog->setModal(true);
 

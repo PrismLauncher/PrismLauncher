@@ -5,20 +5,29 @@
 #include "Application.h"
 #include "ui_BlockedModsDialog.h"
 
+
 #include <QDebug>
 #include <QStandardPaths>
+#include <QDragEnterEvent>
+#include <QFileDialog>
+#include <QFileInfo>
 
 BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods)
     : QDialog(parent), ui(new Ui::BlockedModsDialog), mods(mods)
 {
+    hashing_task = shared_qobject_ptr<ConcurrentTask>(new ConcurrentTask(this, "MakeHashesTask", 10));
+    
     ui->setupUi(this);
 
     auto openAllButton = ui->buttonBox->addButton(tr("Open All"), QDialogButtonBox::ActionRole);
     connect(openAllButton, &QPushButton::clicked, this, &BlockedModsDialog::openAll);
 
+    auto downloadFolderButton = ui->buttonBox->addButton(tr("Add Download Folder"), QDialogButtonBox::ActionRole);
+    connect(downloadFolderButton, &QPushButton::clicked, this, &BlockedModsDialog::addDownloadFolder);
+
     connect(&watcher, &QFileSystemWatcher::directoryChanged, this, &BlockedModsDialog::directoryChanged);
 
-    hashing_task = shared_qobject_ptr<ConcurrentTask>(new ConcurrentTask(this, "MakeHashesTask", 10));
+    
 
     qDebug() << "Mods List: " << mods;
 
@@ -28,6 +37,9 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
     this->setWindowTitle(title);
     ui->label->setText(text);
     ui->labelModsFound->setText(tr("Please download the missing mods."));
+
+    setAcceptDrops(true);
+
     update();
 }
 
@@ -36,11 +48,37 @@ BlockedModsDialog::~BlockedModsDialog()
     delete ui;
 }
 
+void BlockedModsDialog::dragEnterEvent(QDragEnterEvent *e) {
+    if (e->mimeData()->hasUrls()) {
+        e->acceptProposedAction();
+    }
+}
+
+void BlockedModsDialog::dropEvent(QDropEvent *e)
+{
+    foreach (const QUrl &url, e->mimeData()->urls()) {
+        QString file = url.toLocalFile();
+        qDebug() << "Dropped file:" << file;
+        addHashTask(file);
+    }
+    hashing_task->start();
+}
+
 void BlockedModsDialog::openAll()
 {
     for (auto& mod : mods) {
         QDesktopServices::openUrl(mod.websiteUrl);
     }
+}
+
+void BlockedModsDialog::addDownloadFolder() {
+    QString dir = QFileDialog::getExistingDirectory(
+        this,
+        tr("Select directory where you downloaded the mods"),
+        QStandardPaths::writableLocation(QStandardPaths::DownloadLocation),
+        QFileDialog::ShowDirsOnly);
+    watcher.addPath(dir);
+    scanPath(dir);
 }
 
 /// @brief update UI with current status of the blocked mod detection
@@ -74,6 +112,7 @@ void BlockedModsDialog::update()
 void BlockedModsDialog::directoryChanged(QString path)
 {
     qDebug() << "Directory changed: " << path;
+    validateMatchedMods();
     scanPath(path);
 }
 
@@ -108,17 +147,24 @@ void BlockedModsDialog::scanPath(QString path)
             continue;
         }
 
-        auto hash_task = Hashing::createBlockedModHasher(file, ModPlatform::Provider::FLAME, "sha1");
-
-        qDebug() << "Creating Hash task for path: " << file;
-
-        connect(hash_task.get(), &Task::succeeded, [this, hash_task, file] { checkMatchHash(hash_task->getResult(), file); });
-        connect(hash_task.get(), &Task::failed, [file] { qDebug() << "Failed to hash path: " << file; });
-
-        hashing_task->addTask(hash_task);
+        addHashTask(file);
     }
 
     hashing_task->start();
+}
+
+/// @brief add a hashing task for the file located at path and connect it to check that hash against 
+///        our blocked mods list
+/// @param path the path to the local file being hashed
+void BlockedModsDialog::addHashTask(QString path) {
+    auto hash_task = Hashing::createBlockedModHasher(path, ModPlatform::Provider::FLAME, "sha1");
+
+    qDebug() << "Creating Hash task for path: " << path;
+
+    connect(hash_task.get(), &Task::succeeded, [this, hash_task, path] { checkMatchHash(hash_task->getResult(), path); });
+    connect(hash_task.get(), &Task::failed, [path] { qDebug() << "Failed to hash path: " << path; });
+
+    hashing_task->addTask(hash_task);
 }
 
 /// @brief check if the computed hash for the provided path matches a blocked
@@ -172,6 +218,24 @@ bool BlockedModsDialog::checkValidPath(QString path)
 bool BlockedModsDialog::allModsMatched()
 {
     return std::all_of(mods.begin(), mods.end(), [](auto const& mod) { return mod.matched; });
+}
+
+/// @brief ensure matched file paths still exist
+void BlockedModsDialog::validateMatchedMods() {
+    bool changed = false;
+    for (auto& mod : mods) {
+        if (mod.matched) {
+            QFileInfo file = QFileInfo(mod.localPath);
+            if (!file.exists() || !file.isFile()) {
+                mod.localPath = "";
+                mod.matched = false;
+                changed = true;
+            }
+        }
+    }
+    if (changed) {
+        update();
+    }
 }
 
 /// qDebug print support for the BlockedMod struct
