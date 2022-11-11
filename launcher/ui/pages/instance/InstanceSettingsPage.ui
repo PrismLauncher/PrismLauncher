@@ -112,11 +112,18 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,0,0">
+         <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,0,0,0">
           <item row="2" column="0">
            <widget class="QLabel" name="labelPermGen">
             <property name="text">
              <string notr="true">PermGen:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelMinMem">
+            <property name="text">
+             <string>Minimum memory allocation:</string>
             </property>
            </widget>
           </item>
@@ -131,57 +138,6 @@
            <widget class="QLabel" name="labelPermgenNote">
             <property name="text">
              <string>Note: Permgen is set automatically by Java 8 and later</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QSpinBox" name="permGenSpinBox">
-            <property name="toolTip">
-             <string>The amount of memory available to store loaded Java classes.</string>
-            </property>
-            <property name="suffix">
-             <string notr="true"> MiB</string>
-            </property>
-            <property name="minimum">
-             <number>64</number>
-            </property>
-            <property name="maximum">
-             <number>999999999</number>
-            </property>
-            <property name="singleStep">
-             <number>8</number>
-            </property>
-            <property name="value">
-             <number>64</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QSpinBox" name="maxMemSpinBox">
-            <property name="toolTip">
-             <string>The maximum amount of memory Minecraft is allowed to use.</string>
-            </property>
-            <property name="suffix">
-             <string notr="true"> MiB</string>
-            </property>
-            <property name="minimum">
-             <number>128</number>
-            </property>
-            <property name="maximum">
-             <number>1048576</number>
-            </property>
-            <property name="singleStep">
-             <number>128</number>
-            </property>
-            <property name="value">
-             <number>1024</number>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelMinMem">
-            <property name="text">
-             <string>Minimum memory allocation:</string>
             </property>
            </widget>
           </item>
@@ -207,7 +163,51 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="1" column="2">
+           <widget class="QSpinBox" name="maxMemSpinBox">
+            <property name="toolTip">
+             <string>The maximum amount of memory Minecraft is allowed to use.</string>
+            </property>
+            <property name="suffix">
+             <string notr="true"> MiB</string>
+            </property>
+            <property name="minimum">
+             <number>128</number>
+            </property>
+            <property name="maximum">
+             <number>1048576</number>
+            </property>
+            <property name="singleStep">
+             <number>128</number>
+            </property>
+            <property name="value">
+             <number>1024</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QSpinBox" name="permGenSpinBox">
+            <property name="toolTip">
+             <string>The amount of memory available to store loaded Java classes.</string>
+            </property>
+            <property name="suffix">
+             <string notr="true"> MiB</string>
+            </property>
+            <property name="minimum">
+             <number>64</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
+            </property>
+            <property name="singleStep">
+             <number>8</number>
+            </property>
+            <property name="value">
+             <number>64</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
            <widget class="QLabel" name="labelMaxMemIcon">
             <property name="text">
              <string notr="true"/>
