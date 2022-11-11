@@ -41,11 +41,10 @@
 
 bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget *parent)
 {
-    if (jvmargs.contains("-XX:PermSize=") || jvmargs.contains(QRegularExpression("-Xm[sx]"))
-        || jvmargs.contains("-XX-MaxHeapSize") || jvmargs.contains("-XX:InitialHeapSize"))
+    if (jvmargs.contains("-XX:PermSize=") || jvmargs.contains("-XX-MaxHeapSize") || jvmargs.contains("-XX:InitialHeapSize"))
     {
         auto warnStr = QObject::tr(
-            "You tried to manually set a JVM memory option (using \"-XX:PermSize\", \"-XX-MaxHeapSize\", \"-XX:InitialHeapSize\", \"-Xmx\" or \"-Xms\").\n"
+            "You tried to manually set a JVM memory option (using \"-XX:PermSize\", \"-XX-MaxHeapSize\", \"-XX:InitialHeapSize\").\n"
             "There are dedicated boxes for these in the settings (Java tab, in the Memory group at the top).\n"
             "This message will be displayed until you remove them from the JVM arguments.");
         CustomMessageBox::selectable(
