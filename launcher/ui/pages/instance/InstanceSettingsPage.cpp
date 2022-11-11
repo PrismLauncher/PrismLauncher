@@ -458,14 +458,23 @@ void InstanceSettingsPage::updateThresholds()
     auto sysMiB = Sys::getSystemRam() / Sys::mebibyte;
     unsigned int maxMem = ui->maxMemSpinBox->value();
 
+    QString iconName;
+
     if (maxMem >= sysMiB) {
-        ui->labelMaxMemIcon->setText(u8"✘");
+        iconName = "status-bad";
         ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation exceeds your system memory capacity."));
     } else if (maxMem > (sysMiB * 0.9)) {
-        ui->labelMaxMemIcon->setText(u8"⚠");
+        iconName = "status-yellow";
         ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
     } else {
-        ui->labelMaxMemIcon->setText(u8"✔");
+        iconName = "status-good";
         ui->labelMaxMemIcon->setToolTip("");
+    }
+
+    {
+        auto height = ui->labelMaxMemIcon->fontInfo().pixelSize();
+        QIcon icon = APPLICATION->getThemedIcon(iconName);
+        QPixmap pix = icon.pixmap(height, height);
+        ui->labelMaxMemIcon->setPixmap(pix);
     }
 }
