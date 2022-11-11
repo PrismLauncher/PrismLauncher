@@ -6,19 +6,18 @@
 #include "Application.h"
 #include "ui_BlockedModsDialog.h"
 
-
 #include <QDebug>
-#include <QStandardPaths>
 #include <QDragEnterEvent>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QStandardPaths>
 
 BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods)
     : QDialog(parent), ui(new Ui::BlockedModsDialog), m_mods(mods)
 {
     m_hashing_task = shared_qobject_ptr<ConcurrentTask>(new ConcurrentTask(this, "MakeHashesTask", 10));
     connect(m_hashing_task.get(), &Task::finished, this, &BlockedModsDialog::hashTaskFinished);
-    
+
     ui->setupUi(this);
 
     auto openAllButton = ui->buttonBox->addButton(tr("Open All"), QDialogButtonBox::ActionRole);
@@ -28,8 +27,6 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
     connect(downloadFolderButton, &QPushButton::clicked, this, &BlockedModsDialog::addDownloadFolder);
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &BlockedModsDialog::directoryChanged);
-
-    
 
     qDebug() << "[Blocked Mods Dialog] Mods List: " << mods;
 
@@ -50,15 +47,16 @@ BlockedModsDialog::~BlockedModsDialog()
     delete ui;
 }
 
-void BlockedModsDialog::dragEnterEvent(QDragEnterEvent *e) {
+void BlockedModsDialog::dragEnterEvent(QDragEnterEvent* e)
+{
     if (e->mimeData()->hasUrls()) {
         e->acceptProposedAction();
     }
 }
 
-void BlockedModsDialog::dropEvent(QDropEvent *e)
+void BlockedModsDialog::dropEvent(QDropEvent* e)
 {
-    foreach (const QUrl &url, e->mimeData()->urls()) {
+    foreach (const QUrl& url, e->mimeData()->urls()) {
         QString filePath = url.toLocalFile();
         qDebug() << "[Blocked Mods Dialog] Dropped file:" << filePath;
         addHashTask(filePath);
@@ -80,12 +78,11 @@ void BlockedModsDialog::openAll()
     }
 }
 
-void BlockedModsDialog::addDownloadFolder() {
-    QString dir = QFileDialog::getExistingDirectory(
-        this,
-        tr("Select directory where you downloaded the mods"),
-        QStandardPaths::writableLocation(QStandardPaths::DownloadLocation),
-        QFileDialog::ShowDirsOnly);
+void BlockedModsDialog::addDownloadFolder()
+{
+    QString dir =
+        QFileDialog::getExistingDirectory(this, tr("Select directory where you downloaded the mods"),
+                                          QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), QFileDialog::ShowDirsOnly);
     qDebug() << "[Blocked Mods Dialog] Adding watch path:" << dir;
     m_watcher.addPath(dir);
     scanPath(dir, true);
@@ -165,12 +162,12 @@ void BlockedModsDialog::scanPath(QString path, bool start_task)
     if (start_task) {
         runHashTask();
     }
-
 }
 
 /// @brief add a hashing task for the file located at path, add the path to the pending set if the hasing task is already running
 /// @param path the path to the local file being hashed
-void BlockedModsDialog::addHashTask(QString path) {
+void BlockedModsDialog::addHashTask(QString path)
+{
     if (m_hashing_task->isRunning()) {
         qDebug() << "[Blocked Mods Dialog] adding a Hash task for" << path << "to the pending set.";
         m_pending_hash_paths.insert(path);
@@ -179,10 +176,11 @@ void BlockedModsDialog::addHashTask(QString path) {
     }
 }
 
-/// @brief add a hashing task for the file located at path and connect it to check that hash against 
+/// @brief add a hashing task for the file located at path and connect it to check that hash against
 ///        our blocked mods list
 /// @param path the path to the local file being hashed
-void BlockedModsDialog::buildHashTask(QString path) {
+void BlockedModsDialog::buildHashTask(QString path)
+{
     auto hash_task = Hashing::createBlockedModHasher(path, ModPlatform::Provider::FLAME, "sha1");
 
     qDebug() << "[Blocked Mods Dialog] Creating Hash task for path: " << path;
@@ -247,7 +245,8 @@ bool BlockedModsDialog::allModsMatched()
 }
 
 /// @brief ensure matched file paths still exist
-void BlockedModsDialog::validateMatchedMods() {
+void BlockedModsDialog::validateMatchedMods()
+{
     bool changed = false;
     for (auto& mod : m_mods) {
         if (mod.matched) {
@@ -264,8 +263,9 @@ void BlockedModsDialog::validateMatchedMods() {
     }
 }
 
-/// @brief run hast task or mark a pending run if it is already runing
-void BlockedModsDialog::runHashTask() {
+/// @brief run hash task or mark a pending run if it is already runing
+void BlockedModsDialog::runHashTask()
+{
     if (!m_hashing_task->isRunning()) {
         m_rehash_pending = false;
         m_hashing_task->start();
@@ -276,7 +276,8 @@ void BlockedModsDialog::runHashTask() {
     }
 }
 
-void BlockedModsDialog::hashTaskFinished() {
+void BlockedModsDialog::hashTaskFinished()
+{
     qDebug() << "[Blocked Mods Dialog] All hash tasks finished";
     if (m_rehash_pending) {
         qDebug() << "[Blocked Mods Dialog] there was a pending rehash, building and running tasks";
