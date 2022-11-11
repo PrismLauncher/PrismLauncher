@@ -15,6 +15,10 @@ set(SRC
     org/prismlauncher/launcher/impl/legacy/LegacyFrame.java
     org/prismlauncher/exception/ParameterNotFoundException.java
     org/prismlauncher/exception/ParseException.java
+    org/prismlauncher/fix/Fix.java
+    org/prismlauncher/fix/Fixes.java
+    org/prismlauncher/fix/skins/SkinFix.java
+    org/prismlauncher/fix/skins/SkinFixUrlStreamHandler.java
     org/prismlauncher/utils/Parameters.java
     org/prismlauncher/utils/ReflectionUtils.java
     org/prismlauncher/utils/logging/Level.java

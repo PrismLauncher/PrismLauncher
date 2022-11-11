@@ -192,6 +192,8 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
 
+	m_settings->registerSetting("LegacySkinFix", true);
+
     qDebug() << "Instance-type specific settings were loaded!";
 
     setSpecificSettingsLoaded(true);
@@ -660,6 +662,9 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
     {
         launchScript += "traits " + trait + "\n";
     }
+
+    if (profile->getTraits().contains("legacySkins") && settings()->get("LegacySkinFix").toBool())
+        launchScript += "fixes legacySkinFix\n";
 
     launchScript += "launcher " + getLauncher() + "\n";
 

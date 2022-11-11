@@ -59,6 +59,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 import org.prismlauncher.exception.ParseException;
+import org.prismlauncher.fix.Fixes;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.impl.StandardLauncher;
 import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
@@ -107,6 +108,8 @@ public final class EntryPoint {
         }
 
         try {
+            Fixes.apply(params);
+
             Launcher launcher;
             String type = params.getString("launcher");
 

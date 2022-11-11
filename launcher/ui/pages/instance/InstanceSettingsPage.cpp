@@ -3,6 +3,7 @@
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -275,6 +276,9 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("JoinServerOnLaunchAddress");
     }
 
+	bool legacySkinFix = ui->legacySkinFix->isChecked();
+	m_settings->set("LegacySkinFix", legacySkinFix);
+
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
 }
@@ -372,6 +376,9 @@ void InstanceSettingsPage::loadSettings()
 
     ui->serverJoinGroupBox->setChecked(m_settings->get("JoinServerOnLaunch").toBool());
     ui->serverJoinAddress->setText(m_settings->get("JoinServerOnLaunchAddress").toString());
+
+	ui->legacySkinFix->setChecked(m_settings->get("LegacySkinFix").toBool());
+	ui->legacySkinFix->setVisible(m_instance->traits().contains("legacySkins"));
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

@@ -609,6 +609,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="legacySkinFix">
+         <property name="toolTip">
+          <string>Enables support for modern skins on old versions.</string>
+         </property>
+         <property name="text">
+          <string>Enable legacy skin fix</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacerMiscellaneous">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
