@@ -51,11 +51,21 @@ class ManagedPackPage : public QWidget, public BasePage {
     void setInstanceWindow(InstanceWindow* window) { m_instance_window = window; }
 
    public slots:
-    /** Gets the current version selection and update the changelog.
+    /** Gets the current version selection and update the UI, including the update button and the changelog.
      */
-    virtual void suggestVersion() {};
+    virtual void suggestVersion();
 
     virtual void update() {};
+
+   protected slots:
+    /** Does the necessary UI changes for when something failed.
+     *
+     *  This includes:
+     *  - Setting an appropriate text on the version selector to indicate a fail;
+     *  - Setting an appropriate text on the changelog text browser to indicate a fail;
+     *  - Disable the update button.
+     */
+    void setFailState();
 
    protected:
     ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent = nullptr);

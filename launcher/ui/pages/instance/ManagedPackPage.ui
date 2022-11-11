@@ -133,6 +133,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="updateButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -140,7 +143,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Update pack</string>
+          <string>Fetching versions...</string>
          </property>
         </widget>
        </item>

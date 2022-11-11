@@ -127,6 +127,30 @@ bool ManagedPackPage::runUpdateTask(InstanceTask* task)
     return task->wasSuccessful();
 }
 
+void ManagedPackPage::suggestVersion()
+{
+    ui->updateButton->setText(tr("Update pack"));
+    ui->updateButton->setDisabled(false);
+}
+
+void ManagedPackPage::setFailState()
+{
+    qDebug() << "Setting fail state!";
+
+    // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
+    ui->versionsComboBox->blockSignals(true);
+    ui->versionsComboBox->clear();
+    ui->versionsComboBox->addItem(tr("Failed to search for available versions."), {});
+    ui->versionsComboBox->blockSignals(false);
+
+    ui->changelogTextBrowser->setText(tr("Failed to request changelog data for this modpack."));
+
+    ui->updateButton->setText(tr("Cannot update!"));
+    ui->updateButton->setDisabled(true);
+
+    // TODO: Perhaps start a timer here when m_loaded is false to try and reload.
+}
+
 ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
     : ManagedPackPage(inst, instance_window, parent)
 {
@@ -153,6 +177,9 @@ void ModrinthManagedPackPage::parseManagedPack()
             qWarning() << "Error while parsing JSON response from Modrinth at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
             qWarning() << *response;
+
+            setFailState();
+
             return;
         }
 
@@ -161,6 +188,9 @@ void ModrinthManagedPackPage::parseManagedPack()
         } catch (const JSONValidationError& e) {
             qDebug() << *response;
             qWarning() << "Error while reading modrinth modpack version: " << e.cause();
+
+            setFailState();
+            return;
         }
 
         for (auto version : m_pack.versions) {
@@ -183,6 +213,8 @@ void ModrinthManagedPackPage::parseManagedPack()
 
         m_loaded = true;
     });
+    QObject::connect(netJob, &NetJob::failed, this, &ModrinthManagedPackPage::setFailState);
+    QObject::connect(netJob, &NetJob::aborted, this, &ModrinthManagedPackPage::setFailState);
     QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
         netJob->deleteLater();
         delete response;
@@ -202,6 +234,8 @@ void ModrinthManagedPackPage::suggestVersion()
 
     HoeDown md_parser;
     ui->changelogTextBrowser->setHtml(md_parser.process(version.changelog.toUtf8()));
+
+    ManagedPackPage::suggestVersion();
 }
 
 void ModrinthManagedPackPage::update()
