@@ -83,6 +83,9 @@ class GenericManagedPackPage final : public ManagedPackPage {
    public:
     GenericManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent = nullptr) : ManagedPackPage(inst, instance_window, parent) {}
     ~GenericManagedPackPage() override = default;
+
+    // TODO: We may want to show this page with some useful info at some point.
+    [[nodiscard]] bool shouldDisplay() const override { return false; };
 };
 
 class ModrinthManagedPackPage final : public ManagedPackPage {
