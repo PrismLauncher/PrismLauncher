@@ -44,8 +44,8 @@
          <property name="title">
           <string>Memory</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="1" column="1">
+         <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,0,0">
+          <item row="1" column="2">
            <widget class="QSpinBox" name="maxMemSpinBox">
             <property name="toolTip">
              <string>The maximum amount of memory Minecraft is allowed to use.</string>
@@ -67,27 +67,17 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelMinMem">
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelPermGen">
             <property name="text">
-             <string>&amp;Minimum memory allocation:</string>
+             <string notr="true">&amp;PermGen:</string>
             </property>
             <property name="buddy">
-             <cstring>minMemSpinBox</cstring>
+             <cstring>permGenSpinBox</cstring>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelMaxMem">
-            <property name="text">
-             <string>Ma&amp;ximum memory allocation:</string>
-            </property>
-            <property name="buddy">
-             <cstring>maxMemSpinBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
+          <item row="0" column="2">
            <widget class="QSpinBox" name="minMemSpinBox">
             <property name="toolTip">
              <string>The amount of memory Minecraft is started with.</string>
@@ -109,17 +99,27 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="labelPermGen">
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelMaxMem">
             <property name="text">
-             <string notr="true">&amp;PermGen:</string>
+             <string>Ma&amp;ximum memory allocation:</string>
             </property>
             <property name="buddy">
-             <cstring>permGenSpinBox</cstring>
+             <cstring>maxMemSpinBox</cstring>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelMinMem">
+            <property name="text">
+             <string>&amp;Minimum memory allocation:</string>
+            </property>
+            <property name="buddy">
+             <cstring>minMemSpinBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
            <widget class="QSpinBox" name="permGenSpinBox">
             <property name="toolTip">
              <string>The amount of memory available to store loaded Java classes.</string>
@@ -138,6 +138,16 @@
             </property>
             <property name="value">
              <number>64</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="labelMaxMemIcon">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="buddy">
+             <cstring>maxMemSpinBox</cstring>
             </property>
            </widget>
           </item>

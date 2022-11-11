@@ -59,12 +59,12 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
 {
     m_settings = inst->settings();
     ui->setupUi(this);
-    auto sysMB = Sys::getSystemRam() / Sys::mebibyte;
-    ui->maxMemSpinBox->setMaximum(sysMB);
+
     connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
     connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
     connect(APPLICATION, &Application::globalSettingsClosed, this, &InstanceSettingsPage::loadSettings);
     loadSettings();
+    updateThresholds();
 }
 
 bool InstanceSettingsPage::shouldDisplay() const
@@ -437,6 +437,11 @@ void InstanceSettingsPage::on_javaTestBtn_clicked()
     checker->run();
 }
 
+void InstanceSettingsPage::on_maxMemSpinBox_valueChanged(int i)
+{
+    updateThresholds();
+}
+
 void InstanceSettingsPage::checkerFinished()
 {
     checker.reset();
@@ -446,4 +451,21 @@ void InstanceSettingsPage::retranslate()
 {
     ui->retranslateUi(this);
     ui->customCommands->retranslate();  // TODO: why is this seperate from the others?
+}
+
+void InstanceSettingsPage::updateThresholds()
+{
+    auto sysMiB = Sys::getSystemRam() / Sys::mebibyte;
+    unsigned int maxMem = ui->maxMemSpinBox->value();
+
+    if (maxMem >= sysMiB) {
+        ui->labelMaxMemIcon->setText(u8"✘");
+        ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation exceeds your system memory capacity."));
+    } else if (maxMem > (sysMiB * 0.9)) {
+        ui->labelMaxMemIcon->setText(u8"⚠");
+        ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
+    } else {
+        ui->labelMaxMemIcon->setText(u8"✔");
+        ui->labelMaxMemIcon->setToolTip("");
+    }
 }
