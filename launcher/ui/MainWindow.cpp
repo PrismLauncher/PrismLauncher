@@ -2158,6 +2158,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
         else
         {
+            iconFile.remove();
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
         }
 #else
