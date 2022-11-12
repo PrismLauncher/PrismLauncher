@@ -61,7 +61,7 @@ public final class SkinFix implements Fix, URLStreamHandlerFactory {
     public boolean isApplicable(Parameters params) {
         if (!UrlUtils.isSupported()) {
             Log.warning("Cannot access the necessary Java internals for skin fix");
-            Log.warning("Using an older Java version will probably fix this");
+            Log.warning("Try adding '--add-opens java.base/java.net=ALL-UNNAMED' to your Java arguments");
             Log.warning("Alternatively, turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
             return false;
         }
