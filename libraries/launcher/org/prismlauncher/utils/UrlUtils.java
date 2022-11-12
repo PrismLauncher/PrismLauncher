@@ -50,7 +50,7 @@ import org.prismlauncher.utils.logging.Log;
  * A utility class for URLs which uses reflection to access hidden methods.
  * Unfortunately not supported on newer Java versions.
  */
-public class UrlUtils {
+public final class UrlUtils {
 
     private static URLStreamHandler http;
     private static MethodHandle openConnection;

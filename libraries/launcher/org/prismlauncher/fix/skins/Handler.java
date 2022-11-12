@@ -43,8 +43,7 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.util.Map;
 
-import javax.xml.bind.DatatypeConverter;
-
+import org.prismlauncher.utils.Base64;
 import org.prismlauncher.utils.JsonParser;
 import org.prismlauncher.utils.UrlUtils;
 
@@ -115,7 +114,7 @@ final class Handler extends URLStreamHandler {
                 for (Map<String, Object> property : (Iterable<Map<String, Object>>) profile.get("properties")) {
                     if (property.get("name").equals("textures")) {
                         Map<String, Object> result = (Map<String, Object>) JsonParser
-                                .parse(new String(DatatypeConverter.parseBase64Binary((String) property.get("value"))));
+                                .parse(new String(Base64.decode((String) property.get("value"))));
                         result = (Map<String, Object>) result.get("textures");
                         return result;
                     }

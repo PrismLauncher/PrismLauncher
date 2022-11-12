@@ -19,6 +19,8 @@ set(SRC
     org/prismlauncher/fix/Fixes.java
     org/prismlauncher/fix/skins/SkinFix.java
     org/prismlauncher/fix/skins/Handler.java
+    org/prismlauncher/utils/Base64.java
+    org/prismlauncher/utils/JsonParser.java
     org/prismlauncher/utils/Parameters.java
     org/prismlauncher/utils/ReflectionUtils.java
     org/prismlauncher/utils/UrlUtils.java

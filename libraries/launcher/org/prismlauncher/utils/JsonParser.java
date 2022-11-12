@@ -420,7 +420,7 @@ public final class JsonParser {
         return character() == 'n' && read() == 'u' && read() == 'l' && read() == 'l';
     }
 
-    public class JsonParseException extends IOException {
+    public static class JsonParseException extends IOException {
 
         private static final long serialVersionUID = 1L;
 

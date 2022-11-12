@@ -33,53 +33,27 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.fix.skins;
+package org.prismlauncher.utils;
 
-import java.net.URL;
-import java.net.URLStreamHandler;
-import java.net.URLStreamHandlerFactory;
+import java.nio.charset.StandardCharsets;
 
-import org.prismlauncher.fix.Fix;
-import org.prismlauncher.utils.Parameters;
-import org.prismlauncher.utils.UrlUtils;
-import org.prismlauncher.utils.logging.Log;
+import javax.xml.bind.DatatypeConverter;
 
-/**
- * Fixes skins by redirecting to other URLs.
- *
- * @see {@link Handler}
- * @see {@link UrlUtils}
- */
-public final class SkinFix implements Fix, URLStreamHandlerFactory {
+public final class Base64 {
 
-    @Override
-    public String getName() {
-        return "legacySkinFix";
-    }
+    private static boolean legacy;
 
-    @Override
-    public boolean isApplicable(Parameters params) {
-        if (!UrlUtils.isSupported()) {
-            Log.warning("Cannot access the necessary Java internals for skin fix");
-            Log.warning("Using an older Java version will probably fix this");
-            Log.warning("Alternatively, turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
-            return false;
+    public static byte[] decode(String input) {
+        if (!legacy) {
+            try {
+                return java.util.Base64.getDecoder().decode(input.getBytes(StandardCharsets.UTF_8));
+            } catch (NoClassDefFoundError e) {
+                legacy = true;
+            }
         }
 
-        return true;
-    }
-
-    @Override
-    public void apply() {
-        URL.setURLStreamHandlerFactory(this);
-    }
-
-    @Override
-    public URLStreamHandler createURLStreamHandler(String protocol) {
-        if ("http".equals(protocol))
-            return new Handler();
-
-        return null;
+        // support for Java versions < 8
+        return DatatypeConverter.parseBase64Binary(input);
     }
 
 }
