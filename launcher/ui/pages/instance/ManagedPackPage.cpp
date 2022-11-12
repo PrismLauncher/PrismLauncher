@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 flow <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include "ManagedPackPage.h"
 #include "ui_ManagedPackPage.h"
 
@@ -79,6 +83,8 @@ QString ManagedPackPage::displayName() const
     auto type = m_inst->getManagedPackType();
     if (type.isEmpty())
         return {};
+    if (type == "flame")
+        type = "CurseForge";
     return type.replace(0, 1, type[0].toUpper());
 }
 
@@ -158,6 +164,8 @@ ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWin
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
     connect(ui->updateButton, &QPushButton::pressed, this, &ModrinthManagedPackPage::update);
 }
+
+// MODRINTH
 
 void ModrinthManagedPackPage::parseManagedPack()
 {
@@ -271,6 +279,8 @@ void ModrinthManagedPackPage::update()
         m_instance_window->close();
 }
 
+// FLAME
+
 FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
     : ManagedPackPage(inst, instance_window, parent)
 {
@@ -279,23 +289,23 @@ FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* i
     connect(ui->updateButton, &QPushButton::pressed, this, &FlameManagedPackPage::update);
 }
 
-void FlameManagedPackPage::parseManagedPack() {
+void FlameManagedPackPage::parseManagedPack()
+{
     qDebug() << "Parsing Flame pack";
 
     // We need to tell the user to redownload the pack, since we didn't save the required info previously
     if (m_inst->getManagedPackID().isEmpty()) {
         setFailState();
-        QString message = tr(
-            "<h1>Hey there!</h1>"
-            "<h4>"
-            "It seems like your Pack ID is null. This is because of a bug in older versions of the launcher.<br/>"
-            "Unfortunately, we can't do the proper API requests without this information.<br/>"
-            "<br/>"
-            "So, in order for this feature to work, you will need to re-download the modpack from the built-in downloader.<br/>"
-            "<br/>"
-            "Don't worry though, it will ask you to update this instance instead, so you'll not lose this instance!"
-            "</h4>"
-        );
+        QString message =
+            tr("<h1>Hey there!</h1>"
+               "<h4>"
+               "It seems like your Pack ID is null. This is because of a bug in older versions of the launcher.<br/>"
+               "Unfortunately, we can't do the proper API requests without this information.<br/>"
+               "<br/>"
+               "So, in order for this feature to work, you will need to re-download the modpack from the built-in downloader.<br/>"
+               "<br/>"
+               "Don't worry though, it will ask you to update this instance instead, so you'll not lose this instance!"
+               "</h4>");
 
         ui->changelogTextBrowser->setHtml(message);
         return;
@@ -327,7 +337,7 @@ void FlameManagedPackPage::parseManagedPack() {
             Flame::loadIndexedPackVersions(m_pack, data);
         } catch (const JSONValidationError& e) {
             qDebug() << *response;
-            qWarning() << "Error while reading modrinth modpack version: " << e.cause();
+            qWarning() << "Error while reading flame modpack version: " << e.cause();
 
             setFailState();
             return;
@@ -365,6 +375,7 @@ void FlameManagedPackPage::parseManagedPack() {
 
 QString FlameManagedPackPage::url() const
 {
+    // FIXME: We should display the websiteUrl field, but this requires doing the API request first :(
     return {};
 }
 

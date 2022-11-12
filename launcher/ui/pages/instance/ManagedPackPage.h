@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 flow <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
 #pragma once
 
 #include "BaseInstance.h"
@@ -44,7 +48,7 @@ class ManagedPackPage : public QWidget, public BasePage {
 
     /** Gets the necessary information about the managed pack, such as
      *  available versions*/
-    virtual void parseManagedPack() {};
+    virtual void parseManagedPack(){};
 
     /** URL of the managed pack.
      *  Not the version-specific one.
@@ -58,7 +62,7 @@ class ManagedPackPage : public QWidget, public BasePage {
      */
     virtual void suggestVersion();
 
-    virtual void update() {};
+    virtual void update(){};
 
    protected slots:
     /** Does the necessary UI changes for when something failed.
@@ -94,7 +98,9 @@ class GenericManagedPackPage final : public ManagedPackPage {
     Q_OBJECT
 
    public:
-    GenericManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent = nullptr) : ManagedPackPage(inst, instance_window, parent) {}
+    GenericManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent = nullptr)
+        : ManagedPackPage(inst, instance_window, parent)
+    {}
     ~GenericManagedPackPage() override = default;
 
     // TODO: We may want to show this page with some useful info at some point.
