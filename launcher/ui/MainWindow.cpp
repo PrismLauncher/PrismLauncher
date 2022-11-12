@@ -2101,7 +2101,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
 
 #if defined(Q_OS_MACOS)
         // handle macOS bundle weirdness
-        QFileInfo appFileInfo(QApplication::applicationFilePath()));
+        QFileInfo appFileInfo(QApplication::applicationFilePath());
         QString appName = appFileInfo.baseName();
         QString exeName = FS::PathCombine(appFileInfo.filePath(), "Contents/MacOS/" + appName);
 
