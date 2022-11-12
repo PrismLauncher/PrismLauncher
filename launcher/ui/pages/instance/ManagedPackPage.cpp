@@ -246,7 +246,11 @@ void ModrinthManagedPackPage::update()
     auto index = ui->versionsComboBox->currentIndex();
     auto version = m_pack.versions.at(index);
 
-    auto extracted = new InstanceImportTask(version.download_url, this);
+    QMap<QString, QString> extra_info;
+    extra_info.insert("pack_id", m_pack.id);
+    extra_info.insert("pack_version_id", version.id);
+
+    auto extracted = new InstanceImportTask(version.download_url, this, extra_info);
 
     InstanceName inst_name(m_inst->getManagedPackName(), version.version);
     inst_name.setName(m_inst->name().replace(m_inst->getManagedPackVersionName(), version.version));
