@@ -1,5 +1,4 @@
 #include "BlockedModsDialog.h"
-#include <qfileinfo.h>
 #include <QDesktopServices>
 #include <QDialogButtonBox>
 #include <QPushButton>
@@ -34,7 +33,16 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
     scanPaths();
 
     this->setWindowTitle(title);
-    ui->label->setText(text);
+    ui->labelDescription->setText(text);
+    ui->labelExplain->setText(
+        QString(tr("Your configured global mods folder and default downloads folder "
+                   "are automatically checked for the downloaded mods and they will be copied to the instance if found.<br/>"
+                   "Optionally, you may drag and drop the downloaded mods onto this dialog or add a folder to watch "
+                   "if you did not download the mods to a default location.<br/><br/>"
+                   "Global Mods Folder: %1<br/>"
+                   "Default Downloads Folder: %2"))
+            .arg(APPLICATION->settings()->get("CentralModsDir").toString(),
+                 QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)));
     ui->labelModsFound->setText(tr("Please download the missing mods."));
 
     setAcceptDrops(true);
@@ -56,7 +64,7 @@ void BlockedModsDialog::dragEnterEvent(QDragEnterEvent* e)
 
 void BlockedModsDialog::dropEvent(QDropEvent* e)
 {
-    foreach (const QUrl& url, e->mimeData()->urls()) {
+    for (const QUrl& url : e->mimeData()->urls()) {
         QString filePath = url.toLocalFile();
         qDebug() << "[Blocked Mods Dialog] Dropped file:" << filePath;
         addHashTask(filePath);
@@ -106,7 +114,14 @@ void BlockedModsDialog::update()
         text += QString(tr("%1: <a href='%2'>%2</a> <p>Hash: %3 %4</p> <br/>")).arg(mod.name, mod.websiteUrl, mod.hash, span);
     }
 
-    ui->textBrowser->setText(text);
+    ui->textBrowserModsListing->setText(text);
+
+    QString watching;
+    for (auto& dir : m_watcher.directories()) {
+        watching += QString("%1<br/>").arg(dir);
+    }
+
+    ui->textBrowserWatched->setText(watching);
 
     if (allModsMatched()) {
         ui->labelModsFound->setText(tr("All mods found ✔"));
@@ -181,8 +196,8 @@ void BlockedModsDialog::buildHashTask(QString path)
 
     qDebug() << "[Blocked Mods Dialog] Creating Hash task for path: " << path;
 
-    connect(hash_task.get(), &Task::succeeded, [this, hash_task, path] { checkMatchHash(hash_task->getResult(), path); });
-    connect(hash_task.get(), &Task::failed, [path] { qDebug() << "Failed to hash path: " << path; });
+    connect(hash_task.get(), &Task::succeeded, this, [this, hash_task, path] { checkMatchHash(hash_task->getResult(), path); });
+    connect(hash_task.get(), &Task::failed, this, [path] { qDebug() << "Failed to hash path: " << path; });
 
     m_hashing_task->addTask(hash_task);
 }
