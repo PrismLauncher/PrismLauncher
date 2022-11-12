@@ -342,7 +342,31 @@ QString getDesktopDir()
 // Cross-platform Shortcut creation
 bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon)
 {
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+#if defined(Q_OS_MACOS)
+    destination += ".sh";
+
+    QFile f(destination);
+    f.open(QIODevice::WriteOnly | QIODevice::Text);
+    QTextStream stream(&f);
+
+    QString argstring;
+    if (!args.empty())
+        argstring = " \"" + args.join("\" \"") + "\"";
+
+    stream << "#!/bin/bash"
+           << "\n";
+    stream << target
+           << " "
+           << argstring
+           << "\n";
+
+    stream.flush();
+    f.close();
+
+    f.setPermissions(f.permissions() | QFileDevice::ExeOwner | QFileDevice::ExeGroup | QFileDevice::ExeOther);
+
+    return true;
+#elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
     destination += ".desktop";
 
     QFile f(destination);

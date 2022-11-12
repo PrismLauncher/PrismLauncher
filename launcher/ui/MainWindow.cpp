@@ -2100,7 +2100,20 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
 
 #ifdef Q_OS_MACOS
-        QMessageBox::critical(this, tr("Create instance shortcut"), tr("Not supported on macOS yet!"));
+        // handle macOS bundle weirdness
+        QFileInfo appFileInfo(QApplication::applicationFilePath()));
+        QString appName = appFileInfo.baseName();
+        QString exeName = FS::PathCombine(appFileInfo.filePath(), "Contents/MacOS/" + appName);
+
+		if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
+                           exeName, { "--launch", m_selectedInstance->id() }, m_selectedInstance->name(), "")) {
+            QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
+        }
+        else
+        {
+            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
+        }
+		
         return;
 #endif
         auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
