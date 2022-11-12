@@ -343,7 +343,7 @@ QString getDesktopDir()
 bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon)
 {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    destination = PathCombine(destination, name + ".desktop");
+    destination += ".desktop";
 
     QFile f(destination);
     f.open(QIODevice::WriteOnly | QIODevice::Text);
