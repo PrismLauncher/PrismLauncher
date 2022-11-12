@@ -269,7 +269,65 @@ FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* i
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
 }
 
-void FlameManagedPackPage::parseManagedPack() {}
+void FlameManagedPackPage::parseManagedPack() {
+    qDebug() << "Parsing Flame pack";
+
+    auto netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(m_inst->getManagedPackName()), APPLICATION->network());
+    auto response = new QByteArray();
+
+    QString id = m_inst->getManagedPackID();
+
+    netJob->addNetAction(Net::Download::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response));
+
+    QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
+        QJsonParseError parse_error{};
+        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+        if (parse_error.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Flame at " << parse_error.offset
+                       << " reason: " << parse_error.errorString();
+            qWarning() << *response;
+
+            setFailState();
+
+            return;
+        }
+
+        try {
+            auto obj = doc.object();
+            auto data = Json::ensureArray(obj, "data");
+            Flame::loadIndexedPackVersions(m_pack, data);
+        } catch (const JSONValidationError& e) {
+            qDebug() << *response;
+            qWarning() << "Error while reading modrinth modpack version: " << e.cause();
+
+            setFailState();
+            return;
+        }
+
+        for (auto version : m_pack.versions) {
+            QString name;
+
+            name = version.version;
+
+            if (version.fileId == m_inst->getManagedPackVersionID().toInt())
+                name.append(tr(" (Current)"));
+
+            ui->versionsComboBox->addItem(name, QVariant(version.fileId));
+        }
+
+        suggestVersion();
+
+        m_loaded = true;
+    });
+    QObject::connect(netJob, &NetJob::failed, this, &FlameManagedPackPage::setFailState);
+    QObject::connect(netJob, &NetJob::aborted, this, &FlameManagedPackPage::setFailState);
+    QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
+        netJob->deleteLater();
+        delete response;
+    });
+
+    netJob->start();
+}
 
 QString FlameManagedPackPage::url() const
 {
@@ -278,6 +336,12 @@ QString FlameManagedPackPage::url() const
 
 void FlameManagedPackPage::suggestVersion()
 {
+    auto index = ui->versionsComboBox->currentIndex();
+    auto version = m_pack.versions.at(index);
+
+    ui->changelogTextBrowser->setHtml(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId));
+
+    ManagedPackPage::suggestVersion();
 }
 
 #include "ManagedPackPage.moc"

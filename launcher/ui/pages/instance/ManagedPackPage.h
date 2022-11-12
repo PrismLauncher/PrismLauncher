@@ -5,6 +5,9 @@
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackManifest.h"
 
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/flame/FlamePackIndex.h"
+
 #include "ui/pages/BasePage.h"
 
 #include <QWidget>
@@ -130,4 +133,8 @@ class FlameManagedPackPage final : public ManagedPackPage {
 
    public slots:
     void suggestVersion() override;
+
+   private:
+    Flame::IndexedPack m_pack;
+    FlameAPI m_api;
 };
