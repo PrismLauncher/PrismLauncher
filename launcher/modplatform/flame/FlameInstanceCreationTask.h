@@ -51,8 +51,8 @@ class FlameCreationTask final : public InstanceCreationTask {
     Q_OBJECT
 
    public:
-    FlameCreationTask(const QString& staging_path, SettingsObjectPtr global_settings, QWidget* parent)
-        : InstanceCreationTask(), m_parent(parent)
+    FlameCreationTask(const QString& staging_path, SettingsObjectPtr global_settings, QWidget* parent, QString id, QString version_id)
+        : InstanceCreationTask(), m_parent(parent), m_managed_id(std::move(id)), m_managed_version_id(std::move(version_id))
     {
         setStagingPath(staging_path);
         setParentSettings(global_settings);
@@ -77,6 +77,8 @@ class FlameCreationTask final : public InstanceCreationTask {
     // Handle to allow aborting
     NetJob* m_process_update_file_info_job = nullptr;
     NetJob::Ptr m_files_job = nullptr;
+
+    QString m_managed_id, m_managed_version_id;
 
     std::optional<InstancePtr> m_instance;
 };

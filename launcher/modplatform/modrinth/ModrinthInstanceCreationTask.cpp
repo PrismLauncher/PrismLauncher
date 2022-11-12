@@ -211,7 +211,7 @@ bool ModrinthCreationTask::createInstance()
         instance.setIconKey("modrinth");
     }
 
-    instance.setManagedPack("modrinth", getManagedPackID(), m_managed_name, m_managed_version_id, version());
+    instance.setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
     instance.setName(name());
     instance.saveNow();
 
@@ -284,7 +284,8 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
             }
 
             if (set_managed_info) {
-                m_managed_version_id = Json::ensureString(obj, "versionId", {}, "Managed ID");
+                if (m_managed_version_id.isEmpty())
+                    m_managed_version_id = Json::ensureString(obj, "versionId", {}, "Managed ID");
                 m_managed_name = Json::ensureString(obj, "name", {}, "Managed Name");
             }
 
@@ -383,14 +384,4 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
     }
 
     return true;
-}
-
-QString ModrinthCreationTask::getManagedPackID() const
-{
-    if (!m_source_url.isEmpty()) {
-        QRegularExpression regex(R"(data\/(.*)\/versions)");
-        return regex.match(m_source_url).captured(1);
-    }
-
-    return {};
 }

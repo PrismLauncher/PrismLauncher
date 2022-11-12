@@ -355,7 +355,7 @@ bool FlameCreationTask::createInstance()
         FS::deletePath(jarmodsPath);
     }
 
-    instance.setManagedPack("flame", {}, m_pack.name, {}, m_pack.version);
+    instance.setManagedPack("flame", m_managed_id, m_pack.name, m_managed_version_id, m_pack.version);
     instance.setName(name());
 
     m_mod_id_resolver = new Flame::FileResolvingTask(APPLICATION->network(), m_pack);
