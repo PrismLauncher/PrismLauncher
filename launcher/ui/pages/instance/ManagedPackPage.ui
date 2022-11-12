@@ -168,7 +168,11 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTextBrowser" name="changelogTextBrowser"/>
+         <widget class="QTextBrowser" name="changelogTextBrowser">
+          <property name="placeholderText">
+           <string>No changelog available for this version!</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

@@ -219,6 +219,9 @@ void ModrinthManagedPackPage::parseManagedPack()
         netJob->deleteLater();
         delete response;
     });
+
+    ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
+
     netJob->start();
 }
 
