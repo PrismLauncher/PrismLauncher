@@ -271,6 +271,7 @@ FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* i
 {
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
+    connect(ui->updateButton, &QPushButton::pressed, this, &FlameManagedPackPage::update);
 }
 
 void FlameManagedPackPage::parseManagedPack() {
@@ -365,6 +366,31 @@ void FlameManagedPackPage::suggestVersion()
     ui->changelogTextBrowser->setHtml(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId));
 
     ManagedPackPage::suggestVersion();
+}
+
+void FlameManagedPackPage::update()
+{
+    auto index = ui->versionsComboBox->currentIndex();
+    auto version = m_pack.versions.at(index);
+
+    QMap<QString, QString> extra_info;
+    extra_info.insert("pack_id", m_inst->getManagedPackID());
+    extra_info.insert("pack_version_id", QString::number(version.fileId));
+
+    auto extracted = new InstanceImportTask(version.downloadUrl, this, extra_info);
+
+    InstanceName inst_name(m_inst->getManagedPackName(), version.version);
+    inst_name.setName(m_inst->name().replace(m_inst->getManagedPackVersionName(), version.version));
+    extracted->setName(inst_name);
+
+    extracted->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
+    extracted->setIcon(m_inst->iconKey());
+    extracted->setConfirmUpdate(false);
+
+    auto did_succeed = runUpdateTask(extracted);
+
+    if (m_instance_window && did_succeed)
+        m_instance_window->close();
 }
 
 #include "ManagedPackPage.moc"

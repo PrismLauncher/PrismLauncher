@@ -134,6 +134,8 @@ class FlameManagedPackPage final : public ManagedPackPage {
    public slots:
     void suggestVersion() override;
 
+    void update() override;
+
    private:
     Flame::IndexedPack m_pack;
     FlameAPI m_api;
