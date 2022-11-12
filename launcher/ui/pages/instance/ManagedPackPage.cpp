@@ -193,6 +193,11 @@ void ModrinthManagedPackPage::parseManagedPack()
             return;
         }
 
+        // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
+        ui->versionsComboBox->blockSignals(true);
+        ui->versionsComboBox->clear();
+        ui->versionsComboBox->blockSignals(false);
+
         for (auto version : m_pack.versions) {
             QString name;
 
@@ -327,6 +332,11 @@ void FlameManagedPackPage::parseManagedPack() {
             setFailState();
             return;
         }
+
+        // We block signals here so that suggestVersion() doesn't get called, causing an assertion fail.
+        ui->versionsComboBox->blockSignals(true);
+        ui->versionsComboBox->clear();
+        ui->versionsComboBox->blockSignals(false);
 
         for (auto version : m_pack.versions) {
             QString name;
