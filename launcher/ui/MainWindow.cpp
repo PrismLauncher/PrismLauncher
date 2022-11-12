@@ -2099,13 +2099,13 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             return;
         }
 
-#ifdef Q_OS_MACOS
+#if defined(Q_OS_MACOS)
         // handle macOS bundle weirdness
         QFileInfo appFileInfo(QApplication::applicationFilePath()));
         QString appName = appFileInfo.baseName();
         QString exeName = FS::PathCombine(appFileInfo.filePath(), "Contents/MacOS/" + appName);
 
-		if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
+        if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
                            exeName, { "--launch", m_selectedInstance->id() }, m_selectedInstance->name(), "")) {
             QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
         }
@@ -2113,17 +2113,22 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         {
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
         }
-		
-        return;
-#endif
+#elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
         auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
-
-        QString iconPath;
-        bool iconGenerated = false;
-
-#ifdef Q_OS_WIN
-        iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.ico");
-
+        
+        if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
+                           QApplication::applicationFilePath(), { "--launch", m_selectedInstance->id() }, m_selectedInstance->name(), icon->getFilePath())) {
+            QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
+        }
+        else
+        {
+            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
+        }
+#elif defined(Q_OS_WIN)
+        auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
+        
+        QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.ico");
+        
         // part of fix for weird bug involving the window icon being replaced
         // dunno why it happens, but this 2-line fix seems to be enough, so w/e
         auto appIcon = APPLICATION->getThemedIcon("logo");
@@ -2140,31 +2145,24 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         // restore original window icon
         QGuiApplication::setWindowIcon(appIcon);
 
-        if (success)
-        {
-            iconGenerated = true;
-        }
-        else
+        if (!success)
         {
             iconFile.remove();
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
             return;
         }
-#else
-        iconPath = icon->getFilePath();
-#endif
+        
         if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
                            QApplication::applicationFilePath(), { "--launch", m_selectedInstance->id() }, m_selectedInstance->name(), iconPath)) {
             QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
         }
         else
         {
-            if (iconGenerated)
-            {
-                QFile::remove(iconPath);
-            }
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
         }
+#else
+        QMessageBox::critical(this, tr("Create instance shortcut"), tr("Not supported on your platform!"));
+#endif
     }
 }
 

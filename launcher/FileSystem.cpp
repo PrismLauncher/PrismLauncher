@@ -395,7 +395,7 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
     f.setPermissions(f.permissions() | QFileDevice::ExeOwner | QFileDevice::ExeGroup | QFileDevice::ExeOther);
 
     return true;
-#elif defined Q_OS_WIN
+#elif defined(Q_OS_WIN)
     QFileInfo targetInfo(target);
 
     if (!targetInfo.exists())
