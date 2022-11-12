@@ -46,9 +46,10 @@ import java.util.Map;
 import javax.xml.bind.DatatypeConverter;
 
 import org.prismlauncher.utils.JsonParser;
+import org.prismlauncher.utils.UrlUtils;
 
 @SuppressWarnings("unchecked")
-final class SkinFixUrlStreamHandler extends URLStreamHandler {
+final class Handler extends URLStreamHandler {
 
     private URL redirect(URL address) throws IOException {
         String skinOwner = findSkinOwner(address);
@@ -67,27 +68,13 @@ final class SkinFixUrlStreamHandler extends URLStreamHandler {
     @Override
     protected URLConnection openConnection(URL address) throws IOException {
         address = redirect(address);
-
-        try {
-            return SkinFix.openConnection(address);
-        } catch (RuntimeException | Error e) {
-            throw e;
-        } catch (Throwable e) {
-            throw new IllegalStateException(e);
-        }
+        return UrlUtils.openHttpConnection(address);
     }
 
     @Override
     protected URLConnection openConnection(URL address, Proxy proxy) throws IOException {
         address = redirect(address);
-
-        try {
-            return SkinFix.openConnection(address, proxy);
-        } catch (RuntimeException | Error e) {
-            throw e;
-        } catch (Throwable e) {
-            throw new IllegalStateException(e);
-        }
+        return UrlUtils.openHttpConnection(address, proxy);
     }
 
     private URL convertSkin(URL defaultUrl, String owner) throws IOException {

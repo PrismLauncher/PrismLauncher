@@ -39,10 +39,25 @@ import org.prismlauncher.utils.Parameters;
 
 public interface Fix {
 
+    /**
+     * Gets the name of the fix. If the name isn't passed into the program, the fix
+     * won't run.
+     *
+     * @return The name
+     */
     String getName();
 
-    boolean isApplicable(Parameters parameters);
+    /**
+     * Determines whether the fix will be run. This is additional to the name check.
+     *
+     * @param params The parameters
+     * @return <code>true</code> to proceed to applying the fix
+     */
+    boolean isApplicable(Parameters params);
 
+    /**
+     * Applies the fix.
+     */
     void apply();
 
 }

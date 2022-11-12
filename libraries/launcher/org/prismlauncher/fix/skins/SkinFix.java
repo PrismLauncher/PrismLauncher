@@ -35,51 +35,22 @@
 
 package org.prismlauncher.fix.skins;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Method;
-import java.net.Proxy;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 
 import org.prismlauncher.fix.Fix;
 import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.UrlUtils;
 import org.prismlauncher.utils.logging.Log;
 
+/**
+ * Fixes skins by redirecting to other URLs.
+ *
+ * @see {@link Handler}
+ * @see {@link UrlUtils}
+ */
 public final class SkinFix implements Fix, URLStreamHandlerFactory {
-
-    private static URLStreamHandler http;
-    private static MethodHandle openConnection;
-    private static MethodHandle openConnection2;
-
-    static {
-        try {
-            Method getURLStreamHandler = URL.class.getDeclaredMethod("getURLStreamHandler", String.class);
-            getURLStreamHandler.setAccessible(true);
-            http = (URLStreamHandler) getURLStreamHandler.invoke(null, "http");
-
-            Method openConnectionReflect = URLStreamHandler.class.getDeclaredMethod("openConnection", URL.class);
-            openConnectionReflect.setAccessible(true);
-            openConnection = MethodHandles.lookup().unreflect(openConnectionReflect);
-
-            Method openConnectionReflect2 = URLStreamHandler.class.getDeclaredMethod("openConnection", URL.class,
-                    Proxy.class);
-            openConnectionReflect2.setAccessible(true);
-            openConnection2 = MethodHandles.lookup().unreflect(openConnectionReflect2);
-        } catch (Throwable e) {
-            Log.error("Could not perform URL reflection; skin fix will not be availble", e);
-        }
-    }
-
-    static URLConnection openConnection(URL url) throws Throwable {
-        return (URLConnection) openConnection.invokeExact(http, url);
-    }
-
-    static URLConnection openConnection(URL url, Proxy proxy) throws Throwable {
-        return (URLConnection) openConnection2.invokeExact(http, url, proxy);
-    }
 
     @Override
     public String getName() {
@@ -87,8 +58,32 @@ public final class SkinFix implements Fix, URLStreamHandlerFactory {
     }
 
     @Override
-    public boolean isApplicable(Parameters parameters) {
-        return http != null && openConnection != null;
+    public boolean isApplicable(Parameters params) {
+        if (!isSupported()) {
+            Log.warning("Using Java 8 will probably fix this");
+            Log.warning("Alternatively, turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isSupported() {
+        // check for DatatypeConverter first
+        // most users will just be annoyed by the big stacktrace
+        try {
+            Class.forName("javax.xml.bind.DatatypeConverter");
+        } catch (ClassNotFoundException e) {
+            Log.warning("Cannot find DatatypeConverter - required for skin fix");
+            return false;
+        }
+
+        if (!UrlUtils.isSupported()) {
+            Log.warning("Cannot access the necessary Java internals for skin fix");
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -99,7 +94,7 @@ public final class SkinFix implements Fix, URLStreamHandlerFactory {
     @Override
     public URLStreamHandler createURLStreamHandler(String protocol) {
         if ("http".equals(protocol))
-            return new SkinFixUrlStreamHandler();
+            return new Handler();
 
         return null;
     }

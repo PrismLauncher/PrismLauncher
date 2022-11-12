@@ -18,9 +18,10 @@ set(SRC
     org/prismlauncher/fix/Fix.java
     org/prismlauncher/fix/Fixes.java
     org/prismlauncher/fix/skins/SkinFix.java
-    org/prismlauncher/fix/skins/SkinFixUrlStreamHandler.java
+    org/prismlauncher/fix/skins/Handler.java
     org/prismlauncher/utils/Parameters.java
     org/prismlauncher/utils/ReflectionUtils.java
+    org/prismlauncher/utils/UrlUtils.java
     org/prismlauncher/utils/logging/Level.java
     org/prismlauncher/utils/logging/Log.java
     net/minecraft/Launcher.java
