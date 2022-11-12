@@ -272,6 +272,25 @@ FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* i
 void FlameManagedPackPage::parseManagedPack() {
     qDebug() << "Parsing Flame pack";
 
+    // We need to tell the user to redownload the pack, since we didn't save the required info previously
+    if (m_inst->getManagedPackID().isEmpty()) {
+        setFailState();
+        QString message = tr(
+            "<h1>Hey there!</h1>"
+            "<h4>"
+            "It seems like your Pack ID is null. This is because of a bug in older versions of the launcher.<br/>"
+            "Unfortunately, we can't do the proper API requests without this information.<br/>"
+            "<br/>"
+            "So, in order for this feature to work, you will need to re-download the modpack from the built-in downloader.<br/>"
+            "<br/>"
+            "Don't worry though, it will ask you to update this instance instead, so you'll not lose this instance!"
+            "</h4>"
+        );
+
+        ui->changelogTextBrowser->setHtml(message);
+        return;
+    }
+
     auto netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(m_inst->getManagedPackName()), APPLICATION->network());
     auto response = new QByteArray();
 
