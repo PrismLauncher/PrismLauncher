@@ -39,11 +39,14 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
                    "are automatically checked for the downloaded mods and they will be copied to the instance if found.<br/>"
                    "Optionally, you may drag and drop the downloaded mods onto this dialog or add a folder to watch "
                    "if you did not download the mods to a default location.<br/><br/>"
-                   "Global Mods Folder: %1<br/>"
-                   "Default Downloads Folder: %2"))
+                   "Global Mods Folder: <a href=\"%1\">%1</a><br/>"
+                   "Default Downloads Folder: <a href=\"%2\">%2</a>"))
             .arg(APPLICATION->settings()->get("CentralModsDir").toString(),
                  QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)));
     ui->labelModsFound->setText(tr("Please download the missing mods."));
+
+    // force all URL handeling as external
+    connect(ui->textBrowserWatched, &QTextBrowser::anchorClicked, this, [](const QUrl url) { QDesktopServices::openUrl(url); });
 
     setAcceptDrops(true);
 
@@ -118,7 +121,7 @@ void BlockedModsDialog::update()
 
     QString watching;
     for (auto& dir : m_watcher.directories()) {
-        watching += QString("%1<br/>").arg(dir);
+        watching += QString("<a href=\"%1\">%1</a><br/>").arg(dir);
     }
 
     ui->textBrowserWatched->setText(watching);

@@ -35,6 +35,9 @@
      <property name="wordWrap">
       <bool>true</bool>
      </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
@@ -85,6 +88,12 @@
        <width>0</width>
        <height>12</height>
       </size>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+     <property name="openLinks">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
