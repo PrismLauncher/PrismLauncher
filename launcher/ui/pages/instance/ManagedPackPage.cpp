@@ -47,7 +47,7 @@ ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, QString type, Q
 {
     if (type == "modrinth")
         return new ModrinthManagedPackPage(inst, nullptr, parent);
-    if (type == "flame")
+    if (type == "flame" && (APPLICATION->capabilities() & Application::SupportsFlame))
         return new FlameManagedPackPage(inst, nullptr, parent);
 
     return new GenericManagedPackPage(inst, nullptr, parent);
