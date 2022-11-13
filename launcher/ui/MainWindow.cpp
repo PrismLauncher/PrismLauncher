@@ -2101,10 +2101,10 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
 
 #if defined(Q_OS_MACOS)
         QString appPath = QApplication::applicationFilePath();
-		if (appPath.startsWith("/private/var")) {
+        if (appPath.startsWith("/private/var")) {
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("The launcher is in the folder it was extracted from, therefore it cannot create shortcuts."));
             return;
-		}
+        }
 
         if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
                            appPath, { "--launch", m_selectedInstance->id() }, m_selectedInstance->name(), "")) {
