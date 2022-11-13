@@ -2100,13 +2100,14 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
 
 #if defined(Q_OS_MACOS)
-        // handle macOS bundle weirdness
-        QFileInfo appFileInfo(QApplication::applicationFilePath());
-        QString appName = appFileInfo.baseName();
-        QString exeName = FS::PathCombine(appFileInfo.filePath(), "Contents/MacOS/" + appName);
+        QString appPath = QApplication::applicationFilePath();
+		if (appPath.startsWith("/private/var")) {
+            QMessageBox::critical(this, tr("Create instance shortcut"), tr("The launcher is in the folder it was extracted from, therefore it cannot create shortcuts."));
+            return;
+		}
 
         if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
-                           exeName, { "--launch", m_selectedInstance->id() }, m_selectedInstance->name(), "")) {
+                           appPath, { "--launch", m_selectedInstance->id() }, m_selectedInstance->name(), "")) {
             QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
         }
         else

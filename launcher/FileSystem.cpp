@@ -343,7 +343,7 @@ QString getDesktopDir()
 bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon)
 {
 #if defined(Q_OS_MACOS)
-    destination += ".sh";
+    destination += ".command";
 
     QFile f(destination);
     f.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -355,8 +355,9 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
 
     stream << "#!/bin/bash"
            << "\n";
-    stream << target
-           << " "
+    stream << "\""
+           << target
+           << "\" "
            << argstring
            << "\n";
 
