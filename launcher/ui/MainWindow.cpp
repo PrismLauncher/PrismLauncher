@@ -2131,7 +2131,11 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
 
         auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
-        
+        if (icon == nullptr)
+        {
+            icon = APPLICATION->icons()->icon("grass");
+        }
+
         QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.png");
         
         QFile iconFile(iconPath);
@@ -2162,7 +2166,11 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
 #elif defined(Q_OS_WIN)
         auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
-        
+        if (icon == nullptr)
+        {
+            icon = APPLICATION->icons()->icon("grass");
+        }
+
         QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.ico");
         
         // part of fix for weird bug involving the window icon being replaced
