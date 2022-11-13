@@ -173,7 +173,7 @@ bool WorldList::resetIcon(int row)
 
 int WorldList::columnCount(const QModelIndex &parent) const
 {
-    return 4;
+    return parent.isValid()? 0 : 4;
 }
 
 QVariant WorldList::data(const QModelIndex &index, int role) const

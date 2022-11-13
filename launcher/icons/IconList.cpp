@@ -302,7 +302,7 @@ QVariant IconList::data(const QModelIndex &index, int role) const
 
 int IconList::rowCount(const QModelIndex &parent) const
 {
-    return icons.size();
+    return parent.isValid() ? 0 : icons.size();
 }
 
 void IconList::installIcons(const QStringList &iconFiles)

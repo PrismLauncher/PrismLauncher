@@ -408,15 +408,15 @@ QVariant AccountList::headerData(int section, Qt::Orientation orientation, int r
     }
 }
 
-int AccountList::rowCount(const QModelIndex &) const
+int AccountList::rowCount(const QModelIndex &parent) const
 {
     // Return count
-    return count();
+    return parent.isValid() ? 0 : count();
 }
 
-int AccountList::columnCount(const QModelIndex &) const
+int AccountList::columnCount(const QModelIndex &parent) const
 {
-    return NUM_COLUMNS;
+    return parent.isValid() ? 0 : NUM_COLUMNS;
 }
 
 Qt::ItemFlags AccountList::flags(const QModelIndex &index) const

@@ -95,12 +95,12 @@ BaseVersionList::RoleList BaseVersionList::providesRoles() const
 int BaseVersionList::rowCount(const QModelIndex &parent) const
 {
     // Return count
-    return count();
+    return parent.isValid() ? 0 : count();
 }
 
 int BaseVersionList::columnCount(const QModelIndex &parent) const
 {
-    return 1;
+    return parent.isValid() ? 0 : 1;
 }
 
 QHash<int, QByteArray> BaseVersionList::roleNames() const

@@ -400,11 +400,11 @@ public:
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override
     {
-        return m_servers.size();
+        return parent.isValid() ? 0 : m_servers.size();
     }
     int columnCount(const QModelIndex & parent) const override
     {
-        return COLUMN_COUNT;
+        return parent.isValid() ? 0 : COLUMN_COUNT;
     }
 
     Server * at(int index)
