@@ -41,7 +41,7 @@ class ListModel : public QAbstractListModel {
     void requestModVersions(const ModPlatform::IndexedPack& current, QModelIndex index);
 
     virtual void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
-    virtual void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) {};
+    virtual void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
     virtual void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) = 0;
 
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
