@@ -382,7 +382,6 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
            << "\n";
     stream << "Type=Application"
            << "\n";
-    stream << "TryExec=\"" << target.toLocal8Bit() << "\"\n";
     stream << "Exec=\"" << target.toLocal8Bit() << "\"" << argstring.toLocal8Bit() << "\n";
     stream << "Name=" << name.toLocal8Bit() << "\n";
     if (!icon.isEmpty())
