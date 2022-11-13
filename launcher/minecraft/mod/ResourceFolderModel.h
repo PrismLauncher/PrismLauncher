@@ -176,7 +176,7 @@ class ResourceFolderModel : public QAbstractListModel {
      *  if the resource is complex and has more stuff to parse.
      */
     virtual void onParseSucceeded(int ticket, QString resource_id);
-    virtual void onParseFailed([[maybe_unused]] int ticket, [[maybe_unused]] QString resource_id) {}
+    virtual void onParseFailed(int ticket, QString resource_id) { Q_UNUSED(ticket); Q_UNUSED(resource_id); }
 
    protected:
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
