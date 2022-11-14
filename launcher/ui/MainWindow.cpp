@@ -106,6 +106,7 @@
 #include "ui/dialogs/UpdateDialog.h"
 #include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
+#include "ui/themes/ITheme.h"
 
 #include "UpdateController.h"
 #include "KonamiCode.h"
@@ -1311,6 +1312,25 @@ void MainWindow::updateThemeMenu()
     else
     {
         themeMenu = new QMenu(this);
+    }
+
+    auto themes = APPLICATION->getValidApplicationThemes();
+
+    QActionGroup* ThemesGroup = new QActionGroup( this );
+
+    for (int i = 0; i < themes.size(); i++)
+    {
+
+        auto *theme = themes[i];
+        QAction * themeAction = themeMenu->addAction(theme->name());
+
+        themeAction->setCheckable(true);
+        themeAction->setActionGroup(ThemesGroup);
+
+        connect(themeAction, &QAction::triggered, [theme]() {
+            APPLICATION->setApplicationTheme(theme->name().toLower(),false);
+
+        });
     }
 
     ui->actionChangeTheme->setMenu(themeMenu);
