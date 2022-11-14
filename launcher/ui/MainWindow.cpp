@@ -1949,16 +1949,24 @@ void MainWindow::on_actionClearMetadata_triggered()
 }
 
 #ifdef Q_OS_MAC
-void MainWindow::on_actionAddToPATH_triggered() {
+void MainWindow::on_actionAddToPATH_triggered()
+{
     auto binaryPath = APPLICATION->applicationFilePath();
+    auto targetPath = QString("/usr/local/bin/%1").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
+    qDebug() << "Symlinking" << binaryPath << "to" << targetPath;
 
-    qDebug() << "Symlinking" << binaryPath << "to /usr/local/bin/prism";
-    auto outcome = QProcess::execute("/usr/bin/osascript", QStringList()<< "-e" << tr("do shell script \"mkdir -p /usr/local/bin && ln -sf '%1' '/usr/local/bin/prismlauncher'\" with administrator privileges").arg(binaryPath));
-
+    QStringList args;
+    args << "-e";
+    args << QString("do shell script \"mkdir -p /usr/local/bin && ln -sf '%1' '%2'\" with administrator privileges")
+                .arg(binaryPath, targetPath);
+    auto outcome = QProcess::execute("/usr/bin/osascript", args);
     if (!outcome) {
-        QMessageBox::information(this, tr("Added Prism to PATH"), tr("Prism was successfully added to your PATH. You can now run it with `prismlauncher` in your Terminal. Enjoy!"));
+        QMessageBox::information(this, tr("Successfully added %1 to PATH").arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+                                 tr("%1 was successfully added to your PATH. You can now start it by running `%2`.")
+                                     .arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.LAUNCHER_APP_BINARY_NAME));
     } else {
-        QMessageBox::critical(this, tr("Failed to add Prism to PATH"), tr("Failed to add Prism to PATH :("));
+        QMessageBox::critical(this, tr("Failed to add %1 to PATH").arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+                              tr("An error occurred while trying to add %1 to PATH").arg(BuildConfig.LAUNCHER_DISPLAYNAME));
     }
 }
 #endif
