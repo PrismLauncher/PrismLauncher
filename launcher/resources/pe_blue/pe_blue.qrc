@@ -1,4 +1,5 @@
-<RCC>
+<!DOCTYPE RCC>
+<RCC version="1.0">
     <qresource prefix="/icons/pe_blue">
         <file>index.theme</file>
         <file>scalable/about.svg</file>
