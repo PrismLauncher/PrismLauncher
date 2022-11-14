@@ -151,7 +151,7 @@ public:
     void copyManagedPack(BaseInstance& other);
 
     /// guess log level from a line of game log
-    virtual MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level)
+    virtual MessageLevel::Enum guessLevel([[maybe_unused]] const QString &line, MessageLevel::Enum level)
     {
         return level;
     };

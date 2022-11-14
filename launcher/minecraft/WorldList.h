@@ -54,7 +54,7 @@ public:
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const
     {
-        return size();
+        return parent.isValid() ? 0 : static_cast<int>(size());
     };
     virtual QVariant headerData(int section, Qt::Orientation orientation,
                                 int role = Qt::DisplayRole) const;
