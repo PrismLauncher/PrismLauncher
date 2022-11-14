@@ -43,7 +43,6 @@
 #include "settings/SettingsObject.h"
 #include "Application.h"
 
-#include "MMCStrings.h"
 #include "pathmatcher/RegexpMatcher.h"
 #include "pathmatcher/MultiMatcher.h"
 #include "FileSystem.h"

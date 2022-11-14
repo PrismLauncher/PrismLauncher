@@ -44,7 +44,9 @@
 #include <QStandardPaths>
 #include <QTextStream>
 #include <QUrl>
+
 #include "DesktopServices.h"
+#include "StringUtils.h"
 
 #if defined Q_OS_WIN32
 #include <objbase.h>
@@ -77,22 +79,6 @@ namespace fs = std::filesystem;
 #ifndef GHC_USE_STD_FS
 #include <ghc/filesystem.hpp>
 namespace fs = ghc::filesystem;
-#endif
-
-#if defined Q_OS_WIN32
-
-std::wstring toStdString(QString s)
-{
-    return s.toStdWString();
-}
-
-#else
-
-std::string toStdString(QString s)
-{
-    return s.toStdString();
-}
-
 #endif
 
 namespace FS {
@@ -163,6 +149,9 @@ bool ensureFolderPathExists(QString foldernamepath)
     return success;
 }
 
+/// @brief Copies a directory and it's contents from src to dest
+/// @param offset subdirectory form src to copy to dest
+/// @return if there was an error during the filecopy
 bool copy::operator()(const QString& offset)
 {
     using copy_opts = fs::copy_options;
@@ -191,7 +180,7 @@ bool copy::operator()(const QString& offset)
         auto dst_path = PathCombine(dst, relative_dst_path);
         ensureFilePathExists(dst_path);
 
-        fs::copy(toStdString(src_path), toStdString(dst_path), opt, err);
+        fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
         if (err) {
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
@@ -213,7 +202,7 @@ bool copy::operator()(const QString& offset)
     }
 
     // If the root src is not a directory, the previous iterator won't run.
-    if (!fs::is_directory(toStdString(src)))
+    if (!fs::is_directory(StringUtils::toStdString(src)))
         copy_file(src, "");
 
     return err.value() == 0;
@@ -223,7 +212,7 @@ bool deletePath(QString path)
 {
     std::error_code err;
 
-    fs::remove_all(toStdString(path), err);
+    fs::remove_all(StringUtils::toStdString(path), err);
 
     if (err) {
         qWarning() << "Failed to remove files:" << QString::fromStdString(err.message());
@@ -414,7 +403,7 @@ bool overrideFolder(QString overwritten_path, QString override_path)
     fs::copy_options opt = copy_opts::recursive | copy_opts::overwrite_existing;
 
     // FIXME: hello traveller! Apparently std::copy does NOT overwrite existing files on GNU libstdc++ on Windows?
-    fs::copy(toStdString(override_path), toStdString(overwritten_path), opt, err);
+    fs::copy(StringUtils::toStdString(override_path), StringUtils::toStdString(overwritten_path), opt, err);
 
     if (err) {
         qCritical() << QString("Failed to apply override from %1 to %2").arg(override_path, overwritten_path);

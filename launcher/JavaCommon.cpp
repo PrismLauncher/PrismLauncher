@@ -36,7 +36,7 @@
 #include "JavaCommon.h"
 #include "java/JavaUtils.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include <MMCStrings.h>
+
 #include <QRegularExpression>
 
 bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget *parent)

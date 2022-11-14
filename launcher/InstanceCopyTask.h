@@ -1,20 +1,21 @@
 #pragma once
 
-#include "tasks/Task.h"
-#include "net/NetJob.h"
-#include <QUrl>
 #include <QFuture>
 #include <QFutureWatcher>
-#include "settings/SettingsObject.h"
-#include "BaseVersion.h"
+#include <QUrl>
 #include "BaseInstance.h"
+#include "BaseVersion.h"
+#include "InstanceCopyPrefs.h"
 #include "InstanceTask.h"
+#include "net/NetJob.h"
+#include "settings/SettingsObject.h"
+#include "tasks/Task.h"
 
 class InstanceCopyTask : public InstanceTask
 {
     Q_OBJECT
 public:
-    explicit InstanceCopyTask(InstancePtr origInstance, bool copySaves, bool keepPlaytime);
+    explicit InstanceCopyTask(InstancePtr origInstance, const InstanceCopyPrefs& prefs);
 
 protected:
     //! Entry point for tasks.
@@ -22,7 +23,8 @@ protected:
     void copyFinished();
     void copyAborted();
 
-private: /* data */
+private:
+    /* data */
     InstancePtr m_origInstance;
     QFuture<bool> m_copyFuture;
     QFutureWatcher<bool> m_copyFutureWatcher;
