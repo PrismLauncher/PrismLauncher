@@ -264,6 +264,8 @@ public:
 
     TranslatedAction actionLockToolbars;
 
+    TranslatedAction actionChangeTheme;
+
     QVector<TranslatedToolButton *> all_toolbuttons;
 
     QWidget *centralWidget = nullptr;
@@ -428,6 +430,11 @@ public:
         actionLockToolbars.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Lock Toolbars"));
         actionLockToolbars->setCheckable(true);
         all_actions.append(&actionLockToolbars);
+
+        actionChangeTheme = TranslatedAction(MainWindow);
+        actionChangeTheme->setObjectName(QStringLiteral("actionChangeTheme"));
+        actionChangeTheme.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Themes"));
+        all_actions.append(&actionChangeTheme);
     }
 
     void createMainToolbar(QMainWindow *MainWindow)
@@ -528,6 +535,8 @@ public:
 
         viewMenu = menuBar->addMenu(tr("&View"));
         viewMenu->setSeparatorsCollapsible(false);
+        viewMenu->addAction(actionChangeTheme);
+        viewMenu->addSeparator();
         viewMenu->addAction(actionCAT);
         viewMenu->addSeparator();
 
@@ -822,6 +831,7 @@ public:
         createInstanceToolbar(MainWindow);
 
         MainWindow->updateToolsMenu();
+        MainWindow->updateThemeMenu();
 
         retranslateUi(MainWindow);
 
@@ -1269,6 +1279,22 @@ void MainWindow::updateToolsMenu()
         }
     }
     ui->actionLaunchInstance->setMenu(launchMenu);
+}
+
+void MainWindow::updateThemeMenu()
+{
+    QMenu *themeMenu = ui->actionChangeTheme->menu();
+
+    if (themeMenu)
+    {
+        themeMenu->clear();
+    }
+    else
+    {
+        themeMenu = new QMenu(this);
+    }
+
+    ui->actionChangeTheme->setMenu(themeMenu);
 }
 
 void MainWindow::repopulateAccountsMenu()

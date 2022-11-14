@@ -170,6 +170,8 @@ private slots:
 
     void updateToolsMenu();
 
+    void updateThemeMenu();
+
     void instanceActivated(QModelIndex);
 
     void instanceChanged(const QModelIndex &current, const QModelIndex &previous);
