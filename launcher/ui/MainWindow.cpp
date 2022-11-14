@@ -61,6 +61,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QFileDialog>
 #include <QInputDialog>
 #include <QLabel>
 #include <QToolButton>
@@ -253,6 +254,9 @@ public:
     QMenu * helpMenu = nullptr;
     TranslatedToolButton helpMenuButton;
     TranslatedAction actionClearMetadata;
+    #ifdef Q_OS_MAC
+    TranslatedAction actionAddToPATH;
+    #endif
     TranslatedAction actionReportBug;
     TranslatedAction actionDISCORD;
     TranslatedAction actionMATRIX;
@@ -349,6 +353,14 @@ public:
         actionClearMetadata.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Clear Metadata Cache"));
         actionClearMetadata.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Clear cached metadata"));
         all_actions.append(&actionClearMetadata);
+
+        #ifdef Q_OS_MAC
+        actionAddToPATH = TranslatedAction(MainWindow);
+        actionAddToPATH->setObjectName(QStringLiteral("actionAddToPATH"));
+        actionAddToPATH.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Install to &PATH"));
+        actionAddToPATH.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Install a prismlauncher symlink to /usr/local/bin"));
+        all_actions.append(&actionAddToPATH);
+        #endif
 
         if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
             actionReportBug = TranslatedAction(MainWindow);
@@ -455,6 +467,10 @@ public:
 
         helpMenu->addAction(actionClearMetadata);
 
+        #ifdef Q_OS_MAC
+        helpMenu->addAction(actionAddToPATH);
+        #endif
+
         if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
             helpMenu->addAction(actionReportBug);
         }
@@ -542,6 +558,9 @@ public:
         helpMenu = menuBar->addMenu(tr("&Help"));
         helpMenu->setSeparatorsCollapsible(false);
         helpMenu->addAction(actionClearMetadata);
+        #ifdef Q_OS_MAC
+        helpMenu->addAction(actionAddToPATH);
+        #endif
         helpMenu->addSeparator();
         helpMenu->addAction(actionAbout);
         helpMenu->addAction(actionOpenWiki);
@@ -1928,6 +1947,29 @@ void MainWindow::on_actionClearMetadata_triggered()
     APPLICATION->metacache()->evictAll();
     APPLICATION->metacache()->SaveNow();
 }
+
+#ifdef Q_OS_MAC
+void MainWindow::on_actionAddToPATH_triggered()
+{
+    auto binaryPath = APPLICATION->applicationFilePath();
+    auto targetPath = QString("/usr/local/bin/%1").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
+    qDebug() << "Symlinking" << binaryPath << "to" << targetPath;
+
+    QStringList args;
+    args << "-e";
+    args << QString("do shell script \"mkdir -p /usr/local/bin && ln -sf '%1' '%2'\" with administrator privileges")
+                .arg(binaryPath, targetPath);
+    auto outcome = QProcess::execute("/usr/bin/osascript", args);
+    if (!outcome) {
+        QMessageBox::information(this, tr("Successfully added %1 to PATH").arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+                                 tr("%1 was successfully added to your PATH. You can now start it by running `%2`.")
+                                     .arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.LAUNCHER_APP_BINARY_NAME));
+    } else {
+        QMessageBox::critical(this, tr("Failed to add %1 to PATH").arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+                              tr("An error occurred while trying to add %1 to PATH").arg(BuildConfig.LAUNCHER_DISPLAYNAME));
+    }
+}
+#endif
 
 void MainWindow::on_actionOpenWiki_triggered()
 {
