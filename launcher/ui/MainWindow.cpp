@@ -355,8 +355,8 @@ public:
         #ifdef Q_OS_MAC
         actionAddToPATH = TranslatedAction(MainWindow);
         actionAddToPATH->setObjectName(QStringLiteral("actionAddToPATH"));
-        actionAddToPATH.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Add to &PATH"));
-        actionAddToPATH.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Add the prism binary to PATH."));
+        actionAddToPATH.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Install to &PATH"));
+        actionAddToPATH.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Install a prismlauncher symlink to /usr/local/bin"));
         all_actions.append(&actionAddToPATH);
         #endif
 
