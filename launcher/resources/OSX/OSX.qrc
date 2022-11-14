@@ -1,5 +1,4 @@
-<!DOCTYPE RCC>
-<RCC version="1.0">
+<RCC>
     <qresource prefix="/icons/OSX">
         <file>index.theme</file>
         <file>scalable/about.svg</file>
@@ -39,5 +38,6 @@
         <file>scalable/export.svg</file>
         <file>scalable/rename.svg</file>
         <file>scalable/launch.svg</file>
+        <file>scalable/shortcut.svg</file>
     </qresource>
 </RCC>
