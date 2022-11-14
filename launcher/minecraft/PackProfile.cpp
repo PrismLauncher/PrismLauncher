@@ -613,7 +613,7 @@ QVariant PackProfile::data(const QModelIndex &index, int role) const
 
 bool PackProfile::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount(index))
+    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount(index.parent()))
     {
         return false;
     }

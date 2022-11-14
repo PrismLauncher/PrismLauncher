@@ -421,7 +421,7 @@ int AccountList::columnCount(const QModelIndex &parent) const
 
 Qt::ItemFlags AccountList::flags(const QModelIndex &index) const
 {
-    if (index.row() < 0 || index.row() >= rowCount(index) || !index.isValid())
+    if (index.row() < 0 || index.row() >= rowCount(index.parent()) || !index.isValid())
     {
         return Qt::NoItemFlags;
     }
