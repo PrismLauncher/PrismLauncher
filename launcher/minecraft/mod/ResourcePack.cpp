@@ -1,9 +1,11 @@
 #include "ResourcePack.h"
 
+#include <QCoreApplication>
 #include <QDebug>
 #include <QMap>
 #include <QRegularExpression>
 
+#include "MTPixmapCache.h"
 #include "Version.h"
 
 #include "minecraft/mod/tasks/LocalResourcePackParseTask.h"
@@ -43,9 +45,9 @@ void ResourcePack::setImage(QImage new_image)
     Q_ASSERT(!new_image.isNull());
 
     if (m_pack_image_cache_key.key.isValid())
-        QPixmapCache::remove(m_pack_image_cache_key.key);
+        PixmapCache::instance().remove(m_pack_image_cache_key.key);
 
-    m_pack_image_cache_key.key = QPixmapCache::insert(QPixmap::fromImage(new_image));
+    m_pack_image_cache_key.key = PixmapCache::instance().insert(QPixmap::fromImage(new_image));
     m_pack_image_cache_key.was_ever_used = true;
 
     // This can happen if the pixmap is too big to fit in the cache :c
@@ -58,7 +60,7 @@ void ResourcePack::setImage(QImage new_image)
 QPixmap ResourcePack::image(QSize size)
 {
     QPixmap cached_image;
-    if (QPixmapCache::find(m_pack_image_cache_key.key, &cached_image)) {
+    if (PixmapCache::instance().find(m_pack_image_cache_key.key, &cached_image)) {
         if (size.isNull())
             return cached_image;
         return cached_image.scaled(size);
