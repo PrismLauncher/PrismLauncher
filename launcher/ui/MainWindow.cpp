@@ -1305,12 +1305,9 @@ void MainWindow::updateThemeMenu()
 {
     QMenu *themeMenu = ui->actionChangeTheme->menu();
 
-    if (themeMenu)
-    {
+    if (themeMenu) {
         themeMenu->clear();
-    }
-    else
-    {
+    } else {
         themeMenu = new QMenu(this);
     }
 
@@ -1320,11 +1317,13 @@ void MainWindow::updateThemeMenu()
 
     for (int i = 0; i < themes.size(); i++)
     {
-
         auto *theme = themes[i];
         QAction * themeAction = themeMenu->addAction(theme->name());
 
         themeAction->setCheckable(true);
+        if (APPLICATION->settings()->get("ApplicationTheme").toString() == theme->id()) {
+            themeAction->setChecked(true);
+        }
         themeAction->setActionGroup(ThemesGroup);
 
         connect(themeAction, &QAction::triggered, [theme]() {
