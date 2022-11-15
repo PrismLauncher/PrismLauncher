@@ -1965,6 +1965,7 @@ void MainWindow::globalSettingsClosed()
     proxymodel->sort(0);
     updateMainToolBar();
     updateToolsMenu();
+    updateThemeMenu();
     updateStatusCenter();
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
     // but Prism Launcher exits abnormally, causing the window state to never be saved:
