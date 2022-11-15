@@ -49,7 +49,7 @@
 
 #include <QKeyEvent>
 #include <QAction>
-
+#include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
 #include <QHBoxLayout>
