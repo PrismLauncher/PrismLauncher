@@ -49,47 +49,47 @@ class MetaEntry {
     MetaEntry() = default;
 
    public:
-    auto isStale() -> bool { return stale; }
-    void setStale(bool stale) { this->stale = stale; }
+    auto isStale() -> bool { return m_stale; }
+    void setStale(bool stale) { m_stale = stale; }
 
     auto getFullPath() -> QString;
 
-    auto getRemoteChangedTimestamp() -> QString { return remote_changed_timestamp; }
-    void setRemoteChangedTimestamp(QString remote_changed_timestamp) { this->remote_changed_timestamp = remote_changed_timestamp; }
-    void setLocalChangedTimestamp(qint64 timestamp) { local_changed_timestamp = timestamp; }
+    auto getRemoteChangedTimestamp() -> QString { return m_remote_changed_timestamp; }
+    void setRemoteChangedTimestamp(QString remote_changed_timestamp) { m_remote_changed_timestamp = remote_changed_timestamp; }
+    void setLocalChangedTimestamp(qint64 timestamp) { m_local_changed_timestamp = timestamp; }
 
-    auto getETag() -> QString { return etag; }
-    void setETag(QString etag) { this->etag = etag; }
+    auto getETag() -> QString { return m_etag; }
+    void setETag(QString etag) { m_etag = etag; }
 
-    auto getMD5Sum() -> QString { return md5sum; }
-    void setMD5Sum(QString md5sum) { this->md5sum = md5sum; }
+    auto getMD5Sum() -> QString { return m_md5sum; }
+    void setMD5Sum(QString md5sum) { m_md5sum = md5sum; }
 
     /* Whether the entry expires after some time (false) or not (true). */
-    void makeEternal(bool eternal) { is_eternal = eternal; }
-    [[nodiscard]] bool isEternal() const { return is_eternal; }
+    void makeEternal(bool eternal) { m_is_eternal = eternal; }
+    [[nodiscard]] bool isEternal() const { return m_is_eternal; }
 
-    auto getCurrentAge() -> qint64 { return current_age; }
-    void setCurrentAge(qint64 age) { current_age = age; }
+    auto getCurrentAge() -> qint64 { return m_current_age; }
+    void setCurrentAge(qint64 age) { m_current_age = age; }
 
-    auto getMaximumAge() -> qint64 { return max_age; }
-    void setMaximumAge(qint64 age) { max_age = age; }
+    auto getMaximumAge() -> qint64 { return m_max_age; }
+    void setMaximumAge(qint64 age) { m_max_age = age; }
 
-    bool isExpired(qint64 offset) { return !is_eternal && (current_age >= max_age - offset); };
+    bool isExpired(qint64 offset) { return !m_is_eternal && (m_current_age >= m_max_age - offset); };
 
    protected:
-    QString baseId;
-    QString basePath;
-    QString relativePath;
-    QString md5sum;
-    QString etag;
+    QString m_baseId;
+    QString m_basePath;
+    QString m_relativePath;
+    QString m_md5sum;
+    QString m_etag;
 
-    qint64 local_changed_timestamp = 0;
-    QString remote_changed_timestamp;  // QString for now, RFC 2822 encoded time
-    qint64 current_age = 0;
-    qint64 max_age = 0;
-    bool is_eternal = false;
+    qint64 m_local_changed_timestamp = 0;
+    QString m_remote_changed_timestamp;  // QString for now, RFC 2822 encoded time
+    qint64 m_current_age = 0;
+    qint64 m_max_age = 0;
+    bool m_is_eternal = false;
 
-    bool stale = true;
+    bool m_stale = true;
 };
 
 using MetaEntryPtr = std::shared_ptr<MetaEntry>;

@@ -20,8 +20,8 @@ class ListModel : public QAbstractListModel {
     ListModel(ModPage* parent);
     ~ListModel() override;
 
-    inline auto rowCount(const QModelIndex& parent) const -> int override { return modpacks.size(); };
-    inline auto columnCount(const QModelIndex& parent) const -> int override { return 1; };
+    inline auto rowCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : modpacks.size(); };
+    inline auto columnCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : 1; };
     inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); };
 
     auto debugName() const -> QString;
@@ -41,12 +41,12 @@ class ListModel : public QAbstractListModel {
     void requestModVersions(const ModPlatform::IndexedPack& current, QModelIndex index);
 
     virtual void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
-    virtual void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) {};
+    virtual void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
     virtual void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) = 0;
 
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
 
-    inline auto canFetchMore(const QModelIndex& parent) const -> bool override { return searchState == CanPossiblyFetchMore; };
+    inline auto canFetchMore(const QModelIndex& parent) const -> bool override { return parent.isValid() ? false : searchState == CanPossiblyFetchMore; };
 
    public slots:
     void searchRequestFinished(QJsonDocument& doc);

@@ -7,6 +7,10 @@ on:
         description: Type of build (Debug, Release, RelWithDebInfo, MinSizeRel)
         type: string
         default: Debug
+      is_qt_cached:
+        description: Enable Qt caching or not
+        type: string
+        default: true
     secrets:
       SPARKLE_ED25519_KEY:
         description: Private key for signing Sparkle updates
@@ -102,14 +106,6 @@ jobs:
         with:
           submodules: 'true'
 
-      - name: Initialize CodeQL
-        if: runner.os == 'Linux' && matrix.qt_ver == 6
-        uses: github/codeql-action/init@v2
-        with:
-          config-file: ./.github/codeql/codeql-config.yml
-          queries: security-and-quality
-          languages: cpp, java
-
       - name: 'Setup MSYS2'
         if: runner.os == 'Windows' && matrix.msystem != ''
         uses: msys2/setup-msys2@v2
@@ -200,8 +196,7 @@ jobs:
            arch: ${{ matrix.qt_arch }}
            modules: ${{ matrix.qt_modules }}
            tools: ${{ matrix.qt_tools }}
-           cache: true
-           cache-key-prefix: ${{ matrix.qt_host }}-${{ matrix.qt_version }}-"${{ matrix.qt_modules }}"-qt_cache
+           cache: ${{ inputs.is_qt_cached }}
 
       - name: Prepare AppImage (Linux)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
@@ -291,14 +286,6 @@ jobs:
         if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
           ctest -E "^example64|example$" --test-dir build --output-on-failure -C ${{ inputs.build_type }} 
-
-      ##
-      # CODE SCAN
-      ##
-
-      - name: Perform CodeQL Analysis
-        if: runner.os == 'Linux' && matrix.qt_ver == 6
-        uses: github/codeql-action/analyze@v2
 
       ##
       # PACKAGE BUILDS
@@ -510,10 +497,10 @@ jobs:
           echo "VERSION=$ver_short" >> $GITHUB_ENV
       - name: Package Snap (Linux)
         id: snapcraft
-        if: runner.os == 'Linux' && matrix.qt_ver != 5
+        if: runner.os == 'Linux' && inputs.build_type == 'Debug'
         uses: snapcore/action-build@v1
       - name: Upload Snap (Linux)
-        if: runner.os == 'Linux' && matrix.qt_ver != 5
+        if: runner.os == 'Linux' && inputs.build_type == 'Debug'
         uses: actions/upload-artifact@v3
         with:
           name: prismlauncher_${{ env.VERSION }}_amd64.snap
