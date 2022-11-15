@@ -1327,8 +1327,8 @@ void MainWindow::updateThemeMenu()
         themeAction->setActionGroup(ThemesGroup);
 
         connect(themeAction, &QAction::triggered, [theme]() {
-            APPLICATION->setApplicationTheme(theme->name().toLower(),false);
-
+            APPLICATION->setApplicationTheme(theme->id(),false);
+            APPLICATION->settings()->set("ApplicationTheme", theme->id());
         });
     }
 
