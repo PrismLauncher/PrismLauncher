@@ -47,6 +47,12 @@ void ResourcePack::setImage(QImage new_image)
 
     m_pack_image_cache_key.key = QPixmapCache::insert(QPixmap::fromImage(new_image));
     m_pack_image_cache_key.was_ever_used = true;
+
+    // This can happen if the pixmap is too big to fit in the cache :c
+    if (!m_pack_image_cache_key.key.isValid()) {
+        qWarning() << "Could not insert a image cache entry! Ignoring it.";
+        m_pack_image_cache_key.was_ever_used = false;
+    }
 }
 
 QPixmap ResourcePack::image(QSize size)
