@@ -90,8 +90,8 @@ class ResourceFolderModel : public QAbstractListModel {
     /* Basic columns */
     enum Columns { ACTIVE_COLUMN = 0, NAME_COLUMN, DATE_COLUMN, NUM_COLUMNS };
 
-    [[nodiscard]] int rowCount(const QModelIndex& = {}) const override { return size(); }
-    [[nodiscard]] int columnCount(const QModelIndex& = {}) const override { return NUM_COLUMNS; };
+    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : static_cast<int>(size()); }
+    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : NUM_COLUMNS; };
 
     [[nodiscard]] Qt::DropActions supportedDropActions() const override;
 
@@ -176,7 +176,7 @@ class ResourceFolderModel : public QAbstractListModel {
      *  if the resource is complex and has more stuff to parse.
      */
     virtual void onParseSucceeded(int ticket, QString resource_id);
-    virtual void onParseFailed(int ticket, QString resource_id) {}
+    virtual void onParseFailed(int ticket, QString resource_id) { Q_UNUSED(ticket); Q_UNUSED(resource_id); }
 
    protected:
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.

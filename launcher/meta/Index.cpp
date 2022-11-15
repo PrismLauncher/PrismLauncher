@@ -58,11 +58,11 @@ QVariant Index::data(const QModelIndex &index, int role) const
 }
 int Index::rowCount(const QModelIndex &parent) const
 {
-    return m_lists.size();
+    return parent.isValid() ? 0 : m_lists.size();
 }
 int Index::columnCount(const QModelIndex &parent) const
 {
-    return 1;
+    return parent.isValid() ? 0 : 1;
 }
 QVariant Index::headerData(int section, Qt::Orientation orientation, int role) const
 {

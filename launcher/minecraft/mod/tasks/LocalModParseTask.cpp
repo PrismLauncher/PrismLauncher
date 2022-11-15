@@ -121,7 +121,7 @@ ModDetails ReadMCModTOML(QByteArray contents)
         return {};
     }
     auto modsTable = tomlModsTable0->as_table();
-    if (!tomlModsTable0) {
+    if (!modsTable) {
         qWarning() << "Corrupted mods.toml? [[mods]] was not a table!";
         return {};
     }
