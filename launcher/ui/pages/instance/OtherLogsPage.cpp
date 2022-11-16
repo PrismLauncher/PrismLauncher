@@ -198,6 +198,7 @@ void OtherLogsPage::on_btnReload_clicked()
             showTooBig();
             return;
         }
+        content.replace(QRegExp("\\(Session ID is.+\\)", Qt::CaseInsensitive), "(Session ID is <SESSION_ID>)");
         setPlainText(content);
     }
 }
