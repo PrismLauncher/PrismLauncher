@@ -421,15 +421,14 @@ bool ExportInstanceDialog::doExport()
     SaveIcon(m_instance);
     auto & blocked = proxyModel->blockedPaths();
     auto files = QFileInfoList();
-    auto f_name = [blocked](const QString & str){
+    auto isBlocked = [blocked](const QString & str){
         if (str.contains("/logs/") || str.contains("/crash-reports/")) {
             return true;
         }
         // delegate to blockedPaths
         return blocked.covers(str);
     };
-    if (!MMCZip::collectFileListRecursively(m_instance->instanceRoot(), nullptr, &files,
-                                            f_name)) {
+    if (!MMCZip::collectFileListRecursively(m_instance->instanceRoot(), nullptr, &files, isBlocked)) {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
         return false;
     }
