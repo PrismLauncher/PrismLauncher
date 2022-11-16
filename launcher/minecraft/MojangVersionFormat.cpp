@@ -306,6 +306,15 @@ void MojangVersionFormat::writeVersionProperties(const VersionFile* in, QJsonObj
         }
         out.insert("downloads", downloadsOut);
     }
+    if(in->compatibleJavaMajors.size())
+    {
+        QJsonArray compatibleJavaMajorsOut;
+        for(auto compatibleJavaMajor : in->compatibleJavaMajors)
+        {
+            compatibleJavaMajorsOut.append(compatibleJavaMajor);
+        }
+        out.insert("compatibleJavaMajors", compatibleJavaMajorsOut);
+    }
 }
 
 QJsonDocument MojangVersionFormat::versionFileToJson(const VersionFilePtr &patch)

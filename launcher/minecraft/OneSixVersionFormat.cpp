@@ -331,6 +331,20 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
     writeString(root, "appletClass", patch->appletClass);
     writeStringList(root, "+tweakers", patch->addTweakers);
     writeStringList(root, "+traits", patch->traits.values());
+    writeStringList(root, "+jvmArgs", patch->addnJvmArguments);
+    if (!patch->agents.isEmpty())
+    {
+        QJsonArray array;
+        for (auto value: patch->agents)
+        {
+            QJsonObject agentOut = OneSixVersionFormat::libraryToJson(value->library().get());
+            if (!value->argument().isEmpty())
+                agentOut.insert("argument", value->argument());
+
+            array.append(agentOut);
+        }
+        root.insert("+agents", array);
+    }
     if (!patch->libraries.isEmpty())
     {
         QJsonArray array;
