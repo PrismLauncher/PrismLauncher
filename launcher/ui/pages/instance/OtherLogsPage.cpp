@@ -44,7 +44,6 @@
 #include <GZip.h>
 #include <FileSystem.h>
 #include <QShortcut>
-#include <QtGlobal>
 #include <QRegularExpression>
 
 OtherLogsPage::OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget *parent)
