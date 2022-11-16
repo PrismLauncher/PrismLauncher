@@ -10,21 +10,26 @@ import java.net.URI;
  **/
 public class Log4jContextFactory implements LoggerContextFactory {
 
+        @Override
         public LoggerContext getContext(String fqcn, ClassLoader loader, boolean currentContext) { 
             throw new RuntimeException("This is a stub");
         }
-
+        
+        @Override
         public LoggerContext getContext(String s, ClassLoader classLoader, boolean b, URI uri) {            
             throw new RuntimeException("This is a stub");
         }
 
+        @Override
         public LoggerContext getContext(String fqcn, ClassLoader loader, Object externalContext, boolean currentContext) {
             throw new RuntimeException("This is a stub");
         }
-
+        
+        @Override
         public LoggerContext getContext(String fqcn, ClassLoader loader, Object externalContext, boolean currentContext, URI configLocation, String name) {
             throw new RuntimeException("This is a stub");
         }
-
+        
+        @Override
         public void removeContext(org.apache.logging.log4j.spi.LoggerContext loggerContext) {}
 }
