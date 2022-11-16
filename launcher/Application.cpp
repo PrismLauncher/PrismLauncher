@@ -219,6 +219,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         {{"I", "import"}, "Import instance from specified zip (local path or URL)", "file"},
         {"show", "Opens the window for the specified instance (by instance ID)", "show"}
     });
+    // Has to be positional for some OS to handle that properly
+    parser.addPositionalArgument("urls","import the resource at the given url(s) (URL to modpack Zip / local Zip / curseforge:// modpack link)","[urls...]");
+    
     parser.addHelpOption();
     parser.addVersionOption();
 
