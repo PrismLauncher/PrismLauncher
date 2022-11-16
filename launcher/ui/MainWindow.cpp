@@ -1315,9 +1315,7 @@ void MainWindow::updateThemeMenu()
 
     QActionGroup* ThemesGroup = new QActionGroup( this );
 
-    for (int i = 0; i < themes.size(); i++)
-    {
-        auto *theme = themes[i];
+    for (auto* theme : themes) {
         QAction * themeAction = themeMenu->addAction(theme->name());
 
         themeAction->setCheckable(true);
