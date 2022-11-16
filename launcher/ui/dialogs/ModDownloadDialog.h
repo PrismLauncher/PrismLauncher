@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,13 +33,14 @@ class ModDownloadDialog;
 
 class PageContainer;
 class QDialogButtonBox;
+class ModPage;
 class ModrinthModPage;
 
 class ModDownloadDialog final : public QDialog, public BasePageProvider
 {
     Q_OBJECT
 
-public:
+   public:
     explicit ModDownloadDialog(const std::shared_ptr<ModFolderModel>& mods, QWidget* parent, BaseInstance* instance);
     ~ModDownloadDialog() override = default;
 
@@ -51,22 +53,26 @@ public:
     bool isModSelected(QString name) const;
 
     const QList<ModDownloadTask*> getTasks();
-    const std::shared_ptr<ModFolderModel> &mods;
+    const std::shared_ptr<ModFolderModel>& mods;
 
-public slots:
+    bool selectPage(QString pageId);
+    ModPage* getSelectedPage();
+
+   public slots:
     void confirm();
     void accept() override;
     void reject() override;
 
-private slots:
+   private slots:
     void selectedPageChanged(BasePage* previous, BasePage* selected);
 
-private:
-    Ui::ModDownloadDialog *ui = nullptr;
-    PageContainer * m_container = nullptr;
-    QDialogButtonBox * m_buttons = nullptr;
-    QVBoxLayout *m_verticalLayout = nullptr;
+   private:
+    Ui::ModDownloadDialog* ui = nullptr;
+    PageContainer* m_container = nullptr;
+    QDialogButtonBox* m_buttons = nullptr;
+    QVBoxLayout* m_verticalLayout = nullptr;
+    ModPage* m_selectedPage = nullptr;
 
     QHash<QString, ModDownloadTask*> modTask;
-    BaseInstance *m_instance;
+    BaseInstance* m_instance;
 };

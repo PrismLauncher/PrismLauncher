@@ -75,12 +75,12 @@ QVector<QString> AtlOptionalModListModel::getResult() {
 }
 
 int AtlOptionalModListModel::rowCount(const QModelIndex &parent) const {
-    return m_mods.size();
+    return parent.isValid() ? 0 : m_mods.size();
 }
 
 int AtlOptionalModListModel::columnCount(const QModelIndex &parent) const {
     // Enabled, Name, Description
-    return 3;
+    return parent.isValid() ? 0 : 3;
 }
 
 QVariant AtlOptionalModListModel::data(const QModelIndex &index, int role) const {

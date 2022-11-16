@@ -61,6 +61,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QFileDialog>
 #include <QInputDialog>
 #include <QLabel>
 #include <QToolButton>
@@ -253,6 +254,9 @@ public:
     QMenu * helpMenu = nullptr;
     TranslatedToolButton helpMenuButton;
     TranslatedAction actionClearMetadata;
+    #ifdef Q_OS_MAC
+    TranslatedAction actionAddToPATH;
+    #endif
     TranslatedAction actionReportBug;
     TranslatedAction actionDISCORD;
     TranslatedAction actionMATRIX;
@@ -261,6 +265,8 @@ public:
 
     TranslatedAction actionNoAccountsAdded;
     TranslatedAction actionNoDefaultAccount;
+
+    TranslatedAction actionLockToolbars;
 
     QVector<TranslatedToolButton *> all_toolbuttons;
 
@@ -348,6 +354,14 @@ public:
         actionClearMetadata.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Clear cached metadata"));
         all_actions.append(&actionClearMetadata);
 
+        #ifdef Q_OS_MAC
+        actionAddToPATH = TranslatedAction(MainWindow);
+        actionAddToPATH->setObjectName(QStringLiteral("actionAddToPATH"));
+        actionAddToPATH.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Install to &PATH"));
+        actionAddToPATH.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Install a prismlauncher symlink to /usr/local/bin"));
+        all_actions.append(&actionAddToPATH);
+        #endif
+
         if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
             actionReportBug = TranslatedAction(MainWindow);
             actionReportBug->setObjectName(QStringLiteral("actionReportBug"));
@@ -420,6 +434,12 @@ public:
         actionManageAccounts->setCheckable(false);
         actionManageAccounts->setIcon(APPLICATION->getThemedIcon("accounts"));
         all_actions.append(&actionManageAccounts);
+
+        actionLockToolbars = TranslatedAction(MainWindow);
+        actionLockToolbars->setObjectName(QStringLiteral("actionLockToolbars"));
+        actionLockToolbars.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Lock Toolbars"));
+        actionLockToolbars->setCheckable(true);
+        all_actions.append(&actionLockToolbars);
     }
 
     void createMainToolbar(QMainWindow *MainWindow)
@@ -427,7 +447,6 @@ public:
         mainToolBar = TranslatedToolbar(MainWindow);
         mainToolBar->setVisible(menuBar->isNativeMenuBar() || !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
-        mainToolBar->setMovable(true);
         mainToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         mainToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         mainToolBar->setFloatable(false);
@@ -447,6 +466,10 @@ public:
         helpMenu->setToolTipsVisible(true);
 
         helpMenu->addAction(actionClearMetadata);
+
+        #ifdef Q_OS_MAC
+        helpMenu->addAction(actionAddToPATH);
+        #endif
 
         if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
             helpMenu->addAction(actionReportBug);
@@ -524,6 +547,8 @@ public:
         viewMenu->addAction(actionCAT);
         viewMenu->addSeparator();
 
+        viewMenu->addAction(actionLockToolbars);
+
         menuBar->addMenu(foldersMenu);
 
         profileMenu = menuBar->addMenu(tr("&Accounts"));
@@ -533,6 +558,9 @@ public:
         helpMenu = menuBar->addMenu(tr("&Help"));
         helpMenu->setSeparatorsCollapsible(false);
         helpMenu->addAction(actionClearMetadata);
+        #ifdef Q_OS_MAC
+        helpMenu->addAction(actionAddToPATH);
+        #endif
         helpMenu->addSeparator();
         helpMenu->addAction(actionAbout);
         helpMenu->addAction(actionOpenWiki);
@@ -601,7 +629,6 @@ public:
     {
         newsToolBar = TranslatedToolbar(MainWindow);
         newsToolBar->setObjectName(QStringLiteral("newsToolBar"));
-        newsToolBar->setMovable(true);
         newsToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
         newsToolBar->setIconSize(QSize(16, 16));
         newsToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -736,7 +763,6 @@ public:
         instanceToolBar->setObjectName(QStringLiteral("instanceToolBar"));
         // disabled until we have an instance selected
         instanceToolBar->setEnabled(false);
-        instanceToolBar->setMovable(true);
         // Qt doesn't like vertical moving toolbars, so we have to force them...
         // See https://github.com/PolyMC/PolyMC/issues/493
         connect(instanceToolBar, &QToolBar::orientationChanged, [=](Qt::Orientation){ instanceToolBar->setOrientation(Qt::Vertical); });
@@ -918,6 +944,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         connect(ui->actionCAT.operator->(), SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
         setCatBackground(cat_enable);
     }
+
+    // Lock toolbars
+    {
+        bool toolbarsLocked = APPLICATION->settings()->get("ToolbarsLocked").toBool();
+        ui->actionLockToolbars->setChecked(toolbarsLocked);
+        connect(ui->actionLockToolbars, &QAction::toggled, this, &MainWindow::lockToolbars);
+        lockToolbars(toolbarsLocked);
+    }
     // start instance when double-clicked
     connect(view, &InstanceView::activated, this, &MainWindow::instanceActivated);
 
@@ -1073,8 +1107,19 @@ QMenu * MainWindow::createPopupMenu()
 {
     QMenu* filteredMenu = QMainWindow::createPopupMenu();
     filteredMenu->removeAction( ui->mainToolBar->toggleViewAction() );
+
+    filteredMenu->addAction(ui->actionLockToolbars);
+
     return filteredMenu;
 }
+void MainWindow::lockToolbars(bool state)
+{
+    ui->mainToolBar->setMovable(!state);
+    ui->instanceToolBar->setMovable(!state);
+    ui->newsToolBar->setMovable(!state);
+    APPLICATION->settings()->set("ToolbarsLocked", state);
+}
+
 
 void MainWindow::konamiTriggered()
 {
@@ -1564,8 +1609,8 @@ void MainWindow::setCatBackground(bool enabled)
         QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
         if (non_stupid_abs(now.daysTo(xmas)) <= 4) {
             cat += "-xmas";
-        } else if (cat == "kitteh" && non_stupid_abs(now.daysTo(halloween)) <= 4) {
-            cat += "-ween";
+        } else if (non_stupid_abs(now.daysTo(halloween)) <= 4) {
+            cat += "-spooky";
         } else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
             cat += "-bday";
         }
@@ -1625,7 +1670,7 @@ void MainWindow::on_actionCopyInstance_triggered()
     if (!copyInstDlg.exec())
         return;
 
-    auto copyTask = new InstanceCopyTask(m_selectedInstance, copyInstDlg.shouldCopySaves(), copyInstDlg.shouldKeepPlaytime());
+    auto copyTask = new InstanceCopyTask(m_selectedInstance, copyInstDlg.getChosenOptions());
     copyTask->setName(copyInstDlg.instName());
     copyTask->setGroup(copyInstDlg.instGroup());
     copyTask->setIcon(copyInstDlg.iconKey());
@@ -1900,7 +1945,31 @@ void MainWindow::on_actionReportBug_triggered()
 void MainWindow::on_actionClearMetadata_triggered()
 {
     APPLICATION->metacache()->evictAll();
+    APPLICATION->metacache()->SaveNow();
 }
+
+#ifdef Q_OS_MAC
+void MainWindow::on_actionAddToPATH_triggered()
+{
+    auto binaryPath = APPLICATION->applicationFilePath();
+    auto targetPath = QString("/usr/local/bin/%1").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
+    qDebug() << "Symlinking" << binaryPath << "to" << targetPath;
+
+    QStringList args;
+    args << "-e";
+    args << QString("do shell script \"mkdir -p /usr/local/bin && ln -sf '%1' '%2'\" with administrator privileges")
+                .arg(binaryPath, targetPath);
+    auto outcome = QProcess::execute("/usr/bin/osascript", args);
+    if (!outcome) {
+        QMessageBox::information(this, tr("Successfully added %1 to PATH").arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+                                 tr("%1 was successfully added to your PATH. You can now start it by running `%2`.")
+                                     .arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.LAUNCHER_APP_BINARY_NAME));
+    } else {
+        QMessageBox::critical(this, tr("Failed to add %1 to PATH").arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+                              tr("An error occurred while trying to add %1 to PATH").arg(BuildConfig.LAUNCHER_DISPLAYNAME));
+    }
+}
+#endif
 
 void MainWindow::on_actionOpenWiki_triggered()
 {

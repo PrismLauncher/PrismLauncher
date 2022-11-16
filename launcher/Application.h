@@ -200,6 +200,8 @@ public:
 
     void ShowGlobalSettings(class QWidget * parent, QString open_page = QString());
 
+    int suitableMaxMem();
+
 signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();

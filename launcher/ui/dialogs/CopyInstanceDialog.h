@@ -17,7 +17,7 @@
 
 #include <QDialog>
 #include "BaseVersion.h"
-#include <BaseInstance.h>
+#include "InstanceCopyPrefs.h"
 
 class BaseInstance;
 
@@ -39,20 +39,29 @@ public:
     QString instName() const;
     QString instGroup() const;
     QString iconKey() const;
-    bool shouldCopySaves() const;
-    bool shouldKeepPlaytime() const;
+    const InstanceCopyPrefs& getChosenOptions() const;
 
 private
 slots:
     void on_iconButton_clicked();
     void on_instNameTextBox_textChanged(const QString &arg1);
+    // Checkboxes
+    void on_selectAllCheckbox_stateChanged(int state);
     void on_copySavesCheckbox_stateChanged(int state);
     void on_keepPlaytimeCheckbox_stateChanged(int state);
+    void on_copyGameOptionsCheckbox_stateChanged(int state);
+    void on_copyResPacksCheckbox_stateChanged(int state);
+    void on_copyShaderPacksCheckbox_stateChanged(int state);
+    void on_copyServersCheckbox_stateChanged(int state);
+    void on_copyModsCheckbox_stateChanged(int state);
+    void on_copyScreenshotsCheckbox_stateChanged(int state);
 
 private:
+    void checkAllCheckboxes(const bool& b);
+    void updateSelectAllCheckbox();
+    /* data */
     Ui::CopyInstanceDialog *ui;
     QString InstIconKey;
     InstancePtr m_original;
-    bool m_copySaves = true;
-    bool m_keepPlaytime = true;
+    InstanceCopyPrefs m_selectedOptions;
 };

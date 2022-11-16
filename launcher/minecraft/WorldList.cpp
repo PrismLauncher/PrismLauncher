@@ -173,7 +173,7 @@ bool WorldList::resetIcon(int row)
 
 int WorldList::columnCount(const QModelIndex &parent) const
 {
-    return 4;
+    return parent.isValid()? 0 : 4;
 }
 
 QVariant WorldList::data(const QModelIndex &index, int role) const
@@ -398,8 +398,8 @@ void WorldList::installWorld(QFileInfo filename)
     w.install(m_dir.absolutePath());
 }
 
-bool WorldList::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
-                             const QModelIndex &parent)
+bool WorldList::dropMimeData(const QMimeData *data, Qt::DropAction action, [[maybe_unused]] int row, [[maybe_unused]] int column,
+                             [[maybe_unused]] const QModelIndex &parent)
 {
     if (action == Qt::IgnoreAction)
         return true;

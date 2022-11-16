@@ -5,15 +5,17 @@
 #include "pathmatcher/RegexpMatcher.h"
 #include <QtConcurrentRun>
 
-InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, bool copySaves, bool keepPlaytime)
+InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, const InstanceCopyPrefs& prefs)
 {
     m_origInstance = origInstance;
-    m_keepPlaytime = keepPlaytime;
+    m_keepPlaytime = prefs.isKeepPlaytimeEnabled();
 
-    if(!copySaves)
+    QString filters = prefs.getSelectedFiltersAsRegex();
+    if (!filters.isEmpty())
     {
+        // Set regex filter:
         // FIXME: get this from the original instance type...
-        auto matcherReal = new RegexpMatcher("[.]?minecraft/saves");
+        auto matcherReal = new RegexpMatcher(filters);
         matcherReal->caseSensitive(false);
         m_matcher.reset(matcherReal);
     }

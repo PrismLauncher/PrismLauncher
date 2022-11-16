@@ -53,7 +53,7 @@ ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance* instan
     ui->sortByBox->addItem(tr("Sort by Last Updated"));
     ui->sortByBox->addItem(tr("Sort by Newest"));
 
-    // sometimes Qt just ignores virtual slots and doesn't work as intended it seems, 
+    // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's constructor...
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthModPage::onSelectionChanged);

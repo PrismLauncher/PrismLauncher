@@ -13,8 +13,8 @@
   <property name="windowTitle">
    <string notr="true">BlockedModsDialog</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
     <widget class="QLabel" name="label">
      <property name="text">
       <string notr="true"/>
@@ -24,17 +24,7 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
+   <item>
     <widget class="QTextBrowser" name="textBrowser">
      <property name="acceptRichText">
       <bool>true</bool>
@@ -43,6 +33,27 @@
       <bool>true</bool>
      </property>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="bottomBoxH">
+     <item>
+      <widget class="QLabel" name="labelModsFound">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

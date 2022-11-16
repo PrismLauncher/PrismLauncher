@@ -9,7 +9,7 @@
 
 Prism Launcher is a custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.
 
-This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC.
+This is a **fork** of the MultiMC Launcher and is not endorsed by MultiMC.
 
 
 ## Installation
@@ -18,35 +18,35 @@ This is a **fork** of the MultiMC Launcher and not endorsed by MultiMC.
     <img src="https://repology.org/badge/vertical-allrepos/prismlauncher.svg" alt="Packaging status" align="right">
 </a>
 
-- All downloads and instructions for Prism Launcher can be found [on our website](https://prismlauncher.org/download/).
-- Last build status can be found [here](https://github.com/PrismLauncher/PrismLauncher/actions).
+- All downloads and instructions for Prism Launcher can be found on our [Website](https://prismlauncher.org/download/).
+- Last build status can be found in the [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions).
 
 ### Development Builds
 
 There are development builds available [here](https://github.com/PrismLauncher/PrismLauncher/actions). These have debug information in the binaries, so their file sizes are relatively larger.
 
-Portable builds are provided for Linux, Windows, and macOS.
+Prebuilt Development builds are provided for **Linux**, **Windows** and **macOS**.
 
-For Arch, Debian and Gentoo, respectively, you can use these packages to get compiled development versions:
+For **Arch**, **Debian**, **Fedora**, **OpenSUSE (Tumbleweed)** and **Gentoo**, respectively, you can use these packages for the latest development versions:
 
-[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-blue?style=flat-square)](https://aur.archlinux.org/packages/prismlauncher-qt5-git/) [![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--qt5--git-blue?style=flat-square)](https://aur.archlinux.org/packages/prismlauncher-git/) [![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-orange?style=flat-square)](https://mpr.makedeb.org/packages/prismlauncher-git) [![prismlauncher-9999](https://img.shields.io/badge/gentoo-prismlauncher--9999-purple?style=flat-square)](https://packages.gentoo.org/packages/games-action/prismlauncher)
+[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-1793D1?style=flat-square&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/prismlauncher-qt5-git/) [![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--qt5--git-1793D1?style=flat-square&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/prismlauncher-git/) [![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-A80030?style=flat-square&logo=debian&logoColor=white)](https://mpr.makedeb.org/packages/prismlauncher-git) [![prismlauncher-nightly](https://img.shields.io/badge/copr-prismlauncher--nightly-51A2DA?style=flat-square&logo=fedora&logoColor=white)](https://copr.fedorainfracloud.org/coprs/g3tchoo/prismlauncher/) [![prismlauncher-nightly](https://img.shields.io/badge/OBS-prismlauncher--nightly-3AB6A9?style=flat-square&logo=opensuse&logoColor=white)](https://build.opensuse.org/project/show/home:getchoo) [![prismlauncher-9999](https://img.shields.io/badge/gentoo-prismlauncher--9999-4D4270?style=flat-square&logo=gentoo&logoColor=white)](https://packages.gentoo.org/packages/games-action/prismlauncher)
 
-## Help & Support
+## Community & Support
 
-Feel free to create an issue if you need help.
+Feel free to create a GitHub issue if you find a bug or want to suggest a new feature. We have multiple communities that can also help you.
 
 #### Join our Discord server:
-[![Prism Launcher Discord server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner3)](https://discord.gg/prismlauncher)
+[![Prism Launcher Discord server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner2)](https://discord.gg/prismlauncher)
 
-#### Join our Matrix space:
-[![PrismLauncher Space](https://img.shields.io/matrix/prismlauncher:matrix.org?style=for-the-badge)](https://matrix.to/#/#prismlauncher:matrix.org)
+#### Join our Matrix space (Will be opened at a later date):
+[![PrismLauncher Space](https://img.shields.io/matrix/prismlauncher:matrix.org?style=for-the-badge&logo=matrix)](https://matrix.to/#/#prismlauncher:matrix.org)
 
 #### Join our SubReddit:
-[![r/PrismLauncher](https://img.shields.io/reddit/subreddit-subscribers/prismlauncher?style=for-the-badge)](https://www.reddit.com/r/PrismLauncher/)
+[![r/PrismLauncher](https://img.shields.io/reddit/subreddit-subscribers/prismlauncher?style=for-the-badge&logo=reddit)](https://www.reddit.com/r/PrismLauncher/)
 
 ## Building
 
-If you want to build Prism Launcher yourself, check [Build Instructions](https://prismlauncher.org/wiki/development/build-instructions/) for build instructions.
+If you want to build Prism Launcher yourself, check the [Build Instructions](https://prismlauncher.org/wiki/development/build-instructions/).
 
 ## Translations
 
@@ -97,6 +97,6 @@ Thanks to the awesome people over at [MacStadium](https://www.macstadium.com/), 
 
 All launcher code is available under the GPL-3.0-only license.
 
-![https://github.com/PrismLauncher/PrismLauncher/blob/develop/LICENSE](https://img.shields.io/github/license/PrismLauncher/PrismLauncher?style=for-the-badge)
+![https://github.com/PrismLauncher/PrismLauncher/blob/develop/LICENSE](https://img.shields.io/github/license/PrismLauncher/PrismLauncher?style=for-the-badge&logo=gnu&color=C4282D)
 
 The logo and related assets are under the CC BY-SA 4.0 license.

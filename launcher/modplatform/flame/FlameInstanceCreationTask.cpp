@@ -372,13 +372,20 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     auto results = m_mod_id_resolver->getResults();
 
     // first check for blocked mods
-    QString text;
-    QList<QUrl> urls;
+    QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
     for (const auto& result : results.files.values()) {
         if (!result.resolved || result.url.isEmpty()) {
-            text += QString("%1: <a href='%2'>%2</a><br/>").arg(result.fileName, result.websiteUrl);
-            urls.append(QUrl(result.websiteUrl));
+
+            BlockedMod blocked_mod;
+            blocked_mod.name = result.fileName;
+            blocked_mod.websiteUrl = result.websiteUrl;
+            blocked_mod.hash = result.hash;
+            blocked_mod.matched = false;
+            blocked_mod.localPath = "";
+
+            blocked_mods.append(blocked_mod);
+
             anyBlocked = true;
         }
     }
@@ -388,11 +395,12 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked mods found"),
                                                    tr("The following mods were blocked on third party launchers.<br/>"
                                                       "You will need to manually download them and add them to the modpack"),
-                                                   text,
-                                                   urls);
+                                                   blocked_mods);
         message_dialog->setModal(true);
 
         if (message_dialog->exec()) {
+            qDebug() << "Post dialog blocked mods list: " << blocked_mods;
+            copyBlockedMods(blocked_mods);
             setupDownloadJob(loop);
         } else {
             m_mod_id_resolver.reset();
@@ -402,6 +410,38 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     } else {
         setupDownloadJob(loop);
     }
+}
+
+/// @brief copy the matched blocked mods to the instance staging area
+/// @param blocked_mods list of the blocked mods and their matched paths
+void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
+{
+    setStatus(tr("Copying Blocked Mods..."));
+    setAbortable(false);
+    int i = 0;
+    int total = blocked_mods.length();
+    setProgress(i, total);
+    for (auto const& mod : blocked_mods) {
+        if (!mod.matched) {
+            qDebug() << mod.name << "was not matched to a local file, skipping copy";
+            continue;
+        }
+
+        auto dest_path = FS::PathCombine(m_stagingPath, "minecraft", "mods", mod.name);
+
+        setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
+
+        qDebug() << "Will try to copy" << mod.localPath << "to" << dest_path;
+
+        if (!FS::copy(mod.localPath, dest_path)()) {
+            qDebug() << "Copy of" << mod.localPath << "to" << dest_path << "Failed";
+        }
+
+        i++;
+        setProgress(i, total);
+    }
+
+    setAbortable(true);
 }
 
 void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
@@ -449,7 +489,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         m_files_job.reset();
         setError(reason);
     });
-    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { setProgress(current, total); });
+    connect(m_files_job.get(), &NetJob::progress, this, &FlameCreationTask::setProgress);
     connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
 
     setStatus(tr("Downloading mods..."));
