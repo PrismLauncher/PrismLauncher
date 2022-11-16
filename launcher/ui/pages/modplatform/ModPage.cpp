@@ -262,7 +262,7 @@ void ModPage::openUrl(const QUrl& url)
 
     const QString address = url.host() + url.path();
     QRegularExpressionMatch match;
-    const char* page;
+    QString page;
 
     match = modrinth.match(address);
     if (match.hasMatch())
@@ -276,7 +276,7 @@ void ModPage::openUrl(const QUrl& url)
             page = "curseforge";
     }
 
-    if (match.hasMatch()) {
+    if (!page.isNull()) {
         const QString slug = match.captured(1);
 
         // ensure the user isn't opening the same mod

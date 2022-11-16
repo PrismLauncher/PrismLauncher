@@ -80,14 +80,14 @@ QVariant Technic::ListModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-int Technic::ListModel::columnCount(const QModelIndex&) const
+int Technic::ListModel::columnCount(const QModelIndex& parent) const
 {
-    return 1;
+    return parent.isValid() ? 0 : 1;
 }
 
-int Technic::ListModel::rowCount(const QModelIndex&) const
+int Technic::ListModel::rowCount(const QModelIndex& parent) const
 {
-    return modpacks.size();
+    return parent.isValid() ? 0 : modpacks.size();
 }
 
 void Technic::ListModel::searchWithTerm(const QString& term)

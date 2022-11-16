@@ -10,6 +10,8 @@
 
 #include "net/NetJob.h"
 
+#include "ui/dialogs/BlockedModsDialog.h"
+
 class FlameCreationTask final : public InstanceCreationTask {
     Q_OBJECT
 
@@ -29,6 +31,7 @@ class FlameCreationTask final : public InstanceCreationTask {
    private slots:
     void idResolverSucceeded(QEventLoop&);
     void setupDownloadJob(QEventLoop&);
+    void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
 
    private:
     QWidget* m_parent = nullptr;

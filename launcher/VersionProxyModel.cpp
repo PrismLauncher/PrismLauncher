@@ -311,14 +311,14 @@ QModelIndex VersionProxyModel::index(int row, int column, const QModelIndex &par
 
 int VersionProxyModel::columnCount(const QModelIndex &parent) const
 {
-    return m_columns.size();
+    return parent.isValid() ? 0 : m_columns.size();
 }
 
 int VersionProxyModel::rowCount(const QModelIndex &parent) const
 {
     if(sourceModel())
     {
-        return sourceModel()->rowCount();
+        return sourceModel()->rowCount(parent);
     }
     return 0;
 }

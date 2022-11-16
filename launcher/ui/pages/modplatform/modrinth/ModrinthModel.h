@@ -55,8 +55,8 @@ class ModpackListModel : public QAbstractListModel {
     ModpackListModel(ModrinthPage* parent);
     ~ModpackListModel() override = default;
 
-    inline auto rowCount(const QModelIndex& parent) const -> int override { return modpacks.size(); };
-    inline auto columnCount(const QModelIndex& parent) const -> int override { return 1; };
+    inline auto rowCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : modpacks.size(); };
+    inline auto columnCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : 1; };
     inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); };
 
     auto debugName() const -> QString;
@@ -74,7 +74,7 @@ class ModpackListModel : public QAbstractListModel {
 
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
 
-    inline auto canFetchMore(const QModelIndex& parent) const -> bool override { return searchState == CanPossiblyFetchMore; };
+    inline auto canFetchMore(const QModelIndex& parent) const -> bool override { return parent.isValid() ? false : searchState == CanPossiblyFetchMore; };
 
    public slots:
     void searchRequestFinished(QJsonDocument& doc_all);

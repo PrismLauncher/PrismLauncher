@@ -110,6 +110,142 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "@Launcher_Copyright@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "@Launcher_VERSION_NAME4@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@"
 
+
+;--------------------------------
+; Shell Associate Macros
+
+!macro APP_SETUP DESCRIPTION ICON APP_ID APP_NAME APP_EXE COMMANDTEXT COMMAND ; VERB APP_COMPANY
+  ; setup APP_ID
+  WriteRegStr ShCtx "Software\Classes\${APP_ID}" "" `${DESCRIPTION}`
+  WriteRegStr ShCtx "Software\Classes\${APP_ID}\DefaultIcon" "" `${ICON}`
+  ; default open verb
+  WriteRegStr ShCtx "Software\Classes\${APP_ID}\shell" "" "open"                  
+  WriteRegStr ShCtx "Software\Classes\${APP_ID}\shell\open" "" `${COMMANDTEXT}`
+  WriteRegStr ShCtx "Software\Classes\${APP_ID}\shell\open\command" "" `${COMMAND}`
+
+  ; if you want the app to use it's own implementation of a verb
+  ;WriteRegStr ShCtx "Software\Classes\${APP_ID}\shell\${VERB}" "" "${DESCRIPTION}"
+  ;WriteRegStr ShCtx "Software\Classes\${APP_ID}\shell\${VERB}\command" "" `${COMMAND}`
+
+  WriteRegStr ShCtx "Software\Classes\Applications\${APP_EXE}\shell\open\command" "" `${COMMAND}`
+  WriteRegStr ShCtx "Software\Classes\Applications\${APP_EXE}" "FriendlyAppName" `${APP_NAME}` ; [Optional]
+  ;WriteRegStr ShCtx "Software\Classes\Applications\${APP_EXE}" "ApplicationCompany" `${APP_COMPANY}` ; [Optional]
+  ;WriteRegNone ShCtx "Software\Classes\Applications\${APP_EXE}\SupportedTypes" ".${EXT}" ; [Optional] Only allow "Open With" with specific extension(s) on WinXP+
+
+  # Register "Default Programs" [Optional]
+  !ifdef REGISTER_DEFAULTPROGRAMS
+  WriteRegStr ShCtx "Software\Classes\Applications\${APP_EXE}\Capabilities" "ApplicationDescription" `${DESCRIPTION}`
+  WriteRegStr ShCtx "Software\RegisteredApplications" `${APP_NAME}` "Software\Classes\Applications\${APP_EXE}\Capabilities"
+  !endif
+
+!macroend
+
+!macro APP_ASSOCIATE EXT APP_ID APP_EXE OVERWIRTE
+  ; Backup the previously associated file class
+  ${If} ${OVERWIRTE} == true
+  ReadRegStr $R0 ShCtx "Software\Classes\${EXT}" ""
+  WriteRegStr ShCtx "Software\Classes\${EXT}" "${APP_ID}_backup" "$R0"
+  WriteRegStr ShCtx "Software\Classes\${EXT}" "" "${APP_ID}"
+  ${EndIf}
+
+  WriteRegNone ShCtx "Software\Classes\${EXT}\OpenWithList" "${APP_EXE}" ; Win2000+
+  WriteRegNone ShCtx "Software\Classes\${EXT}\OpenWithProgids" "${APP_ID}" ; WinXP+
+
+  # Register "Default Programs" [Optional]
+  !ifdef REGISTER_DEFAULTPROGRAMS
+  WriteRegStr ShCtx "Software\Classes\Applications\${APP_EXE}\Capabilities\FileAssociations" "${EXT}" "${APP_ID}"
+  !endif
+
+!macroend
+
+!macro APP_UNASSOCIATE EXT APP_ID
+
+  # Unregister file type
+  ClearErrors
+  ; restore backup
+  ReadRegStr $R1 ShCtx "Software\Classes\${EXT}" ""
+  ${If} $R1 == "${APP_ID}"
+    ReadRegStr $R0 ShCtx "Software\Classes\${EXT}" `${APP_ID}_backup`
+    WriteRegStr ShCtx "Software\Classes\${EXT}" "" "$R0"
+  ${Else}
+    ReadRegStr $R0 ShCtx "Software\Classes\${EXT}" ""
+  ${EndIf}
+
+  DeleteRegKey /IfEmpty ShCtx "Software\Classes\${APP_ID}"
+  ${IfNot} ${Errors}
+  ${AndIf} $R0 == "${APP_ID}"
+    DeleteRegValue ShCtx "Software\Classes\${EXT}" ""
+    DeleteRegKey /IfEmpty ShCtx "Software\Classes\${EXT}"
+  ${EndIf}
+
+  DeleteRegValue ShCtx "Software\Classes\${EXT}\OpenWithList" "${APP_EXE}"
+  DeleteRegKey /IfEmpty ShCtx "Software\Classes\${EXT}\OpenWithList"
+  DeleteRegValue ShCtx "Software\Classes\${EXT}\OpenWithProgids" "${APP_ID}"
+  DeleteRegKey /IfEmpty ShCtx "Software\Classes\${EXT}\OpenWithProgids"
+  DeleteRegKey /IfEmpty  ShCtx "Software\Classes\${EXT}"
+
+  # Attempt to clean up junk left behind by the Windows shell
+  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "${APP_ID}_${EXT}"
+  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\ApplicationAssociationToasts" "Applications\${APP_EXE}_${EXT}"
+  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\${EXT}\OpenWithProgids" "${APP_ID}"
+  DeleteRegKey /IfEmpty HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\${EXT}\OpenWithProgids"
+  DeleteRegKey /IfEmpty HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\${EXT}\OpenWithList"
+  DeleteRegKey /IfEmpty HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\${EXT}"
+  ;DeleteRegKey HKCU "Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.${EXT}"
+  ;DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs\.${EXT}"
+
+!macroend
+
+!macro APP_TEARDOWN APP_ID APP_NAME APP_EXE
+
+  # Unregister file type
+  ClearErrors
+  DeleteRegKey /IfEmpty ShCtx "Software\Classes\${APP_ID}\shell"
+  ${IfNot} ${Errors}
+    DeleteRegKey ShCtx "Software\Classes\${APP_ID}\DefaultIcon"
+  ${EndIf}
+  
+  # Unregister "Open With"
+  DeleteRegKey ShCtx "Software\Classes\Applications\${APP_EXE}"
+
+  # Unregister "Default Programs"
+  !ifdef REGISTER_DEFAULTPROGRAMS
+  DeleteRegValue ShCtx "Software\RegisteredApplications" `${APP_NAME}`
+  DeleteRegKey ShCtx "Software\Classes\Applications\${APP_EXE}\Capabilities"
+  DeleteRegKey /IfEmpty ShCtx "Software\Classes\Applications\${APP_EXE}"
+  !endif
+
+  DeleteRegKey ShCtx `Software\Classes\${APP_ID}`
+  DeleteRegKey ShCtx "Software\Classes\Applications\${APP_EXE}"
+
+  # Attempt to clean up junk left behind by the Windows shell
+  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Search\JumplistData" "$INSTDIR\${APP_EXE}"
+  DeleteRegValue HKCU "Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache" "$INSTDIR\${APP_EXE}.FriendlyAppName"
+  DeleteRegValue HKCU "Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache" "$INSTDIR\${APP_EXE}.ApplicationCompany"
+  DeleteRegValue HKCU "Software\Microsoft\Windows\ShellNoRoam\MUICache" "$INSTDIR\${APP_EXE}" ; WinXP
+  DeleteRegValue HKCU "Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store" "$INSTDIR\${APP_EXE}"
+
+!macroend
+
+; !defines for use with SHChangeNotify
+!ifdef SHCNE_ASSOCCHANGED
+!undef SHCNE_ASSOCCHANGED
+!endif
+!define SHCNE_ASSOCCHANGED 0x08000000
+!ifdef SHCNF_FLUSH
+!undef SHCNF_FLUSH
+!endif
+!define SHCNF_FLUSH        0x1000
+
+
+# ensure this is called at the end of any section that changes shell keys
+!macro NotifyShell_AssocChanged
+; Using the system.dll plugin to call the SHChangeNotify Win32 API function so we
+; can update the shell.
+  System::Call "shell32::SHChangeNotify(i,i,i,i) (${SHCNE_ASSOCCHANGED}, ${SHCNF_FLUSH}, 0, 0)"
+!macroend
+
+
 ;--------------------------------
 
 ; The stuff to install
@@ -171,6 +307,27 @@ Section /o "Desktop Shortcut" DESKTOP_SHORTCUTS
 
 SectionEnd
 
+
+!define APP_ID "@Launcher_CommonName@.App"
+!define APP_EXE "@Launcher_APP_BINARY_NAME@.exe"
+!define APP_ICON "$INSTDIR\${APP_EXE},0"
+!define APP_DESCRIPTION "@Launcher_DisplayName@"
+!define APP_NAME "@Launcher_DisplayName@"
+!define APP_CMD_TEXT "Minecraft Modpack"
+
+!define REGISTER_DEFAULTPROGRAMS ; value doesn't matter
+
+Section -ShellAssoc
+
+  !insertmacro APP_SETUP `${APP_DESCRIPTION}` `${APP_ICON}` `${APP_ID}` `${APP_CMD_TEXT}` `${APP_EXE}` `${APP_CMD_TEXT}` '$INSTDIR\${APP_EXE} -I "%1"'
+  
+  !insertmacro APP_ASSOCIATE ".zip" `${APP_ID}` `${APP_EXE}` false
+  !insertmacro APP_ASSOCIATE ".mrpack" `${APP_ID}` `${APP_EXE}` true
+
+  !insertmacro NotifyShell_AssocChanged
+SectionEnd
+
+
 ;--------------------------------
 
 ; Uninstaller
@@ -200,6 +357,16 @@ Section "Uninstall"
 
   RMDir "$INSTDIR"
 
+SectionEnd
+
+Section -un.ShellAssoc
+  
+  !insertmacro APP_TEARDOWN `${APP_ID}` `${APP_NAME}` `${APP_EXE}`
+
+  !insertmacro APP_UNASSOCIATE ".zip" `${APP_ID}`
+  !insertmacro APP_UNASSOCIATE ".mrpack" `${APP_ID}`
+
+  !insertmacro NotifyShell_AssocChanged
 SectionEnd
 
 ;--------------------------------

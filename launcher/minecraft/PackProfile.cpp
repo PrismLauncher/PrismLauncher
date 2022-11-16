@@ -613,7 +613,7 @@ QVariant PackProfile::data(const QModelIndex &index, int role) const
 
 bool PackProfile::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount(index))
+    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount(index.parent()))
     {
         return false;
     }
@@ -675,12 +675,12 @@ Qt::ItemFlags PackProfile::flags(const QModelIndex &index) const
 
 int PackProfile::rowCount(const QModelIndex &parent) const
 {
-    return d->components.size();
+    return parent.isValid() ? 0 : d->components.size();
 }
 
 int PackProfile::columnCount(const QModelIndex &parent) const
 {
-    return NUM_COLUMNS;
+    return parent.isValid() ? 0 : NUM_COLUMNS;
 }
 
 void PackProfile::move(const int index, const MoveDirection direction)

@@ -426,7 +426,7 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
 bool ResourceFolderModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     int row = index.row();
-    if (row < 0 || row >= rowCount(index) || !index.isValid())
+    if (row < 0 || row >= rowCount(index.parent()) || !index.isValid())
         return false;
 
     if (role == Qt::CheckStateRole)
