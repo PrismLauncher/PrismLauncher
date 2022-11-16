@@ -225,11 +225,10 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
         {
             QJsonObject agentObj = requireObject(agentVal);
             auto lib = libraryFromJson(*out, agentObj, filename);
+
             QString arg = "";
-            if (agentObj.contains("argument"))
-            {
-                readString(agentObj, "argument", arg);
-            }
+            readString(agentObj, "argument", arg);
+
             AgentPtr agent(new Agent(lib, arg));
             out->agents.append(agent);
         }
