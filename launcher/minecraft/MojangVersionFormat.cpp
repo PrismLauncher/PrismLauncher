@@ -135,7 +135,7 @@ QJsonObject libDownloadInfoToJson(MojangLibraryDownloadInfo::Ptr libinfo)
     {
         out.insert("artifact", downloadInfoToJson(libinfo->artifact));
     }
-    if(libinfo->classifiers.size())
+    if(!libinfo->classifiers.isEmpty())
     {
         QJsonObject classifiersOut;
         for(auto iter = libinfo->classifiers.begin(); iter != libinfo->classifiers.end(); iter++)
@@ -297,7 +297,7 @@ void MojangVersionFormat::writeVersionProperties(const VersionFile* in, QJsonObj
     {
         out.insert("assetIndex", assetIndexToJson(in->mojangAssetIndex));
     }
-    if(in->mojangDownloads.size())
+    if(!in->mojangDownloads.isEmpty())
     {
         QJsonObject downloadsOut;
         for(auto iter = in->mojangDownloads.begin(); iter != in->mojangDownloads.end(); iter++)
@@ -306,7 +306,7 @@ void MojangVersionFormat::writeVersionProperties(const VersionFile* in, QJsonObj
         }
         out.insert("downloads", downloadsOut);
     }
-    if(in->compatibleJavaMajors.size())
+    if(!in->compatibleJavaMajors.isEmpty())
     {
         QJsonArray compatibleJavaMajorsOut;
         for(auto compatibleJavaMajor : in->compatibleJavaMajors)
@@ -405,7 +405,7 @@ QJsonObject MojangVersionFormat::libraryToJson(Library *library)
             iter++;
         }
         libRoot.insert("natives", nativeList);
-        if (library->m_extractExcludes.size())
+        if (!library->m_extractExcludes.isEmpty())
         {
             QJsonArray excludes;
             QJsonObject extract;
@@ -417,7 +417,7 @@ QJsonObject MojangVersionFormat::libraryToJson(Library *library)
             libRoot.insert("extract", extract);
         }
     }
-    if (library->m_rules.size())
+    if (!library->m_rules.isEmpty())
     {
         QJsonArray allRules;
         for (auto &rule : library->m_rules)

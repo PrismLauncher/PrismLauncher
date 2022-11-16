@@ -63,13 +63,13 @@ LibraryPtr OneSixVersionFormat::libraryFromJson(ProblemContainer & problems, con
 QJsonObject OneSixVersionFormat::libraryToJson(Library *library)
 {
     QJsonObject libRoot = MojangVersionFormat::libraryToJson(library);
-    if (library->m_absoluteURL.size())
+    if (!library->m_absoluteURL.isEmpty())
         libRoot.insert("MMC-absoluteUrl", library->m_absoluteURL);
-    if (library->m_hint.size())
+    if (!library->m_hint.isEmpty())
         libRoot.insert("MMC-hint", library->m_hint);
-    if (library->m_filename.size())
+    if (!library->m_filename.isEmpty())
         libRoot.insert("MMC-filename", library->m_filename);
-    if (library->m_displayname.size())
+    if (!library->m_displayname.isEmpty())
         libRoot.insert("MMC-displayname", library->m_displayname);
     return libRoot;
 }
