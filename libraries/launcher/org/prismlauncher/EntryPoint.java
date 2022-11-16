@@ -54,7 +54,7 @@ package org.prismlauncher;
 
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.utils.Parameters;
-import org.prismlauncher.log4jinjector.Log4JInjector20;
+import org.prismlauncher.log4jinjector.UniversalLog4JInjector;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -71,11 +71,7 @@ public final class EntryPoint {
 
     public static void main(String[] args) {
         EntryPoint listener = new EntryPoint();
-        try {
-            Class.forName("org.apache.logging.log4j.core.LoggerContext");
-            Log4JInjector20.inject();
-        } catch (Exception ignored) {}
-
+        UniversalLog4JInjector.inject();
 
         int retCode = listener.listen();
 

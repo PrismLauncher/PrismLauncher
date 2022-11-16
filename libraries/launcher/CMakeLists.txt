@@ -14,14 +14,26 @@ set(SRC
     org/prismlauncher/applet/LegacyFrame.java
     org/prismlauncher/exception/ParameterNotFoundException.java
     org/prismlauncher/exception/ParseException.java
+    org/prismlauncher/log4jinjector/UniversalLog4JInjector.java
+    org/prismlauncher/log4jinjector/Log4JInjector20.java
+    org/prismlauncher/log4jinjector/Log4JInjector2171.java
     org/prismlauncher/utils/Parameters.java
     org/prismlauncher/utils/Utils.java
     net/minecraft/Launcher.java
-    org/prismlauncher/log4jinjector/Log4JInjector20.java
 )
-add_jar(
-        NewLaunch ${SRC}
-        INCLUDE_JARS ${CMAKE_CURRENT_SOURCE_DIR}/compilelibs/log4j-api-2.0-beta9-fixed.jar
-        ${CMAKE_CURRENT_SOURCE_DIR}/compilelibs/log4j-core-2.0-beta9-fixed.jar
+
+set(
+    LOG4J_STUB_SRC
+    org/apache/logging/log4j/core/impl/Log4jContextFactory.java
+    org/apache/logging/log4j/core/Logger.java
+    org/apache/logging/log4j/core/LoggerContext.java
+    org/apache/logging/log4j/message/MessageFactory.java
+    org/apache/logging/log4j/spi/LoggerContext.java
+    org/apache/logging/log4j/spi/LoggerContextFactory.java
+    org/apache/logging/log4j/LogManager.java
 )
+
+add_jar(Log4JStub ${LOG4J_STUB_SRC})
+add_jar(NewLaunch ${SRC}
+        INCLUDE_JARS Log4JStub)
 install_jar(NewLaunch "${JARS_DEST_DIR}")
