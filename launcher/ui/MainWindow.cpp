@@ -1313,7 +1313,7 @@ void MainWindow::updateThemeMenu()
 
     auto themes = APPLICATION->getValidApplicationThemes();
 
-    QActionGroup* ThemesGroup = new QActionGroup( this );
+    QActionGroup* themesGroup = new QActionGroup( this );
 
     for (auto* theme : themes) {
         QAction * themeAction = themeMenu->addAction(theme->name());
