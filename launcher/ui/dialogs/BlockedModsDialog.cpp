@@ -38,12 +38,9 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
         QString(tr("Your configured global mods folder and default downloads folder "
                    "are automatically checked for the downloaded mods and they will be copied to the instance if found.<br/>"
                    "Optionally, you may drag and drop the downloaded mods onto this dialog or add a folder to watch "
-                   "if you did not download the mods to a default location.<br/><br/>"
-                   "Global Mods Folder: <a href=\"%1\">%1</a><br/>"
-                   "Default Downloads Folder: <a href=\"%2\">%2</a>"))
+                   "if you did not download the mods to a default location."))
             .arg(APPLICATION->settings()->get("CentralModsDir").toString(),
                  QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)));
-    ui->labelModsFound->setText(tr("Please download the missing mods."));
 
     // force all URL handeling as external
     connect(ui->textBrowserWatched, &QTextBrowser::anchorClicked, this, [](const QUrl url) { QDesktopServices::openUrl(url); });
@@ -127,7 +124,7 @@ void BlockedModsDialog::update()
     ui->textBrowserWatched->setText(watching);
 
     if (allModsMatched()) {
-        ui->labelModsFound->setText(tr("All mods found ✔"));
+        ui->labelModsFound->setText("<span style=\"color:green\">✔</span>" + tr("All mods found"));
     } else {
         ui->labelModsFound->setText(tr("Please download the missing mods."));
     }
