@@ -211,18 +211,17 @@ void PackInstallTask::onResolveModsSucceeded()
         qDebug() << "Blocked files found, displaying file list";
 
         auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked files found"),
-                                                   tr("The following files are not available for download in third party launchers.<br/>"
-                                                      "You will need to manually download them and add them to the instance."),
-                                                   m_blocked_mods);
+                                                    tr("The following files are not available for download in third party launchers.<br/>"
+                                                       "You will need to manually download them and add them to the instance."),
+                                                    m_blocked_mods);
 
         if (message_dialog->exec() == QDialog::Accepted) {
             qDebug() << "Post dialog blocked mods list: " << m_blocked_mods;
             createInstance();
-        }  
-        else {
+        } else {
             abort();
         }
-            
+
     } else {
         createInstance();
     }
