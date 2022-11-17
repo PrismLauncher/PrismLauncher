@@ -1322,7 +1322,7 @@ void MainWindow::updateThemeMenu()
         if (APPLICATION->settings()->get("ApplicationTheme").toString() == theme->id()) {
             themeAction->setChecked(true);
         }
-        themeAction->setActionGroup(ThemesGroup);
+        themeAction->setActionGroup(themesGroup);
 
         connect(themeAction, &QAction::triggered, [theme]() {
             APPLICATION->setApplicationTheme(theme->id(),false);
