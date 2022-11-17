@@ -49,7 +49,7 @@
 
 #include <QKeyEvent>
 #include <QAction>
-
+#include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
 #include <QHBoxLayout>
@@ -106,6 +106,7 @@
 #include "ui/dialogs/UpdateDialog.h"
 #include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
+#include "ui/themes/ITheme.h"
 
 #include "UpdateController.h"
 #include "KonamiCode.h"
@@ -267,6 +268,8 @@ public:
     TranslatedAction actionNoDefaultAccount;
 
     TranslatedAction actionLockToolbars;
+
+    TranslatedAction actionChangeTheme;
 
     QVector<TranslatedToolButton *> all_toolbuttons;
 
@@ -440,6 +443,11 @@ public:
         actionLockToolbars.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Lock Toolbars"));
         actionLockToolbars->setCheckable(true);
         all_actions.append(&actionLockToolbars);
+
+        actionChangeTheme = TranslatedAction(MainWindow);
+        actionChangeTheme->setObjectName(QStringLiteral("actionChangeTheme"));
+        actionChangeTheme.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Themes"));
+        all_actions.append(&actionChangeTheme);
     }
 
     void createMainToolbar(QMainWindow *MainWindow)
@@ -544,6 +552,8 @@ public:
 
         viewMenu = menuBar->addMenu(tr("&View"));
         viewMenu->setSeparatorsCollapsible(false);
+        viewMenu->addAction(actionChangeTheme);
+        viewMenu->addSeparator();
         viewMenu->addAction(actionCAT);
         viewMenu->addSeparator();
 
@@ -841,6 +851,7 @@ public:
         createInstanceToolbar(MainWindow);
 
         MainWindow->updateToolsMenu();
+        MainWindow->updateThemeMenu();
 
         retranslateUi(MainWindow);
 
@@ -1288,6 +1299,38 @@ void MainWindow::updateToolsMenu()
         }
     }
     ui->actionLaunchInstance->setMenu(launchMenu);
+}
+
+void MainWindow::updateThemeMenu()
+{
+    QMenu *themeMenu = ui->actionChangeTheme->menu();
+
+    if (themeMenu) {
+        themeMenu->clear();
+    } else {
+        themeMenu = new QMenu(this);
+    }
+
+    auto themes = APPLICATION->getValidApplicationThemes();
+
+    QActionGroup* themesGroup = new QActionGroup( this );
+
+    for (auto* theme : themes) {
+        QAction * themeAction = themeMenu->addAction(theme->name());
+
+        themeAction->setCheckable(true);
+        if (APPLICATION->settings()->get("ApplicationTheme").toString() == theme->id()) {
+            themeAction->setChecked(true);
+        }
+        themeAction->setActionGroup(themesGroup);
+
+        connect(themeAction, &QAction::triggered, [theme]() {
+            APPLICATION->setApplicationTheme(theme->id(),false);
+            APPLICATION->settings()->set("ApplicationTheme", theme->id());
+        });
+    }
+
+    ui->actionChangeTheme->setMenu(themeMenu);
 }
 
 void MainWindow::repopulateAccountsMenu()
@@ -1920,6 +1963,7 @@ void MainWindow::globalSettingsClosed()
     proxymodel->sort(0);
     updateMainToolBar();
     updateToolsMenu();
+    updateThemeMenu();
     updateStatusCenter();
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
     // but Prism Launcher exits abnormally, causing the window state to never be saved:
