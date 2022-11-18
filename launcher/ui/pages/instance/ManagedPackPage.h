@@ -123,6 +123,8 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
     void update() override;
 
    private:
+    NetJob::Ptr m_fetch_job = nullptr;
+
     Modrinth::Modpack m_pack;
     ModrinthAPI m_api;
 };
@@ -143,6 +145,8 @@ class FlameManagedPackPage final : public ManagedPackPage {
     void update() override;
 
    private:
+    NetJob::Ptr m_fetch_job = nullptr;
+
     Flame::IndexedPack m_pack;
     FlameAPI m_api;
 };

@@ -179,14 +179,17 @@ void ModrinthManagedPackPage::parseManagedPack()
 {
     qDebug() << "Parsing Modrinth pack";
 
-    auto netJob = new NetJob(QString("Modrinth::PackVersions(%1)").arg(m_inst->getManagedPackName()), APPLICATION->network());
-    auto response = new QByteArray();
+    if (m_fetch_job && m_fetch_job->isRunning())
+        m_fetch_job->abort();
+
+    m_fetch_job.reset(new NetJob(QString("Modrinth::PackVersions(%1)").arg(m_inst->getManagedPackName()), APPLICATION->network()));
+    auto response = std::make_shared<QByteArray>();
 
     QString id = m_inst->getManagedPackID();
 
-    netJob->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
+    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response.get()));
 
-    QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
+    QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -234,16 +237,12 @@ void ModrinthManagedPackPage::parseManagedPack()
 
         m_loaded = true;
     });
-    QObject::connect(netJob, &NetJob::failed, this, &ModrinthManagedPackPage::setFailState);
-    QObject::connect(netJob, &NetJob::aborted, this, &ModrinthManagedPackPage::setFailState);
-    QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-        netJob->deleteLater();
-        delete response;
-    });
+    QObject::connect(m_fetch_job.get(), &NetJob::failed, this, &ModrinthManagedPackPage::setFailState);
+    QObject::connect(m_fetch_job.get(), &NetJob::aborted, this, &ModrinthManagedPackPage::setFailState);
 
     ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
 
-    netJob->start();
+    m_fetch_job->start();
 }
 
 QString ModrinthManagedPackPage::url() const
@@ -319,14 +318,17 @@ void FlameManagedPackPage::parseManagedPack()
         return;
     }
 
-    auto netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(m_inst->getManagedPackName()), APPLICATION->network());
-    auto response = new QByteArray();
+    if (m_fetch_job && m_fetch_job->isRunning())
+        m_fetch_job->abort();
+
+    m_fetch_job.reset(new NetJob(QString("Flame::PackVersions(%1)").arg(m_inst->getManagedPackName()), APPLICATION->network()));
+    auto response = std::make_shared<QByteArray>();
 
     QString id = m_inst->getManagedPackID();
 
-    netJob->addNetAction(Net::Download::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response));
+    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response.get()));
 
-    QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id] {
+    QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -371,14 +373,10 @@ void FlameManagedPackPage::parseManagedPack()
 
         m_loaded = true;
     });
-    QObject::connect(netJob, &NetJob::failed, this, &FlameManagedPackPage::setFailState);
-    QObject::connect(netJob, &NetJob::aborted, this, &FlameManagedPackPage::setFailState);
-    QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-        netJob->deleteLater();
-        delete response;
-    });
+    QObject::connect(m_fetch_job.get(), &NetJob::failed, this, &FlameManagedPackPage::setFailState);
+    QObject::connect(m_fetch_job.get(), &NetJob::aborted, this, &FlameManagedPackPage::setFailState);
 
-    netJob->start();
+    m_fetch_job->start();
 }
 
 QString FlameManagedPackPage::url() const
