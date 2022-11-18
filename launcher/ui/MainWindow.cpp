@@ -297,7 +297,6 @@ public:
         actionAddInstance = TranslatedAction(MainWindow);
         actionAddInstance->setObjectName(QStringLiteral("actionAddInstance"));
         actionAddInstance->setIcon(APPLICATION->getThemedIcon("new"));
-        actionAddInstance->setIconVisibleInMenu(false);
         actionAddInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Add Instanc&e..."));
         actionAddInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Add a new instance."));
         actionAddInstance->setShortcut(QKeySequence::New);
@@ -533,8 +532,6 @@ public:
         fileMenu->setSeparatorsCollapsible(false);
         fileMenu->addAction(actionAddInstance);
         fileMenu->addAction(actionLaunchInstance);
-        fileMenu->addAction(actionLaunchInstanceOffline);
-        fileMenu->addAction(actionLaunchInstanceDemo);
         fileMenu->addAction(actionKillInstance);
         fileMenu->addAction(actionCloseWindow);
         fileMenu->addSeparator();
@@ -584,10 +581,11 @@ public:
             helpMenu->addAction(actionDISCORD);
         if (!BuildConfig.SUBREDDIT_URL.isEmpty())
             helpMenu->addAction(actionREDDIT);
-        helpMenu->addSeparator();
         if(BuildConfig.UPDATER_ENABLED)
+        {
+            helpMenu->addSeparator();
             helpMenu->addAction(actionCheckUpdate);
-
+        }
         MainWindow->setMenuBar(menuBar);
     }
 
@@ -605,6 +603,7 @@ public:
         actionOpenWiki->setObjectName(QStringLiteral("actionOpenWiki"));
         actionOpenWiki.setTextId(QT_TRANSLATE_NOOP("MainWindow", "%1 &Help"));
         actionOpenWiki.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the %1 wiki"));
+        actionOpenWiki->setIcon(APPLICATION->getThemedIcon("help"));
         connect(actionOpenWiki, &QAction::triggered, MainWindow, &MainWindow::on_actionOpenWiki_triggered);
         all_actions.append(&actionOpenWiki);
 
@@ -612,6 +611,7 @@ public:
         actionNewsMenuBar->setObjectName(QStringLiteral("actionNewsMenuBar"));
         actionNewsMenuBar.setTextId(QT_TRANSLATE_NOOP("MainWindow", "%1 &News"));
         actionNewsMenuBar.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the %1 wiki"));
+        actionNewsMenuBar->setIcon(APPLICATION->getThemedIcon("news"));
         connect(actionNewsMenuBar, &QAction::triggered, MainWindow, &MainWindow::on_actionMoreNews_triggered);
         all_actions.append(&actionNewsMenuBar);
     }
