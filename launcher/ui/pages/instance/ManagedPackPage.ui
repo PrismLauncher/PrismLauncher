@@ -179,6 +179,13 @@
      </item>
     </layout>
    </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="reloadButton">
+     <property name="text">
+      <string>Reload page</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>

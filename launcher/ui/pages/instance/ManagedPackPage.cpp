@@ -61,6 +61,14 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
     ui->setupUi(this);
 
     ui->versionsComboBox->setStyle(new NoBigComboBoxStyle(ui->versionsComboBox->style()));
+
+    ui->reloadButton->setVisible(false);
+    connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool){
+        ui->reloadButton->setVisible(false);
+
+        // Pretend we're opening the page again
+        openedImpl();
+    });
 }
 
 ManagedPackPage::~ManagedPackPage()
@@ -154,7 +162,7 @@ void ManagedPackPage::setFailState()
     ui->updateButton->setText(tr("Cannot update!"));
     ui->updateButton->setDisabled(true);
 
-    // TODO: Perhaps start a timer here when m_loaded is false to try and reload.
+    ui->reloadButton->setVisible(true);
 }
 
 ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
