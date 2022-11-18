@@ -492,16 +492,35 @@ jobs:
           submodules: 'true'
       - name: Set short version
         shell: bash
+        if: inputs.build_type == 'Debug'
         run: |
           ver_short=`git rev-parse --short HEAD`
           echo "VERSION=$ver_short" >> $GITHUB_ENV
       - name: Package Snap (Linux)
         id: snapcraft
-        if: runner.os == 'Linux' && inputs.build_type == 'Debug'
+        if: inputs.build_type == 'Debug'
         uses: snapcore/action-build@v1
       - name: Upload Snap (Linux)
-        if: runner.os == 'Linux' && inputs.build_type == 'Debug'
+        if: inputs.build_type == 'Debug'
         uses: actions/upload-artifact@v3
         with:
           name: prismlauncher_${{ env.VERSION }}_amd64.snap
           path: ${{ steps.snapcraft.outputs.snap }}
+
+  flatpak:
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:kde-5.15-22.08
+      options: --privileged
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        if: inputs.build_type == 'Debug'
+        with:
+          submodules: 'true'
+      - name: Build Flatpak (Linux)
+        if: inputs.build_type == 'Debug'
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v4
+        with:
+          bundle: "Prism Launcher.flatpak"
+          manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
