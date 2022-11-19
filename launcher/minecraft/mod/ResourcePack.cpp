@@ -114,3 +114,8 @@ bool ResourcePack::applyFilter(QRegularExpression filter) const
 
     return Resource::applyFilter(filter);
 }
+
+bool ResourcePack::valid() const
+{
+    return m_pack_format != 0;
+}

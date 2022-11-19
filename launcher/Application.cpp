@@ -101,6 +101,9 @@
 #include <minecraft/mod/ResourcePack.h>
 #include <minecraft/mod/ResourcePackFolderModel.h>
 #include <minecraft/mod/tasks/LocalResourcePackParseTask.h>
+#include <minecraft/mod/TexturePack.h>
+#include <minecraft/mod/TexturePackFolderModel.h>
+#include <minecraft/mod/tasks/LocalTexturePackParseTask.h>
 
 #include "updater/UpdateChecker.h"
 
@@ -920,13 +923,13 @@ bool Application::createSetupWizard()
     return false;
 }
 
-bool Application::event(QEvent* event) {
+bool Application::event(QEvent* event)
+{
 #ifdef Q_OS_MACOS
     if (event->type() == QEvent::ApplicationStateChange) {
         auto ev = static_cast<QApplicationStateChangeEvent*>(event);
 
-        if (m_prevAppState == Qt::ApplicationActive
-                && ev->applicationState() == Qt::ApplicationActive) {
+        if (m_prevAppState == Qt::ApplicationActive && ev->applicationState() == Qt::ApplicationActive) {
             emit clickedOnDock();
         }
         m_prevAppState = ev->applicationState();
@@ -936,18 +939,28 @@ bool Application::event(QEvent* event) {
     if (event->type() == QEvent::FileOpen) {
         auto ev = static_cast<QFileOpenEvent*>(event);
 
-        ResourcePack pack{ QFileInfo(ev->file()) };
+        ResourcePack rp{ QFileInfo(ev->file()) };
+        TexturePack tp{ QFileInfo(ev->file()) };
 
-        ResourcePackUtils::process(pack);
-        // 
+        ImportResourcePackDialog dlg(APPLICATION->m_mainWindow);
 
-        if (pack.valid()) {
-            ImportResourcePackDialog dlg(APPLICATION->m_mainWindow);
+        if (ResourcePackUtils::process(rp) && rp.valid()) {
             dlg.exec();
+
             if (dlg.result() == QDialog::Accepted) {
+                qDebug() << "Selected instance to import resource pack into: " << dlg.selectedInstanceKey;
                 auto instance = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
                 auto instanceButBuffed = std::dynamic_pointer_cast<MinecraftInstance>(instance);
                 instanceButBuffed->resourcePackList()->installResource(ev->file());
+            }
+        } else if (TexturePackUtils::process(tp) && tp.valid()) {
+            dlg.exec();
+
+            if (dlg.result() == QDialog::Accepted) {
+                qDebug() << "Selected instance to import texture pack into: " << dlg.selectedInstanceKey;
+                auto instance = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
+                auto instanceButBuffed = std::dynamic_pointer_cast<MinecraftInstance>(instance);
+                instanceButBuffed->texturePackList()->installResource(ev->file());
             }
         } else {
             m_mainWindow->droppedURLs({ ev->url() });
