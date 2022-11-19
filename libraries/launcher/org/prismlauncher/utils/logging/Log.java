@@ -44,10 +44,8 @@ import java.io.PrintStream;
  */
 public final class Log {
 
-    // original before overridden
-    private static final PrintStream OUT = new PrintStream(System.out), ERR = new PrintStream(System.err);
-    private static final PrintStream ERROR_PREFIX = new LogPrintStream(System.err, Level.ERROR),
-            FATAL_PREFIX = new LogPrintStream(System.err, Level.FATAL);
+    // original before possibly overridden by MC
+	private static final PrintStream OUT = new PrintStream(System.out), ERR = new PrintStream(System.err);
     private static final boolean DEBUG = Boolean.getBoolean("org.prismlauncher.debug");
 
     public static void launcher(String message) {
@@ -68,7 +66,7 @@ public final class Log {
 
     public static void error(String message, Throwable e) {
         error(message);
-        e.printStackTrace(ERROR_PREFIX);
+        e.printStackTrace(ERR);
     }
 
     public static void fatal(String message) {
@@ -77,7 +75,7 @@ public final class Log {
 
     public static void fatal(String message, Throwable e) {
         fatal(message);
-        e.printStackTrace(FATAL_PREFIX);
+        e.printStackTrace(ERR);
     }
 
     /**
