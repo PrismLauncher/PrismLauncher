@@ -33,15 +33,15 @@ For **Arch**, **Debian**, **Fedora**, **OpenSUSE (Tumbleweed)** and **Gentoo**, 
 
 ## Community & Support
 
-Feel free to create a GitHub issue if you find a bug or want to suggest a new feature. We have multiple communities that can also help you.
+Feel free to create a GitHub issue if you find a bug or want to suggest a new feature. We have multiple community spaces where other community members can help you.
 
 #### Join our Discord server:
 [![Prism Launcher Discord server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner2)](https://discord.gg/prismlauncher)
 
-#### Join our Matrix space (Will be opened at a later date):
+#### Join our Matrix space:
 [![PrismLauncher Space](https://img.shields.io/matrix/prismlauncher:matrix.org?style=for-the-badge&logo=matrix)](https://matrix.to/#/#prismlauncher:matrix.org)
 
-#### Join our SubReddit:
+#### Join our Subreddit:
 [![r/PrismLauncher](https://img.shields.io/reddit/subreddit-subscribers/prismlauncher?style=for-the-badge&logo=reddit)](https://www.reddit.com/r/PrismLauncher/)
 
 ## Building
