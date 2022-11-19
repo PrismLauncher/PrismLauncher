@@ -3,6 +3,8 @@
 #include <QDialog>
 #include <QItemSelection>
 
+#include "ui/instanceview/InstanceProxyModel.h"
+
 namespace Ui {
 class ImportResourcePackDialog;
 }
@@ -13,6 +15,7 @@ class ImportResourcePackDialog : public QDialog {
    public:
     explicit ImportResourcePackDialog(QWidget* parent = 0);
     ~ImportResourcePackDialog();
+    InstanceProxyModel* proxyModel;
     QString selectedInstanceKey;
 
    private:

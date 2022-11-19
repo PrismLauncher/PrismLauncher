@@ -11,9 +11,16 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Pick icon</string>
+   <string>Choose instance to import</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Choose the instance you would like to import this resource pack to.</string>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QListView" name="instanceView"/>
    </item>

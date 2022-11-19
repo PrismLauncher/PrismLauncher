@@ -8,6 +8,7 @@
 #include "InstanceList.h"
 
 #include <InstanceList.h>
+#include "ui/instanceview/InstanceProxyModel.h"
 #include "ui/instanceview/InstanceDelegate.h"
 
 ImportResourcePackDialog::ImportResourcePackDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ImportResourcePackDialog)
@@ -32,7 +33,10 @@ ImportResourcePackDialog::ImportResourcePackDialog(QWidget* parent) : QDialog(pa
     contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     contentsWidget->setItemDelegate(new ListViewDelegate());
 
-    contentsWidget->setModel(APPLICATION->instances().get());
+    proxyModel = new InstanceProxyModel(this);
+    proxyModel->setSourceModel(APPLICATION->instances().get());
+    proxyModel->sort(0);
+    contentsWidget->setModel(proxyModel);
 
     connect(contentsWidget, SIGNAL(doubleClicked(QModelIndex)), SLOT(activated(QModelIndex)));
     connect(contentsWidget->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
