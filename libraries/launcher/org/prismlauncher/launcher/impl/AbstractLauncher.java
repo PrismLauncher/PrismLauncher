@@ -60,7 +60,6 @@ import java.util.List;
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.utils.Parameters;
-import org.prismlauncher.utils.StringUtils;
 
 public abstract class AbstractLauncher implements Launcher {
 
@@ -93,9 +92,9 @@ public abstract class AbstractLauncher implements Launcher {
         } else {
             maximize = false;
 
-            String[] sizePair = StringUtils.splitStringPair('x', windowParams);
+            String[] sizePair = windowParams.split("x", 2);
 
-            if (sizePair != null) {
+            if (sizePair.length == 2) {
                 try {
                     width = Integer.parseInt(sizePair[0]);
                     height = Integer.parseInt(sizePair[1]);

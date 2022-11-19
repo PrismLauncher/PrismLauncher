@@ -64,8 +64,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.prismlauncher.utils.logging.Log;
-
 /**
  * WARNING: This class is reflectively accessed by legacy Forge versions.
  * <p>
@@ -97,14 +95,13 @@ public final class Launcher extends Applet implements AppletStub {
             if (documentBase == null) {
                 if (applet.getClass().getPackage().getName().startsWith("com.mojang.")) {
                     // Special case only for Classic versions
-                    documentBase = new URL("http", "www.minecraft.net", 80, "/game/");
+                    documentBase = new URL("http://www.minecraft.net:80/game/");
                 } else {
                     documentBase = new URL("http://www.minecraft.net/game/");
                 }
             }
         } catch (MalformedURLException e) {
-            // handle gracefully - it won't happen, but Java requires that it is caught
-            Log.error("Failed to parse document base URL", e);
+            throw new AssertionError(e);
         }
 
         this.documentBase = documentBase;
@@ -143,8 +140,7 @@ public final class Launcher extends Applet implements AppletStub {
         try {
             return new URL("http://www.minecraft.net/game/");
         } catch (MalformedURLException e) {
-            Log.error("Failed to parse codebase URL", e);
-            return null;
+            throw new AssertionError(e);
         }
     }
 

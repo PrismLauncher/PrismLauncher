@@ -63,7 +63,6 @@ import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.impl.StandardLauncher;
 import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
 import org.prismlauncher.utils.Parameters;
-import org.prismlauncher.utils.StringUtils;
 import org.prismlauncher.utils.logging.Log;
 
 public final class EntryPoint {
@@ -150,9 +149,9 @@ public final class EntryPoint {
                 return PreLaunchAction.ABORT;
 
             default:
-                String[] pair = StringUtils.splitStringPair(' ', input);
+                String[] pair = input.split(" ", 2);
 
-                if (pair == null)
+                if (pair.length != 2)
                     throw new ParseException(input, "[key] [value]");
 
                 params.add(pair[0], pair[1]);
