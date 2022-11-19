@@ -200,4 +200,34 @@ void WideBar::contextMenuEvent(QContextMenuEvent* event)
     m_bar_menu->popup(event->globalPos());
 }
 
+[[nodiscard]] QByteArray WideBar::getVisibilityState() const
+{
+    QByteArray state;
+
+    for (auto const& entry : m_entries) {
+        if (entry.type != BarEntry::Type::Action)
+            continue;
+
+        state.append(entry.bar_action->isVisible() ? '1' : '0');
+    }
+
+    return state;
+}
+
+void WideBar::setVisibilityState(QByteArray&& state)
+{
+    qsizetype i = 0;
+    for (auto& entry : m_entries) {
+        if (entry.type != BarEntry::Type::Action)
+            continue;
+        if (i == state.size())
+            break;
+
+        entry.bar_action->setVisible(state.at(i++) == '1');
+
+        // NOTE: This is needed so that disabled actions get reflected on the button when it is made visible.
+        static_cast<ActionButton*>(widgetForAction(entry.bar_action))->actionChanged();
+    }
+}
+
 #include "WideBar.moc"

@@ -26,6 +26,12 @@ class WideBar : public QToolBar {
     QMenu* createContextMenu(QWidget* parent = nullptr, const QString& title = QString());
     void contextMenuEvent(QContextMenuEvent*) override;
 
+    // Ideally we would use a QBitArray for this, but it doesn't support string conversion,
+    // so using it in settings is very messy.
+
+    [[nodiscard]] QByteArray getVisibilityState() const;
+    void setVisibilityState(QByteArray&&);
+
    private:
     struct BarEntry {
         enum class Type { None, Action, Separator, Spacer } type = Type::None;
