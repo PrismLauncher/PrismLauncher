@@ -117,5 +117,5 @@ bool ResourcePack::applyFilter(QRegularExpression filter) const
 
 bool ResourcePack::valid() const
 {
-    return m_pack_format != 0;
+    return s_pack_format_versions.contains(m_pack_format);
 }
