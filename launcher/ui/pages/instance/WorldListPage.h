@@ -42,6 +42,8 @@
 #include <Application.h>
 #include <LoggedProcess.h>
 
+#include "settings/Setting.h"
+
 class WorldList;
 namespace Ui
 {
@@ -101,6 +103,8 @@ private:
     std::shared_ptr<WorldList> m_worlds;
     unique_qobject_ptr<LoggedProcess> m_mceditProcess;
     bool m_mceditStarting = false;
+
+    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
 
 private slots:
     void on_actionCopy_Seed_triggered();
