@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
+ *  Copyright (C) 2022 flow <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
  *
@@ -52,65 +53,74 @@
  *      limitations under the License.
  */
 
-package org.prismlauncher.utils;
+package org.prismlauncher.launcher.impl.legacy;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.File;
+import java.lang.invoke.MethodHandle;
+import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-import org.prismlauncher.exception.ParameterNotFoundException;
+import org.prismlauncher.launcher.impl.AbstractLauncher;
+import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.ReflectionUtils;
+import org.prismlauncher.utils.logging.Log;
 
-public final class Parameters {
+/**
+ * Used to launch old versions that support applets.
+ */
+public final class LegacyLauncher extends AbstractLauncher {
 
-    private final Map<String, List<String>> map = new HashMap<>();
+    private final String user, session;
+    private final String title;
+    private final String appletClass;
+    private final boolean useApplet;
+    private final String gameDir;
 
-    public void add(String key, String value) {
-        List<String> params = map.get(key);
+    public LegacyLauncher(Parameters params) {
+        super(params);
 
-        if (params == null) {
-            params = new ArrayList<>();
+        user = params.getString("userName");
+        session = params.getString("sessionId");
+        title = params.getString("windowTitle", "Minecraft");
+        appletClass = params.getString("appletClass", "net.minecraft.client.MinecraftApplet");
 
-            map.put(key, params);
+        List<String> traits = params.getList("traits", Collections.<String>emptyList());
+        useApplet = !traits.contains("noapplet");
+
+        gameDir = System.getProperty("user.dir");
+    }
+
+    @Override
+    public void launch() throws Throwable {
+        Class<?> main = ClassLoader.getSystemClassLoader().loadClass(mainClassName);
+        Field gameDirField = ReflectionUtils.findMinecraftGameDirField(main);
+
+        if (gameDirField == null)
+            Log.warning("Could not find Minecraft folder field");
+        else {
+            gameDirField.setAccessible(true);
+            gameDirField.set(null, new File(gameDir));
         }
 
-        params.add(value);
-    }
+        if (useApplet) {
+            System.setProperty("minecraft.applet.TargetDirectory", gameDir);
 
-    public List<String> getList(String key) throws ParameterNotFoundException {
-        List<String> params = map.get(key);
+            try {
+                LegacyFrame window = new LegacyFrame(title, ReflectionUtils.createAppletClass(appletClass));
 
-        if (params == null)
-            throw new ParameterNotFoundException(key);
+                window.start(user, session, width, height, maximize, serverAddress, serverPort,
+                        gameArgs.contains("--demo"));
+                return;
+            } catch (Throwable e) {
+                Log.error("Running applet wrapper failed with exception; falling back to main class", e);
+            }
+        }
 
-        return params;
-    }
-
-    public List<String> getList(String key, List<String> def) {
-        List<String> params = map.get(key);
-
-        if (params == null || params.isEmpty())
-            return def;
-
-        return params;
-    }
-
-    public String getString(String key) throws ParameterNotFoundException {
-        List<String> list = getList(key);
-
-        if (list.isEmpty())
-            throw new ParameterNotFoundException(key);
-
-        return list.get(0);
-    }
-
-    public String getString(String key, String def) {
-        List<String> params = map.get(key);
-
-        if (params == null || params.isEmpty())
-            return def;
-
-        return params.get(0);
+        // find and invoke the main method, this time without size parameters
+        // in all versions that support applets, these are ignored
+        MethodHandle method = ReflectionUtils.findMainMethod(main);
+        method.invokeExact(gameArgs.toArray(new String[0]));
     }
 
 }

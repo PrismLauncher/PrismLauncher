@@ -52,65 +52,59 @@
  *      limitations under the License.
  */
 
-package org.prismlauncher.utils;
+package org.prismlauncher.launcher.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.prismlauncher.exception.ParameterNotFoundException;
+import org.prismlauncher.exception.ParseException;
+import org.prismlauncher.launcher.Launcher;
+import org.prismlauncher.utils.Parameters;
 
-public final class Parameters {
+public abstract class AbstractLauncher implements Launcher {
 
-    private final Map<String, List<String>> map = new HashMap<>();
+    private static final int DEFAULT_WINDOW_WIDTH = 854, DEFAULT_WINDOW_HEIGHT = 480;
 
-    public void add(String key, String value) {
-        List<String> params = map.get(key);
+    // parameters, separated from ParamBucket
+    protected final List<String> gameArgs;
 
-        if (params == null) {
-            params = new ArrayList<>();
+    // secondary parameters
+    protected final int width, height;
+    protected final boolean maximize;
+    protected final String serverAddress, serverPort;
 
-            map.put(key, params);
+    protected final String mainClassName;
+
+    protected AbstractLauncher(Parameters params) {
+        gameArgs = params.getList("param", new ArrayList<String>());
+        mainClassName = params.getString("mainClass", "net.minecraft.client.Minecraft");
+
+        serverAddress = params.getString("serverAddress", null);
+        serverPort = params.getString("serverPort", null);
+
+        String windowParams = params.getString("windowParams", null);
+
+        if ("max".equals(windowParams) || windowParams == null) {
+            maximize = windowParams != null;
+
+            width = DEFAULT_WINDOW_WIDTH;
+            height = DEFAULT_WINDOW_HEIGHT;
+        } else {
+            maximize = false;
+
+            String[] sizePair = windowParams.split("x", 2);
+
+            if (sizePair.length == 2) {
+                try {
+                    width = Integer.parseInt(sizePair[0]);
+                    height = Integer.parseInt(sizePair[1]);
+                    return;
+                } catch (NumberFormatException ignored) {
+                }
+            }
+
+            throw new ParseException(windowParams, "[width]x[height]");
         }
-
-        params.add(value);
-    }
-
-    public List<String> getList(String key) throws ParameterNotFoundException {
-        List<String> params = map.get(key);
-
-        if (params == null)
-            throw new ParameterNotFoundException(key);
-
-        return params;
-    }
-
-    public List<String> getList(String key, List<String> def) {
-        List<String> params = map.get(key);
-
-        if (params == null || params.isEmpty())
-            return def;
-
-        return params;
-    }
-
-    public String getString(String key) throws ParameterNotFoundException {
-        List<String> list = getList(key);
-
-        if (list.isEmpty())
-            throw new ParameterNotFoundException(key);
-
-        return list.get(0);
-    }
-
-    public String getString(String key, String def) {
-        List<String> params = map.get(key);
-
-        if (params == null || params.isEmpty())
-            return def;
-
-        return params.get(0);
     }
 
 }
