@@ -66,6 +66,7 @@
 #include "ui/setupwizard/PasteWizardPage.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ImportResourcePackDialog.h"
 
 #include "ui/pagedialog/PageDialog.h"
 
@@ -96,6 +97,10 @@
 #include "net/HttpMetaCache.h"
 
 #include "java/JavaUtils.h"
+#include <minecraft/MinecraftInstance.h>
+#include <minecraft/mod/ResourcePack.h>
+#include <minecraft/mod/ResourcePackFolderModel.h>
+#include <minecraft/mod/tasks/LocalResourcePackParseTask.h>
 
 #include "updater/UpdateChecker.h"
 
@@ -930,7 +935,23 @@ bool Application::event(QEvent* event) {
 
     if (event->type() == QEvent::FileOpen) {
         auto ev = static_cast<QFileOpenEvent*>(event);
-        m_mainWindow->droppedURLs({ ev->url() });
+
+        ResourcePack pack{ QFileInfo(ev->file()) };
+
+        ResourcePackUtils::process(pack);
+        // 
+
+        if (pack.valid()) {
+            ImportResourcePackDialog dlg(APPLICATION->m_mainWindow);
+            dlg.exec();
+            if (dlg.result() == QDialog::Accepted) {
+                auto instance = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
+                auto instanceButBuffed = std::dynamic_pointer_cast<MinecraftInstance>(instance);
+                instanceButBuffed->resourcePackList()->installResource(ev->file());
+            }
+        } else {
+            m_mainWindow->droppedURLs({ ev->url() });
+        }
     }
 
     return QApplication::event(event);
