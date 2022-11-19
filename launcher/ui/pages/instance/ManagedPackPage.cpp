@@ -66,6 +66,7 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
     connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool){
         ui->reloadButton->setVisible(false);
 
+        m_loaded = false;
         // Pretend we're opening the page again
         openedImpl();
     });
@@ -178,6 +179,10 @@ ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWin
 void ModrinthManagedPackPage::parseManagedPack()
 {
     qDebug() << "Parsing Modrinth pack";
+
+    // No need for the extra work because we already have everything we need.
+    if (m_loaded)
+        return;
 
     if (m_fetch_job && m_fetch_job->isRunning())
         m_fetch_job->abort();
@@ -317,6 +322,10 @@ void FlameManagedPackPage::parseManagedPack()
         ui->changelogTextBrowser->setHtml(message);
         return;
     }
+
+    // No need for the extra work because we already have everything we need.
+    if (m_loaded)
+        return;
 
     if (m_fetch_job && m_fetch_job->isRunning())
         m_fetch_job->abort();
