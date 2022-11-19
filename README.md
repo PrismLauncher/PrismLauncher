@@ -29,19 +29,19 @@ Prebuilt Development builds are provided for **Linux**, **Windows** and **macOS*
 
 For **Arch**, **Debian**, **Fedora**, **OpenSUSE (Tumbleweed)** and **Gentoo**, respectively, you can use these packages for the latest development versions:
 
-[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-1793D1?style=flat-square&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/prismlauncher-qt5-git/) [![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--qt5--git-1793D1?style=flat-square&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/prismlauncher-git/) [![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-A80030?style=flat-square&logo=debian&logoColor=white)](https://mpr.makedeb.org/packages/prismlauncher-git) [![prismlauncher-nightly](https://img.shields.io/badge/copr-prismlauncher--nightly-51A2DA?style=flat-square&logo=fedora&logoColor=white)](https://copr.fedorainfracloud.org/coprs/g3tchoo/prismlauncher/) [![prismlauncher-nightly](https://img.shields.io/badge/OBS-prismlauncher--nightly-3AB6A9?style=flat-square&logo=opensuse&logoColor=white)](https://build.opensuse.org/project/show/home:getchoo) [![prismlauncher-9999](https://img.shields.io/badge/gentoo-prismlauncher--9999-4D4270?style=flat-square&logo=gentoo&logoColor=white)](https://packages.gentoo.org/packages/games-action/prismlauncher)
+[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-1793D1?style=flat-square&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/prismlauncher-git/) [![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--qt5--git-1793D1?style=flat-square&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/prismlauncher-qt5-git/) [![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-A80030?style=flat-square&logo=debian&logoColor=white)](https://mpr.makedeb.org/packages/prismlauncher-git) [![prismlauncher-nightly](https://img.shields.io/badge/copr-prismlauncher--nightly-51A2DA?style=flat-square&logo=fedora&logoColor=white)](https://copr.fedorainfracloud.org/coprs/g3tchoo/prismlauncher/) [![prismlauncher-nightly](https://img.shields.io/badge/OBS-prismlauncher--nightly-3AB6A9?style=flat-square&logo=opensuse&logoColor=white)](https://build.opensuse.org/project/show/home:getchoo) [![prismlauncher-9999](https://img.shields.io/badge/gentoo-prismlauncher--9999-4D4270?style=flat-square&logo=gentoo&logoColor=white)](https://packages.gentoo.org/packages/games-action/prismlauncher)
 
 ## Community & Support
 
-Feel free to create a GitHub issue if you find a bug or want to suggest a new feature. We have multiple communities that can also help you.
+Feel free to create a GitHub issue if you find a bug or want to suggest a new feature. We have multiple community spaces where other community members can help you.
 
 #### Join our Discord server:
 [![Prism Launcher Discord server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner2)](https://discord.gg/prismlauncher)
 
-#### Join our Matrix space (Will be opened at a later date):
+#### Join our Matrix space:
 [![PrismLauncher Space](https://img.shields.io/matrix/prismlauncher:matrix.org?style=for-the-badge&logo=matrix)](https://matrix.to/#/#prismlauncher:matrix.org)
 
-#### Join our SubReddit:
+#### Join our Subreddit:
 [![r/PrismLauncher](https://img.shields.io/reddit/subreddit-subscribers/prismlauncher?style=for-the-badge&logo=reddit)](https://www.reddit.com/r/PrismLauncher/)
 
 ## Building

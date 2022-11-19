@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -436,6 +437,17 @@ QStringList MinecraftInstance::javaArguments()
     return args;
 }
 
+QString MinecraftInstance::getLauncher()
+{
+    auto profile = m_components->getProfile();
+
+    // use legacy launcher if the traits are set
+    if (profile->getTraits().contains("legacyLaunch") || profile->getTraits().contains("alphaLaunch"))
+        return "legacy";
+
+    return "standard";
+}
+
 QMap<QString, QString> MinecraftInstance::getVariables()
 {
     QMap<QString, QString> out;
@@ -627,26 +639,13 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
         launchScript += "sessionId " + session->session + "\n";
     }
 
-    // libraries and class path.
-    {
-        QStringList jars, nativeJars;
-        profile->getLibraryFiles(runtimeContext(), jars, nativeJars, getLocalLibraryPath(), binRoot());
-        for(auto file: jars)
-        {
-            launchScript += "cp " + file + "\n";
-        }
-        for(auto file: nativeJars)
-        {
-            launchScript += "ext " + file + "\n";
-        }
-        launchScript += "natives " + getNativePath() + "\n";
-    }
-
     for (auto trait : profile->getTraits())
     {
         launchScript += "traits " + trait + "\n";
     }
-    launchScript += "launcher onesix\n";
+
+    launchScript += "launcher " + getLauncher() + "\n";
+
     // qDebug() << "Generated launch script:" << launchScript;
     return launchScript;
 }
@@ -781,6 +780,8 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
         auto height = settings->get("MinecraftWinHeight").toInt();
         out << "Window size: " + QString::number(width) + " x " + QString::number(height);
     }
+    out << "";
+    out << "Launcher: " + getLauncher();
     out << "";
     return out;
 }

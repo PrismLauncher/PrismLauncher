@@ -52,65 +52,40 @@
  *      limitations under the License.
  */
 
-package org.prismlauncher.utils;
+package org.prismlauncher.launcher.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.invoke.MethodHandle;
 
-import org.prismlauncher.exception.ParameterNotFoundException;
+import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.ReflectionUtils;
 
-public final class Parameters {
+public final class StandardLauncher extends AbstractLauncher {
 
-    private final Map<String, List<String>> map = new HashMap<>();
+    public StandardLauncher(Parameters params) {
+        super(params);
+    }
 
-    public void add(String key, String value) {
-        List<String> params = map.get(key);
-
-        if (params == null) {
-            params = new ArrayList<>();
-
-            map.put(key, params);
+    @Override
+    public void launch() throws Throwable {
+        // window size, title and state
+        // FIXME doesn't support maximisation
+        if (!maximize) {
+            gameArgs.add("--width");
+            gameArgs.add(Integer.toString(width));
+            gameArgs.add("--height");
+            gameArgs.add(Integer.toString(height));
         }
 
-        params.add(value);
-    }
+        if (serverAddress != null) {
+            gameArgs.add("--server");
+            gameArgs.add(serverAddress);
+            gameArgs.add("--port");
+            gameArgs.add(serverPort);
+        }
 
-    public List<String> getList(String key) throws ParameterNotFoundException {
-        List<String> params = map.get(key);
-
-        if (params == null)
-            throw new ParameterNotFoundException(key);
-
-        return params;
-    }
-
-    public List<String> getList(String key, List<String> def) {
-        List<String> params = map.get(key);
-
-        if (params == null || params.isEmpty())
-            return def;
-
-        return params;
-    }
-
-    public String getString(String key) throws ParameterNotFoundException {
-        List<String> list = getList(key);
-
-        if (list.isEmpty())
-            throw new ParameterNotFoundException(key);
-
-        return list.get(0);
-    }
-
-    public String getString(String key, String def) {
-        List<String> params = map.get(key);
-
-        if (params == null || params.isEmpty())
-            return def;
-
-        return params.get(0);
+        // find and invoke the main method
+        MethodHandle method = ReflectionUtils.findMainMethod(mainClassName);
+        method.invokeExact(gameArgs.toArray(new String[0]));
     }
 
 }

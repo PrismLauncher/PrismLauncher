@@ -63,13 +63,13 @@ LibraryPtr OneSixVersionFormat::libraryFromJson(ProblemContainer & problems, con
 QJsonObject OneSixVersionFormat::libraryToJson(Library *library)
 {
     QJsonObject libRoot = MojangVersionFormat::libraryToJson(library);
-    if (library->m_absoluteURL.size())
+    if (!library->m_absoluteURL.isEmpty())
         libRoot.insert("MMC-absoluteUrl", library->m_absoluteURL);
-    if (library->m_hint.size())
+    if (!library->m_hint.isEmpty())
         libRoot.insert("MMC-hint", library->m_hint);
-    if (library->m_filename.size())
+    if (!library->m_filename.isEmpty())
         libRoot.insert("MMC-filename", library->m_filename);
-    if (library->m_displayname.size())
+    if (!library->m_displayname.isEmpty())
         libRoot.insert("MMC-displayname", library->m_displayname);
     return libRoot;
 }
@@ -225,11 +225,10 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
         {
             QJsonObject agentObj = requireObject(agentVal);
             auto lib = libraryFromJson(*out, agentObj, filename);
+
             QString arg = "";
-            if (agentObj.contains("argument"))
-            {
-                readString(agentObj, "argument", arg);
-            }
+            readString(agentObj, "argument", arg);
+
             AgentPtr agent(new Agent(lib, arg));
             out->agents.append(agent);
         }
@@ -332,6 +331,20 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
     writeString(root, "appletClass", patch->appletClass);
     writeStringList(root, "+tweakers", patch->addTweakers);
     writeStringList(root, "+traits", patch->traits.values());
+    writeStringList(root, "+jvmArgs", patch->addnJvmArguments);
+    if (!patch->agents.isEmpty())
+    {
+        QJsonArray array;
+        for (auto value: patch->agents)
+        {
+            QJsonObject agentOut = OneSixVersionFormat::libraryToJson(value->library().get());
+            if (!value->argument().isEmpty())
+                agentOut.insert("argument", value->argument());
+
+            array.append(agentOut);
+        }
+        root.insert("+agents", array);
+    }
     if (!patch->libraries.isEmpty())
     {
         QJsonArray array;

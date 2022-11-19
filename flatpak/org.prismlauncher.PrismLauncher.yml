@@ -1,0 +1,83 @@
+id: org.prismlauncher.PrismLauncher
+runtime: org.kde.Platform
+runtime-version: "5.15-22.08"
+sdk: org.kde.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk17
+  - org.freedesktop.Sdk.Extension.openjdk8
+add-extensions:
+  com.valvesoftware.Steam.Utility.gamescope:
+    version: stable
+    add-ld-path: lib
+    no-autodownload: true
+    autodelete: false
+    directory: utils/gamescope
+
+command: prismlauncher
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --device=all
+  - --share=network
+  - --socket=pulseaudio
+    # for Discord RPC mods
+  - --filesystem=xdg-run/app/com.discordapp.Discord:create
+    # Mod drag&drop
+  - --filesystem=xdg-download:ro
+
+modules:
+  - name: prismlauncher
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DLauncher_BUILD_PLATFORM=flatpak
+      - -DCMAKE_BUILD_TYPE=Debug
+    build-options:
+      env:
+        JAVA_HOME: /usr/lib/sdk/openjdk17/jvm/openjdk-17
+        JAVA_COMPILER: /usr/lib/sdk/openjdk17/jvm/openjdk-17/bin/javac
+    sources:
+        - type: dir
+          path: ../
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/jdk/
+      - /usr/lib/sdk/openjdk17/install.sh
+      - mv /app/jre /app/jdk/17
+      - /usr/lib/sdk/openjdk8/install.sh
+      - mv /app/jre /app/jdk/8
+    cleanup: [/jre]
+  - name: xrandr
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://xorg.freedesktop.org/archive/individual/app/xrandr-1.5.1.tar.xz
+        sha256: 7bc76daf9d72f8aff885efad04ce06b90488a1a169d118dea8a2b661832e8762
+    cleanup: [/share/man, /bin/xkeystone]
+  - name: gamemode
+    buildsystem: meson
+    config-opts:
+      - -Dwith-sd-bus-provider=no-daemon
+      - -Dwith-examples=false
+    post-install:
+      # gamemoderun is installed for users who want to use wrapper commands
+      # post-install is running inside the build dir, we need it from the source though
+      - install -Dm755 ../data/gamemoderun -t /app/bin
+    sources:
+      - type: git
+        url: https://github.com/FeralInteractive/gamemode
+        tag: "1.7"
+        commit: 4dc99dff76218718763a6b07fc1900fa6d1dafd9
+  - name: enhance
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/utils/gamescope
+      - install -Dm755 prime-run /app/bin/prime-run
+      - mv /app/bin/prismlauncher /app/bin/prismrun
+      - install -Dm755 prismlauncher /app/bin/prismlauncher
+    sources:
+      - type: file
+        path: ../flatpak/prime-run
+      - type: file
+        path: ../flatpak/prismlauncher

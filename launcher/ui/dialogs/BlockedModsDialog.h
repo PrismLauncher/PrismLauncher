@@ -31,20 +31,31 @@ public:
 
     ~BlockedModsDialog() override;
 
+protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
 private:
     Ui::BlockedModsDialog *ui;
-    QList<BlockedMod> &mods;
-    QFileSystemWatcher watcher;
-    shared_qobject_ptr<ConcurrentTask> hashing_task;
+    QList<BlockedMod> &m_mods;
+    QFileSystemWatcher m_watcher;
+    shared_qobject_ptr<ConcurrentTask> m_hashing_task;
+    QSet<QString> m_pending_hash_paths;
+    bool m_rehash_pending;
 
     void openAll();
+    void addDownloadFolder();
     void update();
     void directoryChanged(QString path);
     void setupWatch();
     void scanPaths();
-    void scanPath(QString path);
+    void scanPath(QString path, bool start_task);
+    void addHashTask(QString path);
+    void buildHashTask(QString path);
     void checkMatchHash(QString hash, QString path);
+    void validateMatchedMods();
+    void runHashTask();
+    void hashTaskFinished();
 
     bool checkValidPath(QString path);
     bool allModsMatched();

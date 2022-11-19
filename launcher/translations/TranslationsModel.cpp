@@ -83,11 +83,20 @@ struct Language
         else if(key == "es_UY") {
             result = u8"español de Latinoamérica";
         }
+        else if(key == "en_NZ") {
+            result = u8"New Zealand English"; // No idea why qt translates this to just english and not to New Zealand English
+        }
         else if(key == "en@pirate") {
             result = u8"Tongue of the High Seas";
         }
         else if(key == "en@uwu") {
             result = u8"Cute Engwish";
+        }
+        else if(key == "tok") {
+            result = u8"toki pona";
+        }
+        else if(key == "nan") {
+            result = u8"閩南語";  // Using traditional Chinese script. Not sure if we should use simplified instead?
         }
         else {
             result = locale.nativeLanguageName();
