@@ -7,6 +7,7 @@
 #include "Application.h"
 #include "InstanceList.h"
 
+#include <InstanceList.h>
 #include "ui/instanceview/InstanceDelegate.h"
 
 ImportResourcePackDialog::ImportResourcePackDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ImportResourcePackDialog)
@@ -40,7 +41,7 @@ ImportResourcePackDialog::ImportResourcePackDialog(QWidget* parent) : QDialog(pa
 
 void ImportResourcePackDialog::activated(QModelIndex index)
 {
-    selectedInstanceKey = index.data(Qt::UserRole).toString();
+    selectedInstanceKey = index.data(InstanceList::InstanceIDRole).toString();
     accept();
 }
 
@@ -49,7 +50,7 @@ void ImportResourcePackDialog::selectionChanged(QItemSelection selected, QItemSe
     if (selected.empty())
         return;
 
-    QString key = selected.first().indexes().first().data(Qt::UserRole).toString();
+    QString key = selected.first().indexes().first().data(InstanceList::InstanceIDRole).toString();
     if (!key.isEmpty()) {
         selectedInstanceKey = key;
     }

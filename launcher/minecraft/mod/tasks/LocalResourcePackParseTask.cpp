@@ -152,7 +152,7 @@ bool LocalResourcePackParseTask::abort()
 
 void LocalResourcePackParseTask::executeTask()
 {
-    Q_ASSERT(m_resource_pack.valid());
+    // Q_ASSERT(m_resource_pack.valid());
 
     if (!ResourcePackUtils::process(m_resource_pack))
         return;

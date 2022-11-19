@@ -143,7 +143,7 @@ bool LocalTexturePackParseTask::abort()
 
 void LocalTexturePackParseTask::executeTask()
 {
-    Q_ASSERT(m_texture_pack.valid());
+    // Q_ASSERT(m_texture_pack.valid());
 
     if (!TexturePackUtils::process(m_texture_pack))
         return;
