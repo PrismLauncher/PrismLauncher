@@ -1,4 +1,6 @@
 #include "WideBar.h"
+
+#include <QContextMenuEvent>
 #include <QToolButton>
 
 class ActionButton : public QToolButton {
@@ -13,7 +15,7 @@ class ActionButton : public QToolButton {
 
         actionChanged();
     };
-   private slots:
+   public slots:
     void actionChanged()
     {
         setEnabled(m_action->isEnabled());
@@ -34,12 +36,16 @@ WideBar::WideBar(const QString& title, QWidget* parent) : QToolBar(title, parent
 {
     setFloatable(false);
     setMovable(false);
+
+    m_bar_menu = std::make_unique<QMenu>(this);
 }
 
 WideBar::WideBar(QWidget* parent) : QToolBar(parent)
 {
     setFloatable(false);
     setMovable(false);
+
+    m_bar_menu = std::make_unique<QMenu>(this);
 }
 
 void WideBar::addAction(QAction* action)
@@ -50,6 +56,8 @@ void WideBar::addAction(QAction* action)
     entry.type = BarEntry::Type::Action;
 
     m_entries.push_back(entry);
+
+    m_menu_state = MenuState::Dirty;
 }
 
 void WideBar::addSeparator()
@@ -80,6 +88,8 @@ void WideBar::insertActionBefore(QAction* before, QAction* action)
     entry.type = BarEntry::Type::Action;
 
     m_entries.insert(iter, entry);
+
+    m_menu_state = MenuState::Dirty;
 }
 
 void WideBar::insertActionAfter(QAction* after, QAction* action)
@@ -94,6 +104,8 @@ void WideBar::insertActionAfter(QAction* after, QAction* action)
     entry.type = BarEntry::Type::Action;
 
     m_entries.insert(iter + 1, entry);
+
+    m_menu_state = MenuState::Dirty;
 }
 
 void WideBar::insertSpacer(QAction* action)
@@ -142,6 +154,50 @@ QMenu* WideBar::createContextMenu(QWidget* parent, const QString& title)
         }
     }
     return contextMenu;
+}
+
+static void copyAction(QAction* from, QAction* to)
+{
+    Q_ASSERT(from);
+    Q_ASSERT(to);
+
+    to->setText(from->text());
+    to->setIcon(from->icon());
+    to->setToolTip(from->toolTip());
+}
+
+void WideBar::contextMenuEvent(QContextMenuEvent* event)
+{
+    if (m_menu_state == MenuState::Dirty) {
+        for (auto* old_action : m_bar_menu->actions())
+            old_action->deleteLater();
+
+        m_bar_menu->clear();
+
+        for (auto& entry : m_entries) {
+            if (entry.type != BarEntry::Type::Action)
+                continue;
+
+            auto act = new QAction();
+            copyAction(entry.menu_action, act);
+
+            act->setCheckable(true);
+            act->setChecked(entry.bar_action->isVisible());
+
+            connect(act, &QAction::toggled, entry.bar_action, [this, &entry](bool toggled){
+                entry.bar_action->setVisible(toggled);
+
+                // NOTE: This is needed so that disabled actions get reflected on the button when it is made visible.
+                static_cast<ActionButton*>(widgetForAction(entry.bar_action))->actionChanged();
+            });
+
+            m_bar_menu->addAction(act);
+        }
+
+        m_menu_state = MenuState::Fresh;
+    }
+
+    m_bar_menu->popup(event->globalPos());
 }
 
 #include "WideBar.moc"

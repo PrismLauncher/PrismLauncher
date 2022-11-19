@@ -5,6 +5,8 @@
 #include <QMenu>
 #include <QToolBar>
 
+#include <memory>
+
 class WideBar : public QToolBar {
     Q_OBJECT
 
@@ -22,6 +24,7 @@ class WideBar : public QToolBar {
     void insertActionAfter(QAction* after, QAction* action);
 
     QMenu* createContextMenu(QWidget* parent = nullptr, const QString& title = QString());
+    void contextMenuEvent(QContextMenuEvent*) override;
 
    private:
     struct BarEntry {
@@ -34,4 +37,8 @@ class WideBar : public QToolBar {
 
    private:
     QList<BarEntry> m_entries;
+
+    // Menu to toggle visibility from buttons in the bar
+    std::unique_ptr<QMenu> m_bar_menu = nullptr;
+    enum class MenuState { Fresh, Dirty } m_menu_state = MenuState::Dirty;
 };
