@@ -66,7 +66,6 @@
 #include "ui/setupwizard/PasteWizardPage.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/ImportResourcePackDialog.h"
 
 #include "ui/pagedialog/PageDialog.h"
 
@@ -98,12 +97,6 @@
 
 #include "java/JavaUtils.h"
 #include <minecraft/MinecraftInstance.h>
-#include <minecraft/mod/ResourcePack.h>
-#include <minecraft/mod/ResourcePackFolderModel.h>
-#include <minecraft/mod/tasks/LocalResourcePackParseTask.h>
-#include <minecraft/mod/TexturePack.h>
-#include <minecraft/mod/TexturePackFolderModel.h>
-#include <minecraft/mod/tasks/LocalTexturePackParseTask.h>
 
 #include "updater/UpdateChecker.h"
 
@@ -938,33 +931,7 @@ bool Application::event(QEvent* event)
 
     if (event->type() == QEvent::FileOpen) {
         auto ev = static_cast<QFileOpenEvent*>(event);
-
-        ResourcePack rp{ QFileInfo(ev->file()) };
-        TexturePack tp{ QFileInfo(ev->file()) };
-
-        ImportResourcePackDialog dlg(APPLICATION->m_mainWindow);
-
-        if (ResourcePackUtils::process(rp) && rp.valid()) {
-            dlg.exec();
-
-            if (dlg.result() == QDialog::Accepted) {
-                qDebug() << "Selected instance to import resource pack into: " << dlg.selectedInstanceKey;
-                auto instance = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
-                auto instanceButBuffed = std::dynamic_pointer_cast<MinecraftInstance>(instance);
-                instanceButBuffed->resourcePackList()->installResource(ev->file());
-            }
-        } else if (TexturePackUtils::process(tp) && tp.valid()) {
-            dlg.exec();
-
-            if (dlg.result() == QDialog::Accepted) {
-                qDebug() << "Selected instance to import texture pack into: " << dlg.selectedInstanceKey;
-                auto instance = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
-                auto instanceButBuffed = std::dynamic_pointer_cast<MinecraftInstance>(instance);
-                instanceButBuffed->texturePackList()->installResource(ev->file());
-            }
-        } else {
-            m_mainWindow->droppedURLs({ ev->url() });
-        }
+        m_mainWindow->droppedURLs({ ev->url() });
     }
 
     return QApplication::event(event);
