@@ -2,9 +2,8 @@
 
 #include <QAction>
 #include <QMap>
+#include <QMenu>
 #include <QToolBar>
-
-class QMenu;
 
 class WideBar : public QToolBar {
     Q_OBJECT
@@ -12,7 +11,7 @@ class WideBar : public QToolBar {
    public:
     explicit WideBar(const QString& title, QWidget* parent = nullptr);
     explicit WideBar(QWidget* parent = nullptr);
-    virtual ~WideBar();
+    ~WideBar() override = default;
 
     void addAction(QAction* action);
     void addSeparator();
@@ -25,10 +24,14 @@ class WideBar : public QToolBar {
     QMenu* createContextMenu(QWidget* parent = nullptr, const QString& title = QString());
 
    private:
-    struct BarEntry;
+    struct BarEntry {
+        enum class Type { None, Action, Separator, Spacer } type = Type::None;
+        QAction* bar_action = nullptr;
+        QAction* menu_action = nullptr;
+    };
 
-    auto getMatching(QAction* act) -> QList<BarEntry*>::iterator;
+    auto getMatching(QAction* act) -> QList<BarEntry>::iterator;
 
    private:
-    QList<BarEntry*> m_entries;
+    QList<BarEntry> m_entries;
 };
