@@ -96,7 +96,6 @@
 #include "net/HttpMetaCache.h"
 
 #include "java/JavaUtils.h"
-#include <minecraft/MinecraftInstance.h>
 
 #include "updater/UpdateChecker.h"
 

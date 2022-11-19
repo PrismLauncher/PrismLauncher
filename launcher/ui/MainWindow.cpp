@@ -71,6 +71,7 @@
 
 #include <BaseInstance.h>
 #include <InstanceList.h>
+#include <minecraft/MinecraftInstance.h>
 #include <MMCZip.h>
 #include <icons/IconList.h>
 #include <java/JavaUtils.h>
