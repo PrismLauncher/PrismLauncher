@@ -287,6 +287,16 @@
             </item>
             <item>
              <property name="text">
+              <string>Breeze Light</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Breeze Dark</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string notr="true">OSX</string>
              </property>
             </item>
