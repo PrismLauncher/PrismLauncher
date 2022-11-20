@@ -33,24 +33,34 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.fix;
+package org.prismlauncher.utils.url;
 
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
+import java.net.HttpURLConnection;
 
-import org.prismlauncher.fix.skins.SkinFix;
-import org.prismlauncher.utils.Parameters;
+/**
+ * Spoof 404 response from server to avoid unnecessary requests.
+ */
+public final class NullConnection extends HttpURLConnection {
 
-public final class Fixes {
+    public static final NullConnection INSTANCE = new NullConnection();
 
-    private static final Fix[] FIXES = { new SkinFix() };
+    public NullConnection() {
+        super(null);
+    }
 
-    public static void apply(Parameters params) {
-        List<String> fixes = params.getList("fixes", Collections.<String>emptyList());
+    @Override
+    public void connect() throws IOException {
+        responseCode = 404;
+    }
 
-        for (Fix fix : FIXES)
-            if (fixes.contains(fix.getName()) && fix.isApplicable(params))
-                fix.apply();
+    @Override
+    public void disconnect() {
+    }
+
+    @Override
+    public boolean usingProxy() {
+        return false;
     }
 
 }

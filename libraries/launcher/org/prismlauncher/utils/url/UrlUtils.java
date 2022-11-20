@@ -33,7 +33,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.utils;
+package org.prismlauncher.utils.url;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -54,7 +54,6 @@ public final class UrlUtils {
 
     private static URLStreamHandler http;
     private static MethodHandle openConnection;
-    private static MethodHandle openConnectionProxied;
 
     static {
         try {
@@ -64,18 +63,10 @@ public final class UrlUtils {
             getURLStreamHandler.setAccessible(true);
             http = (URLStreamHandler) getURLStreamHandler.invoke(null, "http");
 
-            // reflection is required due to not having access
-            // unreflect is used due to the potential frequency of calls
-            Method openConnectionReflect = URLStreamHandler.class.getDeclaredMethod("openConnection", URL.class);
+            Method openConnectionReflect = URLStreamHandler.class.getDeclaredMethod("openConnection", URL.class,
+                    Proxy.class);
             openConnectionReflect.setAccessible(true);
             openConnection = MethodHandles.lookup().unreflect(openConnectionReflect);
-
-            // a second method which takes in a proxy is required for a fully-functional
-            // URLStreamHandler
-            Method openConnectionReflectProxied = URLStreamHandler.class.getDeclaredMethod("openConnection", URL.class,
-                    Proxy.class);
-            openConnectionReflectProxied.setAccessible(true);
-            openConnectionProxied = MethodHandles.lookup().unreflect(openConnectionReflectProxied);
         } catch (Throwable e) {
             Log.error("URL reflection failed - some features may not work", e);
         }
@@ -87,34 +78,20 @@ public final class UrlUtils {
      * @return <code>true</code> if all features can be used
      */
     public static boolean isSupported() {
-        return http != null && openConnection != null && openConnectionProxied != null;
-    }
-
-    public static URLConnection openHttpConnection(URL url) throws IOException {
-        return openConnection(http, url);
+        return http != null && openConnection != null;
     }
 
     public static URLConnection openHttpConnection(URL url, Proxy proxy) throws IOException {
         return openConnection(http, url, proxy);
     }
 
-    public static URLConnection openConnection(URLStreamHandler handler, URL url) throws IOException {
+    public static URLConnection openConnection(URLStreamHandler handler, URL url, Proxy proxy) throws IOException {
         try {
-            return (URLConnection) openConnection.invokeExact(handler, url);
+            return (URLConnection) openConnection.invokeExact(handler, url, proxy);
         } catch (IOException | Error | RuntimeException e) {
             throw e; // rethrow if possible
         } catch (Throwable e) {
             throw new Error(e); // otherwise, wrap in Error
-        }
-    }
-
-    public static URLConnection openConnection(URLStreamHandler handler, URL url, Proxy proxy) throws IOException {
-        try {
-            return (URLConnection) openConnectionProxied.invokeExact(handler, url, proxy);
-        } catch (IOException | Error | RuntimeException e) {
-            throw e;
-        } catch (Throwable e) {
-            throw new Error(e);
         }
     }
 

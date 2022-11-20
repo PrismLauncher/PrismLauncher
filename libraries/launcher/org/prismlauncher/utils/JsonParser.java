@@ -59,6 +59,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.prismlauncher.exception.JsonParseException;
+
 /**
  * Single-file JSON parser to allow for usage in versions without GSON.
  */
@@ -418,16 +420,6 @@ public final class JsonParser {
 
     private boolean readNull() throws IOException {
         return character() == 'n' && read() == 'u' && read() == 'l' && read() == 'l';
-    }
-
-    public static class JsonParseException extends IOException {
-
-        private static final long serialVersionUID = 1L;
-
-        public JsonParseException(String message) {
-            super(message);
-        }
-
     }
 
 }

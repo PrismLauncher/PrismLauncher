@@ -33,24 +33,16 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.fix;
+package org.prismlauncher.exception;
 
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
 
-import org.prismlauncher.fix.skins.SkinFix;
-import org.prismlauncher.utils.Parameters;
+public class JsonParseException extends IOException {
 
-public final class Fixes {
+    private static final long serialVersionUID = 1L;
 
-    private static final Fix[] FIXES = { new SkinFix() };
-
-    public static void apply(Parameters params) {
-        List<String> fixes = params.getList("fixes", Collections.<String>emptyList());
-
-        for (Fix fix : FIXES)
-            if (fixes.contains(fix.getName()) && fix.isApplicable(params))
-                fix.apply();
+    public JsonParseException(String message) {
+        super(message);
     }
 
 }

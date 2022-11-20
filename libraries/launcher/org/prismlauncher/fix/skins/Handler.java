@@ -45,61 +45,51 @@ import java.util.Map;
 
 import org.prismlauncher.utils.Base64;
 import org.prismlauncher.utils.JsonParser;
-import org.prismlauncher.utils.UrlUtils;
+import org.prismlauncher.utils.url.NullConnection;
+import org.prismlauncher.utils.url.UrlUtils;
 
 @SuppressWarnings("unchecked")
 final class Handler extends URLStreamHandler {
 
     private URL redirect(URL address) throws IOException {
         String skinOwner = findSkinOwner(address);
-
         if (skinOwner != null)
-            return convertSkin(address, skinOwner);
+            return convert(skinOwner, "SKIN");
 
         String capeOwner = findCapeOwner(address);
-
         if (capeOwner != null)
-            return convertCape(address, capeOwner);
+            return convert(capeOwner, "CAPE");
 
         return address;
     }
 
     @Override
     protected URLConnection openConnection(URL address) throws IOException {
-        address = redirect(address);
-        return UrlUtils.openHttpConnection(address);
+        return openConnection(address, null);
     }
 
     @Override
     protected URLConnection openConnection(URL address, Proxy proxy) throws IOException {
         address = redirect(address);
+
+        if (address == null)
+            return NullConnection.INSTANCE;
+
         return UrlUtils.openHttpConnection(address, proxy);
     }
 
-    private URL convertSkin(URL defaultUrl, String owner) throws IOException {
+    private URL convert(String owner, String name) throws IOException {
         Map<String, Object> textures = getTextures(owner);
 
         if (textures != null) {
-            textures = (Map<String, Object>) textures.get("SKIN");
-            return new URL((String) textures.get("url"));
-        }
-
-        return defaultUrl;
-    }
-
-    private URL convertCape(URL defaultUrl, String owner) throws IOException {
-        Map<String, Object> textures = getTextures(owner);
-
-        if (textures != null) {
-            textures = (Map<String, Object>) textures.get("CAPE");
-
+            textures = (Map<String, Object>) textures.get(name);
             if (textures == null)
-                return defaultUrl;
+                return null;
 
             return new URL((String) textures.get("url"));
         }
 
-        return defaultUrl;
+        return null;
     }
 
     private static Map<String, Object> getTextures(String owner) throws IOException {
@@ -116,6 +106,7 @@ final class Handler extends URLStreamHandler {
                         Map<String, Object> result = (Map<String, Object>) JsonParser
                                 .parse(new String(Base64.decode((String) property.get("value"))));
                         result = (Map<String, Object>) result.get("textures");
+
                         return result;
                     }
                 }
@@ -128,11 +119,11 @@ final class Handler extends URLStreamHandler {
     private static String findSkinOwner(URL address) {
         switch (address.getHost()) {
             case "www.minecraft.net":
-                return stripPng(strip(address.getPath(), "/skin/"));
+                return stripIfPrefixed(address.getPath(), "/skin/");
 
             case "s3.amazonaws.com":
             case "skins.minecraft.net":
-                return stripPng(strip(address.getPath(), "/MinecraftSkins/"));
+                return stripIfPrefixed(address.getPath(), "/MinecraftSkins/");
         }
 
         return null;
@@ -141,26 +132,25 @@ final class Handler extends URLStreamHandler {
     private static String findCapeOwner(URL address) {
         switch (address.getHost()) {
             case "www.minecraft.net":
-                return stripPng(strip(address.getQuery(), "user="));
+                return stripIfPrefixed(address.getQuery(), "user=");
 
             case "s3.amazonaws.com":
             case "skins.minecraft.net":
-                return stripPng(strip(address.getPath(), "/MinecraftCloaks/"));
+                return stripIfPrefixed(address.getPath(), "/MinecraftCloaks/");
         }
 
         return null;
     }
 
-    private static String stripPng(String string) {
-        if (string != null && string.endsWith(".png"))
-            return string.substring(0, string.lastIndexOf('.'));
+    private static String stripIfPrefixed(String string, String prefix) {
+        if (string != null && string.startsWith(prefix)) {
+            string = string.substring(prefix.length());
 
-        return string;
-    }
+            if (string.endsWith(".png"))
+                string = string.substring(0, string.lastIndexOf('.'));
 
-    private static String strip(String string, String prefix) {
-        if (string != null && string.startsWith(prefix))
-            return string.substring(prefix.length());
+            return string;
+        }
 
         return null;
     }
