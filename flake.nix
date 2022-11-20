@@ -23,8 +23,8 @@
       pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
 
       packagesFn = pkgs: rec {
-        prismlauncher = pkgs.libsForQt5.callPackage ./nix { inherit version self libnbtplusplus tomlplusplus; };
-        prismlauncher-qt6 = pkgs.qt6Packages.callPackage ./nix { inherit version self libnbtplusplus tomlplusplus; };
+        prismlauncher-qt5 = pkgs.libsForQt5.callPackage ./nix { inherit version self libnbtplusplus tomlplusplus; };
+        prismlauncher = pkgs.qt6Packages.callPackage ./nix { inherit version self libnbtplusplus tomlplusplus; };
       };
     in
     {

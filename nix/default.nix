@@ -1,48 +1,31 @@
-{ stdenv
-, lib
-, fetchFromGitHub
+{ lib
+, stdenv
 , cmake
-, ninja
 , jdk8
 , jdk
-, ghc_filesystem
 , zlib
 , file
 , wrapQtAppsHook
 , xorg
 , libpulseaudio
 , qtbase
-, quazip
+, qtsvg
+, qtwayland
 , libGL
-, msaClientID ? ""
-, extraJDKs ? [ ]
+, quazip
+, glfw
+, openal
 , extra-cmake-modules
+, ghc_filesystem
+, msaClientID ? ""
+, jdks ? [ jdk jdk8 ]
 
   # flake
 , self
 , version
 , libnbtplusplus
 , tomlplusplus
-, enableLTO ? false
 }:
-
-let
-  # Libraries required to run Minecraft
-  libpath = with xorg; lib.makeLibraryPath [
-    libX11
-    libXext
-    libXcursor
-    libXrandr
-    libXxf86vm
-    libpulseaudio
-    libGL
-  ];
-
-  # This variable will be passed to Minecraft by Prism Launcher
-  gameLibraryPath = libpath + ":/run/opengl-driver/lib";
-
-  javaPaths = lib.makeSearchPath "bin/java" ([ jdk jdk8 ] ++ extraJDKs);
-in
 
 stdenv.mkDerivation rec {
   pname = "prismlauncher";
@@ -50,51 +33,67 @@ stdenv.mkDerivation rec {
 
   src = lib.cleanSource self;
 
-  nativeBuildInputs = [ cmake extra-cmake-modules ninja jdk ghc_filesystem file wrapQtAppsHook ];
-  buildInputs = [ qtbase quazip zlib ];
+  nativeBuildInputs = [ extra-cmake-modules cmake file jdk wrapQtAppsHook ];
+  buildInputs = [
+    qtbase
+    qtsvg
+    zlib
+    quazip
+    ghc_filesystem
+  ] ++ lib.optional (lib.versionAtLeast qtbase.version "6") qtwayland;
 
+  cmakeFlags = lib.optionals (msaClientID != "") [ "-DLauncher_MSA_CLIENT_ID=${msaClientID}" ]
+    ++ lib.optionals (lib.versionAtLeast qtbase.version "6") [ "-DLauncher_QT_VERSION_MAJOR=6" ];
   dontWrapQtApps = true;
 
   postUnpack = ''
-    # Copy libnbtplusplus
     rm -rf source/libraries/libnbtplusplus
     mkdir source/libraries/libnbtplusplus
     ln -s ${libnbtplusplus}/* source/libraries/libnbtplusplus
     chmod -R +r+w source/libraries/libnbtplusplus
-    # Copy tomlplusplus
+    chown -R $USER: source/libraries/libnbtplusplus
     rm -rf source/libraries/tomlplusplus
     mkdir source/libraries/tomlplusplus
     ln -s ${tomlplusplus}/* source/libraries/tomlplusplus
     chmod -R +r+w source/libraries/tomlplusplus
+    chown -R $USER: source/libraries/tomlplusplus
   '';
 
-  cmakeFlags = [
-    "-GNinja"
-    "-DLauncher_QT_VERSION_MAJOR=${lib.versions.major qtbase.version}"
-  ] ++ lib.optionals enableLTO [ "-DENABLE_LTO=on" ]
-  ++ lib.optionals (msaClientID != "") [ "-DLauncher_MSA_CLIENT_ID=${msaClientID}" ];
+  postInstall =
+    let
+      libpath = with xorg;
+        lib.makeLibraryPath [
+          libX11
+          libXext
+          libXcursor
+          libXrandr
+          libXxf86vm
+          libpulseaudio
+          libGL
+          glfw
+          openal
+          stdenv.cc.cc.lib
+        ];
+    in
+    ''
+      # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
+      wrapQtApp $out/bin/prismlauncher \
+        --set LD_LIBRARY_PATH /run/opengl-driver/lib:${libpath} \
+        --prefix PRISMLAUNCHER_JAVA_PATHS : ${lib.makeSearchPath "bin/java" jdks} \
+        --prefix PATH : ${lib.makeBinPath [xorg.xrandr]}
+    '';
 
-  # we have to check if the system is NixOS before adding stdenv.cc.cc.lib (#923)
-  postInstall = ''
-    # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
-    wrapQtApp $out/bin/prismlauncher \
-      --run '[ -f /etc/NIXOS ] && export LD_LIBRARY_PATH="${stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"' \
-      --prefix LD_LIBRARY_PATH : ${gameLibraryPath} \
-      --prefix PRISMLAUNCHER_JAVA_PATHS : ${javaPaths} \
-      --prefix PATH : ${lib.makeBinPath [ xorg.xrandr ]}
-  '';
 
   meta = with lib; {
     homepage = "https://prismlauncher.org/";
-    downloadPage = "https://prismlauncher.org/download/";
-    changelog = "https://github.com/PrismLauncher/PrismLauncher/releases";
     description = "A free, open source launcher for Minecraft";
     longDescription = ''
       Allows you to have multiple, separate instances of Minecraft (each with
       their own mods, texture packs, saves, etc) and helps you manage them and
       their associated options with a simple interface.
     '';
-    platforms = platforms.unix;
+    platforms = platforms.linux;
+    changelog = "https://github.com/PrismLauncher/PrismLauncher/releases/tag/${version}";
     license = licenses.gpl3Only;
     maintainers = with maintainers; [ minion3665 Scrumplex ];
   };
