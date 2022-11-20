@@ -71,7 +71,13 @@ public final class SkinFix implements Fix, URLStreamHandlerFactory {
 
     @Override
     public void apply() {
-        URL.setURLStreamHandlerFactory(this);
+    	try {
+    		URL.setURLStreamHandlerFactory(this);
+    	} catch (Error e) {
+            Log.warning("Cannot apply skin fix");
+    		Log.warning("URLStreamHandlerFactory is already set");
+			Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
+    	}
     }
 
     @Override

@@ -40,6 +40,7 @@ import java.util.List;
 
 import org.prismlauncher.fix.skins.SkinFix;
 import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.logging.Log;
 
 public final class Fixes {
 
@@ -48,9 +49,15 @@ public final class Fixes {
     public static void apply(Parameters params) {
         List<String> fixes = params.getList("fixes", Collections.<String>emptyList());
 
-        for (Fix fix : FIXES)
-            if (fixes.contains(fix.getName()) && fix.isApplicable(params))
-                fix.apply();
+		for (Fix fix : FIXES) {
+			if (fixes.contains(fix.getName()) && fix.isApplicable(params)) {
+				try {
+					fix.apply();
+				} catch (Throwable e) {
+					Log.error("Could not apply " + fix.getName(), e);
+				}
+			}
+		}
     }
 
 }
