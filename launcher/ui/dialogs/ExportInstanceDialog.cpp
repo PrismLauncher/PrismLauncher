@@ -419,7 +419,7 @@ bool ExportInstanceDialog::doExport()
     }
 
     SaveIcon(m_instance);
-    
+
     auto & blocked = proxyModel->blockedPaths();
     auto files = QFileInfoList();
     auto isBlocked = [blocked](const QString & str){
