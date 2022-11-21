@@ -487,6 +487,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
+        if: inputs.build_type == 'Debug'
         uses: actions/checkout@v3
         with:
           submodules: 'true'
@@ -524,3 +525,4 @@ jobs:
         with:
           bundle: "Prism Launcher.flatpak"
           manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
+          cache-key: flatpak-${{ github.sha }}-x86_64

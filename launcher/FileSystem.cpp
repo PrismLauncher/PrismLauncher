@@ -152,9 +152,10 @@ bool ensureFolderPathExists(QString foldernamepath)
 /// @brief Copies a directory and it's contents from src to dest
 /// @param offset subdirectory form src to copy to dest
 /// @return if there was an error during the filecopy
-bool copy::operator()(const QString& offset)
+bool copy::operator()(const QString& offset, bool dryRun)
 {
     using copy_opts = fs::copy_options;
+    m_copied = 0;  // reset counter
 
 // NOTE always deep copy on windows. the alternatives are too messy.
 #if defined Q_OS_WIN32
@@ -174,13 +175,14 @@ bool copy::operator()(const QString& offset)
 
     // Function that'll do the actual copying
     auto copy_file = [&](QString src_path, QString relative_dst_path) {
-        if (m_blacklist && m_blacklist->matches(relative_dst_path))
+        if (m_matcher && (m_matcher->matches(relative_dst_path) != m_whitelist))
             return;
 
         auto dst_path = PathCombine(dst, relative_dst_path);
-        ensureFilePathExists(dst_path);
-
-        fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
+        if (!dryRun) {
+            ensureFilePathExists(dst_path);
+            fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
+        }
         if (err) {
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
