@@ -97,6 +97,7 @@ set(PATHMATCHER_SOURCES
     pathmatcher/IPathMatcher.h
     pathmatcher/MultiMatcher.h
     pathmatcher/RegexpMatcher.h
+    pathmatcher/SimplePrefixMatcher.h
 )
 
 set(NET_SOURCES
@@ -575,6 +576,8 @@ SET(LAUNCHER_SOURCES
     # Application base
     Application.h
     Application.cpp
+    DataMigrationTask.h
+    DataMigrationTask.cpp
     UpdateController.cpp
     UpdateController.h
     ApplicationMessage.h
