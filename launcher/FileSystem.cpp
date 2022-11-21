@@ -188,6 +188,8 @@ bool copy::operator()(const QString& offset, bool dryRun)
             qDebug() << "Source file:" << src_path;
             qDebug() << "Destination file:" << dst_path;
         }
+        m_copied++;
+        emit fileCopied(relative_dst_path);
     };
 
     // We can't use copy_opts::recursive because we need to take into account the
