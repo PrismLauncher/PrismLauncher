@@ -82,10 +82,16 @@ public final class UrlUtils {
     }
 
     public static URLConnection openHttpConnection(URL url, Proxy proxy) throws IOException {
+        if (http == null)
+            throw new UnsupportedOperationException();
+
         return openConnection(http, url, proxy);
     }
 
     public static URLConnection openConnection(URLStreamHandler handler, URL url, Proxy proxy) throws IOException {
+        if (openConnection == null)
+            throw new UnsupportedOperationException();
+
         try {
             return (URLConnection) openConnection.invokeExact(handler, url, proxy);
         } catch (IOException | Error | RuntimeException e) {

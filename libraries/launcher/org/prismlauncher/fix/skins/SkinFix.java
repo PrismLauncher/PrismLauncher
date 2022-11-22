@@ -40,6 +40,7 @@ import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 
 import org.prismlauncher.fix.Fix;
+import org.prismlauncher.utils.Base64;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.logging.Log;
 import org.prismlauncher.utils.url.UrlUtils;
@@ -59,7 +60,7 @@ public final class SkinFix implements Fix, URLStreamHandlerFactory {
 
     @Override
     public boolean isApplicable(Parameters params) {
-        if (!UrlUtils.isSupported()) {
+        if (!UrlUtils.isSupported() || !Base64.isSupported()) {
             Log.warning("Cannot access the necessary Java internals for skin fix");
             Log.warning("Try adding '--add-opens java.base/java.net=ALL-UNNAMED' to your Java arguments");
             Log.warning("Alternatively, turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
