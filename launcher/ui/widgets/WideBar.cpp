@@ -1,6 +1,7 @@
 #include "WideBar.h"
 
 #include <QContextMenuEvent>
+#include <QCryptographicHash>
 #include <QToolButton>
 
 class ActionButton : public QToolButton {
@@ -211,23 +212,53 @@ void WideBar::contextMenuEvent(QContextMenuEvent* event)
         state.append(entry.bar_action->isVisible() ? '1' : '0');
     }
 
+    state.append(',');
+    state.append(getHash());
+
     return state;
 }
 
 void WideBar::setVisibilityState(QByteArray&& state)
 {
+    auto split = state.split(',');
+
+    auto bits = split.first();
+    auto hash = split.last();
+
+    // If the actions changed, we better not try to load the old one to avoid unwanted hiding
+    if (!checkHash(hash))
+        return;
+
     qsizetype i = 0;
     for (auto& entry : m_entries) {
         if (entry.type != BarEntry::Type::Action)
             continue;
-        if (i == state.size())
+        if (i == bits.size())
             break;
 
-        entry.bar_action->setVisible(state.at(i++) == '1');
+        entry.bar_action->setVisible(bits.at(i++) == '1');
 
         // NOTE: This is needed so that disabled actions get reflected on the button when it is made visible.
         static_cast<ActionButton*>(widgetForAction(entry.bar_action))->actionChanged();
     }
 }
+
+QByteArray WideBar::getHash() const
+{
+    QCryptographicHash hash(QCryptographicHash::Sha1);
+    for (auto const& entry : m_entries) {
+        if (entry.type != BarEntry::Type::Action)
+            continue;
+        hash.addData(entry.menu_action->text().toLatin1());
+    }
+
+    return hash.result().toBase64();
+}
+
+bool WideBar::checkHash(QByteArray const& old_hash) const
+{
+    return old_hash == getHash();
+}
+
 
 #include "WideBar.moc"
