@@ -303,21 +303,27 @@ void LauncherPage::applySettings()
         s->set("IconTheme", "pe_blue");
         break;
     case 4:
-        s->set("IconTheme", "OSX");
+        s->set("IconTheme", "breeze_light");
         break;
     case 5:
-        s->set("IconTheme", "iOS");
+        s->set("IconTheme", "breeze_dark");
         break;
     case 6:
-        s->set("IconTheme", "flat");
+        s->set("IconTheme", "OSX");
         break;
     case 7:
-        s->set("IconTheme", "flat_white");
+        s->set("IconTheme", "iOS");
         break;
     case 8:
-        s->set("IconTheme", "multimc");
+        s->set("IconTheme", "flat");
         break;
     case 9:
+        s->set("IconTheme", "flat_white");
+        break;
+    case 10:
+        s->set("IconTheme", "multimc");
+        break;
+    case 11:
         s->set("IconTheme", "custom");
         break;
     }
@@ -397,7 +403,18 @@ void LauncherPage::loadSettings()
     m_currentUpdateChannel = s->get("UpdateChannel").toString();
     //FIXME: make generic
     auto theme = s->get("IconTheme").toString();
-    QStringList iconThemeOptions{"pe_colored", "pe_light", "pe_dark", "pe_blue", "OSX", "iOS", "flat", "flat_white", "multimc", "custom"};
+    QStringList iconThemeOptions{"pe_colored", 
+                                 "pe_light", 
+                                 "pe_dark", 
+                                 "pe_blue", 
+                                 "breeze_light", 
+                                 "breeze_dark", 
+                                 "OSX", 
+                                 "iOS", 
+                                 "flat", 
+                                 "flat_white", 
+                                 "multimc", 
+                                 "custom"};
     ui->themeComboBox->setCurrentIndex(iconThemeOptions.indexOf(theme));
 
     auto cat = s->get("BackgroundCat").toString();
