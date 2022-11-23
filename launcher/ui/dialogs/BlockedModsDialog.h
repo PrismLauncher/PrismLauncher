@@ -6,9 +6,9 @@
 
 #include <QFileSystemWatcher>
 
-#include "modplatform/helpers/HashUtils.h"
-
 #include "tasks/ConcurrentTask.h"
+
+class QPushButton;
 
 struct BlockedMod {
     QString name;
@@ -46,8 +46,9 @@ class BlockedModsDialog : public QDialog {
     shared_qobject_ptr<ConcurrentTask> m_hashing_task;
     QSet<QString> m_pending_hash_paths;
     bool m_rehash_pending;
+    QPushButton *m_openMissingButton;
 
-    void openAll();
+    void openAll(bool missingOnly);
     void addDownloadFolder();
     void update();
     void directoryChanged(QString path);

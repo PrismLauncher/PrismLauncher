@@ -1,14 +1,16 @@
 #include "BlockedModsDialog.h"
-#include <QDesktopServices>
-#include <QDialogButtonBox>
-#include <QPushButton>
-#include "Application.h"
 #include "ui_BlockedModsDialog.h"
 
+#include "Application.h"
+#include "modplatform/helpers/HashUtils.h"
+
 #include <QDebug>
+#include <QDesktopServices>
+#include <QDialogButtonBox>
 #include <QDragEnterEvent>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QPushButton>
 #include <QStandardPaths>
 
 BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods)
@@ -19,8 +21,8 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
 
     ui->setupUi(this);
 
-    auto openAllButton = ui->buttonBox->addButton(tr("Open All"), QDialogButtonBox::ActionRole);
-    connect(openAllButton, &QPushButton::clicked, this, &BlockedModsDialog::openAll);
+    m_openMissingButton = ui->buttonBox->addButton(tr("Open Missing"), QDialogButtonBox::ActionRole);
+    connect(m_openMissingButton, &QPushButton::clicked, this, [this]() { openAll(true); });
 
     auto downloadFolderButton = ui->buttonBox->addButton(tr("Add Download Folder"), QDialogButtonBox::ActionRole);
     connect(downloadFolderButton, &QPushButton::clicked, this, &BlockedModsDialog::addDownloadFolder);
@@ -78,10 +80,12 @@ void BlockedModsDialog::done(int r)
     disconnect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &BlockedModsDialog::directoryChanged);
 }
 
-void BlockedModsDialog::openAll()
+void BlockedModsDialog::openAll(bool missingOnly)
 {
     for (auto& mod : m_mods) {
-        QDesktopServices::openUrl(mod.websiteUrl);
+        if (!missingOnly || !mod.matched) {
+            QDesktopServices::openUrl(mod.websiteUrl);
+        }
     }
 }
 
@@ -124,8 +128,10 @@ void BlockedModsDialog::update()
 
     if (allModsMatched()) {
         ui->labelModsFound->setText("<span style=\"color:green\">✔</span>" + tr("All mods found"));
+        m_openMissingButton->setDisabled(true);
     } else {
         ui->labelModsFound->setText(tr("Please download the missing mods."));
+        m_openMissingButton->setDisabled(false);
     }
 }
 
