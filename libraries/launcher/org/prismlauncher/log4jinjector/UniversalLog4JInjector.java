@@ -7,6 +7,9 @@ public class UniversalLog4JInjector {
     private static final Logger LOGGER = Logger.getLogger("UniversalLog4JInjector");
 
     public static void inject() {
+        if (System.getProperty("prism.log4j.inject").equals("false")) {
+            return;
+        }
         String l4jVersion;
         try {
             l4jVersion = Class.forName("org.apache.logging.log4j.LogManager").getPackage().getImplementationVersion();
