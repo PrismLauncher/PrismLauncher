@@ -34,15 +34,8 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
 
     this->setWindowTitle(title);
     ui->labelDescription->setText(text);
-    ui->labelExplain->setText(
-        QString(tr("Your configured global mods folder and default downloads folder "
-                   "are automatically checked for the downloaded mods and they will be copied to the instance if found.<br/>"
-                   "Optionally, you may drag and drop the downloaded mods onto this dialog or add a folder to watch "
-                   "if you did not download the mods to a default location."))
-            .arg(APPLICATION->settings()->get("CentralModsDir").toString(),
-                 QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)));
 
-    // force all URL handeling as external
+    // force all URL handling as external
     connect(ui->textBrowserWatched, &QTextBrowser::anchorClicked, this, [](const QUrl url) { QDesktopServices::openUrl(url); });
 
     setAcceptDrops(true);
