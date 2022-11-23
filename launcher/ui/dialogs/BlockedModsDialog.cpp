@@ -236,12 +236,22 @@ void BlockedModsDialog::checkMatchHash(QString hash, QString path)
 /// @return boolean: did the path match the name of a blocked mod?
 bool BlockedModsDialog::checkValidPath(QString path)
 {
-    QFileInfo file = QFileInfo(path);
-    QString filename = file.fileName();
+    const QFileInfo file = QFileInfo(path);
+    const QString filename = file.fileName();
+    QString laxFilename(filename);
+    laxFilename.replace('+', ' ');
+
+    auto compare = [](QString fsfilename, QString metadataFilename) {
+        return metadataFilename.compare(fsfilename, Qt::CaseInsensitive) == 0;
+    };
 
     for (auto& mod : m_mods) {
-        if (mod.name.compare(filename, Qt::CaseInsensitive) == 0) {
+        if (compare(filename, mod.name)) {
             qDebug() << "[Blocked Mods Dialog] Name match found:" << mod.name << "| From path:" << path;
+            return true;
+        }
+        if (compare(laxFilename, mod.name)) {
+            qDebug() << "[Blocked Mods Dialog] Lax name match found:" << mod.name << "| From path:" << path;
             return true;
         }
     }
