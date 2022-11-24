@@ -2,10 +2,10 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="32"
-   height="32"
+   width="24"
+   height="24"
    version="1.1"
-   viewBox="0 0 32 32"
+   viewBox="0 0 24 24"
    id="svg168"
    xml:space="preserve"
    xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -40,7 +40,7 @@
      id="metadata166"><rdf:RDF><cc:Work
          rdf:about=""><dc:title>Prism Launcher Logo</dc:title><dc:date>19/10/2022</dc:date><dc:creator><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:creator><dc:contributor><cc:Agent><dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title></cc:Agent></dc:contributor><dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source><dc:rights><cc:Agent><dc:title>CC BY-SA 4.0</dc:title></cc:Agent></dc:rights><dc:publisher><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:publisher></cc:Work></rdf:RDF></metadata><g
      id="i_gold"
-     transform="translate(-384)"><rect
+     transform="translate(-388,-4)"><rect
        style="fill:#d7bc21;fill-opacity:1;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
        id="rect15088-8"
        width="20"
@@ -50,10 +50,10 @@
        ry="3" /><rect
        style="fill:#ffffff;fill-opacity:0;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
        id="rect128412-88-6"
-       width="32"
-       height="32"
-       x="384"
-       y="0" /><rect
+       width="24"
+       height="24"
+       x="388"
+       y="4" /><rect
        style="fill:url(#linearGradient48512);fill-opacity:1;stroke:none;stroke-width:1;paint-order:stroke markers fill;stop-color:#000000"
        id="rect40970-3"
        width="18"
