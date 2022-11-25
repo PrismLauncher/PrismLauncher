@@ -20,7 +20,7 @@ static ModPlatform::ProviderCapabilities ProviderCaps;
 static ModrinthAPI modrinth_api;
 static FlameAPI flame_api;
 
-EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::Provider prov)
+EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::ResourceProvider prov)
     : Task(nullptr), m_index_dir(dir), m_provider(prov), m_hashing_task(nullptr), m_current_task(nullptr)
 {
     auto hash_task = createNewHash(mod);
@@ -31,7 +31,7 @@ EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::Provider
     hash_task->start();
 }
 
-EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform::Provider prov)
+EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform::ResourceProvider prov)
     : Task(nullptr), m_index_dir(dir), m_provider(prov), m_current_task(nullptr)
 {
     m_hashing_task = new ConcurrentTask(this, "MakeHashesTask", 10);
@@ -110,10 +110,10 @@ void EnsureMetadataTask::executeTask()
     NetJob::Ptr version_task;
 
     switch (m_provider) {
-        case (ModPlatform::Provider::MODRINTH):
+        case (ModPlatform::ResourceProvider::MODRINTH):
             version_task = modrinthVersionsTask();
             break;
-        case (ModPlatform::Provider::FLAME):
+        case (ModPlatform::ResourceProvider::FLAME):
             version_task = flameVersionsTask();
             break;
     }
@@ -130,10 +130,10 @@ void EnsureMetadataTask::executeTask()
         NetJob::Ptr project_task;
 
         switch (m_provider) {
-            case (ModPlatform::Provider::MODRINTH):
+            case (ModPlatform::ResourceProvider::MODRINTH):
                 project_task = modrinthProjectsTask();
                 break;
-            case (ModPlatform::Provider::FLAME):
+            case (ModPlatform::ResourceProvider::FLAME):
                 project_task = flameProjectsTask();
                 break;
         }
@@ -212,7 +212,7 @@ void EnsureMetadataTask::emitFail(Mod* m, QString key, RemoveFromList remove)
 
 NetJob::Ptr EnsureMetadataTask::modrinthVersionsTask()
 {
-    auto hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
+    auto hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
     auto* response = new QByteArray();
     auto ver_task = modrinth_api.currentVersions(m_mods.keys(), hash_type, response);

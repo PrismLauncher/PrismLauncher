@@ -1,4 +1,4 @@
-#include "FlameModModel.h"
+#include "FlameResourceModels.h"
 #include "Json.h"
 #include "modplatform/flame/FlameModIndex.h"
 
@@ -20,7 +20,7 @@ void ListModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
 
 void ListModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), m_parent->m_instance);
+    FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_associated_page->m_base_instance);
 }
 
 auto ListModel::documentToArray(QJsonDocument& obj) const -> QJsonArray

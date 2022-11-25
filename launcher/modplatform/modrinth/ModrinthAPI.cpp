@@ -37,21 +37,24 @@ auto ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_format
 
 auto ModrinthAPI::latestVersion(QString hash,
                                 QString hash_format,
-                                std::list<Version> mcVersions,
-                                ModLoaderTypes loaders,
+                                std::optional<std::list<Version>> mcVersions,
+                                std::optional<ModLoaderTypes> loaders,
                                 QByteArray* response) -> NetJob::Ptr
 {
     auto* netJob = new NetJob(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
 
     QJsonObject body_obj;
 
-    Json::writeStringList(body_obj, "loaders", getModLoaderStrings(loaders));
+    if (loaders.has_value())
+        Json::writeStringList(body_obj, "loaders", getModLoaderStrings(loaders.value()));
 
-    QStringList game_versions;
-    for (auto& ver : mcVersions) {
-        game_versions.append(ver.toString());
+    if (mcVersions.has_value()) {
+        QStringList game_versions;
+        for (auto& ver : mcVersions.value()) {
+            game_versions.append(ver.toString());
+        }
+        Json::writeStringList(body_obj, "game_versions", game_versions);
     }
-    Json::writeStringList(body_obj, "game_versions", game_versions);
 
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
@@ -66,8 +69,8 @@ auto ModrinthAPI::latestVersion(QString hash,
 
 auto ModrinthAPI::latestVersions(const QStringList& hashes,
                                  QString hash_format,
-                                 std::list<Version> mcVersions,
-                                 ModLoaderTypes loaders,
+                                 std::optional<std::list<Version>> mcVersions,
+                                 std::optional<ModLoaderTypes> loaders,
                                  QByteArray* response) -> NetJob::Ptr
 {
     auto* netJob = new NetJob(QString("Modrinth::GetLatestVersions"), APPLICATION->network());
@@ -77,13 +80,16 @@ auto ModrinthAPI::latestVersions(const QStringList& hashes,
     Json::writeStringList(body_obj, "hashes", hashes);
     Json::writeString(body_obj, "algorithm", hash_format);
 
-    Json::writeStringList(body_obj, "loaders", getModLoaderStrings(loaders));
+    if (loaders.has_value())
+        Json::writeStringList(body_obj, "loaders", getModLoaderStrings(loaders.value()));
 
-    QStringList game_versions;
-    for (auto& ver : mcVersions) {
-        game_versions.append(ver.toString());
+    if (mcVersions.has_value()) {
+        QStringList game_versions;
+        for (auto& ver : mcVersions.value()) {
+            game_versions.append(ver.toString());
+        }
+        Json::writeStringList(body_obj, "game_versions", game_versions);
     }
-    Json::writeStringList(body_obj, "game_versions", game_versions);
 
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
@@ -95,7 +101,7 @@ auto ModrinthAPI::latestVersions(const QStringList& hashes,
     return netJob;
 }
 
-auto ModrinthAPI::getProjects(QStringList addonIds, QByteArray* response) const -> NetJob*
+NetJob::Ptr ModrinthAPI::getProjects(QStringList addonIds, QByteArray* response) const
 {
     auto netJob = new NetJob(QString("Modrinth::GetProjects"), APPLICATION->network());
     auto searchUrl = getMultipleModInfoURL(addonIds);

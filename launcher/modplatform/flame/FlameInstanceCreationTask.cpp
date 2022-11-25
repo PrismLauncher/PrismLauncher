@@ -183,7 +183,7 @@ bool FlameCreationTask::updateInstance()
 
         QEventLoop loop;
 
-        connect(job, &NetJob::succeeded, this, [this, raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir] {
+        connect(job.get(), &NetJob::succeeded, this, [this, raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir] {
             // Parse the API response
             QJsonParseError parse_error{};
             auto doc = QJsonDocument::fromJson(*raw_response, &parse_error);
@@ -225,7 +225,7 @@ bool FlameCreationTask::updateInstance()
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
             }
         });
-        connect(job, &NetJob::finished, &loop, &QEventLoop::quit);
+        connect(job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
 
         m_process_update_file_info_job = job;
         job->start();

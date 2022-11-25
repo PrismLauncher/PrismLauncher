@@ -38,9 +38,9 @@ set(CORE_SOURCES
     InstanceImportTask.h
     InstanceImportTask.cpp
 
-    # Mod downloading task
-    ModDownloadTask.h
-    ModDownloadTask.cpp
+    # Resource downloading task
+    ResourceDownloadTask.h
+    ResourceDownloadTask.cpp
 
     # Use tracking separate from memory management
     Usable.h
@@ -473,7 +473,7 @@ set(API_SOURCES
     modplatform/ModIndex.h
     modplatform/ModIndex.cpp
 
-    modplatform/ModAPI.h
+    modplatform/ResourceAPI.h
 
     modplatform/EnsureMetadataTask.h
     modplatform/EnsureMetadataTask.cpp
@@ -484,8 +484,8 @@ set(API_SOURCES
     modplatform/flame/FlameAPI.cpp
     modplatform/modrinth/ModrinthAPI.h
     modplatform/modrinth/ModrinthAPI.cpp
-    modplatform/helpers/NetworkModAPI.h
-    modplatform/helpers/NetworkModAPI.cpp
+    modplatform/helpers/NetworkResourceAPI.h
+    modplatform/helpers/NetworkResourceAPI.cpp
     modplatform/helpers/HashUtils.h
     modplatform/helpers/HashUtils.cpp
     modplatform/helpers/OverrideUtils.h
@@ -771,6 +771,11 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/VanillaPage.cpp
     ui/pages/modplatform/VanillaPage.h
 
+    ui/pages/modplatform/ResourcePage.cpp
+    ui/pages/modplatform/ResourcePage.h
+    ui/pages/modplatform/ResourceModel.cpp
+    ui/pages/modplatform/ResourceModel.h
+
     ui/pages/modplatform/ModPage.cpp
     ui/pages/modplatform/ModPage.h
     ui/pages/modplatform/ModModel.cpp
@@ -803,10 +808,10 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/flame/FlameModel.h
     ui/pages/modplatform/flame/FlamePage.cpp
     ui/pages/modplatform/flame/FlamePage.h
-    ui/pages/modplatform/flame/FlameModModel.cpp
-    ui/pages/modplatform/flame/FlameModModel.h
-    ui/pages/modplatform/flame/FlameModPage.cpp
-    ui/pages/modplatform/flame/FlameModPage.h
+    ui/pages/modplatform/flame/FlameResourceModels.cpp
+    ui/pages/modplatform/flame/FlameResourceModels.h
+    ui/pages/modplatform/flame/FlameResourcePages.cpp
+    ui/pages/modplatform/flame/FlameResourcePages.h
 
     ui/pages/modplatform/modrinth/ModrinthPage.cpp
     ui/pages/modplatform/modrinth/ModrinthPage.h
@@ -821,10 +826,10 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/ImportPage.cpp
     ui/pages/modplatform/ImportPage.h
 
-    ui/pages/modplatform/modrinth/ModrinthModModel.cpp
-    ui/pages/modplatform/modrinth/ModrinthModModel.h
-    ui/pages/modplatform/modrinth/ModrinthModPage.cpp
-    ui/pages/modplatform/modrinth/ModrinthModPage.h
+    ui/pages/modplatform/modrinth/ModrinthResourceModels.cpp
+    ui/pages/modplatform/modrinth/ModrinthResourceModels.h
+    ui/pages/modplatform/modrinth/ModrinthResourcePages.cpp
+    ui/pages/modplatform/modrinth/ModrinthResourcePages.h
 
     # GUI - dialogs
     ui/dialogs/AboutDialog.cpp
@@ -869,6 +874,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/VersionSelectDialog.h
     ui/dialogs/SkinUploadDialog.cpp
     ui/dialogs/SkinUploadDialog.h
+    ui/dialogs/ResourceDownloadDialog.cpp
+    ui/dialogs/ResourceDownloadDialog.h
     ui/dialogs/ModDownloadDialog.cpp
     ui/dialogs/ModDownloadDialog.h
     ui/dialogs/ScrollMessageBox.cpp
@@ -965,7 +972,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/atlauncher/AtlOptionalModDialog.ui
     ui/pages/modplatform/atlauncher/AtlPage.ui
     ui/pages/modplatform/VanillaPage.ui
-    ui/pages/modplatform/ModPage.ui
+    ui/pages/modplatform/ResourcePage.ui
     ui/pages/modplatform/flame/FlamePage.ui
     ui/pages/modplatform/legacy_ftb/Page.ui
     ui/pages/modplatform/ImportPage.ui

@@ -19,60 +19,29 @@
 
 #pragma once
 
-#include <QDialog>
-#include <QVBoxLayout>
-
-#include "ModDownloadTask.h"
 #include "minecraft/mod/ModFolderModel.h"
-#include "ui/pages/BasePageProvider.h"
 
-namespace Ui
-{
-class ModDownloadDialog;
-}
+#include "ui/dialogs/ResourceDownloadDialog.h"
 
-class PageContainer;
 class QDialogButtonBox;
-class ModPage;
-class ModrinthModPage;
 
-class ModDownloadDialog final : public QDialog, public BasePageProvider
+class ModDownloadDialog final : public ResourceDownloadDialog
 {
     Q_OBJECT
 
    public:
-    explicit ModDownloadDialog(const std::shared_ptr<ModFolderModel>& mods, QWidget* parent, BaseInstance* instance);
+    explicit ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModFolderModel>& mods, BaseInstance* instance);
     ~ModDownloadDialog() override = default;
 
-    QString dialogTitle() override;
+    //: String that gets appended to the mod download dialog title ("Download " + resourcesString())
+    [[nodiscard]] QString resourceString() const override { return tr("mods"); }
+
     QList<BasePage*> getPages() override;
 
-    void addSelectedMod(QString name = QString(), ModDownloadTask* task = nullptr);
-    void removeSelectedMod(QString name = QString());
-    bool isModSelected(QString name, QString filename) const;
-    bool isModSelected(QString name) const;
-
-    const QList<ModDownloadTask*> getTasks();
-    const std::shared_ptr<ModFolderModel>& mods;
-
-    bool selectPage(QString pageId);
-    ModPage* getSelectedPage();
-
    public slots:
-    void confirm();
     void accept() override;
     void reject() override;
 
-   private slots:
-    void selectedPageChanged(BasePage* previous, BasePage* selected);
-
    private:
-    Ui::ModDownloadDialog* ui = nullptr;
-    PageContainer* m_container = nullptr;
-    QDialogButtonBox* m_buttons = nullptr;
-    QVBoxLayout* m_verticalLayout = nullptr;
-    ModPage* m_selectedPage = nullptr;
-
-    QHash<QString, ModDownloadTask*> modTask;
     BaseInstance* m_instance;
 };

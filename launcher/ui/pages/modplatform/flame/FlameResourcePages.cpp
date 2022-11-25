@@ -34,37 +34,37 @@
  *      limitations under the License.
  */
 
-#include "FlameModPage.h"
-#include "ui_ModPage.h"
+#include "FlameResourcePages.h"
+#include "ui_ResourcePage.h"
 
-#include "FlameModModel.h"
+#include "FlameResourceModels.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
-FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance)
-    : ModPage(dialog, instance, new FlameAPI())
+FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance)
+    : ModPage(dialog, instance)
 {
-    listModel = new FlameMod::ListModel(this);
-    ui->packView->setModel(listModel);
+    m_model = new FlameMod::ListModel(this);
+    m_ui->packView->setModel(m_model);
 
     // index is used to set the sorting with the flame api
-    ui->sortByBox->addItem(tr("Sort by Featured"));
-    ui->sortByBox->addItem(tr("Sort by Popularity"));
-    ui->sortByBox->addItem(tr("Sort by Last Updated"));
-    ui->sortByBox->addItem(tr("Sort by Name"));
-    ui->sortByBox->addItem(tr("Sort by Author"));
-    ui->sortByBox->addItem(tr("Sort by Downloads"));
+    m_ui->sortByBox->addItem(tr("Sort by Featured"));
+    m_ui->sortByBox->addItem(tr("Sort by Popularity"));
+    m_ui->sortByBox->addItem(tr("Sort by Last Updated"));
+    m_ui->sortByBox->addItem(tr("Sort by Name"));
+    m_ui->sortByBox->addItem(tr("Sort by Author"));
+    m_ui->sortByBox->addItem(tr("Sort by Downloads"));
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's contructor...
-    connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
-    connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameModPage::onSelectionChanged);
-    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameModPage::onVersionSelectionChanged);
-    connect(ui->modSelectionButton, &QPushButton::clicked, this, &FlameModPage::onModSelected);
+    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameModPage::onSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameModPage::onVersionSelectionChanged);
+    connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameModPage::onResourceSelected);
 
-    ui->packDescription->setMetaEntry(metaEntryBase());
+    m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
-auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders) const -> bool
+auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders) const -> bool
 {
     Q_UNUSED(loaders);
     return ver.mcVersion.contains(mineVer) && !ver.downloadUrl.isEmpty();

@@ -28,17 +28,16 @@ class QIODevice;
 
 namespace ModPlatform {
 
-enum class Provider {
-    MODRINTH,
-    FLAME
-};
+enum class ResourceProvider { MODRINTH, FLAME };
+
+enum class ResourceType { MOD, RESOURCE_PACK };
 
 class ProviderCapabilities {
    public:
-    auto name(Provider) -> const char*;
-    auto readableName(Provider) -> QString;
-    auto hashType(Provider) -> QStringList;
-    auto hash(Provider, QIODevice*, QString type = "") -> QString;
+    auto name(ResourceProvider) -> const char*;
+    auto readableName(ResourceProvider) -> QString;
+    auto hashType(ResourceProvider) -> QStringList;
+    auto hash(ResourceProvider, QIODevice*, QString type = "") -> QString;
 };
 
 struct ModpackAuthor {
@@ -81,7 +80,7 @@ struct ExtraPackData {
 
 struct IndexedPack {
     QVariant addonId;
-    Provider provider;
+    ResourceProvider provider;
     QString name;
     QString slug;
     QString description;
@@ -101,4 +100,4 @@ struct IndexedPack {
 }  // namespace ModPlatform
 
 Q_DECLARE_METATYPE(ModPlatform::IndexedPack)
-Q_DECLARE_METATYPE(ModPlatform::Provider)
+Q_DECLARE_METATYPE(ModPlatform::ResourceProvider)

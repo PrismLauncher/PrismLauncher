@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,32 +36,36 @@
 
 #pragma once
 
-#include "modplatform/ModAPI.h"
+#include "Application.h"
+
+#include "modplatform/ResourceAPI.h"
+
 #include "ui/pages/modplatform/ModPage.h"
 
-#include "modplatform/modrinth/ModrinthAPI.h"
-
-class ModrinthModPage : public ModPage {
+class FlameModPage : public ModPage {
     Q_OBJECT
 
    public:
-    static ModrinthModPage* create(ModDownloadDialog* dialog, BaseInstance* instance)
+    static FlameModPage* create(ModDownloadDialog* dialog, BaseInstance& instance)
     {
-        return ModPage::create<ModrinthModPage>(dialog, instance);
+        return ModPage::create<FlameModPage>(dialog, instance);
     }
 
-    ModrinthModPage(ModDownloadDialog* dialog, BaseInstance* instance);
-    ~ModrinthModPage() override = default;
+    FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance);
+    ~FlameModPage() override = default;
 
-    inline auto displayName() const -> QString override { return "Modrinth"; }
-    inline auto icon() const -> QIcon override { return APPLICATION->getThemedIcon("modrinth"); }
-    inline auto id() const -> QString override { return "modrinth"; }
+    inline auto displayName() const -> QString override { return "CurseForge"; }
+    inline auto icon() const -> QIcon override { return APPLICATION->getThemedIcon("flame"); }
+    inline auto id() const -> QString override { return "curseforge"; }
     inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
-    inline auto debugName() const -> QString override { return "Modrinth"; }
-    inline auto metaEntryBase() const -> QString override { return "ModrinthPacks"; };
+    inline auto debugName() const -> QString override { return "Flame"; }
+    inline auto metaEntryBase() const -> QString override { return "FlameMods"; };
 
-    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders = ModAPI::Unspecified) const -> bool override;
+    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const -> bool override;
+    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
 
     auto shouldDisplay() const -> bool override;
+
+    void openUrl(const QUrl& url) override;
 };

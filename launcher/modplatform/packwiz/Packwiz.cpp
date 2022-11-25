@@ -97,7 +97,7 @@ auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Mo
     mod.name = mod_pack.name;
     mod.filename = mod_version.fileName;
 
-    if (mod_pack.provider == ModPlatform::Provider::FLAME) {
+    if (mod_pack.provider == ModPlatform::ResourceProvider::FLAME) {
         mod.mode = "metadata:curseforge";
     } else {
         mod.mode = "url";
@@ -176,11 +176,11 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
         in_stream << QString("\n[update]\n");
         in_stream << QString("[update.%1]\n").arg(ProviderCaps.name(mod.provider));
         switch (mod.provider) {
-            case (ModPlatform::Provider::FLAME):
+            case (ModPlatform::ResourceProvider::FLAME):
                 in_stream << QString("file-id = %1\n").arg(mod.file_id.toString());
                 in_stream << QString("project-id = %1\n").arg(mod.project_id.toString());
                 break;
-            case (ModPlatform::Provider::MODRINTH):
+            case (ModPlatform::ResourceProvider::MODRINTH):
                 addToStream("mod-id", mod.mod_id().toString());
                 addToStream("version", mod.version().toString());
                 break;
@@ -273,7 +273,7 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
     }
 
     {  // [update] info
-        using Provider = ModPlatform::Provider;
+        using Provider = ModPlatform::ResourceProvider;
 
         auto update_table = table["update"];
         if (!update_table || !update_table.is_table()) {

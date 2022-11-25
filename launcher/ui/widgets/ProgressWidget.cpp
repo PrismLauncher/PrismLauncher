@@ -39,7 +39,7 @@ void ProgressWidget::progressFormat(QString format)
         m_bar->setFormat(format);
 }
 
-void ProgressWidget::watch(Task* task)
+void ProgressWidget::watch(const Task* task)
 {
     if (!task)
         return;
@@ -57,11 +57,11 @@ void ProgressWidget::watch(Task* task)
     show();
 }
 
-void ProgressWidget::start(Task* task)
+void ProgressWidget::start(const Task* task)
 {
     watch(task);
     if (!m_task->isRunning())
-        QMetaObject::invokeMethod(m_task, "start", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(const_cast<Task*>(m_task), "start", Qt::QueuedConnection);
 }
 
 bool ProgressWidget::exec(std::shared_ptr<Task> task)

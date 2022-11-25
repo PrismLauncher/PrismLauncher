@@ -33,48 +33,52 @@
  *      limitations under the License.
  */
 
-#include "ModrinthModPage.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
-#include "ui_ModPage.h"
+#include "ModrinthResourcePages.h"
+#include "ui_ResourcePage.h"
 
-#include "ModrinthModModel.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
+
+#include "ModrinthResourceModels.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
-ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance* instance)
-    : ModPage(dialog, instance, new ModrinthAPI())
+ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instance)
+    : ModPage(dialog, instance)
 {
-    listModel = new Modrinth::ListModel(this);
-    ui->packView->setModel(listModel);
+    m_model = new Modrinth::ListModel(this);
+    m_ui->packView->setModel(m_model);
 
     // index is used to set the sorting with the modrinth api
-    ui->sortByBox->addItem(tr("Sort by Relevance"));
-    ui->sortByBox->addItem(tr("Sort by Downloads"));
-    ui->sortByBox->addItem(tr("Sort by Follows"));
-    ui->sortByBox->addItem(tr("Sort by Last Updated"));
-    ui->sortByBox->addItem(tr("Sort by Newest"));
+    m_ui->sortByBox->addItem(tr("Sort by Relevance"));
+    m_ui->sortByBox->addItem(tr("Sort by Downloads"));
+    m_ui->sortByBox->addItem(tr("Sort by Follows"));
+    m_ui->sortByBox->addItem(tr("Sort by Last Updated"));
+    m_ui->sortByBox->addItem(tr("Sort by Newest"));
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's constructor...
-    connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
-    connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthModPage::onSelectionChanged);
-    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthModPage::onVersionSelectionChanged);
-    connect(ui->modSelectionButton, &QPushButton::clicked, this, &ModrinthModPage::onModSelected);
+    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthModPage::onSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthModPage::onVersionSelectionChanged);
+    connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthModPage::onResourceSelected);
 
-    ui->packDescription->setMetaEntry(metaEntryBase());
+    m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
-auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders) const -> bool
+auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders) const -> bool
 {
-    auto loaderStrings = ModrinthAPI::getModLoaderStrings(loaders);
+    auto loaderCompatible = !loaders.has_value();
 
-    auto loaderCompatible = false;
-    for (auto remoteLoader : ver.loaders)
-    {
-        if (loaderStrings.contains(remoteLoader)) {
-            loaderCompatible = true;
-            break;
+    if (!loaderCompatible) {
+        auto loaderStrings = ModrinthAPI::getModLoaderStrings(loaders.value());
+        for (auto remoteLoader : ver.loaders)
+        {
+            if (loaderStrings.contains(remoteLoader)) {
+                loaderCompatible = true;
+                break;
+            }
         }
     }
+
     return ver.mcVersion.contains(mineVer) && loaderCompatible;
 }
 
@@ -82,3 +86,4 @@ auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString 
 // other mod providers start loading before being selected, at least with
 // my Qt, so we need to implement this in every derived class...
 auto ModrinthModPage::shouldDisplay() const -> bool { return true; }
+

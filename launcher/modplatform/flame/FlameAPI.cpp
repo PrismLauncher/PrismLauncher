@@ -106,13 +106,19 @@ auto FlameAPI::getModDescription(int modId) -> QString
 
 auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion
 {
+    auto versions_url_optional = getVersionsURL(args);
+    if (!versions_url_optional.has_value())
+        return {};
+
+    auto versions_url = versions_url_optional.value();
+
     QEventLoop loop;
 
     auto netJob = new NetJob(QString("Flame::GetLatestVersion(%1)").arg(args.addonId), APPLICATION->network());
     auto response = new QByteArray();
     ModPlatform::IndexedVersion ver;
 
-    netJob->addNetAction(Net::Download::makeByteArray(getVersionsURL(args), response));
+    netJob->addNetAction(Net::Download::makeByteArray(versions_url, response));
 
     QObject::connect(netJob, &NetJob::succeeded, [response, args, &ver] {
         QJsonParseError parse_error{};
@@ -161,7 +167,7 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
     return ver;
 }
 
-auto FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const -> NetJob*
+NetJob::Ptr FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const
 {
     auto* netJob = new NetJob(QString("Flame::GetProjects"), APPLICATION->network());
 
@@ -178,13 +184,13 @@ auto FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const -> 
 
     netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/mods"), response, body_raw));
 
-    QObject::connect(netJob, &NetJob::finished, [response, netJob] { delete response; netJob->deleteLater(); });
+    QObject::connect(netJob, &NetJob::finished, [response] { delete response; });
     QObject::connect(netJob, &NetJob::failed, [body_raw] { qDebug() << body_raw; });
 
     return netJob;
 }
 
-auto FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response) const -> NetJob*
+NetJob::Ptr FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response) const
 {
     auto* netJob = new NetJob(QString("Flame::GetFiles"), APPLICATION->network());
 
@@ -201,7 +207,7 @@ auto FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response) const 
 
     netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/mods/files"), response, body_raw));
 
-    QObject::connect(netJob, &NetJob::finished, [response, netJob] { delete response; netJob->deleteLater(); });
+    QObject::connect(netJob, &NetJob::finished, [response] { delete response; });
     QObject::connect(netJob, &NetJob::failed, [body_raw] { qDebug() << body_raw; });
 
     return netJob;
