@@ -272,7 +272,8 @@ void ModrinthManagedPackPage::update()
     auto version = m_pack.versions.at(index);
 
     QMap<QString, QString> extra_info;
-    extra_info.insert("pack_id", m_pack.id);
+    // NOTE: Don't use 'm_pack.id' here, since we didn't completely parse all the metadata for the pack, including this field.
+    extra_info.insert("pack_id", m_inst->getManagedPackID());
     extra_info.insert("pack_version_id", version.id);
 
     auto extracted = new InstanceImportTask(version.download_url, this, std::move(extra_info));
