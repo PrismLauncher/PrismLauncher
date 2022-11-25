@@ -38,7 +38,8 @@ WideBar::WideBar(const QString& title, QWidget* parent) : QToolBar(title, parent
     setFloatable(false);
     setMovable(false);
 
-    m_bar_menu = std::make_unique<QMenu>(this);
+    setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+    connect(this, &QToolBar::customContextMenuRequested, this, &WideBar::showVisibilityMenu);
 }
 
 WideBar::WideBar(QWidget* parent) : QToolBar(parent)
@@ -46,7 +47,8 @@ WideBar::WideBar(QWidget* parent) : QToolBar(parent)
     setFloatable(false);
     setMovable(false);
 
-    m_bar_menu = std::make_unique<QMenu>(this);
+    setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+    connect(this, &QToolBar::customContextMenuRequested, this, &WideBar::showVisibilityMenu);
 }
 
 void WideBar::addAction(QAction* action)
@@ -167,8 +169,11 @@ static void copyAction(QAction* from, QAction* to)
     to->setToolTip(from->toolTip());
 }
 
-void WideBar::contextMenuEvent(QContextMenuEvent* event)
+void WideBar::showVisibilityMenu(QPoint const& position)
 {
+    if (!m_bar_menu)
+        m_bar_menu = std::make_unique<QMenu>(this);
+
     if (m_menu_state == MenuState::Dirty) {
         for (auto* old_action : m_bar_menu->actions())
             old_action->deleteLater();
@@ -198,7 +203,7 @@ void WideBar::contextMenuEvent(QContextMenuEvent* event)
         m_menu_state = MenuState::Fresh;
     }
 
-    m_bar_menu->popup(event->globalPos());
+    m_bar_menu->popup(mapToGlobal(position));
 }
 
 [[nodiscard]] QByteArray WideBar::getVisibilityState() const

@@ -24,7 +24,7 @@ class WideBar : public QToolBar {
     void insertActionAfter(QAction* after, QAction* action);
 
     QMenu* createContextMenu(QWidget* parent = nullptr, const QString& title = QString());
-    void contextMenuEvent(QContextMenuEvent*) override;
+    void showVisibilityMenu(const QPoint&);
 
     // Ideally we would use a QBitArray for this, but it doesn't support string conversion,
     // so using it in settings is very messy.
