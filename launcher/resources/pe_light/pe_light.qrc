@@ -39,5 +39,6 @@
         <file>scalable/export.svg</file>
         <file>scalable/rename.svg</file>
         <file>scalable/launch.svg</file>
+        <file>scalable/shortcut.svg</file>
     </qresource>
 </RCC>
