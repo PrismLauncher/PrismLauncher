@@ -208,7 +208,7 @@ void FlamePage::suggestCurrent()
     extra_info.insert("pack_id", QString::number(current.addonId));
     extra_info.insert("pack_version_id", QString::number(version.fileId));
 
-    dialog->setSuggestedPack(current.name, new InstanceImportTask(version.downloadUrl, this, extra_info));
+    dialog->setSuggestedPack(current.name, new InstanceImportTask(version.downloadUrl, this, std::move(extra_info)));
     QString editedLogoName;
     editedLogoName = "curseforge_" + current.logoName.section(".", 0, 0);
     listModel->getLogo(current.logoName, current.logoUrl,

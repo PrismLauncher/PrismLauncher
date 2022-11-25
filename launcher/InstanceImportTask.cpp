@@ -55,8 +55,8 @@
 
 #include <quazip/quazipdir.h>
 
-InstanceImportTask::InstanceImportTask(const QUrl sourceUrl, QWidget* parent, QMap<QString, QString> extra_info)
-    : m_sourceUrl(sourceUrl), m_extra_info(std::move(extra_info)), m_parent(parent)
+InstanceImportTask::InstanceImportTask(const QUrl sourceUrl, QWidget* parent, QMap<QString, QString>&& extra_info)
+    : m_sourceUrl(sourceUrl), m_extra_info(extra_info), m_parent(parent)
 {}
 
 bool InstanceImportTask::abort()

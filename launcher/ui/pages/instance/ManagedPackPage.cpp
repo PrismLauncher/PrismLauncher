@@ -275,7 +275,7 @@ void ModrinthManagedPackPage::update()
     extra_info.insert("pack_id", m_pack.id);
     extra_info.insert("pack_version_id", version.id);
 
-    auto extracted = new InstanceImportTask(version.download_url, this, extra_info);
+    auto extracted = new InstanceImportTask(version.download_url, this, std::move(extra_info));
 
     InstanceName inst_name(m_inst->getManagedPackName(), version.version);
     inst_name.setName(m_inst->name().replace(m_inst->getManagedPackVersionName(), version.version));
@@ -413,7 +413,7 @@ void FlameManagedPackPage::update()
     extra_info.insert("pack_id", m_inst->getManagedPackID());
     extra_info.insert("pack_version_id", QString::number(version.fileId));
 
-    auto extracted = new InstanceImportTask(version.downloadUrl, this, extra_info);
+    auto extracted = new InstanceImportTask(version.downloadUrl, this, std::move(extra_info));
 
     InstanceName inst_name(m_inst->getManagedPackName(), version.version);
     inst_name.setName(m_inst->name().replace(m_inst->getManagedPackVersionName(), version.version));
