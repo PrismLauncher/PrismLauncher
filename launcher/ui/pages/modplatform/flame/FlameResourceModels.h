@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FlameModPage.h"
+#include "modplatform/flame/FlameAPI.h"
 
 namespace FlameMod {
 
@@ -8,7 +8,7 @@ class ListModel : public ModPlatform::ListModel {
     Q_OBJECT
 
    public:
-    ListModel(FlameModPage* parent) : ModPlatform::ListModel(parent) {}
+    ListModel(FlameModPage* parent) : ModPlatform::ListModel(parent, new FlameAPI) {}
     ~ListModel() override = default;
 
    private:

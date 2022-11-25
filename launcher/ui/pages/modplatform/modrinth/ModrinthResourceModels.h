@@ -18,7 +18,11 @@
 
 #pragma once
 
-#include "ModrinthModPage.h"
+#include "ui/pages/modplatform/ModModel.h"
+
+#include "ui/pages/modplatform/modrinth/ModrinthResourcePages.h"
+
+#include "modplatform/modrinth/ModrinthAPI.h"
 
 namespace Modrinth {
 
@@ -26,7 +30,7 @@ class ListModel : public ModPlatform::ListModel {
     Q_OBJECT
 
    public:
-    ListModel(ModrinthModPage* parent) : ModPlatform::ListModel(parent){};
+    ListModel(ModrinthModPage* parent) : ModPlatform::ListModel(parent, new ModrinthAPI){};
     ~ListModel() override = default;
 
    private:
@@ -42,3 +46,4 @@ class ListModel : public ModPlatform::ListModel {
 };
 
 }  // namespace Modrinth
+

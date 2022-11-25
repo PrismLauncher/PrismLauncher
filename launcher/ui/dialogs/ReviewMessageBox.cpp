@@ -25,7 +25,7 @@ auto ReviewMessageBox::create(QWidget* parent, QString&& title, QString&& icon) 
     return new ReviewMessageBox(parent, title, icon);
 }
 
-void ReviewMessageBox::appendMod(ModInformation&& info)
+void ReviewMessageBox::appendResource(ResourceInformation&& info)
 {
     auto itemTop = new QTreeWidgetItem(ui->modTreeWidget);
     itemTop->setCheckState(0, Qt::CheckState::Checked);
@@ -39,7 +39,7 @@ void ReviewMessageBox::appendMod(ModInformation&& info)
     ui->modTreeWidget->addTopLevelItem(itemTop);
 }
 
-auto ReviewMessageBox::deselectedMods() -> QStringList
+auto ReviewMessageBox::deselectedResources() -> QStringList
 {
     QStringList list;
 

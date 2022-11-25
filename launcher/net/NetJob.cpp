@@ -38,10 +38,9 @@
 
 auto NetJob::addNetAction(NetAction::Ptr action) -> bool
 {
-    action->m_index_within_job = m_queue.size();
-    m_queue.append(action);
-
     action->setNetwork(m_network);
+
+    addTask(action);
 
     return true;
 }

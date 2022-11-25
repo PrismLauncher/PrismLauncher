@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ModPage</class>
- <widget class="QWidget" name="ModPage">
+ <class>ResourcePage</class>
+ <widget class="QWidget" name="ResourcePage">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -51,7 +51,7 @@
    <item row="0" column="0">
     <widget class="QLineEdit" name="searchEdit">
      <property name="placeholderText">
-      <string>Search for mods...</string>
+      <string>Search for resources...</string>
      </property>
     </widget>
    </item>
@@ -74,16 +74,16 @@
       <widget class="QComboBox" name="sortByBox"/>
      </item>
      <item row="1" column="2">
-      <widget class="QPushButton" name="modSelectionButton">
+      <widget class="QPushButton" name="resourceSelectionButton">
        <property name="text">
-        <string>Select mod for download</string>
+        <string>Select resource for download</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item row="0" column="1">
-    <widget class="QPushButton" name="modFilterButton">
+    <widget class="QPushButton" name="resourceFilterButton">
      <property name="text">
       <string>Filter options</string>
      </property>

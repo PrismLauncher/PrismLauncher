@@ -16,8 +16,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ModrinthModModel.h"
+#include "ModrinthResourceModels.h"
 
+#include "ui/pages/modplatform/modrinth/ModrinthResourcePages.h"
+
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
 namespace Modrinth {
@@ -37,7 +40,7 @@ void ListModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
 
 void ListModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), m_parent->m_instance);
+    Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_associated_page->m_base_instance);
 }
 
 auto ListModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
@@ -46,3 +49,5 @@ auto ListModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 }
 
 }  // namespace Modrinth
+
+

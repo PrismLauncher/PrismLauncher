@@ -59,7 +59,7 @@
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/ModFolderModel.h"
 
-#include "modplatform/ModAPI.h"
+#include "modplatform/ResourceAPI.h"
 
 #include "Version.h"
 #include "tasks/ConcurrentTask.h"
@@ -153,12 +153,12 @@ void ModFolderPage::installMods()
         return;  // this is a null instance or a legacy instance
 
     auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
-    if (profile->getModLoaders() == ModAPI::Unspecified) {
+    if (!profile->getModLoaders().has_value()) {
         QMessageBox::critical(this, tr("Error"), tr("Please install a mod loader first!"));
         return;
     }
 
-    ModDownloadDialog mdownload(m_model, this, m_instance);
+    ModDownloadDialog mdownload(this, m_model, m_instance);
     if (mdownload.exec()) {
         ConcurrentTask* tasks = new ConcurrentTask(this);
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
