@@ -1,0 +1,15 @@
+<svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+    <style
+        type="text/css"
+        id="current-color-scheme">
+        .ColorScheme-Text {
+            color:#232629;
+        }
+    </style>
+    <rect fill="#7f8c8d" height="14" ry="2" width="22" y="4"/>
+    <path d="M1.818 4A1.815 1.815 0 0 0 0 5.818v10.364C0 17.189.811 18 1.818 18h18.364A1.815 1.815 0 0 0 22 16.182V5.818A1.815 1.815 0 0 0 20.182 4zM2 5h18c.554 0 1 .446 1 1v10c0 .554-.446 1-1 1H2c-.554 0-1-.446-1-1V6c0-.554.446-1 1-1z" style="fill:currentColor;fill-opacity:0.6;stroke:none" class="ColorScheme-Text"/>
+    <g fill="#fff">
+        <path d="M4 7c-.554 0-1 .446-1 1v6c0 .554.446 1 1 1h5c.554 0 1-.446 1-1V8c0-.554-.446-1-1-1zm0 1h5v6H4zM13 7c-.554 0-1 .446-1 1v6c0 .554.446 1 1 1h5c.554 0 1-.446 1-1V8c0-.554-.446-1-1-1zm0 1h5v6h-5z"/>
+        <rect height="3" ry="1" width="6" x="8" y="9.5"/>
+    </g>
+</svg>
