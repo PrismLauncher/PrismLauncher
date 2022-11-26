@@ -582,6 +582,8 @@ SET(LAUNCHER_SOURCES
     UpdateController.h
     ApplicationMessage.h
     ApplicationMessage.cpp
+    SysInfo.h
+    SysInfo.cpp
 
     # GUI - general utilities
     DesktopServices.h
@@ -888,6 +890,8 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/InstanceDelegate.h
     ui/instanceview/VisualGroup.cpp
     ui/instanceview/VisualGroup.h
+    JavaDownloader.cpp
+    JavaDownloader.h
 )
 
 if(WIN32)

@@ -48,10 +48,11 @@
 #include "java/JavaUtils.h"
 #include "java/JavaInstallList.h"
 
-#include "settings/SettingsObject.h"
 #include <FileSystem.h>
-#include "Application.h"
 #include <sys.h>
+#include "Application.h"
+#include "JavaDownloader.h"
+#include "settings/SettingsObject.h"
 
 JavaPage::JavaPage(QWidget *parent) : QWidget(parent), ui(new Ui::JavaPage)
 {
@@ -175,6 +176,11 @@ void JavaPage::on_javaTestBtn_clicked()
         ui->minMemSpinBox->value(), ui->maxMemSpinBox->value(), ui->permGenSpinBox->value()));
     connect(checker.get(), SIGNAL(finished()), SLOT(checkerFinished()));
     checker->run();
+}
+
+void JavaPage::on_javaDownloadBtn_clicked()
+{
+   JavaDownloader::showPrompts(this);
 }
 
 void JavaPage::checkerFinished()
