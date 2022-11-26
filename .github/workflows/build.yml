@@ -38,17 +38,17 @@ jobs:
             qt_tools: ''
 
           - os: windows-2022
-            name: "Windows-Legacy"
+            name: "Windows-MinGW-w64-Legacy"
             msystem: clang32
             qt_ver: 5
 
           - os: windows-2022
-            name: "Windows"
+            name: "Windows-MinGW-w64"
             msystem: clang64
             qt_ver: 6
 
           - os: windows-2022
-            name: "Windows-Legacy-MSVC"
+            name: "Windows-MSVC-Legacy"
             msystem: ''
             architecture: 'win32'
             vcvars_arch: 'amd64_x86'
