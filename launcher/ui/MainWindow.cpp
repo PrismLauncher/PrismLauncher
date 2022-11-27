@@ -1801,39 +1801,37 @@ void MainWindow::on_actionAddInstance_triggered()
 
 void MainWindow::droppedURLs(QList<QUrl> urls)
 {
+    // NOTE: This loop only processes one dropped file!
     for (auto& url : urls) {
-        if (url.isLocalFile()) {
-            auto localFileName = url.toLocalFile();
-            QFileInfo localFileInfo(localFileName);
-
-            ImportResourcePackDialog dlg(this);
-
-            if (ResourcePackUtils::validate(localFileInfo)) {
-                dlg.exec();
-
-                if (dlg.result() == QDialog::Accepted) {
-                    qDebug() << "Selected instance to import resource pack into: " << dlg.selectedInstanceKey;
-                    auto instance = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
-                    auto instanceButBuffed = std::dynamic_pointer_cast<MinecraftInstance>(instance);
-                    instanceButBuffed->resourcePackList()->installResource(localFileName);
-                }
-            } else if (TexturePackUtils::validate(localFileInfo)) {
-                dlg.exec();
-
-                if (dlg.result() == QDialog::Accepted) {
-                    qDebug() << "Selected instance to import texture pack into: " << dlg.selectedInstanceKey;
-                    auto instance = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
-                    auto instanceButBuffed = std::dynamic_pointer_cast<MinecraftInstance>(instance);
-                    instanceButBuffed->texturePackList()->installResource(localFileName);
-                }
-            } else {
-                addInstance(localFileName);
-            }
-        } else {
+        if (!url.isLocalFile()) {  // probably instance/modpack
             addInstance(url.toString());
+            break;
         }
 
-        // Only process one dropped file...
+        auto localFileName = url.toLocalFile();
+        QFileInfo localFileInfo(localFileName);
+
+        bool isResourcePack = ResourcePackUtils::validate(localFileInfo);
+        bool isTexturePack = TexturePackUtils::validate(localFileInfo);
+
+        if (!isResourcePack && !isTexturePack) {  // probably instance/modpack
+            addInstance(localFileName);
+            break;
+        }
+
+        ImportResourcePackDialog dlg(this);
+
+        if (dlg.exec() != QDialog::Accepted)
+            break;
+
+        qDebug() << "Adding resource/texture pack" << localFileName << "to" << dlg.selectedInstanceKey;
+
+        auto inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
+        auto minecraftInst = std::dynamic_pointer_cast<MinecraftInstance>(inst);
+        if (isResourcePack)
+            minecraftInst->resourcePackList()->installResource(localFileName);
+        else if (isTexturePack)
+            minecraftInst->texturePackList()->installResource(localFileName);
         break;
     }
 }
