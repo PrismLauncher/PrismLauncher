@@ -6,9 +6,6 @@
         <!-- REDDIT logo icon, needs reddit license! -->
         <file>scalable/reddit-alien.svg</file>
 
-        <!-- Icon for CurseForge. CC0 -->
-        <file alias="128x128/flame.png">scalable/instances/flame.svg</file>
-
         <!-- launcher settings page -->
         <file>scalable/launcher.svg</file>
 
@@ -254,7 +251,8 @@
         <!-- discord logo icon thing. from discord. traced from bitmap -->
         <file>scalable/discord.svg</file>
 
-		<!-- flat instance icons CC BY-SA 4.0, Santiago Cézar -->
+        <!-- flat instance icons CC BY-SA 4.0, Santiago Cézar -->
+        <file alias="128x128/flame.png">scalable/instances/flame.svg</file>
         <file>scalable/instances/chicken.svg</file>
         <file>scalable/instances/creeper.svg</file>
         <file>scalable/instances/enderpearl.svg</file>
@@ -285,7 +283,7 @@
         <!-- instance icons -->
         <file>32x32/instances/chicken_legacy.png</file>
         <file>128x128/instances/chicken_legacy.png</file>
-        
+
         <file>32x32/instances/creeper_legacy.png</file>
         <file>128x128/instances/creeper_legacy.png</file>
 
