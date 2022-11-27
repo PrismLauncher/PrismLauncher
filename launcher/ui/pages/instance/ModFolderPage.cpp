@@ -108,13 +108,13 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
             disconnect(mods.get(), &ModFolderModel::updateFinished, this, 0);
         });
 
+        connect(m_instance, &BaseInstance::runningStatusChanged, this, &ModFolderPage::runningStateChanged);
         ModFolderPage::runningStateChanged(m_instance && m_instance->isRunning());
     }
 }
 
 void ModFolderPage::runningStateChanged(bool running)
 {
-    ExternalResourcesPage::runningStateChanged(running);
     ui->actionDownloadItem->setEnabled(!running);
     ui->actionUpdateItem->setEnabled(!running);
     ui->actionAddItem->setEnabled(!running);

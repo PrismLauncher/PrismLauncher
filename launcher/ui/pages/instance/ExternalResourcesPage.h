@@ -47,7 +47,6 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
    protected slots:
     void itemActivated(const QModelIndex& index);
     void filterTextChanged(const QString& newContents);
-    virtual void runningStateChanged(bool running);
 
     virtual void addItem();
     virtual void removeItem();
