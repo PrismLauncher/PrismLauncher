@@ -91,6 +91,14 @@ public class Log4JInjector20 {
             }
             delegate.info(message);
         }
+        
+        @Override
+        public void debug(String message) {
+            if (message.startsWith("(Session ID is ")) {
+                return;
+            }
+            delegate.info(message);
+        }
 
     }
 
