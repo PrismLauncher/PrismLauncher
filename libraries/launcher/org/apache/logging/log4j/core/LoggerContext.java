@@ -5,7 +5,7 @@ import org.apache.logging.log4j.message.MessageFactory;
 /**
  * This class is a stub and is needed to compile the log4j injector
  * Changing it may break things
- **/
+ */
 public class LoggerContext {
     public LoggerContext(String a, Object b) {}
 

@@ -62,14 +62,14 @@ import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.impl.StandardLauncher;
 import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
-import org.prismlauncher.log4jinjector.UniversalLog4JInjector;
+import org.prismlauncher.log4jinjector.UniversalLog4jInjector;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.logging.Log;
 
 public final class EntryPoint {
 
     public static void main(String[] args) {
-        UniversalLog4JInjector.inject();
+        UniversalLog4jInjector.inject();
         ExitCode code = listen();
 
         if (code != ExitCode.NORMAL) {

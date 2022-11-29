@@ -6,20 +6,15 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.impl.Log4jContextFactory;
 import org.apache.logging.log4j.message.MessageFactory;
 
-import java.lang.reflect.Field;
 import java.net.URI;
 
-// Injects the custom loggers into Log4J 2.0
-public class Log4JInjector20 {
+public class Log4jInjector2171 {
 
-    public static void inject() throws ClassNotFoundException {
-        try {
-            Field f = LogManager.class.getDeclaredField("factory");
-            f.setAccessible(true);
-            f.set(null, new WrappedLoggerContextFactory((Log4jContextFactory) LogManager.getFactory()));
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+    public static void inject() {
+        LogManager.setFactory(
+            new WrappedLoggerContextFactory((Log4jContextFactory) LogManager.getFactory())
+        );
+
     }
 
     static class WrappedLoggerContextFactory extends Log4jContextFactory {
@@ -30,22 +25,18 @@ public class Log4JInjector20 {
         }
 
         @Override
-        public LoggerContext getContext(String fqcn, ClassLoader loader, boolean currentContext) {
-            return new WrappedLoggerContext(delegate.getContext(fqcn, loader, currentContext));
+        public LoggerContext getContext(String fqcn, ClassLoader loader, Object externalContext, boolean currentContext) {
+            return new WrappedLoggerContext(delegate.getContext(fqcn, loader, externalContext, currentContext));
         }
 
         @Override
-        public LoggerContext getContext(String s, ClassLoader classLoader, boolean b, URI uri) {
-            return new WrappedLoggerContext(delegate.getContext(s, classLoader, b, uri));
-        }
-
-        @Override
-        public void removeContext(org.apache.logging.log4j.spi.LoggerContext loggerContext) {
-            delegate.removeContext(loggerContext);
+        public LoggerContext getContext(String fqcn, ClassLoader loader, Object externalContext, boolean currentContext, URI configLocation, String name) {
+            return new WrappedLoggerContext(delegate.getContext(fqcn, loader, externalContext, currentContext));
         }
     }
 
     static class WrappedLoggerContext extends LoggerContext {
+
         private final LoggerContext delegate;
 
         public WrappedLoggerContext(LoggerContext delegate) {
@@ -59,7 +50,7 @@ public class Log4JInjector20 {
         }
 
         @Override
-        public Logger getLogger(final String name) {
+        public Logger getLogger(String name) {
             return new WrappedLogger(delegate.getLogger(name));
         }
 
@@ -73,13 +64,21 @@ public class Log4JInjector20 {
             return delegate.hasLogger(name);
         }
 
+        @Override
+        public boolean hasLogger(String name, MessageFactory messageFactory) {
+            return delegate.hasLogger(name, messageFactory);
+        }
+
+        @Override
+        public boolean hasLogger(String name, Class<? extends MessageFactory> messageFactoryClass) {
+            return delegate.hasLogger(name, messageFactoryClass);
+        }
     }
 
-    public static class WrappedLogger extends Logger {
-
+    static class WrappedLogger extends Logger {
         private final Logger delegate;
 
-        public WrappedLogger(Logger delegate) {
+        protected WrappedLogger(Logger delegate) {
             super(delegate.getContext(), delegate.getName(), delegate.getMessageFactory());
             this.delegate = delegate;
         }
@@ -91,15 +90,6 @@ public class Log4JInjector20 {
             }
             delegate.info(message);
         }
-        
-        @Override
-        public void debug(String message) {
-            if (message.startsWith("(Session ID is ")) {
-                return;
-            }
-            delegate.info(message);
-        }
 
     }
-
 }

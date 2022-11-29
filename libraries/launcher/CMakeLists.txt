@@ -15,9 +15,9 @@ set(SRC
     org/prismlauncher/launcher/impl/legacy/LegacyFrame.java
     org/prismlauncher/exception/ParameterNotFoundException.java
     org/prismlauncher/exception/ParseException.java
-    org/prismlauncher/log4jinjector/UniversalLog4JInjector.java
-    org/prismlauncher/log4jinjector/Log4JInjector20.java
-    org/prismlauncher/log4jinjector/Log4JInjector2171.java
+    org/prismlauncher/log4jinjector/UniversalLog4jInjector.java
+    org/prismlauncher/log4jinjector/Log4jInjector20.java
+    org/prismlauncher/log4jinjector/Log4jInjector2171.java
     org/prismlauncher/utils/Parameters.java
     org/prismlauncher/utils/ReflectionUtils.java
     org/prismlauncher/utils/logging/Level.java
