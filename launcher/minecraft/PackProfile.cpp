@@ -838,15 +838,12 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
         QFileInfo sourceInfo(filepath);
         QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
         QString target_filename = id + ".jar";
-        QString target_id = "org.multimc.jarmod." + id;
+        QString target_id = "custom.jarmod." + id;
         QString target_name = sourceInfo.completeBaseName() + " (jar mod)";
         QString finalPath = FS::PathCombine(d->m_instance->jarModsDir(), target_filename);
 
         QFileInfo targetInfo(finalPath);
-        if(targetInfo.exists())
-        {
-            return false;
-        }
+        Q_ASSERT(!targetInfo.exists());
 
         if (!QFile::copy(sourceInfo.absoluteFilePath(),QFileInfo(finalPath).absoluteFilePath()))
         {
@@ -855,7 +852,7 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
 
         auto f = std::make_shared<VersionFile>();
         auto jarMod = std::make_shared<Library>();
-        jarMod->setRawName(GradleSpecifier("org.multimc.jarmods:" + id + ":1"));
+        jarMod->setRawName(GradleSpecifier("custom.jarmods:" + id + ":1"));
         jarMod->setFilename(target_filename);
         jarMod->setDisplayName(sourceInfo.completeBaseName());
         jarMod->setHint("local");
@@ -895,7 +892,7 @@ bool PackProfile::installCustomJar_internal(QString filepath)
         return false;
     }
 
-    auto specifier = GradleSpecifier("org.multimc:customjar:1");
+    auto specifier = GradleSpecifier("custom:customjar:1");
     QFileInfo sourceInfo(filepath);
     QString target_filename = specifier.getFileName();
     QString target_id = specifier.artifactId();
@@ -957,13 +954,12 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
         const QFileInfo sourceInfo(source);
         const QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
         const QString targetBaseName = id + ".jar";
-        const QString targetId = "org.prismlauncher.agent." + id;
+        const QString targetId = "custom.agent." + id;
         const QString targetName = sourceInfo.completeBaseName() + " (agent)";
         const QString target = FS::PathCombine(d->m_instance->getLocalLibraryPath(), targetBaseName);
 
         const QFileInfo targetInfo(target);
-        if (targetInfo.exists())
-            return false;
+        Q_ASSERT(!targetInfo.exists());
 
         if (!QFile::copy(source, target))
             return false;
@@ -972,7 +968,7 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
 
         auto agent = std::make_shared<Library>();
 
-        agent->setRawName("org.prismlauncher.agents:" + id + ":1");
+        agent->setRawName("custom.agents:" + id + ":1");
         agent->setFilename(targetBaseName);
         agent->setDisplayName(sourceInfo.completeBaseName());
         agent->setHint("local");
