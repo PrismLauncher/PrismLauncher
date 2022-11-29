@@ -14,8 +14,6 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
 {
     ui->setupUi(this);
 
-    ExternalResourcesPage::runningStateChanged(m_instance && m_instance->isRunning());
-
     ui->actionsToolbar->insertSpacer(ui->actionViewConfigs);
 
     m_filterModel = model->createFilterProxyModel(this);
@@ -45,7 +43,6 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     auto selection_model = ui->treeView->selectionModel();
     connect(selection_model, &QItemSelectionModel::currentChanged, this, &ExternalResourcesPage::current);
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ExternalResourcesPage::filterTextChanged);
-    connect(m_instance, &BaseInstance::runningStatusChanged, this, &ExternalResourcesPage::runningStateChanged);
 }
 
 ExternalResourcesPage::~ExternalResourcesPage()
@@ -95,14 +92,6 @@ void ExternalResourcesPage::filterTextChanged(const QString& newContents)
 {
     m_viewFilter = newContents;
     m_filterModel->setFilterRegularExpression(m_viewFilter);
-}
-
-void ExternalResourcesPage::runningStateChanged(bool running)
-{
-    if (m_controlsEnabled == !running)
-        return;
-    
-    m_controlsEnabled = !running;
 }
 
 bool ExternalResourcesPage::shouldDisplay() const
