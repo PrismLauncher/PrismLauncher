@@ -2,12 +2,13 @@ package org.prismlauncher.log4jinjector;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.Objects;
 
 public class UniversalLog4JInjector {
     private static final Logger LOGGER = Logger.getLogger("UniversalLog4JInjector");
 
     public static void inject() {
-        if (System.getProperty("prism.log4j.inject").equals("false")) {
+        if (Objects.equals(System.getProperty("prism.log4j.inject"), "false")) {
             return;
         }
         String l4jVersion;
@@ -15,7 +16,6 @@ public class UniversalLog4JInjector {
             l4jVersion = Class.forName("org.apache.logging.log4j.LogManager").getPackage().getImplementationVersion();
             assert l4jVersion != null;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Log4J not found. Is this Minecraft using Log4J?");
             return;
         }
         if (l4jVersion.startsWith("2.0")) {
