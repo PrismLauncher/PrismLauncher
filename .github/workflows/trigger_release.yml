@@ -63,11 +63,9 @@ jobs:
 
           for d in PrismLauncher-Windows-MinGW-w64*; do
             cd "${d}" || continue
-            LEGACY="$(echo -n ${d} | grep -o Legacy || true)"
             INST="$(echo -n ${d} | grep -o Setup || true)"
             PORT="$(echo -n ${d} | grep -o Portable || true)"
             NAME="PrismLauncher-Windows-MinGW-w64"
-            test -z "${LEGACY}" || NAME="${NAME}-Legacy"
             test -z "${PORT}" || NAME="${NAME}-Portable"
             test -z "${INST}" || mv PrismLauncher-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
             test -n "${INST}" || zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *
@@ -90,9 +88,6 @@ jobs:
             PrismLauncher-Linux-${{ env.VERSION }}-x86_64.AppImage
             PrismLauncher-Linux-Qt6-${{ env.VERSION }}.tar.gz
             PrismLauncher-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-            PrismLauncher-Windows-MinGW-w64-Legacy-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MinGW-w64-Legacy-Portable-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MinGW-w64-Legacy-Setup-${{ env.VERSION }}.exe
             PrismLauncher-Windows-MinGW-w64-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MinGW-w64-Portable-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MinGW-w64-Setup-${{ env.VERSION }}.exe
