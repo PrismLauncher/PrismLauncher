@@ -164,18 +164,14 @@ void InstanceImportTask::processZipPack()
     }
     else
     {
-        QString mmcRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "instance.cfg");
-        QString flameRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "manifest.json");
+        QStringList paths_to_ignore { "overrides/" };
 
-        if (!mmcRoot.isNull())
-        {
+        if (QString mmcRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "instance.cfg", paths_to_ignore); !mmcRoot.isNull()) {
             // process as MultiMC instance/pack
             qDebug() << "MultiMC:" << mmcRoot;
             root = mmcRoot;
             m_modpackType = ModpackType::MultiMC;
-        }
-        else if(!flameRoot.isNull())
-        {
+        } else if (QString flameRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "manifest.json", paths_to_ignore); !flameRoot.isNull()) {
             // process as Flame pack
             qDebug() << "Flame:" << flameRoot;
             root = flameRoot;
