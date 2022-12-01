@@ -32,7 +32,7 @@ public class UniversalLog4jInjector {
                 e.printStackTrace();
             }
         } else {
-            Log.warning("Unable to inject into Log4j (Reason: Log4j version not supported). Token may be written to a file as a result");
+            Log.warning("The active Log4j version is unsupported. Token may be written to a file as a result.");
         }
     }
 }
