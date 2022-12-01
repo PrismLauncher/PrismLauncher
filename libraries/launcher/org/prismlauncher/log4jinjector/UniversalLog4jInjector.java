@@ -5,7 +5,7 @@ import org.prismlauncher.utils.logging.Log;
 import java.util.Objects;
 
 public class UniversalLog4jInjector {
-    private static final String EXCEPTION_DURING_INJECTION = "Unable to inject into Log4j. Token may be written to a file as a result";
+    private static final String EXCEPTION_DURING_INJECTION = "Unable to inject into Log4j. Token may be written to a file as a result.";
     public static void inject() {
         if (Objects.equals(System.getProperty("org.prismlauncher.log4j.inject"), "false")) {
             return;
