@@ -39,6 +39,7 @@
 #include "MMCZip.h"
 #include "FileSystem.h"
 
+#include <QCoreApplication>
 #include <QDebug>
 
 // ours
@@ -228,23 +229,27 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
 }
 
 // ours
-QString MMCZip::findFolderOfFileInZip(QuaZip * zip, const QString & what, const QString &root)
+QString MMCZip::findFolderOfFileInZip(QuaZip* zip, const QString& what, const QStringList& ignore_paths, const QString& root)
 {
     QuaZipDir rootDir(zip, root);
-    for(auto fileName: rootDir.entryList(QDir::Files))
-    {
-        if(fileName == what)
+    for (auto&& fileName : rootDir.entryList(QDir::Files)) {
+        if (fileName == what)
             return root;
+
+        QCoreApplication::processEvents();
     }
-    for(auto fileName: rootDir.entryList(QDir::Dirs))
-    {
-        QString result = findFolderOfFileInZip(zip, what, root + fileName);
-        if(!result.isEmpty())
-        {
+
+    // Recurse the search to non-ignored subfolders
+    for (auto&& fileName : rootDir.entryList(QDir::Dirs)) {
+        if (ignore_paths.contains(fileName))
+            continue;
+
+        QString result = findFolderOfFileInZip(zip, what, ignore_paths, root + fileName);
+        if (!result.isEmpty())
             return result;
-        }
     }
-    return QString();
+
+    return {};
 }
 
 // ours
