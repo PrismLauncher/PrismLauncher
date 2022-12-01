@@ -14,7 +14,6 @@ public class Log4jInjector2171 {
         LogManager.setFactory(
             new WrappedLoggerContextFactory((Log4jContextFactory) LogManager.getFactory())
         );
-
     }
 
     static class WrappedLoggerContextFactory extends Log4jContextFactory {
@@ -85,9 +84,9 @@ public class Log4jInjector2171 {
 
         @Override
         public void info(String message) {
-            if (message.startsWith("(Session ID is ")) {
+            if (message.startsWith("(Session ID is "))
                 return;
-            }
+
             delegate.info(message);
         }
 

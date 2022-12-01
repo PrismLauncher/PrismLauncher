@@ -7,9 +7,8 @@ import java.util.Objects;
 public class UniversalLog4jInjector {
     private static final String EXCEPTION_DURING_INJECTION = "Unable to inject into Log4j. Token may be written to a file as a result.";
     public static void inject() {
-        if (Objects.equals(System.getProperty("org.prismlauncher.log4j.inject"), "false")) {
+        if (Objects.equals(System.getProperty("org.prismlauncher.log4j.inject"), "false"))
             return;
-        }
         String l4jVersion;
         try {
             l4jVersion = Class.forName("org.apache.logging.log4j.LogManager").getPackage().getImplementationVersion();
@@ -17,6 +16,9 @@ public class UniversalLog4jInjector {
         } catch (Exception e) {
             return;
         }
+        if (l4jVersion == null)
+            return;
+ 
         if (l4jVersion.startsWith("2.0")) {
             try {
                 Log4jInjector20.inject();

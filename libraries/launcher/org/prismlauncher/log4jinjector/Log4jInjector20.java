@@ -13,9 +13,9 @@ public class Log4jInjector20 {
 
     public static void inject() {
         try {
-            Field f = LogManager.class.getDeclaredField("factory");
-            f.setAccessible(true);
-            f.set(null, new WrappedLoggerContextFactory((Log4jContextFactory) LogManager.getFactory()));
+            Field factory = LogManager.class.getDeclaredField("factory");
+            factory.setAccessible(true);
+            factory.set(null, new WrappedLoggerContextFactory((Log4jContextFactory) LogManager.getFactory()));
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -85,9 +85,9 @@ public class Log4jInjector20 {
 
         @Override
         public void info(String message) {
-            if (message.startsWith("(Session ID is ")) {
+            if (message.startsWith("(Session ID is "))
                 return;
-            }
+
             delegate.info(message);
         }
         
