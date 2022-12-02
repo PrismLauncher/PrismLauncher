@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="24"
+   height="24"
+   version="1.1"
+   viewBox="0 0 24 24"
+   id="svg168"
+   xml:space="preserve"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"><defs
+     id="defs172"><linearGradient
+       xlink:href="#linearGradient1468"
+       id="linearGradient1470"
+       x1="300"
+       y1="26"
+       x2="300"
+       y2="10"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-1,-2)" /><linearGradient
+       id="linearGradient1468"><stop
+         style="stop-color:#d63954;stop-opacity:1;"
+         offset="0"
+         id="stop1464" /><stop
+         style="stop-color:#e6812b;stop-opacity:1;"
+         offset="1"
+         id="stop1466" /></linearGradient></defs><title
+     id="title132">Prism Launcher Logo</title><metadata
+     id="metadata166"><rdf:RDF><cc:Work
+         rdf:about=""><dc:title>Prism Launcher Logo</dc:title><dc:date>19/10/2022</dc:date><dc:creator><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:creator><dc:contributor><cc:Agent><dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title></cc:Agent></dc:contributor><dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source><dc:rights><cc:Agent><dc:title>CC BY-SA 4.0</dc:title></cc:Agent></dc:rights><dc:publisher><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:publisher></cc:Work></rdf:RDF></metadata><g
+     id="i_flame"
+     transform="translate(-292,-4)"><path
+       id="path5010"
+       style="fill:url(#linearGradient1470);fill-opacity:1;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
+       d="m 299,9 c -1.10457,0 -2,0.895431 -2,2 h -1 -4 c 0,2.209137 1.79086,4 4,4 h 2 v 1 c 0,1.656852 1.34315,3 3,3 v 1 c -1.10457,0 -2,0.895438 -2,2 v 2 h 11 v -2 c 0,-1.104562 -0.89543,-2 -2,-2 v -1 c 1.10457,0 2,-1.053227 2,-2 0,-3.313684 2.68629,-6 6,-6 V 9 Z" /><rect
+       style="fill:#ffffff;fill-opacity:0;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
+       id="rect128412-7-9"
+       width="24"
+       height="24"
+       x="292"
+       y="4" /><path
+       id="path225757"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
+       d="M 305.94922,10 C 304.86851,10.02738 304,10.912691 304,12 v 1 a 1,1 0 0 1 -1,-1 v 2 c 0,0.552284 0.44772,1 1,1 0,0.552284 -0.44772,1 -1,1 -0.55228,0 -1,-0.447716 -1,-1 -0.55228,0 -1,0.447716 -1,1 0,1.104568 0.89543,2 2,2 0.55228,0 1,0.447716 1,1 0,-0.552284 0.44772,-1 1,-1 h 1 c 0.55228,0 1,-0.447716 1,-1 v -1 c 0,0.552284 -0.44772,1 -1,1 -0.55228,0 -1,-0.447716 -1,-1 0.55228,0 1,-0.447716 1,-1 v -1 c 0,-0.552284 -0.44772,-1 -1,-1 v -1 c 0,-1.087309 0.86851,-1.97262 1.94922,-2 H 306 c -0.0173,0 -0.0336,-4.35e-4 -0.0508,0 z" /></g></svg>

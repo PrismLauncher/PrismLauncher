@@ -915,13 +915,13 @@ bool Application::createSetupWizard()
     return false;
 }
 
-bool Application::event(QEvent* event) {
+bool Application::event(QEvent* event)
+{
 #ifdef Q_OS_MACOS
     if (event->type() == QEvent::ApplicationStateChange) {
         auto ev = static_cast<QApplicationStateChangeEvent*>(event);
 
-        if (m_prevAppState == Qt::ApplicationActive
-                && ev->applicationState() == Qt::ApplicationActive) {
+        if (m_prevAppState == Qt::ApplicationActive && ev->applicationState() == Qt::ApplicationActive) {
             emit clickedOnDock();
         }
         m_prevAppState = ev->applicationState();

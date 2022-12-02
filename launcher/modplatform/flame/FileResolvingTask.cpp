@@ -42,12 +42,25 @@ void Flame::FileResolvingTask::executeTask()
 void Flame::FileResolvingTask::netJobFinished()
 {
     setProgress(1, 3);
-    int index = 0;
     // job to check modrinth for blocked projects
     m_checkJob = new NetJob("Modrinth check", m_network);
     blockedProjects = QMap<File *,QByteArray *>();
-    auto doc = Json::requireDocument(*result);
-    auto array = Json::requireArray(doc.object()["data"]);
+
+    QJsonDocument doc;
+    QJsonArray array;
+
+    try {
+        doc = Json::requireDocument(*result);
+        array = Json::requireArray(doc.object()["data"]);
+    } catch (Json::JsonException& e) {
+        qCritical() << "Non-JSON data returned from the CF API";
+        qCritical() << e.cause();
+
+        emitFailed(tr("Invalid data returned from the API."));
+
+        return;
+    }
+
     for (QJsonValueRef file : array) {
         auto fileid = Json::requireInteger(Json::requireObject(file)["id"]);
         auto& out = m_toProcess.files[fileid];
@@ -68,7 +81,6 @@ void Flame::FileResolvingTask::netJobFinished()
                 blockedProjects.insert(&out, output);
             }
         }
-        index++;
     }
     connect(m_checkJob.get(), &NetJob::finished, this, &Flame::FileResolvingTask::modrinthCheckFinished);
 

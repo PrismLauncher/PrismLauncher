@@ -58,9 +58,8 @@ JavaPage::JavaPage(QWidget *parent) : QWidget(parent), ui(new Ui::JavaPage)
     ui->setupUi(this);
     ui->tabWidget->tabBar()->hide();
 
-    auto sysMiB = Sys::getSystemRam() / Sys::mebibyte;
-    ui->maxMemSpinBox->setMaximum(sysMiB);
     loadSettings();
+    updateThresholds();
 }
 
 JavaPage::~JavaPage()
@@ -177,6 +176,11 @@ void JavaPage::on_javaTestBtn_clicked()
     checker->run();
 }
 
+void JavaPage::on_maxMemSpinBox_valueChanged(int i)
+{
+    updateThresholds();
+}
+
 void JavaPage::checkerFinished()
 {
     checker.reset();
@@ -185,4 +189,30 @@ void JavaPage::checkerFinished()
 void JavaPage::retranslate()
 {
     ui->retranslateUi(this);
+}
+
+void JavaPage::updateThresholds()
+{
+    auto sysMiB = Sys::getSystemRam() / Sys::mebibyte;
+    unsigned int maxMem = ui->maxMemSpinBox->value();
+
+    QString iconName;
+
+    if (maxMem >= sysMiB) {
+        iconName = "status-bad";
+        ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation exceeds your system memory capacity."));
+    } else if (maxMem > (sysMiB * 0.9)) {
+        iconName = "status-yellow";
+        ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
+    } else {
+        iconName = "status-good";
+        ui->labelMaxMemIcon->setToolTip("");
+    }
+
+    {
+        auto height = ui->labelMaxMemIcon->fontInfo().pixelSize();
+        QIcon icon = APPLICATION->getThemedIcon(iconName);
+        QPixmap pix = icon.pixmap(height, height);
+        ui->labelMaxMemIcon->setPixmap(pix);
+    }
 }
