@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -82,6 +83,7 @@ private slots:
     void on_actionMove_down_triggered();
     void on_actionAdd_to_Minecraft_jar_triggered();
     void on_actionReplace_Minecraft_jar_triggered();
+    void on_actionAdd_Agents_triggered();
     void on_actionRevert_triggered();
     void on_actionEdit_triggered();
     void on_actionInstall_mods_triggered();

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,7 +48,6 @@
 #include "Exception.h"
 #include "minecraft/OneSixVersionFormat.h"
 #include "FileSystem.h"
-#include "meta/Index.h"
 #include "minecraft/MinecraftInstance.h"
 #include "Json.h"
 
@@ -55,7 +55,6 @@
 #include "PackProfile_p.h"
 #include "ComponentUpdateTask.h"
 
-#include "Application.h"
 #include "modplatform/ModAPI.h"
 
 static const QMap<QString, ModAPI::ModLoaderType> modloaderMapping{
@@ -738,6 +737,11 @@ void PackProfile::installCustomJar(QString selectedFile)
     installCustomJar_internal(selectedFile);
 }
 
+void PackProfile::installAgents(QStringList selectedFiles)
+{
+    installAgents_internal(selectedFiles);
+}
+
 bool PackProfile::installEmpty(const QString& uid, const QString& name)
 {
     QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
@@ -832,18 +836,14 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
     for(auto filepath:filepaths)
     {
         QFileInfo sourceInfo(filepath);
-        auto uuid = QUuid::createUuid();
-        QString id = uuid.toString().remove('{').remove('}');
+        QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
         QString target_filename = id + ".jar";
-        QString target_id = "org.multimc.jarmod." + id;
+        QString target_id = "custom.jarmod." + id;
         QString target_name = sourceInfo.completeBaseName() + " (jar mod)";
         QString finalPath = FS::PathCombine(d->m_instance->jarModsDir(), target_filename);
 
         QFileInfo targetInfo(finalPath);
-        if(targetInfo.exists())
-        {
-            return false;
-        }
+        Q_ASSERT(!targetInfo.exists());
 
         if (!QFile::copy(sourceInfo.absoluteFilePath(),QFileInfo(finalPath).absoluteFilePath()))
         {
@@ -852,7 +852,7 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
 
         auto f = std::make_shared<VersionFile>();
         auto jarMod = std::make_shared<Library>();
-        jarMod->setRawName(GradleSpecifier("org.multimc.jarmods:" + id + ":1"));
+        jarMod->setRawName(GradleSpecifier("custom.jarmods:" + id + ":1"));
         jarMod->setFilename(target_filename);
         jarMod->setDisplayName(sourceInfo.completeBaseName());
         jarMod->setHint("local");
@@ -892,7 +892,7 @@ bool PackProfile::installCustomJar_internal(QString filepath)
         return false;
     }
 
-    auto specifier = GradleSpecifier("org.multimc:customjar:1");
+    auto specifier = GradleSpecifier("custom:customjar:1");
     QFileInfo sourceInfo(filepath);
     QString target_filename = specifier.getFileName();
     QString target_id = specifier.artifactId();
@@ -936,6 +936,64 @@ bool PackProfile::installCustomJar_internal(QString filepath)
 
     scheduleSave();
     invalidateLaunchProfile();
+    return true;
+}
+
+bool PackProfile::installAgents_internal(QStringList filepaths)
+{
+    // FIXME code duplication
+    const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
+    if (!FS::ensureFolderPathExists(patchDir))
+        return false;
+
+    const QString libDir = d->m_instance->getLocalLibraryPath();
+    if (!FS::ensureFolderPathExists(libDir))
+        return false;
+
+    for (const QString& source : filepaths) {
+        const QFileInfo sourceInfo(source);
+        const QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+        const QString targetBaseName = id + ".jar";
+        const QString targetId = "custom.agent." + id;
+        const QString targetName = sourceInfo.completeBaseName() + " (agent)";
+        const QString target = FS::PathCombine(d->m_instance->getLocalLibraryPath(), targetBaseName);
+
+        const QFileInfo targetInfo(target);
+        Q_ASSERT(!targetInfo.exists());
+
+        if (!QFile::copy(source, target))
+            return false;
+
+        auto versionFile = std::make_shared<VersionFile>();
+
+        auto agent = std::make_shared<Library>();
+
+        agent->setRawName("custom.agents:" + id + ":1");
+        agent->setFilename(targetBaseName);
+        agent->setDisplayName(sourceInfo.completeBaseName());
+        agent->setHint("local");
+
+        versionFile->agents.append(std::make_shared<Agent>(agent, QString()));
+
+        versionFile->name = targetName;
+        versionFile->uid = targetId;
+
+        QFile patchFile(FS::PathCombine(patchDir, targetId + ".json"));
+
+        if (!patchFile.open(QFile::WriteOnly)) {
+            qCritical() << "Error opening" << patchFile.fileName() << "for reading:" << patchFile.errorString();
+            return false;
+        }
+
+        patchFile.write(OneSixVersionFormat::versionFileToJson(versionFile).toJson());
+        patchFile.close();
+
+        appendComponent(new Component(this, versionFile->uid, versionFile));
+    }
+
+    scheduleSave();
+    invalidateLaunchProfile();
+
     return true;
 }
 
