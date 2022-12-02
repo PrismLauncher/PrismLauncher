@@ -53,12 +53,12 @@ class ModFolderPage : public ExternalResourcesPage {
     virtual QString helpPage() const override { return "Loader-mods"; }
 
     virtual bool shouldDisplay() const override;
-    void runningStateChanged(bool running) override;
 
    public slots:
     bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override;
 
    private slots:
+    void runningStateChanged(bool running);
     void removeItem() override;
 
     void installMods();

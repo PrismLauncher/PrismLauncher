@@ -38,17 +38,11 @@ jobs:
             qt_tools: ''
 
           - os: windows-2022
-            name: "Windows-Legacy"
-            msystem: clang32
-            qt_ver: 5
-
-          - os: windows-2022
-            name: "Windows"
+            name: "Windows-MinGW-w64"
             msystem: clang64
-            qt_ver: 6
 
           - os: windows-2022
-            name: "Windows-Legacy-MSVC"
+            name: "Windows-MSVC-Legacy"
             msystem: ''
             architecture: 'win32'
             vcvars_arch: 'amd64_x86'
@@ -67,7 +61,19 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ''
-            qt_version: '6.4.1'
+            qt_version: '6.4.0'
+            qt_modules: 'qt5compat qtimageformats'
+            qt_tools: ''
+
+          - os: windows-2022
+            name: "Windows-MSVC-arm64"
+            msystem: ''
+            architecture: 'arm64'
+            vcvars_arch: 'amd64_arm64'
+            qt_ver: 6
+            qt_host: windows
+            qt_arch: 'win64_msvc2019_arm64'
+            qt_version: '6.4.0'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -123,12 +129,12 @@ jobs:
             cmake:p
             extra-cmake-modules:p
             ninja:p
-            qt${{ matrix.qt_ver }}-base:p
-            qt${{ matrix.qt_ver }}-svg:p
-            qt${{ matrix.qt_ver }}-imageformats:p
-            quazip-qt${{ matrix.qt_ver }}:p
+            qt6-base:p
+            qt6-svg:p
+            qt6-imageformats:p
+            quazip-qt6:p
             ccache:p
-            ${{ matrix.qt_ver == 6 && 'qt6-5compat:p' || '' }}
+            qt6-5compat:p
 
       - name: Force newer ccache
         if: runner.os == 'Windows' && matrix.msystem == '' && inputs.build_type == 'Debug'
@@ -139,7 +145,7 @@ jobs:
         if: (runner.os != 'Windows' || matrix.msystem == '') && inputs.build_type == 'Debug'
         uses: hendrikmuhs/ccache-action@v1.2.5
         with:
-          key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}
+          key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}-${{ matrix.architecture }}
 
       - name: Setup ccache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
@@ -162,9 +168,9 @@ jobs:
         uses: actions/cache@v3.0.11
         with:
           path: '${{ github.workspace }}\.ccache'
-          key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}
+          key: ${{ matrix.os }}-mingw-w64
           restore-keys: |
-              ${{ matrix.os }}-qt${{ matrix.qt_ver }}
+              ${{ matrix.os }}-mingw-w64
 
       - name: Set short version
         shell: bash
@@ -188,8 +194,23 @@ jobs:
         if: runner.os == 'Linux' && matrix.qt_ver != 6
         run: |
           sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
- 
-      - name: Install Qt (macOS, AppImage & Windows MSVC)
+
+      - name: Install host Qt (Windows MSVC arm64)
+        if: runner.os == 'Windows' && matrix.architecture == 'arm64'
+        uses: jurplel/install-qt-action@v3
+        with:
+           version: ${{ matrix.qt_version }}
+           host: 'windows'
+           target: 'desktop'
+           arch: ''
+           modules: ${{ matrix.qt_modules }}
+           tools: ${{ matrix.qt_tools }}
+           cache: ${{ inputs.is_qt_cached }}
+           cache-key-prefix: host-qt-arm64-windows
+           dir: ${{ github.workspace }}\HostQt
+           set-env: false
+
+      - name: Install Qt (macOS, Linux, Qt 6 & Windows MSVC)
         if: runner.os == 'Linux' && matrix.qt_ver == 6 || runner.os == 'macOS' || (runner.os == 'Windows' && matrix.msystem == '')
         uses: jurplel/install-qt-action@v3
         with:
@@ -201,6 +222,13 @@ jobs:
            tools: ${{ matrix.qt_tools }}
            cache: ${{ inputs.is_qt_cached }}
 
+      - name: Install MSVC (Windows MSVC)
+        if: runner.os == 'Windows' && matrix.msystem == ''
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          vsversion: 2022
+          arch: ${{ matrix.vcvars_arch }}
+
       - name: Prepare AppImage (Linux)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
         run: |
@@ -209,6 +237,11 @@ jobs:
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
 
           ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
+
+      - name: Add QT_HOST_PATH var (Windows MSVC arm64)
+        if: runner.os == 'Windows' && matrix.architecture == 'arm64'
+        run: |
+          echo "QT_HOST_PATH=${{ github.workspace }}\HostQt\Qt\${{ matrix.qt_version }}\msvc2019_64" >> $env:GITHUB_ENV
 
       ##
       # CONFIGURE
@@ -228,7 +261,7 @@ jobs:
         if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_OBJDUMP=/mingw64/bin/objdump.exe -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=6 -DCMAKE_OBJDUMP=/mingw64/bin/objdump.exe -G Ninja
 
       - name: Configure CMake (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
@@ -286,7 +319,7 @@ jobs:
           ctest -E "^example64|example$" --test-dir build --output-on-failure
 
       - name: Test (Windows MSVC)
-        if: runner.os == 'Windows' && matrix.msystem == ''
+        if: runner.os == 'Windows' && matrix.msystem == '' && matrix.architecture != 'arm64'
         run: |
           ctest -E "^example64|example$" --test-dir build --output-on-failure -C ${{ inputs.build_type }} 
 
@@ -324,22 +357,11 @@ jobs:
           EOF
           fi
 
-      - name: Add VC Enviroment Variables
-        if: runner.os == 'Windows' && matrix.msystem == ''
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: ${{ matrix.vcvars_arch }}
-
       - name: Package (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
         run: |
           cmake --install ${{ env.BUILD_DIR }}
-
-          cd ${{ env.INSTALL_DIR }}
-          if [ "${{ matrix.qt_ver }}" == "5" ]; then
-            cp /clang32/bin/libcrypto-1_1.dll /clang32/bin/libssl-1_1.dll ./
-          fi
 
       - name: Package (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
