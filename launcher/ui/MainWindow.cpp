@@ -1817,6 +1817,10 @@ void MainWindow::droppedURLs(QList<QUrl> urls)
 {
     // NOTE: This loop only processes one dropped file!
     for (auto& url : urls) {
+        // The isLocalFile() check below doesn't work as intended without an explicit scheme.
+        if (url.scheme().isEmpty())
+            url.setScheme("file");
+
         if (!url.isLocalFile()) {  // probably instance/modpack
             addInstance(url.toString());
             break;
