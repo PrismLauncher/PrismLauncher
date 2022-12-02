@@ -28,14 +28,14 @@
 
 namespace TexturePackUtils {
 
-bool process(TexturePack& pack)
+bool process(TexturePack& pack, ProcessingLevel level)
 {
     switch (pack.type()) {
         case ResourceType::FOLDER:
-            TexturePackUtils::processFolder(pack);
+            TexturePackUtils::processFolder(pack, level);
             return true;
         case ResourceType::ZIPFILE:
-            TexturePackUtils::processZIP(pack);
+            TexturePackUtils::processZIP(pack, level);
             return true;
         default:
             qWarning() << "Invalid type for resource pack parse task!";
@@ -43,7 +43,7 @@ bool process(TexturePack& pack)
     }
 }
 
-void processFolder(TexturePack& pack)
+void processFolder(TexturePack& pack, ProcessingLevel level)
 {
     Q_ASSERT(pack.type() == ResourceType::FOLDER);
 
@@ -60,6 +60,9 @@ void processFolder(TexturePack& pack)
         mcmeta_file.close();
     }
 
+    if (level == ProcessingLevel::BasicInfoOnly)
+        return;
+
     QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
     if (image_file_info.isFile()) {
         QFile mcmeta_file(image_file_info.filePath());
@@ -74,7 +77,7 @@ void processFolder(TexturePack& pack)
     }
 }
 
-void processZIP(TexturePack& pack)
+void processZIP(TexturePack& pack, ProcessingLevel level)
 {
     Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
 
@@ -96,6 +99,11 @@ void processZIP(TexturePack& pack)
         TexturePackUtils::processPackTXT(pack, std::move(data));
 
         file.close();
+    }
+
+    if (level == ProcessingLevel::BasicInfoOnly) {
+        zip.close();
+        return;
     }
 
     if (zip.setCurrentFile("pack.png")) {
@@ -129,6 +137,13 @@ void processPackPNG(TexturePack& pack, QByteArray&& raw_data)
         qWarning() << "Failed to parse pack.png.";
     }
 }
+
+bool validate(QFileInfo file)
+{
+    TexturePack rp{ file };
+    return TexturePackUtils::process(rp, ProcessingLevel::BasicInfoOnly) && rp.valid();
+}
+
 }  // namespace TexturePackUtils
 
 LocalTexturePackParseTask::LocalTexturePackParseTask(int token, TexturePack& rp)
@@ -143,8 +158,6 @@ bool LocalTexturePackParseTask::abort()
 
 void LocalTexturePackParseTask::executeTask()
 {
-    Q_ASSERT(m_texture_pack.valid());
-
     if (!TexturePackUtils::process(m_texture_pack))
         return;
 
