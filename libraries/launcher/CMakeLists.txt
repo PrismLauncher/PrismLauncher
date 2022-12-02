@@ -27,6 +27,7 @@ set(SRC
 
 set(
     LOG4J_STUB_SRC
+    org/apache/logging/package-info.java
     org/apache/logging/log4j/core/impl/Log4jContextFactory.java
     org/apache/logging/log4j/core/Logger.java
     org/apache/logging/log4j/core/LoggerContext.java

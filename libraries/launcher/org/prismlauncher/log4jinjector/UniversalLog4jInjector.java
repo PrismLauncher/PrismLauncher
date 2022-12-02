@@ -5,14 +5,15 @@ import org.prismlauncher.utils.logging.Log;
 import java.util.Objects;
 
 public class UniversalLog4jInjector {
+
     private static final String EXCEPTION_DURING_INJECTION = "Unable to inject into Log4j. Token may be written to a file as a result.";
+
     public static void inject() {
         if (Objects.equals(System.getProperty("org.prismlauncher.log4j.inject"), "false"))
             return;
         String l4jVersion;
         try {
             l4jVersion = Class.forName("org.apache.logging.log4j.LogManager").getPackage().getImplementationVersion();
-            assert l4jVersion != null;
         } catch (Exception e) {
             return;
         }
@@ -37,4 +38,5 @@ public class UniversalLog4jInjector {
             Log.warning("The active Log4j version is unsupported. Token may be written to a file as a result.");
         }
     }
+
 }

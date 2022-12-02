@@ -17,6 +17,7 @@ public class Log4jInjector2171 {
     }
 
     static class WrappedLoggerContextFactory extends Log4jContextFactory {
+
         private final Log4jContextFactory delegate;
 
         public WrappedLoggerContextFactory(Log4jContextFactory delegate) {
@@ -32,6 +33,7 @@ public class Log4jInjector2171 {
         public LoggerContext getContext(String fqcn, ClassLoader loader, Object externalContext, boolean currentContext, URI configLocation, String name) {
             return new WrappedLoggerContext(delegate.getContext(fqcn, loader, externalContext, currentContext));
         }
+
     }
 
     static class WrappedLoggerContext extends LoggerContext {
@@ -72,9 +74,11 @@ public class Log4jInjector2171 {
         public boolean hasLogger(String name, Class<? extends MessageFactory> messageFactoryClass) {
             return delegate.hasLogger(name, messageFactoryClass);
         }
+
     }
 
     static class WrappedLogger extends Logger {
+
         private final Logger delegate;
 
         protected WrappedLogger(Logger delegate) {
@@ -84,6 +88,14 @@ public class Log4jInjector2171 {
 
         @Override
         public void info(String message) {
+            if (message.startsWith("(Session ID is "))
+                return;
+
+            delegate.info(message);
+        }
+
+        @Override
+        public void debug(String message) {
             if (message.startsWith("(Session ID is "))
                 return;
 

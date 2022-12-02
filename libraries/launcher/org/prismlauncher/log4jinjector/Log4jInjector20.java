@@ -22,6 +22,7 @@ public class Log4jInjector20 {
     }
 
     static class WrappedLoggerContextFactory extends Log4jContextFactory {
+
         private final Log4jContextFactory delegate;
 
         public WrappedLoggerContextFactory(Log4jContextFactory delegate) {
@@ -45,6 +46,7 @@ public class Log4jInjector20 {
     }
 
     static class WrappedLoggerContext extends LoggerContext {
+
         private final LoggerContext delegate;
 
         public WrappedLoggerContext(LoggerContext delegate) {
@@ -90,15 +92,6 @@ public class Log4jInjector20 {
 
             delegate.info(message);
         }
-        
-        @Override
-        public void debug(String message) {
-            if (message.startsWith("(Session ID is ")) {
-                return;
-            }
-            delegate.info(message);
-        }
 
     }
-
 }
