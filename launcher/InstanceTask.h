@@ -49,8 +49,15 @@ class InstanceTask : public Task, public InstanceName {
 
     bool shouldOverride() const { return m_override_existing; }
 
+    [[nodiscard]] QString originalInstanceID() const { return m_original_instance_id; };
+
    protected:
-    void setOverride(bool override) { m_override_existing = override; }
+    void setOverride(bool override, QString instance_id_to_override = {})
+    {
+        m_override_existing = override;
+        if (!instance_id_to_override.isEmpty())
+            m_original_instance_id = instance_id_to_override;
+    }
 
    protected: /* data */
     SettingsObjectPtr m_globalSettings;
@@ -60,4 +67,6 @@ class InstanceTask : public Task, public InstanceName {
 
     bool m_override_existing = false;
     bool m_confirm_update = true;
+
+    QString m_original_instance_id;
 };

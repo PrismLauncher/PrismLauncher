@@ -81,13 +81,19 @@ bool FlameCreationTask::updateInstance()
     auto instance_list = APPLICATION->instances();
 
     // FIXME: How to handle situations when there's more than one install already for a given modpack?
-    auto inst = instance_list->getInstanceByManagedName(originalName());
+    InstancePtr inst;
+    if (auto original_id = originalInstanceID(); !original_id.isEmpty()) {
+        inst = instance_list->getInstanceById(original_id);
+        Q_ASSERT(inst);
+    } else {
+        inst = instance_list->getInstanceByManagedName(originalName());
 
-    if (!inst) {
-        inst = instance_list->getInstanceById(originalName());
+        if (!inst) {
+            inst = instance_list->getInstanceById(originalName());
 
-        if (!inst)
-            return false;
+            if (!inst)
+                return false;
+        }
     }
 
     QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
@@ -233,7 +239,7 @@ bool FlameCreationTask::updateInstance()
         }
     }
 
-    setOverride(true);
+    setOverride(true, inst->id());
     qDebug() << "Will override instance!";
 
     m_instance = inst;

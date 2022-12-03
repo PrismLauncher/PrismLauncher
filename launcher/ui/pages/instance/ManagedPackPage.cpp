@@ -275,6 +275,7 @@ void ModrinthManagedPackPage::update()
     // NOTE: Don't use 'm_pack.id' here, since we didn't completely parse all the metadata for the pack, including this field.
     extra_info.insert("pack_id", m_inst->getManagedPackID());
     extra_info.insert("pack_version_id", version.id);
+    extra_info.insert("original_instance_id", m_inst->id());
 
     auto extracted = new InstanceImportTask(version.download_url, this, std::move(extra_info));
 
@@ -413,6 +414,7 @@ void FlameManagedPackPage::update()
     QMap<QString, QString> extra_info;
     extra_info.insert("pack_id", m_inst->getManagedPackID());
     extra_info.insert("pack_version_id", QString::number(version.fileId));
+    extra_info.insert("original_instance_id", m_inst->id());
 
     auto extracted = new InstanceImportTask(version.downloadUrl, this, std::move(extra_info));
 
