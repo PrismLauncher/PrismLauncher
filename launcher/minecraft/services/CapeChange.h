@@ -5,12 +5,13 @@
 #include <memory>
 #include "tasks/Task.h"
 #include "QObjectPtr.h"
+#include <minecraft/auth/MinecraftAccount.h>
 
 class CapeChange : public Task
 {
     Q_OBJECT
 public:
-    CapeChange(QObject *parent, QString token, QString capeId);
+    CapeChange(QObject *parent, MinecraftAccountPtr m_acct, QString capeId);
     virtual ~CapeChange() {}
 
 private:
@@ -19,7 +20,7 @@ private:
 
 private:
     QString m_capeId;
-    QString m_token;
+    MinecraftAccountPtr m_acct;
     shared_qobject_ptr<QNetworkReply> m_reply;
 
 protected:

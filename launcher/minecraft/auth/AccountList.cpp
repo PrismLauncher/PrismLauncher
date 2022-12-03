@@ -297,9 +297,7 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
                 return account->accountDisplayString();
 
             case TypeColumn: {
-                auto typeStr = account->typeString();
-                typeStr[0] = typeStr[0].toUpper();
-                return typeStr;
+                return account->typeDisplayName();
             }
 
             case StatusColumn: {
