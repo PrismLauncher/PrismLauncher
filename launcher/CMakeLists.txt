@@ -212,6 +212,8 @@ set(MINECRAFT_SOURCES
 
     minecraft/auth/flows/AuthFlow.cpp
     minecraft/auth/flows/AuthFlow.h
+    minecraft/auth/flows/CustomYggdrasil.cpp
+    minecraft/auth/flows/CustomYggdrasil.h
     minecraft/auth/flows/Mojang.cpp
     minecraft/auth/flows/Mojang.h
     minecraft/auth/flows/MSA.cpp
@@ -924,6 +926,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ImportResourceDialog.h
     ui/dialogs/LoginDialog.cpp
     ui/dialogs/LoginDialog.h
+    ui/dialogs/CustomYggdrasilLoginDialog.cpp
+    ui/dialogs/CustomYggdrasilLoginDialog.h
     ui/dialogs/MSALoginDialog.cpp
     ui/dialogs/MSALoginDialog.h
     ui/dialogs/OfflineLoginDialog.cpp
@@ -1072,6 +1076,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/OfflineLoginDialog.ui
     ui/dialogs/AboutDialog.ui
     ui/dialogs/LoginDialog.ui
+    ui/dialogs/CustomYggdrasilLoginDialog.ui
     ui/dialogs/EditAccountDialog.ui
     ui/dialogs/ReviewMessageBox.ui
     ui/dialogs/ScrollMessageBox.ui

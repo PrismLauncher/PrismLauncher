@@ -158,6 +158,8 @@ public:
     // FIXME: remove
     virtual QString getMainClass() const;
 
+    virtual QStringList processAuthArgs(AuthSessionPtr account) const;
+
     // FIXME: remove
     virtual QStringList processMinecraftArgs(AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) const;
 

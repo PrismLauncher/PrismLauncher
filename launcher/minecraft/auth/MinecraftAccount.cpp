@@ -51,6 +51,7 @@
 
 #include "flows/MSA.h"
 #include "flows/Mojang.h"
+#include "flows/CustomYggdrasil.h"
 #include "flows/Offline.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent) {
@@ -80,6 +81,26 @@ MinecraftAccountPtr MinecraftAccount::createFromUsername(const QString &username
     account->data.type = AccountType::Mojang;
     account->data.yggdrasilToken.extra["userName"] = username;
     account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    return account;
+}
+
+MinecraftAccountPtr MinecraftAccount::createFromUsernameCustomYggdrasil(
+    const QString &username,
+    const QString &customAuthServerUrl,
+    const QString &customAccountServerUrl,
+    const QString &customSessionServerUrl,
+    const QString &customServicesServerUrl
+)
+{
+    MinecraftAccountPtr account = new MinecraftAccount();
+    account->data.type = AccountType::CustomYggdrasil;
+    account->data.yggdrasilToken.extra["userName"] = username;
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+
+    account->data.customAuthServerUrl = customAuthServerUrl;
+    account->data.customAccountServerUrl = customAccountServerUrl;
+    account->data.customSessionServerUrl = customSessionServerUrl;
+    account->data.customServicesServerUrl = customServicesServerUrl;
     return account;
 }
 
@@ -136,6 +157,17 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::login(QString password) {
     m_currentTask.reset(new MojangLogin(&data, password));
     connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
     connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);
+    connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
+    emit activityChanged(true);
+    return m_currentTask;
+}
+
+shared_qobject_ptr<AccountTask> MinecraftAccount::loginCustomYggdrasil(QString password) {
+    Q_ASSERT(m_currentTask.get() == nullptr);
+
+    m_currentTask.reset(new CustomYggdrasilLogin(&data, password));
+    connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
+    connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
     connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
     emit activityChanged(true);
     return m_currentTask;
@@ -311,6 +343,13 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     {
         session->session = "-";
     }
+
+    // API URLs
+    session->auth_server_url = data.authServerUrl();
+    session->account_server_url = data.accountServerUrl();
+    session->session_server_url = data.sessionServerUrl();
+    session->services_server_url = data.servicesServerUrl();
+    session->uses_custom_api_servers = data.usesCustomApiServers();
 }
 
 void MinecraftAccount::decrementUses()

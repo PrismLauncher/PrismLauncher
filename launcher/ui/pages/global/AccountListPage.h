@@ -83,6 +83,7 @@ public:
 
 public slots:
     void on_actionAddMojang_triggered();
+    void on_actionAddCustomYggdrasil_triggered();
     void on_actionAddMicrosoft_triggered();
     void on_actionAddOffline_triggered();
     void on_actionRemove_triggered();

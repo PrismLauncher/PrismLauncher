@@ -4,6 +4,7 @@
 #include <QtNetwork/QtNetwork>
 #include <memory>
 #include "tasks/Task.h"
+#include <minecraft/auth/MinecraftAccount.h>
 
 typedef shared_qobject_ptr<class SkinUpload> SkinUploadPtr;
 
@@ -18,13 +19,13 @@ public:
     };
 
     // Note this class takes ownership of the file.
-    SkinUpload(QObject *parent, QString token, QByteArray skin, Model model = STEVE);
+    SkinUpload(QObject *parent, MinecraftAccountPtr acct, QByteArray skin, Model model = STEVE);
     virtual ~SkinUpload() {}
 
 private:
     Model m_model;
     QByteArray m_skin;
-    QString m_token;
+    MinecraftAccountPtr m_acct;
     shared_qobject_ptr<QNetworkReply> m_reply;
 protected:
     virtual void executeTask();
