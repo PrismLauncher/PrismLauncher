@@ -2088,27 +2088,25 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionDeleteInstance_triggered()
 {
-    if (!m_selectedInstance)
-    {
+    if (!m_selectedInstance) {
         return;
     }
 
     auto id = m_selectedInstance->id();
-    if (APPLICATION->instances()->trashInstance(id)) {
-        ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        return;
-    }
-    
-    auto response = CustomMessageBox::selectable(
-        this,
-        tr("CAREFUL!"),
-        tr("About to delete: %1\nThis is permanent and will completely delete the instance.\n\nAre you sure?").arg(m_selectedInstance->name()),
-        QMessageBox::Warning,
-        QMessageBox::Yes | QMessageBox::No,
-        QMessageBox::No
-    )->exec();
-    if (response == QMessageBox::Yes)
-    {
+
+    auto response =
+        CustomMessageBox::selectable(this, tr("CAREFUL!"),
+                                     tr("About to delete: %1\nThis may be permanent and will completely delete the instance.\n\nAre you sure?")
+                                         .arg(m_selectedInstance->name()),
+                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+            ->exec();
+
+    if (response == QMessageBox::Yes) {
+        if (APPLICATION->instances()->trashInstance(id)) {
+            ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
+            return;
+        }
+
         APPLICATION->instances()->deleteInstance(id);
     }
 }
