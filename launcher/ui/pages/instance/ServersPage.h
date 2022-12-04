@@ -68,7 +68,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return APPLICATION->getThemedIcon("unknown_server");
+        return APPLICATION->getThemedIcon("server");
     }
     virtual QString id() const override
     {

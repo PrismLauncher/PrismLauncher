@@ -48,5 +48,6 @@
         <file>scalable/rename.svg</file>
         <file>scalable/tag.svg</file>
         <file>scalable/launch.svg</file>
+        <file>scalable/server.svg</file>
     </qresource>
 </RCC>
