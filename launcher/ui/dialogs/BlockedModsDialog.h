@@ -35,6 +35,10 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
 
+protected
+slots:
+    void done(int r) override;
+
 private:
     Ui::BlockedModsDialog *ui;
     QList<BlockedMod> &m_mods;
