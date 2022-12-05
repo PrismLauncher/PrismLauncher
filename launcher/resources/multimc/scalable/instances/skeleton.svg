@@ -1,134 +1,33 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   width="24"
-   height="24"
-   version="1.1"
-   viewBox="0 0 24 24"
-   id="svg168"
-   xml:space="preserve"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:dc="http://purl.org/dc/elements/1.1/"><defs
-     id="defs172"><linearGradient
-       xlink:href="#linearGradient6068"
-       id="linearGradient6070"
-       x1="656"
-       y1="27"
-       x2="656"
-       y2="5"
-       gradientUnits="userSpaceOnUse" /><linearGradient
-       id="linearGradient6068"><stop
-         style="stop-color:#cdcdcd;stop-opacity:1;"
-         offset="0"
-         id="stop6064" /><stop
-         style="stop-color:#eeeeee;stop-opacity:1;"
-         offset="1"
-         id="stop6066" /></linearGradient><linearGradient
-       xlink:href="#linearGradient7624"
-       id="linearGradient7626"
-       x1="658"
-       y1="20"
-       x2="658"
-       y2="24"
-       gradientUnits="userSpaceOnUse" /><linearGradient
-       id="linearGradient7624"><stop
-         style="stop-color:#8e8e86;stop-opacity:1;"
-         offset="0"
-         id="stop7620" /><stop
-         style="stop-color:#8e8e86;stop-opacity:0;"
-         offset="1"
-         id="stop7622" /></linearGradient><linearGradient
-       xlink:href="#linearGradient7155"
-       id="linearGradient7165"
-       x1="656"
-       y1="25"
-       x2="656"
-       y2="22"
-       gradientUnits="userSpaceOnUse" /><linearGradient
-       id="linearGradient7155"><stop
-         style="stop-color:#3e4447;stop-opacity:1;"
-         offset="0"
-         id="stop7151" /><stop
-         style="stop-color:#2e3134;stop-opacity:1;"
-         offset="1"
-         id="stop7153" /></linearGradient><radialGradient
-       xlink:href="#linearGradient6078"
-       id="radialGradient6080"
-       cx="662"
-       cy="18"
-       fx="662"
-       fy="18"
-       r="3"
-       gradientTransform="matrix(0.99999794,-1.7103091e-6,1.7879388e-6,1.0000015,0.0013367,0.00110992)"
-       gradientUnits="userSpaceOnUse" /><linearGradient
-       id="linearGradient6078"><stop
-         style="stop-color:#006868;stop-opacity:1;"
-         offset="0"
-         id="stop6074" /><stop
-         style="stop-color:#3e4447;stop-opacity:1;"
-         offset="1"
-         id="stop6076" /></linearGradient><linearGradient
-       xlink:href="#linearGradient7155"
-       id="linearGradient7157"
-       x1="651"
-       y1="20"
-       x2="651"
-       y2="16"
-       gradientUnits="userSpaceOnUse" /></defs><title
-     id="title132">Prism Launcher Logo</title><metadata
-     id="metadata166"><rdf:RDF><cc:Work
-         rdf:about=""><dc:title>Prism Launcher Logo</dc:title><dc:date>19/10/2022</dc:date><dc:creator><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:creator><dc:contributor><cc:Agent><dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title></cc:Agent></dc:contributor><dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source><dc:rights><cc:Agent><dc:title>CC BY-SA 4.0</dc:title></cc:Agent></dc:rights><dc:publisher><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:publisher></cc:Work></rdf:RDF></metadata><g
-     id="i_skeleton"
-     transform="translate(-644,-4)"><rect
-       style="fill:url(#linearGradient6070);fill-opacity:1;stroke-width:0.277182;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect543-0"
-       width="22"
-       height="22"
-       x="645"
-       y="5"
-       ry="3" /><rect
-       style="fill:url(#linearGradient7626);fill-opacity:1;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect61092"
-       width="6"
-       height="3"
-       x="653"
-       y="20"
-       ry="1" /><rect
-       style="fill:url(#linearGradient7165);fill-opacity:1;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect60969"
-       width="16"
-       height="3"
-       x="648"
-       y="22"
-       ry="1" /><rect
-       style="fill:url(#radialGradient6080);fill-opacity:1;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect63182"
-       width="6"
-       height="4"
-       x="659"
-       y="16"
-       ry="1" /><rect
-       style="fill:url(#linearGradient7157);fill-opacity:1;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect63184"
-       width="6"
-       height="4"
-       x="647"
-       y="16"
-       ry="1" /><rect
-       style="fill:#00ffff;fill-opacity:1;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect63186"
-       width="2"
-       height="2"
-       x="661"
-       y="17" /><rect
-       style="fill:#ffffff;fill-opacity:0;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect128412-88-4"
-       width="24"
-       height="24"
-       x="644"
-       y="4" /></g></svg>
+<svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <linearGradient id="a" gradientUnits="userSpaceOnUse" x1="656" x2="656" y1="27" y2="5">
+    <stop offset="0" stop-color="#cdcdcd"/>
+    <stop offset="1" stop-color="#eee"/>
+  </linearGradient>
+  <linearGradient id="b" gradientUnits="userSpaceOnUse" x1="658" x2="658" y1="20" y2="24">
+    <stop offset="0" stop-color="#8e8e86"/>
+    <stop offset="1" stop-color="#8e8e86" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="c" gradientUnits="userSpaceOnUse" x1="656" x2="656" xlink:href="#d" y1="25" y2="22"/>
+  <linearGradient id="d">
+    <stop offset="0" stop-color="#3e4447"/>
+    <stop offset="1" stop-color="#2e3134"/>
+  </linearGradient>
+  <radialGradient id="e" cx="662" cy="18" gradientTransform="matrix(.99999794 -.00000171 .00000179 1.0000015 .001337 .00111)" gradientUnits="userSpaceOnUse" r="3">
+    <stop offset="0" stop-color="#006868"/>
+    <stop offset="1" stop-color="#3e4447"/>
+  </radialGradient>
+  <linearGradient id="f" gradientUnits="userSpaceOnUse" x1="651" x2="651" xlink:href="#d" y1="20" y2="16"/>
+  <title>Prism Launcher Logo</title>
+  <metadata/>
+  <g transform="translate(-644 -4)">
+    <rect fill="url(#a)" height="22" ry="3" stroke-width=".277182" width="22" x="645" y="5"/>
+    <g stroke-width=".264583">
+      <rect fill="url(#b)" height="3" ry="1" width="6" x="653" y="20"/>
+      <rect fill="url(#c)" height="3" ry="1" width="16" x="648" y="22"/>
+      <rect fill="url(#e)" height="4" ry="1" width="6" x="659" y="16"/>
+      <rect fill="url(#f)" height="4" ry="1" width="6" x="647" y="16"/>
+      <rect fill="#0ff" height="2" width="2" x="661" y="17"/>
+    </g>
+    <rect fill="none" height="24" width="24" x="644" y="4"/>
+  </g>
+</svg>

@@ -1,111 +1,26 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   width="24"
-   height="24"
-   version="1.1"
-   viewBox="0 0 24 24"
-   id="svg168"
-   xml:space="preserve"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:dc="http://purl.org/dc/elements/1.1/"><defs
-     id="defs172"><linearGradient
-       id="linearGradient2085"><stop
-         style="stop-color:#261a0a;stop-opacity:1;"
-         offset="0"
-         id="stop2081" /><stop
-         style="stop-color:#3c2b13;stop-opacity:1;"
-         offset="1"
-         id="stop2083" /></linearGradient><radialGradient
-       xlink:href="#linearGradient2066"
-       id="radialGradient2757-3"
-       cx="496.06177"
-       cy="17.211182"
-       fx="495.87827"
-       fy="18.730774"
-       r="11"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(2.5554022,0,0,1.2337313,-807.57556,-8.2669434)" /><linearGradient
-       id="linearGradient2066"><stop
-         style="stop-color:#ceb8aa;stop-opacity:1;"
-         offset="0.23876573"
-         id="stop2062" /><stop
-         style="stop-color:#b39888;stop-opacity:1;"
-         offset="0.51858544"
-         id="stop2064" /></linearGradient><linearGradient
-       xlink:href="#linearGradient2085"
-       id="linearGradient94741"
-       gradientUnits="userSpaceOnUse"
-       x1="504"
-       y1="15"
-       x2="504"
-       y2="5"
-       gradientTransform="translate(-36,-4)" /><linearGradient
-       xlink:href="#linearGradient2564"
-       id="linearGradient2566"
-       x1="466"
-       y1="27"
-       x2="466"
-       y2="22"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(-4,-4)" /><linearGradient
-       id="linearGradient2564"><stop
-         style="stop-color:#45362e;stop-opacity:1;"
-         offset="0"
-         id="stop2560" /><stop
-         style="stop-color:#59463c;stop-opacity:1;"
-         offset="1"
-         id="stop2562" /></linearGradient></defs><title
-     id="title132">Prism Launcher Logo</title><metadata
-     id="metadata166"><rdf:RDF><cc:Work
-         rdf:about=""><dc:title>Prism Launcher Logo</dc:title><dc:date>19/10/2022</dc:date><dc:creator><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:creator><dc:contributor><cc:Agent><dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title></cc:Agent></dc:contributor><dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source><dc:rights><cc:Agent><dc:title>CC BY-SA 4.0</dc:title></cc:Agent></dc:rights><dc:publisher><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:publisher></cc:Work></rdf:RDF></metadata><g
-     id="i_herobrine"
-     transform="translate(-448)"><path
-       id="rect56542-7-5"
-       style="fill:url(#radialGradient2757-3);stroke-width:0.277182;paint-order:stroke markers fill;stop-color:#000000"
-       d="m 452,1 h 16 l 3,2.999999 V 20.000001 C 471,21.662 469.662,23 468,23 h -16 c -1.662,0 -3,-1.338 -3,-2.999999 V 3.999999 Z" /><path
-       id="rect56552"
-       style="fill:url(#linearGradient94741);fill-opacity:1;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       d="m 452,1 c -1.662,0 -3,1.3380017 -3,3 v 7 h 2 c 1.108,0 2,-0.892002 2,-2 V 8 h 14 v 1 c 0,1.107998 0.892,2 2,2 h 2 V 4 c 0,-1.6619983 -1.338,-3 -3,-3 h -1 -14 z" /><rect
-       style="opacity:1;fill:#8a5d54;fill-opacity:1;stroke:none;stroke-width:0.396874;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect53396"
-       width="6"
-       height="3"
-       x="457"
-       y="18"
-       ry="0" /><rect
-       style="fill:#ffffff;fill-opacity:1;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect63182-8-0"
-       width="7"
-       height="3"
-       x="462"
-       y="13"
-       ry="1" /><rect
-       style="fill:#ffffff;fill-opacity:1;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect63184-7-9"
-       width="7"
-       height="3"
-       x="451"
-       y="13"
-       ry="1" /><rect
-       style="opacity:1;fill:#6a493c;fill-opacity:1;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect50123"
-       width="4"
-       height="2"
-       x="458"
-       y="16"
-       ry="0" /><path
-       id="path195645-9"
-       style="fill:url(#linearGradient2566);fill-opacity:1;stroke:none;stroke-width:0.362295;paint-order:stroke markers fill;stop-color:#000000"
-       d="m 457,18 a 2,2 0 0 0 -2,2 v 3 h 3 4 3 v -3 a 2,2 0 0 0 -2,-2 h -1 v 2 h -4 v -2 z" /><rect
-       style="fill:#ffffff;fill-opacity:0;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect128412-8-3-9"
-       width="24"
-       height="24"
-       x="448"
-       y="0" /></g></svg>
+<svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <radialGradient id="a" cx="496.06177" cy="17.211182" fx="495.87827" fy="18.730774" gradientTransform="matrix(2.5554022 0 0 1.2337313 -807.57556 -8.266943)" gradientUnits="userSpaceOnUse" r="11">
+    <stop offset=".23876573" stop-color="#ceb8aa"/>
+    <stop offset=".51858544" stop-color="#b39888"/>
+  </radialGradient>
+  <linearGradient id="b" gradientUnits="userSpaceOnUse" x1="468" x2="468" y1="11" y2="1">
+    <stop offset="0" stop-color="#261a0a"/>
+    <stop offset="1" stop-color="#3c2b13"/>
+  </linearGradient>
+  <linearGradient id="c" gradientUnits="userSpaceOnUse" x1="462" x2="462" y1="23" y2="18">
+    <stop offset="0" stop-color="#45362e"/>
+    <stop offset="1" stop-color="#59463c"/>
+  </linearGradient>
+  <title>Prism Launcher Logo</title>
+  <metadata/>
+  <g transform="translate(-448)">
+    <path d="m452 1h16l3 2.999999v16.000002c0 1.661999-1.338 2.999999-3 2.999999h-16c-1.662 0-3-1.338-3-2.999999v-16.000002z" fill="url(#a)" stroke-width=".277182"/>
+    <path d="m452 1c-1.662 0-3 1.3380017-3 3v7h2c1.108 0 2-.892002 2-2v-1h14v1c0 1.107998.892 2 2 2h2v-7c0-1.6619983-1.338-3-3-3h-1-14z" fill="url(#b)"/>
+    <rect fill="#8a5d54" height="3" ry="0" width="6" x="457" y="18"/>
+    <rect fill="#fff" height="3" ry="1" stroke-width=".264583" width="7" x="462" y="13"/>
+    <rect fill="#fff" height="3" ry="1" stroke-width=".264583" width="7" x="451" y="13"/>
+    <rect fill="#6a493c" height="2" ry="0" width="4" x="458" y="16"/>
+    <path d="m457 18a2 2 0 0 0 -2 2v3h3 4 3v-3a2 2 0 0 0 -2-2h-1v2h-4v-2z" fill="url(#c)"/>
+    <rect fill="none" height="24" width="24" x="448"/>
+  </g>
+</svg>

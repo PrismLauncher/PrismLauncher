@@ -1,225 +1,35 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="1100"
-   height="1100"
-   id="svg2"
-   version="1.1"
-   inkscape:version="0.48.5 r10040"
-   sodipodi:docname="screenshots.svg"
-   inkscape:export-filename="/home/peterix/minecraft/src/MultiMC5/resources/multimc/16x16/screenshots.png"
-   inkscape:export-xdpi="1.3099999"
-   inkscape:export-ydpi="1.3099999">
-  <title
-     id="title3887">Golden Picture Frame</title>
-  <defs
-     id="defs4">
-    <linearGradient
-       id="linearGradient3871">
-      <stop
-         id="stop3873"
-         offset="0"
-         style="stop-color:#ffffff;stop-opacity:1;" />
-      <stop
-         style="stop-color:#604d00;stop-opacity:1;"
-         offset="0.24157524"
-         id="stop3875" />
-      <stop
-         id="stop3877"
-         offset="1"
-         style="stop-color:#745d00;stop-opacity:1;" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient3831">
-      <stop
-         style="stop-color:#fff2be;stop-opacity:1;"
-         offset="0"
-         id="stop3835" />
-      <stop
-         id="stop3839"
-         offset="0.5"
-         style="stop-color:#6a5500;stop-opacity:1;" />
-      <stop
-         id="stop3837"
-         offset="1"
-         style="stop-color:#745d00;stop-opacity:1;" />
-    </linearGradient>
-    <linearGradient
-       id="linearGradient3817">
-      <stop
-         style="stop-color:#ffffff;stop-opacity:1;"
-         offset="0"
-         id="stop3819" />
-      <stop
-         id="stop3825"
-         offset="0.39502749"
-         style="stop-color:#604d00;stop-opacity:1;" />
-      <stop
-         style="stop-color:#745d00;stop-opacity:1;"
-         offset="1"
-         id="stop3821" />
-    </linearGradient>
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3831"
-       id="linearGradient3821"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(2.3556705,0,0,2.3556705,-1198.3938,-507.60896)"
-       x1="568.4173"
-       y1="501.39673"
-       x2="588.28278"
-       y2="502.30829" />
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3817"
-       id="linearGradient3823"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(2.3556705,0,0,2.3556705,-1198.3938,-507.60896)"
-       x1="731.26221"
-       y1="376.98492"
-       x2="731.15552"
-       y2="364.66559" />
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3871"
-       id="linearGradient3825"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(2.3556705,0,0,2.3556705,-1198.3938,-507.60896)"
-       x1="883.03296"
-       y1="502.69846"
-       x2="897.77411"
-       y2="502.96545" />
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3831"
-       id="linearGradient3827"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(2.3556705,0,0,2.3556705,-1198.3938,-507.60896)"
-       x1="723.38055"
-       y1="621.29663"
-       x2="721.71783"
-       y2="661.40479" />
-  </defs>
-  <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="0.16698148"
-     inkscape:cx="-510.5746"
-     inkscape:cy="-1131.4434"
-     inkscape:document-units="px"
-     inkscape:current-layer="g3807"
-     showgrid="false"
-     inkscape:window-width="1612"
-     inkscape:window-height="1026"
-     inkscape:window-x="1677"
-     inkscape:window-y="-4"
-     inkscape:window-maximized="1"
-     fit-margin-top="0"
-     fit-margin-left="0"
-     fit-margin-right="0"
-     fit-margin-bottom="0"
-     inkscape:snap-bbox="true"
-     inkscape:bbox-paths="true"
-     inkscape:bbox-nodes="true"
-     inkscape:snap-bbox-midpoints="true"
-     inkscape:snap-bbox-edge-midpoints="true" />
-  <g
-     inkscape:label="Capa 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(31.270747,-9.54776)">
-    <g
-       id="g3017"
-       transform="matrix(-1.3082428,0,0,1.1906703,1197.3531,-130.52295)">
-      <g
-         id="g3807"
-         transform="translate(0,-102.53568)">
-        <rect
-           y="365.48618"
-           x="555.12488"
-           height="287.45703"
-           width="344.34955"
-           id="rect3017"
-           style="fill:#000000;fill-opacity:0.78921569"
-           transform="matrix(2.3556705,0,0,2.3556705,-1198.3938,-507.60896)" />
-        <rect
-           y="352.5882"
-           x="141.80692"
-           height="641.88568"
-           width="768.85199"
-           id="rect3019"
-           style="fill:#000000;fill-opacity:1" />
-        <rect
-           style="fill:#fff6d5;fill-opacity:1;stroke:#502d16;stroke-width:2.35567045"
-           id="rect3013"
-           width="723.00299"
-           height="599.56348"
-           x="164.73138"
-           y="374.21686" />
-        <rect
-           style="fill:none;stroke:#808000;stroke-width:2.35567045"
-           id="rect3009"
-           width="603.09033"
-           height="469.07022"
-           x="224.68771"
-           y="438.99588" />
-        <rect
-           style="fill:#999999;stroke:none"
-           id="rect3015"
-           width="553.71448"
-           height="419.69443"
-           x="249.37567"
-           y="463.68384" />
-        <path
-           id="path3802"
-           d="m 120.66044,334.92569 0,677.18161 811.16043,0 0,-677.18161 -811.16043,0 z m 21.12742,17.66753 768.90559,0 0,641.8466 -768.90559,0 0,-641.8466 z"
-           style="fill:#ffffff;fill-opacity:1;stroke:#502d16;stroke-width:2.35567045"
-           inkscape:connector-curvature="0" />
-        <path
-           style="fill:#554400;fill-opacity:1"
-           d="m 559.94852,357.66235 0,287.46875 344.34375,0 -0.43711,-287.04864 z m 8.96875,7.5 326.40625,0 0,272.46875 -326.40625,0 z"
-           id="rect3797"
-           inkscape:connector-curvature="0"
-           sodipodi:nodetypes="cccccccccc"
-           transform="matrix(2.3556705,0,0,2.3556705,-1198.3938,-507.60896)" />
-        <path
-           style="fill:url(#linearGradient3821);fill-opacity:1;stroke:none"
-           d="m 164.75566,973.3124 0,-599.59176 -22.9678,-21.12742 0,641.8466 z"
-           id="path3815"
-           inkscape:connector-curvature="0" />
-        <path
-           style="fill:url(#linearGradient3823);fill-opacity:1;stroke:none"
-           d="m 164.75566,373.72064 722.96999,0 22.9678,-21.12742 -768.90559,0 z"
-           id="path3813"
-           inkscape:connector-curvature="0" />
-        <path
-           style="fill:url(#linearGradient3825);fill-opacity:1;stroke:none"
-           d="m 887.72565,373.72064 0,599.59176 22.9678,21.12742 0,-641.8466 z"
-           id="path3811"
-           inkscape:connector-curvature="0" />
-        <path
-           style="fill:url(#linearGradient3827);fill-opacity:1;stroke:none"
-           d="m 887.72565,973.3124 -722.96999,0 -22.9678,21.12742 768.90559,0 z"
-           id="rect3804"
-           inkscape:connector-curvature="0" />
-        <image
-           y="463.68384"
-           x="-803.09015"
-           id="image3837"
-           xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAACiCAIAAAAhs4RgAAAAA3NCSVQICAjb4U/gAAAgAElEQVR4
+<svg height="1100" width="1100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <linearGradient id="a">
+    <stop offset="0" stop-color="#fff2be"/>
+    <stop offset=".5" stop-color="#6a5500"/>
+    <stop offset="1" stop-color="#745d00"/>
+  </linearGradient>
+  <linearGradient id="b" gradientUnits="userSpaceOnUse" x1="140.610065" x2="187.406591" xlink:href="#a" y1="673.516526" y2="675.663861"/>
+  <linearGradient id="c" gradientUnits="userSpaceOnUse" x1="524.219016" x2="523.967689" y1="380.443295" y2="351.423013">
+    <stop offset="0" stop-color="#fff"/>
+    <stop offset=".39502749" stop-color="#604d00"/>
+    <stop offset="1" stop-color="#745d00"/>
+  </linearGradient>
+  <linearGradient id="d" gradientUnits="userSpaceOnUse" x1="881.740894" x2="916.466187" y1="676.582973" y2="677.211913">
+    <stop offset="0" stop-color="#fff"/>
+    <stop offset=".24157524" stop-color="#604d00"/>
+    <stop offset="1" stop-color="#745d00"/>
+  </linearGradient>
+  <linearGradient id="e" gradientUnits="userSpaceOnUse" x1="505.652422" x2="501.735601" xlink:href="#a" y1="955.961183" y2="1050.442792"/>
+  <title>Golden Picture Frame</title>
+  <g transform="matrix(-1.3082428 0 0 1.1906703 1228.623847 -262.156899)">
+    <rect fill-opacity=".789216" height="677.154046" stroke-width="2.355671" width="811.174077" x="109.297504" y="353.356052"/>
+    <rect height="641.88568" width="768.85199" x="141.80692" y="352.5882"/>
+    <rect fill="#fff6d5" height="599.56348" stroke="#502d16" stroke-width="2.35567" width="723.00299" x="164.73138" y="374.21686"/>
+    <rect fill="none" height="469.07022" stroke="#808000" stroke-width="2.35567" width="603.09033" x="224.68771" y="438.99588"/>
+    <rect fill="#999" height="419.69443" width="553.71448" x="249.37567" y="463.68384"/>
+    <path d="m120.66044 334.92569v677.18161h811.16043v-677.18161zm21.12742 17.66753h768.90559v641.8466h-768.90559z" fill="#fff" stroke="#502d16" stroke-width="2.35567"/>
+    <path d="m559.94852 357.66235v287.46875h344.34375l-.43711-287.04864zm8.96875 7.5h326.40625v272.46875h-326.40625z" fill="#540" transform="matrix(2.3556705 0 0 2.3556705 -1198.3938 -507.60896)"/>
+    <path d="m164.75566 973.3124v-599.59176l-22.9678-21.12742v641.8466z" fill="url(#b)"/>
+    <path d="m164.75566 373.72064h722.96999l22.9678-21.12742h-768.90559z" fill="url(#c)"/>
+    <path d="m887.72565 373.72064v599.59176l22.9678 21.12742v-641.8466z" fill="url(#d)"/>
+    <path d="m887.72565 973.3124h-722.96999l-22.9678 21.12742h768.90559z" fill="url(#e)"/>
+    <image height="419.69443" transform="scale(-1 1)" width="553.71448" x="-803.09015" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAACiCAIAAAAhs4RgAAAAA3NCSVQICAjb4U/gAAAgAElEQVR4
 nOy9aYxk2XUmds65974ttszIrTJr6eq9m91NSqQkihI1tkRDgG1BgM3xGJLGY8jwAB4YXjAYj2AD
 hjTzz/YPWwNj7LFmPCMZIk1JlkYLRQ4XSVzEnewm2c1mVy+1ZmXlEnvEW+5yjn+8rOqsLTOrKrur
 uHwIoKIiX7x334tz7j3Ld87F3/2Tz8D3IBBB5H4PAgAAELHZbCZJcu0TFjiTL58vuwB4Hwf24OAx
@@ -1168,64 +978,7 @@ rudtfd3u7tJ8iLW0EKR73x7uRzP/9F+v6yXfZucOIrxedkBoRXvr3B3jusYqF3MHCbwtmYiGOY1z
 svd6Ka+lbHWcIzEd30xpjL0vL3tBukXHOcDysn7896daWsTfSG9+7o20FEImhBAEHJjAHM1ABGsz
 CRLmQ392OUSZJmutZ664KQubOZiaOQk7IIEzEQD8IhUYe7Xz9QYkIaSvftEitxR7FmJBcDQVoi5D
 IwBEQDfQZm4yjsjS41Y5JiQGa0wYY2AhMCVCpu7fBcSMwhQCMpmaxNhyQdNOIHGMQZhCVFME/G8K
-+1s8lHyeawAAAABJRU5ErkJggg==
-"
-           height="419.69443"
-           width="553.71448"
-           transform="scale(-1,1)" />
-      </g>
-    </g>
++1s8lHyeawAAAABJRU5ErkJggg==" y="463.68384"/>
   </g>
-  <metadata
-     id="metadata40">
-    <rdf:RDF>
-      <cc:Work>
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <cc:license
-           rdf:resource="http://creativecommons.org/licenses/publicdomain/" />
-        <dc:publisher>
-          <cc:Agent
-             rdf:about="http://openclipart.org/">
-            <dc:title>Open Clip Art Library</dc:title>
-          </cc:Agent>
-        </dc:publisher>
-        <dc:title>Golden Picture Frame</dc:title>
-        <dc:date>2012-05-24T10:08:07</dc:date>
-        <dc:description>Golden picture frame, Landscape</dc:description>
-        <dc:source>http://openclipart.org/detail/170182/golden-picture-frame-by-tasper</dc:source>
-        <dc:creator>
-          <cc:Agent>
-            <dc:title>tasper</dc:title>
-          </cc:Agent>
-        </dc:creator>
-        <dc:subject>
-          <rdf:Bag>
-            <rdf:li>clip art</rdf:li>
-            <rdf:li>clipart</rdf:li>
-            <rdf:li>frame</rdf:li>
-            <rdf:li>golden</rdf:li>
-            <rdf:li>landscape</rdf:li>
-            <rdf:li>photo</rdf:li>
-            <rdf:li>picture</rdf:li>
-          </rdf:Bag>
-        </dc:subject>
-        <dc:contributor>
-          <cc:Agent>
-            <dc:title>edited by Paul Sherman</dc:title>
-          </cc:Agent>
-        </dc:contributor>
-      </cc:Work>
-      <cc:License
-         rdf:about="http://creativecommons.org/licenses/publicdomain/">
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#Reproduction" />
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#Distribution" />
-        <cc:permits
-           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
-      </cc:License>
-    </rdf:RDF>
-  </metadata>
+  <metadata/>
 </svg>
