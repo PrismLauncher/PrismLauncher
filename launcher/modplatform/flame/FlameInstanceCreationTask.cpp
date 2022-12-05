@@ -393,14 +393,14 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     if (anyBlocked) {
         qWarning() << "Blocked mods found, displaying mod list";
 
-        auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked mods found"),
+        BlockedModsDialog message_dialog(m_parent, tr("Blocked mods found"),
                                                     tr("The following files are not available for download in third party launchers.<br/>"
                                                        "You will need to manually download them and add them to the instance."),
                                                     blocked_mods);
 
-        message_dialog->setModal(true);
+        message_dialog.setModal(true);
 
-        if (message_dialog->exec()) {
+        if (message_dialog.exec()) {
             qDebug() << "Post dialog blocked mods list: " << blocked_mods;
             copyBlockedMods(blocked_mods);
             setupDownloadJob(loop);
