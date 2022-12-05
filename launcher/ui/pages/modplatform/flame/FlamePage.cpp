@@ -217,12 +217,16 @@ void FlamePage::suggestCurrent()
 
 void FlamePage::onVersionSelectionChanged(QString data)
 {
-    if (data.isNull() || data.isEmpty()) {
+    bool is_blocked = false;
+    ui->versionSelectionBox->currentData().toInt(&is_blocked);
+
+    if (data.isNull() || data.isEmpty() || is_blocked) {
         m_selected_version_index = -1;
         return;
     }
 
     m_selected_version_index = ui->versionSelectionBox->currentIndex();
+
     Q_ASSERT(current.versions.at(m_selected_version_index).downloadUrl == ui->versionSelectionBox->currentData().toString());
 
     suggestCurrent();
