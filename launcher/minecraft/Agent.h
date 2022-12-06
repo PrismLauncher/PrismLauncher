@@ -10,7 +10,7 @@ typedef std::shared_ptr<Agent> AgentPtr;
 
 class Agent {
 public:
-    Agent(LibraryPtr library, QString &argument)
+    Agent(LibraryPtr library, const QString &argument)
     {
         m_library = library;
         m_argument = argument;

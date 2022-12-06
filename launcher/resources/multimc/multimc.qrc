@@ -28,14 +28,14 @@
         <!-- Java icon. From Oracle, fixed because it was derpy. -->
         <file>scalable/java.svg</file>
 
-        <!-- Star, CC-BY-SA 3.0, Oxygen icons.-->
+        <!-- Star, LGPL3, Oxygen icons.-->
         <file>16x16/star.png</file>
         <file>24x24/star.png</file>
         <file>32x32/star.png</file>
         <file>48x48/star.png</file>
         <file>64x64/star.png</file>
 
-        <!-- "folder-remote", CC-BY-SA 3.0, Oxygen icons. Used for the worlds folder-->
+        <!-- "folder-remote", LGPL3, Oxygen icons. Used for the worlds folder-->
         <file>16x16/worlds.png</file>
         <file>22x22/worlds.png</file>
         <file>32x32/worlds.png</file>
@@ -84,7 +84,7 @@
         <file>48x48/cat.png</file>
         <file>64x64/cat.png</file>
 
-        <!-- Show mods folder. CC-BY-SA 3.0 http://openiconlibrary.sourceforge.net/gallery2/?./Icons/places/oxygen-style/folder-favorites.png -->
+        <!-- Show mods folder. LGPL3 http://openiconlibrary.sourceforge.net/gallery2/?./Icons/places/oxygen-style/folder-favorites.png -->
         <file>scalable/centralmods.svg</file>
         <file>16x16/centralmods.png</file>
         <file>22x22/centralmods.png</file>
@@ -162,25 +162,25 @@
         <file>64x64/status-running.png</file>
         <file>scalable/status-running.svg</file>
 
-        <!-- Plugin (blue recolor), CC-BY-SA 3.0, Oxygen icons. -->
+        <!-- Plugin (blue recolor), LGPL3, Oxygen icons. -->
         <file>16x16/loadermods.png</file>
         <file>24x24/loadermods.png</file>
         <file>32x32/loadermods.png</file>
         <file>64x64/loadermods.png</file>
 
-        <!-- Plugin (red recolor), CC-BY-SA 3.0, Oxygen icons. -->
+        <!-- Plugin (red recolor), LGPL3, Oxygen icons. -->
         <file>16x16/jarmods.png</file>
         <file>24x24/jarmods.png</file>
         <file>32x32/jarmods.png</file>
         <file>64x64/jarmods.png</file>
 
-        <!-- Plugin (green original), CC-BY-SA 3.0, Oxygen icons. -->
+        <!-- Plugin (green original), LGPL3, Oxygen icons. -->
         <file>16x16/coremods.png</file>
         <file>24x24/coremods.png</file>
         <file>32x32/coremods.png</file>
         <file>64x64/coremods.png</file>
 
-        <!-- Resource packs, CC-BY-SA 3.0, Oxygen icons. -->
+        <!-- Resource packs, LGPL3, Oxygen icons. -->
         <file>16x16/resourcepacks.png</file>
         <file>24x24/resourcepacks.png</file>
         <file>32x32/resourcepacks.png</file>
@@ -189,7 +189,7 @@
         <!-- Resource packs, CC-BY-SA 3.0, Oxygen icons. -->
         <file>128x128/shaderpacks.png</file>
 
-        <!-- Refresh, CC-BY-SA 3.0, Oxygen icons. -->
+        <!-- Refresh, LGPL3, Oxygen icons. -->
         <file>16x16/refresh.png</file>
         <file>22x22/refresh.png</file>
         <file>32x32/refresh.png</file>
@@ -338,7 +338,7 @@
         <file>scalable/instances/fox_legacy.svg</file>
         <file>scalable/instances/bee_legacy.svg</file>
 
-        <!-- delete, tag, rename, shortcut CC-BY-SA 3.0, Oxygen icons.-->
+        <!-- delete, tag, rename, shortcut and server LGPL3, Oxygen icons.-->
         <file>scalable/delete.svg</file>
         <file>scalable/tag.svg</file>
         <file>scalable/rename.svg</file>
@@ -346,5 +346,6 @@
 
         <file>scalable/export.svg</file>
         <file>scalable/launch.svg</file>
+        <file>scalable/server.svg</file>
     </qresource>
 </RCC>

@@ -72,6 +72,7 @@
 
 #include <BaseInstance.h>
 #include <InstanceList.h>
+#include <minecraft/MinecraftInstance.h>
 #include <MMCZip.h>
 #include <icons/IconList.h>
 #include <java/JavaUtils.h>
@@ -107,7 +108,13 @@
 #include "ui/dialogs/UpdateDialog.h"
 #include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
+#include "ui/dialogs/ImportResourcePackDialog.h"
 #include "ui/themes/ITheme.h"
+
+#include <minecraft/mod/ResourcePackFolderModel.h>
+#include <minecraft/mod/tasks/LocalResourcePackParseTask.h>
+#include <minecraft/mod/TexturePackFolderModel.h>
+#include <minecraft/mod/tasks/LocalTexturePackParseTask.h>
 
 #include "UpdateController.h"
 #include "KonamiCode.h"
@@ -1808,17 +1815,41 @@ void MainWindow::on_actionAddInstance_triggered()
 
 void MainWindow::droppedURLs(QList<QUrl> urls)
 {
-    for(auto & url:urls)
-    {
-        if(url.isLocalFile())
-        {
-            addInstance(url.toLocalFile());
-        }
-        else
-        {
+    // NOTE: This loop only processes one dropped file!
+    for (auto& url : urls) {
+        // The isLocalFile() check below doesn't work as intended without an explicit scheme.
+        if (url.scheme().isEmpty())
+            url.setScheme("file");
+
+        if (!url.isLocalFile()) {  // probably instance/modpack
             addInstance(url.toString());
+            break;
         }
-        // Only process one dropped file...
+
+        auto localFileName = url.toLocalFile();
+        QFileInfo localFileInfo(localFileName);
+
+        bool isResourcePack = ResourcePackUtils::validate(localFileInfo);
+        bool isTexturePack = TexturePackUtils::validate(localFileInfo);
+
+        if (!isResourcePack && !isTexturePack) {  // probably instance/modpack
+            addInstance(localFileName);
+            break;
+        }
+
+        ImportResourcePackDialog dlg(this);
+
+        if (dlg.exec() != QDialog::Accepted)
+            break;
+
+        qDebug() << "Adding resource/texture pack" << localFileName << "to" << dlg.selectedInstanceKey;
+
+        auto inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
+        auto minecraftInst = std::dynamic_pointer_cast<MinecraftInstance>(inst);
+        if (isResourcePack)
+            minecraftInst->resourcePackList()->installResource(localFileName);
+        else if (isTexturePack)
+            minecraftInst->texturePackList()->installResource(localFileName);
         break;
     }
 }
@@ -2057,27 +2088,25 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionDeleteInstance_triggered()
 {
-    if (!m_selectedInstance)
-    {
+    if (!m_selectedInstance) {
         return;
     }
 
     auto id = m_selectedInstance->id();
-    if (APPLICATION->instances()->trashInstance(id)) {
-        ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        return;
-    }
-    
-    auto response = CustomMessageBox::selectable(
-        this,
-        tr("CAREFUL!"),
-        tr("About to delete: %1\nThis is permanent and will completely delete the instance.\n\nAre you sure?").arg(m_selectedInstance->name()),
-        QMessageBox::Warning,
-        QMessageBox::Yes | QMessageBox::No,
-        QMessageBox::No
-    )->exec();
-    if (response == QMessageBox::Yes)
-    {
+
+    auto response =
+        CustomMessageBox::selectable(this, tr("CAREFUL!"),
+                                     tr("About to delete: %1\nThis may be permanent and will completely delete the instance.\n\nAre you sure?")
+                                         .arg(m_selectedInstance->name()),
+                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+            ->exec();
+
+    if (response == QMessageBox::Yes) {
+        if (APPLICATION->instances()->trashInstance(id)) {
+            ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
+            return;
+        }
+
         APPLICATION->instances()->deleteInstance(id);
     }
 }
