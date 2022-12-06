@@ -189,7 +189,6 @@ void PackInstallTask::onResolveModsSucceeded()
 
         // First check for blocked mods
         if (!results_file.resolved || results_file.url.isEmpty()) {
-
             BlockedMod blocked_mod;
             blocked_mod.name = local_file.name;
             blocked_mod.websiteUrl = results_file.websiteUrl;
@@ -211,9 +210,9 @@ void PackInstallTask::onResolveModsSucceeded()
         qDebug() << "Blocked files found, displaying file list";
 
         BlockedModsDialog message_dialog(m_parent, tr("Blocked files found"),
-                                                    tr("The following files are not available for download in third party launchers.<br/>"
-                                                       "You will need to manually download them and add them to the instance."),
-                                                    m_blocked_mods);
+                                         tr("The following files are not available for download in third party launchers.<br/>"
+                                            "You will need to manually download them and add them to the instance."),
+                                         m_blocked_mods);
 
         message_dialog.setModal(true);
 

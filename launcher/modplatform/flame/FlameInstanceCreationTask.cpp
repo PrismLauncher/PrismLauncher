@@ -72,7 +72,8 @@ bool FlameCreationTask::updateInstance()
         tr("One or more of your instances are from this same modpack%1. Do you want to create a "
            "separate instance, or update the existing one?\n\nNOTE: Make sure you made a backup of your important instance data before "
            "updating, as worlds can be corrupted and some configuration may be lost (due to pack overrides).")
-            .arg(version_str), QMessageBox::Information, QMessageBox::Ok | QMessageBox::Reset | QMessageBox::Abort);
+            .arg(version_str),
+        QMessageBox::Information, QMessageBox::Ok | QMessageBox::Reset | QMessageBox::Abort);
     info->setButtonText(QMessageBox::Ok, tr("Update existing instance"));
     info->setButtonText(QMessageBox::Abort, tr("Create new instance"));
     info->setButtonText(QMessageBox::Reset, tr("Cancel"));
@@ -197,10 +198,10 @@ bool FlameCreationTask::updateInstance()
         m_process_update_file_info_job = nullptr;
     } else {
         // We don't have an old index file, so we may duplicate stuff!
-        auto dialog = CustomMessageBox::selectable(m_parent,
-                tr("No index file."),
-                tr("We couldn't find a suitable index file for the older version. This may cause some of the files to be duplicated. Do you want to continue?"),
-                QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
+        auto dialog = CustomMessageBox::selectable(m_parent, tr("No index file."),
+                                                   tr("We couldn't find a suitable index file for the older version. This may cause some "
+                                                      "of the files to be duplicated. Do you want to continue?"),
+                                                   QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
 
         if (dialog->exec() == QDialog::DialogCode::Rejected) {
             m_abort = true;
@@ -377,7 +378,6 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     auto anyBlocked = false;
     for (const auto& result : results.files.values()) {
         if (!result.resolved || result.url.isEmpty()) {
-
             BlockedMod blocked_mod;
             blocked_mod.name = result.fileName;
             blocked_mod.websiteUrl = result.websiteUrl;
@@ -394,9 +394,9 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         qWarning() << "Blocked mods found, displaying mod list";
 
         BlockedModsDialog message_dialog(m_parent, tr("Blocked mods found"),
-                                                    tr("The following files are not available for download in third party launchers.<br/>"
-                                                       "You will need to manually download them and add them to the instance."),
-                                                    blocked_mods);
+                                         tr("The following files are not available for download in third party launchers.<br/>"
+                                            "You will need to manually download them and add them to the instance."),
+                                         blocked_mods);
 
         message_dialog.setModal(true);
 
@@ -484,9 +484,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     }
 
     m_mod_id_resolver.reset();
-    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
-        m_files_job.reset();
-    });
+    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() { m_files_job.reset(); });
     connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
         m_files_job.reset();
         setError(reason);
