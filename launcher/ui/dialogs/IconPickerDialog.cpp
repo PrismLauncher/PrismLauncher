@@ -112,6 +112,9 @@ void IconPickerDialog::addNewIcon()
 
 void IconPickerDialog::removeSelectedIcon()
 {
+    if (APPLICATION->icons()->trashIcon(selectedIconKey))
+        return;
+
     APPLICATION->icons()->deleteIcon(selectedIconKey);
 }
 
