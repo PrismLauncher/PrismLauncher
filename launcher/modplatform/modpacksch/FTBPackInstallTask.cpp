@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
@@ -189,7 +189,6 @@ void PackInstallTask::onResolveModsSucceeded()
 
         // First check for blocked mods
         if (!results_file.resolved || results_file.url.isEmpty()) {
-
             BlockedMod blocked_mod;
             blocked_mod.name = local_file.name;
             blocked_mod.websiteUrl = results_file.websiteUrl;
@@ -210,12 +209,14 @@ void PackInstallTask::onResolveModsSucceeded()
     if (anyBlocked) {
         qDebug() << "Blocked files found, displaying file list";
 
-        auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked files found"),
-                                                    tr("The following files are not available for download in third party launchers.<br/>"
-                                                       "You will need to manually download them and add them to the instance."),
-                                                    m_blocked_mods);
+        BlockedModsDialog message_dialog(m_parent, tr("Blocked files found"),
+                                         tr("The following files are not available for download in third party launchers.<br/>"
+                                            "You will need to manually download them and add them to the instance."),
+                                         m_blocked_mods);
 
-        if (message_dialog->exec() == QDialog::Accepted) {
+        message_dialog.setModal(true);
+
+        if (message_dialog.exec() == QDialog::Accepted) {
             qDebug() << "Post dialog blocked mods list: " << m_blocked_mods;
             createInstance();
         } else {

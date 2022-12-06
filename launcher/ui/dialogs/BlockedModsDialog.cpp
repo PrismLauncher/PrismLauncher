@@ -79,6 +79,12 @@ void BlockedModsDialog::dropEvent(QDropEvent* e)
     update();
 }
 
+void BlockedModsDialog::done(int r)
+{
+    QDialog::done(r);
+    disconnect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &BlockedModsDialog::directoryChanged);
+}
+
 void BlockedModsDialog::openAll()
 {
     for (auto& mod : m_mods) {

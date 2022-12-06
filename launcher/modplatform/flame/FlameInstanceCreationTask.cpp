@@ -1,3 +1,38 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 #include "FlameInstanceCreationTask.h"
 
 #include "modplatform/flame/FlameAPI.h"
@@ -72,7 +107,8 @@ bool FlameCreationTask::updateInstance()
         tr("One or more of your instances are from this same modpack%1. Do you want to create a "
            "separate instance, or update the existing one?\n\nNOTE: Make sure you made a backup of your important instance data before "
            "updating, as worlds can be corrupted and some configuration may be lost (due to pack overrides).")
-            .arg(version_str), QMessageBox::Information, QMessageBox::Ok | QMessageBox::Reset | QMessageBox::Abort);
+            .arg(version_str),
+        QMessageBox::Information, QMessageBox::Ok | QMessageBox::Reset | QMessageBox::Abort);
     info->setButtonText(QMessageBox::Ok, tr("Update existing instance"));
     info->setButtonText(QMessageBox::Abort, tr("Create new instance"));
     info->setButtonText(QMessageBox::Reset, tr("Cancel"));
@@ -197,10 +233,10 @@ bool FlameCreationTask::updateInstance()
         m_process_update_file_info_job = nullptr;
     } else {
         // We don't have an old index file, so we may duplicate stuff!
-        auto dialog = CustomMessageBox::selectable(m_parent,
-                tr("No index file."),
-                tr("We couldn't find a suitable index file for the older version. This may cause some of the files to be duplicated. Do you want to continue?"),
-                QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
+        auto dialog = CustomMessageBox::selectable(m_parent, tr("No index file."),
+                                                   tr("We couldn't find a suitable index file for the older version. This may cause some "
+                                                      "of the files to be duplicated. Do you want to continue?"),
+                                                   QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
 
         if (dialog->exec() == QDialog::DialogCode::Rejected) {
             m_abort = true;
@@ -377,7 +413,6 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     auto anyBlocked = false;
     for (const auto& result : results.files.values()) {
         if (!result.resolved || result.url.isEmpty()) {
-
             BlockedMod blocked_mod;
             blocked_mod.name = result.fileName;
             blocked_mod.websiteUrl = result.websiteUrl;
@@ -393,14 +428,14 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     if (anyBlocked) {
         qWarning() << "Blocked mods found, displaying mod list";
 
-        auto message_dialog = new BlockedModsDialog(m_parent, tr("Blocked mods found"),
-                                                    tr("The following files are not available for download in third party launchers.<br/>"
-                                                       "You will need to manually download them and add them to the instance."),
-                                                    blocked_mods);
+        BlockedModsDialog message_dialog(m_parent, tr("Blocked mods found"),
+                                         tr("The following files are not available for download in third party launchers.<br/>"
+                                            "You will need to manually download them and add them to the instance."),
+                                         blocked_mods);
 
-        message_dialog->setModal(true);
+        message_dialog.setModal(true);
 
-        if (message_dialog->exec()) {
+        if (message_dialog.exec()) {
             qDebug() << "Post dialog blocked mods list: " << blocked_mods;
             copyBlockedMods(blocked_mods);
             setupDownloadJob(loop);
@@ -484,9 +519,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     }
 
     m_mod_id_resolver.reset();
-    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
-        m_files_job.reset();
-    });
+    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() { m_files_job.reset(); });
     connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
         m_files_job.reset();
         setError(reason);
