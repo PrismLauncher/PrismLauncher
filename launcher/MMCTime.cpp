@@ -28,11 +28,11 @@ QString Time::prettifyDuration(int64_t duration) {
     int days = (int) (duration / 24);
     if((hours == 0)&&(days == 0))
     {
-        return QObject::tr("%1m %2s").arg(minutes).arg(seconds);
+        return QObject::tr("%1min %2s").arg(minutes).arg(seconds);
     }
     if (days == 0)
     {
-        return QObject::tr("%1h %2m").arg(hours).arg(minutes);
+        return QObject::tr("%1h %2min").arg(hours).arg(minutes);
     }
-    return QObject::tr("%1d %2h %3m").arg(days).arg(hours).arg(minutes);
+    return QObject::tr("%1d %2h %3min").arg(days).arg(hours).arg(minutes);
 }
