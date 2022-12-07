@@ -54,9 +54,9 @@ public:
     {
         setSpecificSettingsLoaded(true);
     }
-    QString getStatusbarDescription() override
+    QString getMainVersion() override
     {
-        return tr("Unknown instance type");
+        return tr("Unknown");
     };
     QSet< QString > traits() const override
     {

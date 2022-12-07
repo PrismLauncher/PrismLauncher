@@ -53,10 +53,8 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QButtonGroup>
-#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QMainWindow>
-#include <QStatusBar>
 #include <QToolBar>
 #include <QWidget>
 #include <QMenu>
@@ -64,11 +62,13 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QLineEdit>
 #include <QLabel>
 #include <QToolButton>
 #include <QWidgetAction>
 #include <QProgressDialog>
 #include <QShortcut>
+#include <QVBoxLayout>
 
 #include <BaseInstance.h>
 #include <InstanceList.h>
@@ -93,21 +93,19 @@
 #include "JavaCommon.h"
 #include "LaunchController.h"
 
-#include "ui/instanceview/InstanceProxyModel.h"
-#include "ui/instanceview/InstanceView.h"
-#include "ui/instanceview/InstanceDelegate.h"
-#include "ui/widgets/LabeledToolButton.h"
+#include "ui/dialogs/AboutDialog.h"
+#include "ui/dialogs/CopyInstanceDialog.h"
+#include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/EditAccountDialog.h"
+#include "ui/dialogs/ExportInstanceDialog.h"
+#include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
-#include "ui/dialogs/AboutDialog.h"
-#include "ui/dialogs/VersionSelectDialog.h"
-#include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/IconPickerDialog.h"
-#include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/UpdateDialog.h"
-#include "ui/dialogs/EditAccountDialog.h"
-#include "ui/dialogs/ExportInstanceDialog.h"
+#include "ui/dialogs/VersionSelectDialog.h"
+#include "ui/instanceview/InstancesView.h"
+#include "ui/widgets/LabeledToolButton.h"
 #include "ui/dialogs/ImportResourcePackDialog.h"
 #include "ui/themes/ITheme.h"
 
@@ -117,7 +115,6 @@
 #include <minecraft/mod/tasks/LocalTexturePackParseTask.h>
 
 #include "UpdateController.h"
-#include "KonamiCode.h"
 
 #include "InstanceImportTask.h"
 #include "InstanceCopyTask.h"
@@ -243,6 +240,8 @@ public:
     TranslatedAction actionViewSelectedInstFolder;
     TranslatedAction actionDeleteInstance;
     TranslatedAction actionCAT;
+    TranslatedAction actionTableMode;
+    TranslatedAction actionGridMode;
     TranslatedAction actionCopyInstance;
     TranslatedAction actionLaunchInstanceOffline;
     TranslatedAction actionLaunchInstanceDemo;
@@ -283,8 +282,7 @@ public:
     QVector<TranslatedToolButton *> all_toolbuttons;
 
     QWidget *centralWidget = nullptr;
-    QHBoxLayout *horizontalLayout = nullptr;
-    QStatusBar *statusBar = nullptr;
+    QVBoxLayout *verticalLayout = nullptr;
 
     QMenuBar *menuBar = nullptr;
     QMenu *fileMenu;
@@ -437,6 +435,24 @@ public:
         actionCAT->setPriority(QAction::LowPriority);
         all_actions.append(&actionCAT);
 
+        actionTableMode = TranslatedAction(MainWindow);
+        actionTableMode->setObjectName(QStringLiteral("actionTableMode"));
+        actionTableMode->setCheckable(true);
+        actionTableMode->setIcon(APPLICATION->getThemedIcon("view-list-symbolic")); // FIXME: add custom icon
+        actionTableMode.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Table View"));
+        actionTableMode.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Display instances in a table"));
+        actionTableMode->setPriority(QAction::LowPriority);
+        all_actions.append(&actionTableMode);
+
+        actionGridMode = TranslatedAction(MainWindow);
+        actionGridMode->setObjectName(QStringLiteral("actionGridMode"));
+        actionGridMode->setCheckable(true);
+        actionGridMode->setIcon(APPLICATION->getThemedIcon("view-grid-symbolic")); // FIXME: add custom icon
+        actionGridMode.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Grid View"));
+        actionGridMode.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Display instances in a grid"));
+        actionGridMode->setPriority(QAction::LowPriority);
+        all_actions.append(&actionGridMode);
+
         // profile menu and its actions
         actionManageAccounts = TranslatedAction(MainWindow);
         actionManageAccounts->setObjectName(QStringLiteral("actionManageAccounts"));
@@ -527,6 +543,9 @@ public:
 
         mainToolBar->addAction(actionCAT);
 
+        mainToolBar->addAction(actionTableMode);
+        mainToolBar->addAction(actionGridMode);
+
         all_toolbars.append(&mainToolBar);
         MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
     }
@@ -562,6 +581,8 @@ public:
         viewMenu->addAction(actionChangeTheme);
         viewMenu->addSeparator();
         viewMenu->addAction(actionCAT);
+        viewMenu->addAction(actionTableMode);
+        viewMenu->addAction(actionGridMode);
         viewMenu->addSeparator();
 
         viewMenu->addAction(actionLockToolbars);
@@ -637,13 +658,6 @@ public:
         actionDeleteInstance->setEnabled(enabled);
         actionCopyInstance->setEnabled(enabled);
         actionCreateInstanceShortcut->setEnabled(enabled);
-    }
-
-    void createStatusBar(QMainWindow *MainWindow)
-    {
-        statusBar = new QStatusBar(MainWindow);
-        statusBar->setObjectName(QStringLiteral("statusBar"));
-        MainWindow->setStatusBar(statusBar);
     }
 
     void createNewsToolbar(QMainWindow *MainWindow)
@@ -737,8 +751,8 @@ public:
 
         actionChangeInstGroup = TranslatedAction(MainWindow);
         actionChangeInstGroup->setObjectName(QStringLiteral("actionChangeInstGroup"));
-        actionChangeInstGroup.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Change Group..."));
-        actionChangeInstGroup.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the selected instance's group."));
+        actionChangeInstGroup.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Change category..."));
+        actionChangeInstGroup.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the selected instance's category."));
         actionChangeInstGroup->setShortcut(QKeySequence(tr("Ctrl+G")));
         actionChangeInstGroup->setIcon(APPLICATION->getThemedIcon("tag"));
         all_actions.append(&actionChangeInstGroup);
@@ -861,14 +875,13 @@ public:
 
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
-        horizontalLayout = new QHBoxLayout(centralWidget);
-        horizontalLayout->setSpacing(0);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        horizontalLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
-        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+        verticalLayout = new QVBoxLayout(centralWidget);
+        verticalLayout->setSpacing(0);
+        verticalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        verticalLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+        verticalLayout->setContentsMargins(0, 0, 0, 0);
         MainWindow->setCentralWidget(centralWidget);
 
-        createStatusBar(MainWindow);
         createNewsToolbar(MainWindow);
         createInstanceToolbar(MainWindow);
 
@@ -898,12 +911,6 @@ public:
         // submenu buttons
         foldersMenuButton->setText(tr("Folders"));
         helpMenuButton->setText(tr("Help"));
-
-        // playtime counter
-        if (MainWindow->m_statusCenter)
-        {
-            MainWindow->updateStatusCenter();
-        }
     } // retranslateUi
 };
 
@@ -921,12 +928,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         connect(q, SIGNAL(activated()), qApp, SLOT(quit()));
     }
 
-    // Konami Code
-    {
-        secretEventFilter = new KonamiCode(this);
-        connect(secretEventFilter, &KonamiCode::triggered, this, &MainWindow::konamiTriggered);
-    }
-
     // Add the news label to the news toolbar.
     {
         m_newsChecker.reset(new NewsChecker(APPLICATION->network(), BuildConfig.NEWS_RSS_URL));
@@ -941,33 +942,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         updateNewsLabel();
     }
 
+    // Create instance list filter box
+    {
+        filterView = new QLineEdit(ui->centralWidget);
+        filterView->setPlaceholderText(tr("Search and filter..."));
+
+        ui->verticalLayout->addWidget(filterView);
+    }
+
     // Create the instance list widget
     {
-        view = new InstanceView(ui->centralWidget);
+        view = new InstancesView(ui->centralWidget, APPLICATION->instances().get());
 
-        view->setSelectionMode(QAbstractItemView::SingleSelection);
-        // FIXME: leaks ListViewDelegate
-        view->setItemDelegate(new ListViewDelegate(this));
-        view->setFrameShape(QFrame::NoFrame);
-        // do not show ugly blue border on the mac
-        view->setAttribute(Qt::WA_MacShowFocusRect, false);
+        connect(view, &InstancesView::showContextMenu, this, &MainWindow::showInstanceContextMenu);
+        connect(view, &InstancesView::refreshInstances, this, &MainWindow::refreshInstances);
+        connect(filterView, &QLineEdit::textEdited, view, &InstancesView::setFilterQuery);
 
-        view->installEventFilter(this);
-        view->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(view, &QWidget::customContextMenuRequested, this, &MainWindow::showInstanceContextMenu);
-        connect(view, &InstanceView::droppedURLs, this, &MainWindow::droppedURLs, Qt::QueuedConnection);
-
-        proxymodel = new InstanceProxyModel(this);
-        proxymodel->setSourceModel(APPLICATION->instances().get());
-        proxymodel->sort(0);
-        connect(proxymodel, &InstanceProxyModel::dataChanged, this, &MainWindow::instanceDataChanged);
-
-        view->setModel(proxymodel);
-        view->setSourceOfGroupCollapseStatus([](const QString & groupName)->bool {
-            return APPLICATION->instances()->isGroupCollapsed(groupName);
-        });
-        connect(view, &InstanceView::groupStateChanged, APPLICATION->instances().get(), &InstanceList::on_GroupStateChanged);
-        ui->horizontalLayout->addWidget(view);
+        ui->verticalLayout->addWidget(view);
     }
     // The cat background
     {
@@ -975,7 +966,37 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         ui->actionCAT->setChecked(cat_enable);
         // NOTE: calling the operator like that is an ugly hack to appease ancient gcc...
         connect(ui->actionCAT.operator->(), SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
-        setCatBackground(cat_enable);
+        view->setCatDisplayed(cat_enable);
+    }
+    // Table/Grid mode
+    {
+        int displayMode = APPLICATION->settings()->get("InstanceDisplayMode").toInt();
+        ui->actionTableMode->setChecked(false);
+        ui->actionGridMode->setChecked(false);
+        if (displayMode == InstancesView::TableMode) {
+            ui->actionTableMode->setChecked(true);
+        } else {
+            ui->actionGridMode->setChecked(true);
+        }
+        view->switchDisplayMode(displayMode == InstancesView::TableMode ? InstancesView::TableMode : InstancesView::GridMode);
+
+        connect(ui->actionTableMode, &QAction::triggered, this, [this](bool state){
+            if (!state) {
+                ui->actionTableMode->setChecked(true);
+            }
+            ui->actionGridMode->setChecked(false);
+            view->switchDisplayMode(InstancesView::TableMode);
+            APPLICATION->settings()->set("InstanceDisplayMode", InstancesView::TableMode);
+        });
+
+        connect(ui->actionGridMode, &QAction::triggered, this, [this](bool state){
+            if (!state) {
+                ui->actionGridMode->setChecked(true);
+            }
+            ui->actionTableMode->setChecked(false);
+            view->switchDisplayMode(InstancesView::GridMode);
+            APPLICATION->settings()->set("InstanceDisplayMode", InstancesView::GridMode);
+        });
     }
 
     // Lock toolbars
@@ -986,10 +1007,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         lockToolbars(toolbarsLocked);
     }
     // start instance when double-clicked
-    connect(view, &InstanceView::activated, this, &MainWindow::instanceActivated);
+    connect(view, &InstancesView::instanceActivated, this, &MainWindow::instanceActivated);
 
     // track the selection -- update the instance toolbar
-    connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::instanceChanged);
+    connect(view, &InstancesView::currentInstanceChanged, this, &MainWindow::instanceChanged);
 
     // track icon changes and update the toolbar!
     connect(APPLICATION->icons().get(), &IconList::iconUpdated, this, &MainWindow::iconUpdated);
@@ -1002,11 +1023,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     // When the global settings page closes, we want to know about it and update our state
     connect(APPLICATION, &Application::globalSettingsClosed, this, &MainWindow::globalSettingsClosed);
-
-    m_statusLeft = new QLabel(tr("No instance selected"), this);
-    m_statusCenter = new QLabel(tr("Total playtime: 0s"), this);
-    statusBar()->addPermanentWidget(m_statusLeft, 1);
-    statusBar()->addPermanentWidget(m_statusCenter, 0);
 
     // Add "manage accounts" button, right align
     QWidget *spacer = new QWidget();
@@ -1123,12 +1139,6 @@ void MainWindow::retranslateUi()
         accountMenuButton->setText(tr("Accounts"));
     }
 
-    if (m_selectedInstance) {
-        m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
-    } else {
-        m_statusLeft->setText(tr("No instance selected"));
-    }
-
     ui->retranslateUi(this);
 }
 
@@ -1154,66 +1164,27 @@ void MainWindow::lockToolbars(bool state)
 }
 
 
-void MainWindow::konamiTriggered()
-{
-    qDebug() << "Super Secret Mode ACTIVATED!";
-}
-
-void MainWindow::showInstanceContextMenu(const QPoint &pos)
+void MainWindow::showInstanceContextMenu(const QPoint &pos, InstancePtr inst)
 {
     QList<QAction *> actions;
 
     QAction *actionSep = new QAction("", this);
     actionSep->setSeparator(true);
 
-    bool onInstance = view->indexAt(pos).isValid();
-    if (onInstance)
-    {
-        actions = ui->instanceToolBar->actions();
+    actions = ui->instanceToolBar->actions();
 
-        // replace the change icon widget with an actual action
-        actions.replace(0, ui->actionChangeInstIcon);
+    // replace the change icon widget with an actual action
+    actions.replace(0, ui->actionChangeInstIcon);
 
-        // replace the rename widget with an actual action
-        actions.replace(1, ui->actionRenameInstance);
+    // replace the rename widget with an actual action
+    actions.replace(1, ui->actionRenameInstance);
 
-        // add header
-        actions.prepend(actionSep);
-        QAction *actionVoid = new QAction(m_selectedInstance->name(), this);
-        actionVoid->setEnabled(false);
-        actions.prepend(actionVoid);
-    }
-    else
-    {
-        auto group = view->groupNameAt(pos);
+    // add header
+    actions.prepend(actionSep);
+    QAction *actionVoid = new QAction(m_selectedInstance->name(), this);
+    actionVoid->setEnabled(false);
+    actions.prepend(actionVoid);
 
-        QAction *actionVoid = new QAction(BuildConfig.LAUNCHER_DISPLAYNAME, this);
-        actionVoid->setEnabled(false);
-
-        QAction *actionCreateInstance = new QAction(tr("Create instance"), this);
-        actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
-        if(!group.isNull())
-        {
-            QVariantMap data;
-            data["group"] = group;
-            actionCreateInstance->setData(data);
-        }
-
-        connect(actionCreateInstance, SIGNAL(triggered(bool)), SLOT(on_actionAddInstance_triggered()));
-
-        actions.prepend(actionSep);
-        actions.prepend(actionVoid);
-        actions.append(actionCreateInstance);
-        if(!group.isNull())
-        {
-            QAction *actionDeleteGroup = new QAction(tr("Delete group '%1'").arg(group), this);
-            QVariantMap data;
-            data["group"] = group;
-            actionDeleteGroup->setData(data);
-            connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(deleteGroup()));
-            actions.append(actionDeleteGroup);
-        }
-    }
     QMenu myMenu;
     myMenu.addActions(actions);
     /*
@@ -1510,7 +1481,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
     {
         if (ev->type() == QEvent::KeyPress)
         {
-            secretEventFilter->input(ev);
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(ev);
             switch (keyEvent->key())
             {
@@ -1525,9 +1495,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
                 return true;
             case Qt::Key_F5:
                 refreshInstances();
-                return true;
-            case Qt::Key_F2:
-                on_actionRenameInstance_triggered();
                 return true;
             default:
                 break;
@@ -1649,52 +1616,8 @@ void MainWindow::downloadUpdates(GoUpdate::Status status)
 
 void MainWindow::onCatToggled(bool state)
 {
-    setCatBackground(state);
+    view->setCatDisplayed(state);
     APPLICATION->settings()->set("TheCat", state);
-}
-
-namespace {
-template <typename T>
-T non_stupid_abs(T in)
-{
-    if (in < 0)
-        return -in;
-    return in;
-}
-}
-
-void MainWindow::setCatBackground(bool enabled)
-{
-    if (enabled)
-    {
-        QDateTime now = QDateTime::currentDateTime();
-        QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
-        QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
-        QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
-        QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
-        if (non_stupid_abs(now.daysTo(xmas)) <= 4) {
-            cat += "-xmas";
-        } else if (non_stupid_abs(now.daysTo(halloween)) <= 4) {
-            cat += "-spooky";
-        } else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
-            cat += "-bday";
-        }
-        view->setStyleSheet(QString(R"(
-InstanceView
-{
-    background-image: url(:/backgrounds/%1);
-    background-attachment: fixed;
-    background-clip: padding;
-    background-position: bottom left;
-    background-repeat: none;
-    background-color:palette(base);
-})")
-                                .arg(cat));
-    }
-    else
-    {
-        view->setStyleSheet(QString());
-    }
 }
 
 void MainWindow::runModalTask(Task *task)
@@ -1745,7 +1668,6 @@ void MainWindow::on_actionCopyInstance_triggered()
 
 void MainWindow::finalizeInstance(InstancePtr inst)
 {
-    view->updateGeometries();
     setSelectedInstanceById(inst->id());
     if (APPLICATION->accounts()->anyAccountIsValid())
     {
@@ -1906,15 +1828,7 @@ void MainWindow::updateInstanceToolIcon(QString new_icon)
 
 void MainWindow::setSelectedInstanceById(const QString &id)
 {
-    if (id.isNull())
-        return;
-    const QModelIndex index = APPLICATION->instances()->getInstanceIndexById(id);
-    if (index.isValid())
-    {
-        QModelIndex selectionIndex = proxymodel->mapFromSource(index);
-        view->selectionModel()->setCurrentIndex(selectionIndex, QItemSelectionModel::ClearAndSelect);
-        updateStatusCenter();
-    }
+    //TODO
 }
 
 void MainWindow::on_actionChangeInstGroup_triggered()
@@ -1930,7 +1844,7 @@ void MainWindow::on_actionChangeInstGroup_triggered()
     groups.sort(Qt::CaseInsensitive);
     int foo = groups.indexOf(name);
 
-    name = QInputDialog::getItem(this, tr("Group name"), tr("Enter a new group name."), groups, foo, true, &ok);
+    name = QInputDialog::getItem(this, tr("Category name"), tr("Enter a new category name."), groups, foo, true, &ok);
     name = name.simplified();
     if (ok)
     {
@@ -1952,7 +1866,7 @@ void MainWindow::deleteGroup()
     QString groupName = map["group"].toString();
     if(!groupName.isEmpty())
     {
-        auto reply = QMessageBox::question(this, tr("Delete group"), tr("Are you sure you want to delete the group %1?")
+        auto reply = QMessageBox::question(this, tr("Delete category"), tr("Are you sure you want to delete the category %1?")
             .arg(groupName), QMessageBox::Yes | QMessageBox::No);
         if(reply == QMessageBox::Yes)
         {
@@ -2005,12 +1919,11 @@ void MainWindow::globalSettingsClosed()
 {
     // FIXME: quick HACK to make this work. improve, optimize.
     APPLICATION->instances()->loadList();
-    proxymodel->invalidate();
-    proxymodel->sort(0);
+    //proxymodel->invalidate();  // TODO!
+    //proxymodel->sort(0);
     updateMainToolBar();
     updateToolsMenu();
     updateThemeMenu();
-    updateStatusCenter();
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
     // but Prism Launcher exits abnormally, causing the window state to never be saved:
     APPLICATION->settings()->set("MainWindowState", saveState().toBase64());
@@ -2123,10 +2036,8 @@ void MainWindow::on_actionExportInstance_triggered()
 
 void MainWindow::on_actionRenameInstance_triggered()
 {
-    if (m_selectedInstance)
-    {
-        view->edit(view->currentIndex());
-    }
+    // NOTE: editSelected already checky if an instance is selected
+    view->editSelected();
 }
 
 void MainWindow::on_actionViewSelectedInstFolder_triggered()
@@ -2143,6 +2054,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     // Save the window state and geometry.
     APPLICATION->settings()->set("MainWindowState", saveState().toBase64());
     APPLICATION->settings()->set("MainWindowGeometry", saveGeometry().toBase64());
+    view->storeState();
     event->accept();
     emit isClosing();
 }
@@ -2156,12 +2068,8 @@ void MainWindow::changeEvent(QEvent* event)
     QMainWindow::changeEvent(event);
 }
 
-void MainWindow::instanceActivated(QModelIndex index)
+void MainWindow::instanceActivated(InstancePtr inst)
 {
-    if (!index.isValid())
-        return;
-    QString id = index.data(InstanceList::InstanceIDRole).toString();
-    InstancePtr inst = APPLICATION->instances()->getInstanceById(id);
     if (!inst)
         return;
 
@@ -2254,7 +2162,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
 
         QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.png");
-        
+
         QFile iconFile(iconPath);
         if (!iconFile.open(QFile::WriteOnly))
         {
@@ -2263,14 +2171,14 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
         bool success = icon->icon().pixmap(64, 64).save(&iconFile, "PNG");
         iconFile.close();
-        
+
         if (!success)
         {
             iconFile.remove();
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create icon for shortcut."));
             return;
         }
-        
+
         if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
                            appPath, { "--launch", m_selectedInstance->id() },
                            m_selectedInstance->name(), iconPath)) {
@@ -2289,7 +2197,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
 
         QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.ico");
-        
+
         // part of fix for weird bug involving the window icon being replaced
         // dunno why it happens, but this 2-line fix seems to be enough, so w/e
         auto appIcon = APPLICATION->getThemedIcon("logo");
@@ -2312,7 +2220,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create icon for shortcut."));
             return;
         }
-        
+
         if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
                            QApplication::applicationFilePath(), { "--launch", m_selectedInstance->id() },
                            m_selectedInstance->name(), iconPath)) {
@@ -2345,9 +2253,9 @@ void MainWindow::startTask(Task *task)
     task->start();
 }
 
-void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &previous)
+void MainWindow::instanceChanged(InstancePtr current, InstancePtr previous)
 {
-    if (!current.isValid())
+    if (!current)
     {
         APPLICATION->settings()->set("SelectedInstance", QString());
         selectionBad();
@@ -2356,8 +2264,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
     if (m_selectedInstance) {
         disconnect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
     }
-    QString id = current.data(InstanceList::InstanceIDRole).toString();
-    m_selectedInstance = APPLICATION->instances()->getInstanceById(id);
+    m_selectedInstance = current;
     if (m_selectedInstance)
     {
         ui->instanceToolBar->setEnabled(true);
@@ -2375,8 +2282,6 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
         ui->renameButton->setText(m_selectedInstance->name());
-        m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
-        updateStatusCenter();
         updateInstanceToolIcon(m_selectedInstance->iconKey());
 
         updateToolsMenu();
@@ -2404,22 +2309,11 @@ void MainWindow::instanceSelectRequest(QString id)
     setSelectedInstanceById(id);
 }
 
-void MainWindow::instanceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
-{
-    auto current = view->selectionModel()->currentIndex();
-    QItemSelection test(topLeft, bottomRight);
-    if (test.contains(current))
-    {
-        instanceChanged(current, current);
-    }
-}
-
 void MainWindow::selectionBad()
 {
     // start by reseting everything...
     m_selectedInstance = nullptr;
 
-    statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
     ui->setInstanceActionsEnabled(false);
     updateToolsMenu();
@@ -2469,18 +2363,8 @@ void MainWindow::checkInstancePathForProblems()
     }
 }
 
-void MainWindow::updateStatusCenter()
-{
-    m_statusCenter->setVisible(APPLICATION->settings()->get("ShowGlobalGameTime").toBool());
-
-    int timePlayed = APPLICATION->instances()->getTotalPlayTime();
-    if (timePlayed > 0) {
-        m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
-    }
-}
-
 void MainWindow::refreshCurrentInstance(bool running)
 {
-    auto current = view->selectionModel()->currentIndex();
+    auto current = view->currentInstance();
     instanceChanged(current, current);
 }

@@ -18,17 +18,11 @@
 
 #pragma once
 
-#include <QStyledItemDelegate>
+#include "InstanceTableProxyModel.h"
 
-class InstanceDelegate : public QStyledItemDelegate {
+class InstanceGridProxyModel : public InstanceTableProxyModel {
     Q_OBJECT
 
    public:
-    InstanceDelegate(QObject* parent = 0, int iconSize = 48, bool isGrid = false);
-
-    void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override;
-
-   private:
-    int m_iconSize;
-    bool m_isGrid;
+    InstanceGridProxyModel(QObject* parent = 0);
 };

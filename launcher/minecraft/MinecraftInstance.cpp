@@ -88,6 +88,8 @@
 #include "minecraft/gameoptions/GameOptions.h"
 #include "minecraft/update/FoldersTask.h"
 
+#include "modplatform/ModAPI.h"
+
 #define IBUS "@im=ibus"
 
 // all of this because keeping things compatible with deprecated old settings
@@ -878,14 +880,7 @@ QString MinecraftInstance::getLogFileRoot()
     return gameRoot();
 }
 
-QString MinecraftInstance::getStatusbarDescription()
-{
-    QStringList traits;
-    if (hasVersionBroken())
-    {
-        traits.append(tr("broken"));
-    }
-
+QString MinecraftInstance::getMainVersion() {
     QString mcVersion = m_components->getComponentVersion("net.minecraft");
     if (mcVersion.isEmpty())
     {
@@ -893,24 +888,15 @@ QString MinecraftInstance::getStatusbarDescription()
         m_components->reload(Net::Mode::Offline);
         mcVersion = m_components->getComponentVersion("net.minecraft");
     }
-
-    QString description;
-    description.append(tr("Minecraft %1").arg(mcVersion));
-    if(m_settings->get("ShowGameTime").toBool())
+    if (mcVersion.isEmpty())
     {
-        if (lastTimePlayed() > 0) {
-            description.append(tr(", last played for %1").arg(Time::prettifyDuration(lastTimePlayed())));
-        }
+        return tr("Unknown");
+    }
+    if (getPackProfile()->getModLoaders() != ModAPI::Unspecified) {
+        return tr("%1 (Modded)").arg(mcVersion);
+    }
 
-        if (totalTimePlayed() > 0) {
-            description.append(tr(", total played for %1").arg(Time::prettifyDuration(totalTimePlayed())));
-        }
-    }
-    if(hasCrashed())
-    {
-        description.append(tr(", has crashed."));
-    }
-    return description;
+    return mcVersion;
 }
 
 Task::Ptr MinecraftInstance::createUpdateTask(Net::Mode mode)
