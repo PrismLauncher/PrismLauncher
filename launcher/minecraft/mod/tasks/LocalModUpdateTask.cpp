@@ -36,7 +36,7 @@ LocalModUpdateTask::LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack&
     }
 
 #ifdef Q_OS_WIN32
-    SetFileAttributesA(index_dir.path().toStdString().c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
+    SetFileAttributesW(index_dir.path().toStdWString().c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
 #endif
 }
 

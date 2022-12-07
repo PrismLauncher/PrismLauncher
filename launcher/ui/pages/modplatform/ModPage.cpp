@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,7 +38,9 @@
 #include "Application.h"
 #include "ui_ModPage.h"
 
+#include <QDesktopServices>
 #include <QKeyEvent>
+#include <QRegularExpression>
 #include <memory>
 
 #include <HoeDown.h>
@@ -80,6 +83,8 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
 
     ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     ui->packView->installEventFilter(this);
+
+    connect(ui->packDescription, &QTextBrowser::anchorClicked, this, &ModPage::openUrl);
 }
 
 ModPage::~ModPage()
@@ -158,8 +163,8 @@ void ModPage::triggerSearch()
 {
     auto changed = m_filter_widget->changed();
     m_filter = m_filter_widget->getFilter();
-    
-    if(changed){
+
+    if (changed) {
         ui->packView->clearSelection();
         ui->packDescription->clear();
         ui->versionSelectionBox->clear();
@@ -241,6 +246,79 @@ void ModPage::onModSelected()
     ui->packView->adjustSize();
 }
 
+static const QRegularExpression modrinth(QRegularExpression::anchoredPattern("(?:www\\.)?modrinth\\.com\\/mod\\/([^\\/]+)\\/?"));
+static const QRegularExpression curseForge(QRegularExpression::anchoredPattern("(?:www\\.)?curseforge\\.com\\/minecraft\\/mc-mods\\/([^\\/]+)\\/?"));
+static const QRegularExpression curseForgeOld(QRegularExpression::anchoredPattern("minecraft\\.curseforge\\.com\\/projects\\/([^\\/]+)\\/?"));
+
+void ModPage::openUrl(const QUrl& url)
+{
+    // do not allow other url schemes for security reasons
+    if (!(url.scheme() == "http" || url.scheme() == "https")) {
+        qWarning() << "Unsupported scheme" << url.scheme();
+        return;
+    }
+
+    // detect mod URLs and search instead
+
+    const QString address = url.host() + url.path();
+    QRegularExpressionMatch match;
+    QString page;
+
+    match = modrinth.match(address);
+    if (match.hasMatch())
+        page = "modrinth";
+    else if (APPLICATION->capabilities() & Application::SupportsFlame) {
+        match = curseForge.match(address);
+        if (!match.hasMatch())
+            match = curseForgeOld.match(address);
+
+        if (match.hasMatch())
+            page = "curseforge";
+    }
+
+    if (!page.isNull()) {
+        const QString slug = match.captured(1);
+
+        // ensure the user isn't opening the same mod
+        if (slug != current.slug) {
+            dialog->selectPage(page);
+
+            ModPage* newPage = dialog->getSelectedPage();
+
+            QLineEdit* searchEdit = newPage->ui->searchEdit;
+            ModPlatform::ListModel* model = newPage->listModel;
+            QListView* view = newPage->ui->packView;
+
+            auto jump = [url, slug, model, view] {
+                for (int row = 0; row < model->rowCount({}); row++) {
+                    const QModelIndex index = model->index(row);
+                    const auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+
+                    if (pack.slug == slug) {
+                        view->setCurrentIndex(index);
+                        return;
+                    }
+                }
+
+                // The final fallback.
+                QDesktopServices::openUrl(url);
+            };
+
+            searchEdit->setText(slug);
+            newPage->triggerSearch();
+
+            if (model->activeJob())
+                connect(model->activeJob(), &Task::finished, jump);
+            else
+                jump();
+
+            return;
+        }
+    }
+
+    // open in the user's web browser
+    QDesktopServices::openUrl(url);
+}
 
 /******** Make changes to the UI ********/
 
@@ -270,8 +348,8 @@ void ModPage::updateModVersions(int prev_count)
         if ((valid || m_filter->versions.empty()) && !optedOut(version))
             ui->versionSelectionBox->addItem(version.version, QVariant(i));
     }
-    if (ui->versionSelectionBox->count() == 0 && prev_count != 0) { 
-        ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1)); 
+    if (ui->versionSelectionBox->count() == 0 && prev_count != 0) {
+        ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1));
         ui->modSelectionButton->setText(tr("Cannot select invalid version :("));
     }
 
@@ -317,8 +395,7 @@ void ModPage::updateUi()
         text += "<br>" + tr(" by ") + authorStrs.join(", ");
     }
 
-    
-    if(current.extraDataLoaded) {
+    if (current.extraDataLoaded) {
         if (!current.extraData.donate.isEmpty()) {
             text += "<br><br>" + tr("Donate information: ");
             auto donateToStr = [](ModPlatform::DonationData& donate) -> QString {

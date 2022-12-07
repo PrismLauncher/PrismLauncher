@@ -144,7 +144,7 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
 
 int ModFolderModel::columnCount(const QModelIndex &parent) const
 {
-    return NUM_COLUMNS;
+    return parent.isValid() ? 0 : NUM_COLUMNS;
 }
 
 Task* ModFolderModel::createUpdateTask()

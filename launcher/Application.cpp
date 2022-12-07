@@ -1,8 +1,12 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2022 Sefa Eyeoglu <contact@scrumplex.net>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
+
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
+ *  Copyright (C) 2022 Tayou <tayou@gmx.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,10 +41,15 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
+#include "DataMigrationTask.h"
 #include "net/PasteUpload.h"
+#include "pathmatcher/MultiMatcher.h"
+#include "pathmatcher/SimplePrefixMatcher.h"
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
 #include "ui/instanceview/InstancesView.h"
+
+#include "ui/dialogs/ProgressDialog.h"
 
 #include "ui/pages/BasePageProvider.h"
 #include "ui/pages/global/LauncherPage.h"
@@ -53,14 +62,9 @@
 #include "ui/pages/global/APIPage.h"
 #include "ui/pages/global/CustomCommandsPage.h"
 
-#include "ui/themes/ITheme.h"
-#include "ui/themes/SystemTheme.h"
-#include "ui/themes/DarkTheme.h"
-#include "ui/themes/BrightTheme.h"
-#include "ui/themes/CustomTheme.h"
-
 #ifdef Q_OS_WIN
 #include "ui/WinDarkmode.h"
+#include <versionhelpers.h>
 #endif
 
 #include "ui/setupwizard/SetupWizard.h"
@@ -71,6 +75,8 @@
 #include "ui/dialogs/CustomMessageBox.h"
 
 #include "ui/pagedialog/PageDialog.h"
+
+#include "ui/themes/ThemeManager.h"
 
 #include "ApplicationMessage.h"
 
@@ -227,7 +233,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
     setApplicationName(BuildConfig.LAUNCHER_NAME);
     setApplicationDisplayName(QString("%1 %2").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString()));
-    setApplicationVersion(BuildConfig.printableVersionString());
+    setApplicationVersion(BuildConfig.printableVersionString() + "\n" + BuildConfig.GIT_COMMIT);
     setDesktopFileName(BuildConfig.LAUNCHER_DESKTOPFILENAME);
     startTime = QDateTime::currentDateTime();
 
@@ -301,22 +307,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
         dataPath = foo.absolutePath();
         adjustedBy = "Persistent data path";
-
-        QDir polymcData(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation), "PolyMC"));
-        if (polymcData.exists()) {
-            dataPath = polymcData.absolutePath();
-            adjustedBy = "PolyMC data path";
-        }
-
-#ifdef Q_OS_LINUX
-        // TODO: this should be removed in a future version
-        // TODO: provide a migration path similar to macOS migration
-        QDir bar(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation), "polymc"));
-        if (bar.exists()) {
-            dataPath = bar.absolutePath();
-            adjustedBy = "Legacy data path";
-        }
-#endif
 
 #ifndef Q_OS_MACOS
         if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
@@ -441,6 +431,15 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
 
     {
+        bool migrated = false;
+
+        if (!migrated)
+            migrated = handleDataMigration(dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../PolyMC"), "PolyMC", "polymc.cfg");
+        if (!migrated)
+            migrated = handleDataMigration(dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../multimc"), "MultiMC", "multimc.cfg");
+    }
+
+    {
 
         qDebug() << BuildConfig.LAUNCHER_DISPLAYNAME << ", (c) 2013-2021 " << BuildConfig.LAUNCHER_COPYRIGHT;
         qDebug() << "Version                    : " << BuildConfig.printableVersionString();
@@ -499,6 +498,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // Theming
         m_settings->registerSetting("IconTheme", QString("pe_colored"));
         m_settings->registerSetting("ApplicationTheme", QString("system"));
+        m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
         // Remembered state
         m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
@@ -563,7 +563,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Memory
         m_settings->registerSetting({"MinMemAlloc", "MinMemoryAlloc"}, 512);
-        m_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, 4096);
+        m_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, suitableMaxMem());
         m_settings->registerSetting("PermGen", 128);
 
         // Java Settings
@@ -611,6 +611,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // The cat
         m_settings->registerSetting("TheCat", false);
         m_settings->registerSetting("InstanceDisplayMode", InstancesView::TableMode);
+
+        m_settings->registerSetting("ToolbarsLocked", false);
 
         m_settings->registerSetting("InstSortMode", "Name");
         m_settings->registerSetting("SelectedInstance", QString());
@@ -746,29 +748,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         qDebug() << "<> Instance icons intialized.";
     }
 
-    // Icon themes
-    {
-        // TODO: icon themes and instance icons do not mesh well together. Rearrange and fix discrepancies!
-        // set icon theme search path!
-        auto searchPaths = QIcon::themeSearchPaths();
-        searchPaths.append("iconthemes");
-        QIcon::setThemeSearchPaths(searchPaths);
-        qDebug() << "<> Icon themes initialized.";
-    }
-
-    // Initialize widget themes
-    {
-        auto insertTheme = [this](ITheme * theme)
-        {
-            m_themes.insert(std::make_pair(theme->id(), std::unique_ptr<ITheme>(theme)));
-        };
-        auto darkTheme = new DarkTheme();
-        insertTheme(new SystemTheme());
-        insertTheme(darkTheme);
-        insertTheme(new BrightTheme());
-        insertTheme(new CustomTheme(darkTheme, "custom"));
-        qDebug() << "<> Widget themes initialized.";
-    }
+    // Themes
+    m_themeManager = std::make_unique<ThemeManager>(m_mainWindow);
 
     // initialize and load all instances
     {
@@ -933,18 +914,24 @@ bool Application::createSetupWizard()
     return false;
 }
 
-bool Application::event(QEvent* event) {
+bool Application::event(QEvent* event)
+{
 #ifdef Q_OS_MACOS
     if (event->type() == QEvent::ApplicationStateChange) {
         auto ev = static_cast<QApplicationStateChangeEvent*>(event);
 
-        if (m_prevAppState == Qt::ApplicationActive
-                && ev->applicationState() == Qt::ApplicationActive) {
+        if (m_prevAppState == Qt::ApplicationActive && ev->applicationState() == Qt::ApplicationActive) {
             emit clickedOnDock();
         }
         m_prevAppState = ev->applicationState();
     }
 #endif
+
+    if (event->type() == QEvent::FileOpen) {
+        auto ev = static_cast<QFileOpenEvent*>(event);
+        m_mainWindow->droppedURLs({ ev->url() });
+    }
+
     return QApplication::event(event);
 }
 
@@ -1122,60 +1109,25 @@ std::shared_ptr<JavaInstallList> Application::javalist()
     return m_javalist;
 }
 
-std::vector<ITheme *> Application::getValidApplicationThemes()
+QList<ITheme*> Application::getValidApplicationThemes()
 {
-    std::vector<ITheme *> ret;
-    auto iter = m_themes.cbegin();
-    while (iter != m_themes.cend())
-    {
-        ret.push_back((*iter).second.get());
-        iter++;
-    }
-    return ret;
-}
-
-bool Application::isFlatpak()
-{
-    #ifdef Q_OS_LINUX
-    return QFile::exists("/.flatpak-info");
-    #else
-    return false;
-    #endif
+    return m_themeManager->getValidApplicationThemes();
 }
 
 void Application::setApplicationTheme(const QString& name, bool initial)
 {
-    auto systemPalette = qApp->palette();
-    auto themeIter = m_themes.find(name);
-    if(themeIter != m_themes.end())
-    {
-        auto & theme = (*themeIter).second;
-        theme->apply(initial);
-#ifdef Q_OS_WIN
-        if (m_mainWindow) {
-            if (QString::compare(theme->id(), "dark") == 0) {
-                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-            } else {
-                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
-            }
-        }
-#endif
-    }
-    else
-    {
-        qWarning() << "Tried to set invalid theme:" << name;
-    }
+    m_themeManager->setApplicationTheme(name, initial);
 }
 
 void Application::setIconTheme(const QString& name)
 {
-    QIcon::setThemeName(name);
+    m_themeManager->setIconTheme(name);
 }
 
 QIcon Application::getThemedIcon(const QString& name)
 {
     if(name == "logo") {
-        return QIcon(":/org.prismlauncher.PrismLauncher.svg");  // FIXME: Make this a BuildConfig variable
+        return QIcon(":/" + BuildConfig.LAUNCHER_SVGFILENAME);
     }
     return QIcon::fromTheme(name);
 }
@@ -1393,10 +1345,13 @@ MainWindow* Application::showMainWindow(bool minimized)
         m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
         m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
 #ifdef Q_OS_WIN
-        if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
-            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-        } else {
-            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+        if (IsWindows10OrGreater())
+        {
+            if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
+                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
+            } else {
+                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+            }
         }
 #endif
         if(minimized)
@@ -1634,4 +1589,103 @@ QString Application::getUserAgentUncached()
     }
 
     return BuildConfig.USER_AGENT_UNCACHED;
+}
+
+int Application::suitableMaxMem()
+{
+    float totalRAM = (float)Sys::getSystemRam() / (float)Sys::mebibyte;
+    int maxMemoryAlloc;
+
+    // If totalRAM < 6GB, use (totalRAM / 1.5), else 4GB
+    if (totalRAM < (4096 * 1.5))
+        maxMemoryAlloc = (int) (totalRAM / 1.5);
+    else
+        maxMemoryAlloc = 4096;
+
+    return maxMemoryAlloc;
+}
+
+bool Application::handleDataMigration(const QString& currentData,
+                                      const QString& oldData,
+                                      const QString& name,
+                                      const QString& configFile) const
+{
+    QString nomigratePath = FS::PathCombine(currentData, name + "_nomigrate.txt");
+    QStringList configPaths = { FS::PathCombine(oldData, configFile), FS::PathCombine(oldData, BuildConfig.LAUNCHER_CONFIGFILE) };
+
+    QLocale locale;
+
+    // Is there a valid config at the old location?
+    bool configExists = false;
+    for (QString configPath : configPaths) {
+        configExists |= QFileInfo::exists(configPath);
+    }
+
+    if (!configExists || QFileInfo::exists(nomigratePath)) {
+        qDebug() << "<> No migration needed from" << name;
+        return false;
+    }
+
+    QString message;
+    bool currentExists = QFileInfo::exists(FS::PathCombine(currentData, BuildConfig.LAUNCHER_CONFIGFILE));
+
+    if (currentExists) {
+        message = tr("Old data from %1 was found, but you already have existing data for %2. Sadly you will need to migrate yourself. Do "
+                     "you want to be reminded of the pending data migration next time you start %2?")
+                      .arg(name, BuildConfig.LAUNCHER_DISPLAYNAME);
+    } else {
+        message = tr("It looks like you used %1 before. Do you want to migrate your data to the new location of %2?")
+                      .arg(name, BuildConfig.LAUNCHER_DISPLAYNAME);
+
+        QFileInfo logInfo(FS::PathCombine(oldData, name + "-0.log"));
+        if (logInfo.exists()) {
+            QString lastModified = logInfo.lastModified().toString(locale.dateFormat());
+            message = tr("It looks like you used %1 on %2 before. Do you want to migrate your data to the new location of %3?")
+                          .arg(name, lastModified, BuildConfig.LAUNCHER_DISPLAYNAME);
+        }
+    }
+
+    QMessageBox::StandardButton askMoveDialogue =
+        QMessageBox::question(nullptr, BuildConfig.LAUNCHER_DISPLAYNAME, message, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+    auto setDoNotMigrate = [&nomigratePath] {
+        QFile file(nomigratePath);
+        file.open(QIODevice::WriteOnly);
+    };
+
+    // create no-migrate file if user doesn't want to migrate
+    if (askMoveDialogue != QMessageBox::Yes) {
+        qDebug() << "<> Migration declined for" << name;
+        setDoNotMigrate();
+        return currentExists;  // cancel further migrations, if we already have a data directory
+    }
+
+    if (!currentExists) {
+        // Migrate!
+        auto matcher = std::make_shared<MultiMatcher>();
+        matcher->add(std::make_shared<SimplePrefixMatcher>(configFile));
+        matcher->add(std::make_shared<SimplePrefixMatcher>(
+            BuildConfig.LAUNCHER_CONFIGFILE));  // it's possible that we already used that directory before
+        matcher->add(std::make_shared<SimplePrefixMatcher>("accounts.json"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("accounts/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("assets/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("icons/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("instances/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("libraries/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("mods/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("themes/"));
+
+        ProgressDialog diag;
+        DataMigrationTask task(nullptr, oldData, currentData, matcher);
+        if (diag.execWithTask(&task)) {
+            qDebug() << "<> Migration succeeded";
+            setDoNotMigrate();
+        } else {
+            QString reason = task.failReason();
+            QMessageBox::critical(nullptr, BuildConfig.LAUNCHER_DISPLAYNAME, tr("Migration failed! Reason: %1").arg(reason));
+        }
+    } else {
+        qWarning() << "<> Migration was skipped, due to existing data";
+    }
+    return true;
 }

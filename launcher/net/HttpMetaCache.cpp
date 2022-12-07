@@ -47,7 +47,7 @@
 auto MetaEntry::getFullPath() -> QString
 {
     // FIXME: make local?
-    return FS::PathCombine(basePath, relativePath);
+    return FS::PathCombine(m_basePath, m_relativePath);
 }
 
 HttpMetaCache::HttpMetaCache(QString path) : QObject(), m_index_file(path)
@@ -99,7 +99,7 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
         return staleEntry(base, resource_path);
     }
 
-    if (!expected_etag.isEmpty() && expected_etag != entry->etag) {
+    if (!expected_etag.isEmpty() && expected_etag != entry->m_etag) {
         // if the etag doesn't match expected, we disown the entry
         selected_base.entry_list.remove(resource_path);
         return staleEntry(base, resource_path);
@@ -107,17 +107,17 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
 
     // if the file changed, check md5sum
     qint64 file_last_changed = finfo.lastModified().toUTC().toMSecsSinceEpoch();
-    if (file_last_changed != entry->local_changed_timestamp) {
+    if (file_last_changed != entry->m_local_changed_timestamp) {
         QFile input(real_path);
         input.open(QIODevice::ReadOnly);
         QString md5sum = QCryptographicHash::hash(input.readAll(), QCryptographicHash::Md5).toHex().constData();
-        if (entry->md5sum != md5sum) {
+        if (entry->m_md5sum != md5sum) {
             selected_base.entry_list.remove(resource_path);
             return staleEntry(base, resource_path);
         }
 
         // md5sums matched... keep entry and save the new state to file
-        entry->local_changed_timestamp = file_last_changed;
+        entry->m_local_changed_timestamp = file_last_changed;
         SaveEventually();
     }
 
@@ -130,23 +130,23 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
     }
 
     // entry passed all the checks we cared about.
-    entry->basePath = getBasePath(base);
+    entry->m_basePath = getBasePath(base);
     return entry;
 }
 
 auto HttpMetaCache::updateEntry(MetaEntryPtr stale_entry) -> bool
 {
-    if (!m_entries.contains(stale_entry->baseId)) {
-        qCritical() << "Cannot add entry with unknown base: " << stale_entry->baseId.toLocal8Bit();
+    if (!m_entries.contains(stale_entry->m_baseId)) {
+        qCritical() << "Cannot add entry with unknown base: " << stale_entry->m_baseId.toLocal8Bit();
         return false;
     }
 
-    if (stale_entry->stale) {
+    if (stale_entry->m_stale) {
         qCritical() << "Cannot add stale entry: " << stale_entry->getFullPath().toLocal8Bit();
         return false;
     }
 
-    m_entries[stale_entry->baseId].entry_list[stale_entry->relativePath] = stale_entry;
+    m_entries[stale_entry->m_baseId].entry_list[stale_entry->m_relativePath] = stale_entry;
     SaveEventually();
 
     return true;
@@ -157,7 +157,7 @@ auto HttpMetaCache::evictEntry(MetaEntryPtr entry) -> bool
     if (!entry)
         return false;
 
-    entry->stale = true;
+    entry->m_stale = true;
     SaveEventually();
     return true;
 }
@@ -169,7 +169,7 @@ void HttpMetaCache::evictAll()
         qDebug() << "Evicting base" << base;
         for (MetaEntryPtr entry : map.entry_list) {
             if (!evictEntry(entry))
-                qWarning() << "Unexpected missing cache entry" << entry->basePath;
+                qWarning() << "Unexpected missing cache entry" << entry->m_basePath;
         }
     }
 }
@@ -177,10 +177,10 @@ void HttpMetaCache::evictAll()
 auto HttpMetaCache::staleEntry(QString base, QString resource_path) -> MetaEntryPtr
 {
     auto foo = new MetaEntry();
-    foo->baseId = base;
-    foo->basePath = getBasePath(base);
-    foo->relativePath = resource_path;
-    foo->stale = true;
+    foo->m_baseId = base;
+    foo->m_basePath = getBasePath(base);
+    foo->m_relativePath = resource_path;
+    foo->m_stale = true;
 
     return MetaEntryPtr(foo);
 }
@@ -235,23 +235,23 @@ void HttpMetaCache::Load()
         auto& entrymap = m_entries[base];
 
         auto foo = new MetaEntry();
-        foo->baseId = base;
-        foo->relativePath = Json::ensureString(element_obj, "path");
-        foo->md5sum = Json::ensureString(element_obj, "md5sum");
-        foo->etag = Json::ensureString(element_obj, "etag");
-        foo->local_changed_timestamp = Json::ensureDouble(element_obj, "last_changed_timestamp");
-        foo->remote_changed_timestamp = Json::ensureString(element_obj, "remote_changed_timestamp");
+        foo->m_baseId = base;
+        foo->m_relativePath = Json::ensureString(element_obj, "path");
+        foo->m_md5sum = Json::ensureString(element_obj, "md5sum");
+        foo->m_etag = Json::ensureString(element_obj, "etag");
+        foo->m_local_changed_timestamp = Json::ensureDouble(element_obj, "last_changed_timestamp");
+        foo->m_remote_changed_timestamp = Json::ensureString(element_obj, "remote_changed_timestamp");
 
-        foo->makeEternal(Json::ensureBoolean(element_obj, "eternal", false));
+        foo->makeEternal(Json::ensureBoolean(element_obj, (const QString)QStringLiteral("eternal"), false));
         if (!foo->isEternal()) {
-            foo->current_age = Json::ensureDouble(element_obj, "current_age");
-            foo->max_age = Json::ensureDouble(element_obj, "max_age");
+            foo->m_current_age = Json::ensureDouble(element_obj, "current_age");
+            foo->m_max_age = Json::ensureDouble(element_obj, "max_age");
         }
 
         // presumed innocent until closer examination
-        foo->stale = false;
+        foo->m_stale = false;
 
-        entrymap.entry_list[foo->relativePath] = MetaEntryPtr(foo);
+        entrymap.entry_list[foo->m_relativePath] = MetaEntryPtr(foo);
     }
 }
 
@@ -276,23 +276,23 @@ void HttpMetaCache::SaveNow()
     for (auto group : m_entries) {
         for (auto entry : group.entry_list) {
             // do not save stale entries. they are dead.
-            if (entry->stale) {
+            if (entry->m_stale) {
                 continue;
             }
 
             QJsonObject entryObj;
-            Json::writeString(entryObj, "base", entry->baseId);
-            Json::writeString(entryObj, "path", entry->relativePath);
-            Json::writeString(entryObj, "md5sum", entry->md5sum);
-            Json::writeString(entryObj, "etag", entry->etag);
-            entryObj.insert("last_changed_timestamp", QJsonValue(double(entry->local_changed_timestamp)));
-            if (!entry->remote_changed_timestamp.isEmpty())
-                entryObj.insert("remote_changed_timestamp", QJsonValue(entry->remote_changed_timestamp));
+            Json::writeString(entryObj, "base", entry->m_baseId);
+            Json::writeString(entryObj, "path", entry->m_relativePath);
+            Json::writeString(entryObj, "md5sum", entry->m_md5sum);
+            Json::writeString(entryObj, "etag", entry->m_etag);
+            entryObj.insert("last_changed_timestamp", QJsonValue(double(entry->m_local_changed_timestamp)));
+            if (!entry->m_remote_changed_timestamp.isEmpty())
+                entryObj.insert("remote_changed_timestamp", QJsonValue(entry->m_remote_changed_timestamp));
             if (entry->isEternal()) {
                 entryObj.insert("eternal", true);
             } else {
-                entryObj.insert("current_age", QJsonValue(double(entry->current_age)));
-                entryObj.insert("max_age", QJsonValue(double(entry->max_age)));
+                entryObj.insert("current_age", QJsonValue(double(entry->m_current_age)));
+                entryObj.insert("max_age", QJsonValue(double(entry->m_max_age)));
             }
             entriesArr.append(entryObj);
         }

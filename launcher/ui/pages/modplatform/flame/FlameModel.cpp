@@ -3,7 +3,6 @@
 #include "Application.h"
 #include "ui/widgets/ProjectItem.h"
 
-#include <MMCStrings.h>
 #include <Version.h>
 
 #include <QtMath>
@@ -16,12 +15,12 @@ ListModel::~ListModel() {}
 
 int ListModel::rowCount(const QModelIndex& parent) const
 {
-    return modpacks.size();
+    return parent.isValid() ? 0 : modpacks.size();
 }
 
 int ListModel::columnCount(const QModelIndex& parent) const
 {
-    return 1;
+    return parent.isValid() ? 0 : 1;
 }
 
 QVariant ListModel::data(const QModelIndex& index, int role) const

@@ -25,9 +25,13 @@ void InstanceCreationTask::executeTask()
             return;
 
         qWarning() << "Instance creation failed!";
-        if (!m_error_message.isEmpty())
+        if (!m_error_message.isEmpty()) {
             qWarning() << "Reason: " << m_error_message;
-        emitFailed(tr("Error while creating new instance."));
+            emitFailed(tr("Error while creating new instance:\n%1").arg(m_error_message));
+        } else {
+            emitFailed(tr("Error while creating new instance."));
+        }
+
         return;
     }
 

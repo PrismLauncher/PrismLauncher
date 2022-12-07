@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>345</width>
-    <height>323</height>
+    <width>341</width>
+    <height>399</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>60</width>
          <height>20</height>
         </size>
        </property>
@@ -60,7 +60,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>60</width>
          <height>20</height>
         </size>
        </property>
@@ -83,7 +83,10 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout">
+    <layout class="QGridLayout" name="groupDropdownLayout">
+     <property name="verticalSpacing">
+      <number>6</number>
+     </property>
      <item row="0" column="0">
       <widget class="QLabel" name="labelVersion_3">
        <property name="text">
@@ -110,18 +113,96 @@
     </layout>
    </item>
    <item>
-    <widget class="QCheckBox" name="copySavesCheckbox">
-     <property name="text">
-      <string>Copy saves</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="selectAllButtonLayout">
+     <item>
+      <widget class="QCheckBox" name="selectAllCheckbox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="text">
+        <string>Select all</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
-    <widget class="QCheckBox" name="keepPlaytimeCheckbox">
-     <property name="text">
-      <string>Keep play time</string>
-     </property>
-    </widget>
+    <layout class="QGridLayout" name="copyOptionsLayout">
+     <item row="6" column="1">
+      <widget class="QCheckBox" name="copyModsCheckbox">
+       <property name="toolTip">
+        <string>Disabling this will still keep the mod loader (ex: Fabric, Quilt, etc.) but erase the mods folder and their configs.</string>
+       </property>
+       <property name="text">
+        <string>Copy mods</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QCheckBox" name="copyGameOptionsCheckbox">
+       <property name="toolTip">
+        <string>Copy the in-game options like FOV, max framerate, etc.</string>
+       </property>
+       <property name="text">
+        <string>Copy game options</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QCheckBox" name="copySavesCheckbox">
+       <property name="text">
+        <string>Copy saves</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QCheckBox" name="copyShaderPacksCheckbox">
+       <property name="text">
+        <string>Copy shader packs</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QCheckBox" name="copyServersCheckbox">
+       <property name="text">
+        <string>Copy servers</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QCheckBox" name="copyResPacksCheckbox">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Copy resource packs</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QCheckBox" name="keepPlaytimeCheckbox">
+       <property name="text">
+        <string>Keep play time</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QCheckBox" name="copyScreenshotsCheckbox">
+       <property name="text">
+        <string>Copy screenshots</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -139,8 +220,6 @@
   <tabstop>iconButton</tabstop>
   <tabstop>instNameTextBox</tabstop>
   <tabstop>groupBox</tabstop>
-  <tabstop>copySavesCheckbox</tabstop>
-  <tabstop>keepPlaytimeCheckbox</tabstop>
  </tabstops>
  <resources>
   <include location="../../graphics.qrc"/>
@@ -153,8 +232,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>254</x>
+     <y>316</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -169,8 +248,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>322</x>
+     <y>316</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

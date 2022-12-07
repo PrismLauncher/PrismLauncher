@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 Tayou <tayou@gmx.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -68,6 +69,7 @@ class BaseDetachedToolFactory;
 class TranslationsModel;
 class ITheme;
 class MCEditTool;
+class ThemeManager;
 
 namespace Meta {
     class Index;
@@ -116,11 +118,9 @@ public:
 
     QIcon getThemedIcon(const QString& name);
 
-    bool isFlatpak();
-
     void setIconTheme(const QString& name);
 
-    std::vector<ITheme *> getValidApplicationThemes();
+    QList<ITheme*> getValidApplicationThemes();
 
     void setApplicationTheme(const QString& name, bool initial);
 
@@ -200,6 +200,8 @@ public:
 
     void ShowGlobalSettings(class QWidget * parent, QString open_page = QString());
 
+    int suitableMaxMem();
+
 signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
@@ -229,6 +231,7 @@ private slots:
     void setupWizardFinished(int status);
 
 private:
+    bool handleDataMigration(const QString & currentData, const QString & oldData, const QString & name, const QString & configFile) const;
     bool createSetupWizard();
     void performMainStartupAction();
 
@@ -257,9 +260,9 @@ private:
     std::shared_ptr<JavaInstallList> m_javalist;
     std::shared_ptr<TranslationsModel> m_translations;
     std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
-    std::map<QString, std::unique_ptr<ITheme>> m_themes;
     std::unique_ptr<MCEditTool> m_mcedit;
     QSet<QString> m_features;
+    std::unique_ptr<ThemeManager> m_themeManager;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 

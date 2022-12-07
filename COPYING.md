@@ -398,3 +398,45 @@
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
+
+## Breeze icons
+
+    Copyright (C) 2014 Uri Herrera <uri_herrera@nitrux.in> and others
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 3 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library. If not, see <http://www.gnu.org/licenses/>.
+
+## Oxygen Icons
+
+    The Oxygen Icon Theme
+        Copyright (C) 2007 Nuno Pinheiro <nuno@oxygen-icons.org>
+        Copyright (C) 2007 David Vignoni <david@icon-king.com>
+        Copyright (C) 2007 David Miller <miller@oxygen-icons.org>
+        Copyright (C) 2007 Johann Ollivier Lapeyre <johann@oxygen-icons.org>
+        Copyright (C) 2007 Kenneth Wimer <kwwii@bootsplash.org>
+        Copyright (C) 2007 Riccardo Iaconelli <riccardo@oxygen-icons.org>
+    
+    and others
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 3 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library. If not, see <http://www.gnu.org/licenses/>.

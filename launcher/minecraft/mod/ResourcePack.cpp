@@ -15,7 +15,7 @@ static const QMap<int, std::pair<Version, Version>> s_pack_format_versions = {
     { 3, { Version("1.11"), Version("1.12.2") } }, { 4, { Version("1.13"), Version("1.14.4") } },
     { 5, { Version("1.15"), Version("1.16.1") } }, { 6, { Version("1.16.2"), Version("1.16.5") } },
     { 7, { Version("1.17"), Version("1.17.1") } }, { 8, { Version("1.18"), Version("1.18.2") } },
-    { 9, { Version("1.19"), Version("1.19.2") } },
+    { 9, { Version("1.19"), Version("1.19.2") } }, { 11, { Version("1.19.3"), Version("1.19.3") } },
 };
 
 void ResourcePack::setPackFormat(int new_format_id)
@@ -113,4 +113,9 @@ bool ResourcePack::applyFilter(QRegularExpression filter) const
         return true;
 
     return Resource::applyFilter(filter);
+}
+
+bool ResourcePack::valid() const
+{
+    return m_pack_format != 0;
 }

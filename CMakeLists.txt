@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.15)  # minimum version required by QuaZip
 
-if(WIN32)
-    # In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
-    cmake_policy(SET CMP0020 OLD)
-endif()
-
 project(Launcher)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
@@ -32,12 +27,51 @@ set(CMAKE_C_STANDARD_REQUIRED true)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
-set(CMAKE_CXX_FLAGS "-Wall -pedantic -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
+if(MSVC)
+    # Use /W4 as /Wall includes unnesserey warnings such as added padding to structs
+    # /permissive- specify standards-conforming compiler behavior, also enabled by Qt6, default on with std:c++20
+    # /GS Adds buffer security checks, default on but incuded anyway to mirror gcc's fstack-protector flag
+    set(CMAKE_CXX_FLAGS "/W4 /permissive- /GS ${CMAKE_CXX_FLAGS}")
+
+    # LINK accepts /SUBSYSTEM whics sets if we are a WINDOWS (gui) or a CONSOLE programs
+    # This implicitly selects an entrypoint specific to the subsystem selected
+    # qtmain/QtEntryPointLib provides the correct entrypoint (wWinMain) for gui programs
+    # Additinaly LINK autodetects we use a GUI so we can omit /SUBSYSTEM
+    # This allows tests to still use have console without using seperate linker flags
+    # /MANIFEST:NO disables generating a manifest file, we instead provide our own
+    # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
+    set(CMAKE_EXE_LINKER_FLAGS "/MANIFEST:NO /STACK:8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+
+    # See https://github.com/ccache/ccache/issues/1040
+    # Note, CMake 3.25 replaces this with CMAKE_MSVC_DEBUG_INFORMATION_FORMAT
+    # See https://cmake.org/cmake/help/v3.25/variable/CMAKE_MSVC_DEBUG_INFORMATION_FORMAT.html
+    foreach(config DEBUG RELWITHDEBINFO)
+        foreach(lang C CXX)
+            set(flags_var "CMAKE_${lang}_FLAGS_${config}")
+            string(REGEX REPLACE "/Z[Ii]" "/Z7" ${flags_var} "${${flags_var}}")
+        endforeach()
+    endforeach()
+
+    if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDLL")
+        set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release "")
+        set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release "")
+    endif()
+else()
+    set(CMAKE_CXX_FLAGS "-Wall -pedantic -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
+
+    # ATL's pack list needs more than the default 1 Mib stack on windows
+    if(WIN32)
+        set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+    endif()
+endif()
 
 # Fix build with Qt 5.13
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_DISABLE_DEPRECATED_BEFORE=0x050C00")
+
+# Fix aarch64 build for toml++
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTOML_ENABLE_FLOAT16=0")
 
 # set CXXFLAGS for build targets
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS_RELEASE}")
@@ -48,11 +82,18 @@ if(ENABLE_LTO)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
 
-    if(ipo_supported AND (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel"))
-        message(STATUS "IPO / LTO enabled")
-        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-    elseif(ipo_supported)
-        message(STATUS "Not enabling IPO / LTO on debug builds")
+    if(ipo_supported)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL TRUE)
+        if(CMAKE_BUILD_TYPE)
+            if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+                message(STATUS "IPO / LTO enabled")
+            else()
+                message(STATUS "Not enabling IPO / LTO on debug builds")
+            endif()
+        else()
+            message(STATUS "IPO / LTO will only be enabled for release builds")
+        endif()
     else()
         message(STATUS "IPO / LTO not supported: <${ipo_error}>")
     endif()
@@ -60,8 +101,20 @@ endif()
 
 option(BUILD_TESTING "Build the testing tree." ON)
 
-find_package(ECM REQUIRED NO_MODULE)
-set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
+find_package(ECM QUIET NO_MODULE)
+if(NOT ECM_FOUND)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/CMakeLists.txt")
+        message(STATUS "Using bundled ECM")
+        set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/modules;${CMAKE_MODULE_PATH}")
+    else()
+        message(FATAL_ERROR
+            " Could not find ECM\n \n"
+            " Either install ECM using the system package manager or clone submodules\n"
+            " Submodules can be cloned with 'git submodule update --init --recursive'")
+    endif()
+else()
+    set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
+endif()
 include(CTest)
 include(ECMAddTests)
 if(BUILD_TESTING)
@@ -76,7 +129,7 @@ set(Launcher_NEWS_OPEN_URL "https://prismlauncher.org/news" CACHE STRING "URL th
 set(Launcher_HELP_URL "https://prismlauncher.org/wiki/help-pages/%1" CACHE STRING "URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help")
 
 ######## Set version numbers ########
-set(Launcher_VERSION_MAJOR 5)
+set(Launcher_VERSION_MAJOR 6)
 set(Launcher_VERSION_MINOR 0)
 
 set(Launcher_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}")
@@ -146,6 +199,10 @@ set(Launcher_BUILD_TIMESTAMP "${TODAY}")
 
 ################################ 3rd Party Libs ################################
 
+if(NOT Launcher_FORCE_BUNDLED_LIBS)
+    find_package(ZLIB QUIET)
+endif()
+
 # Find the required Qt parts
 include(QtVersionlessBackport)
 if(Launcher_QT_VERSION_MAJOR EQUAL 5)
@@ -164,7 +221,7 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE")
 elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_VERSION_MAJOR 6)
-    find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml Core5Compat)
+    find_package(Qt6 REQUIRED COMPONENTS Core CoreTools Widgets Concurrent Network Test Xml Core5Compat)
     list(APPEND Launcher_QT_LIBS Qt6::Core5Compat)
 
     if(NOT Launcher_FORCE_BUNDLED_LIBS)
@@ -178,12 +235,16 @@ else()
     message(FATAL_ERROR "Qt version ${Launcher_QT_VERSION_MAJOR} is not supported")
 endif()
 
-include(ECMQueryQt)
-ecm_query_qt(QT_PLUGINS_DIR  QT_INSTALL_PLUGINS)
-ecm_query_qt(QT_LIBS_DIR     QT_INSTALL_LIBS)
-ecm_query_qt(QT_LIBEXECS_DIR QT_INSTALL_LIBEXECS)
-ecm_query_qt(QT_DATA_DIR     QT_HOST_DATA)
-set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
+if(Launcher_QT_VERSION_MAJOR EQUAL 5)
+    include(ECMQueryQt)
+    ecm_query_qt(QT_PLUGINS_DIR  QT_INSTALL_PLUGINS)
+    ecm_query_qt(QT_LIBS_DIR     QT_INSTALL_LIBS)
+    ecm_query_qt(QT_LIBEXECS_DIR QT_INSTALL_LIBEXECS)
+else()
+    set(QT_PLUGINS_DIR  ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_PLUGINS})
+    set(QT_LIBS_DIR     ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBS})
+    set(QT_LIBEXECS_DIR ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBEXECS})
+endif()
 
 # NOTE: Qt 6 already sets this by default
 if (Qt5_POSITION_INDEPENDENT_CODE)
@@ -222,14 +283,14 @@ if(UNIX AND APPLE)
     set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_Name}.app")
 
     # Mac bundle settings
-    set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_Name}")
-    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_Name}: A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.")
+    set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_DisplayName}")
+    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_DisplayName}: A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.")
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.prismlauncher.${Launcher_Name}")
     set(MACOSX_BUNDLE_BUNDLE_VERSION "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_LONG_VERSION_STRING "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_ICON_FILE ${Launcher_Name}.icns)
-    set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2021-2022 ${Launcher_Copyright}")
+    set(MACOSX_BUNDLE_COPYRIGHT "© 2022 ${Launcher_Copyright_Mac}")
     set(MACOSX_SPARKLE_UPDATE_PUBLIC_KEY "v55ZWWD6QlPoXGV6VLzOTZxZUggWeE51X8cRQyQh6vA=")
     set(MACOSX_SPARKLE_UPDATE_FEED_URL "https://prismlauncher.org/feed/appcast.xml")
 
@@ -247,13 +308,11 @@ if(UNIX AND APPLE)
     install(FILES ${Launcher_Branding_ICNS} DESTINATION ${RESOURCES_DEST_DIR} RENAME ${Launcher_Name}.icns)
 
 elseif(UNIX)
+    include(KDEInstallDirs)
+
     set(BINARY_DEST_DIR "bin")
     set(LIBRARY_DEST_DIR "lib${LIB_SUFFIX}")
     set(JARS_DEST_DIR "share/${Launcher_APP_BINARY_NAME}")
-    set(LAUNCHER_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
-    set(LAUNCHER_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
-    set(LAUNCHER_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
-    set(LAUNCHER_MAN_DEST_DIR "share/man/man6" CACHE STRING "Path to the man page directory")
 
     # install as bundle with no dependencies included
     set(INSTALL_BUNDLE "nodeps")
@@ -261,12 +320,13 @@ elseif(UNIX)
     # Set RPATH
     SET(Launcher_BINARY_RPATH "$ORIGIN/")
 
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${LAUNCHER_ICON_DEST_DIR})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${KDE_INSTALL_APPDIR})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${KDE_INSTALL_METAINFODIR})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION "${KDE_INSTALL_ICONDIR}/hicolor/scalable/apps")
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_mrpack_MIMEInfo} DESTINATION ${KDE_INSTALL_MIMEDIR})
 
     if(Launcher_ManPage)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_ManPage} DESTINATION ${LAUNCHER_MAN_DEST_DIR})
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_ManPage} DESTINATION "${KDE_INSTALL_MANDIR}/man6")
     endif()
 
     # Install basic runner script if component "portable" is selected
@@ -306,6 +366,21 @@ add_subdirectory(libraries/systeminfo) # system information library
 add_subdirectory(libraries/hoedown) # markdown parser
 add_subdirectory(libraries/launcher) # java based launcher part for Minecraft
 add_subdirectory(libraries/javacheck) # java compatibility checker
+if(NOT ZLIB_FOUND)
+    message(STATUS "Using bundled zlib")
+    set(CMAKE_POLICY_DEFAULT_CMP0069 NEW) # Suppress cmake warnings and allow INTERPROCEDURAL_OPTIMIZATION for zlib
+    set(SKIP_INSTALL_ALL ON)
+    add_subdirectory(libraries/zlib EXCLUDE_FROM_ALL)
+    
+    set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib" "${CMAKE_CURRENT_BINARY_DIR}/libraries/zlib" CACHE STRING "")
+    set_target_properties(zlibstatic PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIR}")
+    add_library(ZLIB::ZLIB ALIAS zlibstatic)
+    set(ZLIB_LIBRARY ZLIB::ZLIB CACHE STRING "zlib library name")
+
+    find_package(ZLIB REQUIRED)
+else()
+    message(STATUS "Using system zlib")
+endif()
 if (FORCE_BUNDLED_QUAZIP)
     message(STATUS "Using bundled QuaZip")
     set(BUILD_SHARED_LIBS 0)  # link statically to avoid conflicts.

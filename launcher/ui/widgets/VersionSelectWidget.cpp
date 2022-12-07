@@ -142,7 +142,7 @@ void VersionSelectWidget::changeProgress(qint64 current, qint64 total)
 void VersionSelectWidget::currentRowChanged(const QModelIndex& current, const QModelIndex&)
 {
     auto variant = m_proxyModel->data(current, BaseVersionList::VersionPointerRole);
-    emit selectedVersionChanged(variant.value<BaseVersionPtr>());
+    emit selectedVersionChanged(variant.value<BaseVersion::Ptr>());
 }
 
 void VersionSelectWidget::preselect()
@@ -186,11 +186,11 @@ bool VersionSelectWidget::hasVersions() const
     return m_proxyModel->rowCount(QModelIndex()) != 0;
 }
 
-BaseVersionPtr VersionSelectWidget::selectedVersion() const
+BaseVersion::Ptr VersionSelectWidget::selectedVersion() const
 {
     auto currentIndex = listView->selectionModel()->currentIndex();
     auto variant = m_proxyModel->data(currentIndex, BaseVersionList::VersionPointerRole);
-    return variant.value<BaseVersionPtr>();
+    return variant.value<BaseVersion::Ptr>();
 }
 
 void VersionSelectWidget::setExactFilter(BaseVersionList::ModelRoles role, QString filter)

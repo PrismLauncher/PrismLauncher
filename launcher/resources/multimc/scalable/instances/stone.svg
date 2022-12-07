@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="24"
+   height="24"
+   version="1.1"
+   viewBox="0 0 24 24"
+   id="svg168"
+   xml:space="preserve"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"><defs
+     id="defs172"><linearGradient
+       xlink:href="#linearGradient25803"
+       id="linearGradient25805"
+       x1="785"
+       y1="26"
+       x2="785"
+       y2="6"
+       gradientUnits="userSpaceOnUse" /><linearGradient
+       id="linearGradient25803"><stop
+         style="stop-color:#8e8e86;stop-opacity:1;"
+         offset="0"
+         id="stop25799" /><stop
+         style="stop-color:#a2a29b;stop-opacity:1;"
+         offset="1"
+         id="stop25801" /></linearGradient></defs><title
+     id="title132">Prism Launcher Logo</title><metadata
+     id="metadata166"><rdf:RDF><cc:Work
+         rdf:about=""><dc:title>Prism Launcher Logo</dc:title><dc:date>19/10/2022</dc:date><dc:creator><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:creator><dc:contributor><cc:Agent><dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title></cc:Agent></dc:contributor><dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source><dc:rights><cc:Agent><dc:title>CC BY-SA 4.0</dc:title></cc:Agent></dc:rights><dc:publisher><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:publisher></cc:Work></rdf:RDF></metadata><g
+     id="i_stone"
+     transform="translate(-772,-4)"><rect
+       style="fill:url(#linearGradient25805);fill-opacity:1;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
+       id="rect15088-9"
+       width="20"
+       height="20"
+       x="774"
+       y="6"
+       ry="3" /><rect
+       style="fill:#ffffff;fill-opacity:0;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
+       id="rect128412-4-1"
+       width="24"
+       height="24"
+       x="772"
+       y="4" /><path
+       id="path47261"
+       style="opacity:0.5;fill:#bfbfbb;fill-opacity:1;stroke-width:0.999997;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
+       d="m 777,11 v 1 h 12 v -1 z m 14,2 v 1 h 2 v -1 z m -17,2 v 1 h 8 v -1 z m 16,4 v 1 h 4 v -1 z m -8,2 v 1 h 2 v -1 z m 2,3 v 1 h 5 v -1 z" /><path
+       id="path47259"
+       style="opacity:0.5;fill:#7e7e77;fill-opacity:1;stroke-width:0.999997;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
+       d="m 774,8 v 1 h 7 V 8 Z m 15,0 v 1 h 5 V 8 Z m -4,8 v 1 h 5 v -1 z m -11,4 v 1 h 6 v -1 z m 3,3 v 1 h 2 v -1 z m 14,0 v 1 h 3 v -1 z" /></g></svg>

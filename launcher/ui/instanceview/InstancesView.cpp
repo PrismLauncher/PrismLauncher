@@ -261,15 +261,16 @@ void InstancesView::setCatDisplayed(bool enabled)
 {
     if (enabled) {
         QDateTime now = QDateTime::currentDateTime();
-        QDateTime birthday(QDate(now.date().year(), 12, 28), QTime(0, 0));
         QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
-        QString cat;
+        QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
+        QDateTime birthday(QDate(now.date().year(), 10, 17), QTime(00, 0));
+        QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
         if (std::abs(now.daysTo(xmas)) <= 4) {
-            cat = "catmas";
+            cat += "-xmas";
+        } else if (std::abs(now.daysTo(halloween)) <= 12) {
+            cat += "-spooky";
         } else if (std::abs(now.daysTo(birthday)) <= 12) {
-            cat = "cattiversary";
-        } else {
-            cat = "kitteh";
+            cat += "-bday";
         }
         setStyleSheet(QString(R"(
 * {

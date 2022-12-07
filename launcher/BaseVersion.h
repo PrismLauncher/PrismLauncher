@@ -25,6 +25,7 @@
 class BaseVersion
 {
 public:
+    using Ptr = std::shared_ptr<BaseVersion>;
     virtual ~BaseVersion() {}
     /*!
      * A string used to identify this version in config files.
@@ -54,6 +55,4 @@ public:
     };
 };
 
-typedef std::shared_ptr<BaseVersion> BaseVersionPtr;
-
-Q_DECLARE_METATYPE(BaseVersionPtr)
+Q_DECLARE_METATYPE(BaseVersion::Ptr)

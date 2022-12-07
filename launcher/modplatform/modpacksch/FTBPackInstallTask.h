@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -43,6 +43,7 @@
 #include "QObjectPtr.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "net/NetJob.h"
+#include "ui/dialogs/BlockedModsDialog.h"
 
 #include <QWidget>
 
@@ -76,6 +77,7 @@ private:
     void resolveMods();
     void createInstance();
     void downloadPack();
+    void copyBlockedMods();
 
 private:
     NetJob::Ptr m_net_job = nullptr;
@@ -90,6 +92,7 @@ private:
     Version m_version;
 
     QMap<QString, QString> m_files_to_copy;
+    QList<BlockedMod> m_blocked_mods;
 
     //FIXME: nuke
     QWidget* m_parent;

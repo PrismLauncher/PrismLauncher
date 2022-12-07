@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -130,6 +131,7 @@ public:
     QString createLaunchScript(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin);
     /// get arguments passed to java
     QStringList javaArguments();
+    QString getLauncher();
 
     /// get variables for launch command variable substitution/environment
     QMap<QString, QString> getVariables() override;

@@ -54,7 +54,7 @@ void Meta::Version::parse(const QJsonObject& obj)
     parseVersion(obj, this);
 }
 
-void Meta::Version::mergeFromList(const Meta::VersionPtr& other)
+void Meta::Version::mergeFromList(const Meta::Version::Ptr& other)
 {
     if(other->m_providesRecommendations)
     {
@@ -85,7 +85,7 @@ void Meta::Version::mergeFromList(const Meta::VersionPtr& other)
     }
 }
 
-void Meta::Version::merge(const VersionPtr &other)
+void Meta::Version::merge(const Version::Ptr &other)
 {
     mergeFromList(other);
     if(other->m_data)

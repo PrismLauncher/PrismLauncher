@@ -10,3 +10,9 @@
 [submodule "libraries/libnbtplusplus"]
 	path = libraries/libnbtplusplus
 	url = https://github.com/PrismLauncher/libnbtplusplus.git
+[submodule "libraries/zlib"]
+	path = libraries/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "libraries/extra-cmake-modules"]
+	path = libraries/extra-cmake-modules
+	url = https://github.com/KDE/extra-cmake-modules

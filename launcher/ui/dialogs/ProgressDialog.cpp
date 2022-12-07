@@ -44,7 +44,8 @@ void ProgressDialog::setSkipButton(bool present, QString label)
 void ProgressDialog::on_skipButton_clicked(bool checked)
 {
     Q_UNUSED(checked);
-    task->abort();
+    if (ui->skipButton->isEnabled())  // prevent other triggers from aborting
+        task->abort();
 }
 
 ProgressDialog::~ProgressDialog()

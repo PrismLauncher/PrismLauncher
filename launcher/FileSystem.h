@@ -40,6 +40,7 @@
 
 #include <QDir>
 #include <QFlags>
+#include <QObject>
 
 namespace FS {
 
@@ -75,9 +76,11 @@ bool ensureFilePathExists(QString filenamepath);
  */
 bool ensureFolderPathExists(QString filenamepath);
 
-class copy {
+/// @brief Copies a directory and it's contents from src to dest
+class copy : public QObject {
+    Q_OBJECT
    public:
-    copy(const QString& src, const QString& dst)
+    copy(const QString& src, const QString& dst, QObject* parent = nullptr) : QObject(parent)
     {
         m_src.setPath(src);
         m_dst.setPath(dst);
@@ -87,21 +90,35 @@ class copy {
         m_followSymlinks = follow;
         return *this;
     }
-    copy& blacklist(const IPathMatcher* filter)
+    copy& matcher(const IPathMatcher* filter)
     {
-        m_blacklist = filter;
+        m_matcher = filter;
         return *this;
     }
-    bool operator()() { return operator()(QString()); }
+    copy& whitelist(bool whitelist)
+    {
+        m_whitelist = whitelist;
+        return *this;
+    }
+
+    bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
+
+    int totalCopied() { return m_copied; }
+
+   signals:
+    void fileCopied(const QString& relativeName);
+    // TODO: maybe add a "shouldCopy" signal in the future?
 
    private:
-    bool operator()(const QString& offset);
+    bool operator()(const QString& offset, bool dryRun = false);
 
    private:
     bool m_followSymlinks = true;
-    const IPathMatcher* m_blacklist = nullptr;
+    const IPathMatcher* m_matcher = nullptr;
+    bool m_whitelist = false;
     QDir m_src;
     QDir m_dst;
+    int m_copied;
 };
 
 /**
@@ -155,4 +172,9 @@ QString getDesktopDir();
 // Overrides one folder with the contents of another, preserving items exclusive to the first folder
 // Equivalent to doing QDir::rename, but allowing for overrides
 bool overrideFolder(QString overwritten_path, QString override_path);
+
+/**
+ * Creates a shortcut to the specified target file at the specified destination path.
+ */
+bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon);
 }

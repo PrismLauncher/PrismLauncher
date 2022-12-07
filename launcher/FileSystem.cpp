@@ -45,7 +45,11 @@
 #include <QTextStream>
 #include <QUrl>
 
+#include "DesktopServices.h"
+#include "StringUtils.h"
+
 #if defined Q_OS_WIN32
+#define WIN32_LEAN_AND_MEAN
 #include <objbase.h>
 #include <objidl.h>
 #include <shlguid.h>
@@ -76,22 +80,6 @@ namespace fs = std::filesystem;
 #ifndef GHC_USE_STD_FS
 #include <ghc/filesystem.hpp>
 namespace fs = ghc::filesystem;
-#endif
-
-#if defined Q_OS_WIN32
-
-std::wstring toStdString(QString s)
-{
-    return s.toStdWString();
-}
-
-#else
-
-std::string toStdString(QString s)
-{
-    return s.toStdString();
-}
-
 #endif
 
 namespace FS {
@@ -162,9 +150,13 @@ bool ensureFolderPathExists(QString foldernamepath)
     return success;
 }
 
-bool copy::operator()(const QString& offset)
+/// @brief Copies a directory and it's contents from src to dest
+/// @param offset subdirectory form src to copy to dest
+/// @return if there was an error during the filecopy
+bool copy::operator()(const QString& offset, bool dryRun)
 {
     using copy_opts = fs::copy_options;
+    m_copied = 0;  // reset counter
 
 // NOTE always deep copy on windows. the alternatives are too messy.
 #if defined Q_OS_WIN32
@@ -182,6 +174,24 @@ bool copy::operator()(const QString& offset)
     if (!m_followSymlinks)
         opt |= copy_opts::copy_symlinks;
 
+    // Function that'll do the actual copying
+    auto copy_file = [&](QString src_path, QString relative_dst_path) {
+        if (m_matcher && (m_matcher->matches(relative_dst_path) != m_whitelist))
+            return;
+
+        auto dst_path = PathCombine(dst, relative_dst_path);
+        if (!dryRun) {
+            ensureFilePathExists(dst_path);
+            fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
+        }
+        if (err) {
+            qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
+            qDebug() << "Source file:" << src_path;
+            qDebug() << "Destination file:" << dst_path;
+        }
+        m_copied++;
+        emit fileCopied(relative_dst_path);
+    };
 
     // We can't use copy_opts::recursive because we need to take into account the
     // blacklisted paths, so we iterate over the source directory, and if there's no blacklist
@@ -193,19 +203,12 @@ bool copy::operator()(const QString& offset)
         auto src_path = source_it.next();
         auto relative_path = src_dir.relativeFilePath(src_path);
 
-        if (m_blacklist && m_blacklist->matches(relative_path))
-            continue;
-
-        auto dst_path = PathCombine(dst, relative_path);
-        ensureFilePathExists(dst_path);
-
-        fs::copy(toStdString(src_path), toStdString(dst_path), opt, err);
-        if (err) {
-            qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
-            qDebug() << "Source file:" << src_path;
-            qDebug() << "Destination file:" << dst_path;
-        }
+        copy_file(src_path, relative_path);
     }
+
+    // If the root src is not a directory, the previous iterator won't run.
+    if (!fs::is_directory(StringUtils::toStdString(src)))
+        copy_file(src, "");
 
     return err.value() == 0;
 }
@@ -214,7 +217,7 @@ bool deletePath(QString path)
 {
     std::error_code err;
 
-    fs::remove_all(toStdString(path), err);
+    fs::remove_all(StringUtils::toStdString(path), err);
 
     if (err) {
         qWarning() << "Failed to remove files:" << QString::fromStdString(err.message());
@@ -228,6 +231,9 @@ bool trash(QString path, QString *pathInTrash = nullptr)
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     return false;
 #else
+    // FIXME: Figure out trash in Flatpak. Qt seemingly doesn't use the Trash portal
+    if (DesktopServices::isFlatpak())
+        return false;
     return QFile::moveToTrash(path, pathInTrash);
 #endif
 }
@@ -338,12 +344,37 @@ QString getDesktopDir()
 }
 
 // Cross-platform Shortcut creation
-bool createShortCut(QString location, QString dest, QStringList args, QString name, QString icon)
+bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon)
 {
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-    location = PathCombine(location, name + ".desktop");
+#if defined(Q_OS_MACOS)
+    destination += ".command";
 
-    QFile f(location);
+    QFile f(destination);
+    f.open(QIODevice::WriteOnly | QIODevice::Text);
+    QTextStream stream(&f);
+
+    QString argstring;
+    if (!args.empty())
+        argstring = " \"" + args.join("\" \"") + "\"";
+
+    stream << "#!/bin/bash"
+           << "\n";
+    stream << "\""
+           << target
+           << "\" "
+           << argstring
+           << "\n";
+
+    stream.flush();
+    f.close();
+
+    f.setPermissions(f.permissions() | QFileDevice::ExeOwner | QFileDevice::ExeGroup | QFileDevice::ExeOther);
+
+    return true;
+#elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+    destination += ".desktop";
+
+    QFile f(destination);
     f.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream stream(&f);
 
@@ -355,10 +386,12 @@ bool createShortCut(QString location, QString dest, QStringList args, QString na
            << "\n";
     stream << "Type=Application"
            << "\n";
-    stream << "TryExec=" << dest.toLocal8Bit() << "\n";
-    stream << "Exec=" << dest.toLocal8Bit() << argstring.toLocal8Bit() << "\n";
+    stream << "Exec=\"" << target.toLocal8Bit() << "\"" << argstring.toLocal8Bit() << "\n";
     stream << "Name=" << name.toLocal8Bit() << "\n";
-    stream << "Icon=" << icon.toLocal8Bit() << "\n";
+    if (!icon.isEmpty())
+    {
+        stream << "Icon=" << icon.toLocal8Bit() << "\n";
+    }
 
     stream.flush();
     f.close();
@@ -366,25 +399,132 @@ bool createShortCut(QString location, QString dest, QStringList args, QString na
     f.setPermissions(f.permissions() | QFileDevice::ExeOwner | QFileDevice::ExeGroup | QFileDevice::ExeOther);
 
     return true;
-#elif defined Q_OS_WIN
-    // TODO: Fix
-    //    QFile file(PathCombine(location, name + ".lnk"));
-    //    WCHAR *file_w;
-    //    WCHAR *dest_w;
-    //    WCHAR *args_w;
-    //    file.fileName().toWCharArray(file_w);
-    //    dest.toWCharArray(dest_w);
+#elif defined(Q_OS_WIN)
+    QFileInfo targetInfo(target);
 
-    //    QString argStr;
-    //    for (int i = 0; i < args.count(); i++)
-    //    {
-    //        argStr.append(args[i]);
-    //        argStr.append(" ");
-    //    }
-    //    argStr.toWCharArray(args_w);
+    if (!targetInfo.exists())
+    {
+        qWarning() << "Target file does not exist!";
+        return false;
+    }
 
-    //    return SUCCEEDED(CreateLink(file_w, dest_w, args_w));
-    return false;
+    target = targetInfo.absoluteFilePath();
+
+    if (target.length() >= MAX_PATH)
+    {
+        qWarning() << "Target file path is too long!";
+        return false;
+    }
+
+    if (!icon.isEmpty() && icon.length() >= MAX_PATH)
+    {
+        qWarning() << "Icon path is too long!";
+        return false;
+    }
+
+    destination += ".lnk";
+
+    if (destination.length() >= MAX_PATH)
+    {
+        qWarning() << "Destination path is too long!";
+        return false;
+    }
+
+    QString argStr;
+    int argCount = args.count();
+    for (int i = 0; i < argCount; i++)
+    {
+        if (args[i].contains(' '))
+        {
+            argStr.append('"').append(args[i]).append('"');
+        }
+        else
+        {
+            argStr.append(args[i]);
+        }
+
+        if (i < argCount - 1)
+        {
+            argStr.append(" ");
+        }
+    }
+
+    if (argStr.length() >= MAX_PATH)
+    {
+        qWarning() << "Arguments string is too long!";
+        return false;
+    }
+
+    HRESULT hres;
+
+    // ...yes, you need to initialize the entire COM stack just to make a shortcut
+    hres = CoInitialize(nullptr);
+    if (FAILED(hres))
+    {
+        qWarning() << "Failed to initialize COM!";
+        return false;
+    }
+
+    WCHAR wsz[MAX_PATH];
+
+    IShellLink* psl;
+
+    // create an IShellLink instance - this stores the shortcut's attributes
+    hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&psl);
+    if (SUCCEEDED(hres))
+    {
+        wmemset(wsz, 0, MAX_PATH);
+        target.toWCharArray(wsz);
+        psl->SetPath(wsz);
+
+        wmemset(wsz, 0, MAX_PATH);
+        argStr.toWCharArray(wsz);
+        psl->SetArguments(wsz);
+
+        wmemset(wsz, 0, MAX_PATH);
+        targetInfo.absolutePath().toWCharArray(wsz);
+        psl->SetWorkingDirectory(wsz); // "Starts in" attribute
+
+        if (!icon.isEmpty())
+        {
+            wmemset(wsz, 0, MAX_PATH);
+            icon.toWCharArray(wsz);
+            psl->SetIconLocation(wsz, 0);
+        }
+
+        // query an IPersistFile interface from our IShellLink instance
+        // this is the interface that will actually let us save the shortcut to disk!
+        IPersistFile* ppf;
+        hres = psl->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf);
+        if (SUCCEEDED(hres))
+        {
+            wmemset(wsz, 0, MAX_PATH);
+            destination.toWCharArray(wsz);
+            hres = ppf->Save(wsz, TRUE);
+            if (FAILED(hres))
+            {
+                qWarning() << "IPresistFile->Save() failed";
+                qWarning() << "hres = " << hres;
+            }
+            ppf->Release();
+        }
+        else
+        {
+            qWarning() << "Failed to query IPersistFile interface from IShellLink instance";
+            qWarning() << "hres = " << hres;
+        }
+        psl->Release();
+    }
+    else
+    {
+        qWarning() << "Failed to create IShellLink instance";
+        qWarning() << "hres = " << hres;
+    }
+
+    // go away COM, nobody likes you
+    CoUninitialize();
+
+    return SUCCEEDED(hres);
 #else
     qWarning("Desktop Shortcuts not supported on your platform!");
     return false;
@@ -401,7 +541,8 @@ bool overrideFolder(QString overwritten_path, QString override_path)
     std::error_code err;
     fs::copy_options opt = copy_opts::recursive | copy_opts::overwrite_existing;
 
-    fs::copy(toStdString(override_path), toStdString(overwritten_path), opt, err);
+    // FIXME: hello traveller! Apparently std::copy does NOT overwrite existing files on GNU libstdc++ on Windows?
+    fs::copy(StringUtils::toStdString(override_path), StringUtils::toStdString(overwritten_path), opt, err);
 
     if (err) {
         qCritical() << QString("Failed to apply override from %1 to %2").arg(override_path, overwritten_path);

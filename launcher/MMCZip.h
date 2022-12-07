@@ -80,9 +80,11 @@ namespace MMCZip
     /**
      * Find a single file in archive by file name (not path)
      *
+     * \param ignore_paths paths to skip when recursing the search
+     *
      * \return the path prefix where the file is
      */
-    QString findFolderOfFileInZip(QuaZip * zip, const QString & what, const QString &root = QString(""));
+    QString findFolderOfFileInZip(QuaZip * zip, const QString & what, const QStringList& ignore_paths = {}, const QString &root = QString(""));
 
     /**
      * Find a multiple files of the same name in archive by file name

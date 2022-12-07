@@ -39,7 +39,7 @@
 #include <QList>
 #include <list>
 
-#include "Version.h"
+#include "../Version.h"
 #include "net/NetJob.h"
 
 namespace ModPlatform {

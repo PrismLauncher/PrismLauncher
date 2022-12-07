@@ -3,6 +3,8 @@
 #include "Json.h"
 #include "net/Upload.h"
 
+#include "modplatform/modrinth/ModrinthPackIndex.h"
+
 Flame::FileResolvingTask::FileResolvingTask(const shared_qobject_ptr<QNetworkAccessManager>& network, Flame::Manifest& toProcess)
     : m_network(network), m_toProcess(toProcess)
 {}
@@ -40,12 +42,25 @@ void Flame::FileResolvingTask::executeTask()
 void Flame::FileResolvingTask::netJobFinished()
 {
     setProgress(1, 3);
-    int index = 0;
     // job to check modrinth for blocked projects
     m_checkJob = new NetJob("Modrinth check", m_network);
     blockedProjects = QMap<File *,QByteArray *>();
-    auto doc = Json::requireDocument(*result);
-    auto array = Json::requireArray(doc.object()["data"]);
+
+    QJsonDocument doc;
+    QJsonArray array;
+
+    try {
+        doc = Json::requireDocument(*result);
+        array = Json::requireArray(doc.object()["data"]);
+    } catch (Json::JsonException& e) {
+        qCritical() << "Non-JSON data returned from the CF API";
+        qCritical() << e.cause();
+
+        emitFailed(tr("Invalid data returned from the API."));
+
+        return;
+    }
+
     for (QJsonValueRef file : array) {
         auto fileid = Json::requireInteger(Json::requireObject(file)["id"]);
         auto& out = m_toProcess.files[fileid];
@@ -66,7 +81,6 @@ void Flame::FileResolvingTask::netJobFinished()
                 blockedProjects.insert(&out, output);
             }
         }
-        index++;
     }
     connect(m_checkJob.get(), &NetJob::finished, this, &Flame::FileResolvingTask::modrinthCheckFinished);
 
@@ -84,18 +98,21 @@ void Flame::FileResolvingTask::modrinthCheckFinished() {
             delete bytes;
             continue;
         }
+
         QJsonDocument doc = QJsonDocument::fromJson(*bytes);
         auto obj = doc.object();
-        auto array = Json::requireArray(obj,"files");
-        for (auto file: array) {
-            auto fileObj = Json::requireObject(file);
-            auto primary = Json::requireBoolean(fileObj,"primary");
-            if (primary) {
-                out->url = Json::requireUrl(fileObj,"url");
-                qDebug() << "Found alternative on modrinth " << out->fileName;
-                break;
-            }
+        auto file = Modrinth::loadIndexedPackVersion(obj);
+
+        // If there's more than one mod loader for this version, we can't know for sure
+        // which file is relative to each loader, so it's best to not use any one and
+        // let the user download it manually.
+        if (file.loaders.size() <= 1) {
+            out->url = file.downloadUrl;
+            qDebug() << "Found alternative on modrinth " << out->fileName;
+        } else {
+            out->resolved = false;
         }
+
         delete bytes;
     }
     //copy to an output list and filter out projects found on modrinth
