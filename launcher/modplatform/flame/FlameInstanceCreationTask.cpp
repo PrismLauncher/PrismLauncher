@@ -385,14 +385,6 @@ bool FlameCreationTask::createInstance()
         setAbortable(false);
         auto inst = m_instance.value();
 
-        // Only change the name if it didn't use a custom name, so that the previous custom name
-        // is preserved, but if we're using the original one, we update the version string.
-        // NOTE: This needs to come before the copyManagedPack call!
-        if (inst->name().contains(inst->getManagedPackVersionName())) {
-            if (askForChangingInstanceName(m_parent, inst->name(), instance.name()) == InstanceNameChange::ShouldChange)
-                inst->setName(instance.name());
-        }
-
         inst->copyManagedPack(instance);
     }
 

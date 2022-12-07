@@ -418,10 +418,7 @@ void FlameManagedPackPage::update()
 
     auto extracted = new InstanceImportTask(version.downloadUrl, this, std::move(extra_info));
 
-    InstanceName inst_name(m_inst->getManagedPackName(), version.version);
-    inst_name.setName(m_inst->name().replace(m_inst->getManagedPackVersionName(), version.version));
-    extracted->setName(inst_name);
-
+    extracted->setName(m_inst->name());
     extracted->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
     extracted->setIcon(m_inst->iconKey());
     extracted->setConfirmUpdate(false);
