@@ -548,8 +548,9 @@ public:
         fileMenu->addAction(actionChangeInstGroup);
         fileMenu->addAction(actionViewSelectedInstFolder);
         fileMenu->addAction(actionExportInstance);
-        fileMenu->addAction(actionDeleteInstance);
         fileMenu->addAction(actionCopyInstance);
+        fileMenu->addAction(actionDeleteInstance);
+        fileMenu->addAction(actionCreateInstanceShortcut);
         fileMenu->addSeparator();
         fileMenu->addAction(actionSettings);
 
