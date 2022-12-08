@@ -24,11 +24,10 @@ class InstanceDelegate : public QStyledItemDelegate {
     Q_OBJECT
 
    public:
-    InstanceDelegate(QObject* parent = 0, int iconSize = 48, bool isGrid = false);
+    InstanceDelegate(QObject* parent = 0, int iconSize = 48);
 
     void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override;
 
    private:
     int m_iconSize;
-    bool m_isGrid;
 };

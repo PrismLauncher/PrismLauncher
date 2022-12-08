@@ -21,6 +21,7 @@
 #include <QListView>
 #include <QStackedWidget>
 #include <QTableView>
+#include <QQuickWidget>
 
 #include "BaseInstance.h"
 #include "InstanceList.h"
@@ -41,7 +42,7 @@ class InstancesView : public QStackedWidget {
     QAbstractItemView* currentView()
     {
         if (m_displayMode == GridMode)
-            return m_grid;
+            return nullptr; // TODO
         return m_table;
     }
 
@@ -82,7 +83,7 @@ class InstancesView : public QStackedWidget {
     DisplayMode m_displayMode = TableMode;
 
     QTableView* m_table;
-    QListView* m_grid;
+    QQuickWidget* m_grid;
     InstanceTableProxyModel* m_tableProxy;
     InstanceGridProxyModel* m_gridProxy;
     InstanceList* m_instances;

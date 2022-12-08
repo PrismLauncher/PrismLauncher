@@ -27,11 +27,14 @@
 
 #include "InstanceDelegate.h"
 #include "InstanceList.h"
+#include "icons/IconImageProvider.h"
 #include "ui/instanceview/InstanceGridProxyModel.h"
 #include "ui/instanceview/InstanceTableProxyModel.h"
 
 #include <QHeaderView>
 #include <QKeyEvent>
+#include <QQmlContext>
+#include <QQmlEngine>
 #include <QSize>
 #include <QSortFilterProxyModel>
 
@@ -59,8 +62,8 @@ void InstancesView::switchDisplayMode(InstancesView::DisplayMode mode)
                                                    QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
         setCurrentWidget(m_table);
     } else {
-        m_grid->selectionModel()->setCurrentIndex(m_gridProxy->mapFromSource(sourceIndex),
-                                                  QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+        //m_grid->selectionModel()->setCurrentIndex(m_gridProxy->mapFromSource(sourceIndex),
+        //                                          QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
         setCurrentWidget(m_grid);
     }
     m_displayMode = mode;
@@ -92,7 +95,7 @@ void InstancesView::createTable()
     m_table = new QTableView(this);
     m_table->installEventFilter(this);
     m_table->setModel(m_tableProxy);
-    m_table->setItemDelegate(new InstanceDelegate(this, m_iconSize, false));
+    m_table->setItemDelegate(new InstanceDelegate(this, m_iconSize));
 
     m_table->setTabKeyNavigation(false);
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -138,27 +141,18 @@ void InstancesView::createTable()
 
 void InstancesView::createGrid()
 {
-    m_grid = new QListView(this);
+    m_grid = new QQuickWidget(this);
+    m_grid->rootContext()->setContextProperty("instances", m_gridProxy);
+    m_grid->rootContext()->setContextProperty("iconSize", m_iconSize);
+    m_grid->engine()->addImageProvider("instance", new IconImageProvider(APPLICATION->icons(), m_iconSize));
+    m_grid->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    m_grid->setSource(QUrl("qrc:/instanceview/InstancesGrid.qml"));
     m_grid->installEventFilter(this);
-    m_grid->setModel(m_gridProxy);
-    m_grid->setModelColumn(InstanceList::NameColumn);
-    m_grid->setItemDelegate(new InstanceDelegate(this, m_iconSize, true));
-
-    m_grid->setSelectionMode(QAbstractItemView::SingleSelection);
-    m_grid->setSelectionBehavior(QAbstractItemView::SelectRows);
-    m_grid->setEditTriggers(QAbstractItemView::EditKeyPressed);
-    m_grid->setCurrentIndex(QModelIndex());
     m_grid->setContextMenuPolicy(Qt::CustomContextMenu);
-    m_grid->setWordWrap(true);
-    m_grid->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_grid->setViewMode(QListView::IconMode);
-    m_grid->setMovement(QListView::Static);
-    m_grid->setResizeMode(QListView::Adjust);
-    m_grid->setFrameStyle(QFrame::NoFrame);
-    m_grid->setGridSize(QSize(m_iconSize * 2, m_iconSize * 2));
+    m_grid->show();
 
-    connect(m_grid, &QAbstractItemView::doubleClicked, this, &InstancesView::activateInstance);
-    connect(m_grid->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstancesView::currentRowChanged);
+    //connect(m_grid, &QAbstractItemView::doubleClicked, this, &InstancesView::activateInstance);
+    //connect(m_grid->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstancesView::currentRowChanged);
     connect(m_grid, &QWidget::customContextMenuRequested, this, &InstancesView::contextMenuRequested);
 }
 

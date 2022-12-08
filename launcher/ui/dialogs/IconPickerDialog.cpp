@@ -50,7 +50,7 @@ IconPickerDialog::IconPickerDialog(QWidget *parent, int iconSize)
     contentsWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     contentsWidget->setFrameStyle(QFrame::NoFrame);
     contentsWidget->setGridSize(QSize(m_iconSize * 2, m_iconSize * 2));
-    contentsWidget->setItemDelegate(new InstanceDelegate(this, m_iconSize, true));
+    contentsWidget->setItemDelegate(new InstanceDelegate(this, m_iconSize));
     contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     // contentsWidget->setAcceptDrops(true);

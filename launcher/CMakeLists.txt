@@ -611,6 +611,11 @@ SET(LAUNCHER_SOURCES
     icons/MMCIcon.cpp
     icons/IconList.h
     icons/IconList.cpp
+    icons/IconImageProvider.h
+    icons/IconImageProvider.cpp
+
+    # GUI
+    ui/resources.qrc
 
     # GUI - windows
     ui/GuiUtil.h
@@ -999,6 +1004,7 @@ target_link_libraries(Launcher_logic
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::QuickWidgets
     Qt${QT_VERSION_MAJOR}::Widgets
     ${Launcher_QT_LIBS}
 )

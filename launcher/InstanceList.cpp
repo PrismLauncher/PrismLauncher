@@ -137,6 +137,17 @@ int InstanceList::columnCount(const QModelIndex& parent) const
     return ColumnCount;
 }
 
+QHash<int, QByteArray> InstanceList::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[SortRole] = "sort";
+    roles[IconRole] = "icon";
+    roles[NameRole] = "name";
+    roles[CategoryRole] = "category";
+    roles[InstanceIDRole] = "instanceId";
+    return roles;
+}
+
 QVariant InstanceList::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole) {
@@ -251,11 +262,19 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
             break;
         }
 
+        case IconRole: {
+            return inst->iconKey();
+        }
+
+        case NameRole: {
+            return inst->name();
+        }
+
         case InstanceIDRole: {
             return inst->id();
         }
 
-        case GroupRole: {
+        case CategoryRole: {
             return instanceGroup;
         }
     }
@@ -337,7 +356,7 @@ void InstanceList::setInstanceGroup(const InstancePtr inst, const GroupId& name)
     if (changed) {
         m_groupNameCache.insert(name);
         auto idx = getInstIndex(inst.get());
-        emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), { GroupRole });
+        emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), { CategoryRole });
         saveGroupList();
     }
 }
@@ -377,7 +396,7 @@ void InstanceList::deleteGroup(const QString& name)
             removed = true;
             auto idx = getInstIndex(instance.get());
             if (idx > 0) {
-                emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), { GroupRole });
+                emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), { CategoryRole });
             }
         }
     }

@@ -24,3 +24,21 @@
 
 // Placeholder model, as we might need this in the future
 InstanceGridProxyModel::InstanceGridProxyModel(QObject* parent) : InstanceTableProxyModel(parent) {}
+
+QVariant InstanceGridProxyModel::data(const QModelIndex& index, int role) const
+{
+    QVariant data = InstanceTableProxyModel::data(index, role);
+    QVariant displayData = data;
+    if (role != Qt::DisplayRole)
+        displayData = InstanceTableProxyModel::data(index, Qt::DisplayRole);
+
+    switch (role) {
+        case InstanceList::IconRole: {
+            QString iconKey = data.toString();
+            if (iconKey.isEmpty())
+                break;
+            return "image://instance/" + iconKey;
+        }
+    }
+    return data;
+}

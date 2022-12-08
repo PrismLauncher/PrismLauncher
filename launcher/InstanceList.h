@@ -67,7 +67,9 @@ class InstanceList : public QAbstractTableModel {
         ColumnCount
     };
 
-    enum AdditionalRoles { SortRole = Qt::UserRole + 1, GroupRole, InstanceIDRole };
+    enum AdditionalRoles { SortRole = Qt::UserRole + 1, IconRole, NameRole, CategoryRole, InstanceIDRole };
+
+    QHash<int, QByteArray> roleNames() const override;
 
     InstancePtr at(int i) const { return m_instances.at(i); }
 

@@ -25,4 +25,7 @@ class InstanceGridProxyModel : public InstanceTableProxyModel {
 
    public:
     InstanceGridProxyModel(QObject* parent = 0);
+
+   protected:
+    QVariant data(const QModelIndex& index, int role) const override;
 };

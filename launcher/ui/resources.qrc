@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>instanceview/InstancesGrid.qml</file>
+    </qresource>
+</RCC>
