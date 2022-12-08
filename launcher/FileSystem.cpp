@@ -372,8 +372,6 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
 
     return true;
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    destination += ".desktop";
-
     QFile f(destination);
     f.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream stream(&f);
