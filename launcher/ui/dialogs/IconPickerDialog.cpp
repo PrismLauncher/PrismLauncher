@@ -63,8 +63,7 @@ IconPickerDialog::IconPickerDialog(QWidget *parent)
 
     // NOTE: ResetRole forces the button to be on the left, while the OK/Cancel ones are on the right. We win.
     auto buttonAdd = ui->buttonBox->addButton(tr("Add Icon"), QDialogButtonBox::ResetRole);
-    auto buttonRemove = ui->buttonBox->addButton(tr("Remove Icon"), QDialogButtonBox::ResetRole);
-    buttonRemove->setObjectName("buttonRemove");
+    buttonRemove = ui->buttonBox->addButton(tr("Remove Icon"), QDialogButtonBox::ResetRole);
 
     connect(buttonAdd, SIGNAL(clicked(bool)), SLOT(addNewIcon()));
     connect(buttonRemove, SIGNAL(clicked(bool)), SLOT(removeSelectedIcon()));
@@ -133,7 +132,6 @@ void IconPickerDialog::selectionChanged(QItemSelection selected, QItemSelection 
     if (!key.isEmpty()) {
         selectedIconKey = key;
     }
-    auto buttonRemove = ui->buttonBox->findChild<QPushButton *>("buttonRemove");
     buttonRemove->setEnabled(APPLICATION->icons()->iconFileExists(selectedIconKey));
 }
 
