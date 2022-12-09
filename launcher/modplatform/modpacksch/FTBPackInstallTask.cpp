@@ -195,6 +195,7 @@ void PackInstallTask::onResolveModsSucceeded()
             blocked_mod.hash = results_file.hash;
             blocked_mod.matched = false;
             blocked_mod.localPath = "";
+            blocked_mod.targetFolder = results_file.targetFolder;
 
             m_blocked_mods.append(blocked_mod);
 
@@ -366,7 +367,7 @@ void PackInstallTask::copyBlockedMods()
             continue;
         }
 
-        auto dest_path = FS::PathCombine(m_stagingPath, ".minecraft", "mods", mod.name);
+        auto dest_path = FS::PathCombine(m_stagingPath, ".minecraft", mod.targetFolder, mod.name);
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 
