@@ -548,8 +548,9 @@ public:
         fileMenu->addAction(actionChangeInstGroup);
         fileMenu->addAction(actionViewSelectedInstFolder);
         fileMenu->addAction(actionExportInstance);
-        fileMenu->addAction(actionDeleteInstance);
         fileMenu->addAction(actionCopyInstance);
+        fileMenu->addAction(actionDeleteInstance);
+        fileMenu->addAction(actionCreateInstanceShortcut);
         fileMenu->addSeparator();
         fileMenu->addAction(actionSettings);
 
@@ -2269,10 +2270,25 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create icon for shortcut."));
             return;
         }
-        
-        if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
-                           appPath, { "--launch", m_selectedInstance->id() },
-                           m_selectedInstance->name(), iconPath)) {
+
+        QString desktopFilePath = FS::PathCombine(desktopPath, m_selectedInstance->name() + ".desktop");
+        QStringList args;
+        if (DesktopServices::isFlatpak()) {
+            QFileDialog fileDialog;
+            // workaround to make sure the portal file dialog opens in the desktop directory
+            fileDialog.setDirectoryUrl(desktopPath);
+            desktopFilePath = fileDialog.getSaveFileName(
+                            this, tr("Create Shortcut"), desktopFilePath,
+                            tr("Desktop Entries (*.desktop)"));
+            if (desktopFilePath.isEmpty())
+                return; // file dialog canceled by user
+            appPath = "flatpak";
+            QString flatpakAppId = BuildConfig.LAUNCHER_DESKTOPFILENAME;
+            flatpakAppId.remove(".desktop");
+            args.append({ "run", flatpakAppId });
+        }
+        args.append({ "--launch", m_selectedInstance->id() });
+        if (FS::createShortcut(desktopFilePath, appPath, args, m_selectedInstance->name(), iconPath)) {
             QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
         }
         else
