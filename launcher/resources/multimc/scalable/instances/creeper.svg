@@ -1,68 +1,17 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   width="24"
-   height="24"
-   version="1.1"
-   viewBox="0 0 24 24"
-   id="svg168"
-   xml:space="preserve"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:dc="http://purl.org/dc/elements/1.1/"><defs
-     id="defs172"><linearGradient
-       xlink:href="#linearGradient11855"
-       id="linearGradient11859"
-       x1="111"
-       y1="25"
-       x2="111"
-       y2="7"
-       gradientUnits="userSpaceOnUse" /><linearGradient
-       id="linearGradient11855"><stop
-         style="stop-color:#57965f;stop-opacity:1;"
-         offset="0"
-         id="stop11851" /><stop
-         style="stop-color:#78bf6e;stop-opacity:1;"
-         offset="1"
-         id="stop11853" /></linearGradient><radialGradient
-       xlink:href="#linearGradient10455"
-       id="radialGradient10457"
-       cx="112"
-       cy="17"
-       fx="112"
-       fy="17"
-       r="6"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1.1666668,-6.8921104e-7,5.6666669e-7,1.1666667,-18.666684,-2.8332561)" /><linearGradient
-       id="linearGradient10455"><stop
-         style="stop-color:#1b2719;stop-opacity:1;"
-         offset="0"
-         id="stop10451" /><stop
-         style="stop-color:#0f150e;stop-opacity:1;"
-         offset="1"
-         id="stop10453" /></linearGradient></defs><title
-     id="title132">Prism Launcher Logo</title><metadata
-     id="metadata166"><rdf:RDF><cc:Work
-         rdf:about=""><dc:title>Prism Launcher Logo</dc:title><dc:date>19/10/2022</dc:date><dc:creator><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:creator><dc:contributor><cc:Agent><dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title></cc:Agent></dc:contributor><dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source><dc:rights><cc:Agent><dc:title>CC BY-SA 4.0</dc:title></cc:Agent></dc:rights><dc:publisher><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:publisher></cc:Work></rdf:RDF></metadata><g
-     id="i_creeper"
-     transform="translate(-100,-4)"><rect
-       style="fill:url(#linearGradient11859);fill-opacity:1;stroke-width:0.226785;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect543-0-2-3"
-       width="18"
-       height="18"
-       x="103"
-       y="7"
-       ry="2.4545455" /><path
-       id="rect29291"
-       style="fill:url(#radialGradient10457);fill-opacity:1;stroke-width:0.529166;paint-order:stroke markers fill;stop-color:#000000"
-       d="m 106,12 v 4 h 4 v -4 z m 4,4 v 2 h -2 v 6 h 2 v -2 h 4 v 2 h 2 v -6 h -2 v -2 z m 4,0 h 4 v -4 h -4 z" /><rect
-       style="fill:#ffffff;fill-opacity:0;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect128412-7-6"
-       width="24"
-       height="24"
-       x="100"
-       y="4" /></g></svg>
+<svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <linearGradient id="a" gradientUnits="userSpaceOnUse" x1="111" x2="111" y1="25" y2="7">
+    <stop offset="0" stop-color="#57965f"/>
+    <stop offset="1" stop-color="#78bf6e"/>
+  </linearGradient>
+  <radialGradient id="b" cx="112" cy="17" gradientTransform="matrix(1.1666668 -.00000069 .00000057 1.1666667 -18.666684 -2.833256)" gradientUnits="userSpaceOnUse" r="6">
+    <stop offset="0" stop-color="#1b2719"/>
+    <stop offset="1" stop-color="#0f150e"/>
+  </radialGradient>
+  <title>Prism Launcher Logo</title>
+  <metadata/>
+  <g transform="translate(-100 -4)">
+    <rect fill="url(#a)" height="18" ry="2.454546" stroke-width=".226785" width="18" x="103" y="7"/>
+    <path d="m106 12v4h4v-4zm4 4v2h-2v6h2v-2h4v2h2v-6h-2v-2zm4 0h4v-4h-4z" fill="url(#b)" stroke-width=".529166"/>
+    <rect fill="none" height="24" width="24" x="100" y="4"/>
+  </g>
+</svg>

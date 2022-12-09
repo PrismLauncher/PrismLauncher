@@ -1,178 +1,42 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   width="24"
-   height="24"
-   version="1.1"
-   viewBox="0 0 24 24"
-   id="svg168"
-   xml:space="preserve"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:dc="http://purl.org/dc/elements/1.1/"><defs
-     id="defs172"><linearGradient
-       id="linearGradient27992"><stop
-         style="stop-color:#c5c7cf;stop-opacity:1;"
-         offset="0"
-         id="stop27990" /><stop
-         style="stop-color:#d8d9e0;stop-opacity:1;"
-         offset="1"
-         id="stop27988" /></linearGradient><linearGradient
-       id="linearGradient56358"><stop
-         style="stop-color:#ededed;stop-opacity:1;"
-         offset="0"
-         id="stop56354" /><stop
-         style="stop-color:#f4f4f4;stop-opacity:1;"
-         offset="1"
-         id="stop56356" /></linearGradient><linearGradient
-       xlink:href="#linearGradient27992"
-       id="linearGradient17901"
-       x1="496"
-       y1="26"
-       x2="496"
-       y2="6"
-       gradientUnits="userSpaceOnUse" /><linearGradient
-       xlink:href="#linearGradient56358"
-       id="linearGradient18032"
-       gradientUnits="userSpaceOnUse"
-       x1="503"
-       y1="25"
-       x2="503"
-       y2="23"
-       gradientTransform="translate(0,-4)" /><linearGradient
-       xlink:href="#linearGradient56358"
-       id="linearGradient18124"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(0,-8)"
-       x1="503"
-       y1="25"
-       x2="503"
-       y2="23" /><linearGradient
-       xlink:href="#linearGradient18539"
-       id="linearGradient18530"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(0,-6)"
-       x1="503"
-       y1="25"
-       x2="503"
-       y2="23" /><linearGradient
-       id="linearGradient18539"><stop
-         style="stop-color:#27414e;stop-opacity:0;"
-         offset="0"
-         id="stop18537" /><stop
-         style="stop-color:#27414e;stop-opacity:0.74901961;"
-         offset="0.49837714"
-         id="stop18535" /><stop
-         style="stop-color:#27414e;stop-opacity:1;"
-         offset="0.83958842"
-         id="stop18533" /></linearGradient><linearGradient
-       xlink:href="#linearGradient18539"
-       id="linearGradient18590"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(0,-10)"
-       x1="503"
-       y1="25"
-       x2="503"
-       y2="23" /><linearGradient
-       xlink:href="#linearGradient18539"
-       id="linearGradient18615"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(0,-14)"
-       x1="503"
-       y1="25"
-       x2="503"
-       y2="23" /><linearGradient
-       xlink:href="#linearGradient18539"
-       id="linearGradient18640"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(0,-2)"
-       x1="503"
-       y1="25"
-       x2="503"
-       y2="23" /><linearGradient
-       xlink:href="#linearGradient56358"
-       id="linearGradient18124-2"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(0,-12)"
-       x1="503"
-       y1="25"
-       x2="503"
-       y2="23" /><linearGradient
-       xlink:href="#linearGradient56358"
-       id="linearGradient18124-0"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="translate(0,-16)"
-       x1="503"
-       y1="25"
-       x2="503"
-       y2="23" /></defs><title
-     id="title132">Prism Launcher Logo</title><metadata
-     id="metadata166"><rdf:RDF><cc:Work
-         rdf:about=""><dc:title>Prism Launcher Logo</dc:title><dc:date>19/10/2022</dc:date><dc:creator><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:creator><dc:contributor><cc:Agent><dc:title>AutiOne, Boba, ely, Fulmine, gon sawa, Pankakes, tobimori, Zeke</dc:title></cc:Agent></dc:contributor><dc:source>https://github.com/PrismLauncher/PrismLauncher</dc:source><dc:rights><cc:Agent><dc:title>CC BY-SA 4.0</dc:title></cc:Agent></dc:rights><dc:publisher><cc:Agent><dc:title>Prism Launcher</dc:title></cc:Agent></dc:publisher></cc:Work></rdf:RDF></metadata><g
-     id="i_iron"
-     transform="translate(-484,-4)"><rect
-       style="fill:url(#linearGradient17901);fill-opacity:1;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect15088"
-       width="20"
-       height="20"
-       x="486"
-       y="6"
-       ry="3" /><rect
-       style="fill:#ffffff;fill-opacity:0;stroke:none;stroke-width:0.264583;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect128412-7-6-1-2"
-       width="24"
-       height="24"
-       x="484"
-       y="4" /><path
-       id="rect17965"
-       style="fill:#efefef;fill-opacity:1;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
-       d="m 487,23 c 0,1.107999 0.892,2 2,2 h 14 c 1.108,0 2,-0.892001 2,-2 z" /><rect
-       style="fill:url(#linearGradient18032);fill-opacity:1;stroke-width:0.999996;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect15357-7-8"
-       width="18"
-       height="2"
-       x="487"
-       y="19" /><rect
-       style="fill:url(#linearGradient18124);fill-opacity:1;stroke-width:0.999996;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect15357-7-8-4"
-       width="18"
-       height="2"
-       x="487"
-       y="15" /><rect
-       style="opacity:0.1;fill:url(#linearGradient18530);fill-opacity:1;stroke-width:0.999996;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect15357-7-8-4-7"
-       width="18"
-       height="2"
-       x="487"
-       y="17" /><rect
-       style="opacity:0.1;fill:url(#linearGradient18590);fill-opacity:1;stroke-width:0.999996;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect15357-7-8-4-7-5"
-       width="18"
-       height="2"
-       x="487"
-       y="13" /><rect
-       style="opacity:0.1;fill:url(#linearGradient18615);fill-opacity:1;stroke-width:0.999996;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect15357-7-8-4-7-6"
-       width="18"
-       height="2"
-       x="487"
-       y="9" /><rect
-       style="opacity:0.1;fill:url(#linearGradient18640);fill-opacity:1;stroke-width:0.999996;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect15357-7-8-4-7-56"
-       width="18"
-       height="2"
-       x="487"
-       y="21" /><rect
-       style="fill:url(#linearGradient18124-2);fill-opacity:1;stroke-width:0.999996;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
-       id="rect15357-7-8-4-1"
-       width="18"
-       height="2"
-       x="487"
-       y="11" /><path
-       id="rect15357-7-8-4-5"
-       style="fill:url(#linearGradient18124-0);fill-opacity:1;stroke-width:0.999996;stroke-linecap:square;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
-       d="m 489,7 c -1.108,0 -2,0.8920011 -2,2 h 18 c 0,-1.1079989 -0.892,-2 -2,-2 z" /></g></svg>
+<svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <linearGradient id="a">
+    <stop offset="0" stop-color="#ededed"/>
+    <stop offset="1" stop-color="#f4f4f4"/>
+  </linearGradient>
+  <linearGradient id="b" gradientUnits="userSpaceOnUse" x1="496" x2="496" y1="26" y2="6">
+    <stop offset="0" stop-color="#c5c7cf"/>
+    <stop offset="1" stop-color="#d8d9e0"/>
+  </linearGradient>
+  <linearGradient id="c" gradientUnits="userSpaceOnUse" x1="503" x2="503" xlink:href="#a" y1="21" y2="19"/>
+  <linearGradient id="d" gradientUnits="userSpaceOnUse" x1="503" x2="503" xlink:href="#a" y1="17" y2="15"/>
+  <linearGradient id="e" gradientUnits="userSpaceOnUse" x1="503" x2="503" xlink:href="#f" y1="19" y2="17"/>
+  <linearGradient id="f">
+    <stop offset="0" stop-color="#27414e" stop-opacity="0"/>
+    <stop offset=".49837714" stop-color="#27414e" stop-opacity=".74902"/>
+    <stop offset=".83958842" stop-color="#27414e"/>
+  </linearGradient>
+  <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="503" x2="503" xlink:href="#f" y1="15" y2="13"/>
+  <linearGradient id="h" gradientUnits="userSpaceOnUse" x1="503" x2="503" xlink:href="#f" y1="11" y2="9"/>
+  <linearGradient id="i" gradientUnits="userSpaceOnUse" x1="503" x2="503" xlink:href="#f" y1="23" y2="21"/>
+  <linearGradient id="j" gradientUnits="userSpaceOnUse" x1="503" x2="503" xlink:href="#a" y1="13" y2="11"/>
+  <linearGradient id="k" gradientUnits="userSpaceOnUse" x1="503" x2="503" xlink:href="#a" y1="9" y2="7"/>
+  <title>Prism Launcher Logo</title>
+  <metadata/>
+  <g transform="translate(-484 -4)">
+    <rect fill="url(#b)" height="20" ry="3" stroke-linecap="square" stroke-linejoin="bevel" width="20" x="486" y="6"/>
+    <rect fill="none" height="24" width="24" x="484" y="4"/>
+    <g stroke-linecap="square" stroke-linejoin="bevel">
+      <path d="m487 23c0 1.107999.892 2 2 2h14c1.108 0 2-.892001 2-2z" fill="#efefef"/>
+      <g stroke-width=".999996">
+        <rect fill="url(#c)" height="2" width="18" x="487" y="19"/>
+        <rect fill="url(#d)" height="2" width="18" x="487" y="15"/>
+        <rect fill="url(#e)" height="2" opacity=".1" width="18" x="487" y="17"/>
+        <rect fill="url(#g)" height="2" opacity=".1" width="18" x="487" y="13"/>
+        <rect fill="url(#h)" height="2" opacity=".1" width="18" x="487" y="9"/>
+        <rect fill="url(#i)" height="2" opacity=".1" width="18" x="487" y="21"/>
+        <rect fill="url(#j)" height="2" width="18" x="487" y="11"/>
+        <path d="m489 7c-1.108 0-2 .8920011-2 2h18c0-1.1079989-.892-2-2-2z" fill="url(#k)"/>
+      </g>
+    </g>
+  </g>
+</svg>
