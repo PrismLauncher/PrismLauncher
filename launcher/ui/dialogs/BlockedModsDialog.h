@@ -41,6 +41,7 @@ struct BlockedMod {
     QString hash;
     bool matched;
     QString localPath;
+    QString targetFolder;
 };
 
 QT_BEGIN_NAMESPACE

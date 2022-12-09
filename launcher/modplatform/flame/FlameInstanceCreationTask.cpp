@@ -419,6 +419,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
             blocked_mod.hash = result.hash;
             blocked_mod.matched = false;
             blocked_mod.localPath = "";
+            blocked_mod.targetFolder = result.targetFolder;
 
             blocked_mods.append(blocked_mod);
 
@@ -464,7 +465,7 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
             continue;
         }
 
-        auto dest_path = FS::PathCombine(m_stagingPath, "minecraft", "mods", mod.name);
+        auto dest_path = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 
