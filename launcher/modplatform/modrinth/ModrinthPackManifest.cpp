@@ -128,6 +128,7 @@ auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
 
     file.name = Json::requireString(obj, "name");
     file.version = Json::requireString(obj, "version_number");
+    file.changelog = Json::ensureString(obj, "changelog");
 
     file.id = Json::requireString(obj, "id");
     file.project_id = Json::requireString(obj, "project_id");

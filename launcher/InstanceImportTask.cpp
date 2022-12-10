@@ -55,11 +55,9 @@
 
 #include <quazip/quazipdir.h>
 
-InstanceImportTask::InstanceImportTask(const QUrl sourceUrl, QWidget* parent)
-{
-    m_sourceUrl = sourceUrl;
-    m_parent = parent;
-}
+InstanceImportTask::InstanceImportTask(const QUrl sourceUrl, QWidget* parent, QMap<QString, QString>&& extra_info)
+    : m_sourceUrl(sourceUrl), m_extra_info(extra_info), m_parent(parent)
+{}
 
 bool InstanceImportTask::abort()
 {
@@ -259,14 +257,28 @@ void InstanceImportTask::extractAborted()
 
 void InstanceImportTask::processFlame()
 {
-    auto* inst_creation_task = new FlameCreationTask(m_stagingPath, m_globalSettings, m_parent);
+    auto pack_id_it = m_extra_info.constFind("pack_id");
+    Q_ASSERT(pack_id_it != m_extra_info.constEnd());
+    auto pack_id = pack_id_it.value();
+
+    auto pack_version_id_it = m_extra_info.constFind("pack_version_id");
+    Q_ASSERT(pack_version_id_it != m_extra_info.constEnd());
+    auto pack_version_id = pack_version_id_it.value();
+
+    QString original_instance_id;
+    auto original_instance_id_it = m_extra_info.constFind("original_instance_id");
+    if (original_instance_id_it != m_extra_info.constEnd())
+        original_instance_id = original_instance_id_it.value();
+
+    auto* inst_creation_task = new FlameCreationTask(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
 
     inst_creation_task->setName(*this);
     inst_creation_task->setIcon(m_instIcon);
     inst_creation_task->setGroup(m_instGroup);
+    inst_creation_task->setConfirmUpdate(shouldConfirmUpdate());
     
     connect(inst_creation_task, &Task::succeeded, this, [this, inst_creation_task] {
-        setOverride(inst_creation_task->shouldOverride());
+        setOverride(inst_creation_task->shouldOverride(), inst_creation_task->originalInstanceID());
         emitSucceeded();
     });
     connect(inst_creation_task, &Task::failed, this, &InstanceImportTask::emitFailed);
@@ -323,14 +335,29 @@ void InstanceImportTask::processMultiMC()
 
 void InstanceImportTask::processModrinth()
 {
-    auto* inst_creation_task = new ModrinthCreationTask(m_stagingPath, m_globalSettings, m_parent, m_sourceUrl.toString());
+    auto pack_id_it = m_extra_info.constFind("pack_id");
+    Q_ASSERT(pack_id_it != m_extra_info.constEnd());
+    auto pack_id = pack_id_it.value();
+
+    QString pack_version_id;
+    auto pack_version_id_it = m_extra_info.constFind("pack_version_id");
+    if (pack_version_id_it != m_extra_info.constEnd())
+        pack_version_id = pack_version_id_it.value();
+
+    QString original_instance_id;
+    auto original_instance_id_it = m_extra_info.constFind("original_instance_id");
+    if (original_instance_id_it != m_extra_info.constEnd())
+        original_instance_id = original_instance_id_it.value();
+
+    auto* inst_creation_task = new ModrinthCreationTask(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
 
     inst_creation_task->setName(*this);
     inst_creation_task->setIcon(m_instIcon);
     inst_creation_task->setGroup(m_instGroup);
+    inst_creation_task->setConfirmUpdate(shouldConfirmUpdate());
     
     connect(inst_creation_task, &Task::succeeded, this, [this, inst_creation_task] {
-        setOverride(inst_creation_task->shouldOverride());
+        setOverride(inst_creation_task->shouldOverride(), inst_creation_task->originalInstanceID());
         emitSucceeded();
     });
     connect(inst_creation_task, &Task::failed, this, &InstanceImportTask::emitFailed);

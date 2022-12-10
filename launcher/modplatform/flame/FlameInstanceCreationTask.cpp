@@ -81,13 +81,19 @@ bool FlameCreationTask::updateInstance()
     auto instance_list = APPLICATION->instances();
 
     // FIXME: How to handle situations when there's more than one install already for a given modpack?
-    auto inst = instance_list->getInstanceByManagedName(originalName());
+    InstancePtr inst;
+    if (auto original_id = originalInstanceID(); !original_id.isEmpty()) {
+        inst = instance_list->getInstanceById(original_id);
+        Q_ASSERT(inst);
+    } else {
+        inst = instance_list->getInstanceByManagedName(originalName());
 
-    if (!inst) {
-        inst = instance_list->getInstanceById(originalName());
+        if (!inst) {
+            inst = instance_list->getInstanceById(originalName());
 
-        if (!inst)
-            return false;
+            if (!inst)
+                return false;
+        }
     }
 
     QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
@@ -102,25 +108,14 @@ bool FlameCreationTask::updateInstance()
     auto version_id = inst->getManagedPackVersionName();
     auto version_str = !version_id.isEmpty() ? tr(" (version %1)").arg(version_id) : "";
 
-    auto info = CustomMessageBox::selectable(
-        m_parent, tr("Similar modpack was found!"),
-        tr("One or more of your instances are from this same modpack%1. Do you want to create a "
-           "separate instance, or update the existing one?\n\nNOTE: Make sure you made a backup of your important instance data before "
-           "updating, as worlds can be corrupted and some configuration may be lost (due to pack overrides).")
-            .arg(version_str),
-        QMessageBox::Information, QMessageBox::Ok | QMessageBox::Reset | QMessageBox::Abort);
-    info->setButtonText(QMessageBox::Ok, tr("Update existing instance"));
-    info->setButtonText(QMessageBox::Abort, tr("Create new instance"));
-    info->setButtonText(QMessageBox::Reset, tr("Cancel"));
-
-    info->exec();
-
-    if (info->clickedButton() == info->button(QMessageBox::Abort))
-        return false;
-
-    if (info->clickedButton() == info->button(QMessageBox::Reset)) {
-        m_abort = true;
-        return false;
+    if (shouldConfirmUpdate()) {
+        auto should_update = askIfShouldUpdate(m_parent, version_str);
+        if (should_update == ShouldUpdate::SkipUpdating)
+            return false;
+        if (should_update == ShouldUpdate::Cancel) {
+            m_abort = true;
+            return false;
+        }
     }
 
     QDir old_inst_dir(inst->instanceRoot());
@@ -244,7 +239,7 @@ bool FlameCreationTask::updateInstance()
         }
     }
 
-    setOverride(true);
+    setOverride(true, inst->id());
     qDebug() << "Will override instance!";
 
     m_instance = inst;
@@ -366,7 +361,7 @@ bool FlameCreationTask::createInstance()
         FS::deletePath(jarmodsPath);
     }
 
-    instance.setManagedPack("flame", {}, m_pack.name, {}, m_pack.version);
+    instance.setManagedPack("flame", m_managed_id, m_pack.name, m_managed_version_id, m_pack.version);
     instance.setName(name());
 
     m_mod_id_resolver = new Flame::FileResolvingTask(APPLICATION->network(), m_pack);
@@ -389,14 +384,6 @@ bool FlameCreationTask::createInstance()
     if (m_instance && did_succeed) {
         setAbortable(false);
         auto inst = m_instance.value();
-
-        // Only change the name if it didn't use a custom name, so that the previous custom name
-        // is preserved, but if we're using the original one, we update the version string.
-        // NOTE: This needs to come before the copyManagedPack call!
-        if (inst->name().contains(inst->getManagedPackVersionName())) {
-            if (askForChangingInstanceName(m_parent, inst->name(), instance.name()) == InstanceNameChange::ShouldChange)
-                inst->setName(instance.name());
-        }
 
         inst->copyManagedPack(instance);
     }

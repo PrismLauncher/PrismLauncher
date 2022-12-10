@@ -816,7 +816,7 @@ class InstanceStaging : public Task {
     void childSucceded()
     {
         unsigned sleepTime = backoff();
-        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, m_child->shouldOverride()))
+        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, *m_child.get()))
         {
             emitSucceeded();
             return;
@@ -880,24 +880,21 @@ QString InstanceList::getStagedInstancePath()
     return path;
 }
 
-bool InstanceList::commitStagedInstance(const QString& path, InstanceName const& instanceName, const QString& groupName, bool should_override)
+bool InstanceList::commitStagedInstance(const QString& path, InstanceName const& instanceName, const QString& groupName, InstanceTask const& commiting)
 {
     QDir dir;
     QString instID;
     InstancePtr inst;
 
+    auto should_override = commiting.shouldOverride();
+
     if (should_override) {
-        // This is to avoid problems when the instance folder gets manually renamed
-        if ((inst = getInstanceByManagedName(instanceName.originalName()))) {
-            instID = QFileInfo(inst->instanceRoot()).fileName();
-        } else if ((inst = getInstanceByManagedName(instanceName.modifiedName()))) {
-            instID = QFileInfo(inst->instanceRoot()).fileName();
-        } else {
-            instID = FS::RemoveInvalidFilenameChars(instanceName.modifiedName(), '-');
-        }
+        instID = commiting.originalInstanceID();
     } else {
         instID = FS::DirNameFromString(instanceName.modifiedName(), m_instDir);
     }
+
+    Q_ASSERT(!instID.isEmpty());
 
     {
         WatchLock lock(m_watcher, m_instDir);

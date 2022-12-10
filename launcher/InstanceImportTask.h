@@ -56,7 +56,7 @@ class InstanceImportTask : public InstanceTask
 {
     Q_OBJECT
 public:
-    explicit InstanceImportTask(const QUrl sourceUrl, QWidget* parent = nullptr);
+    explicit InstanceImportTask(const QUrl sourceUrl, QWidget* parent = nullptr, QMap<QString, QString>&& extra_info = {});
 
     bool abort() override;
     const QVector<Flame::File> &getBlockedFiles() const
@@ -100,6 +100,10 @@ private: /* data */
         Flame,
         Modrinth,
     } m_modpackType = ModpackType::Unknown;
+
+    // Extra info we might need, that's available before, but can't be derived from
+    // the source URL / the resource it points to alone.
+    QMap<QString, QString> m_extra_info;
 
     //FIXME: nuke
     QWidget* m_parent;
