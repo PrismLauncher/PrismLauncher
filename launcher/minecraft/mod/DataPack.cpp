@@ -27,8 +27,6 @@
 
 #include "Version.h"
 
-#include "minecraft/mod/tasks/LocalDataPackParseTask.h"
-
 // Values taken from:
 // https://minecraft.fandom.com/wiki/Tutorials/Creating_a_data_pack#%22pack_format%22
 static const QMap<int, std::pair<Version, Version>> s_pack_format_versions = {

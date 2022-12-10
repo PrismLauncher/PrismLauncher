@@ -39,9 +39,10 @@ bool processFolder(DataPack& pack, ProcessingLevel level = ProcessingLevel::Full
 
 bool processMCMeta(DataPack& pack, QByteArray&& raw_data);
 
-/** Checks whether a file is valid as a resource pack or not. */
+/** Checks whether a file is valid as a data pack or not. */
 bool validate(QFileInfo file);
-}  // namespace ResourcePackUtils
+
+}  // namespace DataPackUtils
 
 class LocalDataPackParseTask : public Task {
     Q_OBJECT

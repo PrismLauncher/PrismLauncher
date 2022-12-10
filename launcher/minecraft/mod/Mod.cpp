@@ -43,6 +43,7 @@
 
 #include "MetadataHandler.h"
 #include "Version.h"
+#include "minecraft/mod/ModDetails.h"
 
 Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {
@@ -66,6 +67,10 @@ void Mod::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
         setStatus(ModStatus::Installed);
 
     m_local_details.metadata = metadata;
+}
+
+void Mod::setDetails(const ModDetails& details) {
+    m_local_details = details;
 }
 
 std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
@@ -189,4 +194,9 @@ void Mod::finishResolvingWithDetails(ModDetails&& details)
     m_local_details = std::move(details);
     if (metadata)
         setMetadata(std::move(metadata));
+}
+
+bool Mod::valid() const
+{
+    return !m_local_details.mod_id.isEmpty();
 }
