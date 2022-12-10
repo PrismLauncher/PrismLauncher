@@ -84,7 +84,15 @@ void BlockedModsDialog::dragEnterEvent(QDragEnterEvent* e)
 
 void BlockedModsDialog::dropEvent(QDropEvent* e)
 {
-    for (const QUrl& url : e->mimeData()->urls()) {
+    for (QUrl& url : e->mimeData()->urls()) {
+        if (url.scheme().isEmpty()) { // ensure isLocalFile() works correctly
+            url.setScheme("file");
+        }
+        
+        if (!url.isLocalFile()) { // can't drop external files here.
+            continue;
+        }
+
         QString filePath = url.toLocalFile();
         qDebug() << "[Blocked Mods Dialog] Dropped file:" << filePath;
         addHashTask(filePath);
