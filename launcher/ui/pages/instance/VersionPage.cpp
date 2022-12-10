@@ -461,9 +461,6 @@ static BaseVersion* pickBest(Component* component, const QString& gameVersion)
         }
     }
 
-    if (!chosen)
-        return nullptr;
-
     return chosen;
 }
 
