@@ -365,7 +365,7 @@ bool IconList::trashIcon(const QString &key)
     if (!iconFileExists(key))
         return false;
 
-    return FS::trash(icon(key)->m_images[IconType::FileBased].filename, nullptr);
+    return FS::trash(icon(key)->getFilePath(), nullptr);
 }
 
 bool IconList::addThemeIcon(const QString& key)
