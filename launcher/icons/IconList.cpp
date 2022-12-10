@@ -357,7 +357,7 @@ bool IconList::deleteIcon(const QString &key)
     if (!iconFileExists(key))
         return false;
 
-    return QFile::remove(icon(key)->m_images[IconType::FileBased].filename);
+    return QFile::remove(icon(key)->getFilePath());
 }
 
 bool IconList::trashIcon(const QString &key)
