@@ -253,6 +253,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         {{"I", "import"}, "Import instance from specified zip (local path or URL)", "file"},
         {"show", "Opens the window for the specified instance (by instance ID)", "show"}
     });
+    // Has to be positional for some OS to handle that properly
+    parser.addPositionalArgument("link","Opens the given link as a link to a modpack","[url]");
     parser.addHelpOption();
     parser.addVersionOption();
 
@@ -264,6 +266,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_liveCheck = parser.isSet("alive");
     m_zipToImport = parser.value("import");
     m_instanceIdToShowWindowOf = parser.value("show");
+
+    if(parser.isSet("link")){
+        m_zipToImport = parser.value("link");
+    }
 
     // error if --launch is missing with --server or --profile
     if((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty())
