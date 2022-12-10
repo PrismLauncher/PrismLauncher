@@ -331,6 +331,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/Resource.cpp
     minecraft/mod/ResourceFolderModel.h
     minecraft/mod/ResourceFolderModel.cpp
+    minecraft/mod/DataPack.h
+    minecraft/mod/DataPack.cpp
     minecraft/mod/ResourcePack.h
     minecraft/mod/ResourcePack.cpp
     minecraft/mod/ResourcePackFolderModel.h
@@ -347,6 +349,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/tasks/LocalModParseTask.cpp
     minecraft/mod/tasks/LocalModUpdateTask.h
     minecraft/mod/tasks/LocalModUpdateTask.cpp
+    minecraft/mod/tasks/LocalDataPackParseTask.h
+    minecraft/mod/tasks/LocalDataPackParseTask.cpp
     minecraft/mod/tasks/LocalResourcePackParseTask.h
     minecraft/mod/tasks/LocalResourcePackParseTask.cpp
     minecraft/mod/tasks/LocalTexturePackParseTask.h
