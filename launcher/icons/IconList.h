@@ -66,9 +66,9 @@ signals:
     void iconUpdated(QString key);
 
 private:
-    // hide copy constructor
+    // Hide copy constructor
     IconList(const IconList &) = delete;
-    // hide assign op
+    // Hide assign op
     IconList &operator=(const IconList &) = delete;
     void reindex();
     void sortIconList();
