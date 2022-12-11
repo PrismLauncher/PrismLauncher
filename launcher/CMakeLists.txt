@@ -92,6 +92,15 @@ set(CORE_SOURCES
 
     MTPixmapCache.h
 )
+if (UNIX AND NOT CYGWIN AND NOT APPLE)
+set(CORE_SOURCES
+    ${CORE_SOURCES}
+
+    # MangoHud
+    MangoHud.h
+    MangoHud.cpp
+    )
+endif()
 
 set(PATHMATCHER_SOURCES
     # Path matchers
