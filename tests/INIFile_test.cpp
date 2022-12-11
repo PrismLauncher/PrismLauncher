@@ -43,13 +43,13 @@ slots:
         QString b = "a\nb\t\n\\\\\\C:\\Program files\\terrible\\name\\of something\\#thisIsNotAComment";
         QString filename = "test_SaveLoad.ini";
 
-        // save
+        // Save
         INIFile f;
         f.set("a", a);
         f.set("b", b);
         f.saveFile(filename);
 
-        // load
+        // Load
         INIFile f2;
         f2.loadFile(filename);
         QCOMPARE(a, f2.get("a","NOT SET").toString());
