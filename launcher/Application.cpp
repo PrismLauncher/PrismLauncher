@@ -125,6 +125,7 @@
 #ifdef Q_OS_LINUX
 #include <dlfcn.h>
 #include "gamemode_client.h"
+#include "MangoHud.h"
 #endif
 
 
@@ -1519,17 +1520,8 @@ void Application::updateCapabilities()
     if (gamemode_query_status() >= 0)
         m_capabilities |= SupportsGameMode;
 
-    {
-        void *dummy = dlopen("libMangoHud_dlsym.so", RTLD_LAZY);
-        // try normal variant as well
-        if (dummy == NULL)
-            dummy = dlopen("libMangoHud.so", RTLD_LAZY);
-
-        if (dummy != NULL) {
-            dlclose(dummy);
-            m_capabilities |= SupportsMangoHud;
-        }
-    }
+    if (!MangoHud::getLibraryString().isEmpty())
+        m_capabilities |= SupportsMangoHud;
 #endif
 }
 

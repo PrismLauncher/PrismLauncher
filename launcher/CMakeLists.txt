@@ -90,6 +90,15 @@ set(CORE_SOURCES
     MMCTime.h
     MMCTime.cpp
 )
+if (UNIX AND NOT CYGWIN AND NOT APPLE)
+set(CORE_SOURCES
+    ${CORE_SOURCES}
+
+    # MangoHud
+    MangoHud.h
+    MangoHud.cpp
+    )
+endif()
 
 set(PATHMATCHER_SOURCES
     # Path matchers
