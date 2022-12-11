@@ -66,7 +66,7 @@ else
     echo "ERROR: requires inkscape, sips and iconutil in PATH"
 fi
 
-# replace icon in themes
+# Replace icon in themes
 for dir in ../launcher/resources/*/scalable
 do
     cp -v org.prismlauncher.PrismLauncher.svg "$dir/launcher.svg"
