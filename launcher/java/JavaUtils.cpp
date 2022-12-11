@@ -439,7 +439,7 @@ QList<QString> JavaUtils::FindJavaPaths()
             javas.append(FS::PathCombine(prefix, "bin/java"));
         }
     };
-    // java installed in a snap is installed in the standard directory, but underneath $SNAP
+    // Java installed in a snap is installed in the standard directory, but underneath $SNAP
     auto snap = qEnvironmentVariable("SNAP");
     auto scanJavaDirs = [&](const QString & dirPath)
     {
@@ -448,18 +448,18 @@ QList<QString> JavaUtils::FindJavaPaths()
             scanJavaDir(snap + dirPath);
         }
     };
-    // oracle RPMs
+    // Oracle RPMs
     scanJavaDirs("/usr/java");
-    // general locations used by distro packaging
+    // General locations used by distro packaging
     scanJavaDirs("/usr/lib/jvm");
     scanJavaDirs("/usr/lib64/jvm");
     scanJavaDirs("/usr/lib32/jvm");
-    // javas stored in Prism Launcher's folder
+    // Java versions stored in Prism Launcher's folder
     scanJavaDirs("java");
-    // manually installed JDKs in /opt
+    // Manually installed JDKs in /opt
     scanJavaDirs("/opt/jdk");
     scanJavaDirs("/opt/jdks");
-    // flatpak
+    // Flatpak
     scanJavaDirs("/app/jdk");
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
