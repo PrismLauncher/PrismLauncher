@@ -18,7 +18,7 @@ slots:
 
     void test_Through()
     {
-        // test up to 10 MB
+        // Test up to 10 MB
         static const int size = 10 * 1024 * 1024;
         QByteArray random;
         QByteArray compressed;
@@ -26,17 +26,17 @@ slots:
         std::default_random_engine eng((std::random_device())());
         std::uniform_int_distribution<uint16_t> idis(0, std::numeric_limits<uint8_t>::max());
 
-        // initialize random buffer
+        // Initialize random buffer
         for(int i = 0; i < size; i++)
         {
             random.append((char)idis(eng));
         }
 
-        // initialize fibonacci
+        // Initialize Fibonacci
         int prev = 1;
         int cur = 1;
 
-        // test if fibonacci long random buffers pass through GZip
+        // Test if Fibonacci long random buffers pass through GZip
         do
         {
             QByteArray copy = random;
