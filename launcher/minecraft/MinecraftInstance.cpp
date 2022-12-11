@@ -88,6 +88,10 @@
 #include "minecraft/gameoptions/GameOptions.h"
 #include "minecraft/update/FoldersTask.h"
 
+#ifdef Q_OS_LINUX
+#include "MangoHud.h"
+#endif
+
 #define IBUS "@im=ibus"
 
 // all of this because keeping things compatible with deprecated old settings
@@ -482,12 +486,22 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
 #ifdef Q_OS_LINUX
     if (settings()->get("EnableMangoHud").toBool() && APPLICATION->capabilities() & Application::SupportsMangoHud)
     {
-        auto preload = env.value("LD_PRELOAD", "") + ":libMangoHud_dlsym.so:libMangoHud.so";
-        // $LIB/mangohud is a supported lib path by upstream, do not remove
-        auto lib_path = env.value("LD_LIBRARY_PATH", "") + ":/usr/local/$LIB/mangohud/:/usr/$LIB/mangohud/";
 
-        env.insert("LD_PRELOAD", preload);
-        env.insert("LD_LIBRARY_PATH", lib_path);
+        auto preloadList = env.value("LD_PRELOAD").split(QLatin1String(":"));
+        auto libPaths = env.value("LD_LIBRARY_PATH").split(QLatin1String(":"));
+
+        auto mangoHudLibString = MangoHud::getLibraryString();
+        if (!mangoHudLibString.isEmpty())
+        {
+            QFileInfo mangoHudLib(mangoHudLibString);
+
+            // dlsym variant is only needed for OpenGL and not included in the vulkan layer
+            preloadList << "libMangoHud_dlsym.so" << mangoHudLib.fileName();
+            libPaths << mangoHudLib.absolutePath();
+        }
+
+        env.insert("LD_PRELOAD", preloadList.join(QLatin1String(":")));
+        env.insert("LD_LIBRARY_PATH", libPaths.join(QLatin1String(":")));
         env.insert("MANGOHUD", "1");
     }
 
