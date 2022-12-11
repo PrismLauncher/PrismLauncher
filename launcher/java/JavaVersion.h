@@ -2,7 +2,7 @@
 
 #include <QString>
 
-// NOTE: apparently the GNU C library pollutes the global namespace with these... undef them.
+// NOTE: Apparently the GNU C library pollutes the global namespace with these... undef them.
 #ifdef major
     #undef major
 #endif
