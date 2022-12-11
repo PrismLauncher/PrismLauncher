@@ -23,7 +23,7 @@ finish-args:
   - --socket=pulseaudio
     # for Discord RPC mods
   - --filesystem=xdg-run/app/com.discordapp.Discord:create
-    # Mod drag&drop
+    # Mod drag & drop
   - --filesystem=xdg-download:ro
 
 modules:
