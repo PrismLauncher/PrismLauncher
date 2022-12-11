@@ -97,6 +97,7 @@
 #include <QIcon>
 
 #include "InstanceList.h"
+#include "MTPixmapCache.h"
 
 #include <minecraft/auth/AccountList.h>
 #include "icons/IconList.h"
@@ -140,6 +141,8 @@
 #define TOSTRING(x) STRINGIFY(x)
 
 static const QLatin1String liveCheckFile("live.check");
+
+PixmapCache* PixmapCache::s_instance = nullptr;
 
 namespace {
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -693,6 +696,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<AccountListPage>();
             m_globalSettingsProvider->addPage<APIPage>();
         }
+
+        PixmapCache::setInstance(new PixmapCache(this));
+
         qDebug() << "<> Settings loaded.";
     }
 

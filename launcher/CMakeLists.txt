@@ -89,6 +89,8 @@ set(CORE_SOURCES
     # Time
     MMCTime.h
     MMCTime.cpp
+
+    MTPixmapCache.h
 )
 
 set(PATHMATCHER_SOURCES
