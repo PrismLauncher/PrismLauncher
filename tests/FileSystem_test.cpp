@@ -103,11 +103,11 @@ slots:
             QVERIFY(target_dir.entryList().contains("assets"));
         };
 
-        // first try variant without trailing /
+        // First try variant without trailing /
         QVERIFY(!folder.endsWith('/'));
         f();
 
-        // then variant with trailing /
+        // Then variant with trailing /
         folder.append('/');
         QVERIFY(folder.endsWith('/'));
         f();
@@ -137,11 +137,11 @@ slots:
             QVERIFY(target_dir.entryList().contains("assets"));
         };
 
-        // first try variant without trailing /
+        // First try variant without trailing /
         QVERIFY(!folder.endsWith('/'));
         f();
 
-        // then variant with trailing /
+        // Then variant with trailing /
         folder.append('/');
         QVERIFY(folder.endsWith('/'));
         f();
@@ -172,11 +172,11 @@ slots:
             QVERIFY(!target_dir.entryList().contains("assets"));
         };
 
-        // first try variant without trailing /
+        // First try variant without trailing /
         QVERIFY(!folder.endsWith('/'));
         f();
 
-        // then variant with trailing /
+        // Then variant with trailing /
         folder.append('/');
         QVERIFY(folder.endsWith('/'));
         f();
@@ -208,11 +208,11 @@ slots:
             QVERIFY(target_dir.entryList(filter).contains(".secret_file.txt"));
         };
 
-        // first try variant without trailing /
+        // First try variant without trailing /
         QVERIFY(!folder.endsWith('/'));
         f();
 
-        // then variant with trailing /
+        // Then variant with trailing /
         folder.append('/');
         QVERIFY(folder.endsWith('/'));
         f();
