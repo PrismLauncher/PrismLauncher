@@ -51,8 +51,9 @@ class TaskTest : public QObject {
         t.setStatus(status);
 
         QCOMPARE(t.getStatus(), status);
-        // Even though it is multi step, it does not override the getStepStatus method,
-        // so it should remain the same.
+        /* Even though it is multi step, it does not override the getStepStatus method,
+         * so it should remain the same
+         */
         QCOMPARE(t.getStepStatus(), status);
     }
 
