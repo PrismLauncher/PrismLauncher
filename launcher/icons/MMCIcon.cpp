@@ -82,7 +82,7 @@ QIcon MMCIcon::icon() const
     auto & icon = m_images[m_current_type].icon;
     if(!icon.isNull())
         return icon;
-    // FIXME: inject this.
+    // FIXME: Inject this.
     return QIcon::fromTheme(m_images[m_current_type].key);
 }
 
