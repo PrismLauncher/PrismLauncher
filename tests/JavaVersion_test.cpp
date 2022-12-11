@@ -49,27 +49,27 @@ slots:
         QTest::addColumn<bool>("equal");
         QTest::addColumn<bool>("bigger");
 
-        // old format and new format equivalence
+        // Old format and new format equivalence
         QTest::newRow("1.6.0_33 == 6.0.33") << "1.6.0_33" << "6.0.33" << false << true << false;
-        // old format major version
+        // Old format major version
         QTest::newRow("1.5.0_33 < 1.6.0_33") << "1.5.0_33" << "1.6.0_33" << true << false << false;
-        // new format - first release vs first security patch
+        // New format - First release vs first security patch
         QTest::newRow("9 < 9.0.1") << "9" << "9.0.1" << true << false << false;
         QTest::newRow("9.0.1 > 9") << "9.0.1" << "9" << false << false << true;
-        // new format - first minor vs first release/security patch
+        // New format - First minor vs first release/security patch
         QTest::newRow("9.1 > 9.0.1") << "9.1" << "9.0.1" << false << false << true;
         QTest::newRow("9.0.1 < 9.1") << "9.0.1" << "9.1" << true << false << false;
         QTest::newRow("9.1 > 9") << "9.1" << "9" << false << false << true;
         QTest::newRow("9 > 9.1") << "9" << "9.1" << true << false << false;
-        // new format - omitted numbers
+        // New format - Omitted numbers
         QTest::newRow("9 == 9.0") << "9" << "9.0" << false << true << false;
         QTest::newRow("9 == 9.0.0") << "9" << "9.0.0" << false << true << false;
         QTest::newRow("9.0 == 9.0.0") << "9.0" << "9.0.0" << false << true << false;
-        // early access and prereleases compared to final release
+        // Early access and pre-releases compared to final release
         QTest::newRow("9-ea < 9") << "9-ea" << "9" << true << false << false;
         QTest::newRow("9 < 9.0.1-ea") << "9" << "9.0.1-ea" << true << false << false;
         QTest::newRow("9.0.1-ea > 9") << "9.0.1-ea" << "9" << false << false << true;
-        // prerelease difference only testing
+        // Pre-release difference only testing
         QTest::newRow("9-1 == 9-1") << "9-1" << "9-1" << false << true << false;
         QTest::newRow("9-1 < 9-2") << "9-1" << "9-2" << true << false << false;
         QTest::newRow("9-5 < 9-20") << "9-5" << "9-20" << true << false << false;
