@@ -33,7 +33,7 @@ public:
     bool addJavaCheckerAction(JavaCheckerPtr base)
     {
         javacheckers.append(base);
-        // if this is already running, the action needs to be started right away!
+        // If this is already running, the action needs to be started right away!
         if (isRunning())
         {
             setProgress(num_finished, javacheckers.size());
