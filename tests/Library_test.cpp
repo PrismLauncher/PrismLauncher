@@ -55,7 +55,7 @@ private:
         ProblemContainer problems;
         return MojangVersionFormat::libraryFromJson(problems, QJsonDocument::fromJson(data).object(), path);
     }
-    // get absolute path to expected storage, assuming default cache prefix
+    // Get absolute path to expected storage, assuming default cache prefix
     QStringList getStorage(QString relative)
     {
         return {FS::PathCombine(cache->getBasePath("libraries"), relative)};
