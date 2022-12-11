@@ -49,7 +49,7 @@ IconList::IconList(const QStringList &builtinPaths, QString path, QObject *paren
 {
     QSet<QString> builtinNames;
 
-    // add builtin icons
+    // Add builtin icons
     for(auto & builtinPath: builtinPaths)
     {
         QDir instance_icons(builtinPath);
@@ -246,18 +246,18 @@ bool IconList::dropMimeData(const QMimeData *data, Qt::DropAction action, [[mayb
 {
     if (action == Qt::IgnoreAction)
         return true;
-    // check if the action is supported
+    // Check if the action is supported
     if (!data || !(action & supportedDropActions()))
         return false;
 
-    // files dropped from outside?
+    // Any files dropped from outside?
     if (data->hasUrls())
     {
         auto urls = data->urls();
         QStringList iconFiles;
         for (auto url : urls)
         {
-            // only local files may be dropped...
+            // Only local files may be dropped...
             if (!url.isLocalFile())
                 continue;
             iconFiles += url.toLocalFile();
@@ -377,7 +377,7 @@ bool IconList::addThemeIcon(const QString& key)
     }
     else
     {
-        // add a new icon
+        // Add a new icon
         beginInsertRows(QModelIndex(), icons.size(), icons.size());
         {
             MMCIcon mmc_icon;
@@ -394,7 +394,7 @@ bool IconList::addThemeIcon(const QString& key)
 
 bool IconList::addIcon(const QString &key, const QString &name, const QString &path, const IconType type)
 {
-    // replace the icon even? is the input valid?
+    // Replace the icon even? Is the input valid?
     QIcon icon(path);
     if (icon.isNull())
         return false;
@@ -408,7 +408,7 @@ bool IconList::addIcon(const QString &key, const QString &name, const QString &p
     }
     else
     {
-        // add a new icon
+        // Add a new icon
         beginInsertRows(QModelIndex(), icons.size(), icons.size());
         {
             MMCIcon mmc_icon;
