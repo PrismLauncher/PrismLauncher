@@ -7,6 +7,7 @@
 
 #include <QListView>
 #include <QProxyStyle>
+#include <QStyleFactory>
 
 #include <HoeDown.h>
 
@@ -60,7 +61,10 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
 
     ui->setupUi(this);
 
-    ui->versionsComboBox->setStyle(new NoBigComboBoxStyle(ui->versionsComboBox->style()));
+    // NOTE: GTK2 themes crash with the proxy style.
+    // This seems like an upstream bug, so there's not much else that can be done.
+    if (!QStyleFactory::keys().contains("gtk2"))
+        ui->versionsComboBox->setStyle(new NoBigComboBoxStyle(ui->versionsComboBox->style()));
 
     ui->reloadButton->setVisible(false);
     connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool){
