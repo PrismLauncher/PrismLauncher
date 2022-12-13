@@ -257,20 +257,26 @@ void InstanceImportTask::extractAborted()
 
 void InstanceImportTask::processFlame()
 {
-    auto pack_id_it = m_extra_info.constFind("pack_id");
-    Q_ASSERT(pack_id_it != m_extra_info.constEnd());
-    auto pack_id = pack_id_it.value();
+    FlameCreationTask* inst_creation_task = nullptr;
+    if (!m_extra_info.isEmpty()) {
+        auto pack_id_it = m_extra_info.constFind("pack_id");
+        Q_ASSERT(pack_id_it != m_extra_info.constEnd());
+        auto pack_id = pack_id_it.value();
 
-    auto pack_version_id_it = m_extra_info.constFind("pack_version_id");
-    Q_ASSERT(pack_version_id_it != m_extra_info.constEnd());
-    auto pack_version_id = pack_version_id_it.value();
+        auto pack_version_id_it = m_extra_info.constFind("pack_version_id");
+        Q_ASSERT(pack_version_id_it != m_extra_info.constEnd());
+        auto pack_version_id = pack_version_id_it.value();
 
-    QString original_instance_id;
-    auto original_instance_id_it = m_extra_info.constFind("original_instance_id");
-    if (original_instance_id_it != m_extra_info.constEnd())
-        original_instance_id = original_instance_id_it.value();
+        QString original_instance_id;
+        auto original_instance_id_it = m_extra_info.constFind("original_instance_id");
+        if (original_instance_id_it != m_extra_info.constEnd())
+            original_instance_id = original_instance_id_it.value();
 
-    auto* inst_creation_task = new FlameCreationTask(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
+        inst_creation_task = new FlameCreationTask(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
+    } else {
+        // FIXME: Find a way to get IDs in directly imported ZIPs
+        inst_creation_task = new FlameCreationTask(m_stagingPath, m_globalSettings, m_parent, {}, {});
+    }
 
     inst_creation_task->setName(*this);
     inst_creation_task->setIcon(m_instIcon);
@@ -335,21 +341,33 @@ void InstanceImportTask::processMultiMC()
 
 void InstanceImportTask::processModrinth()
 {
-    auto pack_id_it = m_extra_info.constFind("pack_id");
-    Q_ASSERT(pack_id_it != m_extra_info.constEnd());
-    auto pack_id = pack_id_it.value();
+    ModrinthCreationTask* inst_creation_task = nullptr;
+    if (!m_extra_info.isEmpty()) {
+        auto pack_id_it = m_extra_info.constFind("pack_id");
+        Q_ASSERT(pack_id_it != m_extra_info.constEnd());
+        auto pack_id = pack_id_it.value();
 
-    QString pack_version_id;
-    auto pack_version_id_it = m_extra_info.constFind("pack_version_id");
-    if (pack_version_id_it != m_extra_info.constEnd())
-        pack_version_id = pack_version_id_it.value();
+        QString pack_version_id;
+        auto pack_version_id_it = m_extra_info.constFind("pack_version_id");
+        if (pack_version_id_it != m_extra_info.constEnd())
+            pack_version_id = pack_version_id_it.value();
 
-    QString original_instance_id;
-    auto original_instance_id_it = m_extra_info.constFind("original_instance_id");
-    if (original_instance_id_it != m_extra_info.constEnd())
-        original_instance_id = original_instance_id_it.value();
+        QString original_instance_id;
+        auto original_instance_id_it = m_extra_info.constFind("original_instance_id");
+        if (original_instance_id_it != m_extra_info.constEnd())
+            original_instance_id = original_instance_id_it.value();
 
-    auto* inst_creation_task = new ModrinthCreationTask(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
+        inst_creation_task = new ModrinthCreationTask(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
+    } else {
+        QString pack_id;
+        if (!m_sourceUrl.isEmpty()) {
+            QRegularExpression regex(R"(data\/(.*)\/versions)");
+            pack_id = regex.match(m_sourceUrl.toString()).captured(1);
+        }
+
+        // FIXME: Find a way to get the ID in directly imported ZIPs
+        inst_creation_task = new ModrinthCreationTask(m_stagingPath, m_globalSettings, m_parent, pack_id);
+    }
 
     inst_creation_task->setName(*this);
     inst_creation_task->setIcon(m_instIcon);
