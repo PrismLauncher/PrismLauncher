@@ -227,17 +227,16 @@ void ModrinthManagedPackPage::parseManagedPack()
         ui->versionsComboBox->blockSignals(false);
 
         for (auto version : m_pack.versions) {
-            QString name;
+            QString name = version.version;
 
             if (!version.name.contains(version.version))
                 name = QString("%1 — %2").arg(version.name, version.version);
-            else
-                name = version.name;
 
             // NOTE: the id from version isn't the same id in the modpack format spec...
             // e.g. HexMC's 4.4.0 has versionId 4.0.0 in the modpack index..............
             if (version.version == m_inst->getManagedPackVersionName())
-                name.append(tr(" (Current)"));
+                name = tr("%1 (Current)").arg(name);
+
 
             ui->versionsComboBox->addItem(name, QVariant(version.id));
         }
@@ -374,12 +373,10 @@ void FlameManagedPackPage::parseManagedPack()
         ui->versionsComboBox->blockSignals(false);
 
         for (auto version : m_pack.versions) {
-            QString name;
-
-            name = version.version;
+            QString name = version.version;
 
             if (version.fileId == m_inst->getManagedPackVersionID().toInt())
-                name.append(tr(" (Current)"));
+                name = tr("%1 (Current)").arg(name);
 
             ui->versionsComboBox->addItem(name, QVariant(version.fileId));
         }
