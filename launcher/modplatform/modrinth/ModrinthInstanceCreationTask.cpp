@@ -217,7 +217,9 @@ bool ModrinthCreationTask::createInstance()
         instance.setIconKey("modrinth");
     }
 
-    instance.setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
+    // Don't add managed info to packs without an ID (most likely imported from ZIP)
+    if (!m_managed_id.isEmpty())
+        instance.setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
     instance.setName(name());
     instance.saveNow();
 
