@@ -1683,7 +1683,7 @@ InstanceView
     background-image: url(:/backgrounds/%1);
     background-attachment: fixed;
     background-clip: padding;
-    background-position: bottom left;
+    background-position: bottom right;
     background-repeat: none;
     background-color:palette(base);
 })")
