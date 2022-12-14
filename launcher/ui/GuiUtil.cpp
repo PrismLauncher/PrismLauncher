@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,11 +50,35 @@
 #include <DesktopServices.h>
 #include <BuildConfig.h>
 
-QString GuiUtil::uploadPaste(const QString &text, QWidget *parentWidget)
+QString GuiUtil::uploadPaste(const QString &name, const QString &text, QWidget *parentWidget)
 {
     ProgressDialog dialog(parentWidget);
     auto pasteTypeSetting = static_cast<PasteUpload::PasteType>(APPLICATION->settings()->get("PastebinType").toInt());
     auto pasteCustomAPIBaseSetting = APPLICATION->settings()->get("PastebinCustomAPIBase").toString();
+
+    {
+        QUrl baseUrl;
+        if (pasteCustomAPIBaseSetting.isEmpty())
+            baseUrl = PasteUpload::PasteTypes[pasteTypeSetting].defaultBase;
+        else
+            baseUrl = pasteCustomAPIBaseSetting;
+
+        if (baseUrl.isValid()) {
+            auto response = CustomMessageBox::selectable(parentWidget, "Confirm Upload",
+                                                         QObject::tr("About to upload: %1\n"
+                                                                     "Uploading to: %2\n"
+                                                                     "You should double-check for personal information.\n\n"
+                                                                     "Are you sure?")
+                                                             .arg(name)
+                                                             .arg(baseUrl.host()),
+                                                         QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                                ->exec();
+
+            if (response != QMessageBox::Yes)
+                return "canceled";
+        }
+    }
+
     std::unique_ptr<PasteUpload> paste(new PasteUpload(parentWidget, text, pasteCustomAPIBaseSetting, pasteTypeSetting));
 
     dialog.execWithTask(paste.get());

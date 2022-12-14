@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -139,13 +140,8 @@ bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelI
     return true;
 }
 
-void ModFolderPage::removeItem()
+void ModFolderPage::removeItems(const QItemSelection &selection)
 {
-
-    if (!m_controlsEnabled)
-        return;
-
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     m_model->deleteMods(selection.indexes());
 }
 
