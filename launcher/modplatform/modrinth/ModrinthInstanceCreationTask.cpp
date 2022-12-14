@@ -33,13 +33,19 @@ bool ModrinthCreationTask::updateInstance()
     auto instance_list = APPLICATION->instances();
 
     // FIXME: How to handle situations when there's more than one install already for a given modpack?
-    auto inst = instance_list->getInstanceByManagedName(originalName());
+    InstancePtr inst;
+    if (auto original_id = originalInstanceID(); !original_id.isEmpty()) {
+        inst = instance_list->getInstanceById(original_id);
+        Q_ASSERT(inst);
+    } else {
+        inst = instance_list->getInstanceByManagedName(originalName());
 
-    if (!inst) {
-        inst = instance_list->getInstanceById(originalName());
+        if (!inst) {
+            inst = instance_list->getInstanceById(originalName());
 
-        if (!inst)
-            return false;
+            if (!inst)
+                return false;
+        }
     }
 
     QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
@@ -49,25 +55,14 @@ bool ModrinthCreationTask::updateInstance()
     auto version_name = inst->getManagedPackVersionName();
     auto version_str = !version_name.isEmpty() ? tr(" (version %1)").arg(version_name) : "";
 
-    auto info = CustomMessageBox::selectable(
-        m_parent, tr("Similar modpack was found!"),
-        tr("One or more of your instances are from this same modpack%1. Do you want to create a "
-           "separate instance, or update the existing one?\n\nNOTE: Make sure you made a backup of your important instance data before "
-           "updating, as worlds can be corrupted and some configuration may be lost (due to pack overrides).")
-            .arg(version_str),
-        QMessageBox::Information, QMessageBox::Ok | QMessageBox::Reset | QMessageBox::Abort);
-    info->setButtonText(QMessageBox::Ok, tr("Create new instance"));
-    info->setButtonText(QMessageBox::Abort, tr("Update existing instance"));
-    info->setButtonText(QMessageBox::Reset, tr("Cancel"));
-
-    info->exec();
-
-    if (info->clickedButton() == info->button(QMessageBox::Ok))
-        return false;
-
-    if (info->clickedButton() == info->button(QMessageBox::Reset)) {
-        m_abort = true;
-        return false;
+    if (shouldConfirmUpdate()) {
+        auto should_update = askIfShouldUpdate(m_parent, version_str);
+        if (should_update == ShouldUpdate::SkipUpdating)
+            return false;
+        if (should_update == ShouldUpdate::Cancel) {
+            m_abort = true;
+            return false;
+        }
     }
 
     // Remove repeated files, we don't need to download them!
@@ -149,7 +144,7 @@ bool ModrinthCreationTask::updateInstance()
     }
 
 
-    setOverride(true);
+    setOverride(true, inst->id());
     qDebug() << "Will override instance!";
 
     m_instance = inst;
@@ -222,7 +217,7 @@ bool ModrinthCreationTask::createInstance()
         instance.setIconKey("modrinth");
     }
 
-    instance.setManagedPack("modrinth", getManagedPackID(), m_managed_name, m_managed_version_id, version());
+    instance.setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
     instance.setName(name());
     instance.saveNow();
 
@@ -295,7 +290,8 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
             }
 
             if (set_managed_info) {
-                m_managed_version_id = Json::ensureString(obj, "versionId", {}, "Managed ID");
+                if (m_managed_version_id.isEmpty())
+                    m_managed_version_id = Json::ensureString(obj, "versionId", {}, "Managed ID");
                 m_managed_name = Json::ensureString(obj, "name", {}, "Managed Name");
             }
 
@@ -394,14 +390,4 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
     }
 
     return true;
-}
-
-QString ModrinthCreationTask::getManagedPackID() const
-{
-    if (!m_source_url.isEmpty()) {
-        QRegularExpression regex(R"(data\/(.*)\/versions)");
-        return regex.match(m_source_url).captured(1);
-    }
-
-    return {};
 }

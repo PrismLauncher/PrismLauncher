@@ -537,6 +537,19 @@ void ScreenshotsPage::openedImpl()
             ui->listView->setModel(nullptr);
         }
     }
+
+    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    if (!APPLICATION->settings()->contains(setting_name))
+        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
+    else
+        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+
+    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+}
+
+void ScreenshotsPage::closedImpl()
+{
+    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
 }
 
 #include "ScreenshotsPage.moc"

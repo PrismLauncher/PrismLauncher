@@ -71,6 +71,7 @@ void JavaSettingsWidget::setupUi()
     m_memoryGroupBox->setObjectName(QStringLiteral("memoryGroupBox"));
     m_gridLayout_2 = new QGridLayout(m_memoryGroupBox);
     m_gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
+    m_gridLayout_2->setColumnStretch(0, 1);
 
     m_labelMinMem = new QLabel(m_memoryGroupBox);
     m_labelMinMem->setObjectName(QStringLiteral("labelMinMem"));
@@ -80,7 +81,7 @@ void JavaSettingsWidget::setupUi()
     m_minMemSpinBox->setObjectName(QStringLiteral("minMemSpinBox"));
     m_minMemSpinBox->setSuffix(QStringLiteral(" MiB"));
     m_minMemSpinBox->setMinimum(128);
-    m_minMemSpinBox->setMaximum(m_availableMemory);
+    m_minMemSpinBox->setMaximum(1048576);
     m_minMemSpinBox->setSingleStep(128);
     m_labelMinMem->setBuddy(m_minMemSpinBox);
     m_gridLayout_2->addWidget(m_minMemSpinBox, 0, 1, 1, 1);
@@ -93,10 +94,14 @@ void JavaSettingsWidget::setupUi()
     m_maxMemSpinBox->setObjectName(QStringLiteral("maxMemSpinBox"));
     m_maxMemSpinBox->setSuffix(QStringLiteral(" MiB"));
     m_maxMemSpinBox->setMinimum(128);
-    m_maxMemSpinBox->setMaximum(m_availableMemory);
+    m_maxMemSpinBox->setMaximum(1048576);
     m_maxMemSpinBox->setSingleStep(128);
     m_labelMaxMem->setBuddy(m_maxMemSpinBox);
     m_gridLayout_2->addWidget(m_maxMemSpinBox, 1, 1, 1, 1);
+
+    m_labelMaxMemIcon = new QLabel(m_memoryGroupBox);
+    m_labelMaxMemIcon->setObjectName(QStringLiteral("labelMaxMemIcon"));
+    m_gridLayout_2->addWidget(m_labelMaxMemIcon, 1, 2, 1, 1);
 
     m_labelPermGen = new QLabel(m_memoryGroupBox);
     m_labelPermGen->setObjectName(QStringLiteral("labelPermGen"));
@@ -108,7 +113,7 @@ void JavaSettingsWidget::setupUi()
     m_permGenSpinBox->setObjectName(QStringLiteral("permGenSpinBox"));
     m_permGenSpinBox->setSuffix(QStringLiteral(" MiB"));
     m_permGenSpinBox->setMinimum(64);
-    m_permGenSpinBox->setMaximum(m_availableMemory);
+    m_permGenSpinBox->setMaximum(1048576);
     m_permGenSpinBox->setSingleStep(8);
     m_gridLayout_2->addWidget(m_permGenSpinBox, 2, 1, 1, 1);
     m_permGenSpinBox->setVisible(false);
@@ -130,6 +135,7 @@ void JavaSettingsWidget::initialize()
     m_minMemSpinBox->setValue(observedMinMemory);
     m_maxMemSpinBox->setValue(observedMaxMemory);
     m_permGenSpinBox->setValue(observedPermGenMemory);
+    updateThresholds();
 }
 
 void JavaSettingsWidget::refresh()
@@ -210,9 +216,9 @@ int JavaSettingsWidget::permGenSize() const
 void JavaSettingsWidget::memoryValueChanged(int)
 {
     bool actuallyChanged = false;
-    int min = m_minMemSpinBox->value();
-    int max = m_maxMemSpinBox->value();
-    int permgen = m_permGenSpinBox->value();
+    unsigned int min = m_minMemSpinBox->value();
+    unsigned int max = m_maxMemSpinBox->value();
+    unsigned int permgen = m_permGenSpinBox->value();
     QObject *obj = sender();
     if (obj == m_minMemSpinBox && min != observedMinMemory)
     {
@@ -242,6 +248,7 @@ void JavaSettingsWidget::memoryValueChanged(int)
     if(actuallyChanged)
     {
         checkJavaPathOnEdit(m_javaPathTextBox->text());
+        updateThresholds();
     }
 }
 
@@ -434,4 +441,27 @@ void JavaSettingsWidget::retranslate()
     m_minMemSpinBox->setToolTip(tr("The amount of memory Minecraft is started with."));
     m_permGenSpinBox->setToolTip(tr("The amount of memory available to store loaded Java classes."));
     m_javaBrowseBtn->setText(tr("Browse"));
+}
+
+void JavaSettingsWidget::updateThresholds()
+{
+    QString iconName;
+
+    if (observedMaxMemory >= m_availableMemory) {
+        iconName = "status-bad";
+        m_labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation exceeds your system memory capacity."));
+    } else if (observedMaxMemory > (m_availableMemory * 0.9)) {
+        iconName = "status-yellow";
+        m_labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
+    } else {
+        iconName = "status-good";
+        m_labelMaxMemIcon->setToolTip("");
+    }
+
+    {
+        auto height = m_labelMaxMemIcon->fontInfo().pixelSize();
+        QIcon icon = APPLICATION->getThemedIcon(iconName);
+        QPixmap pix = icon.pixmap(height, height);
+        m_labelMaxMemIcon->setPixmap(pix);
+    }
 }

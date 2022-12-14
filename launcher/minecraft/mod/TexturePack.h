@@ -48,6 +48,8 @@ class TexturePack : public Resource {
     /** Thread-safe. */
     void setImage(QImage new_image);
 
+    bool valid() const override;
+
    protected:
     mutable QMutex m_data_lock;
 

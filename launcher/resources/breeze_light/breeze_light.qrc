@@ -19,6 +19,7 @@
         <file>scalable/loadermods.svg</file>
         <file>scalable/log.svg</file>
         <file>scalable/minecraft.svg</file>
+        <file>scalable/matrix.svg</file>
         <file>scalable/new.svg</file>
         <file>scalable/news.svg</file>
         <file>scalable/notes.svg</file>
@@ -27,6 +28,7 @@
         <file>scalable/refresh.svg</file>
         <file>scalable/resourcepacks.svg</file>
         <file>scalable/shaderpacks.svg</file>
+        <file>scalable/shortcut.svg</file>
         <file>scalable/screenshots.svg</file>
         <file>scalable/settings.svg</file>
         <file>scalable/status-bad.svg</file>
@@ -39,5 +41,6 @@
         <file>scalable/export.svg</file>
         <file>scalable/rename.svg</file>
         <file>scalable/launch.svg</file>
+        <file>scalable/server.svg</file>
     </qresource>
 </RCC>

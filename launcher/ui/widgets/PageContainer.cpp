@@ -130,6 +130,11 @@ bool PageContainer::selectPage(QString pageId)
     return false;
 }
 
+BasePage* PageContainer::getPage(QString pageId)
+{
+    return m_model->findPageEntryById(pageId);
+}
+
 void PageContainer::refreshContainer()
 {
     m_proxyModel->invalidate();

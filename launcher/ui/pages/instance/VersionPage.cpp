@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -123,6 +124,21 @@ bool VersionPage::shouldDisplay() const
 void VersionPage::retranslate()
 {
     ui->retranslateUi(this);
+}
+
+void VersionPage::openedImpl()
+{
+    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    if (!APPLICATION->settings()->contains(setting_name))
+        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
+    else
+        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+
+    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+}
+void VersionPage::closedImpl()
+{
+    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
 }
 
 QMenu * VersionPage::createPopupMenu()
@@ -270,6 +286,7 @@ void VersionPage::updateButtons(int row)
     ui->actionInstall_mods->setEnabled(controlsEnabled);
     ui->actionReplace_Minecraft_jar->setEnabled(controlsEnabled);
     ui->actionAdd_to_Minecraft_jar->setEnabled(controlsEnabled);
+    ui->actionAdd_Agents->setEnabled(controlsEnabled);
 }
 
 bool VersionPage::reloadPackProfile()
@@ -339,6 +356,18 @@ void VersionPage::on_actionReplace_Minecraft_jar_triggered()
     {
         m_profile->installCustomJar(jarPath);
     }
+    updateButtons();
+}
+
+
+void VersionPage::on_actionAdd_Agents_triggered()
+{
+    QStringList list = GuiUtil::BrowseForFiles("agent", tr("Select agents"), tr("Java agents (*.jar)"),
+                                               APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+
+    if (!list.isEmpty())
+        m_profile->installAgents(list);
+
     updateButtons();
 }
 

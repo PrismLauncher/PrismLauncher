@@ -160,6 +160,8 @@ private slots:
 
     void on_actionEditInstance_triggered();
 
+    void on_actionCreateInstanceShortcut_triggered();
+
     void taskEnd();
 
     /**

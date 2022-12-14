@@ -112,7 +112,14 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QGridLayout" name="gridLayout_2">
+         <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,0,0,0">
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelPermGen">
+            <property name="text">
+             <string notr="true">PermGen:</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="labelMinMem">
             <property name="text">
@@ -120,29 +127,21 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="maxMemSpinBox">
-            <property name="toolTip">
-             <string>The maximum amount of memory Minecraft is allowed to use.</string>
-            </property>
-            <property name="suffix">
-             <string notr="true"> MiB</string>
-            </property>
-            <property name="minimum">
-             <number>128</number>
-            </property>
-            <property name="maximum">
-             <number>65536</number>
-            </property>
-            <property name="singleStep">
-             <number>128</number>
-            </property>
-            <property name="value">
-             <number>1024</number>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelMaxMem">
+            <property name="text">
+             <string>Maximum memory allocation:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="3" column="0" colspan="3">
+           <widget class="QLabel" name="labelPermgenNote">
+            <property name="text">
+             <string>Note: Permgen is set automatically by Java 8 and later</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
            <widget class="QSpinBox" name="minMemSpinBox">
             <property name="toolTip">
              <string>The amount of memory Minecraft is started with.</string>
@@ -154,7 +153,7 @@
              <number>128</number>
             </property>
             <property name="maximum">
-             <number>65536</number>
+             <number>1048576</number>
             </property>
             <property name="singleStep">
              <number>128</number>
@@ -164,7 +163,29 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="1" column="2">
+           <widget class="QSpinBox" name="maxMemSpinBox">
+            <property name="toolTip">
+             <string>The maximum amount of memory Minecraft is allowed to use.</string>
+            </property>
+            <property name="suffix">
+             <string notr="true"> MiB</string>
+            </property>
+            <property name="minimum">
+             <number>128</number>
+            </property>
+            <property name="maximum">
+             <number>1048576</number>
+            </property>
+            <property name="singleStep">
+             <number>128</number>
+            </property>
+            <property name="value">
+             <number>1024</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
            <widget class="QSpinBox" name="permGenSpinBox">
             <property name="toolTip">
              <string>The amount of memory available to store loaded Java classes.</string>
@@ -186,24 +207,16 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="labelPermGen">
+          <item row="1" column="3">
+           <widget class="QLabel" name="labelMaxMemIcon">
             <property name="text">
-             <string notr="true">PermGen:</string>
+             <string notr="true"/>
             </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="labelMaxMem">
-            <property name="text">
-             <string>Maximum memory allocation:</string>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="2">
-           <widget class="QLabel" name="labelPermgenNote">
-            <property name="text">
-             <string>Note: Permgen is set automatically by Java 8 and later</string>
+            <property name="buddy">
+             <cstring>maxMemSpinBox</cstring>
             </property>
            </widget>
           </item>

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -69,6 +70,9 @@ public:
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 
+    void openedImpl() override;
+    void closedImpl() override;
+
 private slots:
     void on_actionChange_version_triggered();
     void on_actionInstall_Forge_triggered();
@@ -82,6 +86,7 @@ private slots:
     void on_actionMove_down_triggered();
     void on_actionAdd_to_Minecraft_jar_triggered();
     void on_actionReplace_Minecraft_jar_triggered();
+    void on_actionAdd_Agents_triggered();
     void on_actionRevert_triggered();
     void on_actionEdit_triggered();
     void on_actionInstall_mods_triggered();
@@ -113,6 +118,8 @@ private:
     MinecraftInstance *m_inst;
     int currentIdx = 0;
     bool controlsEnabled = false;
+
+    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
 
 public slots:
     void versionCurrent(const QModelIndex &current, const QModelIndex &previous);

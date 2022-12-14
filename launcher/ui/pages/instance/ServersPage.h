@@ -42,6 +42,8 @@
 #include "ui/pages/BasePage.h"
 #include <Application.h>
 
+#include "settings/Setting.h"
+
 namespace Ui
 {
 class ServersPage;
@@ -68,7 +70,7 @@ public:
     }
     virtual QIcon icon() const override
     {
-        return APPLICATION->getThemedIcon("unknown_server");
+        return APPLICATION->getThemedIcon("server");
     }
     virtual QString id() const override
     {
@@ -112,5 +114,7 @@ private: // data
     Ui::ServersPage *ui = nullptr;
     ServersModel * m_model = nullptr;
     InstancePtr m_inst = nullptr;
+
+    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
 };
 

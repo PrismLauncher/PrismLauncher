@@ -28,14 +28,14 @@
 
 namespace ResourcePackUtils {
 
-bool process(ResourcePack& pack)
+bool process(ResourcePack& pack, ProcessingLevel level)
 {
     switch (pack.type()) {
         case ResourceType::FOLDER:
-            ResourcePackUtils::processFolder(pack);
+            ResourcePackUtils::processFolder(pack, level);
             return true;
         case ResourceType::ZIPFILE:
-            ResourcePackUtils::processZIP(pack);
+            ResourcePackUtils::processZIP(pack, level);
             return true;
         default:
             qWarning() << "Invalid type for resource pack parse task!";
@@ -43,7 +43,7 @@ bool process(ResourcePack& pack)
     }
 }
 
-void processFolder(ResourcePack& pack)
+void processFolder(ResourcePack& pack, ProcessingLevel level)
 {
     Q_ASSERT(pack.type() == ResourceType::FOLDER);
 
@@ -60,6 +60,9 @@ void processFolder(ResourcePack& pack)
         mcmeta_file.close();
     }
 
+    if (level == ProcessingLevel::BasicInfoOnly)
+        return;
+
     QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
     if (image_file_info.isFile()) {
         QFile mcmeta_file(image_file_info.filePath());
@@ -74,7 +77,7 @@ void processFolder(ResourcePack& pack)
     }
 }
 
-void processZIP(ResourcePack& pack)
+void processZIP(ResourcePack& pack, ProcessingLevel level)
 {
     Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
 
@@ -96,6 +99,11 @@ void processZIP(ResourcePack& pack)
         ResourcePackUtils::processMCMeta(pack, std::move(data));
 
         file.close();
+    }
+
+    if (level == ProcessingLevel::BasicInfoOnly) {
+        zip.close();
+        return;
     }
 
     if (zip.setCurrentFile("pack.png")) {
@@ -138,6 +146,13 @@ void processPackPNG(ResourcePack& pack, QByteArray&& raw_data)
         qWarning() << "Failed to parse pack.png.";
     }
 }
+
+bool validate(QFileInfo file)
+{
+    ResourcePack rp{ file };
+    return ResourcePackUtils::process(rp, ProcessingLevel::BasicInfoOnly) && rp.valid();
+}
+
 }  // namespace ResourcePackUtils
 
 LocalResourcePackParseTask::LocalResourcePackParseTask(int token, ResourcePack& rp)
@@ -152,8 +167,6 @@ bool LocalResourcePackParseTask::abort()
 
 void LocalResourcePackParseTask::executeTask()
 {
-    Q_ASSERT(m_resource_pack.valid());
-
     if (!ResourcePackUtils::process(m_resource_pack))
         return;
 

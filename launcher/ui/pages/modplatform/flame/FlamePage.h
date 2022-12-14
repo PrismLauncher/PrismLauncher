@@ -99,5 +99,5 @@ private:
     Flame::ListModel* listModel = nullptr;
     Flame::IndexedPack current;
 
-    QString selectedVersion;
+    int m_selected_version_index = -1;
 };

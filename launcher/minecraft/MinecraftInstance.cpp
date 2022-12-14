@@ -88,6 +88,10 @@
 #include "minecraft/gameoptions/GameOptions.h"
 #include "minecraft/update/FoldersTask.h"
 
+#ifdef Q_OS_LINUX
+#include "MangoHud.h"
+#endif
+
 #define IBUS "@im=ibus"
 
 // all of this because keeping things compatible with deprecated old settings
@@ -482,9 +486,22 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
 #ifdef Q_OS_LINUX
     if (settings()->get("EnableMangoHud").toBool() && APPLICATION->capabilities() & Application::SupportsMangoHud)
     {
-        auto preload = env.value("LD_PRELOAD", "") + ":libMangoHud_dlsym.so:libMangoHud.so";
 
-        env.insert("LD_PRELOAD", preload);
+        auto preloadList = env.value("LD_PRELOAD").split(QLatin1String(":"));
+        auto libPaths = env.value("LD_LIBRARY_PATH").split(QLatin1String(":"));
+
+        auto mangoHudLibString = MangoHud::getLibraryString();
+        if (!mangoHudLibString.isEmpty())
+        {
+            QFileInfo mangoHudLib(mangoHudLibString);
+
+            // dlsym variant is only needed for OpenGL and not included in the vulkan layer
+            preloadList << "libMangoHud_dlsym.so" << mangoHudLib.fileName();
+            libPaths << mangoHudLib.absolutePath();
+        }
+
+        env.insert("LD_PRELOAD", preloadList.join(QLatin1String(":")));
+        env.insert("LD_LIBRARY_PATH", libPaths.join(QLatin1String(":")));
         env.insert("MANGOHUD", "1");
     }
 
@@ -1110,8 +1127,6 @@ std::shared_ptr<ResourcePackFolderModel> MinecraftInstance::resourcePackList() c
     if (!m_resource_pack_list)
     {
         m_resource_pack_list.reset(new ResourcePackFolderModel(resourcePacksDir()));
-        m_resource_pack_list->enableInteraction(!isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_resource_pack_list.get(), &ResourcePackFolderModel::disableInteraction);
     }
     return m_resource_pack_list;
 }
@@ -1121,8 +1136,6 @@ std::shared_ptr<TexturePackFolderModel> MinecraftInstance::texturePackList() con
     if (!m_texture_pack_list)
     {
         m_texture_pack_list.reset(new TexturePackFolderModel(texturePacksDir()));
-        m_texture_pack_list->disableInteraction(isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_texture_pack_list.get(), &ModFolderModel::disableInteraction);
     }
     return m_texture_pack_list;
 }
@@ -1132,8 +1145,6 @@ std::shared_ptr<ShaderPackFolderModel> MinecraftInstance::shaderPackList() const
     if (!m_shader_pack_list)
     {
         m_shader_pack_list.reset(new ShaderPackFolderModel(shaderPacksDir()));
-        m_shader_pack_list->disableInteraction(isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_shader_pack_list.get(), &ModFolderModel::disableInteraction);
     }
     return m_shader_pack_list;
 }
