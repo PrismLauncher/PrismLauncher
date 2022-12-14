@@ -52,6 +52,7 @@ public:
     bool addIcon(const QString &key, const QString &name, const QString &path, const IconType type);
     void saveIcon(const QString &key, const QString &path, const char * format) const;
     bool deleteIcon(const QString &key);
+    bool trashIcon(const QString &key);
     bool iconFileExists(const QString &key) const;
 
     void installIcons(const QStringList &iconFiles);

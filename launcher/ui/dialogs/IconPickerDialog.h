@@ -37,6 +37,7 @@ protected:
 
 private:
     Ui::IconPickerDialog *ui;
+    QPushButton *buttonRemove;
 
 private
 slots:
