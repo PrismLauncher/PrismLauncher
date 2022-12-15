@@ -51,12 +51,12 @@ void LauncherLoginStep::onRequestDone(
     auto requestor = qobject_cast<AuthRequest *>(QObject::sender());
     requestor->deleteLater();
 
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
     qDebug() << data;
 #endif
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
         qDebug() << data;
 #endif
         if (Net::isApplicationError(error)) {
@@ -76,7 +76,7 @@ void LauncherLoginStep::onRequestDone(
 
     if(!Parsers::parseMojangResponse(data, m_data->yggdrasilToken)) {
         qWarning() << "Could not parse login_with_xbox response...";
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
         qDebug() << data;
 #endif
         emit finished(

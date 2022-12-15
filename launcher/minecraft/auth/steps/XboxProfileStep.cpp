@@ -56,7 +56,7 @@ void XboxProfileStep::onRequestDone(
 
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
         qDebug() << data;
 #endif
         if (Net::isApplicationError(error)) {
@@ -74,7 +74,7 @@ void XboxProfileStep::onRequestDone(
         return;
     }
 
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
     qDebug() << "XBox profile: " << data;
 #endif
 

@@ -117,7 +117,7 @@ void MSAStep::onOAuthActivityChanged(Katabasis::Activity activity) {
             // Succeeded or did not invalidate tokens
             emit hideVerificationUriAndCode();
             QVariantMap extraTokens = m_oauth2->extraTokens();
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
             if (!extraTokens.isEmpty()) {
                 qDebug() << "Extra tokens in response:";
                 foreach (QString key, extraTokens.keys()) {

@@ -75,7 +75,7 @@ bool getBool(QJsonValue value, bool & out) {
 
 bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output, QString name) {
     qDebug() << "Parsing" << name <<":";
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
     qDebug() << data;
 #endif
     QJsonParseError jsonError;
@@ -137,7 +137,7 @@ bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output, QString na
 
 bool parseMinecraftProfile(QByteArray & data, MinecraftProfile &output) {
     qDebug() << "Parsing Minecraft profile...";
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
     qDebug() << data;
 #endif
 
@@ -275,7 +275,7 @@ decoded base64 "value":
 
 bool parseMinecraftProfileMojang(QByteArray & data, MinecraftProfile &output) {
     qDebug() << "Parsing Minecraft profile...";
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
     qDebug() << data;
 #endif
 
@@ -389,7 +389,7 @@ bool parseMinecraftProfileMojang(QByteArray & data, MinecraftProfile &output) {
 
 bool parseMinecraftEntitlements(QByteArray & data, MinecraftEntitlement &output) {
     qDebug() << "Parsing Minecraft entitlements...";
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
     qDebug() << data;
 #endif
 
@@ -424,7 +424,7 @@ bool parseMinecraftEntitlements(QByteArray & data, MinecraftEntitlement &output)
 
 bool parseRolloutResponse(QByteArray & data, bool& result) {
     qDebug() << "Parsing Rollout response...";
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
     qDebug() << data;
 #endif
 
@@ -455,7 +455,7 @@ bool parseRolloutResponse(QByteArray & data, bool& result) {
 bool parseMojangResponse(QByteArray & data, Katabasis::Token &output) {
     QJsonParseError jsonError;
     qDebug() << "Parsing Mojang response...";
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
     qDebug() << data;
 #endif
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);

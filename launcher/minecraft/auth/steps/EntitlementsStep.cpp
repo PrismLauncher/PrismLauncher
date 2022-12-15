@@ -41,7 +41,7 @@ void EntitlementsStep::onRequestDone(
     auto requestor = qobject_cast<AuthRequest *>(QObject::sender());
     requestor->deleteLater();
 
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
     qDebug() << data;
 #endif
 
