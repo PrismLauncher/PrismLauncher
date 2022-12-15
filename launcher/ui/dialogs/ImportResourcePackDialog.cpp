@@ -29,7 +29,6 @@ ImportResourcePackDialog::ImportResourcePackDialog(QWidget* parent) : QDialog(pa
     // NOTE: We can't have uniform sizes because the text may wrap if it's too long. If we set this, it will cut off the wrapped text.
     contentsWidget->setUniformItemSizes(false);
     contentsWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    contentsWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     contentsWidget->setItemDelegate(new ListViewDelegate());
 

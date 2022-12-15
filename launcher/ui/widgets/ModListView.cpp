@@ -31,7 +31,6 @@ ModListView::ModListView ( QWidget* parent )
     setSelectionMode ( QAbstractItemView::ExtendedSelection );
     setHeaderHidden ( false );
     setSelectionBehavior(QAbstractItemView::SelectRows);
-    setVerticalScrollBarPolicy ( Qt::ScrollBarAlwaysOn );
     setHorizontalScrollBarPolicy ( Qt::ScrollBarAsNeeded );
     setDropIndicatorShown(true);
     setDragEnabled(true);

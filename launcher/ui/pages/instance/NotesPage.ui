@@ -25,9 +25,6 @@
    </property>
    <item>
     <widget class="QTextEdit" name="noteEditor">
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
-     </property>
      <property name="tabChangesFocus">
       <bool>true</bool>
      </property>
