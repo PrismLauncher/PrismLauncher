@@ -44,6 +44,8 @@
 #include "MetadataHandler.h"
 #include "Version.h"
 
+static ModPlatform::ProviderCapabilities ProviderCaps;
+
 Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {
     m_enabled = (file.suffix() != "disabled");
@@ -91,6 +93,10 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
             if (this_ver < other_ver)
                 return { -1, type == SortType::VERSION };
         }
+        case SortType::PROVIDER:
+            auto compare_result = QString::compare(provider(), cast_other->provider(), Qt::CaseInsensitive);
+            if (compare_result != 0)
+                return { compare_result, type == SortType::PROVIDER };
     }
     return { 0, false };
 }
@@ -189,4 +195,12 @@ void Mod::finishResolvingWithDetails(ModDetails&& details)
     m_local_details = std::move(details);
     if (metadata)
         setMetadata(std::move(metadata));
+};
+
+auto Mod::provider() const -> QString
+{
+    if (metadata()) {
+        return ProviderCaps.readableName(metadata()->provider);
+    }
+    return "Unknown";
 }

@@ -48,10 +48,11 @@
 
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
+#include "modplatform/ModIndex.h"
 
 ModFolderModel::ModFolderModel(const QString &dir, bool is_indexed) : ResourceFolderModel(QDir(dir)), m_is_indexed(is_indexed)
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE };
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER };
 }
 
 QVariant ModFolderModel::data(const QModelIndex &index, int role) const
@@ -82,7 +83,8 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
         }
         case DateColumn:
             return m_resources[row]->dateTimeChanged();
-
+        case ProviderColumn:
+            return at(row)->provider();
         default:
             return QVariant();
         }
@@ -118,6 +120,8 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
             return tr("Version");
         case DateColumn:
             return tr("Last changed");
+        case ProviderColumn:
+            return tr("Provider");
         default:
             return QVariant();
         }
@@ -133,6 +137,8 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
             return tr("The version of the mod.");
         case DateColumn:
             return tr("The date and time this mod was last changed (or added).");
+        case ProviderColumn:
+            return tr("Where the mod was downloaded from.");
         default:
             return QVariant();
         }

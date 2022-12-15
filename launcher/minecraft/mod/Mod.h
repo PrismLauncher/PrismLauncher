@@ -61,6 +61,7 @@ public:
     auto description() const -> QString;
     auto authors()     const -> QStringList;
     auto status()      const -> ModStatus;
+    auto provider()    const -> QString;
 
     auto metadata() -> std::shared_ptr<Metadata::ModStruct>;
     auto metadata() const -> const std::shared_ptr<Metadata::ModStruct>;
