@@ -440,15 +440,15 @@ QStringList MinecraftInstance::javaArguments()
 
     args << "-Duser.language=en";
 
+    if (javaVersion.isModular() && traits().contains("legacySkins") && settings()->get("LegacySkinFix").toBool())
+        args << "--add-opens" << "java.base/java.net=ALL-UNNAMED";
+
     return args;
 }
 
-QString MinecraftInstance::getLauncher()
-{
-    auto profile = m_components->getProfile();
-
+QString MinecraftInstance::getLauncher() {
     // use legacy launcher if the traits are set
-    if (profile->getTraits().contains("legacyLaunch") || profile->getTraits().contains("alphaLaunch"))
+    if (traits().contains("legacyLaunch") || traits().contains("alphaLaunch"))
         return "legacy";
 
     return "standard";

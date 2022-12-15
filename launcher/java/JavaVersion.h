@@ -25,6 +25,8 @@ public:
 
     bool requiresPermGen();
 
+    bool isModular();
+
     QString toString();
 
     int major()
