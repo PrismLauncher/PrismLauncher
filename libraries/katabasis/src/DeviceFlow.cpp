@@ -333,7 +333,7 @@ QString DeviceFlow::refreshToken() {
 }
 
 void DeviceFlow::setRefreshToken(const QString &v) {
-#ifndef NDEBUG
+#ifdef AUTH_DEBUG
     qDebug() << "DeviceFlow::setRefreshToken" << v << "...";
 #endif
     token_.refresh_token = v;
