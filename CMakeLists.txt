@@ -28,19 +28,23 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 if(MSVC)
-    # Use /W4 as /Wall includes unnesserey warnings such as added padding to structs
+    # /GL enables whole program optimizations
+    # /Gw helps reduce binary size
+    # /Gy allows the compiler to package individual functions
+    # /guard:cf enables control flow guard
     # /permissive- specify standards-conforming compiler behavior, also enabled by Qt6, default on with std:c++20
-    # /GS Adds buffer security checks, default on but incuded anyway to mirror gcc's fstack-protector flag
-    set(CMAKE_CXX_FLAGS "/W4 /permissive- /GS ${CMAKE_CXX_FLAGS}")
+    # Use /W4 as /Wall includes unnesserey warnings such as added padding to structs
+    set(CMAKE_CXX_FLAGS "/GL /Gw /Gy /guard:cf /permissive- /W4 ${CMAKE_CXX_FLAGS}")
 
     # LINK accepts /SUBSYSTEM whics sets if we are a WINDOWS (gui) or a CONSOLE programs
     # This implicitly selects an entrypoint specific to the subsystem selected
     # qtmain/QtEntryPointLib provides the correct entrypoint (wWinMain) for gui programs
     # Additinaly LINK autodetects we use a GUI so we can omit /SUBSYSTEM
     # This allows tests to still use have console without using seperate linker flags
+    # /LTCG allows for linking wholy optimizated programs
     # /MANIFEST:NO disables generating a manifest file, we instead provide our own
     # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
-    set(CMAKE_EXE_LINKER_FLAGS "/MANIFEST:NO /STACK:8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "/LTCG /MANIFEST:NO /STACK:8388608 ${CMAKE_EXE_LINKER_FLAGS}")
 
     # See https://github.com/ccache/ccache/issues/1040
     # Note, CMake 3.25 replaces this with CMAKE_MSVC_DEBUG_INFORMATION_FORMAT
