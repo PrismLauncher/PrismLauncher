@@ -73,6 +73,22 @@ bool ConcurrentTask::abort()
     return suceedeed;
 }
 
+void ConcurrentTask::clear()
+{
+    Q_ASSERT(!isRunning());
+
+    m_done.clear();
+    m_failed.clear();
+    m_queue.clear();
+
+    m_aborted = false;
+
+    m_progress = 0;
+    m_stepProgress = 0;
+
+    m_total_size = 0;
+}
+
 void ConcurrentTask::startNext()
 {
     if (m_aborted || m_doing.count() > m_total_max_size)

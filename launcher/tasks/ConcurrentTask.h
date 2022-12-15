@@ -24,6 +24,11 @@ public:
 public slots:
     bool abort() override;
 
+    /** Resets the internal state of the task.
+     *  This allows the same task to be re-used.
+     */
+    void clear();
+
 protected
 slots:
     void executeTask() override;
