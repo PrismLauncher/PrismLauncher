@@ -44,7 +44,6 @@
 #include <GZip.h>
 #include <FileSystem.h>
 #include <QShortcut>
-#include <QRegularExpression>
 
 OtherLogsPage::OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget *parent)
     : QWidget(parent), ui(new Ui::OtherLogsPage), m_path(path), m_fileFilter(fileFilter),
@@ -199,7 +198,6 @@ void OtherLogsPage::on_btnReload_clicked()
             showTooBig();
             return;
         }
-        content.replace((QRegularExpression) QRegularExpression("\\(Session ID is.+\\)", QRegularExpression::CaseInsensitiveOption), (QString) "(Session ID is <SESSION_ID>)");
         setPlainText(content);
     }
 }
