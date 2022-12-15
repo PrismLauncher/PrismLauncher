@@ -422,14 +422,9 @@ static void withVersionsLoaded(Meta::VersionList::Ptr versions, T action)
 // TODO move somewhere else?
 static bool versionRequires(Meta::Version* version, const QString& gameVersion)
 {
-    if (!version)
-        return false;
-
-    for (auto require : version->requires())
-        if (require.uid == "net.minecraft" && require.equalsVersion == gameVersion)
-            return true;
-
-    return false;
+    return version && std::any_of(version->requires().begin(), version->requires().end(), [gameVersion](auto require) {
+               return require.uid == "net.minecraft" && require.equalsVersion == gameVersion;
+           });
 }
 
 static BaseVersion* pickBest(Component* component, const QString& gameVersion)
