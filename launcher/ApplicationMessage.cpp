@@ -47,8 +47,8 @@ void ApplicationMessage::parse(const QByteArray & input) {
     args.clear();
 
     auto parsedArgs = root.value("args").toObject();
-    for(auto iter = parsedArgs.begin(); iter != parsedArgs.end(); iter++) {
-        args[iter.key()] = iter.value().toString();
+    for(auto iter = parsedArgs.constBegin(); iter != parsedArgs.constEnd(); iter++) {
+        args.insert(iter.key(), iter.value().toString());
     }
 }
 
@@ -56,8 +56,8 @@ QByteArray ApplicationMessage::serialize() {
     QJsonObject root;
     root.insert("command", command);
     QJsonObject outArgs;
-    for (auto iter = args.begin(); iter != args.end(); iter++) {
-        outArgs[iter.key()] = iter.value();
+    for (auto iter = args.constBegin(); iter != args.constEnd(); iter++) {
+        outArgs.insert(iter.key(), iter.value());
     }
     root.insert("args", outArgs);
 
