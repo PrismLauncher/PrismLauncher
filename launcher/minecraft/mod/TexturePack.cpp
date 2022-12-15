@@ -62,3 +62,8 @@ QPixmap TexturePack::image(QSize size)
     TexturePackUtils::process(*this);
     return image(size);
 }
+
+bool TexturePack::valid() const
+{
+    return m_description != nullptr;
+}
