@@ -42,6 +42,7 @@
 #include "modplatform/ResourceAPI.h"
 
 #include "ui/pages/modplatform/ModPage.h"
+#include "ui/pages/modplatform/ResourcePackPage.h"
 
 namespace ResourceDownload {
 
@@ -76,6 +77,29 @@ class ModrinthModPage : public ModPage {
     [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
     auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const -> bool override;
+};
+
+class ModrinthResourcePackPage : public ResourcePackResourcePage {
+    Q_OBJECT
+
+   public:
+    static ModrinthResourcePackPage* create(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
+    {
+        return ResourcePackResourcePage::create<ModrinthResourcePackPage>(dialog, instance);
+    }
+
+    ModrinthResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance);
+    ~ModrinthResourcePackPage() override = default;
+
+    [[nodiscard]] bool shouldDisplay() const override;
+
+    [[nodiscard]] inline auto displayName() const -> QString override { return Modrinth::displayName(); }
+    [[nodiscard]] inline auto icon() const -> QIcon override { return Modrinth::icon(); }
+    [[nodiscard]] inline auto id() const -> QString override { return Modrinth::id(); }
+    [[nodiscard]] inline auto debugName() const -> QString override { return Modrinth::debugName(); }
+    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
+
+    [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
 };
 
 }  // namespace ResourceDownload

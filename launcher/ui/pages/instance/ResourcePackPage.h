@@ -44,12 +44,7 @@ class ResourcePackPage : public ExternalResourcesPage
 {
     Q_OBJECT
 public:
-    explicit ResourcePackPage(MinecraftInstance *instance, std::shared_ptr<ResourcePackFolderModel> model, QWidget *parent = 0)
-        : ExternalResourcesPage(instance, model, parent)
-    {
-        ui->actionViewConfigs->setVisible(false);
-    }
-    virtual ~ResourcePackPage() {}
+    explicit ResourcePackPage(MinecraftInstance *instance, std::shared_ptr<ResourcePackFolderModel> model, QWidget *parent = 0);
 
     QString displayName() const override { return tr("Resource packs"); }
     QIcon icon() const override { return APPLICATION->getThemedIcon("resourcepacks"); }
@@ -63,14 +58,7 @@ public:
     }
 
    public slots:
-    bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override
-    {
-        auto sourceCurrent = m_filterModel->mapToSource(current);
-        int row = sourceCurrent.row();
-        auto& rp = static_cast<ResourcePack&>(m_model->at(row));
-        ui->frame->updateWithResourcePack(rp);
-
-        return true;
-    }
+    bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override;
+    void downloadRPs();
 };
 

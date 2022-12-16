@@ -34,4 +34,28 @@ auto FlameModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
     return Json::ensureArray(obj.object(), "data");
 }
 
+FlameResourcePackModel::FlameResourcePackModel(const BaseInstance& base) : ResourcePackResourceModel(base, new FlameAPI) {}
+
+void FlameResourcePackModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
+{
+    FlameMod::loadIndexedPack(m, obj);
+}
+
+// We already deal with the URLs when initializing the pack, due to the API response's structure
+void FlameResourcePackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
+{
+    FlameMod::loadBody(m, obj);
+}
+
+void FlameResourcePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
+{
+    FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
+}
+
+auto FlameResourcePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
+{
+    return Json::ensureArray(obj.object(), "data");
+}
+
+
 }  // namespace ResourceDownload

@@ -25,6 +25,7 @@
 #include "ResourceDownloadTask.h"
 
 #include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ResourcePackFolderModel.h"
 
 #include "ui/dialogs/ReviewMessageBox.h"
 
@@ -225,6 +226,32 @@ QList<BasePage*> ModDownloadDialog::getPages()
         pages.append(FlameModPage::create(this, *m_instance));
 
     m_selectedPage = dynamic_cast<ModPage*>(pages[0]);
+
+    return pages;
+}
+
+
+ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent,
+                                                       const std::shared_ptr<ResourcePackFolderModel>& resource_packs,
+                                                       BaseInstance* instance)
+    : ResourceDownloadDialog(parent, resource_packs), m_instance(instance)
+{
+    setWindowTitle(dialogTitle());
+
+    initializeContainer();
+    connectButtons();
+
+    if (!geometrySaveKey().isEmpty())
+        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toByteArray()));
+}
+
+QList<BasePage*> ResourcePackDownloadDialog::getPages()
+{
+    QList<BasePage*> pages;
+
+    pages.append(ModrinthResourcePackPage::create(this, *m_instance));
+    if (APPLICATION->capabilities() & Application::SupportsFlame)
+        pages.append(FlameResourcePackPage::create(this, *m_instance));
 
     return pages;
 }

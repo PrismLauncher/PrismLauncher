@@ -721,6 +721,7 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/ManagedPackPage.h
     ui/pages/instance/TexturePackPage.h
     ui/pages/instance/ResourcePackPage.h
+    ui/pages/instance/ResourcePackPage.cpp
     ui/pages/instance/ShaderPackPage.h
     ui/pages/instance/ModFolderPage.cpp
     ui/pages/instance/ModFolderPage.h
@@ -772,6 +773,9 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/ModPage.h
     ui/pages/modplatform/ModModel.cpp
     ui/pages/modplatform/ModModel.h
+
+    ui/pages/modplatform/ResourcePackPage.cpp
+    ui/pages/modplatform/ResourcePackModel.cpp
 
     ui/pages/modplatform/atlauncher/AtlFilterModel.cpp
     ui/pages/modplatform/atlauncher/AtlFilterModel.h

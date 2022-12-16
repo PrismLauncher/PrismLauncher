@@ -68,6 +68,8 @@ class ModrinthAPI : public NetworkResourceAPI {
         switch (type) {
             case ModPlatform::ResourceType::MOD:
                 return "mod";
+            case ModPlatform::ResourceType::RESOURCE_PACK:
+                return "resourcepack";
             default:
                 qWarning() << "Invalid resource type for Modrinth API!";
                 break;
