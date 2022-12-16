@@ -7,11 +7,13 @@
 #include "ui/pages/modplatform/ResourcePage.h"
 #include "ui/widgets/ModFilterWidget.h"
 
-class ModDownloadDialog;
-
 namespace Ui {
 class ResourcePage;
 }
+
+namespace ResourceDownload {
+
+class ModDownloadDialog;
 
 /* This page handles most logic related to browsing and selecting mods to download. */
 class ModPage : public ResourcePage {
@@ -57,3 +59,5 @@ class ModPage : public ResourcePage {
     unique_qobject_ptr<ModFilterWidget> m_filter_widget;
     std::shared_ptr<ModFilterWidget::Filter> m_filter;
 };
+
+}  // namespace ResourceDownload

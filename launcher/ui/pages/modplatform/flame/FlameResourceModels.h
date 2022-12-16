@@ -2,14 +2,18 @@
 
 #include "modplatform/flame/FlameAPI.h"
 
-namespace FlameMod {
+#include "ui/pages/modplatform/ModModel.h"
 
-class ListModel : public ModPlatform::ListModel {
+#include "ui/pages/modplatform/flame/FlameResourcePages.h"
+
+namespace ResourceDownload {
+
+class FlameModModel : public ModModel {
     Q_OBJECT
 
    public:
-    ListModel(FlameModPage* parent) : ModPlatform::ListModel(parent, new FlameAPI) {}
-    ~ListModel() override = default;
+    FlameModModel(FlameModPage* parent);
+    ~FlameModModel() override = default;
 
    private:
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
@@ -23,4 +27,4 @@ class ListModel : public ModPlatform::ListModel {
     inline auto getSorts() const -> const char** override { return sorts; };
 };
 
-}  // namespace FlameMod
+}  // namespace ResourceDownload

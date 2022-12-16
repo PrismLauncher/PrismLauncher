@@ -14,8 +14,11 @@ class ResourcePage;
 }
 
 class BaseInstance;
-class ResourceModel;
+
+namespace ResourceDownload {
+
 class ResourceDownloadDialog;
+class ResourceModel;
 
 class ResourcePage : public QWidget, public BasePage {
     Q_OBJECT
@@ -93,3 +96,5 @@ class ResourcePage : public QWidget, public BasePage {
     // Used to do instant searching with a delay to cache quick changes
     QTimer m_search_timer;
 };
+
+}  // namespace ResourceDownload

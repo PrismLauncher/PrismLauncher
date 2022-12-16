@@ -7,19 +7,19 @@
 
 #include <QMessageBox>
 
-namespace ModPlatform {
+namespace ResourceDownload {
 
-ListModel::ListModel(ModPage* parent, ResourceAPI* api) : ResourceModel(parent, api) {}
+ModModel::ModModel(ModPage* parent, ResourceAPI* api) : ResourceModel(parent, api) {}
 
 /******** Make data requests ********/
 
-ResourceAPI::SearchArgs ListModel::createSearchArguments()
+ResourceAPI::SearchArgs ModModel::createSearchArguments()
 {
     auto profile = static_cast<MinecraftInstance&>(m_associated_page->m_base_instance).getPackProfile();
     return { ModPlatform::ResourceType::MOD, m_next_search_offset,     m_search_term,
              getSorts()[currentSort],        profile->getModLoaders(), getMineVersions() };
 }
-ResourceAPI::SearchCallbacks ListModel::createSearchCallbacks()
+ResourceAPI::SearchCallbacks ModModel::createSearchCallbacks()
 {
     return { [this](auto& doc) {
         if (!s_running_models.constFind(this).value())
@@ -28,14 +28,14 @@ ResourceAPI::SearchCallbacks ListModel::createSearchCallbacks()
     } };
 }
 
-ResourceAPI::VersionSearchArgs ListModel::createVersionsArguments(QModelIndex& entry)
+ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& entry)
 {
     auto const& pack = m_packs[entry.row()];
     auto profile = static_cast<MinecraftInstance&>(m_associated_page->m_base_instance).getPackProfile();
 
     return { pack.addonId.toString(), getMineVersions(), profile->getModLoaders() };
 }
-ResourceAPI::VersionSearchCallbacks ListModel::createVersionsCallbacks(QModelIndex& entry)
+ResourceAPI::VersionSearchCallbacks ModModel::createVersionsCallbacks(QModelIndex& entry)
 {
     auto const& pack = m_packs[entry.row()];
 
@@ -46,12 +46,12 @@ ResourceAPI::VersionSearchCallbacks ListModel::createVersionsCallbacks(QModelInd
     } };
 }
 
-ResourceAPI::ProjectInfoArgs ListModel::createInfoArguments(QModelIndex& entry)
+ResourceAPI::ProjectInfoArgs ModModel::createInfoArguments(QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
     return { pack };
 }
-ResourceAPI::ProjectInfoCallbacks ListModel::createInfoCallbacks(QModelIndex& entry)
+ResourceAPI::ProjectInfoCallbacks ModModel::createInfoCallbacks(QModelIndex& entry)
 {
     return { [this, entry](auto& doc, auto& pack) {
         if (!s_running_models.constFind(this).value())
@@ -60,7 +60,7 @@ ResourceAPI::ProjectInfoCallbacks ListModel::createInfoCallbacks(QModelIndex& en
     } };
 }
 
-void ListModel::searchWithTerm(const QString& term, const int sort, const bool filter_changed)
+void ModModel::searchWithTerm(const QString& term, const int sort, const bool filter_changed)
 {
     if (m_search_term == term && m_search_term.isNull() == term.isNull() && currentSort == sort && !filter_changed) {
         return;
@@ -74,7 +74,7 @@ void ListModel::searchWithTerm(const QString& term, const int sort, const bool f
 
 /******** Request callbacks ********/
 
-void ListModel::searchRequestFinished(QJsonDocument& doc)
+void ModModel::searchRequestFinished(QJsonDocument& doc)
 {
     QList<ModPlatform::IndexedPack> newList;
     auto packs = documentToArray(doc);
@@ -108,7 +108,7 @@ void ListModel::searchRequestFinished(QJsonDocument& doc)
     endInsertRows();
 }
 
-void ListModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
+void ModModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
 {
     qDebug() << "Loading mod info";
 
@@ -133,7 +133,7 @@ void ListModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack
     m_associated_page->updateUi();
 }
 
-void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId, const QModelIndex& index)
+void ModModel::versionRequestSucceeded(QJsonDocument doc, QString addonId, const QModelIndex& index)
 {
     auto current = m_associated_page->getCurrentPack();
     if (addonId != current.addonId) {
@@ -159,16 +159,16 @@ void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId, cons
     m_associated_page->updateVersionList();
 }
 
-}  // namespace ModPlatform
-
 /******** Helpers ********/
 
 #define MOD_PAGE(x) static_cast<ModPage*>(x)
 
-auto ModPlatform::ListModel::getMineVersions() const -> std::optional<std::list<Version>>
+auto ModModel::getMineVersions() const -> std::optional<std::list<Version>>
 {
     auto versions = MOD_PAGE(m_associated_page)->getFilter()->versions;
     if (!versions.empty())
         return versions;
     return {};
 }
+
+}  // namespace ResourceDownload

@@ -13,6 +13,8 @@
 #include "ui/pages/modplatform/ResourceModel.h"
 #include "ui/widgets/ProjectItem.h"
 
+namespace ResourceDownload {
+
 ResourcePage::ResourcePage(ResourceDownloadDialog* parent, BaseInstance& base_instance)
     : QWidget(parent), m_base_instance(base_instance), m_ui(new Ui::ResourcePage), m_parent_dialog(parent), m_fetch_progress(this, false)
 {
@@ -345,3 +347,5 @@ void ResourcePage::openUrl(const QUrl& url)
     // open in the user's web browser
     QDesktopServices::openUrl(url);
 }
+
+}  // namespace ResourceDownload

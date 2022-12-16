@@ -7,11 +7,14 @@
 #include "ui/pages/BasePageProvider.h"
 
 class ResourceDownloadTask;
-class ResourcePage;
 class ResourceFolderModel;
 class PageContainer;
 class QVBoxLayout;
 class QDialogButtonBox;
+
+namespace ResourceDownload {
+
+class ResourcePage;
 
 class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     Q_OBJECT
@@ -53,3 +56,5 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
 
     QHash<QString, ResourceDownloadTask*> m_selected;
 };
+
+}  // namespace ResourceDownload

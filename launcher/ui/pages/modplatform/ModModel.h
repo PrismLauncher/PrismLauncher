@@ -7,16 +7,17 @@
 
 #include "ui/pages/modplatform/ResourceModel.h"
 
-class ModPage;
 class Version;
 
-namespace ModPlatform {
+namespace ResourceDownload {
 
-class ListModel : public ResourceModel {
+class ModPage;
+
+class ModModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ListModel(ModPage* parent, ResourceAPI* api);
+    ModModel(ModPage* parent, ResourceAPI* api);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, const int sort, const bool filter_changed);
@@ -51,4 +52,5 @@ class ListModel : public ResourceModel {
    protected:
     int currentSort = 0;
 };
-}  // namespace ModPlatform
+
+}  // namespace ResourceDownload

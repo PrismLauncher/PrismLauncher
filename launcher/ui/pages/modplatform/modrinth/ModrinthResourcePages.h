@@ -41,11 +41,15 @@
 
 #include "ui/pages/modplatform/ModPage.h"
 
+namespace ResourceDownload {
+
+namespace Modrinth {
 static inline QString displayName() { return "Modrinth"; }
 static inline QIcon icon() { return APPLICATION->getThemedIcon("modrinth"); }
 static inline QString id() { return "modrinth"; }
 static inline QString debugName() { return "Modrinth"; }
 static inline QString metaEntryBase() { return "ModrinthPacks"; };
+}
 
 class ModrinthModPage : public ModPage {
     Q_OBJECT
@@ -61,12 +65,15 @@ class ModrinthModPage : public ModPage {
 
     [[nodiscard]] bool shouldDisplay() const override;
 
-    [[nodiscard]] inline auto displayName() const -> QString override { return ::displayName(); } \
-    [[nodiscard]] inline auto icon() const -> QIcon override { return ::icon(); } \
-    [[nodiscard]] inline auto id() const -> QString override { return ::id(); } \
-    [[nodiscard]] inline auto debugName() const -> QString override { return ::debugName(); } \
-    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return ::metaEntryBase(); }
-    inline auto helpPage() const -> QString override { return "Mod-platform"; }
+    [[nodiscard]] inline auto displayName() const -> QString override { return Modrinth::displayName(); }
+    [[nodiscard]] inline auto icon() const -> QIcon override { return Modrinth::icon(); }
+    [[nodiscard]] inline auto id() const -> QString override { return Modrinth::id(); }
+    [[nodiscard]] inline auto debugName() const -> QString override { return Modrinth::debugName(); }
+    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
+
+    [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
     auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const -> bool override;
 };
+
+}  // namespace ResourceDownload

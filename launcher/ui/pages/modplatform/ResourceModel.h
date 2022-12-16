@@ -9,13 +9,15 @@
 #include "tasks/ConcurrentTask.h"
 
 class NetJob;
-class ResourcePage;
 class ResourceAPI;
 
 namespace ModPlatform {
 struct IndexedPack;
 }
 
+namespace ResourceDownload {
+
+class ResourcePage;
 
 class ResourceModel : public QAbstractListModel {
     Q_OBJECT
@@ -99,3 +101,5 @@ class ResourceModel : public QAbstractListModel {
     void searchRequestFailed(QString reason, int network_error_code);
     void searchRequestAborted();
 };
+
+}  // namespace ResourceDownload

@@ -23,31 +23,31 @@
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
-namespace Modrinth {
+namespace ResourceDownload {
 
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-const char* ListModel::sorts[5]{ "relevance", "downloads", "follows", "updated", "newest" };
+const char* ModrinthModModel::sorts[5]{ "relevance", "downloads", "follows", "updated", "newest" };
 
-void ListModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
+ModrinthModModel::ModrinthModModel(ModrinthModPage* parent) : ModModel(parent, new ModrinthAPI){};
+
+void ModrinthModModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
-    Modrinth::loadIndexedPack(m, obj);
+    ::Modrinth::loadIndexedPack(m, obj);
 }
 
-void ListModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
+void ModrinthModModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
-    Modrinth::loadExtraPackData(m, obj);
+    ::Modrinth::loadExtraPackData(m, obj);
 }
 
-void ListModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
+void ModrinthModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_associated_page->m_base_instance);
+    ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_associated_page->m_base_instance);
 }
 
-auto ListModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
+auto ModrinthModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
     return obj.object().value("hits").toArray();
 }
 
-}  // namespace Modrinth
-
-
+}  // namespace ResourceDownload

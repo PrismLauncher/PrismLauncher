@@ -53,6 +53,8 @@
 
 #include "ui/pages/modplatform/ModModel.h"
 
+namespace ResourceDownload {
+
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance& instance)
     : ResourcePage(dialog, instance)
 {
@@ -100,7 +102,7 @@ void ModPage::triggerSearch()
         updateSelectionButton();
     }
 
-    static_cast<ModPlatform::ListModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentIndex(), changed);
+    static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentIndex(), changed);
     m_fetch_progress.watch(&m_model->activeJob());
 }
 
@@ -151,3 +153,5 @@ void ModPage::addResourceToDialog(ModPlatform::IndexedPack& pack, ModPlatform::I
     bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
     m_parent_dialog->addResource(pack.name, new ResourceDownloadTask(pack, version, m_parent_dialog->getBaseModel(), is_indexed));
 }
+
+}  // namespace ResourceDownload
