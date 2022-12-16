@@ -9,6 +9,8 @@
 #include "ui/pages/modplatform/ResourcePage.h"
 #include "ui/widgets/PageContainer.h"
 
+namespace ResourceDownload {
+
 ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, const std::shared_ptr<ResourceFolderModel> base_model)
     : QDialog(parent), m_base_model(base_model), m_buttons(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel), m_vertical_layout(this)
 {
@@ -150,3 +152,5 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
     // Same effect as having a global search bar
     m_selectedPage->setSearchTerm(prev_page->getSearchTerm());
 }
+
+}  // namespace ResourceDownload

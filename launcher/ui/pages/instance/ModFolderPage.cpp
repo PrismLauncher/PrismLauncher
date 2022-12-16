@@ -158,7 +158,7 @@ void ModFolderPage::installMods()
         return;
     }
 
-    ModDownloadDialog mdownload(this, m_model, m_instance);
+    ResourceDownload::ModDownloadDialog mdownload(this, m_model, m_instance);
     if (mdownload.exec()) {
         ConcurrentTask* tasks = new ConcurrentTask(this);
         connect(tasks, &Task::failed, [this, tasks](QString reason) {

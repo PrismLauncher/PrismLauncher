@@ -24,6 +24,8 @@
 #include "ui/pages/modplatform/flame/FlameResourcePages.h"
 #include "ui/pages/modplatform/modrinth/ModrinthResourcePages.h"
 
+namespace ResourceDownload {
+
 ModDownloadDialog::ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModFolderModel>& mods, BaseInstance* instance)
     : ResourceDownloadDialog(parent, mods), m_instance(instance)
 {
@@ -57,3 +59,5 @@ QList<BasePage*> ModDownloadDialog::getPages()
 
     return pages;
 }
+
+}  // namespace ResourceDownload

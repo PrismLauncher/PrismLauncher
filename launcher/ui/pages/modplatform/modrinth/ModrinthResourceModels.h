@@ -20,24 +20,22 @@
 
 #include "ui/pages/modplatform/ModModel.h"
 
-#include "ui/pages/modplatform/modrinth/ModrinthResourcePages.h"
+namespace ResourceDownload {
 
-#include "modplatform/modrinth/ModrinthAPI.h"
+class ModrinthModPage;
 
-namespace Modrinth {
-
-class ListModel : public ModPlatform::ListModel {
+class ModrinthModModel : public ModModel {
     Q_OBJECT
 
    public:
-    ListModel(ModrinthModPage* parent) : ModPlatform::ListModel(parent, new ModrinthAPI){};
-    ~ListModel() override = default;
+    ModrinthModModel(ModrinthModPage* parent);
+    ~ModrinthModModel() override = default;
 
    private:
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
-    
+
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
@@ -45,5 +43,4 @@ class ListModel : public ModPlatform::ListModel {
     inline auto getSorts() const -> const char** override { return sorts; };
 };
 
-}  // namespace Modrinth
-
+}  // namespace ResourceDownload

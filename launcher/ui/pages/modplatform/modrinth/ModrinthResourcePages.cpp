@@ -38,13 +38,16 @@
 
 #include "modplatform/modrinth/ModrinthAPI.h"
 
-#include "ModrinthResourceModels.h"
 #include "ui/dialogs/ModDownloadDialog.h"
+
+#include "ui/pages/modplatform/modrinth/ModrinthResourceModels.h"
+
+namespace ResourceDownload {
 
 ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instance)
     : ModPage(dialog, instance)
 {
-    m_model = new Modrinth::ListModel(this);
+    m_model = new ModrinthModModel(this);
     m_ui->packView->setModel(m_model);
 
     // index is used to set the sorting with the modrinth api
@@ -87,3 +90,4 @@ auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString 
 // my Qt, so we need to implement this in every derived class...
 auto ModrinthModPage::shouldDisplay() const -> bool { return true; }
 
+}  // namespace ResourceDownload

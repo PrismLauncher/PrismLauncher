@@ -20,6 +20,8 @@
 #include "ui/pages/modplatform/ResourcePage.h"
 #include "ui/widgets/ProjectItem.h"
 
+namespace ResourceDownload {
+
 QHash<ResourceModel*, bool> ResourceModel::s_running_models;
 
 ResourceModel::ResourceModel(ResourcePage* parent, ResourceAPI* api) : QAbstractListModel(), m_api(api), m_associated_page(parent)
@@ -256,3 +258,5 @@ void ResourceModel::searchRequestAborted()
     m_next_search_offset = 0;
     search();
 }
+
+}  // namespace ResourceDownload

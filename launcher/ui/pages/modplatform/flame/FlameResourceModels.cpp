@@ -1,31 +1,35 @@
 #include "FlameResourceModels.h"
+
 #include "Json.h"
+
 #include "modplatform/flame/FlameModIndex.h"
 
-namespace FlameMod {
+namespace ResourceDownload {
 
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-const char* ListModel::sorts[6]{ "Featured", "Popularity", "LastUpdated", "Name", "Author", "TotalDownloads" };
+const char* FlameModModel::sorts[6]{ "Featured", "Popularity", "LastUpdated", "Name", "Author", "TotalDownloads" };
 
-void ListModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
+FlameModModel::FlameModModel(FlameModPage* parent) : ModModel(parent, new FlameAPI) {}
+
+void FlameModModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
     FlameMod::loadIndexedPack(m, obj);
 }
 
 // We already deal with the URLs when initializing the pack, due to the API response's structure
-void ListModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
+void FlameModModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
     FlameMod::loadBody(m, obj);
 }
 
-void ListModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
+void FlameModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
     FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_associated_page->m_base_instance);
 }
 
-auto ListModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
+auto FlameModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
     return Json::ensureArray(obj.object(), "data");
 }
 
-}  // namespace FlameMod
+}  // namespace ResourceDownload

@@ -25,8 +25,9 @@
 
 class QDialogButtonBox;
 
-class ModDownloadDialog final : public ResourceDownloadDialog
-{
+namespace ResourceDownload {
+
+class ModDownloadDialog final : public ResourceDownloadDialog {
     Q_OBJECT
 
    public:
@@ -45,3 +46,5 @@ class ModDownloadDialog final : public ResourceDownloadDialog
    private:
     BaseInstance* m_instance;
 };
+
+}  // namespace ResourceDownload

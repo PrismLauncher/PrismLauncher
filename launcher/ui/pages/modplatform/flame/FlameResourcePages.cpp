@@ -40,10 +40,12 @@
 #include "FlameResourceModels.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 
+namespace ResourceDownload {
+
 FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance)
     : ModPage(dialog, instance)
 {
-    m_model = new FlameMod::ListModel(this);
+    m_model = new FlameModModel(this);
     m_ui->packView->setModel(m_model);
 
     // index is used to set the sorting with the flame api
@@ -95,3 +97,5 @@ void FlameModPage::openUrl(const QUrl& url)
 
     ModPage::openUrl(url);
 }
+
+}  // namespace ResourceDownload
