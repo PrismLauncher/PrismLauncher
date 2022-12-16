@@ -202,5 +202,6 @@ auto Mod::provider() const -> QString
     if (metadata()) {
         return ProviderCaps.readableName(metadata()->provider);
     }
-    return "Unknown";
+	//: Unknown mod provider (i.e. not Modrinth, CurseForge, etc...)
+    return tr("Unknown");
 }
