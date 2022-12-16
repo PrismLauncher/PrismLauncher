@@ -54,7 +54,10 @@ void ProgressWidget::watch(const Task* task)
     connect(m_task, &Task::progress, this, &ProgressWidget::handleTaskProgress);
     connect(m_task, &Task::destroyed, this, &ProgressWidget::taskDestroyed);
 
-    show();
+    if (m_task->isRunning())
+        show();
+    else
+        connect(m_task, &Task::started, this, &ProgressWidget::show);
 }
 
 void ProgressWidget::start(const Task* task)
