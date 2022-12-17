@@ -47,7 +47,6 @@ IconPickerDialog::IconPickerDialog(QWidget *parent)
     contentsWidget->setUniformItemSizes(true);
     contentsWidget->setTextElideMode(Qt::ElideRight);
     contentsWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    contentsWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     contentsWidget->setItemDelegate(new ListViewDelegate());
 
