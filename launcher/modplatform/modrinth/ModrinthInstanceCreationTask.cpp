@@ -279,7 +279,7 @@ bool ModrinthCreationTask::createInstance()
     return ended_well;
 }
 
-bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<Modrinth::File>& files, bool set_managed_info, bool show_optional_dialog)
+bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<Modrinth::File>& files, bool set_internal_data, bool show_optional_dialog)
 {
     try {
         auto doc = Json::requireDocument(index_path);
@@ -291,7 +291,7 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
                 throw JSONValidationError("Unknown game: " + game);
             }
 
-            if (set_managed_info) {
+            if (set_internal_data) {
                 if (m_managed_version_id.isEmpty())
                     m_managed_version_id = Json::ensureString(obj, "versionId", {}, "Managed ID");
                 m_managed_name = Json::ensureString(obj, "name", {}, "Managed Name");
@@ -367,19 +367,21 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
                 files.push_back(file);
             }
 
-            auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
-            for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
-                QString name = it.key();
-                if (name == "minecraft") {
-                    minecraftVersion = Json::requireString(*it, "Minecraft version");
-                } else if (name == "fabric-loader") {
-                    fabricVersion = Json::requireString(*it, "Fabric Loader version");
-                } else if (name == "quilt-loader") {
-                    quiltVersion = Json::requireString(*it, "Quilt Loader version");
-                } else if (name == "forge") {
-                    forgeVersion = Json::requireString(*it, "Forge version");
-                } else {
-                    throw JSONValidationError("Unknown dependency type: " + name);
+            if (set_internal_data) {
+                auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
+                for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
+                    QString name = it.key();
+                    if (name == "minecraft") {
+                        minecraftVersion = Json::requireString(*it, "Minecraft version");
+                    } else if (name == "fabric-loader") {
+                        fabricVersion = Json::requireString(*it, "Fabric Loader version");
+                    } else if (name == "quilt-loader") {
+                        quiltVersion = Json::requireString(*it, "Quilt Loader version");
+                    } else if (name == "forge") {
+                        forgeVersion = Json::requireString(*it, "Forge version");
+                    } else {
+                        throw JSONValidationError("Unknown dependency type: " + name);
+                    }
                 }
             }
         } else {

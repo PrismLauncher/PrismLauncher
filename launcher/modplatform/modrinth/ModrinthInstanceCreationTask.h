@@ -37,7 +37,7 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     bool createInstance() override;
 
    private:
-    bool parseManifest(const QString&, std::vector<Modrinth::File>&, bool set_managed_info = true, bool show_optional_dialog = true);
+    bool parseManifest(const QString&, std::vector<Modrinth::File>&, bool set_internal_data = true, bool show_optional_dialog = true);
 
    private:
     QWidget* m_parent = nullptr;
