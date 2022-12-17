@@ -162,7 +162,7 @@ void ExternalResourcesPage::removeItem()
 
     int count = 0;
     bool folder = false;
-    for (auto i : selection.indexes()) {
+    for (auto& i : selection.indexes()) {
         if (i.column() == 0) {
             count++;
 
@@ -172,23 +172,24 @@ void ExternalResourcesPage::removeItem()
         }
     }
 
-    bool enough = count > 1;
+    QString text;
+    bool multiple = count > 1;
 
-    if (enough || folder) {
-        QString text;
-        if (enough)
-            text = tr("About to remove: %1 items\n"
-                      "This may be permanent and they will be gone from the folder.\n\n"
-                      "Are you sure?")
-                       .arg(count);
-        else
-            text = tr("About to remove: %1 (folder)\n"
-                      "This may be permanent and it will be gone from the parent folder.\n\n"
-                      "Are you sure?")
-                       .arg(m_model->at(selection.indexes().at(0).row()).fileinfo().fileName());
+    if (multiple) {
+        text = tr("About to remove: %1 items\n"
+                  "This may be permanent and they will be gone from the folder.\n\n"
+                  "Are you sure?")
+                   .arg(count);
+    } else if (folder) {
+        text = tr("About to remove: %1 (folder)\n"
+                  "This may be permanent and it will be gone from the parent folder.\n\n"
+                  "Are you sure?")
+                   .arg(m_model->at(selection.indexes().at(0).row()).fileinfo().fileName());
+    }
 
-        auto response = CustomMessageBox::selectable(this, tr("CAREFUL!"), text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No,
-                                                     QMessageBox::No)
+    if (!text.isEmpty()) {
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"), text, QMessageBox::Warning,
+                                                     QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
         if (response != QMessageBox::Yes)

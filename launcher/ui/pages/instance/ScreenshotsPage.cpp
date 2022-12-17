@@ -526,7 +526,7 @@ void ScreenshotsPage::on_actionDelete_triggered()
                    .arg(count);
 
     auto response =
-        CustomMessageBox::selectable(this, tr("CAREFUL!"), text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No)->exec();
+        CustomMessageBox::selectable(this, tr("Confirm Deletion"), text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No)->exec();
 
     if (response != QMessageBox::Yes)
         return;

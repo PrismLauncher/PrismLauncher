@@ -64,13 +64,12 @@ QString GuiUtil::uploadPaste(const QString &name, const QString &text, QWidget *
             baseUrl = pasteCustomAPIBaseSetting;
 
         if (baseUrl.isValid()) {
-            auto response = CustomMessageBox::selectable(parentWidget, "Confirm Upload",
+            auto response = CustomMessageBox::selectable(parentWidget, QObject::tr("Confirm Upload"),
                                                          QObject::tr("About to upload: %1\n"
                                                                      "Uploading to: %2\n"
                                                                      "You should double-check for personal information.\n\n"
                                                                      "Are you sure?")
-                                                             .arg(name)
-                                                             .arg(baseUrl.host()),
+                                                             .arg(name, baseUrl.host()),
                                                          QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                                 ->exec();
 

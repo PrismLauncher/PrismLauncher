@@ -194,7 +194,7 @@ void WorldListPage::on_actionRemove_triggered()
     if(!proxiedIndex.isValid())
         return;
 
-    auto result = CustomMessageBox::selectable(this, tr("CAREFUL!"),
+    auto result = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
                                                tr("About to delete: %1\n"
                                                   "The world may be gone forever (A LONG TIME).\n\n"
                                                   "Are you sure?")

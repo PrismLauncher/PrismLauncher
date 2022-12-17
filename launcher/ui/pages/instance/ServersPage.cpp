@@ -801,7 +801,7 @@ void ServersPage::on_actionAdd_triggered()
 
 void ServersPage::on_actionRemove_triggered()
 {
-    auto response = CustomMessageBox::selectable(this, tr("CAREFUL!"),
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
                                                  tr("About to remove: %1\n"
                                                     "This is permanent and the server will be gone from your list forever (A LONG TIME).\n\n"
                                                     "Are you sure?")

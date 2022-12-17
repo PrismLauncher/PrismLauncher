@@ -2094,7 +2094,7 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
     auto id = m_selectedInstance->id();
 
-    auto response = CustomMessageBox::selectable(this, tr("CAREFUL!"),
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
                                                  tr("About to delete: %1\n"
                                                     "This may be permanent and will completely delete the instance.\n\n"
                                                     "Are you sure?")

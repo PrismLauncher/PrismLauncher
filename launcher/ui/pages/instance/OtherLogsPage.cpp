@@ -220,7 +220,7 @@ void OtherLogsPage::on_btnDelete_clicked()
         setControlsEnabled(false);
         return;
     }
-    if (QMessageBox::question(this, tr("CAREFUL!"),
+    if (QMessageBox::question(this, tr("Confirm Deletion"),
                               tr("About to delete: %1\n"
                                  "This may be permanent and it will be gone from the logs folder.\n\n"
                                  "Are you sure?")
@@ -252,7 +252,7 @@ void OtherLogsPage::on_btnClean_clicked()
         return;
     }
     QMessageBox *messageBox = new QMessageBox(this);
-    messageBox->setWindowTitle(tr("CAREFUL!"));
+    messageBox->setWindowTitle(tr("Confirm Cleanup"));
     if(toDelete.size() > 5)
     {
         messageBox->setText(tr("Are you sure you want to delete all log files?"));

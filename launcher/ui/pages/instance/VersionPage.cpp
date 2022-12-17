@@ -326,7 +326,7 @@ void VersionPage::on_actionRemove_triggered()
     auto component = m_profile->getComponent(index);
     if (component->isCustom())
     {
-        auto response = CustomMessageBox::selectable(this, tr("CAREFUL!"),
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
                                                      tr("About to remove: %1\n"
                                                         "This is permanent and will completely remove the custom component.\n\n"
                                                         "Are you sure?")
@@ -725,7 +725,7 @@ void VersionPage::on_actionRevert_triggered()
     }
     auto component = m_profile->getComponent(version);
 
-    auto response = CustomMessageBox::selectable(this, tr("CAREFUL!"),
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Reversion"),
                                                  tr("About to revert: %1\n"
                                                     "This is permanent and will completely revert your customizations.\n\n"
                                                     "Are you sure?")
