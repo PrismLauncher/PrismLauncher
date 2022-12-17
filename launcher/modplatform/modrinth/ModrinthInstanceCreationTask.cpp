@@ -202,14 +202,14 @@ bool ModrinthCreationTask::createInstance()
 
     auto components = instance.getPackProfile();
     components->buildingFromScratch();
-    components->setComponentVersion("net.minecraft", minecraftVersion, true);
+    components->setComponentVersion("net.minecraft", m_minecraft_version, true);
 
-    if (!fabricVersion.isEmpty())
-        components->setComponentVersion("net.fabricmc.fabric-loader", fabricVersion);
-    if (!quiltVersion.isEmpty())
-        components->setComponentVersion("org.quiltmc.quilt-loader", quiltVersion);
-    if (!forgeVersion.isEmpty())
-        components->setComponentVersion("net.minecraftforge", forgeVersion);
+    if (!m_fabric_version.isEmpty())
+        components->setComponentVersion("net.fabricmc.fabric-loader", m_fabric_version);
+    if (!m_quilt_version.isEmpty())
+        components->setComponentVersion("org.quiltmc.quilt-loader", m_quilt_version);
+    if (!m_forge_version.isEmpty())
+        components->setComponentVersion("net.minecraftforge", m_forge_version);
 
     if (m_instIcon != "default") {
         instance.setIconKey(m_instIcon);
@@ -372,13 +372,13 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
                 for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
                     QString name = it.key();
                     if (name == "minecraft") {
-                        minecraftVersion = Json::requireString(*it, "Minecraft version");
+                        m_minecraft_version = Json::requireString(*it, "Minecraft version");
                     } else if (name == "fabric-loader") {
-                        fabricVersion = Json::requireString(*it, "Fabric Loader version");
+                        m_fabric_version = Json::requireString(*it, "Fabric Loader version");
                     } else if (name == "quilt-loader") {
-                        quiltVersion = Json::requireString(*it, "Quilt Loader version");
+                        m_quilt_version = Json::requireString(*it, "Quilt Loader version");
                     } else if (name == "forge") {
-                        forgeVersion = Json::requireString(*it, "Forge version");
+                        m_forge_version = Json::requireString(*it, "Forge version");
                     } else {
                         throw JSONValidationError("Unknown dependency type: " + name);
                     }
