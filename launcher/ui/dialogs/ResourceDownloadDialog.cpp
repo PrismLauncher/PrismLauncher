@@ -1,3 +1,22 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "ResourceDownloadDialog.h"
 
 #include <QPushButton>
@@ -5,8 +24,15 @@
 #include "Application.h"
 #include "ResourceDownloadTask.h"
 
+#include "minecraft/mod/ModFolderModel.h"
+
 #include "ui/dialogs/ReviewMessageBox.h"
+
 #include "ui/pages/modplatform/ResourcePage.h"
+
+#include "ui/pages/modplatform/flame/FlameResourcePages.h"
+#include "ui/pages/modplatform/modrinth/ModrinthResourcePages.h"
+
 #include "ui/widgets/PageContainer.h"
 
 namespace ResourceDownload {
@@ -39,6 +65,22 @@ ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, const std::share
 
     setWindowModality(Qt::WindowModal);
     setWindowTitle(dialogTitle());
+}
+
+void ResourceDownloadDialog::accept()
+{
+    if (!geometrySaveKey().isEmpty())
+        APPLICATION->settings()->set(geometrySaveKey(), saveGeometry().toBase64());
+
+    QDialog::accept();
+}
+
+void ResourceDownloadDialog::reject()
+{
+    if (!geometrySaveKey().isEmpty())
+        APPLICATION->settings()->set(geometrySaveKey(), saveGeometry().toBase64());
+
+    QDialog::reject();
 }
 
 // NOTE: We can't have this in the ctor because PageContainer calls a virtual function, and so
@@ -151,6 +193,31 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
 
     // Same effect as having a global search bar
     m_selectedPage->setSearchTerm(prev_page->getSearchTerm());
+}
+
+
+
+ModDownloadDialog::ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModFolderModel>& mods, BaseInstance* instance)
+    : ResourceDownloadDialog(parent, mods), m_instance(instance)
+{
+    initializeContainer();
+    connectButtons();
+
+    if (!geometrySaveKey().isEmpty())
+        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toByteArray()));
+}
+
+QList<BasePage*> ModDownloadDialog::getPages()
+{
+    QList<BasePage*> pages;
+
+    pages.append(ModrinthModPage::create(this, *m_instance));
+    if (APPLICATION->capabilities() & Application::SupportsFlame)
+        pages.append(FlameModPage::create(this, *m_instance));
+
+    m_selectedPage = dynamic_cast<ModPage*>(pages[0]);
+
+    return pages;
 }
 
 }  // namespace ResourceDownload

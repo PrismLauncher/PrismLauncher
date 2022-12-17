@@ -38,7 +38,7 @@
 #include "ui_ResourcePage.h"
 
 #include "FlameResourceModels.h"
-#include "ui/dialogs/ModDownloadDialog.h"
+#include "ui/dialogs/ResourceDownloadDialog.h"
 
 namespace ResourceDownload {
 

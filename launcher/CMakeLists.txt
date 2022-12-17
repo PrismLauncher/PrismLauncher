@@ -876,8 +876,6 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/SkinUploadDialog.h
     ui/dialogs/ResourceDownloadDialog.cpp
     ui/dialogs/ResourceDownloadDialog.h
-    ui/dialogs/ModDownloadDialog.cpp
-    ui/dialogs/ModDownloadDialog.h
     ui/dialogs/ScrollMessageBox.cpp
     ui/dialogs/ScrollMessageBox.h
     ui/dialogs/BlockedModsDialog.cpp

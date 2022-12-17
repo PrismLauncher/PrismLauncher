@@ -38,7 +38,7 @@
 
 #include "modplatform/modrinth/ModrinthAPI.h"
 
-#include "ui/dialogs/ModDownloadDialog.h"
+#include "ui/dialogs/ResourceDownloadDialog.h"
 
 #include "ui/pages/modplatform/modrinth/ModrinthResourceModels.h"
 
