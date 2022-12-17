@@ -49,8 +49,8 @@
 
 #include "ui/GuiUtil.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/ModDownloadDialog.h"
 #include "ui/dialogs/ModUpdateDialog.h"
+#include "ui/dialogs/ResourceDownloadDialog.h"
 
 #include "DesktopServices.h"
 

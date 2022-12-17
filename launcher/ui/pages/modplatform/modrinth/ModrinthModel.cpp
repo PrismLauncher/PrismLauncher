@@ -40,7 +40,6 @@
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "ui/dialogs/ModDownloadDialog.h"
 #include "ui/widgets/ProjectItem.h"
 
 #include <QMessageBox>

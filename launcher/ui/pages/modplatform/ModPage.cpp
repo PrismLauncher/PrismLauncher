@@ -49,7 +49,7 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
-#include "ui/dialogs/ModDownloadDialog.h"
+#include "ui/dialogs/ResourceDownloadDialog.h"
 
 #include "ui/pages/modplatform/ModModel.h"
 
