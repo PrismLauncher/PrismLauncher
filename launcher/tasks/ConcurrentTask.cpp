@@ -28,15 +28,12 @@ auto ConcurrentTask::getStepTotalProgress() const -> qint64
 void ConcurrentTask::addTask(Task::Ptr task)
 {
     m_queue.append(task);
-    m_total_size += 1;
 }
 
 void ConcurrentTask::executeTask()
 {
-    m_total_size = m_queue.size();
-
     // Start the least amount of tasks needed, but at least one
-    int num_starts = std::max(1, std::min(m_total_max_size, m_total_size));
+    int num_starts = qMax(1, qMin(m_total_max_size, m_queue.size()));
     for (int i = 0; i < num_starts; i++) {
         QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
     }
@@ -83,8 +80,6 @@ void ConcurrentTask::clear()
 
     m_progress = 0;
     m_stepProgress = 0;
-
-    m_total_size = 0;
 }
 
 void ConcurrentTask::startNext()
@@ -164,7 +159,7 @@ void ConcurrentTask::subTaskProgress(qint64 current, qint64 total)
 
 void ConcurrentTask::updateState()
 {
-    setProgress(m_done.count(), m_total_size);
+    setProgress(m_done.count(), totalSize());
     setStatus(tr("Executing %1 task(s) (%2 out of %3 are done)")
-                  .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(m_total_size)));
+                  .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
 }
