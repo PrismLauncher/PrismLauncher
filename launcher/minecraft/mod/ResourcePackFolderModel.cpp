@@ -43,7 +43,7 @@
 
 ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir) : ResourceFolderModel(QDir(dir))
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE };
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE };
 }
 
 QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
@@ -58,7 +58,7 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
         case Qt::DisplayRole:
             switch (column) {
                 case NameColumn:
-                    return m_resources[row]->name();
+                    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row]->name();
                 case PackFormatColumn: {
                     auto resource = at(row);
                     auto pack_format = resource->packFormat();
@@ -73,7 +73,7 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
                         .arg(QString::number(pack_format), version_bounds.first.toString(), version_bounds.second.toString());
                 }
                 case DateColumn:
-                    return m_resources[row]->dateTimeChanged();
+                    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row]->dateTimeChanged();
 
                 default:
                     return {};
@@ -84,7 +84,7 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
                 //: The string being explained by this is in the format: ID (Lower version - Upper version)
                 return tr("The resource pack format ID, as well as the Minecraft versions it was designed for.");
             }
-            return m_resources[row]->internal_id();
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row]->internal_id();
         }
         case Qt::CheckStateRole:
             switch (column) {
@@ -142,10 +142,10 @@ int ResourcePackFolderModel::columnCount(const QModelIndex& parent) const
 
 Task* ResourcePackFolderModel::createUpdateTask()
 {
-    return new BasicFolderLoadTask(m_dir, [](QFileInfo const& entry) { return new ResourcePack(entry); });
+    return new BasicFolderLoadTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir, [](QFileInfo const& entry) { return new ResourcePack(entry); });
 }
 
 Task* ResourcePackFolderModel::createParseTask(Resource& resource)
 {
-    return new LocalResourcePackParseTask(m_next_resolution_ticket, static_cast<ResourcePack&>(resource));
+    return new LocalResourcePackParseTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_next_resolution_ticket, static_cast<ResourcePack&>(resource));
 }

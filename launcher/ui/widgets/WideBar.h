@@ -46,9 +46,9 @@ class WideBar : public QToolBar {
     [[nodiscard]] bool checkHash(QByteArray const&) const;
 
    private:
-    QList<BarEntry> m_entries;
+    QList<BarEntry> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries;
 
     // Menu to toggle visibility from buttons in the bar
-    std::unique_ptr<QMenu> m_bar_menu = nullptr;
-    enum class MenuState { Fresh, Dirty } m_menu_state = MenuState::Dirty;
+    std::unique_ptr<QMenu> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar_menu = nullptr;
+    enum class MenuState { Fresh, Dirty } hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_menu_state = MenuState::Dirty;
 };

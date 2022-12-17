@@ -42,37 +42,37 @@
 
 void ScanModFolders::executeTask()
 {
-    auto m_inst = std::dynamic_pointer_cast<MinecraftInstance>(m_parent->instance());
+    auto hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst = std::dynamic_pointer_cast<MinecraftInstance>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance());
 
-    auto loaders = m_inst->loaderModList();
+    auto loaders = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->loaderModList();
     connect(loaders.get(), &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone);
     if(!loaders->update()) {
-        m_modsDone = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modsDone = true;
     }
 
-    auto cores = m_inst->coreModList();
+    auto cores = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->coreModList();
     connect(cores.get(), &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone);
     if(!cores->update()) {
-        m_coreModsDone = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_coreModsDone = true;
     }
     checkDone();
 }
 
 void ScanModFolders::modsDone()
 {
-    m_modsDone = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modsDone = true;
     checkDone();
 }
 
 void ScanModFolders::coreModsDone()
 {
-    m_coreModsDone = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_coreModsDone = true;
     checkDone();
 }
 
 void ScanModFolders::checkDone()
 {
-    if(m_modsDone && m_coreModsDone) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modsDone && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_coreModsDone) {
         emitSucceeded();
     }
 }

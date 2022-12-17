@@ -16,7 +16,7 @@ VersionSelectWidget::VersionSelectWidget(QWidget* parent)
     verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
     verticalLayout->setContentsMargins(0, 0, 0, 0);
 
-    m_proxyModel = new VersionProxyModel(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel = new VersionProxyModel(this);
 
     listView = new VersionListView(this);
     listView->setObjectName(QStringLiteral("listView"));
@@ -27,7 +27,7 @@ VersionSelectWidget::VersionSelectWidget(QWidget* parent)
     listView->setWordWrap(true);
     listView->header()->setCascadingSectionResizes(true);
     listView->header()->setStretchLastSection(false);
-    listView->setModel(m_proxyModel);
+    listView->setModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel);
     verticalLayout->addWidget(listView);
 
     sneakyProgressBar = new QProgressBar(this);
@@ -42,8 +42,8 @@ VersionSelectWidget::VersionSelectWidget(QWidget* parent)
 
 void VersionSelectWidget::setCurrentVersion(const QString& version)
 {
-    m_currentVersion = version;
-    m_proxyModel->setCurrentVersion(version);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersion = version;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->setCurrentVersion(version);
 }
 
 void VersionSelectWidget::setEmptyString(QString emptyString)
@@ -74,18 +74,18 @@ void VersionSelectWidget::setResizeOn(int column)
 
 void VersionSelectWidget::initialize(BaseVersionList *vlist)
 {
-    m_vlist = vlist;
-    m_proxyModel->setSourceModel(vlist);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist = vlist;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->setSourceModel(vlist);
     listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     listView->header()->setSectionResizeMode(resizeOnColumn, QHeaderView::Stretch);
 
-    if (!m_vlist->isLoaded())
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist->isLoaded())
     {
         loadList();
     }
     else
     {
-        if (m_proxyModel->rowCount() == 0)
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->rowCount() == 0)
         {
             listView->setEmptyMode(VersionListView::String);
         }
@@ -100,7 +100,7 @@ void VersionSelectWidget::closeEvent(QCloseEvent * event)
 
 void VersionSelectWidget::loadList()
 {
-    auto newTask = m_vlist->getLoadTask();
+    auto newTask = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist->getLoadTask();
     if (!newTask)
     {
         return;
@@ -118,7 +118,7 @@ void VersionSelectWidget::loadList()
 
 void VersionSelectWidget::onTaskSucceeded()
 {
-    if (m_proxyModel->rowCount() == 0)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->rowCount() == 0)
     {
         listView->setEmptyMode(VersionListView::String);
     }
@@ -141,7 +141,7 @@ void VersionSelectWidget::changeProgress(qint64 current, qint64 total)
 
 void VersionSelectWidget::currentRowChanged(const QModelIndex& current, const QModelIndex&)
 {
-    auto variant = m_proxyModel->data(current, BaseVersionList::VersionPointerRole);
+    auto variant = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->data(current, BaseVersionList::VersionPointerRole);
     emit selectedVersionChanged(variant.value<BaseVersion::Ptr>());
 }
 
@@ -157,11 +157,11 @@ void VersionSelectWidget::preselect()
 
 void VersionSelectWidget::selectCurrent()
 {
-    if(m_currentVersion.isEmpty())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersion.isEmpty())
     {
         return;
     }
-    auto idx = m_proxyModel->getVersion(m_currentVersion);
+    auto idx = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->getVersion(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersion);
     if(idx.isValid())
     {
         preselectedAlready = true;
@@ -172,7 +172,7 @@ void VersionSelectWidget::selectCurrent()
 
 void VersionSelectWidget::selectRecommended()
 {
-    auto idx = m_proxyModel->getRecommended();
+    auto idx = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->getRecommended();
     if(idx.isValid())
     {
         preselectedAlready = true;
@@ -183,27 +183,27 @@ void VersionSelectWidget::selectRecommended()
 
 bool VersionSelectWidget::hasVersions() const
 {
-    return m_proxyModel->rowCount(QModelIndex()) != 0;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->rowCount(QModelIndex()) != 0;
 }
 
 BaseVersion::Ptr VersionSelectWidget::selectedVersion() const
 {
     auto currentIndex = listView->selectionModel()->currentIndex();
-    auto variant = m_proxyModel->data(currentIndex, BaseVersionList::VersionPointerRole);
+    auto variant = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->data(currentIndex, BaseVersionList::VersionPointerRole);
     return variant.value<BaseVersion::Ptr>();
 }
 
 void VersionSelectWidget::setExactFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-    m_proxyModel->setFilter(role, new ExactFilter(filter));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->setFilter(role, new ExactFilter(filter));
 }
 
 void VersionSelectWidget::setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-    m_proxyModel->setFilter(role, new ContainsFilter(filter));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->setFilter(role, new ContainsFilter(filter));
 }
 
 void VersionSelectWidget::setFilter(BaseVersionList::ModelRoles role, Filter *filter)
 {
-    m_proxyModel->setFilter(role, filter);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->setFilter(role, filter);
 }

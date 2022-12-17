@@ -84,8 +84,8 @@ private slots:
 
 private:
     Ui::NewInstanceDialog *ui = nullptr;
-    PageContainer * m_container = nullptr;
-    QDialogButtonBox * m_buttons = nullptr;
+    PageContainer * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container = nullptr;
+    QDialogButtonBox * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons = nullptr;
 
     QString InstIconKey;
     ImportPage *importPage = nullptr;

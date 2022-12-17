@@ -52,9 +52,9 @@ namespace LegacyFTB {
 
 PackInstallTask::PackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network, Modpack pack, QString version)
 {
-    m_pack = pack;
-    m_version = version;
-    m_network = network;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack = pack;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = version;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network = network;
 }
 
 void PackInstallTask::executeTask()
@@ -64,14 +64,14 @@ void PackInstallTask::executeTask()
 
 void PackInstallTask::downloadPack()
 {
-    setStatus(tr("Downloading zip for %1").arg(m_pack.name));
+    setStatus(tr("Downloading zip for %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.name));
     setAbortable(false);
 
-    archivePath = QString("%1/%2/%3").arg(m_pack.dir, m_version.replace(".", "_"), m_pack.file);
+    archivePath = QString("%1/%2/%3").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.dir, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.replace(".", "_"), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.file);
 
-    netJobContainer = new NetJob("Download FTB Pack", m_network);
+    netJobContainer = new NetJob("Download FTB Pack", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network);
     QString url;
-    if (m_pack.type == PackType::Private) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.type == PackType::Private) {
         url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "privatepacks/%1").arg(archivePath);
     } else {
         url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "modpacks/%1").arg(archivePath);
@@ -102,7 +102,7 @@ void PackInstallTask::onDownloadFailed(QString reason)
 void PackInstallTask::onDownloadProgress(qint64 current, qint64 total)
 {
     progress(current, total * 4);
-    setStatus(tr("Downloading zip for %1 (%2%)").arg(m_pack.name).arg(current / 10));
+    setStatus(tr("Downloading zip for %1 (%2%)").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.name).arg(current / 10));
 }
 
 void PackInstallTask::onDownloadAborted()
@@ -116,23 +116,23 @@ void PackInstallTask::unzip()
     setAbortable(false);
     progress(2, 4);
 
-    QDir extractDir(m_stagingPath);
+    QDir extractDir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath);
 
-    m_packZip.reset(new QuaZip(archivePath));
-    if(!m_packZip->open(QuaZip::mdUnzip))
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_packZip.reset(new QuaZip(archivePath));
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_packZip->open(QuaZip::mdUnzip))
     {
         emitFailed(tr("Failed to open modpack file %1!").arg(archivePath));
         return;
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), QOverload<QString, QString>::of(MMCZip::extractDir), archivePath, extractDir.absolutePath() + "/unzip");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), QOverload<QString, QString>::of(MMCZip::extractDir), archivePath, extractDir.absolutePath() + "/unzip");
 #else
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/unzip");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/unzip");
 #endif
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onUnzipFinished);
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &PackInstallTask::onUnzipCanceled);
-    m_extractFutureWatcher.setFuture(m_extractFuture);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onUnzipFinished);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &PackInstallTask::onUnzipCanceled);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher.setFuture(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture);
 }
 
 void PackInstallTask::onUnzipFinished()
@@ -149,31 +149,31 @@ void PackInstallTask::install()
 {
     setStatus(tr("Installing modpack"));
     progress(3, 4);
-    QDir unzipMcDir(m_stagingPath + "/unzip/minecraft");
+    QDir unzipMcDir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath + "/unzip/minecraft");
     if(unzipMcDir.exists())
     {
         //ok, found minecraft dir, move contents to instance dir
-        if(!QDir().rename(m_stagingPath + "/unzip/minecraft", m_stagingPath + "/.minecraft"))
+        if(!QDir().rename(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath + "/unzip/minecraft", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath + "/.minecraft"))
         {
             emitFailed(tr("Failed to move unzipped Minecraft!"));
             return;
         }
     }
 
-    QString instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
+    QString instanceConfigPath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(instanceConfigPath);
     instanceSettings->suspendSave();
 
-    MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
+    MinecraftInstance instance(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettings, instanceSettings, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath);
     auto components = instance.getPackProfile();
     components->buildingFromScratch();
-    components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
+    components->setComponentVersion("net.minecraft", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.mcVersion, true);
 
     bool fallback = true;
 
     //handle different versions
-    QFile packJson(m_stagingPath + "/.minecraft/pack.json");
-    QDir jarmodDir = QDir(m_stagingPath + "/unzip/instMods");
+    QFile packJson(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath + "/.minecraft/pack.json");
+    QDir jarmodDir = QDir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath + "/unzip/instMods");
     if(packJson.exists())
     {
         packJson.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -193,7 +193,7 @@ void PackInstallTask::install()
 
             GradleSpecifier forgeVersion(nameValue);
 
-            components->setComponentVersion("net.minecraftforge", forgeVersion.version().replace(m_pack.mcVersion, "").replace("-", ""));
+            components->setComponentVersion("net.minecraftforge", forgeVersion.version().replace(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.mcVersion, "").replace("-", ""));
             packJson.remove();
             fallback = false;
             break;
@@ -217,7 +217,7 @@ void PackInstallTask::install()
     }
 
     //just nuke unzip directory, it s not needed anymore
-    FS::deletePath(m_stagingPath + "/unzip");
+    FS::deletePath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath + "/unzip");
 
     if(fallback)
     {
@@ -231,11 +231,11 @@ void PackInstallTask::install()
     progress(4, 4);
 
     instance.setName(name());
-    if(m_instIcon == "default")
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instIcon == "default")
     {
-        m_instIcon = "ftb_logo";
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instIcon = "ftb_logo";
     }
-    instance.setIconKey(m_instIcon);
+    instance.setIconKey(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instIcon);
     instanceSettings->resumeSave();
 
     emitSucceeded();

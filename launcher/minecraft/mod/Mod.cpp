@@ -44,28 +44,28 @@
 #include "MetadataHandler.h"
 #include "Version.h"
 
-Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
+Mod::Mod(const QFileInfo& file) : Resource(file), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_details()
 {
-    m_enabled = (file.suffix() != "disabled");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_enabled = (file.suffix() != "disabled");
 }
 
 Mod::Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata)
     : Mod(mods_dir.absoluteFilePath(metadata.filename))
 {
-    m_name = metadata.name;
-    m_local_details.metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = metadata.name;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_details.metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
 }
 
 void Mod::setStatus(ModStatus status)
 {
-    m_local_details.status = status;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_details.status = status;
 }
 void Mod::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
 {
     if (status() == ModStatus::NoMetadata)
         setStatus(ModStatus::Installed);
 
-    m_local_details.metadata = metadata;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_details.metadata = metadata;
 }
 
 std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
@@ -127,7 +127,7 @@ auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
 
 auto Mod::details() const -> const ModDetails&
 {
-    return m_local_details;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_details;
 }
 
 auto Mod::name() const -> QString
@@ -139,7 +139,7 @@ auto Mod::name() const -> QString
     if (metadata())
         return metadata()->name;
 
-    return m_name;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
 }
 
 auto Mod::version() const -> QString
@@ -169,24 +169,24 @@ auto Mod::status() const -> ModStatus
 
 auto Mod::metadata() -> std::shared_ptr<Metadata::ModStruct>
 {
-    return m_local_details.metadata;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_details.metadata;
 }
 
 auto Mod::metadata() const -> const std::shared_ptr<Metadata::ModStruct>
 {
-    return m_local_details.metadata;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_details.metadata;
 }
 
 void Mod::finishResolvingWithDetails(ModDetails&& details)
 {
-    m_is_resolving = false;
-    m_is_resolved = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_resolving = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_resolved = true;
 
     std::shared_ptr<Metadata::ModStruct> metadata = details.metadata;
     if (details.status == ModStatus::Unknown)
-        details.status = m_local_details.status;
+        details.status = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_details.status;
 
-    m_local_details = std::move(details);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_details = std::move(details);
     if (metadata)
         setMetadata(std::move(metadata));
 }

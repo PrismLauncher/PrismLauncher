@@ -29,8 +29,8 @@ protected slots:
     void modelDestroyed(QObject * model);
 
 protected:
-    QAbstractItemModel *m_model = nullptr;
-    QTextCharFormat *m_defaultFormat = nullptr;
-    bool m_scroll = false;
-    bool m_scrolling = false;
+    QAbstractItemModel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model = nullptr;
+    QTextCharFormat *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultFormat = nullptr;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scroll = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scrolling = false;
 };

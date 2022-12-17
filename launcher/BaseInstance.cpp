@@ -52,51 +52,51 @@
 BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
     : QObject()
 {
-    m_settings = settings;
-    m_global_settings = globalSettings;
-    m_rootDir = rootDir;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings = settings;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_global_settings = globalSettings;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootDir = rootDir;
 
-    m_settings->registerSetting("name", "Unnamed Instance");
-    m_settings->registerSetting("iconKey", "default");
-    m_settings->registerSetting("notes", "");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("name", "Unnamed Instance");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("iconKey", "default");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("notes", "");
 
-    m_settings->registerSetting("lastLaunchTime", 0);
-    m_settings->registerSetting("totalTimePlayed", 0);
-    m_settings->registerSetting("lastTimePlayed", 0);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("lastLaunchTime", 0);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("totalTimePlayed", 0);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("lastTimePlayed", 0);
 
     // Game time override
-    auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
-    m_settings->registerOverride(globalSettings->getSetting("ShowGameTime"), gameTimeOverride);
-    m_settings->registerOverride(globalSettings->getSetting("RecordGameTime"), gameTimeOverride);
+    auto gameTimeOverride = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("OverrideGameTime", false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(globalSettings->getSetting("ShowGameTime"), gameTimeOverride);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(globalSettings->getSetting("RecordGameTime"), gameTimeOverride);
 
     // NOTE: Sometimees InstanceType is already registered, as it was used to identify the type of
     // a locally stored instance
-    if (!m_settings->getSetting("InstanceType"))
-        m_settings->registerSetting("InstanceType", "");
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->getSetting("InstanceType"))
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("InstanceType", "");
 
     // Custom Commands
-    auto commandSetting = m_settings->registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
-    m_settings->registerOverride(globalSettings->getSetting("PreLaunchCommand"), commandSetting);
-    m_settings->registerOverride(globalSettings->getSetting("WrapperCommand"), commandSetting);
-    m_settings->registerOverride(globalSettings->getSetting("PostExitCommand"), commandSetting);
+    auto commandSetting = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(globalSettings->getSetting("PreLaunchCommand"), commandSetting);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(globalSettings->getSetting("WrapperCommand"), commandSetting);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(globalSettings->getSetting("PostExitCommand"), commandSetting);
 
     // Console
-    auto consoleSetting = m_settings->registerSetting("OverrideConsole", false);
-    m_settings->registerOverride(globalSettings->getSetting("ShowConsole"), consoleSetting);
-    m_settings->registerOverride(globalSettings->getSetting("AutoCloseConsole"), consoleSetting);
-    m_settings->registerOverride(globalSettings->getSetting("ShowConsoleOnError"), consoleSetting);
-    m_settings->registerOverride(globalSettings->getSetting("LogPrePostOutput"), consoleSetting);
+    auto consoleSetting = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("OverrideConsole", false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(globalSettings->getSetting("ShowConsole"), consoleSetting);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(globalSettings->getSetting("AutoCloseConsole"), consoleSetting);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(globalSettings->getSetting("ShowConsoleOnError"), consoleSetting);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(globalSettings->getSetting("LogPrePostOutput"), consoleSetting);
 
-    m_settings->registerPassthrough(globalSettings->getSetting("ConsoleMaxLines"), nullptr);
-    m_settings->registerPassthrough(globalSettings->getSetting("ConsoleOverflowStop"), nullptr);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerPassthrough(globalSettings->getSetting("ConsoleMaxLines"), nullptr);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerPassthrough(globalSettings->getSetting("ConsoleOverflowStop"), nullptr);
 
     // Managed Packs
-    m_settings->registerSetting("ManagedPack", false);
-    m_settings->registerSetting("ManagedPackType", "");
-    m_settings->registerSetting("ManagedPackID", "");
-    m_settings->registerSetting("ManagedPackName", "");
-    m_settings->registerSetting("ManagedPackVersionID", "");
-    m_settings->registerSetting("ManagedPackVersionName", "");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ManagedPack", false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ManagedPackType", "");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ManagedPackID", "");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ManagedPackName", "");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ManagedPackVersionID", "");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ManagedPackVersionName", "");
 }
 
 QString BaseInstance::getPreLaunchCommand()
@@ -116,57 +116,57 @@ QString BaseInstance::getPostExitCommand()
 
 bool BaseInstance::isManagedPack() const
 {
-    return m_settings->get("ManagedPack").toBool();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("ManagedPack").toBool();
 }
 
 QString BaseInstance::getManagedPackType() const
 {
-    return m_settings->get("ManagedPackType").toString();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("ManagedPackType").toString();
 }
 
 QString BaseInstance::getManagedPackID() const
 {
-    return m_settings->get("ManagedPackID").toString();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("ManagedPackID").toString();
 }
 
 QString BaseInstance::getManagedPackName() const
 {
-    return m_settings->get("ManagedPackName").toString();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("ManagedPackName").toString();
 }
 
 QString BaseInstance::getManagedPackVersionID() const
 {
-    return m_settings->get("ManagedPackVersionID").toString();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("ManagedPackVersionID").toString();
 }
 
 QString BaseInstance::getManagedPackVersionName() const
 {
-    return m_settings->get("ManagedPackVersionName").toString();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("ManagedPackVersionName").toString();
 }
 
 void BaseInstance::setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version)
 {
-    m_settings->set("ManagedPack", true);
-    m_settings->set("ManagedPackType", type);
-    m_settings->set("ManagedPackID", id);
-    m_settings->set("ManagedPackName", name);
-    m_settings->set("ManagedPackVersionID", versionId);
-    m_settings->set("ManagedPackVersionName", version);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ManagedPack", true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ManagedPackType", type);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ManagedPackID", id);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ManagedPackName", name);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ManagedPackVersionID", versionId);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ManagedPackVersionName", version);
 }
 
 void BaseInstance::copyManagedPack(BaseInstance& other)
 {
-    m_settings->set("ManagedPack", other.isManagedPack());
-    m_settings->set("ManagedPackType", other.getManagedPackType());
-    m_settings->set("ManagedPackID", other.getManagedPackID());
-    m_settings->set("ManagedPackName", other.getManagedPackName());
-    m_settings->set("ManagedPackVersionID", other.getManagedPackVersionID());
-    m_settings->set("ManagedPackVersionName", other.getManagedPackVersionName());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ManagedPack", other.isManagedPack());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ManagedPackType", other.getManagedPackType());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ManagedPackID", other.getManagedPackID());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ManagedPackName", other.getManagedPackName());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ManagedPackVersionID", other.getManagedPackVersionID());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ManagedPackVersionName", other.getManagedPackVersionName());
 }
 
 int BaseInstance::getConsoleMaxLines() const
 {
-    auto lineSetting = m_settings->getSetting("ConsoleMaxLines");
+    auto lineSetting = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->getSetting("ConsoleMaxLines");
     bool conversionOk = false;
     int maxLines = lineSetting->get().toInt(&conversionOk);
     if(!conversionOk)
@@ -179,7 +179,7 @@ int BaseInstance::getConsoleMaxLines() const
 
 bool BaseInstance::shouldStopOnConsoleOverflow() const
 {
-    return m_settings->get("ConsoleOverflowStop").toBool();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("ConsoleOverflowStop").toBool();
 }
 
 void BaseInstance::iconUpdated(QString key)
@@ -201,14 +201,14 @@ void BaseInstance::changeStatus(BaseInstance::Status newStatus)
     Status status = currentStatus();
     if(status != newStatus)
     {
-        m_status = newStatus;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = newStatus;
         emit statusChanged(status, newStatus);
     }
 }
 
 BaseInstance::Status BaseInstance::currentStatus() const
 {
-    return m_status;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status;
 }
 
 QString BaseInstance::id() const
@@ -218,17 +218,17 @@ QString BaseInstance::id() const
 
 bool BaseInstance::isRunning() const
 {
-    return m_isRunning;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isRunning;
 }
 
 void BaseInstance::setRunning(bool running)
 {
-    if(running == m_isRunning)
+    if(running == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isRunning)
         return;
 
-    m_isRunning = running;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isRunning = running;
 
-    if(!m_settings->get("RecordGameTime").toBool())
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("RecordGameTime").toBool())
     {
         emit runningStatusChanged(running);
         return;
@@ -236,15 +236,15 @@ void BaseInstance::setRunning(bool running)
 
     if(running)
     {
-        m_timeStarted = QDateTime::currentDateTime();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_timeStarted = QDateTime::currentDateTime();
     }
     else
     {
         QDateTime timeEnded = QDateTime::currentDateTime();
 
         qint64 current = settings()->get("totalTimePlayed").toLongLong();
-        settings()->set("totalTimePlayed", current + m_timeStarted.secsTo(timeEnded));
-        settings()->set("lastTimePlayed", m_timeStarted.secsTo(timeEnded));
+        settings()->set("totalTimePlayed", current + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_timeStarted.secsTo(timeEnded));
+        settings()->set("lastTimePlayed", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_timeStarted.secsTo(timeEnded));
 
         emit propertiesChanged(this);
     }
@@ -254,23 +254,23 @@ void BaseInstance::setRunning(bool running)
 
 int64_t BaseInstance::totalTimePlayed() const
 {
-    qint64 current = m_settings->get("totalTimePlayed").toLongLong();
-    if(m_isRunning)
+    qint64 current = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("totalTimePlayed").toLongLong();
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isRunning)
     {
         QDateTime timeNow = QDateTime::currentDateTime();
-        return current + m_timeStarted.secsTo(timeNow);
+        return current + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_timeStarted.secsTo(timeNow);
     }
     return current;
 }
 
 int64_t BaseInstance::lastTimePlayed() const
 {
-    if(m_isRunning)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isRunning)
     {
         QDateTime timeNow = QDateTime::currentDateTime();
-        return m_timeStarted.secsTo(timeNow);
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_timeStarted.secsTo(timeNow);
     }
-    return m_settings->get("lastTimePlayed").toLongLong();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("lastTimePlayed").toLongLong();
 }
 
 void BaseInstance::resetTimePlayed()
@@ -281,19 +281,19 @@ void BaseInstance::resetTimePlayed()
 
 QString BaseInstance::instanceType() const
 {
-    return m_settings->get("InstanceType").toString();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("InstanceType").toString();
 }
 
 QString BaseInstance::instanceRoot() const
 {
-    return m_rootDir;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootDir;
 }
 
 SettingsObjectPtr BaseInstance::settings()
 {
     loadSpecificSettings();
 
-    return m_settings;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings;
 }
 
 bool BaseInstance::canLaunch() const
@@ -303,54 +303,54 @@ bool BaseInstance::canLaunch() const
 
 bool BaseInstance::reloadSettings()
 {
-    return m_settings->reload();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reload();
 }
 
 qint64 BaseInstance::lastLaunch() const
 {
-    return m_settings->get("lastLaunchTime").value<qint64>();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("lastLaunchTime").value<qint64>();
 }
 
 void BaseInstance::setLastLaunch(qint64 val)
 {
     //FIXME: if no change, do not set. setting involves saving a file.
-    m_settings->set("lastLaunchTime", val);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("lastLaunchTime", val);
     emit propertiesChanged(this);
 }
 
 void BaseInstance::setNotes(QString val)
 {
     //FIXME: if no change, do not set. setting involves saving a file.
-    m_settings->set("notes", val);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("notes", val);
 }
 
 QString BaseInstance::notes() const
 {
-    return m_settings->get("notes").toString();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("notes").toString();
 }
 
 void BaseInstance::setIconKey(QString val)
 {
     //FIXME: if no change, do not set. setting involves saving a file.
-    m_settings->set("iconKey", val);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("iconKey", val);
     emit propertiesChanged(this);
 }
 
 QString BaseInstance::iconKey() const
 {
-    return m_settings->get("iconKey").toString();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("iconKey").toString();
 }
 
 void BaseInstance::setName(QString val)
 {
     //FIXME: if no change, do not set. setting involves saving a file.
-    m_settings->set("name", val);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("name", val);
     emit propertiesChanged(this);
 }
 
 QString BaseInstance::name() const
 {
-    return m_settings->get("name").toString();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("name").toString();
 }
 
 QString BaseInstance::windowTitle() const
@@ -366,7 +366,7 @@ QStringList BaseInstance::extraArguments()
 
 shared_qobject_ptr<LaunchTask> BaseInstance::getLaunchTask()
 {
-    return m_launchProcess;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchProcess;
 }
 
 void BaseInstance::updateRuntimeContext()

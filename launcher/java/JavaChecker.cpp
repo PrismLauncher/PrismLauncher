@@ -62,30 +62,30 @@ void JavaChecker::performCheck()
     QStringList args;
 
     process.reset(new QProcess());
-    if(m_args.size())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_args.size())
     {
-        auto extraArgs = Commandline::splitArgs(m_args);
+        auto extraArgs = Commandline::splitArgs(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_args);
         args.append(extraArgs);
     }
-    if(m_minMem != 0)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMem != 0)
     {
-        args << QString("-Xms%1m").arg(m_minMem);
+        args << QString("-Xms%1m").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMem);
     }
-    if(m_maxMem != 0)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMem != 0)
     {
-        args << QString("-Xmx%1m").arg(m_maxMem);
+        args << QString("-Xmx%1m").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMem);
     }
-    if(m_permGen != 64)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGen != 64)
     {
-        args << QString("-XX:PermSize=%1m").arg(m_permGen);
+        args << QString("-XX:PermSize=%1m").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGen);
     }
 
     args.append({"-jar", checkerJar});
     process->setArguments(args);
-    process->setProgram(m_path);
+    process->setProgram(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path);
     process->setProcessChannelMode(QProcess::SeparateChannels);
     process->setProcessEnvironment(CleanEnviroment());
-    qDebug() << "Running java checker: " + m_path + args.join(" ");;
+    qDebug() << "Running java checker: " + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path + args.join(" ");;
 
     connect(process.get(), SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(finished(int, QProcess::ExitStatus)));
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -106,7 +106,7 @@ void JavaChecker::stdoutReady()
     QByteArray data = process->readAllStandardOutput();
     QString added = QString::fromLocal8Bit(data);
     added.remove('\r');
-    m_stdout += added;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stdout += added;
 }
 
 void JavaChecker::stderrReady()
@@ -114,7 +114,7 @@ void JavaChecker::stderrReady()
     QByteArray data = process->readAllStandardError();
     QString added = QString::fromLocal8Bit(data);
     added.remove('\r');
-    m_stderr += added;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stderr += added;
 }
 
 void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
@@ -125,13 +125,13 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 
     JavaCheckResult result;
     {
-        result.path = m_path;
-        result.id = m_id;
+        result.path = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
+        result.id = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id;
     }
-    result.errorLog = m_stderr;
-    result.outLog = m_stdout;
-    qDebug() << "STDOUT" << m_stdout;
-    qWarning() << "STDERR" << m_stderr;
+    result.errorLog = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stderr;
+    result.outLog = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stdout;
+    qDebug() << "STDOUT" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stdout;
+    qWarning() << "STDERR" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stderr;
     qDebug() << "Java checker finished with status " << status << " exit code " << exitcode;
 
     if (status == QProcess::CrashExit || exitcode == 1)
@@ -146,9 +146,9 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     QMap<QString, QString> results;
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    QStringList lines = m_stdout.split("\n", Qt::SkipEmptyParts);
+    QStringList lines = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stdout.split("\n", Qt::SkipEmptyParts);
 #else
-    QStringList lines = m_stdout.split("\n", QString::SkipEmptyParts);
+    QStringList lines = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stdout.split("\n", QString::SkipEmptyParts);
 #endif
     for(QString line : lines)
     {
@@ -208,8 +208,8 @@ void JavaChecker::error(QProcess::ProcessError err)
         killTimer.stop();
         JavaCheckResult result;
         {
-            result.path = m_path;
-            result.id = m_id;
+            result.path = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
+            result.id = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id;
         }
 
         emit checkFinished(result);

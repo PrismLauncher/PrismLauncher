@@ -37,64 +37,64 @@
 
 #include <QDebug>
 
-Task::Task(QObject *parent, bool show_debug) : QObject(parent), m_show_debug(show_debug)
+Task::Task(QObject *parent, bool show_debug) : QObject(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_show_debug(show_debug)
 {
     setAutoDelete(false);
 }
 
 void Task::setStatus(const QString &new_status)
 {
-    if(m_status != new_status)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status != new_status)
     {
-        m_status = new_status;
-        emit status(m_status);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = new_status;
+        emit status(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status);
     }
 }
 
 void Task::setProgress(qint64 current, qint64 total)
 {
-    m_progress = current;
-    m_progressTotal = total;
-    emit progress(m_progress, m_progressTotal);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progress = current;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progressTotal = total;
+    emit progress(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progress, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progressTotal);
 }
 
 void Task::start()
 {
-    switch(m_state)
+    switch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state)
     {
         case State::Inactive:
         {
-            if (m_show_debug)
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_show_debug)
                 qDebug() << "Task" << describe() << "starting for the first time";
             break;
         }
         case State::AbortedByUser:
         {
-            if (m_show_debug)
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_show_debug)
                 qDebug() << "Task" << describe() << "restarting for after being aborted by user";
             break;
         }
         case State::Failed:
         {
-            if (m_show_debug)
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_show_debug)
                 qDebug() << "Task" << describe() << "restarting for after failing at first";
             break;
         }
         case State::Succeeded:
         {
-            if (m_show_debug)
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_show_debug)
                 qDebug() << "Task" << describe() << "restarting for after succeeding at first";
             break;
         }
         case State::Running:
         {
-            if (m_show_debug)
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_show_debug)
                 qWarning() << "The launcher tried to start task" << describe() << "while it was already running!";
             return;
         }
     }
     // NOTE: only fall thorugh to here in end states
-    m_state = State::Running;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::Running;
     emit started();
     executeTask();
 }
@@ -107,8 +107,8 @@ void Task::emitFailed(QString reason)
         qCritical() << "Task" << describe() << "failed while not running!!!!: " << reason;
         return;
     }
-    m_state = State::Failed;
-    m_failReason = reason;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::Failed;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failReason = reason;
     qCritical() << "Task" << describe() << "failed: " << reason;
     emit failed(reason);
     emit finished();
@@ -122,9 +122,9 @@ void Task::emitAborted()
         qCritical() << "Task" << describe() << "aborted while not running!!!!";
         return;
     }
-    m_state = State::AbortedByUser;
-    m_failReason = "Aborted.";
-    if (m_show_debug)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::AbortedByUser;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failReason = "Aborted.";
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_show_debug)
         qDebug() << "Task" << describe() << "aborted.";
     emit aborted();
     emit finished();
@@ -138,8 +138,8 @@ void Task::emitSucceeded()
         qCritical() << "Task" << describe() << "succeeded while not running!!!!";
         return;
     }
-    m_state = State::Succeeded;
-    if (m_show_debug)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::Succeeded;
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_show_debug)
         qDebug() << "Task" << describe() << "succeeded";
     emit succeeded();
     emit finished();
@@ -166,31 +166,31 @@ QString Task::describe()
 
 bool Task::isRunning() const
 {
-    return m_state == State::Running;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state == State::Running;
 }
 
 bool Task::isFinished() const
 {
-    return m_state != State::Running && m_state != State::Inactive;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state != State::Running && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state != State::Inactive;
 }
 
 bool Task::wasSuccessful() const
 {
-    return m_state == State::Succeeded;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state == State::Succeeded;
 }
 
 QString Task::failReason() const
 {
-    return m_failReason;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failReason;
 }
 
 void Task::logWarning(const QString& line)
 {
     qWarning() << line;
-    m_Warnings.append(line);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_Warnings.append(line);
 }
 
 QStringList Task::warnings() const
 {
-    return m_Warnings;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_Warnings;
 }

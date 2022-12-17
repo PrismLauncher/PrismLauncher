@@ -44,8 +44,8 @@ class ThemeManager {
     void setApplicationTheme(const QString& name, bool initial);
 
    private:
-    std::map<QString, std::unique_ptr<ITheme>> m_themes;
-    MainWindow* m_mainWindow;
+    std::map<QString, std::unique_ptr<ITheme>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_themes;
+    MainWindow* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow;
 
     QString AddTheme(std::unique_ptr<ITheme> theme);
     ITheme* GetTheme(QString themeId);

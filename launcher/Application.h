@@ -109,7 +109,7 @@ public:
     bool event(QEvent* event) override;
 
     std::shared_ptr<SettingsObject> settings() const {
-        return m_settings;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings;
     }
 
     qint64 timeSinceStart() const {
@@ -125,7 +125,7 @@ public:
     void setApplicationTheme(const QString& name, bool initial);
 
     shared_qobject_ptr<UpdateChecker> updateChecker() {
-        return m_updateChecker;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateChecker;
     }
 
     std::shared_ptr<TranslationsModel> translations();
@@ -133,27 +133,27 @@ public:
     std::shared_ptr<JavaInstallList> javalist();
 
     std::shared_ptr<InstanceList> instances() const {
-        return m_instances;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances;
     }
 
     std::shared_ptr<IconList> icons() const {
-        return m_icons;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icons;
     }
 
     MCEditTool *mcedit() const {
-        return m_mcedit.get();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mcedit.get();
     }
 
     shared_qobject_ptr<AccountList> accounts() const {
-        return m_accounts;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts;
     }
 
     Status status() const {
-        return m_status;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status;
     }
 
     const QMap<QString, std::shared_ptr<BaseProfilerFactory>> &profilers() const {
-        return m_profilers;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilers;
     }
 
     void updateProxySettings(QString proxyTypeStr, QString addr, int port, QString user, QString password);
@@ -179,11 +179,11 @@ public:
 
     /// this is the root of the 'installation'. Used for automatic updates
     const QString &root() {
-        return m_rootPath;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootPath;
     }
 
     const Capabilities capabilities() {
-        return m_capabilities;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_capabilities;
     }
 
     /*!
@@ -235,7 +235,7 @@ private:
     bool createSetupWizard();
     void performMainStartupAction();
 
-    // sets the fatal error message and m_status to Failed.
+    // sets the fatal error message and hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status to Failed.
     void showFatalErrorMessage(const QString & title, const QString & content);
 
 private:
@@ -246,32 +246,32 @@ private:
 private:
     QDateTime startTime;
 
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    shared_qobject_ptr<QNetworkAccessManager> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network;
 
-    shared_qobject_ptr<UpdateChecker> m_updateChecker;
-    shared_qobject_ptr<AccountList> m_accounts;
+    shared_qobject_ptr<UpdateChecker> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateChecker;
+    shared_qobject_ptr<AccountList> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts;
 
-    shared_qobject_ptr<HttpMetaCache> m_metacache;
-    shared_qobject_ptr<Meta::Index> m_metadataIndex;
+    shared_qobject_ptr<HttpMetaCache> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache;
+    shared_qobject_ptr<Meta::Index> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metadataIndex;
 
-    std::shared_ptr<SettingsObject> m_settings;
-    std::shared_ptr<InstanceList> m_instances;
-    std::shared_ptr<IconList> m_icons;
-    std::shared_ptr<JavaInstallList> m_javalist;
-    std::shared_ptr<TranslationsModel> m_translations;
-    std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
-    std::unique_ptr<MCEditTool> m_mcedit;
-    QSet<QString> m_features;
-    std::unique_ptr<ThemeManager> m_themeManager;
+    std::shared_ptr<SettingsObject> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings;
+    std::shared_ptr<InstanceList> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances;
+    std::shared_ptr<IconList> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icons;
+    std::shared_ptr<JavaInstallList> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javalist;
+    std::shared_ptr<TranslationsModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_translations;
+    std::shared_ptr<GenericPageProvider> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider;
+    std::unique_ptr<MCEditTool> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mcedit;
+    QSet<QString> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_features;
+    std::unique_ptr<ThemeManager> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_themeManager;
 
-    QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
+    QMap<QString, std::shared_ptr<BaseProfilerFactory>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilers;
 
-    QString m_rootPath;
-    Status m_status = Application::StartingUp;
-    Capabilities m_capabilities;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootPath;
+    Status hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = Application::StartingUp;
+    Capabilities hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_capabilities;
 
 #ifdef Q_OS_MACOS
-    Qt::ApplicationState m_prevAppState = Qt::ApplicationInactive;
+    Qt::ApplicationState hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prevAppState = Qt::ApplicationInactive;
 #endif
 
 #if defined Q_OS_WIN32
@@ -284,27 +284,27 @@ private:
         InstanceWindow * window = nullptr;
         shared_qobject_ptr<LaunchController> controller;
     };
-    std::map<QString, InstanceXtras> m_instanceExtras;
+    std::map<QString, InstanceXtras> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceExtras;
 
     // main state variables
-    size_t m_openWindows = 0;
-    size_t m_runningInstances = 0;
-    bool m_updateRunning = false;
+    size_t hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_openWindows = 0;
+    size_t hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_runningInstances = 0;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateRunning = false;
 
     // main window, if any
-    MainWindow * m_mainWindow = nullptr;
+    MainWindow * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow = nullptr;
 
     // peer launcher instance connector - used to implement single instance launcher and signalling
-    LocalPeer * m_peerInstance = nullptr;
+    LocalPeer * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_peerInstance = nullptr;
 
-    SetupWizard * m_setupWizard = nullptr;
+    SetupWizard * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_setupWizard = nullptr;
 public:
-    QString m_instanceIdToLaunch;
-    QString m_serverToJoin;
-    QString m_profileToUse;
-    bool m_liveCheck = false;
-    QUrl m_zipToImport;
-    QString m_instanceIdToShowWindowOf;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToLaunch;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profileToUse;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_liveCheck = false;
+    QUrl hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_zipToImport;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
 };
 

@@ -42,8 +42,8 @@
 
 NewsChecker::NewsChecker(shared_qobject_ptr<QNetworkAccessManager> network, const QString& feedUrl)
 {
-    m_network = network;
-    m_feedUrl = feedUrl;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network = network;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_feedUrl = feedUrl;
 }
 
 void NewsChecker::reloadNews()
@@ -57,11 +57,11 @@ void NewsChecker::reloadNews()
 
     qDebug() << "Reloading news.";
 
-    NetJob* job = new NetJob("News RSS Feed", m_network);
-    job->addNetAction(Net::Download::makeByteArray(m_feedUrl, &newsData));
+    NetJob* job = new NetJob("News RSS Feed", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network);
+    job->addNetAction(Net::Download::makeByteArray(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_feedUrl, &newsData));
     QObject::connect(job, &NetJob::succeeded, this, &NewsChecker::rssDownloadFinished);
     QObject::connect(job, &NetJob::failed, this, &NewsChecker::rssDownloadFailed);
-    m_newsNetJob.reset(job);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsNetJob.reset(job);
     job->start();
 }
 
@@ -70,7 +70,7 @@ void NewsChecker::rssDownloadFinished()
     // Parse the XML file and process the RSS feed entries.
     qDebug() << "Finished loading RSS feed.";
 
-    m_newsNetJob.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsNetJob.reset();
     QDomDocument doc;
     {
         // Stuff to store error info in.
@@ -91,7 +91,7 @@ void NewsChecker::rssDownloadFinished()
 
     // If the parsing succeeded, read it.
     QDomNodeList items = doc.elementsByTagName("entry");
-    m_newsEntries.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsEntries.clear();
     for (int i = 0; i < items.length(); i++)
     {
         QDomElement element = items.at(i).toElement();
@@ -101,7 +101,7 @@ void NewsChecker::rssDownloadFinished()
         if (NewsEntry::fromXmlElement(element, entry.get(), &errorMsg))
         {
             qDebug() << "Loaded news entry" << entry->title;
-            m_newsEntries.append(entry);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsEntries.append(entry);
         }
         else
         {
@@ -121,32 +121,32 @@ void NewsChecker::rssDownloadFailed(QString reason)
 
 QList<NewsEntryPtr> NewsChecker::getNewsEntries() const
 {
-    return m_newsEntries;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsEntries;
 }
 
 bool NewsChecker::isLoadingNews() const
 {
-    return m_newsNetJob.get() != nullptr;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsNetJob.get() != nullptr;
 }
 
 QString NewsChecker::getLastLoadErrorMsg() const
 {
-    return m_lastLoadError;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lastLoadError;
 }
 
 void NewsChecker::succeed()
 {
-    m_lastLoadError = "";
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lastLoadError = "";
     qDebug() << "News loading succeeded.";
-    m_newsNetJob.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsNetJob.reset();
     emit newsLoaded();
 }
 
 void NewsChecker::fail(const QString& errorMsg)
 {
-    m_lastLoadError = errorMsg;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lastLoadError = errorMsg;
     qDebug() << "Failed to load news:" << errorMsg;
-    m_newsNetJob.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsNetJob.reset();
     emit newsLoadingFailed(errorMsg);
 }
 

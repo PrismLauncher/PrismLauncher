@@ -65,7 +65,7 @@ public:
     virtual void closedImpl() {}
     virtual void setParentContainer(BasePageContainer * container)
     {
-        m_container = container;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container = container;
     };
     virtual void retranslate() { }
 
@@ -73,7 +73,7 @@ public:
     int stackIndex = -1;
     int listIndex = -1;
 protected:
-    BasePageContainer * m_container = nullptr;
+    BasePageContainer * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container = nullptr;
     bool isOpened = false;
 };
 

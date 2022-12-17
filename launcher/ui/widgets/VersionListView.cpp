@@ -43,12 +43,12 @@
 VersionListView::VersionListView(QWidget *parent)
     :QTreeView ( parent )
 {
-    m_emptyString = tr("No versions are currently available.");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyString = tr("No versions are currently available.");
 }
 
 void VersionListView::rowsInserted(const QModelIndex &parent, int start, int end)
 {
-    m_itemCount += end-start+1;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_itemCount += end-start+1;
     updateEmptyViewPort();
     QTreeView::rowsInserted(parent, start, end);
 }
@@ -56,14 +56,14 @@ void VersionListView::rowsInserted(const QModelIndex &parent, int start, int end
 
 void VersionListView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
 {
-    m_itemCount -= end-start+1;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_itemCount -= end-start+1;
     updateEmptyViewPort();
     QTreeView::rowsInserted(parent, start, end);
 }
 
 void VersionListView::setModel(QAbstractItemModel *model)
 {
-    m_itemCount = model->rowCount();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_itemCount = model->rowCount();
     updateEmptyViewPort();
     QTreeView::setModel(model);
 }
@@ -72,10 +72,10 @@ void VersionListView::reset()
 {
     if(model())
     {
-        m_itemCount = model()->rowCount();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_itemCount = model()->rowCount();
     }
     else {
-        m_itemCount = 0;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_itemCount = 0;
     }
     updateEmptyViewPort();
     QTreeView::reset();
@@ -83,19 +83,19 @@ void VersionListView::reset()
 
 void VersionListView::setEmptyString(QString emptyString)
 {
-    m_emptyString = emptyString;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyString = emptyString;
     updateEmptyViewPort();
 }
 
 void VersionListView::setEmptyErrorString(QString emptyErrorString)
 {
-    m_emptyErrorString = emptyErrorString;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyErrorString = emptyErrorString;
     updateEmptyViewPort();
 }
 
 void VersionListView::setEmptyMode(VersionListView::EmptyMode mode)
 {
-    m_emptyMode = mode;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyMode = mode;
     updateEmptyViewPort();
 }
 
@@ -105,7 +105,7 @@ void VersionListView::updateEmptyViewPort()
     setAccessibleDescription(currentEmptyString());
 #endif /* !QT_NO_ACCESSIBILITY */
 
-    if(!m_itemCount)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_itemCount)
     {
         viewport()->update();
     }
@@ -113,7 +113,7 @@ void VersionListView::updateEmptyViewPort()
 
 void VersionListView::paintEvent(QPaintEvent *event)
 {
-    if(m_itemCount)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_itemCount)
     {
         QTreeView::paintEvent(event);
     }
@@ -125,18 +125,18 @@ void VersionListView::paintEvent(QPaintEvent *event)
 
 QString VersionListView::currentEmptyString() const
 {
-    if(m_itemCount) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_itemCount) {
         return QString();
     }
-    switch(m_emptyMode)
+    switch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyMode)
     {
         default:
         case VersionListView::Empty:
             return QString();
         case VersionListView::String:
-            return m_emptyString;
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyString;
         case VersionListView::ErrorString:
-            return m_emptyErrorString;
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyErrorString;
     }
 }
 

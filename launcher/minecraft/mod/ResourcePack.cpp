@@ -22,52 +22,52 @@ static const QMap<int, std::pair<Version, Version>> s_pack_format_versions = {
 
 void ResourcePack::setPackFormat(int new_format_id)
 {
-    QMutexLocker locker(&m_data_lock);
+    QMutexLocker locker(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data_lock);
 
     if (!s_pack_format_versions.contains(new_format_id)) {
         qWarning() << "Pack format '%1' is not a recognized resource pack id!";
     }
 
-    m_pack_format = new_format_id;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_format = new_format_id;
 }
 
 void ResourcePack::setDescription(QString new_description)
 {
-    QMutexLocker locker(&m_data_lock);
+    QMutexLocker locker(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data_lock);
 
-    m_description = new_description;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description = new_description;
 }
 
 void ResourcePack::setImage(QImage new_image)
 {
-    QMutexLocker locker(&m_data_lock);
+    QMutexLocker locker(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data_lock);
 
     Q_ASSERT(!new_image.isNull());
 
-    if (m_pack_image_cache_key.key.isValid())
-        PixmapCache::instance().remove(m_pack_image_cache_key.key);
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.key.isValid())
+        PixmapCache::instance().remove(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.key);
 
-    m_pack_image_cache_key.key = PixmapCache::instance().insert(QPixmap::fromImage(new_image));
-    m_pack_image_cache_key.was_ever_used = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.key = PixmapCache::instance().insert(QPixmap::fromImage(new_image));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.was_ever_used = true;
 
     // This can happen if the pixmap is too big to fit in the cache :c
-    if (!m_pack_image_cache_key.key.isValid()) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.key.isValid()) {
         qWarning() << "Could not insert a image cache entry! Ignoring it.";
-        m_pack_image_cache_key.was_ever_used = false;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.was_ever_used = false;
     }
 }
 
 QPixmap ResourcePack::image(QSize size)
 {
     QPixmap cached_image;
-    if (PixmapCache::instance().find(m_pack_image_cache_key.key, &cached_image)) {
+    if (PixmapCache::instance().find(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.key, &cached_image)) {
         if (size.isNull())
             return cached_image;
         return cached_image.scaled(size);
     }
 
     // No valid image we can get
-    if (!m_pack_image_cache_key.was_ever_used)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.was_ever_used)
         return {};
 
     // Imaged got evicted from the cache. Re-process it and retry.
@@ -77,11 +77,11 @@ QPixmap ResourcePack::image(QSize size)
 
 std::pair<Version, Version> ResourcePack::compatibleVersions() const
 {
-    if (!s_pack_format_versions.contains(m_pack_format)) {
+    if (!s_pack_format_versions.contains(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_format)) {
         return { {}, {} };
     }
 
-    return s_pack_format_versions.constFind(m_pack_format).value();
+    return s_pack_format_versions.constFind(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_format).value();
 }
 
 std::pair<int, bool> ResourcePack::compare(const Resource& other, SortType type) const
@@ -125,5 +125,5 @@ bool ResourcePack::applyFilter(QRegularExpression filter) const
 
 bool ResourcePack::valid() const
 {
-    return m_pack_format != 0;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_format != 0;
 }

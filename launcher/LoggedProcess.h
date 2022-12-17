@@ -89,11 +89,11 @@ private:
     void changeState(LoggedProcess::State state);
 
 private:
-    QTextDecoder m_err_decoder = QTextDecoder(QTextCodec::codecForLocale());
-    QTextDecoder m_out_decoder = QTextDecoder(QTextCodec::codecForLocale());
-    bool m_killed = false;
-    State m_state = NotRunning;
-    int m_exit_code = 0;
-    bool m_is_aborting = false;
-    bool m_is_detachable = false;
+    QTextDecoder hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_err_decoder = QTextDecoder(QTextCodec::codecForLocale());
+    QTextDecoder hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_out_decoder = QTextDecoder(QTextCodec::codecForLocale());
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killed = false;
+    State hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = NotRunning;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_exit_code = 0;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_aborting = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_detachable = false;
 };

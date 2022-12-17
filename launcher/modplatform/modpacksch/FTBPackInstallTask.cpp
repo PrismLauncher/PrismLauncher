@@ -53,7 +53,7 @@
 namespace ModpacksCH {
 
 PackInstallTask::PackInstallTask(Modpack pack, QString version, QWidget* parent)
-    : m_pack(std::move(pack)), m_version_name(std::move(version)), m_parent(parent)
+    : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack(std::move(pack)), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name(std::move(version)), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent(parent)
 {}
 
 bool PackInstallTask::abort()
@@ -63,10 +63,10 @@ bool PackInstallTask::abort()
 
     bool aborted = true;
 
-    if (m_net_job)
-        aborted &= m_net_job->abort();
-    if (m_mod_id_resolver_task)
-        aborted &= m_mod_id_resolver_task->abort();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job)
+        aborted &= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job->abort();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver_task)
+        aborted &= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver_task->abort();
 
     return aborted ? InstanceTask::abort() : false;
 }
@@ -77,11 +77,11 @@ void PackInstallTask::executeTask()
     setAbortable(false);
 
     // Find pack version
-    auto version_it = std::find_if(m_pack.versions.constBegin(), m_pack.versions.constEnd(),
-                                   [this](ModpacksCH::VersionInfo const& a) { return a.name == m_version_name; });
+    auto version_it = std::find_if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.versions.constBegin(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.versions.constEnd(),
+                                   [this](ModpacksCH::VersionInfo const& a) { return a.name == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name; });
 
-    if (version_it == m_pack.versions.constEnd()) {
-        emitFailed(tr("Failed to find pack version %1").arg(m_version_name));
+    if (version_it == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.versions.constEnd()) {
+        emitFailed(tr("Failed to find pack version %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name));
         return;
     }
 
@@ -89,15 +89,15 @@ void PackInstallTask::executeTask()
 
     auto* netJob = new NetJob("ModpacksCH::VersionFetch", APPLICATION->network());
 
-    auto searchUrl = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/%1/%2").arg(m_pack.id).arg(version.id);
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &m_response));
+    auto searchUrl = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/%1/%2").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.id).arg(version.id);
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response));
 
     QObject::connect(netJob, &NetJob::succeeded, this, &PackInstallTask::onManifestDownloadSucceeded);
     QObject::connect(netJob, &NetJob::failed, this, &PackInstallTask::onManifestDownloadFailed);
     QObject::connect(netJob, &NetJob::aborted, this, &PackInstallTask::abort);
     QObject::connect(netJob, &NetJob::progress, this, &PackInstallTask::setProgress);
 
-    m_net_job = netJob;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job = netJob;
 
     setAbortable(true);
     netJob->start();
@@ -105,14 +105,14 @@ void PackInstallTask::executeTask()
 
 void PackInstallTask::onManifestDownloadSucceeded()
 {
-    m_net_job.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job.reset();
 
     QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(m_response, &parse_error);
+    QJsonDocument doc = QJsonDocument::fromJson(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from ModpacksCH at " << parse_error.offset
                    << " reason: " << parse_error.errorString();
-        qWarning() << m_response;
+        qWarning() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response;
         return;
     }
 
@@ -125,7 +125,7 @@ void PackInstallTask::onManifestDownloadSucceeded()
         return;
     }
 
-    m_version = version;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = version;
 
     resolveMods();
 }
@@ -136,12 +136,12 @@ void PackInstallTask::resolveMods()
     setAbortable(false);
     setProgress(0, 100);
 
-    m_file_id_map.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_id_map.clear();
 
     Flame::Manifest manifest;
     int index = 0;
 
-    for (auto const& file : m_version.files) {
+    for (auto const& file : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.files) {
         if (!file.serverOnly && file.url.isEmpty()) {
             if (file.curseforge.file_id <= 0) {
                 emitFailed(tr("Invalid manifest: There's no information available to download the file '%1'!").arg(file.name));
@@ -154,38 +154,38 @@ void PackInstallTask::resolveMods()
             flame_file.hash = file.sha1;
 
             manifest.files.insert(flame_file.fileId, flame_file);
-            m_file_id_map.append(flame_file.fileId);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_id_map.append(flame_file.fileId);
         } else {
-            m_file_id_map.append(-1);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_id_map.append(-1);
         }
 
         index++;
     }
 
-    m_mod_id_resolver_task = new Flame::FileResolvingTask(APPLICATION->network(), manifest);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver_task = new Flame::FileResolvingTask(APPLICATION->network(), manifest);
 
-    connect(m_mod_id_resolver_task.get(), &Flame::FileResolvingTask::succeeded, this, &PackInstallTask::onResolveModsSucceeded);
-    connect(m_mod_id_resolver_task.get(), &Flame::FileResolvingTask::failed, this, &PackInstallTask::onResolveModsFailed);
-    connect(m_mod_id_resolver_task.get(), &Flame::FileResolvingTask::aborted, this, &PackInstallTask::abort);
-    connect(m_mod_id_resolver_task.get(), &Flame::FileResolvingTask::progress, this, &PackInstallTask::setProgress);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver_task.get(), &Flame::FileResolvingTask::succeeded, this, &PackInstallTask::onResolveModsSucceeded);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver_task.get(), &Flame::FileResolvingTask::failed, this, &PackInstallTask::onResolveModsFailed);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver_task.get(), &Flame::FileResolvingTask::aborted, this, &PackInstallTask::abort);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver_task.get(), &Flame::FileResolvingTask::progress, this, &PackInstallTask::setProgress);
 
     setAbortable(true);
 
-    m_mod_id_resolver_task->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver_task->start();
 }
 
 void PackInstallTask::onResolveModsSucceeded()
 {
     auto anyBlocked = false;
 
-    Flame::Manifest results = m_mod_id_resolver_task->getResults();
-    for (int index = 0; index < m_file_id_map.size(); index++) {
-        auto const file_id = m_file_id_map.at(index);
+    Flame::Manifest results = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver_task->getResults();
+    for (int index = 0; index < hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_id_map.size(); index++) {
+        auto const file_id = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_id_map.at(index);
         if (file_id < 0)
             continue;
 
         Flame::File results_file = results.files[file_id];
-        VersionFile& local_file = m_version.files[index];
+        VersionFile& local_file = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.files[index];
 
         // First check for blocked mods
         if (!results_file.resolved || results_file.url.isEmpty()) {
@@ -197,7 +197,7 @@ void PackInstallTask::onResolveModsSucceeded()
             blocked_mod.localPath = "";
             blocked_mod.targetFolder = results_file.targetFolder;
 
-            m_blocked_mods.append(blocked_mod);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_blocked_mods.append(blocked_mod);
 
             anyBlocked = true;
         } else {
@@ -205,20 +205,20 @@ void PackInstallTask::onResolveModsSucceeded()
         }
     }
 
-    m_mod_id_resolver_task.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver_task.reset();
 
     if (anyBlocked) {
         qDebug() << "Blocked files found, displaying file list";
 
-        BlockedModsDialog message_dialog(m_parent, tr("Blocked files found"),
+        BlockedModsDialog message_dialog(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, tr("Blocked files found"),
                                          tr("The following files are not available for download in third party launchers.<br/>"
                                             "You will need to manually download them and add them to the instance."),
-                                         m_blocked_mods);
+                                         hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_blocked_mods);
 
         message_dialog.setModal(true);
 
         if (message_dialog.exec() == QDialog::Accepted) {
-            qDebug() << "Post dialog blocked mods list: " << m_blocked_mods;
+            qDebug() << "Post dialog blocked mods list: " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_blocked_mods;
             createInstance();
         } else {
             abort();
@@ -236,21 +236,21 @@ void PackInstallTask::createInstance()
     setStatus(tr("Creating the instance..."));
     QCoreApplication::processEvents();
 
-    auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
+    auto instanceConfigPath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(instanceConfigPath);
 
-    MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
+    MinecraftInstance instance(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettings, instanceSettings, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath);
     auto components = instance.getPackProfile();
     components->buildingFromScratch();
 
-    for (auto target : m_version.targets) {
+    for (auto target : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.targets) {
         if (target.type == "game" && target.name == "minecraft") {
             components->setComponentVersion("net.minecraft", target.version, true);
             break;
         }
     }
 
-    for (auto target : m_version.targets) {
+    for (auto target : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.targets) {
         if (target.type != "modloader")
             continue;
 
@@ -262,7 +262,7 @@ void PackInstallTask::createInstance()
     }
 
     // install any jar mods
-    QDir jarModsDir(FS::PathCombine(m_stagingPath, "minecraft", "jarmods"));
+    QDir jarModsDir(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "minecraft", "jarmods"));
     if (jarModsDir.exists()) {
         QStringList jarMods;
 
@@ -276,8 +276,8 @@ void PackInstallTask::createInstance()
     components->saveNow();
 
     instance.setName(name());
-    instance.setIconKey(m_instIcon);
-    instance.setManagedPack("modpacksch", QString::number(m_pack.id), m_pack.name, QString::number(m_version.id), m_version.name);
+    instance.setIconKey(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instIcon);
+    instance.setManagedPack("modpacksch", QString::number(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.id), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.name, QString::number(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.id), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.name);
 
     instance.saveNow();
 
@@ -295,11 +295,11 @@ void PackInstallTask::downloadPack()
     setAbortable(false);
 
     auto* jobPtr = new NetJob(tr("Mod download"), APPLICATION->network());
-    for (auto const& file : m_version.files) {
+    for (auto const& file : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.files) {
         if (file.serverOnly || file.url.isEmpty())
             continue;
 
-        auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path, file.name);
+        auto path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, ".minecraft", file.path, file.name);
         qDebug() << "Will try to download" << file.url << "to" << path;
 
         QFileInfo file_info(file.name);
@@ -318,7 +318,7 @@ void PackInstallTask::downloadPack()
     connect(jobPtr, &NetJob::aborted, this, &PackInstallTask::abort);
     connect(jobPtr, &NetJob::progress, this, &PackInstallTask::setProgress);
 
-    m_net_job = jobPtr;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job = jobPtr;
 
     setAbortable(true);
     jobPtr->start();
@@ -326,8 +326,8 @@ void PackInstallTask::downloadPack()
 
 void PackInstallTask::onModDownloadSucceeded()
 {
-    m_net_job.reset();
-    if (!m_blocked_mods.isEmpty()) {
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job.reset();
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_blocked_mods.isEmpty()) {
         copyBlockedMods();
     }
     emitSucceeded();
@@ -335,12 +335,12 @@ void PackInstallTask::onModDownloadSucceeded()
 
 void PackInstallTask::onManifestDownloadFailed(QString reason)
 {
-    m_net_job.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job.reset();
     emitFailed(reason);
 }
 void PackInstallTask::onResolveModsFailed(QString reason)
 {
-    m_net_job.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job.reset();
     emitFailed(reason);
 }
 void PackInstallTask::onCreateInstanceFailed(QString reason)
@@ -349,7 +349,7 @@ void PackInstallTask::onCreateInstanceFailed(QString reason)
 }
 void PackInstallTask::onModDownloadFailed(QString reason)
 {
-    m_net_job.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job.reset();
     emitFailed(reason);
 }
 
@@ -359,15 +359,15 @@ void PackInstallTask::copyBlockedMods()
     setStatus(tr("Copying Blocked Mods..."));
     setAbortable(false);
     int i = 0;
-    int total = m_blocked_mods.length();
+    int total = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_blocked_mods.length();
     setProgress(i, total);
-    for (auto const& mod : m_blocked_mods) {
+    for (auto const& mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_blocked_mods) {
         if (!mod.matched) {
             qDebug() << mod.name << "was not matched to a local file, skipping copy";
             continue;
         }
 
-        auto dest_path = FS::PathCombine(m_stagingPath, ".minecraft", mod.targetFolder, mod.name);
+        auto dest_path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, ".minecraft", mod.targetFolder, mod.name);
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 

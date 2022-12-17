@@ -61,16 +61,16 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     void ShowContextMenu(const QPoint& pos);
 
    protected:
-    BaseInstance* m_instance = nullptr;
+    BaseInstance* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance = nullptr;
 
     Ui::ExternalResourcesPage* ui = nullptr;
-    std::shared_ptr<ResourceFolderModel> m_model;
-    QSortFilterProxyModel* m_filterModel = nullptr;
+    std::shared_ptr<ResourceFolderModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model;
+    QSortFilterProxyModel* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel = nullptr;
 
-    QString m_fileSelectionFilter;
-    QString m_viewFilter;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fileSelectionFilter;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_viewFilter;
 
-    bool m_controlsEnabled = true;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_controlsEnabled = true;
 
-    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
+    std::shared_ptr<Setting> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = nullptr;
 };

@@ -38,28 +38,28 @@
 
 PreLaunchCommand::PreLaunchCommand(LaunchTask *parent) : LaunchStep(parent)
 {
-    auto instance = m_parent->instance();
-    m_command = instance->getPreLaunchCommand();
-    m_process.setProcessEnvironment(instance->createEnvironment());
-    connect(&m_process, &LoggedProcess::log, this, &PreLaunchCommand::logLines);
-    connect(&m_process, &LoggedProcess::stateChanged, this, &PreLaunchCommand::on_state);
+    auto instance = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_command = instance->getPreLaunchCommand();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.setProcessEnvironment(instance->createEnvironment());
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process, &LoggedProcess::log, this, &PreLaunchCommand::logLines);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process, &LoggedProcess::stateChanged, this, &PreLaunchCommand::on_state);
 }
 
 void PreLaunchCommand::executeTask()
 {
     //FIXME: where to put this?
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    auto args = QProcess::splitCommand(m_command);
-    m_parent->substituteVariables(args);
+    auto args = QProcess::splitCommand(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_command);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->substituteVariables(args);
 
     emit logLine(tr("Running Pre-Launch command: %1").arg(args.join(' ')), MessageLevel::Launcher);
     const QString program = args.takeFirst();
-    m_process.start(program, args);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.start(program, args);
 #else
-    m_parent->substituteVariables(m_command);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->substituteVariables(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_command);
 
-    emit logLine(tr("Running Pre-Launch command: %1").arg(m_command), MessageLevel::Launcher);
-    m_process.start(m_command);
+    emit logLine(tr("Running Pre-Launch command: %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_command), MessageLevel::Launcher);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.start(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_command);
 #endif
 }
 
@@ -67,7 +67,7 @@ void PreLaunchCommand::on_state(LoggedProcess::State state)
 {
     auto getError = [&]()
     {
-        return tr("Pre-Launch command failed with code %1.\n\n").arg(m_process.exitCode());
+        return tr("Pre-Launch command failed with code %1.\n\n").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.exitCode());
     };
     switch(state)
     {
@@ -82,7 +82,7 @@ void PreLaunchCommand::on_state(LoggedProcess::State state)
         }
         case LoggedProcess::Finished:
         {
-            if(m_process.exitCode() != 0)
+            if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.exitCode() != 0)
             {
                 auto error = getError();
                 emit logLine(error, MessageLevel::Fatal);
@@ -101,15 +101,15 @@ void PreLaunchCommand::on_state(LoggedProcess::State state)
 
 void PreLaunchCommand::setWorkingDirectory(const QString &wd)
 {
-    m_process.setWorkingDirectory(wd);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.setWorkingDirectory(wd);
 }
 
 bool PreLaunchCommand::abort()
 {
-    auto state = m_process.state();
+    auto state = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.state();
     if (state == LoggedProcess::Running || state == LoggedProcess::Starting)
     {
-        m_process.kill();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.kill();
     }
     return true;
 }

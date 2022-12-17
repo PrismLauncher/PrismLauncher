@@ -39,13 +39,13 @@
 #include "AtlOptionalModDialog.h"
 #include "ui/dialogs/VersionSelectDialog.h"
 
-AtlUserInteractionSupportImpl::AtlUserInteractionSupportImpl(QWidget *parent) : m_parent(parent)
+AtlUserInteractionSupportImpl::AtlUserInteractionSupportImpl(QWidget *parent) : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent(parent)
 {
 }
 
 std::optional<QVector<QString>> AtlUserInteractionSupportImpl::chooseOptionalMods(ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods)
 {
-    AtlOptionalModDialog optionalModDialog(m_parent, version, mods);
+    AtlOptionalModDialog optionalModDialog(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, version, mods);
     auto result = optionalModDialog.exec();
     if (result == QDialog::Rejected) {
         return {};
@@ -55,7 +55,7 @@ std::optional<QVector<QString>> AtlUserInteractionSupportImpl::chooseOptionalMod
 
 QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionList::Ptr vlist, QString minecraftVersion)
 {
-    VersionSelectDialog vselect(vlist.get(), "Choose Version", m_parent, false);
+    VersionSelectDialog vselect(vlist.get(), "Choose Version", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, false);
     if (minecraftVersion != nullptr) {
         vselect.setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
         vselect.setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
@@ -94,5 +94,5 @@ QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionList::Ptr vlis
 
 void AtlUserInteractionSupportImpl::displayMessage(QString message)
 {
-    QMessageBox::information(m_parent, tr("Installing"), message);
+    QMessageBox::information(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, tr("Installing"), message);
 }

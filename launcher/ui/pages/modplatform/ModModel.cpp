@@ -17,7 +17,7 @@ namespace ModPlatform {
 // This leaks a tiny bit of memory per time the user has opened the mod dialog. How to make this better?
 static QHash<ListModel*, bool> s_running;
 
-ListModel::ListModel(ModPage* parent) : QAbstractListModel(parent), m_parent(parent) { s_running.insert(this, true); }
+ListModel::ListModel(ModPage* parent) : QAbstractListModel(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent(parent) { s_running.insert(this, true); }
 
 ListModel::~ListModel()
 {
@@ -26,7 +26,7 @@ ListModel::~ListModel()
 
 auto ListModel::debugName() const -> QString
 {
-    return m_parent->debugName();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->debugName();
 }
 
 /******** Make data requests ********/
@@ -61,8 +61,8 @@ auto ListModel::data(const QModelIndex& index, int role) const -> QVariant
             return pack.description;
         }
         case Qt::DecorationRole: {
-            if (m_logoMap.contains(pack.logoName)) {
-                return m_logoMap.value(pack.logoName);
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(pack.logoName)) {
+                return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.value(pack.logoName);
             }
             QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
             // un-const-ify this
@@ -82,7 +82,7 @@ auto ListModel::data(const QModelIndex& index, int role) const -> QVariant
         case UserDataTypes::DESCRIPTION:
             return pack.description;
         case UserDataTypes::SELECTED:
-            return m_parent->getDialog()->isModSelected(pack.name);
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->getDialog()->isModSelected(pack.name);
         default:
             break;
     }
@@ -103,9 +103,9 @@ bool ListModel::setData(const QModelIndex &index, const QVariant &value, int rol
 
 void ListModel::requestModVersions(ModPlatform::IndexedPack const& current, QModelIndex index)
 {
-    auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
+    auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance))->getPackProfile();
 
-    m_parent->apiProvider()->getVersions({ current.addonId.toString(), getMineVersions(), profile->getModLoaders() },
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->apiProvider()->getVersions({ current.addonId.toString(), getMineVersions(), profile->getModLoaders() },
                                          [this, current, index](QJsonDocument& doc, QString addonId) {
                                              if (!s_running.constFind(this).value())
                                                  return;
@@ -115,15 +115,15 @@ void ListModel::requestModVersions(ModPlatform::IndexedPack const& current, QMod
 
 void ListModel::performPaginatedSearch()
 {
-    auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->m_instance))->getPackProfile();
+    auto profile = (dynamic_cast<MinecraftInstance*>((dynamic_cast<ModPage*>(parent()))->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance))->getPackProfile();
 
-    m_parent->apiProvider()->searchMods(
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->apiProvider()->searchMods(
         this, { nextSearchOffset, currentSearchTerm, getSorts()[currentSort], profile->getModLoaders(), getMineVersions() });
 }
 
 void ListModel::requestModInfo(ModPlatform::IndexedPack& current, QModelIndex index)
 {
-    m_parent->apiProvider()->getModInfo(current, [this, index](QJsonDocument& doc, ModPlatform::IndexedPack& pack) {
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->apiProvider()->getModInfo(current, [this, index](QJsonDocument& doc, ModPlatform::IndexedPack& pack) {
         if (!s_running.constFind(this).value())
             return;
         infoRequestFinished(doc, pack, index);
@@ -160,9 +160,9 @@ void ListModel::searchWithTerm(const QString& term, const int sort, const bool f
 
 void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
 {
-    if (m_logoMap.contains(logo)) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(logo)) {
         callback(APPLICATION->metacache()
-                     ->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)))
+                     ->resolveEntry(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)))
                      ->getFullPath());
     } else {
         requestLogo(logo, logoUrl);
@@ -171,13 +171,13 @@ void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallbac
 
 void ListModel::requestLogo(QString logo, QString url)
 {
-    if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo) || url.isEmpty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.contains(logo) || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos.contains(logo) || url.isEmpty()) {
         return;
     }
 
     MetaEntryPtr entry =
-        APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)));
-    auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
+        APPLICATION->metacache()->resolveEntry(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)));
+    auto job = new NetJob(QString("%1 Icon Download %2").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->debugName()).arg(logo), APPLICATION->network());
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
@@ -195,15 +195,15 @@ void ListModel::requestLogo(QString logo, QString url)
     });
 
     job->start();
-    m_loadingLogos.append(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.append(logo);
 }
 
 /******** Request callbacks ********/
 
 void ListModel::logoLoaded(QString logo, QIcon out)
 {
-    m_loadingLogos.removeAll(logo);
-    m_logoMap.insert(logo, out);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.removeAll(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.insert(logo, out);
     for (int i = 0; i < modpacks.size(); i++) {
         if (modpacks[i].logoName == logo) {
             emit dataChanged(createIndex(i, 0), createIndex(i, 0), { Qt::DecorationRole });
@@ -213,8 +213,8 @@ void ListModel::logoLoaded(QString logo, QIcon out)
 
 void ListModel::logoFailed(QString logo)
 {
-    m_failedLogos.append(logo);
-    m_loadingLogos.removeAll(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos.append(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.removeAll(logo);
 }
 
 void ListModel::searchRequestFinished(QJsonDocument& doc)
@@ -232,7 +232,7 @@ void ListModel::searchRequestFinished(QJsonDocument& doc)
             loadIndexedPack(pack, packObj);
             newList.append(pack);
         } catch (const JSONValidationError& e) {
-            qWarning() << "Error while loading mod from " << m_parent->debugName() << ": " << e.cause();
+            qWarning() << "Error while loading mod from " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->debugName() << ": " << e.cause();
             continue;
         }
     }
@@ -256,15 +256,15 @@ void ListModel::searchRequestFinished(QJsonDocument& doc)
 void ListModel::searchRequestFailed(QString reason)
 {
     auto failed_action = jobPtr->getFailedActions().at(0);
-    if (!failed_action->m_reply) {
+    if (!failed_action->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply) {
         // Network error
         QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load mods."));
-    } else if (failed_action->m_reply && failed_action->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
+    } else if (failed_action->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply && failed_action->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
         // 409 Gone, notify user to update
         QMessageBox::critical(nullptr, tr("Error"),
                               //: %1 refers to the launcher itself
                               QString("%1 %2")
-                                  .arg(m_parent->displayName())
+                                  .arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->displayName())
                                   .arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_DISPLAYNAME)));
     }
 
@@ -310,12 +310,12 @@ void ListModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack
         }
     }
 
-    m_parent->updateUi();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->updateUi();
 }
 
 void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId, const QModelIndex& index)
 {
-    auto& current = m_parent->getCurrent();
+    auto& current = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->getCurrent();
     if (addonId != current.addonId) {
         return;
     }
@@ -337,7 +337,7 @@ void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId, cons
     }
 
 
-    m_parent->updateModVersions();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->updateModVersions();
 }
 
 }  // namespace ModPlatform
@@ -346,5 +346,5 @@ void ListModel::versionRequestSucceeded(QJsonDocument doc, QString addonId, cons
 
 auto ModPlatform::ListModel::getMineVersions() const -> std::list<Version>
 {
-    return m_parent->getFilter()->versions;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->getFilter()->versions;
 }

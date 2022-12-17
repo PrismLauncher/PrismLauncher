@@ -54,7 +54,7 @@ LoggedProcess::LoggedProcess(QObject *parent) : QProcess(parent)
 
 LoggedProcess::~LoggedProcess()
 {
-    if(m_is_detachable)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_detachable)
     {
         setProcessState(QProcess::NotRunning);
     }
@@ -73,23 +73,23 @@ QStringList reprocess(const QByteArray& data, QTextDecoder& decoder)
 
 void LoggedProcess::on_stdErr()
 {
-    auto lines = reprocess(readAllStandardError(), m_err_decoder);
+    auto lines = reprocess(readAllStandardError(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_err_decoder);
     emit log(lines, MessageLevel::StdErr);
 }
 
 void LoggedProcess::on_stdOut()
 {
-    auto lines = reprocess(readAllStandardOutput(), m_out_decoder);
+    auto lines = reprocess(readAllStandardOutput(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_out_decoder);
     emit log(lines, MessageLevel::StdOut);
 }
 
 void LoggedProcess::on_exit(int exit_code, QProcess::ExitStatus status)
 {
     // save the exit code
-    m_exit_code = exit_code;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_exit_code = exit_code;
 
     // based on state, send signals
-    if (!m_is_aborting)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_aborting)
     {
         if (status == QProcess::NormalExit)
         {
@@ -137,26 +137,26 @@ void LoggedProcess::on_error(QProcess::ProcessError error)
 
 void LoggedProcess::kill()
 {
-    m_is_aborting = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_aborting = true;
     QProcess::kill();
 }
 
 int LoggedProcess::exitCode() const
 {
-    return m_exit_code;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_exit_code;
 }
 
 void LoggedProcess::changeState(LoggedProcess::State state)
 {
-    if(state == m_state)
+    if(state == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state)
         return;
-    m_state = state;
-    emit stateChanged(m_state);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = state;
+    emit stateChanged(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state);
 }
 
 LoggedProcess::State LoggedProcess::state() const
 {
-    return m_state;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state;
 }
 
 void LoggedProcess::on_stateChange(QProcess::ProcessState state)
@@ -167,18 +167,18 @@ void LoggedProcess::on_stateChange(QProcess::ProcessState state)
             break; // let's not - there are too many that handle this already.
         case QProcess::Starting:
         {
-            if(m_state != LoggedProcess::NotRunning)
+            if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state != LoggedProcess::NotRunning)
             {
-                qWarning() << "Wrong state change for process from state" << m_state << "to" << (int) LoggedProcess::Starting;
+                qWarning() << "Wrong state change for process from state" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state << "to" << (int) LoggedProcess::Starting;
             }
             changeState(LoggedProcess::Starting);
             return;
         }
         case QProcess::Running:
         {
-            if(m_state != LoggedProcess::Starting)
+            if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state != LoggedProcess::Starting)
             {
-                qWarning() << "Wrong state change for process from state" << m_state << "to" << (int) LoggedProcess::Running;
+                qWarning() << "Wrong state change for process from state" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state << "to" << (int) LoggedProcess::Running;
             }
             changeState(LoggedProcess::Running);
             return;
@@ -188,5 +188,5 @@ void LoggedProcess::on_stateChange(QProcess::ProcessState state)
 
 void LoggedProcess::setDetachable(bool detachable)
 {
-    m_is_detachable = detachable;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_detachable = detachable;
 }

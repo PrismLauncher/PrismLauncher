@@ -44,19 +44,19 @@ namespace Net {
 class ChecksumValidator : public Validator {
    public:
     ChecksumValidator(QCryptographicHash::Algorithm algorithm, QByteArray expected = QByteArray())
-        : m_checksum(algorithm), m_expected(expected){};
+        : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checksum(algorithm), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_expected(expected){};
     virtual ~ChecksumValidator() = default;
 
    public:
     auto init(QNetworkRequest&) -> bool override
     {
-        m_checksum.reset();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checksum.reset();
         return true;
     }
 
     auto write(QByteArray& data) -> bool override
     {
-        m_checksum.addData(data);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checksum.addData(data);
         return true;
     }
 
@@ -64,19 +64,19 @@ class ChecksumValidator : public Validator {
 
     auto validate(QNetworkReply&) -> bool override
     {
-        if (m_expected.size() && m_expected != hash()) {
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_expected.size() && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_expected != hash()) {
             qWarning() << "Checksum mismatch, download is bad.";
             return false;
         }
         return true;
     }
 
-    auto hash() -> QByteArray { return m_checksum.result(); }
+    auto hash() -> QByteArray { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checksum.result(); }
 
-    void setExpected(QByteArray expected) { m_expected = expected; }
+    void setExpected(QByteArray expected) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_expected = expected; }
 
    private:
-    QCryptographicHash m_checksum;
-    QByteArray m_expected;
+    QCryptographicHash hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checksum;
+    QByteArray hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_expected;
 };
 }  // namespace Net

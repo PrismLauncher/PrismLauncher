@@ -56,94 +56,94 @@ public:
 
     QString toString() const
     {
-        return m_string;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_string;
     }
 
 private:
-    QString m_string;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_string;
     struct Section
     {
         explicit Section(const QString &fullString)
         {
-            m_fullString = fullString;
-            int cutoff = m_fullString.size();
-            for(int i = 0; i < m_fullString.size(); i++)
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString = fullString;
+            int cutoff = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString.size();
+            for(int i = 0; i < hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString.size(); i++)
             {
-                if(!m_fullString[i].isDigit())
+                if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString[i].isDigit())
                 {
                     cutoff = i;
                     break;
                 }
             }
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-            auto numPart = QStringView{m_fullString}.left(cutoff);
+            auto numPart = QStringView{hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString}.left(cutoff);
 #else
-            auto numPart = m_fullString.leftRef(cutoff);
+            auto numPart = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString.leftRef(cutoff);
 #endif
             if(numPart.size())
             {
                 numValid = true;
-                m_numPart = numPart.toInt();
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numPart = numPart.toInt();
             }
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-            auto stringPart = QStringView{m_fullString}.mid(cutoff);
+            auto stringPart = QStringView{hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString}.mid(cutoff);
 #else
-            auto stringPart = m_fullString.midRef(cutoff);
+            auto stringPart = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString.midRef(cutoff);
 #endif
             if(stringPart.size())
             {
-                m_stringPart = stringPart.toString();
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stringPart = stringPart.toString();
             }
         }
         explicit Section() {}
         bool numValid = false;
-        int m_numPart = 0;
-        QString m_stringPart;
-        QString m_fullString;
+        int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numPart = 0;
+        QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stringPart;
+        QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString;
 
         inline bool operator!=(const Section &other) const
         {
             if(numValid && other.numValid)
             {
-                return m_numPart != other.m_numPart || m_stringPart != other.m_stringPart;
+                return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numPart != other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numPart || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stringPart != other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stringPart;
             }
             else
             {
-                return m_fullString != other.m_fullString;
+                return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString != other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString;
             }
         }
         inline bool operator<(const Section &other) const
         {
             if(numValid && other.numValid)
             {
-                if(m_numPart < other.m_numPart)
+                if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numPart < other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numPart)
                     return true;
-                if(m_numPart == other.m_numPart && m_stringPart < other.m_stringPart)
+                if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numPart == other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numPart && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stringPart < other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stringPart)
                     return true;
                 return false;
             }
             else
             {
-                return m_fullString < other.m_fullString;
+                return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString < other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString;
             }
         }
         inline bool operator>(const Section &other) const
         {
             if(numValid && other.numValid)
             {
-                if(m_numPart > other.m_numPart)
+                if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numPart > other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numPart)
                     return true;
-                if(m_numPart == other.m_numPart && m_stringPart > other.m_stringPart)
+                if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numPart == other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numPart && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stringPart > other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stringPart)
                     return true;
                 return false;
             }
             else
             {
-                return m_fullString > other.m_fullString;
+                return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString > other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fullString;
             }
         }
     };
-    QList<Section> m_sections;
+    QList<Section> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections;
 
     void parse();
 };

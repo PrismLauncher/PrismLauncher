@@ -52,30 +52,30 @@ QByteArray getVariant(SkinUpload::Model model) {
 }
 
 SkinUpload::SkinUpload(QObject *parent, QString token, QByteArray skin, SkinUpload::Model model)
-    : Task(parent), m_model(model), m_skin(skin), m_token(token)
+    : Task(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model(model), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_skin(skin), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_token(token)
 {
 }
 
 void SkinUpload::executeTask()
 {
     QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/skins"));
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit());
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_token).toLocal8Bit());
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     QHttpPart skin;
     skin.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
     skin.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"skin.png\""));
-    skin.setBody(m_skin);
+    skin.setBody(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_skin);
 
     QHttpPart model;
     model.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"variant\""));
-    model.setBody(getVariant(m_model));
+    model.setBody(getVariant(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model));
 
     multiPart->append(skin);
     multiPart->append(model);
 
     QNetworkReply *rep = APPLICATION->network()->post(request, multiPart);
-    m_reply = shared_qobject_ptr<QNetworkReply>(rep);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply = shared_qobject_ptr<QNetworkReply>(rep);
 
     setStatus(tr("Uploading skin"));
     connect(rep, &QNetworkReply::uploadProgress, this, &Task::setProgress);
@@ -91,16 +91,16 @@ void SkinUpload::downloadError(QNetworkReply::NetworkError error)
 {
     // error happened during download.
     qCritical() << "Network error: " << error;
-    emitFailed(m_reply->errorString());
+    emitFailed(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->errorString());
 }
 
 void SkinUpload::downloadFinished()
 {
     // if the download failed
-    if (m_reply->error() != QNetworkReply::NetworkError::NoError)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->error() != QNetworkReply::NetworkError::NoError)
     {
-        emitFailed(QString("Network error: %1").arg(m_reply->errorString()));
-        m_reply.reset();
+        emitFailed(QString("Network error: %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->errorString()));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
         return;
     }
     emitSucceeded();

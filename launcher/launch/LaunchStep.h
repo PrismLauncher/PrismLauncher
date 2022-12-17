@@ -25,7 +25,7 @@ class LaunchStep: public Task
 {
     Q_OBJECT
 public: /* methods */
-    explicit LaunchStep(LaunchTask *parent):Task(nullptr), m_parent(parent)
+    explicit LaunchStep(LaunchTask *parent):Task(nullptr), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent(parent)
     {
         bind(parent);
     };
@@ -46,5 +46,5 @@ public slots:
     virtual void finalize() {};
 
 protected: /* data */
-    LaunchTask *m_parent;
+    LaunchTask *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent;
 };

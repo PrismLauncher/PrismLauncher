@@ -160,9 +160,9 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
     }
     else if(role == Qt::DecorationRole)
     {
-        if(m_logoMap.contains(pack.logo))
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(pack.logo))
         {
-            return (m_logoMap.value(pack.logo));
+            return (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.value(pack.logo));
         }
         QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
         ((ListModel *)this)->requestLogo(pack.logo);
@@ -232,20 +232,20 @@ void ListModel::remove(int row)
 
 void ListModel::logoLoaded(QString logo, QIcon out)
 {
-    m_loadingLogos.removeAll(logo);
-    m_logoMap.insert(logo, out);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.removeAll(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.insert(logo, out);
     emit dataChanged(createIndex(0, 0), createIndex(1, 0));
 }
 
 void ListModel::logoFailed(QString logo)
 {
-    m_failedLogos.append(logo);
-    m_loadingLogos.removeAll(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos.append(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.removeAll(logo);
 }
 
 void ListModel::requestLogo(QString file)
 {
-    if(m_loadingLogos.contains(file) || m_failedLogos.contains(file))
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.contains(file) || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos.contains(file))
     {
         return;
     }
@@ -271,12 +271,12 @@ void ListModel::requestLogo(QString file)
 
     job->start();
 
-    m_loadingLogos.append(file);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.append(file);
 }
 
 void ListModel::getLogo(const QString &logo, LogoCallback callback)
 {
-    if(m_logoMap.contains(logo))
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(logo))
     {
         callback(APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }

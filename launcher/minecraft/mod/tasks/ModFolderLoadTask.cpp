@@ -42,77 +42,77 @@
 
 ModFolderLoadTask::ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan)
     : Task(nullptr, false)
-    , m_mods_dir(mods_dir)
-    , m_index_dir(index_dir)
-    , m_is_indexed(is_indexed)
-    , m_clean_orphan(clean_orphan)
-    , m_result(new Result())
-    , m_thread_to_spawn_into(thread())
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods_dir(mods_dir)
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir(index_dir)
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_indexed(is_indexed)
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_clean_orphan(clean_orphan)
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result(new Result())
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thread_to_spawn_into(thread())
 {}
 
 void ModFolderLoadTask::executeTask()
 {
-    if (thread() != m_thread_to_spawn_into)
+    if (thread() != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thread_to_spawn_into)
         connect(this, &Task::finished, this->thread(), &QThread::quit);
 
-    if (m_is_indexed) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_indexed) {
         // Read metadata first
         getFromMetadata();
     }
 
     // Read JAR files that don't have metadata
-    m_mods_dir.refresh();
-    for (auto entry : m_mods_dir.entryInfoList()) {
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods_dir.refresh();
+    for (auto entry : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods_dir.entryInfoList()) {
         Mod* mod(new Mod(entry));
 
         if (mod->enabled()) {
-            if (m_result->mods.contains(mod->internal_id())) {
-                m_result->mods[mod->internal_id()]->setStatus(ModStatus::Installed);
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods.contains(mod->internal_id())) {
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods[mod->internal_id()]->setStatus(ModStatus::Installed);
                 // Delete the object we just created, since a valid one is already in the mods list.
                 delete mod;
             }
             else {
-                m_result->mods[mod->internal_id()] = mod;
-                m_result->mods[mod->internal_id()]->setStatus(ModStatus::NoMetadata);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods[mod->internal_id()] = mod;
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods[mod->internal_id()]->setStatus(ModStatus::NoMetadata);
             }
         }
         else { 
             QString chopped_id = mod->internal_id().chopped(9);
-            if (m_result->mods.contains(chopped_id)) {
-                m_result->mods[mod->internal_id()] = mod;
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods.contains(chopped_id)) {
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods[mod->internal_id()] = mod;
 
-                auto metadata = m_result->mods[chopped_id]->metadata();
+                auto metadata = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods[chopped_id]->metadata();
                 if (metadata) {
                     mod->setMetadata(*metadata);
 
-                    m_result->mods[mod->internal_id()]->setStatus(ModStatus::Installed);
-                    m_result->mods.remove(chopped_id);
+                    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods[mod->internal_id()]->setStatus(ModStatus::Installed);
+                    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods.remove(chopped_id);
                 }
             }
             else {
-                m_result->mods[mod->internal_id()] = mod;
-                m_result->mods[mod->internal_id()]->setStatus(ModStatus::NoMetadata);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods[mod->internal_id()] = mod;
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods[mod->internal_id()]->setStatus(ModStatus::NoMetadata);
             }
         }
     }
 
     // Remove orphan metadata to prevent issues
     // See https://github.com/PolyMC/PolyMC/issues/996
-    if (m_clean_orphan) {
-        QMutableMapIterator iter(m_result->mods);
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_clean_orphan) {
+        QMutableMapIterator iter(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods);
         while (iter.hasNext()) {
             auto mod = iter.next().value();
             if (mod->status() == ModStatus::NotInstalled) {
-                mod->destroy(m_index_dir, false);
+                mod->destroy(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir, false);
                 iter.remove();
             }
         }
     }
 
-    for (auto mod : m_result->mods)
-        mod->moveToThread(m_thread_to_spawn_into);
+    for (auto mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods)
+        mod->moveToThread(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thread_to_spawn_into);
 
-    if (m_aborted)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted)
         emit finished();
     else
         emitSucceeded();
@@ -120,16 +120,16 @@ void ModFolderLoadTask::executeTask()
 
 void ModFolderLoadTask::getFromMetadata()
 {
-    m_index_dir.refresh();
-    for (auto entry : m_index_dir.entryList(QDir::Files)) {
-        auto metadata = Metadata::get(m_index_dir, entry);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir.refresh();
+    for (auto entry : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir.entryList(QDir::Files)) {
+        auto metadata = Metadata::get(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir, entry);
 
         if(!metadata.isValid()){
             return;
         }
 
-        auto* mod = new Mod(m_mods_dir, metadata);
+        auto* mod = new Mod(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods_dir, metadata);
         mod->setStatus(ModStatus::NotInstalled);
-        m_result->mods[mod->internal_id()] = mod;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->mods[mod->internal_id()] = mod;
     }
 }

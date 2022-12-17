@@ -95,13 +95,13 @@ public: /* getters for profile variables */
 
 private:
     /// the version of Minecraft - jar to use
-    QString m_minecraftVersion;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersion;
 
     /// Release type - "release" or "snapshot"
-    QString m_minecraftVersionType;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersionType;
 
     /// Assets type - "legacy" or a version ID
-    MojangAssetIndexInfo::Ptr m_minecraftAssets;
+    MojangAssetIndexInfo::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftAssets;
 
     /**
      * arguments that should be used for launching minecraft
@@ -109,50 +109,50 @@ private:
      * ex: "--username ${auth_player_name} --session ${auth_session}
      *      --version ${version_name} --gameDir ${game_directory} --assetsDir ${game_assets}"
      */
-    QString m_minecraftArguments;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftArguments;
 
     /**
      * Additional arguments to pass to the JVM in addition to those the user has configured,
      * memory settings, etc.
      */
-    QStringList m_addnJvmArguments;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_addnJvmArguments;
 
     /// A list of all tweaker classes
-    QStringList m_tweakers;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tweakers;
 
     /// The main class to load first
-    QString m_mainClass;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainClass;
 
     /// The applet class, for some very old minecraft releases
-    QString m_appletClass;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_appletClass;
 
     /// the list of libraries
-    QList<LibraryPtr> m_libraries;
+    QList<LibraryPtr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_libraries;
 
     /// the list of maven files to be placed in the libraries folder, but not acted upon
-    QList<LibraryPtr> m_mavenFiles;
+    QList<LibraryPtr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mavenFiles;
 
     /// the list of java agents to add to JVM arguments
-    QList<AgentPtr> m_agents;
+    QList<AgentPtr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_agents;
 
     /// the main jar
-    LibraryPtr m_mainJar;
+    LibraryPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainJar;
 
     /// the list of native libraries
-    QList<LibraryPtr> m_nativeLibraries;
+    QList<LibraryPtr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeLibraries;
 
     /// traits, collected from all the version files (version files can only add)
-    QSet<QString> m_traits;
+    QSet<QString> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_traits;
 
     /// A list of jar mods. version files can add those.
-    QList<LibraryPtr> m_jarMods;
+    QList<LibraryPtr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jarMods;
 
     /// the list of mods
-    QList<LibraryPtr> m_mods;
+    QList<LibraryPtr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods;
 
     /// compatible java major versions
-    QList<int> m_compatibleJavaMajors;
+    QList<int> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_compatibleJavaMajors;
 
-    ProblemSeverity m_problemSeverity = ProblemSeverity::None;
+    ProblemSeverity hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_problemSeverity = ProblemSeverity::None;
 
 };

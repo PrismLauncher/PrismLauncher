@@ -44,16 +44,16 @@ private slots:
     void onUnzipCanceled();
 
 private: /* data */
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    shared_qobject_ptr<QNetworkAccessManager> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network;
     bool abortable = false;
-    std::unique_ptr<QuaZip> m_packZip;
-    QFuture<std::optional<QStringList>> m_extractFuture;
-    QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
+    std::unique_ptr<QuaZip> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_packZip;
+    QFuture<std::optional<QStringList>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture;
+    QFutureWatcher<std::optional<QStringList>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher;
     NetJob::Ptr netJobContainer;
     QString archivePath;
 
-    Modpack m_pack;
-    QString m_version;
+    Modpack hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
 };
 
 }

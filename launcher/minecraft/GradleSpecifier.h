@@ -44,7 +44,7 @@ struct GradleSpecifier
 {
     GradleSpecifier()
     {
-        m_valid = false;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid = false;
     }
     GradleSpecifier(QString value)
     {
@@ -63,54 +63,54 @@ struct GradleSpecifier
         */
         QRegularExpression matcher(QRegularExpression::anchoredPattern("([^:@]+):([^:@]+):([^:@]+)" "(?::([^:@]+))?" "(?:@([^:@]+))?"));
         QRegularExpressionMatch match = matcher.match(value);
-        m_valid = match.hasMatch();
-        if(!m_valid) {
-            m_invalidValue = value;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid = match.hasMatch();
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid) {
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_invalidValue = value;
             return *this;
         }
         auto elements = match.captured();
-        m_groupId = match.captured(1);
-        m_artifactId = match.captured(2);
-        m_version = match.captured(3);
-        m_classifier = match.captured(4);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupId = match.captured(1);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_artifactId = match.captured(2);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = match.captured(3);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_classifier = match.captured(4);
         if(match.lastCapturedIndex() >= 5)
         {
-            m_extension = match.captured(5);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extension = match.captured(5);
         }
         return *this;
     }
     QString serialize() const
     {
-        if(!m_valid) {
-            return m_invalidValue;
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid) {
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_invalidValue;
         }
-        QString retval = m_groupId + ":" + m_artifactId + ":" + m_version;
-        if(!m_classifier.isEmpty())
+        QString retval = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupId + ":" + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_artifactId + ":" + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_classifier.isEmpty())
         {
-            retval += ":" + m_classifier;
+            retval += ":" + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_classifier;
         }
-        if(m_extension.isExplicit())
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extension.isExplicit())
         {
-            retval += "@" + m_extension;
+            retval += "@" + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extension;
         }
         return retval;
     }
     QString getFileName() const
     {
-        if(!m_valid) {
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid) {
             return QString();
         }
-        QString filename = m_artifactId + '-' + m_version;
-        if(!m_classifier.isEmpty())
+        QString filename = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_artifactId + '-' + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_classifier.isEmpty())
         {
-            filename += "-" + m_classifier;
+            filename += "-" + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_classifier;
         }
-        filename += "." + m_extension;
+        filename += "." + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extension;
         return filename;
     }
     QString toPath(const QString & filenameOverride = QString()) const
     {
-        if(!m_valid) {
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid) {
             return QString();
         }
         QString filename;
@@ -122,42 +122,42 @@ struct GradleSpecifier
         {
             filename = filenameOverride;
         }
-        QString path = m_groupId;
+        QString path = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupId;
         path.replace('.', '/');
-        path += '/' + m_artifactId + '/' + m_version + '/' + filename;
+        path += '/' + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_artifactId + '/' + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version + '/' + filename;
         return path;
     }
     inline bool valid() const
     {
-        return m_valid;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid;
     }
     inline QString version() const
     {
-        return m_version;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
     }
     inline QString groupId() const
     {
-        return m_groupId;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupId;
     }
     inline QString artifactId() const
     {
-        return m_artifactId;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_artifactId;
     }
     inline void setClassifier(const QString & classifier)
     {
-        m_classifier = classifier;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_classifier = classifier;
     }
     inline QString classifier() const
     {
-        return m_classifier;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_classifier;
     }
     inline QString extension() const
     {
-        return m_extension;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extension;
     }
     inline QString artifactPrefix() const
     {
-        return m_groupId + ":" + m_artifactId;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupId + ":" + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_artifactId;
     }
     bool matchName(const GradleSpecifier & other) const
     {
@@ -165,24 +165,24 @@ struct GradleSpecifier
     }
     bool operator==(const GradleSpecifier & other) const
     {
-        if(m_groupId != other.m_groupId)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupId != other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupId)
             return false;
-        if(m_artifactId != other.m_artifactId)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_artifactId != other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_artifactId)
             return false;
-        if(m_version != other.m_version)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version != other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version)
             return false;
-        if(m_classifier != other.m_classifier)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_classifier != other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_classifier)
             return false;
-        if(m_extension != other.m_extension)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extension != other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extension)
             return false;
         return true;
     }
 private:
-    QString m_invalidValue;
-    QString m_groupId;
-    QString m_artifactId;
-    QString m_version;
-    QString m_classifier;
-    DefaultVariable<QString> m_extension = DefaultVariable<QString>("jar");
-    bool m_valid = false;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_invalidValue;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupId;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_artifactId;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_classifier;
+    DefaultVariable<QString> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extension = DefaultVariable<QString>("jar");
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid = false;
 };

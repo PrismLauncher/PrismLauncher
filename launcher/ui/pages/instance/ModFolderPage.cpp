@@ -65,7 +65,7 @@
 #include "ui/dialogs/ProgressDialog.h"
 
 ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
-    : ExternalResourcesPage(inst, mods, parent), m_model(mods)
+    : ExternalResourcesPage(inst, mods, parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model(mods)
 {
     // This is structured like that so that these changes
     // do not affect the Resource pack and Shader pack tabs
@@ -85,8 +85,8 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
 
         auto check_allow_update = [this] {
-            return (!m_instance || !m_instance->isRunning()) &&
-                   (ui->treeView->selectionModel()->hasSelection() || !m_model->empty());
+            return (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance || !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->isRunning()) &&
+                   (ui->treeView->selectionModel()->hasSelection() || !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->empty());
         };
 
         connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, check_allow_update] {
@@ -108,8 +108,8 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
             disconnect(mods.get(), &ModFolderModel::updateFinished, this, 0);
         });
 
-        connect(m_instance, &BaseInstance::runningStatusChanged, this, &ModFolderPage::runningStateChanged);
-        ModFolderPage::runningStateChanged(m_instance && m_instance->isRunning());
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance, &BaseInstance::runningStatusChanged, this, &ModFolderPage::runningStateChanged);
+        ModFolderPage::runningStateChanged(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->isRunning());
     }
 }
 
@@ -130,9 +130,9 @@ bool ModFolderPage::shouldDisplay() const
 
 bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
 {
-    auto sourceCurrent = m_filterModel->mapToSource(current);
+    auto sourceCurrent = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
-    Mod const* m = m_model->at(row);
+    Mod const* m = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->at(row);
     if (m)
         ui->frame->updateWithMod(*m);
 
@@ -142,27 +142,27 @@ bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelI
 void ModFolderPage::removeItem()
 {
 
-    if (!m_controlsEnabled)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_controlsEnabled)
         return;
 
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
-    m_model->deleteMods(selection.indexes());
+    auto selection = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->deleteMods(selection.indexes());
 }
 
 void ModFolderPage::installMods()
 {
-    if (!m_controlsEnabled)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_controlsEnabled)
         return;
-    if (m_instance->typeName() != "Minecraft")
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 
-    auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
+    auto profile = static_cast<MinecraftInstance*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance)->getPackProfile();
     if (profile->getModLoaders() == ModAPI::Unspecified) {
         QMessageBox::critical(this, tr("Error"), tr("Please install a mod loader first!"));
         return;
     }
 
-    ModDownloadDialog mdownload(m_model, this, m_instance);
+    ModDownloadDialog mdownload(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model, this, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance);
     if (mdownload.exec()) {
         ConcurrentTask* tasks = new ConcurrentTask(this);
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
@@ -189,20 +189,20 @@ void ModFolderPage::installMods()
         loadDialog.setSkipButton(true, tr("Abort"));
         loadDialog.execWithTask(tasks);
 
-        m_model->update();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->update();
     }
 }
 
 void ModFolderPage::updateMods()
 {
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selection = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
 
-    auto mods_list = m_model->selectedMods(selection);
+    auto mods_list = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->selectedMods(selection);
     bool use_all = mods_list.empty();
     if (use_all)
-        mods_list = m_model->allMods();
+        mods_list = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->allMods();
 
-    ModUpdateDialog update_dialog(this, m_instance, m_model, mods_list);
+    ModUpdateDialog update_dialog(this, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model, mods_list);
     update_dialog.checkCandidates();
 
     if (update_dialog.aborted()) {
@@ -249,7 +249,7 @@ void ModFolderPage::updateMods()
         loadDialog.setSkipButton(true, tr("Abort"));
         loadDialog.execWithTask(tasks);
 
-        m_model->update();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->update();
     }
 }
 
@@ -260,7 +260,7 @@ CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFold
 bool CoreModFolderPage::shouldDisplay() const
 {
     if (ModFolderPage::shouldDisplay()) {
-        auto inst = dynamic_cast<MinecraftInstance*>(m_instance);
+        auto inst = dynamic_cast<MinecraftInstance*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance);
         if (!inst)
             return true;
 

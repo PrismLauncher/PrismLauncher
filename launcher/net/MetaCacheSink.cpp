@@ -47,29 +47,29 @@ namespace Net {
 
 
 MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator * md5sum, bool is_eternal)
-    :Net::FileSink(entry->getFullPath()), m_entry(entry), m_md5Node(md5sum), m_is_eternal(is_eternal)
+    :Net::FileSink(entry->getFullPath()), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry(entry), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_md5Node(md5sum), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_eternal(is_eternal)
 {
     addValidator(md5sum);
 }
 
 Task::State MetaCacheSink::initCache(QNetworkRequest& request)
 {
-    if (!m_entry->isStale())
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->isStale())
     {
         return Task::State::Succeeded;
     }
 
     // check if file exists, if it does, use its information for the request
-    QFile current(m_filename);
+    QFile current(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename);
     if(current.exists() && current.size() != 0)
     {
-        if (m_entry->getRemoteChangedTimestamp().size())
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->getRemoteChangedTimestamp().size())
         {
-            request.setRawHeader(QString("If-Modified-Since").toLatin1(), m_entry->getRemoteChangedTimestamp().toLatin1());
+            request.setRawHeader(QString("If-Modified-Since").toLatin1(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->getRemoteChangedTimestamp().toLatin1());
         }
-        if (m_entry->getETag().size())
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->getETag().size())
         {
-            request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->getETag().toLatin1());
+            request.setRawHeader(QString("If-None-Match").toLatin1(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->getETag().toLatin1());
         }
     }
 
@@ -78,42 +78,42 @@ Task::State MetaCacheSink::initCache(QNetworkRequest& request)
 
 Task::State MetaCacheSink::finalizeCache(QNetworkReply & reply)
 {
-    QFileInfo output_file_info(m_filename);
+    QFileInfo output_file_info(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename);
 
     if(wroteAnyData)
     {
-        m_entry->setMD5Sum(m_md5Node->hash().toHex().constData());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->setMD5Sum(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_md5Node->hash().toHex().constData());
     }
 
-    m_entry->setETag(reply.rawHeader("ETag").constData());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->setETag(reply.rawHeader("ETag").constData());
 
     if (reply.hasRawHeader("Last-Modified"))
     {
-        m_entry->setRemoteChangedTimestamp(reply.rawHeader("Last-Modified").constData());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->setRemoteChangedTimestamp(reply.rawHeader("Last-Modified").constData());
     }
 
-    m_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
 
     { // Cache lifetime
-        if (m_is_eternal) {
-            qDebug() << "[MetaCache] Adding eternal cache entry:" << m_entry->getFullPath();
-            m_entry->makeEternal(true);
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_eternal) {
+            qDebug() << "[MetaCache] Adding eternal cache entry:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->getFullPath();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->makeEternal(true);
         } else if (reply.hasRawHeader("Cache-Control")) {
             auto cache_control_header = reply.rawHeader("Cache-Control");
             // qDebug() << "[MetaCache] Parsing 'Cache-Control' header with" << cache_control_header;
 
             QRegularExpression max_age_expr("max-age=([0-9]+)");
             qint64 max_age = max_age_expr.match(cache_control_header).captured(1).toLongLong();
-            m_entry->setMaximumAge(max_age);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->setMaximumAge(max_age);
 
         } else if (reply.hasRawHeader("Expires")) {
             auto expires_header = reply.rawHeader("Expires");
             // qDebug() << "[MetaCache] Parsing 'Expires' header with" << expires_header;
 
             qint64 max_age = QDateTime::fromString(expires_header).toSecsSinceEpoch() - QDateTime::currentSecsSinceEpoch();
-            m_entry->setMaximumAge(max_age);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->setMaximumAge(max_age);
         } else {
-            m_entry->setMaximumAge(MAX_TIME_TO_EXPIRE);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->setMaximumAge(MAX_TIME_TO_EXPIRE);
         }
 
         if (reply.hasRawHeader("Age")) {
@@ -121,21 +121,21 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply & reply)
             // qDebug() << "[MetaCache] Parsing 'Age' header with" << age_header;
 
             qint64 current_age = age_header.toLongLong();
-            m_entry->setCurrentAge(current_age);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->setCurrentAge(current_age);
         } else {
-            m_entry->setCurrentAge(0);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->setCurrentAge(0);
         }
     }
 
-    m_entry->setStale(false);
-    APPLICATION->metacache()->updateEntry(m_entry);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry->setStale(false);
+    APPLICATION->metacache()->updateEntry(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry);
 
     return Task::State::Succeeded;
 }
 
 bool MetaCacheSink::hasLocalData()
 {
-    QFileInfo info(m_filename);
+    QFileInfo info(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename);
     return info.exists() && info.size() != 0;
 }
 }

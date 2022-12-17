@@ -45,18 +45,18 @@ public:
 
     struct Error
     {
-        QString m_errorMessageShort;
-        QString m_errorMessageVerbose;
-        QString m_cause;
+        QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_errorMessageShort;
+        QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_errorMessageVerbose;
+        QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cause;
     };
-    std::shared_ptr<Error> m_error;
+    std::shared_ptr<Error> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_error;
 
     enum AbortedBy
     {
         BY_NOTHING,
         BY_USER,
         BY_TIMEOUT
-    } m_aborted = BY_NOTHING;
+    } hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = BY_NOTHING;
 
 protected:
     void executeTask() override;
@@ -92,7 +92,7 @@ private:
     void sendRequest(QUrl endpoint, QByteArray content);
 
 protected:
-    QNetworkReply *m_netReply = nullptr;
+    QNetworkReply *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply = nullptr;
     QTimer timeout_keeper;
     QTimer counter;
     int count = 0; // num msec since time reset

@@ -52,40 +52,40 @@ public:
     virtual ~LaunchController(){};
 
     void setInstance(InstancePtr instance) {
-        m_instance = instance;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance = instance;
     }
 
     InstancePtr instance() {
-        return m_instance;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance;
     }
 
     void setOnline(bool online) {
-        m_online = online;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_online = online;
     }
 
     void setDemo(bool demo) {
-        m_demo = demo;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_demo = demo;
     }
 
     void setProfiler(BaseProfilerFactory *profiler) {
-        m_profiler = profiler;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profiler = profiler;
     }
 
     void setParentWidget(QWidget * widget) {
-        m_parentWidget = widget;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget = widget;
     }
 
     void setServerToJoin(MinecraftServerTargetPtr serverToJoin) {
-        m_serverToJoin = std::move(serverToJoin);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin = std::move(serverToJoin);
     }
 
     void setAccountToUse(MinecraftAccountPtr accountToUse) {
-        m_accountToUse = std::move(accountToUse);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse = std::move(accountToUse);
     }
 
     QString id()
     {
-        return m_instance->id();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->id();
     }
 
     bool abort() override;
@@ -103,14 +103,14 @@ private slots:
     void onProgressRequested(Task *task);
 
 private:
-    BaseProfilerFactory *m_profiler = nullptr;
-    bool m_online = true;
-    bool m_demo = false;
-    InstancePtr m_instance;
-    QWidget * m_parentWidget = nullptr;
-    InstanceWindow *m_console = nullptr;
-    MinecraftAccountPtr m_accountToUse = nullptr;
-    AuthSessionPtr m_session;
-    shared_qobject_ptr<LaunchTask> m_launcher;
-    MinecraftServerTargetPtr m_serverToJoin;
+    BaseProfilerFactory *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profiler = nullptr;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_online = true;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_demo = false;
+    InstancePtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance;
+    QWidget * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget = nullptr;
+    InstanceWindow *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_console = nullptr;
+    MinecraftAccountPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse = nullptr;
+    AuthSessionPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session;
+    shared_qobject_ptr<LaunchTask> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher;
+    MinecraftServerTargetPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin;
 };

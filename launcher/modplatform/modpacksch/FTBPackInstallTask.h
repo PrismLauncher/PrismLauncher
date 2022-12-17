@@ -80,22 +80,22 @@ private:
     void copyBlockedMods();
 
 private:
-    NetJob::Ptr m_net_job = nullptr;
-    shared_qobject_ptr<Flame::FileResolvingTask> m_mod_id_resolver_task = nullptr;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job = nullptr;
+    shared_qobject_ptr<Flame::FileResolvingTask> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver_task = nullptr;
 
-    QList<int> m_file_id_map;
+    QList<int> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_id_map;
 
-    QByteArray m_response;
+    QByteArray hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response;
 
-    Modpack m_pack;
-    QString m_version_name;
-    Version m_version;
+    Modpack hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name;
+    Version hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
 
-    QMap<QString, QString> m_files_to_copy;
-    QList<BlockedMod> m_blocked_mods;
+    QMap<QString, QString> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_to_copy;
+    QList<BlockedMod> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_blocked_mods;
 
     //FIXME: nuke
-    QWidget* m_parent;
+    QWidget* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent;
 };
 
 }

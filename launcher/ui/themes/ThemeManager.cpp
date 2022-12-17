@@ -38,7 +38,7 @@
 
 ThemeManager::ThemeManager(MainWindow* mainWindow)
 {
-    m_mainWindow = mainWindow;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow = mainWindow;
     InitializeThemes();
 }
 
@@ -48,7 +48,7 @@ ThemeManager::ThemeManager(MainWindow* mainWindow)
 QString ThemeManager::AddTheme(std::unique_ptr<ITheme> theme)
 {
     QString id = theme->id();
-    m_themes.emplace(id, std::move(theme));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_themes.emplace(id, std::move(theme));
     return id;
 }
 
@@ -57,7 +57,7 @@ QString ThemeManager::AddTheme(std::unique_ptr<ITheme> theme)
 /// @return Theme at themeId
 ITheme* ThemeManager::GetTheme(QString themeId)
 {
-    return m_themes[themeId].get();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_themes[themeId].get();
 }
 
 void ThemeManager::InitializeThemes()
@@ -112,8 +112,8 @@ void ThemeManager::InitializeThemes()
 QList<ITheme*> ThemeManager::getValidApplicationThemes()
 {
     QList<ITheme*> ret;
-    ret.reserve(m_themes.size());
-    for (auto&& [id, theme] : m_themes) {
+    ret.reserve(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_themes.size());
+    for (auto&& [id, theme] : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_themes) {
         ret.append(theme.get());
     }
     return ret;
@@ -135,17 +135,17 @@ void ThemeManager::applyCurrentlySelectedTheme()
 void ThemeManager::setApplicationTheme(const QString& name, bool initial)
 {
     auto systemPalette = qApp->palette();
-    auto themeIter = m_themes.find(name);
-    if (themeIter != m_themes.end()) {
+    auto themeIter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_themes.find(name);
+    if (themeIter != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_themes.end()) {
         auto& theme = themeIter->second;
         themeDebugLog() << "applying theme" << theme->name();
         theme->apply(initial);
 #ifdef Q_OS_WIN
-        if (m_mainWindow && IsWindows10OrGreater()) {
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow && IsWindows10OrGreater()) {
             if (QString::compare(theme->id(), "dark") == 0) {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
+                WinDarkmode::setDarkWinTitlebar(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->winId(), true);
             } else {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+                WinDarkmode::setDarkWinTitlebar(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->winId(), false);
             }
         }
 #endif

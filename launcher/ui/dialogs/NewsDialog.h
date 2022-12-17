@@ -25,6 +25,6 @@ class NewsDialog : public QDialog {
    private:
     Ui::NewsDialog* ui;
 
-    QHash<QString, NewsEntryPtr> m_entries;
-    bool m_article_list_hidden = false;
+    QHash<QString, NewsEntryPtr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_article_list_hidden = false;
 };

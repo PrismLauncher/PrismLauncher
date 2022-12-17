@@ -61,7 +61,7 @@ private slots:
     void onOAuthActivityChanged(Katabasis::Activity activity);
 
 private:
-    Katabasis::DeviceFlow *m_oauth2 = nullptr;
-    Action m_action;
-    QString m_clientId;
+    Katabasis::DeviceFlow *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_oauth2 = nullptr;
+    Action hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_clientId;
 };

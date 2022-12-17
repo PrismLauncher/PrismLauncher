@@ -146,49 +146,49 @@ public:
     Translated(){}
     Translated(QWidget *parent)
     {
-        m_contained = new T(parent);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained = new T(parent);
     }
     void setTooltipId(const char * tooltip)
     {
-        m_tooltip = tooltip;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tooltip = tooltip;
     }
     void setTextId(const char * text)
     {
-        m_text = text;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_text = text;
     }
     operator T*()
     {
-        return m_contained;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained;
     }
     T * operator->()
     {
-        return m_contained;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained;
     }
     void retranslate()
     {
-        if(m_text)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_text)
         {
             QString result;
-            result = QApplication::translate("MainWindow", m_text);
+            result = QApplication::translate("MainWindow", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_text);
             if(result.contains("%1")) {
                 result = result.arg(BuildConfig.LAUNCHER_DISPLAYNAME);
             }
-            m_contained->setText(result);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained->setText(result);
         }
-        if(m_tooltip)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tooltip)
         {
             QString result;
-            result = QApplication::translate("MainWindow", m_tooltip);
+            result = QApplication::translate("MainWindow", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tooltip);
             if(result.contains("%1")) {
                 result = result.arg(BuildConfig.LAUNCHER_DISPLAYNAME);
             }
-            m_contained->setToolTip(result);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained->setToolTip(result);
         }
     }
 private:
-    T * m_contained = nullptr;
-    const char * m_text = nullptr;
-    const char * m_tooltip = nullptr;
+    T * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained = nullptr;
+    const char * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_text = nullptr;
+    const char * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tooltip = nullptr;
 };
 using TranslatedAction = Translated<QAction>;
 using TranslatedToolButton = Translated<QToolButton>;
@@ -199,30 +199,30 @@ public:
     TranslatedToolbar(){}
     TranslatedToolbar(QWidget *parent)
     {
-        m_contained = new QToolBar(parent);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained = new QToolBar(parent);
     }
     void setWindowTitleId(const char * title)
     {
-        m_title = title;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_title = title;
     }
     operator QToolBar*()
     {
-        return m_contained;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained;
     }
     QToolBar * operator->()
     {
-        return m_contained;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained;
     }
     void retranslate()
     {
-        if(m_title)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_title)
         {
-            m_contained->setWindowTitle(QApplication::translate("MainWindow", m_title));
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained->setWindowTitle(QApplication::translate("MainWindow", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_title));
         }
     }
 private:
-    QToolBar * m_contained = nullptr;
-    const char * m_title = nullptr;
+    QToolBar * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained = nullptr;
+    const char * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_title = nullptr;
 };
 
 class MainWindow::Ui
@@ -898,7 +898,7 @@ public:
         helpMenuButton->setText(tr("Help"));
 
         // playtime counter
-        if (MainWindow->m_statusCenter)
+        if (MainWindow->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_statusCenter)
         {
             MainWindow->updateStatusCenter();
         }
@@ -927,7 +927,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     // Add the news label to the news toolbar.
     {
-        m_newsChecker.reset(new NewsChecker(APPLICATION->network(), BuildConfig.NEWS_RSS_URL));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsChecker.reset(new NewsChecker(APPLICATION->network(), BuildConfig.NEWS_RSS_URL));
         newsLabel = new QToolButton();
         newsLabel->setIcon(APPLICATION->getThemedIcon("news"));
         newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -935,7 +935,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         newsLabel->setFocusPolicy(Qt::NoFocus);
         ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
         QObject::connect(newsLabel, &QAbstractButton::clicked, this, &MainWindow::newsButtonClicked);
-        QObject::connect(m_newsChecker.get(), &NewsChecker::newsLoaded, this, &MainWindow::updateNewsLabel);
+        QObject::connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsChecker.get(), &NewsChecker::newsLoaded, this, &MainWindow::updateNewsLabel);
         updateNewsLabel();
     }
 
@@ -1001,10 +1001,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     // When the global settings page closes, we want to know about it and update our state
     connect(APPLICATION, &Application::globalSettingsClosed, this, &MainWindow::globalSettingsClosed);
 
-    m_statusLeft = new QLabel(tr("No instance selected"), this);
-    m_statusCenter = new QLabel(tr("Total playtime: 0s"), this);
-    statusBar()->addPermanentWidget(m_statusLeft, 1);
-    statusBar()->addPermanentWidget(m_statusCenter, 0);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_statusLeft = new QLabel(tr("No instance selected"), this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_statusCenter = new QLabel(tr("Total playtime: 0s"), this);
+    statusBar()->addPermanentWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_statusLeft, 1);
+    statusBar()->addPermanentWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_statusCenter, 0);
 
     // Add "manage accounts" button, right align
     QWidget *spacer = new QWidget();
@@ -1055,7 +1055,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
 
     // load the news
     {
-        m_newsChecker->reloadNews();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsChecker->reloadNews();
         updateNewsLabel();
     }
 
@@ -1121,10 +1121,10 @@ void MainWindow::retranslateUi()
         accountMenuButton->setText(tr("Accounts"));
     }
 
-    if (m_selectedInstance) {
-        m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_statusLeft->setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->getStatusbarDescription());
     } else {
-        m_statusLeft->setText(tr("No instance selected"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_statusLeft->setText(tr("No instance selected"));
     }
 
     ui->retranslateUi(this);
@@ -1177,7 +1177,7 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
 
         // add header
         actions.prepend(actionSep);
-        QAction *actionVoid = new QAction(m_selectedInstance->name(), this);
+        QAction *actionVoid = new QAction(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->name(), this);
         actionVoid->setEnabled(false);
         actions.prepend(actionVoid);
     }
@@ -1216,7 +1216,7 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
     myMenu.addActions(actions);
     /*
     if (onInstance)
-        myMenu.setEnabled(m_selectedInstance->canLaunch());
+        myMenu.setEnabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->canLaunch());
     */
     myMenu.exec(view->mapToGlobal(pos));
 }
@@ -1231,11 +1231,11 @@ void MainWindow::updateToolsMenu()
 {
     QToolButton *launchButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstance));
 
-    bool currentInstanceRunning = m_selectedInstance && m_selectedInstance->isRunning();
+    bool currentInstanceRunning = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->isRunning();
 
-    ui->actionLaunchInstance->setDisabled(!m_selectedInstance || currentInstanceRunning);
-    ui->actionLaunchInstanceOffline->setDisabled(!m_selectedInstance || currentInstanceRunning);
-    ui->actionLaunchInstanceDemo->setDisabled(!m_selectedInstance || currentInstanceRunning);
+    ui->actionLaunchInstance->setDisabled(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance || currentInstanceRunning);
+    ui->actionLaunchInstanceOffline->setDisabled(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance || currentInstanceRunning);
+    ui->actionLaunchInstanceDemo->setDisabled(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance || currentInstanceRunning);
 
     QMenu *launchMenu = ui->actionLaunchInstance->menu();
     launchButton->setPopupMode(QToolButton::MenuButtonPopup);
@@ -1254,20 +1254,20 @@ void MainWindow::updateToolsMenu()
     normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
     QAction *normalLaunchDemo = launchMenu->addAction(tr("Launch Demo"));
     normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
-    if (m_selectedInstance)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance)
     {
-        normalLaunch->setEnabled(m_selectedInstance->canLaunch());
-        normalLaunchOffline->setEnabled(m_selectedInstance->canLaunch());
-        normalLaunchDemo->setEnabled(m_selectedInstance->canLaunch());
+        normalLaunch->setEnabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->canLaunch());
+        normalLaunchOffline->setEnabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->canLaunch());
+        normalLaunchDemo->setEnabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->canLaunch());
 
         connect(normalLaunch, &QAction::triggered, [this]() {
-            APPLICATION->launch(m_selectedInstance, true, false);
+            APPLICATION->launch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance, true, false);
         });
         connect(normalLaunchOffline, &QAction::triggered, [this]() {
-            APPLICATION->launch(m_selectedInstance, false, false);
+            APPLICATION->launch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance, false, false);
         });
         connect(normalLaunchDemo, &QAction::triggered, [this]() {
-            APPLICATION->launch(m_selectedInstance, false, true);
+            APPLICATION->launch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance, false, true);
         });
     }
     else
@@ -1278,7 +1278,7 @@ void MainWindow::updateToolsMenu()
     }
 
     // Disable demo-mode if not available.
-    auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
+    auto instance = dynamic_cast<MinecraftInstance*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance.get());
     if (instance) {
         normalLaunchDemo->setEnabled(instance->supportsDemo());
     }
@@ -1298,18 +1298,18 @@ void MainWindow::updateToolsMenu()
             profilerAction->setToolTip(profilerToolTip);
             profilerOfflineAction->setToolTip(profilerToolTip);
         }
-        else if (m_selectedInstance)
+        else if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance)
         {
-            profilerAction->setEnabled(m_selectedInstance->canLaunch());
-            profilerOfflineAction->setEnabled(m_selectedInstance->canLaunch());
+            profilerAction->setEnabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->canLaunch());
+            profilerOfflineAction->setEnabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->canLaunch());
 
             connect(profilerAction, &QAction::triggered, [this, profiler]()
                     {
-                        APPLICATION->launch(m_selectedInstance, true, false, profiler.get());
+                        APPLICATION->launch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance, true, false, profiler.get());
                     });
             connect(profilerOfflineAction, &QAction::triggered, [this, profiler]()
                     {
-                        APPLICATION->launch(m_selectedInstance, false, false, profiler.get());
+                        APPLICATION->launch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance, false, false, profiler.get());
                     });
         }
         else
@@ -1515,7 +1515,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
                 /*
             case Qt::Key_Enter:
             case Qt::Key_Return:
-                activateInstance(m_selectedInstance);
+                activateInstance(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance);
                 return true;
                 */
             case Qt::Key_Delete:
@@ -1537,7 +1537,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
 
 void MainWindow::updateNewsLabel()
 {
-    if (m_newsChecker->isLoadingNews())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsChecker->isLoadingNews())
     {
         newsLabel->setText(tr("Loading news..."));
         newsLabel->setEnabled(false);
@@ -1545,7 +1545,7 @@ void MainWindow::updateNewsLabel()
     }
     else
     {
-        QList<NewsEntryPtr> entries = m_newsChecker->getNewsEntries();
+        QList<NewsEntryPtr> entries = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsChecker->getNewsEntries();
         if (entries.length() > 0)
         {
             newsLabel->setText(entries[0]->title);
@@ -1726,14 +1726,14 @@ void MainWindow::instanceFromInstanceTask(InstanceTask *rawTask)
 
 void MainWindow::on_actionCopyInstance_triggered()
 {
-    if (!m_selectedInstance)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance)
         return;
 
-    CopyInstanceDialog copyInstDlg(m_selectedInstance, this);
+    CopyInstanceDialog copyInstDlg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance, this);
     if (!copyInstDlg.exec())
         return;
 
-    auto copyTask = new InstanceCopyTask(m_selectedInstance, copyInstDlg.getChosenOptions());
+    auto copyTask = new InstanceCopyTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance, copyInstDlg.getChosenOptions());
     copyTask->setName(copyInstDlg.instName());
     copyTask->setGroup(copyInstDlg.instGroup());
     copyTask->setIcon(copyInstDlg.iconKey());
@@ -1870,14 +1870,14 @@ void MainWindow::on_actionMATRIX_triggered()
 
 void MainWindow::on_actionChangeInstIcon_triggered()
 {
-    if (!m_selectedInstance)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance)
         return;
 
     IconPickerDialog dlg(this);
-    dlg.execWithSelection(m_selectedInstance->iconKey());
+    dlg.execWithSelection(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->iconKey());
     if (dlg.result() == QDialog::Accepted)
     {
-        m_selectedInstance->setIconKey(dlg.selectedIconKey);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->setIconKey(dlg.selectedIconKey);
         auto icon = APPLICATION->icons()->getIcon(dlg.selectedIconKey);
         ui->actionChangeInstIcon->setIcon(icon);
         ui->changeIconButton->setIcon(icon);
@@ -1886,9 +1886,9 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 
 void MainWindow::iconUpdated(QString icon)
 {
-    if (icon == m_currentInstIcon)
+    if (icon == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentInstIcon)
     {
-        auto icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
+        auto icon = APPLICATION->icons()->getIcon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentInstIcon);
         ui->actionChangeInstIcon->setIcon(icon);
         ui->changeIconButton->setIcon(icon);
     }
@@ -1896,8 +1896,8 @@ void MainWindow::iconUpdated(QString icon)
 
 void MainWindow::updateInstanceToolIcon(QString new_icon)
 {
-    m_currentInstIcon = new_icon;
-    auto icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentInstIcon = new_icon;
+    auto icon = APPLICATION->icons()->getIcon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentInstIcon);
     ui->actionChangeInstIcon->setIcon(icon);
     ui->changeIconButton->setIcon(icon);
 }
@@ -1917,11 +1917,11 @@ void MainWindow::setSelectedInstanceById(const QString &id)
 
 void MainWindow::on_actionChangeInstGroup_triggered()
 {
-    if (!m_selectedInstance)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance)
         return;
 
     bool ok = false;
-    InstanceId instId = m_selectedInstance->id();
+    InstanceId instId = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->id();
     QString name(APPLICATION->instances()->getInstanceGroup(instId));
     auto groups = APPLICATION->instances()->getGroups();
     groups.insert(0, "");
@@ -2017,7 +2017,7 @@ void MainWindow::globalSettingsClosed()
 
 void MainWindow::on_actionEditInstance_triggered()
 {
-    APPLICATION->showInstanceWindow(m_selectedInstance);
+    APPLICATION->showInstanceWindow(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance);
 }
 
 void MainWindow::on_actionManageAccounts_triggered()
@@ -2066,14 +2066,14 @@ void MainWindow::on_actionOpenWiki_triggered()
 
 void MainWindow::on_actionMoreNews_triggered()
 {
-    auto entries = m_newsChecker->getNewsEntries();
+    auto entries = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsChecker->getNewsEntries();
     NewsDialog news_dialog(entries, this);
     news_dialog.exec();
 }
 
 void MainWindow::newsButtonClicked()
 {
-    auto entries = m_newsChecker->getNewsEntries();
+    auto entries = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsChecker->getNewsEntries();
     NewsDialog news_dialog(entries, this);
     news_dialog.toggleArticleList();
     news_dialog.exec();
@@ -2087,16 +2087,16 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionDeleteInstance_triggered()
 {
-    if (!m_selectedInstance) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance) {
         return;
     }
 
-    auto id = m_selectedInstance->id();
+    auto id = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->id();
 
     auto response =
         CustomMessageBox::selectable(this, tr("CAREFUL!"),
                                      tr("About to delete: %1\nThis may be permanent and will completely delete the instance.\n\nAre you sure?")
-                                         .arg(m_selectedInstance->name()),
+                                         .arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->name()),
                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
             ->exec();
 
@@ -2112,16 +2112,16 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
 void MainWindow::on_actionExportInstance_triggered()
 {
-    if (m_selectedInstance)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance)
     {
-        ExportInstanceDialog dlg(m_selectedInstance, this);
+        ExportInstanceDialog dlg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance, this);
         dlg.exec();
     }
 }
 
 void MainWindow::on_actionRenameInstance_triggered()
 {
-    if (m_selectedInstance)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance)
     {
         view->edit(view->currentIndex());
     }
@@ -2129,9 +2129,9 @@ void MainWindow::on_actionRenameInstance_triggered()
 
 void MainWindow::on_actionViewSelectedInstFolder_triggered()
 {
-    if (m_selectedInstance)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance)
     {
-        QString str = m_selectedInstance->instanceRoot();
+        QString str = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->instanceRoot();
         DesktopServices::openDirectory(QDir(str).absolutePath());
     }
 }
@@ -2168,9 +2168,9 @@ void MainWindow::instanceActivated(QModelIndex index)
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
-    if(m_selectedInstance && !m_selectedInstance->isRunning())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance && !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->isRunning())
     {
-        APPLICATION->launch(m_selectedInstance);
+        APPLICATION->launch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance);
     }
 }
 
@@ -2181,31 +2181,31 @@ void MainWindow::activateInstance(InstancePtr instance)
 
 void MainWindow::on_actionLaunchInstanceOffline_triggered()
 {
-    if (m_selectedInstance)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance)
     {
-        APPLICATION->launch(m_selectedInstance, false);
+        APPLICATION->launch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance, false);
     }
 }
 
 void MainWindow::on_actionLaunchInstanceDemo_triggered()
 {
-    if (m_selectedInstance)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance)
     {
-        APPLICATION->launch(m_selectedInstance, false, true);
+        APPLICATION->launch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance, false, true);
     }
 }
 
 void MainWindow::on_actionKillInstance_triggered()
 {
-    if(m_selectedInstance && m_selectedInstance->isRunning())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->isRunning())
     {
-        APPLICATION->kill(m_selectedInstance);
+        APPLICATION->kill(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance);
     }
 }
 
 void MainWindow::on_actionCreateInstanceShortcut_triggered()
 {
-    if (m_selectedInstance)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance)
     {
         auto desktopPath = FS::getDesktopDir();
         if (desktopPath.isEmpty()) {
@@ -2221,9 +2221,9 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             return;
         }
 
-        if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
-                           appPath, { "--launch", m_selectedInstance->id() },
-                           m_selectedInstance->name(), "")) {
+        if (FS::createShortcut(FS::PathCombine(desktopPath, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->name()),
+                           appPath, { "--launch", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->id() },
+                           hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->name(), "")) {
             QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
         }
         else
@@ -2245,13 +2245,13 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             }
         }
 
-        auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
+        auto icon = APPLICATION->icons()->icon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->iconKey());
         if (icon == nullptr)
         {
             icon = APPLICATION->icons()->icon("grass");
         }
 
-        QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.png");
+        QString iconPath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->instanceRoot(), "icon.png");
         
         QFile iconFile(iconPath);
         if (!iconFile.open(QFile::WriteOnly))
@@ -2269,7 +2269,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             return;
         }
 
-        QString desktopFilePath = FS::PathCombine(desktopPath, m_selectedInstance->name() + ".desktop");
+        QString desktopFilePath = FS::PathCombine(desktopPath, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->name() + ".desktop");
         QStringList args;
         if (DesktopServices::isFlatpak()) {
             QFileDialog fileDialog;
@@ -2285,8 +2285,8 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             flatpakAppId.remove(".desktop");
             args.append({ "run", flatpakAppId });
         }
-        args.append({ "--launch", m_selectedInstance->id() });
-        if (FS::createShortcut(desktopFilePath, appPath, args, m_selectedInstance->name(), iconPath)) {
+        args.append({ "--launch", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->id() });
+        if (FS::createShortcut(desktopFilePath, appPath, args, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->name(), iconPath)) {
             QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
         }
         else
@@ -2295,13 +2295,13 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
         }
 #elif defined(Q_OS_WIN)
-        auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
+        auto icon = APPLICATION->icons()->icon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->iconKey());
         if (icon == nullptr)
         {
             icon = APPLICATION->icons()->icon("grass");
         }
 
-        QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.ico");
+        QString iconPath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->instanceRoot(), "icon.ico");
         
         // part of fix for weird bug involving the window icon being replaced
         // dunno why it happens, but this 2-line fix seems to be enough, so w/e
@@ -2326,9 +2326,9 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             return;
         }
         
-        if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
-                           QApplication::applicationFilePath(), { "--launch", m_selectedInstance->id() },
-                           m_selectedInstance->name(), iconPath)) {
+        if (FS::createShortcut(FS::PathCombine(desktopPath, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->name()),
+                           QApplication::applicationFilePath(), { "--launch", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->id() },
+                           hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->name(), iconPath)) {
             QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
         }
         else
@@ -2345,8 +2345,8 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
 void MainWindow::taskEnd()
 {
     QObject *sender = QObject::sender();
-    if (sender == m_versionLoadTask)
-        m_versionLoadTask = NULL;
+    if (sender == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionLoadTask)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionLoadTask = NULL;
 
     sender->deleteLater();
 }
@@ -2366,37 +2366,37 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         selectionBad();
         return;
     }
-    if (m_selectedInstance) {
-        disconnect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance) {
+        disconnect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
     }
     QString id = current.data(InstanceList::InstanceIDRole).toString();
-    m_selectedInstance = APPLICATION->instances()->getInstanceById(id);
-    if (m_selectedInstance)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance = APPLICATION->instances()->getInstanceById(id);
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance)
     {
         ui->instanceToolBar->setEnabled(true);
         ui->setInstanceActionsEnabled(true);
-        ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
-        ui->actionLaunchInstanceOffline->setEnabled(m_selectedInstance->canLaunch());
-        ui->actionLaunchInstanceDemo->setEnabled(m_selectedInstance->canLaunch());
+        ui->actionLaunchInstance->setEnabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->canLaunch());
+        ui->actionLaunchInstanceOffline->setEnabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->canLaunch());
+        ui->actionLaunchInstanceDemo->setEnabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->canLaunch());
 
         // Disable demo-mode if not available.
-        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
+        auto instance = dynamic_cast<MinecraftInstance*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance.get());
         if (instance) {
              ui->actionLaunchInstanceDemo->setEnabled(instance->supportsDemo());
         }
 
-        ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
-        ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
-        ui->renameButton->setText(m_selectedInstance->name());
-        m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
+        ui->actionKillInstance->setEnabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->isRunning());
+        ui->actionExportInstance->setEnabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->canExport());
+        ui->renameButton->setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->name());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_statusLeft->setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->getStatusbarDescription());
         updateStatusCenter();
-        updateInstanceToolIcon(m_selectedInstance->iconKey());
+        updateInstanceToolIcon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->iconKey());
 
         updateToolsMenu();
 
-        APPLICATION->settings()->set("SelectedInstance", m_selectedInstance->id());
+        APPLICATION->settings()->set("SelectedInstance", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance->id());
 
-        connect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
     }
     else
     {
@@ -2430,7 +2430,7 @@ void MainWindow::instanceDataChanged(const QModelIndex &topLeft, const QModelInd
 void MainWindow::selectionBad()
 {
     // start by reseting everything...
-    m_selectedInstance = nullptr;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance = nullptr;
 
     statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
@@ -2484,11 +2484,11 @@ void MainWindow::checkInstancePathForProblems()
 
 void MainWindow::updateStatusCenter()
 {
-    m_statusCenter->setVisible(APPLICATION->settings()->get("ShowGlobalGameTime").toBool());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_statusCenter->setVisible(APPLICATION->settings()->get("ShowGlobalGameTime").toBool());
 
     int timePlayed = APPLICATION->instances()->getTotalPlayTime();
     if (timePlayed > 0) {
-        m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
     }
 }
 

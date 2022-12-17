@@ -67,12 +67,12 @@ class BlockedModsDialog : public QDialog {
 
    private:
     Ui::BlockedModsDialog* ui;
-    QList<BlockedMod>& m_mods;
-    QFileSystemWatcher m_watcher;
-    shared_qobject_ptr<ConcurrentTask> m_hashing_task;
-    QSet<QString> m_pending_hash_paths;
-    bool m_rehash_pending;
-    QPushButton* m_openMissingButton;
+    QList<BlockedMod>& hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods;
+    QFileSystemWatcher hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher;
+    shared_qobject_ptr<ConcurrentTask> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hashing_task;
+    QSet<QString> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pending_hash_paths;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rehash_pending;
+    QPushButton* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_openMissingButton;
 
     void openAll(bool missingOnly);
     void addDownloadFolder();

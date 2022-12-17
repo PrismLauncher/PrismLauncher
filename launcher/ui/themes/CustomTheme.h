@@ -54,12 +54,12 @@ class CustomTheme : public ITheme {
     QStringList searchPaths() override;
 
    private: /* data */
-    QPalette m_palette;
-    QColor m_fadeColor;
-    double m_fadeAmount;
-    QString m_styleSheet;
-    QString m_name;
-    QString m_id;
-    QString m_widgets;
-    QString m_qssFilePath;
+    QPalette hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_palette;
+    QColor hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fadeColor;
+    double hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fadeAmount;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_styleSheet;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_widgets;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qssFilePath;
 };

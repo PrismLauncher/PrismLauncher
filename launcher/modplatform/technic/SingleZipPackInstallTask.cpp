@@ -25,79 +25,79 @@
 
 Technic::SingleZipPackInstallTask::SingleZipPackInstallTask(const QUrl &sourceUrl, const QString &minecraftVersion)
 {
-    m_sourceUrl = sourceUrl;
-    m_minecraftVersion = minecraftVersion;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sourceUrl = sourceUrl;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersion = minecraftVersion;
 }
 
 bool Technic::SingleZipPackInstallTask::abort() {
-    if(m_abortable)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abortable)
     {
-        return m_filesNetJob->abort();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob->abort();
     }
     return false;
 }
 
 void Technic::SingleZipPackInstallTask::executeTask()
 {
-    setStatus(tr("Downloading modpack:\n%1").arg(m_sourceUrl.toString()));
+    setStatus(tr("Downloading modpack:\n%1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sourceUrl.toString()));
 
-    const QString path = m_sourceUrl.host() + '/' + m_sourceUrl.path();
+    const QString path = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sourceUrl.host() + '/' + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sourceUrl.path();
     auto entry = APPLICATION->metacache()->resolveEntry("general", path);
     entry->setStale(true);
-    m_filesNetJob = new NetJob(tr("Modpack download"), APPLICATION->network());
-    m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
-    m_archivePath = entry->getFullPath();
-    auto job = m_filesNetJob.get();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob = new NetJob(tr("Modpack download"), APPLICATION->network());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob->addNetAction(Net::Download::makeCached(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sourceUrl, entry));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_archivePath = entry->getFullPath();
+    auto job = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SingleZipPackInstallTask::downloadSucceeded);
     connect(job, &NetJob::progress, this, &Technic::SingleZipPackInstallTask::downloadProgressChanged);
     connect(job, &NetJob::failed, this, &Technic::SingleZipPackInstallTask::downloadFailed);
-    m_filesNetJob->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob->start();
 }
 
 void Technic::SingleZipPackInstallTask::downloadSucceeded()
 {
-    m_abortable = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abortable = false;
 
     setStatus(tr("Extracting modpack"));
-    QDir extractDir(FS::PathCombine(m_stagingPath, ".minecraft"));
-    qDebug() << "Attempting to create instance from" << m_archivePath;
+    QDir extractDir(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, ".minecraft"));
+    qDebug() << "Attempting to create instance from" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_archivePath;
 
     // open the zip and find relevant files in it
-    m_packZip.reset(new QuaZip(m_archivePath));
-    if (!m_packZip->open(QuaZip::mdUnzip))
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_packZip.reset(new QuaZip(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_archivePath));
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_packZip->open(QuaZip::mdUnzip))
     {
         emitFailed(tr("Unable to open supplied modpack zip file."));
         return;
     }
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractSubDir, m_packZip.get(), QString(""), extractDir.absolutePath());
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &Technic::SingleZipPackInstallTask::extractFinished);
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &Technic::SingleZipPackInstallTask::extractAborted);
-    m_extractFutureWatcher.setFuture(m_extractFuture);
-    m_filesNetJob.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractSubDir, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_packZip.get(), QString(""), extractDir.absolutePath());
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &Technic::SingleZipPackInstallTask::extractFinished);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &Technic::SingleZipPackInstallTask::extractAborted);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher.setFuture(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.reset();
 }
 
 void Technic::SingleZipPackInstallTask::downloadFailed(QString reason)
 {
-    m_abortable = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abortable = false;
     emitFailed(reason);
-    m_filesNetJob.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.reset();
 }
 
 void Technic::SingleZipPackInstallTask::downloadProgressChanged(qint64 current, qint64 total)
 {
-    m_abortable = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abortable = true;
     setProgress(current / 2, total);
 }
 
 void Technic::SingleZipPackInstallTask::extractFinished()
 {
-    m_packZip.reset();
-    if (!m_extractFuture.result())
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_packZip.reset();
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture.result())
     {
         emitFailed(tr("Failed to extract modpack"));
         return;
     }
-    QDir extractDir(m_stagingPath);
+    QDir extractDir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath);
 
     qDebug() << "Fixing permissions for extracted pack files...";
     QDirIterator it(extractDir, QDirIterator::Subdirectories);
@@ -133,7 +133,7 @@ void Technic::SingleZipPackInstallTask::extractFinished()
     shared_qobject_ptr<Technic::TechnicPackProcessor> packProcessor = new Technic::TechnicPackProcessor();
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &Technic::SingleZipPackInstallTask::emitSucceeded);
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &Technic::SingleZipPackInstallTask::emitFailed);
-    packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath, m_minecraftVersion);
+    packProcessor->run(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettings, name(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instIcon, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersion);
 }
 
 void Technic::SingleZipPackInstallTask::extractAborted()

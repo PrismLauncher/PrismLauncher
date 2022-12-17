@@ -55,6 +55,6 @@ class InfoFrame : public QFrame {
 
    private:
     Ui::InfoFrame* ui;
-    QString m_description;
-    class QMessageBox* m_current_box = nullptr;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description;
+    class QMessageBox* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_box = nullptr;
 };

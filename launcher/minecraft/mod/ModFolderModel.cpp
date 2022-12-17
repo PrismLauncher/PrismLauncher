@@ -49,9 +49,9 @@
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
 
-ModFolderModel::ModFolderModel(const QString &dir, bool is_indexed) : ResourceFolderModel(QDir(dir)), m_is_indexed(is_indexed)
+ModFolderModel::ModFolderModel(const QString &dir, bool is_indexed) : ResourceFolderModel(QDir(dir)), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_indexed(is_indexed)
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE };
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE };
 }
 
 QVariant ModFolderModel::data(const QModelIndex &index, int role) const
@@ -68,9 +68,9 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
         switch (column)
         {
         case NameColumn:
-            return m_resources[row]->name();
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row]->name();
         case VersionColumn: {
-            switch(m_resources[row]->type()) {
+            switch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row]->type()) {
                 case ResourceType::FOLDER:
                     return tr("Folder");
                 case ResourceType::SINGLEFILE:
@@ -81,14 +81,14 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
             return at(row)->version();
         }
         case DateColumn:
-            return m_resources[row]->dateTimeChanged();
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row]->dateTimeChanged();
 
         default:
             return QVariant();
         }
 
     case Qt::ToolTipRole:
-        return m_resources[row]->internal_id();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row]->internal_id();
 
     case Qt::CheckStateRole:
         switch (column)
@@ -150,14 +150,14 @@ int ModFolderModel::columnCount(const QModelIndex &parent) const
 Task* ModFolderModel::createUpdateTask()
 {
     auto index_dir = indexDir();
-    auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load);
-    m_first_folder_load = false;
+    auto task = new ModFolderLoadTask(dir(), index_dir, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_indexed, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_first_folder_load);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_first_folder_load = false;
     return task;
 }
 
 Task* ModFolderModel::createParseTask(Resource& resource)
 {
-    return new LocalModParseTask(m_next_resolution_ticket, resource.type(), resource.fileinfo());
+    return new LocalModParseTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_next_resolution_ticket, resource.type(), resource.fileinfo());
 }
 
 bool ModFolderModel::uninstallMod(const QString& filename, bool preserve_metadata)
@@ -178,7 +178,7 @@ bool ModFolderModel::uninstallMod(const QString& filename, bool preserve_metadat
 
 bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
 {
-    if(!m_can_interact) {
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_can_interact) {
         return false;
     }
 
@@ -202,19 +202,19 @@ bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
 
 bool ModFolderModel::isValid()
 {
-    return m_dir.exists() && m_dir.isReadable();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.exists() && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.isReadable();
 }
 
 bool ModFolderModel::startWatching()
 {
     // Remove orphaned metadata next time
-    m_first_folder_load = true;
-    return ResourceFolderModel::startWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_first_folder_load = true;
+    return ResourceFolderModel::startWatching({ hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath(), indexDir().absolutePath() });
 }
 
 bool ModFolderModel::stopWatching()
 {
-    return ResourceFolderModel::stopWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
+    return ResourceFolderModel::stopWatching({ hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath(), indexDir().absolutePath() });
 }
 
 auto ModFolderModel::selectedMods(QModelIndexList& indexes) -> QList<Mod*>
@@ -233,7 +233,7 @@ auto ModFolderModel::allMods() -> QList<Mod*>
 {
     QList<Mod*> mods;
 
-    for (auto& res : qAsConst(m_resources)) {
+    for (auto& res : qAsConst(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources)) {
         mods.append(static_cast<Mod*>(res.get()));
     }
 
@@ -242,18 +242,18 @@ auto ModFolderModel::allMods() -> QList<Mod*>
 
 void ModFolderModel::onUpdateSucceeded()
 {
-    auto update_results = static_cast<ModFolderLoadTask*>(m_current_update_task.get())->result();
+    auto update_results = static_cast<ModFolderLoadTask*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_update_task.get())->result();
 
     auto& new_mods = update_results->mods;
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    auto current_list = m_resources_index.keys();
+    auto current_list = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index.keys();
     QSet<QString> current_set(current_list.begin(), current_list.end());
 
     auto new_list = new_mods.keys();
     QSet<QString> new_set(new_list.begin(), new_list.end());
 #else
-    QSet<QString> current_set(m_resources_index.keys().toSet());
+    QSet<QString> current_set(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index.keys().toSet());
     QSet<QString> new_set(new_mods.keys().toSet());
 #endif
 
@@ -262,11 +262,11 @@ void ModFolderModel::onUpdateSucceeded()
 
 void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
 {
-    auto iter = m_active_parse_tasks.constFind(ticket);
-    if (iter == m_active_parse_tasks.constEnd())
+    auto iter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_active_parse_tasks.constFind(ticket);
+    if (iter == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_active_parse_tasks.constEnd())
         return;
 
-    int row = m_resources_index[mod_id];
+    int row = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index[mod_id];
 
     auto parse_task = *iter;
     auto cast_task = static_cast<LocalModParseTask*>(parse_task.get());

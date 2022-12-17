@@ -97,8 +97,8 @@ private:
     bool initialized = false;
     NewInstanceDialog *dialog = nullptr;
     Ui::VanillaPage *ui = nullptr;
-    bool m_versionSetByUser = false;
-    BaseVersion::Ptr m_selectedVersion;
-    BaseVersion::Ptr m_selectedLoaderVersion;
-    QString m_selectedLoader;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionSetByUser = false;
+    BaseVersion::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedVersion;
+    BaseVersion::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLoaderVersion;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLoader;
 };

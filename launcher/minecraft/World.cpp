@@ -44,7 +44,7 @@
 #include <MMCZip.h>
 #include <FileSystem.h>
 #include <sstream>
-#include <io/stream_reader.h>
+#include <io/streahello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reader.h>
 #include <tag_string.h>
 #include <tag_primitive.h>
 #include <quazip/quazip.h>
@@ -235,19 +235,19 @@ World::World(const QFileInfo &file)
 
 void World::repath(const QFileInfo &file)
 {
-    m_containerFile = file;
-    m_folderName = file.fileName();
-    m_size = calculateWorldSize(file);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile = file;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folderName = file.fileName();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_size = calculateWorldSize(file);
     if(file.isFile() && file.suffix() == "zip")
     {
-        m_iconFile = QString();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_iconFile = QString();
         readFromZip(file);
     }
     else if(file.isDir())
     {
         QFileInfo assumedIconPath(file.absoluteFilePath() + "/icon.png");
         if(assumedIconPath.exists()) {
-            m_iconFile = assumedIconPath.absoluteFilePath();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_iconFile = assumedIconPath.absoluteFilePath();
         }
         readFromFS(file);
     }
@@ -255,11 +255,11 @@ void World::repath(const QFileInfo &file)
 
 bool World::resetIcon()
 {
-    if(m_iconFile.isNull()) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_iconFile.isNull()) {
         return false;
     }
-    if(QFile(m_iconFile).remove()) {
-        m_iconFile = QString();
+    if(QFile(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_iconFile).remove()) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_iconFile = QString();
         return true;
     }
     return false;
@@ -291,7 +291,7 @@ void World::readFromZip(const QFileInfo &file)
     {
         return;
     }
-    m_containerOffsetPath = location;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerOffsetPath = location;
     QuaZipFile zippedFile(&zip);
     // read the install profile
     is_valid = zip.setCurrentFile(location + "level.dat");
@@ -318,28 +318,28 @@ void World::readFromZip(const QFileInfo &file)
 
 bool World::install(const QString &to, const QString &name)
 {
-    auto finalPath = FS::PathCombine(to, FS::DirNameFromString(m_actualName, to));
+    auto finalPath = FS::PathCombine(to, FS::DirNameFromString(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_actualName, to));
     if(!FS::ensureFolderPathExists(finalPath))
     {
         return false;
     }
     bool ok = false;
-    if(m_containerFile.isFile())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.isFile())
     {
-        QuaZip zip(m_containerFile.absoluteFilePath());
+        QuaZip zip(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.absoluteFilePath());
         if (!zip.open(QuaZip::mdUnzip))
         {
             return false;
         }
-        ok = !MMCZip::extractSubDir(&zip, m_containerOffsetPath, finalPath);
+        ok = !MMCZip::extractSubDir(&zip, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerOffsetPath, finalPath);
     }
-    else if(m_containerFile.isDir())
+    else if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.isDir())
     {
-        QString from = m_containerFile.filePath();
+        QString from = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.filePath();
         ok = FS::copy(from, finalPath)();
     }
 
-    if(ok && !name.isEmpty() && m_actualName != name)
+    if(ok && !name.isEmpty() && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_actualName != name)
     {
         QFileInfo finalPathInfo(finalPath);
         World newWorld(finalPathInfo);
@@ -353,12 +353,12 @@ bool World::install(const QString &to, const QString &name)
 
 bool World::rename(const QString &newName)
 {
-    if(m_containerFile.isFile())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.isFile())
     {
         return false;
     }
 
-    auto data = getLevelDatDataFromFS(m_containerFile);
+    auto data = getLevelDatDataFromFS(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile);
     if(data.isEmpty())
     {
         return false;
@@ -378,14 +378,14 @@ bool World::rename(const QString &newName)
     dataCompound.put("LevelName", nbt::value_initializer(newName.toUtf8().data()));
     data = serializeLevelDat(worldData.get());
 
-    putLevelDatDataToFS(m_containerFile, data);
+    putLevelDatDataToFS(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile, data);
 
-    m_actualName = newName;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_actualName = newName;
 
-    QDir parentDir(m_containerFile.absoluteFilePath());
+    QDir parentDir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.absoluteFilePath());
     parentDir.cdUp();
-    QFile container(m_containerFile.absoluteFilePath());
-    auto dirName = FS::DirNameFromString(m_actualName, parentDir.absolutePath());
+    QFile container(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.absoluteFilePath());
+    auto dirName = FS::DirNameFromString(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_actualName, parentDir.absolutePath());
     container.rename(parentDir.absoluteFilePath(dirName));
 
     return true;
@@ -491,7 +491,7 @@ void World::loadFromLevelDat(QByteArray data)
         valPtr = &levelData->at("Data");
     }
     catch (const std::out_of_range &e) {
-        qWarning() << "Unable to read NBT tags from " << m_folderName << ":" << e.what();
+        qWarning() << "Unable to read NBT tags from " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folderName << ":" << e.what();
         is_valid = false;
         return;
     }
@@ -502,12 +502,12 @@ void World::loadFromLevelDat(QByteArray data)
         return;
 
     auto name = read_string(val, "LevelName");
-    m_actualName = name ? *name : m_folderName;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_actualName = name ? *name : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folderName;
 
     auto timestamp = read_long(val, "LastPlayed");
-    m_lastPlayed = timestamp ? QDateTime::fromMSecsSinceEpoch(*timestamp) : levelDatTime;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lastPlayed = timestamp ? QDateTime::fromMSecsSinceEpoch(*timestamp) : levelDatTime;
 
-    m_gameType = read_gametype(val, "GameType");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gameType = read_gametype(val, "GameType");
 
     optional<int64_t> randomSeed;
     try {
@@ -518,26 +518,26 @@ void World::loadFromLevelDat(QByteArray data)
     if(!randomSeed) {
         randomSeed = read_long(val, "RandomSeed");
     }
-    m_randomSeed = randomSeed ? *randomSeed : 0;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_randomSeed = randomSeed ? *randomSeed : 0;
 
-    qDebug() << "World Name:" << m_actualName;
-    qDebug() << "Last Played:" << m_lastPlayed.toString();
+    qDebug() << "World Name:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_actualName;
+    qDebug() << "Last Played:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lastPlayed.toString();
     if(randomSeed) {
         qDebug() << "Seed:" << *randomSeed;
     }
-    qDebug() << "Size:" << m_size;
-    qDebug() << "GameType:" << m_gameType.toLogString();
+    qDebug() << "Size:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_size;
+    qDebug() << "GameType:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gameType.toLogString();
 }
 
 bool World::replace(World &with)
 {
     if (!destroy())
         return false;
-    bool success = FS::copy(with.m_containerFile.filePath(), m_containerFile.path())();
+    bool success = FS::copy(with.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.filePath(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.path())();
     if (success)
     {
-        m_folderName = with.m_folderName;
-        m_containerFile.refresh();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folderName = with.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folderName;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.refresh();
     }
     return success;
 }
@@ -545,14 +545,14 @@ bool World::replace(World &with)
 bool World::destroy()
 {
     if(!is_valid) return false;
-    if (m_containerFile.isDir())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.isDir())
     {
-        QDir d(m_containerFile.filePath());
+        QDir d(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.filePath());
         return d.removeRecursively();
     }
-    else if(m_containerFile.isFile())
+    else if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.isFile())
     {
-        QFile file(m_containerFile.absoluteFilePath());
+        QFile file(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.absoluteFilePath());
         return file.remove();
     }
     return true;

@@ -14,7 +14,7 @@ ChooseProviderDialog::ChooseProviderDialog(QWidget* parent, bool single_choice, 
     ui->setupUi(this);
 
     addProviders();
-    m_providers.button(0)->click();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_providers.button(0)->click();
 
     connect(ui->skipOneButton, &QPushButton::clicked, this, &ChooseProviderDialog::skipOne);
     connect(ui->skipAllButton, &QPushButton::clicked, this, &ChooseProviderDialog::skipAll);
@@ -49,27 +49,27 @@ void ChooseProviderDialog::skipOne()
 }
 void ChooseProviderDialog::skipAll()
 {
-    m_response.skip_all = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response.skip_all = true;
     reject();
 }
 
 void ChooseProviderDialog::confirmOne()
 {
-    m_response.chosen = getSelectedProvider();
-    m_response.try_others = ui->tryOthersCheckbox->isChecked();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response.chosen = getSelectedProvider();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response.try_others = ui->tryOthersCheckbox->isChecked();
     accept();
 }
 void ChooseProviderDialog::confirmAll()
 {
-    m_response.chosen = getSelectedProvider();
-    m_response.confirm_all = true;
-    m_response.try_others = ui->tryOthersCheckbox->isChecked();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response.chosen = getSelectedProvider();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response.confirhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_all = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response.try_others = ui->tryOthersCheckbox->isChecked();
     accept();
 }
 
 auto ChooseProviderDialog::getSelectedProvider() const -> ModPlatform::Provider
 {
-    return ModPlatform::Provider(m_providers.checkedId());
+    return ModPlatform::Provider(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_providers.checkedId());
 }
 
 void ChooseProviderDialog::addProviders()
@@ -79,14 +79,14 @@ void ChooseProviderDialog::addProviders()
 
     for (auto& provider : { ModPlatform::Provider::MODRINTH, ModPlatform::Provider::FLAME }) {
         btn = new QRadioButton(ProviderCaps.readableName(provider), this);
-        m_providers.addButton(btn, btn_index++);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_providers.addButton(btn, btn_index++);
         ui->providersLayout->addWidget(btn);
     }
 }
 
 void ChooseProviderDialog::disableInput()
 {
-    for (auto& btn : m_providers.buttons())
+    for (auto& btn : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_providers.buttons())
         btn->setEnabled(false);
 
     ui->skipOneButton->setEnabled(false);

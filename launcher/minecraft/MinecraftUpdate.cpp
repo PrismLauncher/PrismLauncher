@@ -34,47 +34,47 @@
 #include <meta/Index.h>
 #include <meta/Version.h>
 
-MinecraftUpdate::MinecraftUpdate(MinecraftInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
+MinecraftUpdate::MinecraftUpdate(MinecraftInstance *inst, QObject *parent) : Task(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst(inst)
 {
 }
 
 void MinecraftUpdate::executeTask()
 {
-    m_tasks.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks.clear();
     // create folders
     {
-        m_tasks.append(new FoldersTask(m_inst));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks.append(new FoldersTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst));
     }
 
     // add metadata update task if necessary
     {
-        auto components = m_inst->getPackProfile();
+        auto components = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getPackProfile();
         components->reload(Net::Mode::Online);
         auto task = components->getCurrentTask();
         if(task)
         {
-            m_tasks.append(task);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks.append(task);
         }
     }
 
     // libraries download
     {
-        m_tasks.append(new LibrariesTask(m_inst));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks.append(new LibrariesTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst));
     }
 
     // FML libraries download and copy into the instance
     {
-        m_tasks.append(new FMLLibrariesTask(m_inst));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks.append(new FMLLibrariesTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst));
     }
 
     // assets update
     {
-        m_tasks.append(new AssetUpdateTask(m_inst));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks.append(new AssetUpdateTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst));
     }
 
-    if(!m_preFailure.isEmpty())
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_preFailure.isEmpty())
     {
-        emitFailed(m_preFailure);
+        emitFailed(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_preFailure);
         return;
     }
     next();
@@ -82,36 +82,36 @@ void MinecraftUpdate::executeTask()
 
 void MinecraftUpdate::next()
 {
-    if(m_abort)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort)
     {
         emitFailed(tr("Aborted by user."));
         return;
     }
-    if(m_failed_out_of_order)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed_out_of_order)
     {
-        emitFailed(m_fail_reason);
+        emitFailed(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fail_reason);
         return;
     }
-    m_currentTask ++;
-    if(m_currentTask > 0)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask ++;
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask > 0)
     {
-        auto task = m_tasks[m_currentTask - 1];
+        auto task = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks[hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask - 1];
         disconnect(task.get(), &Task::succeeded, this, &MinecraftUpdate::subtaskSucceeded);
         disconnect(task.get(), &Task::failed, this, &MinecraftUpdate::subtaskFailed);
         disconnect(task.get(), &Task::aborted, this, &Task::abort);
         disconnect(task.get(), &Task::progress, this, &MinecraftUpdate::progress);
         disconnect(task.get(), &Task::status, this, &MinecraftUpdate::setStatus);
     }
-    if(m_currentTask == m_tasks.size())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks.size())
     {
         emitSucceeded();
         return;
     }
-    auto task = m_tasks[m_currentTask];
+    auto task = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks[hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask];
     // if the task is already finished by the time we look at it, skip it
     if(task->isFinished())
     {
-        qCritical() << "MinecraftUpdate: Skipping finished subtask" << m_currentTask << ":" << task.get();
+        qCritical() << "MinecraftUpdate: Skipping finished subtask" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask << ":" << task.get();
         next();
     }
     connect(task.get(), &Task::succeeded, this, &MinecraftUpdate::subtaskSucceeded);
@@ -134,7 +134,7 @@ void MinecraftUpdate::subtaskSucceeded()
         return;
     }
     auto senderTask = QObject::sender();
-    auto currentTask = m_tasks[m_currentTask].get();
+    auto currentTask = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks[hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask].get();
     if(senderTask != currentTask)
     {
         qDebug() << "MinecraftUpdate: Subtask" << sender() << "succeeded out of order.";
@@ -151,12 +151,12 @@ void MinecraftUpdate::subtaskFailed(QString error)
         return;
     }
     auto senderTask = QObject::sender();
-    auto currentTask = m_tasks[m_currentTask].get();
+    auto currentTask = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks[hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask].get();
     if(senderTask != currentTask)
     {
         qDebug() << "MinecraftUpdate: Subtask" << sender() << "failed out of order.";
-        m_failed_out_of_order = true;
-        m_fail_reason = error;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed_out_of_order = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fail_reason = error;
         return;
     }
     emitFailed(error);
@@ -165,10 +165,10 @@ void MinecraftUpdate::subtaskFailed(QString error)
 
 bool MinecraftUpdate::abort()
 {
-    if(!m_abort)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort)
     {
-        m_abort = true;
-        auto task = m_tasks[m_currentTask];
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort = true;
+        auto task = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks[hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask];
         if(task->canAbort())
         {
             return task->abort();

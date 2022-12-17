@@ -70,14 +70,14 @@ LauncherPage::LauncherPage(QWidget *parent) : QWidget(parent), ui(new Ui::Launch
     ui->setupUi(this);
     auto origForeground = ui->fontPreview->palette().color(ui->fontPreview->foregroundRole());
     auto origBackground = ui->fontPreview->palette().color(ui->fontPreview->backgroundRole());
-    m_colors.reset(new LogColorCache(origForeground, origBackground));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors.reset(new LogColorCache(origForeground, origBackground));
 
     ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
     ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
 
     defaultFormat = new QTextCharFormat(ui->fontPreview->currentCharFormat());
 
-    m_languageModel = APPLICATION->translations();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languageModel = APPLICATION->translations();
     loadSettings();
 
     if(BuildConfig.UPDATER_ENABLED)
@@ -223,9 +223,9 @@ void LauncherPage::refreshUpdateChannelList()
 
         // If the update channel we just added was the selected one, set the current index in
         // the combo box to it.
-        if (entry.id == m_currentUpdateChannel)
+        if (entry.id == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentUpdateChannel)
         {
-            qDebug() << "Selected index" << i << "channel id" << m_currentUpdateChannel;
+            qDebug() << "Selected index" << i << "channel id" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentUpdateChannel;
             selection = i;
         }
     }
@@ -266,7 +266,7 @@ void LauncherPage::refreshUpdateChannelDesc()
         ui->updateChannelDescLabel->setText(selected.description);
 
         // Set the currently selected channel ID.
-        m_currentUpdateChannel = selected.id;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentUpdateChannel = selected.id;
     }
 }
 
@@ -285,7 +285,7 @@ void LauncherPage::applySettings()
         s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
     }
 
-    s->set("UpdateChannel", m_currentUpdateChannel);
+    s->set("UpdateChannel", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentUpdateChannel);
     auto original = s->get("IconTheme").toString();
     //FIXME: make generic
     switch (ui->themeComboBox->currentIndex())
@@ -400,7 +400,7 @@ void LauncherPage::loadSettings()
         ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
     }
 
-    m_currentUpdateChannel = s->get("UpdateChannel").toString();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentUpdateChannel = s->get("UpdateChannel").toString();
     //FIXME: make generic
     auto theme = s->get("IconTheme").toString();
     QStringList iconThemeOptions{"pe_colored", 
@@ -496,7 +496,7 @@ void LauncherPage::refreshFontPreview()
     defaultFormat->setFont(QFont(fontFamily, fontSize));
     {
         QTextCharFormat format(*defaultFormat);
-        format.setForeground(m_colors->getFront(MessageLevel::Error));
+        format.setForeground(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors->getFront(MessageLevel::Error));
         // append a paragraph/line
         auto workCursor = ui->fontPreview->textCursor();
         workCursor.movePosition(QTextCursor::End);
@@ -505,7 +505,7 @@ void LauncherPage::refreshFontPreview()
     }
     {
         QTextCharFormat format(*defaultFormat);
-        format.setForeground(m_colors->getFront(MessageLevel::Message));
+        format.setForeground(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors->getFront(MessageLevel::Message));
         // append a paragraph/line
         auto workCursor = ui->fontPreview->textCursor();
         workCursor.movePosition(QTextCursor::End);
@@ -514,7 +514,7 @@ void LauncherPage::refreshFontPreview()
     }
     {
         QTextCharFormat format(*defaultFormat);
-        format.setForeground(m_colors->getFront(MessageLevel::Warning));
+        format.setForeground(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors->getFront(MessageLevel::Warning));
         // append a paragraph/line
         auto workCursor = ui->fontPreview->textCursor();
         workCursor.movePosition(QTextCursor::End);

@@ -4,20 +4,20 @@
 #include <QDebug>
 
 RecursiveFileSystemWatcher::RecursiveFileSystemWatcher(QObject *parent)
-    : QObject(parent), m_watcher(new QFileSystemWatcher(this))
+    : QObject(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher(new QFileSystemWatcher(this))
 {
-    connect(m_watcher, &QFileSystemWatcher::fileChanged, this,
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher, &QFileSystemWatcher::fileChanged, this,
             &RecursiveFileSystemWatcher::fileChange);
-    connect(m_watcher, &QFileSystemWatcher::directoryChanged, this,
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher, &QFileSystemWatcher::directoryChanged, this,
             &RecursiveFileSystemWatcher::directoryChange);
 }
 
 void RecursiveFileSystemWatcher::setRootDir(const QDir &root)
 {
-    bool wasEnabled = m_isEnabled;
+    bool wasEnabled = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isEnabled;
     disable();
-    m_root = root;
-    setFiles(scanRecursive(m_root));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_root = root;
+    setFiles(scanRecursive(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_root));
     if (wasEnabled)
     {
         enable();
@@ -25,9 +25,9 @@ void RecursiveFileSystemWatcher::setRootDir(const QDir &root)
 }
 void RecursiveFileSystemWatcher::setWatchFiles(const bool watchFiles)
 {
-    bool wasEnabled = m_isEnabled;
+    bool wasEnabled = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isEnabled;
     disable();
-    m_watchFiles = watchFiles;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watchFiles = watchFiles;
     if (wasEnabled)
     {
         enable();
@@ -36,53 +36,53 @@ void RecursiveFileSystemWatcher::setWatchFiles(const bool watchFiles)
 
 void RecursiveFileSystemWatcher::enable()
 {
-    if (m_isEnabled)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isEnabled)
     {
         return;
     }
-    Q_ASSERT(m_root != QDir::root());
-    addFilesToWatcherRecursive(m_root);
-    m_isEnabled = true;
+    Q_ASSERT(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_root != QDir::root());
+    addFilesToWatcherRecursive(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_root);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isEnabled = true;
 }
 void RecursiveFileSystemWatcher::disable()
 {
-    if (!m_isEnabled)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isEnabled)
     {
         return;
     }
-    m_isEnabled = false;
-    m_watcher->removePaths(m_watcher->files());
-    m_watcher->removePaths(m_watcher->directories());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isEnabled = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->removePaths(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->files());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->removePaths(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->directories());
 }
 
 void RecursiveFileSystemWatcher::setFiles(const QStringList &files)
 {
-    if (files != m_files)
+    if (files != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files)
     {
-        m_files = files;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files = files;
         emit filesChanged();
     }
 }
 
 void RecursiveFileSystemWatcher::addFilesToWatcherRecursive(const QDir &dir)
 {
-    m_watcher->addPath(dir.absolutePath());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->addPath(dir.absolutePath());
     for (const QString &directory : dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
     {
         addFilesToWatcherRecursive(dir.absoluteFilePath(directory));
     }
-    if (m_watchFiles)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watchFiles)
     {
         for (const QFileInfo &info : dir.entryInfoList(QDir::Files))
         {
-            m_watcher->addPath(info.absoluteFilePath());
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->addPath(info.absoluteFilePath());
         }
     }
 }
 QStringList RecursiveFileSystemWatcher::scanRecursive(const QDir &directory)
 {
     QStringList ret;
-    if(!m_matcher)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_matcher)
     {
         return {};
     }
@@ -92,8 +92,8 @@ QStringList RecursiveFileSystemWatcher::scanRecursive(const QDir &directory)
     }
     for (const QString &file : directory.entryList(QDir::Files | QDir::Hidden))
     {
-        auto relPath = m_root.relativeFilePath(directory.absoluteFilePath(file));
-        if (m_matcher->matches(relPath))
+        auto relPath = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_root.relativeFilePath(directory.absoluteFilePath(file));
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_matcher->matches(relPath))
         {
             ret.append(relPath);
         }
@@ -107,5 +107,5 @@ void RecursiveFileSystemWatcher::fileChange(const QString &path)
 }
 void RecursiveFileSystemWatcher::directoryChange(const QString &path)
 {
-    setFiles(scanRecursive(m_root));
+    setFiles(scanRecursive(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_root));
 }

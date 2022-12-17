@@ -7,7 +7,7 @@
 class ActionButton : public QToolButton {
     Q_OBJECT
    public:
-    ActionButton(QAction* action, QWidget* parent = nullptr) : QToolButton(parent), m_action(action)
+    ActionButton(QAction* action, QWidget* parent = nullptr) : QToolButton(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action(action)
     {
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
@@ -19,18 +19,18 @@ class ActionButton : public QToolButton {
    public slots:
     void actionChanged()
     {
-        setEnabled(m_action->isEnabled());
-        setChecked(m_action->isChecked());
-        setCheckable(m_action->isCheckable());
-        setText(m_action->text());
-        setIcon(m_action->icon());
-        setToolTip(m_action->toolTip());
-        setHidden(!m_action->isVisible());
+        setEnabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action->isEnabled());
+        setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action->isChecked());
+        setCheckable(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action->isCheckable());
+        setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action->text());
+        setIcon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action->icon());
+        setToolTip(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action->toolTip());
+        setHidden(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action->isVisible());
         setFocusPolicy(Qt::NoFocus);
     }
 
    private:
-    QAction* m_action;
+    QAction* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action;
 };
 
 WideBar::WideBar(const QString& title, QWidget* parent) : QToolBar(title, parent)
@@ -58,9 +58,9 @@ void WideBar::addAction(QAction* action)
     entry.menu_action = action;
     entry.type = BarEntry::Type::Action;
 
-    m_entries.push_back(entry);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.push_back(entry);
 
-    m_menu_state = MenuState::Dirty;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_menu_state = MenuState::Dirty;
 }
 
 void WideBar::addSeparator()
@@ -69,12 +69,12 @@ void WideBar::addSeparator()
     entry.bar_action = QToolBar::addSeparator();
     entry.type = BarEntry::Type::Separator;
 
-    m_entries.push_back(entry);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.push_back(entry);
 }
 
 auto WideBar::getMatching(QAction* act) -> QList<BarEntry>::iterator
 {
-    auto iter = std::find_if(m_entries.begin(), m_entries.end(), [act](BarEntry const& entry) { return entry.menu_action == act; });
+    auto iter = std::find_if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.begin(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.end(), [act](BarEntry const& entry) { return entry.menu_action == act; });
 
     return iter;
 }
@@ -82,7 +82,7 @@ auto WideBar::getMatching(QAction* act) -> QList<BarEntry>::iterator
 void WideBar::insertActionBefore(QAction* before, QAction* action)
 {
     auto iter = getMatching(before);
-    if (iter == m_entries.end())
+    if (iter == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.end())
         return;
 
     BarEntry entry;
@@ -90,15 +90,15 @@ void WideBar::insertActionBefore(QAction* before, QAction* action)
     entry.menu_action = action;
     entry.type = BarEntry::Type::Action;
 
-    m_entries.insert(iter, entry);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.insert(iter, entry);
 
-    m_menu_state = MenuState::Dirty;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_menu_state = MenuState::Dirty;
 }
 
 void WideBar::insertActionAfter(QAction* after, QAction* action)
 {
     auto iter = getMatching(after);
-    if (iter == m_entries.end())
+    if (iter == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.end())
         return;
 
     BarEntry entry;
@@ -106,15 +106,15 @@ void WideBar::insertActionAfter(QAction* after, QAction* action)
     entry.menu_action = action;
     entry.type = BarEntry::Type::Action;
 
-    m_entries.insert(iter + 1, entry);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.insert(iter + 1, entry);
 
-    m_menu_state = MenuState::Dirty;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_menu_state = MenuState::Dirty;
 }
 
 void WideBar::insertSpacer(QAction* action)
 {
     auto iter = getMatching(action);
-    if (iter == m_entries.end())
+    if (iter == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.end())
         return;
 
     auto* spacer = new QWidget();
@@ -123,26 +123,26 @@ void WideBar::insertSpacer(QAction* action)
     BarEntry entry;
     entry.bar_action = insertWidget(iter->bar_action, spacer);
     entry.type = BarEntry::Type::Spacer;
-    m_entries.insert(iter, entry);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.insert(iter, entry);
 }
 
 void WideBar::insertSeparator(QAction* before)
 {
     auto iter = getMatching(before);
-    if (iter == m_entries.end())
+    if (iter == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.end())
         return;
 
     BarEntry entry;
     entry.bar_action = QToolBar::insertSeparator(before);
     entry.type = BarEntry::Type::Separator;
 
-    m_entries.insert(iter, entry);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.insert(iter, entry);
 }
 
 QMenu* WideBar::createContextMenu(QWidget* parent, const QString& title)
 {
     auto* contextMenu = new QMenu(title, parent);
-    for (auto& item : m_entries) {
+    for (auto& item : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries) {
         switch (item.type) {
             default:
             case BarEntry::Type::None:
@@ -171,16 +171,16 @@ static void copyAction(QAction* from, QAction* to)
 
 void WideBar::showVisibilityMenu(QPoint const& position)
 {
-    if (!m_bar_menu)
-        m_bar_menu = std::make_unique<QMenu>(this);
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar_menu)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar_menu = std::make_unique<QMenu>(this);
 
-    if (m_menu_state == MenuState::Dirty) {
-        for (auto* old_action : m_bar_menu->actions())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_menu_state == MenuState::Dirty) {
+        for (auto* old_action : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar_menu->actions())
             old_action->deleteLater();
 
-        m_bar_menu->clear();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar_menu->clear();
 
-        for (auto& entry : m_entries) {
+        for (auto& entry : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries) {
             if (entry.type != BarEntry::Type::Action)
                 continue;
 
@@ -197,20 +197,20 @@ void WideBar::showVisibilityMenu(QPoint const& position)
                 static_cast<ActionButton*>(widgetForAction(entry.bar_action))->actionChanged();
             });
 
-            m_bar_menu->addAction(act);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar_menu->addAction(act);
         }
 
-        m_menu_state = MenuState::Fresh;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_menu_state = MenuState::Fresh;
     }
 
-    m_bar_menu->popup(mapToGlobal(position));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar_menu->popup(mapToGlobal(position));
 }
 
 [[nodiscard]] QByteArray WideBar::getVisibilityState() const
 {
     QByteArray state;
 
-    for (auto const& entry : m_entries) {
+    for (auto const& entry : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries) {
         if (entry.type != BarEntry::Type::Action)
             continue;
 
@@ -235,7 +235,7 @@ void WideBar::setVisibilityState(QByteArray&& state)
         return;
 
     qsizetype i = 0;
-    for (auto& entry : m_entries) {
+    for (auto& entry : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries) {
         if (entry.type != BarEntry::Type::Action)
             continue;
         if (i == bits.size())
@@ -251,7 +251,7 @@ void WideBar::setVisibilityState(QByteArray&& state)
 QByteArray WideBar::getHash() const
 {
     QCryptographicHash hash(QCryptographicHash::Sha1);
-    for (auto const& entry : m_entries) {
+    for (auto const& entry : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries) {
         if (entry.type != BarEntry::Type::Action)
             continue;
         hash.addData(entry.menu_action->text().toLatin1());

@@ -156,27 +156,27 @@ bool ensureFolderPathExists(QString foldernamepath)
 bool copy::operator()(const QString& offset, bool dryRun)
 {
     using copy_opts = fs::copy_options;
-    m_copied = 0;  // reset counter
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copied = 0;  // reset counter
 
 // NOTE always deep copy on windows. the alternatives are too messy.
 #if defined Q_OS_WIN32
-    m_followSymlinks = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_followSymlinks = true;
 #endif
 
-    auto src = PathCombine(m_src.absolutePath(), offset);
-    auto dst = PathCombine(m_dst.absolutePath(), offset);
+    auto src = PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_src.absolutePath(), offset);
+    auto dst = PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dst.absolutePath(), offset);
 
     std::error_code err;
 
     fs::copy_options opt = copy_opts::none;
 
     // The default behavior is to follow symlinks
-    if (!m_followSymlinks)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_followSymlinks)
         opt |= copy_opts::copy_symlinks;
 
     // Function that'll do the actual copying
     auto copy_file = [&](QString src_path, QString relative_dst_path) {
-        if (m_matcher && (m_matcher->matches(relative_dst_path) != m_whitelist))
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_matcher && (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_matcher->matches(relative_dst_path) != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_whitelist))
             return;
 
         auto dst_path = PathCombine(dst, relative_dst_path);
@@ -189,7 +189,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
             qDebug() << "Source file:" << src_path;
             qDebug() << "Destination file:" << dst_path;
         }
-        m_copied++;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copied++;
         emit fileCopied(relative_dst_path);
     };
 

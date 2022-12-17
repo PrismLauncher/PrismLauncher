@@ -197,12 +197,12 @@ void FlamePage::suggestCurrent()
         return;
     }
 
-    if (m_selected_version_index == -1) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selected_version_index == -1) {
         dialog->setSuggestedPack();
         return;
     }
 
-    auto version = current.versions.at(m_selected_version_index);
+    auto version = current.versions.at(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selected_version_index);
 
     QMap<QString, QString> extra_info;
     extra_info.insert("pack_id", QString::number(current.addonId));
@@ -221,13 +221,13 @@ void FlamePage::onVersionSelectionChanged(QString data)
     ui->versionSelectionBox->currentData().toInt(&is_blocked);
 
     if (data.isNull() || data.isEmpty() || is_blocked) {
-        m_selected_version_index = -1;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selected_version_index = -1;
         return;
     }
 
-    m_selected_version_index = ui->versionSelectionBox->currentIndex();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selected_version_index = ui->versionSelectionBox->currentIndex();
 
-    Q_ASSERT(current.versions.at(m_selected_version_index).downloadUrl == ui->versionSelectionBox->currentData().toString());
+    Q_ASSERT(current.versions.at(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selected_version_index).downloadUrl == ui->versionSelectionBox->currentData().toString());
 
     suggestCurrent();
 }

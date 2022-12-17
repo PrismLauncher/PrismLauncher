@@ -64,11 +64,11 @@ IconList::IconList(const QStringList &builtinPaths, QString path, QObject *paren
         addThemeIcon(builtinName);
     }
 
-    m_watcher.reset(new QFileSystemWatcher());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher.reset(new QFileSystemWatcher());
     is_watching = false;
-    connect(m_watcher.get(), SIGNAL(directoryChanged(QString)),
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher.get(), SIGNAL(directoryChanged(QString)),
             SLOT(directoryChanged(QString)));
-    connect(m_watcher.get(), SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher.get(), SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
 
     directoryChanged(path);
 
@@ -80,7 +80,7 @@ void IconList::sortIconList()
 {
     qDebug() << "Sorting icon list...";
     std::sort(icons.begin(), icons.end(), [](const MMCIcon& a, const MMCIcon& b) {
-        return a.m_key.localeAwareCompare(b.m_key) < 0;
+        return a.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_key.localeAwareCompare(b.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_key) < 0;
     });
     reindex();
 }
@@ -88,23 +88,23 @@ void IconList::sortIconList()
 void IconList::directoryChanged(const QString &path)
 {
     QDir new_dir (path);
-    if(m_dir.absolutePath() != new_dir.absolutePath())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath() != new_dir.absolutePath())
     {
-        m_dir.setPath(path);
-        m_dir.refresh();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.setPath(path);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.refresh();
         if(is_watching)
             stopWatching();
         startWatching();
     }
-    if(!m_dir.exists())
-        if(!FS::ensureFolderPathExists(m_dir.absolutePath()))
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.exists())
+        if(!FS::ensureFolderPathExists(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath()))
             return;
-    m_dir.refresh();
-    auto new_list = m_dir.entryList(QDir::Files, QDir::Name);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.refresh();
+    auto new_list = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.entryList(QDir::Files, QDir::Name);
     for (auto it = new_list.begin(); it != new_list.end(); it++)
     {
         QString &foo = (*it);
-        foo = m_dir.filePath(foo);
+        foo = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.filePath(foo);
     }
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QSet<QString> new_set(new_list.begin(), new_list.end());
@@ -116,7 +116,7 @@ void IconList::directoryChanged(const QString &path)
     {
         if (!it.has(IconType::FileBased))
             continue;
-        current_list.push_back(it.m_images[IconType::FileBased].filename);
+        current_list.push_back(it.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_images[IconType::FileBased].filename);
     }
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QSet<QString> current_set(current_list.begin(), current_list.end());
@@ -156,7 +156,7 @@ void IconList::directoryChanged(const QString &path)
         {
             dataChanged(index(idx), index(idx));
         }
-        m_watcher->removePath(remove);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->removePath(remove);
         emit iconUpdated(key);
     }
 
@@ -174,7 +174,7 @@ void IconList::directoryChanged(const QString &path)
 
         if (addIcon(key, QString(), addfile.filePath(), IconType::FileBased))
         {
-            m_watcher->addPath(add);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->addPath(add);
             emit iconUpdated(key);
         }
     }
@@ -196,7 +196,7 @@ void IconList::fileChanged(const QString &path)
     if (!icon.availableSizes().size())
         return;
 
-    icons[idx].m_images[IconType::FileBased].icon = icon;
+    icons[idx].hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_images[IconType::FileBased].icon = icon;
     dataChanged(index(idx), index(idx));
     emit iconUpdated(key);
 }
@@ -211,9 +211,9 @@ void IconList::SettingChanged(const Setting &setting, QVariant value)
 
 void IconList::startWatching()
 {
-    auto abs_path = m_dir.absolutePath();
+    auto abs_path = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath();
     FS::ensureFolderPathExists(abs_path);
-    is_watching = m_watcher->addPath(abs_path);
+    is_watching = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->addPath(abs_path);
     if (is_watching)
     {
         qDebug() << "Started watching " << abs_path;
@@ -226,8 +226,8 @@ void IconList::startWatching()
 
 void IconList::stopWatching()
 {
-    m_watcher->removePaths(m_watcher->files());
-    m_watcher->removePaths(m_watcher->directories());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->removePaths(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->files());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->removePaths(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->directories());
     is_watching = false;
 }
 
@@ -294,7 +294,7 @@ QVariant IconList::data(const QModelIndex &index, int role) const
     case Qt::DisplayRole:
         return icons[row].name();
     case Qt::UserRole:
-        return icons[row].m_key;
+        return icons[row].hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_key;
     default:
         return QVariant();
     }
@@ -384,8 +384,8 @@ bool IconList::addThemeIcon(const QString& key)
         beginInsertRows(QModelIndex(), icons.size(), icons.size());
         {
             MMCIcon mmc_icon;
-            mmc_icon.m_name = key;
-            mmc_icon.m_key = key;
+            mmc_icon.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = key;
+            mmc_icon.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_key = key;
             mmc_icon.replace(Builtin, key);
             icons.push_back(mmc_icon);
             name_index[key] = icons.size() - 1;
@@ -415,8 +415,8 @@ bool IconList::addIcon(const QString &key, const QString &name, const QString &p
         beginInsertRows(QModelIndex(), icons.size(), icons.size());
         {
             MMCIcon mmc_icon;
-            mmc_icon.m_name = name;
-            mmc_icon.m_key = key;
+            mmc_icon.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = name;
+            mmc_icon.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_key = key;
             mmc_icon.replace(type, icon, path);
             icons.push_back(mmc_icon);
             name_index[key] = icons.size() - 1;
@@ -440,7 +440,7 @@ void IconList::reindex()
     int i = 0;
     for (auto &iter : icons)
     {
-        name_index[iter.m_key] = i;
+        name_index[iter.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_key] = i;
         i++;
     }
 }
@@ -471,7 +471,7 @@ int IconList::getIconIndex(const QString &key) const
 
 QString IconList::getDirectory() const
 {
-    return m_dir.absolutePath();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath();
 }
 
 //#include "IconList.moc"

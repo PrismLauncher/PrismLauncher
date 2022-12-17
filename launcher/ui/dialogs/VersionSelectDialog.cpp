@@ -37,41 +37,41 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, 
 {
     setObjectName(QStringLiteral("VersionSelectDialog"));
     resize(400, 347);
-    m_verticalLayout = new QVBoxLayout(this);
-    m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout = new QVBoxLayout(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
-    m_versionWidget = new VersionSelectWidget(parent);
-    m_verticalLayout->addWidget(m_versionWidget);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget = new VersionSelectWidget(parent);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget);
 
-    m_horizontalLayout = new QHBoxLayout();
-    m_horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout = new QHBoxLayout();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
 
-    m_refreshButton = new QPushButton(this);
-    m_refreshButton->setObjectName(QStringLiteral("refreshButton"));
-    m_horizontalLayout->addWidget(m_refreshButton);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshButton = new QPushButton(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshButton->setObjectName(QStringLiteral("refreshButton"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshButton);
 
-    m_buttonBox = new QDialogButtonBox(this);
-    m_buttonBox->setObjectName(QStringLiteral("buttonBox"));
-    m_buttonBox->setOrientation(Qt::Horizontal);
-    m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
-    m_horizontalLayout->addWidget(m_buttonBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttonBox = new QDialogButtonBox(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttonBox->setObjectName(QStringLiteral("buttonBox"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttonBox->setOrientation(Qt::Horizontal);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttonBox);
 
-    m_verticalLayout->addLayout(m_horizontalLayout);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout->addLayout(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout);
 
     retranslate();
 
-    QObject::connect(m_buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
-    QObject::connect(m_buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    QObject::connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    QObject::connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
     QMetaObject::connectSlotsByName(this);
     setWindowModality(Qt::WindowModal);
     setWindowTitle(title);
 
-    m_vlist = vlist;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist = vlist;
 
     if (!cancelable)
     {
-        m_buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
     }
 }
 
@@ -79,24 +79,24 @@ void VersionSelectDialog::retranslate()
 {
     // FIXME: overrides custom title given in constructor!
     setWindowTitle(tr("Choose Version"));
-    m_refreshButton->setToolTip(tr("Reloads the version list."));
-    m_refreshButton->setText(tr("&Refresh"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshButton->setToolTip(tr("Reloads the version list."));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshButton->setText(tr("&Refresh"));
 }
 
 void VersionSelectDialog::setCurrentVersion(const QString& version)
 {
-    m_currentVersion = version;
-    m_versionWidget->setCurrentVersion(version);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersion = version;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->setCurrentVersion(version);
 }
 
 void VersionSelectDialog::setEmptyString(QString emptyString)
 {
-    m_versionWidget->setEmptyString(emptyString);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->setEmptyString(emptyString);
 }
 
 void VersionSelectDialog::setEmptyErrorString(QString emptyErrorString)
 {
-    m_versionWidget->setEmptyErrorString(emptyErrorString);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->setEmptyErrorString(emptyErrorString);
 }
 
 void VersionSelectDialog::setResizeOn(int column)
@@ -107,35 +107,35 @@ void VersionSelectDialog::setResizeOn(int column)
 int VersionSelectDialog::exec()
 {
     QDialog::open();
-    m_versionWidget->initialize(m_vlist);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->initialize(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist);
     if(resizeOnColumn != -1)
     {
-        m_versionWidget->setResizeOn(resizeOnColumn);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->setResizeOn(resizeOnColumn);
     }
     return QDialog::exec();
 }
 
 void VersionSelectDialog::selectRecommended()
 {
-    m_versionWidget->selectRecommended();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->selectRecommended();
 }
 
 BaseVersion::Ptr VersionSelectDialog::selectedVersion() const
 {
-    return m_versionWidget->selectedVersion();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->selectedVersion();
 }
 
 void VersionSelectDialog::on_refreshButton_clicked()
 {
-    m_versionWidget->loadList();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->loadList();
 }
 
 void VersionSelectDialog::setExactFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-    m_versionWidget->setExactFilter(role, filter);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->setExactFilter(role, filter);
 }
 
 void VersionSelectDialog::setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-    m_versionWidget->setFuzzyFilter(role, filter);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->setFuzzyFilter(role, filter);
 }

@@ -59,11 +59,11 @@ public:
 
     QString uid() const
     {
-        return m_uid;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid;
     }
     QString name() const
     {
-        return m_name;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
     }
     QString humanReadable() const;
 
@@ -72,7 +72,7 @@ public:
 
     QVector<Version::Ptr> versions() const
     {
-        return m_versions;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions;
     }
 
 public: // for usage only by parsers
@@ -91,12 +91,12 @@ protected slots:
     }
 
 private:
-    QVector<Version::Ptr> m_versions;
-    QHash<QString, Version::Ptr> m_lookup;
-    QString m_uid;
-    QString m_name;
+    QVector<Version::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions;
+    QHash<QString, Version::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lookup;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
 
-    Version::Ptr m_recommended;
+    Version::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_recommended;
 
     void setupAddedVersion(const int row, const Version::Ptr &version);
 };

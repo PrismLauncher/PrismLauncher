@@ -49,7 +49,7 @@ public:
      */
     virtual QString id() const
     {
-        return m_synonyms.first();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_synonyms.first();
     }
 
     /*!
@@ -60,7 +60,7 @@ public:
      */
     virtual QStringList configKeys() const
     {
-        return m_synonyms;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_synonyms;
     }
 
     /*!
@@ -111,8 +111,8 @@ slots:
 
 protected:
     friend class SettingsObject;
-    SettingsObject * m_storage;
-    QStringList m_synonyms;
-    QVariant m_defVal;
+    SettingsObject * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_storage;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_synonyms;
+    QVariant hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defVal;
 };
 

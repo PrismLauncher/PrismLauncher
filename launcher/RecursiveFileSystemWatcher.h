@@ -13,24 +13,24 @@ public:
     void setRootDir(const QDir &root);
     QDir rootDir() const
     {
-        return m_root;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_root;
     }
 
     // WARNING: setting this to true may be bad for performance
     void setWatchFiles(const bool watchFiles);
     bool watchFiles() const
     {
-        return m_watchFiles;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watchFiles;
     }
 
     void setMatcher(IPathMatcher::Ptr matcher)
     {
-        m_matcher = matcher;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_matcher = matcher;
     }
 
     QStringList files() const
     {
-        return m_files;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files;
     }
 
 signals:
@@ -42,14 +42,14 @@ public slots:
     void disable();
 
 private:
-    QDir m_root;
-    bool m_watchFiles = false;
-    bool m_isEnabled = false;
-    IPathMatcher::Ptr m_matcher;
+    QDir hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_root;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watchFiles = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isEnabled = false;
+    IPathMatcher::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_matcher;
 
-    QFileSystemWatcher *m_watcher;
+    QFileSystemWatcher *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher;
 
-    QStringList m_files;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files;
     void setFiles(const QStringList &files);
 
     void addFilesToWatcherRecursive(const QDir &dir);

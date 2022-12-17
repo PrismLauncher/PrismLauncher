@@ -40,9 +40,9 @@ private slots:
     void subtaskFailed(QString error);
 
 private:
-    MinecraftInstance *m_inst = nullptr;
-    Task::Ptr m_task;
-    QString m_preFailure;
-    QString m_fail_reason;
+    MinecraftInstance *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst = nullptr;
+    Task::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_preFailure;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fail_reason;
 };
 

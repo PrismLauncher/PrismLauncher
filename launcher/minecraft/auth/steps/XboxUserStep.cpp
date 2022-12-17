@@ -33,7 +33,7 @@ void XboxUserStep::perform() {
     "TokenType": "JWT"
 }
 )XXX";
-    auto xbox_auth_data = xbox_auth_template.arg(m_data->msaToken.token);
+    auto xbox_auth_data = xbox_auth_template.arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->msaToken.token);
 
     QNetworkRequest request = QNetworkRequest(QUrl("https://user.auth.xboxlive.com/user/authenticate"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -74,6 +74,6 @@ void XboxUserStep::onRequestDone(
         emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication response could not be understood."));
         return;
     }
-    m_data->userToken = temp;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->userToken = temp;
     emit finished(AccountTaskState::STATE_WORKING, tr("Got Xbox user token"));
 }

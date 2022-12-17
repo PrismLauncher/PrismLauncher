@@ -37,6 +37,6 @@ private:
     void checkDone();
 
 private: // DATA
-    bool m_modsDone = false;
-    bool m_coreModsDone = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modsDone = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_coreModsDone = false;
 };

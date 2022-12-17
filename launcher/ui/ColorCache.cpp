@@ -6,13 +6,13 @@
  */
 QColor ColorCache::blend(QColor color)
 {
-    if (Rainbow::luma(m_front) > Rainbow::luma(m_back))
+    if (Rainbow::luma(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_front) > Rainbow::luma(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_back))
     {
         // for dark color schemes, produce a fitting color first
-        color = Rainbow::tint(m_front, color, 0.5);
+        color = Rainbow::tint(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_front, color, 0.5);
     }
     // adapt contrast
-    return Rainbow::mix(m_front, color, m_bias);
+    return Rainbow::mix(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_front, color, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bias);
 }
 
 /**
@@ -21,13 +21,13 @@ QColor ColorCache::blend(QColor color)
 QColor ColorCache::blendBackground(QColor color)
 {
     // adapt contrast
-    return Rainbow::mix(m_back, color, m_bias);
+    return Rainbow::mix(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_back, color, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bias);
 }
 
 void ColorCache::recolorAll()
 {
-    auto iter = m_colors.begin();
-    while(iter != m_colors.end())
+    auto iter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors.begin();
+    while(iter != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors.end())
     {
         iter->front = blend(iter->original);
         iter->back = blendBackground(iter->original);

@@ -38,21 +38,21 @@
 
 void LaunchProfile::clear()
 {
-    m_minecraftVersion.clear();
-    m_minecraftVersionType.clear();
-    m_minecraftAssets.reset();
-    m_minecraftArguments.clear();
-    m_addnJvmArguments.clear();
-    m_tweakers.clear();
-    m_mainClass.clear();
-    m_appletClass.clear();
-    m_libraries.clear();
-    m_mavenFiles.clear();
-    m_agents.clear();
-    m_traits.clear();
-    m_jarMods.clear();
-    m_mainJar.reset();
-    m_problemSeverity = ProblemSeverity::None;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersion.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersionType.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftAssets.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftArguments.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_addnJvmArguments.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tweakers.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainClass.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_appletClass.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_libraries.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mavenFiles.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_agents.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_traits.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jarMods.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainJar.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_problemSeverity = ProblemSeverity::None;
 }
 
 static void applyString(const QString & from, QString & to)
@@ -64,52 +64,52 @@ static void applyString(const QString & from, QString & to)
 
 void LaunchProfile::applyMinecraftVersion(const QString& id)
 {
-    applyString(id, this->m_minecraftVersion);
+    applyString(id, this->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersion);
 }
 
 void LaunchProfile::applyAppletClass(const QString& appletClass)
 {
-    applyString(appletClass, this->m_appletClass);
+    applyString(appletClass, this->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_appletClass);
 }
 
 void LaunchProfile::applyMainClass(const QString& mainClass)
 {
-    applyString(mainClass, this->m_mainClass);
+    applyString(mainClass, this->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainClass);
 }
 
 void LaunchProfile::applyMinecraftArguments(const QString& minecraftArguments)
 {
-    applyString(minecraftArguments, this->m_minecraftArguments);
+    applyString(minecraftArguments, this->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftArguments);
 }
 
 void LaunchProfile::applyAddnJvmArguments(const QStringList& addnJvmArguments)
 {
-    this->m_addnJvmArguments.append(addnJvmArguments);
+    this->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_addnJvmArguments.append(addnJvmArguments);
 }
 
 void LaunchProfile::applyMinecraftVersionType(const QString& type)
 {
-    applyString(type, this->m_minecraftVersionType);
+    applyString(type, this->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersionType);
 }
 
 void LaunchProfile::applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets)
 {
     if(assets)
     {
-        m_minecraftAssets = assets;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftAssets = assets;
     }
 }
 
 void LaunchProfile::applyTraits(const QSet<QString>& traits)
 {
-    this->m_traits.unite(traits);
+    this->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_traits.unite(traits);
 }
 
 void LaunchProfile::applyTweakers(const QStringList& tweakers)
 {
     // if the applied tweakers override an existing one, skip it. this effectively moves it later in the sequence
     QStringList newTweakers;
-    for(auto & tweaker: m_tweakers)
+    for(auto & tweaker: hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tweakers)
     {
         if (tweakers.contains(tweaker))
         {
@@ -119,12 +119,12 @@ void LaunchProfile::applyTweakers(const QStringList& tweakers)
     }
     // then just append the new tweakers (or moved original ones)
     newTweakers += tweakers;
-    m_tweakers = newTweakers;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tweakers = newTweakers;
 }
 
 void LaunchProfile::applyJarMods(const QList<LibraryPtr>& jarMods)
 {
-    this->m_jarMods.append(jarMods);
+    this->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jarMods.append(jarMods);
 }
 
 static int findLibraryByName(QList<LibraryPtr> *haystack, const GradleSpecifier &needle)
@@ -145,7 +145,7 @@ static int findLibraryByName(QList<LibraryPtr> *haystack, const GradleSpecifier 
 
 void LaunchProfile::applyMods(const QList<LibraryPtr>& mods)
 {
-    QList<LibraryPtr> * list = &m_mods;
+    QList<LibraryPtr> * list = &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods;
     for(auto & mod: mods)
     {
         auto modCopy = Library::limitedCopy(mod);
@@ -170,7 +170,7 @@ void LaunchProfile::applyMods(const QList<LibraryPtr>& mods)
 
 void LaunchProfile::applyCompatibleJavaMajors(QList<int>& javaMajor)
 {
-    m_compatibleJavaMajors.append(javaMajor);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_compatibleJavaMajors.append(javaMajor);
 }
 
 void LaunchProfile::applyLibrary(LibraryPtr library, const RuntimeContext & runtimeContext)
@@ -180,10 +180,10 @@ void LaunchProfile::applyLibrary(LibraryPtr library, const RuntimeContext & runt
         return;
     }
 
-    QList<LibraryPtr> * list = &m_libraries;
+    QList<LibraryPtr> * list = &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_libraries;
     if(library->isNative())
     {
-        list = &m_nativeLibraries;
+        list = &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeLibraries;
     }
 
     auto libraryCopy = Library::limitedCopy(library);
@@ -218,7 +218,7 @@ void LaunchProfile::applyMavenFile(LibraryPtr mavenFile, const RuntimeContext & 
     }
 
     // unlike libraries, we do not keep only one version or try to dedupe them
-    m_mavenFiles.append(Library::limitedCopy(mavenFile));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mavenFiles.append(Library::limitedCopy(mavenFile));
 }
 
 void LaunchProfile::applyAgent(AgentPtr agent, const RuntimeContext & runtimeContext)
@@ -234,27 +234,27 @@ void LaunchProfile::applyAgent(AgentPtr agent, const RuntimeContext & runtimeCon
         return;
     }
 
-    m_agents.append(agent);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_agents.append(agent);
 }
 
 const LibraryPtr LaunchProfile::getMainJar() const
 {
-    return m_mainJar;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainJar;
 }
 
 void LaunchProfile::applyMainJar(LibraryPtr jar)
 {
     if(jar)
     {
-        m_mainJar = jar;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainJar = jar;
     }
 }
 
 void LaunchProfile::applyProblemSeverity(ProblemSeverity severity)
 {
-    if (m_problemSeverity < severity)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_problemSeverity < severity)
     {
-        m_problemSeverity = severity;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_problemSeverity = severity;
     }
 }
 
@@ -266,91 +266,91 @@ const QList<PatchProblem> LaunchProfile::getProblems() const
 
 QString LaunchProfile::getMinecraftVersion() const
 {
-    return m_minecraftVersion;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersion;
 }
 
 QString LaunchProfile::getAppletClass() const
 {
-    return m_appletClass;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_appletClass;
 }
 
 QString LaunchProfile::getMainClass() const
 {
-    return m_mainClass;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainClass;
 }
 
 const QSet<QString> &LaunchProfile::getTraits() const
 {
-    return m_traits;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_traits;
 }
 
 const QStringList & LaunchProfile::getTweakers() const
 {
-    return m_tweakers;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tweakers;
 }
 
 bool LaunchProfile::hasTrait(const QString& trait) const
 {
-    return m_traits.contains(trait);
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_traits.contains(trait);
 }
 
 ProblemSeverity LaunchProfile::getProblemSeverity() const
 {
-    return m_problemSeverity;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_problemSeverity;
 }
 
 QString LaunchProfile::getMinecraftVersionType() const
 {
-    return m_minecraftVersionType;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersionType;
 }
 
 std::shared_ptr<MojangAssetIndexInfo> LaunchProfile::getMinecraftAssets() const
 {
-    if(!m_minecraftAssets)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftAssets)
     {
         return std::make_shared<MojangAssetIndexInfo>("legacy");
     }
-    return m_minecraftAssets;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftAssets;
 }
 
 QString LaunchProfile::getMinecraftArguments() const
 {
-    return m_minecraftArguments;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftArguments;
 }
 
 const QStringList & LaunchProfile::getAddnJvmArguments() const
 {
-    return m_addnJvmArguments;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_addnJvmArguments;
 }
 
 const QList<LibraryPtr> & LaunchProfile::getJarMods() const
 {
-    return m_jarMods;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jarMods;
 }
 
 const QList<LibraryPtr> & LaunchProfile::getLibraries() const
 {
-    return m_libraries;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_libraries;
 }
 
 const QList<LibraryPtr> & LaunchProfile::getNativeLibraries() const
 {
-    return m_nativeLibraries;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeLibraries;
 }
 
 const QList<LibraryPtr> & LaunchProfile::getMavenFiles() const
 {
-    return m_mavenFiles;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mavenFiles;
 }
 
 const QList<AgentPtr> & LaunchProfile::getAgents() const
 {
-    return m_agents;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_agents;
 }
 
 const QList<int> & LaunchProfile::getCompatibleJavaMajors() const
 {
-    return m_compatibleJavaMajors;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_compatibleJavaMajors;
 }
 
 void LaunchProfile::getLibraryFiles(
@@ -369,17 +369,17 @@ void LaunchProfile::getLibraryFiles(
         lib->getApplicableFiles(runtimeContext, jars, nativeJars, native32, native64, overridePath);
     }
     // NOTE: order is important here, add main jar last to the lists
-    if(m_mainJar)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainJar)
     {
         // FIXME: HACK!! jar modding is weird and unsystematic!
-        if(m_jarMods.size())
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jarMods.size())
         {
             QDir tempDir(tempPath);
             jars.append(tempDir.absoluteFilePath("minecraft.jar"));
         }
         else
         {
-            m_mainJar->getApplicableFiles(runtimeContext, jars, nativeJars, native32, native64, overridePath);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainJar->getApplicableFiles(runtimeContext, jars, nativeJars, native32, native64, overridePath);
         }
     }
     for (auto lib : getNativeLibraries())

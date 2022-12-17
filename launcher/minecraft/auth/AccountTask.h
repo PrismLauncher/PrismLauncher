@@ -69,10 +69,10 @@ public:
     explicit AccountTask(AccountData * data, QObject *parent = 0);
     virtual ~AccountTask() {};
 
-    AccountTaskState m_taskState = AccountTaskState::STATE_CREATED;
+    AccountTaskState hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_taskState = AccountTaskState::STATE_CREATED;
 
     AccountTaskState taskState() {
-        return m_taskState;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_taskState;
     }
 
 signals:
@@ -93,5 +93,5 @@ protected slots:
     bool changeState(AccountTaskState newState, QString reason = QString());
 
 protected:
-    AccountData *m_data = nullptr;
+    AccountData *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data = nullptr;
 };

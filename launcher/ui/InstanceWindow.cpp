@@ -52,12 +52,12 @@
 #include "icons/IconList.h"
 
 InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
-    : QMainWindow(parent), m_instance(instance)
+    : QMainWindow(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance(instance)
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
-    auto icon = APPLICATION->icons()->getIcon(m_instance->iconKey());
-    QString windowTitle = tr("Console window for ") + m_instance->name();
+    auto icon = APPLICATION->icons()->getIcon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->iconKey());
+    QString windowTitle = tr("Console window for ") + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->name();
 
     // Set window properties
     {
@@ -67,10 +67,10 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 
     // Add page container
     {
-        auto provider = std::make_shared<InstancePageProvider>(m_instance);
-        m_container = new PageContainer(provider.get(), "console", this);
-        m_container->setParentContainer(this);
-        setCentralWidget(m_container);
+        auto provider = std::make_shared<InstancePageProvider>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container = new PageContainer(provider.get(), "console", this);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->setParentContainer(this);
+        setCentralWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container);
         setContentsMargins(0, 0, 0, 0);
     }
 
@@ -83,33 +83,33 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
         auto btnHelp = new QPushButton();
         btnHelp->setText(tr("Help"));
         horizontalLayout->addWidget(btnHelp);
-        connect(btnHelp, SIGNAL(clicked(bool)), m_container, SLOT(help()));
+        connect(btnHelp, SIGNAL(clicked(bool)), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container, SLOT(help()));
 
         auto spacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
         horizontalLayout->addSpacerItem(spacer);
 
-        m_killButton = new QPushButton();
-        horizontalLayout->addWidget(m_killButton);
-        connect(m_killButton, SIGNAL(clicked(bool)), SLOT(on_btnKillMinecraft_clicked()));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton = new QPushButton();
+        horizontalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton, SIGNAL(clicked(bool)), SLOT(on_btnKillMinecraft_clicked()));
 
-        m_launchOfflineButton = new QPushButton();
-        horizontalLayout->addWidget(m_launchOfflineButton);
-        m_launchOfflineButton->setText(tr("Launch Offline"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchOfflineButton = new QPushButton();
+        horizontalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchOfflineButton);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchOfflineButton->setText(tr("Launch Offline"));
 
-        m_launchDemoButton = new QPushButton();
-        horizontalLayout->addWidget(m_launchDemoButton);
-        m_launchDemoButton->setText(tr("Launch Demo"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchDemoButton = new QPushButton();
+        horizontalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchDemoButton);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchDemoButton->setText(tr("Launch Demo"));
 
         updateLaunchButtons();
-        connect(m_launchOfflineButton, SIGNAL(clicked(bool)), SLOT(on_btnLaunchMinecraftOffline_clicked()));
-        connect(m_launchDemoButton, SIGNAL(clicked(bool)), SLOT(on_btnLaunchMinecraftDemo_clicked()));
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchOfflineButton, SIGNAL(clicked(bool)), SLOT(on_btnLaunchMinecraftOffline_clicked()));
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchDemoButton, SIGNAL(clicked(bool)), SLOT(on_btnLaunchMinecraftDemo_clicked()));
 
-        m_closeButton = new QPushButton();
-        m_closeButton->setText(tr("Close"));
-        horizontalLayout->addWidget(m_closeButton);
-        connect(m_closeButton, SIGNAL(clicked(bool)), SLOT(on_closeButton_clicked()));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_closeButton = new QPushButton();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_closeButton->setText(tr("Close"));
+        horizontalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_closeButton);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_closeButton, SIGNAL(clicked(bool)), SLOT(on_closeButton_clicked()));
 
-        m_container->addButtons(horizontalLayout);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->addButtons(horizontalLayout);
     }
 
     // restore window state
@@ -122,20 +122,20 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 
     // set up instance and launch process recognition
     {
-        auto launchTask = m_instance->getLaunchTask();
+        auto launchTask = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->getLaunchTask();
         instanceLaunchTaskChanged(launchTask);
-        connect(m_instance.get(), &BaseInstance::launchTaskChanged, this, &InstanceWindow::instanceLaunchTaskChanged);
-        connect(m_instance.get(), &BaseInstance::runningStatusChanged, this, &InstanceWindow::runningStateChanged);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance.get(), &BaseInstance::launchTaskChanged, this, &InstanceWindow::instanceLaunchTaskChanged);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance.get(), &BaseInstance::runningStatusChanged, this, &InstanceWindow::runningStateChanged);
     }
 
     // set up instance destruction detection
     {
-        connect(m_instance.get(), &BaseInstance::statusChanged, this, &InstanceWindow::on_instanceStatusChanged);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance.get(), &BaseInstance::statusChanged, this, &InstanceWindow::on_instanceStatusChanged);
     }
 
     // add ourself as the modpack page's instance window
     {
-        static_cast<ManagedPackPage*>(m_container->getPage("managed_pack"))->setInstanceWindow(this);
+        static_cast<ManagedPackPage*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->getPage("managed_pack"))->setInstanceWindow(this);
     }
 
     show();
@@ -145,68 +145,68 @@ void InstanceWindow::on_instanceStatusChanged(BaseInstance::Status, BaseInstance
 {
     if(newStatus == BaseInstance::Status::Gone)
     {
-        m_doNotSave = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doNotSave = true;
         close();
     }
 }
 
 void InstanceWindow::updateLaunchButtons()
 {
-    if(m_instance->isRunning())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->isRunning())
     {
-        m_launchOfflineButton->setEnabled(false);
-        m_launchDemoButton->setEnabled(false);
-        m_killButton->setText(tr("Kill"));
-        m_killButton->setObjectName("killButton");
-        m_killButton->setToolTip(tr("Kill the running instance"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchOfflineButton->setEnabled(false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchDemoButton->setEnabled(false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton->setText(tr("Kill"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton->setObjectName("killButton");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton->setToolTip(tr("Kill the running instance"));
     }
-    else if(!m_instance->canLaunch())
+    else if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->canLaunch())
     {
-        m_launchOfflineButton->setEnabled(false);
-        m_launchDemoButton->setEnabled(false);
-        m_killButton->setText(tr("Launch"));
-        m_killButton->setObjectName("launchButton");
-        m_killButton->setToolTip(tr("Launch the instance"));
-        m_killButton->setEnabled(false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchOfflineButton->setEnabled(false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchDemoButton->setEnabled(false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton->setText(tr("Launch"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton->setObjectName("launchButton");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton->setToolTip(tr("Launch the instance"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton->setEnabled(false);
     }
     else
     {
-        m_launchOfflineButton->setEnabled(true);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchOfflineButton->setEnabled(true);
 
         // Disable demo-mode if not available.
-        auto instance = dynamic_cast<MinecraftInstance*>(m_instance.get());
+        auto instance = dynamic_cast<MinecraftInstance*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance.get());
         if (instance) {
-            m_launchDemoButton->setEnabled(instance->supportsDemo());
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchDemoButton->setEnabled(instance->supportsDemo());
         }
 
-        m_killButton->setText(tr("Launch"));
-        m_killButton->setObjectName("launchButton");
-        m_killButton->setToolTip(tr("Launch the instance"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton->setText(tr("Launch"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton->setObjectName("launchButton");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton->setToolTip(tr("Launch the instance"));
     }
     // NOTE: this is a hack to force the button to recalculate its style
-    m_killButton->setStyleSheet("/* */");
-    m_killButton->setStyleSheet(QString());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton->setStyleSheet("/* */");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton->setStyleSheet(QString());
 }
 
 void InstanceWindow::on_btnLaunchMinecraftOffline_clicked()
 {
-    APPLICATION->launch(m_instance, false, false, nullptr);
+    APPLICATION->launch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance, false, false, nullptr);
 }
 
 void InstanceWindow::on_btnLaunchMinecraftDemo_clicked()
 {
-    APPLICATION->launch(m_instance, false, true, nullptr);
+    APPLICATION->launch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance, false, true, nullptr);
 }
 
 void InstanceWindow::instanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc)
 {
-    m_proc = proc;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proc = proc;
 }
 
 void InstanceWindow::runningStateChanged(bool running)
 {
     updateLaunchButtons();
-    m_container->refreshContainer();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->refreshContainer();
     if(running) {
         selectPage("log");
     }
@@ -220,9 +220,9 @@ void InstanceWindow::on_closeButton_clicked()
 void InstanceWindow::closeEvent(QCloseEvent *event)
 {
     bool proceed = true;
-    if(!m_doNotSave)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doNotSave)
     {
-        proceed &= m_container->prepareToClose();
+        proceed &= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->prepareToClose();
     }
 
     if(!proceed)
@@ -238,34 +238,34 @@ void InstanceWindow::closeEvent(QCloseEvent *event)
 
 bool InstanceWindow::saveAll()
 {
-    return m_container->saveAll();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->saveAll();
 }
 
 void InstanceWindow::on_btnKillMinecraft_clicked()
 {
-    if(m_instance->isRunning())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->isRunning())
     {
-        APPLICATION->kill(m_instance);
+        APPLICATION->kill(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance);
     }
     else
     {
-        APPLICATION->launch(m_instance, true, false, nullptr);
+        APPLICATION->launch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance, true, false, nullptr);
     }
 }
 
 QString InstanceWindow::instanceId()
 {
-    return m_instance->id();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->id();
 }
 
 bool InstanceWindow::selectPage(QString pageId)
 {
-    return m_container->selectPage(pageId);
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->selectPage(pageId);
 }
 
 void InstanceWindow::refreshContainer()
 {
-    m_container->refreshContainer();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->refreshContainer();
 }
 
 InstanceWindow::~InstanceWindow()
@@ -274,7 +274,7 @@ InstanceWindow::~InstanceWindow()
 
 bool InstanceWindow::requestClose()
 {
-    if(m_container->prepareToClose())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->prepareToClose())
     {
         close();
         return true;

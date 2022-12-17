@@ -72,7 +72,7 @@ typedef std::shared_ptr<BaseInstance> InstancePtr;
  * To create a new instance type, create a new class inheriting from this class
  * and implement the pure virtual functions.
  */
-class BaseInstance : public QObject, public std::enable_shared_from_this<BaseInstance>
+class BaseInstance : public QObject, public std::enable_shared_frohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_this<BaseInstance>
 {
     Q_OBJECT
 protected:
@@ -224,44 +224,44 @@ public:
     void updateRuntimeContext();
     RuntimeContext runtimeContext() const
     {
-        return m_runtimeContext;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_runtimeContext;
     }
 
     bool hasVersionBroken() const
     {
-        return m_hasBrokenVersion;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hasBrokenVersion;
     }
     void setVersionBroken(bool value)
     {
-        if(m_hasBrokenVersion != value)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hasBrokenVersion != value)
         {
-            m_hasBrokenVersion = value;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hasBrokenVersion = value;
             emit propertiesChanged(this);
         }
     }
 
     bool hasUpdateAvailable() const
     {
-        return m_hasUpdate;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hasUpdate;
     }
     void setUpdateAvailable(bool value)
     {
-        if(m_hasUpdate != value)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hasUpdate != value)
         {
-            m_hasUpdate = value;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hasUpdate = value;
             emit propertiesChanged(this);
         }
     }
 
     bool hasCrashed() const
     {
-        return m_crashed;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_crashed;
     }
     void setCrashed(bool value)
     {
-        if(m_crashed != value)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_crashed != value)
         {
-            m_crashed = value;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_crashed = value;
             emit propertiesChanged(this);
         }
     }
@@ -285,10 +285,10 @@ public:
 protected:
     void changeStatus(Status newStatus);
 
-    SettingsObjectPtr globalSettings() const { return m_global_settings.lock(); };
+    SettingsObjectPtr globalSettings() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_global_settings.lock(); };
 
-    bool isSpecificSettingsLoaded() const { return m_specific_settings_loaded; }
-    void setSpecificSettingsLoaded(bool loaded) { m_specific_settings_loaded = loaded; }
+    bool isSpecificSettingsLoaded() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_specific_settings_loaded; }
+    void setSpecificSettingsLoaded(bool loaded) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_specific_settings_loaded = loaded; }
 
 signals:
     /*!
@@ -306,22 +306,22 @@ protected slots:
     void iconUpdated(QString key);
 
 protected: /* data */
-    QString m_rootDir;
-    SettingsObjectPtr m_settings;
-    // InstanceFlags m_flags;
-    bool m_isRunning = false;
-    shared_qobject_ptr<LaunchTask> m_launchProcess;
-    QDateTime m_timeStarted;
-    RuntimeContext m_runtimeContext;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootDir;
+    SettingsObjectPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings;
+    // InstanceFlags hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_flags;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isRunning = false;
+    shared_qobject_ptr<LaunchTask> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchProcess;
+    QDateTime hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_timeStarted;
+    RuntimeContext hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_runtimeContext;
 
 private: /* data */
-    Status m_status = Status::Present;
-    bool m_crashed = false;
-    bool m_hasUpdate = false;
-    bool m_hasBrokenVersion = false;
+    Status hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = Status::Present;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_crashed = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hasUpdate = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hasBrokenVersion = false;
 
-    SettingsObjectWeakPtr m_global_settings;
-    bool m_specific_settings_loaded = false;
+    SettingsObjectWeakPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_global_settings;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_specific_settings_loaded = false;
 
 };
 

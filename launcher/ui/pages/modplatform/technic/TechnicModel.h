@@ -72,9 +72,9 @@ private:
 
 private:
     QList<Modpack> modpacks;
-    QStringList m_failedLogos;
-    QStringList m_loadingLogos;
-    QMap<QString, QIcon> m_logoMap;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos;
+    QMap<QString, QIcon> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap;
     QMap<QString, LogoCallback> waitingCallbacks;
 
     QString currentSearchTerm;

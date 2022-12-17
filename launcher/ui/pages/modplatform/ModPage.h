@@ -54,7 +54,7 @@ class ModPage : public QWidget, public BasePage {
     virtual bool optedOut(ModPlatform::IndexedVersion& ver) const { return false; };
 
     auto apiProvider() -> ModAPI* { return api.get(); };
-    auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
+    auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter; }
     auto getDialog() const -> const ModDownloadDialog* { return dialog; }
 
     /** Get the current term in the search bar. */
@@ -70,7 +70,7 @@ class ModPage : public QWidget, public BasePage {
     void openedImpl() override;
     auto eventFilter(QObject* watched, QEvent* event) -> bool override;
 
-    BaseInstance* m_instance;
+    BaseInstance* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance;
 
    protected:
     ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api);
@@ -88,10 +88,10 @@ class ModPage : public QWidget, public BasePage {
     Ui::ModPage* ui = nullptr;
     ModDownloadDialog* dialog = nullptr;
 
-    unique_qobject_ptr<ModFilterWidget> m_filter_widget;
-    std::shared_ptr<ModFilterWidget::Filter> m_filter;
+    unique_qobject_ptr<ModFilterWidget> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget;
+    std::shared_ptr<ModFilterWidget::Filter> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter;
 
-    ProgressWidget m_fetch_progress;
+    ProgressWidget hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_progress;
 
     ModPlatform::ListModel* listModel = nullptr;
     ModPlatform::IndexedPack current;
@@ -101,5 +101,5 @@ class ModPage : public QWidget, public BasePage {
     int selectedVersion = -1;
 
     // Used to do instant searching with a delay to cache quick changes
-    QTimer m_search_timer;
+    QTimer hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_search_timer;
 };

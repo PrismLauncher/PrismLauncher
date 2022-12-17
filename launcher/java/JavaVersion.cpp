@@ -7,7 +7,7 @@
 
 JavaVersion & JavaVersion::operator=(const QString & javaVersionString)
 {
-    m_string = javaVersionString;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_string = javaVersionString;
 
     auto getCapturedInteger = [](const QRegularExpressionMatch & match, const QString &what) -> int
     {
@@ -29,12 +29,12 @@ JavaVersion & JavaVersion::operator=(const QString & javaVersionString)
         pattern = QRegularExpression("(?<major>[0-9]+)([.](?<minor>[0-9]+))?([.](?<security>[0-9]+))?(-(?<prerelease>[a-zA-Z0-9]+))?");
     }
 
-    auto match = pattern.match(m_string);
-    m_parseable = match.hasMatch();
-    m_major = getCapturedInteger(match, "major");
-    m_minor = getCapturedInteger(match, "minor");
-    m_security = getCapturedInteger(match, "security");
-    m_prerelease = match.captured("prerelease");
+    auto match = pattern.match(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_string);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parseable = match.hasMatch();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_major = getCapturedInteger(match, "major");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minor = getCapturedInteger(match, "minor");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_security = getCapturedInteger(match, "security");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prerelease = match.captured("prerelease");
     return *this;
 }
 
@@ -45,24 +45,24 @@ JavaVersion::JavaVersion(const QString &rhs)
 
 QString JavaVersion::toString()
 {
-    return m_string;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_string;
 }
 
 bool JavaVersion::requiresPermGen()
 {
-    if(m_parseable)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parseable)
     {
-        return m_major < 8;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_major < 8;
     }
     return true;
 }
 
 bool JavaVersion::operator<(const JavaVersion &rhs)
 {
-    if(m_parseable && rhs.m_parseable)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parseable && rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parseable)
     {
-        auto major = m_major;
-        auto rmajor = rhs.m_major;
+        auto major = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_major;
+        auto rmajor = rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_major;
 
         // HACK: discourage using java 9
         if(major > 8)
@@ -74,18 +74,18 @@ bool JavaVersion::operator<(const JavaVersion &rhs)
             return true;
         if(major > rmajor)
             return false;
-        if(m_minor < rhs.m_minor)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minor < rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minor)
             return true;
-        if(m_minor > rhs.m_minor)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minor > rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minor)
             return false;
-        if(m_security < rhs.m_security)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_security < rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_security)
             return true;
-        if(m_security > rhs.m_security)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_security > rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_security)
             return false;
 
         // everything else being equal, consider prerelease status
-        bool thisPre = !m_prerelease.isEmpty();
-        bool rhsPre = !rhs.m_prerelease.isEmpty();
+        bool thisPre = !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prerelease.isEmpty();
+        bool rhsPre = !rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prerelease.isEmpty();
         if(thisPre && !rhsPre)
         {
             // this is a prerelease and the other one isn't -> lesser
@@ -99,21 +99,21 @@ bool JavaVersion::operator<(const JavaVersion &rhs)
         else if(thisPre && rhsPre)
         {
             // both are prereleases - use natural compare...
-            return StringUtils::naturalCompare(m_prerelease, rhs.m_prerelease, Qt::CaseSensitive) < 0;
+            return StringUtils::naturalCompare(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prerelease, rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prerelease, Qt::CaseSensitive) < 0;
         }
         // neither is prerelease, so they are the same -> this cannot be less than rhs
         return false;
     }
-    else return StringUtils::naturalCompare(m_string, rhs.m_string, Qt::CaseSensitive) < 0;
+    else return StringUtils::naturalCompare(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_string, rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_string, Qt::CaseSensitive) < 0;
 }
 
 bool JavaVersion::operator==(const JavaVersion &rhs)
 {
-    if(m_parseable && rhs.m_parseable)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parseable && rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parseable)
     {
-        return m_major == rhs.m_major && m_minor == rhs.m_minor && m_security == rhs.m_security && m_prerelease == rhs.m_prerelease;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_major == rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_major && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minor == rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minor && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_security == rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_security && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prerelease == rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prerelease;
     }
-    return m_string == rhs.m_string;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_string == rhs.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_string;
 }
 
 bool JavaVersion::operator>(const JavaVersion &rhs)

@@ -29,9 +29,9 @@ ProfileSelectDialog::ProfileSelectDialog(const QString &message, int flags, QWid
 {
     ui->setupUi(this);
 
-    m_accounts = APPLICATION->accounts();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts = APPLICATION->accounts();
     auto view = ui->listView;
-    //view->setModel(m_accounts.get());
+    //view->setModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.get());
     //view->hideColumn(AccountList::ActiveColumn);
     view->setColumnCount(1);
     view->setRootIsDecorated(false);
@@ -45,9 +45,9 @@ ProfileSelectDialog::ProfileSelectDialog(const QString &message, int flags, QWid
         view->setHeaderLabel(tr("Name"));
     }
     QList <QTreeWidgetItem *> items;
-    for (int i = 0; i < m_accounts->count(); i++)
+    for (int i = 0; i < hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->count(); i++)
     {
-        MinecraftAccountPtr account = m_accounts->at(i);
+        MinecraftAccountPtr account = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->at(i);
         QString profileLabel;
         if(account->isInUse()) {
             profileLabel = tr("%1 (in use)").arg(account->profileName());
@@ -85,7 +85,7 @@ ProfileSelectDialog::~ProfileSelectDialog()
 
 MinecraftAccountPtr ProfileSelectDialog::selectedAccount() const
 {
-    return m_selected;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selected;
 }
 
 bool ProfileSelectDialog::useAsGlobalDefault() const
@@ -104,7 +104,7 @@ void ProfileSelectDialog::on_buttonBox_accepted()
     if (selection.size() > 0)
     {
         QModelIndex selected = selection.first();
-        m_selected = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selected = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
     }
     close();
 }

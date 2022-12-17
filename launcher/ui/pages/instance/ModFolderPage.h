@@ -45,7 +45,7 @@ class ModFolderPage : public ExternalResourcesPage {
     explicit ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent = nullptr);
     virtual ~ModFolderPage() = default;
 
-    void setFilter(const QString& filter) { m_fileSelectionFilter = filter; }
+    void setFilter(const QString& filter) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fileSelectionFilter = filter; }
 
     virtual QString displayName() const override { return tr("Mods"); }
     virtual QIcon icon() const override { return APPLICATION->getThemedIcon("loadermods"); }
@@ -65,7 +65,7 @@ class ModFolderPage : public ExternalResourcesPage {
     void updateMods();
 
    protected:
-    std::shared_ptr<ModFolderModel> m_model;
+    std::shared_ptr<ModFolderModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model;
 };
 
 class CoreModFolderPage : public ModFolderPage {

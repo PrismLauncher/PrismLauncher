@@ -21,7 +21,7 @@
 
 void ReconstructAssets::executeTask()
 {
-    auto instance = m_parent->instance();
+    auto instance = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance();
     std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
     auto components = minecraftInstance->getPackProfile();
     auto profile = components->getProfile();

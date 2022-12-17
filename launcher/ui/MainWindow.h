@@ -240,18 +240,18 @@ private:
     InstanceView *view = nullptr;
     InstanceProxyModel *proxymodel = nullptr;
     QToolButton *newsLabel = nullptr;
-    QLabel *m_statusLeft = nullptr;
-    QLabel *m_statusCenter = nullptr;
+    QLabel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_statusLeft = nullptr;
+    QLabel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_statusCenter = nullptr;
     QMenu *accountMenu = nullptr;
     QToolButton *accountMenuButton = nullptr;
     KonamiCode * secretEventFilter = nullptr;
 
-    unique_qobject_ptr<NewsChecker> m_newsChecker;
+    unique_qobject_ptr<NewsChecker> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsChecker;
 
-    InstancePtr m_selectedInstance;
-    QString m_currentInstIcon;
+    InstancePtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedInstance;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentInstIcon;
 
     // managed by the application object
-    Task *m_versionLoadTask = nullptr;
+    Task *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionLoadTask = nullptr;
 };
 

@@ -91,20 +91,20 @@ QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject &objectWithRules)
 QJsonObject ImplicitRule::toJson()
 {
     QJsonObject ruleObj;
-    ruleObj.insert("action", m_result == Allow ? QString("allow") : QString("disallow"));
+    ruleObj.insert("action", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result == Allow ? QString("allow") : QString("disallow"));
     return ruleObj;
 }
 
 QJsonObject OsRule::toJson()
 {
     QJsonObject ruleObj;
-    ruleObj.insert("action", m_result == Allow ? QString("allow") : QString("disallow"));
+    ruleObj.insert("action", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result == Allow ? QString("allow") : QString("disallow"));
     QJsonObject osObj;
     {
-        osObj.insert("name", m_system);
-        if(!m_version_regexp.isEmpty())
+        osObj.insert("name", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_system);
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_regexp.isEmpty())
         {
-            osObj.insert("version", m_version_regexp);
+            osObj.insert("version", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_regexp);
         }
     }
     ruleObj.insert("os", osObj);

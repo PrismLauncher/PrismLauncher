@@ -113,13 +113,13 @@ protected:
 
 private:
     Ui::VersionPage *ui;
-    QSortFilterProxyModel *m_filterModel;
-    std::shared_ptr<PackProfile> m_profile;
-    MinecraftInstance *m_inst;
+    QSortFilterProxyModel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel;
+    std::shared_ptr<PackProfile> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile;
+    MinecraftInstance *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst;
     int currentIdx = 0;
     bool controlsEnabled = false;
 
-    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
+    std::shared_ptr<Setting> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = nullptr;
 
 public slots:
     void versionCurrent(const QModelIndex &current, const QModelIndex &previous);

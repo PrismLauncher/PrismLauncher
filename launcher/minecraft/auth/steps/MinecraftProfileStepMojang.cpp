@@ -18,13 +18,13 @@ QString MinecraftProfileStepMojang::describe() {
 
 
 void MinecraftProfileStepMojang::perform() {
-    if (m_data->minecraftProfile.id.isEmpty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftProfile.id.isEmpty()) {
         emit finished(AccountTaskState::STATE_FAILED_HARD, tr("A UUID is required to get the profile."));
         return;
     }
 
     // use session server instead of profile due to profile endpoint being locked for locked Mojang accounts
-    QUrl url = QUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + m_data->minecraftProfile.id);
+    QUrl url = QUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftProfile.id);
     QNetworkRequest req = QNetworkRequest(url);
     AuthRequest *request = new AuthRequest(this);
     connect(request, &AuthRequest::finished, this, &MinecraftProfileStepMojang::onRequestDone);
@@ -48,11 +48,11 @@ void MinecraftProfileStepMojang::onRequestDone(
 #endif
     if (error == QNetworkReply::ContentNotFoundError) {
         // NOTE: Succeed even if we do not have a profile. This is a valid account state.
-        if(m_data->type == AccountType::Mojang) {
-            m_data->minecraftEntitlement.canPlayMinecraft = false;
-            m_data->minecraftEntitlement.ownsMinecraft = false;
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->type == AccountType::Mojang) {
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftEntitlement.canPlayMinecraft = false;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftEntitlement.ownsMinecraft = false;
         }
-        m_data->minecraftProfile = MinecraftProfile();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftProfile = MinecraftProfile();
         emit finished(
             AccountTaskState::STATE_SUCCEEDED,
             tr("Account has no Minecraft profile.")
@@ -82,8 +82,8 @@ void MinecraftProfileStepMojang::onRequestDone(
         }
         return;
     }
-    if(!Parsers::parseMinecraftProfileMojang(data, m_data->minecraftProfile)) {
-        m_data->minecraftProfile = MinecraftProfile();
+    if(!Parsers::parseMinecraftProfileMojang(data, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftProfile)) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftProfile = MinecraftProfile();
         emit finished(
             AccountTaskState::STATE_FAILED_SOFT,
             tr("Minecraft Java profile response could not be parsed")
@@ -91,10 +91,10 @@ void MinecraftProfileStepMojang::onRequestDone(
         return;
     }
 
-    if(m_data->type == AccountType::Mojang) {
-        auto validProfile = m_data->minecraftProfile.validity == Katabasis::Validity::Certain;
-        m_data->minecraftEntitlement.canPlayMinecraft = validProfile;
-        m_data->minecraftEntitlement.ownsMinecraft = validProfile;
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->type == AccountType::Mojang) {
+        auto validProfile = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftProfile.validity == Katabasis::Validity::Certain;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftEntitlement.canPlayMinecraft = validProfile;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftEntitlement.ownsMinecraft = validProfile;
     }
     emit finished(
         AccountTaskState::STATE_WORKING,

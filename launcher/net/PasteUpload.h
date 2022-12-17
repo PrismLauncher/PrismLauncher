@@ -73,19 +73,19 @@ public:
 
     QString pasteLink()
     {
-        return m_pasteLink;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pasteLink;
     }
 protected:
     virtual void executeTask();
 
 private:
-    QWidget *m_window;
-    QString m_pasteLink;
-    QString m_baseUrl;
-    QString m_uploadUrl;
-    PasteType m_pasteType;
-    QByteArray m_text;
-    std::shared_ptr<QNetworkReply> m_reply;
+    QWidget *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_window;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pasteLink;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseUrl;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl;
+    PasteType hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pasteType;
+    QByteArray hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_text;
+    std::shared_ptr<QNetworkReply> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply;
 public
 slots:
     void downloadError(QNetworkReply::NetworkError);

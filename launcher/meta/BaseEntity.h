@@ -60,8 +60,8 @@ protected: /* methods */
     bool loadLocalFile();
 
 private:
-    LoadStatus m_loadStatus = LoadStatus::NotLoaded;
-    UpdateStatus m_updateStatus = UpdateStatus::NotDone;
-    NetJob::Ptr m_updateTask;
+    LoadStatus hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadStatus = LoadStatus::NotLoaded;
+    UpdateStatus hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateStatus = UpdateStatus::NotDone;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask;
 };
 }

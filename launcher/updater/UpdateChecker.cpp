@@ -27,39 +27,39 @@
 
 UpdateChecker::UpdateChecker(shared_qobject_ptr<QNetworkAccessManager> nam, QString channelUrl, QString currentChannel)
 {
-    m_network = nam;
-    m_channelUrl = channelUrl;
-    m_currentChannel = currentChannel;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network = nam;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_channelUrl = channelUrl;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentChannel = currentChannel;
 
 #ifdef Q_OS_MAC
-    m_externalUpdater = new MacSparkleUpdater();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalUpdater = new MacSparkleUpdater();
 #endif
 }
 
 QList<UpdateChecker::ChannelListEntry> UpdateChecker::getChannelList() const
 {
-    return m_channels;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_channels;
 }
 
 bool UpdateChecker::hasChannels() const
 {
-    return !m_channels.isEmpty();
+    return !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_channels.isEmpty();
 }
 
 ExternalUpdater* UpdateChecker::getExternalUpdater()
 {
-    return m_externalUpdater;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalUpdater;
 }
 
 void UpdateChecker::checkForUpdate(const QString& updateChannel, bool notifyNoUpdate)
 {
-    if (m_externalUpdater)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalUpdater)
     {
-        m_externalUpdater->setBetaAllowed(updateChannel == "beta");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalUpdater->setBetaAllowed(updateChannel == "beta");
         if (notifyNoUpdate)
         {
             qDebug() << "Checking for updates.";
-            m_externalUpdater->checkForUpdates();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalUpdater->checkForUpdates();
         } else
         {
             // The updater library already handles automatic update checks.
@@ -71,16 +71,16 @@ void UpdateChecker::checkForUpdate(const QString& updateChannel, bool notifyNoUp
         qDebug() << "Checking for updates.";
         // If the channel list hasn't loaded yet, load it and defer checking for updates until
         // later.
-        if (!m_chanListLoaded)
+        if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_chanListLoaded)
         {
             qDebug() << "Channel list isn't loaded yet. Loading channel list and deferring update check.";
-            m_checkUpdateWaiting = true;
-            m_deferredUpdateChannel = updateChannel;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checkUpdateWaiting = true;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_deferredUpdateChannel = updateChannel;
             updateChanList(notifyNoUpdate);
             return;
         }
 
-        if (m_updateChecking)
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateChecking)
         {
             qDebug() << "Ignoring update check request. Already checking for updates.";
             return;
@@ -89,8 +89,8 @@ void UpdateChecker::checkForUpdate(const QString& updateChannel, bool notifyNoUp
         // Find the desired channel within the channel list and get its repo URL. If if cannot be
         // found, error.
         QString stableUrl;
-        m_newRepoUrl = "";
-        for (ChannelListEntry entry: m_channels)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newRepoUrl = "";
+        for (ChannelListEntry entry: hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_channels)
         {
             qDebug() << "channelEntry = " << entry.id;
             if (entry.id == "stable")
@@ -99,37 +99,37 @@ void UpdateChecker::checkForUpdate(const QString& updateChannel, bool notifyNoUp
             }
             if (entry.id == updateChannel)
             {
-                m_newRepoUrl = entry.url;
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newRepoUrl = entry.url;
                 qDebug() << "is intended update channel: " << entry.id;
             }
-            if (entry.id == m_currentChannel)
+            if (entry.id == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentChannel)
             {
-                m_currentRepoUrl = entry.url;
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentRepoUrl = entry.url;
                 qDebug() << "is current update channel: " << entry.id;
             }
         }
 
-        qDebug() << "m_repoUrl = " << m_newRepoUrl;
+        qDebug() << "hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repoUrl = " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newRepoUrl;
 
-        if (m_newRepoUrl.isEmpty())
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newRepoUrl.isEmpty())
         {
-            qWarning() << "m_repoUrl was empty. defaulting to 'stable': " << stableUrl;
-            m_newRepoUrl = stableUrl;
+            qWarning() << "hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repoUrl was empty. defaulting to 'stable': " << stableUrl;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newRepoUrl = stableUrl;
         }
 
         // If nothing applies, error
-        if (m_newRepoUrl.isEmpty())
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newRepoUrl.isEmpty())
         {
             qCritical() << "failed to select any update repository for: " << updateChannel;
             emit updateCheckFailed();
             return;
         }
 
-        m_updateChecking = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateChecking = true;
 
-        QUrl indexUrl = QUrl(m_newRepoUrl).resolved(QUrl("index.json"));
+        QUrl indexUrl = QUrl(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newRepoUrl).resolved(QUrl("index.json"));
 
-        indexJob = new NetJob("GoUpdate Repository Index", m_network);
+        indexJob = new NetJob("GoUpdate Repository Index", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network);
         indexJob->addNetAction(Net::Download::makeByteArray(indexUrl, &indexData));
         connect(indexJob.get(), &NetJob::succeeded, [this, notifyNoUpdate]() { updateCheckFinished(notifyNoUpdate); });
         connect(indexJob.get(), &NetJob::failed, this, &UpdateChecker::updateCheckFailed);
@@ -150,7 +150,7 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
     {
         qCritical() << "Failed to parse GoUpdate repository index. JSON error"
                      << jsonError.errorString() << "at offset" << jsonError.offset;
-        m_updateChecking = false;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateChecking = false;
         return;
     }
 
@@ -162,7 +162,7 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
     {
         qCritical() << "Failed to check for updates. API version mismatch. We're using"
                      << API_VERSION << "server has" << apiVersion;
-        m_updateChecking = false;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateChecking = false;
         return;
     }
 
@@ -182,23 +182,23 @@ void UpdateChecker::updateCheckFinished(bool notifyNoUpdate)
     // We've got the version with the greatest ID number. Now compare it to our current build
     // number and update if they're different.
     int newBuildNumber = newestVersion.value("Id").toVariant().toInt();
-    if (newBuildNumber != m_currentBuild)
+    if (newBuildNumber != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentBuild)
     {
         qDebug() << "Found newer version with ID" << newBuildNumber;
         // Update!
         GoUpdate::Status updateStatus;
         updateStatus.updateAvailable = true;
-        updateStatus.currentVersionId = m_currentBuild;
-        updateStatus.currentRepoUrl = m_currentRepoUrl;
+        updateStatus.currentVersionId = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentBuild;
+        updateStatus.currentRepoUrl = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentRepoUrl;
         updateStatus.newVersionId = newBuildNumber;
-        updateStatus.newRepoUrl = m_newRepoUrl;
+        updateStatus.newRepoUrl = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newRepoUrl;
         emit updateAvailable(updateStatus);
     }
     else if (notifyNoUpdate)
     {
         emit noUpdateFound();
     }
-    m_updateChecking = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateChecking = false;
 }
 
 void UpdateChecker::updateCheckFailed()
@@ -210,15 +210,15 @@ void UpdateChecker::updateChanList(bool notifyNoUpdate)
 {
     qDebug() << "Loading the channel list.";
 
-    if (m_chanListLoading)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_chanListLoading)
     {
         qDebug() << "Ignoring channel list update request. Already grabbing channel list.";
         return;
     }
 
-    m_chanListLoading = true;
-    chanListJob = new NetJob("Update System Channel List", m_network);
-    chanListJob->addNetAction(Net::Download::makeByteArray(QUrl(m_channelUrl), &chanlistData));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_chanListLoading = true;
+    chanListJob = new NetJob("Update System Channel List", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network);
+    chanListJob->addNetAction(Net::Download::makeByteArray(QUrl(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_channelUrl), &chanlistData));
     connect(chanListJob.get(), &NetJob::succeeded, [this, notifyNoUpdate]() { chanListDownloadFinished(notifyNoUpdate); });
     connect(chanListJob.get(), &NetJob::failed, this, &UpdateChecker::chanListDownloadFailed);
     chanListJob->start();
@@ -235,7 +235,7 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
     {
         // TODO: Report errors to the user.
         qCritical() << "Failed to parse channel list JSON:" << jsonError.errorString() << "at" << jsonError.offset;
-        m_chanListLoading = false;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_chanListLoading = false;
         return;
     }
 
@@ -248,7 +248,7 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
         qCritical()
             << "Failed to check for updates. Channel list format version mismatch. We're using"
             << CHANLIST_FORMAT << "server has" << formatVersion;
-        m_chanListLoading = false;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_chanListLoading = false;
         return;
     }
 
@@ -273,15 +273,15 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
     }
 
     // Swap  the channel list we just loaded into the object's channel list.
-    m_channels.swap(loadedChannels);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_channels.swap(loadedChannels);
 
-    m_chanListLoading = false;
-    m_chanListLoaded = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_chanListLoading = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_chanListLoaded = true;
     qDebug() << "Successfully loaded UpdateChecker channel list.";
 
     // If we're waiting to check for updates, do that now.
-    if (m_checkUpdateWaiting) {
-        checkForUpdate(m_deferredUpdateChannel, notifyNoUpdate);
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checkUpdateWaiting) {
+        checkForUpdate(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_deferredUpdateChannel, notifyNoUpdate);
     }
 
     emit channelListLoaded();
@@ -289,7 +289,7 @@ void UpdateChecker::chanListDownloadFinished(bool notifyNoUpdate)
 
 void UpdateChecker::chanListDownloadFailed(QString reason)
 {
-    m_chanListLoading = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_chanListLoading = false;
     qCritical() << QString("Failed to download channel list: %1").arg(reason);
     emit channelListLoaded();
 }

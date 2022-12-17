@@ -39,6 +39,6 @@ slots:
 
 private:
     Ui::OfflineLoginDialog *ui;
-    MinecraftAccountPtr m_account;
-    Task::Ptr m_loginTask;
+    MinecraftAccountPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account;
+    Task::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask;
 };

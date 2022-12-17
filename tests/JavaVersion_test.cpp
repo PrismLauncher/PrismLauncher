@@ -33,12 +33,12 @@ slots:
         QFETCH(QString, prerelease);
 
         JavaVersion test(string);
-        QCOMPARE(test.m_string, string);
+        QCOMPARE(test.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_string, string);
         QCOMPARE(test.toString(), string);
-        QCOMPARE(test.m_major, major);
-        QCOMPARE(test.m_minor, minor);
-        QCOMPARE(test.m_security, security);
-        QCOMPARE(test.m_prerelease, prerelease);
+        QCOMPARE(test.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_major, major);
+        QCOMPARE(test.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minor, minor);
+        QCOMPARE(test.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_security, security);
+        QCOMPARE(test.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prerelease, prerelease);
     }
 
     void test_Sort_data()

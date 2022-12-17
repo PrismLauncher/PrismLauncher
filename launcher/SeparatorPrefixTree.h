@@ -14,7 +14,7 @@ public:
 
     SeparatorPrefixTree(bool contained = false)
     {
-        m_contained = contained;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained = contained;
     }
 
     void insert(QStringList paths)
@@ -56,7 +56,7 @@ public:
     bool covers(QString path) const
     {
         // if we found some valid node, it's good enough. the tree covers the path
-        if(m_contained)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained)
         {
             return true;
         }
@@ -86,7 +86,7 @@ public:
     QString cover(QString path) const
     {
         // if we found some valid node, it's good enough. the tree covers the path
-        if(m_contained)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained)
         {
             return QString("");
         }
@@ -185,7 +185,7 @@ public:
     /// is this node actually contained in the tree, or is it purely structural?
     bool contained() const
     {
-        return m_contained;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained;
     }
 
     /// Remove a path from the tree
@@ -213,7 +213,7 @@ public:
                 list[i] = iter.key() + Tseparator + list[i];
             }
             collected.append(list);
-            if((*iter).m_contained)
+            if((*iter).hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained)
             {
                 collected.append(iter.key());
             }
@@ -232,13 +232,13 @@ private:
     {
         if(path.isEmpty())
         {
-            if(!m_contained)
+            if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained)
             {
                 // remove all children - we are removing a prefix
                 clear();
                 return Succeeded;
             }
-            m_contained = false;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained = false;
             if(children.size())
             {
                 return HasChildren;
@@ -278,7 +278,7 @@ private:
             case Succeeded:
             {
                 children.remove(childToRemove);
-                if(m_contained)
+                if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained)
                 {
                     return HasChildren;
                 }
@@ -294,5 +294,5 @@ private:
 
 private:
     QMap<QString,SeparatorPrefixTree<Tseparator>> children;
-    bool m_contained = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_contained = false;
 };

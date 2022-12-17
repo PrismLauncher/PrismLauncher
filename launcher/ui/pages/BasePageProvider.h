@@ -31,7 +31,7 @@ class GenericPageProvider : public BasePageProvider
     typedef std::function<BasePage *()> PageCreator;
 public:
     explicit GenericPageProvider(const QString &dialogTitle)
-        : m_dialogTitle(dialogTitle)
+        : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dialogTitle(dialogTitle)
     {
     }
     virtual ~GenericPageProvider() {}
@@ -39,21 +39,21 @@ public:
     QList<BasePage *> getPages() override
     {
         QList<BasePage *> pages;
-        for (PageCreator creator : m_creators)
+        for (PageCreator creator : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_creators)
         {
             pages.append(creator());
         }
         return pages;
     }
-    QString dialogTitle() override { return m_dialogTitle; }
+    QString dialogTitle() override { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dialogTitle; }
 
     void setDialogTitle(const QString &title)
     {
-        m_dialogTitle = title;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dialogTitle = title;
     }
     void addPageCreator(PageCreator page)
     {
-        m_creators.append(page);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_creators.append(page);
     }
 
     template<typename PageClass>
@@ -63,6 +63,6 @@ public:
     }
 
 private:
-    QList<PageCreator> m_creators;
-    QString m_dialogTitle;
+    QList<PageCreator> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_creators;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dialogTitle;
 };

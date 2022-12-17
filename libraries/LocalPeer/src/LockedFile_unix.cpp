@@ -55,10 +55,10 @@ bool LockedFile::lock(LockMode mode, bool block)
     if (mode == NoLock)
         return unlock();
 
-    if (mode == m_lock_mode)
+    if (mode == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lock_mode)
         return true;
 
-    if (m_lock_mode != NoLock)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lock_mode != NoLock)
         unlock();
 
     struct flock fl;
@@ -76,7 +76,7 @@ bool LockedFile::lock(LockMode mode, bool block)
     }
 
 
-    m_lock_mode = mode;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lock_mode = mode;
     return true;
 }
 
@@ -103,7 +103,7 @@ bool LockedFile::unlock()
         return false;
     }
 
-    m_lock_mode = NoLock;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lock_mode = NoLock;
     return true;
 }
 

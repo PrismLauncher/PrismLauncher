@@ -55,9 +55,9 @@
 
 
 InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
-    : QWidget(parent), ui(new Ui::InstanceSettingsPage), m_instance(inst)
+    : QWidget(parent), ui(new Ui::InstanceSettingsPage), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance(inst)
 {
-    m_settings = inst->settings();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings = inst->settings();
     ui->setupUi(this);
 
     connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
@@ -69,7 +69,7 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
 
 bool InstanceSettingsPage::shouldDisplay() const
 {
-    return !m_instance->isRunning();
+    return !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->isRunning();
 }
 
 InstanceSettingsPage::~InstanceSettingsPage()
@@ -100,208 +100,208 @@ bool InstanceSettingsPage::apply()
 
 void InstanceSettingsPage::applySettings()
 {
-    SettingsObject::Lock lock(m_settings);
+    SettingsObject::Lock lock(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings);
 
     // Miscellaneous
     bool miscellaneous = ui->miscellaneousSettingsBox->isChecked();
-    m_settings->set("OverrideMiscellaneous", miscellaneous);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("OverrideMiscellaneous", miscellaneous);
     if (miscellaneous)
     {
-        m_settings->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
-        m_settings->set("QuitAfterGameStop", ui->quitAfterGameStopCheck->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("QuitAfterGameStop", ui->quitAfterGameStopCheck->isChecked());
     }
     else
     {
-        m_settings->reset("CloseAfterLaunch");
-        m_settings->reset("QuitAfterGameStop");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("CloseAfterLaunch");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("QuitAfterGameStop");
     }
 
     // Console
     bool console = ui->consoleSettingsBox->isChecked();
-    m_settings->set("OverrideConsole", console);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("OverrideConsole", console);
     if (console)
     {
-        m_settings->set("ShowConsole", ui->showConsoleCheck->isChecked());
-        m_settings->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
-        m_settings->set("ShowConsoleOnError", ui->showConsoleErrorCheck->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ShowConsole", ui->showConsoleCheck->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ShowConsoleOnError", ui->showConsoleErrorCheck->isChecked());
     }
     else
     {
-        m_settings->reset("ShowConsole");
-        m_settings->reset("AutoCloseConsole");
-        m_settings->reset("ShowConsoleOnError");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("ShowConsole");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("AutoCloseConsole");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("ShowConsoleOnError");
     }
 
     // Window Size
     bool window = ui->windowSizeGroupBox->isChecked();
-    m_settings->set("OverrideWindow", window);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("OverrideWindow", window);
     if (window)
     {
-        m_settings->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
-        m_settings->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
-        m_settings->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
     }
     else
     {
-        m_settings->reset("LaunchMaximized");
-        m_settings->reset("MinecraftWinWidth");
-        m_settings->reset("MinecraftWinHeight");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("LaunchMaximized");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("MinecraftWinWidth");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("MinecraftWinHeight");
     }
 
     // Memory
     bool memory = ui->memoryGroupBox->isChecked();
-    m_settings->set("OverrideMemory", memory);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("OverrideMemory", memory);
     if (memory)
     {
         int min = ui->minMemSpinBox->value();
         int max = ui->maxMemSpinBox->value();
         if(min < max)
         {
-            m_settings->set("MinMemAlloc", min);
-            m_settings->set("MaxMemAlloc", max);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("MinMemAlloc", min);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("MaxMemAlloc", max);
         }
         else
         {
-            m_settings->set("MinMemAlloc", max);
-            m_settings->set("MaxMemAlloc", min);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("MinMemAlloc", max);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("MaxMemAlloc", min);
         }
-        m_settings->set("PermGen", ui->permGenSpinBox->value());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("PermGen", ui->permGenSpinBox->value());
     }
     else
     {
-        m_settings->reset("MinMemAlloc");
-        m_settings->reset("MaxMemAlloc");
-        m_settings->reset("PermGen");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("MinMemAlloc");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("MaxMemAlloc");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("PermGen");
     }
 
     // Java Install Settings
     bool javaInstall = ui->javaSettingsGroupBox->isChecked();
-    m_settings->set("OverrideJavaLocation", javaInstall);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("OverrideJavaLocation", javaInstall);
     if (javaInstall)
     {
-        m_settings->set("JavaPath", ui->javaPathTextBox->text());
-        m_settings->set("IgnoreJavaCompatibility", ui->skipCompatibilityCheckbox->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("JavaPath", ui->javaPathTextBox->text());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("IgnoreJavaCompatibility", ui->skipCompatibilityCheckbox->isChecked());
     }
     else
     {
-        m_settings->reset("JavaPath");
-        m_settings->reset("IgnoreJavaCompatibility");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("JavaPath");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("IgnoreJavaCompatibility");
     }
 
     // Java arguments
     bool javaArgs = ui->javaArgumentsGroupBox->isChecked();
-    m_settings->set("OverrideJavaArgs", javaArgs);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("OverrideJavaArgs", javaArgs);
     if(javaArgs)
     {
-        m_settings->set("JvmArgs", ui->jvmArgsTextBox->toPlainText().replace("\n", " "));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("JvmArgs", ui->jvmArgsTextBox->toPlainText().replace("\n", " "));
     }
     else
     {
-        m_settings->reset("JvmArgs");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("JvmArgs");
     }
 
     // old generic 'override both' is removed.
-    m_settings->reset("OverrideJava");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("OverrideJava");
 
     // Custom Commands
     bool custcmd = ui->customCommands->checked();
-    m_settings->set("OverrideCommands", custcmd);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("OverrideCommands", custcmd);
     if (custcmd)
     {
-        m_settings->set("PreLaunchCommand", ui->customCommands->prelaunchCommand());
-        m_settings->set("WrapperCommand", ui->customCommands->wrapperCommand());
-        m_settings->set("PostExitCommand", ui->customCommands->postexitCommand());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("PreLaunchCommand", ui->customCommands->prelaunchCommand());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("WrapperCommand", ui->customCommands->wrapperCommand());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("PostExitCommand", ui->customCommands->postexitCommand());
     }
     else
     {
-        m_settings->reset("PreLaunchCommand");
-        m_settings->reset("WrapperCommand");
-        m_settings->reset("PostExitCommand");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("PreLaunchCommand");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("WrapperCommand");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("PostExitCommand");
     }
 
     // Workarounds
     bool workarounds = ui->nativeWorkaroundsGroupBox->isChecked();
-    m_settings->set("OverrideNativeWorkarounds", workarounds);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("OverrideNativeWorkarounds", workarounds);
     if(workarounds)
     {
-        m_settings->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
-        m_settings->set("UseNativeGLFW", ui->useNativeGLFWCheck->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("UseNativeGLFW", ui->useNativeGLFWCheck->isChecked());
     }
     else
     {
-        m_settings->reset("UseNativeOpenAL");
-        m_settings->reset("UseNativeGLFW");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("UseNativeOpenAL");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("UseNativeGLFW");
     }
 
     // Performance
     bool performance = ui->perfomanceGroupBox->isChecked();
-    m_settings->set("OverridePerformance", performance);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("OverridePerformance", performance);
     if(performance)
     {
-        m_settings->set("EnableFeralGamemode", ui->enableFeralGamemodeCheck->isChecked());
-        m_settings->set("EnableMangoHud", ui->enableMangoHud->isChecked());
-        m_settings->set("UseDiscreteGpu", ui->useDiscreteGpuCheck->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("EnableFeralGamemode", ui->enableFeralGamemodeCheck->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("EnableMangoHud", ui->enableMangoHud->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("UseDiscreteGpu", ui->useDiscreteGpuCheck->isChecked());
     }
     else
     {
-        m_settings->reset("EnableFeralGamemode");
-        m_settings->reset("EnableMangoHud");
-        m_settings->reset("UseDiscreteGpu");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("EnableFeralGamemode");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("EnableMangoHud");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("UseDiscreteGpu");
     }
 
     // Game time
     bool gameTime = ui->gameTimeGroupBox->isChecked();
-    m_settings->set("OverrideGameTime", gameTime);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("OverrideGameTime", gameTime);
     if (gameTime)
     {
-        m_settings->set("ShowGameTime", ui->showGameTime->isChecked());
-        m_settings->set("RecordGameTime", ui->recordGameTime->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("ShowGameTime", ui->showGameTime->isChecked());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("RecordGameTime", ui->recordGameTime->isChecked());
     }
     else
     {
-        m_settings->reset("ShowGameTime");
-        m_settings->reset("RecordGameTime");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("ShowGameTime");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("RecordGameTime");
     }
 
     // Join server on launch
     bool joinServerOnLaunch = ui->serverJoinGroupBox->isChecked();
-    m_settings->set("JoinServerOnLaunch", joinServerOnLaunch);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("JoinServerOnLaunch", joinServerOnLaunch);
     if (joinServerOnLaunch)
     {
-        m_settings->set("JoinServerOnLaunchAddress", ui->serverJoinAddress->text());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("JoinServerOnLaunchAddress", ui->serverJoinAddress->text());
     }
     else
     {
-        m_settings->reset("JoinServerOnLaunchAddress");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("JoinServerOnLaunchAddress");
     }
 
     // FIXME: This should probably be called by a signal instead
-    m_instance->updateRuntimeContext();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->updateRuntimeContext();
 }
 
 void InstanceSettingsPage::loadSettings()
 {
     // Miscellaneous
-    ui->miscellaneousSettingsBox->setChecked(m_settings->get("OverrideMiscellaneous").toBool());
-    ui->closeAfterLaunchCheck->setChecked(m_settings->get("CloseAfterLaunch").toBool());
-    ui->quitAfterGameStopCheck->setChecked(m_settings->get("QuitAfterGameStop").toBool());
+    ui->miscellaneousSettingsBox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("OverrideMiscellaneous").toBool());
+    ui->closeAfterLaunchCheck->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("CloseAfterLaunch").toBool());
+    ui->quitAfterGameStopCheck->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("QuitAfterGameStop").toBool());
 
     // Console
-    ui->consoleSettingsBox->setChecked(m_settings->get("OverrideConsole").toBool());
-    ui->showConsoleCheck->setChecked(m_settings->get("ShowConsole").toBool());
-    ui->autoCloseConsoleCheck->setChecked(m_settings->get("AutoCloseConsole").toBool());
-    ui->showConsoleErrorCheck->setChecked(m_settings->get("ShowConsoleOnError").toBool());
+    ui->consoleSettingsBox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("OverrideConsole").toBool());
+    ui->showConsoleCheck->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("ShowConsole").toBool());
+    ui->autoCloseConsoleCheck->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("AutoCloseConsole").toBool());
+    ui->showConsoleErrorCheck->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("ShowConsoleOnError").toBool());
 
     // Window Size
-    ui->windowSizeGroupBox->setChecked(m_settings->get("OverrideWindow").toBool());
-    ui->maximizedCheckBox->setChecked(m_settings->get("LaunchMaximized").toBool());
-    ui->windowWidthSpinBox->setValue(m_settings->get("MinecraftWinWidth").toInt());
-    ui->windowHeightSpinBox->setValue(m_settings->get("MinecraftWinHeight").toInt());
+    ui->windowSizeGroupBox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("OverrideWindow").toBool());
+    ui->maximizedCheckBox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("LaunchMaximized").toBool());
+    ui->windowWidthSpinBox->setValue(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("MinecraftWinWidth").toInt());
+    ui->windowHeightSpinBox->setValue(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("MinecraftWinHeight").toInt());
 
     // Memory
-    ui->memoryGroupBox->setChecked(m_settings->get("OverrideMemory").toBool());
-    int min = m_settings->get("MinMemAlloc").toInt();
-    int max = m_settings->get("MaxMemAlloc").toInt();
+    ui->memoryGroupBox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("OverrideMemory").toBool());
+    int min = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("MinMemAlloc").toInt();
+    int max = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("MaxMemAlloc").toInt();
     if(min < max)
     {
         ui->minMemSpinBox->setValue(min);
@@ -312,44 +312,44 @@ void InstanceSettingsPage::loadSettings()
         ui->minMemSpinBox->setValue(max);
         ui->maxMemSpinBox->setValue(min);
     }
-    ui->permGenSpinBox->setValue(m_settings->get("PermGen").toInt());
-    bool permGenVisible = m_settings->get("PermGenVisible").toBool();
+    ui->permGenSpinBox->setValue(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("PermGen").toInt());
+    bool permGenVisible = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("PermGenVisible").toBool();
     ui->permGenSpinBox->setVisible(permGenVisible);
     ui->labelPermGen->setVisible(permGenVisible);
     ui->labelPermgenNote->setVisible(permGenVisible);
 
 
     // Java Settings
-    bool overrideJava = m_settings->get("OverrideJava").toBool();
-    bool overrideLocation = m_settings->get("OverrideJavaLocation").toBool() || overrideJava;
-    bool overrideArgs = m_settings->get("OverrideJavaArgs").toBool() || overrideJava;
+    bool overrideJava = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("OverrideJava").toBool();
+    bool overrideLocation = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("OverrideJavaLocation").toBool() || overrideJava;
+    bool overrideArgs = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("OverrideJavaArgs").toBool() || overrideJava;
 
     ui->javaSettingsGroupBox->setChecked(overrideLocation);
-    ui->javaPathTextBox->setText(m_settings->get("JavaPath").toString());
-    ui->skipCompatibilityCheckbox->setChecked(m_settings->get("IgnoreJavaCompatibility").toBool());
+    ui->javaPathTextBox->setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("JavaPath").toString());
+    ui->skipCompatibilityCheckbox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("IgnoreJavaCompatibility").toBool());
 
     ui->javaArgumentsGroupBox->setChecked(overrideArgs);
-    ui->jvmArgsTextBox->setPlainText(m_settings->get("JvmArgs").toString());
+    ui->jvmArgsTextBox->setPlainText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("JvmArgs").toString());
 
     // Custom commands
     ui->customCommands->initialize(
         true,
-        m_settings->get("OverrideCommands").toBool(),
-        m_settings->get("PreLaunchCommand").toString(),
-        m_settings->get("WrapperCommand").toString(),
-        m_settings->get("PostExitCommand").toString()
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("OverrideCommands").toBool(),
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("PreLaunchCommand").toString(),
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("WrapperCommand").toString(),
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("PostExitCommand").toString()
     );
 
     // Workarounds
-    ui->nativeWorkaroundsGroupBox->setChecked(m_settings->get("OverrideNativeWorkarounds").toBool());
-    ui->useNativeGLFWCheck->setChecked(m_settings->get("UseNativeGLFW").toBool());
-    ui->useNativeOpenALCheck->setChecked(m_settings->get("UseNativeOpenAL").toBool());
+    ui->nativeWorkaroundsGroupBox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("OverrideNativeWorkarounds").toBool());
+    ui->useNativeGLFWCheck->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("UseNativeGLFW").toBool());
+    ui->useNativeOpenALCheck->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("UseNativeOpenAL").toBool());
 
     // Performance
-    ui->perfomanceGroupBox->setChecked(m_settings->get("OverridePerformance").toBool());
-    ui->enableFeralGamemodeCheck->setChecked(m_settings->get("EnableFeralGamemode").toBool());
-    ui->enableMangoHud->setChecked(m_settings->get("EnableMangoHud").toBool());
-    ui->useDiscreteGpuCheck->setChecked(m_settings->get("UseDiscreteGpu").toBool());
+    ui->perfomanceGroupBox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("OverridePerformance").toBool());
+    ui->enableFeralGamemodeCheck->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("EnableFeralGamemode").toBool());
+    ui->enableMangoHud->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("EnableMangoHud").toBool());
+    ui->useDiscreteGpuCheck->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("UseDiscreteGpu").toBool());
 
 #if !defined(Q_OS_LINUX)
     ui->settingsTabs->setTabVisible(ui->settingsTabs->indexOf(ui->performancePage), false);
@@ -366,12 +366,12 @@ void InstanceSettingsPage::loadSettings()
     }
 
     // Miscellanous
-    ui->gameTimeGroupBox->setChecked(m_settings->get("OverrideGameTime").toBool());
-    ui->showGameTime->setChecked(m_settings->get("ShowGameTime").toBool());
-    ui->recordGameTime->setChecked(m_settings->get("RecordGameTime").toBool());
+    ui->gameTimeGroupBox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("OverrideGameTime").toBool());
+    ui->showGameTime->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("ShowGameTime").toBool());
+    ui->recordGameTime->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("RecordGameTime").toBool());
 
-    ui->serverJoinGroupBox->setChecked(m_settings->get("JoinServerOnLaunch").toBool());
-    ui->serverJoinAddress->setText(m_settings->get("JoinServerOnLaunchAddress").toString());
+    ui->serverJoinGroupBox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("JoinServerOnLaunch").toBool());
+    ui->serverJoinAddress->setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("JoinServerOnLaunchAddress").toString());
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
@@ -391,11 +391,11 @@ void InstanceSettingsPage::on_javaDetectBtn_clicked()
     {
         java = std::dynamic_pointer_cast<JavaInstall>(vselect.selectedVersion());
         ui->javaPathTextBox->setText(java->path);
-        bool visible = java->id.requiresPermGen() && m_settings->get("OverrideMemory").toBool();
+        bool visible = java->id.requiresPermGen() && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("OverrideMemory").toBool();
         ui->permGenSpinBox->setVisible(visible);
         ui->labelPermGen->setVisible(visible);
         ui->labelPermgenNote->setVisible(visible);
-        m_settings->set("PermGenVisible", visible);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("PermGenVisible", visible);
     }
 }
 
@@ -421,7 +421,7 @@ void InstanceSettingsPage::on_javaBrowseBtn_clicked()
     ui->permGenSpinBox->setVisible(true);
     ui->labelPermGen->setVisible(true);
     ui->labelPermgenNote->setVisible(true);
-    m_settings->set("PermGenVisible", true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("PermGenVisible", true);
 }
 
 void InstanceSettingsPage::on_javaTestBtn_clicked()

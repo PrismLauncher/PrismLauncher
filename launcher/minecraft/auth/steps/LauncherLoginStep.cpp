@@ -19,8 +19,8 @@ QString LauncherLoginStep::describe() {
 
 void LauncherLoginStep::perform() {
     auto requestURL = "https://api.minecraftservices.com/launcher/login";
-    auto uhs = m_data->mojangservicesToken.extra["uhs"].toString();
-    auto xToken = m_data->mojangservicesToken.token;
+    auto uhs = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->mojangservicesToken.extra["uhs"].toString();
+    auto xToken = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->mojangservicesToken.token;
 
     QString mc_auth_template = R"XXX(
 {
@@ -74,7 +74,7 @@ void LauncherLoginStep::onRequestDone(
         return;
     }
 
-    if(!Parsers::parseMojangResponse(data, m_data->yggdrasilToken)) {
+    if(!Parsers::parseMojangResponse(data, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->yggdrasilToken)) {
         qWarning() << "Could not parse login_with_xbox response...";
 #ifndef NDEBUG
         qDebug() << data;

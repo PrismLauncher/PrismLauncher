@@ -53,10 +53,10 @@
 
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     : QWidget(dialog)
-    , m_instance(instance)
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance(instance)
     , ui(new Ui::ModPage)
     , dialog(dialog)
-    , m_fetch_progress(this, false)
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_progress(this, false)
     , api(api)
 {
     ui->setupUi(this);
@@ -65,21 +65,21 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     connect(ui->modFilterButton, &QPushButton::clicked, this, &ModPage::filterMods);
     connect(ui->packView, &QListView::doubleClicked, this, &ModPage::onModSelected);
 
-    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
-    m_search_timer.setSingleShot(true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_search_timer.setSingleShot(true);
 
-    connect(&m_search_timer, &QTimer::timeout, this, &ModPage::triggerSearch);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_search_timer, &QTimer::timeout, this, &ModPage::triggerSearch);
 
     ui->searchEdit->installEventFilter(this);
 
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
-    m_fetch_progress.hideIfInactive(true);
-    m_fetch_progress.setFixedHeight(24);
-    m_fetch_progress.progressFormat("");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_progress.hideIfInactive(true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_progress.setFixedHeight(24);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_progress.progressFormat("");
 
-    ui->gridLayout_3->addWidget(&m_fetch_progress, 0, 0, 1, ui->gridLayout_3->columnCount());
+    ui->gridLayout_3->addWidget(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_progress, 0, 0, 1, ui->gridLayout_3->columnCount());
 
     ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     ui->packView->installEventFilter(this);
@@ -94,20 +94,20 @@ ModPage::~ModPage()
 
 void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
 {
-    if (m_filter_widget)
-        disconnect(m_filter_widget.get(), nullptr, nullptr, nullptr);
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget)
+        disconnect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget.get(), nullptr, nullptr, nullptr);
 
-    m_filter_widget.swap(widget);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget.swap(widget);
 
-    ui->gridLayout_3->addWidget(m_filter_widget.get(), 0, 0, 1, ui->gridLayout_3->columnCount());
+    ui->gridLayout_3->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget.get(), 0, 0, 1, ui->gridLayout_3->columnCount());
 
-    m_filter_widget->setInstance(static_cast<MinecraftInstance*>(m_instance));
-    m_filter = m_filter_widget->getFilter();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget->setInstance(static_cast<MinecraftInstance*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget->getFilter();
 
-    connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this, [&]{
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget.get(), &ModFilterWidget::filterChanged, this, [&]{
         ui->searchButton->setStyleSheet("text-decoration: underline");
     });
-    connect(m_filter_widget.get(), &ModFilterWidget::filterUnchanged, this, [&]{
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget.get(), &ModFilterWidget::filterUnchanged, this, [&]{
         ui->searchButton->setStyleSheet("text-decoration: none");
     });
 }
@@ -130,10 +130,10 @@ auto ModPage::eventFilter(QObject* watched, QEvent* event) -> bool
             keyEvent->accept();
             return true;
         } else {
-            if (m_search_timer.isActive())
-                m_search_timer.stop();
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_search_timer.isActive())
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_search_timer.stop();
 
-            m_search_timer.start(350);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_search_timer.start(350);
         }
     } else if (watched == ui->packView && event->type() == QEvent::KeyPress) {
         auto* keyEvent = dynamic_cast<QKeyEvent*>(event);
@@ -156,13 +156,13 @@ auto ModPage::eventFilter(QObject* watched, QEvent* event) -> bool
 
 void ModPage::filterMods()
 {
-    m_filter_widget->setHidden(!m_filter_widget->isHidden());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget->setHidden(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget->isHidden());
 }
 
 void ModPage::triggerSearch()
 {
-    auto changed = m_filter_widget->changed();
-    m_filter = m_filter_widget->getFilter();
+    auto changed = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget->changed();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter_widget->getFilter();
 
     if (changed) {
         ui->packView->clearSelection();
@@ -172,7 +172,7 @@ void ModPage::triggerSearch()
     }
 
     listModel->searchWithTerm(getSearchTerm(), ui->sortByBox->currentIndex(), changed);
-    m_fetch_progress.watch(listModel->activeJob());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_progress.watch(listModel->activeJob());
 }
 
 QString ModPage::getSearchTerm() const
@@ -329,14 +329,14 @@ void ModPage::retranslate()
 
 void ModPage::updateModVersions(int prev_count)
 {
-    auto packProfile = (dynamic_cast<MinecraftInstance*>(m_instance))->getPackProfile();
+    auto packProfile = (dynamic_cast<MinecraftInstance*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance))->getPackProfile();
 
     QString mcVersion = packProfile->getComponentVersion("net.minecraft");
 
     for (int i = 0; i < current.versions.size(); i++) {
         auto version = current.versions[i];
         bool valid = false;
-        for(auto& mcVer : m_filter->versions){
+        for(auto& mcVer : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter->versions){
             //NOTE: Flame doesn't care about loader, so passing it changes nothing.
             if (validateVersion(version, mcVer.toString(), packProfile->getModLoaders())) {
                 valid = true;
@@ -345,7 +345,7 @@ void ModPage::updateModVersions(int prev_count)
         }
 
         // Only add the version if it's valid or using the 'Any' filter, but never if the version is opted out
-        if ((valid || m_filter->versions.empty()) && !optedOut(version))
+        if ((valid || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter->versions.empty()) && !optedOut(version))
             ui->versionSelectionBox->addItem(version.version, QVariant(i));
     }
     if (ui->versionSelectionBox->count() == 0 && prev_count != 0) {

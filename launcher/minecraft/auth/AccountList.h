@@ -117,8 +117,8 @@ protected:
     void endActivity();
 
 private:
-    const char* m_name;
-    uint32_t m_activityCount = 0;
+    const char* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
+    uint32_t hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_activityCount = 0;
 signals:
     void listChanged();
     void listActivityChanged();
@@ -148,10 +148,10 @@ private slots:
     void authFailed(QString reason);
 
 protected:
-    QList<QString> m_refreshQueue;
-    QTimer *m_refreshTimer;
-    QTimer *m_nextTimer;
-    shared_qobject_ptr<AccountTask> m_currentTask;
+    QList<QString> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshQueue;
+    QTimer *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshTimer;
+    QTimer *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nextTimer;
+    shared_qobject_ptr<AccountTask> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask;
 
     /*!
      * Called whenever the list changes.
@@ -165,17 +165,17 @@ protected:
      */
     void onDefaultAccountChanged();
 
-    QList<MinecraftAccountPtr> m_accounts;
+    QList<MinecraftAccountPtr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts;
 
-    MinecraftAccountPtr m_defaultAccount;
+    MinecraftAccountPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount;
 
     //! Path to the account list file. Empty string if there isn't one.
-    QString m_listFilePath;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath;
 
     /*!
      * If true, the account list will automatically save to the account list path when it changes.
-     * Ignored if m_listFilePath is blank.
+     * Ignored if hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath is blank.
      */
-    bool m_autosave = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_autosave = false;
 };
 

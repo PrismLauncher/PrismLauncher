@@ -58,14 +58,14 @@ class FlameCreationTask final : public InstanceCreationTask {
                       QString version_id,
                       QString original_instance_id = {})
         : InstanceCreationTask()
-        , m_parent(parent)
-        , m_managed_id(std::move(id))
-        , m_managed_version_id(std::move(version_id))
+        , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent(parent)
+        , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_id(std::move(id))
+        , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_version_id(std::move(version_id))
     {
         setStagingPath(staging_path);
         setParentSettings(global_settings);
 
-        m_original_instance_id = std::move(original_instance_id);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_original_instance_id = std::move(original_instance_id);
     }
 
     bool abort() override;
@@ -79,16 +79,16 @@ class FlameCreationTask final : public InstanceCreationTask {
     void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
 
    private:
-    QWidget* m_parent = nullptr;
+    QWidget* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent = nullptr;
 
-    shared_qobject_ptr<Flame::FileResolvingTask> m_mod_id_resolver;
-    Flame::Manifest m_pack;
+    shared_qobject_ptr<Flame::FileResolvingTask> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver;
+    Flame::Manifest hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack;
 
     // Handle to allow aborting
-    NetJob* m_process_update_file_info_job = nullptr;
-    NetJob::Ptr m_files_job = nullptr;
+    NetJob* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process_update_file_info_job = nullptr;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job = nullptr;
 
-    QString m_managed_id, m_managed_version_id;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_id, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_version_id;
 
-    std::optional<InstancePtr> m_instance;
+    std::optional<InstancePtr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance;
 };

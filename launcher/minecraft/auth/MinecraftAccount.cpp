@@ -130,75 +130,75 @@ QPixmap MinecraftAccount::getFace() const {
 
 
 shared_qobject_ptr<AccountTask> MinecraftAccount::login(QString password) {
-    Q_ASSERT(m_currentTask.get() == nullptr);
+    Q_ASSERT(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get() == nullptr);
 
-    m_currentTask.reset(new MojangLogin(&data, password));
-    connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
-    connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
-    connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.reset(new MojangLogin(&data, password));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
     emit activityChanged(true);
-    return m_currentTask;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask;
 }
 
 shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA() {
-    Q_ASSERT(m_currentTask.get() == nullptr);
+    Q_ASSERT(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get() == nullptr);
 
-    m_currentTask.reset(new MSAInteractive(&data));
-    connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
-    connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
-    connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.reset(new MSAInteractive(&data));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
     emit activityChanged(true);
-    return m_currentTask;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask;
 }
 
 shared_qobject_ptr<AccountTask> MinecraftAccount::loginOffline() {
-    Q_ASSERT(m_currentTask.get() == nullptr);
+    Q_ASSERT(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get() == nullptr);
 
-    m_currentTask.reset(new OfflineLogin(&data));
-    connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
-    connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
-    connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.reset(new OfflineLogin(&data));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
     emit activityChanged(true);
-    return m_currentTask;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask;
 }
 
 shared_qobject_ptr<AccountTask> MinecraftAccount::refresh() {
-    if(m_currentTask) {
-        return m_currentTask;
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask) {
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask;
     }
 
     if(data.type == AccountType::MSA) {
-        m_currentTask.reset(new MSASilent(&data));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.reset(new MSASilent(&data));
     }
     else if(data.type == AccountType::Offline) {
-        m_currentTask.reset(new OfflineRefresh(&data));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.reset(new OfflineRefresh(&data));
     }
     else {
-        m_currentTask.reset(new MojangRefresh(&data));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.reset(new MojangRefresh(&data));
     }
 
-    connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
-    connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
-    connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
     emit activityChanged(true);
-    return m_currentTask;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask;
 }
 
 shared_qobject_ptr<AccountTask> MinecraftAccount::currentTask() {
-    return m_currentTask;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask;
 }
 
 
 void MinecraftAccount::authSucceeded()
 {
-    m_currentTask.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.reset();
     emit changed();
     emit activityChanged(false);
 }
 
 void MinecraftAccount::authFailed(QString reason)
 {
-    switch (m_currentTask->taskState()) {
+    switch (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask->taskState()) {
         case AccountTaskState::STATE_OFFLINE:
         case AccountTaskState::STATE_DISABLED: {
             // NOTE: user will need to fix this themselves.
@@ -233,12 +233,12 @@ void MinecraftAccount::authFailed(QString reason)
             // Not reachable here, as they are not failures.
         }
     }
-    m_currentTask.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.reset();
     emit activityChanged(false);
 }
 
 bool MinecraftAccount::isActive() const {
-    return !m_currentTask.isNull();
+    return !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.isNull();
 }
 
 bool MinecraftAccount::shouldRefresh() const {

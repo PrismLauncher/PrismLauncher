@@ -58,16 +58,16 @@ public:
 
     virtual bool shouldDisplay() const override
     {
-        return !m_instance->traits().contains("no-texturepacks") &&
-               !m_instance->traits().contains("texturepacks");
+        return !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->traits().contains("no-texturepacks") &&
+               !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->traits().contains("texturepacks");
     }
 
    public slots:
     bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override
     {
-        auto sourceCurrent = m_filterModel->mapToSource(current);
+        auto sourceCurrent = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->mapToSource(current);
         int row = sourceCurrent.row();
-        auto& rp = static_cast<ResourcePack&>(m_model->at(row));
+        auto& rp = static_cast<ResourcePack&>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->at(row));
         ui->frame->updateWithResourcePack(rp);
 
         return true;

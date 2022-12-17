@@ -10,16 +10,16 @@
 
 XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data, Katabasis::Token *token, QString relyingParty, QString authorizationKind):
     AuthStep(data),
-    m_token(token),
-    m_relyingParty(relyingParty),
-    m_authorizationKind(authorizationKind)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_token(token),
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_relyingParty(relyingParty),
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_authorizationKind(authorizationKind)
 {
 }
 
 XboxAuthorizationStep::~XboxAuthorizationStep() noexcept = default;
 
 QString XboxAuthorizationStep::describe() {
-    return tr("Getting authorization to access %1 services.").arg(m_authorizationKind);
+    return tr("Getting authorization to access %1 services.").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_authorizationKind);
 }
 
 void XboxAuthorizationStep::rehydrate() {
@@ -39,7 +39,7 @@ void XboxAuthorizationStep::perform() {
     "TokenType": "JWT"
 }
 )XXX";
-    auto xbox_auth_data = xbox_auth_template.arg(m_data->userToken.token, m_relyingParty);
+    auto xbox_auth_data = xbox_auth_template.arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->userToken.token, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_relyingParty);
 // http://xboxlive.com
     QNetworkRequest request = QNetworkRequest(QUrl("https://xsts.auth.xboxlive.com/xsts/authorize"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -47,7 +47,7 @@ void XboxAuthorizationStep::perform() {
     AuthRequest *requestor = new AuthRequest(this);
     connect(requestor, &AuthRequest::finished, this, &XboxAuthorizationStep::onRequestDone);
     requestor->post(request, xbox_auth_data.toUtf8());
-    qDebug() << "Getting authorization token for " << m_relyingParty;
+    qDebug() << "Getting authorization token for " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_relyingParty;
 }
 
 void XboxAuthorizationStep::onRequestDone(
@@ -67,45 +67,45 @@ void XboxAuthorizationStep::onRequestDone(
             if(!processSTSError(error, data, headers)) {
                 emit finished(
                     AccountTaskState::STATE_FAILED_SOFT,
-                    tr("Failed to get authorization for %1 services. Error %2.").arg(m_authorizationKind, error)
+                    tr("Failed to get authorization for %1 services. Error %2.").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_authorizationKind, error)
                 );
             }
             else {
                 emit finished(
                     AccountTaskState::STATE_FAILED_SOFT,
-                    tr("Unknown STS error for %1 services: %2").arg(m_authorizationKind, requestor->errorString_)
+                    tr("Unknown STS error for %1 services: %2").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_authorizationKind, requestor->errorString_)
                 );
             }
         }
         else {
             emit finished(
                 AccountTaskState::STATE_OFFLINE,
-                tr("Failed to get authorization for %1 services: %2").arg(m_authorizationKind, requestor->errorString_)
+                tr("Failed to get authorization for %1 services: %2").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_authorizationKind, requestor->errorString_)
             );
         }
         return;
     }
 
     Katabasis::Token temp;
-    if(!Parsers::parseXTokenResponse(data, temp, m_authorizationKind)) {
+    if(!Parsers::parseXTokenResponse(data, temp, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_authorizationKind)) {
         emit finished(
             AccountTaskState::STATE_FAILED_SOFT,
-            tr("Could not parse authorization response for access to %1 services.").arg(m_authorizationKind)
+            tr("Could not parse authorization response for access to %1 services.").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_authorizationKind)
         );
         return;
     }
 
-    if(temp.extra["uhs"] != m_data->userToken.extra["uhs"]) {
+    if(temp.extra["uhs"] != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->userToken.extra["uhs"]) {
         emit finished(
             AccountTaskState::STATE_FAILED_SOFT,
-            tr("Server has changed %1 authorization user hash in the reply. Something is wrong.").arg(m_authorizationKind)
+            tr("Server has changed %1 authorization user hash in the reply. Something is wrong.").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_authorizationKind)
         );
         return;
     }
-    auto & token = *m_token;
+    auto & token = *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_token;
     token = temp;
 
-    emit finished(AccountTaskState::STATE_WORKING, tr("Got authorization to access %1").arg(m_relyingParty));
+    emit finished(AccountTaskState::STATE_WORKING, tr("Got authorization to access %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_relyingParty));
 }
 
 
@@ -121,7 +121,7 @@ bool XboxAuthorizationStep::processSTSError(
             qWarning() << "Cannot parse error XSTS response as JSON: " << jsonError.errorString();
             emit finished(
                 AccountTaskState::STATE_FAILED_SOFT,
-                tr("Cannot parse %1 authorization error response as JSON: %2").arg(m_authorizationKind, jsonError.errorString())
+                tr("Cannot parse %1 authorization error response as JSON: %2").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_authorizationKind, jsonError.errorString())
             );
             return true;
         }
@@ -131,7 +131,7 @@ bool XboxAuthorizationStep::processSTSError(
         if(!Parsers::getNumber(obj.value("XErr"), errorCode)) {
             emit finished(
                 AccountTaskState::STATE_FAILED_SOFT,
-                tr("XErr element is missing from %1 authorization error response.").arg(m_authorizationKind)
+                tr("XErr element is missing from %1 authorization error response.").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_authorizationKind)
             );
             return true;
         }

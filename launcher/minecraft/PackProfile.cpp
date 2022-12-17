@@ -67,12 +67,12 @@ PackProfile::PackProfile(MinecraftInstance * instance)
     : QAbstractListModel()
 {
     d.reset(new PackProfileData);
-    d->m_instance = instance;
-    d->m_saveTimer.setSingleShot(true);
-    d->m_saveTimer.setInterval(5000);
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance = instance;
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_saveTimer.setSingleShot(true);
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_saveTimer.setInterval(5000);
     d->interactionDisabled = instance->isRunning();
-    connect(d->m_instance, &BaseInstance::runningStatusChanged, this, &PackProfile::disableInteraction);
-    connect(&d->m_saveTimer, &QTimer::timeout, this, &PackProfile::save_internal);
+    connect(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance, &BaseInstance::runningStatusChanged, this, &PackProfile::disableInteraction);
+    connect(&d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_saveTimer, &QTimer::timeout, this, &PackProfile::save_internal);
 }
 
 PackProfile::~PackProfile()
@@ -88,36 +88,36 @@ static QJsonObject componentToJsonV1(ComponentPtr component)
 {
     QJsonObject obj;
     // critical
-    obj.insert("uid", component->m_uid);
-    if(!component->m_version.isEmpty())
+    obj.insert("uid", component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid);
+    if(!component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.isEmpty())
     {
-        obj.insert("version", component->m_version);
+        obj.insert("version", component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version);
     }
-    if(component->m_dependencyOnly)
+    if(component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dependencyOnly)
     {
         obj.insert("dependencyOnly", true);
     }
-    if(component->m_important)
+    if(component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_important)
     {
         obj.insert("important", true);
     }
-    if(component->m_disabled)
+    if(component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_disabled)
     {
         obj.insert("disabled", true);
     }
 
     // cached
-    if(!component->m_cachedVersion.isEmpty())
+    if(!component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVersion.isEmpty())
     {
-        obj.insert("cachedVersion", component->m_cachedVersion);
+        obj.insert("cachedVersion", component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVersion);
     }
-    if(!component->m_cachedName.isEmpty())
+    if(!component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedName.isEmpty())
     {
-        obj.insert("cachedName", component->m_cachedName);
+        obj.insert("cachedName", component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedName);
     }
-    Meta::serializeRequires(obj, &component->m_cachedRequires, "cachedRequires");
-    Meta::serializeRequires(obj, &component->m_cachedConflicts, "cachedConflicts");
-    if(component->m_cachedVolatile)
+    Meta::serializeRequires(obj, &component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedRequires, "cachedRequires");
+    Meta::serializeRequires(obj, &component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedConflicts, "cachedConflicts");
+    if(component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVolatile)
     {
         obj.insert("cachedVolatile", true);
     }
@@ -130,17 +130,17 @@ static ComponentPtr componentFromJsonV1(PackProfile * parent, const QString & co
     auto uid = Json::requireString(obj.value("uid"));
     auto filePath = componentJsonPattern.arg(uid);
     auto component = new Component(parent, uid);
-    component->m_version = Json::ensureString(obj.value("version"));
-    component->m_dependencyOnly = Json::ensureBoolean(obj.value("dependencyOnly"), false);
-    component->m_important = Json::ensureBoolean(obj.value("important"), false);
+    component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = Json::ensureString(obj.value("version"));
+    component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dependencyOnly = Json::ensureBoolean(obj.value("dependencyOnly"), false);
+    component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_important = Json::ensureBoolean(obj.value("important"), false);
 
     // cached
     // TODO @RESILIENCE: ignore invalid values/structure here?
-    component->m_cachedVersion = Json::ensureString(obj.value("cachedVersion"));
-    component->m_cachedName = Json::ensureString(obj.value("cachedName"));
-    Meta::parseRequires(obj, &component->m_cachedRequires, "cachedRequires");
-    Meta::parseRequires(obj, &component->m_cachedConflicts, "cachedConflicts");
-    component->m_cachedVolatile = Json::ensureBoolean(obj.value("volatile"), false);
+    component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVersion = Json::ensureString(obj.value("cachedVersion"));
+    component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedName = Json::ensureString(obj.value("cachedName"));
+    Meta::parseRequires(obj, &component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedRequires, "cachedRequires");
+    Meta::parseRequires(obj, &component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedConflicts, "cachedConflicts");
+    component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVolatile = Json::ensureBoolean(obj.value("volatile"), false);
     bool disabled = Json::ensureBoolean(obj.value("disabled"), false);
     component->setEnabled(!disabled);
     return component;
@@ -241,7 +241,7 @@ void PackProfile::saveNow()
 {
     if(saveIsScheduled())
     {
-        d->m_saveTimer.stop();
+        d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_saveTimer.stop();
         save_internal();
     }
 }
@@ -261,30 +261,30 @@ void PackProfile::scheduleSave()
 {
     if(!d->loaded)
     {
-        qDebug() << "Component list should never save if it didn't successfully load, instance:" << d->m_instance->name();
+        qDebug() << "Component list should never save if it didn't successfully load, instance:" << d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->name();
         return;
     }
     if(!d->dirty)
     {
         d->dirty = true;
-        qDebug() << "Component list save is scheduled for" << d->m_instance->name();
+        qDebug() << "Component list save is scheduled for" << d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->name();
     }
-    d->m_saveTimer.start();
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_saveTimer.start();
 }
 
 RuntimeContext PackProfile::runtimeContext()
 {
-    return d->m_instance->runtimeContext();
+    return d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->runtimeContext();
 }
 
 QString PackProfile::componentsFilePath() const
 {
-    return FS::PathCombine(d->m_instance->instanceRoot(), "mmc-pack.json");
+    return FS::PathCombine(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot(), "mmc-pack.json");
 }
 
 QString PackProfile::patchesPattern() const
 {
-    return FS::PathCombine(d->m_instance->instanceRoot(), "patches", "%1.json");
+    return FS::PathCombine(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot(), "patches", "%1.json");
 }
 
 QString PackProfile::patchFilePathForUid(const QString& uid) const
@@ -294,7 +294,7 @@ QString PackProfile::patchFilePathForUid(const QString& uid) const
 
 void PackProfile::save_internal()
 {
-    qDebug() << "Component list save performed now for" << d->m_instance->name();
+    qDebug() << "Component list save performed now for" << d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->name();
     auto filename = componentsFilePath();
     savePackProfile(filename, d->components);
     d->dirty = false;
@@ -308,7 +308,7 @@ bool PackProfile::load()
     ComponentContainer newComponents;
     if(!loadPackProfile(this, filename, patchesPattern(), newComponents))
     {
-        qCritical() << "Failed to load the component config for instance" << d->m_instance->name();
+        qCritical() << "Failed to load the component config for instance" << d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->name();
         return false;
     }
     else
@@ -324,14 +324,14 @@ bool PackProfile::load()
         d->componentIndex.clear();
         for(auto component: newComponents)
         {
-            if(d->componentIndex.contains(component->m_uid))
+            if(d->componentIndex.contains(component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid))
             {
-                qWarning() << "Ignoring duplicate component entry" << component->m_uid;
+                qWarning() << "Ignoring duplicate component entry" << component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid;
                 continue;
             }
             connect(component.get(), &Component::dataChanged, this, &PackProfile::componentDataChanged);
             d->components.append(component);
-            d->componentIndex[component->m_uid] = component;
+            d->componentIndex[component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid] = component;
         }
         endResetModel();
         d->loaded = true;
@@ -342,7 +342,7 @@ bool PackProfile::load()
 void PackProfile::reload(Net::Mode netmode)
 {
     // Do not reload when the update/resolve task is running. It is in control.
-    if(d->m_updateTask)
+    if(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask)
     {
         return;
     }
@@ -361,31 +361,31 @@ void PackProfile::reload(Net::Mode netmode)
 
 Task::Ptr PackProfile::getCurrentTask()
 {
-    return d->m_updateTask;
+    return d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask;
 }
 
 void PackProfile::resolve(Net::Mode netmode)
 {
     auto updateTask = new ComponentUpdateTask(ComponentUpdateTask::Mode::Resolution, netmode, this);
-    d->m_updateTask.reset(updateTask);
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask.reset(updateTask);
     connect(updateTask, &ComponentUpdateTask::succeeded, this, &PackProfile::updateSucceeded);
     connect(updateTask, &ComponentUpdateTask::failed, this, &PackProfile::updateFailed);
     connect(updateTask, &ComponentUpdateTask::aborted, this, [this]{ updateFailed(tr("Aborted")); });
-    d->m_updateTask->start();
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask->start();
 }
 
 
 void PackProfile::updateSucceeded()
 {
-    qDebug() << "Component list update/resolve task succeeded for" << d->m_instance->name();
-    d->m_updateTask.reset();
+    qDebug() << "Component list update/resolve task succeeded for" << d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->name();
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask.reset();
     invalidateLaunchProfile();
 }
 
 void PackProfile::updateFailed(const QString& error)
 {
-    qDebug() << "Component list update/resolve task failed for" << d->m_instance->name() << "Reason:" << error;
-    d->m_updateTask.reset();
+    qDebug() << "Component list update/resolve task failed for" << d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->name() << "Reason:" << error;
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask.reset();
     invalidateLaunchProfile();
 }
 
@@ -724,7 +724,7 @@ void PackProfile::move(const int index, const MoveDirection direction)
 
 void PackProfile::invalidateLaunchProfile()
 {
-    d->m_profile.reset();
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile.reset();
 }
 
 void PackProfile::installJarMods(QStringList selectedFiles)
@@ -744,7 +744,7 @@ void PackProfile::installAgents(QStringList selectedFiles)
 
 bool PackProfile::installEmpty(const QString& uid, const QString& name)
 {
-    QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
+    QString patchDir = FS::PathCombine(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot(), "patches");
     if(!FS::ensureFolderPathExists(patchDir))
     {
         return false;
@@ -793,7 +793,7 @@ bool PackProfile::removeComponent_internal(ComponentPtr patch)
             return true;
         }
         QStringList jar, temp1, temp2, temp3;
-        jarMod->getApplicableFiles(d->m_instance->runtimeContext(), jar, temp1, temp2, temp3, d->m_instance->jarmodsPath().absolutePath());
+        jarMod->getApplicableFiles(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->runtimeContext(), jar, temp1, temp2, temp3, d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->jarmodsPath().absolutePath());
         QFileInfo finfo (jar[0]);
         if(finfo.exists())
         {
@@ -822,13 +822,13 @@ bool PackProfile::removeComponent_internal(ComponentPtr patch)
 
 bool PackProfile::installJarMods_internal(QStringList filepaths)
 {
-    QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
+    QString patchDir = FS::PathCombine(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot(), "patches");
     if(!FS::ensureFolderPathExists(patchDir))
     {
         return false;
     }
 
-    if (!FS::ensureFolderPathExists(d->m_instance->jarModsDir()))
+    if (!FS::ensureFolderPathExists(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->jarModsDir()))
     {
         return false;
     }
@@ -840,7 +840,7 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
         QString target_filename = id + ".jar";
         QString target_id = "custom.jarmod." + id;
         QString target_name = sourceInfo.completeBaseName() + " (jar mod)";
-        QString finalPath = FS::PathCombine(d->m_instance->jarModsDir(), target_filename);
+        QString finalPath = FS::PathCombine(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->jarModsDir(), target_filename);
 
         QFileInfo targetInfo(finalPath);
         Q_ASSERT(!targetInfo.exists());
@@ -880,13 +880,13 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
 
 bool PackProfile::installCustomJar_internal(QString filepath)
 {
-    QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
+    QString patchDir = FS::PathCombine(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot(), "patches");
     if(!FS::ensureFolderPathExists(patchDir))
     {
         return false;
     }
 
-    QString libDir = d->m_instance->getLocalLibraryPath();
+    QString libDir = d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->getLocalLibraryPath();
     if (!FS::ensureFolderPathExists(libDir))
     {
         return false;
@@ -942,11 +942,11 @@ bool PackProfile::installCustomJar_internal(QString filepath)
 bool PackProfile::installAgents_internal(QStringList filepaths)
 {
     // FIXME code duplication
-    const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
+    const QString patchDir = FS::PathCombine(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot(), "patches");
     if (!FS::ensureFolderPathExists(patchDir))
         return false;
 
-    const QString libDir = d->m_instance->getLocalLibraryPath();
+    const QString libDir = d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->getLocalLibraryPath();
     if (!FS::ensureFolderPathExists(libDir))
         return false;
 
@@ -956,7 +956,7 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
         const QString targetBaseName = id + ".jar";
         const QString targetId = "custom.agent." + id;
         const QString targetName = sourceInfo.completeBaseName() + " (agent)";
-        const QString target = FS::PathCombine(d->m_instance->getLocalLibraryPath(), targetBaseName);
+        const QString target = FS::PathCombine(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->getLocalLibraryPath(), targetBaseName);
 
         const QFileInfo targetInfo(target);
         Q_ASSERT(!targetInfo.exists());
@@ -999,7 +999,7 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
 
 std::shared_ptr<LaunchProfile> PackProfile::getProfile() const
 {
-    if(!d->m_profile)
+    if(!d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile)
     {
         try
         {
@@ -1009,14 +1009,14 @@ std::shared_ptr<LaunchProfile> PackProfile::getProfile() const
                 qDebug() << "Applying" << file->getID() << (file->getProblemSeverity() == ProblemSeverity::Error ? "ERROR" : "GOOD");
                 file->applyTo(profile.get());
             }
-            d->m_profile = profile;
+            d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile = profile;
         }
         catch (const Exception &error)
         {
             qWarning() << "Couldn't apply profile patches because: " << error.cause();
         }
     }
-    return d->m_profile;
+    return d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile;
 }
 
 bool PackProfile::setComponentVersion(const QString& uid, const QString& version, bool important)
@@ -1038,8 +1038,8 @@ bool PackProfile::setComponentVersion(const QString& uid, const QString& version
     {
         // add new
         auto component = new Component(this, uid);
-        component->m_version = version;
-        component->m_important = important;
+        component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = version;
+        component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_important = important;
         appendComponent(component);
         return true;
     }

@@ -24,117 +24,117 @@
 
 JavaSettingsWidget::JavaSettingsWidget(QWidget* parent) : QWidget(parent)
 {
-    m_availableMemory = Sys::getSystemRam() / Sys::mebibyte;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_availableMemory = Sys::getSystemRam() / Sys::mebibyte;
 
     goodIcon = APPLICATION->getThemedIcon("status-good");
     yellowIcon = APPLICATION->getThemedIcon("status-yellow");
     badIcon = APPLICATION->getThemedIcon("status-bad");
     setupUi();
 
-    connect(m_minMemSpinBox, SIGNAL(valueChanged(int)), this, SLOT(memoryValueChanged(int)));
-    connect(m_maxMemSpinBox, SIGNAL(valueChanged(int)), this, SLOT(memoryValueChanged(int)));
-    connect(m_permGenSpinBox, SIGNAL(valueChanged(int)), this, SLOT(memoryValueChanged(int)));
-    connect(m_versionWidget, &VersionSelectWidget::selectedVersionChanged, this, &JavaSettingsWidget::javaVersionSelected);
-    connect(m_javaBrowseBtn, &QPushButton::clicked, this, &JavaSettingsWidget::on_javaBrowseBtn_clicked);
-    connect(m_javaPathTextBox, &QLineEdit::textEdited, this, &JavaSettingsWidget::javaPathEdited);
-    connect(m_javaStatusBtn, &QToolButton::clicked, this, &JavaSettingsWidget::on_javaStatusBtn_clicked);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox, SIGNAL(valueChanged(int)), this, SLOT(memoryValueChanged(int)));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox, SIGNAL(valueChanged(int)), this, SLOT(memoryValueChanged(int)));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox, SIGNAL(valueChanged(int)), this, SLOT(memoryValueChanged(int)));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget, &VersionSelectWidget::selectedVersionChanged, this, &JavaSettingsWidget::javaVersionSelected);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaBrowseBtn, &QPushButton::clicked, this, &JavaSettingsWidget::on_javaBrowseBtn_clicked);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPathTextBox, &QLineEdit::textEdited, this, &JavaSettingsWidget::javaPathEdited);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaStatusBtn, &QToolButton::clicked, this, &JavaSettingsWidget::on_javaStatusBtn_clicked);
 }
 
 void JavaSettingsWidget::setupUi()
 {
     setObjectName(QStringLiteral("javaSettingsWidget"));
-    m_verticalLayout = new QVBoxLayout(this);
-    m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout = new QVBoxLayout(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
-    m_versionWidget = new VersionSelectWidget(this);
-    m_verticalLayout->addWidget(m_versionWidget);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget = new VersionSelectWidget(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget);
 
-    m_horizontalLayout = new QHBoxLayout();
-    m_horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-    m_javaPathTextBox = new QLineEdit(this);
-    m_javaPathTextBox->setObjectName(QStringLiteral("javaPathTextBox"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout = new QHBoxLayout();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPathTextBox = new QLineEdit(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPathTextBox->setObjectName(QStringLiteral("javaPathTextBox"));
 
-    m_horizontalLayout->addWidget(m_javaPathTextBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPathTextBox);
 
-    m_javaBrowseBtn = new QPushButton(this);
-    m_javaBrowseBtn->setObjectName(QStringLiteral("javaBrowseBtn"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaBrowseBtn = new QPushButton(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaBrowseBtn->setObjectName(QStringLiteral("javaBrowseBtn"));
 
-    m_horizontalLayout->addWidget(m_javaBrowseBtn);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaBrowseBtn);
 
-    m_javaStatusBtn = new QToolButton(this);
-    m_javaStatusBtn->setIcon(yellowIcon);
-    m_horizontalLayout->addWidget(m_javaStatusBtn);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaStatusBtn = new QToolButton(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaStatusBtn->setIcon(yellowIcon);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaStatusBtn);
 
-    m_verticalLayout->addLayout(m_horizontalLayout);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout->addLayout(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout);
 
-    m_memoryGroupBox = new QGroupBox(this);
-    m_memoryGroupBox->setObjectName(QStringLiteral("memoryGroupBox"));
-    m_gridLayout_2 = new QGridLayout(m_memoryGroupBox);
-    m_gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
-    m_gridLayout_2->setColumnStretch(0, 1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox = new QGroupBox(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox->setObjectName(QStringLiteral("memoryGroupBox"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gridLayout_2 = new QGridLayout(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gridLayout_2->setColumnStretch(0, 1);
 
-    m_labelMinMem = new QLabel(m_memoryGroupBox);
-    m_labelMinMem->setObjectName(QStringLiteral("labelMinMem"));
-    m_gridLayout_2->addWidget(m_labelMinMem, 0, 0, 1, 1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMinMem = new QLabel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMinMem->setObjectName(QStringLiteral("labelMinMem"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gridLayout_2->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMinMem, 0, 0, 1, 1);
 
-    m_minMemSpinBox = new QSpinBox(m_memoryGroupBox);
-    m_minMemSpinBox->setObjectName(QStringLiteral("minMemSpinBox"));
-    m_minMemSpinBox->setSuffix(QStringLiteral(" MiB"));
-    m_minMemSpinBox->setMinimum(128);
-    m_minMemSpinBox->setMaximum(1048576);
-    m_minMemSpinBox->setSingleStep(128);
-    m_labelMinMem->setBuddy(m_minMemSpinBox);
-    m_gridLayout_2->addWidget(m_minMemSpinBox, 0, 1, 1, 1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox = new QSpinBox(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox->setObjectName(QStringLiteral("minMemSpinBox"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox->setSuffix(QStringLiteral(" MiB"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox->setMinimum(128);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox->setMaximum(1048576);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox->setSingleStep(128);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMinMem->setBuddy(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gridLayout_2->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox, 0, 1, 1, 1);
 
-    m_labelMaxMem = new QLabel(m_memoryGroupBox);
-    m_labelMaxMem->setObjectName(QStringLiteral("labelMaxMem"));
-    m_gridLayout_2->addWidget(m_labelMaxMem, 1, 0, 1, 1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMem = new QLabel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMem->setObjectName(QStringLiteral("labelMaxMem"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gridLayout_2->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMem, 1, 0, 1, 1);
 
-    m_maxMemSpinBox = new QSpinBox(m_memoryGroupBox);
-    m_maxMemSpinBox->setObjectName(QStringLiteral("maxMemSpinBox"));
-    m_maxMemSpinBox->setSuffix(QStringLiteral(" MiB"));
-    m_maxMemSpinBox->setMinimum(128);
-    m_maxMemSpinBox->setMaximum(1048576);
-    m_maxMemSpinBox->setSingleStep(128);
-    m_labelMaxMem->setBuddy(m_maxMemSpinBox);
-    m_gridLayout_2->addWidget(m_maxMemSpinBox, 1, 1, 1, 1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox = new QSpinBox(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox->setObjectName(QStringLiteral("maxMemSpinBox"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox->setSuffix(QStringLiteral(" MiB"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox->setMinimum(128);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox->setMaximum(1048576);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox->setSingleStep(128);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMem->setBuddy(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gridLayout_2->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox, 1, 1, 1, 1);
 
-    m_labelMaxMemIcon = new QLabel(m_memoryGroupBox);
-    m_labelMaxMemIcon->setObjectName(QStringLiteral("labelMaxMemIcon"));
-    m_gridLayout_2->addWidget(m_labelMaxMemIcon, 1, 2, 1, 1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMemIcon = new QLabel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMemIcon->setObjectName(QStringLiteral("labelMaxMemIcon"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gridLayout_2->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMemIcon, 1, 2, 1, 1);
 
-    m_labelPermGen = new QLabel(m_memoryGroupBox);
-    m_labelPermGen->setObjectName(QStringLiteral("labelPermGen"));
-    m_labelPermGen->setText(QStringLiteral("PermGen:"));
-    m_gridLayout_2->addWidget(m_labelPermGen, 2, 0, 1, 1);
-    m_labelPermGen->setVisible(false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelPermGen = new QLabel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelPermGen->setObjectName(QStringLiteral("labelPermGen"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelPermGen->setText(QStringLiteral("PermGen:"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gridLayout_2->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelPermGen, 2, 0, 1, 1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelPermGen->setVisible(false);
 
-    m_permGenSpinBox = new QSpinBox(m_memoryGroupBox);
-    m_permGenSpinBox->setObjectName(QStringLiteral("permGenSpinBox"));
-    m_permGenSpinBox->setSuffix(QStringLiteral(" MiB"));
-    m_permGenSpinBox->setMinimum(64);
-    m_permGenSpinBox->setMaximum(1048576);
-    m_permGenSpinBox->setSingleStep(8);
-    m_gridLayout_2->addWidget(m_permGenSpinBox, 2, 1, 1, 1);
-    m_permGenSpinBox->setVisible(false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox = new QSpinBox(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->setObjectName(QStringLiteral("permGenSpinBox"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->setSuffix(QStringLiteral(" MiB"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->setMinimum(64);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->setMaximum(1048576);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->setSingleStep(8);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gridLayout_2->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox, 2, 1, 1, 1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->setVisible(false);
 
-    m_verticalLayout->addWidget(m_memoryGroupBox);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox);
 
     retranslate();
 }
 
 void JavaSettingsWidget::initialize()
 {
-    m_versionWidget->initialize(APPLICATION->javalist().get());
-    m_versionWidget->setResizeOn(2);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->initialize(APPLICATION->javalist().get());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->setResizeOn(2);
     auto s = APPLICATION->settings();
     // Memory
     observedMinMemory = s->get("MinMemAlloc").toInt();
     observedMaxMemory = s->get("MaxMemAlloc").toInt();
     observedPermGenMemory = s->get("PermGen").toInt();
-    m_minMemSpinBox->setValue(observedMinMemory);
-    m_maxMemSpinBox->setValue(observedMaxMemory);
-    m_permGenSpinBox->setValue(observedPermGenMemory);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox->setValue(observedMinMemory);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox->setValue(observedMaxMemory);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->setValue(observedPermGenMemory);
     updateThresholds();
 }
 
@@ -144,7 +144,7 @@ void JavaSettingsWidget::refresh()
         JavaCommon::javaCheckNotFound(this);
         return;
     }
-    m_versionWidget->loadList();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget->loadList();
 }
 
 JavaSettingsWidget::ValidationStatus JavaSettingsWidget::validate()
@@ -190,64 +190,64 @@ JavaSettingsWidget::ValidationStatus JavaSettingsWidget::validate()
 
 QString JavaSettingsWidget::javaPath() const
 {
-    return m_javaPathTextBox->text();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPathTextBox->text();
 }
 
 int JavaSettingsWidget::maxHeapSize() const
 {
-    return m_maxMemSpinBox->value();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox->value();
 }
 
 int JavaSettingsWidget::minHeapSize() const
 {
-    return m_minMemSpinBox->value();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox->value();
 }
 
 bool JavaSettingsWidget::permGenEnabled() const
 {
-    return m_permGenSpinBox->isVisible();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->isVisible();
 }
 
 int JavaSettingsWidget::permGenSize() const
 {
-    return m_permGenSpinBox->value();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->value();
 }
 
 void JavaSettingsWidget::memoryValueChanged(int)
 {
     bool actuallyChanged = false;
-    unsigned int min = m_minMemSpinBox->value();
-    unsigned int max = m_maxMemSpinBox->value();
-    unsigned int permgen = m_permGenSpinBox->value();
+    unsigned int min = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox->value();
+    unsigned int max = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox->value();
+    unsigned int permgen = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->value();
     QObject *obj = sender();
-    if (obj == m_minMemSpinBox && min != observedMinMemory)
+    if (obj == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox && min != observedMinMemory)
     {
         observedMinMemory = min;
         actuallyChanged = true;
         if (min > max)
         {
             observedMaxMemory = min;
-            m_maxMemSpinBox->setValue(min);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox->setValue(min);
         }
     }
-    else if (obj == m_maxMemSpinBox && max != observedMaxMemory)
+    else if (obj == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox && max != observedMaxMemory)
     {
         observedMaxMemory = max;
         actuallyChanged = true;
         if (min > max)
         {
             observedMinMemory = max;
-            m_minMemSpinBox->setValue(max);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox->setValue(max);
         }
     }
-    else if (obj == m_permGenSpinBox && permgen != observedPermGenMemory)
+    else if (obj == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox && permgen != observedPermGenMemory)
     {
         observedPermGenMemory = permgen;
         actuallyChanged = true;
     }
     if(actuallyChanged)
     {
-        checkJavaPathOnEdit(m_javaPathTextBox->text());
+        checkJavaPathOnEdit(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPathTextBox->text());
         updateThresholds();
     }
 }
@@ -260,9 +260,9 @@ void JavaSettingsWidget::javaVersionSelected(BaseVersion::Ptr version)
         return;
     }
     auto visible = java->id.requiresPermGen();
-    m_labelPermGen->setVisible(visible);
-    m_permGenSpinBox->setVisible(visible);
-    m_javaPathTextBox->setText(java->path);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelPermGen->setVisible(visible);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->setVisible(visible);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPathTextBox->setText(java->path);
     checkJavaPath(java->path);
 }
 
@@ -280,7 +280,7 @@ void JavaSettingsWidget::on_javaBrowseBtn_clicked()
         return;
     }
     QString cooked_path = FS::NormalizePath(raw_path);
-    m_javaPathTextBox->setText(cooked_path);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPathTextBox->setText(cooked_path);
     checkJavaPath(cooked_path);
 }
 
@@ -291,7 +291,7 @@ void JavaSettingsWidget::on_javaStatusBtn_clicked()
     switch(javaStatus)
     {
         case JavaStatus::NotSet:
-            checkJavaPath(m_javaPathTextBox->text());
+            checkJavaPath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPathTextBox->text());
             return;
         case JavaStatus::DoesNotExist:
             text += QObject::tr("The specified file either doesn't exist or is not a proper executable.");
@@ -300,7 +300,7 @@ void JavaSettingsWidget::on_javaStatusBtn_clicked()
         case JavaStatus::DoesNotStart:
         {
             text += QObject::tr("The specified Java binary didn't start properly.<br />");
-            auto htmlError = m_result.errorLog;
+            auto htmlError = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result.errorLog;
             if(!htmlError.isEmpty())
             {
                 htmlError.replace('\n', "<br />");
@@ -312,7 +312,7 @@ void JavaSettingsWidget::on_javaStatusBtn_clicked()
         case JavaStatus::ReturnedInvalidData:
         {
             text += QObject::tr("The specified Java binary returned unexpected results:<br />");
-            auto htmlOut = m_result.outLog;
+            auto htmlOut = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result.outLog;
             if(!htmlOut.isEmpty())
             {
                 htmlOut.replace('\n', "<br />");
@@ -323,7 +323,7 @@ void JavaSettingsWidget::on_javaStatusBtn_clicked()
         }
         case JavaStatus::Good:
             text += QObject::tr("Java test succeeded!<br />Platform reported: %1<br />Java version "
-                "reported: %2<br />").arg(m_result.realPlatform, m_result.javaVersion.toString());
+                "reported: %2<br />").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result.realPlatform, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result.javaVersion.toString());
             break;
         case JavaStatus::Pending:
             // TODO: abort here?
@@ -343,14 +343,14 @@ void JavaSettingsWidget::setJavaStatus(JavaSettingsWidget::JavaStatus status)
     switch(javaStatus)
     {
         case JavaStatus::Good:
-            m_javaStatusBtn->setIcon(goodIcon);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaStatusBtn->setIcon(goodIcon);
             break;
         case JavaStatus::NotSet:
         case JavaStatus::Pending:
-            m_javaStatusBtn->setIcon(yellowIcon);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaStatusBtn->setIcon(yellowIcon);
             break;
         default:
-            m_javaStatusBtn->setIcon(badIcon);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaStatusBtn->setIcon(badIcon);
             break;
     }
 }
@@ -370,7 +370,7 @@ void JavaSettingsWidget::checkJavaPathOnEdit(const QString& path)
     }
     else
     {
-        if(!m_checker)
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checker)
         {
             setJavaStatus(JavaStatus::NotSet);
         }
@@ -379,7 +379,7 @@ void JavaSettingsWidget::checkJavaPathOnEdit(const QString& path)
 
 void JavaSettingsWidget::checkJavaPath(const QString &path)
 {
-    if(m_checker)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checker)
     {
         queuedCheck = path;
         return;
@@ -391,21 +391,21 @@ void JavaSettingsWidget::checkJavaPath(const QString &path)
         return;
     }
     setJavaStatus(JavaStatus::Pending);
-    m_checker.reset(new JavaChecker());
-    m_checker->m_path = path;
-    m_checker->m_minMem = m_minMemSpinBox->value();
-    m_checker->m_maxMem = m_maxMemSpinBox->value();
-    if(m_permGenSpinBox->isVisible())
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checker.reset(new JavaChecker());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path = path;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMem = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox->value();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMem = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox->value();
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->isVisible())
     {
-        m_checker->m_permGen = m_permGenSpinBox->value();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGen = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->value();
     }
-    connect(m_checker.get(), &JavaChecker::checkFinished, this, &JavaSettingsWidget::checkFinished);
-    m_checker->performCheck();
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checker.get(), &JavaChecker::checkFinished, this, &JavaSettingsWidget::checkFinished);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checker->performCheck();
 }
 
 void JavaSettingsWidget::checkFinished(JavaCheckResult result)
 {
-    m_result = result;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result = result;
     switch(result.validity)
     {
         case JavaCheckResult::Validity::Valid:
@@ -424,7 +424,7 @@ void JavaSettingsWidget::checkFinished(JavaCheckResult result)
             break;
         }
     }
-    m_checker.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checker.reset();
     if(!queuedCheck.isNull())
     {
         checkJavaPath(queuedCheck);
@@ -434,34 +434,34 @@ void JavaSettingsWidget::checkFinished(JavaCheckResult result)
 
 void JavaSettingsWidget::retranslate()
 {
-    m_memoryGroupBox->setTitle(tr("Memory"));
-    m_maxMemSpinBox->setToolTip(tr("The maximum amount of memory Minecraft is allowed to use."));
-    m_labelMinMem->setText(tr("Minimum memory allocation:"));
-    m_labelMaxMem->setText(tr("Maximum memory allocation:"));
-    m_minMemSpinBox->setToolTip(tr("The amount of memory Minecraft is started with."));
-    m_permGenSpinBox->setToolTip(tr("The amount of memory available to store loaded Java classes."));
-    m_javaBrowseBtn->setText(tr("Browse"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox->setTitle(tr("Memory"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox->setToolTip(tr("The maximum amount of memory Minecraft is allowed to use."));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMinMem->setText(tr("Minimum memory allocation:"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMem->setText(tr("Maximum memory allocation:"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox->setToolTip(tr("The amount of memory Minecraft is started with."));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox->setToolTip(tr("The amount of memory available to store loaded Java classes."));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaBrowseBtn->setText(tr("Browse"));
 }
 
 void JavaSettingsWidget::updateThresholds()
 {
     QString iconName;
 
-    if (observedMaxMemory >= m_availableMemory) {
+    if (observedMaxMemory >= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_availableMemory) {
         iconName = "status-bad";
-        m_labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation exceeds your system memory capacity."));
-    } else if (observedMaxMemory > (m_availableMemory * 0.9)) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation exceeds your system memory capacity."));
+    } else if (observedMaxMemory > (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_availableMemory * 0.9)) {
         iconName = "status-yellow";
-        m_labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
     } else {
         iconName = "status-good";
-        m_labelMaxMemIcon->setToolTip("");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMemIcon->setToolTip("");
     }
 
     {
-        auto height = m_labelMaxMemIcon->fontInfo().pixelSize();
+        auto height = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMemIcon->fontInfo().pixelSize();
         QIcon icon = APPLICATION->getThemedIcon(iconName);
         QPixmap pix = icon.pixmap(height, height);
-        m_labelMaxMemIcon->setPixmap(pix);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMemIcon->setPixmap(pix);
     }
 }

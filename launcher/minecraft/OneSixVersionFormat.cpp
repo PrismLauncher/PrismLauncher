@@ -52,25 +52,25 @@ static void readString(const QJsonObject &root, const QString &key, QString &var
 LibraryPtr OneSixVersionFormat::libraryFromJson(ProblemContainer & problems, const QJsonObject &libObj, const QString &filename)
 {
     LibraryPtr out = MojangVersionFormat::libraryFromJson(problems, libObj, filename);
-    readString(libObj, "MMC-hint", out->m_hint);
-    readString(libObj, "MMC-absulute_url", out->m_absoluteURL);
-    readString(libObj, "MMC-absoluteUrl", out->m_absoluteURL);
-    readString(libObj, "MMC-filename", out->m_filename);
-    readString(libObj, "MMC-displayname", out->m_displayname);
+    readString(libObj, "MMC-hint", out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hint);
+    readString(libObj, "MMC-absulute_url", out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_absoluteURL);
+    readString(libObj, "MMC-absoluteUrl", out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_absoluteURL);
+    readString(libObj, "MMC-filename", out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename);
+    readString(libObj, "MMC-displayname", out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_displayname);
     return out;
 }
 
 QJsonObject OneSixVersionFormat::libraryToJson(Library *library)
 {
     QJsonObject libRoot = MojangVersionFormat::libraryToJson(library);
-    if (!library->m_absoluteURL.isEmpty())
-        libRoot.insert("MMC-absoluteUrl", library->m_absoluteURL);
-    if (!library->m_hint.isEmpty())
-        libRoot.insert("MMC-hint", library->m_hint);
-    if (!library->m_filename.isEmpty())
-        libRoot.insert("MMC-filename", library->m_filename);
-    if (!library->m_displayname.isEmpty())
-        libRoot.insert("MMC-displayname", library->m_displayname);
+    if (!library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_absoluteURL.isEmpty())
+        libRoot.insert("MMC-absoluteUrl", library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_absoluteURL);
+    if (!library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hint.isEmpty())
+        libRoot.insert("MMC-hint", library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hint);
+    if (!library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename.isEmpty())
+        libRoot.insert("MMC-filename", library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename);
+    if (!library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_displayname.isEmpty())
+        libRoot.insert("MMC-displayname", library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_displayname);
     return libRoot;
 }
 
@@ -284,7 +284,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
     }
     if (root.contains("volatile"))
     {
-        out->m_volatile = requireBoolean(root, "volatile");
+        out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_volatile = requireBoolean(root, "volatile");
     }
 
     /* removed features that shouldn't be used */
@@ -389,7 +389,7 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
     {
         Meta::serializeRequires(root, &patch->conflicts, "conflicts");
     }
-    if(patch->m_volatile)
+    if(patch->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_volatile)
     {
         root.insert("volatile", true);
     }

@@ -47,16 +47,16 @@ public:
     {
     public:
         Lock(SettingsObjectPtr locked)
-            :m_locked(locked)
+            :hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked(locked)
         {
-            m_locked->suspendSave();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked->suspendSave();
         }
         ~Lock()
         {
-            m_locked->resumeSave();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked->resumeSave();
         }
     private:
-        SettingsObjectPtr m_locked;
+        SettingsObjectPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked;
     };
 public:
     explicit SettingsObject(QObject *parent = 0);
@@ -206,8 +206,8 @@ protected:
     friend class Setting;
 
 private:
-    QMap<QString, std::shared_ptr<Setting>> m_settings;
+    QMap<QString, std::shared_ptr<Setting>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings;
 protected:
-    bool m_suspendSave = false;
-    bool m_doSave = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_suspendSave = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doSave = false;
 };

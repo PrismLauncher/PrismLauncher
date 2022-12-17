@@ -39,7 +39,7 @@
 
 #include <FileSystem.h>
 #include <sstream>
-#include <io/stream_reader.h>
+#include <io/streahello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reader.h>
 #include <tag_string.h>
 #include <tag_primitive.h>
 #include <tag_list.h>
@@ -64,25 +64,25 @@ struct Server
     // Methods
     Server()
     {
-        m_name = QObject::tr("Minecraft Server");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = QObject::tr("Minecraft Server");
     }
     Server(const QString & name, const QString & address)
     {
-        m_name = name;
-        m_address = address;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = name;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_address = address;
     }
     Server(nbt::tag_compound& server)
     {
         std::string addressStr(server["ip"]);
-        m_address = QString::fromUtf8(addressStr.c_str());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_address = QString::fromUtf8(addressStr.c_str());
 
         std::string nameStr(server["name"]);
-        m_name = QString::fromUtf8(nameStr.c_str());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = QString::fromUtf8(nameStr.c_str());
 
         if(server["icon"])
         {
             std::string base64str(server["icon"]);
-            m_icon = QByteArray::fromBase64(base64str.c_str());
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon = QByteArray::fromBase64(base64str.c_str());
         }
 
         if(server.has_key("acceptTextures", nbt::tag_type::Byte))
@@ -90,44 +90,44 @@ struct Server
             bool value = server["acceptTextures"].as<nbt::tag_byte>().get();
             if(value)
             {
-                m_acceptsTextures = AcceptsTextures::ALWAYS;
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_acceptsTextures = AcceptsTextures::ALWAYS;
             }
             else
             {
-                m_acceptsTextures = AcceptsTextures::NEVER;
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_acceptsTextures = AcceptsTextures::NEVER;
             }
         }
     }
 
     void serialize(nbt::tag_compound& server)
     {
-        server.insert("name", m_name.trimmed().toUtf8().toStdString());
-        server.insert("ip", m_address.trimmed().toUtf8().toStdString());
-        if(m_icon.size())
+        server.insert("name", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name.trimmed().toUtf8().toStdString());
+        server.insert("ip", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_address.trimmed().toUtf8().toStdString());
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon.size())
         {
-            server.insert("icon", m_icon.toBase64().toStdString());
+            server.insert("icon", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon.toBase64().toStdString());
         }
-        if(m_acceptsTextures != AcceptsTextures::ASK)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_acceptsTextures != AcceptsTextures::ASK)
         {
-            server.insert("acceptTextures", nbt::tag_byte(m_acceptsTextures == AcceptsTextures::ALWAYS));
+            server.insert("acceptTextures", nbt::tag_byte(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_acceptsTextures == AcceptsTextures::ALWAYS));
         }
     }
 
     // Data - persistent and user changeable
-    QString m_name;
-    QString m_address;
-    AcceptsTextures m_acceptsTextures = AcceptsTextures::ASK;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_address;
+    AcceptsTextures hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_acceptsTextures = AcceptsTextures::ASK;
 
     // Data - persistent and automatically updated
-    QByteArray m_icon;
+    QByteArray hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon;
 
     // Data - temporary
-    bool m_checked = false;
-    bool m_up = false;
-    QString m_motd; // https://mctools.org/motd-creator
-    int m_ping = 0;
-    int m_currentPlayers = 0;
-    int m_maxPlayers = 0;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checked = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_up = false;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_motd; // https://mctools.org/motd-creator
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ping = 0;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPlayers = 0;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxPlayers = 0;
 };
 
 static std::unique_ptr <nbt::tag_compound> parseServersDat(const QString& filename)
@@ -183,25 +183,25 @@ public:
     explicit ServersModel(const QString &path, QObject *parent = 0)
         : QAbstractListModel(parent)
     {
-        m_path = path;
-        m_watcher = new QFileSystemWatcher(this);
-        connect(m_watcher, &QFileSystemWatcher::fileChanged, this, &ServersModel::fileChanged);
-        connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &ServersModel::dirChanged);
-        m_saveTimer.setSingleShot(true);
-        m_saveTimer.setInterval(5000);
-        connect(&m_saveTimer, &QTimer::timeout, this, &ServersModel::save_internal);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path = path;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher = new QFileSystemWatcher(this);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher, &QFileSystemWatcher::fileChanged, this, &ServersModel::fileChanged);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher, &QFileSystemWatcher::directoryChanged, this, &ServersModel::dirChanged);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_saveTimer.setSingleShot(true);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_saveTimer.setInterval(5000);
+        connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_saveTimer, &QTimer::timeout, this, &ServersModel::save_internal);
     }
     virtual ~ServersModel() {};
 
     void observe()
     {
-        if(m_observed)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_observed)
         {
             return;
         }
-        m_observed = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_observed = true;
 
-        if(!m_loaded)
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded)
         {
             load();
         }
@@ -211,41 +211,41 @@ public:
 
     void unobserve()
     {
-        if(!m_observed)
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_observed)
         {
             return;
         }
-        m_observed = false;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_observed = false;
 
         updateFSObserver();
     }
 
     void lock()
     {
-        if(m_locked)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked)
         {
             return;
         }
         saveNow();
 
-        m_locked = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked = true;
         updateFSObserver();
     }
 
     void unlock()
     {
-        if(!m_locked)
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked)
         {
             return;
         }
-        m_locked = false;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked = false;
 
         updateFSObserver();
     }
 
     int addEmptyRow(int position)
     {
-        if(m_locked)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked)
         {
             return -1;
         }
@@ -254,7 +254,7 @@ public:
             position = rowCount();
         }
         beginInsertRows(QModelIndex(), position, position);
-        m_servers.insert(position, Server());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers.insert(position, Server());
         endInsertRows();
         scheduleSave();
         return position;
@@ -262,7 +262,7 @@ public:
 
     bool removeRow(int row)
     {
-        if(m_locked)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked)
         {
             return false;
         }
@@ -271,7 +271,7 @@ public:
             return false;
         }
         beginRemoveRows(QModelIndex(), row, row);
-        m_servers.removeAt(row);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers.removeAt(row);
         endRemoveRows(); // does absolutely nothing, the selected server stays as the next line...
         scheduleSave();
         return true;
@@ -279,7 +279,7 @@ public:
 
     bool moveUp(int row)
     {
-        if(m_locked)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked)
         {
             return false;
         }
@@ -289,9 +289,9 @@ public:
         }
         beginMoveRows(QModelIndex(), row, row, QModelIndex(), row - 1);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
-        m_servers.swapItemsAt(row-1, row);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers.swapItemsAt(row-1, row);
 #else
-        m_servers.swap(row-1, row);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers.swap(row-1, row);
 #endif
         endMoveRows();
         scheduleSave();
@@ -300,7 +300,7 @@ public:
 
     bool moveDown(int row)
     {
-        if(m_locked)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked)
         {
             return false;
         }
@@ -311,9 +311,9 @@ public:
         }
         beginMoveRows(QModelIndex(), row, row, QModelIndex(), row + 2);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
-        m_servers.swapItemsAt(row+1, row);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers.swapItemsAt(row+1, row);
 #else
-        m_servers.swap(row+1, row);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers.swap(row+1, row);
 #endif
         endMoveRows();
         scheduleSave();
@@ -351,7 +351,7 @@ public:
         if(column < 0 || column >= COLUMN_COUNT)
             return QVariant();
 
-        if (row < 0 || row >= m_servers.size())
+        if (row < 0 || row >= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers.size())
             return QVariant();
 
         switch(column)
@@ -361,7 +361,7 @@ public:
                 {
                 case Qt::DecorationRole:
                 {
-                    auto & bytes = m_servers[row].m_icon;
+                    auto & bytes = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers[row].hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon;
                     if(bytes.size())
                     {
                         QPixmap px;
@@ -371,9 +371,9 @@ public:
                     return APPLICATION->getThemedIcon("unknown_server");
                 }
                 case Qt::DisplayRole:
-                    return m_servers[row].m_name;
+                    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers[row].hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
                 case ServerPtrRole:
-                    return QVariant::fromValue<void *>((void *)&m_servers[row]);
+                    return QVariant::fromValue<void *>((void *)&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers[row]);
                 default:
                     return QVariant();
                 }
@@ -381,7 +381,7 @@ public:
                 switch (role)
                 {
                 case Qt::DisplayRole:
-                    return m_servers[row].m_address;
+                    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers[row].hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_address;
                 default:
                     return QVariant();
                 }
@@ -389,7 +389,7 @@ public:
                 switch (role)
                 {
                 case Qt::DisplayRole:
-                    return m_servers[row].m_ping;
+                    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers[row].hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ping;
                 default:
                     return QVariant();
                 }
@@ -400,7 +400,7 @@ public:
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override
     {
-        return parent.isValid() ? 0 : m_servers.size();
+        return parent.isValid() ? 0 : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers.size();
     }
     int columnCount(const QModelIndex & parent) const override
     {
@@ -413,53 +413,53 @@ public:
         {
             return nullptr;
         }
-        return &m_servers[index];
+        return &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers[index];
     }
 
     void setName(int row, const QString & name)
     {
-        if(m_locked)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked)
         {
             return;
         }
         auto server = at(row);
-        if(!server || server->m_name == name)
+        if(!server || server->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name == name)
         {
             return;
         }
-        server->m_name = name;
+        server->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = name;
         emit dataChanged(index(row, 0), index(row, COLUMN_COUNT - 1));
         scheduleSave();
     }
 
     void setAddress(int row, const QString & address)
     {
-        if(m_locked)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked)
         {
             return;
         }
         auto server = at(row);
-        if(!server || server->m_address == address)
+        if(!server || server->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_address == address)
         {
             return;
         }
-        server->m_address = address;
+        server->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_address = address;
         emit dataChanged(index(row, 0), index(row, COLUMN_COUNT - 1));
         scheduleSave();
     }
 
     void setAcceptsTextures(int row, Server::AcceptsTextures textures)
     {
-        if(m_locked)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked)
         {
             return;
         }
         auto server = at(row);
-        if(!server || server->m_acceptsTextures == textures)
+        if(!server || server->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_acceptsTextures == textures)
         {
             return;
         }
-        server->m_acceptsTextures = textures;
+        server->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_acceptsTextures = textures;
         emit dataChanged(index(row, 0), index(row, COLUMN_COUNT - 1));
         scheduleSave();
     }
@@ -480,8 +480,8 @@ public:
                 servers.append(s);
             }
         }
-        m_servers.swap(servers);
-        m_loaded = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers.swap(servers);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = true;
         endResetModel();
     }
 
@@ -514,7 +514,7 @@ private slots:
 
         nbt::tag_compound out;
         nbt::tag_list list;
-        for(auto & server: m_servers)
+        for(auto & server: hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers)
         {
             nbt::tag_compound serverNbt;
             server.serialize(serverNbt);
@@ -532,41 +532,41 @@ private slots:
 private:
     void scheduleSave()
     {
-        if(!m_loaded)
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded)
         {
-            qDebug() << "Server list should never save if it didn't successfully load, path:" << m_path;
+            qDebug() << "Server list should never save if it didn't successfully load, path:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
             return;
         }
-        if(!m_dirty)
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dirty)
         {
-            m_dirty = true;
-            qDebug() << "Server list save is scheduled for" << m_path;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dirty = true;
+            qDebug() << "Server list save is scheduled for" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
         }
-        m_saveTimer.start();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_saveTimer.start();
     }
 
     void cancelSave()
     {
-        m_dirty = false;
-        m_saveTimer.stop();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dirty = false;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_saveTimer.stop();
     }
 
     bool saveIsScheduled() const
     {
-        return m_dirty;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dirty;
     }
 
     void updateFSObserver()
     {
-        bool observingFS = m_watcher->directories().contains(m_path);
-        if(m_observed && m_locked)
+        bool observingFS = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->directories().contains(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path);
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_observed && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked)
         {
             if(!observingFS)
             {
-                qWarning() << "Will watch" << m_path;
-                if(!m_watcher->addPath(m_path))
+                qWarning() << "Will watch" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
+                if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->addPath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path))
                 {
-                    qWarning() << "Failed to start watching" << m_path;
+                    qWarning() << "Failed to start watching" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
                 }
             }
         }
@@ -574,10 +574,10 @@ private:
         {
             if(observingFS)
             {
-                qWarning() << "Will stop watching" << m_path;
-                if(!m_watcher->removePath(m_path))
+                qWarning() << "Will stop watching" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
+                if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->removePath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path))
                 {
-                    qWarning() << "Failed to stop watching" << m_path;
+                    qWarning() << "Failed to stop watching" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
                 }
             }
         }
@@ -585,29 +585,29 @@ private:
 
     QString serversPath()
     {
-        QFileInfo foo(FS::PathCombine(m_path, "servers.dat"));
+        QFileInfo foo(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path, "servers.dat"));
         return foo.filePath();
     }
 
 private:
-    bool m_loaded = false;
-    bool m_locked = false;
-    bool m_observed = false;
-    bool m_dirty = false;
-    QString m_path;
-    QList<Server> m_servers;
-    QFileSystemWatcher *m_watcher = nullptr;
-    QTimer m_saveTimer;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_observed = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dirty = false;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
+    QList<Server> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_servers;
+    QFileSystemWatcher *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher = nullptr;
+    QTimer hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_saveTimer;
 };
 
 ServersPage::ServersPage(InstancePtr inst, QWidget* parent)
     : QMainWindow(parent), ui(new Ui::ServersPage)
 {
     ui->setupUi(this);
-    m_inst = inst;
-    m_model = new ServersModel(inst->gameRoot(), this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst = inst;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model = new ServersModel(inst->gameRoot(), this);
     ui->serversView->setIconSize(QSize(64,64));
-    ui->serversView->setModel(m_model);
+    ui->serversView->setModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model);
     ui->serversView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->serversView, &QTreeView::customContextMenuRequested, this, &ServersPage::ShowContextMenu);
 
@@ -623,16 +623,16 @@ ServersPage::ServersPage(InstancePtr inst, QWidget* parent)
 
     auto selectionModel = ui->serversView->selectionModel();
     connect(selectionModel, &QItemSelectionModel::currentChanged, this, &ServersPage::currentChanged);
-    connect(m_inst.get(), &MinecraftInstance::runningStatusChanged, this, &ServersPage::runningStateChanged);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst.get(), &MinecraftInstance::runningStatusChanged, this, &ServersPage::runningStateChanged);
     connect(ui->nameLine, &QLineEdit::textEdited, this, &ServersPage::nameEdited);
     connect(ui->addressLine, &QLineEdit::textEdited, this, &ServersPage::addressEdited);
     connect(ui->resourceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(resourceIndexChanged(int)));
-    connect(m_model, &QAbstractItemModel::rowsRemoved, this, &ServersPage::rowsRemoved);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model, &QAbstractItemModel::rowsRemoved, this, &ServersPage::rowsRemoved);
 
-    m_locked = m_inst->isRunning();
-    if(m_locked)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->isRunning();
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked)
     {
-        m_model->lock();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->lock();
     }
 
     updateState();
@@ -640,7 +640,7 @@ ServersPage::ServersPage(InstancePtr inst, QWidget* parent)
 
 ServersPage::~ServersPage()
 {
-    m_model->saveNow();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->saveNow();
     delete ui;
 }
 
@@ -665,18 +665,18 @@ QMenu * ServersPage::createPopupMenu()
 
 void ServersPage::runningStateChanged(bool running)
 {
-    if(m_locked == running)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked == running)
     {
         return;
     }
-    m_locked = running;
-    if(m_locked)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked = running;
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked)
     {
-        m_model->lock();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->lock();
     }
     else
     {
-        m_model->unlock();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->unlock();
     }
     updateState();
 }
@@ -719,25 +719,25 @@ void ServersPage::rowsRemoved(const QModelIndex& parent, int first, int last)
 
 void ServersPage::nameEdited(const QString& name)
 {
-    m_model->setName(currentServer, name);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setName(currentServer, name);
 }
 
 void ServersPage::addressEdited(const QString& address)
 {
-    m_model->setAddress(currentServer, address);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setAddress(currentServer, address);
 }
 
 void ServersPage::resourceIndexChanged(int index)
 {
     auto acceptsTextures = Server::AcceptsTextures(index);
-    m_model->setAcceptsTextures(currentServer, acceptsTextures);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setAcceptsTextures(currentServer, acceptsTextures);
 }
 
 void ServersPage::updateState()
 {
-    auto server = m_model->at(currentServer);
+    auto server = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->at(currentServer);
 
-    bool serverEditEnabled = server && !m_locked;
+    bool serverEditEnabled = server && !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked;
     ui->addressLine->setEnabled(serverEditEnabled);
     ui->nameLine->setEnabled(serverEditEnabled);
     ui->resourceComboBox->setEnabled(serverEditEnabled);
@@ -748,9 +748,9 @@ void ServersPage::updateState()
 
     if(server)
     {
-        ui->addressLine->setText(server->m_address);
-        ui->nameLine->setText(server->m_name);
-        ui->resourceComboBox->setCurrentIndex(int(server->m_acceptsTextures));
+        ui->addressLine->setText(server->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_address);
+        ui->nameLine->setText(server->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name);
+        ui->resourceComboBox->setCurrentIndex(int(server->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_acceptsTextures));
     }
     else
     {
@@ -759,39 +759,39 @@ void ServersPage::updateState()
         ui->resourceComboBox->setCurrentIndex(0);
     }
 
-    ui->actionAdd->setDisabled(m_locked);
+    ui->actionAdd->setDisabled(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked);
 }
 
 void ServersPage::openedImpl()
 {
-    m_model->observe();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->observe();
 
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     if (!APPLICATION->settings()->contains(setting_name))
-        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
     else
-        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
 
-    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->toolBar->setVisibilityState(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting->get().toByteArray());
 }
 
 void ServersPage::closedImpl()
 {
-    m_model->unobserve();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->unobserve();
 
-    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting->set(ui->toolBar->getVisibilityState());
 }
 
 void ServersPage::on_actionAdd_triggered()
 {
-    int position = m_model->addEmptyRow(currentServer + 1);
+    int position = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->addEmptyRow(currentServer + 1);
     if(position < 0)
     {
         return;
     }
     // select the new row
     ui->serversView->selectionModel()->setCurrentIndex(
-        m_model->index(position),
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->index(position),
         QItemSelectionModel::SelectCurrent | QItemSelectionModel::Clear | QItemSelectionModel::Rows
     );
     currentServer = position;
@@ -799,12 +799,12 @@ void ServersPage::on_actionAdd_triggered()
 
 void ServersPage::on_actionRemove_triggered()
 {
-    m_model->removeRow(currentServer);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->removeRow(currentServer);
 }
 
 void ServersPage::on_actionMove_Up_triggered()
 {
-    if(m_model->moveUp(currentServer))
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->moveUp(currentServer))
     {
         currentServer --;
     }
@@ -812,7 +812,7 @@ void ServersPage::on_actionMove_Up_triggered()
 
 void ServersPage::on_actionMove_Down_triggered()
 {
-    if(m_model->moveDown(currentServer))
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->moveDown(currentServer))
     {
         currentServer ++;
     }
@@ -820,8 +820,8 @@ void ServersPage::on_actionMove_Down_triggered()
 
 void ServersPage::on_actionJoin_triggered()
 {
-    const auto &address = m_model->at(currentServer)->m_address;
-    APPLICATION->launch(m_inst, true, false, nullptr, std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(address)));
+    const auto &address = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->at(currentServer)->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_address;
+    APPLICATION->launch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst, true, false, nullptr, std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(address)));
 }
 
 #include "ServersPage.moc"

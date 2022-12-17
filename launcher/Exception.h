@@ -9,24 +9,24 @@
 class Exception : public std::exception
 {
 public:
-    Exception(const QString &message) : std::exception(), m_message(message)
+    Exception(const QString &message) : std::exception(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_message(message)
     {
         qCritical() << "Exception:" << message;
     }
     Exception(const Exception &other)
-        : std::exception(), m_message(other.cause())
+        : std::exception(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_message(other.cause())
     {
     }
     virtual ~Exception() noexcept {}
     const char *what() const noexcept
     {
-        return m_message.toLatin1().constData();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_message.toLatin1().constData();
     }
     QString cause() const
     {
-        return m_message;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_message;
     }
 
 private:
-    QString m_message;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_message;
 };

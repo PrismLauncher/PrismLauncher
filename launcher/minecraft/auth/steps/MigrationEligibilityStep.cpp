@@ -19,7 +19,7 @@ void MigrationEligibilityStep::perform() {
     auto url = QUrl("https://api.minecraftservices.com/rollout/v1/msamigration");
     QNetworkRequest request = QNetworkRequest(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8());
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->yggdrasilToken.token).toUtf8());
 
     AuthRequest *requestor = new AuthRequest(this);
     connect(requestor, &AuthRequest::finished, this, &MigrationEligibilityStep::onRequestDone);
@@ -39,7 +39,7 @@ void MigrationEligibilityStep::onRequestDone(
     requestor->deleteLater();
 
     if (error == QNetworkReply::NoError) {
-        Parsers::parseRolloutResponse(data, m_data->canMigrateToMSA);
+        Parsers::parseRolloutResponse(data, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->canMigrateToMSA);
     }
     emit finished(AccountTaskState::STATE_WORKING, tr("Got migration flags"));
 }

@@ -13,41 +13,41 @@ Resource::Resource(QFileInfo file_info) : QObject()
 
 void Resource::setFile(QFileInfo file_info)
 {
-    m_file_info = file_info;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_info = file_info;
     parseFile();
 }
 
 void Resource::parseFile()
 {
-    QString file_name{ m_file_info.fileName() };
+    QString file_name{ hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_info.fileName() };
 
-    m_type = ResourceType::UNKNOWN;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type = ResourceType::UNKNOWN;
 
-    m_internal_id = file_name;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_internal_id = file_name;
 
-    if (m_file_info.isDir()) {
-        m_type = ResourceType::FOLDER;
-        m_name = file_name;
-    } else if (m_file_info.isFile()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_info.isDir()) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type = ResourceType::FOLDER;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = file_name;
+    } else if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_info.isFile()) {
         if (file_name.endsWith(".disabled")) {
             file_name.chop(9);
-            m_enabled = false;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_enabled = false;
         }
 
         if (file_name.endsWith(".zip") || file_name.endsWith(".jar")) {
-            m_type = ResourceType::ZIPFILE;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type = ResourceType::ZIPFILE;
             file_name.chop(4);
         } else if (file_name.endsWith(".litemod")) {
-            m_type = ResourceType::LITEMOD;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type = ResourceType::LITEMOD;
             file_name.chop(8);
         } else {
-            m_type = ResourceType::SINGLEFILE;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type = ResourceType::SINGLEFILE;
         }
 
-        m_name = file_name;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = file_name;
     }
 
-    m_changed_date_time = m_file_info.lastModified();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_changed_date_time = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_info.lastModified();
 }
 
 static void removeThePrefix(QString& string)
@@ -94,11 +94,11 @@ bool Resource::applyFilter(QRegularExpression filter) const
 
 bool Resource::enable(EnableAction action)
 {
-    if (m_type == ResourceType::UNKNOWN || m_type == ResourceType::FOLDER)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type == ResourceType::UNKNOWN || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type == ResourceType::FOLDER)
         return false;
 
 
-    QString path = m_file_info.absoluteFilePath();
+    QString path = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_info.absoluteFilePath();
     QFile file(path);
 
     bool enable = true;
@@ -115,11 +115,11 @@ bool Resource::enable(EnableAction action)
             break;
     }
 
-    if (m_enabled == enable)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_enabled == enable)
         return false;
 
     if (enable) {
-        // m_enabled is false, but there's no '.disabled' suffix.
+        // hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_enabled is false, but there's no '.disabled' suffix.
         // TODO: Report error?
         if (!path.endsWith(".disabled"))
             return false;
@@ -136,12 +136,12 @@ bool Resource::enable(EnableAction action)
 
     setFile(QFileInfo(path));
 
-    m_enabled = enable;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_enabled = enable;
     return true;
 }
 
 bool Resource::destroy()
 {
-    m_type = ResourceType::UNKNOWN;
-    return FS::deletePath(m_file_info.filePath());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type = ResourceType::UNKNOWN;
+    return FS::deletePath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_info.filePath());
 }

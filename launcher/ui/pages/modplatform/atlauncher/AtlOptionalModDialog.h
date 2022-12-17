@@ -83,15 +83,15 @@ private:
     void setMod(ATLauncher::VersionMod mod, int index, bool enable, bool shouldEmit = true);
 
 private:
-    NetJob::Ptr m_jobPtr;
-    QByteArray m_response;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jobPtr;
+    QByteArray hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response;
 
-    ATLauncher::PackVersion m_version;
-    QVector<ATLauncher::VersionMod> m_mods;
+    ATLauncher::PackVersion hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
+    QVector<ATLauncher::VersionMod> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods;
 
-    QMap<QString, bool> m_selection;
-    QMap<QString, int> m_index;
-    QMap<QString, QVector<QString>> m_dependants;
+    QMap<QString, bool> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selection;
+    QMap<QString, int> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index;
+    QMap<QString, QVector<QString>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dependants;
 };
 
 class AtlOptionalModDialog : public QDialog {

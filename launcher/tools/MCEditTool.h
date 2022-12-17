@@ -12,5 +12,5 @@ public:
     bool check(const QString &toolPath, QString &error);
     QString getProgramPath();
 private:
-    SettingsObjectPtr m_settings;
+    SettingsObjectPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings;
 };

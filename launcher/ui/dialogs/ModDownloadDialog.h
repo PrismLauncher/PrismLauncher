@@ -68,11 +68,11 @@ class ModDownloadDialog final : public QDialog, public BasePageProvider
 
    private:
     Ui::ModDownloadDialog* ui = nullptr;
-    PageContainer* m_container = nullptr;
-    QDialogButtonBox* m_buttons = nullptr;
-    QVBoxLayout* m_verticalLayout = nullptr;
-    ModPage* m_selectedPage = nullptr;
+    PageContainer* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container = nullptr;
+    QDialogButtonBox* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons = nullptr;
+    QVBoxLayout* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout = nullptr;
+    ModPage* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedPage = nullptr;
 
     QHash<QString, ModDownloadTask*> modTask;
-    BaseInstance* m_instance;
+    BaseInstance* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance;
 };

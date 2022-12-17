@@ -2,18 +2,18 @@
 
 TextPrint::TextPrint(LaunchTask * parent, const QStringList &lines, MessageLevel::Enum level) : LaunchStep(parent)
 {
-    m_lines = lines;
-    m_level = level;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lines = lines;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_level = level;
 }
 TextPrint::TextPrint(LaunchTask *parent, const QString &line, MessageLevel::Enum level) : LaunchStep(parent)
 {
-    m_lines.append(line);
-    m_level = level;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lines.append(line);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_level = level;
 }
 
 void TextPrint::executeTask()
 {
-    emit logLines(m_lines, m_level);
+    emit logLines(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lines, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_level);
     emitSucceeded();
 }
 

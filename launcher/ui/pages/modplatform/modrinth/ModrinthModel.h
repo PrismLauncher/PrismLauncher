@@ -93,14 +93,14 @@ class ModpackListModel : public QAbstractListModel {
     inline auto getMineVersions() const -> std::list<Version>;
 
    protected:
-    ModrinthPage* m_parent;
+    ModrinthPage* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent;
 
     QList<Modrinth::Modpack> modpacks;
 
-    LogoMap m_logoMap;
+    LogoMap hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap;
     QMap<QString, LogoCallback> waitingCallbacks;
-    QStringList m_failedLogos;
-    QStringList m_loadingLogos;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos;
 
     QString currentSearchTerm;
     QString currentSort;
@@ -109,9 +109,9 @@ class ModpackListModel : public QAbstractListModel {
 
     NetJob::Ptr jobPtr;
 
-    QByteArray m_all_response;
-    QByteArray m_specific_response;
+    QByteArray hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_all_response;
+    QByteArray hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_specific_response;
 
-    int m_modpacks_per_page = 20;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modpacks_per_page = 20;
 };
 }  // namespace ModPlatform

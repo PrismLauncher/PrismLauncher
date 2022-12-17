@@ -13,11 +13,11 @@ public:
 
     bool canAbort() const override { return true; }
 
-    inline auto isMultiStep() const -> bool override { return m_queue.size() > 1; };
+    inline auto isMultiStep() const -> bool override { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_queue.size() > 1; };
     auto getStepProgress() const -> qint64 override;
     auto getStepTotalProgress() const -> qint64 override;
 
-    inline auto getStepStatus() const -> QString override { return m_step_status; }
+    inline auto getStepStatus() const -> QString override { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_step_status; }
 
     void addTask(Task::Ptr task);
 
@@ -36,25 +36,25 @@ slots:
     void subTaskProgress(qint64 current, qint64 total);
 
 protected:
-    void setStepStatus(QString status) { m_step_status = status; emit stepStatus(status); };
+    void setStepStatus(QString status) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_step_status = status; emit stepStatus(status); };
 
     virtual void updateState();
 
 protected:
-    QString m_name;
-    QString m_step_status;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_step_status;
 
-    QQueue<Task::Ptr> m_queue;
+    QQueue<Task::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_queue;
 
-    QHash<Task*, Task::Ptr> m_doing;
-    QHash<Task*, Task::Ptr> m_done;
-    QHash<Task*, Task::Ptr> m_failed;
+    QHash<Task*, Task::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doing;
+    QHash<Task*, Task::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_done;
+    QHash<Task*, Task::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed;
 
-    int m_total_max_size;
-    int m_total_size;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_total_max_size;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_total_size;
 
-    qint64 m_stepProgress = 0;
-    qint64 m_stepTotalProgress = 100;
+    qint64 hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stepProgress = 0;
+    qint64 hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stepTotalProgress = 100;
 
-    bool m_aborted = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = false;
 };

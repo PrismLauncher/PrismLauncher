@@ -6,16 +6,16 @@
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
 Flame::FileResolvingTask::FileResolvingTask(const shared_qobject_ptr<QNetworkAccessManager>& network, Flame::Manifest& toProcess)
-    : m_network(network), m_toProcess(toProcess)
+    : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network(network), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_toProcess(toProcess)
 {}
 
 bool Flame::FileResolvingTask::abort()
 {
     bool aborted = true;
-    if (m_dljob)
-        aborted &= m_dljob->abort();
-    if (m_checkJob)
-        aborted &= m_checkJob->abort();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dljob)
+        aborted &= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dljob->abort();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checkJob)
+        aborted &= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checkJob->abort();
     return aborted ? Task::abort() : false;
 }
 
@@ -23,27 +23,27 @@ void Flame::FileResolvingTask::executeTask()
 {
     setStatus(tr("Resolving mod IDs..."));
     setProgress(0, 3);
-    m_dljob = new NetJob("Mod id resolver", m_network);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dljob = new NetJob("Mod id resolver", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network);
     result.reset(new QByteArray());
     //build json data to send
     QJsonObject object;
 
-    object["fileIds"] = QJsonArray::fromVariantList(std::accumulate(m_toProcess.files.begin(), m_toProcess.files.end(), QVariantList(), [](QVariantList& l, const File& s) {
+    object["fileIds"] = QJsonArray::fromVariantList(std::accumulate(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_toProcess.files.begin(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_toProcess.files.end(), QVariantList(), [](QVariantList& l, const File& s) {
         l.push_back(s.fileId);
         return l;
     }));
     QByteArray data = Json::toText(object);
     auto dl = Net::Upload::makeByteArray(QUrl("https://api.curseforge.com/v1/mods/files"), result.get(), data);
-    m_dljob->addNetAction(dl);
-    connect(m_dljob.get(), &NetJob::finished, this, &Flame::FileResolvingTask::netJobFinished);
-    m_dljob->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dljob->addNetAction(dl);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dljob.get(), &NetJob::finished, this, &Flame::FileResolvingTask::netJobFinished);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dljob->start();
 }
 
 void Flame::FileResolvingTask::netJobFinished()
 {
     setProgress(1, 3);
     // job to check modrinth for blocked projects
-    m_checkJob = new NetJob("Modrinth check", m_network);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checkJob = new NetJob("Modrinth check", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network);
     blockedProjects = QMap<File *,QByteArray *>();
 
     QJsonDocument doc;
@@ -63,7 +63,7 @@ void Flame::FileResolvingTask::netJobFinished()
 
     for (QJsonValueRef file : array) {
         auto fileid = Json::requireInteger(Json::requireObject(file)["id"]);
-        auto& out = m_toProcess.files[fileid];
+        auto& out = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_toProcess.files[fileid];
         try {
            out.parseFromObject(Json::requireObject(file));
         } catch (const JSONValidationError& e) {
@@ -77,14 +77,14 @@ void Flame::FileResolvingTask::netJobFinished()
                     out.resolved = true;
                 });
 
-                m_checkJob->addNetAction(dl);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checkJob->addNetAction(dl);
                 blockedProjects.insert(&out, output);
             }
         }
     }
-    connect(m_checkJob.get(), &NetJob::finished, this, &Flame::FileResolvingTask::modrinthCheckFinished);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checkJob.get(), &NetJob::finished, this, &Flame::FileResolvingTask::modrinthCheckFinished);
 
-    m_checkJob->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checkJob->start();
 }
 
 void Flame::FileResolvingTask::modrinthCheckFinished() {
@@ -124,7 +124,7 @@ void Flame::FileResolvingTask::modrinthCheckFinished() {
     //Display not found mods early
     if (!block->empty()) {
         //blocked mods found, we need the slug for displaying.... we need another job :D !
-        auto slugJob = new NetJob("Slug Job", m_network);
+        auto slugJob = new NetJob("Slug Job", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network);
         auto slugs = QVector<QByteArray>(block->size());
         auto index = 0;
         for (auto fileInfo: *block) {

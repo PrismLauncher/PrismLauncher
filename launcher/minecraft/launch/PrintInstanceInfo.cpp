@@ -128,7 +128,7 @@ void runGlxinfo(QStringList & log)
 
 void PrintInstanceInfo::executeTask()
 {
-    auto instance = m_parent->instance();
+    auto instance = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance();
     QStringList log;
 
 #if defined(Q_OS_LINUX)
@@ -142,6 +142,6 @@ void PrintInstanceInfo::executeTask()
 #endif
 
     logLines(log, MessageLevel::Launcher);
-    logLines(instance->verboseDescription(m_session, m_serverToJoin), MessageLevel::Launcher);
+    logLines(instance->verboseDescription(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin), MessageLevel::Launcher);
     emitSucceeded();
 }

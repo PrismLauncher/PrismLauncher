@@ -41,8 +41,8 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
             }
             return pack.description;
         } case Qt::DecorationRole: {
-            if (m_logoMap.contains(pack.logoName)) {
-                return (m_logoMap.value(pack.logoName));
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(pack.logoName)) {
+                return (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.value(pack.logoName));
             }
             QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
             ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
@@ -79,8 +79,8 @@ bool ListModel::setData(const QModelIndex &index, const QVariant &value, int rol
 
 void ListModel::logoLoaded(QString logo, QIcon out)
 {
-    m_loadingLogos.removeAll(logo);
-    m_logoMap.insert(logo, out);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.removeAll(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.insert(logo, out);
     for (int i = 0; i < modpacks.size(); i++) {
         if (modpacks[i].logoName == logo) {
             emit dataChanged(createIndex(i, 0), createIndex(i, 0), { Qt::DecorationRole });
@@ -90,13 +90,13 @@ void ListModel::logoLoaded(QString logo, QIcon out)
 
 void ListModel::logoFailed(QString logo)
 {
-    m_failedLogos.append(logo);
-    m_loadingLogos.removeAll(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos.append(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.removeAll(logo);
 }
 
 void ListModel::requestLogo(QString logo, QString url)
 {
-    if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo)) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.contains(logo) || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos.contains(logo)) {
         return;
     }
 
@@ -120,12 +120,12 @@ void ListModel::requestLogo(QString logo, QString url)
 
     job->start();
 
-    m_loadingLogos.append(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.append(logo);
 }
 
 void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
 {
-    if (m_logoMap.contains(logo)) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(logo)) {
         callback(APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     } else {
         requestLogo(logo, logoUrl);

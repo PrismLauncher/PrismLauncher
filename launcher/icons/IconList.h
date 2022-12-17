@@ -81,9 +81,9 @@ protected slots:
     void fileChanged(const QString &path);
     void SettingChanged(const Setting & setting, QVariant value);
 private:
-    shared_qobject_ptr<QFileSystemWatcher> m_watcher;
+    shared_qobject_ptr<QFileSystemWatcher> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher;
     bool is_watching;
     QMap<QString, int> name_index;
     QVector<MMCIcon> icons;
-    QDir m_dir;
+    QDir hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir;
 };

@@ -38,10 +38,10 @@
 #include <QTabBar>
 
 NotesPage::NotesPage(BaseInstance *inst, QWidget *parent)
-    : QWidget(parent), ui(new Ui::NotesPage), m_inst(inst)
+    : QWidget(parent), ui(new Ui::NotesPage), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst(inst)
 {
     ui->setupUi(this);
-    ui->noteEditor->setText(m_inst->notes());
+    ui->noteEditor->setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->notes());
 }
 
 NotesPage::~NotesPage()
@@ -51,7 +51,7 @@ NotesPage::~NotesPage()
 
 bool NotesPage::apply()
 {
-    m_inst->setNotes(ui->noteEditor->toPlainText());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->setNotes(ui->noteEditor->toPlainText());
     return true;
 }
 

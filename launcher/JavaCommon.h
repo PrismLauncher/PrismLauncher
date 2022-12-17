@@ -24,7 +24,7 @@ namespace JavaCommon
         Q_OBJECT
     public:
         TestCheck(QWidget *parent, QString path, QString args, int minMem, int maxMem, int permGen)
-            :m_parent(parent), m_path(path), m_args(args), m_minMem(minMem), m_maxMem(maxMem), m_permGen(permGen)
+            :hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path(path), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_args(args), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMem(minMem), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMem(maxMem), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGen(permGen)
         {
         }
         virtual ~TestCheck() {};
@@ -40,11 +40,11 @@ namespace JavaCommon
 
     private:
         std::shared_ptr<JavaChecker> checker;
-        QWidget *m_parent = nullptr;
-        QString m_path;
-        QString m_args;
-        int m_minMem = 0;
-        int m_maxMem = 0;
-        int m_permGen = 64;
+        QWidget *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent = nullptr;
+        QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
+        QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_args;
+        int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMem = 0;
+        int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMem = 0;
+        int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGen = 64;
     };
 }

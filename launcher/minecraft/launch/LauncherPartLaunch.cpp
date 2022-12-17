@@ -53,7 +53,7 @@ LauncherPartLaunch::LauncherPartLaunch(LaunchTask *parent) : LaunchStep(parent)
     if (instance->settings()->get("CloseAfterLaunch").toBool())
     {
         std::shared_ptr<QMetaObject::Connection> connection{new QMetaObject::Connection};
-        *connection = connect(&m_process, &LoggedProcess::log, this, [=](QStringList lines, MessageLevel::Enum level) {
+        *connection = connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process, &LoggedProcess::log, this, [=](QStringList lines, MessageLevel::Enum level) {
             qDebug() << lines;
             if (lines.filter(QRegularExpression(".*Setting user.+", QRegularExpression::CaseInsensitiveOption)).length() != 0)
             {
@@ -63,8 +63,8 @@ LauncherPartLaunch::LauncherPartLaunch(LaunchTask *parent) : LaunchStep(parent)
         });
     }
 
-    connect(&m_process, &LoggedProcess::log, this, &LauncherPartLaunch::logLines);
-    connect(&m_process, &LoggedProcess::stateChanged, this, &LauncherPartLaunch::on_state);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process, &LoggedProcess::log, this, &LauncherPartLaunch::logLines);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process, &LoggedProcess::stateChanged, this, &LauncherPartLaunch::on_state);
 }
 
 #ifdef Q_OS_WIN
@@ -104,20 +104,20 @@ void LauncherPartLaunch::executeTask()
         return;
     }
 
-    auto instance = m_parent->instance();
+    auto instance = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance();
     std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
 
-    m_launchScript = minecraftInstance->createLaunchScript(m_session, m_serverToJoin);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchScript = minecraftInstance->createLaunchScript(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin);
     QStringList args = minecraftInstance->javaArguments();
     QString allArgs = args.join(", ");
-    emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::Launcher);
+    emit logLine("Java Arguments:\n[" + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::Launcher);
 
     auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
 
-    m_process.setProcessEnvironment(instance->createLaunchEnvironment());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.setProcessEnvironment(instance->createLaunchEnvironment());
 
     // make detachable - this will keep the process running even if the object is destroyed
-    m_process.setDetachable(true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.setDetachable(true);
 
     auto classPath = minecraftInstance->getClassPath();
     classPath.prepend(jarPath);
@@ -173,17 +173,17 @@ void LauncherPartLaunch::executeTask()
         }
         emit logLine("Wrapper command is:\n" + wrapperCommandStr + "\n\n", MessageLevel::Launcher);
         args.prepend(javaPath);
-        m_process.start(wrapperCommand, wrapperArgs + args);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.start(wrapperCommand, wrapperArgs + args);
     }
     else
     {
-        m_process.start(javaPath, args);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.start(javaPath, args);
     }
 
 #ifdef Q_OS_LINUX
     if (instance->settings()->get("EnableFeralGamemode").toBool() && APPLICATION->capabilities() & Application::SupportsGameMode)
     {
-        auto pid = m_process.processId();
+        auto pid = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.processId();
         if (pid)
         {
             gamemode_request_start_for(pid);
@@ -207,36 +207,36 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
         case LoggedProcess::Aborted:
         case LoggedProcess::Crashed:
         {
-            m_parent->setPid(-1);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->setPid(-1);
             emitFailed(tr("Game crashed."));
             return;
         }
         case LoggedProcess::Finished:
         {
-            auto instance = m_parent->instance();
+            auto instance = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance();
             if (instance->settings()->get("CloseAfterLaunch").toBool())
                 APPLICATION->showMainWindow();
 
-            m_parent->setPid(-1);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->setPid(-1);
             // if the exit code wasn't 0, report this as a crash
-            auto exitCode = m_process.exitCode();
+            auto exitCode = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.exitCode();
             if(exitCode != 0)
             {
                 emitFailed(tr("Game crashed."));
                 return;
             }
             //FIXME: make this work again
-            // m_postlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(exitCode));
+            // hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_postlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(exitCode));
             // run post-exit
             emitSucceeded();
             break;
         }
         case LoggedProcess::Running:
-            emit logLine(QString("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::Launcher);
-            m_parent->setPid(m_process.processId());
-            m_parent->instance()->setLastLaunch();
+            emit logLine(QString("Minecraft process ID: %1\n\n").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.processId()), MessageLevel::Launcher);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->setPid(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.processId());
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance()->setLastLaunch();
             // send the launch script to the launcher part
-            m_process.write(m_launchScript.toUtf8());
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.write(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchScript.toUtf8());
 
             mayProceed = true;
             emit readyForLaunch();
@@ -248,7 +248,7 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
 
 void LauncherPartLaunch::setWorkingDirectory(const QString &wd)
 {
-    m_process.setWorkingDirectory(wd);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.setWorkingDirectory(wd);
 }
 
 void LauncherPartLaunch::proceed()
@@ -256,7 +256,7 @@ void LauncherPartLaunch::proceed()
     if(mayProceed)
     {
         QString launchString("launch\n");
-        m_process.write(launchString.toUtf8());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.write(launchString.toUtf8());
         mayProceed = false;
     }
 }
@@ -267,14 +267,14 @@ bool LauncherPartLaunch::abort()
     {
         mayProceed = false;
         QString launchString("abort\n");
-        m_process.write(launchString.toUtf8());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.write(launchString.toUtf8());
     }
     else
     {
-        auto state = m_process.state();
+        auto state = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.state();
         if (state == LoggedProcess::Running || state == LoggedProcess::Starting)
         {
-            m_process.kill();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.kill();
         }
     }
     return true;

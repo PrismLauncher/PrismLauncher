@@ -13,9 +13,9 @@ static FlameAPI api;
 
 bool FlameCheckUpdate::abort()
 {
-    m_was_aborted = true;
-    if (m_net_job)
-        return m_net_job->abort();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_was_aborted = true;
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job)
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job->abort();
     return true;
 }
 
@@ -117,19 +117,19 @@ void FlameCheckUpdate::executeTask()
     setStatus(tr("Preparing mods for CurseForge..."));
 
     int i = 0;
-    for (auto* mod : m_mods) {
+    for (auto* mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods) {
         if (!mod->enabled()) {
             emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
             continue;
         }
 
         setStatus(tr("Getting API response from CurseForge for '%1'...").arg(mod->name()));
-        setProgress(i++, m_mods.size());
+        setProgress(i++, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.size());
 
-        auto latest_ver = api.getLatestVersion({ mod->metadata()->project_id.toString(), m_game_versions, m_loaders });
+        auto latest_ver = api.getLatestVersion({ mod->metadata()->project_id.toString(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_game_versions, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaders });
 
         // Check if we were aborted while getting the latest version
-        if (m_was_aborted) {
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_was_aborted) {
             aborted();
             return;
         }
@@ -168,8 +168,8 @@ void FlameCheckUpdate::executeTask()
                 old_version = current_ver.version;
             }
 
-            auto download_task = new ModDownloadTask(pack, latest_ver, m_mods_folder);
-            m_updatable.emplace_back(pack.name, mod->metadata()->hash, old_version, latest_ver.version,
+            auto download_task = new ModDownloadTask(pack, latest_ver, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods_folder);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updatable.emplace_back(pack.name, mod->metadata()->hash, old_version, latest_ver.version,
                                      api.getModFileChangelog(latest_ver.addonId.toInt(), latest_ver.fileId.toInt()),
                                      ModPlatform::Provider::FLAME, download_task);
         }

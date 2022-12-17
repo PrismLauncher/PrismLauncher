@@ -238,7 +238,7 @@ void InfoFrame::setDescription(QString text)
     {
         ui->descriptionLabel->setOpenExternalLinks(false);
         ui->descriptionLabel->setTextFormat(Qt::TextFormat::RichText);
-        m_description = text;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description = text;
         // This allows injecting HTML here.
         labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
         QObject::connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler);
@@ -263,19 +263,19 @@ void InfoFrame::setImage(QPixmap img)
 
 void InfoFrame::descriptionEllipsisHandler(QString link)
 {
-    if(!m_current_box)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_box)
     {
-        m_current_box = CustomMessageBox::selectable(this, "", m_description);
-        connect(m_current_box, &QMessageBox::finished, this, &InfoFrame::boxClosed);
-        m_current_box->show();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_box = CustomMessageBox::selectable(this, "", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_box, &QMessageBox::finished, this, &InfoFrame::boxClosed);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_box->show();
     }
     else
     {
-        m_current_box->setText(m_description);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_box->setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description);
     }
 }
 
 void InfoFrame::boxClosed(int result)
 {
-    m_current_box = nullptr;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_box = nullptr;
 }

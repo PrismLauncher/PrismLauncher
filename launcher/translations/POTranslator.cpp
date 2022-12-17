@@ -156,7 +156,7 @@ public:
 void POTranslatorPrivate::reload()
 {
     QFile file(filename);
-    if(!file.open(QFile::OpenMode::enum_type::ReadOnly | QFile::OpenMode::enum_type::Text))
+    if(!file.open(QFile::OpenMode::enuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type::ReadOnly | QFile::OpenMode::enuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type::Text))
     {
         qDebug() << "Failed to open PO file:" << filename;
         return;

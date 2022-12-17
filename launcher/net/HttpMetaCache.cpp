@@ -47,10 +47,10 @@
 auto MetaEntry::getFullPath() -> QString
 {
     // FIXME: make local?
-    return FS::PathCombine(m_basePath, m_relativePath);
+    return FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_basePath, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_relativePath);
 }
 
-HttpMetaCache::HttpMetaCache(QString path) : QObject(), m_index_file(path)
+HttpMetaCache::HttpMetaCache(QString path) : QObject(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_file(path)
 {
     saveBatchingTimer.setSingleShot(true);
     saveBatchingTimer.setTimerType(Qt::VeryCoarseTimer);
@@ -67,12 +67,12 @@ HttpMetaCache::~HttpMetaCache()
 auto HttpMetaCache::getEntry(QString base, QString resource_path) -> MetaEntryPtr
 {
     // no base. no base path. can't store
-    if (!m_entries.contains(base)) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.contains(base)) {
         // TODO: log problem
         return {};
     }
 
-    EntryMap& map = m_entries[base];
+    EntryMap& map = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries[base];
     if (map.entry_list.contains(resource_path)) {
         return map.entry_list[resource_path];
     }
@@ -88,7 +88,7 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
         return staleEntry(base, resource_path);
     }
 
-    auto& selected_base = m_entries[base];
+    auto& selected_base = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries[base];
     QString real_path = FS::PathCombine(selected_base.base_path, resource_path);
     QFileInfo finfo(real_path);
 
@@ -99,7 +99,7 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
         return staleEntry(base, resource_path);
     }
 
-    if (!expected_etag.isEmpty() && expected_etag != entry->m_etag) {
+    if (!expected_etag.isEmpty() && expected_etag != entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_etag) {
         // if the etag doesn't match expected, we disown the entry
         selected_base.entry_list.remove(resource_path);
         return staleEntry(base, resource_path);
@@ -107,17 +107,17 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
 
     // if the file changed, check md5sum
     qint64 file_last_changed = finfo.lastModified().toUTC().toMSecsSinceEpoch();
-    if (file_last_changed != entry->m_local_changed_timestamp) {
+    if (file_last_changed != entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_changed_timestamp) {
         QFile input(real_path);
         input.open(QIODevice::ReadOnly);
         QString md5sum = QCryptographicHash::hash(input.readAll(), QCryptographicHash::Md5).toHex().constData();
-        if (entry->m_md5sum != md5sum) {
+        if (entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_md5sum != md5sum) {
             selected_base.entry_list.remove(resource_path);
             return staleEntry(base, resource_path);
         }
 
         // md5sums matched... keep entry and save the new state to file
-        entry->m_local_changed_timestamp = file_last_changed;
+        entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_changed_timestamp = file_last_changed;
         SaveEventually();
     }
 
@@ -130,23 +130,23 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
     }
 
     // entry passed all the checks we cared about.
-    entry->m_basePath = getBasePath(base);
+    entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_basePath = getBasePath(base);
     return entry;
 }
 
 auto HttpMetaCache::updateEntry(MetaEntryPtr stale_entry) -> bool
 {
-    if (!m_entries.contains(stale_entry->m_baseId)) {
-        qCritical() << "Cannot add entry with unknown base: " << stale_entry->m_baseId.toLocal8Bit();
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.contains(stale_entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseId)) {
+        qCritical() << "Cannot add entry with unknown base: " << stale_entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseId.toLocal8Bit();
         return false;
     }
 
-    if (stale_entry->m_stale) {
+    if (stale_entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stale) {
         qCritical() << "Cannot add stale entry: " << stale_entry->getFullPath().toLocal8Bit();
         return false;
     }
 
-    m_entries[stale_entry->m_baseId].entry_list[stale_entry->m_relativePath] = stale_entry;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries[stale_entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseId].entry_list[stale_entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_relativePath] = stale_entry;
     SaveEventually();
 
     return true;
@@ -157,19 +157,19 @@ auto HttpMetaCache::evictEntry(MetaEntryPtr entry) -> bool
     if (!entry)
         return false;
 
-    entry->m_stale = true;
+    entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stale = true;
     SaveEventually();
     return true;
 }
 
 void HttpMetaCache::evictAll()
 {
-    for (QString& base : m_entries.keys()) {
-        EntryMap& map = m_entries[base];
+    for (QString& base : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.keys()) {
+        EntryMap& map = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries[base];
         qDebug() << "Evicting base" << base;
         for (MetaEntryPtr entry : map.entry_list) {
             if (!evictEntry(entry))
-                qWarning() << "Unexpected missing cache entry" << entry->m_basePath;
+                qWarning() << "Unexpected missing cache entry" << entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_basePath;
         }
     }
 }
@@ -177,10 +177,10 @@ void HttpMetaCache::evictAll()
 auto HttpMetaCache::staleEntry(QString base, QString resource_path) -> MetaEntryPtr
 {
     auto foo = new MetaEntry();
-    foo->m_baseId = base;
-    foo->m_basePath = getBasePath(base);
-    foo->m_relativePath = resource_path;
-    foo->m_stale = true;
+    foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseId = base;
+    foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_basePath = getBasePath(base);
+    foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_relativePath = resource_path;
+    foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stale = true;
 
     return MetaEntryPtr(foo);
 }
@@ -188,19 +188,19 @@ auto HttpMetaCache::staleEntry(QString base, QString resource_path) -> MetaEntry
 void HttpMetaCache::addBase(QString base, QString base_root)
 {
     // TODO: report error
-    if (m_entries.contains(base))
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.contains(base))
         return;
 
     // TODO: check if the base path is valid
     EntryMap foo;
     foo.base_path = base_root;
-    m_entries[base] = foo;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries[base] = foo;
 }
 
 auto HttpMetaCache::getBasePath(QString base) -> QString
 {
-    if (m_entries.contains(base)) {
-        return m_entries[base].base_path;
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.contains(base)) {
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries[base].base_path;
     }
 
     return {};
@@ -208,10 +208,10 @@ auto HttpMetaCache::getBasePath(QString base) -> QString
 
 void HttpMetaCache::Load()
 {
-    if (m_index_file.isNull())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_file.isNull())
         return;
 
-    QFile index(m_index_file);
+    QFile index(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_file);
     if (!index.open(QIODevice::ReadOnly))
         return;
 
@@ -229,29 +229,29 @@ void HttpMetaCache::Load()
     for (auto element : array) {
         auto element_obj = Json::ensureObject(element);
         auto base = Json::ensureString(element_obj, "base");
-        if (!m_entries.contains(base))
+        if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.contains(base))
             continue;
 
-        auto& entrymap = m_entries[base];
+        auto& entrymap = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries[base];
 
         auto foo = new MetaEntry();
-        foo->m_baseId = base;
-        foo->m_relativePath = Json::ensureString(element_obj, "path");
-        foo->m_md5sum = Json::ensureString(element_obj, "md5sum");
-        foo->m_etag = Json::ensureString(element_obj, "etag");
-        foo->m_local_changed_timestamp = Json::ensureDouble(element_obj, "last_changed_timestamp");
-        foo->m_remote_changed_timestamp = Json::ensureString(element_obj, "remote_changed_timestamp");
+        foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseId = base;
+        foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_relativePath = Json::ensureString(element_obj, "path");
+        foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_md5sum = Json::ensureString(element_obj, "md5sum");
+        foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_etag = Json::ensureString(element_obj, "etag");
+        foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_changed_timestamp = Json::ensureDouble(element_obj, "last_changed_timestamp");
+        foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_remote_changed_timestamp = Json::ensureString(element_obj, "remote_changed_timestamp");
 
         foo->makeEternal(Json::ensureBoolean(element_obj, (const QString)QStringLiteral("eternal"), false));
         if (!foo->isEternal()) {
-            foo->m_current_age = Json::ensureDouble(element_obj, "current_age");
-            foo->m_max_age = Json::ensureDouble(element_obj, "max_age");
+            foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_age = Json::ensureDouble(element_obj, "current_age");
+            foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_max_age = Json::ensureDouble(element_obj, "max_age");
         }
 
         // presumed innocent until closer examination
-        foo->m_stale = false;
+        foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stale = false;
 
-        entrymap.entry_list[foo->m_relativePath] = MetaEntryPtr(foo);
+        entrymap.entry_list[foo->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_relativePath] = MetaEntryPtr(foo);
     }
 }
 
@@ -264,35 +264,35 @@ void HttpMetaCache::SaveEventually()
 
 void HttpMetaCache::SaveNow()
 {
-    if (m_index_file.isNull())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_file.isNull())
         return;
 
-    qDebug() << "[HttpMetaCache]" << "Saving metacache with" << m_entries.size() << "entries";
+    qDebug() << "[HttpMetaCache]" << "Saving metacache with" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries.size() << "entries";
 
     QJsonObject toplevel;
     Json::writeString(toplevel, "version", "1");
 
     QJsonArray entriesArr;
-    for (auto group : m_entries) {
+    for (auto group : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entries) {
         for (auto entry : group.entry_list) {
             // do not save stale entries. they are dead.
-            if (entry->m_stale) {
+            if (entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stale) {
                 continue;
             }
 
             QJsonObject entryObj;
-            Json::writeString(entryObj, "base", entry->m_baseId);
-            Json::writeString(entryObj, "path", entry->m_relativePath);
-            Json::writeString(entryObj, "md5sum", entry->m_md5sum);
-            Json::writeString(entryObj, "etag", entry->m_etag);
-            entryObj.insert("last_changed_timestamp", QJsonValue(double(entry->m_local_changed_timestamp)));
-            if (!entry->m_remote_changed_timestamp.isEmpty())
-                entryObj.insert("remote_changed_timestamp", QJsonValue(entry->m_remote_changed_timestamp));
+            Json::writeString(entryObj, "base", entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseId);
+            Json::writeString(entryObj, "path", entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_relativePath);
+            Json::writeString(entryObj, "md5sum", entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_md5sum);
+            Json::writeString(entryObj, "etag", entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_etag);
+            entryObj.insert("last_changed_timestamp", QJsonValue(double(entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_local_changed_timestamp)));
+            if (!entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_remote_changed_timestamp.isEmpty())
+                entryObj.insert("remote_changed_timestamp", QJsonValue(entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_remote_changed_timestamp));
             if (entry->isEternal()) {
                 entryObj.insert("eternal", true);
             } else {
-                entryObj.insert("current_age", QJsonValue(double(entry->m_current_age)));
-                entryObj.insert("max_age", QJsonValue(double(entry->m_max_age)));
+                entryObj.insert("current_age", QJsonValue(double(entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_age)));
+                entryObj.insert("max_age", QJsonValue(double(entry->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_max_age)));
             }
             entriesArr.append(entryObj);
         }
@@ -300,7 +300,7 @@ void HttpMetaCache::SaveNow()
     toplevel.insert("entries", entriesArr);
 
     try {
-        Json::write(toplevel, m_index_file);
+        Json::write(toplevel, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_file);
     } catch (const Exception& e) {
         qWarning() << e.what();
     }

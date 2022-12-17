@@ -24,7 +24,7 @@
 namespace Meta
 {
 VersionList::VersionList(const QString &uid, QObject *parent)
-    : BaseVersionList(parent), m_uid(uid)
+    : BaseVersionList(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid(uid)
 {
     setObjectName("Version list: " + uid);
 }
@@ -42,17 +42,17 @@ bool VersionList::isLoaded()
 
 const BaseVersion::Ptr VersionList::at(int i) const
 {
-    return m_versions.at(i);
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.at(i);
 }
 int VersionList::count() const
 {
-    return m_versions.size();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.size();
 }
 
 void VersionList::sortVersions()
 {
     beginResetModel();
-    std::sort(m_versions.begin(), m_versions.end(), [](const Version::Ptr &a, const Version::Ptr &b)
+    std::sort(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.begin(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.end(), [](const Version::Ptr &a, const Version::Ptr &b)
     {
         return *a.get() < *b.get();
     });
@@ -61,12 +61,12 @@ void VersionList::sortVersions()
 
 QVariant VersionList::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= m_versions.size() || index.parent().isValid())
+    if (!index.isValid() || index.row() < 0 || index.row() >= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.size() || index.parent().isValid())
     {
         return QVariant();
     }
 
-    Version::Ptr version = m_versions.at(index.row());
+    Version::Ptr version = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.at(index.row());
 
     switch (role)
     {
@@ -121,55 +121,55 @@ QHash<int, QByteArray> VersionList::roleNames() const
 
 QString VersionList::localFilename() const
 {
-    return m_uid + "/index.json";
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid + "/index.json";
 }
 
 QString VersionList::humanReadable() const
 {
-    return m_name.isEmpty() ? m_uid : m_name;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name.isEmpty() ? hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
 }
 
 Version::Ptr VersionList::getVersion(const QString &version)
 {
-    Version::Ptr out = m_lookup.value(version, nullptr);
+    Version::Ptr out = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lookup.value(version, nullptr);
     if(!out)
     {
-        out = std::make_shared<Version>(m_uid, version);
-        m_lookup[version] = out;
+        out = std::make_shared<Version>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid, version);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lookup[version] = out;
     }
     return out;
 }
 
 bool VersionList::hasVersion(QString version) const
 {
-    auto ver = std::find_if(m_versions.constBegin(), m_versions.constEnd(),
+    auto ver = std::find_if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.constBegin(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.constEnd(),
             [&](Meta::Version::Ptr const& a){ return a->version() == version; });
-    return (ver != m_versions.constEnd());
+    return (ver != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.constEnd());
 }
 
 void VersionList::setName(const QString &name)
 {
-    m_name = name;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = name;
     emit nameChanged(name);
 }
 
 void VersionList::setVersions(const QVector<Version::Ptr> &versions)
 {
     beginResetModel();
-    m_versions = versions;
-    std::sort(m_versions.begin(), m_versions.end(), [](const Version::Ptr &a, const Version::Ptr &b)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions = versions;
+    std::sort(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.begin(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.end(), [](const Version::Ptr &a, const Version::Ptr &b)
     {
         return a->rawTime() > b->rawTime();
     });
-    for (int i = 0; i < m_versions.size(); ++i)
+    for (int i = 0; i < hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.size(); ++i)
     {
-        m_lookup.insert(m_versions.at(i)->version(), m_versions.at(i));
-        setupAddedVersion(i, m_versions.at(i));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lookup.insert(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.at(i)->version(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.at(i));
+        setupAddedVersion(i, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.at(i));
     }
 
     // FIXME: this is dumb, we have 'recommended' as part of the metadata already...
-    auto recommendedIt = std::find_if(m_versions.constBegin(), m_versions.constEnd(), [](const Version::Ptr &ptr) { return ptr->type() == "release"; });
-    m_recommended = recommendedIt == m_versions.constEnd() ? nullptr : *recommendedIt;
+    auto recommendedIt = std::find_if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.constBegin(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.constEnd(), [](const Version::Ptr &ptr) { return ptr->type() == "release"; });
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_recommended = recommendedIt == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.constEnd() ? nullptr : *recommendedIt;
     endResetModel();
 }
 
@@ -196,41 +196,41 @@ static const Meta::Version::Ptr &getBetterVersion(const Meta::Version::Ptr &a, c
 
 void VersionList::mergeFromIndex(const VersionList::Ptr &other)
 {
-    if (m_name != other->m_name)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name != other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name)
     {
-        setName(other->m_name);
+        setName(other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name);
     }
 }
 
 void VersionList::merge(const VersionList::Ptr &other)
 {
-    if (m_name != other->m_name)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name != other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name)
     {
-        setName(other->m_name);
+        setName(other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name);
     }
 
     // TODO: do not reset the whole model. maybe?
     beginResetModel();
-    m_versions.clear();
-    if(other->m_versions.isEmpty())
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.clear();
+    if(other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.isEmpty())
     {
         qWarning() << "Empty list loaded ...";
     }
-    for (const Version::Ptr &version : other->m_versions)
+    for (const Version::Ptr &version : other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions)
     {
         // we already have the version. merge the contents
-        if (m_lookup.contains(version->version()))
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lookup.contains(version->version()))
         {
-            m_lookup.value(version->version())->mergeFromList(version);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lookup.value(version->version())->mergeFromList(version);
         }
         else
         {
-            m_lookup.insert(version->uid(), version);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lookup.insert(version->uid(), version);
         }
         // connect it.
-        setupAddedVersion(m_versions.size(), version);
-        m_versions.append(version);
-        m_recommended = getBetterVersion(m_recommended, version);
+        setupAddedVersion(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.size(), version);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versions.append(version);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_recommended = getBetterVersion(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_recommended, version);
     }
     endResetModel();
 }
@@ -246,7 +246,7 @@ void VersionList::setupAddedVersion(const int row, const Version::Ptr &version)
 
 BaseVersion::Ptr VersionList::getRecommended() const
 {
-    return m_recommended;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_recommended;
 }
 
 }

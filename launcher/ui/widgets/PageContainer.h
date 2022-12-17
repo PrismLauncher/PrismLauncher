@@ -71,9 +71,9 @@ public:
     /* request close - used by individual pages */
     bool requestClose() override
     {
-        if(m_container)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container)
         {
-            return m_container->requestClose();
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->requestClose();
         }
         return false;
     }
@@ -84,7 +84,7 @@ public:
     void refreshContainer() override;
     virtual void setParentContainer(BasePageContainer * container)
     {
-        m_container = container;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container = container;
     };
 
     void changeEvent(QEvent*) override;
@@ -105,13 +105,13 @@ private slots:
     void showPage(int row);
 
 private:
-    BasePageContainer * m_container = nullptr;
-    BasePage * m_currentPage = 0;
-    QSortFilterProxyModel *m_proxyModel;
-    PageModel *m_model;
-    QStackedLayout *m_pageStack;
-    QListView *m_pageList;
-    QLabel *m_header;
-    IconLabel *m_iconHeader;
-    QGridLayout *m_layout;
+    BasePageContainer * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container = nullptr;
+    BasePage * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage = 0;
+    QSortFilterProxyModel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel;
+    PageModel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model;
+    QStackedLayout *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageStack;
+    QListView *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageList;
+    QLabel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_header;
+    IconLabel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_iconHeader;
+    QGridLayout *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_layout;
 };

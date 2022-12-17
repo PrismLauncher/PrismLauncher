@@ -21,14 +21,14 @@ class ModrinthCreationTask final : public InstanceCreationTask {
                          QString version_id = {},
                          QString original_instance_id = {})
         : InstanceCreationTask()
-        , m_parent(parent)
-        , m_managed_id(std::move(id))
-        , m_managed_version_id(std::move(version_id))
+        , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent(parent)
+        , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_id(std::move(id))
+        , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_version_id(std::move(version_id))
     {
         setStagingPath(staging_path);
         setParentSettings(global_settings);
 
-        m_original_instance_id = std::move(original_instance_id);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_original_instance_id = std::move(original_instance_id);
     }
 
     bool abort() override;
@@ -40,13 +40,13 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     bool parseManifest(const QString&, std::vector<Modrinth::File>&, bool set_internal_data = true, bool show_optional_dialog = true);
 
    private:
-    QWidget* m_parent = nullptr;
+    QWidget* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent = nullptr;
 
-    QString m_minecraft_version, m_fabric_version, m_quilt_version, m_forge_version;
-    QString m_managed_id, m_managed_version_id, m_managed_name;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraft_version, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fabric_version, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_quilt_version, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_forge_version;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_id, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_version_id, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_name;
 
-    std::vector<Modrinth::File> m_files;
-    NetJob::Ptr m_files_job;
+    std::vector<Modrinth::File> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job;
 
-    std::optional<InstancePtr> m_instance;
+    std::optional<InstancePtr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance;
 };

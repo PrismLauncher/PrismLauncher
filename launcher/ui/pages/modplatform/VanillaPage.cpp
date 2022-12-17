@@ -119,9 +119,9 @@ void VanillaPage::filterChanged()
 void VanillaPage::loaderFilterChanged()
 {
     QString minecraftVersion;
-    if (m_selectedVersion)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedVersion)
     {
-        minecraftVersion = m_selectedVersion->descriptor();
+        minecraftVersion = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedVersion->descriptor();
     }
     else
     {
@@ -140,7 +140,7 @@ void VanillaPage::loaderFilterChanged()
     else if(ui->forgeFilter->isChecked())
     {
         ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
-        m_selectedLoader = "net.minecraftforge";
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLoader = "net.minecraftforge";
     }
     else if(ui->fabricFilter->isChecked())
     {
@@ -149,7 +149,7 @@ void VanillaPage::loaderFilterChanged()
             ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "");
         else // Fabric/Quilt unsupported
             ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA"); // clear list
-        m_selectedLoader = "net.fabricmc.fabric-loader";
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLoader = "net.fabricmc.fabric-loader";
     }
     else if(ui->quiltFilter->isChecked())
     {
@@ -158,15 +158,15 @@ void VanillaPage::loaderFilterChanged()
             ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "");
         else // Fabric/Quilt unsupported
             ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, "AAA"); // clear list
-        m_selectedLoader = "org.quiltmc.quilt-loader";
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLoader = "org.quiltmc.quilt-loader";
     }
     else if(ui->liteLoaderFilter->isChecked())
     {
         ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
-        m_selectedLoader = "com.mumfrey.liteloader";
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLoader = "com.mumfrey.liteloader";
     }
 
-    auto vlist = APPLICATION->metadataIndex()->get(m_selectedLoader);
+    auto vlist = APPLICATION->metadataIndex()->get(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLoader);
     ui->loaderVersionList->initialize(vlist.get());
     ui->loaderVersionList->selectRecommended();
     ui->loaderVersionList->setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
@@ -189,17 +189,17 @@ void VanillaPage::retranslate()
 
 BaseVersion::Ptr VanillaPage::selectedVersion() const
 {
-    return m_selectedVersion;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedVersion;
 }
 
 BaseVersion::Ptr VanillaPage::selectedLoaderVersion() const
 {
-    return m_selectedLoaderVersion;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLoaderVersion;
 }
 
 QString VanillaPage::selectedLoader() const
 {
-    return m_selectedLoader;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLoader;
 }
 
 void VanillaPage::suggestCurrent()
@@ -209,7 +209,7 @@ void VanillaPage::suggestCurrent()
         return;
     }
         
-    if(!m_selectedVersion)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedVersion)
     {
         dialog->setSuggestedPack();
         return;
@@ -217,25 +217,25 @@ void VanillaPage::suggestCurrent()
 
     // There isn't a selected version if the version list is empty
     if(ui->loaderVersionList->selectedVersion() == nullptr)
-        dialog->setSuggestedPack(m_selectedVersion->descriptor(), new VanillaCreationTask(m_selectedVersion));
+        dialog->setSuggestedPack(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedVersion->descriptor(), new VanillaCreationTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedVersion));
     else
     {
-        dialog->setSuggestedPack(m_selectedVersion->descriptor(),
-                                 new VanillaCreationTask(m_selectedVersion, m_selectedLoader,
-                                                          m_selectedLoaderVersion));
+        dialog->setSuggestedPack(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedVersion->descriptor(),
+                                 new VanillaCreationTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedVersion, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLoader,
+                                                          hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLoaderVersion));
     }
     dialog->setSuggestedIcon("default");
 }
 
 void VanillaPage::setSelectedVersion(BaseVersion::Ptr version)
 {
-    m_selectedVersion = version;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedVersion = version;
     suggestCurrent();
     loaderFilterChanged();
 }
 
 void VanillaPage::setSelectedLoaderVersion(BaseVersion::Ptr version)
 {
-    m_selectedLoaderVersion = version;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLoaderVersion = version;
     suggestCurrent();
 }

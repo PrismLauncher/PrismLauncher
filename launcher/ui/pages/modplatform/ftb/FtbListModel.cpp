@@ -63,8 +63,8 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
     {
         QIcon placeholder = APPLICATION->getThemedIcon("screenshot-placeholder");
 
-        auto iter = m_logoMap.find(pack.name);
-        if (iter != m_logoMap.end()) {
+        auto iter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.find(pack.name);
+        if (iter != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.end()) {
             auto & logo = *iter;
             if(!logo.result.isNull()) {
                 return logo.result;
@@ -91,7 +91,7 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
 
 void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallback callback)
 {
-    if(m_logoMap.contains(logo))
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(logo))
     {
         callback(APPLICATION->metacache()->resolveEntry("ModpacksCHPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }
@@ -103,7 +103,7 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
 
 void ListModel::request()
 {
-    m_aborted = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = false;
 
     beginResetModel();
     modpacks.clear();
@@ -121,7 +121,7 @@ void ListModel::request()
 
 void ListModel::abortRequest()
 {
-    m_aborted = jobPtr->abort();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = jobPtr->abort();
     jobPtr.reset();
 }
 
@@ -170,7 +170,7 @@ void ListModel::requestPack()
 
 void ListModel::packRequestFinished()
 {
-    if (!jobPtr || m_aborted)
+    if (!jobPtr || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted)
         return;
 
     jobPtr.reset();
@@ -226,7 +226,7 @@ void ListModel::packRequestFailed(QString reason)
 
 void ListModel::logoLoaded(QString logo, bool stale)
 {
-    auto & logoObj = m_logoMap[logo];
+    auto & logoObj = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap[logo];
     logoObj.downloadJob.reset();
     QString smallPath = logoObj.fullpath + ".small";
 
@@ -267,13 +267,13 @@ void ListModel::logoLoaded(QString logo, bool stale)
 
 void ListModel::logoFailed(QString logo)
 {
-    m_logoMap[logo].failed = true;
-    m_logoMap[logo].downloadJob.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap[logo].failed = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap[logo].downloadJob.reset();
 }
 
 void ListModel::requestLogo(QString logo, QString url)
 {
-    if(m_logoMap.contains(logo)) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(logo)) {
         return;
     }
 
@@ -295,7 +295,7 @@ void ListModel::requestLogo(QString logo, QString url)
         logoFailed(logo);
     });
 
-    auto &newLogoEntry = m_logoMap[logo];
+    auto &newLogoEntry = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap[logo];
     newLogoEntry.downloadJob = job;
     newLogoEntry.fullpath = fullPath;
     job->start();

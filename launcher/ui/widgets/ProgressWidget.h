@@ -15,7 +15,7 @@ class ProgressWidget : public QWidget {
     explicit ProgressWidget(QWidget* parent = nullptr, bool show_label = true);
 
     /** Whether to hide the widget automatically if it's watching no running task. */
-    void hideIfInactive(bool hide) { m_hide_if_inactive = hide; }
+    void hideIfInactive(bool hide) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hide_if_inactive = hide; }
 
     /** Reset the displayed progress to 0 */
     void reset();
@@ -48,9 +48,9 @@ class ProgressWidget : public QWidget {
     void taskDestroyed();
 
    private:
-    QLabel* m_label = nullptr;
-    QProgressBar* m_bar = nullptr;
-    Task* m_task = nullptr;
+    QLabel* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label = nullptr;
+    QProgressBar* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar = nullptr;
+    Task* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task = nullptr;
 
-    bool m_hide_if_inactive = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hide_if_inactive = false;
 };

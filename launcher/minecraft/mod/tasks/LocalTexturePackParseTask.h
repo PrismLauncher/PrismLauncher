@@ -52,12 +52,12 @@ class LocalTexturePackParseTask : public Task {
 
     void executeTask() override;
 
-    [[nodiscard]] int token() const { return m_token; }
+    [[nodiscard]] int token() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_token; }
 
    private:
-    int m_token;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_token;
 
-    TexturePack& m_texture_pack;
+    TexturePack& hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_texture_pack;
 
-    bool m_aborted = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = false;
 };

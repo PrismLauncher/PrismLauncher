@@ -50,14 +50,14 @@ class Resource : public QObject {
     void setFile(QFileInfo file_info);
     void parseFile();
 
-    [[nodiscard]] auto fileinfo() const -> QFileInfo { return m_file_info; }
-    [[nodiscard]] auto dateTimeChanged() const -> QDateTime { return m_changed_date_time; }
-    [[nodiscard]] auto internal_id() const -> QString { return m_internal_id; }
-    [[nodiscard]] auto type() const -> ResourceType { return m_type; }
-    [[nodiscard]] bool enabled() const { return m_enabled; }
+    [[nodiscard]] auto fileinfo() const -> QFileInfo { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_info; }
+    [[nodiscard]] auto dateTimeChanged() const -> QDateTime { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_changed_date_time; }
+    [[nodiscard]] auto internal_id() const -> QString { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_internal_id; }
+    [[nodiscard]] auto type() const -> ResourceType { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type; }
+    [[nodiscard]] bool enabled() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_enabled; }
 
-    [[nodiscard]] virtual auto name() const -> QString { return m_name; }
-    [[nodiscard]] virtual bool valid() const { return m_type != ResourceType::UNKNOWN; }
+    [[nodiscard]] virtual auto name() const -> QString { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name; }
+    [[nodiscard]] virtual bool valid() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type != ResourceType::UNKNOWN; }
 
     /** Compares two Resources, for sorting purposes, considering a ascending order, returning:
      *  > 0: 'this' comes after 'other'
@@ -79,15 +79,15 @@ class Resource : public QObject {
      */
     bool enable(EnableAction action);
 
-    [[nodiscard]] auto shouldResolve() const -> bool { return !m_is_resolving && !m_is_resolved; }
-    [[nodiscard]] auto isResolving() const -> bool { return m_is_resolving; }
-    [[nodiscard]] auto isResolved() const -> bool { return m_is_resolved; }
-    [[nodiscard]] auto resolutionTicket() const -> int { return m_resolution_ticket; }
+    [[nodiscard]] auto shouldResolve() const -> bool { return !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_resolving && !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_resolved; }
+    [[nodiscard]] auto isResolving() const -> bool { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_resolving; }
+    [[nodiscard]] auto isResolved() const -> bool { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_resolved; }
+    [[nodiscard]] auto resolutionTicket() const -> int { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resolution_ticket; }
 
     void setResolving(bool resolving, int resolutionTicket)
     {
-        m_is_resolving = resolving;
-        m_resolution_ticket = resolutionTicket;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_resolving = resolving;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resolution_ticket = resolutionTicket;
     }
 
     // Delete all files of this resource.
@@ -95,23 +95,23 @@ class Resource : public QObject {
 
    protected:
     /* The file corresponding to this resource. */
-    QFileInfo m_file_info;
+    QFileInfo hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file_info;
     /* The cached date when this file was last changed. */
-    QDateTime m_changed_date_time;
+    QDateTime hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_changed_date_time;
 
     /* Internal ID for internal purposes. Properties such as human-readability should not be assumed. */
-    QString m_internal_id;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_internal_id;
     /* Name as reported via the file name. In the absence of a better name, this is shown to the user. */
-    QString m_name;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
 
     /* The type of file we're dealing with. */
-    ResourceType m_type = ResourceType::UNKNOWN;
+    ResourceType hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type = ResourceType::UNKNOWN;
 
     /* Whether the resource is enabled (e.g. shows up in the game) or not. */
-    bool m_enabled = true;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_enabled = true;
 
     /* Used to keep trach of pending / concluded actions on the resource. */
-    bool m_is_resolving = false;
-    bool m_is_resolved = false;
-    int m_resolution_ticket = 0;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_resolving = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_resolved = false;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resolution_ticket = 0;
 };

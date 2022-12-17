@@ -40,10 +40,10 @@ void JProfiler::profilerFinished(int exit, QProcess::ExitStatus status)
     {
         emit abortLaunch(tr("Profiler aborted"));
     }
-    if (m_profilerProcess)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilerProcess)
     {
-        m_profilerProcess->deleteLater();
-        m_profilerProcess = 0;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilerProcess->deleteLater();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilerProcess = 0;
     }
 }
 
@@ -71,7 +71,7 @@ void JProfiler::beginProfilingImpl(shared_qobject_ptr<LaunchTask> process)
     connect(profiler, SIGNAL(started()), SLOT(profilerStarted()));
     connect(profiler, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(profilerFinished(int,QProcess::ExitStatus)));
 
-    m_profilerProcess = profiler;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilerProcess = profiler;
     profiler->start();
 }
 

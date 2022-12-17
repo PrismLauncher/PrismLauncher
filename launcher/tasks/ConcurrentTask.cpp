@@ -4,12 +4,12 @@
 #include <QCoreApplication>
 
 ConcurrentTask::ConcurrentTask(QObject* parent, QString task_name, int max_concurrent)
-    : Task(parent), m_name(task_name), m_total_max_size(max_concurrent)
+    : Task(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name(task_name), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_total_max_size(max_concurrent)
 { setObjectName(task_name); }
 
 ConcurrentTask::~ConcurrentTask()
 {
-    for (auto task : m_queue) {
+    for (auto task : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_queue) {
         if (task)
             task->deleteLater();
     }
@@ -17,39 +17,39 @@ ConcurrentTask::~ConcurrentTask()
 
 auto ConcurrentTask::getStepProgress() const -> qint64
 {
-    return m_stepProgress;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stepProgress;
 }
 
 auto ConcurrentTask::getStepTotalProgress() const -> qint64
 {
-    return m_stepTotalProgress;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stepTotalProgress;
 }
 
 void ConcurrentTask::addTask(Task::Ptr task)
 {
     if (!isRunning())
-        m_queue.append(task);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_queue.append(task);
     else
         qWarning() << "Tried to add a task to a running concurrent task!";
 }
 
 void ConcurrentTask::executeTask()
 {
-    m_total_size = m_queue.size();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_total_size = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_queue.size();
 
     // Start the least amount of tasks needed, but at least one
-    int num_starts = std::max(1, std::min(m_total_max_size, m_total_size));
-    for (int i = 0; i < num_starts; i++) {
+    int nuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_starts = std::max(1, std::min(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_total_max_size, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_total_size));
+    for (int i = 0; i < nuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_starts; i++) {
         QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
     }
 }
 
 bool ConcurrentTask::abort()
 {
-    m_queue.clear();
-    m_aborted = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_queue.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = true;
 
-    if (m_doing.isEmpty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doing.isEmpty()) {
         // Don't call emitAborted() here, we want to bypass the 'is the task running' check
         emit aborted();
         emit finished();
@@ -59,7 +59,7 @@ bool ConcurrentTask::abort()
 
     bool suceedeed = true;
 
-    QMutableHashIterator<Task*, Task::Ptr> doing_iter(m_doing);
+    QMutableHashIterator<Task*, Task::Ptr> doing_iter(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doing);
     while (doing_iter.hasNext()) {
         auto task = doing_iter.next();
         suceedeed &= (task.value())->abort();
@@ -75,18 +75,18 @@ bool ConcurrentTask::abort()
 
 void ConcurrentTask::startNext()
 {
-    if (m_aborted || m_doing.count() > m_total_max_size)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doing.count() > hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_total_max_size)
         return;
 
-    if (m_queue.isEmpty() && m_doing.isEmpty() && !wasSuccessful()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_queue.isEmpty() && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doing.isEmpty() && !wasSuccessful()) {
         emitSucceeded();
         return;
     }
 
-    if (m_queue.isEmpty())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_queue.isEmpty())
         return;
 
-    Task::Ptr next = m_queue.dequeue();
+    Task::Ptr next = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_queue.dequeue();
 
     connect(next.get(), &Task::succeeded, this, [this, next] { subTaskSucceeded(next); });
     connect(next.get(), &Task::failed, this, [this, next](QString msg) { subTaskFailed(next, msg); });
@@ -96,7 +96,7 @@ void ConcurrentTask::startNext()
 
     connect(next.get(), &Task::progress, this, &ConcurrentTask::subTaskProgress);
 
-    m_doing.insert(next.get(), next);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doing.insert(next.get(), next);
 
     setStepStatus(next->isMultiStep() ? next->getStepStatus() : next->getStatus());
     updateState();
@@ -108,8 +108,8 @@ void ConcurrentTask::startNext()
 
 void ConcurrentTask::subTaskSucceeded(Task::Ptr task)
 {
-    m_done.insert(task.get(), task);
-    m_doing.remove(task.get());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_done.insert(task.get(), task);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doing.remove(task.get());
 
     disconnect(task.get(), 0, this, 0);
 
@@ -120,10 +120,10 @@ void ConcurrentTask::subTaskSucceeded(Task::Ptr task)
 
 void ConcurrentTask::subTaskFailed(Task::Ptr task, const QString& msg)
 {
-    m_done.insert(task.get(), task);
-    m_failed.insert(task.get(), task);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_done.insert(task.get(), task);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed.insert(task.get(), task);
 
-    m_doing.remove(task.get());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doing.remove(task.get());
 
     disconnect(task.get(), 0, this, 0);
 
@@ -139,13 +139,13 @@ void ConcurrentTask::subTaskStatus(const QString& msg)
 
 void ConcurrentTask::subTaskProgress(qint64 current, qint64 total)
 {
-    m_stepProgress = current;
-    m_stepTotalProgress = total;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stepProgress = current;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stepTotalProgress = total;
 }
 
 void ConcurrentTask::updateState()
 {
-    setProgress(m_done.count(), m_total_size);
+    setProgress(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_done.count(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_total_size);
     setStatus(tr("Executing %1 task(s) (%2 out of %3 are done)")
-                  .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(m_total_size)));
+                  .arg(QString::number(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doing.count()), QString::number(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_done.count()), QString::number(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_total_size)));
 }

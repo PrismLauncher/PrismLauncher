@@ -51,10 +51,10 @@ class NetAction : public Task {
 
     virtual ~NetAction() = default;
 
-    QUrl url() { return m_url; }
-    auto index() -> int { return m_index_within_job; }
+    QUrl url() { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url; }
+    auto index() -> int { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_within_job; }
 
-    void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
+    void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network = network; }
 
    protected slots:
     virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) = 0;
@@ -65,7 +65,7 @@ class NetAction : public Task {
    public slots:
     void startAction(shared_qobject_ptr<QNetworkAccessManager> network)
     {
-        m_network = network;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network = network;
         executeTask();
     }
 
@@ -73,14 +73,14 @@ class NetAction : public Task {
     void executeTask() override {};
 
    public:
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    shared_qobject_ptr<QNetworkAccessManager> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network;
 
     /// index within the parent job, FIXME: nuke
-    int m_index_within_job = 0;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_within_job = 0;
 
     /// the network reply
-    unique_qobject_ptr<QNetworkReply> m_reply;
+    unique_qobject_ptr<QNetworkReply> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply;
 
     /// source URL
-    QUrl m_url;
+    QUrl hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url;
 };

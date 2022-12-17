@@ -21,7 +21,7 @@
 #include "minecraft/PackProfile.h"
 
 Meta::Version::Version(const QString &uid, const QString &version)
-    : BaseVersion(), m_uid(uid), m_version(version)
+    : BaseVersion(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid(uid), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version(version)
 {
 }
 
@@ -31,22 +31,22 @@ Meta::Version::~Version()
 
 QString Meta::Version::descriptor()
 {
-    return m_version;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
 }
 QString Meta::Version::name()
 {
-    if(m_data)
-        return m_data->name;
-    return m_uid;
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data)
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->name;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid;
 }
 QString Meta::Version::typeString() const
 {
-    return m_type;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type;
 }
 
 QDateTime Meta::Version::time() const
 {
-    return QDateTime::fromMSecsSinceEpoch(m_time * 1000, Qt::UTC);
+    return QDateTime::fromMSecsSinceEpoch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_time * 1000, Qt::UTC);
 }
 
 void Meta::Version::parse(const QJsonObject& obj)
@@ -56,85 +56,85 @@ void Meta::Version::parse(const QJsonObject& obj)
 
 void Meta::Version::mergeFromList(const Meta::Version::Ptr& other)
 {
-    if(other->m_providesRecommendations)
+    if(other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_providesRecommendations)
     {
-        if(m_recommended != other->m_recommended)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_recommended != other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_recommended)
         {
-            setRecommended(other->m_recommended);
+            setRecommended(other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_recommended);
         }
     }
-    if (m_type != other->m_type)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type != other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type)
     {
-        setType(other->m_type);
+        setType(other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type);
     }
-    if (m_time != other->m_time)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_time != other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_time)
     {
-        setTime(other->m_time);
+        setTime(other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_time);
     }
-    if (m_requires != other->m_requires)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_requires != other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_requires)
     {
-        m_requires = other->m_requires;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_requires = other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_requires;
     }
-    if (m_conflicts != other->m_conflicts)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_conflicts != other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_conflicts)
     {
-        m_conflicts = other->m_conflicts;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_conflicts = other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_conflicts;
     }
-    if(m_volatile != other->m_volatile)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_volatile != other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_volatile)
     {
-        setVolatile(other->m_volatile);
+        setVolatile(other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_volatile);
     }
 }
 
 void Meta::Version::merge(const Version::Ptr &other)
 {
     mergeFromList(other);
-    if(other->m_data)
+    if(other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data)
     {
-        setData(other->m_data);
+        setData(other->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data);
     }
 }
 
 QString Meta::Version::localFilename() const
 {
-    return m_uid + '/' + m_version + ".json";
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid + '/' + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version + ".json";
 }
 
 void Meta::Version::setType(const QString &type)
 {
-    m_type = type;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type = type;
     emit typeChanged();
 }
 
 void Meta::Version::setTime(const qint64 time)
 {
-    m_time = time;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_time = time;
     emit timeChanged();
 }
 
 void Meta::Version::setRequires(const Meta::RequireSet &requires, const Meta::RequireSet &conflicts)
 {
-    m_requires = requires;
-    m_conflicts = conflicts;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_requires = requires;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_conflicts = conflicts;
     emit requiresChanged();
 }
 
 void Meta::Version::setVolatile(bool volatile_)
 {
-    m_volatile = volatile_;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_volatile = volatile_;
 }
 
 
 void Meta::Version::setData(const VersionFilePtr &data)
 {
-    m_data = data;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data = data;
 }
 
 void Meta::Version::setProvidesRecommendations()
 {
-    m_providesRecommendations = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_providesRecommendations = true;
 }
 
 void Meta::Version::setRecommended(bool recommended)
 {
-    m_recommended = recommended;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_recommended = recommended;
 }

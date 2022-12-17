@@ -81,50 +81,50 @@ PageContainer::PageContainer(BasePageProvider *pageProvider, QString defaultId,
     : QWidget(parent)
 {
     createUI();
-    m_model = new PageModel(this);
-    m_proxyModel = new PageEntryFilterModel(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model = new PageModel(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel = new PageEntryFilterModel(this);
     int counter = 0;
     auto pages = pageProvider->getPages();
     for (auto page : pages)
     {
-        page->stackIndex = m_pageStack->addWidget(dynamic_cast<QWidget *>(page));
+        page->stackIndex = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageStack->addWidget(dynamic_cast<QWidget *>(page));
         page->listIndex = counter;
         page->setParentContainer(this);
         counter++;
     }
-    m_model->setPages(pages);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setPages(pages);
 
-    m_proxyModel->setSourceModel(m_model);
-    m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->setSourceModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
-    m_pageList->setIconSize(QSize(pageIconSize, pageIconSize));
-    m_pageList->setSelectionMode(QAbstractItemView::SingleSelection);
-    m_pageList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    m_pageList->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-    m_pageList->setModel(m_proxyModel);
-    connect(m_pageList->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageList->setIconSize(QSize(pageIconSize, pageIconSize));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageList->setSelectionMode(QAbstractItemView::SingleSelection);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageList->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageList->setModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageList->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
             this, SLOT(currentChanged(QModelIndex)));
-    m_pageStack->setStackingMode(QStackedLayout::StackOne);
-    m_pageList->setFocus();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageStack->setStackingMode(QStackedLayout::StackOne);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageList->setFocus();
     selectPage(defaultId);
 }
 
 bool PageContainer::selectPage(QString pageId)
 {
     // now find what we want to have selected...
-    auto page = m_model->findPageEntryById(pageId);
+    auto page = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->findPageEntryById(pageId);
     QModelIndex index;
     if (page)
     {
-        index = m_proxyModel->mapFromSource(m_model->index(page->listIndex));
+        index = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->mapFromSource(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->index(page->listIndex));
     }
     if(!index.isValid())
     {
-        index = m_proxyModel->index(0, 0);
+        index = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->index(0, 0);
     }
     if (index.isValid())
     {
-        m_pageList->setCurrentIndex(index);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageList->setCurrentIndex(index);
         return true;
     }
     return false;
@@ -132,18 +132,18 @@ bool PageContainer::selectPage(QString pageId)
 
 BasePage* PageContainer::getPage(QString pageId)
 {
-    return m_model->findPageEntryById(pageId);
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->findPageEntryById(pageId);
 }
 
 void PageContainer::refreshContainer()
 {
-    m_proxyModel->invalidate();
-    if(!m_currentPage->shouldDisplay())
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->invalidate();
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage->shouldDisplay())
     {
-        auto index = m_proxyModel->index(0, 0);
+        auto index = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->index(0, 0);
         if(index.isValid())
         {
-            m_pageList->setCurrentIndex(index);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageList->setCurrentIndex(index);
         }
         else
         {
@@ -154,93 +154,93 @@ void PageContainer::refreshContainer()
 
 void PageContainer::createUI()
 {
-    m_pageStack = new QStackedLayout;
-    m_pageList = new PageView;
-    m_header = new QLabel();
-    m_iconHeader = new IconLabel(this, QIcon(), QSize(24, 24));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageStack = new QStackedLayout;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageList = new PageView;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_header = new QLabel();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_iconHeader = new IconLabel(this, QIcon(), QSize(24, 24));
 
-    QFont headerLabelFont = m_header->font();
+    QFont headerLabelFont = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_header->font();
     headerLabelFont.setBold(true);
     const int pointSize = headerLabelFont.pointSize();
     if (pointSize > 0)
         headerLabelFont.setPointSize(pointSize + 2);
-    m_header->setFont(headerLabelFont);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_header->setFont(headerLabelFont);
 
     QHBoxLayout *headerHLayout = new QHBoxLayout;
     const int leftMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
     headerHLayout->addSpacerItem(new QSpacerItem(leftMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
-    headerHLayout->addWidget(m_header);
+    headerHLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_header);
     headerHLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Ignored));
-    headerHLayout->addWidget(m_iconHeader);
+    headerHLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_iconHeader);
     const int rightMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutRightMargin);
     headerHLayout->addSpacerItem(new QSpacerItem(rightMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->setContentsMargins(0, 6, 0, 0);
 
-    m_pageStack->setContentsMargins(0, 0, 0, 0);
-    m_pageStack->addWidget(new QWidget(this));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageStack->setContentsMargins(0, 0, 0, 0);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageStack->addWidget(new QWidget(this));
 
-    m_layout = new QGridLayout;
-    m_layout->addLayout(headerHLayout, 0, 1, 1, 1);
-    m_layout->addWidget(m_pageList, 0, 0, 2, 1);
-    m_layout->addLayout(m_pageStack, 1, 1, 1, 1);
-    m_layout->setColumnStretch(1, 4);
-    m_layout->setContentsMargins(0,0,0,6);
-    setLayout(m_layout);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_layout = new QGridLayout;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_layout->addLayout(headerHLayout, 0, 1, 1, 1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_layout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageList, 0, 0, 2, 1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_layout->addLayout(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageStack, 1, 1, 1, 1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_layout->setColumnStretch(1, 4);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_layout->setContentsMargins(0,0,0,6);
+    setLayout(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_layout);
 }
 
 void PageContainer::retranslate()
 {
-    if (m_currentPage)
-        m_header->setText(m_currentPage->displayName());
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_header->setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage->displayName());
 
-    for (auto page : m_model->pages())
+    for (auto page : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->pages())
         page->retranslate();
 }
 
 void PageContainer::addButtons(QWidget *buttons)
 {
-    m_layout->addWidget(buttons, 2, 0, 1, 2);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_layout->addWidget(buttons, 2, 0, 1, 2);
 }
 
 void PageContainer::addButtons(QLayout *buttons)
 {
-    m_layout->addLayout(buttons, 2, 0, 1, 2);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_layout->addLayout(buttons, 2, 0, 1, 2);
 }
 
 void PageContainer::showPage(int row)
 {
-    if (m_currentPage)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage)
     {
-        m_currentPage->closed();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage->closed();
     }
     if (row != -1)
     {
-        m_currentPage = m_model->pages().at(row);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->pages().at(row);
     }
     else
     {
-        m_currentPage = nullptr;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage = nullptr;
     }
-    if (m_currentPage)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage)
     {
-        m_pageStack->setCurrentIndex(m_currentPage->stackIndex);
-        m_header->setText(m_currentPage->displayName());
-        m_iconHeader->setIcon(m_currentPage->icon());
-        m_currentPage->opened();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageStack->setCurrentIndex(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage->stackIndex);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_header->setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage->displayName());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_iconHeader->setIcon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage->icon());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage->opened();
     }
     else
     {
-        m_pageStack->setCurrentIndex(0);
-        m_header->setText(QString());
-        m_iconHeader->setIcon(APPLICATION->getThemedIcon("bug"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pageStack->setCurrentIndex(0);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_header->setText(QString());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_iconHeader->setIcon(APPLICATION->getThemedIcon("bug"));
     }
 }
 
 void PageContainer::help()
 {
-    if (m_currentPage)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage)
     {
-        QString pageId = m_currentPage->helpPage();
+        QString pageId = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage->helpPage();
         if (pageId.isEmpty())
             return;
         DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg(pageId)));
@@ -249,10 +249,10 @@ void PageContainer::help()
 
 void PageContainer::currentChanged(const QModelIndex &current)
 {
-    int selected_index = current.isValid() ? m_proxyModel->mapToSource(current).row() : -1;
+    int selected_index = current.isValid() ? hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel->mapToSource(current).row() : -1;
 
-    auto* selected = m_model->pages().at(selected_index);
-    auto* previous = m_currentPage;
+    auto* selected = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->pages().at(selected_index);
+    auto* previous = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage;
 
     emit selectedPageChanged(previous, selected);
 
@@ -265,16 +265,16 @@ bool PageContainer::prepareToClose()
     {
         return false;
     }
-    if (m_currentPage)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage)
     {
-        m_currentPage->closed();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentPage->closed();
     }
     return true;
 }
 
 bool PageContainer::saveAll()
 {
-    for (auto page : m_model->pages())
+    for (auto page : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->pages())
     {
         if (!page->apply())
             return false;

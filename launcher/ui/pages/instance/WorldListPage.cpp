@@ -85,7 +85,7 @@ public:
 
 
 WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worlds, QWidget *parent)
-    : QMainWindow(parent), m_inst(inst), ui(new Ui::WorldListPage), m_worlds(worlds)
+    : QMainWindow(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst(inst), ui(new Ui::WorldListPage), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds(worlds)
 {
     ui->setupUi(this);
 
@@ -93,7 +93,7 @@ WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worl
 
     WorldListProxyModel * proxy = new WorldListProxyModel(this);
     proxy->setSortCaseSensitivity(Qt::CaseInsensitive);
-    proxy->setSourceModel(m_worlds.get());
+    proxy->setSourceModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds.get());
     proxy->setSortRole(Qt::UserRole);
     ui->worldTreeView->setSortingEnabled(true);
     ui->worldTreeView->setModel(proxy);
@@ -112,27 +112,27 @@ WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worl
 
 void WorldListPage::openedImpl()
 {
-    m_worlds->startWatching();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->startWatching();
 
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     if (!APPLICATION->settings()->contains(setting_name))
-        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
     else
-        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
 
-    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->toolBar->setVisibilityState(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting->get().toByteArray());
 }
 
 void WorldListPage::closedImpl()
 {
-    m_worlds->stopWatching();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->stopWatching();
 
-    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting->set(ui->toolBar->getVisibilityState());
 }
 
 WorldListPage::~WorldListPage()
 {
-    m_worlds->stopWatching();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->stopWatching();
     delete ui;
 }
 
@@ -202,14 +202,14 @@ void WorldListPage::on_actionRemove_triggered()
     {
         return;
     }
-    m_worlds->stopWatching();
-    m_worlds->deleteWorld(proxiedIndex.row());
-    m_worlds->startWatching();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->stopWatching();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->deleteWorld(proxiedIndex.row());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->startWatching();
 }
 
 void WorldListPage::on_actionView_Folder_triggered()
 {
-    DesktopServices::openDirectory(m_worlds->dir().absolutePath(), true);
+    DesktopServices::openDirectory(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->dir().absolutePath(), true);
 }
 
 void WorldListPage::on_actionDatapacks_triggered()
@@ -224,7 +224,7 @@ void WorldListPage::on_actionDatapacks_triggered()
     if(!worldSafetyNagQuestion(tr("Open World Datapacks Folder")))
         return;
 
-    auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
+    auto fullPath = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->data(index, WorldList::FolderRole).toString();
 
     DesktopServices::openDirectory(FS::PathCombine(fullPath, "datapacks"), true);
 }
@@ -237,7 +237,7 @@ void WorldListPage::on_actionReset_Icon_triggered()
     if(!proxiedIndex.isValid())
         return;
 
-    if(m_worlds->resetIcon(proxiedIndex.row())) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->resetIcon(proxiedIndex.row())) {
         ui->actionReset_Icon->setEnabled(false);
     }
 }
@@ -259,13 +259,13 @@ void WorldListPage::on_actionCopy_Seed_triggered()
     {
         return;
     }
-    int64_t seed = m_worlds->data(index, WorldList::SeedRole).toLongLong();
+    int64_t seed = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->data(index, WorldList::SeedRole).toLongLong();
     APPLICATION->clipboard()->setText(QString::number(seed));
 }
 
 void WorldListPage::on_actionMCEdit_triggered()
 {
-    if(m_mceditStarting)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mceditStarting)
         return;
 
     auto mcedit = APPLICATION->mcedit();
@@ -282,7 +282,7 @@ void WorldListPage::on_actionMCEdit_triggered()
     if(!worldSafetyNagQuestion(tr("Open World in MCEdit")))
         return;
 
-    auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
+    auto fullPath = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->data(index, WorldList::FolderRole).toString();
 
     auto program = mcedit->getProgramPath();
     if(program.size())
@@ -293,12 +293,12 @@ void WorldListPage::on_actionMCEdit_triggered()
             mceditError();
         }
 #else
-        m_mceditProcess.reset(new LoggedProcess());
-        m_mceditProcess->setDetachable(true);
-        connect(m_mceditProcess.get(), &LoggedProcess::stateChanged, this, &WorldListPage::mceditState);
-        m_mceditProcess->start(program, {fullPath});
-        m_mceditProcess->setWorkingDirectory(mceditPath);
-        m_mceditStarting = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mceditProcess.reset(new LoggedProcess());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mceditProcess->setDetachable(true);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mceditProcess.get(), &LoggedProcess::stateChanged, this, &WorldListPage::mceditState);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mceditProcess->start(program, {fullPath});
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mceditProcess->setWorkingDirectory(mceditPath);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mceditStarting = true;
 #endif
     }
     else
@@ -337,7 +337,7 @@ void WorldListPage::mceditState(LoggedProcess::State state)
         case LoggedProcess::Running:
         case LoggedProcess::Finished:
         {
-            m_mceditStarting = false;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mceditStarting = false;
             break;
         }
     }
@@ -369,18 +369,18 @@ void WorldListPage::on_actionAdd_triggered()
         tr("Minecraft World Zip File (*.zip)"), QString(), this->parentWidget());
     if (!list.empty())
     {
-        m_worlds->stopWatching();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->stopWatching();
         for (auto filename : list)
         {
-            m_worlds->installWorld(QFileInfo(filename));
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->installWorld(QFileInfo(filename));
         }
-        m_worlds->startWatching();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->startWatching();
     }
 }
 
 bool WorldListPage::isWorldSafe(QModelIndex)
 {
-    return !m_inst->isRunning();
+    return !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->isRunning();
 }
 
 bool WorldListPage::worldSafetyNagQuestion(const QString &actionType)
@@ -408,14 +408,14 @@ void WorldListPage::on_actionCopy_triggered()
     if(!worldSafetyNagQuestion(tr("Copy World")))
         return;
 
-    auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
+    auto worldVariant = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->data(index, WorldList::ObjectRole);
     auto world = (World *) worldVariant.value<void *>();
     bool ok = false;
     QString name = QInputDialog::getText(this, tr("World name"), tr("Enter a new name for the copy."), QLineEdit::Normal, world->name(), &ok);
 
     if (ok && name.length() > 0)
     {
-        world->install(m_worlds->dir().absolutePath(), name);
+        world->install(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->dir().absolutePath(), name);
     }
 }
 
@@ -430,7 +430,7 @@ void WorldListPage::on_actionRename_triggered()
     if(!worldSafetyNagQuestion(tr("Rename World")))
         return;
 
-    auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
+    auto worldVariant = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->data(index, WorldList::ObjectRole);
     auto world = (World *) worldVariant.value<void *>();
 
     bool ok = false;
@@ -444,7 +444,7 @@ void WorldListPage::on_actionRename_triggered()
 
 void WorldListPage::on_actionRefresh_triggered()
 {
-    m_worlds->update();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds->update();
 }
 
 #include "WorldListPage.moc"

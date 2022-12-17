@@ -19,7 +19,7 @@ class EnsureMetadataTask : public Task {
 
     ~EnsureMetadataTask() = default;
 
-    Task::Ptr getHashingTask() { return m_hashing_task; }
+    Task::Ptr getHashingTask() { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hashing_task; }
 
    public slots:
     bool abort() override;
@@ -55,11 +55,11 @@ class EnsureMetadataTask : public Task {
     void metadataFailed(Mod*);
 
    private:
-    QHash<QString, Mod*> m_mods;
-    QDir m_index_dir;
-    ModPlatform::Provider m_provider;
+    QHash<QString, Mod*> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods;
+    QDir hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir;
+    ModPlatform::Provider hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_provider;
 
-    QHash<QString, ModPlatform::IndexedVersion> m_temp_versions;
-    ConcurrentTask* m_hashing_task;
-    NetJob* m_current_task;
+    QHash<QString, ModPlatform::IndexedVersion> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_temp_versions;
+    ConcurrentTask* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hashing_task;
+    NetJob* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_task;
 };

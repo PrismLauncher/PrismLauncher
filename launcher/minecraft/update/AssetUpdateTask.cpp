@@ -9,7 +9,7 @@
 
 AssetUpdateTask::AssetUpdateTask(MinecraftInstance * inst)
 {
-    m_inst = inst;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst = inst;
 }
 
 AssetUpdateTask::~AssetUpdateTask()
@@ -19,13 +19,13 @@ AssetUpdateTask::~AssetUpdateTask()
 void AssetUpdateTask::executeTask()
 {
     setStatus(tr("Updating assets index..."));
-    auto components = m_inst->getPackProfile();
+    auto components = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getPackProfile();
     auto profile = components->getProfile();
     auto assets = profile->getMinecraftAssets();
     QUrl indexUrl = assets->url;
     QString localPath = assets->id + ".json";
     auto job = new NetJob(
-        tr("Asset index for %1").arg(m_inst->name()),
+        tr("Asset index for %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->name()),
         APPLICATION->network()
     );
 
@@ -46,7 +46,7 @@ void AssetUpdateTask::executeTask()
     connect(downloadJob.get(), &NetJob::aborted, this, [this]{ emitFailed(tr("Aborted")); });
     connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
 
-    qDebug() << m_inst->name() << ": Starting asset index download";
+    qDebug() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->name() << ": Starting asset index download";
     downloadJob->start();
 }
 
@@ -58,9 +58,9 @@ bool AssetUpdateTask::canAbort() const
 void AssetUpdateTask::assetIndexFinished()
 {
     AssetsIndex index;
-    qDebug() << m_inst->name() << ": Finished asset index download";
+    qDebug() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->name() << ": Finished asset index download";
 
-    auto components = m_inst->getPackProfile();
+    auto components = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getPackProfile();
     auto profile = components->getProfile();
     auto assets = profile->getMinecraftAssets();
 
@@ -91,7 +91,7 @@ void AssetUpdateTask::assetIndexFinished()
 
 void AssetUpdateTask::assetIndexFailed(QString reason)
 {
-    qDebug() << m_inst->name() << ": Failed asset index download";
+    qDebug() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->name() << ": Failed asset index download";
     emitFailed(tr("Failed to download the assets index:\n%1").arg(reason));
 }
 

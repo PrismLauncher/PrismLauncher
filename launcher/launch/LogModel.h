@@ -42,16 +42,16 @@ private /* types */:
     };
 
 private: /* data */
-    QVector <entry> m_content;
-    int m_maxLines = 1000;
+    QVector <entry> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_content;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxLines = 1000;
     // first line in the circular buffer
-    int m_firstLine = 0;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_firstLine = 0;
     // number of lines occupied in the circular buffer
-    int m_numLines = 0;
-    bool m_stopOnOverflow = false;
-    QString m_overflowMessage = "OVERFLOW";
-    bool m_suspended = false;
-    bool m_lineWrap = true;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_numLines = 0;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stopOnOverflow = false;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_overflowMessage = "OVERFLOW";
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_suspended = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lineWrap = true;
 
 private:
     Q_DISABLE_COPY(LogModel)

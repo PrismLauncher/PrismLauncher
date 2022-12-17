@@ -63,9 +63,9 @@ QVariant Technic::ListModel::data(const QModelIndex& index, int role) const
     }
     else if(role == Qt::DecorationRole)
     {
-        if(m_logoMap.contains(pack.logoName))
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(pack.logoName))
         {
-            return (m_logoMap.value(pack.logoName));
+            return (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.value(pack.logoName));
         }
         QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
         ((ListModel *)this)->requestLogo(pack.logoName, pack.logoUrl);
@@ -229,7 +229,7 @@ void Technic::ListModel::searchRequestFinished()
 
 void Technic::ListModel::getLogo(const QString& logo, const QString& logoUrl, Technic::LogoCallback callback)
 {
-    if(m_logoMap.contains(logo))
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(logo))
     {
         callback(APPLICATION->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo))->getFullPath());
     }
@@ -260,8 +260,8 @@ void Technic::ListModel::searchRequestFailed()
 
 void Technic::ListModel::logoLoaded(QString logo, QString out)
 {
-    m_loadingLogos.removeAll(logo);
-    m_logoMap.insert(logo, QIcon(out));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.removeAll(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.insert(logo, QIcon(out));
     for(int i = 0; i < modpacks.size(); i++)
     {
         if(modpacks[i].logoName == logo)
@@ -273,13 +273,13 @@ void Technic::ListModel::logoLoaded(QString logo, QString out)
 
 void Technic::ListModel::logoFailed(QString logo)
 {
-    m_failedLogos.append(logo);
-    m_loadingLogos.removeAll(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos.append(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.removeAll(logo);
 }
 
 void Technic::ListModel::requestLogo(QString logo, QString url)
 {
-    if(m_loadingLogos.contains(logo) || m_failedLogos.contains(logo) || logo == "null")
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.contains(logo) || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos.contains(logo) || logo == "null")
     {
         return;
     }
@@ -302,5 +302,5 @@ void Technic::ListModel::requestLogo(QString logo, QString url)
 
     job->start();
 
-    m_loadingLogos.append(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.append(logo);
 }

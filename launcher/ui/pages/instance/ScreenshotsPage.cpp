@@ -85,12 +85,12 @@ class ThumbnailRunnable : public QRunnable
 public:
     ThumbnailRunnable(QString path, SharedIconCachePtr cache)
     {
-        m_path = path;
-        m_cache = cache;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path = path;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cache = cache;
     }
     void run()
     {
-        QFileInfo info(m_path);
+        QFileInfo info(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path);
         if (info.isDir())
             return;
         if ((info.suffix().compare("png", Qt::CaseInsensitive) != 0))
@@ -98,9 +98,9 @@ public:
         int tries = 5;
         while (tries)
         {
-            if (!m_cache->stale(m_path))
+            if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cache->stale(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path))
                 return;
-            QImage image(m_path);
+            QImage image(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path);
             if (image.isNull())
             {
                 QThread::msleep(500);
@@ -121,15 +121,15 @@ public:
             painter.end();
 
             QIcon icon(QPixmap::fromImage(square));
-            m_cache->add(m_path, icon);
-            m_resultEmitter.emitResultsReady(m_path);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cache->add(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path, icon);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resultEmitter.emitResultsReady(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path);
             return;
         }
-        m_resultEmitter.emitResultsFailed(m_path);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resultEmitter.emitResultsFailed(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path);
     }
-    QString m_path;
-    SharedIconCachePtr m_cache;
-    ThumbnailingResult m_resultEmitter;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
+    SharedIconCachePtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cache;
+    ThumbnailingResult hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resultEmitter;
 };
 
 // this is about as elegant and well written as a bag of bricks with scribbles done by insane
@@ -140,13 +140,13 @@ class FilterModel : public QIdentityProxyModel
 public:
     explicit FilterModel(QObject *parent = 0) : QIdentityProxyModel(parent)
     {
-        m_thumbnailingPool.setMaxThreadCount(4);
-        m_thumbnailCache = std::make_shared<SharedIconCache>();
-        m_thumbnailCache->add("placeholder", APPLICATION->getThemedIcon("screenshot-placeholder"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thumbnailingPool.setMaxThreadCount(4);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thumbnailCache = std::make_shared<SharedIconCache>();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thumbnailCache->add("placeholder", APPLICATION->getThemedIcon("screenshot-placeholder"));
         connect(&watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
         // FIXME: the watched file set is not updated when files are removed
     }
-    virtual ~FilterModel() { m_thumbnailingPool.waitForDone(500); }
+    virtual ~FilterModel() { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thumbnailingPool.waitForDone(500); }
     virtual QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const
     {
         auto model = sourceModel();
@@ -168,15 +168,15 @@ public:
                 ((QFileSystemWatcher &)watcher).addPath(filePath);
                 ((QSet<QString> &)watched).insert(filePath);
             }
-            if (m_thumbnailCache->get(filePath, temp))
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thumbnailCache->get(filePath, temp))
             {
                 return temp;
             }
-            if (!m_failed.contains(filePath))
+            if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed.contains(filePath))
             {
                 ((FilterModel *)this)->thumbnailImage(filePath);
             }
-            return (m_thumbnailCache->get("placeholder"));
+            return (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thumbnailCache->get("placeholder"));
         }
         return sourceModel()->data(mapToSource(proxyIndex), role);
     }
@@ -200,19 +200,19 @@ public:
 private:
     void thumbnailImage(QString path)
     {
-        auto runnable = new ThumbnailRunnable(path, m_thumbnailCache);
-        connect(&(runnable->m_resultEmitter), SIGNAL(resultsReady(QString)),
+        auto runnable = new ThumbnailRunnable(path, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thumbnailCache);
+        connect(&(runnable->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resultEmitter), SIGNAL(resultsReady(QString)),
                 SLOT(thumbnailReady(QString)));
-        connect(&(runnable->m_resultEmitter), SIGNAL(resultsFailed(QString)),
+        connect(&(runnable->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resultEmitter), SIGNAL(resultsFailed(QString)),
                 SLOT(thumbnailFailed(QString)));
-        ((QThreadPool &)m_thumbnailingPool).start(runnable);
+        ((QThreadPool &)hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thumbnailingPool).start(runnable);
     }
 private slots:
     void thumbnailReady(QString path) { emit layoutChanged(); }
-    void thumbnailFailed(QString path) { m_failed.insert(path); }
+    void thumbnailFailed(QString path) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed.insert(path); }
     void fileChanged(QString filepath)
     {
-        m_thumbnailCache->setStale(filepath);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thumbnailCache->setStale(filepath);
         thumbnailImage(filepath);
         // reinsert the path...
         watcher.removePath(filepath);
@@ -220,9 +220,9 @@ private slots:
     }
 
 private:
-    SharedIconCachePtr m_thumbnailCache;
-    QThreadPool m_thumbnailingPool;
-    QSet<QString> m_failed;
+    SharedIconCachePtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thumbnailCache;
+    QThreadPool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thumbnailingPool;
+    QSet<QString> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed;
     QSet<QString> watched;
     QFileSystemWatcher watcher;
 };
@@ -250,15 +250,15 @@ public:
 ScreenshotsPage::ScreenshotsPage(QString path, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::ScreenshotsPage)
 {
-    m_model.reset(new QFileSystemModel());
-    m_filterModel.reset(new FilterModel());
-    m_filterModel->setSourceModel(m_model.get());
-    m_model->setFilter(QDir::Files);
-    m_model->setReadOnly(false);
-    m_model->setNameFilters({"*.png"});
-    m_model->setNameFilterDisables(false);
-    m_folder = path;
-    m_valid = FS::ensureFolderPathExists(m_folder);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model.reset(new QFileSystemModel());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel.reset(new FilterModel());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setSourceModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model.get());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setFilter(QDir::Files);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setReadOnly(false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setNameFilters({"*.png"});
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setNameFilterDisables(false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folder = path;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid = FS::ensureFolderPathExists(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folder);
 
     ui->setupUi(this);
     ui->toolBar->insertSpacer(ui->actionView_Folder);
@@ -340,7 +340,7 @@ void ScreenshotsPage::onItemActivated(QModelIndex index)
 {
     if (!index.isValid())
         return;
-    auto info = m_model->fileInfo(index);
+    auto info = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->fileInfo(index);
     QString fileName = info.absoluteFilePath();
     DesktopServices::openFile(info.absoluteFilePath());
 }
@@ -354,7 +354,7 @@ void ScreenshotsPage::onCurrentSelectionChanged(const QItemSelection &selected)
     {
         if (!index.isValid())
             break;
-        auto info = m_model->fileInfo(index);
+        auto info = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->fileInfo(index);
         if (!info.isReadable())
             allReadable = false;
         if (!info.isWritable())
@@ -370,7 +370,7 @@ void ScreenshotsPage::onCurrentSelectionChanged(const QItemSelection &selected)
 
 void ScreenshotsPage::on_actionView_Folder_triggered()
 {
-    DesktopServices::openDirectory(m_folder, true);
+    DesktopServices::openDirectory(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folder, true);
 }
 
 void ScreenshotsPage::on_actionUpload_triggered()
@@ -384,11 +384,11 @@ void ScreenshotsPage::on_actionUpload_triggered()
     if(selection.size() < 2)
     {
         auto item = selection.at(0);
-        auto info = m_model->fileInfo(item);
+        auto info = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->fileInfo(item);
         auto screenshot = std::make_shared<ScreenShot>(info);
         job->addNetAction(ImgurUpload::make(screenshot));
 
-        m_uploadActive = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadActive = true;
         ProgressDialog dialog(this);
 
         if(dialog.execWithTask(job.get()) != QDialog::Accepted)
@@ -398,7 +398,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
         }
         else
         {
-            auto link = screenshot->m_url;
+            auto link = screenshot->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url;
             QClipboard *clipboard = QApplication::clipboard();
             clipboard->setText(link);
             CustomMessageBox::selectable(
@@ -410,13 +410,13 @@ void ScreenshotsPage::on_actionUpload_triggered()
             )->exec();
         }
 
-        m_uploadActive = false;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadActive = false;
         return;
     }
 
     for (auto item : selection)
     {
-        auto info = m_model->fileInfo(item);
+        auto info = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->fileInfo(item);
         auto screenshot = std::make_shared<ScreenShot>(info);
         uploaded.push_back(screenshot);
         job->addNetAction(ImgurUpload::make(screenshot));
@@ -427,7 +427,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
     albumTask->addNetAction(imgurAlbum);
     task.addTask(job);
     task.addTask(albumTask);
-    m_uploadActive = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadActive = true;
     ProgressDialog prog(this);
     if (prog.execWithTask(&task) != QDialog::Accepted)
     {
@@ -450,7 +450,7 @@ void ScreenshotsPage::on_actionUpload_triggered()
             QMessageBox::Information
         )->exec();
     }
-    m_uploadActive = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadActive = false;
 }
 
 void ScreenshotsPage::on_actionCopy_Image_triggered()
@@ -463,7 +463,7 @@ void ScreenshotsPage::on_actionCopy_Image_triggered()
 
     // You can only copy one image to the clipboard. In the case of multiple selected files, only the first one gets copied.
     auto item = selection[0];
-    auto info = m_model->fileInfo(item);
+    auto info = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->fileInfo(item);
     QImage image(info.absoluteFilePath());
     Q_ASSERT(!image.isNull());
     QApplication::clipboard()->setImage(image, QClipboard::Clipboard);
@@ -481,7 +481,7 @@ void ScreenshotsPage::on_actionCopy_File_s_triggered()
     QString buf = "";
     for (auto item : selection)
     {
-        auto info = m_model->fileInfo(item);
+        auto info = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->fileInfo(item);
         buf += "file:///" + info.absoluteFilePath() + "\r\n";
     }
     QMimeData* mimeData = new QMimeData();
@@ -502,7 +502,7 @@ void ScreenshotsPage::on_actionDelete_triggered()
     auto selected = ui->listView->selectionModel()->selectedIndexes();
     for (auto item : selected)
     {
-        m_model->remove(item);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->remove(item);
     }
 }
 
@@ -517,20 +517,20 @@ void ScreenshotsPage::on_actionRename_triggered()
 
 void ScreenshotsPage::openedImpl()
 {
-    if(!m_valid)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid)
     {
-        m_valid = FS::ensureFolderPathExists(m_folder);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid = FS::ensureFolderPathExists(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folder);
     }
-    if (m_valid)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid)
     {
-        QString path = QDir(m_folder).absolutePath();
-        auto idx = m_model->setRootPath(path);
+        QString path = QDir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folder).absolutePath();
+        auto idx = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setRootPath(path);
         if(idx.isValid())
         {
-            ui->listView->setModel(m_filterModel.get());
+            ui->listView->setModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel.get());
             connect(ui->listView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ScreenshotsPage::onCurrentSelectionChanged);
             onCurrentSelectionChanged(ui->listView->selectionModel()->selection()); // set initial button enable states
-            ui->listView->setRootIndex(m_filterModel->mapFromSource(idx));
+            ui->listView->setRootIndex(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->mapFromSource(idx));
         }
         else
         {
@@ -540,16 +540,16 @@ void ScreenshotsPage::openedImpl()
 
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     if (!APPLICATION->settings()->contains(setting_name))
-        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
     else
-        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
 
-    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->toolBar->setVisibilityState(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting->get().toByteArray());
 }
 
 void ScreenshotsPage::closedImpl()
 {
-    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting->set(ui->toolBar->getVisibilityState());
 }
 
 #include "ScreenshotsPage.moc"

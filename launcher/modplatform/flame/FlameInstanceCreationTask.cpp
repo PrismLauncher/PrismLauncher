@@ -65,13 +65,13 @@ bool FlameCreationTask::abort()
     if (!canAbort())
         return false;
 
-    m_abort = true;
-    if (m_process_update_file_info_job)
-        m_process_update_file_info_job->abort();
-    if (m_files_job)
-        m_files_job->abort();
-    if (m_mod_id_resolver)
-        m_mod_id_resolver->abort();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort = true;
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process_update_file_info_job)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process_update_file_info_job->abort();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job->abort();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver->abort();
 
     return Task::abort();
 }
@@ -96,10 +96,10 @@ bool FlameCreationTask::updateInstance()
         }
     }
 
-    QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
+    QString index_path(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "manifest.json"));
 
     try {
-        Flame::loadManifest(m_pack, index_path);
+        Flame::loadManifest(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack, index_path);
     } catch (const JSONValidationError& e) {
         setError(tr("Could not understand pack manifest:\n") + e.cause());
         return false;
@@ -109,11 +109,11 @@ bool FlameCreationTask::updateInstance()
     auto version_str = !version_id.isEmpty() ? tr(" (version %1)").arg(version_id) : "";
 
     if (shouldConfirmUpdate()) {
-        auto should_update = askIfShouldUpdate(m_parent, version_str);
+        auto should_update = askIfShouldUpdate(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, version_str);
         if (should_update == ShouldUpdate::SkipUpdating)
             return false;
         if (should_update == ShouldUpdate::Cancel) {
-            m_abort = true;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort = true;
             return false;
         }
     }
@@ -130,7 +130,7 @@ bool FlameCreationTask::updateInstance()
 
         auto& old_files = old_pack.files;
 
-        auto& files = m_pack.files;
+        auto& files = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.files;
 
         // Remove repeated files, we don't need to download them!
         auto files_iterator = files.begin();
@@ -161,7 +161,7 @@ bool FlameCreationTask::updateInstance()
             if (entry.isEmpty())
                 continue;
             qDebug() << "Scheduling" << entry << "for removal";
-            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
 
         // Remove remaining old files (we need to do an API request to know which ids are which files...)
@@ -215,26 +215,26 @@ bool FlameCreationTask::updateInstance()
 
                 QString relative_path(FS::PathCombine(file.targetFolder, file.fileName));
                 qDebug() << "Scheduling" << relative_path << "for removal";
-                m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
             }
         });
         connect(job, &NetJob::finished, &loop, &QEventLoop::quit);
 
-        m_process_update_file_info_job = job;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process_update_file_info_job = job;
         job->start();
 
         loop.exec();
 
-        m_process_update_file_info_job = nullptr;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process_update_file_info_job = nullptr;
     } else {
         // We don't have an old index file, so we may duplicate stuff!
-        auto dialog = CustomMessageBox::selectable(m_parent, tr("No index file."),
+        auto dialog = CustomMessageBox::selectable(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, tr("No index file."),
                                                    tr("We couldn't find a suitable index file for the older version. This may cause some "
                                                       "of the files to be duplicated. Do you want to continue?"),
                                                    QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
 
         if (dialog->exec() == QDialog::DialogCode::Rejected) {
-            m_abort = true;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort = true;
             return false;
         }
     }
@@ -242,7 +242,7 @@ bool FlameCreationTask::updateInstance()
     setOverride(true, inst->id());
     qDebug() << "Will override instance!";
 
-    m_instance = inst;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance = inst;
 
     // We let it go through the createInstance() stage, just with a couple modifications for updating
     return false;
@@ -252,12 +252,12 @@ bool FlameCreationTask::createInstance()
 {
     QEventLoop loop;
 
-    QString parent_folder(FS::PathCombine(m_stagingPath, "flame"));
+    QString parent_folder(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "flame"));
 
     try {
-        QString index_path(FS::PathCombine(m_stagingPath, "manifest.json"));
-        if (!m_pack.is_loaded)
-            Flame::loadManifest(m_pack, index_path);
+        QString index_path(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "manifest.json"));
+        if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.is_loaded)
+            Flame::loadManifest(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack, index_path);
 
         // Keep index file in case we need it some other time (like when changing versions)
         QString new_index_place(FS::PathCombine(parent_folder, "manifest.json"));
@@ -269,27 +269,27 @@ bool FlameCreationTask::createInstance()
         return false;
     }
 
-    if (!m_pack.overrides.isEmpty()) {
-        QString overridePath = FS::PathCombine(m_stagingPath, m_pack.overrides);
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.overrides.isEmpty()) {
+        QString overridePath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.overrides);
         if (QFile::exists(overridePath)) {
             // Create a list of overrides in "overrides.txt" inside flame/
             Override::createOverrides("overrides", parent_folder, overridePath);
 
-            QString mcPath = FS::PathCombine(m_stagingPath, "minecraft");
+            QString mcPath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "minecraft");
             if (!QFile::rename(overridePath, mcPath)) {
-                setError(tr("Could not rename the overrides folder:\n") + m_pack.overrides);
+                setError(tr("Could not rename the overrides folder:\n") + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.overrides);
                 return false;
             }
         } else {
             logWarning(
-                tr("The specified overrides folder (%1) is missing. Maybe the modpack was already used before?").arg(m_pack.overrides));
+                tr("The specified overrides folder (%1) is missing. Maybe the modpack was already used before?").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.overrides));
         }
     }
 
     QString forgeVersion;
     QString fabricVersion;
     // TODO: is Quilt relevant here?
-    for (auto& loader : m_pack.minecraft.modLoaders) {
+    for (auto& loader : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.minecraft.modLoaders) {
         auto id = loader.id;
         if (id.startsWith("forge-")) {
             id.remove("forge-");
@@ -304,10 +304,10 @@ bool FlameCreationTask::createInstance()
         logWarning(tr("Unknown mod loader in manifest: %1").arg(id));
     }
 
-    QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
+    QString configPath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
-    MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
-    auto mcVersion = m_pack.minecraft.version;
+    MinecraftInstance instance(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettings, instanceSettings, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath);
+    auto mcVersion = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.minecraft.version;
 
     // Hack to correct some 'special sauce'...
     if (mcVersion.endsWith('.')) {
@@ -332,19 +332,19 @@ bool FlameCreationTask::createInstance()
     if (!fabricVersion.isEmpty())
         components->setComponentVersion("net.fabricmc.fabric-loader", fabricVersion);
 
-    if (m_instIcon != "default") {
-        instance.setIconKey(m_instIcon);
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instIcon != "default") {
+        instance.setIconKey(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instIcon);
     } else {
-        if (m_pack.name.contains("Direwolf20")) {
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.name.contains("Direwolf20")) {
             instance.setIconKey("steve");
-        } else if (m_pack.name.contains("FTB") || m_pack.name.contains("Feed The Beast")) {
+        } else if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.name.contains("FTB") || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.name.contains("Feed The Beast")) {
             instance.setIconKey("ftb_logo");
         } else {
             instance.setIconKey("flame");
         }
     }
 
-    QString jarmodsPath = FS::PathCombine(m_stagingPath, "minecraft", "jarmods");
+    QString jarmodsPath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "minecraft", "jarmods");
     QFileInfo jarmodsInfo(jarmodsPath);
     if (jarmodsInfo.isDir()) {
         // install all the jar mods
@@ -362,30 +362,30 @@ bool FlameCreationTask::createInstance()
     }
 
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
-    if (!m_managed_id.isEmpty())
-        instance.setManagedPack("flame", m_managed_id, m_pack.name, m_managed_version_id, m_pack.version);
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_id.isEmpty())
+        instance.setManagedPack("flame", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_id, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.name, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_version_id, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.version);
     instance.setName(name());
 
-    m_mod_id_resolver = new Flame::FileResolvingTask(APPLICATION->network(), m_pack);
-    connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::succeeded, this, [this, &loop] { idResolverSucceeded(loop); });
-    connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::failed, [&](QString reason) {
-        m_mod_id_resolver.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver = new Flame::FileResolvingTask(APPLICATION->network(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver.get(), &Flame::FileResolvingTask::succeeded, this, [this, &loop] { idResolverSucceeded(loop); });
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver.get(), &Flame::FileResolvingTask::failed, [&](QString reason) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver.reset();
         setError(tr("Unable to resolve mod IDs:\n") + reason);
         loop.quit();
     });
-    connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::progress, this, &FlameCreationTask::setProgress);
-    connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::status, this, &FlameCreationTask::setStatus);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver.get(), &Flame::FileResolvingTask::progress, this, &FlameCreationTask::setProgress);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver.get(), &Flame::FileResolvingTask::status, this, &FlameCreationTask::setStatus);
 
-    m_mod_id_resolver->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver->start();
 
     loop.exec();
 
     bool did_succeed = getError().isEmpty();
 
     // Update information of the already installed instance, if any.
-    if (m_instance && did_succeed) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance && did_succeed) {
         setAbortable(false);
-        auto inst = m_instance.value();
+        auto inst = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance.value();
 
         inst->copyManagedPack(instance);
     }
@@ -395,7 +395,7 @@ bool FlameCreationTask::createInstance()
 
 void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
 {
-    auto results = m_mod_id_resolver->getResults();
+    auto results = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver->getResults();
 
     // first check for blocked mods
     QList<BlockedMod> blocked_mods;
@@ -418,7 +418,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     if (anyBlocked) {
         qWarning() << "Blocked mods found, displaying mod list";
 
-        BlockedModsDialog message_dialog(m_parent, tr("Blocked mods found"),
+        BlockedModsDialog message_dialog(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, tr("Blocked mods found"),
                                          tr("The following files are not available for download in third party launchers.<br/>"
                                             "You will need to manually download them and add them to the instance."),
                                          blocked_mods);
@@ -430,7 +430,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
             copyBlockedMods(blocked_mods);
             setupDownloadJob(loop);
         } else {
-            m_mod_id_resolver.reset();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver.reset();
             setError("Canceled");
             loop.quit();
         }
@@ -454,7 +454,7 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
             continue;
         }
 
-        auto dest_path = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
+        auto dest_path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "minecraft", mod.targetFolder, mod.name);
 
         setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
 
@@ -473,15 +473,15 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
 
 void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 {
-    m_files_job = new NetJob(tr("Mod download"), APPLICATION->network());
-    for (const auto& result : m_mod_id_resolver->getResults().files) {
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job = new NetJob(tr("Mod download"), APPLICATION->network());
+    for (const auto& result : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver->getResults().files) {
         QString filename = result.fileName;
         if (!result.required) {
             filename += ".disabled";
         }
 
         auto relpath = FS::PathCombine("minecraft", result.targetFolder, filename);
-        auto path = FS::PathCombine(m_stagingPath, relpath);
+        auto path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, relpath);
 
         switch (result.type) {
             case Flame::File::Type::Folder: {
@@ -493,7 +493,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
                 if (!result.url.isEmpty()) {
                     qDebug() << "Will download" << result.url << "to" << path;
                     auto dl = Net::Download::makeFile(result.url, path);
-                    m_files_job->addNetAction(dl);
+                    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job->addNetAction(dl);
                 }
                 break;
             }
@@ -508,15 +508,15 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         }
     }
 
-    m_mod_id_resolver.reset();
-    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() { m_files_job.reset(); });
-    connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
-        m_files_job.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_id_resolver.reset();
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job.get(), &NetJob::succeeded, this, [&]() { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job.reset(); });
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job.get(), &NetJob::failed, [&](QString reason) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job.reset();
         setError(reason);
     });
-    connect(m_files_job.get(), &NetJob::progress, this, &FlameCreationTask::setProgress);
-    connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job.get(), &NetJob::progress, this, &FlameCreationTask::setProgress);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
 
     setStatus(tr("Downloading mods..."));
-    m_files_job->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job->start();
 }

@@ -61,7 +61,7 @@ public:
     bool abort() override;
     const QVector<Flame::File> &getBlockedFiles() const
     {
-        return m_blockedMods;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_blockedMods;
     }
 
 protected:
@@ -84,27 +84,27 @@ private slots:
     void extractAborted();
 
 private: /* data */
-    NetJob::Ptr m_filesNetJob;
-    shared_qobject_ptr<Flame::FileResolvingTask> m_modIdResolver;
-    QUrl m_sourceUrl;
-    QString m_archivePath;
-    bool m_downloadRequired = false;
-    std::unique_ptr<QuaZip> m_packZip;
-    QFuture<std::optional<QStringList>> m_extractFuture;
-    QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
-    QVector<Flame::File> m_blockedMods;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob;
+    shared_qobject_ptr<Flame::FileResolvingTask> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modIdResolver;
+    QUrl hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sourceUrl;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_archivePath;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_downloadRequired = false;
+    std::unique_ptr<QuaZip> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_packZip;
+    QFuture<std::optional<QStringList>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture;
+    QFutureWatcher<std::optional<QStringList>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher;
+    QVector<Flame::File> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_blockedMods;
     enum class ModpackType{
         Unknown,
         MultiMC,
         Technic,
         Flame,
         Modrinth,
-    } m_modpackType = ModpackType::Unknown;
+    } hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modpackType = ModpackType::Unknown;
 
     // Extra info we might need, that's available before, but can't be derived from
     // the source URL / the resource it points to alone.
-    QMap<QString, QString> m_extra_info;
+    QMap<QString, QString> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extra_info;
 
     //FIXME: nuke
-    QWidget* m_parent;
+    QWidget* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent;
 };

@@ -167,14 +167,14 @@ protected:
     QString launchMethod();
 
 protected: // data
-    std::shared_ptr<PackProfile> m_components;
-    mutable std::shared_ptr<ModFolderModel> m_loader_mod_list;
-    mutable std::shared_ptr<ModFolderModel> m_core_mod_list;
-    mutable std::shared_ptr<ResourcePackFolderModel> m_resource_pack_list;
-    mutable std::shared_ptr<ShaderPackFolderModel> m_shader_pack_list;
-    mutable std::shared_ptr<TexturePackFolderModel> m_texture_pack_list;
-    mutable std::shared_ptr<WorldList> m_world_list;
-    mutable std::shared_ptr<GameOptions> m_game_options;
+    std::shared_ptr<PackProfile> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components;
+    mutable std::shared_ptr<ModFolderModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loader_mod_list;
+    mutable std::shared_ptr<ModFolderModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_core_mod_list;
+    mutable std::shared_ptr<ResourcePackFolderModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resource_pack_list;
+    mutable std::shared_ptr<ShaderPackFolderModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_shader_pack_list;
+    mutable std::shared_ptr<TexturePackFolderModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_texture_pack_list;
+    mutable std::shared_ptr<WorldList> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_world_list;
+    mutable std::shared_ptr<GameOptions> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_game_options;
 };
 
 typedef std::shared_ptr<MinecraftInstance> MinecraftInstancePtr;

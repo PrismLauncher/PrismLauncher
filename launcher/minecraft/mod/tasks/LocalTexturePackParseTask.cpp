@@ -147,21 +147,21 @@ bool validate(QFileInfo file)
 }  // namespace TexturePackUtils
 
 LocalTexturePackParseTask::LocalTexturePackParseTask(int token, TexturePack& rp)
-    : Task(nullptr, false), m_token(token), m_texture_pack(rp)
+    : Task(nullptr, false), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_token(token), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_texture_pack(rp)
 {}
 
 bool LocalTexturePackParseTask::abort()
 {
-    m_aborted = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = true;
     return true;
 }
 
 void LocalTexturePackParseTask::executeTask()
 {
-    if (!TexturePackUtils::process(m_texture_pack))
+    if (!TexturePackUtils::process(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_texture_pack))
         return;
 
-    if (m_aborted)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted)
         emitAborted();
     else
         emitSucceeded();

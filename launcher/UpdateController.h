@@ -17,10 +17,10 @@ private:
     bool rollback();
 
 private:
-    QString m_root;
-    QString m_updateFilesDir;
-    GoUpdate::OperationList m_operations;
-    QWidget * m_parent;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_root;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateFilesDir;
+    GoUpdate::OperationList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_operations;
+    QWidget * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent;
 
     struct BackupEntry
     {
@@ -31,14 +31,14 @@ private:
         // path where the backup of the updated file was placed
         QString backup;
     };
-    QList <BackupEntry> m_replace_backups;
-    QList <BackupEntry> m_delete_backups;
+    QList <BackupEntry> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_replace_backups;
+    QList <BackupEntry> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_delete_backups;
     enum Failure
     {
         Replace,
         Delete,
         Start,
         Nothing
-    } m_failedOperationType = Nothing;
-    QString m_failedFile;
+    } hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedOperationType = Nothing;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedFile;
 };

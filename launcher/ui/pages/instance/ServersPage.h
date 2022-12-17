@@ -110,11 +110,11 @@ private slots:
 
 private: // data
     int currentServer = -1;
-    bool m_locked = true;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locked = true;
     Ui::ServersPage *ui = nullptr;
-    ServersModel * m_model = nullptr;
-    InstancePtr m_inst = nullptr;
+    ServersModel * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model = nullptr;
+    InstancePtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst = nullptr;
 
-    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
+    std::shared_ptr<Setting> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = nullptr;
 };
 

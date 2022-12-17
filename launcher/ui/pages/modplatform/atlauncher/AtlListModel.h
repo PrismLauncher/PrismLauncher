@@ -56,9 +56,9 @@ private:
 private:
     QList<ATLauncher::IndexedPack> modpacks;
 
-    QStringList m_failedLogos;
-    QStringList m_loadingLogos;
-    LogoMap m_logoMap;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos;
+    LogoMap hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap;
     QMap<QString, LogoCallback> waitingCallbacks;
 
     NetJob::Ptr jobPtr;

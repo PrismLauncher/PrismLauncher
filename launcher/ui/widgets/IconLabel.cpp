@@ -7,19 +7,19 @@
 #include <QRect>
 
 IconLabel::IconLabel(QWidget *parent, QIcon icon, QSize size)
-    : QWidget(parent), m_size(size), m_icon(icon)
+    : QWidget(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_size(size), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon(icon)
 {
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 }
 
 QSize IconLabel::sizeHint() const
 {
-    return m_size;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_size;
 }
 
 void IconLabel::setIcon(QIcon icon)
 {
-    m_icon = icon;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon = icon;
     update();
 }
 
@@ -39,5 +39,5 @@ void IconLabel::paintEvent(QPaintEvent *)
         rect.setWidth(height);
         rect.translate((width - height) / 2, 0);
     }
-    m_icon.paint(&p, rect);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon.paint(&p, rect);
 }

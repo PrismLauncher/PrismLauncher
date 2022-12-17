@@ -43,8 +43,8 @@ GameOptionsPage::GameOptionsPage(MinecraftInstance * inst, QWidget* parent)
 {
     ui->setupUi(this);
     ui->tabWidget->tabBar()->hide();
-    m_model = inst->gameOptionsModel();
-    ui->optionsView->setModel(m_model.get());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model = inst->gameOptionsModel();
+    ui->optionsView->setModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model.get());
     auto head = ui->optionsView->header();
     if(head->count())
     {
@@ -58,17 +58,17 @@ GameOptionsPage::GameOptionsPage(MinecraftInstance * inst, QWidget* parent)
 
 GameOptionsPage::~GameOptionsPage()
 {
-    // m_model->save();
+    // hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->save();
 }
 
 void GameOptionsPage::openedImpl()
 {
-    // m_model->observe();
+    // hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->observe();
 }
 
 void GameOptionsPage::closedImpl()
 {
-    // m_model->unobserve();
+    // hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->unobserve();
 }
 
 void GameOptionsPage::retranslate()

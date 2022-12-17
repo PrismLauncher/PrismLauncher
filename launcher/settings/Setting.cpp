@@ -17,13 +17,13 @@
 #include "settings/SettingsObject.h"
 
 Setting::Setting(QStringList synonyms, QVariant defVal)
-    : QObject(), m_synonyms(synonyms), m_defVal(defVal)
+    : QObject(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_synonyms(synonyms), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defVal(defVal)
 {
 }
 
 QVariant Setting::get() const
 {
-    SettingsObject *sbase = m_storage;
+    SettingsObject *sbase = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_storage;
     if (!sbase)
     {
         return defValue();
@@ -39,7 +39,7 @@ QVariant Setting::get() const
 
 QVariant Setting::defValue() const
 {
-    return m_defVal;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defVal;
 }
 
 void Setting::set(QVariant value)

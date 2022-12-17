@@ -15,19 +15,19 @@ void InstanceCreationTask::executeTask()
     }
 
     // When the user aborted in the update stage.
-    if (m_abort) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort) {
         emitAborted();
         return;
     }
 
     if (!createInstance()) {
-        if (m_abort)
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort)
             return;
 
         qWarning() << "Instance creation failed!";
-        if (!m_error_message.isEmpty()) {
-            qWarning() << "Reason: " << m_error_message;
-            emitFailed(tr("Error while creating new instance:\n%1").arg(m_error_message));
+        if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_error_message.isEmpty()) {
+            qWarning() << "Reason: " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_error_message;
+            emitFailed(tr("Error while creating new instance:\n%1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_error_message));
         } else {
             emitFailed(tr("Error while creating new instance."));
         }
@@ -43,7 +43,7 @@ void InstanceCreationTask::executeTask()
         setStatus(tr("Removing old conflicting files..."));
         qDebug() << "Removing old files";
 
-        for (auto path : m_files_to_remove) {
+        for (auto path : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_to_remove) {
             if (!QFile::exists(path))
                 continue;
             qDebug() << "Removing" << path;

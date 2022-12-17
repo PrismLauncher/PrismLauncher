@@ -29,13 +29,13 @@
 
 DirectJavaLaunch::DirectJavaLaunch(LaunchTask *parent) : LaunchStep(parent)
 {
-    connect(&m_process, &LoggedProcess::log, this, &DirectJavaLaunch::logLines);
-    connect(&m_process, &LoggedProcess::stateChanged, this, &DirectJavaLaunch::on_state);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process, &LoggedProcess::log, this, &DirectJavaLaunch::logLines);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process, &LoggedProcess::stateChanged, this, &DirectJavaLaunch::on_state);
 }
 
 void DirectJavaLaunch::executeTask()
 {
-    auto instance = m_parent->instance();
+    auto instance = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance();
     std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
     QStringList args = minecraftInstance->javaArguments();
 
@@ -53,16 +53,16 @@ void DirectJavaLaunch::executeTask()
     args.append(minecraftInstance->getMainClass());
 
     QString allArgs = args.join(", ");
-    emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::Launcher);
+    emit logLine("Java Arguments:\n[" + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::Launcher);
 
     auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
 
-    m_process.setProcessEnvironment(instance->createLaunchEnvironment());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.setProcessEnvironment(instance->createLaunchEnvironment());
 
     // make detachable - this will keep the process running even if the object is destroyed
-    m_process.setDetachable(true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.setDetachable(true);
 
-    auto mcArgs = minecraftInstance->processMinecraftArgs(m_session, m_serverToJoin);
+    auto mcArgs = minecraftInstance->processMinecraftArgs(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin);
     args.append(mcArgs);
 
     QString wrapperCommandStr = instance->getWrapperCommand().trimmed();
@@ -80,17 +80,17 @@ void DirectJavaLaunch::executeTask()
         }
         emit logLine("Wrapper command is:\n" + wrapperCommandStr + "\n\n", MessageLevel::Launcher);
         args.prepend(javaPath);
-        m_process.start(wrapperCommand, wrapperArgs + args);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.start(wrapperCommand, wrapperArgs + args);
     }
     else
     {
-        m_process.start(javaPath, args);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.start(javaPath, args);
     }
 
 #ifdef Q_OS_LINUX
     if (instance->settings()->get("EnableFeralGamemode").toBool() && APPLICATION->capabilities() & Application::SupportsGameMode)
     {
-        auto pid = m_process.processId();
+        auto pid = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.processId();
         if (pid)
         {
             gamemode_request_start_for(pid);
@@ -114,30 +114,30 @@ void DirectJavaLaunch::on_state(LoggedProcess::State state)
         case LoggedProcess::Aborted:
         case LoggedProcess::Crashed:
         {
-            m_parent->setPid(-1);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->setPid(-1);
             emitFailed(tr("Game crashed."));
             return;
         }
         case LoggedProcess::Finished:
         {
-            m_parent->setPid(-1);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->setPid(-1);
             // if the exit code wasn't 0, report this as a crash
-            auto exitCode = m_process.exitCode();
+            auto exitCode = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.exitCode();
             if(exitCode != 0)
             {
                 emitFailed(tr("Game crashed."));
                 return;
             }
             //FIXME: make this work again
-            // m_postlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(exitCode));
+            // hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_postlaunchprocess.processEnvironment().insert("INST_EXITCODE", QString(exitCode));
             // run post-exit
             emitSucceeded();
             break;
         }
         case LoggedProcess::Running:
-            emit logLine(QString("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::Launcher);
-            m_parent->setPid(m_process.processId());
-            m_parent->instance()->setLastLaunch();
+            emit logLine(QString("Minecraft process ID: %1\n\n").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.processId()), MessageLevel::Launcher);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->setPid(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.processId());
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance()->setLastLaunch();
             break;
         default:
             break;
@@ -146,7 +146,7 @@ void DirectJavaLaunch::on_state(LoggedProcess::State state)
 
 void DirectJavaLaunch::setWorkingDirectory(const QString &wd)
 {
-    m_process.setWorkingDirectory(wd);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.setWorkingDirectory(wd);
 }
 
 void DirectJavaLaunch::proceed()
@@ -156,10 +156,10 @@ void DirectJavaLaunch::proceed()
 
 bool DirectJavaLaunch::abort()
 {
-    auto state = m_process.state();
+    auto state = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.state();
     if (state == LoggedProcess::Running || state == LoggedProcess::Starting)
     {
-        m_process.kill();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process.kill();
     }
     return true;
 }

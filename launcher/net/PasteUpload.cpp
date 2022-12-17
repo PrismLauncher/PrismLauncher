@@ -51,16 +51,16 @@ std::array<PasteUpload::PasteTypeInfo, 4> PasteUpload::PasteTypes = {
      {"paste.gg", "https://paste.gg", "/api/v1/pastes"},
      {"mclo.gs", "https://api.mclo.gs", "/1/log"}}};
 
-PasteUpload::PasteUpload(QWidget *window, QString text, QString baseUrl, PasteType pasteType) : m_window(window), m_baseUrl(baseUrl), m_pasteType(pasteType), m_text(text.toUtf8())
+PasteUpload::PasteUpload(QWidget *window, QString text, QString baseUrl, PasteType pasteType) : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_window(window), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseUrl(baseUrl), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pasteType(pasteType), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_text(text.toUtf8())
 {
-    if (m_baseUrl == "")
-        m_baseUrl = PasteTypes.at(pasteType).defaultBase;
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseUrl == "")
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseUrl = PasteTypes.at(pasteType).defaultBase;
 
     // HACK: Paste's docs say the standard API path is at /api/<version> but the official instance paste.gg doesn't follow that??
-    if (pasteType == PasteGG && m_baseUrl == PasteTypes.at(pasteType).defaultBase)
-        m_uploadUrl = "https://api.paste.gg/v1/pastes";
+    if (pasteType == PasteGG && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseUrl == PasteTypes.at(pasteType).defaultBase)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl = "https://api.paste.gg/v1/pastes";
     else
-        m_uploadUrl = m_baseUrl + PasteTypes.at(pasteType).endpointPath;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseUrl + PasteTypes.at(pasteType).endpointPath;
 }
 
 PasteUpload::~PasteUpload()
@@ -69,18 +69,18 @@ PasteUpload::~PasteUpload()
 
 void PasteUpload::executeTask()
 {
-    QNetworkRequest request{QUrl(m_uploadUrl)};
+    QNetworkRequest request{QUrl(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl)};
     QNetworkReply *rep{};
 
     request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgentUncached().toUtf8());
 
-    switch (m_pasteType) {
+    switch (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pasteType) {
     case NullPointer: {
         QHttpMultiPart *multiPart =
           new QHttpMultiPart{QHttpMultiPart::FormDataType};
 
         QHttpPart filePart;
-        filePart.setBody(m_text);
+        filePart.setBody(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_text);
         filePart.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");
         filePart.setHeader(QNetworkRequest::ContentDispositionHeader,
                          "form-data; name=\"file\"; filename=\"log.txt\"");
@@ -93,12 +93,12 @@ void PasteUpload::executeTask()
     }
     case Hastebin: {
         request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgentUncached().toUtf8());
-        rep = APPLICATION->network()->post(request, m_text);
+        rep = APPLICATION->network()->post(request, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_text);
         break;
     }
     case Mclogs: {
         QUrlQuery postData;
-        postData.addQueryItem("content", m_text);
+        postData.addQueryItem("content", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_text);
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
         rep = APPLICATION->network()->post(request, postData.toString().toUtf8());
         break;
@@ -114,7 +114,7 @@ void PasteUpload::executeTask()
         QJsonObject logFileInfo;
         QJsonObject logFileContentInfo;
         logFileContentInfo.insert("format", "text");
-        logFileContentInfo.insert("value", QString::fromUtf8(m_text));
+        logFileContentInfo.insert("value", QString::fromUtf8(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_text));
         logFileInfo.insert("name", "log.txt");
         logFileInfo.insert("content", logFileContentInfo);
         files.append(logFileInfo);
@@ -137,42 +137,42 @@ void PasteUpload::executeTask()
 #endif
 
 
-    m_reply = std::shared_ptr<QNetworkReply>(rep);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply = std::shared_ptr<QNetworkReply>(rep);
 
-    setStatus(tr("Uploading to %1").arg(m_uploadUrl));
+    setStatus(tr("Uploading to %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl));
 }
 
 void PasteUpload::downloadError(QNetworkReply::NetworkError error)
 {
     // error happened during download.
     qCritical() << "Network error: " << error;
-    emitFailed(m_reply->errorString());
+    emitFailed(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->errorString());
 }
 
 void PasteUpload::downloadFinished()
 {
-    QByteArray data = m_reply->readAll();
-    int statusCode = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    QByteArray data = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->readAll();
+    int statusCode = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
-    if (m_reply->error() != QNetworkReply::NetworkError::NoError)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->error() != QNetworkReply::NetworkError::NoError)
     {
-        emitFailed(tr("Network error: %1").arg(m_reply->errorString()));
-        m_reply.reset();
+        emitFailed(tr("Network error: %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->errorString()));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
         return;
     }
     else if (statusCode != 200 && statusCode != 201)
     {
-        QString reasonPhrase = m_reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
-        emitFailed(tr("Error: %1 returned unexpected status code %2 %3").arg(m_uploadUrl).arg(statusCode).arg(reasonPhrase));
-        qCritical() << m_uploadUrl << " returned unexpected status code " << statusCode << " with body: " << data;
-        m_reply.reset();
+        QString reasonPhrase = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+        emitFailed(tr("Error: %1 returned unexpected status code %2 %3").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl).arg(statusCode).arg(reasonPhrase));
+        qCritical() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl << " returned unexpected status code " << statusCode << " with body: " << data;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
         return;
     }
 
-    switch (m_pasteType)
+    switch (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pasteType)
     {
     case NullPointer:
-        m_pasteLink = QString::fromUtf8(data).trimmed();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pasteLink = QString::fromUtf8(data).trimmed();
         break;
     case Hastebin: {
         QJsonDocument jsonDoc{QJsonDocument::fromJson(data)};
@@ -180,12 +180,12 @@ void PasteUpload::downloadFinished()
         if (jsonObj.contains("key") && jsonObj["key"].isString())
         {
             QString key = jsonDoc.object()["key"].toString();
-            m_pasteLink = m_baseUrl + "/" + key;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pasteLink = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseUrl + "/" + key;
         }
         else
         {
-            emitFailed(tr("Error: %1 returned a malformed response body").arg(m_uploadUrl));
-            qCritical() << m_uploadUrl << " returned malformed response body: " << data;
+            emitFailed(tr("Error: %1 returned a malformed response body").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl));
+            qCritical() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl << " returned malformed response body: " << data;
             return;
         }
         break;
@@ -198,21 +198,21 @@ void PasteUpload::downloadFinished()
             bool success = jsonObj["success"].toBool();
             if (success)
             {
-                m_pasteLink = jsonObj["url"].toString();
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pasteLink = jsonObj["url"].toString();
             }
             else
             {
                 QString error = jsonObj["error"].toString();
-                emitFailed(tr("Error: %1 returned an error: %2").arg(m_uploadUrl, error));
-                qCritical() << m_uploadUrl << " returned error: " << error;
+                emitFailed(tr("Error: %1 returned an error: %2").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl, error));
+                qCritical() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl << " returned error: " << error;
                 qCritical() << "Response body: " << data;
                 return;
             }
         }
         else
         {
-            emitFailed(tr("Error: %1 returned a malformed response body").arg(m_uploadUrl));
-            qCritical() << m_uploadUrl << " returned malformed response body: " << data;
+            emitFailed(tr("Error: %1 returned a malformed response body").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl));
+            qCritical() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl << " returned malformed response body: " << data;
             return;
         }
         break;
@@ -225,14 +225,14 @@ void PasteUpload::downloadFinished()
             QString status = jsonObj["status"].toString();
             if (status == "success")
             {
-                m_pasteLink = m_baseUrl + "/p/anonymous/" + jsonObj["result"].toObject()["id"].toString();
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pasteLink = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_baseUrl + "/p/anonymous/" + jsonObj["result"].toObject()["id"].toString();
             }
             else
             {
                 QString error = jsonObj["error"].toString();
                 QString message = (jsonObj.contains("message") && jsonObj["message"].isString()) ? jsonObj["message"].toString() : "none";
-                emitFailed(tr("Error: %1 returned an error code: %2\nError message: %3").arg(m_uploadUrl, error, message));
-                qCritical() << m_uploadUrl << " returned error: " << error;
+                emitFailed(tr("Error: %1 returned an error code: %2\nError message: %3").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl, error, message));
+                qCritical() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl << " returned error: " << error;
                 qCritical() << "Error message: " << message;
                 qCritical() << "Response body: " << data;
                 return;
@@ -240,8 +240,8 @@ void PasteUpload::downloadFinished()
         }
         else
         {
-            emitFailed(tr("Error: %1 returned a malformed response body").arg(m_uploadUrl));
-            qCritical() << m_uploadUrl << " returned malformed response body: " << data;
+            emitFailed(tr("Error: %1 returned a malformed response body").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl));
+            qCritical() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadUrl << " returned malformed response body: " << data;
             return;
         }
         break;

@@ -27,35 +27,35 @@
 
 void TexturePack::setDescription(QString new_description)
 {
-    QMutexLocker locker(&m_data_lock);
+    QMutexLocker locker(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data_lock);
 
-    m_description = new_description;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description = new_description;
 }
 
 void TexturePack::setImage(QImage new_image)
 {
-    QMutexLocker locker(&m_data_lock);
+    QMutexLocker locker(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data_lock);
 
     Q_ASSERT(!new_image.isNull());
 
-    if (m_pack_image_cache_key.key.isValid())
-        QPixmapCache::remove(m_pack_image_cache_key.key);
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.key.isValid())
+        QPixmapCache::remove(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.key);
 
-    m_pack_image_cache_key.key = QPixmapCache::insert(QPixmap::fromImage(new_image));
-    m_pack_image_cache_key.was_ever_used = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.key = QPixmapCache::insert(QPixmap::fromImage(new_image));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.was_ever_used = true;
 }
 
 QPixmap TexturePack::image(QSize size)
 {
     QPixmap cached_image;
-    if (QPixmapCache::find(m_pack_image_cache_key.key, &cached_image)) {
+    if (QPixmapCache::find(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.key, &cached_image)) {
         if (size.isNull())
             return cached_image;
         return cached_image.scaled(size);
     }
 
     // No valid image we can get
-    if (!m_pack_image_cache_key.was_ever_used)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key.was_ever_used)
         return {};
 
     // Imaged got evicted from the cache. Re-process it and retry.
@@ -65,5 +65,5 @@ QPixmap TexturePack::image(QSize size)
 
 bool TexturePack::valid() const
 {
-    return m_description != nullptr;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description != nullptr;
 }

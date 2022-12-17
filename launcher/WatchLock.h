@@ -7,14 +7,14 @@
 struct WatchLock
 {
     WatchLock(QFileSystemWatcher * watcher, const QString& directory)
-        : m_watcher(watcher), m_directory(directory)
+        : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher(watcher), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_directory(directory)
     {
-        m_watcher->removePath(m_directory);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->removePath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_directory);
     }
     ~WatchLock()
     {
-        m_watcher->addPath(m_directory);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->addPath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_directory);
     }
-    QFileSystemWatcher * m_watcher;
-    QString m_directory;
+    QFileSystemWatcher * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_directory;
 };

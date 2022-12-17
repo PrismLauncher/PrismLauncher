@@ -35,38 +35,38 @@ INISettingsObject::INISettingsObject(QStringList paths, QObject *parent)
         }
     }
 
-    m_filePath = first_path;
-    m_ini.loadFile(first_path);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filePath = first_path;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ini.loadFile(first_path);
 }
 
 INISettingsObject::INISettingsObject(QString path, QObject* parent)
     : SettingsObject(parent)
 {
-    m_filePath = path;
-    m_ini.loadFile(path);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filePath = path;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ini.loadFile(path);
 }
 
 void INISettingsObject::setFilePath(const QString &filePath)
 {
-    m_filePath = filePath;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filePath = filePath;
 }
 
 bool INISettingsObject::reload()
 {
-    return m_ini.loadFile(m_filePath) && SettingsObject::reload();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ini.loadFile(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filePath) && SettingsObject::reload();
 }
 
 void INISettingsObject::suspendSave()
 {
-    m_suspendSave = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_suspendSave = true;
 }
 
 void INISettingsObject::resumeSave()
 {
-    m_suspendSave = false;
-    if(m_doSave)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_suspendSave = false;
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doSave)
     {
-        m_ini.saveFile(m_filePath);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ini.saveFile(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filePath);
     }
 }
 
@@ -78,15 +78,15 @@ void INISettingsObject::changeSetting(const Setting &setting, QVariant value)
         if (value.isValid())
         {
             auto list = setting.configKeys();
-            m_ini.set(list.takeFirst(), value);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ini.set(list.takeFirst(), value);
             for(auto iter: list)
-                m_ini.remove(iter);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ini.remove(iter);
         }
         // invalid -> remove all (just like resetSetting)
         else
         {
             for(auto iter: setting.configKeys())
-                m_ini.remove(iter);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ini.remove(iter);
         }
         doSave();
     }
@@ -94,13 +94,13 @@ void INISettingsObject::changeSetting(const Setting &setting, QVariant value)
 
 void INISettingsObject::doSave()
 {
-    if(m_suspendSave)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_suspendSave)
     {
-        m_doSave = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doSave = true;
     }
     else
     {
-        m_ini.saveFile(m_filePath);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ini.saveFile(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filePath);
     }
 }
 
@@ -110,7 +110,7 @@ void INISettingsObject::resetSetting(const Setting &setting)
     if (contains(setting.id()))
     {
         for(auto iter: setting.configKeys())
-            m_ini.remove(iter);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ini.remove(iter);
         doSave();
     }
 }
@@ -122,8 +122,8 @@ QVariant INISettingsObject::retrieveValue(const Setting &setting)
     {
         for(auto iter: setting.configKeys())
         {
-            if(m_ini.contains(iter))
-                return m_ini[iter];
+            if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ini.contains(iter))
+                return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ini[iter];
         }
     }
     return QVariant();

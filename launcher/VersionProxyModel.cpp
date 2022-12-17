@@ -46,14 +46,14 @@ class VersionFilterModel : public QSortFilterProxyModel
 public:
     VersionFilterModel(VersionProxyModel *parent) : QSortFilterProxyModel(parent)
     {
-        m_parent = parent;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent = parent;
         setSortRole(BaseVersionList::SortRole);
         sort(0, Qt::DescendingOrder);
     }
 
     bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
     {
-        const auto &filters = m_parent->filters();
+        const auto &filters = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->filters();
         for (auto it = filters.begin(); it != filters.end(); ++it)
         {
             auto idx = sourceModel()->index(source_row, 0, source_parent);
@@ -72,7 +72,7 @@ public:
         invalidateFilter();
     }
 private:
-    VersionProxyModel *m_parent;
+    VersionProxyModel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent;
 };
 
 VersionProxyModel::VersionProxyModel(QObject *parent) : QAbstractProxyModel(parent)
@@ -98,11 +98,11 @@ VersionProxyModel::VersionProxyModel(QObject *parent) : QAbstractProxyModel(pare
 
 QVariant VersionProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(section < 0 || section >= m_columns.size())
+    if(section < 0 || section >= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns.size())
         return QVariant();
     if(orientation != Qt::Horizontal)
         return QVariant();
-    auto column = m_columns[section];
+    auto column = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns[section];
     if(role == Qt::DisplayRole)
     {
         switch(column)
@@ -152,7 +152,7 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
     {
         return QVariant();
     }
-    auto column = m_columns[index.column()];
+    auto column = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns[index.column()];
     auto parentIndex = mapToSource(index);
     switch(role)
     {
@@ -163,7 +163,7 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
                 case Name:
                 {
                     QString version = sourceModel()->data(parentIndex, BaseVersionList::VersionRole).toString();
-                    if(version == m_currentVersion)
+                    if(version == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersion)
                     {
                         return tr("%1 (installed)").arg(version);
                     }
@@ -311,7 +311,7 @@ QModelIndex VersionProxyModel::index(int row, int column, const QModelIndex &par
 
 int VersionProxyModel::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_columns.size();
+    return parent.isValid() ? 0 : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns.size();
 }
 
 int VersionProxyModel::rowCount(const QModelIndex &parent) const
@@ -324,14 +324,14 @@ int VersionProxyModel::rowCount(const QModelIndex &parent) const
 }
 
 void VersionProxyModel::sourceDataChanged(const QModelIndex &source_top_left,
-                                          const QModelIndex &source_bottom_right)
+                                          const QModelIndex &source_bottohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_right)
 {
-    if(source_top_left.parent() != source_bottom_right.parent())
+    if(source_top_left.parent() != source_bottohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_right.parent())
         return;
 
     // whole row is getting changed
     auto topLeft = createIndex(source_top_left.row(), 0);
-    auto bottomRight = createIndex(source_bottom_right.row(), columnCount() - 1);
+    auto bottomRight = createIndex(source_bottohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_right.row(), columnCount() - 1);
     emit dataChanged(topLeft, bottomRight);
 }
 
@@ -340,7 +340,7 @@ void VersionProxyModel::setSourceModel(QAbstractItemModel *replacingRaw)
     auto replacing = dynamic_cast<BaseVersionList *>(replacingRaw);
     beginResetModel();
 
-    m_columns.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns.clear();
     if(!replacing)
     {
         roles.clear();
@@ -351,33 +351,33 @@ void VersionProxyModel::setSourceModel(QAbstractItemModel *replacingRaw)
     roles = replacing->providesRoles();
     if(roles.contains(BaseVersionList::VersionRole))
     {
-        m_columns.push_back(Name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns.push_back(Name);
     }
     /*
     if(roles.contains(BaseVersionList::ParentVersionRole))
     {
-        m_columns.push_back(ParentVersion);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns.push_back(ParentVersion);
     }
     */
     if(roles.contains(BaseVersionList::ArchitectureRole))
     {
-        m_columns.push_back(Architecture);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns.push_back(Architecture);
     }
     if(roles.contains(BaseVersionList::PathRole))
     {
-        m_columns.push_back(Path);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns.push_back(Path);
     }
     if(roles.contains(Meta::VersionList::TimeRole))
     {
-        m_columns.push_back(Time);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns.push_back(Time);
     }
     if(roles.contains(BaseVersionList::BranchRole))
     {
-        m_columns.push_back(Branch);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns.push_back(Branch);
     }
     if(roles.contains(BaseVersionList::TypeRole))
     {
-        m_columns.push_back(Type);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns.push_back(Type);
     }
     if(roles.contains(BaseVersionList::RecommendedRole))
     {
@@ -430,19 +430,19 @@ QModelIndex VersionProxyModel::getVersion(const QString& version) const
 
 void VersionProxyModel::clearFilters()
 {
-    m_filters.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filters.clear();
     filterModel->filterChanged();
 }
 
 void VersionProxyModel::setFilter(const BaseVersionList::ModelRoles column, Filter * f)
 {
-    m_filters[column].reset(f);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filters[column].reset(f);
     filterModel->filterChanged();
 }
 
 const VersionProxyModel::FilterMap &VersionProxyModel::filters() const
 {
-    return m_filters;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filters;
 }
 
 void VersionProxyModel::sourceAboutToBeReset()
@@ -477,7 +477,7 @@ void VersionProxyModel::sourceRowsRemoved(const QModelIndex& parent, int first, 
 
 void VersionProxyModel::setCurrentVersion(const QString &version)
 {
-    m_currentVersion = version;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersion = version;
 }
 
 #include "VersionProxyModel.moc"

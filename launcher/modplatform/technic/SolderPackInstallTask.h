@@ -66,19 +66,19 @@ namespace Technic
         void extractAborted();
 
     private:
-        bool m_abortable = false;
+        bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abortable = false;
 
-        shared_qobject_ptr<QNetworkAccessManager> m_network;
+        shared_qobject_ptr<QNetworkAccessManager> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network;
 
-        NetJob::Ptr m_filesNetJob;
-        QUrl m_solderUrl;
-        QString m_pack;
-        QString m_version;
-        QString m_minecraftVersion;
-        QByteArray m_response;
-        QTemporaryDir m_outputDir;
-        int m_modCount;
-        QFuture<bool> m_extractFuture;
-        QFutureWatcher<bool> m_extractFutureWatcher;
+        NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob;
+        QUrl hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_solderUrl;
+        QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack;
+        QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
+        QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersion;
+        QByteArray hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response;
+        QTemporaryDir hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_outputDir;
+        int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modCount;
+        QFuture<bool> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture;
+        QFutureWatcher<bool> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher;
     };
 }

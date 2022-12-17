@@ -10,16 +10,16 @@ class SimplePrefixMatcher : public IPathMatcher {
     virtual ~SimplePrefixMatcher(){};
     SimplePrefixMatcher(const QString& prefix)
     {
-        m_prefix = prefix;
-        m_isPrefix = prefix.endsWith('/');
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prefix = prefix;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isPrefix = prefix.endsWith('/');
     }
 
     virtual bool matches(const QString& string) const override
     {
-        if (m_isPrefix)
-            return string.startsWith(m_prefix);
-        return string == m_prefix;
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isPrefix)
+            return string.startsWith(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prefix);
+        return string == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prefix;
     }
-    QString m_prefix;
-    bool m_isPrefix = false;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prefix;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_isPrefix = false;
 };

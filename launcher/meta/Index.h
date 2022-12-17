@@ -52,15 +52,15 @@ public:
     Version::Ptr get(const QString &uid, const QString &version);
     bool hasUid(const QString &uid) const;
 
-    QVector<VersionList::Ptr> lists() const { return m_lists; }
+    QVector<VersionList::Ptr> lists() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists; }
 
 public: // for usage by parsers only
     void merge(const std::shared_ptr<Index> &other);
     void parse(const QJsonObject &obj) override;
 
 private:
-    QVector<VersionList::Ptr> m_lists;
-    QHash<QString, VersionList::Ptr> m_uids;
+    QVector<VersionList::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists;
+    QHash<QString, VersionList::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uids;
 
     void connectVersionList(const int row, const VersionList::Ptr &list);
 };

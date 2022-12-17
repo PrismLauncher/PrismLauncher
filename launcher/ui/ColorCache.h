@@ -9,38 +9,38 @@ class ColorCache
 public:
     ColorCache(QColor front, QColor back, qreal bias)
     {
-        m_front = front;
-        m_back = back;
-        m_bias = bias;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_front = front;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_back = back;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bias = bias;
     };
 
     void addColor(int key, QColor color)
     {
-        m_colors[key] = {color, blend(color), blendBackground(color)};
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors[key] = {color, blend(color), blendBackground(color)};
     }
 
     void setForeground(QColor front)
     {
-        if(m_front != front)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_front != front)
         {
-            m_front = front;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_front = front;
             recolorAll();
         }
     }
 
     void setBackground(QColor back)
     {
-        if(m_back != back)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_back != back)
         {
-            m_back = back;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_back = back;
             recolorAll();
         }
     }
 
     QColor getFront(int key)
     {
-        auto iter = m_colors.find(key);
-        if(iter == m_colors.end())
+        auto iter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors.find(key);
+        if(iter == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors.end())
         {
             return QColor();
         }
@@ -49,8 +49,8 @@ public:
 
     QColor getBack(int key)
     {
-        auto iter = m_colors.find(key);
-        if(iter == m_colors.end())
+        auto iter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors.find(key);
+        if(iter == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors.end())
         {
             return QColor();
         }
@@ -79,10 +79,10 @@ protected:
     };
 
 protected:
-    qreal m_bias;
-    QColor m_front;
-    QColor m_back;
-    QMap<int, ColorEntry> m_colors;
+    qreal hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bias;
+    QColor hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_front;
+    QColor hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_back;
+    QMap<int, ColorEntry> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors;
 };
 
 class LogColorCache : public ColorCache
@@ -101,7 +101,7 @@ public:
 
     QColor getFront(MessageLevel::Enum level)
     {
-        if(!m_colors.contains((int) level))
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors.contains((int) level))
         {
             return ColorCache::getFront((int)MessageLevel::Message);
         }

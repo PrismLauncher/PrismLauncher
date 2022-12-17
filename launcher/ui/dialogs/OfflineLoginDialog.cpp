@@ -27,13 +27,13 @@ void OfflineLoginDialog::accept()
     ui->progressBar->setVisible(true);
 
     // Setup the login task and start it
-    m_account = MinecraftAccount::createOffline(ui->userTextBox->text());
-    m_loginTask = m_account->loginOffline();
-    connect(m_loginTask.get(), &Task::failed, this, &OfflineLoginDialog::onTaskFailed);
-    connect(m_loginTask.get(), &Task::succeeded, this, &OfflineLoginDialog::onTaskSucceeded);
-    connect(m_loginTask.get(), &Task::status, this, &OfflineLoginDialog::onTaskStatus);
-    connect(m_loginTask.get(), &Task::progress, this, &OfflineLoginDialog::onTaskProgress);
-    m_loginTask->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account = MinecraftAccount::createOffline(ui->userTextBox->text());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account->loginOffline();
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &Task::failed, this, &OfflineLoginDialog::onTaskFailed);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &Task::succeeded, this, &OfflineLoginDialog::onTaskSucceeded);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &Task::status, this, &OfflineLoginDialog::onTaskStatus);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &Task::progress, this, &OfflineLoginDialog::onTaskProgress);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask->start();
 }
 
 void OfflineLoginDialog::setUserInputsEnabled(bool enable)
@@ -101,7 +101,7 @@ MinecraftAccountPtr OfflineLoginDialog::newAccount(QWidget *parent, QString msg)
     dlg.ui->label->setText(msg);
     if (dlg.exec() == QDialog::Accepted)
     {
-        return dlg.m_account;
+        return dlg.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account;
     }
     return nullptr;
 }

@@ -45,7 +45,7 @@ public:
     void setCurrentVersion(const QString &version);
 private slots:
 
-    void sourceDataChanged(const QModelIndex &source_top_left,const QModelIndex &source_bottom_right);
+    void sourceDataChanged(const QModelIndex &source_top_left,const QModelIndex &source_bottohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_right);
 
     void sourceAboutToBeReset();
     void sourceReset();
@@ -57,11 +57,11 @@ private slots:
     void sourceRowsRemoved(const QModelIndex &parent, int first, int last);
 
 private:
-    QList<Column> m_columns;
-    FilterMap m_filters;
+    QList<Column> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_columns;
+    FilterMap hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filters;
     BaseVersionList::RoleList roles;
     VersionFilterModel * filterModel;
     bool hasRecommended = false;
     bool hasLatest = false;
-    QString m_currentVersion;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersion;
 };

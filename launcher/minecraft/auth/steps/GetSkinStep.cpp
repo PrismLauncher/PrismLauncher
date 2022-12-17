@@ -17,7 +17,7 @@ QString GetSkinStep::describe() {
 }
 
 void GetSkinStep::perform() {
-    auto url = QUrl(m_data->minecraftProfile.skin.url);
+    auto url = QUrl(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftProfile.skin.url);
     QNetworkRequest request = QNetworkRequest(url);
     AuthRequest *requestor = new AuthRequest(this);
     connect(requestor, &AuthRequest::finished, this, &GetSkinStep::onRequestDone);
@@ -37,7 +37,7 @@ void GetSkinStep::onRequestDone(
     requestor->deleteLater();
 
     if (error == QNetworkReply::NoError) {
-        m_data->minecraftProfile.skin.data = data;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftProfile.skin.data = data;
     }
     emit finished(AccountTaskState::STATE_SUCCEEDED, tr("Got skin"));
 }

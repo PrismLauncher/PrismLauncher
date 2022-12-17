@@ -49,30 +49,30 @@
 
 LabeledToolButton::LabeledToolButton(QWidget * parent)
     : QToolButton(parent)
-    , m_label(new QLabel(this))
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label(new QLabel(this))
 {
     //QToolButton::setText(" ");
-    m_label->setWordWrap(true);
-    m_label->setMouseTracking(false);
-    m_label->setAlignment(Qt::AlignCenter);
-    m_label->setTextInteractionFlags(Qt::NoTextInteraction);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setWordWrap(true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setMouseTracking(false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setAlignment(Qt::AlignCenter);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setTextInteractionFlags(Qt::NoTextInteraction);
     // somehow, this makes word wrap work in the QLabel. yay.
-    //m_label->setMinimumWidth(100);
+    //hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setMinimumWidth(100);
 }
 
 QString LabeledToolButton::text() const
 {
-    return m_label->text();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->text();
 }
 
 void LabeledToolButton::setText(const QString & text)
 {
-    m_label->setText(text);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setText(text);
 }
 
 void LabeledToolButton::setIcon(QIcon icon)
 {
-    m_icon = icon;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon = icon;
     resetIcon();
 }
 
@@ -92,7 +92,7 @@ QSize LabeledToolButton::sizeHint() const
     int w = 0, h = 0;
     QStyleOptionToolButton opt;
     initStyleOption(&opt);
-    QSize sz =m_label->sizeHint();
+    QSize sz =hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->sizeHint();
     w = sz.width();
     h = sz.height();
 
@@ -107,8 +107,8 @@ QSize LabeledToolButton::sizeHint() const
 
 void LabeledToolButton::resizeEvent(QResizeEvent * event)
 {
-    m_label->setGeometry(QRect(4, 4, width()-8, height()-8));
-    if(!m_icon.isNull())
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setGeometry(QRect(4, 4, width()-8, height()-8));
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon.isNull())
     {
         resetIcon();
     }
@@ -117,7 +117,7 @@ void LabeledToolButton::resizeEvent(QResizeEvent * event)
 
 void LabeledToolButton::resetIcon()
 {
-    auto iconSz = m_icon.actualSize(QSize(160, 80));
+    auto iconSz = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon.actualSize(QSize(160, 80));
     float w = iconSz.width();
     float h = iconSz.height();
     float ar = w/h;
@@ -126,8 +126,8 @@ void LabeledToolButton::resetIcon()
     if(newW > 160)
         newW = 160;
     QSize newSz (newW, 80);
-    auto pixmap = m_icon.pixmap(newSz);
-    m_label->setPixmap(pixmap);
-    m_label->setMinimumHeight(80);
-    m_label->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred );
+    auto pixmap = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon.pixmap(newSz);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setPixmap(pixmap);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setMinimumHeight(80);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Preferred );
 }

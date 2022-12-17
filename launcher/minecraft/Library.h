@@ -66,22 +66,22 @@ public:
     }
     Library(const QString &name)
     {
-        m_name = name;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = name;
     }
     /// limited copy without some data. TODO: why?
     static LibraryPtr limitedCopy(LibraryPtr base)
     {
         auto newlib = std::make_shared<Library>();
-        newlib->m_name = base->m_name;
-        newlib->m_repositoryURL = base->m_repositoryURL;
-        newlib->m_hint = base->m_hint;
-        newlib->m_absoluteURL = base->m_absoluteURL;
-        newlib->m_extractExcludes = base->m_extractExcludes;
-        newlib->m_nativeClassifiers = base->m_nativeClassifiers;
-        newlib->m_rules = base->m_rules;
-        newlib->m_storagePrefix = base->m_storagePrefix;
-        newlib->m_mojangDownloads = base->m_mojangDownloads;
-        newlib->m_filename = base->m_filename;
+        newlib->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = base->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
+        newlib->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repositoryURL = base->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repositoryURL;
+        newlib->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hint = base->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hint;
+        newlib->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_absoluteURL = base->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_absoluteURL;
+        newlib->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractExcludes = base->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractExcludes;
+        newlib->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers = base->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers;
+        newlib->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rules = base->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rules;
+        newlib->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_storagePrefix = base->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_storagePrefix;
+        newlib->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads = base->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads;
+        newlib->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename = base->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename;
         return newlib;
     }
 
@@ -89,41 +89,41 @@ public: /* methods */
     /// Returns the raw name field
     const GradleSpecifier & rawName() const
     {
-        return m_name;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
     }
 
     void setRawName(const GradleSpecifier & spec)
     {
-        m_name = spec;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = spec;
     }
 
     void setClassifier(const QString & spec)
     {
-        m_name.setClassifier(spec);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name.setClassifier(spec);
     }
 
     /// returns the full group and artifact prefix
     QString artifactPrefix() const
     {
-        return m_name.artifactPrefix();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name.artifactPrefix();
     }
 
     /// get the artifact ID
     QString artifactId() const
     {
-        return m_name.artifactId();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name.artifactId();
     }
 
     /// get the artifact version
     QString version() const
     {
-        return m_name.version();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name.version();
     }
 
     /// Returns true if the library is native
     bool isNative() const
     {
-        return m_nativeClassifiers.size() != 0;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers.size() != 0;
     }
 
     void setStoragePrefix(QString prefix = QString());
@@ -131,7 +131,7 @@ public: /* methods */
     /// Set the url base for downloads
     void setRepositoryURL(const QString &base_url)
     {
-        m_repositoryURL = base_url;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repositoryURL = base_url;
     }
 
     void getApplicableFiles(const RuntimeContext & runtimeContext, QStringList & jar, QStringList & native,
@@ -139,12 +139,12 @@ public: /* methods */
 
     void setAbsoluteUrl(const QString &absolute_url)
     {
-        m_absoluteURL = absolute_url;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_absoluteURL = absolute_url;
     }
 
     void setFilename(const QString &filename)
     {
-        m_filename = filename;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename = filename;
     }
 
     /// Get the file name of the library
@@ -153,7 +153,7 @@ public: /* methods */
     // DEPRECATED: set a display name, used by jar mods only
     void setDisplayName(const QString & displayName)
     {
-        m_displayname = displayName;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_displayname = displayName;
     }
 
     /// Get the file name of the library
@@ -161,18 +161,18 @@ public: /* methods */
 
     void setMojangDownloadInfo(MojangLibraryDownloadInfo::Ptr info)
     {
-        m_mojangDownloads = info;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads = info;
     }
 
     void setHint(const QString &hint)
     {
-        m_hint = hint;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hint = hint;
     }
 
     /// Set the load rules
     void setRules(QList<std::shared_ptr<Rule>> rules)
     {
-        m_rules = rules;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rules = rules;
     }
 
     /// Returns true if the library should be loaded (or extracted, in case of natives)
@@ -205,52 +205,52 @@ private: /* methods */
 
     QString hint() const
     {
-        return m_hint;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hint;
     }
 
 protected: /* data */
     /// the basic gradle dependency specifier.
-    GradleSpecifier m_name;
+    GradleSpecifier hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
 
     /// DEPRECATED URL prefix of the maven repo where the file can be downloaded
-    QString m_repositoryURL;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repositoryURL;
 
     /// DEPRECATED: Prism Launcher-specific absolute URL. takes precedence over the implicit maven repo URL, if defined
-    QString m_absoluteURL;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_absoluteURL;
 
     /// Prism Launcher extension - filename override
-    QString m_filename;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename;
 
     /// DEPRECATED Prism Launcher extension - display name
-    QString m_displayname;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_displayname;
 
     /**
      * Prism Launcher-specific type hint - modifies how the library is treated
      */
-    QString m_hint;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hint;
 
     /**
      * storage - by default the local libraries folder in Prism Launcher, but could be elsewhere
      * Prism Launcher specific, because of FTB.
      */
-    QString m_storagePrefix;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_storagePrefix;
 
     /// true if the library had an extract/excludes section (even empty)
-    bool m_hasExcludes = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hasExcludes = false;
 
     /// a list of files that shouldn't be extracted from the library
-    QStringList m_extractExcludes;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractExcludes;
 
     /// native suffixes per OS
-    QMap<QString, QString> m_nativeClassifiers;
+    QMap<QString, QString> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers;
 
     /// true if the library had a rules section (even empty)
     bool applyRules = false;
 
     /// rules associated with the library
-    QList<std::shared_ptr<Rule>> m_rules;
+    QList<std::shared_ptr<Rule>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rules;
 
     /// MOJANG: container with Mojang style download info
-    MojangLibraryDownloadInfo::Ptr m_mojangDownloads;
+    MojangLibraryDownloadInfo::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads;
 };
 

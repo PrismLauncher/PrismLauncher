@@ -11,13 +11,13 @@ public:
     }
     MultiMatcher &add(Ptr add)
     {
-        m_matchers.append(add);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_matchers.append(add);
         return *this;
     }
 
     virtual bool matches(const QString &string) const override
     {
-        for(auto iter: m_matchers)
+        for(auto iter: hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_matchers)
         {
             if(iter->matches(string))
             {
@@ -27,5 +27,5 @@ public:
         return false;
     }
 
-    QList<Ptr> m_matchers;
+    QList<Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_matchers;
 };

@@ -36,6 +36,6 @@ private slots:
     void on_state(LoggedProcess::State state);
 
 private:
-    LoggedProcess m_process;
-    QString m_command;
+    LoggedProcess hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_command;
 };

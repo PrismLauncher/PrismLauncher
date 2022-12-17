@@ -108,6 +108,6 @@ slots:
     void onParseSucceeded(int ticket, QString resource_id) override;
 
 protected:
-    bool m_is_indexed;
-    bool m_first_folder_load = true;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_indexed;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_first_folder_load = true;
 };

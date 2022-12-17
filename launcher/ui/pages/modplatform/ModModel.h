@@ -73,14 +73,14 @@ class ListModel : public QAbstractListModel {
     inline auto getMineVersions() const -> std::list<Version>;
 
    protected:
-    ModPage* m_parent;
+    ModPage* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent;
 
     QList<ModPlatform::IndexedPack> modpacks;
 
-    LogoMap m_logoMap;
+    LogoMap hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap;
     QMap<QString, LogoCallback> waitingCallbacks;
-    QStringList m_failedLogos;
-    QStringList m_loadingLogos;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos;
 
     QString currentSearchTerm;
     int currentSort = 0;

@@ -27,7 +27,7 @@ SettingsObject::SettingsObject(QObject *parent) : QObject(parent)
 
 SettingsObject::~SettingsObject()
 {
-    m_settings.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings.clear();
 }
 
 std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Setting> original,
@@ -40,9 +40,9 @@ std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Settin
         return nullptr; // Fail
     }
     auto override = std::make_shared<OverrideSetting>(original, gate);
-    override->m_storage = this;
+    override->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_storage = this;
     connectSignals(*override);
-    m_settings.insert(override->id(), override);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings.insert(override->id(), override);
     return override;
 }
 
@@ -56,9 +56,9 @@ std::shared_ptr<Setting> SettingsObject::registerPassthrough(std::shared_ptr<Set
         return nullptr; // Fail
     }
     auto passthrough = std::make_shared<PassthroughSetting>(original, gate);
-    passthrough->m_storage = this;
+    passthrough->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_storage = this;
     connectSignals(*passthrough);
-    m_settings.insert(passthrough->id(), passthrough);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings.insert(passthrough->id(), passthrough);
     return passthrough;
 }
 
@@ -73,19 +73,19 @@ std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, Q
         return nullptr; // Fail
     }
     auto setting = std::make_shared<Setting>(synonyms, defVal);
-    setting->m_storage = this;
+    setting->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_storage = this;
     connectSignals(*setting);
-    m_settings.insert(setting->id(), setting);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings.insert(setting->id(), setting);
     return setting;
 }
 
 std::shared_ptr<Setting> SettingsObject::getSetting(const QString &id) const
 {
     // Make sure there is a setting with the given ID.
-    if (!m_settings.contains(id))
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings.contains(id))
         return NULL;
 
-    return m_settings[id];
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings[id];
 }
 
 QVariant SettingsObject::get(const QString &id) const
@@ -118,12 +118,12 @@ void SettingsObject::reset(const QString &id) const
 
 bool SettingsObject::contains(const QString &id)
 {
-    return m_settings.contains(id);
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings.contains(id);
 }
 
 bool SettingsObject::reload()
 {
-    for (auto setting : m_settings.values())
+    for (auto setting : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings.values())
     {
         setting->set(setting->get());
     }

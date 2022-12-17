@@ -46,10 +46,10 @@ void PrivatePackManager::load()
     try
     {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-        auto foo = QString::fromUtf8(FS::read(m_filename)).split('\n', Qt::SkipEmptyParts);
+        auto foo = QString::fromUtf8(FS::read(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename)).split('\n', Qt::SkipEmptyParts);
         currentPacks = QSet<QString>(foo.begin(), foo.end());
 #else
-        currentPacks = QString::fromUtf8(FS::read(m_filename)).split('\n', QString::SkipEmptyParts).toSet();
+        currentPacks = QString::fromUtf8(FS::read(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename)).split('\n', QString::SkipEmptyParts).toSet();
 #endif
 
         dirty = false;
@@ -57,7 +57,7 @@ void PrivatePackManager::load()
     catch(...)
     {
         currentPacks = {};
-        qWarning() << "Failed to read third party FTB pack codes from" << m_filename;
+        qWarning() << "Failed to read third party FTB pack codes from" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename;
     }
 }
 
@@ -70,12 +70,12 @@ void PrivatePackManager::save() const
     try
     {
         QStringList list = currentPacks.values();
-        FS::write(m_filename, list.join('\n').toUtf8());
+        FS::write(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename, list.join('\n').toUtf8());
         dirty = false;
     }
     catch(...)
     {
-        qWarning() << "Failed to write third party FTB pack codes to" << m_filename;
+        qWarning() << "Failed to write third party FTB pack codes to" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename;
     }
 }
 

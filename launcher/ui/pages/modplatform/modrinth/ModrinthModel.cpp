@@ -47,11 +47,11 @@
 
 namespace Modrinth {
 
-ModpackListModel::ModpackListModel(ModrinthPage* parent) : QAbstractListModel(parent), m_parent(parent) {}
+ModpackListModel::ModpackListModel(ModrinthPage* parent) : QAbstractListModel(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent(parent) {}
 
 auto ModpackListModel::debugName() const -> QString
 {
-    return m_parent->debugName();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->debugName();
 }
 
 /******** Make data requests ********/
@@ -86,8 +86,8 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
             return pack.description;
         }
         case Qt::DecorationRole: {
-            if (m_logoMap.contains(pack.iconName))
-                return m_logoMap.value(pack.iconName);
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(pack.iconName))
+                return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.value(pack.iconName);
 
             QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
             ((ModpackListModel*)this)->requestLogo(pack.iconName, pack.iconUrl.toString());
@@ -137,20 +137,20 @@ void ModpackListModel::performPaginatedSearch()
                             "index=%4&"
                             "facets=[[\"project_type:modpack\"]]")
                             .arg(nextSearchOffset)
-                            .arg(m_modpacks_per_page)
+                            .arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modpacks_per_page)
                             .arg(currentSearchTerm)
                             .arg(currentSort);
 
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchAllUrl), &m_all_response));
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchAllUrl), &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_all_response));
 
     QObject::connect(netJob, &NetJob::succeeded, this, [this] {
         QJsonParseError parse_error_all{};
 
-        QJsonDocument doc_all = QJsonDocument::fromJson(m_all_response, &parse_error_all);
+        QJsonDocument doc_all = QJsonDocument::fromJson(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_all_response, &parse_error_all);
         if (parse_error_all.error != QJsonParseError::NoError) {
             qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parse_error_all.offset
                        << " reason: " << parse_error_all.errorString();
-            qWarning() << m_all_response;
+            qWarning() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_all_response;
             return;
         }
 
@@ -216,9 +216,9 @@ void ModpackListModel::searchWithTerm(const QString& term, const int sort)
 
 void ModpackListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
 {
-    if (m_logoMap.contains(logo)) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(logo)) {
         callback(APPLICATION->metacache()
-                     ->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)))
+                     ->resolveEntry(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)))
                      ->getFullPath());
     } else {
         requestLogo(logo, logoUrl);
@@ -227,13 +227,13 @@ void ModpackListModel::getLogo(const QString& logo, const QString& logoUrl, Logo
 
 void ModpackListModel::requestLogo(QString logo, QString url)
 {
-    if (m_loadingLogos.contains(logo) || m_failedLogos.contains(logo) || url.isEmpty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.contains(logo) || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos.contains(logo) || url.isEmpty()) {
         return;
     }
 
     MetaEntryPtr entry =
-        APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)));
-    auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
+        APPLICATION->metacache()->resolveEntry(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)));
+    auto job = new NetJob(QString("%1 Icon Download %2").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->debugName()).arg(logo), APPLICATION->network());
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
@@ -251,15 +251,15 @@ void ModpackListModel::requestLogo(QString logo, QString url)
     });
 
     job->start();
-    m_loadingLogos.append(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.append(logo);
 }
 
 /******** Request callbacks ********/
 
 void ModpackListModel::logoLoaded(QString logo, QIcon out)
 {
-    m_loadingLogos.removeAll(logo);
-    m_logoMap.insert(logo, out);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.removeAll(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.insert(logo, out);
     for (int i = 0; i < modpacks.size(); i++) {
         if (modpacks[i].iconName == logo) {
             emit dataChanged(createIndex(i, 0), createIndex(i, 0), { Qt::DecorationRole });
@@ -269,8 +269,8 @@ void ModpackListModel::logoLoaded(QString logo, QIcon out)
 
 void ModpackListModel::logoFailed(QString logo)
 {
-    m_failedLogos.append(logo);
-    m_loadingLogos.removeAll(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos.append(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.removeAll(logo);
 }
 
 void ModpackListModel::searchRequestFinished(QJsonDocument& doc_all)
@@ -288,15 +288,15 @@ void ModpackListModel::searchRequestFinished(QJsonDocument& doc_all)
             Modrinth::loadIndexedPack(pack, packObj);
             newList.append(pack);
         } catch (const JSONValidationError& e) {
-            qWarning() << "Error while loading mod from " << m_parent->debugName() << ": " << e.cause();
+            qWarning() << "Error while loading mod from " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->debugName() << ": " << e.cause();
             continue;
         }
     }
 
-    if (packs_all.size() < m_modpacks_per_page) {
+    if (packs_all.size() < hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modpacks_per_page) {
         searchState = Finished;
     } else {
-        nextSearchOffset += m_modpacks_per_page;
+        nextSearchOffset += hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modpacks_per_page;
         searchState = CanPossiblyFetchMore;
     }
 
@@ -312,15 +312,15 @@ void ModpackListModel::searchRequestFinished(QJsonDocument& doc_all)
 void ModpackListModel::searchRequestFailed(QString reason)
 {
     auto failed_action = jobPtr->getFailedActions().at(0);
-    if (!failed_action->m_reply) {
+    if (!failed_action->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply) {
         // Network error
         QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load modpacks."));
-    } else if (failed_action->m_reply && failed_action->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
+    } else if (failed_action->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply && failed_action->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
         // 409 Gone, notify user to update
         QMessageBox::critical(nullptr, tr("Error"),
                               //: %1 refers to the launcher itself
                               QString("%1 %2")
-                                  .arg(m_parent->displayName())
+                                  .arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->displayName())
                                   .arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_DISPLAYNAME)));
     }
     jobPtr.reset();

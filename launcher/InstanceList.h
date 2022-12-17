@@ -90,12 +90,12 @@ public:
 
     InstancePtr at(int i) const
     {
-        return m_instances.at(i);
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.at(i);
     }
 
     int count() const
     {
-        return m_instances.count();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.count();
     }
 
     InstListError loadList();
@@ -181,21 +181,21 @@ private:
     InstancePtr loadInstance(const InstanceId& id);
 
 private:
-    int m_watchLevel = 0;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watchLevel = 0;
     int totalPlayTime = 0;
-    bool m_dirty = false;
-    QList<InstancePtr> m_instances;
-    QSet<QString> m_groupNameCache;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dirty = false;
+    QList<InstancePtr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances;
+    QSet<QString> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupNameCache;
 
-    SettingsObjectPtr m_globalSettings;
-    QString m_instDir;
-    QFileSystemWatcher * m_watcher;
+    SettingsObjectPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettings;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir;
+    QFileSystemWatcher * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher;
     // FIXME: this is so inefficient that looking at it is almost painful.
-    QSet<QString> m_collapsedGroups;
-    QMap<InstanceId, GroupId> m_instanceGroupIndex;
+    QSet<QString> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_collapsedGroups;
+    QMap<InstanceId, GroupId> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex;
     QSet<InstanceId> instanceSet;
-    bool m_groupsLoaded = false;
-    bool m_instancesProbed = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupsLoaded = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instancesProbed = false;
 
-    QStack<TrashHistoryItem> m_trashHistory;
+    QStack<TrashHistoryItem> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_trashHistory;
 };

@@ -18,7 +18,7 @@ public:
 
     const Flame::Manifest &getResults() const
     {
-        return m_toProcess;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_toProcess;
     }
 
 protected:
@@ -28,11 +28,11 @@ protected slots:
     void netJobFinished();
 
 private: /* data */
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
-    Flame::Manifest m_toProcess;
+    shared_qobject_ptr<QNetworkAccessManager> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network;
+    Flame::Manifest hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_toProcess;
 	std::shared_ptr<QByteArray> result;
-    NetJob::Ptr m_dljob;
-	NetJob::Ptr m_checkJob;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dljob;
+	NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checkJob;
 
     void modrinthCheckFinished();
 

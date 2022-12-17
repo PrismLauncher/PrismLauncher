@@ -53,7 +53,7 @@ void VariableSizedImageObject::drawObject(QPainter* painter,
 {
     if (!format.hasProperty(ImageData)) {
         QUrl image_url{ qvariant_cast<QString>(format.property(QTextFormat::ImageName)) };
-        if (m_fetching_images.contains(image_url))
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetching_images.contains(image_url))
             return;
 
         loadImage(doc, image_url, posInDocument);
@@ -68,7 +68,7 @@ void VariableSizedImageObject::drawObject(QPainter* painter,
 
 void VariableSizedImageObject::flush()
 {
-    m_fetching_images.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetching_images.clear();
 }
 
 void VariableSizedImageObject::parseImage(QTextDocument* doc, QImage image, int posInDocument)
@@ -90,10 +90,10 @@ void VariableSizedImageObject::parseImage(QTextDocument* doc, QImage image, int 
 
 void VariableSizedImageObject::loadImage(QTextDocument* doc, const QUrl& source, int posInDocument)
 {
-    m_fetching_images.insert(source);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetching_images.insert(source);
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(
-        m_meta_entry,
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_meta_entry,
         QString("images/%1").arg(QString(QCryptographicHash::hash(source.toEncoded(), QCryptographicHash::Algorithm::Sha1).toHex())));
 
     auto job = new NetJob(QString("Load Image: %1").arg(source.fileName()), APPLICATION->network());
@@ -105,7 +105,7 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, const QUrl& source,
         qDebug() << "Loaded resource at" << full_entry_path;
 
         // If we flushed, don't proceed.
-        if (!m_fetching_images.contains(source_url))
+        if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetching_images.contains(source_url))
             return;
 
         QImage image(full_entry_path);
@@ -119,7 +119,7 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, const QUrl& source,
         doc->adjustSize();
         doc->setPageSize(size);
 
-        m_fetching_images.remove(source_url);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetching_images.remove(source_url);
     });
     connect(job, &NetJob::finished, job, &NetJob::deleteLater);
 

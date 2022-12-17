@@ -347,19 +347,19 @@ LibraryPtr MojangVersionFormat::libraryFromJson(ProblemContainer & problems, con
         throw JSONValidationError(filename + "contains a library that doesn't have a 'name' field");
     }
     auto rawName = libObj.value("name").toString();
-    out->m_name = rawName;
-    if(!out->m_name.valid()) {
+    out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = rawName;
+    if(!out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name.valid()) {
         problems.addProblem(ProblemSeverity::Error, QObject::tr("Library %1 name is broken and cannot be processed.").arg(rawName));
     }
 
-    Bits::readString(libObj, "url", out->m_repositoryURL);
+    Bits::readString(libObj, "url", out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repositoryURL);
     if (libObj.contains("extract"))
     {
-        out->m_hasExcludes = true;
+        out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hasExcludes = true;
         auto extractObj = requireObject(libObj.value("extract"));
         for (auto excludeVal : requireArray(extractObj.value("exclude")))
         {
-            out->m_extractExcludes.append(requireString(excludeVal));
+            out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractExcludes.append(requireString(excludeVal));
         }
     }
     if (libObj.contains("natives"))
@@ -372,17 +372,17 @@ LibraryPtr MojangVersionFormat::libraryFromJson(ProblemContainer & problems, con
                 qWarning() << filename << "contains an invalid native (skipping)";
             }
             // FIXME: Skip unknown platforms
-            out->m_nativeClassifiers[it.key()] = it.value().toString();
+            out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers[it.key()] = it.value().toString();
         }
     }
     if (libObj.contains("rules"))
     {
         out->applyRules = true;
-        out->m_rules = rulesFromJsonV4(libObj);
+        out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rules = rulesFromJsonV4(libObj);
     }
     if (libObj.contains("downloads"))
     {
-        out->m_mojangDownloads = libDownloadInfoFromJson(libObj);
+        out->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads = libDownloadInfoFromJson(libObj);
     }
     return out;
 }
@@ -390,26 +390,26 @@ LibraryPtr MojangVersionFormat::libraryFromJson(ProblemContainer & problems, con
 QJsonObject MojangVersionFormat::libraryToJson(Library *library)
 {
     QJsonObject libRoot;
-    libRoot.insert("name", library->m_name.serialize());
-    if (!library->m_repositoryURL.isEmpty())
+    libRoot.insert("name", library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name.serialize());
+    if (!library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repositoryURL.isEmpty())
     {
-        libRoot.insert("url", library->m_repositoryURL);
+        libRoot.insert("url", library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repositoryURL);
     }
     if (library->isNative())
     {
         QJsonObject nativeList;
-        auto iter = library->m_nativeClassifiers.begin();
-        while (iter != library->m_nativeClassifiers.end())
+        auto iter = library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers.begin();
+        while (iter != library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers.end())
         {
             nativeList.insert(iter.key(), iter.value());
             iter++;
         }
         libRoot.insert("natives", nativeList);
-        if (!library->m_extractExcludes.isEmpty())
+        if (!library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractExcludes.isEmpty())
         {
             QJsonArray excludes;
             QJsonObject extract;
-            for (auto exclude : library->m_extractExcludes)
+            for (auto exclude : library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractExcludes)
             {
                 excludes.append(exclude);
             }
@@ -417,19 +417,19 @@ QJsonObject MojangVersionFormat::libraryToJson(Library *library)
             libRoot.insert("extract", extract);
         }
     }
-    if (!library->m_rules.isEmpty())
+    if (!library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rules.isEmpty())
     {
         QJsonArray allRules;
-        for (auto &rule : library->m_rules)
+        for (auto &rule : library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rules)
         {
             QJsonObject ruleObj = rule->toJson();
             allRules.append(ruleObj);
         }
         libRoot.insert("rules", allRules);
     }
-    if(library->m_mojangDownloads)
+    if(library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads)
     {
-        auto downloadsObj = libDownloadInfoToJson(library->m_mojangDownloads);
+        auto downloadsObj = libDownloadInfoToJson(library->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads);
         libRoot.insert("downloads", downloadsObj);
     }
     return libRoot;

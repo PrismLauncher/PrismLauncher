@@ -26,10 +26,10 @@ class ModUpdateDialog final : public ReviewMessageBox {
     void appendMod(const CheckUpdateTask::UpdatableMod& info);
 
     const QList<ModDownloadTask*> getTasks();
-    auto indexDir() const -> QDir { return m_mod_model->indexDir(); }
+    auto indexDir() const -> QDir { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_model->indexDir(); }
 
-    auto noUpdates() const -> bool { return m_no_updates; };
-    auto aborted() const -> bool { return m_aborted; };
+    auto noUpdates() const -> bool { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_no_updates; };
+    auto aborted() const -> bool { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted; };
 
    private:
     auto ensureMetadata() -> bool;
@@ -39,24 +39,24 @@ class ModUpdateDialog final : public ReviewMessageBox {
     void onMetadataFailed(Mod*, bool try_others = false, ModPlatform::Provider first_choice = ModPlatform::Provider::MODRINTH);
 
    private:
-    QWidget* m_parent;
+    QWidget* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent;
 
-    ModrinthCheckUpdate* m_modrinth_check_task = nullptr;
-    FlameCheckUpdate* m_flame_check_task = nullptr;
+    ModrinthCheckUpdate* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modrinth_check_task = nullptr;
+    FlameCheckUpdate* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_flame_check_task = nullptr;
 
-    const std::shared_ptr<ModFolderModel> m_mod_model;
+    const std::shared_ptr<ModFolderModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_model;
 
-    QList<Mod*>& m_candidates;
-    QList<Mod*> m_modrinth_to_update;
-    QList<Mod*> m_flame_to_update;
+    QList<Mod*>& hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_candidates;
+    QList<Mod*> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modrinth_to_update;
+    QList<Mod*> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_flame_to_update;
 
-    ConcurrentTask* m_second_try_metadata;
-    QList<std::tuple<Mod*, QString>> m_failed_metadata;
-    QList<std::tuple<Mod*, QString, QUrl>> m_failed_check_update;
+    ConcurrentTask* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_second_try_metadata;
+    QList<std::tuple<Mod*, QString>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed_metadata;
+    QList<std::tuple<Mod*, QString, QUrl>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed_check_update;
 
-    QHash<QString, ModDownloadTask*> m_tasks;
-    BaseInstance* m_instance;
+    QHash<QString, ModDownloadTask*> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks;
+    BaseInstance* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance;
 
-    bool m_no_updates = false;
-    bool m_aborted = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_no_updates = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = false;
 };

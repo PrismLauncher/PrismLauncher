@@ -55,7 +55,7 @@ ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, QString type, Q
 }
 
 ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
-    : QWidget(parent), m_instance_window(instance_window), ui(new Ui::ManagedPackPage), m_inst(inst)
+    : QWidget(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance_window(instance_window), ui(new Ui::ManagedPackPage), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst(inst)
 {
     Q_ASSERT(inst);
 
@@ -70,7 +70,7 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
     connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool){
         ui->reloadButton->setVisible(false);
 
-        m_loaded = false;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = false;
         // Pretend we're opening the page again
         openedImpl();
     });
@@ -83,17 +83,17 @@ ManagedPackPage::~ManagedPackPage()
 
 void ManagedPackPage::openedImpl()
 {
-    ui->packName->setText(m_inst->getManagedPackName());
-    ui->packVersion->setText(m_inst->getManagedPackVersionName());
+    ui->packName->setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackName());
+    ui->packVersion->setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackVersionName());
     ui->packOrigin->setText(tr("Website: <a href=%1>%2</a>    |    Pack ID: %3    |    Version ID: %4")
-                                .arg(url(), displayName(), m_inst->getManagedPackID(), m_inst->getManagedPackVersionID()));
+                                .arg(url(), displayName(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackID(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackVersionID()));
 
     parseManagedPack();
 }
 
 QString ManagedPackPage::displayName() const
 {
-    auto type = m_inst->getManagedPackType();
+    auto type = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackType();
     if (type.isEmpty())
         return {};
     if (type == "flame")
@@ -103,7 +103,7 @@ QString ManagedPackPage::displayName() const
 
 QIcon ManagedPackPage::icon() const
 {
-    return APPLICATION->getThemedIcon(m_inst->getManagedPackType());
+    return APPLICATION->getThemedIcon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackType());
 }
 
 QString ManagedPackPage::helpPage() const
@@ -118,7 +118,7 @@ void ManagedPackPage::retranslate()
 
 bool ManagedPackPage::shouldDisplay() const
 {
-    return m_inst->isManagedPack();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->isManagedPack();
 }
 
 bool ManagedPackPage::runUpdateTask(InstanceTask* task)
@@ -185,20 +185,20 @@ void ModrinthManagedPackPage::parseManagedPack()
     qDebug() << "Parsing Modrinth pack";
 
     // No need for the extra work because we already have everything we need.
-    if (m_loaded)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded)
         return;
 
-    if (m_fetch_job && m_fetch_job->isRunning())
-        m_fetch_job->abort();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job->isRunning())
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job->abort();
 
-    m_fetch_job.reset(new NetJob(QString("Modrinth::PackVersions(%1)").arg(m_inst->getManagedPackName()), APPLICATION->network()));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job.reset(new NetJob(QString("Modrinth::PackVersions(%1)").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackName()), APPLICATION->network()));
     auto response = std::make_shared<QByteArray>();
 
-    QString id = m_inst->getManagedPackID();
+    QString id = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackID();
 
-    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response.get()));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response.get()));
 
-    QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
+    QObject::connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -212,7 +212,7 @@ void ModrinthManagedPackPage::parseManagedPack()
         }
 
         try {
-            Modrinth::loadIndexedVersions(m_pack, doc);
+            Modrinth::loadIndexedVersions(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack, doc);
         } catch (const JSONValidationError& e) {
             qDebug() << *response;
             qWarning() << "Error while reading modrinth modpack version: " << e.cause();
@@ -226,7 +226,7 @@ void ModrinthManagedPackPage::parseManagedPack()
         ui->versionsComboBox->clear();
         ui->versionsComboBox->blockSignals(false);
 
-        for (auto version : m_pack.versions) {
+        for (auto version : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.versions) {
             QString name = version.version;
 
             if (!version.name.contains(version.version))
@@ -234,7 +234,7 @@ void ModrinthManagedPackPage::parseManagedPack()
 
             // NOTE: the id from version isn't the same id in the modpack format spec...
             // e.g. HexMC's 4.4.0 has versionId 4.0.0 in the modpack index..............
-            if (version.version == m_inst->getManagedPackVersionName())
+            if (version.version == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackVersionName())
                 name = tr("%1 (Current)").arg(name);
 
 
@@ -243,25 +243,25 @@ void ModrinthManagedPackPage::parseManagedPack()
 
         suggestVersion();
 
-        m_loaded = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = true;
     });
-    QObject::connect(m_fetch_job.get(), &NetJob::failed, this, &ModrinthManagedPackPage::setFailState);
-    QObject::connect(m_fetch_job.get(), &NetJob::aborted, this, &ModrinthManagedPackPage::setFailState);
+    QObject::connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job.get(), &NetJob::failed, this, &ModrinthManagedPackPage::setFailState);
+    QObject::connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job.get(), &NetJob::aborted, this, &ModrinthManagedPackPage::setFailState);
 
     ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
 
-    m_fetch_job->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job->start();
 }
 
 QString ModrinthManagedPackPage::url() const
 {
-    return "https://modrinth.com/mod/" + m_inst->getManagedPackID();
+    return "https://modrinth.com/mod/" + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackID();
 }
 
 void ModrinthManagedPackPage::suggestVersion()
 {
     auto index = ui->versionsComboBox->currentIndex();
-    auto version = m_pack.versions.at(index);
+    auto version = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.versions.at(index);
 
     HoeDown md_parser;
     ui->changelogTextBrowser->setHtml(md_parser.process(version.changelog.toUtf8()));
@@ -272,28 +272,28 @@ void ModrinthManagedPackPage::suggestVersion()
 void ModrinthManagedPackPage::update()
 {
     auto index = ui->versionsComboBox->currentIndex();
-    auto version = m_pack.versions.at(index);
+    auto version = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.versions.at(index);
 
     QMap<QString, QString> extra_info;
-    // NOTE: Don't use 'm_pack.id' here, since we didn't completely parse all the metadata for the pack, including this field.
-    extra_info.insert("pack_id", m_inst->getManagedPackID());
+    // NOTE: Don't use 'hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.id' here, since we didn't completely parse all the metadata for the pack, including this field.
+    extra_info.insert("pack_id", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackID());
     extra_info.insert("pack_version_id", version.id);
-    extra_info.insert("original_instance_id", m_inst->id());
+    extra_info.insert("original_instance_id", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->id());
 
     auto extracted = new InstanceImportTask(version.download_url, this, std::move(extra_info));
 
-    InstanceName inst_name(m_inst->getManagedPackName(), version.version);
-    inst_name.setName(m_inst->name().replace(m_inst->getManagedPackVersionName(), version.version));
+    InstanceName inst_name(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackName(), version.version);
+    inst_name.setName(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->name().replace(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackVersionName(), version.version));
     extracted->setName(inst_name);
 
-    extracted->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
-    extracted->setIcon(m_inst->iconKey());
+    extracted->setGroup(APPLICATION->instances()->getInstanceGroup(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->id()));
+    extracted->setIcon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->iconKey());
     extracted->setConfirmUpdate(false);
 
     auto did_succeed = runUpdateTask(extracted);
 
-    if (m_instance_window && did_succeed)
-        m_instance_window->close();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance_window && did_succeed)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance_window->close();
 }
 
 // FLAME
@@ -311,7 +311,7 @@ void FlameManagedPackPage::parseManagedPack()
     qDebug() << "Parsing Flame pack";
 
     // We need to tell the user to redownload the pack, since we didn't save the required info previously
-    if (m_inst->getManagedPackID().isEmpty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackID().isEmpty()) {
         setFailState();
         QString message =
             tr("<h1>Hey there!</h1>"
@@ -329,20 +329,20 @@ void FlameManagedPackPage::parseManagedPack()
     }
 
     // No need for the extra work because we already have everything we need.
-    if (m_loaded)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded)
         return;
 
-    if (m_fetch_job && m_fetch_job->isRunning())
-        m_fetch_job->abort();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job->isRunning())
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job->abort();
 
-    m_fetch_job.reset(new NetJob(QString("Flame::PackVersions(%1)").arg(m_inst->getManagedPackName()), APPLICATION->network()));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job.reset(new NetJob(QString("Flame::PackVersions(%1)").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackName()), APPLICATION->network()));
     auto response = std::make_shared<QByteArray>();
 
-    QString id = m_inst->getManagedPackID();
+    QString id = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackID();
 
-    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response.get()));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response.get()));
 
-    QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
+    QObject::connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -358,7 +358,7 @@ void FlameManagedPackPage::parseManagedPack()
         try {
             auto obj = doc.object();
             auto data = Json::ensureArray(obj, "data");
-            Flame::loadIndexedPackVersions(m_pack, data);
+            Flame::loadIndexedPackVersions(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack, data);
         } catch (const JSONValidationError& e) {
             qDebug() << *response;
             qWarning() << "Error while reading flame modpack version: " << e.cause();
@@ -372,10 +372,10 @@ void FlameManagedPackPage::parseManagedPack()
         ui->versionsComboBox->clear();
         ui->versionsComboBox->blockSignals(false);
 
-        for (auto version : m_pack.versions) {
+        for (auto version : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.versions) {
             QString name = version.version;
 
-            if (version.fileId == m_inst->getManagedPackVersionID().toInt())
+            if (version.fileId == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackVersionID().toInt())
                 name = tr("%1 (Current)").arg(name);
 
             ui->versionsComboBox->addItem(name, QVariant(version.fileId));
@@ -383,12 +383,12 @@ void FlameManagedPackPage::parseManagedPack()
 
         suggestVersion();
 
-        m_loaded = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = true;
     });
-    QObject::connect(m_fetch_job.get(), &NetJob::failed, this, &FlameManagedPackPage::setFailState);
-    QObject::connect(m_fetch_job.get(), &NetJob::aborted, this, &FlameManagedPackPage::setFailState);
+    QObject::connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job.get(), &NetJob::failed, this, &FlameManagedPackPage::setFailState);
+    QObject::connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job.get(), &NetJob::aborted, this, &FlameManagedPackPage::setFailState);
 
-    m_fetch_job->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job->start();
 }
 
 QString FlameManagedPackPage::url() const
@@ -400,9 +400,9 @@ QString FlameManagedPackPage::url() const
 void FlameManagedPackPage::suggestVersion()
 {
     auto index = ui->versionsComboBox->currentIndex();
-    auto version = m_pack.versions.at(index);
+    auto version = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId));
+    ui->changelogTextBrowser->setHtml(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_api.getModFileChangelog(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackID().toInt(), version.fileId));
 
     ManagedPackPage::suggestVersion();
 }
@@ -410,24 +410,24 @@ void FlameManagedPackPage::suggestVersion()
 void FlameManagedPackPage::update()
 {
     auto index = ui->versionsComboBox->currentIndex();
-    auto version = m_pack.versions.at(index);
+    auto version = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack.versions.at(index);
 
     QMap<QString, QString> extra_info;
-    extra_info.insert("pack_id", m_inst->getManagedPackID());
+    extra_info.insert("pack_id", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getManagedPackID());
     extra_info.insert("pack_version_id", QString::number(version.fileId));
-    extra_info.insert("original_instance_id", m_inst->id());
+    extra_info.insert("original_instance_id", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->id());
 
     auto extracted = new InstanceImportTask(version.downloadUrl, this, std::move(extra_info));
 
-    extracted->setName(m_inst->name());
-    extracted->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
-    extracted->setIcon(m_inst->iconKey());
+    extracted->setName(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->name());
+    extracted->setGroup(APPLICATION->instances()->getInstanceGroup(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->id()));
+    extracted->setIcon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->iconKey());
     extracted->setConfirmUpdate(false);
 
     auto did_succeed = runUpdateTask(extracted);
 
-    if (m_instance_window && did_succeed)
-        m_instance_window->close();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance_window && did_succeed)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance_window->close();
 }
 
 #include "ManagedPackPage.moc"

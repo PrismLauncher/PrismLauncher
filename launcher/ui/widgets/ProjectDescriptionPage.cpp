@@ -4,20 +4,20 @@
 
 #include <QDebug>
 
-ProjectDescriptionPage::ProjectDescriptionPage(QWidget* parent) : QTextBrowser(parent), m_image_text_object(new VariableSizedImageObject)
+ProjectDescriptionPage::ProjectDescriptionPage(QWidget* parent) : QTextBrowser(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_image_text_object(new VariableSizedImageObject)
 {
-    m_image_text_object->setParent(this);
-    document()->documentLayout()->registerHandler(QTextFormat::ImageObject, m_image_text_object.get());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_image_text_object->setParent(this);
+    document()->documentLayout()->registerHandler(QTextFormat::ImageObject, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_image_text_object.get());
 }
 
 void ProjectDescriptionPage::setMetaEntry(QString entry)
 {
-    if (m_image_text_object)
-        m_image_text_object->setMetaEntry(entry);
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_image_text_object)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_image_text_object->setMetaEntry(entry);
 }
 
 void ProjectDescriptionPage::flush()
 {
-    if (m_image_text_object)
-        m_image_text_object->flush();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_image_text_object)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_image_text_object->flush();
 }

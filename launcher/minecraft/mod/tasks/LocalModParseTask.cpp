@@ -286,12 +286,12 @@ ModDetails ReadLiteModInfo(QByteArray contents)
 }  // namespace
 
 LocalModParseTask::LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile)
-    : Task(nullptr, false), m_token(token), m_type(type), m_modFile(modFile), m_result(new Result())
+    : Task(nullptr, false), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_token(token), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type(type), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modFile(modFile), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result(new Result())
 {}
 
 void LocalModParseTask::processAsZip()
 {
-    QuaZip zip(m_modFile.filePath());
+    QuaZip zip(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modFile.filePath());
     if (!zip.open(QuaZip::mdUnzip))
         return;
 
@@ -303,11 +303,11 @@ void LocalModParseTask::processAsZip()
             return;
         }
 
-        m_result->details = ReadMCModTOML(file.readAll());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->details = ReadMCModTOML(file.readAll());
         file.close();
 
         // to replace ${file.jarVersion} with the actual version, as needed
-        if (m_result->details.version == "${file.jarVersion}") {
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->details.version == "${file.jarVersion}") {
             if (zip.setCurrentFile("META-INF/MANIFEST.MF")) {
                 if (!file.open(QIODevice::ReadOnly)) {
                     zip.close();
@@ -330,7 +330,7 @@ void LocalModParseTask::processAsZip()
                     manifestVersion = "NONE";
                 }
 
-                m_result->details.version = manifestVersion;
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->details.version = manifestVersion;
 
                 file.close();
             }
@@ -344,7 +344,7 @@ void LocalModParseTask::processAsZip()
             return;
         }
 
-        m_result->details = ReadMCModInfo(file.readAll());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->details = ReadMCModInfo(file.readAll());
         file.close();
         zip.close();
         return;
@@ -354,7 +354,7 @@ void LocalModParseTask::processAsZip()
             return;
         }
 
-        m_result->details = ReadQuiltModInfo(file.readAll());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->details = ReadQuiltModInfo(file.readAll());
         file.close();
         zip.close();
         return;
@@ -364,7 +364,7 @@ void LocalModParseTask::processAsZip()
             return;
         }
 
-        m_result->details = ReadFabricModInfo(file.readAll());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->details = ReadFabricModInfo(file.readAll());
         file.close();
         zip.close();
         return;
@@ -374,7 +374,7 @@ void LocalModParseTask::processAsZip()
             return;
         }
 
-        m_result->details = ReadForgeInfo(file.readAll());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->details = ReadForgeInfo(file.readAll());
         file.close();
         zip.close();
         return;
@@ -385,7 +385,7 @@ void LocalModParseTask::processAsZip()
 
 void LocalModParseTask::processAsFolder()
 {
-    QFileInfo mcmod_info(FS::PathCombine(m_modFile.filePath(), "mcmod.info"));
+    QFileInfo mcmod_info(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modFile.filePath(), "mcmod.info"));
     if (mcmod_info.isFile()) {
         QFile mcmod(mcmod_info.filePath());
         if (!mcmod.open(QIODevice::ReadOnly))
@@ -393,13 +393,13 @@ void LocalModParseTask::processAsFolder()
         auto data = mcmod.readAll();
         if (data.isEmpty() || data.isNull())
             return;
-        m_result->details = ReadMCModInfo(data);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->details = ReadMCModInfo(data);
     }
 }
 
 void LocalModParseTask::processAsLitemod()
 {
-    QuaZip zip(m_modFile.filePath());
+    QuaZip zip(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modFile.filePath());
     if (!zip.open(QuaZip::mdUnzip))
         return;
 
@@ -411,7 +411,7 @@ void LocalModParseTask::processAsLitemod()
             return;
         }
 
-        m_result->details = ReadLiteModInfo(file.readAll());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result->details = ReadLiteModInfo(file.readAll());
         file.close();
     }
     zip.close();
@@ -419,13 +419,13 @@ void LocalModParseTask::processAsLitemod()
 
 bool LocalModParseTask::abort()
 {
-    m_aborted.store(true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted.store(true);
     return true;
 }
 
 void LocalModParseTask::executeTask()
 {
-    switch (m_type) {
+    switch (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type) {
         case ResourceType::ZIPFILE:
             processAsZip();
             break;
@@ -439,7 +439,7 @@ void LocalModParseTask::executeTask()
             break;
     }
 
-    if (m_aborted)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted)
         emit finished();
     else
         emitSucceeded();

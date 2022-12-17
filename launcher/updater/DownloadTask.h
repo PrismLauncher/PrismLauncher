@@ -62,23 +62,23 @@ protected:
      */
     void loadVersionInfo();
 
-    NetJob::Ptr m_vinfoNetJob;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vinfoNetJob;
     QByteArray currentVersionFileListData;
     QByteArray newVersionFileListData;
-    Net::Download::Ptr m_currentVersionFileListDownload;
-    Net::Download::Ptr m_newVersionFileListDownload;
+    Net::Download::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersionFileListDownload;
+    Net::Download::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newVersionFileListDownload;
 
-    NetJob::Ptr m_filesNetJob;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob;
 
-    Status m_status;
+    Status hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status;
 
-    OperationList m_operations;
+    OperationList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_operations;
 
     /*!
      * Temporary directory to store update files in.
      * This will be set to not auto delete. Task will fail if this fails to be created.
      */
-    QTemporaryDir m_updateFilesDir;
+    QTemporaryDir hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateFilesDir;
 
 protected slots:
     /*!
@@ -93,7 +93,7 @@ protected slots:
     void fileDownloadProgressChanged(qint64 current, qint64 total);
 
 private:
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    shared_qobject_ptr<QNetworkAccessManager> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network;
 };
 
 }

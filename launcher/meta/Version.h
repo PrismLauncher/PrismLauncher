@@ -47,36 +47,36 @@ public:
 
     QString uid() const
     {
-        return m_uid;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid;
     }
     QString version() const
     {
-        return m_version;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
     }
     QString type() const
     {
-        return m_type;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type;
     }
     QDateTime time() const;
     qint64 rawTime() const
     {
-        return m_time;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_time;
     }
     const Meta::RequireSet &requires() const
     {
-        return m_requires;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_requires;
     }
     VersionFilePtr data() const
     {
-        return m_data;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data;
     }
     bool isRecommended() const
     {
-        return m_recommended;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_recommended;
     }
     bool isLoaded() const
     {
-        return m_data != nullptr;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data != nullptr;
     }
 
     void merge(const Version::Ptr &other);
@@ -100,17 +100,17 @@ signals:
     void requiresChanged();
 
 private:
-    bool m_providesRecommendations = false;
-    bool m_recommended = false;
-    QString m_name;
-    QString m_uid;
-    QString m_version;
-    QString m_type;
-    qint64 m_time = 0;
-    Meta::RequireSet m_requires;
-    Meta::RequireSet m_conflicts;
-    bool m_volatile = false;
-    VersionFilePtr m_data;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_providesRecommendations = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_recommended = false;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type;
+    qint64 hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_time = 0;
+    Meta::RequireSet hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_requires;
+    Meta::RequireSet hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_conflicts;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_volatile = false;
+    VersionFilePtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data;
 };
 }
 

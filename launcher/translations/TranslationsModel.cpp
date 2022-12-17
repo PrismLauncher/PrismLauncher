@@ -181,26 +181,26 @@ struct Language
 
 struct TranslationsModel::Private
 {
-    QDir m_dir;
+    QDir hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir;
 
     // initial state is just english
-    QVector<Language> m_languages = {Language (defaultLangCode)};
+    QVector<Language> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages = {Language (defaultLangCode)};
 
-    QString m_selectedLanguage = defaultLangCode;
-    std::unique_ptr<QTranslator> m_qt_translator;
-    std::unique_ptr<QTranslator> m_app_translator;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLanguage = defaultLangCode;
+    std::unique_ptr<QTranslator> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qt_translator;
+    std::unique_ptr<QTranslator> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_app_translator;
 
-    Net::Download::Ptr m_index_task;
-    QString m_downloadingTranslation;
-    NetJob::Ptr m_dl_job;
-    NetJob::Ptr m_index_job;
-    QString m_nextDownload;
+    Net::Download::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_task;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_downloadingTranslation;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dl_job;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_job;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nextDownload;
 
-    std::unique_ptr<POTranslator> m_po_translator;
+    std::unique_ptr<POTranslator> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_po_translator;
     QFileSystemWatcher *watcher;
 
-    const QString m_system_locale = QLocale::system().name();
-    const QString m_system_language = m_system_locale.split('_').front();
+    const QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_systehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locale = QLocale::system().name();
+    const QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_systehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_language = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_systehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locale.split('_').front();
 
     bool no_language_set = false;
 };
@@ -208,13 +208,13 @@ struct TranslationsModel::Private
 TranslationsModel::TranslationsModel(QString path, QObject* parent): QAbstractListModel(parent)
 {
     d.reset(new Private);
-    d->m_dir.setPath(path);
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.setPath(path);
     FS::ensureFolderPathExists(path);
     reloadLocalFiles();
 
     d->watcher = new QFileSystemWatcher(this);
     connect(d->watcher, &QFileSystemWatcher::directoryChanged, this, &TranslationsModel::translationDirChanged);
-    d->watcher->addPath(d->m_dir.canonicalPath());
+    d->watcher->addPath(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.canonicalPath());
 }
 
 TranslationsModel::~TranslationsModel()
@@ -234,16 +234,16 @@ void TranslationsModel::translationDirChanged(const QString& path)
 void TranslationsModel::indexReceived()
 {
     qDebug() << "Got translations index!";
-    d->m_index_job.reset();
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_job.reset();
 
     if (d->no_language_set)
     {
         reloadLocalFiles();
 
-        auto language = d->m_system_locale;
+        auto language = d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_systehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locale;
         if (!findLanguage(language))
         {
-            language = d->m_system_language;
+            language = d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_systehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_language;
         }
         selectLanguage(language);
         if (selectedLanguage() != defaultLangCode)
@@ -254,9 +254,9 @@ void TranslationsModel::indexReceived()
         d->no_language_set = false;
     }
 
-    else if(d->m_selectedLanguage != defaultLangCode)
+    else if(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLanguage != defaultLangCode)
     {
-        downloadTranslation(d->m_selectedLanguage);
+        downloadTranslation(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLanguage);
     }
 }
 
@@ -321,8 +321,8 @@ void TranslationsModel::reloadLocalFiles()
 {
     QMap<QString, Language> languages = {{defaultLangCode, Language(defaultLangCode)}};
 
-    readIndex(d->m_dir.absoluteFilePath("index_v2.json"), languages);
-    auto entries = d->m_dir.entryInfoList({"mmc_*.qm", "*.po"}, QDir::Files | QDir::NoDotAndDotDot);
+    readIndex(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absoluteFilePath("index_v2.json"), languages);
+    auto entries = d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.entryInfoList({"mmc_*.qm", "*.po"}, QDir::Files | QDir::NoDotAndDotDot);
     for(auto & entry: entries)
     {
         auto completeSuffix = entry.completeSuffix();
@@ -364,10 +364,10 @@ void TranslationsModel::reloadLocalFiles()
     }
 
     // changed and removed languages
-    for(auto iter = d->m_languages.begin(); iter != d->m_languages.end();)
+    for(auto iter = d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.begin(); iter != d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.end();)
     {
         auto &language = *iter;
-        auto row = iter - d->m_languages.begin();
+        auto row = iter - d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.begin();
 
         auto updatedLanguageIter = languages.find(language.key);
         if(updatedLanguageIter != languages.end())
@@ -387,7 +387,7 @@ void TranslationsModel::reloadLocalFiles()
         else
         {
             beginRemoveRows(QModelIndex(), row, row);
-            iter = d->m_languages.erase(iter);
+            iter = d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.erase(iter);
             endRemoveRows();
         }
     }
@@ -396,19 +396,19 @@ void TranslationsModel::reloadLocalFiles()
     {
         return;
     }
-    beginInsertRows(QModelIndex(), 0, d->m_languages.size() + languages.size() - 1);
+    beginInsertRows(QModelIndex(), 0, d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.size() + languages.size() - 1);
     for(auto & language: languages)
     {
-        d->m_languages.append(language);
+        d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.append(language);
     }
-    std::sort(d->m_languages.begin(), d->m_languages.end(), [this](const Language& a, const Language& b) {
+    std::sort(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.begin(), d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.end(), [this](const Language& a, const Language& b) {
         if (a.key != b.key)
         {
-            if (a.key == d->m_system_locale || a.key == d->m_system_language)
+            if (a.key == d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_systehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locale || a.key == d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_systehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_language)
             {
                 return true;
             }
-            if (b.key == d->m_system_locale || b.key == d->m_system_language)
+            if (b.key == d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_systehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_locale || b.key == d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_systehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_language)
             {
                 return false;
             }
@@ -435,10 +435,10 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
     int row = index.row();
     auto column = static_cast<Column>(index.column());
 
-    if (row < 0 || row >= d->m_languages.size())
+    if (row < 0 || row >= d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.size())
         return QVariant();
 
-    auto & lang = d->m_languages[row];
+    auto & lang = d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages[row];
     switch (role)
     {
     case Qt::DisplayRole:
@@ -502,7 +502,7 @@ QVariant TranslationsModel::headerData(int section, Qt::Orientation orientation,
 
 int TranslationsModel::rowCount(const QModelIndex& parent) const
 {
-    return d->m_languages.size();
+    return d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.size();
 }
 
 int TranslationsModel::columnCount(const QModelIndex& parent) const
@@ -512,11 +512,11 @@ int TranslationsModel::columnCount(const QModelIndex& parent) const
 
 Language * TranslationsModel::findLanguage(const QString& key)
 {
-    auto found = std::find_if(d->m_languages.begin(), d->m_languages.end(), [&](Language & lang)
+    auto found = std::find_if(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.begin(), d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.end(), [&](Language & lang)
     {
         return lang.key == key;
     });
-    if(found == d->m_languages.end())
+    if(found == d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.end())
     {
         return nullptr;
     }
@@ -547,15 +547,15 @@ bool TranslationsModel::selectLanguage(QString key)
     }
 
     // uninstall existing translators if there are any
-    if (d->m_app_translator)
+    if (d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_app_translator)
     {
-        QCoreApplication::removeTranslator(d->m_app_translator.get());
-        d->m_app_translator.reset();
+        QCoreApplication::removeTranslator(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_app_translator.get());
+        d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_app_translator.reset();
     }
-    if (d->m_qt_translator)
+    if (d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qt_translator)
     {
-        QCoreApplication::removeTranslator(d->m_qt_translator.get());
-        d->m_qt_translator.reset();
+        QCoreApplication::removeTranslator(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qt_translator.get());
+        d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qt_translator.reset();
     }
 
     /*
@@ -569,21 +569,21 @@ bool TranslationsModel::selectLanguage(QString key)
     // if it's the default UI language, finish
     if(langCode == defaultLangCode)
     {
-        d->m_selectedLanguage = langCode;
+        d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLanguage = langCode;
         return true;
     }
 
     // otherwise install new translations
     bool successful = false;
     // FIXME: this is likely never present. FIX IT.
-    d->m_qt_translator.reset(new QTranslator());
-    if (d->m_qt_translator->load("qt_" + langCode, QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qt_translator.reset(new QTranslator());
+    if (d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qt_translator->load("qt_" + langCode, QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
     {
         qDebug() << "Loading Qt Language File for" << langCode.toLocal8Bit().constData() << "...";
-        if (!QCoreApplication::installTranslator(d->m_qt_translator.get()))
+        if (!QCoreApplication::installTranslator(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qt_translator.get()))
         {
             qCritical() << "Loading Qt Language File failed.";
-            d->m_qt_translator.reset();
+            d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qt_translator.reset();
         }
         else
         {
@@ -592,13 +592,13 @@ bool TranslationsModel::selectLanguage(QString key)
     }
     else
     {
-        d->m_qt_translator.reset();
+        d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qt_translator.reset();
     }
 
     if(langPtr->localFileType == FileType::PO)
     {
         qDebug() << "Loading Application Language File for" << langCode.toLocal8Bit().constData() << "...";
-        auto poTranslator = new POTranslator(FS::PathCombine(d->m_dir.path(), langCode + ".po"));
+        auto poTranslator = new POTranslator(FS::PathCombine(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.path(), langCode + ".po"));
         if(!poTranslator->isEmpty())
         {
             if (!QCoreApplication::installTranslator(poTranslator))
@@ -608,26 +608,26 @@ bool TranslationsModel::selectLanguage(QString key)
             }
             else
             {
-                d->m_app_translator.reset(poTranslator);
+                d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_app_translator.reset(poTranslator);
                 successful = true;
             }
         }
         else
         {
             qCritical() << "Loading Application Language File failed.";
-            d->m_app_translator.reset();
+            d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_app_translator.reset();
         }
     }
     else if(langPtr->localFileType == FileType::QM)
     {
-        d->m_app_translator.reset(new QTranslator());
-        if (d->m_app_translator->load("mmc_" + langCode, d->m_dir.path()))
+        d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_app_translator.reset(new QTranslator());
+        if (d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_app_translator->load("mmc_" + langCode, d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.path()))
         {
             qDebug() << "Loading Application Language File for" << langCode.toLocal8Bit().constData() << "...";
-            if (!QCoreApplication::installTranslator(d->m_app_translator.get()))
+            if (!QCoreApplication::installTranslator(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_app_translator.get()))
             {
                 qCritical() << "Installing Application Language File failed.";
-                d->m_app_translator.reset();
+                d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_app_translator.reset();
             }
             else
             {
@@ -636,48 +636,48 @@ bool TranslationsModel::selectLanguage(QString key)
         }
         else
         {
-            d->m_app_translator.reset();
+            d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_app_translator.reset();
         }
     }
     else
     {
-        d->m_app_translator.reset();
+        d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_app_translator.reset();
     }
-    d->m_selectedLanguage = langCode;
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLanguage = langCode;
     return successful;
 }
 
 QModelIndex TranslationsModel::selectedIndex()
 {
-    auto found = findLanguage(d->m_selectedLanguage);
+    auto found = findLanguage(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLanguage);
     if(found)
     {
         // QVector iterator freely converts to pointer to contained type
-        return index(found - d->m_languages.begin(), 0, QModelIndex());
+        return index(found - d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languages.begin(), 0, QModelIndex());
     }
     return QModelIndex();
 }
 
 QString TranslationsModel::selectedLanguage()
 {
-    return d->m_selectedLanguage;
+    return d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLanguage;
 }
 
 void TranslationsModel::downloadIndex()
 {
-    if(d->m_index_job || d->m_dl_job)
+    if(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_job || d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dl_job)
     {
         return;
     }
     qDebug() << "Downloading Translations Index...";
-    d->m_index_job = new NetJob("Translations Index", APPLICATION->network());
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_job = new NetJob("Translations Index", APPLICATION->network());
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
-    d->m_index_task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + "index_v2.json"), entry);
-    d->m_index_job->addNetAction(d->m_index_task);
-    connect(d->m_index_job.get(), &NetJob::failed, this, &TranslationsModel::indexFailed);
-    connect(d->m_index_job.get(), &NetJob::succeeded, this, &TranslationsModel::indexReceived);
-    d->m_index_job->start();
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + "index_v2.json"), entry);
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_job->addNetAction(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_task);
+    connect(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_job.get(), &NetJob::failed, this, &TranslationsModel::indexFailed);
+    connect(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_job.get(), &NetJob::succeeded, this, &TranslationsModel::indexReceived);
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_job->start();
 }
 
 void TranslationsModel::updateLanguage(QString key)
@@ -701,9 +701,9 @@ void TranslationsModel::updateLanguage(QString key)
 
 void TranslationsModel::downloadTranslation(QString key)
 {
-    if(d->m_dl_job)
+    if(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dl_job)
     {
-        d->m_nextDownload = key;
+        d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nextDownload = key;
         return;
     }
     auto lang = findLanguage(key);
@@ -713,7 +713,7 @@ void TranslationsModel::downloadTranslation(QString key)
         return;
     }
 
-    d->m_downloadingTranslation = key;
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_downloadingTranslation = key;
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
     entry->setStale(true);
 
@@ -722,45 +722,45 @@ void TranslationsModel::downloadTranslation(QString key)
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
     dl->setProgress(dl->getProgress(), lang->file_size);
 
-    d->m_dl_job = new NetJob("Translation for " + key, APPLICATION->network());
-    d->m_dl_job->addNetAction(dl);
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dl_job = new NetJob("Translation for " + key, APPLICATION->network());
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dl_job->addNetAction(dl);
 
-    connect(d->m_dl_job.get(), &NetJob::succeeded, this, &TranslationsModel::dlGood);
-    connect(d->m_dl_job.get(), &NetJob::failed, this, &TranslationsModel::dlFailed);
+    connect(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dl_job.get(), &NetJob::succeeded, this, &TranslationsModel::dlGood);
+    connect(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dl_job.get(), &NetJob::failed, this, &TranslationsModel::dlFailed);
 
-    d->m_dl_job->start();
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dl_job->start();
 }
 
 void TranslationsModel::downloadNext()
 {
-    if(!d->m_nextDownload.isEmpty())
+    if(!d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nextDownload.isEmpty())
     {
-        downloadTranslation(d->m_nextDownload);
-        d->m_nextDownload.clear();
+        downloadTranslation(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nextDownload);
+        d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nextDownload.clear();
     }
 }
 
 void TranslationsModel::dlFailed(QString reason)
 {
     qCritical() << "Translations Download Failed:" << reason;
-    d->m_dl_job.reset();
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dl_job.reset();
     downloadNext();
 }
 
 void TranslationsModel::dlGood()
 {
-    qDebug() << "Got translation:" << d->m_downloadingTranslation;
+    qDebug() << "Got translation:" << d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_downloadingTranslation;
 
-    if(d->m_downloadingTranslation == d->m_selectedLanguage)
+    if(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_downloadingTranslation == d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLanguage)
     {
-        selectLanguage(d->m_selectedLanguage);
+        selectLanguage(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedLanguage);
     }
-    d->m_dl_job.reset();
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dl_job.reset();
     downloadNext();
 }
 
 void TranslationsModel::indexFailed(QString reason)
 {
     qCritical() << "Translations Index Download Failed:" << reason;
-    d->m_index_job.reset();
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_job.reset();
 }

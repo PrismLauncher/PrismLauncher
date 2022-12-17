@@ -10,19 +10,19 @@
 #include <QMenu>
 
 ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared_ptr<ResourceFolderModel> model, QWidget* parent)
-    : QMainWindow(parent), m_instance(instance), ui(new Ui::ExternalResourcesPage), m_model(model)
+    : QMainWindow(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance(instance), ui(new Ui::ExternalResourcesPage), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model(model)
 {
     ui->setupUi(this);
 
     ui->actionsToolbar->insertSpacer(ui->actionViewConfigs);
 
-    m_filterModel = model->createFilterProxyModel(this);
-    m_filterModel->setDynamicSortFilter(true);
-    m_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
-    m_filterModel->setSourceModel(m_model.get());
-    m_filterModel->setFilterKeyColumn(-1);
-    ui->treeView->setModel(m_filterModel);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel = model->createFilterProxyModel(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setDynamicSortFilter(true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setSourceModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model.get());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setFilterKeyColumn(-1);
+    ui->treeView->setModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel);
 
     ui->treeView->installEventFilter(this);
     ui->treeView->sortByColumn(1, Qt::AscendingOrder);
@@ -66,22 +66,22 @@ void ExternalResourcesPage::ShowContextMenu(const QPoint& pos)
 
 void ExternalResourcesPage::openedImpl()
 {
-    m_model->startWatching();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->startWatching();
 
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     if (!APPLICATION->settings()->contains(setting_name))
-        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
     else
-        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
 
-    ui->actionsToolbar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->actionsToolbar->setVisibilityState(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting->get().toByteArray());
 }
 
 void ExternalResourcesPage::closedImpl()
 {
-    m_model->stopWatching();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->stopWatching();
 
-    m_wide_bar_setting->set(ui->actionsToolbar->getVisibilityState());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting->set(ui->actionsToolbar->getVisibilityState());
 }
 
 void ExternalResourcesPage::retranslate()
@@ -91,17 +91,17 @@ void ExternalResourcesPage::retranslate()
 
 void ExternalResourcesPage::itemActivated(const QModelIndex&)
 {
-    if (!m_controlsEnabled)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_controlsEnabled)
         return;
 
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
-    m_model->setResourceEnabled(selection.indexes(), EnableAction::TOGGLE);
+    auto selection = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setResourceEnabled(selection.indexes(), EnableAction::TOGGLE);
 }
 
 void ExternalResourcesPage::filterTextChanged(const QString& newContents)
 {
-    m_viewFilter = newContents;
-    m_filterModel->setFilterRegularExpression(m_viewFilter);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_viewFilter = newContents;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setFilterRegularExpression(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_viewFilter);
 }
 
 bool ExternalResourcesPage::shouldDisplay() const
@@ -138,56 +138,56 @@ bool ExternalResourcesPage::eventFilter(QObject* obj, QEvent* ev)
 
 void ExternalResourcesPage::addItem()
 {
-    if (!m_controlsEnabled)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_controlsEnabled)
         return;
     
 
     auto list = GuiUtil::BrowseForFiles(
         helpPage(), tr("Select %1", "Select whatever type of files the page contains. Example: 'Loader Mods'").arg(displayName()),
-        m_fileSelectionFilter.arg(displayName()), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fileSelectionFilter.arg(displayName()), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
     if (!list.isEmpty()) {
         for (auto filename : list) {
-            m_model->installResource(filename);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->installResource(filename);
         }
     }
 }
 
 void ExternalResourcesPage::removeItem()
 {
-    if (!m_controlsEnabled)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_controlsEnabled)
         return;
     
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
-    m_model->deleteResources(selection.indexes());
+    auto selection = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->deleteResources(selection.indexes());
 }
 
 void ExternalResourcesPage::enableItem()
 {
-    if (!m_controlsEnabled)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_controlsEnabled)
         return;
 
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
-    m_model->setResourceEnabled(selection.indexes(), EnableAction::ENABLE);
+    auto selection = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setResourceEnabled(selection.indexes(), EnableAction::ENABLE);
 }
 
 void ExternalResourcesPage::disableItem()
 {
-    if (!m_controlsEnabled)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_controlsEnabled)
         return;
 
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
-    m_model->setResourceEnabled(selection.indexes(), EnableAction::DISABLE);
+    auto selection = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setResourceEnabled(selection.indexes(), EnableAction::DISABLE);
 }
 
 void ExternalResourcesPage::viewConfigs()
 {
-    DesktopServices::openDirectory(m_instance->instanceConfigFolder(), true);
+    DesktopServices::openDirectory(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceConfigFolder(), true);
 }
 
 void ExternalResourcesPage::viewFolder()
 {
-    DesktopServices::openDirectory(m_model->dir().absolutePath(), true);
+    DesktopServices::openDirectory(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->dir().absolutePath(), true);
 }
 
 bool ExternalResourcesPage::current(const QModelIndex& current, const QModelIndex& previous)
@@ -202,9 +202,9 @@ bool ExternalResourcesPage::current(const QModelIndex& current, const QModelInde
 
 bool ExternalResourcesPage::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
 {
-    auto sourceCurrent = m_filterModel->mapToSource(current);
+    auto sourceCurrent = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
-    Resource const& resource = m_model->at(row);
+    Resource const& resource = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->at(row);
     ui->frame->updateWithResource(resource);
 
     return true;

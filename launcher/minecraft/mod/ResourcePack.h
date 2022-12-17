@@ -23,12 +23,12 @@ class ResourcePack : public Resource {
     ResourcePack(QFileInfo file_info) : Resource(file_info) {}
 
     /** Gets the numerical ID of the pack format. */
-    [[nodiscard]] int packFormat() const { return m_pack_format; }
+    [[nodiscard]] int packFormat() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_format; }
     /** Gets, respectively, the lower and upper versions supported by the set pack format. */
     [[nodiscard]] std::pair<Version, Version> compatibleVersions() const;
 
     /** Gets the description of the resource pack. */
-    [[nodiscard]] QString description() const { return m_description; }
+    [[nodiscard]] QString description() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description; }
 
     /** Gets the image of the resource pack, converted to a QPixmap for drawing, and scaled to size. */
     [[nodiscard]] QPixmap image(QSize size);
@@ -48,16 +48,16 @@ class ResourcePack : public Resource {
     [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
 
    protected:
-    mutable QMutex m_data_lock;
+    mutable QMutex hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data_lock;
 
     /* The 'version' of a resource pack, as defined in the pack.mcmeta file.
      * See https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
      */
-    int m_pack_format = 0;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_format = 0;
 
     /** The resource pack's description, as defined in the pack.mcmeta file.
      */
-    QString m_description;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description;
 
     /** The resource pack's image file cache key, for access in the QPixmapCache global instance.
      *
@@ -67,5 +67,5 @@ class ResourcePack : public Resource {
     struct {
         QPixmapCache::Key key;
         bool was_ever_used = false;
-    } m_pack_image_cache_key;
+    } hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key;
 };

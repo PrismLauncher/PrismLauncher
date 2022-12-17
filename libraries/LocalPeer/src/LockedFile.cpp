@@ -87,7 +87,7 @@ LockedFile::LockedFile()
     wmutex = 0;
     rmutex = 0;
 #endif
-    m_lock_mode = NoLock;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lock_mode = NoLock;
 }
 
 /*!
@@ -104,7 +104,7 @@ LockedFile::LockedFile(const QString &name)
     wmutex = 0;
     rmutex = 0;
 #endif
-    m_lock_mode = NoLock;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lock_mode = NoLock;
 }
 
 /*!
@@ -137,7 +137,7 @@ bool LockedFile::open(OpenMode mode)
 */
 bool LockedFile::isLocked() const
 {
-    return m_lock_mode != NoLock;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lock_mode != NoLock;
 }
 
 /*!
@@ -148,7 +148,7 @@ bool LockedFile::isLocked() const
 */
 LockedFile::LockMode LockedFile::lockMode() const
 {
-    return m_lock_mode;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lock_mode;
 }
 
 /*!

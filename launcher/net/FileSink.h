@@ -42,7 +42,7 @@
 namespace Net {
 class FileSink : public Sink {
    public:
-    FileSink(QString filename) : m_filename(filename){};
+    FileSink(QString filename) : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename(filename){};
     virtual ~FileSink() = default;
 
    public:
@@ -58,8 +58,8 @@ class FileSink : public Sink {
     virtual auto finalizeCache(QNetworkReply& reply) -> Task::State;
 
    protected:
-    QString m_filename;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename;
     bool wroteAnyData = false;
-    std::unique_ptr<QSaveFile> m_output_file;
+    std::unique_ptr<QSaveFile> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output_file;
 };
 }  // namespace Net

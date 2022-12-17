@@ -42,31 +42,31 @@ public:
     World(const QFileInfo &file);
     QString folderName() const
     {
-        return m_folderName;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folderName;
     }
     QString name() const
     {
-        return m_actualName;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_actualName;
     }
     QString iconFile() const
     {
-        return m_iconFile;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_iconFile;
     }
     int64_t bytes() const
     {
-        return m_size;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_size;
     }
     QDateTime lastPlayed() const
     {
-        return m_lastPlayed;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lastPlayed;
     }
     GameType gameType() const
     {
-        return m_gameType;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gameType;
     }
     int64_t seed() const
     {
-        return m_randomSeed;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_randomSeed;
     }
     bool isValid() const
     {
@@ -74,11 +74,11 @@ public:
     }
     bool isOnFS() const
     {
-        return m_containerFile.isDir();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile.isDir();
     }
     QFileInfo container() const
     {
-        return m_containerFile;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile;
     }
     // delete all the files of this world
     bool destroy();
@@ -102,15 +102,15 @@ private:
 
 protected:
 
-    QFileInfo m_containerFile;
-    QString m_containerOffsetPath;
-    QString m_folderName;
-    QString m_actualName;
-    QString m_iconFile;
+    QFileInfo hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerFile;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_containerOffsetPath;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folderName;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_actualName;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_iconFile;
     QDateTime levelDatTime;
-    QDateTime m_lastPlayed;
-    int64_t m_size;
-    int64_t m_randomSeed = 0;
-    GameType m_gameType;
+    QDateTime hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lastPlayed;
+    int64_t hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_size;
+    int64_t hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_randomSeed = 0;
+    GameType hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gameType;
     bool is_valid = false;
 };

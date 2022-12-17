@@ -5,19 +5,19 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 
-Version::Version(const QString &str) : m_string(str)
+Version::Version(const QString &str) : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_string(str)
 {
     parse();
 }
 
 bool Version::operator<(const Version &other) const
 {
-    const int size = qMax(m_sections.size(), other.m_sections.size());
+    const int size = qMax(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.size(), other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.size());
     for (int i = 0; i < size; ++i)
     {
-        const Section sec1 = (i >= m_sections.size()) ? Section("0") : m_sections.at(i);
+        const Section sec1 = (i >= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.size()) ? Section("0") : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.at(i);
         const Section sec2 =
-            (i >= other.m_sections.size()) ? Section("0") : other.m_sections.at(i);
+            (i >= other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.size()) ? Section("0") : other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.at(i);
         if (sec1 != sec2)
         {
             return sec1 < sec2;
@@ -32,12 +32,12 @@ bool Version::operator<=(const Version &other) const
 }
 bool Version::operator>(const Version &other) const
 {
-    const int size = qMax(m_sections.size(), other.m_sections.size());
+    const int size = qMax(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.size(), other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.size());
     for (int i = 0; i < size; ++i)
     {
-        const Section sec1 = (i >= m_sections.size()) ? Section("0") : m_sections.at(i);
+        const Section sec1 = (i >= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.size()) ? Section("0") : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.at(i);
         const Section sec2 =
-            (i >= other.m_sections.size()) ? Section("0") : other.m_sections.at(i);
+            (i >= other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.size()) ? Section("0") : other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.at(i);
         if (sec1 != sec2)
         {
             return sec1 > sec2;
@@ -52,12 +52,12 @@ bool Version::operator>=(const Version &other) const
 }
 bool Version::operator==(const Version &other) const
 {
-    const int size = qMax(m_sections.size(), other.m_sections.size());
+    const int size = qMax(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.size(), other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.size());
     for (int i = 0; i < size; ++i)
     {
-        const Section sec1 = (i >= m_sections.size()) ? Section("0") : m_sections.at(i);
+        const Section sec1 = (i >= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.size()) ? Section("0") : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.at(i);
         const Section sec2 =
-            (i >= other.m_sections.size()) ? Section("0") : other.m_sections.at(i);
+            (i >= other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.size()) ? Section("0") : other.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.at(i);
         if (sec1 != sec2)
         {
             return false;
@@ -73,13 +73,13 @@ bool Version::operator!=(const Version &other) const
 
 void Version::parse()
 {
-    m_sections.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.clear();
 
     // FIXME: this is bad. versions can contain a lot more separators...
-    QStringList parts = m_string.split('.');
+    QStringList parts = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_string.split('.');
 
     for (const auto& part : parts)
     {
-        m_sections.append(Section(part));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sections.append(Section(part));
     }
 }

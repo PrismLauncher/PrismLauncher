@@ -72,39 +72,39 @@ signals:
     void dataChanged();
 
 public: /* data */
-    PackProfile * m_parent;
+    PackProfile * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent;
 
     // BEGIN: persistent component list properties
     /// ID of the component
-    QString m_uid;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid;
     /// version of the component - when there's a custom json override, this is also the version the component reverts to
-    QString m_version;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
     /// if true, this has been added automatically to satisfy dependencies and may be automatically removed
-    bool m_dependencyOnly = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dependencyOnly = false;
     /// if true, the component is either the main component of the instance, or otherwise important and cannot be removed.
-    bool m_important = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_important = false;
     /// if true, the component is disabled
-    bool m_disabled = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_disabled = false;
 
     /// cached name for display purposes, taken from the version file (meta or local override)
-    QString m_cachedName;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedName;
     /// cached version for display AND other purposes, taken from the version file (meta or local override)
-    QString m_cachedVersion;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVersion;
     /// cached set of requirements, taken from the version file (meta or local override)
-    Meta::RequireSet m_cachedRequires;
-    Meta::RequireSet m_cachedConflicts;
+    Meta::RequireSet hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedRequires;
+    Meta::RequireSet hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedConflicts;
     /// if true, the component is volatile and may be automatically removed when no longer needed
-    bool m_cachedVolatile = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVolatile = false;
     // END: persistent component list properties
 
     // DEPRECATED: explicit numeric order values, used for loading old non-component config. TODO: refactor and move to migration code
-    bool m_orderOverride = false;
-    int m_order = 0;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_orderOverride = false;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_order = 0;
 
     // load state
-    std::shared_ptr<Meta::Version> m_metaVersion;
-    std::shared_ptr<VersionFile> m_file;
-    bool m_loaded = false;
+    std::shared_ptr<Meta::Version> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion;
+    std::shared_ptr<VersionFile> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = false;
 };
 
 typedef shared_qobject_ptr<Component> ComponentPtr;

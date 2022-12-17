@@ -20,13 +20,13 @@ void BaseProfiler::abortProfiling()
 
 void BaseProfiler::abortProfilingImpl()
 {
-    if (!m_profilerProcess)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilerProcess)
     {
         return;
     }
-    m_profilerProcess->terminate();
-    m_profilerProcess->deleteLater();
-    m_profilerProcess = 0;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilerProcess->terminate();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilerProcess->deleteLater();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilerProcess = 0;
     emit abortLaunch(tr("Profiler aborted"));
 }
 

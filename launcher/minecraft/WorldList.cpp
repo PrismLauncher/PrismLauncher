@@ -46,14 +46,14 @@
 #include <QDebug>
 
 WorldList::WorldList(const QString &dir)
-    : QAbstractListModel(), m_dir(dir)
+    : QAbstractListModel(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir(dir)
 {
-    FS::ensureFolderPathExists(m_dir.absolutePath());
-    m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
-    m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
-    m_watcher = new QFileSystemWatcher(this);
+    FS::ensureFolderPathExists(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher = new QFileSystemWatcher(this);
     is_watching = false;
-    connect(m_watcher, SIGNAL(directoryChanged(QString)), this,
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher, SIGNAL(directoryChanged(QString)), this,
             SLOT(directoryChanged(QString)));
 }
 
@@ -64,14 +64,14 @@ void WorldList::startWatching()
         return;
     }
     update();
-    is_watching = m_watcher->addPath(m_dir.absolutePath());
+    is_watching = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->addPath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath());
     if (is_watching)
     {
-        qDebug() << "Started watching " << m_dir.absolutePath();
+        qDebug() << "Started watching " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath();
     }
     else
     {
-        qDebug() << "Failed to start watching " << m_dir.absolutePath();
+        qDebug() << "Failed to start watching " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath();
     }
 }
 
@@ -81,14 +81,14 @@ void WorldList::stopWatching()
     {
         return;
     }
-    is_watching = !m_watcher->removePath(m_dir.absolutePath());
+    is_watching = !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->removePath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath());
     if (!is_watching)
     {
-        qDebug() << "Stopped watching " << m_dir.absolutePath();
+        qDebug() << "Stopped watching " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath();
     }
     else
     {
-        qDebug() << "Failed to stop watching " << m_dir.absolutePath();
+        qDebug() << "Failed to stop watching " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath();
     }
 }
 
@@ -98,8 +98,8 @@ bool WorldList::update()
         return false;
 
     QList<World> newWorlds;
-    m_dir.refresh();
-    auto folderContents = m_dir.entryInfoList();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.refresh();
+    auto folderContents = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.entryInfoList();
     // if there are any untracked files...
     for (QFileInfo entry : folderContents)
     {
@@ -125,7 +125,7 @@ void WorldList::directoryChanged(QString path)
 
 bool WorldList::isValid()
 {
-    return m_dir.exists() && m_dir.isReadable();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.exists() && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.isReadable();
 }
 
 bool WorldList::deleteWorld(int index)
@@ -312,7 +312,7 @@ Q_OBJECT
 public:
     WorldMimeData(QList<World> worlds)
     {
-        m_worlds = worlds;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds = worlds;
 
     }
     QStringList formats() const
@@ -328,7 +328,7 @@ protected:
 #endif
     {
         QList<QUrl> urls;
-        for(auto &world: m_worlds)
+        for(auto &world: hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds)
         {
             if(!world.isValid() || !world.isOnFS())
                 continue;
@@ -340,7 +340,7 @@ protected:
         return QMimeData::retrieveData(mimetype, type);
     }
 private:
-    QList<World> m_worlds;
+    QList<World> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds;
 };
 
 QMimeData *WorldList::mimeData(const QModelIndexList &indexes) const
@@ -395,7 +395,7 @@ void WorldList::installWorld(QFileInfo filename)
     {
         return;
     }
-    w.install(m_dir.absolutePath());
+    w.install(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath());
 }
 
 bool WorldList::dropMimeData(const QMimeData *data, Qt::DropAction action, [[maybe_unused]] int row, [[maybe_unused]] int column,
@@ -422,7 +422,7 @@ bool WorldList::dropMimeData(const QMimeData *data, Qt::DropAction action, [[may
 
             QFileInfo worldInfo(filename);
 
-            if(!m_dir.entryInfoList().contains(worldInfo))
+            if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.entryInfoList().contains(worldInfo))
             {
                 installWorld(worldInfo);
             }

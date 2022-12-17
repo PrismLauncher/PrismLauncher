@@ -392,7 +392,7 @@ int AccessibleInstanceView::indexOfChild(const QAccessibleInterface *iface) cons
     Q_ASSERT(iface->role() != QAccessible::TreeItem); // should be handled by tree class
     if (iface->role() == QAccessible::Cell || iface->role() == QAccessible::ListItem) {
         const AccessibleInstanceViewItem* cell = static_cast<const AccessibleInstanceViewItem*>(iface);
-        return logicalIndex(cell->m_index);
+        return logicalIndex(cell->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index);
     } else if (iface->role() == QAccessible::Pane) {
         return 0; // corner button
     } else {
@@ -513,7 +513,7 @@ void AccessibleInstanceView::modelChange(QAccessibleTableModelChangeEvent *event
                     Q_ASSERT(iface->tableCellInterface());
                     AccessibleInstanceViewItem *cell = static_cast<AccessibleInstanceViewItem*>(iface->tableCellInterface());
                     // Since it is a QPersistentModelIndex, we only need to check if it is valid
-                    if (cell->m_index.isValid())
+                    if (cell->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index.isValid())
                         newCache.insert(indexOfChild(cell), id);
                     else
                         QAccessible::deleteAccessibleInterface(id);
@@ -533,7 +533,7 @@ void AccessibleInstanceView::modelChange(QAccessibleTableModelChangeEvent *event
 // TABLE CELL
 
 AccessibleInstanceViewItem::AccessibleInstanceViewItem(QAbstractItemView *view_, const QModelIndex &index_)
-    : view(view_), m_index(index_)
+    : view(view_), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index(index_)
 {
     if (Q_UNLIKELY(!index_.isValid()))
         qWarning() << "AccessibleInstanceViewItem::AccessibleInstanceViewItem with invalid index: " << index_;
@@ -567,7 +567,7 @@ int AccessibleInstanceViewItem::columnIndex() const
         return -1;
     }
 
-    return m_index.column();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index.column();
 }
 
 int AccessibleInstanceViewItem::rowIndex() const
@@ -576,7 +576,7 @@ int AccessibleInstanceViewItem::rowIndex() const
         return -1;
     }
 
-    return m_index.row();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index.row();
 }
 
 bool AccessibleInstanceViewItem::isSelected() const
@@ -585,7 +585,7 @@ bool AccessibleInstanceViewItem::isSelected() const
         return false;
     }
 
-    return view->selectionModel()->isSelected(m_index);
+    return view->selectionModel()->isSelected(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index);
 }
 
 QStringList AccessibleInstanceViewItem::actionNames() const
@@ -631,11 +631,11 @@ void AccessibleInstanceViewItem::selectCell()
             break;
         case QAbstractItemView::SelectColumns:
             if (cellTable)
-                cellTable->selectColumn(m_index.column());
+                cellTable->selectColumn(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index.column());
             return;
         case QAbstractItemView::SelectRows:
             if (cellTable)
-                cellTable->selectRow(m_index.row());
+                cellTable->selectRow(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index.row());
             return;
     }
 
@@ -643,7 +643,7 @@ void AccessibleInstanceViewItem::selectCell()
         view->clearSelection();
     }
 
-    view->selectionModel()->select(m_index, QItemSelectionModel::Select);
+    view->selectionModel()->select(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index, QItemSelectionModel::Select);
 }
 
 void AccessibleInstanceViewItem::unselectCell()
@@ -661,11 +661,11 @@ void AccessibleInstanceViewItem::unselectCell()
             break;
         case QAbstractItemView::SelectColumns:
             if (cellTable)
-                cellTable->unselectColumn(m_index.column());
+                cellTable->unselectColumn(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index.column());
             return;
         case QAbstractItemView::SelectRows:
             if (cellTable)
-                cellTable->unselectRow(m_index.row());
+                cellTable->unselectRow(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index.row());
             return;
     }
 
@@ -674,7 +674,7 @@ void AccessibleInstanceViewItem::unselectCell()
     if ((selectionMode != QAbstractItemView::MultiSelection) && (selectionMode != QAbstractItemView::ExtendedSelection) && (view->selectionModel()->selectedIndexes().count() <= 1))
         return;
 
-    view->selectionModel()->select(m_index, QItemSelectionModel::Deselect);
+    view->selectionModel()->select(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index, QItemSelectionModel::Deselect);
 }
 
 QAccessibleInterface *AccessibleInstanceViewItem::table() const
@@ -698,14 +698,14 @@ QAccessible::State AccessibleInstanceViewItem::state() const
     if (!globalRect.intersects(rect()))
         st.invisible = true;
 
-    if (view->selectionModel()->isSelected(m_index))
+    if (view->selectionModel()->isSelected(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index))
         st.selected = true;
-    if (view->selectionModel()->currentIndex() == m_index)
+    if (view->selectionModel()->currentIndex() == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index)
         st.focused = true;
-    if (m_index.model()->data(m_index, Qt::CheckStateRole).toInt() == Qt::Checked)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index.model()->data(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index, Qt::CheckStateRole).toInt() == Qt::Checked)
         st.checked = true;
 
-    Qt::ItemFlags flags = m_index.flags();
+    Qt::ItemFlags flags = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index.flags();
     if (flags & Qt::ItemIsSelectable) {
         st.selectable = true;
         st.focusable = true;
@@ -723,7 +723,7 @@ QRect AccessibleInstanceViewItem::rect() const
     QRect r;
     if (!isValid())
         return r;
-    r = view->visualRect(m_index);
+    r = view->visualRect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index);
 
     if (!r.isNull()) {
         r.translate(view->viewport()->mapTo(view, QPoint(0,0)));
@@ -740,12 +740,12 @@ QString AccessibleInstanceViewItem::text(QAccessible::Text t) const
     QAbstractItemModel *model = view->model();
     switch (t) {
         case QAccessible::Name:
-            value = model->data(m_index, Qt::AccessibleTextRole).toString();
+            value = model->data(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index, Qt::AccessibleTextRole).toString();
             if (value.isEmpty())
-                value = model->data(m_index, Qt::DisplayRole).toString();
+                value = model->data(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index, Qt::DisplayRole).toString();
             break;
         case QAccessible::Description:
-            value = model->data(m_index, Qt::AccessibleDescriptionRole).toString();
+            value = model->data(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index, Qt::AccessibleDescriptionRole).toString();
             break;
         default:
             break;
@@ -755,14 +755,14 @@ QString AccessibleInstanceViewItem::text(QAccessible::Text t) const
 
 void AccessibleInstanceViewItem::setText(QAccessible::Text /*t*/, const QString &text)
 {
-    if (!isValid() || !(m_index.flags() & Qt::ItemIsEditable))
+    if (!isValid() || !(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index.flags() & Qt::ItemIsEditable))
         return;
-    view->model()->setData(m_index, text);
+    view->model()->setData(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index, text);
 }
 
 bool AccessibleInstanceViewItem::isValid() const
 {
-    return view && view->model() && m_index.isValid();
+    return view && view->model() && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index.isValid();
 }
 
 QAccessibleInterface *AccessibleInstanceViewItem::parent() const

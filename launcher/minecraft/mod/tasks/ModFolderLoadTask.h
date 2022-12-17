@@ -53,7 +53,7 @@ public:
     };
     using ResultPtr = std::shared_ptr<Result>;
     ResultPtr result() const {
-        return m_result;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result;
     }
 
 public:
@@ -62,7 +62,7 @@ public:
     [[nodiscard]] bool canAbort() const override { return true; }
     bool abort() override
     {
-        m_aborted.store(true);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted.store(true);
         return true;
     }
 
@@ -73,13 +73,13 @@ private:
     void getFromMetadata();
 
 private:
-    QDir m_mods_dir, m_index_dir;
-    bool m_is_indexed;
-    bool m_clean_orphan;
-    ResultPtr m_result;
+    QDir hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods_dir, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_indexed;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_clean_orphan;
+    ResultPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result;
 
-    std::atomic<bool> m_aborted = false;
+    std::atomic<bool> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = false;
 
     /** This is the thread in which we should put new mod objects */
-    QThread* m_thread_to_spawn_into;
+    QThread* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_thread_to_spawn_into;
 };

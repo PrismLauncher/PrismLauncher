@@ -65,13 +65,13 @@ LaunchController::LaunchController(QObject *parent) : Task(parent)
 
 void LaunchController::executeTask()
 {
-    if (!m_instance)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance)
     {
         emitFailed(tr("No instance specified!"));
         return;
     }
 
-    if(!JavaCommon::checkJVMArgs(m_instance->settings()->get("JvmArgs").toString(), m_parentWidget)) {
+    if(!JavaCommon::checkJVMArgs(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->settings()->get("JvmArgs").toString(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget)) {
         emitFailed(tr("Invalid Java arguments specified. Please fix this first."));
         return;
     }
@@ -81,7 +81,7 @@ void LaunchController::executeTask()
 
 void LaunchController::decideAccount()
 {
-    if(m_accountToUse) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse) {
         return;
     }
 
@@ -91,7 +91,7 @@ void LaunchController::decideAccount()
     {
         // Tell the user they need to log in at least one account in order to play.
         auto reply = CustomMessageBox::selectable(
-            m_parentWidget,
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget,
             tr("No Accounts"),
             tr("In order to play Minecraft, you must have at least one Microsoft or Mojang "
                "account logged in. Mojang accounts can only be used offline. "
@@ -103,7 +103,7 @@ void LaunchController::decideAccount()
         if (reply == QMessageBox::Yes)
         {
             // Open the account manager.
-            APPLICATION->ShowGlobalSettings(m_parentWidget, "accounts");
+            APPLICATION->ShowGlobalSettings(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget, "accounts");
         }
         else if (reply == QMessageBox::No)
         {
@@ -112,24 +112,24 @@ void LaunchController::decideAccount()
         }
     }
 
-    m_accountToUse = accounts->defaultAccount();
-    if (!m_accountToUse)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse = accounts->defaultAccount();
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse)
     {
         // If no default account is set, ask the user which one to use.
         ProfileSelectDialog selectDialog(
             tr("Which account would you like to use?"),
             ProfileSelectDialog::GlobalDefaultCheckbox,
-            m_parentWidget
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget
         );
 
         selectDialog.exec();
 
         // Launch the instance with the selected account.
-        m_accountToUse = selectDialog.selectedAccount();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse = selectDialog.selectedAccount();
 
         // If the user said to use the account as default, do that.
-        if (selectDialog.useAsGlobalDefault() && m_accountToUse) {
-            accounts->setDefaultAccount(m_accountToUse);
+        if (selectDialog.useAsGlobalDefault() && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse) {
+            accounts->setDefaultAccount(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse);
         }
     }
 }
@@ -139,7 +139,7 @@ void LaunchController::login() {
     decideAccount();
 
     // if no account is selected, we bail
-    if (!m_accountToUse)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse)
     {
         emitFailed(tr("No account selected for launch."));
         return;
@@ -153,7 +153,7 @@ void LaunchController::login() {
     {
         if (tries > 0 && tries % 3 == 0) {
             auto result = QMessageBox::question(
-                m_parentWidget,
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget,
                 tr("Continue launch?"),
                 tr("It looks like we couldn't launch after %1 tries. Do you want to continue trying?")
                     .arg(tries)
@@ -165,36 +165,36 @@ void LaunchController::login() {
             }
         }
         tries++;
-        m_session = std::make_shared<AuthSession>();
-        m_session->wants_online = m_online;
-        m_session->demo = m_demo;
-        m_accountToUse->fillSession(m_session);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session = std::make_shared<AuthSession>();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session->wants_online = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_online;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session->demo = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_demo;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse->fillSession(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session);
 
         // Launch immediately in true offline mode
-        if(m_accountToUse->isOffline()) {
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse->isOffline()) {
             launchInstance();
             return;
         }
 
-        switch(m_accountToUse->accountState()) {
+        switch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse->accountState()) {
             case AccountState::Offline: {
-                m_session->wants_online = false;
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session->wants_online = false;
                 // NOTE: fallthrough is intentional
             }
             case AccountState::Online: {
-                if(!m_session->wants_online) {
+                if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session->wants_online) {
                     // we ask the user for a player name
                     bool ok = false;
 
                     QString message = tr("Choose your offline mode player name.");
-                    if(m_session->demo) {
+                    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session->demo) {
                         message = tr("Choose your demo mode player name.");
                     }
 
                     QString lastOfflinePlayerName = APPLICATION->settings()->get("LastOfflinePlayerName").toString();
-                    QString usedname = lastOfflinePlayerName.isEmpty() ? m_session->player_name : lastOfflinePlayerName;
+                    QString usedname = lastOfflinePlayerName.isEmpty() ? hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session->player_name : lastOfflinePlayerName;
                     QString name = QInputDialog::getText(
-                        m_parentWidget,
+                        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget,
                         tr("Player name"),
                         message,
                         QLineEdit::Normal,
@@ -211,13 +211,13 @@ void LaunchController::login() {
                         usedname = name;
                         APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
                     }
-                    m_session->MakeOffline(usedname);
+                    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session->MakeOffline(usedname);
                     // offline flavored game from here :3
                 }
-                if(m_accountToUse->ownsMinecraft()) {
-                    if(!m_accountToUse->hasProfile()) {
+                if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse->ownsMinecraft()) {
+                    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse->hasProfile()) {
                         // Now handle setting up a profile name here...
-                        ProfileSetupDialog dialog(m_accountToUse, m_parentWidget);
+                        ProfileSetupDialog dialog(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget);
                         if (dialog.exec() == QDialog::Accepted)
                         {
                             tryagain = true;
@@ -235,7 +235,7 @@ void LaunchController::login() {
                 }
                 else {
                     // play demo ?
-                    QMessageBox box(m_parentWidget);
+                    QMessageBox box(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget);
                     box.setWindowTitle(tr("Play demo?"));
                     box.setText(tr("This account does not own Minecraft.\nYou need to purchase the game first to play it.\n\nDo you want to play the demo?"));
                     box.setIcon(QMessageBox::Warning);
@@ -246,7 +246,7 @@ void LaunchController::login() {
                     box.exec();
                     if(box.clickedButton() == demoButton) {
                         // play demo here
-                        m_session->MakeDemo();
+                        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session->MakeDemo();
                         launchInstance();
                     }
                     else {
@@ -258,17 +258,17 @@ void LaunchController::login() {
             case AccountState::Errored:
                 // This means some sort of soft error that we can fix with a refresh ... so let's refresh.
             case AccountState::Unchecked: {
-                m_accountToUse->refresh();
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse->refresh();
                 // NOTE: fallthrough intentional
             }
             case AccountState::Working: {
                 // refresh is in progress, we need to wait for it to finish to proceed.
-                ProgressDialog progDialog(m_parentWidget);
-                if (m_online)
+                ProgressDialog progDialog(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget);
+                if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_online)
                 {
                     progDialog.setSkipButton(true, tr("Play Offline"));
                 }
-                auto task = m_accountToUse->currentTask();
+                auto task = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToUse->currentTask();
                 progDialog.execWithTask(task.get());
                 continue;
             }
@@ -281,7 +281,7 @@ void LaunchController::login() {
             case AccountState::Expired: {
                 auto errorString = tr("The account has expired and needs to be logged into manually again.");
                 QMessageBox::warning(
-                    m_parentWidget,
+                    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget,
                     tr("Account refresh failed"),
                     errorString,
                     QMessageBox::StandardButton::Ok,
@@ -293,7 +293,7 @@ void LaunchController::login() {
             case AccountState::Disabled: {
                 auto errorString = tr("The launcher's client identification has changed. Please remove this account and add it again.");
                 QMessageBox::warning(
-                        m_parentWidget,
+                        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget,
                         tr("Client identification changed"),
                         errorString,
                         QMessageBox::StandardButton::Ok,
@@ -305,7 +305,7 @@ void LaunchController::login() {
             case AccountState::Gone: {
                 auto errorString = tr("The account no longer exists on the servers. It may have been migrated, in which case please add the new account you migrated this one to.");
                 QMessageBox::warning(
-                    m_parentWidget,
+                    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget,
                     tr("Account gone"),
                     errorString,
                     QMessageBox::StandardButton::Ok,
@@ -321,37 +321,37 @@ void LaunchController::login() {
 
 void LaunchController::launchInstance()
 {
-    Q_ASSERT_X(m_instance != NULL, "launchInstance", "instance is NULL");
-    Q_ASSERT_X(m_session.get() != nullptr, "launchInstance", "session is NULL");
+    Q_ASSERT_X(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance != NULL, "launchInstance", "instance is NULL");
+    Q_ASSERT_X(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session.get() != nullptr, "launchInstance", "session is NULL");
 
-    if(!m_instance->reloadSettings())
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->reloadSettings())
     {
-        QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Couldn't load the instance profile."));
+        QMessageBox::critical(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget, tr("Error!"), tr("Couldn't load the instance profile."));
         emitFailed(tr("Couldn't load the instance profile."));
         return;
     }
 
-    m_launcher = m_instance->createLaunchTask(m_session, m_serverToJoin);
-    if (!m_launcher)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->createLaunchTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin);
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher)
     {
         emitFailed(tr("Couldn't instantiate a launcher."));
         return;
     }
 
-    auto console = qobject_cast<InstanceWindow *>(m_parentWidget);
-    auto showConsole = m_instance->settings()->get("ShowConsole").toBool();
+    auto console = qobject_cast<InstanceWindow *>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget);
+    auto showConsole = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->settings()->get("ShowConsole").toBool();
     if(!console && showConsole)
     {
-        APPLICATION->showInstanceWindow(m_instance);
+        APPLICATION->showInstanceWindow(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance);
     }
-    connect(m_launcher.get(), &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
-    connect(m_launcher.get(), &LaunchTask::succeeded, this, &LaunchController::onSucceeded);
-    connect(m_launcher.get(), &LaunchTask::failed, this,  &LaunchController::onFailed);
-    connect(m_launcher.get(), &LaunchTask::requestProgress, this, &LaunchController::onProgressRequested);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher.get(), &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher.get(), &LaunchTask::succeeded, this, &LaunchController::onSucceeded);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher.get(), &LaunchTask::failed, this,  &LaunchController::onFailed);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher.get(), &LaunchTask::requestProgress, this, &LaunchController::onProgressRequested);
 
     // Prepend Online and Auth Status
     QString online_mode;
-    if(m_session->wants_online) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session->wants_online) {
         online_mode = "online";
 
         // Prepend Server Status
@@ -374,35 +374,35 @@ void LaunchController::launchInstance()
             }
             resolved_servers = resolved_servers + "]\n\n";
         }
-        m_launcher->prependStep(new TextPrint(m_launcher.get(), resolved_servers, MessageLevel::Launcher));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher->prependStep(new TextPrint(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher.get(), resolved_servers, MessageLevel::Launcher));
     } else {
-        online_mode = m_demo ? "demo" : "offline";
+        online_mode = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_demo ? "demo" : "offline";
     }
 
-    m_launcher->prependStep(new TextPrint(m_launcher.get(), "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher->prependStep(new TextPrint(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher.get(), "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
 
     // Prepend Version
-    m_launcher->prependStep(new TextPrint(m_launcher.get(), BuildConfig.LAUNCHER_DISPLAYNAME + " version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::Launcher));
-    m_launcher->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher->prependStep(new TextPrint(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher.get(), BuildConfig.LAUNCHER_DISPLAYNAME + " version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::Launcher));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher->start();
 }
 
 void LaunchController::readyForLaunch()
 {
-    if (!m_profiler)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profiler)
     {
-        m_launcher->proceed();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher->proceed();
         return;
     }
 
     QString error;
-    if (!m_profiler->check(&error))
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profiler->check(&error))
     {
-        m_launcher->abort();
-        QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Couldn't start profiler: %1").arg(error));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher->abort();
+        QMessageBox::critical(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget, tr("Error!"), tr("Couldn't start profiler: %1").arg(error));
         emitFailed("Profiler startup failed!");
         return;
     }
-    BaseProfiler *profilerInstance = m_profiler->createProfiler(m_launcher->instance(), this);
+    BaseProfiler *profilerInstance = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profiler->createProfiler(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher->instance(), this);
 
     connect(profilerInstance, &BaseProfiler::readyToLaunch, [this](const QString & message)
     {
@@ -415,7 +415,7 @@ void LaunchController::readyForLaunch()
         msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
         msg.setModal(true);
         msg.exec();
-        m_launcher->proceed();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher->proceed();
     });
     connect(profilerInstance, &BaseProfiler::abortLaunch, [this](const QString & message)
     {
@@ -426,10 +426,10 @@ void LaunchController::readyForLaunch()
         msg.addButton(QMessageBox::Ok);
         msg.setModal(true);
         msg.exec();
-        m_launcher->abort();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher->abort();
         emitFailed("Profiler startup failed!");
     });
-    profilerInstance->beginProfiling(m_launcher);
+    profilerInstance->beginProfiling(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher);
 }
 
 void LaunchController::onSucceeded()
@@ -439,39 +439,39 @@ void LaunchController::onSucceeded()
 
 void LaunchController::onFailed(QString reason)
 {
-    if(m_instance->settings()->get("ShowConsoleOnError").toBool())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->settings()->get("ShowConsoleOnError").toBool())
     {
-        APPLICATION->showInstanceWindow(m_instance, "console");
+        APPLICATION->showInstanceWindow(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance, "console");
     }
     emitFailed(reason);
 }
 
 void LaunchController::onProgressRequested(Task* task)
 {
-    ProgressDialog progDialog(m_parentWidget);
+    ProgressDialog progDialog(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget);
     progDialog.setSkipButton(true, tr("Abort"));
-    m_launcher->proceed();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher->proceed();
     progDialog.execWithTask(task);
 }
 
 bool LaunchController::abort()
 {
-    if(!m_launcher)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher)
     {
         return true;
     }
-    if(!m_launcher->canAbort())
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher->canAbort())
     {
         return false;
     }
     auto response = CustomMessageBox::selectable(
-            m_parentWidget, tr("Kill Minecraft?"),
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget, tr("Kill Minecraft?"),
             tr("This can cause the instance to get corrupted and should only be used if Minecraft "
             "is frozen for some reason"),
             QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)->exec();
     if (response == QMessageBox::Yes)
     {
-        return m_launcher->abort();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launcher->abort();
     }
     return false;
 }

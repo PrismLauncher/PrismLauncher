@@ -156,21 +156,21 @@ bool validate(QFileInfo file)
 }  // namespace ResourcePackUtils
 
 LocalResourcePackParseTask::LocalResourcePackParseTask(int token, ResourcePack& rp)
-    : Task(nullptr, false), m_token(token), m_resource_pack(rp)
+    : Task(nullptr, false), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_token(token), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resource_pack(rp)
 {}
 
 bool LocalResourcePackParseTask::abort()
 {
-    m_aborted = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = true;
     return true;
 }
 
 void LocalResourcePackParseTask::executeTask()
 {
-    if (!ResourcePackUtils::process(m_resource_pack))
+    if (!ResourcePackUtils::process(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resource_pack))
         return;
 
-    if (m_aborted)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted)
         emitAborted();
     else
         emitSucceeded();

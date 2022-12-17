@@ -56,11 +56,11 @@ QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject &objectWithRules)
 class Rule
 {
 protected:
-    RuleAction m_result;
+    RuleAction hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result;
     virtual bool applies(const Library *parent, const RuntimeContext & runtimeContext) = 0;
 
 public:
-    Rule(RuleAction result) : m_result(result)
+    Rule(RuleAction result) : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result(result)
     {
     }
     virtual ~Rule() {};
@@ -68,7 +68,7 @@ public:
     RuleAction apply(const Library *parent, const RuntimeContext & runtimeContext)
     {
         if (applies(parent, runtimeContext))
-            return m_result;
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result;
         else
             return Defer;
     }
@@ -78,17 +78,17 @@ class OsRule : public Rule
 {
 private:
     // the OS
-    QString m_system;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_system;
     // the OS version regexp
-    QString m_version_regexp;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_regexp;
 
 protected:
     virtual bool applies(const Library *, const RuntimeContext & runtimeContext)
     {
-        return runtimeContext.classifierMatches(m_system);
+        return runtimeContext.classifierMatches(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_system);
     }
     OsRule(RuleAction result, QString system, QString version_regexp)
-        : Rule(result), m_system(system), m_version_regexp(version_regexp)
+        : Rule(result), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_system(system), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_regexp(version_regexp)
     {
     }
 

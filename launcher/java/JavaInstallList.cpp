@@ -55,36 +55,36 @@ Task::Ptr JavaInstallList::getLoadTask()
 
 Task::Ptr JavaInstallList::getCurrentTask()
 {
-    if(m_status == Status::InProgress)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status == Status::InProgress)
     {
-        return m_loadTask;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadTask;
     }
     return nullptr;
 }
 
 void JavaInstallList::load()
 {
-    if(m_status != Status::InProgress)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status != Status::InProgress)
     {
-        m_status = Status::InProgress;
-        m_loadTask = new JavaListLoadTask(this);
-        m_loadTask->start();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = Status::InProgress;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadTask = new JavaListLoadTask(this);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadTask->start();
     }
 }
 
 const BaseVersion::Ptr JavaInstallList::at(int i) const
 {
-    return m_vlist.at(i);
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist.at(i);
 }
 
 bool JavaInstallList::isLoaded()
 {
-    return m_status == JavaInstallList::Status::Done;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status == JavaInstallList::Status::Done;
 }
 
 int JavaInstallList::count() const
 {
-    return m_vlist.count();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist.count();
 }
 
 QVariant JavaInstallList::data(const QModelIndex &index, int role) const
@@ -95,11 +95,11 @@ QVariant JavaInstallList::data(const QModelIndex &index, int role) const
     if (index.row() > count())
         return QVariant();
 
-    auto version = std::dynamic_pointer_cast<JavaInstall>(m_vlist[index.row()]);
+    auto version = std::dynamic_pointer_cast<JavaInstall>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist[index.row()]);
     switch (role)
     {
         case VersionPointerRole:
-            return QVariant::fromValue(m_vlist[index.row()]);
+            return QVariant::fromValue(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist[index.row()]);
         case VersionIdRole:
             return version->descriptor();
         case VersionRole:
@@ -124,16 +124,16 @@ BaseVersionList::RoleList JavaInstallList::providesRoles() const
 void JavaInstallList::updateListData(QList<BaseVersion::Ptr> versions)
 {
     beginResetModel();
-    m_vlist = versions;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist = versions;
     sortVersions();
-    if(m_vlist.size())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist.size())
     {
-        auto best = std::dynamic_pointer_cast<JavaInstall>(m_vlist[0]);
+        auto best = std::dynamic_pointer_cast<JavaInstall>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist[0]);
         best->recommended = true;
     }
     endResetModel();
-    m_status = Status::Done;
-    m_loadTask.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = Status::Done;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadTask.reset();
 }
 
 bool sortJavas(BaseVersion::Ptr left, BaseVersion::Ptr right)
@@ -146,14 +146,14 @@ bool sortJavas(BaseVersion::Ptr left, BaseVersion::Ptr right)
 void JavaInstallList::sortVersions()
 {
     beginResetModel();
-    std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
+    std::sort(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist.begin(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist.end(), sortJavas);
     endResetModel();
 }
 
 JavaListLoadTask::JavaListLoadTask(JavaInstallList *vlist) : Task()
 {
-    m_list = vlist;
-    m_currentRecommended = NULL;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_list = vlist;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentRecommended = NULL;
 }
 
 JavaListLoadTask::~JavaListLoadTask()
@@ -167,9 +167,9 @@ void JavaListLoadTask::executeTask()
     JavaUtils ju;
     QList<QString> candidate_paths = ju.FindJavaPaths();
 
-    m_job = new JavaCheckerJob("Java detection");
-    connect(m_job.get(), &Task::finished, this, &JavaListLoadTask::javaCheckerFinished);
-    connect(m_job.get(), &Task::progress, this, &Task::setProgress);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_job = new JavaCheckerJob("Java detection");
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_job.get(), &Task::finished, this, &JavaListLoadTask::javaCheckerFinished);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_job.get(), &Task::progress, this, &Task::setProgress);
 
     qDebug() << "Probing the following Java paths: ";
     int id = 0;
@@ -178,20 +178,20 @@ void JavaListLoadTask::executeTask()
         qDebug() << " " << candidate;
 
         auto candidate_checker = new JavaChecker();
-        candidate_checker->m_path = candidate;
-        candidate_checker->m_id = id;
-        m_job->addJavaCheckerAction(JavaCheckerPtr(candidate_checker));
+        candidate_checker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path = candidate;
+        candidate_checker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id = id;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_job->addJavaCheckerAction(JavaCheckerPtr(candidate_checker));
 
         id++;
     }
 
-    m_job->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_job->start();
 }
 
 void JavaListLoadTask::javaCheckerFinished()
 {
     QList<JavaInstallPtr> candidates;
-    auto results = m_job->getResults();
+    auto results = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_job->getResults();
 
     qDebug() << "Found the following valid Java installations:";
     for(JavaCheckResult result : results)
@@ -221,6 +221,6 @@ void JavaListLoadTask::javaCheckerFinished()
         }
     }
 
-    m_list->updateListData(javas_bvp);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_list->updateListData(javas_bvp);
     emitSucceeded();
 }

@@ -142,7 +142,7 @@ VisualGroup::HitResults VisualGroup::hitScan(const QPoint &pos) const
         int collapseSize = headerHeight() - 4;
 
         // the icon
-        QRect iconRect = QRect(view->m_leftMargin + 2, 2 + y_start, collapseSize, collapseSize);
+        QRect iconRect = QRect(view->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_leftMargin + 2, 2 + y_start, collapseSize, collapseSize);
         if (iconRect.contains(pos))
         {
             results |= VisualGroup::CheckboxHit;
@@ -326,7 +326,7 @@ int VisualGroup::numRows() const
 
 int VisualGroup::verticalPosition() const
 {
-    return m_verticalPosition;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalPosition;
 }
 
 QList<QModelIndex> VisualGroup::items() const

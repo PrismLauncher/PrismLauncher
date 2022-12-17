@@ -43,10 +43,10 @@ TexturePackFolderModel::TexturePackFolderModel(const QString &dir) : ResourceFol
 
 Task* TexturePackFolderModel::createUpdateTask()
 {
-    return new BasicFolderLoadTask(m_dir, [](QFileInfo const& entry) { return new TexturePack(entry); });
+    return new BasicFolderLoadTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir, [](QFileInfo const& entry) { return new TexturePack(entry); });
 }
 
 Task* TexturePackFolderModel::createParseTask(Resource& resource)
 {
-    return new LocalTexturePackParseTask(m_next_resolution_ticket, static_cast<TexturePack&>(resource));
+    return new LocalTexturePackParseTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_next_resolution_ticket, static_cast<TexturePack&>(resource));
 }

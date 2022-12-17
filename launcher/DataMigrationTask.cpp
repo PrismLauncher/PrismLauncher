@@ -16,9 +16,9 @@ DataMigrationTask::DataMigrationTask(QObject* parent,
                                      const QString& sourcePath,
                                      const QString& targetPath,
                                      const IPathMatcher::Ptr pathMatcher)
-    : Task(parent), m_sourcePath(sourcePath), m_targetPath(targetPath), m_pathMatcher(pathMatcher), m_copy(sourcePath, targetPath)
+    : Task(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sourcePath(sourcePath), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_targetPath(targetPath), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pathMatcher(pathMatcher), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copy(sourcePath, targetPath)
 {
-    m_copy.matcher(m_pathMatcher.get()).whitelist(true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copy.matcher(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pathMatcher.get()).whitelist(true);
 }
 
 void DataMigrationTask::executeTask()
@@ -27,23 +27,23 @@ void DataMigrationTask::executeTask()
 
     // 1. Scan
     // Check how many files we gotta copy
-    m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [&] {
-        return m_copy(true);  // dry run to collect amount of files
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [&] {
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copy(true);  // dry run to collect amount of files
     });
-    connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &DataMigrationTask::dryRunFinished);
-    connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &DataMigrationTask::dryRunAborted);
-    m_copyFutureWatcher.setFuture(m_copyFuture);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &DataMigrationTask::dryRunFinished);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &DataMigrationTask::dryRunAborted);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFutureWatcher.setFuture(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFuture);
 }
 
 void DataMigrationTask::dryRunFinished()
 {
-    disconnect(&m_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &DataMigrationTask::dryRunFinished);
-    disconnect(&m_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &DataMigrationTask::dryRunAborted);
+    disconnect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &DataMigrationTask::dryRunFinished);
+    disconnect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &DataMigrationTask::dryRunAborted);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-    if (!m_copyFuture.isValid() || !m_copyFuture.result()) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFuture.isValid() || !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFuture.result()) {
 #else
-    if (!m_copyFuture.result()) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFuture.result()) {
 #endif
         emitFailed(tr("Failed to scan source path."));
         return;
@@ -51,21 +51,21 @@ void DataMigrationTask::dryRunFinished()
 
     // 2. Copy
     // Actually copy all files now.
-    m_toCopy = m_copy.totalCopied();
-    connect(&m_copy, &FS::copy::fileCopied, [&, this](const QString& relativeName) {
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_toCopy = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copy.totalCopied();
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copy, &FS::copy::fileCopied, [&, this](const QString& relativeName) {
         QString shortenedName = relativeName;
         // shorten the filename to hopefully fit into one line
         if (shortenedName.length() > 50)
             shortenedName = relativeName.left(20) + "…" + relativeName.right(29);
-        setProgress(m_copy.totalCopied(), m_toCopy);
+        setProgress(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copy.totalCopied(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_toCopy);
         setStatus(tr("Copying %1…").arg(shortenedName));
     });
-    m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [&] {
-        return m_copy(false);  // actually copy now
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [&] {
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copy(false);  // actually copy now
     });
-    connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &DataMigrationTask::copyFinished);
-    connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &DataMigrationTask::copyAborted);
-    m_copyFutureWatcher.setFuture(m_copyFuture);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &DataMigrationTask::copyFinished);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &DataMigrationTask::copyAborted);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFutureWatcher.setFuture(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFuture);
 }
 
 void DataMigrationTask::dryRunAborted()
@@ -75,13 +75,13 @@ void DataMigrationTask::dryRunAborted()
 
 void DataMigrationTask::copyFinished()
 {
-    disconnect(&m_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &DataMigrationTask::copyFinished);
-    disconnect(&m_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &DataMigrationTask::copyAborted);
+    disconnect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &DataMigrationTask::copyFinished);
+    disconnect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &DataMigrationTask::copyAborted);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-    if (!m_copyFuture.isValid() || !m_copyFuture.result()) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFuture.isValid() || !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFuture.result()) {
 #else
-    if (!m_copyFuture.result()) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFuture.result()) {
 #endif
         emitFailed(tr("Some paths could not be copied!"));
         return;

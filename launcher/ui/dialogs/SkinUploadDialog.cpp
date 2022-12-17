@@ -120,12 +120,12 @@ void SkinUploadDialog::on_buttonBox_accepted()
         {
             model = SkinUpload::ALEX;
         }
-        skinUpload.addTask(shared_qobject_ptr<SkinUpload>(new SkinUpload(this, m_acct->accessToken(), FS::read(fileName), model)));
+        skinUpload.addTask(shared_qobject_ptr<SkinUpload>(new SkinUpload(this, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_acct->accessToken(), FS::read(fileName), model)));
     }
 
     auto selectedCape = ui->capeCombo->currentData().toString();
-    if(selectedCape != m_acct->accountData()->minecraftProfile.currentCape) {
-        skinUpload.addTask(shared_qobject_ptr<CapeChange>(new CapeChange(this, m_acct->accessToken(), selectedCape)));
+    if(selectedCape != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_acct->accountData()->minecraftProfile.currentCape) {
+        skinUpload.addTask(shared_qobject_ptr<CapeChange>(new CapeChange(this, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_acct->accessToken(), selectedCape)));
     }
     if (prog.execWithTask(&skinUpload) != QDialog::Accepted)
     {
@@ -150,7 +150,7 @@ void SkinUploadDialog::on_skinBrowseBtn_clicked()
 }
 
 SkinUploadDialog::SkinUploadDialog(MinecraftAccountPtr acct, QWidget *parent)
-    :QDialog(parent), m_acct(acct), ui(new Ui::SkinUploadDialog)
+    :QDialog(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_acct(acct), ui(new Ui::SkinUploadDialog)
 {
     ui->setupUi(this);
 

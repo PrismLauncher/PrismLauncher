@@ -4,12 +4,12 @@
 #include "minecraft/auth/Parsers.h"
 #include "minecraft/auth/Yggdrasil.h"
 
-YggdrasilStep::YggdrasilStep(AccountData* data, QString password) : AuthStep(data), m_password(password) {
-    m_yggdrasil = new Yggdrasil(m_data, this);
+YggdrasilStep::YggdrasilStep(AccountData* data, QString password) : AuthStep(data), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_password(password) {
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_yggdrasil = new Yggdrasil(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data, this);
 
-    connect(m_yggdrasil, &Task::failed, this, &YggdrasilStep::onAuthFailed);
-    connect(m_yggdrasil, &Task::succeeded, this, &YggdrasilStep::onAuthSucceeded);
-    connect(m_yggdrasil, &Task::aborted, this, &YggdrasilStep::onAuthFailed);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_yggdrasil, &Task::failed, this, &YggdrasilStep::onAuthFailed);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_yggdrasil, &Task::succeeded, this, &YggdrasilStep::onAuthSucceeded);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_yggdrasil, &Task::aborted, this, &YggdrasilStep::onAuthFailed);
 }
 
 YggdrasilStep::~YggdrasilStep() noexcept = default;
@@ -23,11 +23,11 @@ void YggdrasilStep::rehydrate() {
 }
 
 void YggdrasilStep::perform() {
-    if(m_password.size()) {
-        m_yggdrasil->login(m_password);
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_password.size()) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_yggdrasil->login(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_password);
     }
     else {
-        m_yggdrasil->refresh();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_yggdrasil->refresh();
     }
 }
 
@@ -37,10 +37,10 @@ void YggdrasilStep::onAuthSucceeded() {
 
 void YggdrasilStep::onAuthFailed() {
     // TODO: hook these in again, expand to MSA
-    // m_error = m_yggdrasil->m_error;
-    // m_aborted = m_yggdrasil->m_aborted;
+    // hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_error = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_yggdrasil->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_error;
+    // hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_yggdrasil->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted;
 
-    auto state = m_yggdrasil->taskState();
+    auto state = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_yggdrasil->taskState();
     QString errorMessage = tr("Mojang user authentication failed.");
 
     // NOTE: soft error in the first step means 'offline'

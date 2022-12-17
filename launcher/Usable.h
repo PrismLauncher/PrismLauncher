@@ -18,23 +18,23 @@ class Usable
 public:
     std::size_t useCount() const
     {
-        return m_useCount;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_useCount;
     }
     bool isInUse() const
     {
-        return m_useCount > 0;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_useCount > 0;
     }
 protected:
     virtual void decrementUses()
     {
-        m_useCount--;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_useCount--;
     }
     virtual void incrementUses()
     {
-        m_useCount++;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_useCount++;
     }
 private:
-    std::size_t m_useCount = 0;
+    std::size_t hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_useCount = 0;
 };
 
 /**
@@ -46,15 +46,15 @@ class UseLock
 {
 public:
     UseLock(shared_qobject_ptr<Usable> usable)
-        : m_usable(usable)
+        : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_usable(usable)
     {
         // this doesn't use shared pointer use count, because that wouldn't be correct. this count is separate.
-        m_usable->incrementUses();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_usable->incrementUses();
     }
     ~UseLock()
     {
-        m_usable->decrementUses();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_usable->decrementUses();
     }
 private:
-    shared_qobject_ptr<Usable> m_usable;
+    shared_qobject_ptr<Usable> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_usable;
 };

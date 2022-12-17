@@ -74,23 +74,23 @@ protected: /* methods */
     void setupUi();
 
 private: /* data */
-    VersionSelectWidget *m_versionWidget = nullptr;
-    QVBoxLayout *m_verticalLayout = nullptr;
+    VersionSelectWidget *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget = nullptr;
+    QVBoxLayout *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout = nullptr;
 
-    QLineEdit * m_javaPathTextBox = nullptr;
-    QPushButton * m_javaBrowseBtn = nullptr;
-    QToolButton * m_javaStatusBtn = nullptr;
-    QHBoxLayout *m_horizontalLayout = nullptr;
+    QLineEdit * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPathTextBox = nullptr;
+    QPushButton * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaBrowseBtn = nullptr;
+    QToolButton * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaStatusBtn = nullptr;
+    QHBoxLayout *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout = nullptr;
 
-    QGroupBox *m_memoryGroupBox = nullptr;
-    QGridLayout *m_gridLayout_2 = nullptr;
-    QSpinBox *m_maxMemSpinBox = nullptr;
-    QLabel *m_labelMinMem = nullptr;
-    QLabel *m_labelMaxMem = nullptr;
-    QLabel *m_labelMaxMemIcon = nullptr;
-    QSpinBox *m_minMemSpinBox = nullptr;
-    QLabel *m_labelPermGen = nullptr;
-    QSpinBox *m_permGenSpinBox = nullptr;
+    QGroupBox *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_memoryGroupBox = nullptr;
+    QGridLayout *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gridLayout_2 = nullptr;
+    QSpinBox *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMemSpinBox = nullptr;
+    QLabel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMinMem = nullptr;
+    QLabel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMem = nullptr;
+    QLabel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelMaxMemIcon = nullptr;
+    QSpinBox *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMemSpinBox = nullptr;
+    QLabel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_labelPermGen = nullptr;
+    QSpinBox *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGenSpinBox = nullptr;
     QIcon goodIcon;
     QIcon yellowIcon;
     QIcon badIcon;
@@ -99,7 +99,7 @@ private: /* data */
     unsigned int observedMaxMemory = 0;
     unsigned int observedPermGenMemory = 0;
     QString queuedCheck;
-    uint64_t m_availableMemory = 0ull;
-    shared_qobject_ptr<JavaChecker> m_checker;
-    JavaCheckResult m_result;
+    uint64_t hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_availableMemory = 0ull;
+    shared_qobject_ptr<JavaChecker> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checker;
+    JavaCheckResult hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result;
 };

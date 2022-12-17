@@ -26,7 +26,7 @@ class PrintInstanceInfo: public LaunchStep
     Q_OBJECT
 public:
     explicit PrintInstanceInfo(LaunchTask *parent, AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) :
-        LaunchStep(parent), m_session(session), m_serverToJoin(serverToJoin) {};
+        LaunchStep(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session(session), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin(serverToJoin) {};
     virtual ~PrintInstanceInfo(){};
 
     virtual void executeTask();
@@ -35,7 +35,7 @@ public:
         return false;
     }
 private:
-    AuthSessionPtr m_session;
-    MinecraftServerTargetPtr m_serverToJoin;
+    AuthSessionPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session;
+    MinecraftServerTargetPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin;
 };
 

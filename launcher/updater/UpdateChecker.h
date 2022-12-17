@@ -83,50 +83,50 @@ private slots:
 private:
     friend class UpdateCheckerTest;
 
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    shared_qobject_ptr<QNetworkAccessManager> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network;
 
     NetJob::Ptr indexJob;
     QByteArray indexData;
     NetJob::Ptr chanListJob;
     QByteArray chanlistData;
 
-    QString m_channelUrl;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_channelUrl;
 
-    QList<ChannelListEntry> m_channels;
+    QList<ChannelListEntry> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_channels;
 
     /*!
      * True while the system is checking for updates.
      * If checkForUpdate is called while this is true, it will be ignored.
      */
-    bool m_updateChecking = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateChecking = false;
 
     /*!
      * True if the channel list has loaded.
      * If this is false, trying to check for updates will call updateChanList first.
      */
-    bool m_chanListLoaded = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_chanListLoaded = false;
 
     /*!
      * Set to true while the channel list is currently loading.
      */
-    bool m_chanListLoading = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_chanListLoading = false;
 
     /*!
      * Set to true when checkForUpdate is called while the channel list isn't loaded.
      * When the channel list finishes loading, if this is true, the update checker will check for updates.
      */
-    bool m_checkUpdateWaiting = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checkUpdateWaiting = false;
 
     /*!
-     * if m_checkUpdateWaiting, this is the last used update channel
+     * if hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_checkUpdateWaiting, this is the last used update channel
      */
-    QString m_deferredUpdateChannel;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_deferredUpdateChannel;
 
-    int m_currentBuild = -1;
-    QString m_currentChannel;
-    QString m_currentRepoUrl;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentBuild = -1;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentChannel;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentRepoUrl;
 
-    QString m_newRepoUrl;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newRepoUrl;
 
     /*!
      * If not a nullptr, then the updater here will be used instead of the old updater that uses GoUpdate when
@@ -135,6 +135,6 @@ private:
      * As a result, signals from this class won't be emitted, and most of the functions in this class other
      * than checkForUpdate are not useful. Call functions from this external updater object instead.
      */
-    ExternalUpdater *m_externalUpdater = nullptr;
+    ExternalUpdater *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalUpdater = nullptr;
 };
 

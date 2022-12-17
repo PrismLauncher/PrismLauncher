@@ -25,23 +25,23 @@ Index::Index(QObject *parent)
 {
 }
 Index::Index(const QVector<VersionList::Ptr> &lists, QObject *parent)
-    : QAbstractListModel(parent), m_lists(lists)
+    : QAbstractListModel(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists(lists)
 {
-    for (int i = 0; i < m_lists.size(); ++i)
+    for (int i = 0; i < hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists.size(); ++i)
     {
-        m_uids.insert(m_lists.at(i)->uid(), m_lists.at(i));
-        connectVersionList(i, m_lists.at(i));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uids.insert(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists.at(i)->uid(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists.at(i));
+        connectVersionList(i, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists.at(i));
     }
 }
 
 QVariant Index::data(const QModelIndex &index, int role) const
 {
-    if (index.parent().isValid() || index.row() < 0 || index.row() >= m_lists.size())
+    if (index.parent().isValid() || index.row() < 0 || index.row() >= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists.size())
     {
         return QVariant();
     }
 
-    VersionList::Ptr list = m_lists.at(index.row());
+    VersionList::Ptr list = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists.at(index.row());
     switch (role)
     {
     case Qt::DisplayRole:
@@ -58,7 +58,7 @@ QVariant Index::data(const QModelIndex &index, int role) const
 }
 int Index::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : m_lists.size();
+    return parent.isValid() ? 0 : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists.size();
 }
 int Index::columnCount(const QModelIndex &parent) const
 {
@@ -78,16 +78,16 @@ QVariant Index::headerData(int section, Qt::Orientation orientation, int role) c
 
 bool Index::hasUid(const QString &uid) const
 {
-    return m_uids.contains(uid);
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uids.contains(uid);
 }
 
 VersionList::Ptr Index::get(const QString &uid)
 {
-    VersionList::Ptr out = m_uids.value(uid, nullptr);
+    VersionList::Ptr out = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uids.value(uid, nullptr);
     if(!out)
     {
         out = std::make_shared<VersionList>(uid);
-        m_uids[uid] = out;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uids[uid] = out;
     }
     return out;
 }
@@ -105,15 +105,15 @@ void Index::parse(const QJsonObject& obj)
 
 void Index::merge(const std::shared_ptr<Index> &other)
 {
-    const QVector<VersionList::Ptr> lists = std::dynamic_pointer_cast<Index>(other)->m_lists;
+    const QVector<VersionList::Ptr> lists = std::dynamic_pointer_cast<Index>(other)->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists;
     // initial load, no need to merge
-    if (m_lists.isEmpty())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists.isEmpty())
     {
         beginResetModel();
-        m_lists = lists;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists = lists;
         for (int i = 0; i < lists.size(); ++i)
         {
-            m_uids.insert(lists.at(i)->uid(), lists.at(i));
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uids.insert(lists.at(i)->uid(), lists.at(i));
             connectVersionList(i, lists.at(i));
         }
         endResetModel();
@@ -122,16 +122,16 @@ void Index::merge(const std::shared_ptr<Index> &other)
     {
         for (const VersionList::Ptr &list : lists)
         {
-            if (m_uids.contains(list->uid()))
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uids.contains(list->uid()))
             {
-                m_uids[list->uid()]->mergeFromIndex(list);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uids[list->uid()]->mergeFromIndex(list);
             }
             else
             {
-                beginInsertRows(QModelIndex(), m_lists.size(), m_lists.size());
-                connectVersionList(m_lists.size(), list);
-                m_lists.append(list);
-                m_uids.insert(list->uid(), list);
+                beginInsertRows(QModelIndex(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists.size(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists.size());
+                connectVersionList(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists.size(), list);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lists.append(list);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uids.insert(list->uid(), list);
                 endInsertRows();
             }
         }

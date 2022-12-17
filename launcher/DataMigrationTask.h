@@ -31,12 +31,12 @@ class DataMigrationTask : public Task {
     void copyAborted();
 
    private:
-    const QString& m_sourcePath;
-    const QString& m_targetPath;
-    const IPathMatcher::Ptr m_pathMatcher;
+    const QString& hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sourcePath;
+    const QString& hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_targetPath;
+    const IPathMatcher::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pathMatcher;
 
-    FS::copy m_copy;
-    int m_toCopy = 0;
-    QFuture<bool> m_copyFuture;
-    QFutureWatcher<bool> m_copyFutureWatcher;
+    FS::copy hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copy;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_toCopy = 0;
+    QFuture<bool> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFuture;
+    QFutureWatcher<bool> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copyFutureWatcher;
 };

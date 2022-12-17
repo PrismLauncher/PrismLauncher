@@ -49,11 +49,11 @@ private:
     void next();
 
 private:
-    MinecraftInstance *m_inst = nullptr;
-    QList<Task::Ptr> m_tasks;
-    QString m_preFailure;
-    int m_currentTask = -1;
-    bool m_abort = false;
-    bool m_failed_out_of_order = false;
-    QString m_fail_reason;
+    MinecraftInstance *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst = nullptr;
+    QList<Task::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_preFailure;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask = -1;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed_out_of_order = false;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fail_reason;
 };

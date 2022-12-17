@@ -69,9 +69,9 @@ private:
     void preselect();
 
 private:
-    QString m_currentVersion;
-    BaseVersionList *m_vlist = nullptr;
-    VersionProxyModel *m_proxyModel = nullptr;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersion;
+    BaseVersionList *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist = nullptr;
+    VersionProxyModel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel = nullptr;
     int resizeOnColumn = 0;
     Task * loadTask;
     bool preselectedAlready = false;

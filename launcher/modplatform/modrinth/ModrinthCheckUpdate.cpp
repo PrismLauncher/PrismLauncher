@@ -15,8 +15,8 @@ static ModPlatform::ProviderCapabilities ProviderCaps;
 
 bool ModrinthCheckUpdate::abort()
 {
-    if (m_net_job)
-        return m_net_job->abort();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job)
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job->abort();
     return true;
 }
 
@@ -37,7 +37,7 @@ void ModrinthCheckUpdate::executeTask()
     auto best_hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
 
     ConcurrentTask hashing_task(this, "MakeModrinthHashesTask", 10);
-    for (auto* mod : m_mods) {
+    for (auto* mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods) {
         if (!mod->enabled()) {
             emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
             continue;
@@ -69,7 +69,7 @@ void ModrinthCheckUpdate::executeTask()
     loop.exec();
 
     auto* response = new QByteArray();
-    auto job = api.latestVersions(hashes, best_hash_type, m_game_versions, m_loaders, response);
+    auto job = api.latestVersions(hashes, best_hash_type, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_game_versions, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaders, response);
 
     QEventLoop lock;
 
@@ -110,7 +110,7 @@ void ModrinthCheckUpdate::executeTask()
                 QString loader_filter;
                 static auto flags = { ModAPI::ModLoaderType::Forge, ModAPI::ModLoaderType::Fabric, ModAPI::ModLoaderType::Quilt };
                 for (auto flag : flags) {
-                    if (m_loaders.testFlag(flag)) {
+                    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaders.testFlag(flag)) {
                         loader_filter = api.getModLoaderString(flag);
                         break;
                     }
@@ -154,9 +154,9 @@ void ModrinthCheckUpdate::executeTask()
                     pack.description = mod->description();
                     pack.provider = ModPlatform::Provider::MODRINTH;
 
-                    auto download_task = new ModDownloadTask(pack, project_ver, m_mods_folder);
+                    auto download_task = new ModDownloadTask(pack, project_ver, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods_folder);
 
-                    m_updatable.emplace_back(pack.name, hash, mod->version(), project_ver.version_number, project_ver.changelog,
+                    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updatable.emplace_back(pack.name, hash, mod->version(), project_ver.version_number, project_ver.changelog,
                                              ModPlatform::Provider::MODRINTH, download_task);
                 }
             }
@@ -170,7 +170,7 @@ void ModrinthCheckUpdate::executeTask()
     setStatus(tr("Waiting for the API response from Modrinth..."));
     setProgress(1, 3);
 
-    m_net_job = job.get();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job = job.get();
     job->start();
 
     lock.exec();

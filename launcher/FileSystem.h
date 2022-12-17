@@ -82,28 +82,28 @@ class copy : public QObject {
    public:
     copy(const QString& src, const QString& dst, QObject* parent = nullptr) : QObject(parent)
     {
-        m_src.setPath(src);
-        m_dst.setPath(dst);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_src.setPath(src);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dst.setPath(dst);
     }
     copy& followSymlinks(const bool follow)
     {
-        m_followSymlinks = follow;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_followSymlinks = follow;
         return *this;
     }
     copy& matcher(const IPathMatcher* filter)
     {
-        m_matcher = filter;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_matcher = filter;
         return *this;
     }
     copy& whitelist(bool whitelist)
     {
-        m_whitelist = whitelist;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_whitelist = whitelist;
         return *this;
     }
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
-    int totalCopied() { return m_copied; }
+    int totalCopied() { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copied; }
 
    signals:
     void fileCopied(const QString& relativeName);
@@ -113,12 +113,12 @@ class copy : public QObject {
     bool operator()(const QString& offset, bool dryRun = false);
 
    private:
-    bool m_followSymlinks = true;
-    const IPathMatcher* m_matcher = nullptr;
-    bool m_whitelist = false;
-    QDir m_src;
-    QDir m_dst;
-    int m_copied;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_followSymlinks = true;
+    const IPathMatcher* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_matcher = nullptr;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_whitelist = false;
+    QDir hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_src;
+    QDir hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dst;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_copied;
 };
 
 /**

@@ -101,31 +101,31 @@ class OrSetting : public Setting
     Q_OBJECT
 public:
     OrSetting(QString id, std::shared_ptr<Setting> a, std::shared_ptr<Setting> b)
-    :Setting({id}, false), m_a(a), m_b(b)
+    :Setting({id}, false), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_a(a), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_b(b)
     {
     }
     virtual QVariant get() const
     {
-        bool a = m_a->get().toBool();
-        bool b = m_b->get().toBool();
+        bool a = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_a->get().toBool();
+        bool b = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_b->get().toBool();
         return a || b;
     }
     virtual void reset() {}
     virtual void set(QVariant value) {}
 private:
-    std::shared_ptr<Setting> m_a;
-    std::shared_ptr<Setting> m_b;
+    std::shared_ptr<Setting> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_a;
+    std::shared_ptr<Setting> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_b;
 };
 
 MinecraftInstance::MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
     : BaseInstance(globalSettings, settings, rootDir)
 {
-    m_components.reset(new PackProfile(this));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components.reset(new PackProfile(this));
 }
 
 void MinecraftInstance::saveNow()
 {
-    m_components->saveNow();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->saveNow();
 }
 
 void MinecraftInstance::loadSpecificSettings()
@@ -134,63 +134,63 @@ void MinecraftInstance::loadSpecificSettings()
         return;
 
     // Java Settings
-    auto javaOverride = m_settings->registerSetting("OverrideJava", false);
-    auto locationOverride = m_settings->registerSetting("OverrideJavaLocation", false);
-    auto argsOverride = m_settings->registerSetting("OverrideJavaArgs", false);
+    auto javaOverride = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("OverrideJava", false);
+    auto locationOverride = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("OverrideJavaLocation", false);
+    auto argsOverride = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("OverrideJavaArgs", false);
 
     // combinations
     auto javaOrLocation = std::make_shared<OrSetting>("JavaOrLocationOverride", javaOverride, locationOverride);
     auto javaOrArgs = std::make_shared<OrSetting>("JavaOrArgsOverride", javaOverride, argsOverride);
 
     if (auto global_settings = globalSettings()) {
-        m_settings->registerOverride(global_settings->getSetting("JavaPath"), javaOrLocation);
-        m_settings->registerOverride(global_settings->getSetting("JvmArgs"), javaOrArgs);
-        m_settings->registerOverride(global_settings->getSetting("IgnoreJavaCompatibility"), javaOrLocation);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("JavaPath"), javaOrLocation);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("JvmArgs"), javaOrArgs);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("IgnoreJavaCompatibility"), javaOrLocation);
 
         // special!
-        m_settings->registerPassthrough(global_settings->getSetting("JavaTimestamp"), javaOrLocation);
-        m_settings->registerPassthrough(global_settings->getSetting("JavaVersion"), javaOrLocation);
-        m_settings->registerPassthrough(global_settings->getSetting("JavaArchitecture"), javaOrLocation);
-        m_settings->registerPassthrough(global_settings->getSetting("JavaRealArchitecture"), javaOrLocation);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerPassthrough(global_settings->getSetting("JavaTimestamp"), javaOrLocation);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerPassthrough(global_settings->getSetting("JavaVersion"), javaOrLocation);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerPassthrough(global_settings->getSetting("JavaArchitecture"), javaOrLocation);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerPassthrough(global_settings->getSetting("JavaRealArchitecture"), javaOrLocation);
 
         // Window Size
-        auto windowSetting = m_settings->registerSetting("OverrideWindow", false);
-        m_settings->registerOverride(global_settings->getSetting("LaunchMaximized"), windowSetting);
-        m_settings->registerOverride(global_settings->getSetting("MinecraftWinWidth"), windowSetting);
-        m_settings->registerOverride(global_settings->getSetting("MinecraftWinHeight"), windowSetting);
+        auto windowSetting = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("OverrideWindow", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("LaunchMaximized"), windowSetting);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("MinecraftWinWidth"), windowSetting);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("MinecraftWinHeight"), windowSetting);
 
         // Memory
-        auto memorySetting = m_settings->registerSetting("OverrideMemory", false);
-        m_settings->registerOverride(global_settings->getSetting("MinMemAlloc"), memorySetting);
-        m_settings->registerOverride(global_settings->getSetting("MaxMemAlloc"), memorySetting);
-        m_settings->registerOverride(global_settings->getSetting("PermGen"), memorySetting);
+        auto memorySetting = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("OverrideMemory", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("MinMemAlloc"), memorySetting);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("MaxMemAlloc"), memorySetting);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("PermGen"), memorySetting);
 
         // Minecraft launch method
-        auto launchMethodOverride = m_settings->registerSetting("OverrideMCLaunchMethod", false);
-        m_settings->registerOverride(global_settings->getSetting("MCLaunchMethod"), launchMethodOverride);
+        auto launchMethodOverride = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("OverrideMCLaunchMethod", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("MCLaunchMethod"), launchMethodOverride);
 
         // Native library workarounds
-        auto nativeLibraryWorkaroundsOverride = m_settings->registerSetting("OverrideNativeWorkarounds", false);
-        m_settings->registerOverride(global_settings->getSetting("UseNativeOpenAL"), nativeLibraryWorkaroundsOverride);
-        m_settings->registerOverride(global_settings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
+        auto nativeLibraryWorkaroundsOverride = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("OverrideNativeWorkarounds", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("UseNativeOpenAL"), nativeLibraryWorkaroundsOverride);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
 
         // Peformance related options
-        auto performanceOverride = m_settings->registerSetting("OverridePerformance", false);
-        m_settings->registerOverride(global_settings->getSetting("EnableFeralGamemode"), performanceOverride);
-        m_settings->registerOverride(global_settings->getSetting("EnableMangoHud"), performanceOverride);
-        m_settings->registerOverride(global_settings->getSetting("UseDiscreteGpu"), performanceOverride);
+        auto performanceOverride = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("OverridePerformance", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("EnableFeralGamemode"), performanceOverride);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("EnableMangoHud"), performanceOverride);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("UseDiscreteGpu"), performanceOverride);
 
         // Miscellaneous
-        auto miscellaneousOverride = m_settings->registerSetting("OverrideMiscellaneous", false);
-        m_settings->registerOverride(global_settings->getSetting("CloseAfterLaunch"), miscellaneousOverride);
-        m_settings->registerOverride(global_settings->getSetting("QuitAfterGameStop"), miscellaneousOverride);
+        auto miscellaneousOverride = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("OverrideMiscellaneous", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("CloseAfterLaunch"), miscellaneousOverride);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerOverride(global_settings->getSetting("QuitAfterGameStop"), miscellaneousOverride);
 
-        m_settings->set("InstanceType", "OneSix");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("InstanceType", "OneSix");
     }
 
     // Join server on launch, this does not have a global override
-    m_settings->registerSetting("JoinServerOnLaunch", false);
-    m_settings->registerSetting("JoinServerOnLaunchAddress", "");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("JoinServerOnLaunch", false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("JoinServerOnLaunchAddress", "");
 
     qDebug() << "Instance-type specific settings were loaded!";
 
@@ -201,7 +201,7 @@ void MinecraftInstance::loadSpecificSettings()
 
 void MinecraftInstance::updateRuntimeContext()
 {
-    m_runtimeContext.updateFromInstanceSettings(m_settings);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_runtimeContext.updateFromInstanceSettings(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings);
 }
 
 QString MinecraftInstance::typeName() const
@@ -211,7 +211,7 @@ QString MinecraftInstance::typeName() const
 
 std::shared_ptr<PackProfile> MinecraftInstance::getPackProfile() const
 {
-    return m_components;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components;
 }
 
 QSet<QString> MinecraftInstance::traits() const
@@ -339,21 +339,21 @@ QDir MinecraftInstance::versionsPath() const
 QStringList MinecraftInstance::getClassPath()
 {
     QStringList jars, nativeJars;
-    auto profile = m_components->getProfile();
+    auto profile = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->getProfile();
     profile->getLibraryFiles(runtimeContext(), jars, nativeJars, getLocalLibraryPath(), binRoot());
     return jars;
 }
 
 QString MinecraftInstance::getMainClass() const
 {
-    auto profile = m_components->getProfile();
+    auto profile = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->getProfile();
     return profile->getMainClass();
 }
 
 QStringList MinecraftInstance::getNativeJars()
 {
     QStringList jars, nativeJars;
-    auto profile = m_components->getProfile();
+    auto profile = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->getProfile();
     profile->getLibraryFiles(runtimeContext(), jars, nativeJars, getLocalLibraryPath(), binRoot());
     return nativeJars;
 }
@@ -370,11 +370,11 @@ QStringList MinecraftInstance::extraArguments()
         list.append({"-Dfml.ignoreInvalidMinecraftCertificates=true",
                      "-Dfml.ignorePatchDiscrepancies=true"});
     }
-    auto addn = m_components->getProfile()->getAddnJvmArguments();
+    auto addn = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->getProfile()->getAddnJvmArguments();
     if (!addn.isEmpty()) {
         list.append(addn);
     }
-    auto agents = m_components->getProfile()->getAgents();
+    auto agents = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->getProfile()->getAgents();
     for (auto agent : agents)
     {
         QStringList jar, temp1, temp2, temp3;
@@ -443,7 +443,7 @@ QStringList MinecraftInstance::javaArguments()
 
 QString MinecraftInstance::getLauncher()
 {
-    auto profile = m_components->getProfile();
+    auto profile = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->getProfile();
 
     // use legacy launcher if the traits are set
     if (profile->getTraits().contains("legacyLaunch") || profile->getTraits().contains("alphaLaunch"))
@@ -546,7 +546,7 @@ static QString replaceTokensIn(QString text, QMap<QString, QString> with)
 QStringList MinecraftInstance::processMinecraftArgs(
         AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) const
 {
-    auto profile = m_components->getProfile();
+    auto profile = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->getProfile();
     QString args_pattern = profile->getMinecraftArguments();
     for (auto tweaker : profile->getTweakers())
     {
@@ -604,9 +604,9 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
 {
     QString launchScript;
 
-    if (!m_components)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components)
         return QString();
-    auto profile = m_components->getProfile();
+    auto profile = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->getProfile();
     if(!profile)
         return QString();
 
@@ -673,7 +673,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
     out << "Main Class:" << "  " + getMainClass() << "";
     out << "Native path:" << "  " + getNativePath() << "";
 
-    auto profile = m_components->getProfile();
+    auto profile = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->getProfile();
 
     auto alltraits = traits();
     if(alltraits.size())
@@ -903,17 +903,17 @@ QString MinecraftInstance::getStatusbarDescription()
         traits.append(tr("broken"));
     }
 
-    QString mcVersion = m_components->getComponentVersion("net.minecraft");
+    QString mcVersion = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->getComponentVersion("net.minecraft");
     if (mcVersion.isEmpty())
     {
         // Load component info if needed
-        m_components->reload(Net::Mode::Offline);
-        mcVersion = m_components->getComponentVersion("net.minecraft");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->reload(Net::Mode::Offline);
+        mcVersion = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->getComponentVersion("net.minecraft");
     }
 
     QString description;
     description.append(tr("Minecraft %1").arg(mcVersion));
-    if(m_settings->get("ShowGameTime").toBool())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("ShowGameTime").toBool())
     {
         if (lastTimePlayed() > 0) {
             description.append(tr(", last played for %1").arg(Time::prettifyDuration(lastTimePlayed())));
@@ -950,8 +950,8 @@ Task::Ptr MinecraftInstance::createUpdateTask(Net::Mode mode)
 shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin)
 {
     updateRuntimeContext();
-    // FIXME: get rid of shared_from_this ...
-    auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(shared_from_this()));
+    // FIXME: get rid of shared_frohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_this ...
+    auto process = LaunchTask::create(std::dynamic_pointer_cast<MinecraftInstance>(shared_frohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_this()));
     auto pptr = process.get();
 
     APPLICATION->icons()->saveIcon(iconKey(), FS::PathCombine(gameRoot(), "icon.png"), "PNG");
@@ -1078,14 +1078,14 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     {
         process->setCensorFilter(createCensorFilterFromSession(session));
     }
-    if(m_settings->get("QuitAfterGameStop").toBool())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("QuitAfterGameStop").toBool())
     {
         auto step = new QuitAfterGameStop(pptr);
         process->appendStep(step);
     }
-    m_launchProcess = process;
-    emit launchTaskChanged(m_launchProcess);
-    return m_launchProcess;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchProcess = process;
+    emit launchTaskChanged(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchProcess);
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchProcess;
 }
 
 QString MinecraftInstance::launchMethod()
@@ -1100,76 +1100,76 @@ JavaVersion MinecraftInstance::getJavaVersion()
 
 std::shared_ptr<ModFolderModel> MinecraftInstance::loaderModList() const
 {
-    if (!m_loader_mod_list)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loader_mod_list)
     {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_loader_mod_list.reset(new ModFolderModel(modsRoot(), is_indexed));
-        m_loader_mod_list->disableInteraction(isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_loader_mod_list.get(), &ModFolderModel::disableInteraction);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loader_mod_list.reset(new ModFolderModel(modsRoot(), is_indexed));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loader_mod_list->disableInteraction(isRunning());
+        connect(this, &BaseInstance::runningStatusChanged, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loader_mod_list.get(), &ModFolderModel::disableInteraction);
     }
-    return m_loader_mod_list;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loader_mod_list;
 }
 
 std::shared_ptr<ModFolderModel> MinecraftInstance::coreModList() const
 {
-    if (!m_core_mod_list)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_core_mod_list)
     {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_core_mod_list.reset(new ModFolderModel(coreModsDir(), is_indexed));
-        m_core_mod_list->disableInteraction(isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_core_mod_list.get(), &ModFolderModel::disableInteraction);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_core_mod_list.reset(new ModFolderModel(coreModsDir(), is_indexed));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_core_mod_list->disableInteraction(isRunning());
+        connect(this, &BaseInstance::runningStatusChanged, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_core_mod_list.get(), &ModFolderModel::disableInteraction);
     }
-    return m_core_mod_list;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_core_mod_list;
 }
 
 std::shared_ptr<ResourcePackFolderModel> MinecraftInstance::resourcePackList() const
 {
-    if (!m_resource_pack_list)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resource_pack_list)
     {
-        m_resource_pack_list.reset(new ResourcePackFolderModel(resourcePacksDir()));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resource_pack_list.reset(new ResourcePackFolderModel(resourcePacksDir()));
     }
-    return m_resource_pack_list;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resource_pack_list;
 }
 
 std::shared_ptr<TexturePackFolderModel> MinecraftInstance::texturePackList() const
 {
-    if (!m_texture_pack_list)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_texture_pack_list)
     {
-        m_texture_pack_list.reset(new TexturePackFolderModel(texturePacksDir()));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_texture_pack_list.reset(new TexturePackFolderModel(texturePacksDir()));
     }
-    return m_texture_pack_list;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_texture_pack_list;
 }
 
 std::shared_ptr<ShaderPackFolderModel> MinecraftInstance::shaderPackList() const
 {
-    if (!m_shader_pack_list)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_shader_pack_list)
     {
-        m_shader_pack_list.reset(new ShaderPackFolderModel(shaderPacksDir()));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_shader_pack_list.reset(new ShaderPackFolderModel(shaderPacksDir()));
     }
-    return m_shader_pack_list;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_shader_pack_list;
 }
 
 std::shared_ptr<WorldList> MinecraftInstance::worldList() const
 {
-    if (!m_world_list)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_world_list)
     {
-        m_world_list.reset(new WorldList(worldDir()));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_world_list.reset(new WorldList(worldDir()));
     }
-    return m_world_list;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_world_list;
 }
 
 std::shared_ptr<GameOptions> MinecraftInstance::gameOptionsModel() const
 {
-    if (!m_game_options)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_game_options)
     {
-        m_game_options.reset(new GameOptions(FS::PathCombine(gameRoot(), "options.txt")));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_game_options.reset(new GameOptions(FS::PathCombine(gameRoot(), "options.txt")));
     }
-    return m_game_options;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_game_options;
 }
 
 QList<Mod*> MinecraftInstance::getJarMods() const
 {
-    auto profile = m_components->getProfile();
+    auto profile = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_components->getProfile();
     QList<Mod*> mods;
     for (auto jarmod : profile->getJarMods())
     {

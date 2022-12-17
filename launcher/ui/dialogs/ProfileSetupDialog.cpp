@@ -50,7 +50,7 @@
 
 
 ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidget *parent)
-    : QDialog(parent), m_accountToSetup(accountToSetup), ui(new Ui::ProfileSetupDialog)
+    : QDialog(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToSetup(accountToSetup), ui(new Ui::ProfileSetupDialog)
 {
     ui->setupUi(this);
     ui->errorLabel->setVisible(false);
@@ -152,7 +152,7 @@ void ProfileSetupDialog::checkName(const QString &name) {
     currentCheck = name;
     isChecking = true;
 
-    auto token = m_accountToSetup->accessToken();
+    auto token = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToSetup->accessToken();
 
     auto url = QString("https://api.minecraftservices.com/minecraft/profile/name/%1/available").arg(name);
     QNetworkRequest request = QNetworkRequest(url);
@@ -201,7 +201,7 @@ void ProfileSetupDialog::setupProfile(const QString &profileName) {
         return;
     }
 
-    auto token = m_accountToSetup->accessToken();
+    auto token = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToSetup->accessToken();
 
     auto url = QString("https://api.minecraftservices.com/minecraft/profile");
     QNetworkRequest request = QNetworkRequest(url);

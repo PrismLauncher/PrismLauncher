@@ -38,11 +38,11 @@ ModUpdateDialog::ModUpdateDialog(QWidget* parent,
                                  const std::shared_ptr<ModFolderModel> mods,
                                  QList<Mod*>& search_for)
     : ReviewMessageBox(parent, tr("Confirm mods to update"), "")
-    , m_parent(parent)
-    , m_mod_model(mods)
-    , m_candidates(search_for)
-    , m_second_try_metadata(new ConcurrentTask())
-    , m_instance(instance)
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent(parent)
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_model(mods)
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_candidates(search_for)
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_second_try_metadata(new ConcurrentTask())
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance(instance)
 {
     ReviewMessageBox::setGeometry(0, 0, 800, 600);
 
@@ -55,48 +55,48 @@ void ModUpdateDialog::checkCandidates()
     // Ensure mods have valid metadata
     auto went_well = ensureMetadata();
     if (!went_well) {
-        m_aborted = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = true;
         return;
     }
 
     // Report failed metadata generation
-    if (!m_failed_metadata.empty()) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed_metadata.empty()) {
         QString text;
-        for (const auto& failed : m_failed_metadata) {
+        for (const auto& failed : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed_metadata) {
             const auto& mod = std::get<0>(failed);
             const auto& reason = std::get<1>(failed);
             text += tr("Mod name: %1<br>File name: %2<br>Reason: %3<br><br>").arg(mod->name(), mod->fileinfo().fileName(), reason);
         }
 
-        ScrollMessageBox message_dialog(m_parent, tr("Metadata generation failed"),
+        ScrollMessageBox message_dialog(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, tr("Metadata generation failed"),
                                         tr("Could not generate metadata for the following mods:<br>"
                                            "Do you wish to proceed without those mods?"),
                                         text);
         message_dialog.setModal(true);
         if (message_dialog.exec() == QDialog::Rejected) {
-            m_aborted = true;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = true;
             QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
             return;
         }
     }
 
-    auto versions = mcVersions(m_instance);
-    auto loaders = mcLoaders(m_instance);
+    auto versions = mcVersions(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance);
+    auto loaders = mcLoaders(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance);
 
-    SequentialTask check_task(m_parent, tr("Checking for updates"));
+    SequentialTask check_task(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, tr("Checking for updates"));
 
-    if (!m_modrinth_to_update.empty()) {
-        m_modrinth_check_task = new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model);
-        connect(m_modrinth_check_task, &CheckUpdateTask::checkFailed, this,
-                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({mod, reason, recover_url}); });
-        check_task.addTask(m_modrinth_check_task);
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modrinth_to_update.empty()) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modrinth_check_task = new ModrinthCheckUpdate(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modrinth_to_update, versions, loaders, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_model);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modrinth_check_task, &CheckUpdateTask::checkFailed, this,
+                [this](Mod* mod, QString reason, QUrl recover_url) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed_check_update.append({mod, reason, recover_url}); });
+        check_task.addTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modrinth_check_task);
     }
 
-    if (!m_flame_to_update.empty()) {
-        m_flame_check_task = new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_mod_model);
-        connect(m_flame_check_task, &CheckUpdateTask::checkFailed, this,
-                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({mod, reason, recover_url}); });
-        check_task.addTask(m_flame_check_task);
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_flame_to_update.empty()) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_flame_check_task = new FlameCheckUpdate(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_flame_to_update, versions, loaders, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_model);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_flame_check_task, &CheckUpdateTask::checkFailed, this,
+                [this](Mod* mod, QString reason, QUrl recover_url) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed_check_update.append({mod, reason, recover_url}); });
+        check_task.addTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_flame_check_task);
     }
 
     connect(&check_task, &Task::failed, this,
@@ -110,44 +110,44 @@ void ModUpdateDialog::checkCandidates()
     });
 
     // Check for updates
-    ProgressDialog progress_dialog(m_parent);
+    ProgressDialog progress_dialog(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent);
     progress_dialog.setSkipButton(true, tr("Abort"));
     progress_dialog.setWindowTitle(tr("Checking for updates..."));
     auto ret = progress_dialog.execWithTask(&check_task);
 
     // If the dialog was skipped / some download error happened
     if (ret == QDialog::DialogCode::Rejected) {
-        m_aborted = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = true;
         QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
         return;
     }
 
     // Add found updates for Modrinth
-    if (m_modrinth_check_task) {
-        auto modrinth_updates = m_modrinth_check_task->getUpdatable();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modrinth_check_task) {
+        auto modrinth_updates = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modrinth_check_task->getUpdatable();
         for (auto& updatable : modrinth_updates) {
             qDebug() << QString("Mod %1 has an update available!").arg(updatable.name);
 
             appendMod(updatable);
-            m_tasks.insert(updatable.name, updatable.download);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks.insert(updatable.name, updatable.download);
         }
     }
 
     // Add found updated for Flame
-    if (m_flame_check_task) {
-        auto flame_updates = m_flame_check_task->getUpdatable();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_flame_check_task) {
+        auto flame_updates = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_flame_check_task->getUpdatable();
         for (auto& updatable : flame_updates) {
             qDebug() << QString("Mod %1 has an update available!").arg(updatable.name);
 
             appendMod(updatable);
-            m_tasks.insert(updatable.name, updatable.download);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks.insert(updatable.name, updatable.download);
         }
     }
 
     // Report failed update checking
-    if (!m_failed_check_update.empty()) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed_check_update.empty()) {
         QString text;
-        for (const auto& failed : m_failed_check_update) {
+        for (const auto& failed : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed_check_update) {
             const auto& mod = std::get<0>(failed);
             const auto& reason = std::get<1>(failed);
             const auto& recover_url = std::get<2>(failed);
@@ -164,13 +164,13 @@ void ModUpdateDialog::checkCandidates()
             text += "<br>";
         }
 
-        ScrollMessageBox message_dialog(m_parent, tr("Failed to check for updates"),
+        ScrollMessageBox message_dialog(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, tr("Failed to check for updates"),
                                         tr("Could not check or get the following mods for updates:<br>"
                                            "Do you wish to proceed without those mods?"),
                                         text);
         message_dialog.setModal(true);
         if (message_dialog.exec() == QDialog::Rejected) {
-            m_aborted = true;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = true;
             QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
             return;
         }
@@ -178,7 +178,7 @@ void ModUpdateDialog::checkCandidates()
 
     // If there's no mod to be updated
     if (ui->modTreeWidget->topLevelItemCount() == 0) {
-        m_no_updates = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_no_updates = true;
     } else {
         // FIXME: Find a more efficient way of doing this!
 
@@ -193,7 +193,7 @@ void ModUpdateDialog::checkCandidates()
         }
     }
 
-    if (m_aborted || m_no_updates)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_no_updates)
         QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
 }
 
@@ -202,14 +202,14 @@ auto ModUpdateDialog::ensureMetadata() -> bool
 {
     auto index_dir = indexDir();
 
-    SequentialTask seq(m_parent, tr("Looking for metadata"));
+    SequentialTask seq(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, tr("Looking for metadata"));
 
     // A better use of data structures here could remove the need for this QHash
     QHash<QString, bool> should_try_others;
     QList<Mod*> modrinth_tmp;
     QList<Mod*> flame_tmp;
 
-    bool confirm_rest = false;
+    bool confirhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rest = false;
     bool try_others_rest = false;
     bool skip_rest = false;
     ModPlatform::Provider provider_rest = ModPlatform::Provider::MODRINTH;
@@ -225,7 +225,7 @@ auto ModUpdateDialog::ensureMetadata() -> bool
         }
     };
 
-    for (auto candidate : m_candidates) {
+    for (auto candidate : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_candidates) {
         if (candidate->status() != ModStatus::NoMetadata) {
             onMetadataEnsured(candidate);
             continue;
@@ -234,7 +234,7 @@ auto ModUpdateDialog::ensureMetadata() -> bool
         if (skip_rest)
             continue;
 
-        if (confirm_rest) {
+        if (confirhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rest) {
             addToTmp(candidate, provider_rest);
             should_try_others.insert(candidate->internal_id(), try_others_rest);
             continue;
@@ -251,8 +251,8 @@ auto ModUpdateDialog::ensureMetadata() -> bool
 
         if (response.skip_all)
             skip_rest = true;
-        if (response.confirm_all) {
-            confirm_rest = true;
+        if (response.confirhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_all) {
+            confirhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rest = true;
             provider_rest = response.chosen;
             try_others_rest = response.try_others;
         }
@@ -289,9 +289,9 @@ auto ModUpdateDialog::ensureMetadata() -> bool
         seq.addTask(flame_task);
     }
 
-    seq.addTask(m_second_try_metadata);
+    seq.addTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_second_try_metadata);
 
-    ProgressDialog checking_dialog(m_parent);
+    ProgressDialog checking_dialog(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent);
     checking_dialog.setSkipButton(true, tr("Abort"));
     checking_dialog.setWindowTitle(tr("Generating metadata..."));
     auto ret_metadata = checking_dialog.execWithTask(&seq);
@@ -307,10 +307,10 @@ void ModUpdateDialog::onMetadataEnsured(Mod* mod)
 
     switch (mod->metadata()->provider) {
         case ModPlatform::Provider::MODRINTH:
-            m_modrinth_to_update.push_back(mod);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modrinth_to_update.push_back(mod);
             break;
         case ModPlatform::Provider::FLAME:
-            m_flame_to_update.push_back(mod);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_flame_to_update.push_back(mod);
             break;
     }
 }
@@ -336,31 +336,31 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::P
         connect(task, &EnsureMetadataTask::metadataReady, [this](Mod* candidate) { onMetadataEnsured(candidate); });
         connect(task, &EnsureMetadataTask::metadataFailed, [this](Mod* candidate) { onMetadataFailed(candidate, false); });
 
-        m_second_try_metadata->addTask(task);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_second_try_metadata->addTask(task);
     } else {
         QString reason{ tr("Couldn't find a valid version on the selected mod provider(s)") };
 
-        m_failed_metadata.append({mod, reason});
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed_metadata.append({mod, reason});
     }
 }
 
 void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
 {
-    auto item_top = new QTreeWidgetItem(ui->modTreeWidget);
-    item_top->setCheckState(0, Qt::CheckState::Checked);
-    item_top->setText(0, info.name);
-    item_top->setExpanded(true);
+    auto itehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_top = new QTreeWidgetItem(ui->modTreeWidget);
+    itehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_top->setCheckState(0, Qt::CheckState::Checked);
+    itehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_top->setText(0, info.name);
+    itehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_top->setExpanded(true);
 
-    auto provider_item = new QTreeWidgetItem(item_top);
+    auto provider_item = new QTreeWidgetItem(itehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_top);
     provider_item->setText(0, tr("Provider: %1").arg(ProviderCaps.readableName(info.provider)));
 
-    auto old_version_item = new QTreeWidgetItem(item_top);
+    auto old_version_item = new QTreeWidgetItem(itehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_top);
     old_version_item->setText(0, tr("Old version: %1").arg(info.old_version.isEmpty() ? tr("Not installed") : info.old_version));
 
-    auto new_version_item = new QTreeWidgetItem(item_top);
+    auto new_version_item = new QTreeWidgetItem(itehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_top);
     new_version_item->setText(0, tr("New version: %1").arg(info.new_version));
 
-    auto changelog_item = new QTreeWidgetItem(item_top);
+    auto changelog_item = new QTreeWidgetItem(itehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_top);
     changelog_item->setText(0, tr("Changelog of the latest version"));
 
     auto changelog = new QTreeWidgetItem(changelog_item);
@@ -390,7 +390,7 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
 
     ui->modTreeWidget->setItemWidget(changelog, 0, changelog_area);
 
-    ui->modTreeWidget->addTopLevelItem(item_top);
+    ui->modTreeWidget->addTopLevelItem(itehello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_top);
 }
 
 auto ModUpdateDialog::getTasks() -> const QList<ModDownloadTask*>
@@ -401,7 +401,7 @@ auto ModUpdateDialog::getTasks() -> const QList<ModDownloadTask*>
 
     for (int i = 1; item != nullptr; ++i) {
         if (item->checkState(0) == Qt::CheckState::Checked) {
-            list.push_back(m_tasks.find(item->text(0)).value());
+            list.push_back(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_tasks.find(item->text(0)).value());
         }
 
         item = ui->modTreeWidget->topLevelItem(i);

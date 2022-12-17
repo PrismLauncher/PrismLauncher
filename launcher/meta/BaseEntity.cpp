@@ -26,7 +26,7 @@
 class ParsingValidator : public Net::Validator
 {
 public: /* con/des */
-    ParsingValidator(Meta::BaseEntity *entity) : m_entity(entity)
+    ParsingValidator(Meta::BaseEntity *entity) : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entity(entity)
     {
     };
     virtual ~ParsingValidator()
@@ -49,12 +49,12 @@ public: /* methods */
     }
     bool validate(QNetworkReply &) override
     {
-        auto fname = m_entity->localFilename();
+        auto fname = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entity->localFilename();
         try
         {
             auto doc = Json::requireDocument(data, fname);
             auto obj = Json::requireObject(doc, fname);
-            m_entity->parse(obj);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entity->parse(obj);
             return true;
         }
         catch (const Exception &e)
@@ -66,7 +66,7 @@ public: /* methods */
 
 private: /* data */
     QByteArray data;
-    Meta::BaseEntity *m_entity;
+    Meta::BaseEntity *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entity;
 };
 
 Meta::BaseEntity::~BaseEntity()
@@ -118,7 +118,7 @@ void Meta::BaseEntity::load(Net::Mode loadType)
     {
         if(loadLocalFile())
         {
-            m_loadStatus = LoadStatus::Local;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadStatus = LoadStatus::Local;
         }
     }
     // if we need remote update, run the update task
@@ -126,7 +126,7 @@ void Meta::BaseEntity::load(Net::Mode loadType)
     {
         return;
     }
-    m_updateTask = new NetJob(QObject::tr("Download of meta file %1").arg(localFilename()), APPLICATION->network());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask = new NetJob(QObject::tr("Download of meta file %1").arg(localFilename()), APPLICATION->network());
     auto url = this->url();
     auto entry = APPLICATION->metacache()->resolveEntry("meta", localFilename());
     entry->setStale(true);
@@ -136,38 +136,38 @@ void Meta::BaseEntity::load(Net::Mode loadType)
      * If that fails, the file is not written to storage.
      */
     dl->addValidator(new ParsingValidator(this));
-    m_updateTask->addNetAction(dl);
-    m_updateStatus = UpdateStatus::InProgress;
-    QObject::connect(m_updateTask.get(), &NetJob::succeeded, [&]()
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask->addNetAction(dl);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateStatus = UpdateStatus::InProgress;
+    QObject::connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask.get(), &NetJob::succeeded, [&]()
     {
-        m_loadStatus = LoadStatus::Remote;
-        m_updateStatus = UpdateStatus::Succeeded;
-        m_updateTask.reset();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadStatus = LoadStatus::Remote;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateStatus = UpdateStatus::Succeeded;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask.reset();
     });
-    QObject::connect(m_updateTask.get(), &NetJob::failed, [&]()
+    QObject::connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask.get(), &NetJob::failed, [&]()
     {
-        m_updateStatus = UpdateStatus::Failed;
-        m_updateTask.reset();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateStatus = UpdateStatus::Failed;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask.reset();
     });
-    m_updateTask->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask->start();
 }
 
 bool Meta::BaseEntity::isLoaded() const
 {
-    return m_loadStatus > LoadStatus::NotLoaded;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadStatus > LoadStatus::NotLoaded;
 }
 
 bool Meta::BaseEntity::shouldStartRemoteUpdate() const
 {
     // TODO: version-locks and offline mode?
-    return m_updateStatus != UpdateStatus::InProgress;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateStatus != UpdateStatus::InProgress;
 }
 
 Task::Ptr Meta::BaseEntity::getCurrentTask()
 {
-    if(m_updateStatus == UpdateStatus::InProgress)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateStatus == UpdateStatus::InProgress)
     {
-        return m_updateTask;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask;
     }
     return nullptr;
 }

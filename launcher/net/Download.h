@@ -81,8 +81,8 @@ class Download : public NetAction {
     void executeTask() override;
 
    private:
-    std::unique_ptr<Sink> m_sink;
-    Options m_options;
+    std::unique_ptr<Sink> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink;
+    Options hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_options;
 };
 }  // namespace Net
 

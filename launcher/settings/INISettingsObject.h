@@ -39,7 +39,7 @@ public:
      */
     virtual QString filePath() const
     {
-        return m_filePath;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filePath;
     }
 
     /*!
@@ -62,6 +62,6 @@ protected:
     void doSave();
 
 protected:
-    INIFile m_ini;
-    QString m_filePath;
+    INIFile hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ini;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filePath;
 };

@@ -87,12 +87,12 @@ private:
     void updateLaunchButtons();
 
 private:
-    shared_qobject_ptr<LaunchTask> m_proc;
-    InstancePtr m_instance;
-    bool m_doNotSave = false;
-    PageContainer *m_container = nullptr;
-    QPushButton *m_closeButton = nullptr;
-    QPushButton *m_killButton = nullptr;
-    QPushButton *m_launchOfflineButton = nullptr;
-    QPushButton *m_launchDemoButton = nullptr;
+    shared_qobject_ptr<LaunchTask> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proc;
+    InstancePtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doNotSave = false;
+    PageContainer *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container = nullptr;
+    QPushButton *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_closeButton = nullptr;
+    QPushButton *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_killButton = nullptr;
+    QPushButton *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchOfflineButton = nullptr;
+    QPushButton *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_launchDemoButton = nullptr;
 };

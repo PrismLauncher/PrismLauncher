@@ -57,9 +57,9 @@ protected:
     Task::Ptr getCurrentTask();
 
 protected:
-    Status m_status = Status::NotDone;
-    shared_qobject_ptr<JavaListLoadTask> m_loadTask;
-    QList<BaseVersion::Ptr> m_vlist;
+    Status hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = Status::NotDone;
+    shared_qobject_ptr<JavaListLoadTask> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadTask;
+    QList<BaseVersion::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist;
 };
 
 class JavaListLoadTask : public Task
@@ -75,7 +75,7 @@ public slots:
     void javaCheckerFinished();
 
 protected:
-    shared_qobject_ptr<JavaCheckerJob> m_job;
-    JavaInstallList *m_list;
-    JavaInstall *m_currentRecommended;
+    shared_qobject_ptr<JavaCheckerJob> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_job;
+    JavaInstallList *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_list;
+    JavaInstall *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentRecommended;
 };

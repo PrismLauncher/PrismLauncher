@@ -13,30 +13,30 @@ ProgressWidget::ProgressWidget(QWidget* parent, bool show_label) : QWidget(paren
     auto* layout = new QVBoxLayout(this);
 
     if (show_label) {
-        m_label = new QLabel(this);
-        m_label->setWordWrap(true);
-        layout->addWidget(m_label);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label = new QLabel(this);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setWordWrap(true);
+        layout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label);
     }
 
-    m_bar = new QProgressBar(this);
-    m_bar->setMinimum(0);
-    m_bar->setMaximum(100);
-    layout->addWidget(m_bar);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar = new QProgressBar(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar->setMinimum(0);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar->setMaximum(100);
+    layout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar);
 
     setLayout(layout);
 }
 
 void ProgressWidget::reset()
 {
-    m_bar->reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar->reset();
 }
 
 void ProgressWidget::progressFormat(QString format)
 {
     if (format.isEmpty())
-        m_bar->setTextVisible(false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar->setTextVisible(false);
     else
-        m_bar->setFormat(format);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar->setFormat(format);
 }
 
 void ProgressWidget::watch(Task* task)
@@ -44,15 +44,15 @@ void ProgressWidget::watch(Task* task)
     if (!task)
         return;
 
-    if (m_task)
-        disconnect(m_task, nullptr, this, nullptr);
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task)
+        disconnect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task, nullptr, this, nullptr);
 
-    m_task = task;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task = task;
 
-    connect(m_task, &Task::finished, this, &ProgressWidget::handleTaskFinish);
-    connect(m_task, &Task::status, this, &ProgressWidget::handleTaskStatus);
-    connect(m_task, &Task::progress, this, &ProgressWidget::handleTaskProgress);
-    connect(m_task, &Task::destroyed, this, &ProgressWidget::taskDestroyed);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task, &Task::finished, this, &ProgressWidget::handleTaskFinish);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task, &Task::status, this, &ProgressWidget::handleTaskStatus);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task, &Task::progress, this, &ProgressWidget::handleTaskProgress);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task, &Task::destroyed, this, &ProgressWidget::taskDestroyed);
 
     show();
 }
@@ -60,8 +60,8 @@ void ProgressWidget::watch(Task* task)
 void ProgressWidget::start(Task* task)
 {
     watch(task);
-    if (!m_task->isRunning())
-        QMetaObject::invokeMethod(m_task, "start", Qt::QueuedConnection);
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task->isRunning())
+        QMetaObject::invokeMethod(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task, "start", Qt::QueuedConnection);
 }
 
 bool ProgressWidget::exec(std::shared_ptr<Task> task)
@@ -89,23 +89,23 @@ void ProgressWidget::hide()
 
 void ProgressWidget::handleTaskFinish()
 {
-    if (!m_task->wasSuccessful() && m_label)
-        m_label->setText(m_task->failReason());
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task->wasSuccessful() && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task->failReason());
 
-    if (m_hide_if_inactive)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hide_if_inactive)
         hide();
 }
 void ProgressWidget::handleTaskStatus(const QString& status)
 {
-    if (m_label)
-        m_label->setText(status);
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_label->setText(status);
 }
 void ProgressWidget::handleTaskProgress(qint64 current, qint64 total)
 {
-    m_bar->setMaximum(total);
-    m_bar->setValue(current);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar->setMaximum(total);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bar->setValue(current);
 }
 void ProgressWidget::taskDestroyed()
 {
-    m_task = nullptr;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task = nullptr;
 }

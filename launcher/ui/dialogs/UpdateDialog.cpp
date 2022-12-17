@@ -74,12 +74,12 @@ void UpdateDialog::loadChangelog()
     if(channel == "stable")
     {
         url = QString("https://raw.githubusercontent.com/PrismLauncher/PrismLauncher/%1/changelog.md").arg(channel);
-        m_changelogType = CHANGELOG_MARKDOWN;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_changelogType = CHANGELOG_MARKDOWN;
     }
     else
     {
         url = QString("https://api.github.com/repos/PrismLauncher/PrismLauncher/compare/%1...%2").arg(BuildConfig.GIT_COMMIT, channel);
-        m_changelogType = CHANGELOG_COMMITS;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_changelogType = CHANGELOG_COMMITS;
     }
     dljob->addNetAction(Net::Download::makeByteArray(QUrl(url), &changelogData));
     connect(dljob.get(), &NetJob::succeeded, this, &UpdateDialog::changelogLoaded);
@@ -182,7 +182,7 @@ QString reprocessCommits(QByteArray json)
 void UpdateDialog::changelogLoaded()
 {
     QString result;
-    switch(m_changelogType)
+    switch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_changelogType)
     {
         case CHANGELOG_COMMITS:
             result = reprocessCommits(changelogData);

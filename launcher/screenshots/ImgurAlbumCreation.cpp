@@ -46,32 +46,32 @@
 #include "BuildConfig.h"
 #include "Application.h"
 
-ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenShot::Ptr> screenshots) : NetAction(), m_screenshots(screenshots)
+ImgurAlbumCreation::ImgurAlbumCreation(QList<ScreenShot::Ptr> screenshots) : NetAction(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_screenshots(screenshots)
 {
-    m_url = BuildConfig.IMGUR_BASE_URL + "album.json";
-    m_state = State::Inactive;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url = BuildConfig.IMGUR_BASE_URL + "album.json";
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::Inactive;
 }
 
 void ImgurAlbumCreation::executeTask()
 {
-    m_state = State::Running;
-    QNetworkRequest request(m_url);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::Running;
+    QNetworkRequest request(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url);
     request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgentUncached().toUtf8());
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     request.setRawHeader("Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toStdString().c_str());
     request.setRawHeader("Accept", "application/json");
 
     QStringList hashes;
-    for (auto shot : m_screenshots)
+    for (auto shot : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_screenshots)
     {
-        hashes.append(shot->m_imgurDeleteHash);
+        hashes.append(shot->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_imgurDeleteHash);
     }
 
     const QByteArray data = "deletehashes=" + hashes.join(',').toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
 
     QNetworkReply *rep = APPLICATION->network()->post(request, data);
 
-    m_reply.reset(rep);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &ImgurAlbumCreation::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &ImgurAlbumCreation::downloadFinished);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -82,15 +82,15 @@ void ImgurAlbumCreation::executeTask()
 }
 void ImgurAlbumCreation::downloadError(QNetworkReply::NetworkError error)
 {
-    qDebug() << m_reply->errorString();
-    m_state = State::Failed;
+    qDebug() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->errorString();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::Failed;
 }
 void ImgurAlbumCreation::downloadFinished()
 {
-    if (m_state != State::Failed)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state != State::Failed)
     {
-        QByteArray data = m_reply->readAll();
-        m_reply.reset();
+        QByteArray data = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->readAll();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
         QJsonParseError jsonError;
         QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
         if (jsonError.error != QJsonParseError::NoError)
@@ -106,16 +106,16 @@ void ImgurAlbumCreation::downloadFinished()
             emitFailed();
             return;
         }
-        m_deleteHash = object.value("data").toObject().value("deletehash").toString();
-        m_id = object.value("data").toObject().value("id").toString();
-        m_state = State::Succeeded;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_deleteHash = object.value("data").toObject().value("deletehash").toString();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id = object.value("data").toObject().value("id").toString();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::Succeeded;
         emit succeeded();
         return;
     }
     else
     {
-        qDebug() << m_reply->readAll();
-        m_reply.reset();
+        qDebug() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->readAll();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
         emitFailed();
         return;
     }

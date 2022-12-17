@@ -85,8 +85,8 @@ int ProgressDialog::execWithTask(Task* task)
     connect(task, &Task::aborted, this, &ProgressDialog::hide);
     connect(task, &Task::abortStatusChanged, ui->skipButton, &QPushButton::setEnabled);
 
-    m_is_multi_step = task->isMultiStep();
-    if (!m_is_multi_step) {
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_multi_step = task->isMultiStep();
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_multi_step) {
         ui->globalStatusLabel->setHidden(true);
         ui->globalProgressBar->setHidden(true);
     }
@@ -159,7 +159,7 @@ void ProgressDialog::changeProgress(qint64 current, qint64 total)
     ui->globalProgressBar->setMaximum(total);
     ui->globalProgressBar->setValue(current);
 
-    if (!m_is_multi_step) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_multi_step) {
         ui->taskProgressBar->setMaximum(total);
         ui->taskProgressBar->setValue(current);
     } else {

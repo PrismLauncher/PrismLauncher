@@ -19,7 +19,7 @@ class FlameCheckUpdate : public CheckUpdateTask {
     void executeTask() override;
 
    private:
-    NetJob* m_net_job = nullptr;
+    NetJob* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_net_job = nullptr;
 
-    bool m_was_aborted = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_was_aborted = false;
 };

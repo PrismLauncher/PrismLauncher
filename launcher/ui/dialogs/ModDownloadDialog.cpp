@@ -37,30 +37,30 @@
 #include "ui/widgets/PageContainer.h"
 
 ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel>& mods, QWidget* parent, BaseInstance* instance)
-    : QDialog(parent), mods(mods), m_verticalLayout(new QVBoxLayout(this)), m_instance(instance)
+    : QDialog(parent), mods(mods), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout(new QVBoxLayout(this)), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance(instance)
 {
     setObjectName(QStringLiteral("ModDownloadDialog"));
-    m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
     resize(std::max(0.5 * parent->width(), 400.0), std::max(0.75 * parent->height(), 400.0));
 
     setWindowIcon(APPLICATION->getThemedIcon("new"));
-    // NOTE: m_buttons must be initialized before PageContainer, because it indirectly accesses m_buttons through setSuggestedPack! Do not
+    // NOTE: hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons must be initialized before PageContainer, because it indirectly accesses hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons through setSuggestedPack! Do not
     // move this below.
-    m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-    m_container = new PageContainer(this);
-    m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
-    m_container->layout()->setContentsMargins(0, 0, 0, 0);
-    m_verticalLayout->addWidget(m_container);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container = new PageContainer(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->layout()->setContentsMargins(0, 0, 0, 0);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container);
 
-    m_container->addButtons(m_buttons);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->addButtons(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons);
 
-    connect(m_container, &PageContainer::selectedPageChanged, this, &ModDownloadDialog::selectedPageChanged);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container, &PageContainer::selectedPageChanged, this, &ModDownloadDialog::selectedPageChanged);
 
     // Bonk Qt over its stupid head and make sure it understands which button is the default one...
     // See: https://stackoverflow.com/questions/24556831/qbuttonbox-set-default-button
-    auto OkButton = m_buttons->button(QDialogButtonBox::Ok);
+    auto OkButton = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons->button(QDialogButtonBox::Ok);
     OkButton->setEnabled(false);
     OkButton->setDefault(true);
     OkButton->setAutoDefault(true);
@@ -69,15 +69,15 @@ ModDownloadDialog::ModDownloadDialog(const std::shared_ptr<ModFolderModel>& mods
     OkButton->setToolTip(tr("Opens a new popup to review your selected mods and confirm your selection. Shortcut: Ctrl+Return"));
     connect(OkButton, &QPushButton::clicked, this, &ModDownloadDialog::confirm);
 
-    auto CancelButton = m_buttons->button(QDialogButtonBox::Cancel);
+    auto CancelButton = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons->button(QDialogButtonBox::Cancel);
     CancelButton->setDefault(false);
     CancelButton->setAutoDefault(false);
     connect(CancelButton, &QPushButton::clicked, this, &ModDownloadDialog::reject);
 
-    auto HelpButton = m_buttons->button(QDialogButtonBox::Help);
+    auto HelpButton = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons->button(QDialogButtonBox::Help);
     HelpButton->setDefault(false);
     HelpButton->setAutoDefault(false);
-    connect(HelpButton, &QPushButton::clicked, m_container, &PageContainer::help);
+    connect(HelpButton, &QPushButton::clicked, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container, &PageContainer::help);
 
     QMetaObject::connectSlotsByName(this);
     setWindowModality(Qt::WindowModal);
@@ -102,14 +102,14 @@ void ModDownloadDialog::confirm()
     auto keys = modTask.keys();
     keys.sort(Qt::CaseInsensitive);
 
-    auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm mods to download"));
+    auto confirhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dialog = ReviewMessageBox::create(this, tr("Confirm mods to download"));
 
     for (auto& task : keys) {
-        confirm_dialog->appendMod({ task, modTask.find(task).value()->getFilename() });
+        confirhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dialog->appendMod({ task, modTask.find(task).value()->getFilename() });
     }
 
-    if (confirm_dialog->exec()) {
-        auto deselected = confirm_dialog->deselectedMods();
+    if (confirhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dialog->exec()) {
+        auto deselected = confirhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dialog->deselectedMods();
         for (auto name : deselected) {
             modTask.remove(name);
         }
@@ -128,11 +128,11 @@ QList<BasePage*> ModDownloadDialog::getPages()
 {
     QList<BasePage*> pages;
 
-    pages.append(ModrinthModPage::create(this, m_instance));
+    pages.append(ModrinthModPage::create(this, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance));
     if (APPLICATION->capabilities() & Application::SupportsFlame)
-        pages.append(FlameModPage::create(this, m_instance));
+        pages.append(FlameModPage::create(this, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance));
 
-    m_selectedPage = dynamic_cast<ModPage*>(pages[0]);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedPage = dynamic_cast<ModPage*>(pages[0]);
 
     return pages;
 }
@@ -142,7 +142,7 @@ void ModDownloadDialog::addSelectedMod(QString name, ModDownloadTask* task)
     removeSelectedMod(name);
     modTask.insert(name, task);
 
-    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(!modTask.isEmpty());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons->button(QDialogButtonBox::Ok)->setEnabled(!modTask.isEmpty());
 }
 
 void ModDownloadDialog::removeSelectedMod(QString name)
@@ -151,7 +151,7 @@ void ModDownloadDialog::removeSelectedMod(QString name)
         delete modTask.find(name).value();
     modTask.remove(name);
 
-    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(!modTask.isEmpty());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons->button(QDialogButtonBox::Ok)->setEnabled(!modTask.isEmpty());
 }
 
 bool ModDownloadDialog::isModSelected(QString name, QString filename) const
@@ -181,22 +181,22 @@ void ModDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* select
         return;
     }
 
-    m_selectedPage = dynamic_cast<ModPage*>(selected);
-    if (!m_selectedPage) {
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedPage = dynamic_cast<ModPage*>(selected);
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedPage) {
         qCritical() << "Page '" << selected->displayName() << "' in ModDownloadDialog is not a ModPage!";
         return;
     }
 
     // Same effect as having a global search bar
-    m_selectedPage->setSearchTerm(prev_page->getSearchTerm());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedPage->setSearchTerm(prev_page->getSearchTerm());
 }
 
 bool ModDownloadDialog::selectPage(QString pageId)
 {
-    return m_container->selectPage(pageId);
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->selectPage(pageId);
 }
 
 ModPage* ModDownloadDialog::getSelectedPage()
 {
-    return m_selectedPage;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedPage;
 }

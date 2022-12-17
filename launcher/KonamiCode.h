@@ -13,5 +13,5 @@ signals:
     void triggered();
 
 private:
-    int m_progress = 0;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progress = 0;
 };

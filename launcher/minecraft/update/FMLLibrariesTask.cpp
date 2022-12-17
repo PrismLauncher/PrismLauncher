@@ -10,12 +10,12 @@
 
 FMLLibrariesTask::FMLLibrariesTask(MinecraftInstance * inst)
 {
-    m_inst = inst;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst = inst;
 }
 void FMLLibrariesTask::executeTask()
 {
     // Get the mod list
-    MinecraftInstance *inst = (MinecraftInstance *)m_inst;
+    MinecraftInstance *inst = (MinecraftInstance *)hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst;
     auto components = inst->getPackProfile();
     auto profile = components->getProfile();
 
@@ -90,7 +90,7 @@ void FMLLibrariesTask::fmllibsFinished()
     if (!fmlLibsToProcess.isEmpty())
     {
         setStatus(tr("Copying FML libraries into the instance..."));
-        MinecraftInstance *inst = (MinecraftInstance *)m_inst;
+        MinecraftInstance *inst = (MinecraftInstance *)hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst;
         auto metacache = APPLICATION->metacache();
         int index = 0;
         for (auto &lib : fmlLibsToProcess)

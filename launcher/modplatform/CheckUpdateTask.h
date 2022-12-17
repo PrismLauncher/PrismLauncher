@@ -13,7 +13,7 @@ class CheckUpdateTask : public Task {
 
    public:
     CheckUpdateTask(QList<Mod*>& mods, std::list<Version>& mcVersions, ModAPI::ModLoaderTypes loaders, std::shared_ptr<ModFolderModel> mods_folder)
-        : Task(nullptr), m_mods(mods), m_game_versions(mcVersions), m_loaders(loaders), m_mods_folder(mods_folder) {};
+        : Task(nullptr), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods(mods), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_game_versions(mcVersions), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaders(loaders), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods_folder(mods_folder) {};
 
     struct UpdatableMod {
         QString name;
@@ -30,7 +30,7 @@ class CheckUpdateTask : public Task {
         {}
     };
 
-    auto getUpdatable() -> std::vector<UpdatableMod>&& { return std::move(m_updatable); }
+    auto getUpdatable() -> std::vector<UpdatableMod>&& { return std::move(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updatable); }
 
    public slots:
     bool abort() override = 0;
@@ -42,10 +42,10 @@ class CheckUpdateTask : public Task {
     void checkFailed(Mod* failed, QString reason, QUrl recover_url = {});
 
    protected:
-    QList<Mod*>& m_mods;
-    std::list<Version>& m_game_versions;
-    ModAPI::ModLoaderTypes m_loaders;
-    std::shared_ptr<ModFolderModel> m_mods_folder;
+    QList<Mod*>& hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods;
+    std::list<Version>& hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_game_versions;
+    ModAPI::ModLoaderTypes hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaders;
+    std::shared_ptr<ModFolderModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods_folder;
 
-    std::vector<UpdatableMod> m_updatable;
+    std::vector<UpdatableMod> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updatable;
 };

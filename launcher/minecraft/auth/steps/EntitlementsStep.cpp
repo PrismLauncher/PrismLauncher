@@ -17,12 +17,12 @@ QString EntitlementsStep::describe() {
 
 void EntitlementsStep::perform() {
     auto uuid = QUuid::createUuid();
-    m_entitlementsRequestId = uuid.toString().remove('{').remove('}');
-    auto url = "https://api.minecraftservices.com/entitlements/license?requestId=" + m_entitlementsRequestId;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entitlementsRequestId = uuid.toString().remove('{').remove('}');
+    auto url = "https://api.minecraftservices.com/entitlements/license?requestId=" + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entitlementsRequestId;
     QNetworkRequest request = QNetworkRequest(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8());
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->yggdrasilToken.token).toUtf8());
     AuthRequest *requestor = new AuthRequest(this);
     connect(requestor, &AuthRequest::finished, this, &EntitlementsStep::onRequestDone);
     requestor->get(request);
@@ -47,7 +47,7 @@ void EntitlementsStep::onRequestDone(
 
     // TODO: check presence of same entitlementsRequestId?
     // TODO: validate JWTs?
-    Parsers::parseMinecraftEntitlements(data, m_data->minecraftEntitlement);
+    Parsers::parseMinecraftEntitlements(data, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftEntitlement);
 
     emit finished(AccountTaskState::STATE_WORKING, tr("Got entitlements"));
 }

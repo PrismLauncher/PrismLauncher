@@ -51,17 +51,17 @@ Technic::SolderPackInstallTask::SolderPackInstallTask(
     const QString &version,
     const QString &minecraftVersion
 ) {
-    m_solderUrl = solderUrl;
-    m_pack = pack;
-    m_version = version;
-    m_network = network;
-    m_minecraftVersion = minecraftVersion;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_solderUrl = solderUrl;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack = pack;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = version;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network = network;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersion = minecraftVersion;
 }
 
 bool Technic::SolderPackInstallTask::abort() {
-    if(m_abortable)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abortable)
     {
-        return m_filesNetJob->abort();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob->abort();
     }
     return false;
 }
@@ -70,15 +70,15 @@ void Technic::SolderPackInstallTask::executeTask()
 {
     setStatus(tr("Resolving modpack files"));
 
-    m_filesNetJob = new NetJob(tr("Resolving modpack files"), m_network);
-    auto sourceUrl = QString("%1/modpack/%2/%3").arg(m_solderUrl.toString(), m_pack, m_version);
-    m_filesNetJob->addNetAction(Net::Download::makeByteArray(sourceUrl, &m_response));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob = new NetJob(tr("Resolving modpack files"), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network);
+    auto sourceUrl = QString("%1/modpack/%2/%3").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_solderUrl.toString(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob->addNetAction(Net::Download::makeByteArray(sourceUrl, &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response));
 
-    auto job = m_filesNetJob.get();
+    auto job = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SolderPackInstallTask::fileListSucceeded);
     connect(job, &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
     connect(job, &NetJob::aborted, this, &Technic::SolderPackInstallTask::downloadAborted);
-    m_filesNetJob->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob->start();
 }
 
 void Technic::SolderPackInstallTask::fileListSucceeded()
@@ -86,10 +86,10 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     setStatus(tr("Downloading modpack"));
 
     QJsonParseError parse_error {};
-    QJsonDocument doc = QJsonDocument::fromJson(m_response, &parse_error);
+    QJsonDocument doc = QJsonDocument::fromJson(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from Solder at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << m_response;
+        qWarning() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response;
         return;
     }
     auto obj = doc.object();
@@ -100,53 +100,53 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     }
     catch (const JSONValidationError& e) {
         emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
-        m_filesNetJob.reset();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.reset();
         return;
     }
 
     if (!build.minecraft.isEmpty())
-        m_minecraftVersion = build.minecraft;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersion = build.minecraft;
 
-    m_filesNetJob = new NetJob(tr("Downloading modpack"), m_network);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob = new NetJob(tr("Downloading modpack"), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network);
 
     int i = 0;
     for (const auto &mod : build.mods) {
-        auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
+        auto path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_outputDir.path(), QString("%1").arg(i));
 
         auto dl = Net::Download::makeFile(mod.url, path);
         if (!mod.md5.isEmpty()) {
             auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
         }
-        m_filesNetJob->addNetAction(dl);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob->addNetAction(dl);
 
         i++;
     }
 
-    m_modCount = build.mods.size();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modCount = build.mods.size();
 
-    connect(m_filesNetJob.get(), &NetJob::succeeded, this, &Technic::SolderPackInstallTask::downloadSucceeded);
-    connect(m_filesNetJob.get(), &NetJob::progress, this, &Technic::SolderPackInstallTask::downloadProgressChanged);
-    connect(m_filesNetJob.get(), &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
-    connect(m_filesNetJob.get(), &NetJob::aborted, this, &Technic::SolderPackInstallTask::downloadAborted);
-    m_filesNetJob->start();
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.get(), &NetJob::succeeded, this, &Technic::SolderPackInstallTask::downloadSucceeded);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.get(), &NetJob::progress, this, &Technic::SolderPackInstallTask::downloadProgressChanged);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.get(), &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.get(), &NetJob::aborted, this, &Technic::SolderPackInstallTask::downloadAborted);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob->start();
 }
 
 void Technic::SolderPackInstallTask::downloadSucceeded()
 {
-    m_abortable = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abortable = false;
 
     setStatus(tr("Extracting modpack"));
-    m_filesNetJob.reset();
-    m_extractFuture = QtConcurrent::run([this]()
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture = QtConcurrent::run([this]()
     {
         int i = 0;
-        QString extractDir = FS::PathCombine(m_stagingPath, ".minecraft");
+        QString extractDir = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, ".minecraft");
         FS::ensureFolderPathExists(extractDir);
 
-        while (m_modCount > i)
+        while (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modCount > i)
         {
-            auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
+            auto path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_outputDir.path(), QString("%1").arg(i));
             if (!MMCZip::extractDir(path, extractDir))
             {
                 return false;
@@ -155,38 +155,38 @@ void Technic::SolderPackInstallTask::downloadSucceeded()
         }
         return true;
     });
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &Technic::SolderPackInstallTask::extractFinished);
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &Technic::SolderPackInstallTask::extractAborted);
-    m_extractFutureWatcher.setFuture(m_extractFuture);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &Technic::SolderPackInstallTask::extractFinished);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &Technic::SolderPackInstallTask::extractAborted);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher.setFuture(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture);
 }
 
 void Technic::SolderPackInstallTask::downloadFailed(QString reason)
 {
-    m_abortable = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abortable = false;
     emitFailed(reason);
-    m_filesNetJob.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.reset();
 }
 
 void Technic::SolderPackInstallTask::downloadProgressChanged(qint64 current, qint64 total)
 {
-    m_abortable = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abortable = true;
     setProgress(current / 2, total);
 }
 
 void Technic::SolderPackInstallTask::downloadAborted()
 {
     emitAborted();
-    m_filesNetJob.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.reset();
 }
 
 void Technic::SolderPackInstallTask::extractFinished()
 {
-    if (!m_extractFuture.result())
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture.result())
     {
         emitFailed(tr("Failed to extract modpack"));
         return;
     }
-    QDir extractDir(m_stagingPath);
+    QDir extractDir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath);
 
     qDebug() << "Fixing permissions for extracted pack files...";
     QDirIterator it(extractDir, QDirIterator::Subdirectories);
@@ -222,7 +222,7 @@ void Technic::SolderPackInstallTask::extractFinished()
     shared_qobject_ptr<Technic::TechnicPackProcessor> packProcessor = new Technic::TechnicPackProcessor();
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &Technic::SolderPackInstallTask::emitSucceeded);
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &Technic::SolderPackInstallTask::emitFailed);
-    packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath, m_minecraftVersion, true);
+    packProcessor->run(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettings, name(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instIcon, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersion, true);
 }
 
 void Technic::SolderPackInstallTask::extractAborted()

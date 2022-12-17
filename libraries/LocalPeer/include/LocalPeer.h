@@ -62,17 +62,17 @@ public: /* methods */
 
     QString toString()
     {
-        return m_id;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id;
     }
 
 private: /* methods */
     ApplicationId(const QString & value)
     {
-        m_id = value;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id = value;
     }
 
 private: /* data */
-    QString m_id;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id;
 };
 
 class LocalPeer : public QObject

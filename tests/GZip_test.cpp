@@ -23,8 +23,8 @@ slots:
         QByteArray random;
         QByteArray compressed;
         QByteArray decompressed;
-        std::default_random_engine eng((std::random_device())());
-        std::uniform_int_distribution<uint16_t> idis(0, std::numeric_limits<uint8_t>::max());
+        std::default_randohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_engine eng((std::randohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_device())());
+        std::uniforhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_int_distribution<uint16_t> idis(0, std::numeric_limits<uint8_t>::max());
 
         // initialize random buffer
         for(int i = 0; i < size; i++)

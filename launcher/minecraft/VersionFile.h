@@ -147,7 +147,7 @@ public: /* data */
     Meta::RequireSet conflicts;
 
     /// is volatile -- may be removed as soon as it is no longer needed by something else
-    bool m_volatile = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_volatile = false;
 
 public:
     // Mojang: DEPRECATED list of 'downloads' - client jar, server jar, windows server exe, maybe more.

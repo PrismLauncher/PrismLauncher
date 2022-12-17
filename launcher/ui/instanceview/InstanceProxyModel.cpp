@@ -23,10 +23,10 @@
 #include <QDebug>
 
 InstanceProxyModel::InstanceProxyModel(QObject *parent) : QSortFilterProxyModel(parent) {
-    m_naturalSort.setNumericMode(true);
-    m_naturalSort.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_naturalSort.setNumericMode(true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_naturalSort.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
     // FIXME: use loaded translation as source of locale instead, hook this up to translation changes
-    m_naturalSort.setLocale(QLocale::system());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_naturalSort.setLocale(QLocale::system());
 }
 
 QVariant InstanceProxyModel::data(const QModelIndex & index, int role) const
@@ -66,6 +66,6 @@ bool InstanceProxyModel::subSortLessThan(const QModelIndex &left, const QModelIn
     }
     else
     {
-        return m_naturalSort.compare(pdataLeft->name(), pdataRight->name()) < 0;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_naturalSort.compare(pdataLeft->name(), pdataRight->name()) < 0;
     }
 }

@@ -40,13 +40,13 @@
 FoldersTask::FoldersTask(MinecraftInstance * inst)
     :Task()
 {
-    m_inst = inst;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst = inst;
 }
 
 void FoldersTask::executeTask()
 {
     // Make directories
-    QDir mcDir(m_inst->gameRoot());
+    QDir mcDir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->gameRoot());
     if (!mcDir.exists() && !mcDir.mkpath("."))
     {
         emitFailed(tr("Failed to create folder for Minecraft binaries."));

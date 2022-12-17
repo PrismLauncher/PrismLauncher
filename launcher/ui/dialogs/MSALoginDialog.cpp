@@ -60,16 +60,16 @@ int MSALoginDialog::exec() {
     ui->progressBar->setVisible(true);
 
     // Setup the login task and start it
-    m_account = MinecraftAccount::createBlankMSA();
-    m_loginTask = m_account->loginMSA();
-    connect(m_loginTask.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
-    connect(m_loginTask.get(), &Task::succeeded, this, &MSALoginDialog::onTaskSucceeded);
-    connect(m_loginTask.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
-    connect(m_loginTask.get(), &Task::progress, this, &MSALoginDialog::onTaskProgress);
-    connect(m_loginTask.get(), &AccountTask::showVerificationUriAndCode, this, &MSALoginDialog::showVerificationUriAndCode);
-    connect(m_loginTask.get(), &AccountTask::hideVerificationUriAndCode, this, &MSALoginDialog::hideVerificationUriAndCode);
-    connect(&m_externalLoginTimer, &QTimer::timeout, this, &MSALoginDialog::externalLoginTick);
-    m_loginTask->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account = MinecraftAccount::createBlankMSA();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account->loginMSA();
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &Task::succeeded, this, &MSALoginDialog::onTaskSucceeded);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &Task::progress, this, &MSALoginDialog::onTaskProgress);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &AccountTask::showVerificationUriAndCode, this, &MSALoginDialog::showVerificationUriAndCode);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &AccountTask::hideVerificationUriAndCode, this, &MSALoginDialog::hideVerificationUriAndCode);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginTimer, &QTimer::timeout, this, &MSALoginDialog::externalLoginTick);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask->start();
 
     return QDialog::exec();
 }
@@ -81,26 +81,26 @@ MSALoginDialog::~MSALoginDialog()
 }
 
 void MSALoginDialog::externalLoginTick() {
-    m_externalLoginElapsed++;
-    ui->progressBar->setValue(m_externalLoginElapsed);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginElapsed++;
+    ui->progressBar->setValue(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginElapsed);
     ui->progressBar->repaint();
 
-    if(m_externalLoginElapsed >= m_externalLoginTimeout) {
-        m_externalLoginTimer.stop();
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginElapsed >= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginTimeout) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginTimer.stop();
     }
 }
 
 
 void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& code, int expiresIn) {
-    m_externalLoginElapsed = 0;
-    m_externalLoginTimeout = expiresIn;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginElapsed = 0;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginTimeout = expiresIn;
 
-    m_externalLoginTimer.setInterval(1000);
-    m_externalLoginTimer.setSingleShot(false);
-    m_externalLoginTimer.start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginTimer.setInterval(1000);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginTimer.setSingleShot(false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginTimer.start();
 
     ui->progressBar->setMaximum(expiresIn);
-    ui->progressBar->setValue(m_externalLoginElapsed);
+    ui->progressBar->setValue(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginElapsed);
 
     QString urlString = uri.toString();
     QString linkString = QString("<a href=\"%1\">%2</a>").arg(urlString, urlString);
@@ -114,7 +114,7 @@ void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& 
 }
 
 void MSALoginDialog::hideVerificationUriAndCode() {
-    m_externalLoginTimer.stop();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginTimer.stop();
     ui->actionButton->setVisible(false);
 }
 
@@ -167,7 +167,7 @@ MinecraftAccountPtr MSALoginDialog::newAccount(QWidget *parent, QString msg)
     dlg.ui->label->setText(msg);
     if (dlg.exec() == QDialog::Accepted)
     {
-        return dlg.m_account;
+        return dlg.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account;
     }
     return nullptr;
 }

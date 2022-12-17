@@ -52,8 +52,8 @@ class MetaCacheSink : public FileSink {
     auto finalizeCache(QNetworkReply& reply) -> Task::State override;
 
    private:
-    MetaEntryPtr m_entry;
-    ChecksumValidator* m_md5Node;
-    bool m_is_eternal;
+    MetaEntryPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_entry;
+    ChecksumValidator* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_md5Node;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_eternal;
 };
 }  // namespace Net

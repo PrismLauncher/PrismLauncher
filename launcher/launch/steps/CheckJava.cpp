@@ -43,25 +43,25 @@
 
 void CheckJava::executeTask()
 {
-    auto instance = m_parent->instance();
+    auto instance = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance();
     auto settings = instance->settings();
-    m_javaPath = FS::ResolveExecutable(settings->get("JavaPath").toString());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPath = FS::ResolveExecutable(settings->get("JavaPath").toString());
     bool perInstance = settings->get("OverrideJava").toBool() || settings->get("OverrideJavaLocation").toBool();
 
-    auto realJavaPath = QStandardPaths::findExecutable(m_javaPath);
+    auto realJavaPath = QStandardPaths::findExecutable(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPath);
     if (realJavaPath.isEmpty())
     {
         if (perInstance)
         {
             emit logLine(
                 QString("The java binary \"%1\" couldn't be found. Please fix the java path "
-                   "override in the instance's settings or disable it.").arg(m_javaPath),
+                   "override in the instance's settings or disable it.").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPath),
                 MessageLevel::Warning);
         }
         else
         {
             emit logLine(QString("The java binary \"%1\" couldn't be found. Please set up java in "
-                            "the settings.").arg(m_javaPath),
+                            "the settings.").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPath),
                          MessageLevel::Warning);
         }
         emitFailed(QString("Java path is not valid."));
@@ -69,7 +69,7 @@ void CheckJava::executeTask()
     }
     else
     {
-        emit logLine("Java path is:\n" + m_javaPath + "\n\n", MessageLevel::Launcher);
+        emit logLine("Java path is:\n" + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPath + "\n\n", MessageLevel::Launcher);
     }
 
     if (JavaUtils::getJavaCheckPath().isEmpty())
@@ -87,17 +87,17 @@ void CheckJava::executeTask()
     auto storedRealArchitecture = settings->get("JavaRealArchitecture").toString();
     auto storedVersion = settings->get("JavaVersion").toString();
     auto storedVendor = settings->get("JavaVendor").toString();
-    m_javaUnixTime = javaUnixTime;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaUnixTime = javaUnixTime;
     // if timestamps are not the same, or something is missing, check!
     if (javaUnixTime != storedUnixTime || storedVersion.size() == 0
         || storedArchitecture.size() == 0 || storedRealArchitecture.size() == 0
         || storedVendor.size() == 0)
     {
-        m_JavaChecker = new JavaChecker();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_JavaChecker = new JavaChecker();
         emit logLine(QString("Checking Java version..."), MessageLevel::Launcher);
-        connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this, &CheckJava::checkJavaFinished);
-        m_JavaChecker->m_path = realJavaPath;
-        m_JavaChecker->performCheck();
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_JavaChecker.get(), &JavaChecker::checkFinished, this, &CheckJava::checkJavaFinished);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_JavaChecker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path = realJavaPath;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_JavaChecker->performCheck();
         return;
     }
     else
@@ -134,13 +134,13 @@ void CheckJava::checkJavaFinished(JavaCheckResult result)
         }
         case JavaCheckResult::Validity::Valid:
         {
-            auto instance = m_parent->instance();
+            auto instance = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance();
             printJavaInfo(result.javaVersion.toString(), result.mojangPlatform, result.realPlatform, result.javaVendor);
             instance->settings()->set("JavaVersion", result.javaVersion.toString());
             instance->settings()->set("JavaArchitecture", result.mojangPlatform);
             instance->settings()->set("JavaRealArchitecture", result.realPlatform);
             instance->settings()->set("JavaVendor", result.javaVendor);
-            instance->settings()->set("JavaTimestamp", m_javaUnixTime);
+            instance->settings()->set("JavaTimestamp", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaUnixTime);
             emitSucceeded();
             return;
         }

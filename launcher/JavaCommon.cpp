@@ -111,20 +111,20 @@ void JavaCommon::javaCheckNotFound(QWidget *parent)
 
 void JavaCommon::TestCheck::run()
 {
-    if (!JavaCommon::checkJVMArgs(m_args, m_parent))
+    if (!JavaCommon::checkJVMArgs(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_args, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent))
     {
         emit finished();
         return;
     }
     if (JavaUtils::getJavaCheckPath().isEmpty()) {
-        javaCheckNotFound(m_parent);
+        javaCheckNotFound(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent);
         emit finished();
         return;
     }
     checker.reset(new JavaChecker());
     connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
             SLOT(checkFinished(JavaCheckResult)));
-    checker->m_path = m_path;
+    checker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
     checker->performCheck();
 }
 
@@ -132,20 +132,20 @@ void JavaCommon::TestCheck::checkFinished(JavaCheckResult result)
 {
     if (result.validity != JavaCheckResult::Validity::Valid)
     {
-        javaBinaryWasBad(m_parent, result);
+        javaBinaryWasBad(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, result);
         emit finished();
         return;
     }
     checker.reset(new JavaChecker());
     connect(checker.get(), SIGNAL(checkFinished(JavaCheckResult)), this,
             SLOT(checkFinishedWithArgs(JavaCheckResult)));
-    checker->m_path = m_path;
-    checker->m_args = m_args;
-    checker->m_minMem = m_minMem;
-    checker->m_maxMem = m_maxMem;
+    checker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
+    checker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_args = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_args;
+    checker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMem = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMem;
+    checker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMem = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMem;
     if (result.javaVersion.requiresPermGen())
     {
-        checker->m_permGen = m_permGen;
+        checker->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGen = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGen;
     }
     checker->performCheck();
 }
@@ -154,11 +154,11 @@ void JavaCommon::TestCheck::checkFinishedWithArgs(JavaCheckResult result)
 {
     if (result.validity == JavaCheckResult::Validity::Valid)
     {
-        javaWasOk(m_parent, result);
+        javaWasOk(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, result);
         emit finished();
         return;
     }
-    javaArgsWereBad(m_parent, result);
+    javaArgsWereBad(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, result);
     emit finished();
 }
 

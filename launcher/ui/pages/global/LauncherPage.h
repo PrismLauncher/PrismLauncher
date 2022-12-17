@@ -113,12 +113,12 @@ private:
     /*!
      * Stores the currently selected update channel.
      */
-    QString m_currentUpdateChannel;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentUpdateChannel;
 
     // default format for the font preview...
     QTextCharFormat *defaultFormat;
 
-    std::unique_ptr<LogColorCache> m_colors;
+    std::unique_ptr<LogColorCache> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_colors;
 
-    std::shared_ptr<TranslationsModel> m_languageModel;
+    std::shared_ptr<TranslationsModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_languageModel;
 };

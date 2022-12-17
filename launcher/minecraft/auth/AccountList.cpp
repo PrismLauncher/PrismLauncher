@@ -60,12 +60,12 @@ enum AccountListVersion {
 };
 
 AccountList::AccountList(QObject *parent) : QAbstractListModel(parent) {
-    m_refreshTimer = new QTimer(this);
-    m_refreshTimer->setSingleShot(true);
-    connect(m_refreshTimer, &QTimer::timeout, this, &AccountList::fillQueue);
-    m_nextTimer = new QTimer(this);
-    m_nextTimer->setSingleShot(true);
-    connect(m_nextTimer, &QTimer::timeout, this, &AccountList::tryNext);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshTimer = new QTimer(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshTimer->setSingleShot(true);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshTimer, &QTimer::timeout, this, &AccountList::fillQueue);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nextTimer = new QTimer(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nextTimer->setSingleShot(true);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nextTimer, &QTimer::timeout, this, &AccountList::tryNext);
 }
 
 AccountList::~AccountList() noexcept {}
@@ -92,12 +92,12 @@ MinecraftAccountPtr AccountList::getAccountByProfileName(const QString& profileN
 
 const MinecraftAccountPtr AccountList::at(int i) const
 {
-    return MinecraftAccountPtr(m_accounts.at(i));
+    return MinecraftAccountPtr(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.at(i));
 }
 
 QStringList AccountList::profileNames() const {
     QStringList out;
-    for(auto & account: m_accounts) {
+    for(auto & account: hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts) {
         auto profileName =  account->profileName();
         if(profileName.isEmpty()) {
             continue;
@@ -111,7 +111,7 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
 {
     // NOTE: Do not allow adding something that's already there. We shouldn't let it continue
     // because of the signal / slot connections after this.
-    if (m_accounts.contains(account)) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.contains(account)) {
         qDebug() << "Tried to add account that's already on the accounts list!";
         return;
     }
@@ -127,10 +127,10 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
         if(existingAccount != -1) {
             qDebug() << "Replacing old account with a new one with the same profile ID!";
 
-            MinecraftAccountPtr existingAccountPtr = m_accounts[existingAccount];
-            m_accounts[existingAccount] = account;
-            if(m_defaultAccount == existingAccountPtr) {
-                m_defaultAccount = account;
+            MinecraftAccountPtr existingAccountPtr = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts[existingAccount];
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts[existingAccount] = account;
+            if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount == existingAccountPtr) {
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount = account;
             }
             // disconnect notifications for changes in the account being replaced
             existingAccountPtr->disconnect(this);
@@ -141,11 +141,11 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
     }
 
     // if we don't have this profileId yet, add the account to the end
-    int row = m_accounts.count();
+    int row = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.count();
     qDebug() << "Inserting account at index" << row;
 
     beginInsertRows(QModelIndex(), row, row);
-    m_accounts.append(account);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.append(account);
     endInsertRows();
 
     onListChanged();
@@ -154,18 +154,18 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
 void AccountList::removeAccount(QModelIndex index)
 {
     int row = index.row();
-    if(index.isValid() && row >= 0 && row < m_accounts.size())
+    if(index.isValid() && row >= 0 && row < hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.size())
     {
-        auto & account = m_accounts[row];
-        if(account == m_defaultAccount)
+        auto & account = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts[row];
+        if(account == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount)
         {
-            m_defaultAccount = nullptr;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount = nullptr;
             onDefaultAccountChanged();
         }
         account->disconnect(this);
 
         beginRemoveRows(QModelIndex(), row, row);
-        m_accounts.removeAt(index.row());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.removeAt(index.row());
         endRemoveRows();
         onListChanged();
     }
@@ -173,17 +173,17 @@ void AccountList::removeAccount(QModelIndex index)
 
 MinecraftAccountPtr AccountList::defaultAccount() const
 {
-    return m_defaultAccount;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount;
 }
 
 void AccountList::setDefaultAccount(MinecraftAccountPtr newAccount)
 {
-    if (!newAccount && m_defaultAccount)
+    if (!newAccount && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount)
     {
         int idx = 0;
-        auto previousDefaultAccount = m_defaultAccount;
-        m_defaultAccount = nullptr;
-        for (MinecraftAccountPtr account : m_accounts)
+        auto previousDefaultAccount = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount = nullptr;
+        for (MinecraftAccountPtr account : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts)
         {
             if (account == previousDefaultAccount)
             {
@@ -195,12 +195,12 @@ void AccountList::setDefaultAccount(MinecraftAccountPtr newAccount)
     }
     else
     {
-        auto currentDefaultAccount = m_defaultAccount;
+        auto currentDefaultAccount = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount;
         int currentDefaultAccountIdx = -1;
-        auto newDefaultAccount = m_defaultAccount;
+        auto newDefaultAccount = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount;
         int newDefaultAccountIdx = -1;
         int idx = 0;
-        for (MinecraftAccountPtr account : m_accounts)
+        for (MinecraftAccountPtr account : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts)
         {
             if (account == newAccount)
             {
@@ -217,7 +217,7 @@ void AccountList::setDefaultAccount(MinecraftAccountPtr newAccount)
         {
             emit dataChanged(index(currentDefaultAccountIdx), index(currentDefaultAccountIdx, columnCount(QModelIndex()) - 1));
             emit dataChanged(index(newDefaultAccountIdx), index(newDefaultAccountIdx, columnCount(QModelIndex()) - 1));
-            m_defaultAccount = newDefaultAccount;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount = newDefaultAccount;
             onDefaultAccountChanged();
         }
     }
@@ -254,7 +254,7 @@ void AccountList::accountActivityChanged(bool active)
 
 void AccountList::onListChanged()
 {
-    if (m_autosave)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_autosave)
         // TODO: Alert the user if this fails.
         saveList();
 
@@ -263,7 +263,7 @@ void AccountList::onListChanged()
 
 void AccountList::onDefaultAccountChanged()
 {
-    if (m_autosave)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_autosave)
         saveList();
 
     emit defaultAccountChanged();
@@ -271,7 +271,7 @@ void AccountList::onDefaultAccountChanged()
 
 int AccountList::count() const
 {
-    return m_accounts.count();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.count();
 }
 
 QVariant AccountList::data(const QModelIndex &index, int role) const
@@ -357,7 +357,7 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
             switch (index.column())
             {
                 case ProfileNameColumn:
-                    return account == m_defaultAccount ? Qt::Checked : Qt::Unchecked;
+                    return account == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount ? Qt::Checked : Qt::Unchecked;
             }
 
         default:
@@ -451,19 +451,19 @@ bool AccountList::setData(const QModelIndex &idx, const QVariant &value, int rol
 
 bool AccountList::loadList()
 {
-    if (m_listFilePath.isEmpty())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath.isEmpty())
     {
         qCritical() << "Can't load Mojang account list. No file path given and no default set.";
         return false;
     }
 
-    QFile file(m_listFilePath);
+    QFile file(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath);
 
     // Try to open the file and fail if we can't.
     // TODO: We should probably report this error to the user.
     if (!file.open(QIODevice::ReadOnly))
     {
-        qCritical() << QString("Failed to read the account list file (%1).").arg(m_listFilePath).toUtf8();
+        qCritical() << QString("Failed to read the account list file (%1).").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath).toUtf8();
         return false;
     }
 
@@ -532,9 +532,9 @@ bool AccountList::loadV2(QJsonObject& root) {
             }
             connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
             connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
-            m_accounts.append(account);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.append(account);
             if (defaultUserName.size() && account->mojangUserName() == defaultUserName) {
-                m_defaultAccount = account;
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount = account;
             }
         }
         else
@@ -563,9 +563,9 @@ bool AccountList::loadV3(QJsonObject& root) {
             }
             connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
             connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
-            m_accounts.append(account);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.append(account);
             if(accountObj.value("active").toBool(false)) {
-                m_defaultAccount = account;
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount = account;
             }
         }
         else
@@ -580,25 +580,25 @@ bool AccountList::loadV3(QJsonObject& root) {
 
 bool AccountList::saveList()
 {
-    if (m_listFilePath.isEmpty())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath.isEmpty())
     {
         qCritical() << "Can't save Mojang account list. No file path given and no default set.";
         return false;
     }
 
     // make sure the parent folder exists
-    if(!FS::ensureFilePathExists(m_listFilePath))
+    if(!FS::ensureFilePathExists(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath))
         return false;
 
     // make sure the file wasn't overwritten with a folder before (fixes a bug)
-    QFileInfo finfo(m_listFilePath);
+    QFileInfo finfo(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath);
     if(finfo.isDir())
     {
-        QDir badDir(m_listFilePath);
+        QDir badDir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath);
         badDir.removeRecursively();
     }
 
-    qDebug() << "Writing account list to" << m_listFilePath;
+    qDebug() << "Writing account list to" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath;
 
     qDebug() << "Building JSON data structure.";
     // Build the JSON document to write to the list file.
@@ -609,10 +609,10 @@ bool AccountList::saveList()
     // Build a list of accounts.
     qDebug() << "Building account array.";
     QJsonArray accounts;
-    for (MinecraftAccountPtr account : m_accounts)
+    for (MinecraftAccountPtr account : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts)
     {
         QJsonObject accountObj = account->saveToJson();
-        if(m_defaultAccount == account) {
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount == account) {
             accountObj["active"] = true;
         }
         accounts.append(accountObj);
@@ -626,13 +626,13 @@ bool AccountList::saveList()
 
     // Now that we're done building the JSON object, we can write it to the file.
     qDebug() << "Writing account list to file.";
-    QSaveFile file(m_listFilePath);
+    QSaveFile file(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath);
 
     // Try to open the file and fail if we can't.
     // TODO: We should probably report this error to the user.
     if (!file.open(QIODevice::WriteOnly))
     {
-        qCritical() << QString("Failed to read the account list file (%1).").arg(m_listFilePath).toUtf8();
+        qCritical() << QString("Failed to read the account list file (%1).").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath).toUtf8();
         return false;
     }
 
@@ -640,24 +640,24 @@ bool AccountList::saveList()
     file.write(doc.toJson());
     file.setPermissions(QFile::ReadOwner|QFile::WriteOwner|QFile::ReadUser|QFile::WriteUser);
     if(file.commit()) {
-        qDebug() << "Saved account list to" << m_listFilePath;
+        qDebug() << "Saved account list to" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath;
         return true;
     }
     else {
-        qDebug() << "Failed to save accounts to" << m_listFilePath;
+        qDebug() << "Failed to save accounts to" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath;
         return false;
     }
 }
 
 void AccountList::setListFilePath(QString path, bool autosave)
 {
-    m_listFilePath = path;
-    m_autosave = autosave;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_listFilePath = path;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_autosave = autosave;
 }
 
 bool AccountList::anyAccountIsValid()
 {
-    for(auto account: m_accounts)
+    for(auto account: hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts)
     {
         if(account->ownsMinecraft()) {
             return true;
@@ -668,15 +668,15 @@ bool AccountList::anyAccountIsValid()
 
 void AccountList::fillQueue() {
 
-    if(m_defaultAccount && m_defaultAccount->shouldRefresh()) {
-        auto idToRefresh = m_defaultAccount->internalId();
-        m_refreshQueue.push_back(idToRefresh);
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount->shouldRefresh()) {
+        auto idToRefresh = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount->internalId();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshQueue.push_back(idToRefresh);
         qDebug() << "AccountList: Queued default account with internal ID " << idToRefresh << " to refresh first";
     }
 
     for(int i = 0; i < count(); i++) {
         auto account = at(i);
-        if(account == m_defaultAccount) {
+        if(account == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultAccount) {
             continue;
         }
 
@@ -689,11 +689,11 @@ void AccountList::fillQueue() {
 }
 
 void AccountList::requestRefresh(QString accountId) {
-    auto index = m_refreshQueue.indexOf(accountId);
+    auto index = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshQueue.indexOf(accountId);
     if(index != -1) {
-        m_refreshQueue.removeAt(index);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshQueue.removeAt(index);
     }
-    m_refreshQueue.push_front(accountId);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshQueue.push_front(accountId);
     qDebug() << "AccountList: Pushed account with internal ID " << accountId << " to the front of the queue";
     if(!isActive()) {
         tryNext();
@@ -701,26 +701,26 @@ void AccountList::requestRefresh(QString accountId) {
 }
 
 void AccountList::queueRefresh(QString accountId) {
-    if(m_refreshQueue.indexOf(accountId) != -1) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshQueue.indexOf(accountId) != -1) {
         return;
     }
-    m_refreshQueue.push_back(accountId);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshQueue.push_back(accountId);
     qDebug() << "AccountList: Queued account with internal ID " << accountId << " to refresh";
 }
 
 
 void AccountList::tryNext() {
-    while (m_refreshQueue.length()) {
-        auto accountId = m_refreshQueue.front();
-        m_refreshQueue.pop_front();
+    while (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshQueue.length()) {
+        auto accountId = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshQueue.front();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshQueue.pop_front();
         for(int i = 0; i < count(); i++) {
             auto account = at(i);
             if(account->internalId() == accountId) {
-                m_currentTask = account->refresh();
-                if(m_currentTask) {
-                    connect(m_currentTask.get(), &AccountTask::succeeded, this, &AccountList::authSucceeded);
-                    connect(m_currentTask.get(), &AccountTask::failed, this, &AccountList::authFailed);
-                    m_currentTask->start();
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask = account->refresh();
+                if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask) {
+                    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), &AccountTask::succeeded, this, &AccountList::authSucceeded);
+                    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.get(), &AccountTask::failed, this, &AccountList::authFailed);
+                    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask->start();
                     qDebug() << "RefreshSchedule: Processing account " << account->accountDisplayString() << " with internal ID " << accountId;
                     return;
                 }
@@ -729,40 +729,40 @@ void AccountList::tryNext() {
         qDebug() << "RefreshSchedule: Account with with internal ID " << accountId << " not found.";
     }
     // if we get here, no account needed refreshing. Schedule refresh in an hour.
-    m_refreshTimer->start(1000 * 3600);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshTimer->start(1000 * 3600);
 }
 
 void AccountList::authSucceeded() {
     qDebug() << "RefreshSchedule: Background account refresh succeeded";
-    m_currentTask.reset();
-    m_nextTimer->start(1000 * 20);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nextTimer->start(1000 * 20);
 }
 
 void AccountList::authFailed(QString reason) {
     qDebug() << "RefreshSchedule: Background account refresh failed: " << reason;
-    m_currentTask.reset();
-    m_nextTimer->start(1000 * 20);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentTask.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nextTimer->start(1000 * 20);
 }
 
 bool AccountList::isActive() const {
-    return m_activityCount != 0;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_activityCount != 0;
 }
 
 void AccountList::beginActivity() {
-    bool activating = m_activityCount == 0;
-    m_activityCount++;
+    bool activating = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_activityCount == 0;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_activityCount++;
     if(activating) {
         emit activityChanged(true);
     }
 }
 
 void AccountList::endActivity() {
-    if(m_activityCount == 0) {
-        qWarning() << m_name << " - Activity count would become below zero";
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_activityCount == 0) {
+        qWarning() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name << " - Activity count would become below zero";
         return;
     }
-    bool deactivating = m_activityCount == 1;
-    m_activityCount--;
+    bool deactivating = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_activityCount == 1;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_activityCount--;
     if(deactivating) {
         emit activityChanged(false);
     }

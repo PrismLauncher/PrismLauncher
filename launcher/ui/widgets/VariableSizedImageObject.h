@@ -36,7 +36,7 @@ class VariableSizedImageObject final : public QObject, public QTextObjectInterfa
     QSizeF intrinsicSize(QTextDocument* doc, int posInDocument, const QTextFormat& format) override;
     void drawObject(QPainter* painter, const QRectF& rect, QTextDocument* doc, int posInDocument, const QTextFormat& format) override;
 
-    void setMetaEntry(QString meta_entry) { m_meta_entry = meta_entry; }
+    void setMetaEntry(QString meta_entry) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_meta_entry = meta_entry; }
 
    public slots:
     /** Stops all currently loading images from modifying the document.
@@ -53,12 +53,12 @@ class VariableSizedImageObject final : public QObject, public QTextObjectInterfa
 
     /** Loads an image from an external source, and adds it to the document.
      *
-     *  This uses m_meta_entry to cache the image.
+     *  This uses hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_meta_entry to cache the image.
      */
     void loadImage(QTextDocument* doc, const QUrl& source, int posInDocument);
 
    private:
-    QString m_meta_entry;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_meta_entry;
 
-    QSet<QUrl> m_fetching_images;
+    QSet<QUrl> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetching_images;
 };

@@ -19,26 +19,26 @@ PassthroughSetting::PassthroughSetting(std::shared_ptr<Setting> other, std::shar
     : Setting(other->configKeys(), QVariant())
 {
     Q_ASSERT(other);
-    m_other = other;
-    m_gate = gate;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_other = other;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gate = gate;
 }
 
 bool PassthroughSetting::isOverriding() const
 {
-    if(!m_gate)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gate)
     {
         return false;
     }
-    return m_gate->get().toBool();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gate->get().toBool();
 }
 
 QVariant PassthroughSetting::defValue() const
 {
     if(isOverriding())
     {
-        return m_other->get();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_other->get();
     }
-    return m_other->defValue();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_other->defValue();
 }
 
 QVariant PassthroughSetting::get() const
@@ -47,7 +47,7 @@ QVariant PassthroughSetting::get() const
     {
         return Setting::get();
     }
-    return m_other->get();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_other->get();
 }
 
 void PassthroughSetting::reset()
@@ -56,7 +56,7 @@ void PassthroughSetting::reset()
     {
         Setting::reset();
     }
-    m_other->reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_other->reset();
 }
 
 void PassthroughSetting::set(QVariant value)
@@ -65,5 +65,5 @@ void PassthroughSetting::set(QVariant value)
     {
         Setting::set(value);
     }
-    m_other->set(value);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_other->set(value);
 }

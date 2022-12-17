@@ -11,17 +11,17 @@
 MCEditTool::MCEditTool(SettingsObjectPtr settings)
 {
     settings->registerSetting("MCEditPath");
-    m_settings = settings;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings = settings;
 }
 
 void MCEditTool::setPath(QString& path)
 {
-    m_settings->set("MCEditPath", path);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("MCEditPath", path);
 }
 
 QString MCEditTool::path() const
 {
-    return m_settings->get("MCEditPath").toString();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("MCEditPath").toString();
 }
 
 bool MCEditTool::check(const QString& toolPath, QString& error)

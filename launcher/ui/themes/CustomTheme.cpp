@@ -160,15 +160,15 @@ static bool writeThemeJson(const QString& path,
 CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest)
 {
     if (isManifest) {
-        m_id = fileInfo.dir().dirName();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id = fileInfo.dir().dirName();
 
-        QString path = FS::PathCombine("themes", m_id);
-        QString pathResources = FS::PathCombine("themes", m_id, "resources");
+        QString path = FS::PathCombine("themes", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id);
+        QString pathResources = FS::PathCombine("themes", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id, "resources");
 
         if (!FS::ensureFolderPathExists(path) || !FS::ensureFolderPathExists(pathResources)) {
             themeWarningLog() << "couldn't create folder for theme!";
-            m_palette = baseTheme->colorScheme();
-            m_styleSheet = baseTheme->appStyleSheet();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_palette = baseTheme->colorScheme();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_styleSheet = baseTheme->appStyleSheet();
             return;
         }
 
@@ -176,81 +176,81 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
 
         bool jsonDataIncomplete = false;
 
-        m_palette = baseTheme->colorScheme();
-        if (!readThemeJson(themeFilePath, m_palette, m_fadeAmount, m_fadeColor, m_name, m_widgets, m_qssFilePath, jsonDataIncomplete)) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_palette = baseTheme->colorScheme();
+        if (!readThemeJson(themeFilePath, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_palette, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fadeAmount, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fadeColor, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_widgets, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qssFilePath, jsonDataIncomplete)) {
             themeDebugLog() << "Did not read theme json file correctly, writing new one to: " << themeFilePath;
-            m_name = "Custom";
-            m_palette = baseTheme->colorScheme();
-            m_fadeColor = baseTheme->fadeColor();
-            m_fadeAmount = baseTheme->fadeAmount();
-            m_widgets = baseTheme->qtTheme();
-            m_qssFilePath = "themeStyle.css";
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = "Custom";
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_palette = baseTheme->colorScheme();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fadeColor = baseTheme->fadeColor();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fadeAmount = baseTheme->fadeAmount();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_widgets = baseTheme->qtTheme();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qssFilePath = "themeStyle.css";
         } else {
-            m_palette = fadeInactive(m_palette, m_fadeAmount, m_fadeColor);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_palette = fadeInactive(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_palette, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fadeAmount, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fadeColor);
         }
 
         if (jsonDataIncomplete) {
-            writeThemeJson(fileInfo.absoluteFilePath(), m_palette, m_fadeAmount, m_fadeColor, m_name, m_widgets, m_qssFilePath);
+            writeThemeJson(fileInfo.absoluteFilePath(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_palette, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fadeAmount, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fadeColor, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_widgets, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qssFilePath);
         }
 
-        auto qssFilePath = FS::PathCombine(path, m_qssFilePath);
+        auto qssFilePath = FS::PathCombine(path, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_qssFilePath);
         QFileInfo info(qssFilePath);
         if (info.isFile()) {
             try {
                 // TODO: validate css?
-                m_styleSheet = QString::fromUtf8(FS::read(qssFilePath));
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_styleSheet = QString::fromUtf8(FS::read(qssFilePath));
             } catch (const Exception& e) {
                 themeWarningLog() << "Couldn't load css:" << e.cause() << "from" << qssFilePath;
-                m_styleSheet = baseTheme->appStyleSheet();
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_styleSheet = baseTheme->appStyleSheet();
             }
         } else {
             themeDebugLog() << "No theme css present.";
-            m_styleSheet = baseTheme->appStyleSheet();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_styleSheet = baseTheme->appStyleSheet();
             try {
-                FS::write(qssFilePath, m_styleSheet.toUtf8());
+                FS::write(qssFilePath, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_styleSheet.toUtf8());
             } catch (const Exception& e) {
                 themeWarningLog() << "Couldn't write css:" << e.cause() << "to" << qssFilePath;
             }
         }
     } else {
-        m_id = fileInfo.fileName();
-        m_name = fileInfo.baseName();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id = fileInfo.fileName();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name = fileInfo.baseName();
         QString path = fileInfo.filePath();
-        // themeDebugLog << "Theme ID: " << m_id;
-        // themeDebugLog << "Theme Name: " << m_name;
+        // themeDebugLog << "Theme ID: " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id;
+        // themeDebugLog << "Theme Name: " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
         // themeDebugLog << "Theme Path: " << path;
 
         if (!FS::ensureFilePathExists(path)) {
-            themeWarningLog() << m_name << " Theme file path doesn't exist!";
-            m_palette = baseTheme->colorScheme();
-            m_styleSheet = baseTheme->appStyleSheet();
+            themeWarningLog() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name << " Theme file path doesn't exist!";
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_palette = baseTheme->colorScheme();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_styleSheet = baseTheme->appStyleSheet();
             return;
         }
 
-        m_palette = baseTheme->colorScheme();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_palette = baseTheme->colorScheme();
         try {
             // TODO: validate qss?
-            m_styleSheet = QString::fromUtf8(FS::read(path));
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_styleSheet = QString::fromUtf8(FS::read(path));
         } catch (const Exception& e) {
             themeWarningLog() << "Couldn't load qss:" << e.cause() << "from" << path;
-            m_styleSheet = baseTheme->appStyleSheet();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_styleSheet = baseTheme->appStyleSheet();
         }
     }
 }
 
 QStringList CustomTheme::searchPaths()
 {
-    return { FS::PathCombine("themes", m_id, "resources") };
+    return { FS::PathCombine("themes", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id, "resources") };
 }
 
 QString CustomTheme::id()
 {
-    return m_id;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id;
 }
 
 QString CustomTheme::name()
 {
-    return m_name;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
 }
 
 bool CustomTheme::hasColorScheme()
@@ -260,7 +260,7 @@ bool CustomTheme::hasColorScheme()
 
 QPalette CustomTheme::colorScheme()
 {
-    return m_palette;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_palette;
 }
 
 bool CustomTheme::hasStyleSheet()
@@ -270,20 +270,20 @@ bool CustomTheme::hasStyleSheet()
 
 QString CustomTheme::appStyleSheet()
 {
-    return m_styleSheet;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_styleSheet;
 }
 
 double CustomTheme::fadeAmount()
 {
-    return m_fadeAmount;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fadeAmount;
 }
 
 QColor CustomTheme::fadeColor()
 {
-    return m_fadeColor;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fadeColor;
 }
 
 QString CustomTheme::qtTheme()
 {
-    return m_widgets;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_widgets;
 }

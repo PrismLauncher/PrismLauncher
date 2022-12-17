@@ -50,11 +50,11 @@ public:
 
     QString deleteHash() const
     {
-        return m_deleteHash;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_deleteHash;
     }
     QString id() const
     {
-        return m_id;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id;
     }
 
 protected
@@ -69,8 +69,8 @@ slots:
     void executeTask() override;
 
 private:
-    QList<ScreenShot::Ptr> m_screenshots;
+    QList<ScreenShot::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_screenshots;
 
-    QString m_deleteHash;
-    QString m_id;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_deleteHash;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id;
 };

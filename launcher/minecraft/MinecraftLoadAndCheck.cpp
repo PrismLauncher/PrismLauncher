@@ -2,27 +2,27 @@
 #include "MinecraftInstance.h"
 #include "PackProfile.h"
 
-MinecraftLoadAndCheck::MinecraftLoadAndCheck(MinecraftInstance *inst, QObject *parent) : Task(parent), m_inst(inst)
+MinecraftLoadAndCheck::MinecraftLoadAndCheck(MinecraftInstance *inst, QObject *parent) : Task(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst(inst)
 {
 }
 
 void MinecraftLoadAndCheck::executeTask()
 {
     // add offline metadata load task
-    auto components = m_inst->getPackProfile();
+    auto components = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getPackProfile();
     components->reload(Net::Mode::Offline);
-    m_task = components->getCurrentTask();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task = components->getCurrentTask();
 
-    if(!m_task)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task)
     {
         emitSucceeded();
         return;
     }
-    connect(m_task.get(), &Task::succeeded, this, &MinecraftLoadAndCheck::subtaskSucceeded);
-    connect(m_task.get(), &Task::failed, this, &MinecraftLoadAndCheck::subtaskFailed);
-    connect(m_task.get(), &Task::aborted, this, [this]{ subtaskFailed(tr("Aborted")); });
-    connect(m_task.get(), &Task::progress, this, &MinecraftLoadAndCheck::progress);
-    connect(m_task.get(), &Task::status, this, &MinecraftLoadAndCheck::setStatus);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task.get(), &Task::succeeded, this, &MinecraftLoadAndCheck::subtaskSucceeded);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task.get(), &Task::failed, this, &MinecraftLoadAndCheck::subtaskFailed);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task.get(), &Task::aborted, this, [this]{ subtaskFailed(tr("Aborted")); });
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task.get(), &Task::progress, this, &MinecraftLoadAndCheck::progress);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_task.get(), &Task::status, this, &MinecraftLoadAndCheck::setStatus);
 }
 
 void MinecraftLoadAndCheck::subtaskSucceeded()

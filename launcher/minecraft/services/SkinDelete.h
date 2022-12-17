@@ -14,8 +14,8 @@ public:
     virtual ~SkinDelete() = default;
 
 private:
-    QString m_token;
-    shared_qobject_ptr<QNetworkReply> m_reply;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_token;
+    shared_qobject_ptr<QNetworkReply> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply;
 
 protected:
     virtual void executeTask();

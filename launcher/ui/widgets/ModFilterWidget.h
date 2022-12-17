@@ -35,7 +35,7 @@ public:
         bool operator!=(const Filter& other) const { return !(*this == other); }
     };
 
-    std::shared_ptr<Filter> m_filter;
+    std::shared_ptr<Filter> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter;
 
 public:
     static unique_qobject_ptr<ModFilterWidget> create(Version default_version, QWidget* parent = nullptr);
@@ -47,14 +47,14 @@ public:
     void disableVersionButton(VersionButtonID, QString reason = {});
 
     auto getFilter() -> std::shared_ptr<Filter>;
-    auto changed() const -> bool { return m_last_version_id != m_version_id; }
+    auto changed() const -> bool { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_last_version_id != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_id; }
 
-    Meta::VersionList::Ptr versionList() { return m_version_list; }
+    Meta::VersionList::Ptr versionList() { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_list; }
 
 private:
     ModFilterWidget(Version def, QWidget* parent = nullptr);
 
-    inline auto mcVersionStr() const -> QString { return m_instance ? m_instance->getPackProfile()->getComponentVersion("net.minecraft") : ""; }
+    inline auto mcVersionStr() const -> QString { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance ? hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->getPackProfile()->getComponentVersion("net.minecraft") : ""; }
     inline auto mcVersion() const -> Version { return { mcVersionStr() }; }
 
 private slots:
@@ -67,15 +67,15 @@ public: signals:
 private:
     Ui::ModFilterWidget* ui;
 
-    MinecraftInstance* m_instance = nullptr;
+    MinecraftInstance* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance = nullptr;
 
 
 /* Version stuff */
-    QButtonGroup m_mcVersion_buttons;
+    QButtonGroup hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mcVersion_buttons;
 
-    Meta::VersionList::Ptr m_version_list;
+    Meta::VersionList::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_list;
 
     /* Used to tell if the filter was changed since the last getFilter() call */
-    VersionButtonID m_last_version_id = VersionButtonID::Strict;
-    VersionButtonID m_version_id = VersionButtonID::Strict;
+    VersionButtonID hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_last_version_id = VersionButtonID::Strict;
+    VersionButtonID hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_id = VersionButtonID::Strict;
 };

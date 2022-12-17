@@ -46,14 +46,14 @@ namespace Net {
  */
 class ByteArraySink : public Sink {
    public:
-    ByteArraySink(QByteArray* output) : m_output(output){};
+    ByteArraySink(QByteArray* output) : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output(output){};
 
     virtual ~ByteArraySink() = default;
 
    public:
     auto init(QNetworkRequest& request) -> Task::State override
     {
-        m_output->clear();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output->clear();
         if (initAllValidators(request))
             return Task::State::Running;
         return Task::State::Failed;
@@ -61,7 +61,7 @@ class ByteArraySink : public Sink {
 
     auto write(QByteArray& data) -> Task::State override
     {
-        m_output->append(data);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output->append(data);
         if (writeAllValidators(data))
             return Task::State::Running;
         return Task::State::Failed;
@@ -69,7 +69,7 @@ class ByteArraySink : public Sink {
 
     auto abort() -> Task::State override
     {
-        m_output->clear();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output->clear();
         failAllValidators();
         return Task::State::Failed;
     }
@@ -84,6 +84,6 @@ class ByteArraySink : public Sink {
     auto hasLocalData() -> bool override { return false; }
 
    private:
-    QByteArray* m_output;
+    QByteArray* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output;
 };
 }  // namespace Net

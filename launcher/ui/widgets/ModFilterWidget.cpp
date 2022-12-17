@@ -35,27 +35,27 @@ unique_qobject_ptr<ModFilterWidget> ModFilterWidget::create(Version default_vers
 }
 
 ModFilterWidget::ModFilterWidget(Version def, QWidget* parent)
-    : QTabWidget(parent), m_filter(new Filter()),  ui(new Ui::ModFilterWidget)
+    : QTabWidget(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter(new Filter()),  ui(new Ui::ModFilterWidget)
 {
     ui->setupUi(this);
 
-    m_mcVersion_buttons.addButton(ui->strictVersionButton,   VersionButtonID::Strict);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mcVersion_buttons.addButton(ui->strictVersionButton,   VersionButtonID::Strict);
     ui->strictVersionButton->click();
-    m_mcVersion_buttons.addButton(ui->majorVersionButton,    VersionButtonID::Major);
-    m_mcVersion_buttons.addButton(ui->allVersionsButton,     VersionButtonID::All);
-    //m_mcVersion_buttons.addButton(ui->betweenVersionsButton, VersionButtonID::Between);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mcVersion_buttons.addButton(ui->majorVersionButton,    VersionButtonID::Major);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mcVersion_buttons.addButton(ui->allVersionsButton,     VersionButtonID::All);
+    //hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mcVersion_buttons.addButton(ui->betweenVersionsButton, VersionButtonID::Between);
 
-    connect(&m_mcVersion_buttons, SIGNAL(idClicked(int)), this, SLOT(onVersionFilterChanged(int)));
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mcVersion_buttons, SIGNAL(idClicked(int)), this, SLOT(onVersionFilterChanged(int)));
 
-    m_filter->versions.push_front(def);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter->versions.push_front(def);
 
-    m_version_list = APPLICATION->metadataIndex()->get("net.minecraft");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_list = APPLICATION->metadataIndex()->get("net.minecraft");
     setHidden(true);
 }
 
 void ModFilterWidget::setInstance(MinecraftInstance* instance)
 {
-    m_instance = instance;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance = instance;
 
     ui->strictVersionButton->setText(
         tr("Strict match (= %1)").arg(mcVersionStr()));
@@ -80,9 +80,9 @@ void ModFilterWidget::setInstance(MinecraftInstance* instance)
 
 auto ModFilterWidget::getFilter() -> std::shared_ptr<Filter>
 {
-    m_last_version_id = m_version_id;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_last_version_id = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_id;
     emit filterUnchanged();
-    return m_filter;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter;
 }
 
 void ModFilterWidget::disableVersionButton(VersionButtonID id, QString reason)
@@ -119,17 +119,17 @@ void ModFilterWidget::onVersionFilterChanged(int id)
     int index = 1;
 
     auto cast_id = (VersionButtonID) id;
-    if (cast_id != m_version_id) {
-        m_version_id = cast_id;
+    if (cast_id != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_id) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_id = cast_id;
     } else {
         return;
     }
 
-    m_filter->versions.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter->versions.clear();
 
     switch(cast_id){
     case(VersionButtonID::Strict):
-        m_filter->versions.push_front(mcVersion());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter->versions.push_front(mcVersion());
         break;
     case(VersionButtonID::Major): {
         auto versionSplit = mcVersionStr().split(".");
@@ -137,8 +137,8 @@ void ModFilterWidget::onVersionFilterChanged(int id)
         auto major_version = QString("%1.%2").arg(versionSplit[0], versionSplit[1]);
         QString version_str = major_version;
 
-        while (m_version_list->hasVersion(version_str)) {
-            m_filter->versions.emplace_back(version_str);
+        while (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_list->hasVersion(version_str)) {
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filter->versions.emplace_back(version_str);
             version_str = QString("%1.%2").arg(major_version, QString::number(index++));
         }
 

@@ -57,7 +57,7 @@ class PackIgnoreProxy : public QSortFilterProxyModel
 public:
     PackIgnoreProxy(InstancePtr instance, QObject *parent) : QSortFilterProxyModel(parent)
     {
-        m_instance = instance;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance = instance;
     }
     // NOTE: Sadly, we have to do sorting ourselves.
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const
@@ -164,7 +164,7 @@ public:
 
     QString relPath(const QString &path) const
     {
-        QString prefix = QDir().absoluteFilePath(m_instance->instanceRoot());
+        QString prefix = QDir().absoluteFilePath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot());
         prefix += '/';
         if (!path.startsWith(prefix))
         {
@@ -203,7 +203,7 @@ public:
                 blocked.remove(cover);
                 // block all contents, except for any cover
                 QModelIndex rootIndex =
-                    fsm->index(FS::PathCombine(m_instance->instanceRoot(), cover));
+                    fsm->index(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot(), cover));
                 QModelIndex doing = rootIndex;
                 int row = 0;
                 QStack<QModelIndex> todo;
@@ -325,16 +325,16 @@ protected:
     }
 
 private:
-    InstancePtr m_instance;
+    InstancePtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance;
     SeparatorPrefixTree<'/'> blocked;
 };
 
 ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget *parent)
-    : QDialog(parent), ui(new Ui::ExportInstanceDialog), m_instance(instance)
+    : QDialog(parent), ui(new Ui::ExportInstanceDialog), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance(instance)
 {
     ui->setupUi(this);
     auto model = new QFileSystemModel(this);
-    proxyModel = new PackIgnoreProxy(m_instance, this);
+    proxyModel = new PackIgnoreProxy(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance, this);
     loadPackIgnore();
     proxyModel->setSourceModel(model);
     auto root = instance->instanceRoot();
@@ -357,9 +357,9 @@ ExportInstanceDialog::~ExportInstanceDialog()
 }
 
 /// Save icon to instance's folder is needed
-void SaveIcon(InstancePtr m_instance)
+void SaveIcon(InstancePtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance)
 {
-    auto iconKey = m_instance->iconKey();
+    auto iconKey = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->iconKey();
     auto iconList = APPLICATION->icons();
     auto mmcIcon = iconList->icon(iconKey);
     if(!mmcIcon || mmcIcon->isBuiltIn()) {
@@ -368,10 +368,10 @@ void SaveIcon(InstancePtr m_instance)
     auto path = mmcIcon->getFilePath();
     if(!path.isNull()) {
         QFileInfo inInfo (path);
-        FS::copy(path, FS::PathCombine(m_instance->instanceRoot(), inInfo.fileName())) ();
+        FS::copy(path, FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot(), inInfo.fileName())) ();
         return;
     }
-    auto & image = mmcIcon->m_images[mmcIcon->type()];
+    auto & image = mmcIcon->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_images[mmcIcon->type()];
     auto & icon = image.icon;
     auto sizes = icon.availableSizes();
     if(sizes.size() == 0)
@@ -392,15 +392,15 @@ void SaveIcon(InstancePtr m_instance)
         }
     }
     auto pixmap = icon.pixmap(largest);
-    pixmap.save(FS::PathCombine(m_instance->instanceRoot(), iconKey + ".png"));
+    pixmap.save(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot(), iconKey + ".png"));
 }
 
 bool ExportInstanceDialog::doExport()
 {
-    auto name = FS::RemoveInvalidFilenameChars(m_instance->name());
+    auto name = FS::RemoveInvalidFilenameChars(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->name());
 
     const QString output = QFileDialog::getSaveFileName(
-        this, tr("Export %1").arg(m_instance->name()),
+        this, tr("Export %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->name()),
         FS::PathCombine(QDir::homePath(), name + ".zip"), "Zip (*.zip)", nullptr, QFileDialog::DontConfirmOverwrite);
     if (output.isEmpty())
     {
@@ -418,17 +418,17 @@ bool ExportInstanceDialog::doExport()
         }
     }
 
-    SaveIcon(m_instance);
+    SaveIcon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance);
 
     auto & blocked = proxyModel->blockedPaths();
     using std::placeholders::_1;
     auto files = QFileInfoList();
-    if (!MMCZip::collectFileListRecursively(m_instance->instanceRoot(), nullptr, &files,
+    if (!MMCZip::collectFileListRecursively(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot(), nullptr, &files,
                                     std::bind(&SeparatorPrefixTree<'/'>::covers, blocked, _1))) {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
         return false;
     }
-    if (!MMCZip::compressDirFiles(output, m_instance->instanceRoot(), files))
+    if (!MMCZip::compressDirFiles(output, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot(), files))
     {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
         return false;
@@ -474,7 +474,7 @@ void ExportInstanceDialog::rowsInserted(QModelIndex parent, int top, int bottom)
 
 QString ExportInstanceDialog::ignoreFileName()
 {
-    return FS::PathCombine(m_instance->instanceRoot(), ".packignore");
+    return FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->instanceRoot(), ".packignore");
 }
 
 void ExportInstanceDialog::loadPackIgnore()

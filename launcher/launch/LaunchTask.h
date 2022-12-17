@@ -72,17 +72,17 @@ public: /* methods */
 
     InstancePtr instance()
     {
-        return m_instance;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance;
     }
 
     void setPid(qint64 pid)
     {
-        m_pid = pid;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pid = pid;
     }
 
     qint64 pid()
     {
-        return m_pid;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pid;
     }
 
     /**
@@ -134,11 +134,11 @@ private: /*methods */
     void finalizeSteps(bool successful, const QString & error);
 
 protected: /* data */
-    InstancePtr m_instance;
-    shared_qobject_ptr<LogModel> m_logModel;
-    QList <shared_qobject_ptr<LaunchStep>> m_steps;
-    QMap<QString, QString> m_censorFilter;
+    InstancePtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance;
+    shared_qobject_ptr<LogModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logModel;
+    QList <shared_qobject_ptr<LaunchStep>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps;
+    QMap<QString, QString> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_censorFilter;
     int currentStep = -1;
     State state = NotStarted;
-    qint64 m_pid = -1;
+    qint64 hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pid = -1;
 };

@@ -23,32 +23,32 @@
 #include "minecraft/mod/ModFolderModel.h"
 
 ModDownloadTask::ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods, bool is_indexed)
-    : m_mod(mod), m_mod_version(version), mods(mods)
+    : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod(mod), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_version(version), mods(mods)
 {
     if (is_indexed) {
-        m_update_task.reset(new LocalModUpdateTask(mods->indexDir(), m_mod, m_mod_version));
-        connect(m_update_task.get(), &LocalModUpdateTask::hasOldMod, this, &ModDownloadTask::hasOldMod);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_update_task.reset(new LocalModUpdateTask(mods->indexDir(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_version));
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_update_task.get(), &LocalModUpdateTask::hasOldMod, this, &ModDownloadTask::hasOldMod);
 
-        addTask(m_update_task);
+        addTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_update_task);
     }
 
-    m_filesNetJob.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
-    m_filesNetJob->setStatus(tr("Downloading mod:\n%1").arg(m_mod_version.downloadUrl));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob->setStatus(tr("Downloading mod:\n%1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_version.downloadUrl));
     
-    m_filesNetJob->addNetAction(Net::Download::makeFile(m_mod_version.downloadUrl, mods->dir().absoluteFilePath(getFilename())));
-    connect(m_filesNetJob.get(), &NetJob::succeeded, this, &ModDownloadTask::downloadSucceeded);
-    connect(m_filesNetJob.get(), &NetJob::progress, this, &ModDownloadTask::downloadProgressChanged);
-    connect(m_filesNetJob.get(), &NetJob::failed, this, &ModDownloadTask::downloadFailed);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob->addNetAction(Net::Download::makeFile(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_version.downloadUrl, mods->dir().absoluteFilePath(getFilename())));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.get(), &NetJob::succeeded, this, &ModDownloadTask::downloadSucceeded);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.get(), &NetJob::progress, this, &ModDownloadTask::downloadProgressChanged);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.get(), &NetJob::failed, this, &ModDownloadTask::downloadFailed);
 
-    addTask(m_filesNetJob);
+    addTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob);
 }
 
 void ModDownloadTask::downloadSucceeded()
 {
-    m_filesNetJob.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.reset();
     auto name = std::get<0>(to_delete);
     auto filename = std::get<1>(to_delete);
-    if (!name.isEmpty() && filename != m_mod_version.fileName) {
+    if (!name.isEmpty() && filename != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_version.fileName) {
         mods->uninstallMod(filename, true);
     }
 }
@@ -56,7 +56,7 @@ void ModDownloadTask::downloadSucceeded()
 void ModDownloadTask::downloadFailed(QString reason)
 {
     emitFailed(reason);
-    m_filesNetJob.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob.reset();
 }
 
 void ModDownloadTask::downloadProgressChanged(qint64 current, qint64 total)

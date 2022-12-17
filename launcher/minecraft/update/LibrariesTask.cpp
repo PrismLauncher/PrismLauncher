@@ -7,14 +7,14 @@
 
 LibrariesTask::LibrariesTask(MinecraftInstance * inst)
 {
-    m_inst = inst;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst = inst;
 }
 
 void LibrariesTask::executeTask()
 {
     setStatus(tr("Downloading required library files..."));
-    qDebug() << m_inst->name() << ": downloading libraries";
-    MinecraftInstance *inst = (MinecraftInstance *)m_inst;
+    qDebug() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->name() << ": downloading libraries";
+    MinecraftInstance *inst = (MinecraftInstance *)hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst;
 
     // Build a list of URLs that will need to be downloaded.
     auto components = inst->getPackProfile();

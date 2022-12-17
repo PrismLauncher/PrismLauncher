@@ -40,12 +40,12 @@
 LogView::LogView(QWidget* parent) : QPlainTextEdit(parent)
 {
     setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-    m_defaultFormat = new QTextCharFormat(currentCharFormat());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultFormat = new QTextCharFormat(currentCharFormat());
 }
 
 LogView::~LogView()
 {
-    delete m_defaultFormat;
+    delete hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultFormat;
 }
 
 void LogView::setWordWrap(bool wrapping)
@@ -64,33 +64,33 @@ void LogView::setWordWrap(bool wrapping)
 
 void LogView::setModel(QAbstractItemModel* model)
 {
-    if(m_model)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model)
     {
-        disconnect(m_model, &QAbstractItemModel::modelReset, this, &LogView::repopulate);
-        disconnect(m_model, &QAbstractItemModel::rowsInserted, this, &LogView::rowsInserted);
-        disconnect(m_model, &QAbstractItemModel::rowsAboutToBeInserted, this, &LogView::rowsAboutToBeInserted);
-        disconnect(m_model, &QAbstractItemModel::rowsRemoved, this, &LogView::rowsRemoved);
+        disconnect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model, &QAbstractItemModel::modelReset, this, &LogView::repopulate);
+        disconnect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model, &QAbstractItemModel::rowsInserted, this, &LogView::rowsInserted);
+        disconnect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model, &QAbstractItemModel::rowsAboutToBeInserted, this, &LogView::rowsAboutToBeInserted);
+        disconnect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model, &QAbstractItemModel::rowsRemoved, this, &LogView::rowsRemoved);
     }
-    m_model = model;
-    if(m_model)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model = model;
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model)
     {
-        connect(m_model, &QAbstractItemModel::modelReset, this, &LogView::repopulate);
-        connect(m_model, &QAbstractItemModel::rowsInserted, this, &LogView::rowsInserted);
-        connect(m_model, &QAbstractItemModel::rowsAboutToBeInserted, this, &LogView::rowsAboutToBeInserted);
-        connect(m_model, &QAbstractItemModel::rowsRemoved, this, &LogView::rowsRemoved);
-        connect(m_model, &QAbstractItemModel::destroyed, this, &LogView::modelDestroyed);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model, &QAbstractItemModel::modelReset, this, &LogView::repopulate);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model, &QAbstractItemModel::rowsInserted, this, &LogView::rowsInserted);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model, &QAbstractItemModel::rowsAboutToBeInserted, this, &LogView::rowsAboutToBeInserted);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model, &QAbstractItemModel::rowsRemoved, this, &LogView::rowsRemoved);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model, &QAbstractItemModel::destroyed, this, &LogView::modelDestroyed);
     }
     repopulate();
 }
 
 QAbstractItemModel * LogView::model() const
 {
-    return m_model;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model;
 }
 
 void LogView::modelDestroyed(QObject* model)
 {
-    if(m_model == model)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model == model)
     {
         setModel(nullptr);
     }
@@ -100,11 +100,11 @@ void LogView::repopulate()
 {
     auto doc = document();
     doc->clear();
-    if(!m_model)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model)
     {
         return;
     }
-    rowsInserted(QModelIndex(), 0, m_model->rowCount() - 1);
+    rowsInserted(QModelIndex(), 0, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->rowCount() - 1);
 }
 
 void LogView::rowsAboutToBeInserted(const QModelIndex& parent, int first, int last)
@@ -115,13 +115,13 @@ void LogView::rowsAboutToBeInserted(const QModelIndex& parent, int first, int la
     QScrollBar *bar = verticalScrollBar();
     int max_bar = bar->maximum();
     int val_bar = bar->value();
-    if (m_scroll)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scroll)
     {
-        m_scroll = (max_bar - val_bar) <= 1;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scroll = (max_bar - val_bar) <= 1;
     }
     else
     {
-        m_scroll = val_bar == max_bar;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scroll = val_bar == max_bar;
     }
 }
 
@@ -129,20 +129,20 @@ void LogView::rowsInserted(const QModelIndex& parent, int first, int last)
 {
     for(int i = first; i <= last; i++)
     {
-        auto idx = m_model->index(i, 0, parent);
-        auto text = m_model->data(idx, Qt::DisplayRole).toString();
-        QTextCharFormat format(*m_defaultFormat);
-        auto font = m_model->data(idx, Qt::FontRole);
+        auto idx = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->index(i, 0, parent);
+        auto text = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->data(idx, Qt::DisplayRole).toString();
+        QTextCharFormat format(*hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_defaultFormat);
+        auto font = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->data(idx, Qt::FontRole);
         if(font.isValid())
         {
             format.setFont(font.value<QFont>());
         }
-        auto fg = m_model->data(idx, Qt::ForegroundRole);
+        auto fg = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->data(idx, Qt::ForegroundRole);
         if(fg.isValid())
         {
             format.setForeground(fg.value<QColor>());
         }
-        auto bg = m_model->data(idx, Qt::BackgroundRole);
+        auto bg = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->data(idx, Qt::BackgroundRole);
         if(bg.isValid())
         {
             format.setBackground(bg.value<QColor>());
@@ -152,9 +152,9 @@ void LogView::rowsInserted(const QModelIndex& parent, int first, int last)
         workCursor.insertText(text, format);
         workCursor.insertBlock();
     }
-    if(m_scroll && !m_scrolling)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scroll && !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scrolling)
     {
-        m_scrolling = true;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scrolling = true;
         QMetaObject::invokeMethod( this, "scrollToBottom", Qt::QueuedConnection);
     }
 }
@@ -169,7 +169,7 @@ void LogView::rowsRemoved(const QModelIndex& parent, int first, int last)
 
 void LogView::scrollToBottom()
 {
-    m_scrolling = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scrolling = false;
     verticalScrollBar()->setSliderPosition(verticalScrollBar()->maximum());
 }
 

@@ -47,22 +47,22 @@
 #include <QUrl>
 #include <QDebug>
 
-ImgurUpload::ImgurUpload(ScreenShot::Ptr shot) : NetAction(), m_shot(shot)
+ImgurUpload::ImgurUpload(ScreenShot::Ptr shot) : NetAction(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_shot(shot)
 {
-    m_url = BuildConfig.IMGUR_BASE_URL + "upload.json";
-    m_state = State::Inactive;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url = BuildConfig.IMGUR_BASE_URL + "upload.json";
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::Inactive;
 }
 
 void ImgurUpload::executeTask()
 {
     finished = false;
-    m_state = Task::State::Running;
-    QNetworkRequest request(m_url);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = Task::State::Running;
+    QNetworkRequest request(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url);
     request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgentUncached().toUtf8());
     request.setRawHeader("Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toStdString().c_str());
     request.setRawHeader("Accept", "application/json");
 
-    QFile f(m_shot->m_file.absoluteFilePath());
+    QFile f(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_shot->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file.absoluteFilePath());
     if (!f.open(QFile::ReadOnly))
     {
         emitFailed();
@@ -81,12 +81,12 @@ void ImgurUpload::executeTask()
     multipart->append(typePart);
     QHttpPart namePart;
     namePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"name\"");
-    namePart.setBody(m_shot->m_file.baseName().toUtf8());
+    namePart.setBody(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_shot->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file.baseName().toUtf8());
     multipart->append(namePart);
 
-    QNetworkReply *rep = m_network->post(request, multipart);
+    QNetworkReply *rep = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network->post(request, multipart);
 
-    m_reply.reset(rep);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &ImgurUpload::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &ImgurUpload::downloadFinished);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -97,15 +97,15 @@ void ImgurUpload::executeTask()
 }
 void ImgurUpload::downloadError(QNetworkReply::NetworkError error)
 {
-    qCritical() << "ImgurUpload failed with error" << m_reply->errorString() << "Server reply:\n" << m_reply->readAll();
+    qCritical() << "ImgurUpload failed with error" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->errorString() << "Server reply:\n" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->readAll();
     if(finished)
     {
         qCritical() << "Double finished ImgurUpload!";
         return;
     }
-    m_state = Task::State::Failed;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = Task::State::Failed;
     finished = true;
-    m_reply.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
     emitFailed();
 }
 void ImgurUpload::downloadFinished()
@@ -115,15 +115,15 @@ void ImgurUpload::downloadFinished()
         qCritical() << "Double finished ImgurUpload!";
         return;
     }
-    QByteArray data = m_reply->readAll();
-    m_reply.reset();
+    QByteArray data = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->readAll();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if (jsonError.error != QJsonParseError::NoError)
     {
         qDebug() << "imgur server did not reply with JSON" << jsonError.errorString();
         finished = true;
-        m_reply.reset();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
         emitFailed();
         return;
     }
@@ -132,14 +132,14 @@ void ImgurUpload::downloadFinished()
     {
         qDebug() << "Screenshot upload not successful:" << doc.toJson();
         finished = true;
-        m_reply.reset();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
         emitFailed();
         return;
     }
-    m_shot->m_imgurId = object.value("data").toObject().value("id").toString();
-    m_shot->m_url = object.value("data").toObject().value("link").toString();
-    m_shot->m_imgurDeleteHash = object.value("data").toObject().value("deletehash").toString();
-    m_state = Task::State::Succeeded;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_shot->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_imgurId = object.value("data").toObject().value("id").toString();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_shot->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url = object.value("data").toObject().value("link").toString();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_shot->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_imgurDeleteHash = object.value("data").toObject().value("deletehash").toString();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = Task::State::Succeeded;
     finished = true;
     emit succeeded();
     return;

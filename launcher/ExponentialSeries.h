@@ -21,23 +21,23 @@ class ExponentialSeries
 public:
     ExponentialSeries(unsigned min, unsigned max, unsigned exponent = 2)
     {
-        m_current = m_min = min;
-        m_max = max;
-        m_exponent = exponent;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_min = min;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_max = max;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_exponent = exponent;
     }
     void reset()
     {
-        m_current = m_min;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_min;
     }
     unsigned operator()()
     {
-        unsigned retval = m_current;
-        m_current *= m_exponent;
-        clamp(m_current, m_min, m_max);
+        unsigned retval = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current *= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_exponent;
+        clamp(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_min, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_max);
         return retval;
     }
-    unsigned m_current;
-    unsigned m_min;
-    unsigned m_max;
-    unsigned m_exponent;
+    unsigned hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current;
+    unsigned hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_min;
+    unsigned hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_max;
+    unsigned hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_exponent;
 };

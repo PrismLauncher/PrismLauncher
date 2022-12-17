@@ -38,11 +38,11 @@ void Yggdrasil::sendRequest(QUrl endpoint, QByteArray content) {
 
     QNetworkRequest netRequest(endpoint);
     netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    m_netReply = APPLICATION->network()->post(netRequest, content);
-    connect(m_netReply, &QNetworkReply::finished, this, &Yggdrasil::processReply);
-    connect(m_netReply, &QNetworkReply::uploadProgress, this, &Yggdrasil::refreshTimers);
-    connect(m_netReply, &QNetworkReply::downloadProgress, this, &Yggdrasil::refreshTimers);
-    connect(m_netReply, &QNetworkReply::sslErrors, this, &Yggdrasil::sslErrors);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply = APPLICATION->network()->post(netRequest, content);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply, &QNetworkReply::finished, this, &Yggdrasil::processReply);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply, &QNetworkReply::uploadProgress, this, &Yggdrasil::refreshTimers);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply, &QNetworkReply::downloadProgress, this, &Yggdrasil::refreshTimers);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply, &QNetworkReply::sslErrors, this, &Yggdrasil::sslErrors);
     timeout_keeper.setSingleShot(true);
     timeout_keeper.start(timeout_max);
     counter.setSingleShot(false);
@@ -70,11 +70,11 @@ void Yggdrasil::refresh() {
      * }
      */
     QJsonObject req;
-    req.insert("clientToken", m_data->clientToken());
-    req.insert("accessToken", m_data->accessToken());
+    req.insert("clientToken", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->clientToken());
+    req.insert("accessToken", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->accessToken());
     /*
     {
-        auto currentProfile = m_account->currentProfile();
+        auto currentProfile = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account->currentProfile();
         QJsonObject profile;
         profile.insert("id", currentProfile->id());
         profile.insert("name", currentProfile->name());
@@ -117,15 +117,15 @@ void Yggdrasil::login(QString password) {
         req.insert("agent", agent);
     }
 
-    req.insert("username", m_data->userName());
+    req.insert("username", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->userName());
     req.insert("password", password);
     req.insert("requestUser", false);
 
     // If we already have a client token, give it to the server.
     // Otherwise, let the server give us one.
 
-    m_data->generateClientTokenIfMissing();
-    req.insert("clientToken", m_data->clientToken());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->generateClientTokenIfMissing();
+    req.insert("clientToken", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->clientToken());
 
     QJsonDocument doc(req);
 
@@ -152,16 +152,16 @@ void Yggdrasil::heartbeat() {
 bool Yggdrasil::abort() {
     progress(timeout_max, timeout_max);
     // TODO: actually use this in a meaningful way
-    m_aborted = Yggdrasil::BY_USER;
-    m_netReply->abort();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = Yggdrasil::BY_USER;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply->abort();
     return true;
 }
 
 void Yggdrasil::abortByTimeout() {
     progress(timeout_max, timeout_max);
     // TODO: actually use this in a meaningful way
-    m_aborted = Yggdrasil::BY_TIMEOUT;
-    m_netReply->abort();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = Yggdrasil::BY_TIMEOUT;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply->abort();
 }
 
 void Yggdrasil::sslErrors(QList<QSslError> errors) {
@@ -188,10 +188,10 @@ void Yggdrasil::processResponse(QJsonObject responseData) {
         changeState(AccountTaskState::STATE_FAILED_HARD, tr("Authentication server didn't send a client token."));
         return;
     }
-    if(m_data->clientToken().isEmpty()) {
-        m_data->setClientToken(clientToken);
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->clientToken().isEmpty()) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->setClientToken(clientToken);
     }
-    else if(clientToken != m_data->clientToken()) {
+    else if(clientToken != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->clientToken()) {
         changeState(AccountTaskState::STATE_FAILED_HARD, tr("Authentication server attempted to change the client token. This isn't supported."));
         return;
     }
@@ -205,9 +205,9 @@ void Yggdrasil::processResponse(QJsonObject responseData) {
         return;
     }
     // Set the access token.
-    m_data->yggdrasilToken.token = accessToken;
-    m_data->yggdrasilToken.validity = Katabasis::Validity::Certain;
-    m_data->yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->yggdrasilToken.token = accessToken;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->yggdrasilToken.validity = Katabasis::Validity::Certain;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
 
     // Get UUID here since we need it for later
     auto profile = responseData.value("selectedProfile");
@@ -219,14 +219,14 @@ void Yggdrasil::processResponse(QJsonObject responseData) {
     auto profileObj = profile.toObject();
     for (auto i = profileObj.constBegin(); i != profileObj.constEnd(); ++i) {
         if (i.key() == "name" && i.value().isString()) {
-            m_data->minecraftProfile.name = i->toString();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftProfile.name = i->toString();
         }
         else if (i.key() == "id" && i.value().isString()) {
-            m_data->minecraftProfile.id = i->toString();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftProfile.id = i->toString();
         }
     }
 
-    if (m_data->minecraftProfile.id.isEmpty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->minecraftProfile.id.isEmpty()) {
         changeState(AccountTaskState::STATE_FAILED_HARD, tr("Authentication server didn't send a UUID in selected profile."));
         return;
     }
@@ -240,7 +240,7 @@ void Yggdrasil::processResponse(QJsonObject responseData) {
 void Yggdrasil::processReply() {
     changeState(AccountTaskState::STATE_WORKING);
 
-    switch (m_netReply->error())
+    switch (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply->error())
     {
     case QNetworkReply::NoError:
         break;
@@ -277,7 +277,7 @@ void Yggdrasil::processReply() {
     default:
         changeState(
             AccountTaskState::STATE_FAILED_SOFT,
-            tr("Authentication operation failed due to a network error: %1 (%2)").arg(m_netReply->errorString()).arg(m_netReply->error())
+            tr("Authentication operation failed due to a network error: %1 (%2)").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply->errorString()).arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply->error())
         );
         return;
     }
@@ -285,10 +285,10 @@ void Yggdrasil::processReply() {
     // Try to parse the response regardless of the response code.
     // Sometimes the auth server will give more information and an error code.
     QJsonParseError jsonError;
-    QByteArray replyData = m_netReply->readAll();
+    QByteArray replyData = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply->readAll();
     QJsonDocument doc = QJsonDocument::fromJson(replyData, &jsonError);
     // Check the response code.
-    int responseCode = m_netReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    int responseCode = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     if (responseCode == 200) {
         // If the response code was 200, then there shouldn't be an error. Make sure
@@ -326,7 +326,7 @@ void Yggdrasil::processReply() {
         qDebug() << "The request failed and the server gave no error message. Unknown error.";
         changeState(
             AccountTaskState::STATE_FAILED_SOFT,
-            tr("An unknown error occurred when trying to communicate with the authentication server: %1").arg(m_netReply->errorString())
+            tr("An unknown error occurred when trying to communicate with the authentication server: %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_netReply->errorString())
         );
     }
 }
@@ -337,17 +337,17 @@ void Yggdrasil::processError(QJsonObject responseData) {
     QJsonValue causeVal = responseData.value("cause");
 
     if (errorVal.isString() && errorMessageValue.isString()) {
-        m_error = std::shared_ptr<Error>(
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_error = std::shared_ptr<Error>(
             new Error {
                 errorVal.toString(""),
                 errorMessageValue.toString(""),
                 causeVal.toString("")
             }
         );
-        changeState(AccountTaskState::STATE_FAILED_HARD, m_error->m_errorMessageVerbose);
+        changeState(AccountTaskState::STATE_FAILED_HARD, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_error->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_errorMessageVerbose);
     }
     else {
-        // Error is not in standard format. Don't set m_error and return unknown error.
+        // Error is not in standard format. Don't set hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_error and return unknown error.
         changeState(AccountTaskState::STATE_FAILED_HARD, tr("An unknown Yggdrasil error occurred."));
     }
 }

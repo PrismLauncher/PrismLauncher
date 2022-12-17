@@ -14,7 +14,7 @@ AuthFlow::AuthFlow(AccountData * data, QObject *parent) :
 }
 
 void AuthFlow::succeed() {
-    m_data->validity_ = Katabasis::Validity::Certain;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->validity_ = Katabasis::Validity::Certain;
     changeState(
         AccountTaskState::STATE_SUCCEEDED,
         tr("Finished all authentication steps")
@@ -22,7 +22,7 @@ void AuthFlow::succeed() {
 }
 
 void AuthFlow::executeTask() {
-    if(m_currentStep) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentStep) {
         return;
     }
     changeState(AccountTaskState::STATE_WORKING, tr("Initializing"));
@@ -30,29 +30,29 @@ void AuthFlow::executeTask() {
 }
 
 void AuthFlow::nextStep() {
-    if(m_steps.size() == 0) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.size() == 0) {
         // we got to the end without an incident... assume this is all.
-        m_currentStep.reset();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentStep.reset();
         succeed();
         return;
     }
-    m_currentStep = m_steps.front();
-    qDebug() << "AuthFlow:" << m_currentStep->describe();
-    m_steps.pop_front();
-    connect(m_currentStep.get(), &AuthStep::finished, this, &AuthFlow::stepFinished);
-    connect(m_currentStep.get(), &AuthStep::showVerificationUriAndCode, this, &AuthFlow::showVerificationUriAndCode);
-    connect(m_currentStep.get(), &AuthStep::hideVerificationUriAndCode, this, &AuthFlow::hideVerificationUriAndCode);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentStep = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.front();
+    qDebug() << "AuthFlow:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentStep->describe();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.pop_front();
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentStep.get(), &AuthStep::finished, this, &AuthFlow::stepFinished);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentStep.get(), &AuthStep::showVerificationUriAndCode, this, &AuthFlow::showVerificationUriAndCode);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentStep.get(), &AuthStep::hideVerificationUriAndCode, this, &AuthFlow::hideVerificationUriAndCode);
 
-    m_currentStep->perform();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentStep->perform();
 }
 
 
 QString AuthFlow::getStateMessage() const {
-    switch (m_taskState)
+    switch (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_taskState)
     {
         case AccountTaskState::STATE_WORKING: {
-            if(m_currentStep) {
-                return m_currentStep->describe();
+            if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentStep) {
+                return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentStep->describe();
             }
             else {
                 return tr("Working...");

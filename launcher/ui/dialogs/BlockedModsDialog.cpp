@@ -39,20 +39,20 @@
 #include <QStandardPaths>
 
 BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods)
-    : QDialog(parent), ui(new Ui::BlockedModsDialog), m_mods(mods)
+    : QDialog(parent), ui(new Ui::BlockedModsDialog), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods(mods)
 {
-    m_hashing_task = shared_qobject_ptr<ConcurrentTask>(new ConcurrentTask(this, "MakeHashesTask", 10));
-    connect(m_hashing_task.get(), &Task::finished, this, &BlockedModsDialog::hashTaskFinished);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hashing_task = shared_qobject_ptr<ConcurrentTask>(new ConcurrentTask(this, "MakeHashesTask", 10));
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hashing_task.get(), &Task::finished, this, &BlockedModsDialog::hashTaskFinished);
 
     ui->setupUi(this);
 
-    m_openMissingButton = ui->buttonBox->addButton(tr("Open Missing"), QDialogButtonBox::ActionRole);
-    connect(m_openMissingButton, &QPushButton::clicked, this, [this]() { openAll(true); });
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_openMissingButton = ui->buttonBox->addButton(tr("Open Missing"), QDialogButtonBox::ActionRole);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_openMissingButton, &QPushButton::clicked, this, [this]() { openAll(true); });
 
     auto downloadFolderButton = ui->buttonBox->addButton(tr("Add Download Folder"), QDialogButtonBox::ActionRole);
     connect(downloadFolderButton, &QPushButton::clicked, this, &BlockedModsDialog::addDownloadFolder);
 
-    connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &BlockedModsDialog::directoryChanged);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher, &QFileSystemWatcher::directoryChanged, this, &BlockedModsDialog::directoryChanged);
 
     qDebug() << "[Blocked Mods Dialog] Mods List: " << mods;
 
@@ -101,7 +101,7 @@ void BlockedModsDialog::dropEvent(QDropEvent* e)
         QFileInfo file = QFileInfo(filePath);
         QString path = file.dir().absolutePath();
         qDebug() << "[Blocked Mods Dialog] Adding watch path:" << path;
-        m_watcher.addPath(path);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher.addPath(path);
     }
     scanPaths();
     update();
@@ -110,12 +110,12 @@ void BlockedModsDialog::dropEvent(QDropEvent* e)
 void BlockedModsDialog::done(int r)
 {
     QDialog::done(r);
-    disconnect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &BlockedModsDialog::directoryChanged);
+    disconnect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher, &QFileSystemWatcher::directoryChanged, this, &BlockedModsDialog::directoryChanged);
 }
 
 void BlockedModsDialog::openAll(bool missingOnly)
 {
-    for (auto& mod : m_mods) {
+    for (auto& mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods) {
         if (!missingOnly || !mod.matched) {
             QDesktopServices::openUrl(mod.websiteUrl);
         }
@@ -128,7 +128,7 @@ void BlockedModsDialog::addDownloadFolder()
         QFileDialog::getExistingDirectory(this, tr("Select directory where you downloaded the mods"),
                                           QStandardPaths::writableLocation(QStandardPaths::DownloadLocation), QFileDialog::ShowDirsOnly);
     qDebug() << "[Blocked Mods Dialog] Adding watch path:" << dir;
-    m_watcher.addPath(dir);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher.addPath(dir);
     scanPath(dir, true);
     update();
 }
@@ -139,7 +139,7 @@ void BlockedModsDialog::update()
     QString text;
     QString span;
 
-    for (auto& mod : m_mods) {
+    for (auto& mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods) {
         if (mod.matched) {
             // &#x2714; -> html for HEAVY CHECK MARK : ✔
             span = QString(tr("<span style=\"color:green\"> &#x2714; Found at %1 </span>")).arg(mod.localPath);
@@ -153,7 +153,7 @@ void BlockedModsDialog::update()
     ui->textBrowserModsListing->setText(text);
 
     QString watching;
-    for (auto& dir : m_watcher.directories()) {
+    for (auto& dir : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher.directories()) {
         watching += QString("<a href=\"%1\">%1</a><br/>").arg(dir);
     }
 
@@ -161,10 +161,10 @@ void BlockedModsDialog::update()
 
     if (allModsMatched()) {
         ui->labelModsFound->setText("<span style=\"color:green\">✔</span>" + tr("All mods found"));
-        m_openMissingButton->setDisabled(true);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_openMissingButton->setDisabled(true);
     } else {
         ui->labelModsFound->setText(tr("Please download the missing mods."));
-        m_openMissingButton->setDisabled(false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_openMissingButton->setDisabled(false);
     }
 }
 
@@ -182,14 +182,14 @@ void BlockedModsDialog::setupWatch()
 {
     const QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
     const QString modsFolder = APPLICATION->settings()->get("CentralModsDir").toString();
-    m_watcher.addPath(downloadsFolder);
-    m_watcher.addPath(modsFolder);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher.addPath(downloadsFolder);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher.addPath(modsFolder);
 }
 
 /// @brief scan all watched folder
 void BlockedModsDialog::scanPaths()
 {
-    for (auto& dir : m_watcher.directories()) {
+    for (auto& dir : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher.directories()) {
         scanPath(dir, false);
     }
     runHashTask();
@@ -222,7 +222,7 @@ void BlockedModsDialog::scanPath(QString path, bool start_task)
 void BlockedModsDialog::addHashTask(QString path)
 {
     qDebug() << "[Blocked Mods Dialog] adding a Hash task for" << path << "to the pending set.";
-    m_pending_hash_paths.insert(path);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pending_hash_paths.insert(path);
 }
 
 /// @brief add a hashing task for the file located at path and connect it to check that hash against
@@ -237,7 +237,7 @@ void BlockedModsDialog::buildHashTask(QString path)
     connect(hash_task.get(), &Task::succeeded, this, [this, hash_task, path] { checkMatchHash(hash_task->getResult(), path); });
     connect(hash_task.get(), &Task::failed, this, [path] { qDebug() << "Failed to hash path: " << path; });
 
-    m_hashing_task->addTask(hash_task);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hashing_task->addTask(hash_task);
 }
 
 /// @brief check if the computed hash for the provided path matches a blocked
@@ -250,7 +250,7 @@ void BlockedModsDialog::checkMatchHash(QString hash, QString path)
 
     qDebug() << "[Blocked Mods Dialog] Checking for match on hash: " << hash << "| From path:" << path;
 
-    for (auto& mod : m_mods) {
+    for (auto& mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods) {
         if (mod.matched) {
             continue;
         }
@@ -284,7 +284,7 @@ bool BlockedModsDialog::checkValidPath(QString path)
         return metadataFilename.compare(fsfilename, Qt::CaseInsensitive) == 0;
     };
 
-    for (auto& mod : m_mods) {
+    for (auto& mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods) {
         if (compare(filename, mod.name)) {
             qDebug() << "[Blocked Mods Dialog] Name match found:" << mod.name << "| From path:" << path;
             return true;
@@ -300,14 +300,14 @@ bool BlockedModsDialog::checkValidPath(QString path)
 
 bool BlockedModsDialog::allModsMatched()
 {
-    return std::all_of(m_mods.begin(), m_mods.end(), [](auto const& mod) { return mod.matched; });
+    return std::all_of(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.begin(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.end(), [](auto const& mod) { return mod.matched; });
 }
 
 /// @brief ensure matched file paths still exist
 void BlockedModsDialog::validateMatchedMods()
 {
     bool changed = false;
-    for (auto& mod : m_mods) {
+    for (auto& mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods) {
         if (mod.matched) {
             QFileInfo file = QFileInfo(mod.localPath);
             if (!file.exists() || !file.isFile()) {
@@ -327,31 +327,31 @@ void BlockedModsDialog::validateMatchedMods()
 /// @brief run hash task or mark a pending run if it is already runing
 void BlockedModsDialog::runHashTask()
 {
-    if (!m_hashing_task->isRunning()) {
-        m_rehash_pending = false;
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hashing_task->isRunning()) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rehash_pending = false;
 
-        if (!m_pending_hash_paths.isEmpty()) {
+        if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pending_hash_paths.isEmpty()) {
             qDebug() << "[Blocked Mods Dialog] there are pending hash tasks, building and running tasks";
 
-            auto path = m_pending_hash_paths.begin();
-            while (path != m_pending_hash_paths.end()) {
+            auto path = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pending_hash_paths.begin();
+            while (path != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pending_hash_paths.end()) {
                 buildHashTask(*path);
-                path = m_pending_hash_paths.erase(path);
+                path = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pending_hash_paths.erase(path);
             }
 
-            m_hashing_task->start();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hashing_task->start();
         }
     } else {
         qDebug() << "[Blocked Mods Dialog] queueing another run of the hashing task";
-        qDebug() << "[Blocked Mods Dialog] pending hash tasks:" << m_pending_hash_paths;
-        m_rehash_pending = true;
+        qDebug() << "[Blocked Mods Dialog] pending hash tasks:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pending_hash_paths;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rehash_pending = true;
     }
 }
 
 void BlockedModsDialog::hashTaskFinished()
 {
     qDebug() << "[Blocked Mods Dialog] All hash tasks finished";
-    if (m_rehash_pending) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rehash_pending) {
         qDebug() << "[Blocked Mods Dialog] task finished with a rehash pending, rerunning";
         runHashTask();
     }

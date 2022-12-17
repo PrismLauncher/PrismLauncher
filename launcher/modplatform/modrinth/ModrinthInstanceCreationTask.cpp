@@ -22,9 +22,9 @@ bool ModrinthCreationTask::abort()
     if (!canAbort())
         return false;
 
-    m_abort = true;
-    if (m_files_job)
-        m_files_job->abort();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort = true;
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job)
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job->abort();
     return Task::abort();
 }
 
@@ -48,19 +48,19 @@ bool ModrinthCreationTask::updateInstance()
         }
     }
 
-    QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
-    if (!parseManifest(index_path, m_files, true, false))
+    QString index_path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "modrinth.index.json");
+    if (!parseManifest(index_path, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files, true, false))
         return false;
 
     auto version_name = inst->getManagedPackVersionName();
     auto version_str = !version_name.isEmpty() ? tr(" (version %1)").arg(version_name) : "";
 
     if (shouldConfirmUpdate()) {
-        auto should_update = askIfShouldUpdate(m_parent, version_str);
+        auto should_update = askIfShouldUpdate(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, version_str);
         if (should_update == ShouldUpdate::SkipUpdating)
             return false;
         if (should_update == ShouldUpdate::Cancel) {
-            m_abort = true;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort = true;
             return false;
         }
     }
@@ -77,9 +77,9 @@ bool ModrinthCreationTask::updateInstance()
         parseManifest(old_index_path, old_files, false, false);
 
         // Let's remove all duplicated, identical resources!
-        auto files_iterator = m_files.begin();
+        auto files_iterator = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files.begin();
     begin:
-        while (files_iterator != m_files.end()) {
+        while (files_iterator != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files.end()) {
             auto const& file = *files_iterator;
 
             auto old_files_iterator = old_files.begin();
@@ -88,7 +88,7 @@ bool ModrinthCreationTask::updateInstance()
 
                 if (old_file.hash == file.hash) {
                     qDebug() << "Removed file at" << file.path << "from list of downloads";
-                    files_iterator = m_files.erase(files_iterator);
+                    files_iterator = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files.erase(files_iterator);
                     old_files_iterator = old_files.erase(old_files_iterator);
                     goto begin;  // Sorry :c
                 }
@@ -108,7 +108,7 @@ bool ModrinthCreationTask::updateInstance()
                 if (file.path.isEmpty())
                     continue;
                 qDebug() << "Scheduling" << file.path << "for removal";
-                m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path));
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path));
             }
         }
 
@@ -120,7 +120,7 @@ bool ModrinthCreationTask::updateInstance()
             if (entry.isEmpty())
                 continue;
             qDebug() << "Scheduling" << entry << "for removal";
-            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
 
         auto old_client_overrides = Override::readOverrides("client-overrides", old_index_folder);
@@ -128,17 +128,17 @@ bool ModrinthCreationTask::updateInstance()
             if (entry.isEmpty())
                 continue;
             qDebug() << "Scheduling" << entry << "for removal";
-            m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_to_remove.append(old_minecraft_dir.absoluteFilePath(entry));
         }
     } else {
         // We don't have an old index file, so we may duplicate stuff!
-        auto dialog = CustomMessageBox::selectable(m_parent,
+        auto dialog = CustomMessageBox::selectable(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent,
                 tr("No index file."),
                 tr("We couldn't find a suitable index file for the older version. This may cause some of the files to be duplicated. Do you want to continue?"),
                 QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
 
         if (dialog->exec() == QDialog::DialogCode::Rejected) {
-            m_abort = true;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort = true;
             return false;
         }
     }
@@ -147,7 +147,7 @@ bool ModrinthCreationTask::updateInstance()
     setOverride(true, inst->id());
     qDebug() << "Will override instance!";
 
-    m_instance = inst;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance = inst;
 
     // We let it go through the createInstance() stage, just with a couple modifications for updating
     return false;
@@ -158,10 +158,10 @@ bool ModrinthCreationTask::createInstance()
 {
     QEventLoop loop;
 
-    QString parent_folder(FS::PathCombine(m_stagingPath, "mrpack"));
+    QString parent_folder(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "mrpack"));
 
-    QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
-    if (m_files.empty() && !parseManifest(index_path, m_files, true, true))
+    QString index_path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "modrinth.index.json");
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files.empty() && !parseManifest(index_path, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files, true, true))
         return false;
 
     // Keep index file in case we need it some other time (like when changing versions)
@@ -169,9 +169,9 @@ bool ModrinthCreationTask::createInstance()
     FS::ensureFilePathExists(new_index_place);
     QFile::rename(index_path, new_index_place);
 
-    auto mcPath = FS::PathCombine(m_stagingPath, ".minecraft");
+    auto mcPath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, ".minecraft");
 
-    auto override_path = FS::PathCombine(m_stagingPath, "overrides");
+    auto override_path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "overrides");
     if (QFile::exists(override_path)) {
         // Create a list of overrides in "overrides.txt" inside mrpack/
         Override::createOverrides("overrides", parent_folder, override_path);
@@ -184,7 +184,7 @@ bool ModrinthCreationTask::createInstance()
     }
 
     // Do client overrides
-    auto client_override_path = FS::PathCombine(m_stagingPath, "client-overrides");
+    auto client_override_path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "client-overrides");
     if (QFile::exists(client_override_path)) {
         // Create a list of overrides in "client-overrides.txt" inside mrpack/
         Override::createOverrides("client-overrides", parent_folder, client_override_path);
@@ -196,41 +196,41 @@ bool ModrinthCreationTask::createInstance()
         }
     }
 
-    QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
+    QString configPath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
-    MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
+    MinecraftInstance instance(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettings, instanceSettings, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath);
 
     auto components = instance.getPackProfile();
     components->buildingFromScratch();
-    components->setComponentVersion("net.minecraft", m_minecraft_version, true);
+    components->setComponentVersion("net.minecraft", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraft_version, true);
 
-    if (!m_fabric_version.isEmpty())
-        components->setComponentVersion("net.fabricmc.fabric-loader", m_fabric_version);
-    if (!m_quilt_version.isEmpty())
-        components->setComponentVersion("org.quiltmc.quilt-loader", m_quilt_version);
-    if (!m_forge_version.isEmpty())
-        components->setComponentVersion("net.minecraftforge", m_forge_version);
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fabric_version.isEmpty())
+        components->setComponentVersion("net.fabricmc.fabric-loader", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fabric_version);
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_quilt_version.isEmpty())
+        components->setComponentVersion("org.quiltmc.quilt-loader", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_quilt_version);
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_forge_version.isEmpty())
+        components->setComponentVersion("net.minecraftforge", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_forge_version);
 
-    if (m_instIcon != "default") {
-        instance.setIconKey(m_instIcon);
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instIcon != "default") {
+        instance.setIconKey(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instIcon);
     } else {
         instance.setIconKey("modrinth");
     }
 
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
-    if (!m_managed_id.isEmpty())
-        instance.setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_id.isEmpty())
+        instance.setManagedPack("modrinth", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_id, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_name, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_version_id, version());
     instance.setName(name());
     instance.saveNow();
 
-    m_files_job = new NetJob(tr("Mod download"), APPLICATION->network());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job = new NetJob(tr("Mod download"), APPLICATION->network());
 
-    for (auto file : m_files) {
-        auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path);
+    for (auto file : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files) {
+        auto path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, ".minecraft", file.path);
         qDebug() << "Will try to download" << file.downloads.front() << "to" << path;
         auto dl = Net::Download::makeFile(file.downloads.dequeue(), path);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
-        m_files_job->addNetAction(dl);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job->addNetAction(dl);
 
         if (!file.downloads.empty()) {
             // FIXME: This really needs to be put into a ConcurrentTask of
@@ -239,7 +239,7 @@ bool ModrinthCreationTask::createInstance()
             connect(dl.get(), &NetAction::failed, [this, &file, path, param] {
                 auto ndl = Net::Download::makeFile(file.downloads.dequeue(), path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
-                m_files_job->addNetAction(ndl);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job->addNetAction(ndl);
                 if (auto shared = param.lock()) shared->succeeded();
             });
         }
@@ -247,29 +247,29 @@ bool ModrinthCreationTask::createInstance()
 
     bool ended_well = false;
 
-    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() { ended_well = true; });
-    connect(m_files_job.get(), &NetJob::failed, [&](const QString& reason) {
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job.get(), &NetJob::succeeded, this, [&]() { ended_well = true; });
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job.get(), &NetJob::failed, [&](const QString& reason) {
         ended_well = false;
         setError(reason);
     });
-    connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
-    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { setProgress(current, total); });
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { setProgress(current, total); });
 
     setStatus(tr("Downloading mods..."));
-    m_files_job->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_job->start();
 
     loop.exec();
 
     // Update information of the already installed instance, if any.
-    if (m_instance && ended_well) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance && ended_well) {
         setAbortable(false);
-        auto inst = m_instance.value();
+        auto inst = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance.value();
 
         // Only change the name if it didn't use a custom name, so that the previous custom name
         // is preserved, but if we're using the original one, we update the version string.
         // NOTE: This needs to come before the copyManagedPack call!
         if (inst->name().contains(inst->getManagedPackVersionName())) {
-            if (askForChangingInstanceName(m_parent, inst->name(), instance.name()) == InstanceNameChange::ShouldChange)
+            if (askForChangingInstanceName(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, inst->name(), instance.name()) == InstanceNameChange::ShouldChange)
                 inst->setName(instance.name());
         }
 
@@ -292,9 +292,9 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
             }
 
             if (set_internal_data) {
-                if (m_managed_version_id.isEmpty())
-                    m_managed_version_id = Json::ensureString(obj, "versionId", {}, "Managed ID");
-                m_managed_name = Json::ensureString(obj, "name", {}, "Managed Name");
+                if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_version_id.isEmpty())
+                    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_version_id = Json::ensureString(obj, "versionId", {}, "Managed ID");
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_managed_name = Json::ensureString(obj, "name", {}, "Managed Name");
             }
 
             auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
@@ -314,7 +314,7 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
                         if (!had_optional && show_optional_dialog) {
                             had_optional = true;
                             auto info = CustomMessageBox::selectable(
-                                m_parent, tr("Optional mod detected!"),
+                                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent, tr("Optional mod detected!"),
                                 tr("One or more mods from this modpack are optional. They will be downloaded, but disabled by default!"),
                                 QMessageBox::Information);
                             info->exec();
@@ -372,13 +372,13 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
                 for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
                     QString name = it.key();
                     if (name == "minecraft") {
-                        m_minecraft_version = Json::requireString(*it, "Minecraft version");
+                        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraft_version = Json::requireString(*it, "Minecraft version");
                     } else if (name == "fabric-loader") {
-                        m_fabric_version = Json::requireString(*it, "Fabric Loader version");
+                        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fabric_version = Json::requireString(*it, "Fabric Loader version");
                     } else if (name == "quilt-loader") {
-                        m_quilt_version = Json::requireString(*it, "Quilt Loader version");
+                        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_quilt_version = Json::requireString(*it, "Quilt Loader version");
                     } else if (name == "forge") {
-                        m_forge_version = Json::requireString(*it, "Forge version");
+                        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_forge_version = Json::requireString(*it, "Forge version");
                     } else {
                         throw JSONValidationError("Unknown dependency type: " + name);
                     }

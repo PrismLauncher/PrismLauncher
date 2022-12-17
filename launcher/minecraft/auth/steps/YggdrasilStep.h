@@ -23,6 +23,6 @@ private slots:
     void onAuthFailed();
 
 private:
-    Yggdrasil *m_yggdrasil = nullptr;
-    QString m_password;
+    Yggdrasil *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_yggdrasil = nullptr;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_password;
 };

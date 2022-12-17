@@ -9,15 +9,15 @@ ClaimAccount::ClaimAccount(LaunchTask* parent, AuthSessionPtr session): LaunchSt
     if(session->status == AuthSession::Status::PlayableOnline && !session->demo)
     {
         auto accounts = APPLICATION->accounts();
-        m_account = accounts->getAccountByProfileName(session->player_name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account = accounts->getAccountByProfileName(session->player_name);
     }
 }
 
 void ClaimAccount::executeTask()
 {
-    if(m_account)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account)
     {
-        lock.reset(new UseLock(m_account));
+        lock.reset(new UseLock(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account));
         emitSucceeded();
     }
 }

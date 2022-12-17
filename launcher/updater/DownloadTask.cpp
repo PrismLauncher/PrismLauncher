@@ -31,11 +31,11 @@ DownloadTask::DownloadTask(
     Status status,
     QString target,
     QObject *parent
-) : Task(parent), m_updateFilesDir(target), m_network(network)
+) : Task(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateFilesDir(target), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network(network)
 {
-    m_status = status;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = status;
 
-    m_updateFilesDir.setAutoRemove(false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateFilesDir.setAutoRemove(false);
 }
 
 void DownloadTask::executeTask()
@@ -47,26 +47,26 @@ void DownloadTask::loadVersionInfo()
 {
     setStatus(tr("Loading version information..."));
 
-    NetJob *netJob = new NetJob("Version Info", m_network);
+    NetJob *netJob = new NetJob("Version Info", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network);
 
     // Find the index URL.
-    QUrl newIndexUrl = QUrl(m_status.newRepoUrl).resolved(QString::number(m_status.newVersionId) + ".json");
-    qDebug() << m_status.newRepoUrl << " turns into " << newIndexUrl;
+    QUrl newIndexUrl = QUrl(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status.newRepoUrl).resolved(QString::number(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status.newVersionId) + ".json");
+    qDebug() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status.newRepoUrl << " turns into " << newIndexUrl;
 
-    netJob->addNetAction(m_newVersionFileListDownload = Net::Download::makeByteArray(newIndexUrl, &newVersionFileListData));
+    netJob->addNetAction(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newVersionFileListDownload = Net::Download::makeByteArray(newIndexUrl, &newVersionFileListData));
 
     // If we have a current version URL, get that one too.
-    if (!m_status.currentRepoUrl.isEmpty())
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status.currentRepoUrl.isEmpty())
     {
-        QUrl cIndexUrl = QUrl(m_status.currentRepoUrl).resolved(QString::number(m_status.currentVersionId) + ".json");
-        netJob->addNetAction(m_currentVersionFileListDownload = Net::Download::makeByteArray(cIndexUrl, &currentVersionFileListData));
-        qDebug() << m_status.currentRepoUrl << " turns into " << cIndexUrl;
+        QUrl cIndexUrl = QUrl(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status.currentRepoUrl).resolved(QString::number(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status.currentVersionId) + ".json");
+        netJob->addNetAction(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersionFileListDownload = Net::Download::makeByteArray(cIndexUrl, &currentVersionFileListData));
+        qDebug() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status.currentRepoUrl << " turns into " << cIndexUrl;
     }
 
     // connect signals and start the job
     connect(netJob, &NetJob::succeeded, this, &DownloadTask::processDownloadedVersionInfo);
     connect(netJob, &NetJob::failed, this, &DownloadTask::vinfoDownloadFailed);
-    m_vinfoNetJob.reset(netJob);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vinfoNetJob.reset(netJob);
     netJob->start();
 }
 
@@ -74,7 +74,7 @@ void DownloadTask::vinfoDownloadFailed()
 {
     // Something failed. We really need the second download (current version info), so parse
     // downloads anyways as long as the first one succeeded.
-    if (m_newVersionFileListDownload->wasSuccessful())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newVersionFileListDownload->wasSuccessful())
     {
         processDownloadedVersionInfo();
         return;
@@ -87,13 +87,13 @@ void DownloadTask::vinfoDownloadFailed()
 
 void DownloadTask::processDownloadedVersionInfo()
 {
-    VersionFileList m_currentVersionFileList;
-    VersionFileList m_newVersionFileList;
+    VersionFileList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersionFileList;
+    VersionFileList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newVersionFileList;
 
     setStatus(tr("Reading file list for new version..."));
     qDebug() << "Reading file list for new version...";
     QString error;
-    if (!parseVersionInfo(newVersionFileListData, m_newVersionFileList, error))
+    if (!parseVersionInfo(newVersionFileListData, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newVersionFileList, error))
     {
         qCritical() << error;
         emitFailed(error);
@@ -101,30 +101,30 @@ void DownloadTask::processDownloadedVersionInfo()
     }
 
     // if we have the current version info, use it.
-    if (m_currentVersionFileListDownload && m_currentVersionFileListDownload->wasSuccessful())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersionFileListDownload && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersionFileListDownload->wasSuccessful())
     {
         setStatus(tr("Reading file list for current version..."));
         qDebug() << "Reading file list for current version...";
         // if this fails, it's not a complete loss.
         QString error;
-        if(!parseVersionInfo( currentVersionFileListData, m_currentVersionFileList, error))
+        if(!parseVersionInfo( currentVersionFileListData, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersionFileList, error))
         {
             qDebug() << error << "This is not a fatal error.";
         }
     }
 
     // We don't need this any more.
-    m_currentVersionFileListDownload.reset();
-    m_newVersionFileListDownload.reset();
-    m_vinfoNetJob.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersionFileListDownload.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newVersionFileListDownload.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vinfoNetJob.reset();
 
     setStatus(tr("Processing file lists - figuring out how to install the update..."));
 
     // make a new netjob for the actual update files
-    NetJob::Ptr netJob = new NetJob("Update Files", m_network);
+    NetJob::Ptr netJob = new NetJob("Update Files", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network);
 
     // fill netJob and operationList
-    if (!processFileLists(m_currentVersionFileList, m_newVersionFileList, m_status.rootPath, m_updateFilesDir.path(), netJob, m_operations))
+    if (!processFileLists(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersionFileList, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newVersionFileList, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status.rootPath, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateFilesDir.path(), netJob, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_operations))
     {
         emitFailed(tr("Failed to process update lists..."));
         return;
@@ -143,9 +143,9 @@ void DownloadTask::processDownloadedVersionInfo()
     {
         setStatus(tr("Downloading %1 update files.").arg(QString::number(netJob->size())));
     }
-    qDebug() << "Begin downloading update files to" << m_updateFilesDir.path();
-    m_filesNetJob = netJob;
-    m_filesNetJob->start();
+    qDebug() << "Begin downloading update files to" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateFilesDir.path();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob = netJob;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob->start();
 }
 
 void DownloadTask::fileDownloadFinished()
@@ -166,12 +166,12 @@ void DownloadTask::fileDownloadProgressChanged(qint64 current, qint64 total)
 
 QString DownloadTask::updateFilesDir()
 {
-    return m_updateFilesDir.path();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateFilesDir.path();
 }
 
 OperationList DownloadTask::operations()
 {
-    return m_operations;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_operations;
 }
 
 }

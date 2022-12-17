@@ -74,16 +74,16 @@ protected slots:
 
 protected: /* data */
     //! The URL for the RSS feed to fetch.
-    QString m_feedUrl;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_feedUrl;
 
     //! List of news entries.
-    QList<NewsEntryPtr> m_newsEntries;
+    QList<NewsEntryPtr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsEntries;
 
     //! The network job to use to load the news.
-    NetJob::Ptr m_newsNetJob;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_newsNetJob;
 
     //! True if news has been loaded.
-    bool m_loadedNews;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadedNews;
 
     QByteArray newsData;
 
@@ -91,15 +91,15 @@ protected: /* data */
      * Gets the error message that was given last time the news was loaded.
      * If the last news load succeeded, this will be an empty string.
      */
-    QString m_lastLoadError;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lastLoadError;
 
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    shared_qobject_ptr<QNetworkAccessManager> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network;
 
 protected slots:
-    /// Emits newsLoaded() and sets m_lastLoadError to empty string.
+    /// Emits newsLoaded() and sets hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lastLoadError to empty string.
     void succeed();
 
-    /// Emits newsLoadingFailed() and sets m_lastLoadError to the given message.
+    /// Emits newsLoadingFailed() and sets hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lastLoadError to the given message.
     void fail(const QString& errorMsg);
 };
 

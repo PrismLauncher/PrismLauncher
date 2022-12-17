@@ -50,12 +50,12 @@ Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::Provider prov
 
 void ModrinthHasher::executeTask()
 {
-    QFile file(m_path);
+    QFile file(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path);
 
     try {
         file.open(QFile::ReadOnly);
     } catch (FS::FileSystemException& e) {
-        qCritical() << QString("Failed to open JAR file in %1").arg(m_path);
+        qCritical() << QString("Failed to open JAR file in %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path);
         qCritical() << QString("Reason: ") << e.cause();
 
         emitFailed("Failed to open file for hashing.");
@@ -63,11 +63,11 @@ void ModrinthHasher::executeTask()
     }
 
     auto hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
-    m_hash = ProviderCaps.hash(ModPlatform::Provider::MODRINTH, &file, hash_type);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hash = ProviderCaps.hash(ModPlatform::Provider::MODRINTH, &file, hash_type);
 
     file.close();
 
-    if (m_hash.isEmpty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hash.isEmpty()) {
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();
@@ -79,12 +79,12 @@ void FlameHasher::executeTask()
     // CF-specific
     auto should_filter_out = [](char c) { return (c == 9 || c == 10 || c == 13 || c == 32); };
 
-    std::ifstream file_stream(StringUtils::toStdString(m_path), std::ifstream::binary);
+    std::ifstream file_stream(StringUtils::toStdString(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path), std::ifstream::binary);
     // TODO: This is very heavy work, but apparently QtConcurrent can't use move semantics, so we can't boop this to another thread.
     // How do we make this non-blocking then?
-    m_hash = QString::number(MurmurHash2(std::move(file_stream), 4 * MiB, should_filter_out));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hash = QString::number(MurmurHash2(std::move(file_stream), 4 * MiB, should_filter_out));
 
-    if (m_hash.isEmpty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hash.isEmpty()) {
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();
@@ -100,23 +100,23 @@ BlockedModHasher::BlockedModHasher(QString file_path, ModPlatform::Provider prov
 
 void BlockedModHasher::executeTask()
 {
-    QFile file(m_path);
+    QFile file(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path);
 
     try {
         file.open(QFile::ReadOnly);
     } catch (FS::FileSystemException& e) {
-        qCritical() << QString("Failed to open JAR file in %1").arg(m_path);
+        qCritical() << QString("Failed to open JAR file in %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path);
         qCritical() << QString("Reason: ") << e.cause();
 
         emitFailed("Failed to open file for hashing.");
         return;
     }
 
-    m_hash = ProviderCaps.hash(provider, &file, hash_type);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hash = ProviderCaps.hash(provider, &file, hash_type);
 
     file.close();
 
-    if (m_hash.isEmpty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hash.isEmpty()) {
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();

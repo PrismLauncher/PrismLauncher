@@ -51,62 +51,62 @@ namespace Net {
 
 Download::Download() : NetAction()
 {
-    m_state = State::Inactive;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::Inactive;
 }
 
 auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
 {
     auto* dl = new Download();
-    dl->m_url = url;
-    dl->m_options = options;
+    dl->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url = url;
+    dl->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_options = options;
     auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
     auto cachedNode = new MetaCacheSink(entry, md5Node, options.testFlag(Option::MakeEternal));
-    dl->m_sink.reset(cachedNode);
+    dl->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink.reset(cachedNode);
     return dl;
 }
 
 auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> Download::Ptr
 {
     auto* dl = new Download();
-    dl->m_url = url;
-    dl->m_options = options;
-    dl->m_sink.reset(new ByteArraySink(output));
+    dl->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url = url;
+    dl->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_options = options;
+    dl->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink.reset(new ByteArraySink(output));
     return dl;
 }
 
 auto Download::makeFile(QUrl url, QString path, Options options) -> Download::Ptr
 {
     auto* dl = new Download();
-    dl->m_url = url;
-    dl->m_options = options;
-    dl->m_sink.reset(new FileSink(path));
+    dl->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url = url;
+    dl->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_options = options;
+    dl->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink.reset(new FileSink(path));
     return dl;
 }
 
 void Download::addValidator(Validator* v)
 {
-    m_sink->addValidator(v);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink->addValidator(v);
 }
 
 void Download::executeTask()
 {
-    setStatus(tr("Downloading %1").arg(m_url.toString()));
+    setStatus(tr("Downloading %1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString()));
 
     if (getState() == Task::State::AbortedByUser) {
-        qWarning() << "Attempt to start an aborted Download:" << m_url.toString();
+        qWarning() << "Attempt to start an aborted Download:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString();
         emitAborted();
         return;
     }
 
-    QNetworkRequest request(m_url);
-    m_state = m_sink->init(request);
-    switch (m_state) {
+    QNetworkRequest request(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink->init(request);
+    switch (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state) {
         case State::Succeeded:
             emit succeeded();
-            qDebug() << "Download cache hit " << m_url.toString();
+            qDebug() << "Download cache hit " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString();
             return;
         case State::Running:
-            qDebug() << "Downloading " << m_url.toString();
+            qDebug() << "Downloading " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString();
             break;
         case State::Inactive:
         case State::Failed:
@@ -123,9 +123,9 @@ void Download::executeTask()
         request.setRawHeader("x-api-key", APPLICATION->getFlameAPIKey().toUtf8());
     };
 
-    QNetworkReply* rep = m_network->get(request);
+    QNetworkReply* rep = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network->get(request);
 
-    m_reply.reset(rep);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset(rep);
     connect(rep, &QNetworkReply::downloadProgress, this, &Download::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &Download::downloadFinished);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -145,18 +145,18 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 void Download::downloadError(QNetworkReply::NetworkError error)
 {
     if (error == QNetworkReply::OperationCanceledError) {
-        qCritical() << "Aborted " << m_url.toString();
-        m_state = State::AbortedByUser;
+        qCritical() << "Aborted " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::AbortedByUser;
     } else {
-        if (m_options & Option::AcceptLocalFiles) {
-            if (m_sink->hasLocalData()) {
-                m_state = State::Succeeded;
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_options & Option::AcceptLocalFiles) {
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink->hasLocalData()) {
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::Succeeded;
                 return;
             }
         }
         // error happened during download.
-        qCritical() << "Failed " << m_url.toString() << " with reason " << error;
-        m_state = State::Failed;
+        qCritical() << "Failed " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString() << " with reason " << error;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::Failed;
     }
 }
 
@@ -164,7 +164,7 @@ void Download::sslErrors(const QList<QSslError>& errors)
 {
     int i = 1;
     for (auto error : errors) {
-        qCritical() << "Download" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
+        qCritical() << "Download" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString() << "SSL Error #" << i << " : " << error.errorString();
         auto cert = error.certificate();
         qCritical() << "Certificate in question:\n" << cert.toText();
         i++;
@@ -173,14 +173,14 @@ void Download::sslErrors(const QList<QSslError>& errors)
 
 auto Download::handleRedirect() -> bool
 {
-    QUrl redirect = m_reply->header(QNetworkRequest::LocationHeader).toUrl();
+    QUrl redirect = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->header(QNetworkRequest::LocationHeader).toUrl();
     if (!redirect.isValid()) {
-        if (!m_reply->hasRawHeader("Location")) {
+        if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->hasRawHeader("Location")) {
             // no redirect -> it's fine to continue
             return false;
         }
         // there is a Location header, but it's not correct. we need to apply some workarounds...
-        QByteArray redirectBA = m_reply->rawHeader("Location");
+        QByteArray redirectBA = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->rawHeader("Location");
         if (redirectBA.size() == 0) {
             // empty, yet present redirect header? WTF?
             return false;
@@ -193,12 +193,12 @@ auto Download::handleRedirect() -> bool
              * See: https://bugreports.qt.io/browse/QTBUG-41061
              * See: http://tools.ietf.org/html/rfc3986#section-4.2
              */
-            redirectStr = m_reply->url().scheme() + ":" + redirectStr;
+            redirectStr = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->url().scheme() + ":" + redirectStr;
         } else if (redirectStr.startsWith("/")) {
             /*
              * IF the URL begins with /, we need to process it as a relative URL
              */
-            auto url = m_reply->url();
+            auto url = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->url();
             url.setPath(redirectStr, QUrl::TolerantMode);
             redirectStr = url.toString();
         }
@@ -218,9 +218,9 @@ auto Download::handleRedirect() -> bool
         qDebug() << "Location header:" << redirect;
     }
 
-    m_url = QUrl(redirect.toString());
-    qDebug() << "Following redirect to " << m_url.toString();
-    startAction(m_network);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url = QUrl(redirect.toString());
+    qDebug() << "Following redirect to " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString();
+    startAction(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network);
 
     return true;
 }
@@ -229,65 +229,65 @@ void Download::downloadFinished()
 {
     // handle HTTP redirection first
     if (handleRedirect()) {
-        qDebug() << "Download redirected:" << m_url.toString();
+        qDebug() << "Download redirected:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString();
         return;
     }
 
     // if the download failed before this point ...
-    if (m_state == State::Succeeded)  // pretend to succeed so we continue processing :)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state == State::Succeeded)  // pretend to succeed so we continue processing :)
     {
-        qDebug() << "Download failed but we are allowed to proceed:" << m_url.toString();
-        m_sink->abort();
-        m_reply.reset();
+        qDebug() << "Download failed but we are allowed to proceed:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink->abort();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
         emit succeeded();
         return;
-    } else if (m_state == State::Failed) {
-        qDebug() << "Download failed in previous step:" << m_url.toString();
-        m_sink->abort();
-        m_reply.reset();
+    } else if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state == State::Failed) {
+        qDebug() << "Download failed in previous step:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink->abort();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
         emit failed("");
         return;
-    } else if (m_state == State::AbortedByUser) {
-        qDebug() << "Download aborted in previous step:" << m_url.toString();
-        m_sink->abort();
-        m_reply.reset();
+    } else if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state == State::AbortedByUser) {
+        qDebug() << "Download aborted in previous step:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink->abort();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
         emit aborted();
         return;
     }
 
     // make sure we got all the remaining data, if any
-    auto data = m_reply->readAll();
+    auto data = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->readAll();
     if (data.size()) {
         qDebug() << "Writing extra" << data.size() << "bytes";
-        m_state = m_sink->write(data);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink->write(data);
     }
 
     // otherwise, finalize the whole graph
-    m_state = m_sink->finalize(*m_reply.get());
-    if (m_state != State::Succeeded) {
-        qDebug() << "Download failed to finalize:" << m_url.toString();
-        m_sink->abort();
-        m_reply.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink->finalize(*hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.get());
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state != State::Succeeded) {
+        qDebug() << "Download failed to finalize:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink->abort();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
         emit failed("");
         return;
     }
 
-    m_reply.reset();
-    qDebug() << "Download succeeded:" << m_url.toString();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply.reset();
+    qDebug() << "Download succeeded:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString();
     emit succeeded();
 }
 
 void Download::downloadReadyRead()
 {
-    if (m_state == State::Running) {
-        auto data = m_reply->readAll();
-        m_state = m_sink->write(data);
-        if (m_state == State::Failed) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state == State::Running) {
+        auto data = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->readAll();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink->write(data);
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state == State::Failed) {
             qCritical() << "Failed to process response chunk";
         }
-        // qDebug() << "Download" << m_url.toString() << "gained" << data.size() << "bytes";
+        // qDebug() << "Download" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url.toString() << "gained" << data.size() << "bytes";
     } else {
-        qCritical() << "Cannot write download data! illegal status " << m_status;
+        qCritical() << "Cannot write download data! illegal status " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status;
     }
 }
 
@@ -295,10 +295,10 @@ void Download::downloadReadyRead()
 
 auto Net::Download::abort() -> bool
 {
-    if (m_reply) {
-        m_reply->abort();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_reply->abort();
     } else {
-        m_state = State::AbortedByUser;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::AbortedByUser;
     }
     return true;
 }

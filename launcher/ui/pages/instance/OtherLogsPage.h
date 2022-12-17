@@ -96,8 +96,8 @@ private:
 
 private:
     Ui::OtherLogsPage *ui;
-    QString m_path;
-    QString m_currentFile;
-    IPathMatcher::Ptr m_fileFilter;
-    RecursiveFileSystemWatcher *m_watcher;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile;
+    IPathMatcher::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fileFilter;
+    RecursiveFileSystemWatcher *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher;
 };

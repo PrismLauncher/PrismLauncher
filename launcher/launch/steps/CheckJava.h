@@ -39,7 +39,7 @@ private:
     void printSystemInfo(bool javaIsKnown, bool javaIs64bit);
 
 private:
-    QString m_javaPath;
-    qlonglong m_javaUnixTime;
-    JavaCheckerPtr m_JavaChecker;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaPath;
+    qlonglong hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javaUnixTime;
+    JavaCheckerPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_JavaChecker;
 };

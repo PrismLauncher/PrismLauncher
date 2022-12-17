@@ -48,7 +48,7 @@
 #include "InstanceList.h"
 
 CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
-    :QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
+    :QDialog(parent), ui(new Ui::CopyInstanceDialog), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_original(original)
 {
     ui->setupUi(this);
     resize(minimumSizeHint());
@@ -70,21 +70,21 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     groupList.removeOne("");
     groupList.push_front("");
     ui->groupBox->addItems(groupList);
-    int index = groupList.indexOf(APPLICATION->instances()->getInstanceGroup(m_original->id()));
+    int index = groupList.indexOf(APPLICATION->instances()->getInstanceGroup(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_original->id()));
     if(index == -1)
     {
         index = 0;
     }
     ui->groupBox->setCurrentIndex(index);
     ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
-    ui->copySavesCheckbox->setChecked(m_selectedOptions.isCopySavesEnabled());
-    ui->keepPlaytimeCheckbox->setChecked(m_selectedOptions.isKeepPlaytimeEnabled());
-    ui->copyGameOptionsCheckbox->setChecked(m_selectedOptions.isCopyGameOptionsEnabled());
-    ui->copyResPacksCheckbox->setChecked(m_selectedOptions.isCopyResourcePacksEnabled());
-    ui->copyShaderPacksCheckbox->setChecked(m_selectedOptions.isCopyShaderPacksEnabled());
-    ui->copyServersCheckbox->setChecked(m_selectedOptions.isCopyServersEnabled());
-    ui->copyModsCheckbox->setChecked(m_selectedOptions.isCopyModsEnabled());
-    ui->copyScreenshotsCheckbox->setChecked(m_selectedOptions.isCopyScreenshotsEnabled());
+    ui->copySavesCheckbox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.isCopySavesEnabled());
+    ui->keepPlaytimeCheckbox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.isKeepPlaytimeEnabled());
+    ui->copyGameOptionsCheckbox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.isCopyGameOptionsEnabled());
+    ui->copyResPacksCheckbox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.isCopyResourcePacksEnabled());
+    ui->copyShaderPacksCheckbox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.isCopyShaderPacksEnabled());
+    ui->copyServersCheckbox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.isCopyServersEnabled());
+    ui->copyModsCheckbox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.isCopyModsEnabled());
+    ui->copyScreenshotsCheckbox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.isCopyScreenshotsEnabled());
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()
@@ -124,7 +124,7 @@ QString CopyInstanceDialog::instGroup() const
 
 const InstanceCopyPrefs& CopyInstanceDialog::getChosenOptions() const
 {
-    return m_selectedOptions;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions;
 }
 
 void CopyInstanceDialog::checkAllCheckboxes(const bool& b)
@@ -143,7 +143,7 @@ void CopyInstanceDialog::checkAllCheckboxes(const bool& b)
 void CopyInstanceDialog::updateSelectAllCheckbox()
 {
     ui->selectAllCheckbox->blockSignals(true);
-    ui->selectAllCheckbox->setChecked(m_selectedOptions.allTrue());
+    ui->selectAllCheckbox->setChecked(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.allTrue());
     ui->selectAllCheckbox->blockSignals(false);
 }
 
@@ -174,49 +174,49 @@ void CopyInstanceDialog::on_selectAllCheckbox_stateChanged(int state)
 
 void CopyInstanceDialog::on_copySavesCheckbox_stateChanged(int state)
 {
-    m_selectedOptions.enableCopySaves(state == Qt::Checked);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.enableCopySaves(state == Qt::Checked);
     updateSelectAllCheckbox();
 }
 
 
 void CopyInstanceDialog::on_keepPlaytimeCheckbox_stateChanged(int state)
 {
-    m_selectedOptions.enableKeepPlaytime(state == Qt::Checked);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.enableKeepPlaytime(state == Qt::Checked);
     updateSelectAllCheckbox();
 }
 
 void CopyInstanceDialog::on_copyGameOptionsCheckbox_stateChanged(int state)
 {
-    m_selectedOptions.enableCopyGameOptions(state == Qt::Checked);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.enableCopyGameOptions(state == Qt::Checked);
     updateSelectAllCheckbox();
 }
 
 void CopyInstanceDialog::on_copyResPacksCheckbox_stateChanged(int state)
 {
-    m_selectedOptions.enableCopyResourcePacks(state == Qt::Checked);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.enableCopyResourcePacks(state == Qt::Checked);
     updateSelectAllCheckbox();
 }
 
 void CopyInstanceDialog::on_copyShaderPacksCheckbox_stateChanged(int state)
 {
-    m_selectedOptions.enableCopyShaderPacks(state == Qt::Checked);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.enableCopyShaderPacks(state == Qt::Checked);
     updateSelectAllCheckbox();
 }
 
 void CopyInstanceDialog::on_copyServersCheckbox_stateChanged(int state)
 {
-    m_selectedOptions.enableCopyServers(state == Qt::Checked);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.enableCopyServers(state == Qt::Checked);
     updateSelectAllCheckbox();
 }
 
 void CopyInstanceDialog::on_copyModsCheckbox_stateChanged(int state)
 {
-    m_selectedOptions.enableCopyMods(state == Qt::Checked);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.enableCopyMods(state == Qt::Checked);
     updateSelectAllCheckbox();
 }
 
 void CopyInstanceDialog::on_copyScreenshotsCheckbox_stateChanged(int state)
 {
-    m_selectedOptions.enableCopyScreenshots(state == Qt::Checked);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selectedOptions.enableCopyScreenshots(state == Qt::Checked);
     updateSelectAllCheckbox();
 }

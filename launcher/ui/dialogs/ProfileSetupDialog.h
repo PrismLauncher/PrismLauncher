@@ -70,7 +70,7 @@ protected:
     void setupProfile(const QString & profileName);
 
 private:
-    MinecraftAccountPtr m_accountToSetup;
+    MinecraftAccountPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accountToSetup;
     Ui::ProfileSetupDialog *ui;
     QIcon goodIcon;
     QIcon yellowIcon;

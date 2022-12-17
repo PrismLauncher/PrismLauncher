@@ -20,7 +20,7 @@ class ChooseProviderDialog : public QDialog {
 
     struct Response {
         bool skip_all = false;
-        bool confirm_all = false;
+        bool confirhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_all = false;
 
         bool try_others = false;
 
@@ -31,7 +31,7 @@ class ChooseProviderDialog : public QDialog {
     explicit ChooseProviderDialog(QWidget* parent, bool single_choice = false, bool allow_skipping = true);
     ~ChooseProviderDialog();
 
-    auto getResponse() const -> Response { return m_response; }
+    auto getResponse() const -> Response { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response; }
 
     void setDescription(QString desc);
 
@@ -50,7 +50,7 @@ class ChooseProviderDialog : public QDialog {
    private:
     Ui::ChooseProviderDialog* ui;
 
-    QButtonGroup m_providers;
+    QButtonGroup hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_providers;
 
-    Response m_response;
+    Response hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response;
 };

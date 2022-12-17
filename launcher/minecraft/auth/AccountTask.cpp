@@ -46,14 +46,14 @@
 #include <QDebug>
 
 AccountTask::AccountTask(AccountData *data, QObject *parent)
-    : Task(parent), m_data(data)
+    : Task(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data(data)
 {
     changeState(AccountTaskState::STATE_CREATED);
 }
 
 QString AccountTask::getStateMessage() const
 {
-    switch (m_taskState)
+    switch (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_taskState)
     {
     case AccountTaskState::STATE_CREATED:
         return "Waiting...";
@@ -78,57 +78,57 @@ QString AccountTask::getStateMessage() const
 
 bool AccountTask::changeState(AccountTaskState newState, QString reason)
 {
-    m_taskState = newState;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_taskState = newState;
     // FIXME: virtual method invoked in constructor.
     // We want that behavior, but maybe make it less weird?
     setStatus(getStateMessage());
     switch(newState) {
         case AccountTaskState::STATE_CREATED: {
-            m_data->errorString.clear();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->errorString.clear();
             return true;
         }
         case AccountTaskState::STATE_WORKING: {
-            m_data->accountState = AccountState::Working;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->accountState = AccountState::Working;
             return true;
         }
         case AccountTaskState::STATE_SUCCEEDED: {
-            m_data->accountState = AccountState::Online;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->accountState = AccountState::Online;
             emitSucceeded();
             return false;
         }
         case AccountTaskState::STATE_OFFLINE: {
-            m_data->errorString = reason;
-            m_data->accountState = AccountState::Offline;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->errorString = reason;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->accountState = AccountState::Offline;
             emitFailed(reason);
             return false;
         }
         case AccountTaskState::STATE_DISABLED: {
-            m_data->errorString = reason;
-            m_data->accountState = AccountState::Disabled;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->errorString = reason;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->accountState = AccountState::Disabled;
             emitFailed(reason);
             return false;
         }
         case AccountTaskState::STATE_FAILED_SOFT: {
-            m_data->errorString = reason;
-            m_data->accountState = AccountState::Errored;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->errorString = reason;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->accountState = AccountState::Errored;
             emitFailed(reason);
             return false;
         }
         case AccountTaskState::STATE_FAILED_HARD: {
-            m_data->errorString = reason;
-            m_data->accountState = AccountState::Expired;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->errorString = reason;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->accountState = AccountState::Expired;
             emitFailed(reason);
             return false;
         }
         case AccountTaskState::STATE_FAILED_GONE: {
-            m_data->errorString = reason;
-            m_data->accountState = AccountState::Gone;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->errorString = reason;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->accountState = AccountState::Gone;
             emitFailed(reason);
             return false;
         }
         default: {
             QString error = tr("Unknown account task state: %1").arg(int(newState));
-            m_data->accountState = AccountState::Errored;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->accountState = AccountState::Errored;
             emitFailed(error);
             return false;
         }

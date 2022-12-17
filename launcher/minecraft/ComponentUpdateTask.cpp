@@ -36,7 +36,7 @@ ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfi
     : Task(parent)
 {
     d.reset(new ComponentUpdateTaskData);
-    d->m_list = list;
+    d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_list = list;
     d->mode = mode;
     d->netmode = netmode;
 }
@@ -71,7 +71,7 @@ LoadResult composeLoadResult(LoadResult a, LoadResult b)
 
 static LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net::Mode netmode)
 {
-    if(component->m_loaded)
+    if(component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded)
     {
         qDebug() << component->getName() << "is already loaded";
         return LoadResult::LoadedLocal;
@@ -86,9 +86,9 @@ static LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net
         // check for uid problems inside...
         bool fileChanged = false;
         auto file = ProfileUtils::parseJsonFile(QFileInfo(customPatchFilename), false);
-        if(file->uid != component->m_uid)
+        if(file->uid != component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid)
         {
-            file->uid = component->m_uid;
+            file->uid = component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid;
             fileChanged = true;
         }
         if(fileChanged)
@@ -97,17 +97,17 @@ static LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net
             ProfileUtils::saveJsonFile(OneSixVersionFormat::versionFileToJson(file), customPatchFilename);
         }
 
-        component->m_file = file;
-        component->m_loaded = true;
+        component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file = file;
+        component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = true;
         result = LoadResult::LoadedLocal;
     }
     else
     {
-        auto metaVersion = APPLICATION->metadataIndex()->get(component->m_uid, component->m_version);
-        component->m_metaVersion = metaVersion;
+        auto metaVersion = APPLICATION->metadataIndex()->get(component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid, component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version);
+        component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion = metaVersion;
         if(metaVersion->isLoaded())
         {
-            component->m_loaded = true;
+            component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = true;
             result = LoadResult::LoadedLocal;
         }
         else
@@ -129,17 +129,17 @@ static LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net
 /*
 static LoadResult loadPackProfile(ComponentPtr component, Task::Ptr& loadTask, Net::Mode netmode)
 {
-    if(component->m_loaded)
+    if(component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded)
     {
         qDebug() << component->getName() << "is already loaded";
         return LoadResult::LoadedLocal;
     }
 
     LoadResult result = LoadResult::Failed;
-    auto metaList = APPLICATION->metadataIndex()->get(component->m_uid);
+    auto metaList = APPLICATION->metadataIndex()->get(component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid);
     if(metaList->isLoaded())
     {
-        component->m_loaded = true;
+        component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = true;
         result = LoadResult::LoadedLocal;
     }
     else
@@ -205,7 +205,7 @@ void ComponentUpdateTask::loadComponents()
         }
     }
     // load all the components OR their lists...
-    for (auto component: d->m_list->d->components)
+    for (auto component: d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_list->d->components)
     {
         Task::Ptr loadTask;
         LoadResult singleResult;
@@ -343,7 +343,7 @@ static bool gatherRequirementsFromComponents(const ComponentContainer & input, R
     size_t componentNum = 0;
     for(auto component: input)
     {
-        auto &componentRequires = component->m_cachedRequires;
+        auto &componentRequires = component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedRequires;
         for(const auto & componentRequire: componentRequires)
         {
             auto found = std::find_if(output.cbegin(), output.cend(), [componentRequire](const Meta::Require & req){
@@ -393,16 +393,16 @@ static void getTrivialRemovals(const ComponentContainer & components, const Requ
 {
     for(const auto & component: components)
     {
-        if(!component->m_dependencyOnly)
+        if(!component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dependencyOnly)
             continue;
-        if(!component->m_cachedVolatile)
+        if(!component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVolatile)
             continue;
         RequireEx reqNeedle;
-        reqNeedle.uid = component->m_uid;
+        reqNeedle.uid = component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid;
         const auto iter = reqs.find(reqNeedle);
         if(iter == reqs.cend())
         {
-            toRemove.append(component->m_uid);
+            toRemove.append(component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid);
         }
     }
 }
@@ -463,7 +463,7 @@ static bool getTrivialComponentChanges(const ComponentIndex & index, const Requi
                     if(comp->isCustom()) {
                         decision = Decision::LockedVersionNotSame;
                     } else {
-                        if(comp->m_dependencyOnly)
+                        if(comp->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dependencyOnly)
                         {
                             decision = Decision::VersionNotSame;
                         }
@@ -520,8 +520,8 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
      *
      * NOTE: this is a placeholder and should eventually be replaced with something 'serious'
      */
-    auto & components = d->m_list->d->components;
-    auto & componentIndex = d->m_list->d->componentIndex;
+    auto & components = d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_list->d->components;
+    auto & componentIndex = d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_list->d->componentIndex;
 
     RequireExSet allRequires;
     QStringList toRemove;
@@ -541,7 +541,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
             for(auto & remove : toRemove)
             {
                 qDebug() << "Removing" << remove;
-                d->m_list->remove(remove);
+                d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_list->remove(remove);
             }
         }
     } while (!toRemove.isEmpty());
@@ -572,12 +572,12 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
         // add stuff...
         for(auto &add: toAdd)
         {
-            ComponentPtr component = new Component(d->m_list, add.uid);
+            ComponentPtr component = new Component(d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_list, add.uid);
             if(!add.equalsVersion.isEmpty())
             {
                 // exact version
                 qDebug() << "Adding" << add.uid << "version" << add.equalsVersion << "at position" << add.indexOfFirstDependee;
-                component->m_version = add.equalsVersion;
+                component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = add.equalsVersion;
             }
             else
             {
@@ -587,17 +587,17 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
 // HACK HACK HACK HACK FIXME: this is a placeholder for deciding what version to use. For now, it is hardcoded.
                 if(!add.suggests.isEmpty())
                 {
-                    component->m_version = add.suggests;
+                    component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = add.suggests;
                 }
                 else
                 {
                     if(add.uid == "org.lwjgl")
                     {
-                        component->m_version = "2.9.1";
+                        component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = "2.9.1";
                     }
                     else if (add.uid == "org.lwjgl3")
                     {
-                        component->m_version = "3.1.2";
+                        component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = "3.1.2";
                     }
                     else if (add.uid == "net.fabricmc.intermediary" || add.uid == "org.quiltmc.hashed")
                     {
@@ -605,16 +605,16 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
                             return cmp->getID() == "net.minecraft";
                         });
                         if(minecraft != components.end()) {
-                            component->m_version = (*minecraft)->getVersion();
+                            component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = (*minecraft)->getVersion();
                         }
                     }
                 }
 // HACK HACK HACK HACK FIXME: this is a placeholder for deciding what version to use. For now, it is hardcoded.
 // ############################################################################################################
             }
-            component->m_dependencyOnly = true;
+            component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dependencyOnly = true;
             // FIXME: this should not work directly with the component list
-            d->m_list->insertComponent(add.indexOfFirstDependee, component);
+            d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_list->insertComponent(add.indexOfFirstDependee, component);
             componentIndex[add.uid] = component;
         }
         recursionNeeded = true;
@@ -657,8 +657,8 @@ void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex)
     // update the cached data of the component from the downloaded version file.
     if (taskSlot.type == RemoteLoadStatus::Type::Version)
     {
-        auto component = d->m_list->getComponent(taskSlot.PackProfileIndex);
-        component->m_loaded = true;
+        auto component = d->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_list->getComponent(taskSlot.PackProfileIndex);
+        component->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = true;
         component->updateCachedData();
     }
     checkIfAllFinished();

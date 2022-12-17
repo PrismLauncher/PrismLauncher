@@ -30,10 +30,10 @@ PageDialog::PageDialog(BasePageProvider *pageProvider, QString defaultId, QWidge
     : QDialog(parent)
 {
     setWindowTitle(pageProvider->dialogTitle());
-    m_container = new PageContainer(pageProvider, defaultId, this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container = new PageContainer(pageProvider, defaultId, this);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addWidget(m_container);
+    mainLayout->addWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container);
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     setLayout(mainLayout);
@@ -41,10 +41,10 @@ PageDialog::PageDialog(BasePageProvider *pageProvider, QString defaultId, QWidge
     QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Close);
     buttons->button(QDialogButtonBox::Close)->setDefault(true);
     buttons->setContentsMargins(6, 0, 6, 0);
-    m_container->addButtons(buttons);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->addButtons(buttons);
 
     connect(buttons->button(QDialogButtonBox::Close), SIGNAL(clicked()), this, SLOT(close()));
-    connect(buttons->button(QDialogButtonBox::Help), SIGNAL(clicked()), m_container, SLOT(help()));
+    connect(buttons->button(QDialogButtonBox::Help), SIGNAL(clicked()), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container, SLOT(help()));
 
     restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("PagedGeometry").toByteArray()));
 }
@@ -52,7 +52,7 @@ PageDialog::PageDialog(BasePageProvider *pageProvider, QString defaultId, QWidge
 void PageDialog::closeEvent(QCloseEvent *event)
 {
     qDebug() << "Paged dialog close requested";
-    if (m_container->prepareToClose())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->prepareToClose())
     {
         qDebug() << "Paged dialog close approved";
         APPLICATION->settings()->set("PagedGeometry", saveGeometry().toBase64());

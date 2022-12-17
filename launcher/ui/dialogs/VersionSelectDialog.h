@@ -61,16 +61,16 @@ private:
     void selectRecommended();
 
 private:
-    QString m_currentVersion;
-    VersionSelectWidget *m_versionWidget = nullptr;
-    QVBoxLayout *m_verticalLayout = nullptr;
-    QHBoxLayout *m_horizontalLayout = nullptr;
-    QPushButton *m_refreshButton = nullptr;
-    QDialogButtonBox *m_buttonBox = nullptr;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentVersion;
+    VersionSelectWidget *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_versionWidget = nullptr;
+    QVBoxLayout *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_verticalLayout = nullptr;
+    QHBoxLayout *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_horizontalLayout = nullptr;
+    QPushButton *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_refreshButton = nullptr;
+    QDialogButtonBox *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttonBox = nullptr;
 
-    BaseVersionList *m_vlist = nullptr;
+    BaseVersionList *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_vlist = nullptr;
 
-    VersionProxyModel *m_proxyModel = nullptr;
+    VersionProxyModel *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxyModel = nullptr;
 
     int resizeOnColumn = -1;
 

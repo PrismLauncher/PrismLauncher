@@ -9,8 +9,8 @@ enum class ProblemSeverity
 
 struct PatchProblem
 {
-    ProblemSeverity m_severity;
-    QString m_description;
+    ProblemSeverity hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_severity;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description;
 };
 
 class ProblemProvider
@@ -26,22 +26,22 @@ class ProblemContainer : public ProblemProvider
 public:
     const QList<PatchProblem> getProblems() const override
     {
-        return m_problems;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_problems;
     }
     ProblemSeverity getProblemSeverity() const override
     {
-        return m_problemSeverity;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_problemSeverity;
     }
     virtual void addProblem(ProblemSeverity severity, const QString &description)
     {
-        if(severity > m_problemSeverity)
+        if(severity > hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_problemSeverity)
         {
-            m_problemSeverity = severity;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_problemSeverity = severity;
         }
-        m_problems.append({severity, description});
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_problems.append({severity, description});
     }
 
 private:
-    QList<PatchProblem> m_problems;
-    ProblemSeverity m_problemSeverity = ProblemSeverity::None;
+    QList<PatchProblem> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_problems;
+    ProblemSeverity hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_problemSeverity = ProblemSeverity::None;
 };

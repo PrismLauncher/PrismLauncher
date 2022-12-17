@@ -62,11 +62,11 @@ static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString&
 
 PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString packName, QString version, InstallMode installMode)
 {
-    m_support = support;
-    m_pack_name = packName;
-    m_pack_safe_name = packName.replace(QRegularExpression("[^A-Za-z0-9]"), "");
-    m_version_name = version;
-    m_install_mode = installMode;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_support = support;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_name = packName;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_safe_name = packName.replace(QRegularExpression("[^A-Za-z0-9]"), "");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name = version;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_install_mode = installMode;
 }
 
 bool PackInstallTask::abort()
@@ -83,7 +83,7 @@ void PackInstallTask::executeTask()
     qDebug() << "PackInstallTask::executeTask: " << QThread::currentThreadId();
     auto *netJob = new NetJob("ATLauncher::VersionFetch", APPLICATION->network());
     auto searchUrl = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json")
-            .arg(m_pack_safe_name).arg(m_version_name);
+            .arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_safe_name).arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();
@@ -117,21 +117,21 @@ void PackInstallTask::onDownloadSucceeded()
         emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
         return;
     }
-    m_version = version;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = version;
 
     // Derived from the installation mode
     QString message;
     bool resetDirectory;
 
-    switch (m_install_mode) {
+    switch (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_install_mode) {
     case InstallMode::Reinstall:
     case InstallMode::Update:
-        message = m_version.messages.update;
+        message = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.messages.update;
         resetDirectory = true;
         break;
 
     case InstallMode::Install:
-        message = m_version.messages.install;
+        message = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.messages.install;
         resetDirectory = false;
         break;
 
@@ -142,11 +142,11 @@ void PackInstallTask::onDownloadSucceeded()
 
     // Display message if one exists
     if (!message.isEmpty())
-        m_support->displayMessage(message);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_support->displayMessage(message);
 
-    auto ver = getComponentVersion("net.minecraft", m_version.minecraft);
+    auto ver = getComponentVersion("net.minecraft", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.minecraft);
     if (!ver) {
-        emitFailed(tr("Failed to get local metadata index for '%1' v%2").arg("net.minecraft", m_version.minecraft));
+        emitFailed(tr("Failed to get local metadata index for '%1' v%2").arg("net.minecraft", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.minecraft));
         return;
     }
     minecraftVersion = ver;
@@ -155,7 +155,7 @@ void PackInstallTask::onDownloadSucceeded()
         deleteExistingFiles();
     }
 
-    if(m_version.noConfigs) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.noConfigs) {
         downloadMods();
     }
     else {
@@ -196,17 +196,17 @@ void PackInstallTask::deleteExistingFiles()
     keeps.files.append(VersionKeep{ "root", "servers.dat" });
 
     // Merge with version deletes and keeps
-    for (const auto& item : m_version.deletes.files)
+    for (const auto& item : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.deletes.files)
         deletes.files.append(item);
-    for (const auto& item : m_version.deletes.folders)
+    for (const auto& item : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.deletes.folders)
         deletes.folders.append(item);
-    for (const auto& item : m_version.keeps.files)
+    for (const auto& item : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.keeps.files)
         keeps.files.append(item);
-    for (const auto& item : m_version.keeps.folders)
+    for (const auto& item : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.keeps.folders)
         keeps.folders.append(item);
 
     auto getPathForBase = [this](const QString& base) {
-        auto minecraftPath = FS::PathCombine(m_stagingPath, "minecraft");
+        auto minecraftPath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "minecraft");
 
         if (base == "root") {
             return minecraftPath;
@@ -308,7 +308,7 @@ QString PackInstallTask::getDirForModType(ModType type, QString raw)
         case ModType::Flan:
             return "Flan";
         case ModType::Dependency:
-            return FS::PathCombine("mods", m_version.minecraft);
+            return FS::PathCombine("mods", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.minecraft);
         case ModType::Ic2Lib:
             return FS::PathCombine("mods", "ic2");
         case ModType::DenLib:
@@ -336,7 +336,7 @@ QString PackInstallTask::getDirForModType(ModType type, QString raw)
 
 QString PackInstallTask::getVersionForLoader(QString uid)
 {
-    if(m_version.loader.recommended || m_version.loader.latest || m_version.loader.choose) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.recommended || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.latest || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.choose) {
         auto vlist = APPLICATION->metadataIndex()->get(uid);
         if(!vlist)
         {
@@ -348,7 +348,7 @@ QString PackInstallTask::getVersionForLoader(QString uid)
             vlist->load(Net::Mode::Online);
         }
 
-        if(m_version.loader.recommended || m_version.loader.latest) {
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.recommended || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.latest) {
             for (int i = 0; i < vlist->versions().size(); i++) {
                 auto version = vlist->versions().at(i);
                 auto reqs = version->requires();
@@ -356,15 +356,15 @@ QString PackInstallTask::getVersionForLoader(QString uid)
                 // filter by minecraft version, if the loader depends on a certain version.
                 // not all mod loaders depend on a given Minecraft version, so we won't do this
                 // filtering for those loaders.
-                if (m_version.loader.type != "fabric") {
+                if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.type != "fabric") {
                     auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Meta::Require &req) {
                         return req.uid == "net.minecraft";
                     });
                     if (iter == reqs.end()) continue;
-                    if (iter->equalsVersion != m_version.minecraft) continue;
+                    if (iter->equalsVersion != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.minecraft) continue;
                 }
 
-                if (m_version.loader.recommended) {
+                if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.recommended) {
                     // first recommended build we find, we use.
                     if (!version->isRecommended()) continue;
                 }
@@ -372,25 +372,25 @@ QString PackInstallTask::getVersionForLoader(QString uid)
                 return version->descriptor();
             }
 
-            emitFailed(tr("Failed to find version for %1 loader").arg(m_version.loader.type));
+            emitFailed(tr("Failed to find version for %1 loader").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.type));
             return Q_NULLPTR;
         }
-        else if(m_version.loader.choose) {
+        else if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.choose) {
             // Fabric Loader doesn't depend on a given Minecraft version.
-            if (m_version.loader.type == "fabric") {
-                return m_support->chooseVersion(vlist, Q_NULLPTR);
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.type == "fabric") {
+                return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_support->chooseVersion(vlist, Q_NULLPTR);
             }
 
-            return m_support->chooseVersion(vlist, m_version.minecraft);
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_support->chooseVersion(vlist, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.minecraft);
         }
     }
 
-    if (m_version.loader.version == Q_NULLPTR || m_version.loader.version.isEmpty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.version == Q_NULLPTR || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.version.isEmpty()) {
         emitFailed(tr("No loader version set for modpack!"));
         return Q_NULLPTR;
     }
 
-    return m_version.loader.version;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.version;
 }
 
 QString PackInstallTask::detectLibrary(VersionLibrary library)
@@ -430,7 +430,7 @@ QString PackInstallTask::detectLibrary(VersionLibrary library)
 
 bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared_ptr<PackProfile> profile)
 {
-    if(m_version.libraries.isEmpty()) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.libraries.isEmpty()) {
         return true;
     }
 
@@ -463,7 +463,7 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
     auto patchFileName = FS::PathCombine(patchDir, target_id + ".json");
 
     auto f = std::make_shared<VersionFile>();
-    f->name = m_pack_name + " " + m_version_name + " (libraries)";
+    f->name = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_name + " " + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name + " (libraries)";
 
     const static QMap<QString, QString> liteLoaderMap = {
             { "61179803bcd5fb7790789b790908663d", "1.12-SNAPSHOT" },
@@ -497,7 +497,7 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
             { "b9bef8abc8dc309069aeba6fbbe58980", "1.12.1-SNAPSHOT" }
     };
 
-    for(const auto & lib : m_version.libraries) {
+    for(const auto & lib : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.libraries) {
         // If the library is LiteLoader, we need to ignore it and handle it separately.
         if (liteLoaderMap.contains(lib.md5)) {
             auto ver = getComponentVersion("com.mumfrey.liteloader", liteLoaderMap.value(lib.md5));
@@ -558,26 +558,26 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
 
 bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<PackProfile> profile)
 {
-    if (m_version.mainClass.mainClass.isEmpty() && m_version.extraArguments.arguments.isEmpty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.mainClass.mainClass.isEmpty() && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.extraArguments.arguments.isEmpty()) {
         return true;
     }
 
-    auto mainClass = m_version.mainClass.mainClass;
-    auto extraArguments = m_version.extraArguments.arguments;
+    auto mainClass = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.mainClass.mainClass;
+    auto extraArguments = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.extraArguments.arguments;
 
-    auto hasMainClassDepends = !m_version.mainClass.depends.isEmpty();
-    auto hasExtraArgumentsDepends = !m_version.extraArguments.depends.isEmpty();
+    auto hasMainClassDepends = !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.mainClass.depends.isEmpty();
+    auto hasExtraArgumentsDepends = !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.extraArguments.depends.isEmpty();
     if (hasMainClassDepends || hasExtraArgumentsDepends) {
         QSet<QString> mods;
-        for (const auto& item : m_version.mods) {
+        for (const auto& item : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.mods) {
             mods.insert(item.name);
         }
 
-        if (hasMainClassDepends && !mods.contains(m_version.mainClass.depends)) {
+        if (hasMainClassDepends && !mods.contains(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.mainClass.depends)) {
             mainClass = "";
         }
 
-        if (hasExtraArgumentsDepends && !mods.contains(m_version.extraArguments.depends)) {
+        if (hasExtraArgumentsDepends && !mods.contains(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.extraArguments.depends)) {
             extraArguments = "";
         }
     }
@@ -609,7 +609,7 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<
     }
 
     auto f = std::make_shared<VersionFile>();
-    f->name = m_pack_name + " " + m_version_name;
+    f->name = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_name + " " + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name;
     if (!mainClass.isEmpty() && !mainClasses.contains(mainClass)) {
         f->mainClass = mainClass;
     }
@@ -651,15 +651,15 @@ void PackInstallTask::installConfigs()
     setStatus(tr("Downloading configs..."));
     jobPtr = new NetJob(tr("Config download"), APPLICATION->network());
 
-    auto path = QString("Configs/%1/%2.zip").arg(m_pack_safe_name).arg(m_version_name);
+    auto path = QString("Configs/%1/%2.zip").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_safe_name).arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name);
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.zip")
-            .arg(m_pack_safe_name).arg(m_version_name);
+            .arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_safe_name).arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name);
     auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", path);
     entry->setStale(true);
 
     auto dl = Net::Download::makeCached(url, entry);
-    if (!m_version.configs.sha1.isEmpty()) {
-        auto rawSha1 = QByteArray::fromHex(m_version.configs.sha1.toLatin1());
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.configs.sha1.isEmpty()) {
+        auto rawSha1 = QByteArray::fromHex(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.configs.sha1.toLatin1());
         dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
     }
     jobPtr->addNetAction(dl);
@@ -696,7 +696,7 @@ void PackInstallTask::extractConfigs()
     qDebug() << "PackInstallTask::extractConfigs: " << QThread::currentThreadId();
     setStatus(tr("Extracting configs..."));
 
-    QDir extractDir(m_stagingPath);
+    QDir extractDir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath);
 
     QuaZip packZip(archivePath);
     if(!packZip.open(QuaZip::mdUnzip))
@@ -706,19 +706,19 @@ void PackInstallTask::extractConfigs()
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), QOverload<QString, QString>::of(MMCZip::extractDir), archivePath, extractDir.absolutePath() + "/minecraft");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), QOverload<QString, QString>::of(MMCZip::extractDir), archivePath, extractDir.absolutePath() + "/minecraft");
 #else
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/minecraft");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/minecraft");
 #endif
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, [&]()
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, [&]()
     {
         downloadMods();
     });
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]()
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]()
     {
         emitAborted();
     });
-    m_extractFutureWatcher.setFuture(m_extractFuture);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher.setFuture(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture);
 }
 
 void PackInstallTask::downloadMods()
@@ -726,7 +726,7 @@ void PackInstallTask::downloadMods()
     qDebug() << "PackInstallTask::installMods: " << QThread::currentThreadId();
 
     QVector<ATLauncher::VersionMod> optionalMods;
-    for (const auto& mod : m_version.mods) {
+    for (const auto& mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.mods) {
         if (mod.optional) {
             optionalMods.push_back(mod);
         }
@@ -736,7 +736,7 @@ void PackInstallTask::downloadMods()
     QVector<QString> selectedMods;
     if (!optionalMods.isEmpty()) {
         setStatus(tr("Selecting optional mods..."));
-        auto mods = m_support->chooseOptionalMods(m_version, optionalMods);
+        auto mods = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_support->chooseOptionalMods(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version, optionalMods);
         if (!mods.has_value()) {
             emitAborted();
             return;
@@ -748,7 +748,7 @@ void PackInstallTask::downloadMods()
 
     jarmods.clear();
     jobPtr = new NetJob(tr("Mod download"), APPLICATION->network());
-    for(const auto& mod : m_version.mods) {
+    for(const auto& mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.mods) {
         // skip non-client mods
         if(!mod.client) continue;
 
@@ -812,7 +812,7 @@ void PackInstallTask::downloadMods()
             }
             jobPtr->addNetAction(dl);
 
-            auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
+            auto path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "minecraft", relpath, mod.file);
 
             if(mod.type == ModType::Forge) {
                 auto ver = getComponentVersion("net.minecraftforge", mod.version);
@@ -866,16 +866,16 @@ void PackInstallTask::onModsDownloaded() {
 
     if(!modsToExtract.empty() || !modsToDecomp.empty() || !modsToCopy.empty()) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        m_modExtractFuture = QtConcurrent::run(QThreadPool::globalInstance(), &PackInstallTask::extractMods, this, modsToExtract, modsToDecomp, modsToCopy);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modExtractFuture = QtConcurrent::run(QThreadPool::globalInstance(), &PackInstallTask::extractMods, this, modsToExtract, modsToDecomp, modsToCopy);
 #else
-        m_modExtractFuture = QtConcurrent::run(QThreadPool::globalInstance(), this, &PackInstallTask::extractMods, modsToExtract, modsToDecomp, modsToCopy);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modExtractFuture = QtConcurrent::run(QThreadPool::globalInstance(), this, &PackInstallTask::extractMods, modsToExtract, modsToDecomp, modsToCopy);
 #endif
-        connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onModsExtracted);
-        connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]()
+        connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modExtractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onModsExtracted);
+        connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modExtractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]()
         {
             emitAborted();
         });
-        m_modExtractFutureWatcher.setFuture(m_modExtractFuture);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modExtractFutureWatcher.setFuture(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modExtractFuture);
     }
     else {
         install();
@@ -884,7 +884,7 @@ void PackInstallTask::onModsDownloaded() {
 
 void PackInstallTask::onModsExtracted() {
     qDebug() << "PackInstallTask::onModsExtracted: " << QThread::currentThreadId();
-    if(m_modExtractFuture.result()) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modExtractFuture.result()) {
         install();
     }
     else {
@@ -915,7 +915,7 @@ bool PackInstallTask::extractMods(
             extractToDir = FS::PathCombine("resourcepacks", "extracted");
         }
 
-        QDir extractDir(m_stagingPath);
+        QDir extractDir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath);
         auto extractToPath = FS::PathCombine(extractDir.absolutePath(), "minecraft", extractToDir);
 
         QString folderToExtract = "";
@@ -936,7 +936,7 @@ bool PackInstallTask::extractMods(
         auto &mod = iter.value();
         auto extractToDir = getDirForModType(mod.decompType, mod.decompType_raw);
 
-        QDir extractDir(m_stagingPath);
+        QDir extractDir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath);
         auto extractToPath = FS::PathCombine(extractDir.absolutePath(), "minecraft", extractToDir, mod.decompFile);
 
         qDebug() << "Extracting " + mod.decompFile + " to " + extractToDir;
@@ -974,11 +974,11 @@ void PackInstallTask::install()
     qDebug() << "PackInstallTask::install: " << QThread::currentThreadId();
     setStatus(tr("Installing modpack"));
 
-    auto instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
+    auto instanceConfigPath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(instanceConfigPath);
     instanceSettings->suspendSave();
 
-    MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
+    MinecraftInstance instance(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettings, instanceSettings, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath);
     auto components = instance.getPackProfile();
     components->buildingFromScratch();
 
@@ -989,26 +989,26 @@ void PackInstallTask::install()
     }
 
     // Minecraft
-    components->setComponentVersion("net.minecraft", m_version.minecraft, true);
+    components->setComponentVersion("net.minecraft", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.minecraft, true);
 
     // Loader
-    if(m_version.loader.type == QString("forge"))
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.type == QString("forge"))
     {
         auto version = getVersionForLoader("net.minecraftforge");
         if(version == Q_NULLPTR) return;
 
         components->setComponentVersion("net.minecraftforge", version);
     }
-    else if(m_version.loader.type == QString("fabric"))
+    else if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.type == QString("fabric"))
     {
         auto version = getVersionForLoader("net.fabricmc.fabric-loader");
         if(version == Q_NULLPTR) return;
 
         components->setComponentVersion("net.fabricmc.fabric-loader", version);
     }
-    else if(m_version.loader.type != QString())
+    else if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.type != QString())
     {
-        emitFailed(tr("Unknown loader type: ") + m_version.loader.type);
+        emitFailed(tr("Unknown loader type: ") + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.loader.type);
         return;
     }
 
@@ -1029,8 +1029,8 @@ void PackInstallTask::install()
     components->saveNow();
 
     instance.setName(name());
-    instance.setIconKey(m_instIcon);
-    instance.setManagedPack("atlauncher", m_pack_safe_name, m_pack_name, m_version_name, m_version_name);
+    instance.setIconKey(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instIcon);
+    instance.setManagedPack("atlauncher", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_safe_name, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_name, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name);
     instanceSettings->resumeSave();
 
     jarmods.clear();

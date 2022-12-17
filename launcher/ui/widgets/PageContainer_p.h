@@ -44,25 +44,25 @@ public:
     {
         QPixmap empty(pageIconSize, pageIconSize);
         empty.fill(Qt::transparent);
-        m_emptyIcon = QIcon(empty);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyIcon = QIcon(empty);
     }
     virtual ~PageModel() {}
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const
     {
-        return parent.isValid() ? 0 : m_pages.size();
+        return parent.isValid() ? 0 : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pages.size();
     }
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const
     {
         switch (role)
         {
         case Qt::DisplayRole:
-            return m_pages.at(index.row())->displayName();
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pages.at(index.row())->displayName();
         case Qt::DecorationRole:
         {
-            QIcon icon = m_pages.at(index.row())->icon();
+            QIcon icon = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pages.at(index.row())->icon();
             if (icon.isNull())
-                icon = m_emptyIcon;
+                icon = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyIcon;
             // HACK: fixes icon stretching on windows. TODO: report Qt bug for this
             return QIcon(icon.pixmap(QSize(48,48)));
         }
@@ -73,17 +73,17 @@ public:
     void setPages(const QList<BasePage *> &pages)
     {
         beginResetModel();
-        m_pages = pages;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pages = pages;
         endResetModel();
     }
     const QList<BasePage *> &pages() const
     {
-        return m_pages;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pages;
     }
 
     BasePage * findPageEntryById(QString id)
     {
-        for(auto page: m_pages)
+        for(auto page: hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pages)
         {
             if (page->id() == id)
                 return page;
@@ -91,8 +91,8 @@ public:
         return nullptr;
     }
 
-    QList<BasePage *> m_pages;
-    QIcon m_emptyIcon;
+    QList<BasePage *> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pages;
+    QIcon hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyIcon;
 };
 
 class PageView : public QListView

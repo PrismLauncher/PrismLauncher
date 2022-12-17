@@ -27,17 +27,17 @@ void KonamiCode::input(QEvent* event)
     {
         QKeyEvent *keyEvent = static_cast<QKeyEvent*>( event );
         auto key = Qt::Key(keyEvent->key());
-        if(key == konamiCode[m_progress])
+        if(key == konamiCode[hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progress])
         {
-            m_progress ++;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progress ++;
         }
         else
         {
-            m_progress = 0;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progress = 0;
         }
-        if(m_progress == static_cast<int>(konamiCode.size()))
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progress == static_cast<int>(konamiCode.size()))
         {
-            m_progress = 0;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progress = 0;
             emit triggered();
         }
     }

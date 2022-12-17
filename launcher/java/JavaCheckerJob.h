@@ -27,7 +27,7 @@ class JavaCheckerJob : public Task
 {
     Q_OBJECT
 public:
-    explicit JavaCheckerJob(QString job_name) : Task(), m_job_name(job_name) {};
+    explicit JavaCheckerJob(QString job_name) : Task(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_job_name(job_name) {};
     virtual ~JavaCheckerJob() {};
 
     bool addJavaCheckerAction(JavaCheckerPtr base)
@@ -36,7 +36,7 @@ public:
         // if this is already running, the action needs to be started right away!
         if (isRunning())
         {
-            setProgress(num_finished, javacheckers.size());
+            setProgress(nuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_finished, javacheckers.size());
             connect(base.get(), &JavaChecker::checkFinished, this, &JavaCheckerJob::partFinished);
             base->performCheck();
         }
@@ -54,8 +54,8 @@ protected:
     virtual void executeTask() override;
 
 private:
-    QString m_job_name;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_job_name;
     QList<JavaCheckerPtr> javacheckers;
     QList<JavaCheckResult> javaresults;
-    int num_finished = 0;
+    int nuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_finished = 0;
 };

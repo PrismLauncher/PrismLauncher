@@ -31,15 +31,15 @@ class ModDownloadTask : public SequentialTask {
     Q_OBJECT
 public:
     explicit ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods, bool is_indexed = true);
-    const QString& getFilename() const { return m_mod_version.fileName; }
+    const QString& getFilename() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_version.fileName; }
 
 private:
-    ModPlatform::IndexedPack m_mod;
-    ModPlatform::IndexedVersion m_mod_version;
+    ModPlatform::IndexedPack hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod;
+    ModPlatform::IndexedVersion hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_version;
     const std::shared_ptr<ModFolderModel> mods;
 
-    NetJob::Ptr m_filesNetJob;
-    LocalModUpdateTask::Ptr m_update_task;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob;
+    LocalModUpdateTask::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_update_task;
 
     void downloadProgressChanged(qint64 current, qint64 total);
 

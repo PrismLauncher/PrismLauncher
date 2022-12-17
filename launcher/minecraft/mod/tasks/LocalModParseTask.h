@@ -17,7 +17,7 @@ public:
     };
     using ResultPtr = std::shared_ptr<Result>;
     ResultPtr result() const {
-        return m_result;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result;
     }
 
     [[nodiscard]] bool canAbort() const override { return true; }
@@ -26,7 +26,7 @@ public:
     LocalModParseTask(int token, ResourceType type, const QFileInfo & modFile);
     void executeTask() override;
 
-    [[nodiscard]] int token() const { return m_token; }
+    [[nodiscard]] int token() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_token; }
 
 private:
     void processAsZip();
@@ -34,10 +34,10 @@ private:
     void processAsLitemod();
 
 private:
-    int m_token;
-    ResourceType m_type;
-    QFileInfo m_modFile;
-    ResultPtr m_result;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_token;
+    ResourceType hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type;
+    QFileInfo hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modFile;
+    ResultPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_result;
 
-    std::atomic<bool> m_aborted = false;
+    std::atomic<bool> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = false;
 };

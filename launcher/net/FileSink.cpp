@@ -47,15 +47,15 @@ Task::State FileSink::init(QNetworkRequest& request)
     }
 
     // create a new save file and open it for writing
-    if (!FS::ensureFilePathExists(m_filename)) {
-        qCritical() << "Could not create folder for " + m_filename;
+    if (!FS::ensureFilePathExists(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename)) {
+        qCritical() << "Could not create folder for " + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename;
         return Task::State::Failed;
     }
 
     wroteAnyData = false;
-    m_output_file.reset(new QSaveFile(m_filename));
-    if (!m_output_file->open(QIODevice::WriteOnly)) {
-        qCritical() << "Could not open " + m_filename + " for writing";
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output_file.reset(new QSaveFile(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename));
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output_file->open(QIODevice::WriteOnly)) {
+        qCritical() << "Could not open " + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename + " for writing";
         return Task::State::Failed;
     }
 
@@ -66,10 +66,10 @@ Task::State FileSink::init(QNetworkRequest& request)
 
 Task::State FileSink::write(QByteArray& data)
 {
-    if (!writeAllValidators(data) || m_output_file->write(data) != data.size()) {
-        qCritical() << "Failed writing into " + m_filename;
-        m_output_file->cancelWriting();
-        m_output_file.reset();
+    if (!writeAllValidators(data) || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output_file->write(data) != data.size()) {
+        qCritical() << "Failed writing into " + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output_file->cancelWriting();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output_file.reset();
         wroteAnyData = false;
         return Task::State::Failed;
     }
@@ -80,7 +80,7 @@ Task::State FileSink::write(QByteArray& data)
 
 Task::State FileSink::abort()
 {
-    m_output_file->cancelWriting();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output_file->cancelWriting();
     failAllValidators();
     return Task::State::Failed;
 }
@@ -105,15 +105,15 @@ Task::State FileSink::finalize(QNetworkReply& reply)
             return Task::State::Failed;
 
         // nothing went wrong...
-        if (!m_output_file->commit()) {
-            qCritical() << "Failed to commit changes to " << m_filename;
-            m_output_file->cancelWriting();
+        if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output_file->commit()) {
+            qCritical() << "Failed to commit changes to " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output_file->cancelWriting();
             return Task::State::Failed;
         }
     }
 
     // then get rid of the save file
-    m_output_file.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_output_file.reset();
 
     return finalizeCache(reply);
 }
@@ -130,7 +130,7 @@ Task::State FileSink::finalizeCache(QNetworkReply&)
 
 bool FileSink::hasLocalData()
 {
-    QFileInfo info(m_filename);
+    QFileInfo info(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename);
     return info.exists() && info.size() != 0;
 }
 }  // namespace Net

@@ -45,19 +45,19 @@
 
 AtlOptionalModListModel::AtlOptionalModListModel(QWidget* parent, ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods)
     : QAbstractListModel(parent)
-    , m_version(version)
-    , m_mods(mods)
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version(version)
+    , hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods(mods)
 {
     // fill mod index
-    for (int i = 0; i < m_mods.size(); i++) {
-        auto mod = m_mods.at(i);
-        m_index[mod.name] = i;
+    for (int i = 0; i < hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.size(); i++) {
+        auto mod = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.at(i);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index[mod.name] = i;
     }
 
     // set initial state
-    for (int i = 0; i < m_mods.size(); i++) {
-        auto mod = m_mods.at(i);
-        m_selection[mod.name] = false;
+    for (int i = 0; i < hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.size(); i++) {
+        auto mod = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.at(i);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selection[mod.name] = false;
         setMod(mod, i, mod.selected, false);
     }
 }
@@ -65,8 +65,8 @@ AtlOptionalModListModel::AtlOptionalModListModel(QWidget* parent, ATLauncher::Pa
 QVector<QString> AtlOptionalModListModel::getResult() {
     QVector<QString> result;
 
-    for (const auto& mod : m_mods) {
-        if (m_selection[mod.name]) {
+    for (const auto& mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods) {
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selection[mod.name]) {
             result.push_back(mod.name);
         }
     }
@@ -75,7 +75,7 @@ QVector<QString> AtlOptionalModListModel::getResult() {
 }
 
 int AtlOptionalModListModel::rowCount(const QModelIndex &parent) const {
-    return parent.isValid() ? 0 : m_mods.size();
+    return parent.isValid() ? 0 : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.size();
 }
 
 int AtlOptionalModListModel::columnCount(const QModelIndex &parent) const {
@@ -85,7 +85,7 @@ int AtlOptionalModListModel::columnCount(const QModelIndex &parent) const {
 
 QVariant AtlOptionalModListModel::data(const QModelIndex &index, int role) const {
     auto row = index.row();
-    auto mod = m_mods.at(row);
+    auto mod = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.at(row);
 
     if (role == Qt::DisplayRole) {
         if (index.column() == NameColumn) {
@@ -101,13 +101,13 @@ QVariant AtlOptionalModListModel::data(const QModelIndex &index, int role) const
         }
     }
     else if (role == Qt::ForegroundRole) {
-        if (!mod.colour.isEmpty() && m_version.colours.contains(mod.colour)) {
-            return QColor(QString("#%1").arg(m_version.colours[mod.colour]));
+        if (!mod.colour.isEmpty() && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.colours.contains(mod.colour)) {
+            return QColor(QString("#%1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.colours[mod.colour]));
         }
     }
     else if (role == Qt::CheckStateRole) {
         if (index.column() == EnabledColumn) {
-            return m_selection[mod.name] ? Qt::Checked : Qt::Unchecked;
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selection[mod.name] ? Qt::Checked : Qt::Unchecked;
         }
     }
 
@@ -117,7 +117,7 @@ QVariant AtlOptionalModListModel::data(const QModelIndex &index, int role) const
 bool AtlOptionalModListModel::setData(const QModelIndex &index, const QVariant &value, int role) {
     if (role == Qt::CheckStateRole) {
         auto row = index.row();
-        auto mod = m_mods.at(row);
+        auto mod = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.at(row);
 
         toggleMod(mod, row);
         return true;
@@ -150,26 +150,26 @@ Qt::ItemFlags AtlOptionalModListModel::flags(const QModelIndex &index) const {
 }
 
 void AtlOptionalModListModel::useShareCode(const QString& code) {
-    m_jobPtr.reset(new NetJob("Atl::Request", APPLICATION->network()));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jobPtr.reset(new NetJob("Atl::Request", APPLICATION->network()));
     auto url = QString(BuildConfig.ATL_API_BASE_URL + "share-codes/" + code);
-    m_jobPtr->addNetAction(Net::Download::makeByteArray(QUrl(url), &m_response));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jobPtr->addNetAction(Net::Download::makeByteArray(QUrl(url), &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response));
 
-    connect(m_jobPtr.get(), &NetJob::succeeded,
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jobPtr.get(), &NetJob::succeeded,
             this, &AtlOptionalModListModel::shareCodeSuccess);
-    connect(m_jobPtr.get(), &NetJob::failed,
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jobPtr.get(), &NetJob::failed,
             this, &AtlOptionalModListModel::shareCodeFailure);
 
-    m_jobPtr->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jobPtr->start();
 }
 
 void AtlOptionalModListModel::shareCodeSuccess() {
-    m_jobPtr.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jobPtr.reset();
 
     QJsonParseError parse_error {};
-    auto doc = QJsonDocument::fromJson(m_response, &parse_error);
+    auto doc = QJsonDocument::fromJson(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from ATL at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << m_response;
+        qWarning() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response;
         return;
     }
     auto obj = doc.object();
@@ -179,7 +179,7 @@ void AtlOptionalModListModel::shareCodeSuccess() {
         ATLauncher::loadShareCodeResponse(response, obj);
     }
     catch (const JSONValidationError& e) {
-        qDebug() << QString::fromUtf8(m_response);
+        qDebug() << QString::fromUtf8(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_response);
         qWarning() << "Error while reading response from ATLauncher: " << e.cause();
         return;
     }
@@ -193,50 +193,50 @@ void AtlOptionalModListModel::shareCodeSuccess() {
     // FIXME: verify pack and version, error if not matching.
 
     // Clear the current selection
-    for (const auto& mod : m_mods) {
-        m_selection[mod.name] = false;
+    for (const auto& mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selection[mod.name] = false;
     }
 
     // Make the selections, as per the share code.
     for (const auto& mod : response.data.mods) {
-        m_selection[mod.name] = mod.selected;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selection[mod.name] = mod.selected;
     }
 
     emit dataChanged(AtlOptionalModListModel::index(0, EnabledColumn),
-                     AtlOptionalModListModel::index(m_mods.size() - 1, EnabledColumn));
+                     AtlOptionalModListModel::index(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.size() - 1, EnabledColumn));
 }
 
 void AtlOptionalModListModel::shareCodeFailure(const QString& reason) {
-    m_jobPtr.reset();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_jobPtr.reset();
 
     // fixme: plumb in an error message
 }
 
 void AtlOptionalModListModel::selectRecommended() {
-    for (const auto& mod : m_mods) {
-        m_selection[mod.name] = mod.recommended;
+    for (const auto& mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selection[mod.name] = mod.recommended;
     }
 
     emit dataChanged(AtlOptionalModListModel::index(0, EnabledColumn),
-                     AtlOptionalModListModel::index(m_mods.size() - 1, EnabledColumn));
+                     AtlOptionalModListModel::index(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.size() - 1, EnabledColumn));
 }
 
 void AtlOptionalModListModel::clearAll() {
-    for (const auto& mod : m_mods) {
-        m_selection[mod.name] = false;
+    for (const auto& mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selection[mod.name] = false;
     }
 
     emit dataChanged(AtlOptionalModListModel::index(0, EnabledColumn),
-                     AtlOptionalModListModel::index(m_mods.size() - 1, EnabledColumn));
+                     AtlOptionalModListModel::index(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.size() - 1, EnabledColumn));
 }
 
 void AtlOptionalModListModel::toggleMod(ATLauncher::VersionMod mod, int index) {
-    auto enable = !m_selection[mod.name];
+    auto enable = !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selection[mod.name];
 
     // If there is a warning for the mod, display that first (if we would be enabling the mod)
-    if (enable && !mod.warning.isEmpty() && m_version.warnings.contains(mod.warning)) {
+    if (enable && !mod.warning.isEmpty() && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.warnings.contains(mod.warning)) {
         auto message = QString("%1<br><br>%2")
-                           .arg(m_version.warnings[mod.warning], tr("Are you sure that you want to enable this mod?"));
+                           .arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version.warnings[mod.warning], tr("Are you sure that you want to enable this mod?"));
 
         // fixme: avoid casting here
         auto result = QMessageBox::warning((QWidget*) this->parent(), tr("Warning"), message, QMessageBox::Yes | QMessageBox::No);
@@ -249,15 +249,15 @@ void AtlOptionalModListModel::toggleMod(ATLauncher::VersionMod mod, int index) {
 }
 
 void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool enable, bool shouldEmit) {
-    if (m_selection[mod.name] == enable) return;
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selection[mod.name] == enable) return;
 
-    m_selection[mod.name] = enable;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_selection[mod.name] = enable;
 
     // disable other mods in the group, if applicable
     if (enable && !mod.group.isEmpty()) {
-        for (int i = 0; i < m_mods.size(); i++) {
+        for (int i = 0; i < hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.size(); i++) {
             if (index == i) continue;
-            auto other = m_mods.at(i);
+            auto other = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.at(i);
 
             if (mod.group == other.group) {
                 setMod(other, i, false, shouldEmit);
@@ -266,8 +266,8 @@ void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool
     }
 
     for (const auto& dependencyName : mod.depends) {
-        auto dependencyIndex = m_index[dependencyName];
-        auto dependencyMod = m_mods.at(dependencyIndex);
+        auto dependencyIndex = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index[dependencyName];
+        auto dependencyMod = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.at(dependencyIndex);
 
         // enable/disable dependencies
         if (enable) {
@@ -277,7 +277,7 @@ void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool
         // if the dependency is 'effectively hidden', then track which mods
         // depend on it - so we can efficiently disable it when no more dependents
         // depend on it.
-        auto dependants = m_dependants[dependencyName];
+        auto dependants = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dependants[dependencyName];
 
         if (enable) {
             dependants.append(mod.name);
@@ -294,10 +294,10 @@ void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool
 
     // disable mods that depend on this one, if disabling
     if (!enable) {
-        auto dependants = m_dependants[mod.name];
+        auto dependants = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dependants[mod.name];
         for (const auto& dependencyName : dependants) {
-            auto dependencyIndex = m_index[dependencyName];
-            auto dependencyMod = m_mods.at(dependencyIndex);
+            auto dependencyIndex = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index[dependencyName];
+            auto dependencyMod = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.at(dependencyIndex);
 
             setMod(dependencyMod, dependencyIndex, false, shouldEmit);
         }

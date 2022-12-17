@@ -86,7 +86,7 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
 
         // Get first line unconditionally
         description = cut_text.first().second;
-        auto num_lines = 1;
+        auto nuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lines = 1;
 
         // Get second line, elided if needed
         if (cut_text.size() > 1) {
@@ -100,7 +100,7 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
                 } else {
                     description += cut_text.at(1).second;
                 }
-                num_lines += 1;
+                nuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lines += 1;
             }
         }
 
@@ -110,7 +110,7 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
         // Have the y-value be set based on the number of lines in the description, to centralize the
         // description text with the space between the base and the title.
         int description_y = rect.y() + title_height + (rect.height() - title_height) / 2;
-        if (num_lines == 1)
+        if (nuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lines == 1)
             description_y -= opt.fontMetrics.height() / 2;
         else
             description_y -= opt.fontMetrics.height();

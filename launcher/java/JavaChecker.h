@@ -37,20 +37,20 @@ public:
     explicit JavaChecker(QObject *parent = 0);
     void performCheck();
 
-    QString m_path;
-    QString m_args;
-    int m_id = 0;
-    int m_minMem = 0;
-    int m_maxMem = 0;
-    int m_permGen = 64;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_args;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_id = 0;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minMem = 0;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_maxMem = 0;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_permGen = 64;
 
 signals:
     void checkFinished(JavaCheckResult result);
 private:
     QProcessPtr process;
     QTimer killTimer;
-    QString m_stdout;
-    QString m_stderr;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stdout;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stderr;
 public
 slots:
     void timeout();

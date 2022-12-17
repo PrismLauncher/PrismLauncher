@@ -54,10 +54,10 @@ slots:
 
 private:
     Ui::MSALoginDialog *ui;
-    MinecraftAccountPtr m_account;
-    shared_qobject_ptr<AccountTask> m_loginTask;
-    QTimer m_externalLoginTimer;
-    int m_externalLoginElapsed = 0;
-    int m_externalLoginTimeout = 0;
+    MinecraftAccountPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account;
+    shared_qobject_ptr<AccountTask> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask;
+    QTimer hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginTimer;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginElapsed = 0;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_externalLoginTimeout = 0;
 };
 

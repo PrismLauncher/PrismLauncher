@@ -21,27 +21,27 @@ static ModrinthAPI modrinth_api;
 static FlameAPI flame_api;
 
 EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::Provider prov)
-    : Task(nullptr), m_index_dir(dir), m_provider(prov), m_hashing_task(nullptr), m_current_task(nullptr)
+    : Task(nullptr), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir(dir), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_provider(prov), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hashing_task(nullptr), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_task(nullptr)
 {
     auto hash_task = createNewHash(mod);
     if (!hash_task)
         return;
-    connect(hash_task.get(), &Task::succeeded, [this, hash_task, mod] { m_mods.insert(hash_task->getResult(), mod); });
+    connect(hash_task.get(), &Task::succeeded, [this, hash_task, mod] { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.insert(hash_task->getResult(), mod); });
     connect(hash_task.get(), &Task::failed, [this, hash_task, mod] { emitFail(mod, "", RemoveFromList::No); });
     hash_task->start();
 }
 
 EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform::Provider prov)
-    : Task(nullptr), m_index_dir(dir), m_provider(prov), m_current_task(nullptr)
+    : Task(nullptr), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir(dir), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_provider(prov), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_task(nullptr)
 {
-    m_hashing_task = new ConcurrentTask(this, "MakeHashesTask", 10);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hashing_task = new ConcurrentTask(this, "MakeHashesTask", 10);
     for (auto* mod : mods) {
         auto hash_task = createNewHash(mod);
         if (!hash_task)
             continue;
-        connect(hash_task.get(), &Task::succeeded, [this, hash_task, mod] { m_mods.insert(hash_task->getResult(), mod); });
+        connect(hash_task.get(), &Task::succeeded, [this, hash_task, mod] { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.insert(hash_task->getResult(), mod); });
         connect(hash_task.get(), &Task::failed, [this, hash_task, mod] { emitFail(mod, "", RemoveFromList::No); });
-        m_hashing_task->addTask(hash_task);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hashing_task->addTask(hash_task);
     }
 }
 
@@ -50,22 +50,22 @@ Hashing::Hasher::Ptr EnsureMetadataTask::createNewHash(Mod* mod)
     if (!mod || !mod->valid() || mod->type() == ResourceType::FOLDER)
         return nullptr;
 
-    return Hashing::createHasher(mod->fileinfo().absoluteFilePath(), m_provider);
+    return Hashing::createHasher(mod->fileinfo().absoluteFilePath(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_provider);
 }
 
 QString EnsureMetadataTask::getExistingHash(Mod* mod)
 {
     // Check for already computed hashes
     // (linear on the number of mods vs. linear on the size of the mod's JAR)
-    auto it = m_mods.keyValueBegin();
-    while (it != m_mods.keyValueEnd()) {
+    auto it = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.keyValueBegin();
+    while (it != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.keyValueEnd()) {
         if ((*it).second == mod)
             break;
         it++;
     }
 
     // We already have the hash computed
-    if (it != m_mods.keyValueEnd()) {
+    if (it != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.keyValueEnd()) {
         return (*it).first;
     }
 
@@ -78,8 +78,8 @@ bool EnsureMetadataTask::abort()
     // Prevent sending signals to a dead object
     disconnect(this, 0, 0, 0);
 
-    if (m_current_task)
-        return m_current_task->abort();
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_task)
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_task->abort();
     return true;
 }
 
@@ -87,7 +87,7 @@ void EnsureMetadataTask::executeTask()
 {
     setStatus(tr("Checking if mods have metadata..."));
 
-    for (auto* mod : m_mods) {
+    for (auto* mod : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods) {
         if (!mod->valid()) {
             qDebug() << "Mod" << mod->name() << "is invalid!";
             emitFail(mod);
@@ -95,7 +95,7 @@ void EnsureMetadataTask::executeTask()
         }
 
         // They already have the right metadata :o
-        if (mod->status() != ModStatus::NoMetadata && mod->metadata() && mod->metadata()->provider == m_provider) {
+        if (mod->status() != ModStatus::NoMetadata && mod->metadata() && mod->metadata()->provider == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_provider) {
             qDebug() << "Mod" << mod->name() << "already has metadata!";
             emitReady(mod);
             continue;
@@ -109,7 +109,7 @@ void EnsureMetadataTask::executeTask()
 
     NetJob::Ptr version_task;
 
-    switch (m_provider) {
+    switch (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_provider) {
         case (ModPlatform::Provider::MODRINTH):
             version_task = modrinthVersionsTask();
             break;
@@ -119,9 +119,9 @@ void EnsureMetadataTask::executeTask()
     }
 
     auto invalidade_leftover = [this] {
-        for (auto mod = m_mods.constBegin(); mod != m_mods.constEnd(); mod++)
+        for (auto mod = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.constBegin(); mod != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.constEnd(); mod++)
             emitFail(mod.value(), mod.key(), RemoveFromList::No);
-        m_mods.clear();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.clear();
 
         emitSucceeded();
     };
@@ -129,7 +129,7 @@ void EnsureMetadataTask::executeTask()
     connect(version_task.get(), &Task::finished, this, [this, invalidade_leftover] {
         NetJob::Ptr project_task;
 
-        switch (m_provider) {
+        switch (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_provider) {
             case (ModPlatform::Provider::MODRINTH):
                 project_task = modrinthProjectsTask();
                 break;
@@ -146,25 +146,25 @@ void EnsureMetadataTask::executeTask()
         connect(project_task.get(), &Task::finished, this, [=] {
             invalidade_leftover();
             project_task->deleteLater();
-            m_current_task = nullptr;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_task = nullptr;
         });
 
-        m_current_task = project_task.get();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_task = project_task.get();
         project_task->start();
     });
 
     connect(version_task.get(), &Task::finished, [=] {
         version_task->deleteLater();
-        m_current_task = nullptr;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_task = nullptr;
     });
 
-    if (m_mods.size() > 1)
-        setStatus(tr("Requesting metadata information from %1...").arg(ProviderCaps.readableName(m_provider)));
-    else if (!m_mods.empty())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.size() > 1)
+        setStatus(tr("Requesting metadata information from %1...").arg(ProviderCaps.readableName(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_provider)));
+    else if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.empty())
         setStatus(tr("Requesting metadata information from %1 for '%2'...")
-                      .arg(ProviderCaps.readableName(m_provider), m_mods.begin().value()->name()));
+                      .arg(ProviderCaps.readableName(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_provider), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.begin().value()->name()));
 
-    m_current_task = version_task.get();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_task = version_task.get();
     version_task->start();
 }
 
@@ -173,7 +173,7 @@ void EnsureMetadataTask::emitReady(Mod* m, QString key, RemoveFromList remove)
     if (!m) {
         qCritical() << "Tried to mark a null mod as ready.";
         if (!key.isEmpty())
-            m_mods.remove(key);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.remove(key);
 
         return;
     }
@@ -184,7 +184,7 @@ void EnsureMetadataTask::emitReady(Mod* m, QString key, RemoveFromList remove)
     if (remove == RemoveFromList::Yes) {
         if (key.isEmpty())
             key = getExistingHash(m);
-        m_mods.remove(key);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.remove(key);
     }
 }
 
@@ -193,7 +193,7 @@ void EnsureMetadataTask::emitFail(Mod* m, QString key, RemoveFromList remove)
     if (!m) {
         qCritical() << "Tried to mark a null mod as failed.";
         if (!key.isEmpty())
-            m_mods.remove(key);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.remove(key);
 
         return;
     }
@@ -204,7 +204,7 @@ void EnsureMetadataTask::emitFail(Mod* m, QString key, RemoveFromList remove)
     if (remove == RemoveFromList::Yes) {
         if (key.isEmpty())
             key = getExistingHash(m);
-        m_mods.remove(key);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.remove(key);
     }
 }
 
@@ -215,7 +215,7 @@ NetJob::Ptr EnsureMetadataTask::modrinthVersionsTask()
     auto hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
 
     auto* response = new QByteArray();
-    auto ver_task = modrinth_api.currentVersions(m_mods.keys(), hash_type, response);
+    auto ver_task = modrinth_api.currentVersions(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.keys(), hash_type, response);
 
     // Prevents unfortunate timings when aborting the task
     if (!ver_task)
@@ -235,15 +235,15 @@ NetJob::Ptr EnsureMetadataTask::modrinthVersionsTask()
 
         try {
             auto entries = Json::requireObject(doc);
-            for (auto& hash : m_mods.keys()) {
-                auto mod = m_mods.find(hash).value();
+            for (auto& hash : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.keys()) {
+                auto mod = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.find(hash).value();
                 try {
                     auto entry = Json::requireObject(entries, hash);
 
                     setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod->name()));
                     qDebug() << "Getting version for" << mod->name() << "from Modrinth";
 
-                    m_temp_versions.insert(hash, Modrinth::loadIndexedPackVersion(entry));
+                    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_temp_versions.insert(hash, Modrinth::loadIndexedPackVersion(entry));
                 } catch (Json::JsonException& e) {
                     qDebug() << e.cause();
                     qDebug() << entries;
@@ -263,7 +263,7 @@ NetJob::Ptr EnsureMetadataTask::modrinthVersionsTask()
 NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
 {
     QHash<QString, QString> addonIds;
-    for (auto const& data : m_temp_versions)
+    for (auto const& data : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_temp_versions)
         addonIds.insert(data.addonId.toString(), data.hash);
 
     auto response = new QByteArray();
@@ -306,8 +306,8 @@ NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
 
                 auto hash = addonIds.find(pack.addonId.toString()).value();
 
-                auto mod_iter = m_mods.find(hash);
-                if (mod_iter == m_mods.end()) {
+                auto mod_iter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.find(hash);
+                if (mod_iter == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.end()) {
                     qWarning() << "Invalid project id from the API response.";
                     continue;
                 }
@@ -317,7 +317,7 @@ NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
                 try {
                     setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod->name()));
 
-                    modrinthCallback(pack, m_temp_versions.find(hash).value(), mod);
+                    modrinthCallback(pack, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_temp_versions.find(hash).value(), mod);
                 } catch (Json::JsonException& e) {
                     qDebug() << e.cause();
                     qDebug() << entries;
@@ -340,7 +340,7 @@ NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
     auto* response = new QByteArray();
 
     QList<uint> fingerprints;
-    for (auto& murmur : m_mods.keys()) {
+    for (auto& murmur : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.keys()) {
         fingerprints.push_back(murmur.toUInt());
     }
 
@@ -380,15 +380,15 @@ NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
                 }
 
                 auto fingerprint = QString::number(Json::ensureVariant(file_obj, "fileFingerprint").toUInt());
-                auto mod = m_mods.find(fingerprint);
-                if (mod == m_mods.end()) {
+                auto mod = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.find(fingerprint);
+                if (mod == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.end()) {
                     qWarning() << "Invalid fingerprint from the API response.";
                     continue;
                 }
 
                 setStatus(tr("Parsing API response from CurseForge for '%1'...").arg((*mod)->name()));
 
-                m_temp_versions.insert(fingerprint, FlameMod::loadIndexedPackVersion(file_obj));
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_temp_versions.insert(fingerprint, FlameMod::loadIndexedPackVersion(file_obj));
             }
 
         } catch (Json::JsonException& e) {
@@ -403,9 +403,9 @@ NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
 NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
 {
     QHash<QString, QString> addonIds;
-    for (auto const& hash : m_mods.keys()) {
-        if (m_temp_versions.contains(hash)) {
-            auto const& data = m_temp_versions.find(hash).value();
+    for (auto const& hash : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.keys()) {
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_temp_versions.contains(hash)) {
+            auto const& data = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_temp_versions.find(hash).value();
 
             auto id_str = data.addonId.toString();
             if (!id_str.isEmpty())
@@ -450,7 +450,7 @@ NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
 
                 auto id = QString::number(Json::requireInteger(entry_obj, "id"));
                 auto hash = addonIds.find(id).value();
-                auto mod = m_mods.find(hash).value();
+                auto mod = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mods.find(hash).value();
 
                 try {
                     setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name()));
@@ -458,7 +458,7 @@ NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
                     ModPlatform::IndexedPack pack;
                     FlameMod::loadIndexedPack(pack, entry_obj);
 
-                    flameCallback(pack, m_temp_versions.find(hash).value(), mod);
+                    flameCallback(pack, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_temp_versions.find(hash).value(), mod);
                 } catch (Json::JsonException& e) {
                     qDebug() << e.cause();
                     qDebug() << entries;
@@ -482,10 +482,10 @@ void EnsureMetadataTask::modrinthCallback(ModPlatform::IndexedPack& pack, ModPla
     if (ver.fileName.endsWith(".disabled"))
         ver.fileName.chop(9);
 
-    QDir tmp_index_dir(m_index_dir);
+    QDir tmp_index_dir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir);
 
     {
-        LocalModUpdateTask update_metadata(m_index_dir, pack, ver);
+        LocalModUpdateTask update_metadata(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir, pack, ver);
         QEventLoop loop;
 
         QObject::connect(&update_metadata, &Task::finished, &loop, &QEventLoop::quit);
@@ -516,10 +516,10 @@ void EnsureMetadataTask::flameCallback(ModPlatform::IndexedPack& pack, ModPlatfo
         if (ver.fileName.endsWith(".disabled"))
             ver.fileName.chop(9);
 
-        QDir tmp_index_dir(m_index_dir);
+        QDir tmp_index_dir(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir);
 
         {
-            LocalModUpdateTask update_metadata(m_index_dir, pack, ver);
+            LocalModUpdateTask update_metadata(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir, pack, ver);
             QEventLoop loop;
 
             QObject::connect(&update_metadata, &Task::finished, &loop, &QEventLoop::quit);

@@ -28,11 +28,11 @@
 #endif
 
 LocalModUpdateTask::LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack& mod, ModPlatform::IndexedVersion& mod_version)
-    : m_index_dir(index_dir), m_mod(mod), m_mod_version(mod_version)
+    : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir(index_dir), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod(mod), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_version(mod_version)
 {
     // Ensure a '.index' folder exists in the mods folder, and create it if it does not
     if (!FS::ensureFolderPathExists(index_dir.path())) {
-        emitFailed(QString("Unable to create index for mod %1!").arg(m_mod.name));
+        emitFailed(QString("Unable to create index for mod %1!").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod.name));
     }
 
 #ifdef Q_OS_WIN32
@@ -42,18 +42,18 @@ LocalModUpdateTask::LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack&
 
 void LocalModUpdateTask::executeTask()
 {
-    setStatus(tr("Updating index for mod:\n%1").arg(m_mod.name));
+    setStatus(tr("Updating index for mod:\n%1").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod.name));
 
-    auto old_metadata = Metadata::get(m_index_dir, m_mod.addonId);
+    auto old_metadata = Metadata::get(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod.addonId);
     if (old_metadata.isValid()) {
         emit hasOldMod(old_metadata.name, old_metadata.filename);
-        if (m_mod.slug.isEmpty())
-            m_mod.slug = old_metadata.slug;
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod.slug.isEmpty())
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod.slug = old_metadata.slug;
     }
 
-    auto pw_mod = Metadata::create(m_index_dir, m_mod, m_mod_version);
+    auto pw_mod = Metadata::create(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_version);
     if (pw_mod.isValid()) {
-        Metadata::update(m_index_dir, pw_mod);
+        Metadata::update(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir, pw_mod);
         emitSucceeded();
     } else {
         qCritical() << "Tried to update an invalid mod!";

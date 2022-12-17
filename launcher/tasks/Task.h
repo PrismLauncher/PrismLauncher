@@ -68,15 +68,15 @@ class Task : public QObject, public QRunnable {
 
     virtual QStringList warnings() const;
 
-    virtual bool canAbort() const { return m_can_abort; }
+    virtual bool canAbort() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_can_abort; }
 
-    auto getState() const -> State { return m_state; }
+    auto getState() const -> State { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state; }
 
-    QString getStatus() { return m_status; }
-    virtual auto getStepStatus() const -> QString { return m_status; }
+    QString getStatus() { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status; }
+    virtual auto getStepStatus() const -> QString { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status; }
 
-    qint64 getProgress() { return m_progress; }
-    qint64 getTotalProgress() { return m_progressTotal; }
+    qint64 getProgress() { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progress; }
+    qint64 getTotalProgress() { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progressTotal; }
     virtual auto getStepProgress() const -> qint64 { return 0; }
     virtual auto getStepTotalProgress() const -> qint64 { return 100; }
 
@@ -107,7 +107,7 @@ class Task : public QObject, public QRunnable {
     virtual void start();
     virtual bool abort() { if(canAbort()) emitAborted(); return canAbort(); };
 
-    void setAbortable(bool can_abort) { m_can_abort = can_abort; emit abortStatusChanged(can_abort); }
+    void setAbortable(bool can_abort) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_can_abort = can_abort; emit abortStatusChanged(can_abort); }
 
    protected:
     virtual void executeTask() = 0;
@@ -122,17 +122,17 @@ class Task : public QObject, public QRunnable {
     void setProgress(qint64 current, qint64 total);
 
    protected:
-    State m_state = State::Inactive;
-    QStringList m_Warnings;
-    QString m_failReason = "";
-    QString m_status;
-    int m_progress = 0;
-    int m_progressTotal = 100;
+    State hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_state = State::Inactive;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_Warnings;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failReason = "";
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progress = 0;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_progressTotal = 100;
 
     // TODO: Nuke in favor of QLoggingCategory
-    bool m_show_debug = true;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_show_debug = true;
 
    private:
     // Change using setAbortStatus
-    bool m_can_abort = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_can_abort = false;
 };

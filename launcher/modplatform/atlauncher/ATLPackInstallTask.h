@@ -118,18 +118,18 @@ private:
     void install();
 
 private:
-    UserInteractionSupport *m_support;
+    UserInteractionSupport *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_support;
 
     bool abortable = false;
 
     NetJob::Ptr jobPtr;
     QByteArray response;
 
-    InstallMode m_install_mode;
-    QString m_pack_name;
-    QString m_pack_safe_name;
-    QString m_version_name;
-    PackVersion m_version;
+    InstallMode hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_install_mode;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_name;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_safe_name;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version_name;
+    PackVersion hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version;
 
     QMap<QString, VersionMod> modsToExtract;
     QMap<QString, VersionMod> modsToDecomp;
@@ -140,11 +140,11 @@ private:
     Meta::Version::Ptr minecraftVersion;
     QMap<QString, Meta::Version::Ptr> componentsToInstall;
 
-    QFuture<std::optional<QStringList>> m_extractFuture;
-    QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
+    QFuture<std::optional<QStringList>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture;
+    QFutureWatcher<std::optional<QStringList>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher;
 
-    QFuture<bool> m_modExtractFuture;
-    QFutureWatcher<bool> m_modExtractFutureWatcher;
+    QFuture<bool> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modExtractFuture;
+    QFutureWatcher<bool> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_modExtractFutureWatcher;
 
 };
 

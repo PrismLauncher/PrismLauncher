@@ -21,6 +21,6 @@ public:
     void setIcon(QIcon icon);
 
 private:
-    QSize m_size;
-    QIcon m_icon;
+    QSize hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_size;
+    QIcon hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icon;
 };

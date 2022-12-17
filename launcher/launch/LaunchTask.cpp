@@ -49,7 +49,7 @@
 
 void LaunchTask::init()
 {
-    m_instance->setRunning(true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->setRunning(true);
 }
 
 shared_qobject_ptr<LaunchTask> LaunchTask::create(InstancePtr inst)
@@ -59,24 +59,24 @@ shared_qobject_ptr<LaunchTask> LaunchTask::create(InstancePtr inst)
     return proc;
 }
 
-LaunchTask::LaunchTask(InstancePtr instance): m_instance(instance)
+LaunchTask::LaunchTask(InstancePtr instance): hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance(instance)
 {
 }
 
 void LaunchTask::appendStep(shared_qobject_ptr<LaunchStep> step)
 {
-    m_steps.append(step);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(step);
 }
 
 void LaunchTask::prependStep(shared_qobject_ptr<LaunchStep> step)
 {
-    m_steps.prepend(step);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.prepend(step);
 }
 
 void LaunchTask::executeTask()
 {
-    m_instance->setCrashed(false);
-    if(!m_steps.size())
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->setCrashed(false);
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.size())
     {
         state = LaunchTask::Finished;
         emitSucceeded();
@@ -97,22 +97,22 @@ void LaunchTask::onStepFinished()
     if(currentStep == -1)
     {
         currentStep ++;
-        m_steps[currentStep]->start();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps[currentStep]->start();
         return;
     }
 
-    auto step = m_steps[currentStep];
+    auto step = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps[currentStep];
     if(step->wasSuccessful())
     {
         // end?
-        if(currentStep == m_steps.size() - 1)
+        if(currentStep == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.size() - 1)
         {
             finalizeSteps(true, QString());
         }
         else
         {
             currentStep ++;
-            step = m_steps[currentStep];
+            step = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps[currentStep];
             step->start();
         }
     }
@@ -126,7 +126,7 @@ void LaunchTask::finalizeSteps(bool successful, const QString& error)
 {
     for(auto step = currentStep; step >= 0; step--)
     {
-        m_steps[step]->finalize();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps[step]->finalize();
     }
     if(successful)
     {
@@ -141,18 +141,18 @@ void LaunchTask::finalizeSteps(bool successful, const QString& error)
 void LaunchTask::onProgressReportingRequested()
 {
     state = LaunchTask::Waiting;
-    emit requestProgress(m_steps[currentStep].get());
+    emit requestProgress(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps[currentStep].get());
 }
 
 void LaunchTask::setCensorFilter(QMap<QString, QString> filter)
 {
-    m_censorFilter = filter;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_censorFilter = filter;
 }
 
 QString LaunchTask::censorPrivateInfo(QString in)
 {
-    auto iter = m_censorFilter.begin();
-    while (iter != m_censorFilter.end())
+    auto iter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_censorFilter.begin();
+    while (iter != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_censorFilter.end())
     {
         in.replace(iter.key(), iter.value());
         iter++;
@@ -166,7 +166,7 @@ void LaunchTask::proceed()
     {
         return;
     }
-    m_steps[currentStep]->proceed();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps[currentStep]->proceed();
 }
 
 bool LaunchTask::canAbort() const
@@ -182,7 +182,7 @@ bool LaunchTask::canAbort() const
         case LaunchTask::Running:
         case LaunchTask::Waiting:
         {
-            auto step = m_steps[currentStep];
+            auto step = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps[currentStep];
             return step->canAbort();
         }
     }
@@ -206,7 +206,7 @@ bool LaunchTask::abort()
         case LaunchTask::Running:
         case LaunchTask::Waiting:
         {
-            auto step = m_steps[currentStep];
+            auto step = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps[currentStep];
             if(!step->canAbort())
             {
                 return false;
@@ -225,17 +225,17 @@ bool LaunchTask::abort()
 
 shared_qobject_ptr<LogModel> LaunchTask::getLogModel()
 {
-    if(!m_logModel)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logModel)
     {
-        m_logModel.reset(new LogModel());
-        m_logModel->setMaxLines(m_instance->getConsoleMaxLines());
-        m_logModel->setStopOnOverflow(m_instance->shouldStopOnConsoleOverflow());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logModel.reset(new LogModel());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logModel->setMaxLines(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->getConsoleMaxLines());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logModel->setStopOnOverflow(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->shouldStopOnConsoleOverflow());
         // FIXME: should this really be here?
-        m_logModel->setOverflowMessage(tr("Stopped watching the game log because the log length surpassed %1 lines.\n"
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logModel->setOverflowMessage(tr("Stopped watching the game log because the log length surpassed %1 lines.\n"
             "You may have to fix your mods because the game is still logging to files and"
-            " likely wasting harddrive space at an alarming rate!").arg(m_logModel->getMaxLines()));
+            " likely wasting harddrive space at an alarming rate!").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logModel->getMaxLines()));
     }
-    return m_logModel;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logModel;
 }
 
 void LaunchTask::onLogLines(const QStringList &lines, MessageLevel::Enum defaultLevel)
@@ -258,7 +258,7 @@ void LaunchTask::onLogLine(QString line, MessageLevel::Enum level)
     // If the level is still undetermined, guess level
     if (level == MessageLevel::StdErr || level == MessageLevel::StdOut || level == MessageLevel::Unknown)
     {
-        level = m_instance->guessLevel(line, level);
+        level = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->guessLevel(line, level);
     }
 
     // censor private user info
@@ -270,20 +270,20 @@ void LaunchTask::onLogLine(QString line, MessageLevel::Enum level)
 
 void LaunchTask::emitSucceeded()
 {
-    m_instance->setRunning(false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->setRunning(false);
     Task::emitSucceeded();
 }
 
 void LaunchTask::emitFailed(QString reason)
 {
-    m_instance->setRunning(false);
-    m_instance->setCrashed(true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->setRunning(false);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->setCrashed(true);
     Task::emitFailed(reason);
 }
 
 void LaunchTask::substituteVariables(QStringList &args) const
 {
-    auto env = m_instance->createEnvironment();
+    auto env = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->createEnvironment();
 
     for (auto key : env.keys())
     {
@@ -293,7 +293,7 @@ void LaunchTask::substituteVariables(QStringList &args) const
 
 void LaunchTask::substituteVariables(QString &cmd) const
 {
-    auto env = m_instance->createEnvironment();
+    auto env = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance->createEnvironment();
 
     for (auto key : env.keys())
     {

@@ -12,14 +12,14 @@
 
 #include "tasks/Task.h"
 
-ResourceFolderModel::ResourceFolderModel(QDir dir, QObject* parent) : QAbstractListModel(parent), m_dir(dir), m_watcher(this)
+ResourceFolderModel::ResourceFolderModel(QDir dir, QObject* parent) : QAbstractListModel(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir(dir), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher(this)
 {
-    FS::ensureFolderPathExists(m_dir.absolutePath());
+    FS::ensureFolderPathExists(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath());
 
-    m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
-    m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
 
-    connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &ResourceFolderModel::directoryChanged);
+    connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher, &QFileSystemWatcher::directoryChanged, this, &ResourceFolderModel::directoryChanged);
 }
 
 ResourceFolderModel::~ResourceFolderModel()
@@ -30,10 +30,10 @@ ResourceFolderModel::~ResourceFolderModel()
 
 bool ResourceFolderModel::startWatching(const QStringList paths)
 {
-    if (m_is_watching)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_watching)
         return false;
 
-    auto couldnt_be_watched = m_watcher.addPaths(paths);
+    auto couldnt_be_watched = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher.addPaths(paths);
     for (auto path : paths) {
         if (couldnt_be_watched.contains(path))
             qDebug() << "Failed to start watching " << path;
@@ -43,16 +43,16 @@ bool ResourceFolderModel::startWatching(const QStringList paths)
 
     update();
 
-    m_is_watching = !m_is_watching;
-    return m_is_watching;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_watching = !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_watching;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_watching;
 }
 
 bool ResourceFolderModel::stopWatching(const QStringList paths)
 {
-    if (!m_is_watching)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_watching)
         return false;
 
-    auto couldnt_be_stopped = m_watcher.removePaths(paths);
+    auto couldnt_be_stopped = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher.removePaths(paths);
     for (auto path : paths) {
         if (couldnt_be_stopped.contains(path))
             qDebug() << "Failed to stop watching " << path;
@@ -60,13 +60,13 @@ bool ResourceFolderModel::stopWatching(const QStringList paths)
             qDebug() << "Stopped watching " << path;
     }
 
-    m_is_watching = !m_is_watching;
-    return !m_is_watching;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_watching = !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_watching;
+    return !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_watching;
 }
 
 bool ResourceFolderModel::installResource(QString original_path)
 {
-    if (!m_can_interact) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_can_interact) {
         return false;
     }
 
@@ -86,7 +86,7 @@ bool ResourceFolderModel::installResource(QString original_path)
         return false;
     }
 
-    auto new_path = FS::NormalizePath(m_dir.filePath(file_info.fileName()));
+    auto new_path = FS::NormalizePath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.filePath(file_info.fileName()));
     if (original_path == new_path) {
         qWarning() << "Overwriting the mod (" << original_path << ") with itself makes no sense...";
         return false;
@@ -114,7 +114,7 @@ bool ResourceFolderModel::installResource(QString original_path)
             QFileInfo new_path_file_info(new_path);
             resource.setFile(new_path_file_info);
 
-            if (!m_is_watching)
+            if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_watching)
                 return update();
 
             return true;
@@ -133,7 +133,7 @@ bool ResourceFolderModel::installResource(QString original_path)
             QFileInfo newpathInfo(new_path);
             resource.setFile(newpathInfo);
 
-            if (!m_is_watching)
+            if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_watching)
                 return update();
 
             return true;
@@ -146,7 +146,7 @@ bool ResourceFolderModel::installResource(QString original_path)
 
 bool ResourceFolderModel::uninstallResource(QString file_name)
 {
-    for (auto& resource : m_resources) {
+    for (auto& resource : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources) {
         if (resource->fileinfo().fileName() == file_name) {
             auto res = resource->destroy();
 
@@ -160,7 +160,7 @@ bool ResourceFolderModel::uninstallResource(QString file_name)
 
 bool ResourceFolderModel::deleteResources(const QModelIndexList& indexes)
 {
-    if (!m_can_interact)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_can_interact)
         return false;
 
     if (indexes.isEmpty())
@@ -171,7 +171,7 @@ bool ResourceFolderModel::deleteResources(const QModelIndexList& indexes)
             continue;
         }
 
-        auto& resource = m_resources.at(i.row());
+        auto& resource = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.at(i.row());
 
         resource->destroy();
     }
@@ -183,7 +183,7 @@ bool ResourceFolderModel::deleteResources(const QModelIndexList& indexes)
 
 bool ResourceFolderModel::setResourceEnabled(const QModelIndexList &indexes, EnableAction action)
 {
-    if (!m_can_interact)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_can_interact)
         return false;
 
     if (indexes.isEmpty())
@@ -196,7 +196,7 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList &indexes, Ena
 
         int row = idx.row();
 
-        auto& resource = m_resources[row];
+        auto& resource = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row];
 
         // Preserve the row, but change its ID
         auto old_id = resource->internal_id();
@@ -206,12 +206,12 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList &indexes, Ena
         }
 
         auto new_id = resource->internal_id();
-        if (m_resources_index.contains(new_id)) {
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index.contains(new_id)) {
             // FIXME: https://github.com/PolyMC/PolyMC/issues/550
         }
 
-        m_resources_index.remove(old_id);
-        m_resources_index[new_id] = row;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index.remove(old_id);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index[new_id] = row;
 
         emit dataChanged(index(row, 0), index(row, columnCount(QModelIndex()) - 1));
     }
@@ -222,33 +222,33 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList &indexes, Ena
 static QMutex s_update_task_mutex;
 bool ResourceFolderModel::update()
 {
-    // We hold a lock here to prevent race conditions on the m_current_update_task reset.
+    // We hold a lock here to prevent race conditions on the hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_update_task reset.
     QMutexLocker lock(&s_update_task_mutex);
 
     // Already updating, so we schedule a future update and return.
-    if (m_current_update_task) {
-        m_scheduled_update = true;
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_update_task) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scheduled_update = true;
         return false;
     }
 
-    m_current_update_task.reset(createUpdateTask());
-    if (!m_current_update_task)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_update_task.reset(createUpdateTask());
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_update_task)
         return false;
 
-    connect(m_current_update_task.get(), &Task::succeeded, this, &ResourceFolderModel::onUpdateSucceeded,
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_update_task.get(), &Task::succeeded, this, &ResourceFolderModel::onUpdateSucceeded,
             Qt::ConnectionType::QueuedConnection);
-    connect(m_current_update_task.get(), &Task::failed, this, &ResourceFolderModel::onUpdateFailed, Qt::ConnectionType::QueuedConnection);
-    connect(m_current_update_task.get(), &Task::finished, this, [=] {
-        m_current_update_task.reset();
-        if (m_scheduled_update) {
-            m_scheduled_update = false;
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_update_task.get(), &Task::failed, this, &ResourceFolderModel::onUpdateFailed, Qt::ConnectionType::QueuedConnection);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_update_task.get(), &Task::finished, this, [=] {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_update_task.reset();
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scheduled_update) {
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scheduled_update = false;
             update();
         } else {
             emit updateFinished();
         }
     }, Qt::ConnectionType::QueuedConnection);
 
-    QThreadPool::globalInstance()->start(m_current_update_task.get());
+    QThreadPool::globalInstance()->start(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_update_task.get());
 
     return true;
 }
@@ -263,35 +263,35 @@ void ResourceFolderModel::resolveResource(Resource* res)
     if (!task)
         return;
 
-    int ticket = m_next_resolution_ticket.fetch_add(1);
+    int ticket = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_next_resolution_ticket.fetch_add(1);
 
     res->setResolving(true, ticket);
-    m_active_parse_tasks.insert(ticket, task);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_active_parse_tasks.insert(ticket, task);
 
     connect(
         task, &Task::succeeded, this, [=] { onParseSucceeded(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
     connect(
         task, &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
     connect(
-        task, &Task::finished, this, [=] { m_active_parse_tasks.remove(ticket); }, Qt::ConnectionType::QueuedConnection);
+        task, &Task::finished, this, [=] { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_active_parse_tasks.remove(ticket); }, Qt::ConnectionType::QueuedConnection);
 
     QThreadPool::globalInstance()->start(task);
 }
 
 void ResourceFolderModel::onUpdateSucceeded()
 {
-    auto update_results = static_cast<BasicFolderLoadTask*>(m_current_update_task.get())->result();
+    auto update_results = static_cast<BasicFolderLoadTask*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_update_task.get())->result();
 
     auto& new_resources = update_results->resources;
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    auto current_list = m_resources_index.keys();
+    auto current_list = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index.keys();
     QSet<QString> current_set(current_list.begin(), current_list.end());
 
     auto new_list = new_resources.keys();
     QSet<QString> new_set(new_list.begin(), new_list.end());
 #else
-    QSet<QString> current_set(m_resources_index.keys().toSet());
+    QSet<QString> current_set(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index.keys().toSet());
     QSet<QString> new_set(new_resources.keys().toSet());
 #endif
 
@@ -300,22 +300,22 @@ void ResourceFolderModel::onUpdateSucceeded()
 
 void ResourceFolderModel::onParseSucceeded(int ticket, QString resource_id)
 {
-    auto iter = m_active_parse_tasks.constFind(ticket);
-    if (iter == m_active_parse_tasks.constEnd())
+    auto iter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_active_parse_tasks.constFind(ticket);
+    if (iter == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_active_parse_tasks.constEnd())
         return;
 
-    int row = m_resources_index[resource_id];
+    int row = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index[resource_id];
     emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
 }
 
 Task* ResourceFolderModel::createUpdateTask()
 {
-    return new BasicFolderLoadTask(m_dir);
+    return new BasicFolderLoadTask(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir);
 }
 
 bool ResourceFolderModel::hasPendingParseTasks() const
 {
-    return !m_active_parse_tasks.isEmpty();
+    return !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_active_parse_tasks.isEmpty();
 }
 
 void ResourceFolderModel::directoryChanged(QString path)
@@ -333,7 +333,7 @@ Qt::ItemFlags ResourceFolderModel::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
     auto flags = defaultFlags;
-    if (!m_can_interact) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_can_interact) {
         flags &= ~Qt::ItemIsDropEnabled;
     } else {
         flags |= Qt::ItemIsDropEnabled;
@@ -385,7 +385,7 @@ bool ResourceFolderModel::validateIndex(const QModelIndex& index) const
         return false;
 
     int row = index.row();
-    if (row < 0 || row >= m_resources.size())
+    if (row < 0 || row >= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.size())
         return false;
 
     return true;
@@ -403,18 +403,18 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
         case Qt::DisplayRole:
             switch (column) {
                 case NAME_COLUMN:
-                    return m_resources[row]->name();
+                    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row]->name();
                 case DATE_COLUMN:
-                    return m_resources[row]->dateTimeChanged();
+                    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row]->dateTimeChanged();
                 default:
                     return {};
             }
         case Qt::ToolTipRole:
-            return m_resources[row]->internal_id();
+            return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row]->internal_id();
         case Qt::CheckStateRole:
             switch (column) {
                 case ACTIVE_COLUMN:
-                    return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
+                    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
                 default:
                     return {};
             }
@@ -476,16 +476,16 @@ QSortFilterProxyModel* ResourceFolderModel::createFilterProxyModel(QObject* pare
 
 SortType ResourceFolderModel::columnToSortKey(size_t column) const
 {
-    Q_ASSERT(m_column_sort_keys.size() == columnCount());
-    return m_column_sort_keys.at(column);
+    Q_ASSERT(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_column_sort_keys.size() == columnCount());
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_column_sort_keys.at(column);
 }
 
 void ResourceFolderModel::enableInteraction(bool enabled)
 {
-    if (m_can_interact == enabled)
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_can_interact == enabled)
         return;
 
-    m_can_interact = enabled;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_can_interact = enabled;
     if (size())
         emit dataChanged(index(0), index(size() - 1));
 }

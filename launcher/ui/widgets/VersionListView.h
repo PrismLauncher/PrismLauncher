@@ -49,8 +49,8 @@ private: /* methods */
     QString currentEmptyString() const;
 
 private: /* variables */
-    int m_itemCount = 0;
-    QString m_emptyString;
-    QString m_emptyErrorString;
-    EmptyMode m_emptyMode = Empty;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_itemCount = 0;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyString;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyErrorString;
+    EmptyMode hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_emptyMode = Empty;
 };

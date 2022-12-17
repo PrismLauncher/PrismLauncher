@@ -59,9 +59,9 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
     }
     else if(role == Qt::DecorationRole)
     {
-        if(m_logoMap.contains(pack.safeName))
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(pack.safeName))
         {
-            return (m_logoMap.value(pack.safeName));
+            return (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.value(pack.safeName));
         }
         auto icon = APPLICATION->getThemedIcon("atlauncher-placeholder");
 
@@ -147,7 +147,7 @@ void ListModel::requestFailed(QString reason)
 
 void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallback callback)
 {
-    if(m_logoMap.contains(logo))
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.contains(logo))
     {
         callback(APPLICATION->metacache()->resolveEntry("ATLauncherPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
     }
@@ -159,14 +159,14 @@ void ListModel::getLogo(const QString &logo, const QString &logoUrl, LogoCallbac
 
 void ListModel::logoFailed(QString logo)
 {
-    m_failedLogos.append(logo);
-    m_loadingLogos.removeAll(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos.append(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.removeAll(logo);
 }
 
 void ListModel::logoLoaded(QString logo, QIcon out)
 {
-    m_loadingLogos.removeAll(logo);
-    m_logoMap.insert(logo, out);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.removeAll(logo);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap.insert(logo, out);
 
     for(int i = 0; i < modpacks.size(); i++) {
         if(modpacks[i].safeName == logo) {
@@ -177,7 +177,7 @@ void ListModel::logoLoaded(QString logo, QIcon out)
 
 void ListModel::requestLogo(QString file, QString url)
 {
-    if(m_loadingLogos.contains(file) || m_failedLogos.contains(file))
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.contains(file) || hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failedLogos.contains(file))
     {
         return;
     }
@@ -203,7 +203,7 @@ void ListModel::requestLogo(QString file, QString url)
 
     job->start();
 
-    m_loadingLogos.append(file);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loadingLogos.append(file);
 }
 
 }

@@ -52,7 +52,7 @@ public:
     void getLogo(const QString &logo, const QString &logoUrl, LogoCallback callback);
 
     [[nodiscard]] bool isMakingRequest() const { return jobPtr.get(); }
-    [[nodiscard]] bool wasAborted() const { return m_aborted; }
+    [[nodiscard]] bool wasAborted() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted; }
 
 private slots:
     void requestFinished();
@@ -69,10 +69,10 @@ private:
     void requestLogo(QString file, QString url);
 
 private:
-    bool m_aborted = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = false;
 
     QList<ModpacksCH::Modpack> modpacks;
-    LogoMap m_logoMap;
+    LogoMap hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_logoMap;
 
     NetJob::Ptr jobPtr;
     int currentPack;

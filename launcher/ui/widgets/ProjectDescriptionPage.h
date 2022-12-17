@@ -28,5 +28,5 @@ class ProjectDescriptionPage final : public QTextBrowser {
     void flush();
 
    private:
-    shared_qobject_ptr<VariableSizedImageObject> m_image_text_object;
+    shared_qobject_ptr<VariableSizedImageObject> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_image_text_object;
 };

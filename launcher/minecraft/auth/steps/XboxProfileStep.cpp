@@ -39,7 +39,7 @@ void XboxProfileStep::perform() {
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
     request.setRawHeader("x-xbl-contract-version", "3");
-    request.setRawHeader("Authorization", QString("XBL3.0 x=%1;%2").arg(m_data->userToken.extra["uhs"].toString(), m_data->xboxApiToken.token).toUtf8());
+    request.setRawHeader("Authorization", QString("XBL3.0 x=%1;%2").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->userToken.extra["uhs"].toString(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->xboxApiToken.token).toUtf8());
     AuthRequest *requestor = new AuthRequest(this);
     connect(requestor, &AuthRequest::finished, this, &XboxProfileStep::onRequestDone);
     requestor->get(request);

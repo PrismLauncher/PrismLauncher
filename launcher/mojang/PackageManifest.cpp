@@ -378,10 +378,10 @@ UpdateOperations UpdateOperations::resolve(const Package& from, const Package& t
     // Folders
     std::set<Path, deep_first_sort> remove_folders;
     std::set<Path, shallow_first_sort> make_folders;
-    for(auto from_path: from.folders) {
-        auto iter = to.folders.find(from_path);
+    for(auto frohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path: from.folders) {
+        auto iter = to.folders.find(frohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path);
         if(iter == to.folders.end()) {
-            remove_folders.insert(from_path);
+            remove_folders.insert(frohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path);
         }
     }
     for(auto & rmdir: remove_folders) {

@@ -80,7 +80,7 @@ private slots:
     void on_btnPaste_clicked();
     void on_btnCopy_clicked();
     void on_btnClear_clicked();
-    void on_btnBottom_clicked();
+    void on_btnBottohello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_clicked();
 
     void on_trackLogCheckbox_clicked(bool checked);
     void on_wrapCheckbox_clicked(bool checked);
@@ -99,9 +99,9 @@ private:
 
 private:
     Ui::LogPage *ui;
-    InstancePtr m_instance;
-    shared_qobject_ptr<LaunchTask> m_process;
+    InstancePtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance;
+    shared_qobject_ptr<LaunchTask> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process;
 
-    LogFormatProxyModel * m_proxy;
-    shared_qobject_ptr <LogModel> m_model;
+    LogFormatProxyModel * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_proxy;
+    shared_qobject_ptr <LogModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model;
 };

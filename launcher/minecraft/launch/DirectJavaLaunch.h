@@ -38,21 +38,21 @@ public:
     void setWorkingDirectory(const QString &wd);
     void setAuthSession(AuthSessionPtr session)
     {
-        m_session = session;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session = session;
     }
 
     void setServerToJoin(MinecraftServerTargetPtr serverToJoin)
     {
-        m_serverToJoin = std::move(serverToJoin);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin = std::move(serverToJoin);
     }
 
 private slots:
     void on_state(LoggedProcess::State state);
 
 private:
-    LoggedProcess m_process;
-    QString m_command;
-    AuthSessionPtr m_session;
-    MinecraftServerTargetPtr m_serverToJoin;
+    LoggedProcess hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_process;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_command;
+    AuthSessionPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_session;
+    MinecraftServerTargetPtr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin;
 };
 

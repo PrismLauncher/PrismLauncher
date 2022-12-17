@@ -87,7 +87,7 @@ public:
 
     int spacing() const
     {
-        return m_spacing;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_spacing;
     };
 
 public slots:
@@ -125,28 +125,28 @@ protected:
 
 private:
     friend struct VisualGroup;
-    QList<VisualGroup *> m_groups;
+    QList<VisualGroup *> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groups;
 
     visibilityFunction fVisibility;
 
     // geometry
-    int m_leftMargin = 5;
-    int m_rightMargin = 5;
-    int m_bottomMargin = 5;
-    int m_categoryMargin = 5;
-    int m_spacing = 5;
-    int m_itemWidth = 100;
-    int m_currentItemsPerRow = -1;
-    int m_currentCursorColumn= -1;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_leftMargin = 5;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rightMargin = 5;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_bottomMargin = 5;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_categoryMargin = 5;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_spacing = 5;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_itemWidth = 100;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentItemsPerRow = -1;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentCursorColumn= -1;
     mutable QCache<int, QRect> geometryCache;
 
     // point where the currently active mouse action started in geometry coordinates
-    QPoint m_pressedPosition;
-    QPersistentModelIndex m_pressedIndex;
-    bool m_pressedAlreadySelected;
-    VisualGroup *m_pressedCategory;
-    QItemSelectionModel::SelectionFlag m_ctrlDragSelectionFlag;
-    QPoint m_lastDragPosition;
+    QPoint hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pressedPosition;
+    QPersistentModelIndex hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pressedIndex;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pressedAlreadySelected;
+    VisualGroup *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pressedCategory;
+    QItemSelectionModel::SelectionFlag hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_ctrlDragSelectionFlag;
+    QPoint hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_lastDragPosition;
 
     VisualGroup *category(const QModelIndex &index) const;
     VisualGroup *category(const QString &cat) const;
@@ -154,7 +154,7 @@ private:
 
     int itemsPerRow() const
     {
-        return m_currentItemsPerRow;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentItemsPerRow;
     };
     int contentWidth() const;
 

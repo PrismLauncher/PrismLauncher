@@ -19,14 +19,14 @@
 
 void JavaCheckerJob::partFinished(JavaCheckResult result)
 {
-    num_finished++;
-    qDebug() << m_job_name.toLocal8Bit() << "progress:" << num_finished << "/"
+    nuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_finished++;
+    qDebug() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_job_name.toLocal8Bit() << "progress:" << nuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_finished << "/"
                 << javacheckers.size();
-    setProgress(num_finished, javacheckers.size());
+    setProgress(nuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_finished, javacheckers.size());
 
     javaresults.replace(result.id, result);
 
-    if (num_finished == javacheckers.size())
+    if (nuhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_finished == javacheckers.size())
     {
         emitSucceeded();
     }
@@ -34,7 +34,7 @@ void JavaCheckerJob::partFinished(JavaCheckResult result)
 
 void JavaCheckerJob::executeTask()
 {
-    qDebug() << m_job_name.toLocal8Bit() << " started.";
+    qDebug() << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_job_name.toLocal8Bit() << " started.";
     for (auto iter : javacheckers)
     {
         javaresults.append(JavaCheckResult());

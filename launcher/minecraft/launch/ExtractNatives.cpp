@@ -82,7 +82,7 @@ static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibH
 
 void ExtractNatives::executeTask()
 {
-    auto instance = m_parent->instance();
+    auto instance = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance();
     std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
     auto toExtract = minecraftInstance->getNativeJars();
     if(toExtract.isEmpty())
@@ -111,7 +111,7 @@ void ExtractNatives::executeTask()
 
 void ExtractNatives::finalize()
 {
-    auto instance = m_parent->instance();
+    auto instance = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance();
     QString target_dir = FS::PathCombine(instance->instanceRoot(), "natives/");
     QDir dir(target_dir);
     dir.removeRecursively();

@@ -45,7 +45,7 @@ namespace Net {
         Q_OBJECT
 
     public:
-        static Upload::Ptr makeByteArray(QUrl url, QByteArray *output, QByteArray m_post_data);
+        static Upload::Ptr makeByteArray(QUrl url, QByteArray *output, QByteArray hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_post_data);
         auto abort() -> bool override;
         auto canAbort() const -> bool override { return true; };
 
@@ -59,8 +59,8 @@ namespace Net {
     public slots:
         void executeTask() override;
     private:
-        std::unique_ptr<Sink> m_sink;
-        QByteArray m_post_data;
+        std::unique_ptr<Sink> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sink;
+        QByteArray hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_post_data;
 
         bool handleRedirect();
     };

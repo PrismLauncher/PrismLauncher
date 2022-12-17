@@ -46,16 +46,16 @@
 #include <QShortcut>
 
 OtherLogsPage::OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget *parent)
-    : QWidget(parent), ui(new Ui::OtherLogsPage), m_path(path), m_fileFilter(fileFilter),
-      m_watcher(new RecursiveFileSystemWatcher(this))
+    : QWidget(parent), ui(new Ui::OtherLogsPage), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path(path), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fileFilter(fileFilter),
+      hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher(new RecursiveFileSystemWatcher(this))
 {
     ui->setupUi(this);
     ui->tabWidget->tabBar()->hide();
 
-    m_watcher->setMatcher(fileFilter);
-    m_watcher->setRootDir(QDir::current().absoluteFilePath(m_path));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->setMatcher(fileFilter);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->setRootDir(QDir::current().absoluteFilePath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path));
 
-    connect(m_watcher, &RecursiveFileSystemWatcher::filesChanged, this, &OtherLogsPage::populateSelectLogBox);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher, &RecursiveFileSystemWatcher::filesChanged, this, &OtherLogsPage::populateSelectLogBox);
     populateSelectLogBox();
 
     auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
@@ -82,25 +82,25 @@ void OtherLogsPage::retranslate()
 
 void OtherLogsPage::openedImpl()
 {
-    m_watcher->enable();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->enable();
 }
 void OtherLogsPage::closedImpl()
 {
-    m_watcher->disable();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->disable();
 }
 
 void OtherLogsPage::populateSelectLogBox()
 {
     ui->selectLogBox->clear();
-    ui->selectLogBox->addItems(m_watcher->files());
-    if (m_currentFile.isEmpty())
+    ui->selectLogBox->addItems(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->files());
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile.isEmpty())
     {
         setControlsEnabled(false);
         ui->selectLogBox->setCurrentIndex(-1);
     }
     else
     {
-        const int index = ui->selectLogBox->findText(m_currentFile);
+        const int index = ui->selectLogBox->findText(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile);
         if (index != -1)
         {
             ui->selectLogBox->setCurrentIndex(index);
@@ -121,15 +121,15 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
         file = ui->selectLogBox->itemText(index);
     }
 
-    if (file.isEmpty() || !QFile::exists(FS::PathCombine(m_path, file)))
+    if (file.isEmpty() || !QFile::exists(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path, file)))
     {
-        m_currentFile = QString();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile = QString();
         ui->text->clear();
         setControlsEnabled(false);
     }
     else
     {
-        m_currentFile = file;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile = file;
         on_btnReload_clicked();
         setControlsEnabled(true);
     }
@@ -137,19 +137,19 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 
 void OtherLogsPage::on_btnReload_clicked()
 {
-    if(m_currentFile.isEmpty())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile.isEmpty())
     {
         setControlsEnabled(false);
         return;
     }
-    QFile file(FS::PathCombine(m_path, m_currentFile));
+    QFile file(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile));
     if (!file.open(QFile::ReadOnly))
     {
         setControlsEnabled(false);
         ui->btnReload->setEnabled(true); // allow reload
-        m_currentFile = QString();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile = QString();
         QMessageBox::critical(this, tr("Error"), tr("Unable to open %1 for reading: %2")
-                                                     .arg(m_currentFile, file.errorString()));
+                                                     .arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile, file.errorString()));
     }
     else
     {
@@ -214,22 +214,22 @@ void OtherLogsPage::on_btnCopy_clicked()
 
 void OtherLogsPage::on_btnDelete_clicked()
 {
-    if(m_currentFile.isEmpty())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile.isEmpty())
     {
         setControlsEnabled(false);
         return;
     }
     if (QMessageBox::question(this, tr("Delete"),
-                              tr("Do you really want to delete %1?").arg(m_currentFile),
+                              tr("Do you really want to delete %1?").arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile),
                               QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
     {
         return;
     }
-    QFile file(FS::PathCombine(m_path, m_currentFile));
+    QFile file(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile));
     if (!file.remove())
     {
         QMessageBox::critical(this, tr("Error"), tr("Unable to delete %1: %2")
-                                                     .arg(m_currentFile, file.errorString()));
+                                                     .arg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_currentFile, file.errorString()));
     }
 }
 
@@ -237,7 +237,7 @@ void OtherLogsPage::on_btnDelete_clicked()
 
 void OtherLogsPage::on_btnClean_clicked()
 {
-    auto toDelete = m_watcher->files();
+    auto toDelete = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->files();
     if(toDelete.isEmpty())
     {
         return;
@@ -266,7 +266,7 @@ void OtherLogsPage::on_btnClean_clicked()
     QStringList failed;
     for(auto item: toDelete)
     {
-        QFile file(FS::PathCombine(m_path, item));
+        QFile file(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path, item));
         if (!file.remove())
         {
             failed.push_back(item);

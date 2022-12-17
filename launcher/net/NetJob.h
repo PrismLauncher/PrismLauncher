@@ -51,7 +51,7 @@ class NetJob : public ConcurrentTask {
    public:
     using Ptr = shared_qobject_ptr<NetJob>;
 
-    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network) : ConcurrentTask(nullptr, job_name), m_network(network) {}
+    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network) : ConcurrentTask(nullptr, job_name), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network(network) {}
     ~NetJob() override = default;
 
     void startNext() override;
@@ -72,7 +72,7 @@ class NetJob : public ConcurrentTask {
     void updateState() override;
 
    private:
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    shared_qobject_ptr<QNetworkAccessManager> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network;
 
-    int m_try = 1;
+    int hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_try = 1;
 };

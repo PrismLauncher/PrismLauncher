@@ -41,8 +41,8 @@ class ResourceFolderModel : public QAbstractListModel {
     bool stopWatching(const QStringList paths);
 
     /* Helper methods for subclasses, using a predetermined list of paths. */
-    virtual bool startWatching() { return startWatching({ m_dir.absolutePath() }); };
-    virtual bool stopWatching() { return stopWatching({ m_dir.absolutePath() }); };
+    virtual bool startWatching() { return startWatching({ hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath() }); };
+    virtual bool stopWatching() { return stopWatching({ hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir.absolutePath() }); };
 
     /** Given a path in the system, install that resource, moving it to its place in the
      *  instance file hierarchy.
@@ -70,13 +70,13 @@ class ResourceFolderModel : public QAbstractListModel {
     /** Creates a new parse task, if needed, for 'res' and start it.*/
     virtual void resolveResource(Resource* res);
 
-    [[nodiscard]] size_t size() const { return m_resources.size(); };
+    [[nodiscard]] size_t size() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.size(); };
     [[nodiscard]] bool empty() const { return size() == 0; }
-    [[nodiscard]] Resource& at(int index) { return *m_resources.at(index); }
-    [[nodiscard]] Resource const& at(int index) const { return *m_resources.at(index); }
-    [[nodiscard]] QList<Resource::Ptr> const& all() const { return m_resources; }
+    [[nodiscard]] Resource& at(int index) { return *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.at(index); }
+    [[nodiscard]] Resource const& at(int index) const { return *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.at(index); }
+    [[nodiscard]] QList<Resource::Ptr> const& all() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources; }
 
-    [[nodiscard]] QDir const& dir() const { return m_dir; }
+    [[nodiscard]] QDir const& dir() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir; }
 
     /** Checks whether there's any parse tasks being done.
      *
@@ -181,53 +181,53 @@ class ResourceFolderModel : public QAbstractListModel {
    protected:
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
-    QList<SortType> m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE };
+    QList<SortType> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE };
 
-    bool m_can_interact = true;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_can_interact = true;
 
-    QDir m_dir;
-    QFileSystemWatcher m_watcher;
-    bool m_is_watching = false;
+    QDir hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dir;
+    QFileSystemWatcher hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_is_watching = false;
 
-    Task::Ptr m_current_update_task = nullptr;
-    bool m_scheduled_update = false;
+    Task::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_update_task = nullptr;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_scheduled_update = false;
 
-    QList<Resource::Ptr> m_resources;
+    QList<Resource::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources;
 
     // Represents the relationship between a resource's internal ID and it's row position on the model.
-    QMap<QString, int> m_resources_index;
+    QMap<QString, int> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index;
 
-    QMap<int, Task::Ptr> m_active_parse_tasks;
-    std::atomic<int> m_next_resolution_ticket = 0;
+    QMap<int, Task::Ptr> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_active_parse_tasks;
+    std::atomic<int> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_next_resolution_ticket = 0;
 };
 
 /* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
 #define RESOURCE_HELPERS(T)                                                                       \
     [[nodiscard]] T* operator[](size_t index)                                                     \
     {                                                                                             \
-        return static_cast<T*>(m_resources[index].get());                                         \
+        return static_cast<T*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[index].get());                                         \
     }                                                                                             \
     [[nodiscard]] T* at(size_t index)                                                             \
     {                                                                                             \
-        return static_cast<T*>(m_resources[index].get());                                         \
+        return static_cast<T*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[index].get());                                         \
     }                                                                                             \
     [[nodiscard]] const T* at(size_t index) const                                                 \
     {                                                                                             \
-        return static_cast<const T*>(m_resources.at(index).get());                                \
+        return static_cast<const T*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.at(index).get());                                \
     }                                                                                             \
     [[nodiscard]] T* first()                                                                      \
     {                                                                                             \
-        return static_cast<T*>(m_resources.first().get());                                        \
+        return static_cast<T*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.first().get());                                        \
     }                                                                                             \
     [[nodiscard]] T* last()                                                                       \
     {                                                                                             \
-        return static_cast<T*>(m_resources.last().get());                                         \
+        return static_cast<T*>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.last().get());                                         \
     }                                                                                             \
     [[nodiscard]] T* find(QString id)                                                             \
     {                                                                                             \
-        auto iter = std::find_if(m_resources.constBegin(), m_resources.constEnd(),                \
+        auto iter = std::find_if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.constBegin(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.constEnd(),                \
                                  [&](Resource::Ptr const& r) { return r->internal_id() == id; }); \
-        if (iter == m_resources.constEnd())                                                       \
+        if (iter == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.constEnd())                                                       \
             return nullptr;                                                                       \
         return static_cast<T*>((*iter).get());                                                    \
     }
@@ -242,12 +242,12 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
         kept_set.intersect(new_set);
 
         for (auto const& kept : kept_set) {
-            auto row_it = m_resources_index.constFind(kept);
-            Q_ASSERT(row_it != m_resources_index.constEnd());
+            auto row_it = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index.constFind(kept);
+            Q_ASSERT(row_it != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index.constEnd());
             auto row = row_it.value();
 
             auto& new_resource = new_resources[kept];
-            auto const& current_resource = m_resources.at(row);
+            auto const& current_resource = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.at(row);
 
             if (new_resource->dateTimeChanged() == current_resource->dateTimeChanged()) {
                 // no significant change, ignore...
@@ -258,14 +258,14 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             // continue the resolving.
             if (current_resource->isResolving()) {
                 auto ticket = current_resource->resolutionTicket();
-                if (m_active_parse_tasks.contains(ticket)) {
-                    auto task = (*m_active_parse_tasks.find(ticket)).get();
+                if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_active_parse_tasks.contains(ticket)) {
+                    auto task = (*hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_active_parse_tasks.find(ticket)).get();
                     task->abort();
                 }
             }
 
-            m_resources[row].reset(new_resource);
-            resolveResource(m_resources.at(row).get());
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources[row].reset(new_resource);
+            resolveResource(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.at(row).get());
             emit dataChanged(index(row, 0), index(row, columnCount(QModelIndex()) - 1));
         }
     }
@@ -277,26 +277,26 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
 
         QList<int> removed_rows;
         for (auto& removed : removed_set)
-            removed_rows.append(m_resources_index[removed]);
+            removed_rows.append(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index[removed]);
 
         std::sort(removed_rows.begin(), removed_rows.end(), std::greater<int>());
 
         for (auto& removed_index : removed_rows) {
-            auto removed_it = m_resources.begin() + removed_index;
+            auto removed_it = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.begin() + removed_index;
 
-            Q_ASSERT(removed_it != m_resources.end());
+            Q_ASSERT(removed_it != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.end());
             Q_ASSERT(removed_set.contains(removed_it->get()->internal_id()));
 
             if ((*removed_it)->isResolving()) {
                 auto ticket = (*removed_it)->resolutionTicket();
-                if (m_active_parse_tasks.contains(ticket)) {
-                    auto task = (*m_active_parse_tasks.find(ticket)).get();
+                if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_active_parse_tasks.contains(ticket)) {
+                    auto task = (*hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_active_parse_tasks.find(ticket)).get();
                     task->abort();
                 }
             }
 
             beginRemoveRows(QModelIndex(), removed_index, removed_index);
-            m_resources.erase(removed_it);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.erase(removed_it);
             endRemoveRows();
         }
     }
@@ -308,12 +308,12 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
 
         // When you have a Qt build with assertions turned on, proceeding here will abort the application
         if (added_set.size() > 0) {
-            beginInsertRows(QModelIndex(), m_resources.size(), m_resources.size() + added_set.size() - 1);
+            beginInsertRows(QModelIndex(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.size(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.size() + added_set.size() - 1);
 
             for (auto& added : added_set) {
                 auto res = new_resources[added];
-                m_resources.append(res);
-                resolveResource(m_resources.last().get());
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.append(res);
+                resolveResource(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources.last().get());
             }
 
             endInsertRows();
@@ -322,10 +322,10 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
 
     // update index
     {
-        m_resources_index.clear();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index.clear();
         int idx = 0;
-        for (auto const& mod : qAsConst(m_resources)) {
-            m_resources_index[mod->internal_id()] = idx;
+        for (auto const& mod : qAsConst(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources)) {
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_resources_index[mod->internal_id()] = idx;
             idx++;
         }
     }

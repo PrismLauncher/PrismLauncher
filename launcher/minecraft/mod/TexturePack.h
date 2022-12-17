@@ -37,7 +37,7 @@ class TexturePack : public Resource {
     TexturePack(QFileInfo file_info) : Resource(file_info) {}
 
     /** Gets the description of the texture pack. */
-    [[nodiscard]] QString description() const { return m_description; }
+    [[nodiscard]] QString description() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description; }
 
     /** Gets the image of the texture pack, converted to a QPixmap for drawing, and scaled to size. */
     [[nodiscard]] QPixmap image(QSize size);
@@ -51,11 +51,11 @@ class TexturePack : public Resource {
     bool valid() const override;
 
    protected:
-    mutable QMutex m_data_lock;
+    mutable QMutex hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data_lock;
 
     /** The texture pack's description, as defined in the pack.txt file.
      */
-    QString m_description;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description;
 
     /** The texture pack's image file cache key, for access in the QPixmapCache global instance.
      *
@@ -65,5 +65,5 @@ class TexturePack : public Resource {
     struct {
         QPixmapCache::Key key;
         bool was_ever_used = false;
-    } m_pack_image_cache_key;
+    } hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack_image_cache_key;
 };

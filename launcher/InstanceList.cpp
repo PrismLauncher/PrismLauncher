@@ -67,7 +67,7 @@
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
 InstanceList::InstanceList(SettingsObjectPtr settings, const QString& instDir, QObject* parent)
-    : QAbstractListModel(parent), m_globalSettings(settings)
+    : QAbstractListModel(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettings(settings)
 {
     resumeWatch();
     // Create aand normalize path
@@ -78,10 +78,10 @@ InstanceList::InstanceList(SettingsObjectPtr settings, const QString& instDir, Q
     connect(this, &InstanceList::instancesChanged, this, &InstanceList::providerUpdated);
 
     // NOTE: canonicalPath requires the path to exist. Do not move this above the creation block!
-    m_instDir = QDir(instDir).canonicalPath();
-    m_watcher = new QFileSystemWatcher(this);
-    connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &InstanceList::instanceDirContentsChanged);
-    m_watcher->addPath(m_instDir);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir = QDir(instDir).canonicalPath();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher = new QFileSystemWatcher(this);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher, &QFileSystemWatcher::directoryChanged, this, &InstanceList::instanceDirContentsChanged);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher->addPath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir);
 }
 
 InstanceList::~InstanceList() {}
@@ -132,15 +132,15 @@ QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
 int InstanceList::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    return m_instances.count();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.count();
 }
 
 QModelIndex InstanceList::index(int row, int column, const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    if (row < 0 || row >= m_instances.size())
+    if (row < 0 || row >= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.size())
         return QModelIndex();
-    return createIndex(row, column, (void*)m_instances.at(row).get());
+    return createIndex(row, column, (void*)hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.at(row).get());
 }
 
 QVariant InstanceList::data(const QModelIndex& index, int role) const
@@ -220,8 +220,8 @@ GroupId InstanceList::getInstanceGroup(const InstanceId& id) const
     if (!inst) {
         return GroupId();
     }
-    auto iter = m_instanceGroupIndex.find(inst->id());
-    if (iter != m_instanceGroupIndex.end()) {
+    auto iter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex.find(inst->id());
+    if (iter != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex.end()) {
         return *iter;
     }
     return GroupId();
@@ -236,19 +236,19 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
     }
 
     bool changed = false;
-    auto iter = m_instanceGroupIndex.find(inst->id());
-    if (iter != m_instanceGroupIndex.end()) {
+    auto iter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex.find(inst->id());
+    if (iter != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex.end()) {
         if (*iter != name) {
             *iter = name;
             changed = true;
         }
     } else {
         changed = true;
-        m_instanceGroupIndex[id] = name;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex[id] = name;
     }
 
     if (changed) {
-        m_groupNameCache.insert(name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupNameCache.insert(name);
         auto idx = getInstIndex(inst.get());
         emit dataChanged(index(idx), index(idx), { GroupRole });
         saveGroupList();
@@ -257,18 +257,18 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
 
 QStringList InstanceList::getGroups()
 {
-    return m_groupNameCache.values();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupNameCache.values();
 }
 
 void InstanceList::deleteGroup(const QString& name)
 {
     bool removed = false;
     qDebug() << "Delete group" << name;
-    for (auto& instance : m_instances) {
+    for (auto& instance : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances) {
         const auto& instID = instance->id();
         auto instGroupName = getInstanceGroup(instID);
         if (instGroupName == name) {
-            m_instanceGroupIndex.remove(instID);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex.remove(instID);
             qDebug() << "Remove" << instID << "from group" << name;
             removed = true;
             auto idx = getInstIndex(instance.get());
@@ -284,7 +284,7 @@ void InstanceList::deleteGroup(const QString& name)
 
 bool InstanceList::isGroupCollapsed(const QString& group)
 {
-    return m_collapsedGroups.contains(group);
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_collapsedGroups.contains(group);
 }
 
 bool InstanceList::trashInstance(const InstanceId& id)
@@ -295,12 +295,12 @@ bool InstanceList::trashInstance(const InstanceId& id)
         return false;
     }
 
-    auto cachedGroupId = m_instanceGroupIndex[id];
+    auto cachedGroupId = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex[id];
 
     qDebug() << "Will trash instance" << id;
     QString trashedLoc;
 
-    if (m_instanceGroupIndex.remove(id)) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex.remove(id)) {
         saveGroupList();
     }
 
@@ -310,22 +310,22 @@ bool InstanceList::trashInstance(const InstanceId& id)
     }
 
     qDebug() << "Instance" << id << "has been trashed by the launcher.";
-    m_trashHistory.push({id, inst->instanceRoot(), trashedLoc, cachedGroupId});
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_trashHistory.push({id, inst->instanceRoot(), trashedLoc, cachedGroupId});
     
     return true;
 }
 
 bool InstanceList::trashedSomething() {
-    return !m_trashHistory.empty();
+    return !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_trashHistory.empty();
 }
 
 void InstanceList::undoTrashInstance() {
-    if (m_trashHistory.empty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_trashHistory.empty()) {
         qWarning() << "Nothing to recover from trash.";
         return;
     }
 
-    auto top = m_trashHistory.pop();
+    auto top = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_trashHistory.pop();
 
     while (QDir(top.polyPath).exists()) {
         top.id += "1";
@@ -335,8 +335,8 @@ void InstanceList::undoTrashInstance() {
     qDebug() << "Moving" << top.trashPath << "back to" << top.polyPath;
     QFile(top.trashPath).rename(top.polyPath);
 
-    m_instanceGroupIndex[top.id] = top.groupName;
-    m_groupNameCache.insert(top.groupName);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex[top.id] = top.groupName;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupNameCache.insert(top.groupName);
 
     saveGroupList();
     emit instancesChanged();
@@ -350,7 +350,7 @@ void InstanceList::deleteInstance(const InstanceId& id)
         return;
     }
 
-    if (m_instanceGroupIndex.remove(id)) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex.remove(id)) {
         saveGroupList();
     }
 
@@ -380,9 +380,9 @@ static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstancePtr>& 
 
 QList<InstanceId> InstanceList::discoverInstances()
 {
-    qDebug() << "Discovering instances in" << m_instDir;
+    qDebug() << "Discovering instances in" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir;
     QList<InstanceId> out;
-    QDirIterator iter(m_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
+    QDirIterator iter(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
     while (iter.hasNext()) {
         QString subDir = iter.next();
         QFileInfo dirInfo(subDir);
@@ -391,7 +391,7 @@ QList<InstanceId> InstanceList::discoverInstances()
         // if it is a symlink, ignore it if it goes to the instance folder
         if (dirInfo.isSymLink()) {
             QFileInfo targetInfo(dirInfo.symLinkTarget());
-            QFileInfo instDirInfo(m_instDir);
+            QFileInfo instDirInfo(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir);
             if (targetInfo.canonicalPath() == instDirInfo.canonicalFilePath()) {
                 qDebug() << "Ignoring symlink" << subDir << "that leads into the instances folder";
                 continue;
@@ -406,13 +406,13 @@ QList<InstanceId> InstanceList::discoverInstances()
 #else
     instanceSet = out.toSet();
 #endif
-    m_instancesProbed = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instancesProbed = true;
     return out;
 }
 
 InstanceList::InstListError InstanceList::loadList()
 {
-    auto existingIds = getIdMapping(m_instances);
+    auto existingIds = getIdMapping(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances);
 
     QList<InstancePtr> newList;
 
@@ -441,7 +441,7 @@ InstanceList::InstListError InstanceList::loadList()
         int currentItem = -1;
         auto removeNow = [&]() {
             beginRemoveRows(QModelIndex(), front_bookmark, back_bookmark);
-            m_instances.erase(m_instances.begin() + front_bookmark, m_instances.begin() + back_bookmark + 1);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.erase(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.begin() + front_bookmark, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.begin() + back_bookmark + 1);
             endRemoveRows();
             front_bookmark = -1;
             back_bookmark = currentItem;
@@ -468,7 +468,7 @@ InstanceList::InstListError InstanceList::loadList()
     if (newList.size()) {
         add(newList);
     }
-    m_dirty = false;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dirty = false;
     updateTotalPlayTime();
     return NoError;
 }
@@ -476,22 +476,22 @@ InstanceList::InstListError InstanceList::loadList()
 void InstanceList::updateTotalPlayTime()
 {
     totalPlayTime = 0;
-    for (auto const& itr : m_instances) {
+    for (auto const& itr : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances) {
         totalPlayTime += itr.get()->totalTimePlayed();
     }
 }
 
 void InstanceList::saveNow()
 {
-    for (auto& item : m_instances) {
+    for (auto& item : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances) {
         item->saveNow();
     }
 }
 
 void InstanceList::add(const QList<InstancePtr>& t)
 {
-    beginInsertRows(QModelIndex(), m_instances.count(), m_instances.count() + t.size() - 1);
-    m_instances.append(t);
+    beginInsertRows(QModelIndex(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.count(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.count() + t.size() - 1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.append(t);
     for (auto& ptr : t) {
         connect(ptr.get(), &BaseInstance::propertiesChanged, this, &InstanceList::propertiesChanged);
     }
@@ -500,25 +500,25 @@ void InstanceList::add(const QList<InstancePtr>& t)
 
 void InstanceList::resumeWatch()
 {
-    if (m_watchLevel > 0) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watchLevel > 0) {
         qWarning() << "Bad suspend level resume in instance list";
         return;
     }
-    m_watchLevel++;
-    if (m_watchLevel > 0 && m_dirty) {
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watchLevel++;
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watchLevel > 0 && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dirty) {
         loadList();
     }
 }
 
 void InstanceList::suspendWatch()
 {
-    m_watchLevel--;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watchLevel--;
 }
 
 void InstanceList::providerUpdated()
 {
-    m_dirty = true;
-    if (m_watchLevel == 1) {
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dirty = true;
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watchLevel == 1) {
         loadList();
     }
 }
@@ -527,7 +527,7 @@ InstancePtr InstanceList::getInstanceById(QString instId) const
 {
     if (instId.isEmpty())
         return InstancePtr();
-    for (auto& inst : m_instances) {
+    for (auto& inst : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances) {
         if (inst->id() == instId) {
             return inst;
         }
@@ -540,7 +540,7 @@ InstancePtr InstanceList::getInstanceByManagedName(const QString& managed_name) 
     if (managed_name.isEmpty())
         return {};
 
-    for (auto instance : m_instances) {
+    for (auto instance : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances) {
         if (instance->getManagedPackName() == managed_name)
             return instance;
     }
@@ -555,9 +555,9 @@ QModelIndex InstanceList::getInstanceIndexById(const QString &id) const
 
 int InstanceList::getInstIndex(BaseInstance* inst) const
 {
-    int count = m_instances.count();
+    int count = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.count();
     for (int i = 0; i < count; i++) {
-        if (inst == m_instances[i].get()) {
+        if (inst == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances[i].get()) {
             return i;
         }
     }
@@ -575,11 +575,11 @@ void InstanceList::propertiesChanged(BaseInstance* inst)
 
 InstancePtr InstanceList::loadInstance(const InstanceId& id)
 {
-    if (!m_groupsLoaded) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupsLoaded) {
         loadGroupList();
     }
 
-    auto instanceRoot = FS::PathCombine(m_instDir, id);
+    auto instanceRoot = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir, id);
     auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(instanceRoot, "instance.cfg"));
     InstancePtr inst;
 
@@ -590,11 +590,11 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
     // NOTE: Some PolyMC versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a OneSix instance
     if (inst_type == "OneSix" || inst_type.isEmpty())
     {
-        inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
+        inst.reset(new MinecraftInstance(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettings, instanceSettings, instanceRoot));
     }
     else
     {
-        inst.reset(new NullInstance(m_globalSettings, instanceSettings, instanceRoot));
+        inst.reset(new NullInstance(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettings, instanceSettings, instanceRoot));
     }
     qDebug() << "Loaded instance " << inst->name() << " from " << inst->instanceRoot();
     return inst;
@@ -603,14 +603,14 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
 void InstanceList::saveGroupList()
 {
     qDebug() << "Will save group list now.";
-    if (!m_instancesProbed) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instancesProbed) {
         qDebug() << "Group saving prevented because we don't know the full list of instances yet.";
         return;
     }
-    WatchLock foo(m_watcher, m_instDir);
-    QString groupFileName = m_instDir + "/instgroups.json";
+    WatchLock foo(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir);
+    QString groupFileName = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir + "/instgroups.json";
     QMap<QString, QSet<QString>> reverseGroupMap;
-    for (auto iter = m_instanceGroupIndex.begin(); iter != m_instanceGroupIndex.end(); iter++) {
+    for (auto iter = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex.begin(); iter != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex.end(); iter++) {
         QString id = iter.key();
         QString group = iter.value();
         if (group.isEmpty())
@@ -637,7 +637,7 @@ void InstanceList::saveGroupList()
         auto name = iter.key();
         QJsonObject groupObj;
         QJsonArray instanceArr;
-        groupObj.insert("hidden", QJsonValue(m_collapsedGroups.contains(name)));
+        groupObj.insert("hidden", QJsonValue(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_collapsedGroups.contains(name)));
         for (auto item : list) {
             instanceArr.append(QJsonValue(item));
         }
@@ -658,7 +658,7 @@ void InstanceList::loadGroupList()
 {
     qDebug() << "Will load group list now.";
 
-    QString groupFileName = m_instDir + "/instgroups.json";
+    QString groupFileName = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir + "/instgroups.json";
 
     // if there's no group file, fail
     if (!QFileInfo(groupFileName).exists())
@@ -702,7 +702,7 @@ void InstanceList::loadGroupList()
     }
 
     QSet<QString> groupSet;
-    m_instanceGroupIndex.clear();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex.clear();
 
     // Iterate through all the groups.
     QJsonObject groupMapping = rootObj.value("groups").toObject();
@@ -728,18 +728,18 @@ void InstanceList::loadGroupList()
 
         auto hidden = groupObj.value("hidden").toBool(false);
         if (hidden) {
-            m_collapsedGroups.insert(groupName);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_collapsedGroups.insert(groupName);
         }
 
         // Iterate through the list of instances in the group.
         QJsonArray instancesArray = groupObj.value("instances").toArray();
 
         for (QJsonArray::iterator iter2 = instancesArray.begin(); iter2 != instancesArray.end(); iter2++) {
-            m_instanceGroupIndex[(*iter2).toString()] = groupName;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex[(*iter2).toString()] = groupName;
         }
     }
-    m_groupsLoaded = true;
-    m_groupNameCache.unite(groupSet);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupsLoaded = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupNameCache.unite(groupSet);
     qDebug() << "Group list loaded.";
 }
 
@@ -752,12 +752,12 @@ void InstanceList::instanceDirContentsChanged(const QString& path)
 void InstanceList::on_InstFolderChanged(const Setting& setting, QVariant value)
 {
     QString newInstDir = QDir(value.toString()).canonicalPath();
-    if (newInstDir != m_instDir) {
-        if (m_groupsLoaded) {
+    if (newInstDir != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir) {
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupsLoaded) {
             saveGroupList();
         }
-        m_instDir = newInstDir;
-        m_groupsLoaded = false;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir = newInstDir;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupsLoaded = false;
         emit instancesChanged();
     }
 }
@@ -766,9 +766,9 @@ void InstanceList::on_GroupStateChanged(const QString& group, bool collapsed)
 {
     qDebug() << "Group" << group << (collapsed ? "collapsed" : "expanded");
     if (collapsed) {
-        m_collapsedGroups.insert(group);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_collapsedGroups.insert(group);
     } else {
-        m_collapsedGroups.remove(group);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_collapsedGroups.remove(group);
     }
     saveGroupList();
 }
@@ -779,16 +779,16 @@ class InstanceStaging : public Task {
     const unsigned maxBackoff = 16;
    public:
     InstanceStaging(InstanceList* parent, InstanceTask* child, QString stagingPath, InstanceName const& instanceName, QString groupName)
-        : m_parent(parent), backoff(minBackoff, maxBackoff), m_stagingPath(std::move(stagingPath)), m_instance_name(std::move(instanceName)), m_groupName(std::move(groupName))
+        : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent(parent), backoff(minBackoff, maxBackoff), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath(std::move(stagingPath)), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance_name(std::move(instanceName)), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupName(std::move(groupName))
     {
-        m_child.reset(child);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_child.reset(child);
         connect(child, &Task::succeeded, this, &InstanceStaging::childSucceded);
         connect(child, &Task::failed, this, &InstanceStaging::childFailed);
         connect(child, &Task::aborted, this, &InstanceStaging::childAborted);
         connect(child, &Task::abortStatusChanged, this, &InstanceStaging::setAbortable);
         connect(child, &Task::status, this, &InstanceStaging::setStatus);
         connect(child, &Task::progress, this, &InstanceStaging::setProgress);
-        connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);
+        connect(&hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);
     }
 
     virtual ~InstanceStaging(){};
@@ -799,24 +799,24 @@ class InstanceStaging : public Task {
         if (!canAbort())
             return false;
 
-        m_child->abort();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_child->abort();
 
         return Task::abort();
     }
     bool canAbort() const override
     {
-        return (m_child && m_child->canAbort());
+        return (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_child && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_child->canAbort());
     }
 
    protected:
-    virtual void executeTask() override { m_child->start(); }
-    QStringList warnings() const override { return m_child->warnings(); }
+    virtual void executeTask() override { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_child->start(); }
+    QStringList warnings() const override { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_child->warnings(); }
 
    private slots:
     void childSucceded()
     {
         unsigned sleepTime = backoff();
-        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, *m_child.get()))
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->commitStagedInstance(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance_name, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupName, *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_child.get()))
         {
             emitSucceeded();
             return;
@@ -826,12 +826,12 @@ class InstanceStaging : public Task {
             emitFailed(tr("Failed to commit instance, even after multiple retries. It is being blocked by something."));
             return;
         }
-        qDebug() << "Failed to commit instance" << m_instance_name.name() << "Initiating backoff:" << sleepTime;
-        m_backoffTimer.start(sleepTime * 500);
+        qDebug() << "Failed to commit instance" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance_name.name() << "Initiating backoff:" << sleepTime;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_backoffTimer.start(sleepTime * 500);
     }
     void childFailed(const QString& reason)
     {
-        m_parent->destroyStagingPath(m_stagingPath);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->destroyStagingPath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath);
         emitFailed(reason);
     }
 
@@ -841,25 +841,25 @@ class InstanceStaging : public Task {
     }
 
 private:
-    InstanceList * m_parent;
+    InstanceList * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent;
     /*
      * WHY: the whole reason why this uses an exponential backoff retry scheme is antivirus on Windows.
      * Basically, it starts messing things up while the launcher is extracting/creating instances
      * and causes that horrible failure that is NTFS to lock files in place because they are open.
      */
     ExponentialSeries backoff;
-    QString m_stagingPath;
-    unique_qobject_ptr<InstanceTask> m_child;
-    InstanceName m_instance_name;
-    QString m_groupName;
-    QTimer m_backoffTimer;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_stagingPath;
+    unique_qobject_ptr<InstanceTask> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_child;
+    InstanceName hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance_name;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupName;
+    QTimer hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_backoffTimer;
 };
 
 Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 {
     auto stagingPath = getStagedInstancePath();
     task->setStagingPath(stagingPath);
-    task->setParentSettings(m_globalSettings);
+    task->setParentSettings(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettings);
     return new InstanceStaging(this, task, stagingPath, *task, task->group());
 }
 
@@ -868,13 +868,13 @@ QString InstanceList::getStagedInstancePath()
     QString key = QUuid::createUuid().toString();
     QString tempDir = ".LAUNCHER_TEMP/";
     QString relPath = FS::PathCombine(tempDir, key);
-    QDir rootPath(m_instDir);
-    auto path = FS::PathCombine(m_instDir, relPath);
+    QDir rootPath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir);
+    auto path = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir, relPath);
     if (!rootPath.mkpath(relPath)) {
         return QString();
     }
 #ifdef Q_OS_WIN32
-    auto tempPath = FS::PathCombine(m_instDir, tempDir);
+    auto tempPath = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir, tempDir);
     SetFileAttributesA(tempPath.toStdString().c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
 #endif
     return path;
@@ -891,14 +891,14 @@ bool InstanceList::commitStagedInstance(const QString& path, InstanceName const&
     if (should_override) {
         instID = commiting.originalInstanceID();
     } else {
-        instID = FS::DirNameFromString(instanceName.modifiedName(), m_instDir);
+        instID = FS::DirNameFromString(instanceName.modifiedName(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir);
     }
 
     Q_ASSERT(!instID.isEmpty());
 
     {
-        WatchLock lock(m_watcher, m_instDir);
-        QString destination = FS::PathCombine(m_instDir, instID);
+        WatchLock lock(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_watcher, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir);
+        QString destination = FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instDir, instID);
 
         if (should_override) {
             if (!FS::overrideFolder(destination, path)) {
@@ -911,8 +911,8 @@ bool InstanceList::commitStagedInstance(const QString& path, InstanceName const&
                 return false;
             }
 
-            m_instanceGroupIndex[instID] = groupName;
-            m_groupNameCache.insert(groupName);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceGroupIndex[instID] = groupName;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_groupNameCache.insert(groupName);
         }
 
         instanceSet.insert(instID);

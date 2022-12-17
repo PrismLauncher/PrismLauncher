@@ -11,19 +11,19 @@ class Hasher : public Task {
    public:
     using Ptr = shared_qobject_ptr<Hasher>;
 
-    Hasher(QString file_path) : m_path(std::move(file_path)) {}
+    Hasher(QString file_path) : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path(std::move(file_path)) {}
 
     /* We can't really abort this task, but we can say we aborted and finish our thing quickly :) */
     bool abort() override { return true; }
 
     void executeTask() override = 0;
 
-    QString getResult() const { return m_hash; };
-    QString getPath() const { return m_path; };
+    QString getResult() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hash; };
+    QString getPath() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path; };
 
    protected:
-    QString m_hash;
-    QString m_path;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hash;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_path;
 };
 
 class FlameHasher : public Hasher {

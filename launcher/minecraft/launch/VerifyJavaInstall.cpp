@@ -40,7 +40,7 @@
 #include "minecraft/MinecraftInstance.h"
 
 void VerifyJavaInstall::executeTask() {
-    auto instance = std::dynamic_pointer_cast<MinecraftInstance>(m_parent->instance());
+    auto instance = std::dynamic_pointer_cast<MinecraftInstance>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->instance());
     auto packProfile = instance->getPackProfile();
     auto settings = instance->settings();
     auto storedVersion = settings->get("JavaVersion").toString();

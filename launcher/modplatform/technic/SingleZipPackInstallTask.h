@@ -50,15 +50,15 @@ private slots:
     void extractAborted();
 
 private:
-    bool m_abortable = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abortable = false;
 
-    QUrl m_sourceUrl;
-    QString m_minecraftVersion;
-    QString m_archivePath;
-    NetJob::Ptr m_filesNetJob;
-    std::unique_ptr<QuaZip> m_packZip;
-    QFuture<std::optional<QStringList>> m_extractFuture;
-    QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
+    QUrl hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_sourceUrl;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_minecraftVersion;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_archivePath;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filesNetJob;
+    std::unique_ptr<QuaZip> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_packZip;
+    QFuture<std::optional<QStringList>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFuture;
+    QFutureWatcher<std::optional<QStringList>> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_extractFutureWatcher;
 };
 
 } // namespace Technic

@@ -51,38 +51,38 @@
 Component::Component(PackProfile * parent, const QString& uid)
 {
     assert(parent);
-    m_parent = parent;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent = parent;
 
-    m_uid = uid;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid = uid;
 }
 
 Component::Component(PackProfile * parent, std::shared_ptr<Meta::Version> version)
 {
     assert(parent);
-    m_parent = parent;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent = parent;
 
-    m_metaVersion = version;
-    m_uid = version->uid();
-    m_version = m_cachedVersion = version->version();
-    m_cachedName = version->name();
-    m_loaded = version->isLoaded();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion = version;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid = version->uid();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVersion = version->version();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedName = version->name();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = version->isLoaded();
 }
 
 Component::Component(PackProfile * parent, const QString& uid, std::shared_ptr<VersionFile> file)
 {
     assert(parent);
-    m_parent = parent;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent = parent;
 
-    m_file = file;
-    m_uid = uid;
-    m_cachedVersion = m_file->version;
-    m_cachedName = m_file->name;
-    m_loaded = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file = file;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid = uid;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVersion = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file->version;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedName = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file->name;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = true;
 }
 
 std::shared_ptr<Meta::Version> Component::getMeta()
 {
-    return m_metaVersion;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion;
 }
 
 void Component::applyTo(LaunchProfile* profile)
@@ -95,7 +95,7 @@ void Component::applyTo(LaunchProfile* profile)
     auto vfile = getVersionFile();
     if(vfile)
     {
-        vfile->applyTo(profile, m_parent->runtimeContext());
+        vfile->applyTo(profile, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->runtimeContext());
     }
     else
     {
@@ -105,34 +105,34 @@ void Component::applyTo(LaunchProfile* profile)
 
 std::shared_ptr<class VersionFile> Component::getVersionFile() const
 {
-    if(m_metaVersion)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion)
     {
-        if(!m_metaVersion->isLoaded())
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion->isLoaded())
         {
-            m_metaVersion->load(Net::Mode::Online);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion->load(Net::Mode::Online);
         }
-        return m_metaVersion->data();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion->data();
     }
     else
     {
-        return m_file;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file;
     }
 }
 
 std::shared_ptr<class Meta::VersionList> Component::getVersionList() const
 {
     // FIXME: what if the metadata index isn't loaded yet?
-    if(APPLICATION->metadataIndex()->hasUid(m_uid))
+    if(APPLICATION->metadataIndex()->hasUid(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid))
     {
-        return APPLICATION->metadataIndex()->get(m_uid);
+        return APPLICATION->metadataIndex()->get(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid);
     }
     return nullptr;
 }
 
 int Component::getOrder()
 {
-    if(m_orderOverride)
-        return m_order;
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_orderOverride)
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_order;
 
     auto vfile = getVersionFile();
     if(vfile)
@@ -143,32 +143,32 @@ int Component::getOrder()
 }
 void Component::setOrder(int order)
 {
-    m_orderOverride = true;
-    m_order = order;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_orderOverride = true;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_order = order;
 }
 QString Component::getID()
 {
-    return m_uid;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid;
 }
 QString Component::getName()
 {
-    if (!m_cachedName.isEmpty())
-        return m_cachedName;
-    return m_uid;
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedName.isEmpty())
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedName;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid;
 }
 QString Component::getVersion()
 {
-    return m_cachedVersion;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVersion;
 }
 QString Component::getFilename()
 {
-    return m_parent->patchFilePathForUid(m_uid);
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->patchFilePathForUid(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid);
 }
 QDateTime Component::getReleaseDateTime()
 {
-    if(m_metaVersion)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion)
     {
-        return m_metaVersion->time();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion->time();
     }
     auto vfile = getVersionFile();
     if(vfile)
@@ -181,12 +181,12 @@ QDateTime Component::getReleaseDateTime()
 
 bool Component::isEnabled()
 {
-    return !canBeDisabled() || !m_disabled;
+    return !canBeDisabled() || !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_disabled;
 }
 
 bool Component::canBeDisabled()
 {
-    return isRemovable() && !m_dependencyOnly;
+    return isRemovable() && !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_dependencyOnly;
 }
 
 bool Component::setEnabled(bool state)
@@ -196,9 +196,9 @@ bool Component::setEnabled(bool state)
     {
         intendedDisabled = false;
     }
-    if(intendedDisabled != m_disabled)
+    if(intendedDisabled != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_disabled)
     {
-        m_disabled = intendedDisabled;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_disabled = intendedDisabled;
         emit dataChanged();
         return true;
     }
@@ -207,12 +207,12 @@ bool Component::setEnabled(bool state)
 
 bool Component::isCustom()
 {
-    return m_file != nullptr;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file != nullptr;
 }
 
 bool Component::isCustomizable()
 {
-    if(m_metaVersion)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion)
     {
         if(getVersionFile())
         {
@@ -223,13 +223,13 @@ bool Component::isCustomizable()
 }
 bool Component::isRemovable()
 {
-    return !m_important;
+    return !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_important;
 }
 bool Component::isRevertible()
 {
     if (isCustom())
     {
-        if(APPLICATION->metadataIndex()->hasUid(m_uid))
+        if(APPLICATION->metadataIndex()->hasUid(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid))
         {
             return true;
         }
@@ -257,9 +257,9 @@ bool Component::isVersionChangeable()
 
 void Component::setImportant(bool state)
 {
-    if(m_important != state)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_important != state)
     {
-        m_important = state;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_important = state;
         emit dataChanged();
     }
 }
@@ -286,34 +286,34 @@ const QList<PatchProblem> Component::getProblems() const
 
 void Component::setVersion(const QString& version)
 {
-    if(version == m_version)
+    if(version == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version)
     {
         return;
     }
-    m_version = version;
-    if(m_loaded)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version = version;
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded)
     {
         // we are loaded and potentially have state to invalidate
-        if(m_file)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file)
         {
             // we have a file... explicit version has been changed and there is nothing else to do.
         }
         else
         {
             // we don't have a file, therefore we are loaded with metadata
-            m_cachedVersion = version;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVersion = version;
             // see if the meta version is loaded
-            auto metaVersion = APPLICATION->metadataIndex()->get(m_uid, version);
+            auto metaVersion = APPLICATION->metadataIndex()->get(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid, version);
             if(metaVersion->isLoaded())
             {
                 // if yes, we can continue with that.
-                m_metaVersion = metaVersion;
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion = metaVersion;
             }
             else
             {
                 // if not, we need loading
-                m_metaVersion.reset();
-                m_loaded = false;
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion.reset();
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = false;
             }
             updateCachedData();
         }
@@ -356,8 +356,8 @@ bool Component::customize()
         {
             return false;
         }
-        m_file = vfile;
-        m_metaVersion.reset();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file = vfile;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion.reset();
         emit dataChanged();
     }
     catch (const Exception &error)
@@ -384,18 +384,18 @@ bool Component::revert()
     if(result)
     {
         // file gone...
-        m_file.reset();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_file.reset();
 
         // check local cache for metadata...
-        auto version = APPLICATION->metadataIndex()->get(m_uid, m_version);
+        auto version = APPLICATION->metadataIndex()->get(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uid, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_version);
         if(version->isLoaded())
         {
-            m_metaVersion = version;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion = version;
         }
         else
         {
-            m_metaVersion.reset();
-            m_loaded = false;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metaVersion.reset();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = false;
         }
         emit dataChanged();
     }
@@ -436,29 +436,29 @@ void Component::updateCachedData()
     if(file)
     {
         bool changed = false;
-        if(m_cachedName != file->name)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedName != file->name)
         {
-            m_cachedName = file->name;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedName = file->name;
             changed = true;
         }
-        if(m_cachedVersion != file->version)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVersion != file->version)
         {
-            m_cachedVersion = file->version;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVersion = file->version;
             changed = true;
         }
-        if(m_cachedVolatile != file->m_volatile)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVolatile != file->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_volatile)
         {
-            m_cachedVolatile = file->m_volatile;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedVolatile = file->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_volatile;
             changed = true;
         }
-        if(!deepCompare(m_cachedRequires, file->requires))
+        if(!deepCompare(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedRequires, file->requires))
         {
-            m_cachedRequires = file->requires;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedRequires = file->requires;
             changed = true;
         }
-        if(!deepCompare(m_cachedConflicts, file->conflicts))
+        if(!deepCompare(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedConflicts, file->conflicts))
         {
-            m_cachedConflicts = file->conflicts;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedConflicts = file->conflicts;
             changed = true;
         }
         if(changed)
@@ -469,8 +469,8 @@ void Component::updateCachedData()
     else
     {
         // in case we removed all the metadata
-        m_cachedRequires.clear();
-        m_cachedConflicts.clear();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedRequires.clear();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_cachedConflicts.clear();
         emit dataChanged();
     }
 }

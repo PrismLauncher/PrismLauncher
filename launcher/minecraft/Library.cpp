@@ -143,7 +143,7 @@ QList<NetAction::Ptr> Library::getDownloads(
     };
 
     QString raw_storage = storageSuffix(runtimeContext);
-    if(m_mojangDownloads)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads)
     {
         if(isNative())
         {
@@ -156,14 +156,14 @@ QList<NetAction::Ptr> Library::getDownloads(
                     nat32Classifier.replace("${arch}", "32");
                     auto nat64Classifier = nativeClassifier;
                     nat64Classifier.replace("${arch}", "64");
-                    auto nat32info = m_mojangDownloads->getDownloadInfo(nat32Classifier);
+                    auto nat32info = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads->getDownloadInfo(nat32Classifier);
                     if(nat32info)
                     {
                         auto cooked_storage = raw_storage;
                         cooked_storage.replace("${arch}", "32");
                         add_download(cooked_storage, nat32info->url, nat32info->sha1);
                     }
-                    auto nat64info = m_mojangDownloads->getDownloadInfo(nat64Classifier);
+                    auto nat64info = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads->getDownloadInfo(nat64Classifier);
                     if(nat64info)
                     {
                         auto cooked_storage = raw_storage;
@@ -173,7 +173,7 @@ QList<NetAction::Ptr> Library::getDownloads(
                 }
                 else
                 {
-                    auto info = m_mojangDownloads->getDownloadInfo(nativeClassifier);
+                    auto info = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads->getDownloadInfo(nativeClassifier);
                     if(info)
                     {
                         add_download(raw_storage, info->url, info->sha1);
@@ -182,19 +182,19 @@ QList<NetAction::Ptr> Library::getDownloads(
             }
             else
             {
-                qDebug() << "Ignoring native library" << m_name.serialize() << "because it has no classifier for current OS";
+                qDebug() << "Ignoring native library" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name.serialize() << "because it has no classifier for current OS";
             }
         }
         else
         {
-            if(m_mojangDownloads->artifact)
+            if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads->artifact)
             {
-                auto artifact = m_mojangDownloads->artifact;
+                auto artifact = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mojangDownloads->artifact;
                 add_download(raw_storage, artifact->url, artifact->sha1);
             }
             else
             {
-                qDebug() << "Ignoring java library" << m_name.serialize() << "because it has no artifact";
+                qDebug() << "Ignoring java library" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name.serialize() << "because it has no artifact";
             }
         }
     }
@@ -202,23 +202,23 @@ QList<NetAction::Ptr> Library::getDownloads(
     {
         auto raw_dl = [&]()
         {
-            if (!m_absoluteURL.isEmpty())
+            if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_absoluteURL.isEmpty())
             {
-                return m_absoluteURL;
+                return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_absoluteURL;
             }
 
-            if (m_repositoryURL.isEmpty())
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repositoryURL.isEmpty())
             {
                 return BuildConfig.LIBRARY_BASE + raw_storage;
             }
 
-            if(m_repositoryURL.endsWith('/'))
+            if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repositoryURL.endsWith('/'))
             {
-                return m_repositoryURL + raw_storage;
+                return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repositoryURL + raw_storage;
             }
             else
             {
-                return m_repositoryURL + QChar('/') + raw_storage;
+                return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_repositoryURL + QChar('/') + raw_storage;
             }
         }();
         if (raw_storage.contains("${arch}"))
@@ -241,14 +241,14 @@ QList<NetAction::Ptr> Library::getDownloads(
 bool Library::isActive(const RuntimeContext & runtimeContext) const
 {
     bool result = true;
-    if (m_rules.empty())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rules.empty())
     {
         result = true;
     }
     else
     {
         RuleAction ruleResult = Disallow;
-        for (auto rule : m_rules)
+        for (auto rule : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rules)
         {
             RuleAction temp = rule->apply(this, runtimeContext);
             if (temp != Defer)
@@ -265,22 +265,22 @@ bool Library::isActive(const RuntimeContext & runtimeContext) const
 
 bool Library::isLocal() const
 {
-    return m_hint == "local";
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hint == "local";
 }
 
 bool Library::isAlwaysStale() const
 {
-    return m_hint == "always-stale";
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_hint == "always-stale";
 }
 
 QString Library::getCompatibleNative(const RuntimeContext & runtimeContext) const {
     // try to match precise classifier "[os]-[arch]"
-    auto entry = m_nativeClassifiers.constFind(runtimeContext.getClassifier());
+    auto entry = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers.constFind(runtimeContext.getClassifier());
     // try to match imprecise classifier on legacy architectures "[os]"
-    if (entry == m_nativeClassifiers.constEnd() && runtimeContext.isLegacyArch())
-        entry = m_nativeClassifiers.constFind(runtimeContext.system);
+    if (entry == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers.constEnd() && runtimeContext.isLegacyArch())
+        entry = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers.constFind(runtimeContext.system);
 
-    if (entry == m_nativeClassifiers.constEnd())
+    if (entry == hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers.constEnd())
         return QString();
 
     return entry.value();
@@ -288,7 +288,7 @@ QString Library::getCompatibleNative(const RuntimeContext & runtimeContext) cons
 
 void Library::setStoragePrefix(QString prefix)
 {
-    m_storagePrefix = prefix;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_storagePrefix = prefix;
 }
 
 QString Library::defaultStoragePrefix()
@@ -298,27 +298,27 @@ QString Library::defaultStoragePrefix()
 
 QString Library::storagePrefix() const
 {
-    if(m_storagePrefix.isEmpty())
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_storagePrefix.isEmpty())
     {
         return defaultStoragePrefix();
     }
-    return m_storagePrefix;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_storagePrefix;
 }
 
 QString Library::filename(const RuntimeContext & runtimeContext) const
 {
-    if(!m_filename.isEmpty())
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename.isEmpty())
     {
-        return m_filename;
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename;
     }
     // non-native? use only the gradle specifier
     if (!isNative())
     {
-        return m_name.getFileName();
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name.getFileName();
     }
 
     // otherwise native, override classifiers. Mojang HACK!
-    GradleSpecifier nativeSpec = m_name;
+    GradleSpecifier nativeSpec = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
     QString nativeClassifier = getCompatibleNative(runtimeContext);
     if (!nativeClassifier.isNull())
     {
@@ -333,8 +333,8 @@ QString Library::filename(const RuntimeContext & runtimeContext) const
 
 QString Library::displayName(const RuntimeContext & runtimeContext) const
 {
-    if(!m_displayname.isEmpty())
-        return m_displayname;
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_displayname.isEmpty())
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_displayname;
     return filename(runtimeContext);
 }
 
@@ -343,11 +343,11 @@ QString Library::storageSuffix(const RuntimeContext & runtimeContext) const
     // non-native? use only the gradle specifier
     if (!isNative())
     {
-        return m_name.toPath(m_filename);
+        return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name.toPath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename);
     }
 
     // otherwise native, override classifiers. Mojang HACK!
-    GradleSpecifier nativeSpec = m_name;
+    GradleSpecifier nativeSpec = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
     QString nativeClassifier = getCompatibleNative(runtimeContext);
     if (!nativeClassifier.isNull())
     {
@@ -357,5 +357,5 @@ QString Library::storageSuffix(const RuntimeContext & runtimeContext) const
     {
         nativeSpec.setClassifier("INVALID");
     }
-    return nativeSpec.toPath(m_filename);
+    return nativeSpec.toPath(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename);
 }

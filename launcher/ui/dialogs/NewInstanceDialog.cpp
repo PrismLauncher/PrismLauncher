@@ -97,37 +97,37 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
     ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
 
 
-    // NOTE: m_buttons must be initialized before PageContainer, because it indirectly accesses m_buttons through setSuggestedPack! Do not move this below.
-    m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    // NOTE: hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons must be initialized before PageContainer, because it indirectly accesses hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons through setSuggestedPack! Do not move this below.
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-    m_container = new PageContainer(this);
-    m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
-    m_container->layout()->setContentsMargins(0, 0, 0, 0);
-    ui->verticalLayout->insertWidget(2, m_container);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container = new PageContainer(this);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->layout()->setContentsMargins(0, 0, 0, 0);
+    ui->verticalLayout->insertWidget(2, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container);
 
-    m_container->addButtons(m_buttons);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->addButtons(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons);
 
     // Bonk Qt over its stupid head and make sure it understands which button is the default one...
     // See: https://stackoverflow.com/questions/24556831/qbuttonbox-set-default-button
-    auto OkButton = m_buttons->button(QDialogButtonBox::Ok);
+    auto OkButton = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons->button(QDialogButtonBox::Ok);
     OkButton->setDefault(true);
     OkButton->setAutoDefault(true);
     connect(OkButton, &QPushButton::clicked, this, &NewInstanceDialog::accept);
 
-    auto CancelButton = m_buttons->button(QDialogButtonBox::Cancel);
+    auto CancelButton = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons->button(QDialogButtonBox::Cancel);
     CancelButton->setDefault(false);
     CancelButton->setAutoDefault(false);
     connect(CancelButton, &QPushButton::clicked, this, &NewInstanceDialog::reject);
 
-    auto HelpButton = m_buttons->button(QDialogButtonBox::Help);
+    auto HelpButton = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons->button(QDialogButtonBox::Help);
     HelpButton->setDefault(false);
     HelpButton->setAutoDefault(false);
-    connect(HelpButton, &QPushButton::clicked, m_container, &PageContainer::help);
+    connect(HelpButton, &QPushButton::clicked, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container, &PageContainer::help);
 
     if(!url.isEmpty())
     {
         QUrl actualUrl(url);
-        m_container->selectPage("import");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->selectPage("import");
         importPage->setUrl(url);
     }
 
@@ -141,7 +141,7 @@ void NewInstanceDialog::reject()
     APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
 
     // This is just so that the pages get the close() call and can react to it, if needed.
-    m_container->prepareToClose();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->prepareToClose();
 
     QDialog::reject();
 }
@@ -152,7 +152,7 @@ void NewInstanceDialog::accept()
     importIconNow();
 
     // This is just so that the pages get the close() call and can react to it, if needed.
-    m_container->prepareToClose();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->prepareToClose();
 
     QDialog::accept();
 }
@@ -199,7 +199,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
     }
 
     auto allowOK = task && !instName().isEmpty();
-    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
 void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, InstanceTask* task)
@@ -215,7 +215,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, I
     }
 
     auto allowOK = task && !instName().isEmpty();
-    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons->button(QDialogButtonBox::Ok)->setEnabled(allowOK);
 }
 
 void NewInstanceDialog::setSuggestedIconFromFile(const QString &path, const QString &name)
@@ -253,7 +253,7 @@ InstanceTask * NewInstanceDialog::extractTask()
 void NewInstanceDialog::updateDialogState()
 {
     auto allowOK = creationTask && !instName().isEmpty();
-    auto OkButton = m_buttons->button(QDialogButtonBox::Ok);
+    auto OkButton = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_buttons->button(QDialogButtonBox::Ok);
     if(OkButton->isEnabled() != allowOK)
     {
         OkButton->setEnabled(allowOK);

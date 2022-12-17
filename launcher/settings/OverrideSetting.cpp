@@ -20,18 +20,18 @@ OverrideSetting::OverrideSetting(std::shared_ptr<Setting> other, std::shared_ptr
 {
     Q_ASSERT(other);
     Q_ASSERT(gate);
-    m_other = other;
-    m_gate = gate;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_other = other;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gate = gate;
 }
 
 bool OverrideSetting::isOverriding() const
 {
-    return m_gate->get().toBool();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_gate->get().toBool();
 }
 
 QVariant OverrideSetting::defValue() const
 {
-    return m_other->get();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_other->get();
 }
 
 QVariant OverrideSetting::get() const
@@ -40,7 +40,7 @@ QVariant OverrideSetting::get() const
     {
         return Setting::get();
     }
-    return m_other->get();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_other->get();
 }
 
 void OverrideSetting::reset()

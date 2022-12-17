@@ -72,7 +72,7 @@ private:
 class AccessibleInstanceViewItem: public QAccessibleInterface, public QAccessibleTableCellInterface, public QAccessibleActionInterface
 {
 public:
-    AccessibleInstanceViewItem(QAbstractItemView *view, const QModelIndex &m_index);
+    AccessibleInstanceViewItem(QAbstractItemView *view, const QModelIndex &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index);
 
     void *interface_cast(QAccessible::InterfaceType t) override;
     QObject *object() const override { return nullptr; }
@@ -108,7 +108,7 @@ public:
 
 private:
     QPointer<QAbstractItemView > view;
-    QPersistentModelIndex m_index;
+    QPersistentModelIndex hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index;
 
     void selectCell();
     void unselectCell();

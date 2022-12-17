@@ -46,19 +46,19 @@
 using OAuth2 = Katabasis::DeviceFlow;
 using Activity = Katabasis::Activity;
 
-MSAStep::MSAStep(AccountData* data, Action action) : AuthStep(data), m_action(action) {
-    m_clientId = APPLICATION->getMSAClientID();
+MSAStep::MSAStep(AccountData* data, Action action) : AuthStep(data), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action(action) {
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_clientId = APPLICATION->getMSAClientID();
     OAuth2::Options opts;
     opts.scope = "XboxLive.signin offline_access";
-    opts.clientIdentifier = m_clientId;
+    opts.clientIdentifier = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_clientId;
     opts.authorizationUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
     opts.accessTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
 
     // FIXME: OAuth2 is not aware of our fancy shared pointers
-    m_oauth2 = new OAuth2(opts, m_data->msaToken, this, APPLICATION->network().get());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_oauth2 = new OAuth2(opts, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->msaToken, this, APPLICATION->network().get());
 
-    connect(m_oauth2, &OAuth2::activityChanged, this, &MSAStep::onOAuthActivityChanged);
-    connect(m_oauth2, &OAuth2::showVerificationUriAndCode, this, &MSAStep::showVerificationUriAndCode);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_oauth2, &OAuth2::activityChanged, this, &MSAStep::onOAuthActivityChanged);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_oauth2, &OAuth2::showVerificationUriAndCode, this, &MSAStep::showVerificationUriAndCode);
 }
 
 MSAStep::~MSAStep() noexcept = default;
@@ -69,7 +69,7 @@ QString MSAStep::describe() {
 
 
 void MSAStep::rehydrate() {
-    switch(m_action) {
+    switch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action) {
         case Refresh: {
             // TODO: check the tokens and see if they are old (older than a day)
             return;
@@ -82,23 +82,23 @@ void MSAStep::rehydrate() {
 }
 
 void MSAStep::perform() {
-    switch(m_action) {
+    switch(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_action) {
         case Refresh: {
-            if (m_data->msaClientID != m_clientId) {
+            if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->msaClientID != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_clientId) {
                 emit hideVerificationUriAndCode();
                 emit finished(AccountTaskState::STATE_DISABLED, tr("Microsoft user authentication failed - client identification has changed."));
             }
-            m_oauth2->refresh();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_oauth2->refresh();
             return;
         }
         case Login: {
             QVariantMap extraOpts;
             extraOpts["prompt"] = "select_account";
-            m_oauth2->setExtraRequestParams(extraOpts);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_oauth2->setExtraRequestParams(extraOpts);
 
-            *m_data = AccountData();
-            m_data->msaClientID = m_clientId;
-            m_oauth2->login();
+            *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data = AccountData();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->msaClientID = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_clientId;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_oauth2->login();
             return;
         }
     }
@@ -116,7 +116,7 @@ void MSAStep::onOAuthActivityChanged(Katabasis::Activity activity) {
         case Katabasis::Activity::Succeeded: {
             // Succeeded or did not invalidate tokens
             emit hideVerificationUriAndCode();
-            QVariantMap extraTokens = m_oauth2->extraTokens();
+            QVariantMap extraTokens = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_oauth2->extraTokens();
 #ifndef NDEBUG
             if (!extraTokens.isEmpty()) {
                 qDebug() << "Extra tokens in response:";

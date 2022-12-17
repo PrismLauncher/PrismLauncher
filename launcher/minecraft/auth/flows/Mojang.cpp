@@ -9,19 +9,19 @@ MojangRefresh::MojangRefresh(
     AccountData *data,
     QObject *parent
 ) : AuthFlow(data, parent) {
-    m_steps.append(new YggdrasilStep(m_data, QString()));
-    m_steps.append(new MinecraftProfileStepMojang(m_data));
-    m_steps.append(new MigrationEligibilityStep(m_data));
-    m_steps.append(new GetSkinStep(m_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new YggdrasilStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data, QString()));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new MinecraftProfileStepMojang(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new MigrationEligibilityStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new GetSkinStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
 }
 
 MojangLogin::MojangLogin(
     AccountData *data,
     QString password,
     QObject *parent
-): AuthFlow(data, parent), m_password(password) {
-    m_steps.append(new YggdrasilStep(m_data, m_password));
-    m_steps.append(new MinecraftProfileStepMojang(m_data));
-    m_steps.append(new MigrationEligibilityStep(m_data));
-    m_steps.append(new GetSkinStep(m_data));
+): AuthFlow(data, parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_password(password) {
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new YggdrasilStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_password));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new MinecraftProfileStepMojang(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new MigrationEligibilityStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new GetSkinStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
 }

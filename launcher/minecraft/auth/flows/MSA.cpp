@@ -10,28 +10,28 @@
 #include "minecraft/auth/steps/GetSkinStep.h"
 
 MSASilent::MSASilent(AccountData* data, QObject* parent) : AuthFlow(data, parent) {
-    m_steps.append(new MSAStep(m_data, MSAStep::Action::Refresh));
-    m_steps.append(new XboxUserStep(m_data));
-    m_steps.append(new XboxAuthorizationStep(m_data, &m_data->xboxApiToken, "http://xboxlive.com", "Xbox"));
-    m_steps.append(new XboxAuthorizationStep(m_data, &m_data->mojangservicesToken, "rp://api.minecraftservices.com/", "Mojang"));
-    m_steps.append(new LauncherLoginStep(m_data));
-    m_steps.append(new XboxProfileStep(m_data));
-    m_steps.append(new EntitlementsStep(m_data));
-    m_steps.append(new MinecraftProfileStep(m_data));
-    m_steps.append(new GetSkinStep(m_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new MSAStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data, MSAStep::Action::Refresh));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new XboxUserStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new XboxAuthorizationStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data, &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->xboxApiToken, "http://xboxlive.com", "Xbox"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new XboxAuthorizationStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data, &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->mojangservicesToken, "rp://api.minecraftservices.com/", "Mojang"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new LauncherLoginStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new XboxProfileStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new EntitlementsStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new MinecraftProfileStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new GetSkinStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
 }
 
 MSAInteractive::MSAInteractive(
     AccountData* data,
     QObject* parent
 ) : AuthFlow(data, parent) {
-    m_steps.append(new MSAStep(m_data, MSAStep::Action::Login));
-    m_steps.append(new XboxUserStep(m_data));
-    m_steps.append(new XboxAuthorizationStep(m_data, &m_data->xboxApiToken, "http://xboxlive.com", "Xbox"));
-    m_steps.append(new XboxAuthorizationStep(m_data, &m_data->mojangservicesToken, "rp://api.minecraftservices.com/", "Mojang"));
-    m_steps.append(new LauncherLoginStep(m_data));
-    m_steps.append(new XboxProfileStep(m_data));
-    m_steps.append(new EntitlementsStep(m_data));
-    m_steps.append(new MinecraftProfileStep(m_data));
-    m_steps.append(new GetSkinStep(m_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new MSAStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data, MSAStep::Action::Login));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new XboxUserStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new XboxAuthorizationStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data, &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->xboxApiToken, "http://xboxlive.com", "Xbox"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new XboxAuthorizationStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data, &hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data->mojangservicesToken, "rp://api.minecraftservices.com/", "Mojang"));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new LauncherLoginStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new XboxProfileStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new EntitlementsStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new MinecraftProfileStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_steps.append(new GetSkinStep(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_data));
 }

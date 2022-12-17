@@ -100,7 +100,7 @@ slots:
         QCOMPARE(downloads.size(), 1);
         QCOMPARE(failedFiles, {});
         NetAction::Ptr dl = downloads[0];
-        QCOMPARE(dl->m_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion.jar"));
+        QCOMPARE(dl->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion.jar"));
     }
     void test_legacy_url_local_broken()
     {
@@ -136,7 +136,7 @@ slots:
     {
         RuntimeContext r = dummyContext();
         Library test("test.package:testname:testversion");
-        test.m_nativeClassifiers["linux"] = "linux";
+        test.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers["linux"] = "linux";
         QCOMPARE(test.isNative(), true);
         test.setRepositoryURL("file://foo/bar");
         {
@@ -151,16 +151,16 @@ slots:
             QCOMPARE(dls.size(), 1);
             QCOMPARE(failedFiles, {});
             auto dl = dls[0];
-            QCOMPARE(dl->m_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-linux.jar"));
+            QCOMPARE(dl->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-linux.jar"));
         }
     }
     void test_legacy_native_arch()
     {
         RuntimeContext r = dummyContext();
         Library test("test.package:testname:testversion");
-        test.m_nativeClassifiers["linux"]="linux-${arch}";
-        test.m_nativeClassifiers["osx"]="osx-${arch}";
-        test.m_nativeClassifiers["windows"]="windows-${arch}";
+        test.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers["linux"]="linux-${arch}";
+        test.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers["osx"]="osx-${arch}";
+        test.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers["windows"]="windows-${arch}";
         QCOMPARE(test.isNative(), true);
         test.setRepositoryURL("file://foo/bar");
         {
@@ -174,8 +174,8 @@ slots:
             auto dls = test.getDownloads(r, cache.get(), failedFiles, QString());
             QCOMPARE(dls.size(), 2);
             QCOMPARE(failedFiles, {});
-            QCOMPARE(dls[0]->m_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-linux-32.jar"));
-            QCOMPARE(dls[1]->m_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-linux-64.jar"));
+            QCOMPARE(dls[0]->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-linux-32.jar"));
+            QCOMPARE(dls[1]->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-linux-64.jar"));
         }
         r.system = "windows";
         {
@@ -189,8 +189,8 @@ slots:
             auto dls = test.getDownloads(r, cache.get(), failedFiles, QString());
             QCOMPARE(dls.size(), 2);
             QCOMPARE(failedFiles, {});
-            QCOMPARE(dls[0]->m_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-windows-32.jar"));
-            QCOMPARE(dls[1]->m_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-windows-64.jar"));
+            QCOMPARE(dls[0]->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-windows-32.jar"));
+            QCOMPARE(dls[1]->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-windows-64.jar"));
         }
         r.system = "osx";
         {
@@ -204,15 +204,15 @@ slots:
             auto dls = test.getDownloads(r, cache.get(), failedFiles, QString());
             QCOMPARE(dls.size(), 2);
             QCOMPARE(failedFiles, {});
-            QCOMPARE(dls[0]->m_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-osx-32.jar"));
-            QCOMPARE(dls[1]->m_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-osx-64.jar"));
+            QCOMPARE(dls[0]->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-osx-32.jar"));
+            QCOMPARE(dls[1]->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url, QUrl("file://foo/bar/test/package/testname/testversion/testname-testversion-osx-64.jar"));
         }
     }
     void test_legacy_native_arch_local_override()
     {
         RuntimeContext r = dummyContext();
         Library test("test.package:testname:testversion");
-        test.m_nativeClassifiers["linux"]="linux-${arch}";
+        test.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_nativeClassifiers["linux"]="linux-${arch}";
         test.setHint("local");
         QCOMPARE(test.isNative(), true);
         test.setRepositoryURL("file://foo/bar");
@@ -247,7 +247,7 @@ slots:
             auto dls = test->getDownloads(r, cache.get(), failedFiles, QString());
             QCOMPARE(dls.size(), 1);
             QCOMPARE(failedFiles, {});
-            QCOMPARE(dls[0]->m_url, QUrl("https://libraries.minecraft.net/com/paulscode/codecwav/20101023/codecwav-20101023.jar"));
+            QCOMPARE(dls[0]->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url, QUrl("https://libraries.minecraft.net/com/paulscode/codecwav/20101023/codecwav-20101023.jar"));
         }
         r.system = "osx";
         test->setHint("local");
@@ -302,7 +302,7 @@ slots:
         auto dls = test->getDownloads(r, cache.get(), failedFiles, QString());
         QCOMPARE(dls.size(), 1);
         QCOMPARE(failedFiles, {});
-        QCOMPARE(dls[0]->m_url, QUrl("https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"));
+        QCOMPARE(dls[0]->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url, QUrl("https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"));
     }
     void test_onenine_native_arch()
     {
@@ -318,8 +318,8 @@ slots:
         auto dls = test->getDownloads(r, cache.get(), failedFiles, QString());
         QCOMPARE(dls.size(), 2);
         QCOMPARE(failedFiles, {});
-        QCOMPARE(dls[0]->m_url, QUrl("https://libraries.minecraft.net/tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-windows-32.jar"));
-        QCOMPARE(dls[1]->m_url, QUrl("https://libraries.minecraft.net/tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-windows-64.jar"));
+        QCOMPARE(dls[0]->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url, QUrl("https://libraries.minecraft.net/tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-windows-32.jar"));
+        QCOMPARE(dls[1]->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_url, QUrl("https://libraries.minecraft.net/tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-windows-64.jar"));
     }
 private:
     std::unique_ptr<HttpMetaCache> cache;

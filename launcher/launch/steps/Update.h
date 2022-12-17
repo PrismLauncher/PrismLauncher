@@ -26,7 +26,7 @@ class Update: public LaunchStep
 {
     Q_OBJECT
 public:
-    explicit Update(LaunchTask *parent, Net::Mode mode):LaunchStep(parent), m_mode(mode) {};
+    explicit Update(LaunchTask *parent, Net::Mode mode):LaunchStep(parent), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mode(mode) {};
     virtual ~Update() {};
 
     void executeTask() override;
@@ -39,7 +39,7 @@ private slots:
     void updateFinished();
 
 private:
-    Task::Ptr m_updateTask;
-    bool m_aborted = false;
-    Net::Mode m_mode = Net::Mode::Offline;
+    Task::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateTask;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_aborted = false;
+    Net::Mode hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mode = Net::Mode::Offline;
 };

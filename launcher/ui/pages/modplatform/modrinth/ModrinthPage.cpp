@@ -57,8 +57,8 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget
 
     connect(ui->searchButton, &QPushButton::clicked, this, &ModrinthPage::triggerSearch);
     ui->searchEdit->installEventFilter(this);
-    m_model = new Modrinth::ModpackListModel(this);
-    ui->packView->setModel(m_model);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model = new Modrinth::ModpackListModel(this);
+    ui->packView->setModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model);
 
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
@@ -117,7 +117,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         return;
     }
 
-    current = m_model->data(curr, Qt::UserRole).value<Modrinth::Modpack>();
+    current = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->data(curr, Qt::UserRole).value<Modrinth::Modpack>();
     auto name = current.name;
 
     if (!current.extraInfoLoaded) {
@@ -158,7 +158,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             QVariant current_updated;
             current_updated.setValue(current);
 
-            if (!m_model->setData(curr, current_updated, Qt::UserRole))
+            if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setData(curr, current_updated, Qt::UserRole))
                 qWarning() << "Failed to cache extra info for the current pack!";
 
             suggestCurrent();
@@ -213,7 +213,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             QVariant current_updated;
             current_updated.setValue(current);
 
-            if (!m_model->setData(curr, current_updated, Qt::UserRole))
+            if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->setData(curr, current_updated, Qt::UserRole))
                 qWarning() << "Failed to cache versions for the current pack!";
 
             suggestCurrent();
@@ -306,7 +306,7 @@ void ModrinthPage::suggestCurrent()
 
             dialog->setSuggestedPack(current.name, ver.version, new InstanceImportTask(ver.download_url, this, std::move(extra_info)));
             auto iconName = current.iconName;
-            m_model->getLogo(iconName, current.iconUrl.toString(),
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->getLogo(iconName, current.iconUrl.toString(),
                              [this, iconName](QString logo) { dialog->setSuggestedIconFromFile(logo, iconName); });
 
             break;
@@ -316,7 +316,7 @@ void ModrinthPage::suggestCurrent()
 
 void ModrinthPage::triggerSearch()
 {
-    m_model->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
 }
 
 void ModrinthPage::onVersionSelectionChanged(QString data)

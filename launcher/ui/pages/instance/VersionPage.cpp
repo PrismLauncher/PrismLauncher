@@ -77,14 +77,14 @@ public:
     IconProxy(QWidget *parentWidget) : QIdentityProxyModel(parentWidget)
     {
         connect(parentWidget, &QObject::destroyed, this, &IconProxy::widgetGone);
-        m_parentWidget = parentWidget;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget = parentWidget;
     }
 
     virtual QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const override
     {
         QVariant var = QIdentityProxyModel::data(proxyIndex, role);
         int column = proxyIndex.column();
-        if(column == 0 && role == Qt::DecorationRole && m_parentWidget)
+        if(column == 0 && role == Qt::DecorationRole && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget)
         {
             if(!var.isNull())
             {
@@ -105,16 +105,16 @@ public:
 private slots:
     void widgetGone()
     {
-        m_parentWidget = nullptr;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget = nullptr;
     }
 
 private:
-    QWidget *m_parentWidget = nullptr;
+    QWidget *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parentWidget = nullptr;
 };
 
 QIcon VersionPage::icon() const
 {
-    return APPLICATION->icons()->getIcon(m_inst->iconKey());
+    return APPLICATION->icons()->getIcon(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->iconKey());
 }
 bool VersionPage::shouldDisplay() const
 {
@@ -130,15 +130,15 @@ void VersionPage::openedImpl()
 {
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     if (!APPLICATION->settings()->contains(setting_name))
-        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
     else
-        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
 
-    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+    ui->toolBar->setVisibilityState(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting->get().toByteArray());
 }
 void VersionPage::closedImpl()
 {
-    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting->set(ui->toolBar->getVisibilityState());
 }
 
 QMenu * VersionPage::createPopupMenu()
@@ -149,27 +149,27 @@ QMenu * VersionPage::createPopupMenu()
 }
 
 VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::VersionPage), m_inst(inst)
+    : QMainWindow(parent), ui(new Ui::VersionPage), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst(inst)
 {
     ui->setupUi(this);
 
     ui->toolBar->insertSpacer(ui->actionReload);
 
-    m_profile = m_inst->getPackProfile();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getPackProfile();
 
     reloadPackProfile();
 
     auto proxy = new IconProxy(ui->packageView);
-    proxy->setSourceModel(m_profile.get());
+    proxy->setSourceModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile.get());
 
-    m_filterModel = new QSortFilterProxyModel();
-    m_filterModel->setDynamicSortFilter(true);
-    m_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
-    m_filterModel->setSourceModel(proxy);
-    m_filterModel->setFilterKeyColumn(-1);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel = new QSortFilterProxyModel();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setDynamicSortFilter(true);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setSourceModel(proxy);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setFilterKeyColumn(-1);
 
-    ui->packageView->setModel(m_filterModel);
+    ui->packageView->setModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel);
     ui->packageView->installEventFilter(this);
     ui->packageView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->packageView->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -178,11 +178,11 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     auto smodel = ui->packageView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::packageCurrent);
 
-    connect(m_profile.get(), &PackProfile::minecraftChanged, this, &VersionPage::updateVersionControls);
-    controlsEnabled = !m_inst->isRunning();
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile.get(), &PackProfile::minecraftChanged, this, &VersionPage::updateVersionControls);
+    controlsEnabled = !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->isRunning();
     updateVersionControls();
     preselect(0);
-    connect(m_inst, &BaseInstance::runningStatusChanged, this, &VersionPage::updateRunningStatus);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst, &BaseInstance::runningStatusChanged, this, &VersionPage::updateRunningStatus);
     connect(ui->packageView, &ModListView::customContextMenuRequested, this, &VersionPage::showContextMenu);
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &VersionPage::onFilterTextChanged);
 }
@@ -207,7 +207,7 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
         return;
     }
     int row = current.row();
-    auto patch = m_profile->getComponent(row);
+    auto patch = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponent(row);
     auto severity = patch->getProblemSeverity();
     switch(severity)
     {
@@ -227,15 +227,15 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
     QString problemOut;
     for (auto &problem: problems)
     {
-        if(problem.m_severity == ProblemSeverity::Error)
+        if(problem.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_severity == ProblemSeverity::Error)
         {
             problemOut += tr("Error: ");
         }
-        else if(problem.m_severity == ProblemSeverity::Warning)
+        else if(problem.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_severity == ProblemSeverity::Warning)
         {
             problemOut += tr("Warning: ");
         }
-        problemOut += problem.m_description;
+        problemOut += problem.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_description;
         problemOut += "\n";
     }
     ui->frame->setDescription(problemOut);
@@ -252,7 +252,7 @@ void VersionPage::updateRunningStatus(bool running)
 void VersionPage::updateVersionControls()
 {
     // FIXME: this is a dirty hack
-    auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
+    auto minecraftVersion = Version(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponentVersion("net.minecraft"));
 
     ui->actionInstall_Forge->setEnabled(controlsEnabled);
 
@@ -272,7 +272,7 @@ void VersionPage::updateButtons(int row)
 {
     if(row == -1)
         row = currentRow();
-    auto patch = m_profile->getComponent(row);
+    auto patch = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponent(row);
     ui->actionRemove->setEnabled(controlsEnabled && patch && patch->isRemovable());
     ui->actionMove_down->setEnabled(controlsEnabled && patch && patch->isMoveable());
     ui->actionMove_up->setEnabled(controlsEnabled && patch && patch->isMoveable());
@@ -293,7 +293,7 @@ bool VersionPage::reloadPackProfile()
 {
     try
     {
-        m_profile->reload(Net::Mode::Online);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->reload(Net::Mode::Online);
         return true;
     }
     catch (const Exception &e)
@@ -313,7 +313,7 @@ bool VersionPage::reloadPackProfile()
 void VersionPage::on_actionReload_triggered()
 {
     reloadPackProfile();
-    m_container->refreshContainer();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->refreshContainer();
 }
 
 void VersionPage::on_actionRemove_triggered()
@@ -321,21 +321,21 @@ void VersionPage::on_actionRemove_triggered()
     if (ui->packageView->currentIndex().isValid())
     {
         // FIXME: use actual model, not reloading.
-        if (!m_profile->remove(ui->packageView->currentIndex().row()))
+        if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->remove(ui->packageView->currentIndex().row()))
         {
             QMessageBox::critical(this, tr("Error"), tr("Couldn't remove file"));
         }
     }
     updateButtons();
     reloadPackProfile();
-    m_container->refreshContainer();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->refreshContainer();
 }
 
 void VersionPage::on_actionInstall_mods_triggered()
 {
-    if(m_container)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container)
     {
-        m_container->selectPage("mods");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->selectPage("mods");
     }
 }
 
@@ -344,7 +344,7 @@ void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
     auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
     if(!list.empty())
     {
-        m_profile->installJarMods(list);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->installJarMods(list);
     }
     updateButtons();
 }
@@ -354,7 +354,7 @@ void VersionPage::on_actionReplace_Minecraft_jar_triggered()
     auto jarPath = GuiUtil::BrowseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement (*.jar)"), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
     if(!jarPath.isEmpty())
     {
-        m_profile->installCustomJar(jarPath);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->installCustomJar(jarPath);
     }
     updateButtons();
 }
@@ -366,7 +366,7 @@ void VersionPage::on_actionAdd_Agents_triggered()
                                                APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
     if (!list.isEmpty())
-        m_profile->installAgents(list);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->installAgents(list);
 
     updateButtons();
 }
@@ -375,7 +375,7 @@ void VersionPage::on_actionMove_up_triggered()
 {
     try
     {
-        m_profile->move(currentRow(), PackProfile::MoveUp);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->move(currentRow(), PackProfile::MoveUp);
     }
     catch (const Exception &e)
     {
@@ -388,7 +388,7 @@ void VersionPage::on_actionMove_down_triggered()
 {
     try
     {
-        m_profile->move(currentRow(), PackProfile::MoveDown);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->move(currentRow(), PackProfile::MoveDown);
     }
     catch (const Exception &e)
     {
@@ -404,7 +404,7 @@ void VersionPage::on_actionChange_version_triggered()
     {
         return;
     }
-    auto patch = m_profile->getComponent(versionRow);
+    auto patch = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponent(versionRow);
     auto name = patch->getName();
     auto list = patch->getVersionList();
     if(!list)
@@ -428,7 +428,7 @@ void VersionPage::on_actionChange_version_triggered()
     {
         vselect.setEmptyString(tr("No intermediary mappings versions are currently available."));
         vselect.setEmptyErrorString(tr("Couldn't load or download the intermediary mappings version lists!"));
-        vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
+        vselect.setExactFilter(BaseVersionList::ParentVersionRole, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponentVersion("net.minecraft"));
     }
     auto currentVersion = patch->getVersion();
     if(!currentVersion.isEmpty())
@@ -444,9 +444,9 @@ void VersionPage::on_actionChange_version_triggered()
     {
         important = true;
     }
-    m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);
-    m_profile->resolve(Net::Mode::Online);
-    m_container->refreshContainer();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->resolve(Net::Mode::Online);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->refreshContainer();
 }
 
 void VersionPage::on_actionDownload_All_triggered()
@@ -461,7 +461,7 @@ void VersionPage::on_actionDownload_All_triggered()
         return;
     }
 
-    auto updateTask = m_inst->createUpdateTask(Net::Mode::Online);
+    auto updateTask = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->createUpdateTask(Net::Mode::Online);
     if (!updateTask)
     {
         return;
@@ -471,7 +471,7 @@ void VersionPage::on_actionDownload_All_triggered()
     // FIXME: unused return value
     tDialog.execWithTask(updateTask.get());
     updateButtons();
-    m_container->refreshContainer();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->refreshContainer();
 }
 
 void VersionPage::on_actionInstall_Forge_triggered()
@@ -482,11 +482,11 @@ void VersionPage::on_actionInstall_Forge_triggered()
         return;
     }
     VersionSelectDialog vselect(vlist.get(), tr("Select Forge version"), this);
-    vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
-    vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") + m_profile->getComponentVersion("net.minecraft"));
+    vselect.setExactFilter(BaseVersionList::ParentVersionRole, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponentVersion("net.minecraft"));
+    vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponentVersion("net.minecraft"));
     vselect.setEmptyErrorString(tr("Couldn't load or download the Forge version lists!"));
 
-    auto currentVersion = m_profile->getComponentVersion("net.minecraftforge");
+    auto currentVersion = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponentVersion("net.minecraftforge");
     if(!currentVersion.isEmpty())
     {
         vselect.setCurrentVersion(currentVersion);
@@ -495,11 +495,11 @@ void VersionPage::on_actionInstall_Forge_triggered()
     if (vselect.exec() && vselect.selectedVersion())
     {
         auto vsn = vselect.selectedVersion();
-        m_profile->setComponentVersion("net.minecraftforge", vsn->descriptor());
-        m_profile->resolve(Net::Mode::Online);
-        // m_profile->installVersion();
-        preselect(m_profile->rowCount(QModelIndex())-1);
-        m_container->refreshContainer();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->setComponentVersion("net.minecraftforge", vsn->descriptor());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->resolve(Net::Mode::Online);
+        // hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->installVersion();
+        preselect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->rowCount(QModelIndex())-1);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->refreshContainer();
     }
 }
 
@@ -514,7 +514,7 @@ void VersionPage::on_actionInstall_Fabric_triggered()
     vselect.setEmptyString(tr("No Fabric Loader versions are currently available."));
     vselect.setEmptyErrorString(tr("Couldn't load or download the Fabric Loader version lists!"));
 
-    auto currentVersion = m_profile->getComponentVersion("net.fabricmc.fabric-loader");
+    auto currentVersion = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponentVersion("net.fabricmc.fabric-loader");
     if(!currentVersion.isEmpty())
     {
         vselect.setCurrentVersion(currentVersion);
@@ -523,10 +523,10 @@ void VersionPage::on_actionInstall_Fabric_triggered()
     if (vselect.exec() && vselect.selectedVersion())
     {
         auto vsn = vselect.selectedVersion();
-        m_profile->setComponentVersion("net.fabricmc.fabric-loader", vsn->descriptor());
-        m_profile->resolve(Net::Mode::Online);
-        preselect(m_profile->rowCount(QModelIndex())-1);
-        m_container->refreshContainer();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->setComponentVersion("net.fabricmc.fabric-loader", vsn->descriptor());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->resolve(Net::Mode::Online);
+        preselect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->rowCount(QModelIndex())-1);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->refreshContainer();
     }
 }
 
@@ -541,7 +541,7 @@ void VersionPage::on_actionInstall_Quilt_triggered()
     vselect.setEmptyString(tr("No Quilt Loader versions are currently available."));
     vselect.setEmptyErrorString(tr("Couldn't load or download the Quilt Loader version lists!"));
 
-    auto currentVersion = m_profile->getComponentVersion("org.quiltmc.quilt-loader");
+    auto currentVersion = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponentVersion("org.quiltmc.quilt-loader");
     if(!currentVersion.isEmpty())
     {
         vselect.setCurrentVersion(currentVersion);
@@ -550,10 +550,10 @@ void VersionPage::on_actionInstall_Quilt_triggered()
     if (vselect.exec() && vselect.selectedVersion())
     {
         auto vsn = vselect.selectedVersion();
-        m_profile->setComponentVersion("org.quiltmc.quilt-loader", vsn->descriptor());
-        m_profile->resolve(Net::Mode::Online);
-        preselect(m_profile->rowCount(QModelIndex())-1);
-        m_container->refreshContainer();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->setComponentVersion("org.quiltmc.quilt-loader", vsn->descriptor());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->resolve(Net::Mode::Online);
+        preselect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->rowCount(QModelIndex())-1);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->refreshContainer();
     }
 }
 
@@ -561,9 +561,9 @@ void VersionPage::on_actionAdd_Empty_triggered()
 {
     NewComponentDialog compdialog(QString(), QString(), this);
     QStringList blacklist;
-    for(int i = 0; i < m_profile->rowCount(); i++)
+    for(int i = 0; i < hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->rowCount(); i++)
     {
-        auto comp = m_profile->getComponent(i);
+        auto comp = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponent(i);
         blacklist.push_back(comp->getID());
     }
     compdialog.setBlacklist(blacklist);
@@ -571,7 +571,7 @@ void VersionPage::on_actionAdd_Empty_triggered()
     {
         qDebug() << "name:" << compdialog.name();
         qDebug() << "uid:" << compdialog.uid();
-        m_profile->installEmpty(compdialog.uid(), compdialog.name());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->installEmpty(compdialog.uid(), compdialog.name());
     }
 }
 
@@ -583,11 +583,11 @@ void VersionPage::on_actionInstall_LiteLoader_triggered()
         return;
     }
     VersionSelectDialog vselect(vlist.get(), tr("Select LiteLoader version"), this);
-    vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
-    vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") + m_profile->getComponentVersion("net.minecraft"));
+    vselect.setExactFilter(BaseVersionList::ParentVersionRole, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponentVersion("net.minecraft"));
+    vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponentVersion("net.minecraft"));
     vselect.setEmptyErrorString(tr("Couldn't load or download the LiteLoader version lists!"));
 
-    auto currentVersion = m_profile->getComponentVersion("com.mumfrey.liteloader");
+    auto currentVersion = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponentVersion("com.mumfrey.liteloader");
     if(!currentVersion.isEmpty())
     {
         vselect.setCurrentVersion(currentVersion);
@@ -596,22 +596,22 @@ void VersionPage::on_actionInstall_LiteLoader_triggered()
     if (vselect.exec() && vselect.selectedVersion())
     {
         auto vsn = vselect.selectedVersion();
-        m_profile->setComponentVersion("com.mumfrey.liteloader", vsn->descriptor());
-        m_profile->resolve(Net::Mode::Online);
-        // m_profile->installVersion(vselect.selectedVersion());
-        preselect(m_profile->rowCount(QModelIndex())-1);
-        m_container->refreshContainer();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->setComponentVersion("com.mumfrey.liteloader", vsn->descriptor());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->resolve(Net::Mode::Online);
+        // hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->installVersion(vselect.selectedVersion());
+        preselect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->rowCount(QModelIndex())-1);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->refreshContainer();
     }
 }
 
 void VersionPage::on_actionLibrariesFolder_triggered()
 {
-    DesktopServices::openDirectory(m_inst->getLocalLibraryPath(), true);
+    DesktopServices::openDirectory(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->getLocalLibraryPath(), true);
 }
 
 void VersionPage::on_actionMinecraftFolder_triggered()
 {
-    DesktopServices::openDirectory(m_inst->gameRoot(), true);
+    DesktopServices::openDirectory(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst->gameRoot(), true);
 }
 
 void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &previous)
@@ -626,15 +626,15 @@ void VersionPage::preselect(int row)
     {
         row = 0;
     }
-    if(row >= m_profile->rowCount(QModelIndex()))
+    if(row >= hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->rowCount(QModelIndex()))
     {
-        row = m_profile->rowCount(QModelIndex()) - 1;
+        row = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->rowCount(QModelIndex()) - 1;
     }
     if(row < 0)
     {
         return;
     }
-    auto model_index = m_profile->index(row);
+    auto model_index = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->index(row);
     ui->packageView->selectionModel()->select(model_index, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
     updateButtons(row);
 }
@@ -651,7 +651,7 @@ Component * VersionPage::current()
     {
         return nullptr;
     }
-    return m_profile->getComponent(row);
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponent(row);
 }
 
 int VersionPage::currentRow()
@@ -670,13 +670,13 @@ void VersionPage::on_actionCustomize_triggered()
     {
         return;
     }
-    auto patch = m_profile->getComponent(version);
+    auto patch = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->getComponent(version);
     if(!patch->getVersionFile())
     {
         // TODO: wait for the update task to finish here...
         return;
     }
-    if(!m_profile->customize(version))
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->customize(version))
     {
         // TODO: some error box here
     }
@@ -707,18 +707,18 @@ void VersionPage::on_actionRevert_triggered()
     {
         return;
     }
-    if(!m_profile->revertToBase(version))
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profile->revertToBase(version))
     {
         // TODO: some error box here
     }
     updateButtons();
     preselect(currentIdx);
-    m_container->refreshContainer();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_container->refreshContainer();
 }
 
 void VersionPage::onFilterTextChanged(const QString &newContents)
 {
-    m_filterModel->setFilterFixedString(newContents);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel->setFilterFixedString(newContents);
 }
 
 #include "VersionPage.moc"

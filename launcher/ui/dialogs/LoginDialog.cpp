@@ -42,13 +42,13 @@ void LoginDialog::accept()
     ui->progressBar->setVisible(true);
 
     // Setup the login task and start it
-    m_account = MinecraftAccount::createFromUsername(ui->userTextBox->text());
-    m_loginTask = m_account->login(ui->passTextBox->text());
-    connect(m_loginTask.get(), &Task::failed, this, &LoginDialog::onTaskFailed);
-    connect(m_loginTask.get(), &Task::succeeded, this, &LoginDialog::onTaskSucceeded);
-    connect(m_loginTask.get(), &Task::status, this, &LoginDialog::onTaskStatus);
-    connect(m_loginTask.get(), &Task::progress, this, &LoginDialog::onTaskProgress);
-    m_loginTask->start();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account = MinecraftAccount::createFromUsername(ui->userTextBox->text());
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account->login(ui->passTextBox->text());
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &Task::failed, this, &LoginDialog::onTaskFailed);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &Task::succeeded, this, &LoginDialog::onTaskSucceeded);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &Task::status, this, &LoginDialog::onTaskStatus);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask.get(), &Task::progress, this, &LoginDialog::onTaskProgress);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loginTask->start();
 }
 
 void LoginDialog::setUserInputsEnabled(bool enable)
@@ -113,7 +113,7 @@ MinecraftAccountPtr LoginDialog::newAccount(QWidget *parent, QString msg)
     dlg.ui->label->setText(msg);
     if (dlg.exec() == QDialog::Accepted)
     {
-        return dlg.m_account;
+        return dlg.hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_account;
     }
     return nullptr;
 }

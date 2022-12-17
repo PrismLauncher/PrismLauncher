@@ -31,16 +31,16 @@ class InstanceCreationTask : public InstanceTask {
      */
     virtual bool createInstance() { return false; };
 
-    QString getError() const { return m_error_message; }
+    QString getError() const { return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_error_message; }
 
    protected:
-    void setError(QString message) { m_error_message = message; };
+    void setError(QString message) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_error_message = message; };
 
    protected:
-    bool m_abort = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_abort = false;
 
-    QStringList m_files_to_remove;
+    QStringList hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_files_to_remove;
 
    private:
-    QString m_error_message;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_error_message;
 };

@@ -262,18 +262,18 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     parser.process(arguments());
 
-    m_instanceIdToLaunch = parser.value("launch");
-    m_serverToJoin = parser.value("server");
-    m_profileToUse = parser.value("profile");
-    m_liveCheck = parser.isSet("alive");
-    m_zipToImport = parser.value("import");
-    m_instanceIdToShowWindowOf = parser.value("show");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToLaunch = parser.value("launch");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin = parser.value("server");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profileToUse = parser.value("profile");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_liveCheck = parser.isSet("alive");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_zipToImport = parser.value("import");
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToShowWindowOf = parser.value("show");
 
     // error if --launch is missing with --server or --profile
-    if((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty())
+    if((!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin.isEmpty() || !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profileToUse.isEmpty()) && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToLaunch.isEmpty())
     {
         std::cerr << "--server and --profile can only be used in combination with --launch!" << std::endl;
-        m_status = Application::Failed;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = Application::Failed;
         return;
     }
 
@@ -284,14 +284,14 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // Root path is used for updates and portable data
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
         QDir foo(FS::PathCombine(binPath, "..")); // typically portable-root or /usr
-        m_rootPath = foo.absolutePath();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootPath = foo.absolutePath();
 #elif defined(Q_OS_WIN32)
-        m_rootPath = binPath;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootPath = binPath;
 #elif defined(Q_OS_MAC)
         QDir foo(FS::PathCombine(binPath, "../.."));
-        m_rootPath = foo.absolutePath();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootPath = foo.absolutePath();
         // on macOS, touch the root to force Finder to reload the .app metadata (and fix any icon change issues)
-        FS::updateTimestamp(m_rootPath);
+        FS::updateTimestamp(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootPath);
 #endif
     }
 
@@ -313,8 +313,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         adjustedBy = "Persistent data path";
 
 #ifndef Q_OS_MACOS
-        if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
-            dataPath = m_rootPath;
+        if (QFile::exists(FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootPath, "portable.txt"))) {
+            dataPath = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootPath;
             adjustedBy = "Portable data path";
         }
 #endif
@@ -359,42 +359,42 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     auto appID = ApplicationId::fromPathAndVersion(QDir::currentPath(), BuildConfig.printableVersionString());
     {
         // FIXME: you can run the same binaries with multiple data dirs and they won't clash. This could cause issues for updates.
-        m_peerInstance = new LocalPeer(this, appID);
-        connect(m_peerInstance, &LocalPeer::messageReceived, this, &Application::messageReceived);
-        if(m_peerInstance->isClient()) {
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_peerInstance = new LocalPeer(this, appID);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_peerInstance, &LocalPeer::messageReceived, this, &Application::messageReceived);
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_peerInstance->isClient()) {
             int timeout = 2000;
 
-            if(m_instanceIdToLaunch.isEmpty())
+            if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToLaunch.isEmpty())
             {
                 ApplicationMessage activate;
                 activate.command = "activate";
-                m_peerInstance->sendMessage(activate.serialize(), timeout);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_peerInstance->sendMessage(activate.serialize(), timeout);
 
-                if(!m_zipToImport.isEmpty())
+                if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_zipToImport.isEmpty())
                 {
                     ApplicationMessage import;
                     import.command = "import";
-                    import.args.insert("path", m_zipToImport.toString());
-                    m_peerInstance->sendMessage(import.serialize(), timeout);
+                    import.args.insert("path", hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_zipToImport.toString());
+                    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_peerInstance->sendMessage(import.serialize(), timeout);
                 }
             }
             else
             {
                 ApplicationMessage launch;
                 launch.command = "launch";
-                launch.args["id"] = m_instanceIdToLaunch;
+                launch.args["id"] = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToLaunch;
 
-                if(!m_serverToJoin.isEmpty())
+                if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin.isEmpty())
                 {
-                    launch.args["server"] = m_serverToJoin;
+                    launch.args["server"] = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin;
                 }
-                if(!m_profileToUse.isEmpty())
+                if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profileToUse.isEmpty())
                 {
-                    launch.args["profile"] = m_profileToUse;
+                    launch.args["profile"] = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profileToUse;
                 }
-                m_peerInstance->sendMessage(launch.serialize(), timeout);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_peerInstance->sendMessage(launch.serialize(), timeout);
             }
-            m_status = Application::Succeeded;
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = Application::Succeeded;
             return;
         }
     }
@@ -460,19 +460,19 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             qDebug() << "Work dir                   : " << QDir::currentPath();
         }
         qDebug() << "Binary path                : " << binPath;
-        qDebug() << "Application root path      : " << m_rootPath;
-        if(!m_instanceIdToLaunch.isEmpty())
+        qDebug() << "Application root path      : " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootPath;
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToLaunch.isEmpty())
         {
-            qDebug() << "ID of instance to launch   : " << m_instanceIdToLaunch;
+            qDebug() << "ID of instance to launch   : " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToLaunch;
         }
-        if(!m_serverToJoin.isEmpty())
+        if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin.isEmpty())
         {
-            qDebug() << "Address of server to join  :" << m_serverToJoin;
+            qDebug() << "Address of server to join  :" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin;
         }
         qDebug() << "<> Paths set.";
     }
 
-    if(m_liveCheck)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_liveCheck)
     {
         QFile check(liveCheckFile);
         if(check.open(QIODevice::WriteOnly | QIODevice::Truncate))
@@ -493,21 +493,21 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     // Initialize application settings
     {
         // Provide a fallback for migration from PolyMC
-        m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this));
         // Updates
         // Multiple channels are separated by spaces
-        m_settings->registerSetting("UpdateChannel", BuildConfig.VERSION_CHANNEL);
-        m_settings->registerSetting("AutoUpdate", true);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("UpdateChannel", BuildConfig.VERSION_CHANNEL);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("AutoUpdate", true);
 
         // Theming
-        m_settings->registerSetting("IconTheme", QString("pe_colored"));
-        m_settings->registerSetting("ApplicationTheme", QString("system"));
-        m_settings->registerSetting("BackgroundCat", QString("kitteh"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("IconTheme", QString("pe_colored"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ApplicationTheme", QString("system"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
         // Remembered state
-        m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("LastUsedGroupForNewInstance", QString());
 
-        m_settings->registerSetting("MenuBarInsteadOfToolBar", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("MenuBarInsteadOfToolBar", false);
 
         QString defaultMonospace;
         int defaultSize = 11;
@@ -531,171 +531,171 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         qDebug() << "Detected default console font:" << resolvedDefaultMonospace
             << ", substitutions:" << resolvedFont.substitutions().join(',');
 
-        m_settings->registerSetting("ConsoleFont", resolvedDefaultMonospace);
-        m_settings->registerSetting("ConsoleFontSize", defaultSize);
-        m_settings->registerSetting("ConsoleMaxLines", 100000);
-        m_settings->registerSetting("ConsoleOverflowStop", true);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ConsoleFont", resolvedDefaultMonospace);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ConsoleFontSize", defaultSize);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ConsoleMaxLines", 100000);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ConsoleOverflowStop", true);
 
         // Folders
-        m_settings->registerSetting("InstanceDir", "instances");
-        m_settings->registerSetting({"CentralModsDir", "ModsDir"}, "mods");
-        m_settings->registerSetting("IconsDir", "icons");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("InstanceDir", "instances");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting({"CentralModsDir", "ModsDir"}, "mods");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("IconsDir", "icons");
 
         // Editors
-        m_settings->registerSetting("JsonEditor", QString());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("JsonEditor", QString());
 
         // Language
-        m_settings->registerSetting("Language", QString());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("Language", QString());
 
         // Console
-        m_settings->registerSetting("ShowConsole", false);
-        m_settings->registerSetting("AutoCloseConsole", false);
-        m_settings->registerSetting("ShowConsoleOnError", true);
-        m_settings->registerSetting("LogPrePostOutput", true);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ShowConsole", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("AutoCloseConsole", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ShowConsoleOnError", true);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("LogPrePostOutput", true);
 
         // Window Size
-        m_settings->registerSetting({"LaunchMaximized", "MCWindowMaximize"}, false);
-        m_settings->registerSetting({"MinecraftWinWidth", "MCWindowWidth"}, 854);
-        m_settings->registerSetting({"MinecraftWinHeight", "MCWindowHeight"}, 480);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting({"LaunchMaximized", "MCWindowMaximize"}, false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting({"MinecraftWinWidth", "MCWindowWidth"}, 854);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting({"MinecraftWinHeight", "MCWindowHeight"}, 480);
 
         // Proxy Settings
-        m_settings->registerSetting("ProxyType", "None");
-        m_settings->registerSetting({"ProxyAddr", "ProxyHostName"}, "127.0.0.1");
-        m_settings->registerSetting("ProxyPort", 8080);
-        m_settings->registerSetting({"ProxyUser", "ProxyUsername"}, "");
-        m_settings->registerSetting({"ProxyPass", "ProxyPassword"}, "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ProxyType", "None");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting({"ProxyAddr", "ProxyHostName"}, "127.0.0.1");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ProxyPort", 8080);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting({"ProxyUser", "ProxyUsername"}, "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting({"ProxyPass", "ProxyPassword"}, "");
 
         // Memory
-        m_settings->registerSetting({"MinMemAlloc", "MinMemoryAlloc"}, 512);
-        m_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, suitableMaxMem());
-        m_settings->registerSetting("PermGen", 128);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting({"MinMemAlloc", "MinMemoryAlloc"}, 512);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, suitableMaxMem());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("PermGen", 128);
 
         // Java Settings
-        m_settings->registerSetting("JavaPath", "");
-        m_settings->registerSetting("JavaTimestamp", 0);
-        m_settings->registerSetting("JavaArchitecture", "");
-        m_settings->registerSetting("JavaRealArchitecture", "");
-        m_settings->registerSetting("JavaVersion", "");
-        m_settings->registerSetting("JavaVendor", "");
-        m_settings->registerSetting("LastHostname", "");
-        m_settings->registerSetting("JvmArgs", "");
-        m_settings->registerSetting("IgnoreJavaCompatibility", false);
-        m_settings->registerSetting("IgnoreJavaWizard", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("JavaPath", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("JavaTimestamp", 0);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("JavaArchitecture", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("JavaRealArchitecture", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("JavaVersion", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("JavaVendor", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("LastHostname", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("JvmArgs", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("IgnoreJavaCompatibility", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("IgnoreJavaWizard", false);
 
         // Native library workarounds
-        m_settings->registerSetting("UseNativeOpenAL", false);
-        m_settings->registerSetting("UseNativeGLFW", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("UseNativeOpenAL", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("UseNativeGLFW", false);
 
         // Peformance related options
-        m_settings->registerSetting("EnableFeralGamemode", false);
-        m_settings->registerSetting("EnableMangoHud", false);
-        m_settings->registerSetting("UseDiscreteGpu", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("EnableFeralGamemode", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("EnableMangoHud", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("UseDiscreteGpu", false);
 
         // Game time
-        m_settings->registerSetting("ShowGameTime", true);
-        m_settings->registerSetting("ShowGlobalGameTime", true);
-        m_settings->registerSetting("RecordGameTime", true);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ShowGameTime", true);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ShowGlobalGameTime", true);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("RecordGameTime", true);
 
         // Minecraft launch method
-        m_settings->registerSetting("MCLaunchMethod", "LauncherPart");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("MCLaunchMethod", "LauncherPart");
 
         // Minecraft mods
-        m_settings->registerSetting("ModMetadataDisabled", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ModMetadataDisabled", false);
 
         // Minecraft offline player name
-        m_settings->registerSetting("LastOfflinePlayerName", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("LastOfflinePlayerName", "");
 
         // Wrapper command for launch
-        m_settings->registerSetting("WrapperCommand", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("WrapperCommand", "");
 
         // Custom Commands
-        m_settings->registerSetting({"PreLaunchCommand", "PreLaunchCmd"}, "");
-        m_settings->registerSetting({"PostExitCommand", "PostExitCmd"}, "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting({"PreLaunchCommand", "PreLaunchCmd"}, "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting({"PostExitCommand", "PostExitCmd"}, "");
 
         // The cat
-        m_settings->registerSetting("TheCat", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("TheCat", false);
 
-        m_settings->registerSetting("ToolbarsLocked", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ToolbarsLocked", false);
 
-        m_settings->registerSetting("InstSortMode", "Name");
-        m_settings->registerSetting("SelectedInstance", QString());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("InstSortMode", "Name");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("SelectedInstance", QString());
 
         // Window state and geometry
-        m_settings->registerSetting("MainWindowState", "");
-        m_settings->registerSetting("MainWindowGeometry", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("MainWindowState", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("MainWindowGeometry", "");
 
-        m_settings->registerSetting("ConsoleWindowState", "");
-        m_settings->registerSetting("ConsoleWindowGeometry", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ConsoleWindowState", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ConsoleWindowGeometry", "");
 
-        m_settings->registerSetting("SettingsGeometry", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("SettingsGeometry", "");
 
-        m_settings->registerSetting("PagedGeometry", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("PagedGeometry", "");
 
-        m_settings->registerSetting("NewInstanceGeometry", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("NewInstanceGeometry", "");
 
-        m_settings->registerSetting("UpdateDialogGeometry", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("UpdateDialogGeometry", "");
 
-        m_settings->registerSetting("ModDownloadGeometry", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("ModDownloadGeometry", "");
 
         // HACK: This code feels so stupid is there a less stupid way of doing this?
         {
-            m_settings->registerSetting("PastebinURL", "");
-            m_settings->registerSetting("PastebinType", PasteUpload::PasteType::Mclogs);
-            m_settings->registerSetting("PastebinCustomAPIBase", "");
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("PastebinURL", "");
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("PastebinType", PasteUpload::PasteType::Mclogs);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("PastebinCustomAPIBase", "");
 
-            QString pastebinURL = m_settings->get("PastebinURL").toString();
+            QString pastebinURL = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("PastebinURL").toString();
 
             bool userHadDefaultPastebin = pastebinURL == "https://0x0.st";
             if (!pastebinURL.isEmpty() && !userHadDefaultPastebin)
             {
-                m_settings->set("PastebinType", PasteUpload::PasteType::NullPointer);
-                m_settings->set("PastebinCustomAPIBase", pastebinURL);
-                m_settings->reset("PastebinURL");
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("PastebinType", PasteUpload::PasteType::NullPointer);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("PastebinCustomAPIBase", pastebinURL);
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("PastebinURL");
             }
 
             bool ok;
-            int pasteType = m_settings->get("PastebinType").toInt(&ok);
+            int pasteType = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("PastebinType").toInt(&ok);
             // If PastebinType is invalid then reset the related settings.
             if (!ok || !(PasteUpload::PasteType::First <= pasteType && pasteType <= PasteUpload::PasteType::Last))
             {
-                m_settings->reset("PastebinType");
-                m_settings->reset("PastebinCustomAPIBase");
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("PastebinType");
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("PastebinCustomAPIBase");
             }
         }
         // meta URL
-        m_settings->registerSetting("MetaURLOverride", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("MetaURLOverride", "");
 
-        m_settings->registerSetting("CloseAfterLaunch", false);
-        m_settings->registerSetting("QuitAfterGameStop", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("CloseAfterLaunch", false);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("QuitAfterGameStop", false);
 
         // Custom Microsoft Authentication Client ID
-        m_settings->registerSetting("MSAClientIDOverride", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("MSAClientIDOverride", "");
 
         // Custom Flame API Key
         {
-            m_settings->registerSetting("CFKeyOverride", "");
-            m_settings->registerSetting("FlameKeyOverride", "");
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("CFKeyOverride", "");
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("FlameKeyOverride", "");
 
-            QString flameKey = m_settings->get("CFKeyOverride").toString();
+            QString flameKey = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("CFKeyOverride").toString();
 
             if (!flameKey.isEmpty())
-                m_settings->set("FlameKeyOverride", flameKey);
-            m_settings->reset("CFKeyOverride");
+                hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->set("FlameKeyOverride", flameKey);
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->reset("CFKeyOverride");
         }
-        m_settings->registerSetting("UserAgentOverride", "");
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->registerSetting("UserAgentOverride", "");
 
         // Init page provider
         {
-            m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
-            m_globalSettingsProvider->addPage<LauncherPage>();
-            m_globalSettingsProvider->addPage<MinecraftPage>();
-            m_globalSettingsProvider->addPage<JavaPage>();
-            m_globalSettingsProvider->addPage<LanguagePage>();
-            m_globalSettingsProvider->addPage<CustomCommandsPage>();
-            m_globalSettingsProvider->addPage<ProxyPage>();
-            m_globalSettingsProvider->addPage<ExternalToolsPage>();
-            m_globalSettingsProvider->addPage<AccountListPage>();
-            m_globalSettingsProvider->addPage<APIPage>();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider->addPage<LauncherPage>();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider->addPage<MinecraftPage>();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider->addPage<JavaPage>();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider->addPage<LanguagePage>();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider->addPage<CustomCommandsPage>();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider->addPage<ProxyPage>();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider->addPage<ExternalToolsPage>();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider->addPage<AccountListPage>();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider->addPage<APIPage>();
         }
 
         PixmapCache::setInstance(new PixmapCache(this));
@@ -709,7 +709,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // initialize network access and proxy setup
     {
-        m_network = new QNetworkAccessManager();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network = new QNetworkAccessManager();
         QString proxyTypeStr = settings()->get("ProxyType").toString();
         QString addr = settings()->get("ProxyAddr").toString();
         int port = settings()->get("ProxyPort").value<qint16>();
@@ -721,9 +721,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // load translations
     {
-        m_translations.reset(new TranslationsModel("translations"));
-        auto bcp47Name = m_settings->get("Language").toString();
-        m_translations->selectLanguage(bcp47Name);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_translations.reset(new TranslationsModel("translations"));
+        auto bcp47Name = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("Language").toString();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_translations->selectLanguage(bcp47Name);
         qDebug() << "Your language is" << bcp47Name;
         qDebug() << "<> Translations loaded.";
     }
@@ -734,7 +734,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         auto platform = getIdealPlatform(BuildConfig.BUILD_PLATFORM);
         auto channelUrl = BuildConfig.UPDATER_BASE + platform + "/channels.json";
         qDebug() << "Initializing updater with platform: " << platform << " -- " << channelUrl;
-        m_updateChecker.reset(new UpdateChecker(m_network, channelUrl, BuildConfig.VERSION_CHANNEL));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateChecker.reset(new UpdateChecker(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network, channelUrl, BuildConfig.VERSION_CHANNEL));
         qDebug() << "<> Updater started.";
     }
 
@@ -748,20 +748,20 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             ":/icons/multimc/128x128/instances/",
             ":/icons/multimc/scalable/instances/"
         };
-        m_icons.reset(new IconList(instFolders, setting->get().toString()));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icons.reset(new IconList(instFolders, setting->get().toString()));
         connect(setting.get(), &Setting::SettingChanged,[&](const Setting &, QVariant value)
         {
-            m_icons->directoryChanged(value.toString());
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_icons->directoryChanged(value.toString());
         });
         qDebug() << "<> Instance icons intialized.";
     }
 
     // Themes
-    m_themeManager = std::make_unique<ThemeManager>(m_mainWindow);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_themeManager = std::make_unique<ThemeManager>(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow);
 
     // initialize and load all instances
     {
-        auto InstDirSetting = m_settings->getSetting("InstanceDir");
+        auto InstDirSetting = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->getSetting("InstanceDir");
         // instance path: check for problems with '!' in instance path and warn the user in the log
         // and remember that we have to show him a dialog when the gui starts (if it does so)
         QString instDir = InstDirSetting->get().toString();
@@ -770,64 +770,64 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         {
             qWarning() << "Your instance path contains \'!\' and this is known to cause java problems!";
         }
-        m_instances.reset(new InstanceList(m_settings, instDir, this));
-        connect(InstDirSetting.get(), &Setting::SettingChanged, m_instances.get(), &InstanceList::on_InstFolderChanged);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.reset(new InstanceList(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings, instDir, this));
+        connect(InstDirSetting.get(), &Setting::SettingChanged, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances.get(), &InstanceList::on_InstFolderChanged);
         qDebug() << "Loading Instances...";
-        m_instances->loadList();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances->loadList();
         qDebug() << "<> Instances loaded.";
     }
 
     // and accounts
     {
-        m_accounts.reset(new AccountList(this));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.reset(new AccountList(this));
         qDebug() << "Loading accounts...";
-        m_accounts->setListFilePath("accounts.json", true);
-        m_accounts->loadList();
-        m_accounts->fillQueue();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->setListFilePath("accounts.json", true);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->loadList();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->fillQueue();
         qDebug() << "<> Accounts loaded.";
     }
 
     // init the http meta cache
     {
-        m_metacache.reset(new HttpMetaCache("metacache"));
-        m_metacache->addBase("asset_indexes", QDir("assets/indexes").absolutePath());
-        m_metacache->addBase("asset_objects", QDir("assets/objects").absolutePath());
-        m_metacache->addBase("versions", QDir("versions").absolutePath());
-        m_metacache->addBase("libraries", QDir("libraries").absolutePath());
-        m_metacache->addBase("minecraftforge", QDir("mods/minecraftforge").absolutePath());
-        m_metacache->addBase("fmllibs", QDir("mods/minecraftforge/libs").absolutePath());
-        m_metacache->addBase("liteloader", QDir("mods/liteloader").absolutePath());
-        m_metacache->addBase("general", QDir("cache").absolutePath());
-        m_metacache->addBase("ATLauncherPacks", QDir("cache/ATLauncherPacks").absolutePath());
-        m_metacache->addBase("FTBPacks", QDir("cache/FTBPacks").absolutePath());
-        m_metacache->addBase("ModpacksCHPacks", QDir("cache/ModpacksCHPacks").absolutePath());
-        m_metacache->addBase("TechnicPacks", QDir("cache/TechnicPacks").absolutePath());
-        m_metacache->addBase("FlamePacks", QDir("cache/FlamePacks").absolutePath());
-        m_metacache->addBase("FlameMods", QDir("cache/FlameMods").absolutePath());
-        m_metacache->addBase("ModrinthPacks", QDir("cache/ModrinthPacks").absolutePath());
-        m_metacache->addBase("ModrinthModpacks", QDir("cache/ModrinthModpacks").absolutePath());
-        m_metacache->addBase("root", QDir::currentPath());
-        m_metacache->addBase("translations", QDir("translations").absolutePath());
-        m_metacache->addBase("icons", QDir("cache/icons").absolutePath());
-        m_metacache->addBase("meta", QDir("meta").absolutePath());
-        m_metacache->Load();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache.reset(new HttpMetaCache("metacache"));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("asset_indexes", QDir("assets/indexes").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("asset_objects", QDir("assets/objects").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("versions", QDir("versions").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("libraries", QDir("libraries").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("minecraftforge", QDir("mods/minecraftforge").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("fmllibs", QDir("mods/minecraftforge/libs").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("liteloader", QDir("mods/liteloader").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("general", QDir("cache").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("ATLauncherPacks", QDir("cache/ATLauncherPacks").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("FTBPacks", QDir("cache/FTBPacks").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("ModpacksCHPacks", QDir("cache/ModpacksCHPacks").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("TechnicPacks", QDir("cache/TechnicPacks").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("FlamePacks", QDir("cache/FlamePacks").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("FlameMods", QDir("cache/FlameMods").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("ModrinthPacks", QDir("cache/ModrinthPacks").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("ModrinthModpacks", QDir("cache/ModrinthModpacks").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("root", QDir::currentPath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("translations", QDir("translations").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("icons", QDir("cache/icons").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->addBase("meta", QDir("meta").absolutePath());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache->Load();
         qDebug() << "<> Cache initialized.";
     }
 
     // now we have network, download translation updates
-    m_translations->downloadIndex();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_translations->downloadIndex();
 
     //FIXME: what to do with these?
-    m_profilers.insert("jprofiler", std::shared_ptr<BaseProfilerFactory>(new JProfilerFactory()));
-    m_profilers.insert("jvisualvm", std::shared_ptr<BaseProfilerFactory>(new JVisualVMFactory()));
-    for (auto profiler : m_profilers.values())
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilers.insert("jprofiler", std::shared_ptr<BaseProfilerFactory>(new JProfilerFactory()));
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilers.insert("jvisualvm", std::shared_ptr<BaseProfilerFactory>(new JVisualVMFactory()));
+    for (auto profiler : hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profilers.values())
     {
-        profiler->registerSettings(m_settings);
+        profiler->registerSettings(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings);
     }
 
     // Create the MCEdit thing... why is this here?
     {
-        m_mcedit.reset(new MCEditTool(m_settings));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mcedit.reset(new MCEditTool(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings));
     }
 
 #ifdef Q_OS_MACOS
@@ -837,10 +837,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 #endif
 
     connect(this, &Application::aboutToQuit, [this](){
-        if(m_instances)
+        if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances)
         {
             // save any remaining instance state
-            m_instances->saveNow();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instances->saveNow();
         }
         if(logFile)
         {
@@ -870,7 +870,7 @@ bool Application::createSetupWizard()
 {
     bool javaRequired = [&]()
     {
-        bool ignoreJavaWizard = m_settings->get("IgnoreJavaWizard").toBool();
+        bool ignoreJavaWizard = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("IgnoreJavaWizard").toBool();
         if(ignoreJavaWizard) {
             return false;
         }
@@ -900,23 +900,23 @@ bool Application::createSetupWizard()
 
     if(wizardRequired)
     {
-        m_setupWizard = new SetupWizard(nullptr);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_setupWizard = new SetupWizard(nullptr);
         if (languageRequired)
         {
-            m_setupWizard->addPage(new LanguageWizardPage(m_setupWizard));
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_setupWizard->addPage(new LanguageWizardPage(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_setupWizard));
         }
 
         if (javaRequired)
         {
-            m_setupWizard->addPage(new JavaWizardPage(m_setupWizard));
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_setupWizard->addPage(new JavaWizardPage(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_setupWizard));
         }
 
         if (pasteInterventionRequired)
         {
-            m_setupWizard->addPage(new PasteWizardPage(m_setupWizard));
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_setupWizard->addPage(new PasteWizardPage(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_setupWizard));
         }
-        connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
-        m_setupWizard->show();
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_setupWizard->show();
         return true;
     }
     return false;
@@ -928,16 +928,16 @@ bool Application::event(QEvent* event)
     if (event->type() == QEvent::ApplicationStateChange) {
         auto ev = static_cast<QApplicationStateChangeEvent*>(event);
 
-        if (m_prevAppState == Qt::ApplicationActive && ev->applicationState() == Qt::ApplicationActive) {
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prevAppState == Qt::ApplicationActive && ev->applicationState() == Qt::ApplicationActive) {
             emit clickedOnDock();
         }
-        m_prevAppState = ev->applicationState();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_prevAppState = ev->applicationState();
     }
 #endif
 
     if (event->type() == QEvent::FileOpen) {
         auto ev = static_cast<QFileOpenEvent*>(event);
-        m_mainWindow->droppedURLs({ ev->url() });
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->droppedURLs({ ev->url() });
     }
 
     return QApplication::event(event);
@@ -951,62 +951,62 @@ void Application::setupWizardFinished(int status)
 
 void Application::performMainStartupAction()
 {
-    m_status = Application::Initialized;
-    if(!m_instanceIdToLaunch.isEmpty())
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = Application::Initialized;
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToLaunch.isEmpty())
     {
-        auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
+        auto inst = instances()->getInstanceById(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToLaunch);
         if(inst)
         {
             MinecraftServerTargetPtr serverToJoin = nullptr;
             MinecraftAccountPtr accountToUse = nullptr;
 
-            qDebug() << "<> Instance" << m_instanceIdToLaunch << "launching";
-            if(!m_serverToJoin.isEmpty())
+            qDebug() << "<> Instance" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToLaunch << "launching";
+            if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin.isEmpty())
             {
                 // FIXME: validate the server string
-                serverToJoin.reset(new MinecraftServerTarget(MinecraftServerTarget::parse(m_serverToJoin)));
-                qDebug() << "   Launching with server" << m_serverToJoin;
+                serverToJoin.reset(new MinecraftServerTarget(MinecraftServerTarget::parse(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin)));
+                qDebug() << "   Launching with server" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_serverToJoin;
             }
 
-            if(!m_profileToUse.isEmpty())
+            if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profileToUse.isEmpty())
             {
-                accountToUse = accounts()->getAccountByProfileName(m_profileToUse);
+                accountToUse = accounts()->getAccountByProfileName(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profileToUse);
                 if(!accountToUse) {
                     return;
                 }
-                qDebug() << "   Launching with account" << m_profileToUse;
+                qDebug() << "   Launching with account" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_profileToUse;
             }
 
             launch(inst, true, false, nullptr, serverToJoin, accountToUse);
             return;
         }
     }
-    if(!m_instanceIdToShowWindowOf.isEmpty())
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToShowWindowOf.isEmpty())
     {
-        auto inst = instances()->getInstanceById(m_instanceIdToShowWindowOf);
+        auto inst = instances()->getInstanceById(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToShowWindowOf);
         if(inst)
         {
-            qDebug() << "<> Showing window of instance " << m_instanceIdToShowWindowOf;
+            qDebug() << "<> Showing window of instance " << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceIdToShowWindowOf;
             showInstanceWindow(inst);
             return;
         }
     }
-    if(!m_mainWindow)
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow)
     {
         // normal main window
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
     }
-    if(!m_zipToImport.isEmpty())
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_zipToImport.isEmpty())
     {
-        qDebug() << "<> Importing instance from zip:" << m_zipToImport;
-        m_mainWindow->droppedURLs({ m_zipToImport });
+        qDebug() << "<> Importing instance from zip:" << hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_zipToImport;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->droppedURLs({ hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_zipToImport });
     }
 }
 
 void Application::showFatalErrorMessage(const QString& title, const QString& content)
 {
-    m_status = Application::Failed;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = Application::Failed;
     auto dialog = CustomMessageBox::selectable(nullptr, title, content, QMessageBox::Critical);
     dialog->exec();
 }
@@ -1053,7 +1053,7 @@ void Application::messageReceived(const QByteArray& message)
             qWarning() << "Received" << command << "message without a zip path/URL.";
             return;
         }
-        m_mainWindow->droppedURLs({ QUrl(path) });
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->droppedURLs({ QUrl(path) });
     }
     else if(command == "launch")
     {
@@ -1105,31 +1105,31 @@ void Application::messageReceived(const QByteArray& message)
 
 std::shared_ptr<TranslationsModel> Application::translations()
 {
-    return m_translations;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_translations;
 }
 
 std::shared_ptr<JavaInstallList> Application::javalist()
 {
-    if (!m_javalist)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javalist)
     {
-        m_javalist.reset(new JavaInstallList());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javalist.reset(new JavaInstallList());
     }
-    return m_javalist;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_javalist;
 }
 
 QList<ITheme*> Application::getValidApplicationThemes()
 {
-    return m_themeManager->getValidApplicationThemes();
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_themeManager->getValidApplicationThemes();
 }
 
 void Application::setApplicationTheme(const QString& name, bool initial)
 {
-    m_themeManager->setApplicationTheme(name, initial);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_themeManager->setApplicationTheme(name, initial);
 }
 
 void Application::setIconTheme(const QString& name)
 {
-    m_themeManager->setIconTheme(name);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_themeManager->setIconTheme(name);
 }
 
 QIcon Application::getThemedIcon(const QString& name)
@@ -1143,14 +1143,14 @@ QIcon Application::getThemedIcon(const QString& name)
 bool Application::openJsonEditor(const QString &filename)
 {
     const QString file = QDir::current().absoluteFilePath(filename);
-    if (m_settings->get("JsonEditor").toString().isEmpty())
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("JsonEditor").toString().isEmpty())
     {
         return DesktopServices::openUrl(QUrl::fromLocalFile(file));
     }
     else
     {
-        //return DesktopServices::openFile(m_settings->get("JsonEditor").toString(), file);
-        return DesktopServices::run(m_settings->get("JsonEditor").toString(), {file});
+        //return DesktopServices::openFile(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("JsonEditor").toString(), file);
+        return DesktopServices::run(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("JsonEditor").toString(), {file});
     }
 }
 
@@ -1162,13 +1162,13 @@ bool Application::launch(
         MinecraftServerTargetPtr serverToJoin,
         MinecraftAccountPtr accountToUse
 ) {
-    if(m_updateRunning)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateRunning)
     {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
     }
     else if(instance->canLaunch())
     {
-        auto & extras = m_instanceExtras[instance->id()];
+        auto & extras = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceExtras[instance->id()];
         auto & window = extras.window;
         if(window)
         {
@@ -1189,9 +1189,9 @@ bool Application::launch(
         {
             controller->setParentWidget(window);
         }
-        else if(m_mainWindow)
+        else if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow)
         {
-            controller->setParentWidget(m_mainWindow);
+            controller->setParentWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow);
         }
         connect(controller.get(), &LaunchController::succeeded, this, &Application::controllerSucceeded);
         connect(controller.get(), &LaunchController::failed, this, &Application::controllerFailed);
@@ -1222,7 +1222,7 @@ bool Application::kill(InstancePtr instance)
         qWarning() << "Attempted to kill instance" << instance->id() << ", which isn't running.";
         return false;
     }
-    auto & extras = m_instanceExtras[instance->id()];
+    auto & extras = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceExtras[instance->id()];
     // NOTE: copy of the shared pointer keeps it alive
     auto controller = extras.controller;
     if(controller)
@@ -1240,8 +1240,8 @@ void Application::closeCurrentWindow()
 
 void Application::addRunningInstance()
 {
-    m_runningInstances ++;
-    if(m_runningInstances == 1)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_runningInstances ++;
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_runningInstances == 1)
     {
         emit updateAllowedChanged(false);
     }
@@ -1249,13 +1249,13 @@ void Application::addRunningInstance()
 
 void Application::subRunningInstance()
 {
-    if(m_runningInstances == 0)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_runningInstances == 0)
     {
         qCritical() << "Something went really wrong and we now have less than 0 running instances... WTF";
         return;
     }
-    m_runningInstances --;
-    if(m_runningInstances == 0)
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_runningInstances --;
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_runningInstances == 0)
     {
         emit updateAllowedChanged(true);
     }
@@ -1263,17 +1263,17 @@ void Application::subRunningInstance()
 
 bool Application::shouldExitNow() const
 {
-    return m_runningInstances == 0 && m_openWindows == 0;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_runningInstances == 0 && hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_openWindows == 0;
 }
 
 bool Application::updatesAreAllowed()
 {
-    return m_runningInstances == 0;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_runningInstances == 0;
 }
 
 void Application::updateIsRunning(bool running)
 {
-    m_updateRunning = running;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_updateRunning = running;
 }
 
 
@@ -1283,7 +1283,7 @@ void Application::controllerSucceeded()
     if(!controller)
         return;
     auto id = controller->id();
-    auto & extras = m_instanceExtras[id];
+    auto & extras = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceExtras[id];
 
     // on success, do...
     if (controller->instance()->settings()->get("AutoCloseConsole").toBool())
@@ -1299,7 +1299,7 @@ void Application::controllerSucceeded()
     // quit when there are no more windows.
     if(shouldExitNow())
     {
-        m_status = Status::Succeeded;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = Status::Succeeded;
         exit(0);
     }
 }
@@ -1311,7 +1311,7 @@ void Application::controllerFailed(const QString& error)
     if(!controller)
         return;
     auto id = controller->id();
-    auto & extras = m_instanceExtras[id];
+    auto & extras = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceExtras[id];
 
     // on failure, do... nothing
     extras.controller.reset();
@@ -1320,20 +1320,20 @@ void Application::controllerFailed(const QString& error)
     // quit when there are no more windows.
     if(shouldExitNow())
     {
-        m_status = Status::Failed;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_status = Status::Failed;
         exit(1);
     }
 }
 
 void Application::ShowGlobalSettings(class QWidget* parent, QString open_page)
 {
-    if(!m_globalSettingsProvider) {
+    if(!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider) {
         return;
     }
     emit globalSettingsAboutToOpen();
     {
         SettingsObject::Lock lock(APPLICATION->settings());
-        PageDialog dlg(m_globalSettingsProvider.get(), open_page, parent);
+        PageDialog dlg(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_globalSettingsProvider.get(), open_page, parent);
         dlg.exec();
     }
     emit globalSettingsClosed();
@@ -1341,42 +1341,42 @@ void Application::ShowGlobalSettings(class QWidget* parent, QString open_page)
 
 MainWindow* Application::showMainWindow(bool minimized)
 {
-    if(m_mainWindow)
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow)
     {
-        m_mainWindow->setWindowState(m_mainWindow->windowState() & ~Qt::WindowMinimized);
-        m_mainWindow->raise();
-        m_mainWindow->activateWindow();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->setWindowState(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->windowState() & ~Qt::WindowMinimized);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->raise();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->activateWindow();
     }
     else
     {
-        m_mainWindow = new MainWindow();
-        m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
-        m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow = new MainWindow();
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
 #ifdef Q_OS_WIN
         if (IsWindows10OrGreater())
         {
             if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
+                WinDarkmode::setDarkWinTitlebar(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->winId(), true);
             } else {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
+                WinDarkmode::setDarkWinTitlebar(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->winId(), false);
             }
         }
 #endif
         if(minimized)
         {
-            m_mainWindow->showMinimized();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->showMinimized();
         }
         else
         {
-            m_mainWindow->show();
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->show();
         }
 
-        m_mainWindow->checkInstancePathForProblems();
-        connect(this, &Application::updateAllowedChanged, m_mainWindow, &MainWindow::updatesAllowedChanged);
-        connect(m_mainWindow, &MainWindow::isClosing, this, &Application::on_windowClose);
-        m_openWindows++;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow->checkInstancePathForProblems();
+        connect(this, &Application::updateAllowedChanged, hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow, &MainWindow::updatesAllowedChanged);
+        connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow, &MainWindow::isClosing, this, &Application::on_windowClose);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_openWindows++;
     }
-    return m_mainWindow;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow;
 }
 
 InstanceWindow *Application::showInstanceWindow(InstancePtr instance, QString page)
@@ -1384,7 +1384,7 @@ InstanceWindow *Application::showInstanceWindow(InstancePtr instance, QString pa
     if(!instance)
         return nullptr;
     auto id = instance->id();
-    auto & extras = m_instanceExtras[id];
+    auto & extras = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceExtras[id];
     auto & window = extras.window;
 
     if(window)
@@ -1395,7 +1395,7 @@ InstanceWindow *Application::showInstanceWindow(InstancePtr instance, QString pa
     else
     {
         window = new InstanceWindow(instance);
-        m_openWindows ++;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_openWindows ++;
         connect(window, &InstanceWindow::isClosing, this, &Application::on_windowClose);
     }
     if(!page.isEmpty())
@@ -1411,21 +1411,21 @@ InstanceWindow *Application::showInstanceWindow(InstancePtr instance, QString pa
 
 void Application::on_windowClose()
 {
-    m_openWindows--;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_openWindows--;
     auto instWindow = qobject_cast<InstanceWindow *>(QObject::sender());
     if(instWindow)
     {
-        auto & extras = m_instanceExtras[instWindow->instanceId()];
+        auto & extras = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instanceExtras[instWindow->instanceId()];
         extras.window = nullptr;
         if(extras.controller)
         {
-            extras.controller->setParentWidget(m_mainWindow);
+            extras.controller->setParentWidget(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow);
         }
     }
     auto mainWindow = qobject_cast<MainWindow *>(QObject::sender());
     if(mainWindow)
     {
-        m_mainWindow = nullptr;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mainWindow = nullptr;
     }
     // quit when there are no more windows.
     if(shouldExitNow())
@@ -1460,7 +1460,7 @@ void Application::updateProxySettings(QString proxyTypeStr, QString addr, int po
 
     qDebug() << "Detecting proxy settings...";
     QNetworkProxy proxy = QNetworkProxy::applicationProxy();
-    m_network->setProxy(proxy);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network->setProxy(proxy);
 
     QString proxyDesc;
     if (proxy.type() == QNetworkProxy::NoProxy)
@@ -1497,37 +1497,37 @@ void Application::updateProxySettings(QString proxyTypeStr, QString addr, int po
 
 shared_qobject_ptr< HttpMetaCache > Application::metacache()
 {
-    return m_metacache;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metacache;
 }
 
 shared_qobject_ptr<QNetworkAccessManager> Application::network()
 {
-    return m_network;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_network;
 }
 
 shared_qobject_ptr<Meta::Index> Application::metadataIndex()
 {
-    if (!m_metadataIndex)
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metadataIndex)
     {
-        m_metadataIndex.reset(new Meta::Index());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metadataIndex.reset(new Meta::Index());
     }
-    return m_metadataIndex;
+    return hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_metadataIndex;
 }
 
 void Application::updateCapabilities()
 {
-    m_capabilities = None;
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_capabilities = None;
     if (!getMSAClientID().isEmpty())
-        m_capabilities |= SupportsMSA;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_capabilities |= SupportsMSA;
     if (!getFlameAPIKey().isEmpty())
-        m_capabilities |= SupportsFlame;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_capabilities |= SupportsFlame;
 
 #ifdef Q_OS_LINUX
     if (gamemode_query_status() >= 0)
-        m_capabilities |= SupportsGameMode;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_capabilities |= SupportsGameMode;
 
     if (!MangoHud::getLibraryString().isEmpty())
-        m_capabilities |= SupportsMangoHud;
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_capabilities |= SupportsMangoHud;
 #endif
 }
 
@@ -1535,9 +1535,9 @@ QString Application::getJarPath(QString jarFile)
 {
     QStringList potentialPaths = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-        FS::PathCombine(m_rootPath, "share/" + BuildConfig.LAUNCHER_APP_BINARY_NAME),
+        FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootPath, "share/" + BuildConfig.LAUNCHER_APP_BINARY_NAME),
 #endif
-        FS::PathCombine(m_rootPath, "jars"),
+        FS::PathCombine(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_rootPath, "jars"),
         FS::PathCombine(applicationDirPath(), "jars")
     };
     for(QString p : potentialPaths)
@@ -1551,7 +1551,7 @@ QString Application::getJarPath(QString jarFile)
 
 QString Application::getMSAClientID()
 {
-    QString clientIDOverride = m_settings->get("MSAClientIDOverride").toString();
+    QString clientIDOverride = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("MSAClientIDOverride").toString();
     if (!clientIDOverride.isEmpty()) {
         return clientIDOverride;
     }
@@ -1561,7 +1561,7 @@ QString Application::getMSAClientID()
 
 QString Application::getFlameAPIKey()
 {
-    QString keyOverride = m_settings->get("FlameKeyOverride").toString();
+    QString keyOverride = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("FlameKeyOverride").toString();
     if (!keyOverride.isEmpty()) {
         return keyOverride;
     }
@@ -1571,7 +1571,7 @@ QString Application::getFlameAPIKey()
 
 QString Application::getUserAgent()
 {
-    QString uaOverride = m_settings->get("UserAgentOverride").toString();
+    QString uaOverride = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("UserAgentOverride").toString();
     if (!uaOverride.isEmpty()) {
         return uaOverride.replace("$LAUNCHER_VER", BuildConfig.printableVersionString());
     }
@@ -1581,7 +1581,7 @@ QString Application::getUserAgent()
 
 QString Application::getUserAgentUncached()
 {
-    QString uaOverride = m_settings->get("UserAgentOverride").toString();
+    QString uaOverride = hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_settings->get("UserAgentOverride").toString();
     if (!uaOverride.isEmpty()) {
         uaOverride += " (Uncached)";
         return uaOverride.replace("$LAUNCHER_VER", BuildConfig.printableVersionString());

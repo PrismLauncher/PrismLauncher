@@ -23,7 +23,7 @@ struct RemoteLoadStatus
 
 struct ComponentUpdateTaskData
 {
-    PackProfile * m_list = nullptr;
+    PackProfile * hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_list = nullptr;
     QList<RemoteLoadStatus> remoteLoadStatusList;
     bool remoteLoadSuccessful = true;
     size_t remoteTasksInProgress = 0;

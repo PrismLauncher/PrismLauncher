@@ -55,7 +55,7 @@ class ManagedPackPage : public QWidget, public BasePage {
      */
     [[nodiscard]] virtual QString url() const { return {}; };
 
-    void setInstanceWindow(InstanceWindow* window) { m_instance_window = window; }
+    void setInstanceWindow(InstanceWindow* window) { hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance_window = window; }
 
    public slots:
     /** Gets the current version selection and update the UI, including the update button and the changelog.
@@ -85,12 +85,12 @@ class ManagedPackPage : public QWidget, public BasePage {
     bool runUpdateTask(InstanceTask*);
 
    protected:
-    InstanceWindow* m_instance_window = nullptr;
+    InstanceWindow* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance_window = nullptr;
 
     Ui::ManagedPackPage* ui;
-    BaseInstance* m_inst;
+    BaseInstance* hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst;
 
-    bool m_loaded = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_loaded = false;
 };
 
 /** Simple page for when we aren't a managed pack. */
@@ -123,10 +123,10 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
     void update() override;
 
    private:
-    NetJob::Ptr m_fetch_job = nullptr;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job = nullptr;
 
-    Modrinth::Modpack m_pack;
-    ModrinthAPI m_api;
+    Modrinth::Modpack hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack;
+    ModrinthAPI hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_api;
 };
 
 class FlameManagedPackPage final : public ManagedPackPage {
@@ -145,8 +145,8 @@ class FlameManagedPackPage final : public ManagedPackPage {
     void update() override;
 
    private:
-    NetJob::Ptr m_fetch_job = nullptr;
+    NetJob::Ptr hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_fetch_job = nullptr;
 
-    Flame::IndexedPack m_pack;
-    FlameAPI m_api;
+    Flame::IndexedPack hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_pack;
+    FlameAPI hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_api;
 };

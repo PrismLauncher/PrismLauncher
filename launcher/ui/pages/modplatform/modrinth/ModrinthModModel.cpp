@@ -37,7 +37,7 @@ void ListModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
 
 void ListModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), m_parent->m_instance);
+    Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_parent->hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_instance);
 }
 
 auto ListModel::documentToArray(QJsonDocument& obj) const -> QJsonArray

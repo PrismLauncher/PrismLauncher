@@ -70,9 +70,9 @@ AccountListPage::AccountListPage(QWidget *parent)
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    m_accounts = APPLICATION->accounts();
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts = APPLICATION->accounts();
 
-    ui->listView->setModel(m_accounts.get());
+    ui->listView->setModel(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.get());
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::ProfileNameColumn, QHeaderView::Stretch);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::NameColumn, QHeaderView::Stretch);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::MigrationColumn, QHeaderView::ResizeToContents);
@@ -89,9 +89,9 @@ AccountListPage::AccountListPage(QWidget *parent)
     });
     connect(ui->listView, &VersionListView::customContextMenuRequested, this, &AccountListPage::ShowContextMenu);
 
-    connect(m_accounts.get(), &AccountList::listChanged, this, &AccountListPage::listChanged);
-    connect(m_accounts.get(), &AccountList::listActivityChanged, this, &AccountListPage::listChanged);
-    connect(m_accounts.get(), &AccountList::defaultAccountChanged, this, &AccountListPage::listChanged);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.get(), &AccountList::listChanged, this, &AccountListPage::listChanged);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.get(), &AccountList::listActivityChanged, this, &AccountListPage::listChanged);
+    connect(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts.get(), &AccountList::defaultAccountChanged, this, &AccountListPage::listChanged);
 
     updateButtonStates();
 
@@ -150,9 +150,9 @@ void AccountListPage::on_actionAddMojang_triggered()
 
     if (account)
     {
-        m_accounts->addAccount(account);
-        if (m_accounts->count() == 1) {
-            m_accounts->setDefaultAccount(account);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->addAccount(account);
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->count() == 1) {
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->setDefaultAccount(account);
         }
     }
 }
@@ -179,16 +179,16 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
 
     if (account)
     {
-        m_accounts->addAccount(account);
-        if (m_accounts->count() == 1) {
-            m_accounts->setDefaultAccount(account);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->addAccount(account);
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->count() == 1) {
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->setDefaultAccount(account);
         }
     }
 }
 
 void AccountListPage::on_actionAddOffline_triggered()
 {
-    if (!m_accounts->anyAccountIsValid()) {
+    if (!hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->anyAccountIsValid()) {
         QMessageBox::warning(
             this,
             tr("Error"),
@@ -208,9 +208,9 @@ void AccountListPage::on_actionAddOffline_triggered()
 
     if (account)
     {
-        m_accounts->addAccount(account);
-        if (m_accounts->count() == 1) {
-            m_accounts->setDefaultAccount(account);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->addAccount(account);
+        if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->count() == 1) {
+            hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->setDefaultAccount(account);
         }
     }
 }
@@ -221,7 +221,7 @@ void AccountListPage::on_actionRemove_triggered()
     if (selection.size() > 0)
     {
         QModelIndex selected = selection.first();
-        m_accounts->removeAccount(selected);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->removeAccount(selected);
     }
 }
 
@@ -230,7 +230,7 @@ void AccountListPage::on_actionRefresh_triggered() {
     if (selection.size() > 0) {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
-        m_accounts->requestRefresh(account->internalId());
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->requestRefresh(account->internalId());
     }
 }
 
@@ -242,13 +242,13 @@ void AccountListPage::on_actionSetDefault_triggered()
     {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
-        m_accounts->setDefaultAccount(account);
+        hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->setDefaultAccount(account);
     }
 }
 
 void AccountListPage::on_actionNoDefault_triggered()
 {
-    m_accounts->setDefaultAccount(nullptr);
+    hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->setDefaultAccount(nullptr);
 }
 
 void AccountListPage::updateButtonStates()
@@ -271,7 +271,7 @@ void AccountListPage::updateButtonStates()
     ui->actionDeleteSkin->setEnabled(accountIsReady && accountIsOnline);
     ui->actionRefresh->setEnabled(accountIsReady && accountIsOnline);
 
-    if(m_accounts->defaultAccount().get() == nullptr) {
+    if(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_accounts->defaultAccount().get() == nullptr) {
         ui->actionNoDefault->setEnabled(false);
         ui->actionNoDefault->setChecked(true);
     }

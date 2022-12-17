@@ -41,7 +41,7 @@ class LocalModUpdateTask : public Task {
     void hasOldMod(QString name, QString filename);
 
    private:
-    QDir m_index_dir;
-    ModPlatform::IndexedPack& m_mod;
-    ModPlatform::IndexedVersion& m_mod_version;
+    QDir hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_index_dir;
+    ModPlatform::IndexedPack& hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod;
+    ModPlatform::IndexedVersion& hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mod_version;
 };

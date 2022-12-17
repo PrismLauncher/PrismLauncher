@@ -88,7 +88,7 @@ public:
     }
     virtual bool apply() override
     {
-        return !m_uploadActive;
+        return !hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadActive;
     }
     void retranslate() override;
 
@@ -108,11 +108,11 @@ private slots:
 
 private:
     Ui::ScreenshotsPage *ui;
-    std::shared_ptr<QFileSystemModel> m_model;
-    std::shared_ptr<QIdentityProxyModel> m_filterModel;
-    QString m_folder;
-    bool m_valid = false;
-    bool m_uploadActive = false;
+    std::shared_ptr<QFileSystemModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_model;
+    std::shared_ptr<QIdentityProxyModel> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filterModel;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_folder;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_valid = false;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_uploadActive = false;
 
-    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
+    std::shared_ptr<Setting> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = nullptr;
 };

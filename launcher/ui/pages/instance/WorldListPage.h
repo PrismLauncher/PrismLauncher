@@ -90,7 +90,7 @@ protected:
     QMenu * createPopupMenu() override;
 
 protected:
-    BaseInstance *m_inst;
+    BaseInstance *hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_inst;
 
 private:
     QModelIndex getSelectedWorld();
@@ -100,11 +100,11 @@ private:
 
 private:
     Ui::WorldListPage *ui;
-    std::shared_ptr<WorldList> m_worlds;
-    unique_qobject_ptr<LoggedProcess> m_mceditProcess;
-    bool m_mceditStarting = false;
+    std::shared_ptr<WorldList> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_worlds;
+    unique_qobject_ptr<LoggedProcess> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mceditProcess;
+    bool hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_mceditStarting = false;
 
-    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
+    std::shared_ptr<Setting> hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_wide_bar_setting = nullptr;
 
 private slots:
     void on_actionCopy_Seed_triggered();

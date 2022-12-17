@@ -36,7 +36,7 @@ public:
 
 private:
     QSet<QString> currentPacks;
-    QString m_filename = "private_packs.txt";
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_filename = "private_packs.txt";
     mutable bool dirty = false;
 };
 

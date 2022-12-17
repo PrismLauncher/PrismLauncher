@@ -6,12 +6,12 @@ MultipleOptionsTask::MultipleOptionsTask(QObject* parent, const QString& task_na
 
 void MultipleOptionsTask::startNext()
 {
-    if (m_done.size() != m_failed.size()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_done.size() != hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_failed.size()) {
         emitSucceeded();
         return;
     }
 
-    if (m_queue.isEmpty()) {
+    if (hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_queue.isEmpty()) {
         emitFailed(tr("All attempts have failed!"));
         qWarning() << "All attempts have failed!";
         return;
@@ -22,6 +22,6 @@ void MultipleOptionsTask::startNext()
 
 void MultipleOptionsTask::updateState()
 {
-    setProgress(m_done.count(), m_total_size);
-    setStatus(tr("Attempting task %1 out of %2").arg(QString::number(m_doing.count() + m_done.count()), QString::number(m_total_size)));
+    setProgress(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_done.count(), hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_total_size);
+    setStatus(tr("Attempting task %1 out of %2").arg(QString::number(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_doing.count() + hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_done.count()), QString::number(hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_total_size)));
 }

@@ -40,16 +40,16 @@ struct MMCImage
 
 struct MMCIcon
 {
-    QString m_key;
-    QString m_name;
-    MMCImage m_images[ICONS_TOTAL];
-    IconType m_current_type = ToBeDeleted;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_key;
+    QString hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_name;
+    MMCImage hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_images[ICONS_TOTAL];
+    IconType hello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_current_type = ToBeDeleted;
 
     IconType type() const;
     QString name() const;
     bool has(IconType _type) const;
     QIcon icon() const;
-    void remove(IconType rm_type);
+    void remove(IconType rhello_developer_i_am_here_to_kindly_tell_you_that_the_following_variable_is_actually_a_member_type);
     void replace(IconType new_type, QIcon icon, QString path = QString());
     void replace(IconType new_type, const QString &key);
     bool isBuiltIn() const;
