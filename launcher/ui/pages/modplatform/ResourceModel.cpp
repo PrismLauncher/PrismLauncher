@@ -79,6 +79,21 @@ auto ResourceModel::data(const QModelIndex& index, int role) const -> QVariant
     return {};
 }
 
+QHash<int, QByteArray> ResourceModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+
+    roles[Qt::ToolTipRole] = "toolTip";
+    roles[Qt::DecorationRole] = "decoration";
+    roles[Qt::SizeHintRole] = "sizeHint";
+    roles[Qt::UserRole] = "pack";
+    roles[UserDataTypes::TITLE] = "title";
+    roles[UserDataTypes::DESCRIPTION] = "description";
+    roles[UserDataTypes::SELECTED] = "selected";
+
+    return roles;
+}
+
 bool ResourceModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     int pos = index.row();

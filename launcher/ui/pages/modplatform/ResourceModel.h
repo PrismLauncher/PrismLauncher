@@ -21,11 +21,14 @@ namespace ResourceDownload {
 class ResourceModel : public QAbstractListModel {
     Q_OBJECT
 
+    Q_PROPERTY(QString search_term MEMBER m_search_term WRITE setSearchTerm)
+
    public:
     ResourceModel(BaseInstance const&, ResourceAPI* api);
     ~ResourceModel() override;
 
     [[nodiscard]] auto data(const QModelIndex&, int role) const -> QVariant override;
+    [[nodiscard]] auto roleNames() const -> QHash<int, QByteArray> override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
     [[nodiscard]] virtual auto debugName() const -> QString;
