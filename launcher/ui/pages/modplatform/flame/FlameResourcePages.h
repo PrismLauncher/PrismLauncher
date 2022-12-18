@@ -49,7 +49,7 @@ static inline QString displayName() { return "CurseForge"; }
 static inline QIcon icon() { return APPLICATION->getThemedIcon("flame"); }
 static inline QString id() { return "curseforge"; }
 static inline QString debugName() { return "Flame"; }
-static inline QString metaEntryBase() { return "FlameMods"; };
+static inline QString metaEntryBase() { return "FlameMods"; }
 }
 
 class FlameModPage : public ModPage {

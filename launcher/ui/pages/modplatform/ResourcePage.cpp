@@ -302,7 +302,9 @@ void ResourcePage::openUrl(const QUrl& url)
     QRegularExpressionMatch match;
     QString page;
 
-    for (auto&& [regex, candidate] : urlHandlers().asKeyValueRange()) {
+    auto handlers = urlHandlers();
+    for (auto it = handlers.constKeyValueBegin(); it != handlers.constKeyValueEnd(); it++) {
+        auto&& [regex, candidate] = *it;
         if (match = QRegularExpression(regex).match(address); match.hasMatch()) {
             page = candidate;
             break;

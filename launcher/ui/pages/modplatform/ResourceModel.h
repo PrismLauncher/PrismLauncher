@@ -35,19 +35,16 @@ class ResourceModel : public QAbstractListModel {
     [[nodiscard]] virtual auto metaEntryBase() const -> QString = 0;
 
     [[nodiscard]] inline int rowCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : m_packs.size(); }
-    [[nodiscard]] inline int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : 1; };
-    [[nodiscard]] inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); };
+    [[nodiscard]] inline int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : 1; }
+    [[nodiscard]] inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); }
 
     inline void addActiveJob(Task::Ptr ptr) { m_current_job.addTask(ptr); if (!m_current_job.isRunning()) m_current_job.start(); }
     inline Task const& activeJob() { return m_current_job; }
 
-   signals:
-    void versionListUpdated();
-    void projectInfoUpdated();
-
    public slots:
     void fetchMore(const QModelIndex& parent) override;
-    [[nodiscard]] inline bool canFetchMore(const QModelIndex& parent) const override
+    // NOTE: Can't use [[nodiscard]] here because of https://bugreports.qt.io/browse/QTBUG-58628 on Qt 5.12
+    inline bool canFetchMore(const QModelIndex& parent) const override
     {
         return parent.isValid() ? false : m_search_state == SearchState::CanFetchMore;
     }
@@ -105,6 +102,10 @@ class ResourceModel : public QAbstractListModel {
     /* Default search request callbacks */
     void searchRequestFailed(QString reason, int network_error_code);
     void searchRequestAborted();
+
+   signals:
+    void versionListUpdated();
+    void projectInfoUpdated();
 };
 
 }  // namespace ResourceDownload

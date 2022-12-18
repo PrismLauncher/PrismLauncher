@@ -21,6 +21,7 @@
 
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QHash>
 #include <QLayout>
 
 #include "QObjectPtr.h"

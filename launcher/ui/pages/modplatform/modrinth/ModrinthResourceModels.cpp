@@ -26,7 +26,7 @@ namespace ResourceDownload {
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 const char* ModrinthModModel::sorts[5]{ "relevance", "downloads", "follows", "updated", "newest" };
 
-ModrinthModModel::ModrinthModModel(BaseInstance const& base) : ModModel(base, new ModrinthAPI){};
+ModrinthModModel::ModrinthModModel(BaseInstance const& base) : ModModel(base, new ModrinthAPI) {}
 
 void ModrinthModModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
