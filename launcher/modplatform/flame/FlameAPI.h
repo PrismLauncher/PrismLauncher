@@ -78,7 +78,7 @@ class FlameAPI : public NetworkResourceAPI {
 
     [[nodiscard]] std::optional<QString> getVersionsURL(VersionSearchArgs const& args) const override
     {
-        QString url{QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&").arg(args.addonId)};
+        QString url{QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&").arg(args.pack.addonId.toString())};
 
         QStringList get_parameters;
         if (args.mcVersions.has_value())

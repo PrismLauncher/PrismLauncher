@@ -23,6 +23,8 @@
 #include <QDialogButtonBox>
 #include <QLayout>
 
+#include "QObjectPtr.h"
+#include "modplatform/ModIndex.h"
 #include "ui/pages/BasePageProvider.h"
 
 class BaseInstance;
@@ -41,6 +43,8 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     Q_OBJECT
 
    public:
+    using DownloadTaskPtr = shared_qobject_ptr<ResourceDownloadTask>;
+
     ResourceDownloadDialog(QWidget* parent, const std::shared_ptr<ResourceFolderModel> base_model);
 
     void initializeContainer();
@@ -54,11 +58,10 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     bool selectPage(QString pageId);
     ResourcePage* getSelectedPage();
 
-    void addResource(QString name, ResourceDownloadTask* task);
-    void removeResource(QString name);
-    [[nodiscard]] bool isSelected(QString name, QString filename = "") const;
+    void addResource(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&, bool is_indexed = false);
+    void removeResource(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
 
-    const QList<ResourceDownloadTask*> getTasks();
+    const QList<DownloadTaskPtr> getTasks();
     [[nodiscard]] const std::shared_ptr<ResourceFolderModel> getBaseModel() const { return m_base_model; }
 
    public slots:
@@ -82,7 +85,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     QDialogButtonBox m_buttons;
     QVBoxLayout m_vertical_layout;
 
-    QHash<QString, ResourceDownloadTask*> m_selected;
+    QHash<QString, DownloadTaskPtr> m_selected;
 };
 
 

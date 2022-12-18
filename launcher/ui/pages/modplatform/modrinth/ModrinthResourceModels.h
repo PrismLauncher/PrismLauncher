@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ui/pages/modplatform/ModModel.h"
+#include "ui/pages/modplatform/modrinth/ModrinthResourcePages.h"
 
 namespace ResourceDownload {
 
@@ -28,10 +29,13 @@ class ModrinthModModel : public ModModel {
     Q_OBJECT
 
    public:
-    ModrinthModModel(ModrinthModPage* parent);
+    ModrinthModModel(const BaseInstance&);
     ~ModrinthModModel() override = default;
 
    private:
+    [[nodiscard]] QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
+    [[nodiscard]] QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
+
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;

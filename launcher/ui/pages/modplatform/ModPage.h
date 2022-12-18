@@ -5,6 +5,7 @@
 #include "modplatform/ModIndex.h"
 
 #include "ui/pages/modplatform/ResourcePage.h"
+#include "ui/pages/modplatform/ModModel.h"
 #include "ui/widgets/ModFilterWidget.h"
 
 namespace Ui {
@@ -24,9 +25,14 @@ class ModPage : public ResourcePage {
     static T* create(ModDownloadDialog* dialog, BaseInstance& instance)
     {
         auto page = new T(dialog, instance);
+        auto model = static_cast<ModModel*>(page->getModel());
 
         auto filter_widget = ModFilterWidget::create(static_cast<MinecraftInstance&>(instance).getPackProfile()->getComponentVersion("net.minecraft"), page);
         page->setFilterWidget(filter_widget);
+        model->setFilter(page->getFilter());
+
+        connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::updateVersionList);
+        connect(model, &ResourceModel::projectInfoUpdated, page, &ResourcePage::updateUi);
 
         return page;
     }

@@ -76,10 +76,10 @@ static QString enumToString(int hash_algorithm)
 void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        QJsonArray& arr,
                                        const shared_qobject_ptr<QNetworkAccessManager>& network,
-                                       BaseInstance* inst)
+                                       const BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    auto profile = (dynamic_cast<MinecraftInstance*>(inst))->getPackProfile();
+    auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
     QString mcVersion = profile->getComponentVersion("net.minecraft");
 
     for (auto versionIter : arr) {

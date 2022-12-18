@@ -50,10 +50,12 @@ class ResourcePage : public QWidget, public BasePage {
     /** Programatically set the term in the search bar. */
     void setSearchTerm(QString);
 
-    [[nodiscard]] bool isPackSelected(const ModPlatform::IndexedPack&, int version = -1) const;
+    [[nodiscard]] bool setCurrentPack(ModPlatform::IndexedPack);
     [[nodiscard]] auto getCurrentPack() const -> ModPlatform::IndexedPack;
 
     [[nodiscard]] auto getDialog() const -> const ResourceDownloadDialog* { return m_parent_dialog; }
+
+    [[nodiscard]] auto getModel() const -> ResourceModel* { return m_model; }
 
    protected:
     ResourcePage(ResourceDownloadDialog* parent, BaseInstance&);

@@ -17,14 +17,13 @@
 
 #include "modplatform/ModIndex.h"
 
-#include "ui/pages/modplatform/ResourcePage.h"
 #include "ui/widgets/ProjectItem.h"
 
 namespace ResourceDownload {
 
 QHash<ResourceModel*, bool> ResourceModel::s_running_models;
 
-ResourceModel::ResourceModel(ResourcePage* parent, ResourceAPI* api) : QAbstractListModel(), m_api(api), m_associated_page(parent)
+ResourceModel::ResourceModel(BaseInstance const& base_inst, ResourceAPI* api) : QAbstractListModel(), m_base_instance(base_inst), m_api(api)
 {
     s_running_models.insert(this, true);
 }
@@ -72,7 +71,7 @@ auto ResourceModel::data(const QModelIndex& index, int role) const -> QVariant
         case UserDataTypes::DESCRIPTION:
             return pack.description;
         case UserDataTypes::SELECTED:
-            return isPackSelected(pack);
+            return pack.isAnyVersionSelected();
         default:
             break;
     }
@@ -87,13 +86,14 @@ bool ResourceModel::setData(const QModelIndex& index, const QVariant& value, int
         return false;
 
     m_packs[pos] = value.value<ModPlatform::IndexedPack>();
+    emit dataChanged(index, index);
 
     return true;
 }
 
 QString ResourceModel::debugName() const
 {
-    return m_associated_page->debugName() + " (Model)";
+    return "ResourceDownload (Model)";
 }
 
 void ResourceModel::fetchMore(const QModelIndex& parent)
@@ -195,7 +195,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
         return {};
 
     auto cache_entry = APPLICATION->metacache()->resolveEntry(
-        m_associated_page->metaEntryBase(),
+        metaEntryBase(),
         QString("logos/%1").arg(QString(QCryptographicHash::hash(url.toEncoded(), QCryptographicHash::Algorithm::Sha1).toHex())));
     auto icon_fetch_action = Net::Download::makeCached(url, cache_entry);
 
@@ -222,11 +222,6 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     return {};
 }
 
-bool ResourceModel::isPackSelected(const ModPlatform::IndexedPack& pack) const
-{
-    return m_associated_page->isPackSelected(pack);
-}
-
 void ResourceModel::searchRequestFailed(QString reason, int network_error_code)
 {
     switch (network_error_code) {
@@ -237,9 +232,7 @@ void ResourceModel::searchRequestFailed(QString reason, int network_error_code)
         case 409:
             // 409 Gone, notify user to update
             QMessageBox::critical(nullptr, tr("Error"),
-                                  //: %1 refers to the launcher itself
-                                  QString("%1 %2")
-                                      .arg(m_associated_page->displayName())
+                                  QString("%1")
                                       .arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_DISPLAYNAME)));
             break;
     }

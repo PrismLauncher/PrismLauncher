@@ -103,17 +103,16 @@ void ResourcePage::setSearchTerm(QString term)
     m_ui->searchEdit->setText(term);
 }
 
+bool ResourcePage::setCurrentPack(ModPlatform::IndexedPack pack)
+{
+    QVariant v;
+    v.setValue(pack);
+    return m_model->setData(m_ui->packView->currentIndex(), v, Qt::UserRole);
+}
+
 ModPlatform::IndexedPack ResourcePage::getCurrentPack() const
 {
     return m_model->data(m_ui->packView->currentIndex(), Qt::UserRole).value<ModPlatform::IndexedPack>();
-}
-
-bool ResourcePage::isPackSelected(const ModPlatform::IndexedPack& pack, int version) const
-{
-    if (version < 0 || !pack.versionsLoaded)
-        return m_parent_dialog->isSelected(pack.name);
-
-    return m_parent_dialog->isSelected(pack.name, pack.versions[version].fileName);
 }
 
 void ResourcePage::updateUi()
@@ -185,7 +184,7 @@ void ResourcePage::updateSelectionButton()
     }
 
     m_ui->resourceSelectionButton->setEnabled(true);
-    if (!isPackSelected(getCurrentPack(), m_selected_version_index)) {
+    if (!getCurrentPack().isVersionSelected(m_selected_version_index)) {
         m_ui->resourceSelectionButton->setText(tr("Select %1 for download").arg(resourceString()));
     } else {
         m_ui->resourceSelectionButton->setText(tr("Deselect %1 for download").arg(resourceString()));
@@ -256,12 +255,12 @@ void ResourcePage::onVersionSelectionChanged(QString data)
 
 void ResourcePage::addResourceToDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& version)
 {
-    m_parent_dialog->addResource(pack.name, new ResourceDownloadTask(pack, version, m_parent_dialog->getBaseModel()));
+    m_parent_dialog->addResource(pack, version);
 }
 
-void ResourcePage::removeResourceFromDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion&)
+void ResourcePage::removeResourceFromDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& version)
 {
-    m_parent_dialog->removeResource(pack.name);
+    m_parent_dialog->removeResource(pack, version);
 }
 
 void ResourcePage::onResourceSelected()
@@ -270,12 +269,18 @@ void ResourcePage::onResourceSelected()
         return;
 
     auto current_pack = getCurrentPack();
+    if (!current_pack.versionsLoaded)
+        return;
 
     auto& version = current_pack.versions[m_selected_version_index];
-    if (m_parent_dialog->isSelected(current_pack.name, version.fileName))
+    if (version.is_currently_selected)
         removeResourceFromDialog(current_pack, version);
     else
         addResourceToDialog(current_pack, version);
+
+    // Save the modified pack (and prevent warning in release build)
+    [[maybe_unused]] bool set = setCurrentPack(current_pack);
+    Q_ASSERT(set);
 
     updateSelectionButton();
 

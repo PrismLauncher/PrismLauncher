@@ -51,8 +51,6 @@
 
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
-#include "ui/pages/modplatform/ModModel.h"
-
 namespace ResourceDownload {
 
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance& instance)
@@ -151,7 +149,7 @@ void ModPage::updateVersionList()
 void ModPage::addResourceToDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& version)
 {
     bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_parent_dialog->addResource(pack.name, new ResourceDownloadTask(pack, version, m_parent_dialog->getBaseModel(), is_indexed));
+    m_parent_dialog->addResource(pack, version, is_indexed);
 }
 
 }  // namespace ResourceDownload

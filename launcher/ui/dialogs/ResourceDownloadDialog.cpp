@@ -141,38 +141,44 @@ ResourcePage* ResourceDownloadDialog::getSelectedPage()
     return m_selectedPage;
 }
 
-void ResourceDownloadDialog::addResource(QString name, ResourceDownloadTask* task)
+void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, bool is_indexed)
 {
-    removeResource(name);
-    m_selected.insert(name, task);
+    removeResource(pack, ver);
+
+    ver.is_currently_selected = true;
+    m_selected.insert(pack.name, new ResourceDownloadTask(pack, ver, getBaseModel(), is_indexed));
 
     m_buttons.button(QDialogButtonBox::Ok)->setEnabled(!m_selected.isEmpty());
 }
 
-void ResourceDownloadDialog::removeResource(QString name)
+static ModPlatform::IndexedVersion& getVersionWithID(ModPlatform::IndexedPack& pack, QVariant id)
 {
-    if (m_selected.contains(name))
-        m_selected.find(name).value()->deleteLater();
-    m_selected.remove(name);
+    Q_ASSERT(pack.versionsLoaded);
+    auto it = std::find_if(pack.versions.begin(), pack.versions.end(), [id](auto const& v) { return v.fileId == id; });
+    Q_ASSERT(it != pack.versions.end());
+    return *it;
+}
+
+void ResourceDownloadDialog::removeResource(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver)
+{
+    if (auto selected_task_it = m_selected.find(pack.name); selected_task_it != m_selected.end()) {
+        auto selected_task = *selected_task_it;
+        auto old_version_id = selected_task->getVersionID();
+
+        // If the new and old version IDs don't match, search for the old one and deselect it.
+        if (ver.fileId != old_version_id)
+            getVersionWithID(pack, old_version_id).is_currently_selected = false;
+    }
+
+    // Deselect the new version too, since all versions of that pack got removed.
+    ver.is_currently_selected = false;
+
+    m_selected.remove(pack.name);
 
     m_buttons.button(QDialogButtonBox::Ok)->setEnabled(!m_selected.isEmpty());
 }
 
-bool ResourceDownloadDialog::isSelected(QString name, QString filename) const
-{
-    auto iter = m_selected.constFind(name);
-    if (iter == m_selected.constEnd())
-        return false;
-
-    // FIXME: Is there a way to check for versions without checking the filename
-    //        as a heuristic, other than adding such info to ResourceDownloadTask itself?
-    if (!filename.isEmpty())
-        return iter.value()->getFilename() == filename;
-
-    return true;
-}
-
-const QList<ResourceDownloadTask*> ResourceDownloadDialog::getTasks()
+const QList<ResourceDownloadDialog::DownloadTaskPtr> ResourceDownloadDialog::getTasks()
 {
     return m_selected.values();
 }

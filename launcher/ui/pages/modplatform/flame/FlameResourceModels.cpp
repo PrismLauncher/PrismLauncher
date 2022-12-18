@@ -2,6 +2,7 @@
 
 #include "Json.h"
 
+#include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 
 namespace ResourceDownload {
@@ -9,7 +10,7 @@ namespace ResourceDownload {
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 const char* FlameModModel::sorts[6]{ "Featured", "Popularity", "LastUpdated", "Name", "Author", "TotalDownloads" };
 
-FlameModModel::FlameModModel(FlameModPage* parent) : ModModel(parent, new FlameAPI) {}
+FlameModModel::FlameModModel(BaseInstance const& base) : ModModel(base, new FlameAPI) {}
 
 void FlameModModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
@@ -24,7 +25,7 @@ void FlameModModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& 
 
 void FlameModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_associated_page->m_base_instance);
+    FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
 auto FlameModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray

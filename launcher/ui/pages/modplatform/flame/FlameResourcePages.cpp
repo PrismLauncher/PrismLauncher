@@ -45,7 +45,7 @@ namespace ResourceDownload {
 FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance)
     : ModPage(dialog, instance)
 {
-    m_model = new FlameModModel(this);
+    m_model = new FlameModModel(instance);
     m_ui->packView->setModel(m_model);
 
     // index is used to set the sorting with the flame api

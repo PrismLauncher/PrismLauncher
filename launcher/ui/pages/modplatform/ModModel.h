@@ -6,6 +6,7 @@
 #include "modplatform/ResourceAPI.h"
 
 #include "ui/pages/modplatform/ResourceModel.h"
+#include "ui/widgets/ModFilterWidget.h"
 
 class Version;
 
@@ -17,7 +18,7 @@ class ModModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ModModel(ModPage* parent, ResourceAPI* api);
+    ModModel(const BaseInstance&, ResourceAPI* api);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, const int sort, const bool filter_changed);
@@ -26,12 +27,12 @@ class ModModel : public ResourceModel {
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
     virtual void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) = 0;
 
+    void setFilter(std::shared_ptr<ModFilterWidget::Filter> filter) { m_filter = filter; }
+
    public slots:
     void searchRequestFinished(QJsonDocument& doc);
-
     void infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index);
-
-    void versionRequestSucceeded(QJsonDocument doc, QString addonId, const QModelIndex& index);
+    void versionRequestSucceeded(QJsonDocument doc, ModPlatform::IndexedPack& pack, const QModelIndex& index);
 
    public slots:
     ResourceAPI::SearchArgs createSearchArguments() override;
@@ -47,10 +48,10 @@ class ModModel : public ResourceModel {
     virtual auto documentToArray(QJsonDocument& obj) const -> QJsonArray = 0;
     virtual auto getSorts() const -> const char** = 0;
 
-    inline auto getMineVersions() const -> std::optional<std::list<Version>>;
-
    protected:
     int currentSort = 0;
+
+    std::shared_ptr<ModFilterWidget::Filter> m_filter = nullptr;
 };
 
 }  // namespace ResourceDownload
