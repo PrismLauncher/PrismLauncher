@@ -36,15 +36,15 @@ These packages are also availiable to all the distributions based on the ones me
 
 Feel free to create a GitHub issue if you find a bug or want to suggest a new feature. We have multiple community spaces where other community members can help you:
 
-1) **Our Discord server:**
+- **Our Discord server:**
 
 [![Prism Launcher Discord server](https://discordapp.com/api/guilds/1031648380885147709/widget.png?style=banner3)](https://discord.gg/prismlauncher)
 
-2) **Our Matrix space:**
+- **Our Matrix space:**
 
 [![PrismLauncher Space](https://img.shields.io/matrix/prismlauncher:matrix.org?style=for-the-badge&label=Matrix%20Space&logo=matrix&color=purple)](https://matrix.to/#/#prismlauncher:matrix.org)
 
-3) **Our Subreddit:**
+- **Our Subreddit:**
 
 [![r/PrismLauncher](https://img.shields.io/reddit/subreddit-subscribers/prismlauncher?style=for-the-badge&logo=reddit)](https://www.reddit.com/r/PrismLauncher/)
 
