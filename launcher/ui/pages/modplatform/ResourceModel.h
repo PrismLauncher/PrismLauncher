@@ -5,6 +5,7 @@
 #include <QAbstractListModel>
 
 #include "QObjectPtr.h"
+#include "BaseInstance.h"
 #include "modplatform/ResourceAPI.h"
 #include "tasks/ConcurrentTask.h"
 
@@ -17,19 +18,18 @@ struct IndexedPack;
 
 namespace ResourceDownload {
 
-class ResourcePage;
-
 class ResourceModel : public QAbstractListModel {
     Q_OBJECT
 
    public:
-    ResourceModel(ResourcePage* parent, ResourceAPI* api);
+    ResourceModel(BaseInstance const&, ResourceAPI* api);
     ~ResourceModel() override;
 
     [[nodiscard]] auto data(const QModelIndex&, int role) const -> QVariant override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
-    [[nodiscard]] auto debugName() const -> QString;
+    [[nodiscard]] virtual auto debugName() const -> QString;
+    [[nodiscard]] virtual auto metaEntryBase() const -> QString = 0;
 
     [[nodiscard]] inline int rowCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : m_packs.size(); }
     [[nodiscard]] inline int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : 1; };
@@ -37,6 +37,10 @@ class ResourceModel : public QAbstractListModel {
 
     inline void addActiveJob(Task::Ptr ptr) { m_current_job.addTask(ptr); if (!m_current_job.isRunning()) m_current_job.start(); }
     inline Task const& activeJob() { return m_current_job; }
+
+   signals:
+    void versionListUpdated();
+    void projectInfoUpdated();
 
    public slots:
     void fetchMore(const QModelIndex& parent) override;
@@ -72,9 +76,9 @@ class ResourceModel : public QAbstractListModel {
     /** Resets the model's data. */
     void clearData();
 
-    [[nodiscard]] bool isPackSelected(const ModPlatform::IndexedPack&) const;
-
    protected:
+    const BaseInstance& m_base_instance;
+
     /* Basic search parameters */
     enum class SearchState { None, CanFetchMore, ResetRequested, Finished } m_search_state = SearchState::None;
     int m_next_search_offset = 0;
@@ -87,8 +91,6 @@ class ResourceModel : public QAbstractListModel {
     shared_qobject_ptr<NetJob> m_current_icon_job;
     QSet<QUrl> m_currently_running_icon_actions;
     QSet<QUrl> m_failed_icon_actions;
-
-    ResourcePage* m_associated_page = nullptr;
 
     QList<ModPlatform::IndexedPack> m_packs;
 

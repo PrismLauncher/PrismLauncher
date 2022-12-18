@@ -47,7 +47,7 @@ namespace ResourceDownload {
 ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instance)
     : ModPage(dialog, instance)
 {
-    m_model = new ModrinthModModel(this);
+    m_model = new ModrinthModModel(instance);
     m_ui->packView->setModel(m_model);
 
     // index is used to set the sorting with the modrinth api

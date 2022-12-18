@@ -1,7 +1,7 @@
 #include "ModModel.h"
 
 #include "Json.h"
-#include "ModPage.h"
+
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
@@ -9,15 +9,23 @@
 
 namespace ResourceDownload {
 
-ModModel::ModModel(ModPage* parent, ResourceAPI* api) : ResourceModel(parent, api) {}
+ModModel::ModModel(BaseInstance const& base_inst, ResourceAPI* api) : ResourceModel(base_inst, api) {}
 
 /******** Make data requests ********/
 
 ResourceAPI::SearchArgs ModModel::createSearchArguments()
 {
-    auto profile = static_cast<MinecraftInstance&>(m_associated_page->m_base_instance).getPackProfile();
+    auto profile = static_cast<MinecraftInstance const&>(m_base_instance).getPackProfile();
+
+    Q_ASSERT(profile);
+    Q_ASSERT(m_filter);
+
+    std::optional<std::list<Version>> versions {};
+    if (!m_filter->versions.empty())
+        versions = m_filter->versions;
+
     return { ModPlatform::ResourceType::MOD, m_next_search_offset,     m_search_term,
-             getSorts()[currentSort],        profile->getModLoaders(), getMineVersions() };
+             getSorts()[currentSort],        profile->getModLoaders(), versions };
 }
 ResourceAPI::SearchCallbacks ModModel::createSearchCallbacks()
 {
@@ -30,19 +38,24 @@ ResourceAPI::SearchCallbacks ModModel::createSearchCallbacks()
 
 ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& entry)
 {
-    auto const& pack = m_packs[entry.row()];
-    auto profile = static_cast<MinecraftInstance&>(m_associated_page->m_base_instance).getPackProfile();
+    auto& pack = m_packs[entry.row()];
+    auto profile = static_cast<MinecraftInstance const&>(m_base_instance).getPackProfile();
 
-    return { pack.addonId.toString(), getMineVersions(), profile->getModLoaders() };
+    Q_ASSERT(profile);
+    Q_ASSERT(m_filter);
+
+    std::optional<std::list<Version>> versions {};
+    if (!m_filter->versions.empty()) 
+        versions = m_filter->versions;
+
+    return { pack, versions, profile->getModLoaders() };
 }
 ResourceAPI::VersionSearchCallbacks ModModel::createVersionsCallbacks(QModelIndex& entry)
 {
-    auto const& pack = m_packs[entry.row()];
-
-    return { [this, pack, entry](auto& doc, auto addonId) {
+    return { [this, entry](auto& doc, auto& pack) {
         if (!s_running_models.constFind(this).value())
             return;
-        versionRequestSucceeded(doc, addonId, entry);
+        versionRequestSucceeded(doc, pack, entry);
     } };
 }
 
@@ -87,7 +100,7 @@ void ModModel::searchRequestFinished(QJsonDocument& doc)
             loadIndexedPack(pack, packObj);
             newList.append(pack);
         } catch (const JSONValidationError& e) {
-            qWarning() << "Error while loading mod from " << m_associated_page->debugName() << ": " << e.cause();
+            qWarning() << "Error while loading mod from " << debugName() << ": " << e.cause();
             continue;
         }
     }
@@ -127,48 +140,36 @@ void ModModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack&
         new_pack.setValue(pack);
         if (!setData(index, new_pack, Qt::UserRole)) {
             qWarning() << "Failed to cache mod info!";
+            return;
         }
+        
+        emit projectInfoUpdated();
     }
-
-    m_associated_page->updateUi();
 }
 
-void ModModel::versionRequestSucceeded(QJsonDocument doc, QString addonId, const QModelIndex& index)
+void ModModel::versionRequestSucceeded(QJsonDocument doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
 {
-    auto current = m_associated_page->getCurrentPack();
-    if (addonId != current.addonId) {
-        return;
-    }
-
     auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
 
     try {
-        loadIndexedPackVersions(current, arr);
+        loadIndexedPackVersions(pack, arr);
     } catch (const JSONValidationError& e) {
         qDebug() << doc;
         qWarning() << "Error while reading " << debugName() << " mod version: " << e.cause();
     }
 
-    // Cache info :^)
-    QVariant new_pack;
-    new_pack.setValue(current);
-    if (!setData(index, new_pack, Qt::UserRole)) {
-        qWarning() << "Failed to cache mod versions!";
+    // Check if the index is still valid for this mod or not
+    if (pack.addonId == data(index, Qt::UserRole).value<ModPlatform::IndexedPack>().addonId) {
+        // Cache info :^)
+        QVariant new_pack;
+        new_pack.setValue(pack);
+        if (!setData(index, new_pack, Qt::UserRole)) {
+            qWarning() << "Failed to cache mod versions!";
+            return;
+        }
+
+        emit versionListUpdated();
     }
-
-    m_associated_page->updateVersionList();
-}
-
-/******** Helpers ********/
-
-#define MOD_PAGE(x) static_cast<ModPage*>(x)
-
-auto ModModel::getMineVersions() const -> std::optional<std::list<Version>>
-{
-    auto versions = MOD_PAGE(m_associated_page)->getFilter()->versions;
-    if (!versions.empty())
-        return versions;
-    return {};
 }
 
 }  // namespace ResourceDownload

@@ -32,6 +32,7 @@ class ResourceDownloadTask : public SequentialTask {
 public:
     explicit ResourceDownloadTask(ModPlatform::IndexedPack pack, ModPlatform::IndexedVersion version, const std::shared_ptr<ResourceFolderModel> packs, bool is_indexed = true);
     const QString& getFilename() const { return m_pack_version.fileName; }
+    const QVariant& getVersionID() const { return m_pack_version.fileId; }
 
 private:
     ModPlatform::IndexedPack m_pack;

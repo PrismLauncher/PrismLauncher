@@ -114,7 +114,7 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
 
     QEventLoop loop;
 
-    auto netJob = new NetJob(QString("Flame::GetLatestVersion(%1)").arg(args.addonId), APPLICATION->network());
+    auto netJob = new NetJob(QString("Flame::GetLatestVersion(%1)").arg(args.pack.name), APPLICATION->network());
     auto response = new QByteArray();
     ModPlatform::IndexedVersion ver;
 

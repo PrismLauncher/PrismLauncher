@@ -129,7 +129,8 @@ void FlameCheckUpdate::executeTask()
         setStatus(tr("Getting API response from CurseForge for '%1'...").arg(mod->name()));
         setProgress(i++, m_mods.size());
 
-        auto latest_ver = api.getLatestVersion({ mod->metadata()->project_id.toString(), m_game_versions, m_loaders });
+        ModPlatform::IndexedPack pack{ mod->metadata()->project_id.toString() };
+        auto latest_ver = api.getLatestVersion({ pack, m_game_versions, m_loaders });
 
         // Check if we were aborted while getting the latest version
         if (m_was_aborted) {

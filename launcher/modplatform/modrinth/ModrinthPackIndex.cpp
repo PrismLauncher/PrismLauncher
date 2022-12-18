@@ -95,10 +95,10 @@ void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
 void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        QJsonArray& arr,
                                        const shared_qobject_ptr<QNetworkAccessManager>& network,
-                                       BaseInstance* inst)
+                                       const BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    QString mcVersion = (static_cast<MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.minecraft");
+    QString mcVersion = (static_cast<const MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.minecraft");
 
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();

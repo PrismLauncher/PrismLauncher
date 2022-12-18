@@ -69,13 +69,20 @@ class ResourceAPI {
     };
 
     struct VersionSearchArgs {
-        QString addonId;
+        ModPlatform::IndexedPack& pack;
 
         std::optional<std::list<Version> > mcVersions;
         std::optional<ModLoaderTypes> loaders;
+
+        void operator=(VersionSearchArgs other)
+        {
+            pack = other.pack;
+            mcVersions = other.mcVersions;
+            loaders = other.loaders;
+        }
     };
     struct VersionSearchCallbacks {
-        std::function<void(QJsonDocument&, QString)> on_succeed;
+        std::function<void(QJsonDocument&, ModPlatform::IndexedPack&)> on_succeed;
     };
 
     struct ProjectInfoArgs {

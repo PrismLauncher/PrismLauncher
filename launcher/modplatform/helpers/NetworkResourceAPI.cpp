@@ -79,7 +79,7 @@ NetJob::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, Ver
 
     auto versions_url = versions_url_optional.value();
 
-    auto netJob = new NetJob(QString("%1::Versions").arg(args.addonId), APPLICATION->network());
+    auto netJob = new NetJob(QString("%1::Versions").arg(args.pack.name), APPLICATION->network());
     auto response = new QByteArray();
 
     netJob->addNetAction(Net::Download::makeByteArray(versions_url, response));
@@ -94,7 +94,7 @@ NetJob::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, Ver
             return;
         }
 
-        callbacks.on_succeed(doc, args.addonId);
+        callbacks.on_succeed(doc, args.pack);
     });
 
     QObject::connect(netJob, &NetJob::finished, [response] {

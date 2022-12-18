@@ -18,8 +18,6 @@
 
 #include "ModrinthResourceModels.h"
 
-#include "ui/pages/modplatform/modrinth/ModrinthResourcePages.h"
-
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
@@ -28,7 +26,7 @@ namespace ResourceDownload {
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 const char* ModrinthModModel::sorts[5]{ "relevance", "downloads", "follows", "updated", "newest" };
 
-ModrinthModModel::ModrinthModModel(ModrinthModPage* parent) : ModModel(parent, new ModrinthAPI){};
+ModrinthModModel::ModrinthModModel(BaseInstance const& base) : ModModel(base, new ModrinthAPI){};
 
 void ModrinthModModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
@@ -42,7 +40,7 @@ void ModrinthModModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObjec
 
 void ModrinthModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_associated_page->m_base_instance);
+    ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
 auto ModrinthModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
