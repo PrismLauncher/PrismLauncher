@@ -39,6 +39,7 @@
 #include <QString>
 
 #include <list>
+#include <optional>
 
 #include "../Version.h"
 

@@ -75,8 +75,10 @@ class ResourcePage : public QWidget, public BasePage {
     void onVersionSelectionChanged(QString data);
     void onResourceSelected();
 
+    // NOTE: Can't use [[nodiscard]] here because of https://bugreports.qt.io/browse/QTBUG-58628 on Qt 5.12
+
     /** Associates regex expressions to pages in the order they're given in the map. */
-    [[nodiscard]] virtual QMap<QString, QString> urlHandlers() const = 0;
+    virtual QMap<QString, QString> urlHandlers() const = 0;
     virtual void openUrl(const QUrl&);
 
     /** Whether the version is opted out or not. Currently only makes sense in CF. */

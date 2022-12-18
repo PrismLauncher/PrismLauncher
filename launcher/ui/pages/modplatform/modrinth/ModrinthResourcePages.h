@@ -48,7 +48,7 @@ static inline QString displayName() { return "Modrinth"; }
 static inline QIcon icon() { return APPLICATION->getThemedIcon("modrinth"); }
 static inline QString id() { return "modrinth"; }
 static inline QString debugName() { return "Modrinth"; }
-static inline QString metaEntryBase() { return "ModrinthPacks"; };
+static inline QString metaEntryBase() { return "ModrinthPacks"; }
 }
 
 class ModrinthModPage : public ModPage {
