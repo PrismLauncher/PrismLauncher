@@ -2,7 +2,7 @@
 , stdenv
 , cmake
 , jdk8
-, jdk
+, jdk17
 , zlib
 , file
 , wrapQtAppsHook
@@ -18,7 +18,7 @@
 , extra-cmake-modules
 , ghc_filesystem
 , msaClientID ? ""
-, jdks ? [ jdk jdk8 ]
+, jdks ? [ jdk17 jdk8 ]
 
   # flake
 , self
@@ -33,7 +33,7 @@ stdenv.mkDerivation rec {
 
   src = lib.cleanSource self;
 
-  nativeBuildInputs = [ extra-cmake-modules cmake file jdk wrapQtAppsHook ];
+  nativeBuildInputs = [ extra-cmake-modules cmake file jdk17 wrapQtAppsHook ];
   buildInputs = [
     qtbase
     qtsvg
