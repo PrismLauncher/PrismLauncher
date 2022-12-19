@@ -20,6 +20,7 @@ ResourceFolderModel::ResourceFolderModel(QDir dir, QObject* parent) : QAbstractL
     m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &ResourceFolderModel::directoryChanged);
+    connect(&m_helper_thread_task, &ConcurrentTask::finished, this, [this]{ m_helper_thread_task.clear(); });
 }
 
 ResourceFolderModel::~ResourceFolderModel()
@@ -275,7 +276,11 @@ void ResourceFolderModel::resolveResource(Resource* res)
     connect(
         task, &Task::finished, this, [=] { m_active_parse_tasks.remove(ticket); }, Qt::ConnectionType::QueuedConnection);
 
-    QThreadPool::globalInstance()->start(task);
+    m_helper_thread_task.addTask(task);
+
+    if (!m_helper_thread_task.isRunning()) {
+        QThreadPool::globalInstance()->start(&m_helper_thread_task);
+    }
 }
 
 void ResourceFolderModel::onUpdateSucceeded()
