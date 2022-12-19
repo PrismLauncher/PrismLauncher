@@ -123,7 +123,7 @@ auto NetJob::getFailedFiles() -> QList<QString>
 
 void NetJob::updateState()
 {
-    emit progress(m_done.count(), m_total_size);
+    emit progress(m_done.count(), totalSize());
     setStatus(tr("Executing %1 task(s) (%2 out of %3 are done)")
-                  .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(m_total_size)));
+                  .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
 }

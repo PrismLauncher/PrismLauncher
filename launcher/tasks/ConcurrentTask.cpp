@@ -27,18 +27,13 @@ auto ConcurrentTask::getStepTotalProgress() const -> qint64
 
 void ConcurrentTask::addTask(Task::Ptr task)
 {
-    if (!isRunning())
-        m_queue.append(task);
-    else
-        qWarning() << "Tried to add a task to a running concurrent task!";
+    m_queue.append(task);
 }
 
 void ConcurrentTask::executeTask()
 {
-    m_total_size = m_queue.size();
-
     // Start the least amount of tasks needed, but at least one
-    int num_starts = std::max(1, std::min(m_total_max_size, m_total_size));
+    int num_starts = qMax(1, qMin(m_total_max_size, m_queue.size()));
     for (int i = 0; i < num_starts; i++) {
         QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
     }
@@ -73,6 +68,20 @@ bool ConcurrentTask::abort()
     return suceedeed;
 }
 
+void ConcurrentTask::clear()
+{
+    Q_ASSERT(!isRunning());
+
+    m_done.clear();
+    m_failed.clear();
+    m_queue.clear();
+
+    m_aborted = false;
+
+    m_progress = 0;
+    m_stepProgress = 0;
+}
+
 void ConcurrentTask::startNext()
 {
     if (m_aborted || m_doing.count() > m_total_max_size)
@@ -101,9 +110,14 @@ void ConcurrentTask::startNext()
     setStepStatus(next->isMultiStep() ? next->getStepStatus() : next->getStatus());
     updateState();
 
-    QCoreApplication::processEvents();
+    QMetaObject::invokeMethod(next.get(), &Task::start, Qt::QueuedConnection);
 
-    next->start();
+    // Allow going up the number of concurrent tasks in case of tasks being added in the middle of a running task.
+    int num_starts = m_total_max_size - m_doing.size();
+    for (int i = 0; i < num_starts; i++)
+        QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
+
+    QCoreApplication::processEvents();
 }
 
 void ConcurrentTask::subTaskSucceeded(Task::Ptr task)
@@ -145,7 +159,7 @@ void ConcurrentTask::subTaskProgress(qint64 current, qint64 total)
 
 void ConcurrentTask::updateState()
 {
-    setProgress(m_done.count(), m_total_size);
+    setProgress(m_done.count(), totalSize());
     setStatus(tr("Executing %1 task(s) (%2 out of %3 are done)")
-                  .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(m_total_size)));
+                  .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
 }
