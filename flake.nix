@@ -5,10 +5,9 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-compat = { url = "github:edolstra/flake-compat"; flake = false; };
     libnbtplusplus = { url = "github:PrismLauncher/libnbtplusplus"; flake = false; };
-    tomlplusplus = { url = "github:marzer/tomlplusplus"; flake = false; };
   };
 
-  outputs = { self, nixpkgs, libnbtplusplus, tomlplusplus, ... }:
+  outputs = { self, nixpkgs, libnbtplusplus, ... }:
     let
       # User-friendly version number.
       version = builtins.substring 0 8 self.lastModifiedDate;
@@ -23,8 +22,8 @@
       pkgs = forAllSystems (system: nixpkgs.legacyPackages.${system});
 
       packagesFn = pkgs: rec {
-        prismlauncher-qt5 = pkgs.libsForQt5.callPackage ./nix { inherit version self libnbtplusplus tomlplusplus; };
-        prismlauncher = pkgs.qt6Packages.callPackage ./nix { inherit version self libnbtplusplus tomlplusplus; };
+        prismlauncher-qt5 = pkgs.libsForQt5.callPackage ./nix { inherit version self libnbtplusplus; };
+        prismlauncher = pkgs.qt6Packages.callPackage ./nix { inherit version self libnbtplusplus; };
       };
     in
     {
