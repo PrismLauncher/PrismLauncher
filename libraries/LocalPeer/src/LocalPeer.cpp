@@ -122,6 +122,14 @@ LocalPeer::LocalPeer(QObject * parent, const ApplicationId &appId)
     QString lockName = QDir(QDir::tempPath()).absolutePath() + QLatin1Char('/') + socketName + QLatin1String("-lockfile");
     lockFile.reset(new LockedFile(lockName));
     lockFile->open(QIODevice::ReadWrite);
+
+    if (!server->isListening())
+    {
+        if (!server->listen(socketName))
+        {
+            // handle warning
+        }
+    }
 }
 
 LocalPeer::~LocalPeer()
