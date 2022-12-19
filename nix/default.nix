@@ -16,6 +16,7 @@
 , glfw
 , openal
 , extra-cmake-modules
+, tomlplusplus
 , ghc_filesystem
 , msaClientID ? ""
 , jdks ? [ jdk17 jdk8 ]
@@ -24,7 +25,6 @@
 , self
 , version
 , libnbtplusplus
-, tomlplusplus
 }:
 
 stdenv.mkDerivation rec {
@@ -40,6 +40,7 @@ stdenv.mkDerivation rec {
     zlib
     quazip
     ghc_filesystem
+    tomlplusplus
   ] ++ lib.optional (lib.versionAtLeast qtbase.version "6") qtwayland;
 
   cmakeFlags = lib.optionals (msaClientID != "") [ "-DLauncher_MSA_CLIENT_ID=${msaClientID}" ]
@@ -52,11 +53,6 @@ stdenv.mkDerivation rec {
     ln -s ${libnbtplusplus}/* source/libraries/libnbtplusplus
     chmod -R +r+w source/libraries/libnbtplusplus
     chown -R $USER: source/libraries/libnbtplusplus
-    rm -rf source/libraries/tomlplusplus
-    mkdir source/libraries/tomlplusplus
-    ln -s ${tomlplusplus}/* source/libraries/tomlplusplus
-    chmod -R +r+w source/libraries/tomlplusplus
-    chown -R $USER: source/libraries/tomlplusplus
   '';
 
   postInstall =
