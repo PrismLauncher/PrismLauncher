@@ -123,8 +123,8 @@ void ResourceModel::fetchMore(const QModelIndex& parent)
 
 void ResourceModel::search()
 {
-    if (!m_current_job.isRunning())
-        m_current_job.clear();
+    if (hasActiveSearchJob())
+        return;
 
     auto args{ createSearchArguments() };
 
@@ -146,22 +146,22 @@ void ResourceModel::search()
         };
 
     if (auto job = m_api->searchProjects(std::move(args), std::move(callbacks)); job)
-        addActiveJob(job);
+        runSearchJob(job);
 }
 
 void ResourceModel::loadEntry(QModelIndex& entry)
 {
     auto const& pack = m_packs[entry.row()];
 
-    if (!m_current_job.isRunning())
-        m_current_job.clear();
+    if (!hasActiveInfoJob())
+        m_current_info_job.clear();
 
     if (!pack.versionsLoaded) {
         auto args{ createVersionsArguments(entry) };
         auto callbacks{ createVersionsCallbacks(entry) };
 
         if (auto job = m_api->getProjectVersions(std::move(args), std::move(callbacks)); job)
-            addActiveJob(job);
+            runInfoJob(job);
     }
 
     if (!pack.extraDataLoaded) {
@@ -169,14 +169,25 @@ void ResourceModel::loadEntry(QModelIndex& entry)
         auto callbacks{ createInfoCallbacks(entry) };
 
         if (auto job = m_api->getProjectInfo(std::move(args), std::move(callbacks)); job)
-            addActiveJob(job);
+            runInfoJob(job);
     }
 }
 
 void ResourceModel::refresh()
 {
-    if (m_current_job.isRunning()) {
-        m_current_job.abort();
+    bool reset_requested = false;
+
+    if (hasActiveInfoJob()) {
+        m_current_info_job.abort();
+        reset_requested = true;
+    }
+
+    if (hasActiveSearchJob()) {
+        m_current_search_job->abort();
+        reset_requested = true;
+    }
+
+    if (reset_requested) {
         m_search_state = SearchState::ResetRequested;
         return;
     }
@@ -193,6 +204,22 @@ void ResourceModel::clearData()
     beginResetModel();
     m_packs.clear();
     endResetModel();
+}
+
+void ResourceModel::runSearchJob(NetJob::Ptr ptr)
+{
+    m_current_search_job = ptr;
+    m_current_search_job->start();
+}
+void ResourceModel::runInfoJob(Task::Ptr ptr)
+{
+    if (!m_current_info_job.isRunning())
+        m_current_info_job.clear();
+
+    m_current_info_job.addTask(ptr);
+
+    if (!m_current_info_job.isRunning())
+        m_current_info_job.run();
 }
 
 std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
