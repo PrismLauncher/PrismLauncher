@@ -6,7 +6,9 @@
 
 #include "QObjectPtr.h"
 #include "BaseInstance.h"
+
 #include "modplatform/ResourceAPI.h"
+
 #include "tasks/ConcurrentTask.h"
 
 class NetJob;
@@ -40,6 +42,8 @@ class ResourceModel : public QAbstractListModel {
 
     inline void addActiveJob(Task::Ptr ptr) { m_current_job.addTask(ptr); if (!m_current_job.isRunning()) m_current_job.start(); }
     inline Task const& activeJob() { return m_current_job; }
+
+    [[nodiscard]] auto getSortingMethods() const { return m_api->getSortingMethods(); }
 
    public slots:
     void fetchMore(const QModelIndex& parent) override;
@@ -83,6 +87,7 @@ class ResourceModel : public QAbstractListModel {
     enum class SearchState { None, CanFetchMore, ResetRequested, Finished } m_search_state = SearchState::None;
     int m_next_search_offset = 0;
     QString m_search_term;
+    unsigned int m_current_sort_index = 0;
 
     std::unique_ptr<ResourceAPI> m_api;
 

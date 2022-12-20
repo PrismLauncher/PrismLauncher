@@ -100,7 +100,7 @@ void ModPage::triggerSearch()
         updateSelectionButton();
     }
 
-    static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentIndex(), changed);
+    static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentData().toUInt(), changed);
     m_fetch_progress.watch(&m_model->activeJob());
 }
 

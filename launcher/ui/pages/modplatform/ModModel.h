@@ -21,7 +21,7 @@ class ModModel : public ResourceModel {
     ModModel(const BaseInstance&, ResourceAPI* api);
 
     /* Ask the API for more information */
-    void searchWithTerm(const QString& term, const int sort, const bool filter_changed);
+    void searchWithTerm(const QString& term, unsigned int sort, bool filter_changed);
 
     virtual void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
@@ -46,11 +46,8 @@ class ModModel : public ResourceModel {
 
    protected:
     virtual auto documentToArray(QJsonDocument& obj) const -> QJsonArray = 0;
-    virtual auto getSorts() const -> const char** = 0;
 
    protected:
-    int currentSort = 0;
-
     std::shared_ptr<ModFilterWidget::Filter> m_filter = nullptr;
 };
 

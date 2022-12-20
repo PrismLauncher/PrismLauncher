@@ -49,6 +49,8 @@ class ModrinthAPI : public NetworkResourceAPI {
     NetJob::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
 
    public:
+    [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
+
     inline auto getAuthorURL(const QString& name) const -> QString { return "https://modrinth.com/user/" + name; };
 
     static auto getModLoaderStrings(const ModLoaderTypes types) -> const QStringList
@@ -116,7 +118,7 @@ class ModrinthAPI : public NetworkResourceAPI {
         if (args.search.has_value())
             get_arguments.append(QString("query=%1").arg(args.search.value()));
         if (args.sorting.has_value())
-            get_arguments.append(QString("index=%1").arg(args.sorting.value()));
+            get_arguments.append(QString("index=%1").arg(args.sorting.value().name));
         get_arguments.append(QString("facets=%1").arg(createFacets(args)));
 
         return BuildConfig.MODRINTH_PROD_URL + "/search?" + get_arguments.join('&');

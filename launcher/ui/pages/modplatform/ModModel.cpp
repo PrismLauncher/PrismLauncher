@@ -20,12 +20,23 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
     Q_ASSERT(profile);
     Q_ASSERT(m_filter);
 
-    std::optional<std::list<Version>> versions {};
-    if (!m_filter->versions.empty())
-        versions = m_filter->versions;
+    std::optional<std::list<Version>> versions{};
+    std::optional<ResourceAPI::SortingMethod> sort{};
 
-    return { ModPlatform::ResourceType::MOD, m_next_search_offset,     m_search_term,
-             getSorts()[currentSort],        profile->getModLoaders(), versions };
+    { // Version filter
+        if (!m_filter->versions.empty())
+            versions = m_filter->versions;
+    }
+
+    { // Sorting method
+        auto sorting_methods = getSortingMethods();
+        auto method = std::find_if(sorting_methods.begin(), sorting_methods.end(),
+                [this](auto const& e) { return m_current_sort_index == e.index; });
+        if (method != sorting_methods.end())
+            sort = *method;
+    }
+
+    return { ModPlatform::ResourceType::MOD, m_next_search_offset, m_search_term, sort, profile->getModLoaders(), versions };
 }
 ResourceAPI::SearchCallbacks ModModel::createSearchCallbacks()
 {
@@ -44,8 +55,8 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& en
     Q_ASSERT(profile);
     Q_ASSERT(m_filter);
 
-    std::optional<std::list<Version>> versions {};
-    if (!m_filter->versions.empty()) 
+    std::optional<std::list<Version>> versions{};
+    if (!m_filter->versions.empty())
         versions = m_filter->versions;
 
     return { pack, versions, profile->getModLoaders() };
@@ -73,14 +84,14 @@ ResourceAPI::ProjectInfoCallbacks ModModel::createInfoCallbacks(QModelIndex& ent
     } };
 }
 
-void ModModel::searchWithTerm(const QString& term, const int sort, const bool filter_changed)
+void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filter_changed)
 {
-    if (m_search_term == term && m_search_term.isNull() == term.isNull() && currentSort == sort && !filter_changed) {
+    if (m_search_term == term && m_search_term.isNull() == term.isNull() && m_current_sort_index == sort && !filter_changed) {
         return;
     }
 
     setSearchTerm(term);
-    currentSort = sort;
+    m_current_sort_index = sort;
 
     refresh();
 }
@@ -142,7 +153,7 @@ void ModModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack&
             qWarning() << "Failed to cache mod info!";
             return;
         }
-        
+
         emit projectInfoUpdated();
     }
 }

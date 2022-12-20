@@ -54,12 +54,23 @@ class ResourceAPI {
     enum ModLoaderType { Forge = 1 << 0, Cauldron = 1 << 1, LiteLoader = 1 << 2, Fabric = 1 << 3, Quilt = 1 << 4 };
     Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
 
+    struct SortingMethod {
+        // The index of the sorting method. Used to allow for arbitrary ordering in the list of methods.
+        // Used by Flame in the API request.
+        unsigned int index;
+        // The real name of the sorting, as used in the respective API specification.
+        // Used by Modrinth in the API request.
+        QString name;
+        // The human-readable name of the sorting, used for display in the UI.
+        QString readable_name;
+    };
+
     struct SearchArgs {
         ModPlatform::ResourceType type{};
         int offset = 0;
 
         std::optional<QString> search;
-        std::optional<QString> sorting;
+        std::optional<SortingMethod> sorting;
         std::optional<ModLoaderTypes> loaders;
         std::optional<std::list<Version> > versions;
     };
@@ -94,6 +105,10 @@ class ResourceAPI {
     struct ProjectInfoCallbacks {
         std::function<void(QJsonDocument&, ModPlatform::IndexedPack&)> on_succeed;
     };
+
+   public:
+    /** Gets a list of available sorting methods for this API. */
+    [[nodiscard]] virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
 
    public slots:
     [[nodiscard]] virtual NetJob::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const
