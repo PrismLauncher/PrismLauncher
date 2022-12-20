@@ -81,7 +81,7 @@ class ResourceAPI {
     };
 
     struct VersionSearchArgs {
-        ModPlatform::IndexedPack& pack;
+        ModPlatform::IndexedPack pack;
 
         std::optional<std::list<Version> > mcVersions;
         std::optional<ModLoaderTypes> loaders;
@@ -94,16 +94,16 @@ class ResourceAPI {
         }
     };
     struct VersionSearchCallbacks {
-        std::function<void(QJsonDocument&, ModPlatform::IndexedPack&)> on_succeed;
+        std::function<void(QJsonDocument&, ModPlatform::IndexedPack)> on_succeed;
     };
 
     struct ProjectInfoArgs {
-        ModPlatform::IndexedPack& pack;
+        ModPlatform::IndexedPack pack;
 
         void operator=(ProjectInfoArgs other) { pack = other.pack; }
     };
     struct ProjectInfoCallbacks {
-        std::function<void(QJsonDocument&, ModPlatform::IndexedPack&)> on_succeed;
+        std::function<void(QJsonDocument&, ModPlatform::IndexedPack)> on_succeed;
     };
 
    public:
