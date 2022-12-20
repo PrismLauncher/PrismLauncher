@@ -52,13 +52,13 @@ class ResourcePage : public QWidget, public BasePage {
 
     [[nodiscard]] bool setCurrentPack(ModPlatform::IndexedPack);
     [[nodiscard]] auto getCurrentPack() const -> ModPlatform::IndexedPack;
-
     [[nodiscard]] auto getDialog() const -> const ResourceDownloadDialog* { return m_parent_dialog; }
-
     [[nodiscard]] auto getModel() const -> ResourceModel* { return m_model; }
 
    protected:
     ResourcePage(ResourceDownloadDialog* parent, BaseInstance&);
+
+    void addSortings();
 
    public slots:
     virtual void updateUi();

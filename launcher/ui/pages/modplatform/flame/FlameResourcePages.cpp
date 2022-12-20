@@ -48,13 +48,7 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance)
     m_model = new FlameModModel(instance);
     m_ui->packView->setModel(m_model);
 
-    // index is used to set the sorting with the flame api
-    m_ui->sortByBox->addItem(tr("Sort by Featured"));
-    m_ui->sortByBox->addItem(tr("Sort by Popularity"));
-    m_ui->sortByBox->addItem(tr("Sort by Last Updated"));
-    m_ui->sortByBox->addItem(tr("Sort by Name"));
-    m_ui->sortByBox->addItem(tr("Sort by Author"));
-    m_ui->sortByBox->addItem(tr("Sort by Downloads"));
+    addSortings();
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's contructor...

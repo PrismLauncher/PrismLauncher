@@ -7,9 +7,6 @@
 
 namespace ResourceDownload {
 
-// NOLINTNEXTLINE(modernize-avoid-c-arrays)
-const char* FlameModModel::sorts[6]{ "Featured", "Popularity", "LastUpdated", "Name", "Author", "TotalDownloads" };
-
 FlameModModel::FlameModModel(BaseInstance const& base) : ModModel(base, new FlameAPI) {}
 
 void FlameModModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)

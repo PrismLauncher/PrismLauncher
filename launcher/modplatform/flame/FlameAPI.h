@@ -14,20 +14,9 @@ class FlameAPI : public NetworkResourceAPI {
     NetJob::Ptr matchFingerprints(const QList<uint>& fingerprints, QByteArray* response);
     NetJob::Ptr getFiles(const QStringList& fileIds, QByteArray* response) const;
 
-   private:
-    static int getSortFieldInt(QString const& sortString)
-    {
-        return sortString == "Featured"         ? 1
-               : sortString == "Popularity"     ? 2
-               : sortString == "LastUpdated"    ? 3
-               : sortString == "Name"           ? 4
-               : sortString == "Author"         ? 5
-               : sortString == "TotalDownloads" ? 6
-               : sortString == "Category"       ? 7
-               : sortString == "GameVersion"    ? 8
-                                                : 1;
-    }
+    [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
+   private:
     static int getClassId(ModPlatform::ResourceType type)
     {
         switch (type) {
@@ -62,7 +51,7 @@ class FlameAPI : public NetworkResourceAPI {
         if (args.search.has_value())
             get_arguments.append(QString("searchFilter=%1").arg(args.search.value()));
         if (args.sorting.has_value())
-            get_arguments.append(QString("sortField=%1").arg(getSortFieldInt(args.sorting.value())));
+            get_arguments.append(QString("sortField=%1").arg(args.sorting.value().index));
         get_arguments.append("sortOrder=desc");
         if (args.loaders.has_value())
             get_arguments.append(QString("modLoaderType=%1").arg(getMappedModLoader(args.loaders.value())));

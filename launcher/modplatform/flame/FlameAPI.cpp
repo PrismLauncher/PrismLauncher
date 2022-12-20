@@ -212,3 +212,18 @@ NetJob::Ptr FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response)
 
     return netJob;
 }
+
+// https://docs.curseforge.com/?python#tocS_ModsSearchSortField
+static QList<ResourceAPI::SortingMethod> s_sorts = { { 1, "Featured", QObject::tr("Sort by Featured") },
+                                                     { 2, "Popularity", QObject::tr("Sort by Popularity") },
+                                                     { 3, "LastUpdated", QObject::tr("Sort by Last Updated") },
+                                                     { 4, "Name", QObject::tr("Sort by Name") },
+                                                     { 5, "Author", QObject::tr("Sort by Author") },
+                                                     { 6, "TotalDownloads", QObject::tr("Sort by Downloads") },
+                                                     { 7, "Category", QObject::tr("Sort by Category") },
+                                                     { 8, "GameVersion", QObject::tr("Sort by Game Version") } };
+
+QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
+{
+    return s_sorts;
+}
