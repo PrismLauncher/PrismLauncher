@@ -101,7 +101,7 @@ void ModPage::triggerSearch()
     }
 
     static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentData().toUInt(), changed);
-    m_fetch_progress.watch(&m_model->activeJob());
+    m_fetch_progress.watch(m_model->activeSearchJob().get());
 }
 
 QMap<QString, QString> ModPage::urlHandlers() const

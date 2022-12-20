@@ -353,8 +353,8 @@ void ResourcePage::openUrl(const QUrl& url)
             searchEdit->setText(slug);
             newPage->triggerSearch();
 
-            if (model->activeJob().isRunning())
-                connect(&model->activeJob(), &Task::finished, jump);
+            if (model->hasActiveSearchJob())
+                connect(model->activeSearchJob().get(), &Task::finished, jump);
             else
                 jump();
 
