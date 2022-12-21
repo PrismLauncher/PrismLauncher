@@ -45,8 +45,7 @@ import java.util.Map;
 
 import org.prismlauncher.utils.Base64;
 import org.prismlauncher.utils.JsonParser;
-import org.prismlauncher.utils.url.NullConnection;
-import org.prismlauncher.utils.url.UrlUtils;
+import org.prismlauncher.utils.UrlUtils;
 
 @SuppressWarnings("unchecked")
 final class Handler extends URLStreamHandler {
@@ -71,10 +70,6 @@ final class Handler extends URLStreamHandler {
     @Override
     protected URLConnection openConnection(URL address, Proxy proxy) throws IOException {
         address = redirect(address);
-
-        if (address == null)
-            return NullConnection.INSTANCE;
-
         return UrlUtils.openHttpConnection(address, proxy);
     }
 

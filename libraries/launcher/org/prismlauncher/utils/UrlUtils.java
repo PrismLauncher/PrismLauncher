@@ -33,7 +33,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.utils.url;
+package org.prismlauncher.utils;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -47,8 +47,8 @@ import java.net.URLStreamHandler;
 import org.prismlauncher.utils.logging.Log;
 
 /**
- * A utility class for URLs which uses reflection to access hidden methods.
- * Unfortunately not supported on newer Java versions.
+ * A utility class for URLs which uses reflection to access constructors for
+ * internal classes.
  */
 public final class UrlUtils {
 
@@ -57,12 +57,12 @@ public final class UrlUtils {
 
     static {
         try {
-            // invoke URL.getURLStreamHandler to obtain some of the default handlers before
-            // they are overridden
+            // we first obtain the stock URLStreamHandler for http as we overwrite it later
             Method getURLStreamHandler = URL.class.getDeclaredMethod("getURLStreamHandler", String.class);
             getURLStreamHandler.setAccessible(true);
             http = (URLStreamHandler) getURLStreamHandler.invoke(null, "http");
 
+            // we next find the openConnection method
             Method openConnectionReflect = URLStreamHandler.class.getDeclaredMethod("openConnection", URL.class,
                     Proxy.class);
             openConnectionReflect.setAccessible(true);
@@ -97,7 +97,7 @@ public final class UrlUtils {
         } catch (IOException | Error | RuntimeException e) {
             throw e; // rethrow if possible
         } catch (Throwable e) {
-            throw new Error(e); // otherwise, wrap in Error
+            throw new AssertionError(e); // oh dear! this isn't meant to happen
         }
     }
 

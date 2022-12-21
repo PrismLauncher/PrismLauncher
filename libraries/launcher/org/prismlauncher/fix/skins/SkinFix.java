@@ -42,8 +42,8 @@ import java.net.URLStreamHandlerFactory;
 import org.prismlauncher.fix.Fix;
 import org.prismlauncher.utils.Base64;
 import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.UrlUtils;
 import org.prismlauncher.utils.logging.Log;
-import org.prismlauncher.utils.url.UrlUtils;
 
 /**
  * Fixes skins by redirecting to other URLs.

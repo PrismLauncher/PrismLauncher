@@ -23,8 +23,7 @@ set(SRC
     org/prismlauncher/utils/JsonParser.java
     org/prismlauncher/utils/Parameters.java
     org/prismlauncher/utils/ReflectionUtils.java
-    org/prismlauncher/utils/url/NullConnection.java
-    org/prismlauncher/utils/url/UrlUtils.java
+    org/prismlauncher/utils/UrlUtils.java
     org/prismlauncher/utils/logging/Level.java
     org/prismlauncher/utils/logging/Log.java
     net/minecraft/Launcher.java

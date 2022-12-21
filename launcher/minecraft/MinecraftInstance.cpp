@@ -192,7 +192,7 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
 
-	m_settings->registerSetting("LegacySkinFix", true);
+    m_settings->registerSetting("LegacySkinFix", true);
 
     qDebug() << "Instance-type specific settings were loaded!";
 
@@ -441,7 +441,9 @@ QStringList MinecraftInstance::javaArguments()
     args << "-Duser.language=en";
 
     if (javaVersion.isModular() && traits().contains("legacySkins") && settings()->get("LegacySkinFix").toBool())
-        args << "--add-opens" << "java.base/java.net=ALL-UNNAMED";
+        // allow reflective access to java.net - required by the skin fix
+        args << "--add-opens"
+             << "java.base/java.net=ALL-UNNAMED";
 
     return args;
 }
