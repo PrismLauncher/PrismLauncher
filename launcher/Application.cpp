@@ -425,7 +425,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         }
         qInstallMessageHandler(appDebugOutput);
 
-        // TODO: Set filter rules based on CLI arguments
         qSetMessagePattern(
                 "%{time process}" " "
                 "%{if-debug}D%{endif}" "%{if-info}I%{endif}" "%{if-warning}W%{endif}" "%{if-critical}C%{endif}" "%{if-fatal}F%{endif}"
