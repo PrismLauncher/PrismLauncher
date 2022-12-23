@@ -609,12 +609,12 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="legacySkinFix">
+        <widget class="QCheckBox" name="onlineFixes">
          <property name="toolTip">
-          <string>Enables support for modern skins on old versions.</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fixes usages of old online services which are no longer operating by emulating them or redirecting to their modern counterparts.&lt;/p&gt;&lt;p&gt;This currently only allows modern skins to be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>Enable legacy skin fix</string>
+          <string>Enable online fixes</string>
          </property>
         </widget>
        </item>

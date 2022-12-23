@@ -276,8 +276,8 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("JoinServerOnLaunchAddress");
     }
 
-	bool legacySkinFix = ui->legacySkinFix->isChecked();
-	m_settings->set("LegacySkinFix", legacySkinFix);
+	bool onlineFixes = ui->onlineFixes->isChecked();
+	m_settings->set("OnlineFixes", onlineFixes);
 
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
@@ -377,8 +377,8 @@ void InstanceSettingsPage::loadSettings()
     ui->serverJoinGroupBox->setChecked(m_settings->get("JoinServerOnLaunch").toBool());
     ui->serverJoinAddress->setText(m_settings->get("JoinServerOnLaunchAddress").toString());
 
-	ui->legacySkinFix->setChecked(m_settings->get("LegacySkinFix").toBool());
-	ui->legacySkinFix->setVisible(m_instance->traits().contains("legacySkins"));
+	ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
+	ui->onlineFixes->setVisible(m_instance->traits().contains("legacyServices"));
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

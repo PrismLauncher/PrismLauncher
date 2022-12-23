@@ -33,31 +33,45 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.fix;
+package org.prismlauncher.fix.online;
 
-import org.prismlauncher.utils.Parameters;
+import java.net.URL;
+import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
 
-public interface Fix {
+import org.prismlauncher.utils.Base64;
+import org.prismlauncher.utils.UrlUtils;
+import org.prismlauncher.utils.logging.Log;
 
-    /**
-     * Gets the name of the fix. If the name isn't passed into the program, the fix
-     * won't run.
-     *
-     * @return The name
-     */
-    String getName();
+/**
+ * Fixes skins by redirecting to other URLs.
+ *
+ * @see {@link Handler}
+ * @see {@link UrlUtils}
+ */
+public final class OnlineFixes implements URLStreamHandlerFactory {
 
-    /**
-     * Determines whether the fix will be run. This is additional to the name check.
-     *
-     * @param params The parameters
-     * @return <code>true</code> to proceed to applying the fix
-     */
-    boolean isApplicable(Parameters params);
+    public static void apply() {
+        if (!UrlUtils.isSupported() || !Base64.isSupported()) {
+            Log.warning("Cannot access the necessary Java internals for skin fix");
+            Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
+            return;
+        }
 
-    /**
-     * Applies the fix.
-     */
-    void apply();
+    	try {
+            URL.setURLStreamHandlerFactory(new OnlineFixes());
+    	} catch (Error e) {
+            Log.warning("Cannot apply skin fix: URLStreamHandlerFactory is already set");
+			Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
+    	}
+    }
+
+    @Override
+    public URLStreamHandler createURLStreamHandler(String protocol) {
+        if ("http".equals(protocol))
+            return new Handler();
+
+        return null;
+    }
 
 }

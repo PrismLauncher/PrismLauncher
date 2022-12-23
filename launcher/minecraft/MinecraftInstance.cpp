@@ -192,7 +192,7 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
 
-    m_settings->registerSetting("LegacySkinFix", true);
+    m_settings->registerSetting("OnlineFixes", true);
 
     qDebug() << "Instance-type specific settings were loaded!";
 
@@ -440,7 +440,7 @@ QStringList MinecraftInstance::javaArguments()
 
     args << "-Duser.language=en";
 
-    if (javaVersion.isModular() && traits().contains("legacySkins") && settings()->get("LegacySkinFix").toBool())
+    if (javaVersion.isModular() && traits().contains("legacyServices") && settings()->get("OnlineFixes").toBool())
         // allow reflective access to java.net - required by the skin fix
         args << "--add-opens"
              << "java.base/java.net=ALL-UNNAMED";
@@ -665,8 +665,8 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
         launchScript += "traits " + trait + "\n";
     }
 
-    if (profile->getTraits().contains("legacySkins") && settings()->get("LegacySkinFix").toBool())
-        launchScript += "fixes legacySkinFix\n";
+    if (profile->getTraits().contains("legacyServices") && settings()->get("OnlineFixes").toBool())
+        launchScript += "onlineFixes true\n";
 
     launchScript += "launcher " + getLauncher() + "\n";
 

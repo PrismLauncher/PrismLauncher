@@ -33,59 +33,27 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.fix.skins;
+package org.prismlauncher.fix.online;
 
+import java.io.IOException;
+import java.net.Proxy;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLStreamHandler;
-import java.net.URLStreamHandlerFactory;
 
-import org.prismlauncher.fix.Fix;
-import org.prismlauncher.utils.Base64;
-import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.UrlUtils;
-import org.prismlauncher.utils.logging.Log;
 
-/**
- * Fixes skins by redirecting to other URLs.
- *
- * @see {@link Handler}
- * @see {@link UrlUtils}
- */
-public final class SkinFix implements Fix, URLStreamHandlerFactory {
+final class Handler extends URLStreamHandler {
 
     @Override
-    public String getName() {
-        return "legacySkinFix";
+    protected URLConnection openConnection(URL address) throws IOException {
+        return openConnection(address, null);
     }
 
     @Override
-    public boolean isApplicable(Parameters params) {
-        if (!UrlUtils.isSupported() || !Base64.isSupported()) {
-            Log.warning("Cannot access the necessary Java internals for skin fix");
-            Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
-            return false;
-        }
-
-        return true;
-    }
-
-    @Override
-    public void apply() {
-    	try {
-    		URL.setURLStreamHandlerFactory(this);
-    	} catch (Error e) {
-            Log.warning("Cannot apply skin fix");
-    		Log.warning("URLStreamHandlerFactory is already set");
-			Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
-    	}
-    }
-
-    @Override
-    public URLStreamHandler createURLStreamHandler(String protocol) {
-        if ("http".equals(protocol))
-            return new Handler();
-
-        return null;
+    protected URLConnection openConnection(URL address, Proxy proxy) throws IOException {
+        address = SkinFix.redirect(address);
+        return UrlUtils.openHttpConnection(address, proxy);
     }
 
 }
