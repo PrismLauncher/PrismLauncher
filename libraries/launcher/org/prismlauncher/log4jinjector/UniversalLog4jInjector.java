@@ -27,7 +27,7 @@ public class UniversalLog4jInjector {
                 Log.warning(EXCEPTION_DURING_INJECTION);
                 e.printStackTrace();
             }
-        } else if (l4jVersion.startsWith("2.17.1")) {
+        } else if (l4jVersion.startsWith("2.17.1") || l4jVersion.startsWith("2.19.0")) {
             try {
                 Log4jInjector2171.inject();
             } catch (Exception e) {

@@ -8,6 +8,9 @@ import org.apache.logging.log4j.message.MessageFactory;
 
 import java.net.URI;
 
+/**
+ * This is also the injector for Log4j 2.19.0
+ */
 public class Log4jInjector2171 {
 
     public static void inject() {
