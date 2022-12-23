@@ -23,29 +23,19 @@ class ModModel : public ResourceModel {
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort, bool filter_changed);
 
-    virtual void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
-    virtual void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
-    virtual void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) = 0;
+    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override = 0;
+    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override = 0;
+    void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override = 0;
 
     void setFilter(std::shared_ptr<ModFilterWidget::Filter> filter) { m_filter = filter; }
 
    public slots:
-    void searchRequestFinished(QJsonDocument& doc);
-    void infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index);
-    void versionRequestSucceeded(QJsonDocument doc, ModPlatform::IndexedPack& pack, const QModelIndex& index);
-
-   public slots:
     ResourceAPI::SearchArgs createSearchArguments() override;
-    ResourceAPI::SearchCallbacks createSearchCallbacks() override;
-
     ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override;
-    ResourceAPI::VersionSearchCallbacks createVersionsCallbacks(QModelIndex&) override;
-
     ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) override;
-    ResourceAPI::ProjectInfoCallbacks createInfoCallbacks(QModelIndex&) override;
 
    protected:
-    virtual auto documentToArray(QJsonDocument& obj) const -> QJsonArray = 0;
+    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override = 0;
 
    protected:
     std::shared_ptr<ModFilterWidget::Filter> m_filter = nullptr;
