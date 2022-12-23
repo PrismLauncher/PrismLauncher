@@ -8,12 +8,10 @@
 
 #include "Application.h"
 #include "BuildConfig.h"
+#include "Json.h"
 
 #include "net/Download.h"
 #include "net/NetJob.h"
-
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
 
 #include "modplatform/ModIndex.h"
 
@@ -129,9 +127,14 @@ void ResourceModel::search()
     auto args{ createSearchArguments() };
 
     auto callbacks{ createSearchCallbacks() };
-    Q_ASSERT(callbacks.on_succeed);
 
     // Use defaults if no callbacks are set
+    if (!callbacks.on_succeed)
+        callbacks.on_succeed = [this](auto& doc) {
+            if (!s_running_models.constFind(this).value())
+                return;
+            searchRequestSucceeded(doc);
+        };
     if (!callbacks.on_fail)
         callbacks.on_fail = [this](QString reason, int network_error_code) {
             if (!s_running_models.constFind(this).value())
@@ -160,6 +163,14 @@ void ResourceModel::loadEntry(QModelIndex& entry)
         auto args{ createVersionsArguments(entry) };
         auto callbacks{ createVersionsCallbacks(entry) };
 
+        // Use default if no callbacks are set
+        if (!callbacks.on_succeed)
+            callbacks.on_succeed = [this, entry](auto& doc, auto pack) {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                versionRequestSucceeded(doc, pack, entry);
+            };
+
         if (auto job = m_api->getProjectVersions(std::move(args), std::move(callbacks)); job)
             runInfoJob(job);
     }
@@ -167,6 +178,14 @@ void ResourceModel::loadEntry(QModelIndex& entry)
     if (!pack.extraDataLoaded) {
         auto args{ createInfoArguments(entry) };
         auto callbacks{ createInfoCallbacks(entry) };
+
+        // Use default if no callbacks are set
+        if (!callbacks.on_succeed)
+            callbacks.on_succeed = [this, entry](auto& doc, auto pack) {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                infoRequestSucceeded(doc, pack, entry);
+            };
 
         if (auto job = m_api->getProjectInfo(std::move(args), std::move(callbacks)); job)
             runInfoJob(job);
@@ -226,10 +245,10 @@ std::optional<ResourceAPI::SortingMethod> ResourceModel::getCurrentSortingMethod
 {
     std::optional<ResourceAPI::SortingMethod> sort{};
 
-    { // Find sorting method by ID
+    {  // Find sorting method by ID
         auto sorting_methods = getSortingMethods();
         auto method = std::find_if(sorting_methods.constBegin(), sorting_methods.constEnd(),
-                [this](auto const& e) { return m_current_sort_index == e.index; });
+                                   [this](auto const& e) { return m_current_sort_index == e.index; });
         if (method != sorting_methods.constEnd())
             sort = *method;
     }
@@ -279,6 +298,64 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     return {};
 }
 
+// No 'forgor to implement' shall pass here :blobfox_knife:
+#define NEED_FOR_CALLBACK_ASSERT(name) \
+    Q_ASSERT_X(0 != 0, #name, "You NEED to re-implement this if you intend on using the default callbacks.")
+
+QJsonArray ResourceModel::documentToArray(QJsonDocument& doc) const
+{
+    NEED_FOR_CALLBACK_ASSERT("documentToArray");
+    return {};
+}
+void ResourceModel::loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&)
+{
+    NEED_FOR_CALLBACK_ASSERT("loadIndexedPack");
+}
+void ResourceModel::loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&)
+{
+    NEED_FOR_CALLBACK_ASSERT("loadExtraPackInfo");
+}
+void ResourceModel::loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArray&)
+{
+    NEED_FOR_CALLBACK_ASSERT("loadIndexedPackVersions");
+}
+
+/* Default callbacks */
+
+void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
+{
+    QList<ModPlatform::IndexedPack> newList;
+    auto packs = documentToArray(doc);
+
+    for (auto packRaw : packs) {
+        auto packObj = packRaw.toObject();
+
+        ModPlatform::IndexedPack pack;
+        try {
+            loadIndexedPack(pack, packObj);
+            newList.append(pack);
+        } catch (const JSONValidationError& e) {
+            qWarning() << "Error while loading resource from " << debugName() << ": " << e.cause();
+            continue;
+        }
+    }
+
+    if (packs.size() < 25) {
+        m_search_state = SearchState::Finished;
+    } else {
+        m_next_search_offset += 25;
+        m_search_state = SearchState::CanFetchMore;
+    }
+
+    // When you have a Qt build with assertions turned on, proceeding here will abort the application
+    if (newList.size() == 0)
+        return;
+
+    beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + newList.size() - 1);
+    m_packs.append(newList);
+    endInsertRows();
+}
+
 void ResourceModel::searchRequestFailed(QString reason, int network_error_code)
 {
     switch (network_error_code) {
@@ -289,8 +366,7 @@ void ResourceModel::searchRequestFailed(QString reason, int network_error_code)
         case 409:
             // 409 Gone, notify user to update
             QMessageBox::critical(nullptr, tr("Error"),
-                                  QString("%1")
-                                      .arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_DISPLAYNAME)));
+                                  QString("%1").arg(tr("API version too old!\nPlease update %1!").arg(BuildConfig.LAUNCHER_DISPLAYNAME)));
             break;
     }
 
@@ -307,6 +383,60 @@ void ResourceModel::searchRequestAborted()
 
     m_next_search_offset = 0;
     search();
+}
+
+void ResourceModel::versionRequestSucceeded(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
+{
+    auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+
+    // Check if the index is still valid for this resource or not
+    if (pack.addonId != current_pack.addonId)
+        return;
+
+    try {
+        auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
+        loadIndexedPackVersions(current_pack, arr);
+    } catch (const JSONValidationError& e) {
+        qDebug() << doc;
+        qWarning() << "Error while reading " << debugName() << " resource version: " << e.cause();
+    }
+
+    // Cache info :^)
+    QVariant new_pack;
+    new_pack.setValue(current_pack);
+    if (!setData(index, new_pack, Qt::UserRole)) {
+        qWarning() << "Failed to cache resource versions!";
+        return;
+    }
+
+    emit versionListUpdated();
+}
+
+void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
+{
+    auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+
+    // Check if the index is still valid for this resource or not
+    if (pack.addonId != current_pack.addonId)
+        return;
+
+    try {
+        auto obj = Json::requireObject(doc);
+        loadExtraPackInfo(current_pack, obj);
+    } catch (const JSONValidationError& e) {
+        qDebug() << doc;
+        qWarning() << "Error while reading " << debugName() << " resource info: " << e.cause();
+    }
+
+    // Cache info :^)
+    QVariant new_pack;
+    new_pack.setValue(current_pack);
+    if (!setData(index, new_pack, Qt::UserRole)) {
+        qWarning() << "Failed to cache resource info!";
+        return;
+    }
+
+    emit projectInfoUpdated();
 }
 
 }  // namespace ResourceDownload

@@ -1,7 +1,5 @@
 #include "ModModel.h"
 
-#include "Json.h"
-
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
@@ -31,14 +29,6 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
 
     return { ModPlatform::ResourceType::MOD, m_next_search_offset, m_search_term, sort, profile->getModLoaders(), versions };
 }
-ResourceAPI::SearchCallbacks ModModel::createSearchCallbacks()
-{
-    return { [this](auto& doc) {
-        if (!s_running_models.constFind(this).value())
-            return;
-        searchRequestFinished(doc);
-    } };
-}
 
 ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& entry)
 {
@@ -54,27 +44,11 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& en
 
     return { pack, versions, profile->getModLoaders() };
 }
-ResourceAPI::VersionSearchCallbacks ModModel::createVersionsCallbacks(QModelIndex& entry)
-{
-    return { [this, entry](auto& doc, auto pack) {
-        if (!s_running_models.constFind(this).value())
-            return;
-        versionRequestSucceeded(doc, pack, entry);
-    } };
-}
 
 ResourceAPI::ProjectInfoArgs ModModel::createInfoArguments(QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
     return { pack };
-}
-ResourceAPI::ProjectInfoCallbacks ModModel::createInfoCallbacks(QModelIndex& entry)
-{
-    return { [this, entry](auto& doc, auto pack) {
-        if (!s_running_models.constFind(this).value())
-            return;
-        infoRequestFinished(doc, pack, entry);
-    } };
 }
 
 void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filter_changed)
@@ -87,99 +61,6 @@ void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filte
     m_current_sort_index = sort;
 
     refresh();
-}
-
-/******** Request callbacks ********/
-
-void ModModel::searchRequestFinished(QJsonDocument& doc)
-{
-    QList<ModPlatform::IndexedPack> newList;
-    auto packs = documentToArray(doc);
-
-    for (auto packRaw : packs) {
-        auto packObj = packRaw.toObject();
-
-        ModPlatform::IndexedPack pack;
-        try {
-            loadIndexedPack(pack, packObj);
-            newList.append(pack);
-        } catch (const JSONValidationError& e) {
-            qWarning() << "Error while loading mod from " << debugName() << ": " << e.cause();
-            continue;
-        }
-    }
-
-    if (packs.size() < 25) {
-        m_search_state = SearchState::Finished;
-    } else {
-        m_next_search_offset += 25;
-        m_search_state = SearchState::CanFetchMore;
-    }
-
-    // When you have a Qt build with assertions turned on, proceeding here will abort the application
-    if (newList.size() == 0)
-        return;
-
-    beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + newList.size() - 1);
-    m_packs.append(newList);
-    endInsertRows();
-}
-
-void ModModel::infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
-{
-    qDebug() << "Loading mod info";
-
-    auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
-
-    // Check if the index is still valid for this mod or not
-    if (pack.addonId != current_pack.addonId)
-        return;
-
-    try {
-        auto obj = Json::requireObject(doc);
-        loadExtraPackInfo(current_pack, obj);
-    } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << debugName() << " mod info: " << e.cause();
-    }
-
-    // Cache info :^)
-    QVariant new_pack;
-    new_pack.setValue(current_pack);
-    if (!setData(index, new_pack, Qt::UserRole)) {
-        qWarning() << "Failed to cache mod info!";
-        return;
-    }
-
-    emit projectInfoUpdated();
-}
-
-void ModModel::versionRequestSucceeded(QJsonDocument doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
-{
-    auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
-
-    auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
-
-    // Check if the index is still valid for this mod or not
-    if (pack.addonId != current_pack.addonId)
-        return;
-
-    try {
-        loadIndexedPackVersions(current_pack, arr);
-    } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << debugName() << " mod version: " << e.cause();
-    }
-
-    // Cache info :^)
-    QVariant new_pack;
-    new_pack.setValue(current_pack);
-    if (!setData(index, new_pack, Qt::UserRole)) {
-        qWarning() << "Failed to cache mod versions!";
-        return;
-    }
-
-    emit versionListUpdated();
 }
 
 }  // namespace ResourceDownload
