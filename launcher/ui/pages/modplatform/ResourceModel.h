@@ -84,6 +84,8 @@ class ResourceModel : public QAbstractListModel {
     void runSearchJob(NetJob::Ptr);
     void runInfoJob(Task::Ptr);
 
+    [[nodiscard]] auto getCurrentSortingMethodByIndex() const -> std::optional<ResourceAPI::SortingMethod>;
+
    protected:
     const BaseInstance& m_base_instance;
 
