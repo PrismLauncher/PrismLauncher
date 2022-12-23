@@ -21,20 +21,13 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
     Q_ASSERT(m_filter);
 
     std::optional<std::list<Version>> versions{};
-    std::optional<ResourceAPI::SortingMethod> sort{};
 
     { // Version filter
         if (!m_filter->versions.empty())
             versions = m_filter->versions;
     }
 
-    { // Sorting method
-        auto sorting_methods = getSortingMethods();
-        auto method = std::find_if(sorting_methods.begin(), sorting_methods.end(),
-                [this](auto const& e) { return m_current_sort_index == e.index; });
-        if (method != sorting_methods.end())
-            sort = *method;
-    }
+    auto sort = getCurrentSortingMethodByIndex();
 
     return { ModPlatform::ResourceType::MOD, m_next_search_offset, m_search_term, sort, profile->getModLoaders(), versions };
 }

@@ -222,6 +222,21 @@ void ResourceModel::runInfoJob(Task::Ptr ptr)
         m_current_info_job.run();
 }
 
+std::optional<ResourceAPI::SortingMethod> ResourceModel::getCurrentSortingMethodByIndex() const
+{
+    std::optional<ResourceAPI::SortingMethod> sort{};
+
+    { // Find sorting method by ID
+        auto sorting_methods = getSortingMethods();
+        auto method = std::find_if(sorting_methods.constBegin(), sorting_methods.constEnd(),
+                [this](auto const& e) { return m_current_sort_index == e.index; });
+        if (method != sorting_methods.constEnd())
+            sort = *method;
+    }
+
+    return sort;
+}
+
 std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
 {
     QPixmap pixmap;
