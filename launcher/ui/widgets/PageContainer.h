@@ -79,6 +79,7 @@ public:
     }
 
     virtual bool selectPage(QString pageId) override;
+    BasePage* getPage(QString pageId) override;
 
     void refreshContainer() override;
     virtual void setParentContainer(BasePageContainer * container)

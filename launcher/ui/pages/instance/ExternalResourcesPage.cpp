@@ -67,11 +67,21 @@ void ExternalResourcesPage::ShowContextMenu(const QPoint& pos)
 void ExternalResourcesPage::openedImpl()
 {
     m_model->startWatching();
+
+    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    if (!APPLICATION->settings()->contains(setting_name))
+        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
+    else
+        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+
+    ui->actionsToolbar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
 }
 
 void ExternalResourcesPage::closedImpl()
 {
     m_model->stopWatching();
+
+    m_wide_bar_setting->set(ui->actionsToolbar->getVisibilityState());
 }
 
 void ExternalResourcesPage::retranslate()

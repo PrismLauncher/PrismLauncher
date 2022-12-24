@@ -354,15 +354,18 @@ const MMCIcon *IconList::icon(const QString &key) const
 
 bool IconList::deleteIcon(const QString &key)
 {
-    int iconIdx = getIconIndex(key);
-    if (iconIdx == -1)
+    if (!iconFileExists(key))
         return false;
-    auto &iconEntry = icons[iconIdx];
-    if (iconEntry.has(IconType::FileBased))
-    {
-        return QFile::remove(iconEntry.m_images[IconType::FileBased].filename);
-    }
-    return false;
+
+    return QFile::remove(icon(key)->getFilePath());
+}
+
+bool IconList::trashIcon(const QString &key)
+{
+    if (!iconFileExists(key))
+        return false;
+
+    return FS::trash(icon(key)->getFilePath(), nullptr);
 }
 
 bool IconList::addThemeIcon(const QString& key)

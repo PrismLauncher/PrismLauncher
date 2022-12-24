@@ -97,6 +97,7 @@
 #include <QIcon>
 
 #include "InstanceList.h"
+#include "MTPixmapCache.h"
 
 #include <minecraft/auth/AccountList.h>
 #include "icons/IconList.h"
@@ -125,6 +126,7 @@
 #ifdef Q_OS_LINUX
 #include <dlfcn.h>
 #include "gamemode_client.h"
+#include "MangoHud.h"
 #endif
 
 
@@ -140,6 +142,8 @@
 #define TOSTRING(x) STRINGIFY(x)
 
 static const QLatin1String liveCheckFile("live.check");
+
+PixmapCache* PixmapCache::s_instance = nullptr;
 
 namespace {
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -693,6 +697,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<AccountListPage>();
             m_globalSettingsProvider->addPage<APIPage>();
         }
+
+        PixmapCache::setInstance(new PixmapCache(this));
+
         qDebug() << "<> Settings loaded.";
     }
 
@@ -1519,17 +1526,8 @@ void Application::updateCapabilities()
     if (gamemode_query_status() >= 0)
         m_capabilities |= SupportsGameMode;
 
-    {
-        void *dummy = dlopen("libMangoHud_dlsym.so", RTLD_LAZY);
-        // try normal variant as well
-        if (dummy == NULL)
-            dummy = dlopen("libMangoHud.so", RTLD_LAZY);
-
-        if (dummy != NULL) {
-            dlclose(dummy);
-            m_capabilities |= SupportsMangoHud;
-        }
-    }
+    if (!MangoHud::getLibraryString().isEmpty())
+        m_capabilities |= SupportsMangoHud;
 #endif
 }
 

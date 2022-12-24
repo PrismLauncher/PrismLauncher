@@ -17,17 +17,11 @@
    <property name="topMargin">
     <number>0</number>
    </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
    <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
     <widget class="QTextEdit" name="noteEditor">
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
-     </property>
      <property name="tabChangesFocus">
       <bool>true</bool>
      </property>

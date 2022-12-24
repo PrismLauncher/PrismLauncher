@@ -779,8 +779,6 @@ public:
         actionCreateInstanceShortcut->setObjectName(QStringLiteral("actionCreateInstanceShortcut"));
         actionCreateInstanceShortcut.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Create Shortcut"));
         actionCreateInstanceShortcut.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Creates a shortcut on your desktop to launch the selected instance."));
-        //actionCreateInstanceShortcut->setShortcut(QKeySequence(tr("Ctrl+D")));     // TODO
-        // FIXME missing on Legacy, Flat and Flat (White)
         actionCreateInstanceShortcut->setIcon(APPLICATION->getThemedIcon("shortcut"));
         all_actions.append(&actionCreateInstanceShortcut);
 
@@ -1685,7 +1683,7 @@ InstanceView
     background-image: url(:/backgrounds/%1);
     background-attachment: fixed;
     background-clip: padding;
-    background-position: bottom left;
+    background-position: bottom right;
     background-repeat: none;
     background-color:palette(base);
 })")

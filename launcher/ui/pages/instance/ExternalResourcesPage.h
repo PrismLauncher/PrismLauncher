@@ -4,6 +4,7 @@
 #include <QSortFilterProxyModel>
 
 #include "Application.h"
+#include "settings/Setting.h"
 #include "minecraft/MinecraftInstance.h"
 #include "ui/pages/BasePage.h"
 
@@ -70,4 +71,6 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     QString m_viewFilter;
 
     bool m_controlsEnabled = true;
+
+    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
 };

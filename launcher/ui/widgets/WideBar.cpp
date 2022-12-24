@@ -1,19 +1,24 @@
 #include "WideBar.h"
-#include <QToolButton>
-#include <QMenu>
 
-class ActionButton : public QToolButton
-{
+#include <QContextMenuEvent>
+#include <QCryptographicHash>
+#include <QToolButton>
+
+class ActionButton : public QToolButton {
     Q_OBJECT
-public:
-    ActionButton(QAction * action, QWidget * parent = 0) : QToolButton(parent), m_action(action) {
+   public:
+    ActionButton(QAction* action, QWidget* parent = nullptr) : QToolButton(parent), m_action(action)
+    {
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
         connect(action, &QAction::changed, this, &ActionButton::actionChanged);
         connect(this, &ActionButton::clicked, action, &QAction::trigger);
+
         actionChanged();
     };
-private slots:
-    void actionChanged() {
+   public slots:
+    void actionChanged()
+    {
         setEnabled(m_action->isEnabled());
         setChecked(m_action->isChecked());
         setCheckable(m_action->isCheckable());
@@ -23,137 +28,242 @@ private slots:
         setHidden(!m_action->isVisible());
         setFocusPolicy(Qt::NoFocus);
     }
-private:
-    QAction * m_action;
-};
 
+   private:
+    QAction* m_action;
+};
 
 WideBar::WideBar(const QString& title, QWidget* parent) : QToolBar(title, parent)
 {
     setFloatable(false);
     setMovable(false);
+
+    setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+    connect(this, &QToolBar::customContextMenuRequested, this, &WideBar::showVisibilityMenu);
 }
 
 WideBar::WideBar(QWidget* parent) : QToolBar(parent)
 {
     setFloatable(false);
     setMovable(false);
-}
 
-struct WideBar::BarEntry {
-    enum Type {
-        None,
-        Action,
-        Separator,
-        Spacer
-    } type = None;
-    QAction *qAction = nullptr;
-    QAction *wideAction = nullptr;
-};
-
-
-WideBar::~WideBar()
-{
-    for(auto *iter: m_entries) {
-        delete iter;
-    }
+    setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+    connect(this, &QToolBar::customContextMenuRequested, this, &WideBar::showVisibilityMenu);
 }
 
 void WideBar::addAction(QAction* action)
 {
-    auto entry = new BarEntry();
-    entry->qAction = addWidget(new ActionButton(action, this));
-    entry->wideAction = action;
-    entry->type = BarEntry::Action;
+    BarEntry entry;
+    entry.bar_action = addWidget(new ActionButton(action, this));
+    entry.menu_action = action;
+    entry.type = BarEntry::Type::Action;
+
     m_entries.push_back(entry);
+
+    m_menu_state = MenuState::Dirty;
 }
 
 void WideBar::addSeparator()
 {
-    auto entry = new BarEntry();
-    entry->qAction = QToolBar::addSeparator();
-    entry->type = BarEntry::Separator;
+    BarEntry entry;
+    entry.bar_action = QToolBar::addSeparator();
+    entry.type = BarEntry::Type::Separator;
+
     m_entries.push_back(entry);
 }
 
-auto WideBar::getMatching(QAction* act) -> QList<BarEntry*>::iterator
+auto WideBar::getMatching(QAction* act) -> QList<BarEntry>::iterator
 {
-    auto iter = std::find_if(m_entries.begin(), m_entries.end(), [act](BarEntry * entry) {
-        return entry->wideAction == act;
-    });
-    
+    auto iter = std::find_if(m_entries.begin(), m_entries.end(), [act](BarEntry const& entry) { return entry.menu_action == act; });
+
     return iter;
 }
 
-void WideBar::insertActionBefore(QAction* before, QAction* action){
+void WideBar::insertActionBefore(QAction* before, QAction* action)
+{
     auto iter = getMatching(before);
-    if(iter == m_entries.end())
+    if (iter == m_entries.end())
         return;
 
-    auto entry = new BarEntry();
-    entry->qAction = insertWidget((*iter)->qAction, new ActionButton(action, this));
-    entry->wideAction = action;
-    entry->type = BarEntry::Action;
+    BarEntry entry;
+    entry.bar_action = insertWidget(iter->bar_action, new ActionButton(action, this));
+    entry.menu_action = action;
+    entry.type = BarEntry::Type::Action;
+
     m_entries.insert(iter, entry);
+
+    m_menu_state = MenuState::Dirty;
 }
 
-void WideBar::insertActionAfter(QAction* after, QAction* action){
+void WideBar::insertActionAfter(QAction* after, QAction* action)
+{
     auto iter = getMatching(after);
-    if(iter == m_entries.end())
+    if (iter == m_entries.end())
         return;
 
-    auto entry = new BarEntry();
-    entry->qAction = insertWidget((*(iter+1))->qAction, new ActionButton(action, this));
-    entry->wideAction = action;
-    entry->type = BarEntry::Action;
+    BarEntry entry;
+    entry.bar_action = insertWidget((iter + 1)->bar_action, new ActionButton(action, this));
+    entry.menu_action = action;
+    entry.type = BarEntry::Type::Action;
+
     m_entries.insert(iter + 1, entry);
+
+    m_menu_state = MenuState::Dirty;
 }
 
 void WideBar::insertSpacer(QAction* action)
 {
     auto iter = getMatching(action);
-    if(iter == m_entries.end())
+    if (iter == m_entries.end())
         return;
 
-    QWidget* spacer = new QWidget();
+    auto* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    auto entry = new BarEntry();
-    entry->qAction = insertWidget((*iter)->qAction, spacer);
-    entry->type = BarEntry::Spacer;
+    BarEntry entry;
+    entry.bar_action = insertWidget(iter->bar_action, spacer);
+    entry.type = BarEntry::Type::Spacer;
     m_entries.insert(iter, entry);
 }
 
 void WideBar::insertSeparator(QAction* before)
 {
     auto iter = getMatching(before);
-    if(iter == m_entries.end())
+    if (iter == m_entries.end())
         return;
 
-    auto entry = new BarEntry();
-    entry->qAction = QToolBar::insertSeparator(before);
-    entry->type = BarEntry::Separator;
+    BarEntry entry;
+    entry.bar_action = QToolBar::insertSeparator(before);
+    entry.type = BarEntry::Type::Separator;
+
     m_entries.insert(iter, entry);
 }
 
-QMenu * WideBar::createContextMenu(QWidget *parent, const QString & title)
+QMenu* WideBar::createContextMenu(QWidget* parent, const QString& title)
 {
-    QMenu *contextMenu = new QMenu(title, parent);
-    for(auto & item: m_entries) {
-        switch(item->type) {
+    auto* contextMenu = new QMenu(title, parent);
+    for (auto& item : m_entries) {
+        switch (item.type) {
             default:
-            case BarEntry::None:
+            case BarEntry::Type::None:
                 break;
-            case BarEntry::Separator:
-            case BarEntry::Spacer:
+            case BarEntry::Type::Separator:
+            case BarEntry::Type::Spacer:
                 contextMenu->addSeparator();
                 break;
-            case BarEntry::Action:
-                contextMenu->addAction(item->wideAction);
+            case BarEntry::Type::Action:
+                contextMenu->addAction(item.menu_action);
                 break;
         }
     }
     return contextMenu;
 }
+
+static void copyAction(QAction* from, QAction* to)
+{
+    Q_ASSERT(from);
+    Q_ASSERT(to);
+
+    to->setText(from->text());
+    to->setIcon(from->icon());
+    to->setToolTip(from->toolTip());
+}
+
+void WideBar::showVisibilityMenu(QPoint const& position)
+{
+    if (!m_bar_menu)
+        m_bar_menu = std::make_unique<QMenu>(this);
+
+    if (m_menu_state == MenuState::Dirty) {
+        for (auto* old_action : m_bar_menu->actions())
+            old_action->deleteLater();
+
+        m_bar_menu->clear();
+
+        for (auto& entry : m_entries) {
+            if (entry.type != BarEntry::Type::Action)
+                continue;
+
+            auto act = new QAction();
+            copyAction(entry.menu_action, act);
+
+            act->setCheckable(true);
+            act->setChecked(entry.bar_action->isVisible());
+
+            connect(act, &QAction::toggled, entry.bar_action, [this, &entry](bool toggled){
+                entry.bar_action->setVisible(toggled);
+
+                // NOTE: This is needed so that disabled actions get reflected on the button when it is made visible.
+                static_cast<ActionButton*>(widgetForAction(entry.bar_action))->actionChanged();
+            });
+
+            m_bar_menu->addAction(act);
+        }
+
+        m_menu_state = MenuState::Fresh;
+    }
+
+    m_bar_menu->popup(mapToGlobal(position));
+}
+
+[[nodiscard]] QByteArray WideBar::getVisibilityState() const
+{
+    QByteArray state;
+
+    for (auto const& entry : m_entries) {
+        if (entry.type != BarEntry::Type::Action)
+            continue;
+
+        state.append(entry.bar_action->isVisible() ? '1' : '0');
+    }
+
+    state.append(',');
+    state.append(getHash());
+
+    return state;
+}
+
+void WideBar::setVisibilityState(QByteArray&& state)
+{
+    auto split = state.split(',');
+
+    auto bits = split.first();
+    auto hash = split.last();
+
+    // If the actions changed, we better not try to load the old one to avoid unwanted hiding
+    if (!checkHash(hash))
+        return;
+
+    qsizetype i = 0;
+    for (auto& entry : m_entries) {
+        if (entry.type != BarEntry::Type::Action)
+            continue;
+        if (i == bits.size())
+            break;
+
+        entry.bar_action->setVisible(bits.at(i++) == '1');
+
+        // NOTE: This is needed so that disabled actions get reflected on the button when it is made visible.
+        static_cast<ActionButton*>(widgetForAction(entry.bar_action))->actionChanged();
+    }
+}
+
+QByteArray WideBar::getHash() const
+{
+    QCryptographicHash hash(QCryptographicHash::Sha1);
+    for (auto const& entry : m_entries) {
+        if (entry.type != BarEntry::Type::Action)
+            continue;
+        hash.addData(entry.menu_action->text().toLatin1());
+    }
+
+    return hash.result().toBase64();
+}
+
+bool WideBar::checkHash(QByteArray const& old_hash) const
+{
+    return old_hash == getHash();
+}
+
 
 #include "WideBar.moc"

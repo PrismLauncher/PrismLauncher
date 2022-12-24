@@ -2,9 +2,10 @@
 
 #include <QAction>
 #include <QMap>
+#include <QMenu>
 #include <QToolBar>
 
-class QMenu;
+#include <memory>
 
 class WideBar : public QToolBar {
     Q_OBJECT
@@ -12,7 +13,7 @@ class WideBar : public QToolBar {
    public:
     explicit WideBar(const QString& title, QWidget* parent = nullptr);
     explicit WideBar(QWidget* parent = nullptr);
-    virtual ~WideBar();
+    ~WideBar() override = default;
 
     void addAction(QAction* action);
     void addSeparator();
@@ -23,12 +24,31 @@ class WideBar : public QToolBar {
     void insertActionAfter(QAction* after, QAction* action);
 
     QMenu* createContextMenu(QWidget* parent = nullptr, const QString& title = QString());
+    void showVisibilityMenu(const QPoint&);
+
+    // Ideally we would use a QBitArray for this, but it doesn't support string conversion,
+    // so using it in settings is very messy.
+
+    [[nodiscard]] QByteArray getVisibilityState() const;
+    void setVisibilityState(QByteArray&&);
 
    private:
-    struct BarEntry;
+    struct BarEntry {
+        enum class Type { None, Action, Separator, Spacer } type = Type::None;
+        QAction* bar_action = nullptr;
+        QAction* menu_action = nullptr;
+    };
 
-    auto getMatching(QAction* act) -> QList<BarEntry*>::iterator;
+    auto getMatching(QAction* act) -> QList<BarEntry>::iterator;
+
+    /** Used to distinguish between versions of the WideBar with different actions */
+    [[nodiscard]] QByteArray getHash() const;
+    [[nodiscard]] bool checkHash(QByteArray const&) const;
 
    private:
-    QList<BarEntry*> m_entries;
+    QList<BarEntry> m_entries;
+
+    // Menu to toggle visibility from buttons in the bar
+    std::unique_ptr<QMenu> m_bar_menu = nullptr;
+    enum class MenuState { Fresh, Dirty } m_menu_state = MenuState::Dirty;
 };

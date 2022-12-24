@@ -24,6 +24,11 @@ public:
 public slots:
     bool abort() override;
 
+    /** Resets the internal state of the task.
+     *  This allows the same task to be re-used.
+     */
+    void clear();
+
 protected
 slots:
     void executeTask() override;
@@ -36,6 +41,9 @@ slots:
     void subTaskProgress(qint64 current, qint64 total);
 
 protected:
+    // NOTE: This is not thread-safe.
+    [[nodiscard]] unsigned int totalSize() const { return m_queue.size() + m_doing.size() + m_done.size(); }
+
     void setStepStatus(QString status) { m_step_status = status; emit stepStatus(status); };
 
     virtual void updateState();
@@ -51,7 +59,6 @@ protected:
     QHash<Task*, Task::Ptr> m_failed;
 
     int m_total_max_size;
-    int m_total_size;
 
     qint64 m_stepProgress = 0;
     qint64 m_stepTotalProgress = 100;

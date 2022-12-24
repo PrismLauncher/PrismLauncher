@@ -28,9 +28,6 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="ModListView" name="packageView">
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOn</enum>
-        </property>
         <property name="horizontalScrollBarPolicy">
          <enum>Qt::ScrollBarAlwaysOff</enum>
         </property>

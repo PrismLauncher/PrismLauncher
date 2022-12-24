@@ -12,7 +12,7 @@ LibrariesTask::LibrariesTask(MinecraftInstance * inst)
 
 void LibrariesTask::executeTask()
 {
-    setStatus(tr("Getting the library files from Mojang..."));
+    setStatus(tr("Downloading required library files..."));
     qDebug() << m_inst->name() << ": downloading libraries";
     MinecraftInstance *inst = (MinecraftInstance *)m_inst;
 
