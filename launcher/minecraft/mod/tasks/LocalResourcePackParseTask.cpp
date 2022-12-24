@@ -75,15 +75,15 @@ bool processFolder(ResourcePack& pack, ProcessingLevel level)
         
     QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
     if (image_file_info.exists() && image_file_info.isFile()) {
-        QFile mcmeta_file(image_file_info.filePath());
-        if (!mcmeta_file.open(QIODevice::ReadOnly))
+        QFile pack_png_file(image_file_info.filePath());
+        if (!pack_png_file.open(QIODevice::ReadOnly))
             return false; // can't open pack.png file
 
-        auto data = mcmeta_file.readAll();
+        auto data = pack_png_file.readAll();
 
         bool pack_png_result = ResourcePackUtils::processPackPNG(pack, std::move(data));
 
-        mcmeta_file.close();
+        pack_png_file.close();
         if (!pack_png_result) {
             return false; // pack.png invalid
         }

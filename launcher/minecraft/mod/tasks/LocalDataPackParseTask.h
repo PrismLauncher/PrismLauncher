@@ -47,7 +47,7 @@ bool validate(QFileInfo file);
 class LocalDataPackParseTask : public Task {
     Q_OBJECT
    public:
-    LocalDataPackParseTask(int token, DataPack& rp);
+    LocalDataPackParseTask(int token, DataPack& dp);
 
     [[nodiscard]] bool canAbort() const override { return true; }
     bool abort() override;
