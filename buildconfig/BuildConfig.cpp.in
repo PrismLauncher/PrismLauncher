@@ -76,7 +76,9 @@ Config::Config()
 
     // Assume that builds outside of Git repos are "stable"
     if (GIT_REFSPEC == QStringLiteral("GITDIR-NOTFOUND")
-        || GIT_TAG == QStringLiteral("GITDIR-NOTFOUND"))
+        || GIT_TAG == QStringLiteral("GITDIR-NOTFOUND")
+        || GIT_REFSPEC == QStringLiteral("")
+        || GIT_TAG == QStringLiteral("GIT-NOTFOUND"))
     {
         GIT_REFSPEC = "refs/heads/stable";
         GIT_TAG = versionString();
