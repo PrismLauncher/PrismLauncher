@@ -146,19 +146,12 @@ static const QLatin1String liveCheckFile("live.check");
 PixmapCache* PixmapCache::s_instance = nullptr;
 
 namespace {
+
+/** This is used so that we can output to the log file in addition to the CLI. */
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    const char *levels = "DWCFIS";
-    const QString format("%1 %2 %3\n");
-
-    qint64 msecstotal = APPLICATION->timeSinceStart();
-    qint64 seconds = msecstotal / 1000;
-    qint64 msecs = msecstotal % 1000;
-    QString foo;
-    char buf[1025] = {0};
-    ::snprintf(buf, 1024, "%5lld.%03lld", seconds, msecs);
-
-    QString out = format.arg(buf).arg(levels[type]).arg(msg);
+    QString out = qFormatLogMessage(type, context, msg);
+    out += QChar::LineFeed;
 
     APPLICATION->logFile->write(out.toUtf8());
     APPLICATION->logFile->flush();
@@ -431,6 +424,14 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             return;
         }
         qInstallMessageHandler(appDebugOutput);
+
+        qSetMessagePattern(
+                "%{time process}" " "
+                "%{if-debug}D%{endif}" "%{if-info}I%{endif}" "%{if-warning}W%{endif}" "%{if-critical}C%{endif}" "%{if-fatal}F%{endif}"
+                " " "|" " "
+                "%{if-category}[%{category}]: %{endif}"
+                "%{message}");
+
         qDebug() << "<> Log initialized.";
     }
 
