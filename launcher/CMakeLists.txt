@@ -339,6 +339,10 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ResourcePackFolderModel.cpp
     minecraft/mod/TexturePack.h
     minecraft/mod/TexturePack.cpp
+    minecraft/mod/ShaderPack.h
+    minecraft/mod/ShaderPack.cpp
+    minecraft/mod/WorldSave.h
+    minecraft/mod/WorldSave.cpp
     minecraft/mod/TexturePackFolderModel.h
     minecraft/mod/TexturePackFolderModel.cpp
     minecraft/mod/ShaderPackFolderModel.h
@@ -355,6 +359,10 @@ set(MINECRAFT_SOURCES
     minecraft/mod/tasks/LocalResourcePackParseTask.cpp
     minecraft/mod/tasks/LocalTexturePackParseTask.h
     minecraft/mod/tasks/LocalTexturePackParseTask.cpp
+    minecraft/mod/tasks/LocalShaderPackParseTask.h
+    minecraft/mod/tasks/LocalShaderPackParseTask.cpp
+    minecraft/mod/tasks/LocalWorldSaveParseTask.h
+    minecraft/mod/tasks/LocalWorldSaveParseTask.cpp
 
     # Assets
     minecraft/AssetsUtils.h

@@ -27,7 +27,7 @@
 
 class Version;
 
-enum WorldSaveFormat {
+enum class WorldSaveFormat {
 	SINGLE,
 	MULTI,
 	INVALID

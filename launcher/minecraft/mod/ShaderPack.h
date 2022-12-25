@@ -39,7 +39,7 @@
 
 #include <QMutex>
 
-enum ShaderPackFormat {
+enum class ShaderPackFormat {
 	VALID,
 	INVALID
 };

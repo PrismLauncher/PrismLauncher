@@ -121,6 +121,9 @@ bool processZIP(WorldSave& save, ProcessingLevel level)
 
     auto [ found, save_dir_name, found_saves_dir ] = contains_level_dat(zip);
 
+    if (save_dir_name.endsWith("/")) {
+        save_dir_name.chop(1);
+    }
     
     if (!found) {
         return false;
