@@ -116,7 +116,7 @@ bool processZIP(TexturePack& pack, ProcessingLevel level)
 
     if (level == ProcessingLevel::BasicInfoOnly) {
         zip.close();
-        return false;
+        return true;
     }
 
     if (zip.setCurrentFile("pack.png")) {
