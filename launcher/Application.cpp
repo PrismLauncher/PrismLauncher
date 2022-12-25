@@ -394,7 +394,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // init the logger
     {
-        static const QString logBase = BuildConfig.LAUNCHER_NAME + "-%0.log";
+        static const QString logBase = "logs/"+BuildConfig.LAUNCHER_NAME + "-%0.log";
+        QDir logDir = QDir(dataPath);
+        if(!logDir.exists("logs")) {
+            logDir.mkpath("logs"); //this can fail, but there is no need to throw an error *yet*, since it also triggers the error message below!
+        }
         auto moveFile = [](const QString &oldName, const QString &newName)
         {
             QFile::remove(newName);
@@ -415,11 +419,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 QString(
                     "The launcher couldn't create a log file - the data folder is not writable.\n"
                     "\n"
-                    "Make sure you have write permissions to the data folder.\n"
+                    "Make sure you have write permissions to the logs folder.\n"
                     "(%1)\n"
                     "\n"
                     "The launcher cannot continue until you fix this problem."
-                ).arg(dataPath)
+                ).arg(dataPath+"/logs")
             );
             return;
         }
@@ -1666,6 +1670,7 @@ bool Application::handleDataMigration(const QString& currentData,
         matcher->add(std::make_shared<SimplePrefixMatcher>(configFile));
         matcher->add(std::make_shared<SimplePrefixMatcher>(
             BuildConfig.LAUNCHER_CONFIGFILE));  // it's possible that we already used that directory before
+        matcher->add(std::make_shared<SimplePrefixMatcher>("logs/"));
         matcher->add(std::make_shared<SimplePrefixMatcher>("accounts.json"));
         matcher->add(std::make_shared<SimplePrefixMatcher>("accounts/"));
         matcher->add(std::make_shared<SimplePrefixMatcher>("assets/"));
