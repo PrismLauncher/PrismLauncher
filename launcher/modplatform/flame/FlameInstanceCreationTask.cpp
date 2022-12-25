@@ -53,6 +53,13 @@
 #include "ui/dialogs/BlockedModsDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
+#include <minecraft/mod/tasks/LocalResourcePackParseTask.h>
+#include <minecraft/mod/tasks/LocalTexturePackParseTask.h>
+#include <minecraft/mod/tasks/LocalDataPackParseTask.h>
+#include <minecraft/mod/tasks/LocalModParseTask.h>
+#include <qdebug.h>
+#include <qfileinfo.h>
+
 const static QMap<QString, QString> forgemap = { { "1.2.5", "3.4.9.171" },
                                                  { "1.4.2", "6.0.1.355" },
                                                  { "1.4.7", "6.6.2.534" },
@@ -401,6 +408,11 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
     for (const auto& result : results.files.values()) {
+
+        if(result.fileName.endsWith(".zip")) {
+            m_ZIP_resources.append(std::make_pair(result.fileName, result.targetFolder));
+        }
+
         if (!result.resolved || result.url.isEmpty()) {
             BlockedMod blocked_mod;
             blocked_mod.name = result.fileName;
@@ -439,37 +451,6 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     }
 }
 
-/// @brief copy the matched blocked mods to the instance staging area
-/// @param blocked_mods list of the blocked mods and their matched paths
-void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
-{
-    setStatus(tr("Copying Blocked Mods..."));
-    setAbortable(false);
-    int i = 0;
-    int total = blocked_mods.length();
-    setProgress(i, total);
-    for (auto const& mod : blocked_mods) {
-        if (!mod.matched) {
-            qDebug() << mod.name << "was not matched to a local file, skipping copy";
-            continue;
-        }
-
-        auto dest_path = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
-
-        setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
-
-        qDebug() << "Will try to copy" << mod.localPath << "to" << dest_path;
-
-        if (!FS::copy(mod.localPath, dest_path)()) {
-            qDebug() << "Copy of" << mod.localPath << "to" << dest_path << "Failed";
-        }
-
-        i++;
-        setProgress(i, total);
-    }
-
-    setAbortable(true);
-}
 
 void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 {
@@ -509,7 +490,10 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     }
 
     m_mod_id_resolver.reset();
-    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() { m_files_job.reset(); });
+    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() { 
+        m_files_job.reset(); 
+        validateZIPResouces();
+    });
     connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
         m_files_job.reset();
         setError(reason);
@@ -519,4 +503,103 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 
     setStatus(tr("Downloading mods..."));
     m_files_job->start();
+}
+
+/// @brief copy the matched blocked mods to the instance staging area
+/// @param blocked_mods list of the blocked mods and their matched paths
+void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
+{
+    setStatus(tr("Copying Blocked Mods..."));
+    setAbortable(false);
+    int i = 0;
+    int total = blocked_mods.length();
+    setProgress(i, total);
+    for (auto const& mod : blocked_mods) {
+        if (!mod.matched) {
+            qDebug() << mod.name << "was not matched to a local file, skipping copy";
+            continue;
+        }
+
+        auto destPath = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
+
+        setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
+
+        qDebug() << "Will try to copy" << mod.localPath << "to" << destPath;
+
+        if (!FS::copy(mod.localPath, destPath)()) {
+            qDebug() << "Copy of" << mod.localPath << "to" << destPath << "Failed";
+        }
+
+        i++;
+        setProgress(i, total);
+    }
+
+    setAbortable(true);
+}
+
+static bool moveFile(QString src, QString dst)
+{
+    if (!FS::copy(src, dst)()) {  // copy
+        qDebug() << "Copy of" << src << "to" << dst << "Failed!";
+        return false;
+    } else {
+        if (!FS::deletePath(src)) {  // remove origonal
+            qDebug() << "Deleation of" << src << "Failed!";
+            return false;
+        };
+    }
+    return true;
+}
+
+void FlameCreationTask::validateZIPResouces()
+{
+    qDebug() << "Validating resoucres stored as .zip are in the right place";
+    for (auto [fileName, targetFolder] : m_ZIP_resources) {
+        qDebug() << "Checking" << fileName << "...";
+        auto localPath = FS::PathCombine(m_stagingPath, "minecraft", targetFolder, fileName);
+        QFileInfo localFileInfo(localPath);
+        if (localFileInfo.exists() && localFileInfo.isFile()) {
+            if (ResourcePackUtils::validate(localFileInfo)) {
+                if (targetFolder != "resourcepacks") {
+                    qDebug() << "Target folder of" << fileName << "is incorrect, it's a resource pack.";
+                    auto destPath = FS::PathCombine(m_stagingPath, "minecraft", "resourcepacks", fileName);
+                    qDebug() << "Moveing" << localPath << "to" << destPath;
+                    moveFile(localPath, destPath);
+                } else {
+                    qDebug() << fileName << "is in the right place :" << targetFolder;
+                }
+            } else if (TexturePackUtils::validate(localFileInfo)) {
+                if (targetFolder != "texturepacks") {
+                    qDebug() << "Target folder of" << fileName << "is incorrect, it's a pre 1.6 texture pack.";
+                    auto destPath = FS::PathCombine(m_stagingPath, "minecraft", "texturepacks", fileName);
+                    qDebug() << "Moveing" << localPath << "to" << destPath;
+                    moveFile(localPath, destPath);
+                } else {
+                    qDebug() << fileName << "is in the right place :" << targetFolder;
+                }
+            } else if (DataPackUtils::validate(localFileInfo)) {
+                if (targetFolder != "datapacks") {
+                    qDebug() << "Target folder of" << fileName << "is incorrect, it's a data pack.";
+                    auto destPath = FS::PathCombine(m_stagingPath, "minecraft", "datapacks", fileName);
+                    qDebug() << "Moveing" << localPath << "to" << destPath;
+                    moveFile(localPath, destPath);
+                } else {
+                    qDebug() << fileName << "is in the right place :" << targetFolder;
+                }
+            } else if (ModUtils::validate(localFileInfo)) {
+                if (targetFolder != "mods") {
+                    qDebug() << "Target folder of" << fileName << "is incorrect, it's a mod.";
+                    auto destPath = FS::PathCombine(m_stagingPath, "minecraft", "mods", fileName);
+                    qDebug() << "Moveing" << localPath << "to" << destPath;
+                    moveFile(localPath, destPath);
+                } else {
+                    qDebug() << fileName << "is in the right place :" << targetFolder;
+                }
+            } else {
+                qDebug() << "Can't Identify" << fileName << "at" << localPath << ", leaving it where it is.";
+            }
+        } else {
+            qDebug() << "Can't find" << localPath << "to validate it, ignoreing";
+        }
+    }
 }

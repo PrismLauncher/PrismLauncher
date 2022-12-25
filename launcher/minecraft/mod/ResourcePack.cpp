@@ -27,7 +27,7 @@ void ResourcePack::setPackFormat(int new_format_id)
     QMutexLocker locker(&m_data_lock);
 
     if (!s_pack_format_versions.contains(new_format_id)) {
-        qWarning() << "Pack format '%1' is not a recognized resource pack id!";
+        qWarning() << "Pack format '" << new_format_id << "' is not a recognized resource pack id!";
     }
 
     m_pack_format = new_format_id;
