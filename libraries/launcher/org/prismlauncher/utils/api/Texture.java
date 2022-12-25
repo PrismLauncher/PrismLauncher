@@ -33,45 +33,29 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.fix.online;
+package org.prismlauncher.utils.api;
 
 import java.net.URL;
-import java.net.URLStreamHandler;
-import java.net.URLStreamHandlerFactory;
-
-import org.prismlauncher.utils.Base64;
-import org.prismlauncher.utils.logging.Log;
-import org.prismlauncher.utils.url.UrlUtils;
 
 /**
- * Fixes skins by redirecting to other URLs.
- *
- * @see {@link Handler}
- * @see {@link UrlUtils}
+ * Represents a texture from the Mojang API.
  */
-public final class OnlineFixes implements URLStreamHandlerFactory {
+public final class Texture {
 
-    public static void apply() {
-        if (!UrlUtils.isSupported() || !Base64.isSupported()) {
-            Log.warning("Cannot access the necessary Java internals for skin fix");
-            Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
-            return;
-        }
+    private final URL url;
+    private final boolean slim;
 
-    	try {
-            URL.setURLStreamHandlerFactory(new OnlineFixes());
-    	} catch (Error e) {
-            Log.warning("Cannot apply skin fix: URLStreamHandlerFactory is already set");
-			Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
-    	}
+    public Texture(URL url, boolean slim) {
+        this.url = url;
+        this.slim = slim;
     }
 
-    @Override
-    public URLStreamHandler createURLStreamHandler(String protocol) {
-        if ("http".equals(protocol))
-            return new Handler();
+    public URL getUrl() {
+        return url;
+    }
 
-        return null;
+    public boolean isSlim() {
+        return slim;
     }
 
 }

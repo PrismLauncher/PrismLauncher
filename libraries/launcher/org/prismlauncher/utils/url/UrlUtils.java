@@ -33,7 +33,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.utils;
+package org.prismlauncher.utils.url;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -81,11 +81,17 @@ public final class UrlUtils {
         return http != null && openConnection != null;
     }
 
-    public static URLConnection openHttpConnection(URL url, Proxy proxy) throws IOException {
+    public static URLConnection openConnection(URL url, Proxy proxy) throws IOException {
         if (http == null)
             throw new UnsupportedOperationException();
 
-        return openConnection(http, url, proxy);
+        if (url.getProtocol().equals("http"))
+            return openConnection(http, url, proxy);
+
+        // fall back to Java's default method
+        // at this point, this should not cause a StackOverflowError unless we've missed
+        // a protocol out from the if statements
+        return url.openConnection();
     }
 
     public static URLConnection openConnection(URLStreamHandler handler, URL url, Proxy proxy) throws IOException {

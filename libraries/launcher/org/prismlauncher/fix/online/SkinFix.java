@@ -1,63 +1,85 @@
 package org.prismlauncher.fix.online;
 
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Proxy;
 import java.net.URL;
-import java.util.Map;
+import java.net.URLConnection;
 
-import org.prismlauncher.utils.Base64;
-import org.prismlauncher.utils.JsonParser;
+import javax.imageio.ImageIO;
 
-@SuppressWarnings("unchecked")
+import org.prismlauncher.utils.api.MojangApi;
+import org.prismlauncher.utils.api.Texture;
+import org.prismlauncher.utils.url.CustomUrlConnection;
+import org.prismlauncher.utils.url.UrlUtils;
+
 final class SkinFix {
 
-    static URL redirect(URL address) throws IOException {
+    static URLConnection openConnection(URL address, Proxy proxy) throws IOException {
         String skinOwner = findSkinOwner(address);
         if (skinOwner != null)
-            return convert(skinOwner, "SKIN");
+            // we need to correct the skin
+            return getSkinConnection(skinOwner, proxy);
 
         String capeOwner = findCapeOwner(address);
-        if (capeOwner != null)
-            return convert(capeOwner, "CAPE");
-
-        return address;
-    }
-
-    private static URL convert(String owner, String name) throws IOException {
-        Map<String, Object> textures = getTextures(owner);
-
-        if (textures != null) {
-            textures = (Map<String, Object>) textures.get(name);
-            if (textures == null)
+        if (capeOwner != null) {
+            // since we do not need to process the image, open a direct connection bypassing Handler
+            Texture texture = MojangApi.getTexture(MojangApi.getUuid(capeOwner), "CAPE");
+            if (texture == null)
                 return null;
 
-            return new URL((String) textures.get("url"));
+            return UrlUtils.openConnection(texture.getUrl(), proxy);
         }
 
         return null;
     }
 
-    private static Map<String, Object> getTextures(String owner) throws IOException {
-        try (InputStream in = new URL("https://api.mojang.com/users/profiles/minecraft/" + owner).openStream()) {
-            Map<String, Object> map = (Map<String, Object>) JsonParser.parse(in);
-            String id = (String) map.get("id");
+    private static URLConnection getSkinConnection(String owner, Proxy proxy) throws IOException {
+        Texture texture = MojangApi.getTexture(MojangApi.getUuid(owner), "SKIN");
+        if (texture == null)
+            return null;
 
-            try (InputStream profileIn = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + id)
-                    .openStream()) {
-                Map<String, Object> profile = (Map<String, Object>) JsonParser.parse(profileIn);
+        URLConnection connection = UrlUtils.openConnection(texture.getUrl(), proxy);
+        try (InputStream in = connection.getInputStream()) {
+            // thank you craftycodie!
+            // this is heavily based on
+            // https://github.com/Mojang/LegacyLauncher/pull/33/files#diff-b61023785a9260651ca0a223573ea9acb5be5eec478bff626dafb7abe13ffebaR99
+            BufferedImage image = ImageIO.read(in);
+            Graphics2D graphics = image.createGraphics();
+            graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
 
-                for (Map<String, Object> property : (Iterable<Map<String, Object>>) profile.get("properties")) {
-                    if (property.get("name").equals("textures")) {
-                        Map<String, Object> result = (Map<String, Object>) JsonParser
-                                .parse(new String(Base64.decode((String) property.get("value"))));
-                        result = (Map<String, Object>) result.get("textures");
+            BufferedImage subimage;
 
-                        return result;
-                    }
-                }
-
-                return null;
+            if (image.getHeight() > 32) {
+                // flatten second layers
+                subimage = image.getSubimage(0, 32, 56, 16);
+                graphics.drawImage(subimage, 0, 16, null);
             }
+
+            if (texture.isSlim()) {
+                // convert slim to wide
+                subimage = image.getSubimage(45, 16, 9, 16);
+                graphics.drawImage(subimage, 46, 16, null);
+
+                subimage = image.getSubimage(49, 16, 2, 4);
+                graphics.drawImage(subimage, 50, 16, null);
+
+                subimage = image.getSubimage(53, 20, 2, 12);
+                graphics.drawImage(subimage, 54, 20, null);
+            }
+
+            graphics.dispose();
+
+            // crop the image
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            image = image.getSubimage(0, 0, 64, 32);
+            ImageIO.write(image, "png", out);
+
+            return new CustomUrlConnection(out.toByteArray());
         }
     }
 

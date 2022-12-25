@@ -23,9 +23,12 @@ set(SRC
     org/prismlauncher/utils/JsonParser.java
     org/prismlauncher/utils/Parameters.java
     org/prismlauncher/utils/ReflectionUtils.java
-    org/prismlauncher/utils/UrlUtils.java
+    org/prismlauncher/utils/api/MojangApi.java
+    org/prismlauncher/utils/api/Texture.java
     org/prismlauncher/utils/logging/Level.java
     org/prismlauncher/utils/logging/Log.java
+    org/prismlauncher/utils/url/UrlUtils.java
+    org/prismlauncher/utils/url/CustomUrlConnection.java
     net/minecraft/Launcher.java
 )
 add_jar(NewLaunch ${SRC})

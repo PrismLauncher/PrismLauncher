@@ -33,45 +33,47 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.fix.online;
+package org.prismlauncher.utils.url;
 
-import java.net.URL;
-import java.net.URLStreamHandler;
-import java.net.URLStreamHandlerFactory;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 
-import org.prismlauncher.utils.Base64;
-import org.prismlauncher.utils.logging.Log;
-import org.prismlauncher.utils.url.UrlUtils;
+public class CustomUrlConnection extends HttpURLConnection {
 
-/**
- * Fixes skins by redirecting to other URLs.
- *
- * @see {@link Handler}
- * @see {@link UrlUtils}
- */
-public final class OnlineFixes implements URLStreamHandlerFactory {
+    private InputStream in;
 
-    public static void apply() {
-        if (!UrlUtils.isSupported() || !Base64.isSupported()) {
-            Log.warning("Cannot access the necessary Java internals for skin fix");
-            Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
-            return;
-        }
+    public CustomUrlConnection(byte[] data) {
+        this(new ByteArrayInputStream(data));
+    }
 
-    	try {
-            URL.setURLStreamHandlerFactory(new OnlineFixes());
-    	} catch (Error e) {
-            Log.warning("Cannot apply skin fix: URLStreamHandlerFactory is already set");
-			Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
-    	}
+    public CustomUrlConnection(InputStream in) {
+        super(null);
+        this.in = in;
     }
 
     @Override
-    public URLStreamHandler createURLStreamHandler(String protocol) {
-        if ("http".equals(protocol))
-            return new Handler();
+    public void connect() throws IOException {
+        responseCode = 200;
+    }
 
-        return null;
+    @Override
+    public void disconnect() {
+        try {
+            in.close();
+        } catch (IOException e) {
+        }
+    }
+
+    @Override
+    public InputStream getInputStream() throws IOException {
+        return in;
+    }
+
+    @Override
+    public boolean usingProxy() {
+        return false;
     }
 
 }

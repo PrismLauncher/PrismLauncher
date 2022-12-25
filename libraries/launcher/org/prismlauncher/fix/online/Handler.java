@@ -41,7 +41,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import org.prismlauncher.utils.UrlUtils;
+import org.prismlauncher.utils.url.UrlUtils;
 
 final class Handler extends URLStreamHandler {
 
@@ -52,8 +52,14 @@ final class Handler extends URLStreamHandler {
 
     @Override
     protected URLConnection openConnection(URL address, Proxy proxy) throws IOException {
-        address = SkinFix.redirect(address);
-        return UrlUtils.openHttpConnection(address, proxy);
+        URLConnection result;
+
+        // try skin fix
+        result = SkinFix.openConnection(address, proxy);
+        if (result != null)
+            return result;
+
+        return UrlUtils.openConnection(address, proxy);
     }
 
 }
