@@ -57,6 +57,9 @@
 #include <minecraft/mod/tasks/LocalTexturePackParseTask.h>
 #include <minecraft/mod/tasks/LocalDataPackParseTask.h>
 #include <minecraft/mod/tasks/LocalModParseTask.h>
+#include <minecraft/mod/tasks/LocalWorldSaveParseTask.h>
+#include <minecraft/mod/tasks/LocalShaderPackParseTask.h>
+#include <minecraft/World.h>
 #include <qdebug.h>
 #include <qfileinfo.h>
 
@@ -537,13 +540,13 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
     setAbortable(true);
 }
 
-static bool moveFile(QString src, QString dst)
+bool moveFile(QString src, QString dst)
 {
     if (!FS::copy(src, dst)()) {  // copy
         qDebug() << "Copy of" << src << "to" << dst << "Failed!";
         return false;
     } else {
-        if (!FS::deletePath(src)) {  // remove origonal
+        if (!FS::deletePath(src)) {  // remove original
             qDebug() << "Deleation of" << src << "Failed!";
             return false;
         };
@@ -551,50 +554,53 @@ static bool moveFile(QString src, QString dst)
     return true;
 }
 
+
 void FlameCreationTask::validateZIPResouces()
 {
     qDebug() << "Validating resoucres stored as .zip are in the right place";
     for (auto [fileName, targetFolder] : m_ZIP_resources) {
+
         qDebug() << "Checking" << fileName << "...";
         auto localPath = FS::PathCombine(m_stagingPath, "minecraft", targetFolder, fileName);
+
+        auto validatePath = [&localPath, this](QString fileName, QString targetFolder, QString realTarget) {
+            if (targetFolder != "resourcepacks") {
+                qDebug() << "Target folder of" << fileName << "is incorrect, it's a resource pack.";
+                auto destPath = FS::PathCombine(m_stagingPath, "minecraft", "resourcepacks", fileName);
+                qDebug() << "Moving" << localPath << "to" << destPath;
+                if (moveFile(localPath, destPath)) {
+                    return destPath;
+                }
+            } else {
+                qDebug() << fileName << "is in the right place :" << targetFolder;
+            }
+            return localPath;
+        };
+
         QFileInfo localFileInfo(localPath);
         if (localFileInfo.exists() && localFileInfo.isFile()) {
             if (ResourcePackUtils::validate(localFileInfo)) {
-                if (targetFolder != "resourcepacks") {
-                    qDebug() << "Target folder of" << fileName << "is incorrect, it's a resource pack.";
-                    auto destPath = FS::PathCombine(m_stagingPath, "minecraft", "resourcepacks", fileName);
-                    qDebug() << "Moveing" << localPath << "to" << destPath;
-                    moveFile(localPath, destPath);
-                } else {
-                    qDebug() << fileName << "is in the right place :" << targetFolder;
-                }
+                validatePath(fileName, targetFolder, "resourcepacks");
             } else if (TexturePackUtils::validate(localFileInfo)) {
-                if (targetFolder != "texturepacks") {
-                    qDebug() << "Target folder of" << fileName << "is incorrect, it's a pre 1.6 texture pack.";
-                    auto destPath = FS::PathCombine(m_stagingPath, "minecraft", "texturepacks", fileName);
-                    qDebug() << "Moveing" << localPath << "to" << destPath;
-                    moveFile(localPath, destPath);
-                } else {
-                    qDebug() << fileName << "is in the right place :" << targetFolder;
-                }
+                validatePath(fileName, targetFolder, "texturepacks");
             } else if (DataPackUtils::validate(localFileInfo)) {
-                if (targetFolder != "datapacks") {
-                    qDebug() << "Target folder of" << fileName << "is incorrect, it's a data pack.";
-                    auto destPath = FS::PathCombine(m_stagingPath, "minecraft", "datapacks", fileName);
-                    qDebug() << "Moveing" << localPath << "to" << destPath;
-                    moveFile(localPath, destPath);
-                } else {
-                    qDebug() << fileName << "is in the right place :" << targetFolder;
-                }
+                validatePath(fileName, targetFolder, "datapacks");
             } else if (ModUtils::validate(localFileInfo)) {
-                if (targetFolder != "mods") {
-                    qDebug() << "Target folder of" << fileName << "is incorrect, it's a mod.";
-                    auto destPath = FS::PathCombine(m_stagingPath, "minecraft", "mods", fileName);
-                    qDebug() << "Moveing" << localPath << "to" << destPath;
-                    moveFile(localPath, destPath);
+                validatePath(fileName, targetFolder, "mods");
+            } else  if (WorldSaveUtils::validate(localFileInfo)) {
+                QString worldPath = validatePath(fileName, targetFolder, "saves");
+
+                qDebug() << "Installing World from" << worldPath;
+                World w(worldPath);
+                if (!w.isValid()) {
+                    qDebug() << "World at" << worldPath << "is not valid, skipping install.";
                 } else {
-                    qDebug() << fileName << "is in the right place :" << targetFolder;
-                }
+                    w.install(FS::PathCombine(m_stagingPath, "minecraft", "saves"));
+                } 
+            } else if (ShaderPackUtils::validate(localFileInfo)) {
+                // in theroy flame API can't do this but who knows, that *may* change ?
+                // better to handle it if it *does* occure in the future
+                validatePath(fileName, targetFolder, "shaderpacks");
             } else {
                 qDebug() << "Can't Identify" << fileName << "at" << localPath << ", leaving it where it is.";
             }
