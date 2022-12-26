@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -490,7 +491,7 @@ public:
         if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
             helpMenu->addAction(actionReportBug);
         }
-        
+
         if(!BuildConfig.MATRIX_URL.isEmpty()) {
             helpMenu->addAction(actionMATRIX);
         }
@@ -2093,21 +2094,23 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
     auto id = m_selectedInstance->id();
 
-    auto response =
-        CustomMessageBox::selectable(this, tr("CAREFUL!"),
-                                     tr("About to delete: %1\nThis may be permanent and will completely delete the instance.\n\nAre you sure?")
-                                         .arg(m_selectedInstance->name()),
-                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-            ->exec();
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
+                                                 tr("You are about to delete \"%1\".\n"
+                                                    "This may be permanent and will completely delete the instance.\n\n"
+                                                    "Are you sure?")
+                                                     .arg(m_selectedInstance->name()),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
 
-    if (response == QMessageBox::Yes) {
-        if (APPLICATION->instances()->trashInstance(id)) {
-            ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-            return;
-        }
+    if (response != QMessageBox::Yes)
+        return;
 
-        APPLICATION->instances()->deleteInstance(id);
+    if (APPLICATION->instances()->trashInstance(id)) {
+        ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
+        return;
     }
+
+    APPLICATION->instances()->deleteInstance(id);
 }
 
 void MainWindow::on_actionExportInstance_triggered()
@@ -2252,7 +2255,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
 
         QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.png");
-        
+
         QFile iconFile(iconPath);
         if (!iconFile.open(QFile::WriteOnly))
         {
@@ -2261,7 +2264,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
         bool success = icon->icon().pixmap(64, 64).save(&iconFile, "PNG");
         iconFile.close();
-        
+
         if (!success)
         {
             iconFile.remove();
@@ -2302,7 +2305,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
 
         QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.ico");
-        
+
         // part of fix for weird bug involving the window icon being replaced
         // dunno why it happens, but this 2-line fix seems to be enough, so w/e
         auto appIcon = APPLICATION->getThemedIcon("logo");
@@ -2325,7 +2328,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create icon for shortcut."));
             return;
         }
-        
+
         if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
                            QApplication::applicationFilePath(), { "--launch", m_selectedInstance->id() },
                            m_selectedInstance->name(), iconPath)) {

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -226,7 +227,7 @@ bool deletePath(QString path)
     return err.value() == 0;
 }
 
-bool trash(QString path, QString *pathInTrash = nullptr)
+bool trash(QString path, QString *pathInTrash)
 {
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     return false;

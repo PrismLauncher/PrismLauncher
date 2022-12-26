@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -204,7 +205,7 @@ void OtherLogsPage::on_btnReload_clicked()
 
 void OtherLogsPage::on_btnPaste_clicked()
 {
-    GuiUtil::uploadPaste(ui->text->toPlainText(), this);
+    GuiUtil::uploadPaste(m_currentFile, ui->text->toPlainText(), this);
 }
 
 void OtherLogsPage::on_btnCopy_clicked()
@@ -219,13 +220,21 @@ void OtherLogsPage::on_btnDelete_clicked()
         setControlsEnabled(false);
         return;
     }
-    if (QMessageBox::question(this, tr("Delete"),
-                              tr("Do you really want to delete %1?").arg(m_currentFile),
-                              QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
-    {
+    if (QMessageBox::question(this, tr("Confirm Deletion"),
+                              tr("You are about to delete \"%1\".\n"
+                                 "This may be permanent and it will be gone from the logs folder.\n\n"
+                                 "Are you sure?")
+                                  .arg(m_currentFile),
+                              QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
         return;
     }
     QFile file(FS::PathCombine(m_path, m_currentFile));
+
+    if (FS::trash(file.fileName()))
+    {
+        return;
+    }
+
     if (!file.remove())
     {
         QMessageBox::critical(this, tr("Error"), tr("Unable to delete %1: %2")
@@ -243,15 +252,15 @@ void OtherLogsPage::on_btnClean_clicked()
         return;
     }
     QMessageBox *messageBox = new QMessageBox(this);
-    messageBox->setWindowTitle(tr("Clean up"));
+    messageBox->setWindowTitle(tr("Confirm Cleanup"));
     if(toDelete.size() > 5)
     {
-        messageBox->setText(tr("Do you really want to delete all log files?"));
+        messageBox->setText(tr("Are you sure you want to delete all log files?"));
         messageBox->setDetailedText(toDelete.join('\n'));
     }
     else
     {
-        messageBox->setText(tr("Do you really want to delete these files?\n%1").arg(toDelete.join('\n')));
+        messageBox->setText(tr("Are you sure you want to delete all these files?\n%1").arg(toDelete.join('\n')));
     }
     messageBox->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     messageBox->setDefaultButton(QMessageBox::Ok);
@@ -267,6 +276,10 @@ void OtherLogsPage::on_btnClean_clicked()
     for(auto item: toDelete)
     {
         QFile file(FS::PathCombine(m_path, item));
+        if (FS::trash(file.fileName()))
+        {
+            continue;
+        }
         if (!file.remove())
         {
             failed.push_back(item);
