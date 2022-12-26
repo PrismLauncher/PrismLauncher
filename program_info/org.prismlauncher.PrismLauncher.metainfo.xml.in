@@ -30,27 +30,31 @@
   <screenshots>
     <screenshot type="default">
       <caption>The main Prism Launcher window</caption>
-      <image type="source" width="976" height="764">https://prismlauncher.org/img/screenshots/LauncherDark.png</image>
+      <image type="source" width="1030" height="764">https://prismlauncher.org/img/screenshots/LauncherDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Modpack installation</caption>
-      <image type="source" width="1103" height="954">https://prismlauncher.org/img/screenshots/ModpackInstallDark.png</image>
+      <image type="source" width="1126" height="850">https://prismlauncher.org/img/screenshots/ModpackInstallDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Mod installation</caption>
-      <image type="source" width="1036" height="700">https://prismlauncher.org/img/screenshots/ModInstallDark.png</image>
+      <image type="source" width="848" height="558">https://prismlauncher.org/img/screenshots/ModInstallDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Mod updating</caption>
-      <image type="source" width="930" height="858">https://prismlauncher.org/img/screenshots/ModUpdateDark.png</image>
+      <image type="source" width="860" height="748">https://prismlauncher.org/img/screenshots/ModUpdateDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Instance management</caption>
-      <image type="source" width="1083" height="735">https://prismlauncher.org/img/screenshots/PropertiesDark.png</image>
+      <image type="source" width="960" height="659">https://prismlauncher.org/img/screenshots/PropertiesDark.png</image>
     </screenshot>
     <screenshot>
       <caption>Cat :)</caption>
-      <image type="source" width="931" height="759">https://prismlauncher.org/img/screenshots/LauncherCatDark.png</image>
+      <image type="source" width="1042" height="754">https://prismlauncher.org/img/screenshots/LauncherCatDark.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Customization</caption>
+      <image type="source" width="1040" height="752">https://prismlauncher.org/img/screenshots/CustomizeDark.png</image>
     </screenshot>
   </screenshots>
   <releases>
