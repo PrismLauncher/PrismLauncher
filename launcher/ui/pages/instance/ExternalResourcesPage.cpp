@@ -176,12 +176,12 @@ void ExternalResourcesPage::removeItem()
     bool multiple = count > 1;
 
     if (multiple) {
-        text = tr("About to remove: %1 items\n"
+        text = tr("You are about to remove %1 items.\n"
                   "This may be permanent and they will be gone from the folder.\n\n"
                   "Are you sure?")
                    .arg(count);
     } else if (folder) {
-        text = tr("About to remove: %1 (folder)\n"
+        text = tr("You are about to remove the folder \"%1\".\n"
                   "This may be permanent and it will be gone from the parent folder.\n\n"
                   "Are you sure?")
                    .arg(m_model->at(selection.indexes().at(0).row()).fileinfo().fileName());

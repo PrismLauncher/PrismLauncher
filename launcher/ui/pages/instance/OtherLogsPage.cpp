@@ -221,7 +221,7 @@ void OtherLogsPage::on_btnDelete_clicked()
         return;
     }
     if (QMessageBox::question(this, tr("Confirm Deletion"),
-                              tr("About to delete: %1\n"
+                              tr("You are about to delete \"%1\".\n"
                                  "This may be permanent and it will be gone from the logs folder.\n\n"
                                  "Are you sure?")
                                   .arg(m_currentFile),

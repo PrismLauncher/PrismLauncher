@@ -65,8 +65,7 @@ QString GuiUtil::uploadPaste(const QString &name, const QString &text, QWidget *
 
         if (baseUrl.isValid()) {
             auto response = CustomMessageBox::selectable(parentWidget, QObject::tr("Confirm Upload"),
-                                                         QObject::tr("About to upload: %1\n"
-                                                                     "Uploading to: %2\n"
+                                                         QObject::tr("You are about to upload \"%1\" to %2.\n"
                                                                      "You should double-check for personal information.\n\n"
                                                                      "Are you sure?")
                                                              .arg(name, baseUrl.host()),

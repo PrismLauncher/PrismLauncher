@@ -383,12 +383,12 @@ void ScreenshotsPage::on_actionUpload_triggered()
 
     QString text;
     if (selection.size() > 1)
-        text = tr("About to upload: %1 screenshots\n\n"
+        text = tr("You are about to upload %1 screenshots.\n\n"
                   "Are you sure?")
                    .arg(selection.size());
     else
         text =
-            tr("About to upload the selected screenshot.\n\n"
+            tr("You are about to upload the selected screenshot.\n\n"
                "Are you sure?");
 
     auto response = CustomMessageBox::selectable(this, "Confirm Upload", text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No,
@@ -515,12 +515,12 @@ void ScreenshotsPage::on_actionDelete_triggered()
     int count = ui->listView->selectionModel()->selectedRows().size();
     QString text;
     if (count > 1)
-        text = tr("About to delete: %1 screenshots\n"
+        text = tr("You are about to delete %1 screenshots.\n"
                   "This may be permanent and they will be gone from the folder.\n\n"
                   "Are you sure?")
                    .arg(count);
     else
-        text = tr("About to delete the selected screenshot.\n"
+        text = tr("You are about to delete the selected screenshot.\n"
                   "This may be permanent and it will be gone from the folder.\n\n"
                   "Are you sure?")
                    .arg(count);
