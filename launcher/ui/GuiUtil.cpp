@@ -50,7 +50,7 @@
 #include <DesktopServices.h>
 #include <BuildConfig.h>
 
-QString GuiUtil::uploadPaste(const QString &name, const QString &text, QWidget *parentWidget)
+std::optional<QString> GuiUtil::uploadPaste(const QString &name, const QString &text, QWidget *parentWidget)
 {
     ProgressDialog dialog(parentWidget);
     auto pasteTypeSetting = static_cast<PasteUpload::PasteType>(APPLICATION->settings()->get("PastebinType").toInt());
@@ -63,7 +63,8 @@ QString GuiUtil::uploadPaste(const QString &name, const QString &text, QWidget *
         else
             baseUrl = pasteCustomAPIBaseSetting;
 
-        if (baseUrl.isValid()) {
+        if (baseUrl.isValid())
+        {
             auto response = CustomMessageBox::selectable(parentWidget, QObject::tr("Confirm Upload"),
                                                          QObject::tr("You are about to upload \"%1\" to %2.\n"
                                                                      "You should double-check for personal information.\n\n"
@@ -73,7 +74,7 @@ QString GuiUtil::uploadPaste(const QString &name, const QString &text, QWidget *
                                 ->exec();
 
             if (response != QMessageBox::Yes)
-                return "canceled";
+                return {};
         }
     }
 

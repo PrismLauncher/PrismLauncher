@@ -283,16 +283,17 @@ void LogPage::on_btnPaste_clicked()
         )
     );
     auto url = GuiUtil::uploadPaste(tr("Minecraft Log"), m_model->toPlainText(), this);
-    if(url == "canceled")
+    if(!url.has_value())
     {
         m_model->append(MessageLevel::Error, QString("Log upload canceled"));
     }
-    else if(!url.isEmpty())
+    else if (url->isNull())
     {
-        m_model->append(MessageLevel::Launcher, QString("Log uploaded to: %1").arg(url));
-    }
-    else {
         m_model->append(MessageLevel::Error, QString("Log upload failed!"));
+    }
+    else
+    {
+        m_model->append(MessageLevel::Launcher, QString("Log uploaded to: %1").arg(url.value()));
     }
 }
 
