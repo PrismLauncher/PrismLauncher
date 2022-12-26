@@ -30,9 +30,9 @@
 // Values taken from:
 // https://minecraft.fandom.com/wiki/Tutorials/Creating_a_data_pack#%22pack_format%22
 static const QMap<int, std::pair<Version, Version>> s_pack_format_versions = {
-    { 4, { Version("1.13"), Version("1.14.4") } }, { 5, { Version("1.15"), Version("1.16.1") } }, 
-    { 6, { Version("1.16.2"), Version("1.16.5") } }, { 7, { Version("1.17"), Version("1.17.1") } }, 
-    { 8, { Version("1.18"), Version("1.18.1") } }, { 9, { Version("1.18.2"), Version("1.18.2") } },
+    { 4, { Version("1.13"), Version("1.14.4") } },   { 5, { Version("1.15"), Version("1.16.1") } },
+    { 6, { Version("1.16.2"), Version("1.16.5") } }, { 7, { Version("1.17"), Version("1.17.1") } },
+    { 8, { Version("1.18"), Version("1.18.1") } },   { 9, { Version("1.18.2"), Version("1.18.2") } },
     { 10, { Version("1.19"), Version("1.19.3") } },
 };
 

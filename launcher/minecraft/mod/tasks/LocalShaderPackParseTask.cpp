@@ -24,8 +24,8 @@
 #include "FileSystem.h"
 
 #include <quazip/quazip.h>
-#include <quazip/quazipfile.h>
 #include <quazip/quazipdir.h>
+#include <quazip/quazipfile.h>
 
 namespace ShaderPackUtils {
 
@@ -45,18 +45,18 @@ bool process(ShaderPack& pack, ProcessingLevel level)
 bool processFolder(ShaderPack& pack, ProcessingLevel level)
 {
     Q_ASSERT(pack.type() == ResourceType::FOLDER);
- 
+
     QFileInfo shaders_dir_info(FS::PathCombine(pack.fileinfo().filePath(), "shaders"));
     if (!shaders_dir_info.exists() || !shaders_dir_info.isDir()) {
-        return false; // assets dir does not exists or isn't valid
+        return false;  // assets dir does not exists or isn't valid
     }
     pack.setPackFormat(ShaderPackFormat::VALID);
 
     if (level == ProcessingLevel::BasicInfoOnly) {
-        return true; // only need basic info already checked
+        return true;  // only need basic info already checked
     }
-      
-    return true; // all tests passed
+
+    return true;  // all tests passed
 }
 
 bool processZIP(ShaderPack& pack, ProcessingLevel level)
@@ -65,26 +65,25 @@ bool processZIP(ShaderPack& pack, ProcessingLevel level)
 
     QuaZip zip(pack.fileinfo().filePath());
     if (!zip.open(QuaZip::mdUnzip))
-        return false; // can't open zip file
+        return false;  // can't open zip file
 
     QuaZipFile file(&zip);
 
     QuaZipDir zipDir(&zip);
     if (!zipDir.exists("/shaders")) {
-        return false; // assets dir does not exists at zip root
+        return false;  // assets dir does not exists at zip root
     }
     pack.setPackFormat(ShaderPackFormat::VALID);
 
     if (level == ProcessingLevel::BasicInfoOnly) {
         zip.close();
-        return true; // only need basic info already checked
+        return true;  // only need basic info already checked
     }
 
     zip.close();
 
     return true;
 }
-
 
 bool validate(QFileInfo file)
 {
@@ -94,9 +93,7 @@ bool validate(QFileInfo file)
 
 }  // namespace ShaderPackUtils
 
-LocalShaderPackParseTask::LocalShaderPackParseTask(int token, ShaderPack& sp)
-    : Task(nullptr, false), m_token(token), m_shader_pack(sp)
-{}
+LocalShaderPackParseTask::LocalShaderPackParseTask(int token, ShaderPack& sp) : Task(nullptr, false), m_token(token), m_shader_pack(sp) {}
 
 bool LocalShaderPackParseTask::abort()
 {

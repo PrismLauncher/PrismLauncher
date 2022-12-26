@@ -25,8 +25,8 @@
 #include "Json.h"
 
 #include <quazip/quazip.h>
-#include <quazip/quazipfile.h>
 #include <quazip/quazipdir.h>
+#include <quazip/quazipfile.h>
 
 #include <QCryptographicHash>
 
@@ -40,7 +40,7 @@ bool process(DataPack& pack, ProcessingLevel level)
         case ResourceType::ZIPFILE:
             return DataPackUtils::processZIP(pack, level);
         default:
-            qWarning() << "Invalid type for resource pack parse task!";
+            qWarning() << "Invalid type for data pack parse task!";
             return false;
     }
 }
@@ -49,11 +49,16 @@ bool processFolder(DataPack& pack, ProcessingLevel level)
 {
     Q_ASSERT(pack.type() == ResourceType::FOLDER);
 
+    auto mcmeta_invalid = [&pack]() {
+        qWarning() << "Resource pack at" << pack.fileinfo().filePath() << "does not have a valid pack.mcmeta";
+        return false;  // the mcmeta is not optional
+    };
+
     QFileInfo mcmeta_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.mcmeta"));
     if (mcmeta_file_info.exists() && mcmeta_file_info.isFile()) {
         QFile mcmeta_file(mcmeta_file_info.filePath());
         if (!mcmeta_file.open(QIODevice::ReadOnly))
-            return false; // can't open mcmeta file
+            return mcmeta_invalid();  // can't open mcmeta file
 
         auto data = mcmeta_file.readAll();
 
@@ -61,22 +66,22 @@ bool processFolder(DataPack& pack, ProcessingLevel level)
 
         mcmeta_file.close();
         if (!mcmeta_result) {
-            return false; // mcmeta invalid
+            return mcmeta_invalid();  // mcmeta invalid
         }
     } else {
-        return false; // mcmeta file isn't a valid file
+        return mcmeta_invalid();  // mcmeta file isn't a valid file
     }
 
     QFileInfo data_dir_info(FS::PathCombine(pack.fileinfo().filePath(), "data"));
     if (!data_dir_info.exists() || !data_dir_info.isDir()) {
-        return false; // data dir does not exists or isn't valid
+        return false;  // data dir does not exists or isn't valid
     }
 
     if (level == ProcessingLevel::BasicInfoOnly) {
-        return true; // only need basic info already checked
+        return true;  // only need basic info already checked
     }
 
-    return true; // all tests passed
+    return true;  // all tests passed
 }
 
 bool processZIP(DataPack& pack, ProcessingLevel level)
@@ -85,15 +90,20 @@ bool processZIP(DataPack& pack, ProcessingLevel level)
 
     QuaZip zip(pack.fileinfo().filePath());
     if (!zip.open(QuaZip::mdUnzip))
-        return false; // can't open zip file
+        return false;  // can't open zip file
 
     QuaZipFile file(&zip);
+
+    auto mcmeta_invalid = [&pack]() {
+        qWarning() << "Resource pack at" << pack.fileinfo().filePath() << "does not have a valid pack.mcmeta";
+        return false;  // the mcmeta is not optional
+    };
 
     if (zip.setCurrentFile("pack.mcmeta")) {
         if (!file.open(QIODevice::ReadOnly)) {
             qCritical() << "Failed to open file in zip.";
             zip.close();
-            return false;
+            return mcmeta_invalid();
         }
 
         auto data = file.readAll();
@@ -102,20 +112,20 @@ bool processZIP(DataPack& pack, ProcessingLevel level)
 
         file.close();
         if (!mcmeta_result) {
-            return false; // mcmeta invalid
+            return mcmeta_invalid();  // mcmeta invalid
         }
     } else {
-        return false; // could not set pack.mcmeta as current file.
+        return mcmeta_invalid();  // could not set pack.mcmeta as current file.
     }
 
     QuaZipDir zipDir(&zip);
     if (!zipDir.exists("/data")) {
-        return false; // data dir does not exists at zip root
+        return false;  // data dir does not exists at zip root
     }
 
     if (level == ProcessingLevel::BasicInfoOnly) {
         zip.close();
-        return true; // only need basic info already checked
+        return true;  // only need basic info already checked
     }
 
     zip.close();
@@ -123,7 +133,7 @@ bool processZIP(DataPack& pack, ProcessingLevel level)
     return true;
 }
 
-// https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
+// https://minecraft.fandom.com/wiki/Data_pack#pack.mcmeta
 bool processMCMeta(DataPack& pack, QByteArray&& raw_data)
 {
     try {
@@ -147,9 +157,7 @@ bool validate(QFileInfo file)
 
 }  // namespace DataPackUtils
 
-LocalDataPackParseTask::LocalDataPackParseTask(int token, DataPack& dp)
-    : Task(nullptr, false), m_token(token), m_resource_pack(dp)
-{}
+LocalDataPackParseTask::LocalDataPackParseTask(int token, DataPack& dp) : Task(nullptr, false), m_token(token), m_data_pack(dp) {}
 
 bool LocalDataPackParseTask::abort()
 {
@@ -159,7 +167,7 @@ bool LocalDataPackParseTask::abort()
 
 void LocalDataPackParseTask::executeTask()
 {
-    if (!DataPackUtils::process(m_resource_pack))
+    if (!DataPackUtils::process(m_data_pack))
         return;
 
     if (m_aborted)

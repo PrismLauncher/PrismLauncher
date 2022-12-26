@@ -24,12 +24,10 @@
 
 #include "minecraft/mod/tasks/LocalShaderPackParseTask.h"
 
-
 void ShaderPack::setPackFormat(ShaderPackFormat new_format)
 {
     QMutexLocker locker(&m_data_lock);
 
-    
     m_pack_format = new_format;
 }
 

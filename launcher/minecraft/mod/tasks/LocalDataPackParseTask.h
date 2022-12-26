@@ -59,7 +59,7 @@ class LocalDataPackParseTask : public Task {
    private:
     int m_token;
 
-    DataPack& m_resource_pack;
+    DataPack& m_data_pack;
 
     bool m_aborted = false;
 };

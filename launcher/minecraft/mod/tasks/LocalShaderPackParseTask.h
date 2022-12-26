@@ -19,7 +19,6 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #pragma once
 
 #include <QDebug>
@@ -38,7 +37,7 @@ bool process(ShaderPack& pack, ProcessingLevel level = ProcessingLevel::Full);
 bool processZIP(ShaderPack& pack, ProcessingLevel level = ProcessingLevel::Full);
 bool processFolder(ShaderPack& pack, ProcessingLevel level = ProcessingLevel::Full);
 
-/** Checks whether a file is valid as a resource pack or not. */
+/** Checks whether a file is valid as a shader pack or not. */
 bool validate(QFileInfo file);
 }  // namespace ShaderPackUtils
 

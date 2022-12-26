@@ -45,7 +45,7 @@ class DataPack : public Resource {
     /** Gets, respectively, the lower and upper versions supported by the set pack format. */
     [[nodiscard]] std::pair<Version, Version> compatibleVersions() const;
 
-    /** Gets the description of the resource pack. */
+    /** Gets the description of the data pack. */
     [[nodiscard]] QString description() const { return m_description; }
 
     /** Thread-safe. */
@@ -62,12 +62,12 @@ class DataPack : public Resource {
    protected:
     mutable QMutex m_data_lock;
 
-    /* The 'version' of a resource pack, as defined in the pack.mcmeta file.
-     * See https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
+    /* The 'version' of a data pack, as defined in the pack.mcmeta file.
+     * See https://minecraft.fandom.com/wiki/Data_pack#pack.mcmeta
      */
     int m_pack_format = 0;
 
-    /** The resource pack's description, as defined in the pack.mcmeta file.
+    /** The data pack's description, as defined in the pack.mcmeta file.
      */
     QString m_description;
 };

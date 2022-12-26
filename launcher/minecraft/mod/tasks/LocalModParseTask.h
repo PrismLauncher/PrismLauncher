@@ -27,32 +27,29 @@ bool processLitemod(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
 bool validate(QFileInfo file);
 }  // namespace ModUtils
 
-class LocalModParseTask : public Task
-{
+class LocalModParseTask : public Task {
     Q_OBJECT
-public:
+   public:
     struct Result {
         ModDetails details;
     };
     using ResultPtr = std::shared_ptr<Result>;
-    ResultPtr result() const {
-        return m_result;
-    }
+    ResultPtr result() const { return m_result; }
 
     [[nodiscard]] bool canAbort() const override { return true; }
     bool abort() override;
 
-    LocalModParseTask(int token, ResourceType type, const QFileInfo & modFile);
+    LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile);
     void executeTask() override;
 
     [[nodiscard]] int token() const { return m_token; }
 
-private:
+   private:
     void processAsZip();
     void processAsFolder();
     void processAsLitemod();
 
-private:
+   private:
     int m_token;
     ResourceType m_type;
     QFileInfo m_modFile;

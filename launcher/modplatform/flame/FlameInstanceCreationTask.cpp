@@ -53,15 +53,16 @@
 #include "ui/dialogs/BlockedModsDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
-#include <minecraft/mod/tasks/LocalResourcePackParseTask.h>
-#include <minecraft/mod/tasks/LocalTexturePackParseTask.h>
-#include <minecraft/mod/tasks/LocalDataPackParseTask.h>
-#include <minecraft/mod/tasks/LocalModParseTask.h>
-#include <minecraft/mod/tasks/LocalWorldSaveParseTask.h>
-#include <minecraft/mod/tasks/LocalShaderPackParseTask.h>
-#include <minecraft/World.h>
-#include <qdebug.h>
-#include <qfileinfo.h>
+#include <QDebug>
+#include <QFileInfo>
+
+#include "minecraft/World.h"
+#include "minecraft/mod/tasks/LocalDataPackParseTask.h"
+#include "minecraft/mod/tasks/LocalModParseTask.h"
+#include "minecraft/mod/tasks/LocalResourcePackParseTask.h"
+#include "minecraft/mod/tasks/LocalShaderPackParseTask.h"
+#include "minecraft/mod/tasks/LocalTexturePackParseTask.h"
+#include "minecraft/mod/tasks/LocalWorldSaveParseTask.h"
 
 const static QMap<QString, QString> forgemap = { { "1.2.5", "3.4.9.171" },
                                                  { "1.4.2", "6.0.1.355" },
@@ -411,8 +412,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
     for (const auto& result : results.files.values()) {
-
-        if(result.fileName.endsWith(".zip")) {
+        if (result.fileName.endsWith(".zip")) {
             m_ZIP_resources.append(std::make_pair(result.fileName, result.targetFolder));
         }
 
@@ -454,7 +454,6 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     }
 }
 
-
 void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 {
     m_files_job = new NetJob(tr("Mod download"), APPLICATION->network());
@@ -493,8 +492,8 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     }
 
     m_mod_id_resolver.reset();
-    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() { 
-        m_files_job.reset(); 
+    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
+        m_files_job.reset();
         validateZIPResouces();
     });
     connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
@@ -543,26 +542,26 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
 bool moveFile(QString src, QString dst)
 {
     if (!FS::copy(src, dst)()) {  // copy
-        qDebug() << "Copy of" << src << "to" << dst << "Failed!";
+        qDebug() << "Copy of" << src << "to" << dst << "failed!";
         return false;
     } else {
         if (!FS::deletePath(src)) {  // remove original
-            qDebug() << "Deleation of" << src << "Failed!";
+            qDebug() << "Deletion of" << src << "failed!";
             return false;
         };
     }
     return true;
 }
 
-
 void FlameCreationTask::validateZIPResouces()
 {
-    qDebug() << "Validating resoucres stored as .zip are in the right place";
+    qDebug() << "Validating whether resources stored as .zip are in the right place";
     for (auto [fileName, targetFolder] : m_ZIP_resources) {
-
         qDebug() << "Checking" << fileName << "...";
         auto localPath = FS::PathCombine(m_stagingPath, "minecraft", targetFolder, fileName);
 
+        /// @brief check the target and move the the file
+        /// @return path where file can now be found
         auto validatePath = [&localPath, this](QString fileName, QString targetFolder, QString realTarget) {
             if (targetFolder != realTarget) {
                 qDebug() << "Target folder of" << fileName << "is incorrect, it belongs in" << realTarget;
@@ -589,7 +588,7 @@ void FlameCreationTask::validateZIPResouces()
             } else if (ModUtils::validate(localFileInfo)) {
                 qDebug() << fileName << "is a mod";
                 validatePath(fileName, targetFolder, "mods");
-            } else  if (WorldSaveUtils::validate(localFileInfo)) {
+            } else if (WorldSaveUtils::validate(localFileInfo)) {
                 qDebug() << fileName << "is a world save";
                 QString worldPath = validatePath(fileName, targetFolder, "saves");
 
@@ -600,7 +599,7 @@ void FlameCreationTask::validateZIPResouces()
                     qDebug() << "World at" << worldPath << "is not valid, skipping install.";
                 } else {
                     w.install(FS::PathCombine(m_stagingPath, "minecraft", "saves"));
-                } 
+                }
             } else if (ShaderPackUtils::validate(localFileInfo)) {
                 // in theroy flame API can't do this but who knows, that *may* change ?
                 // better to handle it if it *does* occure in the future
@@ -610,7 +609,7 @@ void FlameCreationTask::validateZIPResouces()
                 qDebug() << "Can't Identify" << fileName << "at" << localPath << ", leaving it where it is.";
             }
         } else {
-            qDebug() << "Can't find" << localPath << "to validate it, ignoreing";
+            qDebug() << "Can't find" << localPath << "to validate it, ignoring";
         }
     }
 }

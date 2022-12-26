@@ -27,11 +27,7 @@
 
 class Version;
 
-enum class WorldSaveFormat {
-	SINGLE,
-	MULTI,
-	INVALID
-};
+enum class WorldSaveFormat { SINGLE, MULTI, INVALID };
 
 class WorldSave : public Resource {
     Q_OBJECT
@@ -53,15 +49,13 @@ class WorldSave : public Resource {
 
     bool valid() const override;
 
-
    protected:
     mutable QMutex m_data_lock;
 
-    /* The 'version' of a resource pack, as defined in the pack.mcmeta file.
-     * See https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
+    /** The format in which the save file is in.
+     *  Since saves can be distributed in various slightly different ways, this allows us to treat them separately.
      */
     WorldSaveFormat m_save_format = WorldSaveFormat::INVALID;
 
-		QString m_save_dir_name;
-
+    QString m_save_dir_name;
 };

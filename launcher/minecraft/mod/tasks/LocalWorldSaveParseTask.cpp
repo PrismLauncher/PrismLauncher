@@ -24,12 +24,12 @@
 
 #include "FileSystem.h"
 
-#include <qdir.h>
-#include <qfileinfo.h>
 #include <quazip/quazip.h>
-#include <quazip/quazipfile.h>
 #include <quazip/quazipdir.h>
-#include <utility>
+#include <quazip/quazipfile.h>
+
+#include <QDir>
+#include <QFileInfo>
 
 namespace WorldSaveUtils {
 
@@ -41,15 +41,22 @@ bool process(WorldSave& pack, ProcessingLevel level)
         case ResourceType::ZIPFILE:
             return WorldSaveUtils::processZIP(pack, level);
         default:
-            qWarning() << "Invalid type for shader pack parse task!";
+            qWarning() << "Invalid type for world save parse task!";
             return false;
     }
 }
 
-
+/// @brief checks a folder structure to see if it contains a level.dat
+/// @param dir the path to check
+/// @param saves used in recursive call if a "saves" dir was found
+/// @return std::tuple of (
+///             bool <found level.dat>, 
+///             QString <name of folder containing level.dat>, 
+///             bool <saves folder found>
+///         )
 static std::tuple<bool, QString, bool> contains_level_dat(QDir dir, bool saves = false)
 {
-    for(auto const& entry : dir.entryInfoList()) {
+    for (auto const& entry : dir.entryInfoList()) {
         if (!entry.isDir()) {
             continue;
         }
@@ -64,12 +71,11 @@ static std::tuple<bool, QString, bool> contains_level_dat(QDir dir, bool saves =
     return std::make_tuple(false, "", saves);
 }
 
-
 bool processFolder(WorldSave& save, ProcessingLevel level)
 {
     Q_ASSERT(save.type() == ResourceType::FOLDER);
 
-		auto [ found, save_dir_name, found_saves_dir ] = contains_level_dat(QDir(save.fileinfo().filePath()));
+    auto [found, save_dir_name, found_saves_dir] = contains_level_dat(QDir(save.fileinfo().filePath()));
 
     if (!found) {
         return false;
@@ -84,14 +90,21 @@ bool processFolder(WorldSave& save, ProcessingLevel level)
     }
 
     if (level == ProcessingLevel::BasicInfoOnly) {
-        return true; // only need basic info already checked
+        return true;  // only need basic info already checked
     }
 
-    // resurved for more intensive processing
-      
-    return true; // all tests passed
+    // reserved for more intensive processing
+
+    return true;  // all tests passed
 }
 
+/// @brief checks a folder structure to see if it contains a level.dat
+/// @param zip the zip file to check
+/// @return std::tuple of (
+///             bool <found level.dat>, 
+///             QString <name of folder containing level.dat>, 
+///             bool <saves folder found>
+///         )
 static std::tuple<bool, QString, bool> contains_level_dat(QuaZip& zip)
 {
     bool saves = false;
@@ -100,7 +113,7 @@ static std::tuple<bool, QString, bool> contains_level_dat(QuaZip& zip)
         saves = true;
         zipDir.cd("/saves");
     }
-    
+
     for (auto const& entry : zipDir.entryList()) {
         zipDir.cd(entry);
         if (zipDir.exists("level.dat")) {
@@ -117,14 +130,14 @@ bool processZIP(WorldSave& save, ProcessingLevel level)
 
     QuaZip zip(save.fileinfo().filePath());
     if (!zip.open(QuaZip::mdUnzip))
-        return false; // can't open zip file
+        return false;  // can't open zip file
 
-    auto [ found, save_dir_name, found_saves_dir ] = contains_level_dat(zip);
+    auto [found, save_dir_name, found_saves_dir] = contains_level_dat(zip);
 
     if (save_dir_name.endsWith("/")) {
         save_dir_name.chop(1);
     }
-    
+
     if (!found) {
         return false;
     }
@@ -139,16 +152,15 @@ bool processZIP(WorldSave& save, ProcessingLevel level)
 
     if (level == ProcessingLevel::BasicInfoOnly) {
         zip.close();
-        return true; // only need basic info already checked
+        return true;  // only need basic info already checked
     }
 
-    // resurved for more intensive processing
+    // reserved for more intensive processing
 
     zip.close();
 
     return true;
 }
-
 
 bool validate(QFileInfo file)
 {
@@ -158,9 +170,7 @@ bool validate(QFileInfo file)
 
 }  // namespace WorldSaveUtils
 
-LocalWorldSaveParseTask::LocalWorldSaveParseTask(int token, WorldSave& save)
-    : Task(nullptr, false), m_token(token), m_save(save)
-{}
+LocalWorldSaveParseTask::LocalWorldSaveParseTask(int token, WorldSave& save) : Task(nullptr, false), m_token(token), m_save(save) {}
 
 bool LocalWorldSaveParseTask::abort()
 {

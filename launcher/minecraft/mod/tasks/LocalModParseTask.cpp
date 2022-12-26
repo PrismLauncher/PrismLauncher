@@ -284,7 +284,8 @@ ModDetails ReadLiteModInfo(QByteArray contents)
     return details;
 }
 
-bool process(Mod& mod, ProcessingLevel level) {
+bool process(Mod& mod, ProcessingLevel level)
+{
     switch (mod.type()) {
         case ResourceType::FOLDER:
             return processFolder(mod, level);
@@ -293,13 +294,13 @@ bool process(Mod& mod, ProcessingLevel level) {
         case ResourceType::LITEMOD:
             return processLitemod(mod);
         default:
-            qWarning() << "Invalid type for resource pack parse task!";
+            qWarning() << "Invalid type for mod parse task!";
             return false;
     }
 }
 
-bool processZIP(Mod& mod, ProcessingLevel level) {
-
+bool processZIP(Mod& mod, ProcessingLevel level)
+{
     ModDetails details;
 
     QuaZip zip(mod.fileinfo().filePath());
@@ -316,7 +317,7 @@ bool processZIP(Mod& mod, ProcessingLevel level) {
 
         details = ReadMCModTOML(file.readAll());
         file.close();
-        
+
         // to replace ${file.jarVersion} with the actual version, as needed
         if (details.version == "${file.jarVersion}") {
             if (zip.setCurrentFile("META-INF/MANIFEST.MF")) {
@@ -346,7 +347,6 @@ bool processZIP(Mod& mod, ProcessingLevel level) {
                 file.close();
             }
         }
-
 
         zip.close();
         mod.setDetails(details);
@@ -403,11 +403,11 @@ bool processZIP(Mod& mod, ProcessingLevel level) {
     }
 
     zip.close();
-    return false; // no valid mod found in archive
+    return false;  // no valid mod found in archive
 }
 
-bool processFolder(Mod& mod, ProcessingLevel level) {
-
+bool processFolder(Mod& mod, ProcessingLevel level)
+{
     ModDetails details;
 
     QFileInfo mcmod_info(FS::PathCombine(mod.fileinfo().filePath(), "mcmod.info"));
@@ -424,13 +424,13 @@ bool processFolder(Mod& mod, ProcessingLevel level) {
         return true;
     }
 
-    return false; // no valid mcmod.info file found
+    return false;  // no valid mcmod.info file found
 }
 
-bool processLitemod(Mod& mod, ProcessingLevel level) {
-    
+bool processLitemod(Mod& mod, ProcessingLevel level)
+{
     ModDetails details;
-    
+
     QuaZip zip(mod.fileinfo().filePath());
     if (!zip.open(QuaZip::mdUnzip))
         return false;
@@ -451,23 +451,21 @@ bool processLitemod(Mod& mod, ProcessingLevel level) {
     }
     zip.close();
 
-    return false; // no valid litemod.json found in archive
+    return false;  // no valid litemod.json found in archive
 }
 
 /** Checks whether a file is valid as a mod or not. */
-bool validate(QFileInfo file) {
-    
+bool validate(QFileInfo file)
+{
     Mod mod{ file };
     return ModUtils::process(mod, ProcessingLevel::BasicInfoOnly) && mod.valid();
 }
 
 }  // namespace ModUtils
 
-
 LocalModParseTask::LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile)
     : Task(nullptr, false), m_token(token), m_type(type), m_modFile(modFile), m_result(new Result())
 {}
-
 
 bool LocalModParseTask::abort()
 {
@@ -476,7 +474,7 @@ bool LocalModParseTask::abort()
 }
 
 void LocalModParseTask::executeTask()
-{   
+{
     Mod mod{ m_modFile };
     ModUtils::process(mod, ModUtils::ProcessingLevel::Full);
 
