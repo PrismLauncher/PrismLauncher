@@ -40,11 +40,10 @@
       <image type="source" width="1126" height="850">https://prismlauncher.org/img/screenshots/ModpackInstallDark.png</image>
     </screenshot>
     <screenshot>
-      <screenshot>
-        <caption>Modpack updating</caption>
-        <image type="source" width="930" height="677">https://prismlauncher.org/img/screenshots/ModpackUpdateDark.png</image>
-      </screenshot>
-      <screenshot>
+      <caption>Modpack updating</caption>
+      <image type="source" width="930" height="677">https://prismlauncher.org/img/screenshots/ModpackUpdateDark.png</image>
+    </screenshot>
+    <screenshot>
       <caption>Mod installation</caption>
       <image type="source" width="848" height="558">https://prismlauncher.org/img/screenshots/ModInstallDark.png</image>
     </screenshot>
