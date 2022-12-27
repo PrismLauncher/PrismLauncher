@@ -397,93 +397,6 @@ void VersionPage::on_actionMove_down_triggered()
     updateButtons();
 }
 
-template <typename T>
-static void withVersionsLoaded(Meta::VersionList::Ptr versions, T action)
-{
-    if (!versions)
-        return;
-
-    if (!versions->isLoaded()) {
-        auto task = versions->getLoadTask();
-
-        if (task) {
-            QObject::connect(task.get(), &Task::finished, action);
-
-            if (!task->isRunning()) {
-                task->start();
-                return;
-            }
-        }
-    }
-
-    action();
-}
-
-// TODO move somewhere else?
-static bool versionRequires(Meta::Version* version, const QString& gameVersion)
-{
-    return version && std::any_of(version->requires().begin(), version->requires().end(), [gameVersion](auto require) {
-               return require.uid == "net.minecraft" && require.equalsVersion == gameVersion;
-           });
-}
-
-static BaseVersion* pickBest(Component* component, const QString& gameVersion)
-{
-    auto versions = component->getVersionList();
-
-    if (versionRequires(versions->getVersion(component->getVersion()).get(), gameVersion))
-        return nullptr;
-
-    BaseVersion* chosen = nullptr;
-
-    for (int i = 0; i < versions->count(); i++) {
-        auto version = dynamic_cast<Meta::Version*>(versions->at(i).get());
-        if (!version)
-            continue;
-
-        bool sameVersion = versionRequires(version, gameVersion);
-        if (!sameVersion)
-            continue;
-
-        bool recommended = version->isRecommended();
-
-        if (!chosen)
-            chosen = version;
-
-        if (recommended) {
-            chosen = version;
-            break;
-        }
-    }
-
-    return chosen;
-}
-
-void VersionPage::fixModLoaderVersions(const QString& gameVersion)
-{
-    fixModLoaderVersion("net.fabricmc.intermediary", gameVersion);
-    fixModLoaderVersion("org.quiltmc.hashed", gameVersion);
-    fixModLoaderVersion("net.minecraftforge", gameVersion);
-    fixModLoaderVersion("com.mumfrey.liteloader", gameVersion);
-}
-
-void VersionPage::fixModLoaderVersion(const QString &id, const QString &gameVersion) {
-    Component *component = m_profile->getComponent(id);
-
-    if (!component)
-        return;
-    if (component->isCustom())
-        return;
-
-    withVersionsLoaded(component->getVersionList(), [this, component, gameVersion] {
-        auto chosen = pickBest(component, gameVersion);
-        if (!chosen)
-            return;
-
-        m_profile->setComponentVersion(component->getID(), chosen->descriptor());
-    });
-}
-
 void VersionPage::on_actionChange_version_triggered()
 {
     auto versionRow = currentRow();
@@ -526,15 +439,7 @@ void VersionPage::on_actionChange_version_triggered()
         return;
 
     qDebug() << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
-
-    const QString newVersion = vselect.selectedVersion()->descriptor();
-    bool minecraft = uid == "net.minecraft";
-
-    m_profile->setComponentVersion(uid, newVersion, minecraft);
-
-    // if Minecraft is being changed, try to resolve conflicts with the mod loader
-    if (minecraft)
-        fixModLoaderVersions(newVersion);
+    m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), uid == "net.minecraft");
 
     m_profile->resolve(Net::Mode::Online);
     m_container->refreshContainer();

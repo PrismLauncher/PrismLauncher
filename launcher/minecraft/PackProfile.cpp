@@ -46,6 +46,7 @@
 #include <QTimer>
 
 #include "Exception.h"
+#include "meta/VersionList.h"
 #include "minecraft/OneSixVersionFormat.h"
 #include "FileSystem.h"
 #include "minecraft/MinecraftInstance.h"
@@ -73,6 +74,8 @@ PackProfile::PackProfile(MinecraftInstance * instance)
     d->interactionDisabled = instance->isRunning();
     connect(d->m_instance, &BaseInstance::runningStatusChanged, this, &PackProfile::disableInteraction);
     connect(&d->m_saveTimer, &QTimer::timeout, this, &PackProfile::save_internal);
+
+    connect(this, &PackProfile::minecraftChanged, this, &PackProfile::updateLoaderVersions);
 }
 
 PackProfile::~PackProfile()
@@ -1064,6 +1067,95 @@ void PackProfile::disableInteraction(bool disable)
             emit dataChanged(index(0), index(size - 1));
         }
     }
+}
+
+template <typename T>
+static void withVersionsLoaded(Meta::VersionList::Ptr versions, T action)
+{
+    if (!versions)
+        return;
+
+    if (!versions->isLoaded()) {
+        auto task = versions->getLoadTask();
+
+        if (task) {
+            QObject::connect(task.get(), &Task::finished, action);
+
+            if (!task->isRunning()) {
+                task->start();
+                return;
+            }
+        }
+    }
+
+    action();
+}
+
+// TODO move somewhere else?
+static bool versionRequires(Meta::Version* version, const QString& gameVersion)
+{
+    return version && std::any_of(version->requires().begin(), version->requires().end(), [gameVersion](auto require) {
+               return require.uid == "net.minecraft" && require.equalsVersion == gameVersion;
+           });
+}
+
+static BaseVersion* pickBest(Component* component, const QString& gameVersion)
+{
+    auto versions = component->getVersionList();
+
+    if (versionRequires(versions->getVersion(component->getVersion()).get(), gameVersion))
+        return nullptr;
+
+    BaseVersion* chosen = nullptr;
+
+    for (int i = 0; i < versions->count(); i++) {
+        auto version = dynamic_cast<Meta::Version*>(versions->at(i).get());
+        if (!version)
+            continue;
+
+        bool sameVersion = versionRequires(version, gameVersion);
+        if (!sameVersion)
+            continue;
+
+        bool recommended = version->isRecommended();
+
+        if (!chosen)
+            chosen = version;
+
+        if (recommended) {
+            chosen = version;
+            break;
+        }
+    }
+
+    return chosen;
+}
+
+void PackProfile::updateLoaderVersions()
+{
+    const QString gameVersion = getComponentVersion("net.minecraft");
+    updateLoaderVersion("net.fabricmc.intermediary", gameVersion);
+    updateLoaderVersion("org.quiltmc.hashed", gameVersion);
+    updateLoaderVersion("net.minecraftforge", gameVersion);
+    updateLoaderVersion("com.mumfrey.liteloader", gameVersion);
+}
+
+void PackProfile::updateLoaderVersion(const QString& id, const QString &gameVersion)
+{
+    Component* component = getComponent(id);
+
+    if (!component)
+        return;
+    if (component->isCustom())
+        return;
+
+    withVersionsLoaded(component->getVersionList(), [this, component, gameVersion] {
+        auto chosen = pickBest(component, gameVersion);
+        if (!chosen)
+            return;
+
+        setComponentVersion(component->getID(), chosen->descriptor());
+    });
 }
 
 ModAPI::ModLoaderTypes PackProfile::getModLoaders()
