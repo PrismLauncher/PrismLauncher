@@ -562,6 +562,13 @@ ecm_qt_declare_logging_category(CORE_SOURCES
     EXPORT "${Launcher_Name}"
 )
 
+if(KDE_INSTALL_LOGGINGCATEGORIESDIR)  # only install if there is a standard path for this
+    ecm_qt_install_logging_categories(
+        EXPORT "${Launcher_Name}"
+        DESTINATION "${KDE_INSTALL_LOGGINGCATEGORIESDIR}"
+    )
+endif()
+
 ################################ COMPILE ################################
 
 set(LOGIC_SOURCES
