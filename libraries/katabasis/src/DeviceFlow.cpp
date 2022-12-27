@@ -19,6 +19,7 @@
 #include "katabasis/PollServer.h"
 #include "katabasis/Globals.h"
 
+#include "KatabasisLogging.h"
 #include "JsonResponse.h"
 
 namespace {
@@ -58,8 +59,6 @@ QByteArray createQueryParameters(const QList<Katabasis::RequestParameter> &param
 }
 
 namespace Katabasis {
-
-Q_LOGGING_CATEGORY(katabasisCredentials, "katabasis.credentials", QtWarningMsg)
 
 DeviceFlow::DeviceFlow(Options & opts, Token & token, QObject *parent, QNetworkAccessManager *manager) : QObject(parent), token_(token) {
     manager_ = manager ? manager : new QNetworkAccessManager(this);

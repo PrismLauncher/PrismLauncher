@@ -27,8 +27,6 @@ set(CORE_SOURCES
     StringUtils.h
     StringUtils.cpp
     RuntimeContext.h
-    Logging.h
-    Logging.cpp
 
     # Basic instance manipulation tasks (derived from InstanceTask)
     InstanceCreationTask.h
@@ -551,6 +549,17 @@ set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLPackManifest.h
     modplatform/atlauncher/ATLShareCode.cpp
     modplatform/atlauncher/ATLShareCode.h
+)
+
+######## Logging categories ########
+
+ecm_qt_declare_logging_category(CORE_SOURCES
+    HEADER Logging.h
+    IDENTIFIER authCredentials
+    CATEGORY_NAME "launcher.auth.credentials"
+    DEFAULT_SEVERITY Warning
+    DESCRIPTION "Secrets and credentials for debugging purposes"
+    EXPORT "${Launcher_Name}"
 )
 
 ################################ COMPILE ################################

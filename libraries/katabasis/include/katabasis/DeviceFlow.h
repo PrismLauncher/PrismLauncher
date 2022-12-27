@@ -12,8 +12,6 @@
 
 namespace Katabasis {
 
-Q_DECLARE_LOGGING_CATEGORY(katabasisCredentials)
-
 class ReplyServer;
 class PollServer;
 
