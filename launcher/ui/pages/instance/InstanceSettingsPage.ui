@@ -619,7 +619,7 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
+         <layout class="QVBoxLayout" name="verticalLayout_15">
           <item>
            <layout class="QGridLayout" name="instanceAccountLayout">
             <item row="0" column="0">
