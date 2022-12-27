@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QLoggingCategory>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -10,6 +11,8 @@
 #include "Bits.h"
 
 namespace Katabasis {
+
+Q_DECLARE_LOGGING_CATEGORY(katabasisCredentials)
 
 class ReplyServer;
 class PollServer;

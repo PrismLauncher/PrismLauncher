@@ -22,6 +22,7 @@
 #include "JsonResponse.h"
 
 namespace {
+
 // ref: https://tools.ietf.org/html/rfc8628#section-3.2
 // Exception: Google sign-in uses "verification_url" instead of "*_uri" - we'll accept both.
 bool hasMandatoryDeviceAuthParams(const QVariantMap& params)
@@ -57,6 +58,8 @@ QByteArray createQueryParameters(const QList<Katabasis::RequestParameter> &param
 }
 
 namespace Katabasis {
+
+Q_LOGGING_CATEGORY(katabasisCredentials, "katabasis.credentials", QtWarningMsg)
 
 DeviceFlow::DeviceFlow(Options & opts, Token & token, QObject *parent, QNetworkAccessManager *manager) : QObject(parent), token_(token) {
     manager_ = manager ? manager : new QNetworkAccessManager(this);
@@ -333,9 +336,7 @@ QString DeviceFlow::refreshToken() {
 }
 
 void DeviceFlow::setRefreshToken(const QString &v) {
-#ifndef NDEBUG
-    qDebug() << "DeviceFlow::setRefreshToken" << v << "...";
-#endif
+    qCDebug(katabasisCredentials) << "new refresh token:" << v;
     token_.refresh_token = v;
 }
 

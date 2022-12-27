@@ -27,6 +27,8 @@ set(CORE_SOURCES
     StringUtils.h
     StringUtils.cpp
     RuntimeContext.h
+    Logging.h
+    Logging.cpp
 
     # Basic instance manipulation tasks (derived from InstanceTask)
     InstanceCreationTask.h
