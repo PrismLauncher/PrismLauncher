@@ -51,15 +51,16 @@ QByteArray getVariant(SkinUpload::Model model) {
     }
 }
 
-SkinUpload::SkinUpload(QObject *parent, QString token, QByteArray skin, SkinUpload::Model model)
-    : Task(parent), m_model(model), m_skin(skin), m_token(token)
+SkinUpload::SkinUpload(QObject *parent, MinecraftAccountPtr acct, QByteArray skin, SkinUpload::Model model)
+    : Task(parent), m_model(model), m_skin(skin), m_acct(acct)
 {
 }
 
 void SkinUpload::executeTask()
 {
-    QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/skins"));
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit());
+    QNetworkRequest request(QUrl(m_acct->servicesServerUrl() + "/minecraft/profile/skins"));
+    QString token = m_acct->accessToken();
+    request.setRawHeader("Authorization", QString("Bearer %1").arg(token).toLocal8Bit());
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     QHttpPart skin;

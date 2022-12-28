@@ -26,6 +26,13 @@ struct AuthSession
         GoneOrMigrated
     } status = Undetermined;
 
+    // API URLs
+    QString auth_server_url;
+    QString account_server_url;
+    QString session_server_url;
+    QString services_server_url;
+    bool uses_custom_api_servers = false;
+
     // client token
     QString client_token;
     // account user name

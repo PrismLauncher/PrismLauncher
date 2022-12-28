@@ -54,6 +54,7 @@
    </attribute>
    <addaction name="actionAddMicrosoft"/>
    <addaction name="actionAddMojang"/>
+   <addaction name="actionAddCustomYggdrasil"/>
    <addaction name="actionAddOffline"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionRemove"/>
@@ -66,6 +67,11 @@
   <action name="actionAddMojang">
    <property name="text">
     <string>Add &amp;Mojang</string>
+   </property>
+  </action>
+  <action name="actionAddCustomYggdrasil">
+   <property name="text">
+    <string>Add &amp;Custom Yggdrasil</string>
    </property>
   </action>
   <action name="actionRemove">
