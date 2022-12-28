@@ -551,6 +551,24 @@ set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLShareCode.h
 )
 
+######## Logging categories ########
+
+ecm_qt_declare_logging_category(CORE_SOURCES
+    HEADER Logging.h
+    IDENTIFIER authCredentials
+    CATEGORY_NAME "launcher.auth.credentials"
+    DEFAULT_SEVERITY Warning
+    DESCRIPTION "Secrets and credentials for debugging purposes"
+    EXPORT "${Launcher_Name}"
+)
+
+if(KDE_INSTALL_LOGGINGCATEGORIESDIR)  # only install if there is a standard path for this
+    ecm_qt_install_logging_categories(
+        EXPORT "${Launcher_Name}"
+        DESTINATION "${KDE_INSTALL_LOGGINGCATEGORIESDIR}"
+    )
+endif()
+
 ################################ COMPILE ################################
 
 set(LOGIC_SOURCES

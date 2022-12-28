@@ -4,6 +4,7 @@
 #include <QJsonParseError>
 #include <QJsonDocument>
 
+#include "Logging.h"
 #include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
@@ -58,9 +59,7 @@ void XboxAuthorizationStep::onRequestDone(
     auto requestor = qobject_cast<AuthRequest *>(QObject::sender());
     requestor->deleteLater();
 
-#ifndef NDEBUG
-    qDebug() << data;
-#endif
+    qCDebug(authCredentials()) << data;
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
         if (Net::isApplicationError(error)) {

@@ -268,6 +268,8 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
     find_package(ghc_filesystem QUIET)
 endif()
 
+include(ECMQtDeclareLoggingCategory)
+
 ####################################### Program Info #######################################
 
 set(Launcher_APP_BINARY_NAME "prismlauncher" CACHE STRING "Name of the Launcher binary")
