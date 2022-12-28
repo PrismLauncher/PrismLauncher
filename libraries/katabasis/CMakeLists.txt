@@ -38,6 +38,15 @@ set( katabasis_PUBLIC
     include/katabasis/RequestParameter.h
 )
 
+ecm_qt_declare_logging_category(katabasis_PRIVATE
+    HEADER KatabasisLogging.h  # NOTE: this won't be in src/, but CMAKE_BINARY_DIR/src isn't included by default so this should be fine
+    IDENTIFIER katabasisCredentials
+    CATEGORY_NAME "katabasis.credentials"
+    DEFAULT_SEVERITY Warning
+    DESCRIPTION "Secrets and credentials from Katabasis"
+    EXPORT "Katabasis"
+)
+
 add_library( Katabasis STATIC ${katabasis_PRIVATE} ${katabasis_PUBLIC} )
 target_link_libraries(Katabasis Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network)
 

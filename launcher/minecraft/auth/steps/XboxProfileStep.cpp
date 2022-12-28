@@ -3,7 +3,7 @@
 #include <QNetworkRequest>
 #include <QUrlQuery>
 
-
+#include "Logging.h"
 #include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
@@ -56,9 +56,7 @@ void XboxProfileStep::onRequestDone(
 
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
-#ifndef NDEBUG
-        qDebug() << data;
-#endif
+        qCDebug(authCredentials()) << data;
         if (Net::isApplicationError(error)) {
             emit finished(
                 AccountTaskState::STATE_FAILED_SOFT,
@@ -74,9 +72,7 @@ void XboxProfileStep::onRequestDone(
         return;
     }
 
-#ifndef NDEBUG
-    qDebug() << "XBox profile: " << data;
-#endif
+    qCDebug(authCredentials()) << "XBox profile: " << data;
 
     emit finished(AccountTaskState::STATE_WORKING, tr("Got Xbox profile"));
 }

@@ -3,6 +3,7 @@
 #include <QNetworkRequest>
 #include <QUuid>
 
+#include "Logging.h"
 #include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
 
@@ -41,9 +42,7 @@ void EntitlementsStep::onRequestDone(
     auto requestor = qobject_cast<AuthRequest *>(QObject::sender());
     requestor->deleteLater();
 
-#ifndef NDEBUG
-    qDebug() << data;
-#endif
+    qCDebug(authCredentials()) << data;
 
     // TODO: check presence of same entitlementsRequestId?
     // TODO: validate JWTs?
