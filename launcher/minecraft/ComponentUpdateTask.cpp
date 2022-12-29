@@ -48,7 +48,7 @@ ComponentUpdateTask::~ComponentUpdateTask()
 void ComponentUpdateTask::executeTask()
 {
     qDebug() << "Loading components";
-    loadComponents();
+    loadComponents(true);
 }
 
 namespace
@@ -171,7 +171,7 @@ static LoadResult loadIndex(Task::Ptr& loadTask, Net::Mode netmode)
 }
 }
 
-void ComponentUpdateTask::loadComponents()
+void ComponentUpdateTask::loadComponents(bool firstRun)
 {
     LoadResult result = LoadResult::LoadedLocal;
     size_t taskIndex = 0;
@@ -191,15 +191,15 @@ void ComponentUpdateTask::loadComponents()
             d->remoteLoadStatusList.append(status);
             connect(indexLoadTask.get(), &Task::succeeded, [=]()
             {
-                remoteLoadSucceeded(taskIndex);
+                remoteLoadSucceeded(taskIndex, firstRun);
             });
             connect(indexLoadTask.get(), &Task::failed, [=](const QString & error)
             {
-                remoteLoadFailed(taskIndex, error);
+                remoteLoadFailed(taskIndex, error, firstRun);
             });
             connect(indexLoadTask.get(), &Task::aborted, [=]()
             {
-                remoteLoadFailed(taskIndex, tr("Aborted"));
+                remoteLoadFailed(taskIndex, tr("Aborted"), firstRun);
             });
             taskIndex++;
         }
@@ -241,15 +241,15 @@ void ComponentUpdateTask::loadComponents()
             qDebug() << "Remote loading is being run for" << component->getName();
             connect(loadTask.get(), &Task::succeeded, [=]()
             {
-                remoteLoadSucceeded(taskIndex);
+                remoteLoadSucceeded(taskIndex, firstRun);
             });
             connect(loadTask.get(), &Task::failed, [=](const QString & error)
             {
-                remoteLoadFailed(taskIndex, error);
+                remoteLoadFailed(taskIndex, error, firstRun);
             });
             connect(loadTask.get(), &Task::aborted, [=]()
             {
-                remoteLoadFailed(taskIndex, tr("Aborted"));
+                remoteLoadFailed(taskIndex, tr("Aborted"), firstRun);
             });
             RemoteLoadStatus status;
             status.type = loadType;
@@ -265,7 +265,7 @@ void ComponentUpdateTask::loadComponents()
         case LoadResult::LoadedLocal:
         {
             // Everything got loaded. Advance to dependency resolution.
-            resolveDependencies(d->mode == Mode::Launch || d->netmode == Net::Mode::Offline);
+            resolveDependencies(firstRun, d->mode == Mode::Launch || d->netmode == Net::Mode::Offline);
             break;
         }
         case LoadResult::RequiresRemote:
@@ -389,7 +389,7 @@ static bool gatherRequirementsFromComponents(const ComponentContainer & input, R
 }
 
 /// Get list of uids that can be trivially removed because nothing is depending on them anymore (and they are installed as deps)
-static void getTrivialRemovals(const ComponentContainer & components, const RequireExSet & reqs, QStringList &toRemove)
+static void getTrivialRemovals(const ComponentContainer & components, const RequireExSet & reqs, QStringList &toRemove, bool greedyRemove)
 {
     for(const auto & component: components)
     {
@@ -403,6 +403,15 @@ static void getTrivialRemovals(const ComponentContainer & components, const Requ
         if(iter == reqs.cend())
         {
             toRemove.append(component->m_uid);
+        } else if (greedyRemove) {
+// ############################################################################################################
+// HACK HACK HACK HACK FIXME: this is a placeholder for removing intermediary to be added back later
+            if (component->m_uid == "net.fabricmc.intermediary" || component->m_uid == "org.quiltmc.hashed")
+            {
+                toRemove.append(component->m_uid);
+            }
+// HACK HACK HACK HACK FIXME: this is a placeholder for removing intermediary to be added back later
+// ############################################################################################################
         }
     }
 }
@@ -506,7 +515,7 @@ static bool getTrivialComponentChanges(const ComponentIndex & index, const Requi
 // FIXME, TODO: decouple dependency resolution from loading
 // FIXME: This works directly with the PackProfile internals. It shouldn't! It needs richer data types than PackProfile uses.
 // FIXME: throw all this away and use a graph
-void ComponentUpdateTask::resolveDependencies(bool checkOnly)
+void ComponentUpdateTask::resolveDependencies(bool firstRun, bool checkOnly)
 {
     qDebug() << "Resolving dependencies";
     /*
@@ -534,7 +543,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
             emitFailed(tr("Conflicting requirements detected during dependency checking!"));
             return;
         }
-        getTrivialRemovals(components, allRequires, toRemove);
+        getTrivialRemovals(components, allRequires, toRemove, firstRun);
         if(!toRemove.isEmpty())
         {
             qDebug() << "Removing obsolete components...";
@@ -634,7 +643,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
 
     if(recursionNeeded)
     {
-        loadComponents();
+        loadComponents(false);
     }
     else
     {
@@ -642,7 +651,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
     }
 }
 
-void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex)
+void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex, bool firstRun)
 {
     auto &taskSlot = d->remoteLoadStatusList[taskIndex];
     if(taskSlot.finished)
@@ -661,11 +670,11 @@ void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex)
         component->m_loaded = true;
         component->updateCachedData();
     }
-    checkIfAllFinished();
+    checkIfAllFinished(firstRun);
 }
 
 
-void ComponentUpdateTask::remoteLoadFailed(size_t taskIndex, const QString& msg)
+void ComponentUpdateTask::remoteLoadFailed(size_t taskIndex, const QString& msg, bool firstRun)
 {
     auto &taskSlot = d->remoteLoadStatusList[taskIndex];
     if(taskSlot.finished)
@@ -679,10 +688,10 @@ void ComponentUpdateTask::remoteLoadFailed(size_t taskIndex, const QString& msg)
     taskSlot.finished = true;
     taskSlot.error = msg;
     d->remoteTasksInProgress --;
-    checkIfAllFinished();
+    checkIfAllFinished(firstRun);
 }
 
-void ComponentUpdateTask::checkIfAllFinished()
+void ComponentUpdateTask::checkIfAllFinished(bool firstRun)
 {
     if(d->remoteTasksInProgress)
     {
@@ -693,7 +702,7 @@ void ComponentUpdateTask::checkIfAllFinished()
     {
         // nothing bad happened... clear the temp load status and proceed with looking at dependencies
         d->remoteLoadStatusList.clear();
-        resolveDependencies(d->mode == Mode::Launch);
+        resolveDependencies(firstRun, d->mode == Mode::Launch);
     }
     else
     {
