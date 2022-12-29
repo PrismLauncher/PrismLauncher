@@ -93,10 +93,11 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
             if (this_ver < other_ver)
                 return { -1, type == SortType::VERSION };
         }
-        case SortType::PROVIDER:
-            auto compare_result = QString::compare(provider(), cast_other->provider(), Qt::CaseInsensitive);
+        case SortType::PROVIDER: {
+            auto compare_result = QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
             if (compare_result != 0)
                 return { compare_result, type == SortType::PROVIDER };
+        }
     }
     return { 0, false };
 }
@@ -197,11 +198,9 @@ void Mod::finishResolvingWithDetails(ModDetails&& details)
         setMetadata(std::move(metadata));
 };
 
-auto Mod::provider() const -> QString
+auto Mod::provider() const -> std::optional<QString>
 {
-    if (metadata()) {
+    if (metadata())
         return ProviderCaps.readableName(metadata()->provider);
-    }
-	//: Unknown mod provider (i.e. not Modrinth, CurseForge, etc...)
-    return tr("Unknown");
+    return {};
 }

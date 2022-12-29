@@ -83,8 +83,15 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
         }
         case DateColumn:
             return m_resources[row]->dateTimeChanged();
-        case ProviderColumn:
-            return at(row)->provider();
+        case ProviderColumn: {
+            auto provider = at(row)->provider();
+            if (!provider.has_value()) {
+	            //: Unknown mod provider (i.e. not Modrinth, CurseForge, etc...)
+                return tr("Unknown");
+            }
+
+            return provider.value();
+        }
         default:
             return QVariant();
         }
