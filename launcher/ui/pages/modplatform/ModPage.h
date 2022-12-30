@@ -39,6 +39,9 @@ class ModPage : public ResourcePage {
 
     ~ModPage() override = default;
 
+    //: The plural version of 'mod'
+    [[nodiscard]] inline QString resourcesString() const override { return tr("mods"); }
+    //: The singular version of 'mods'
     [[nodiscard]] inline QString resourceString() const override { return tr("mod"); }
 
     [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
