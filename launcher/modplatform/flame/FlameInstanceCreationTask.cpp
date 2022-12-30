@@ -539,19 +539,6 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
     setAbortable(true);
 }
 
-bool moveFile(QString src, QString dst)
-{
-    if (!FS::copy(src, dst)()) {  // copy
-        qDebug() << "Copy of" << src << "to" << dst << "failed!";
-        return false;
-    } else {
-        if (!FS::deletePath(src)) {  // remove original
-            qDebug() << "Deletion of" << src << "failed!";
-            return false;
-        };
-    }
-    return true;
-}
 
 void FlameCreationTask::validateZIPResouces()
 {
@@ -567,7 +554,7 @@ void FlameCreationTask::validateZIPResouces()
                 qDebug() << "Target folder of" << fileName << "is incorrect, it belongs in" << realTarget;
                 auto destPath = FS::PathCombine(m_stagingPath, "minecraft", realTarget, fileName);
                 qDebug() << "Moving" << localPath << "to" << destPath;
-                if (moveFile(localPath, destPath)) {
+                if (FS::move(localPath, destPath)) {
                     return destPath;
                 }
             }

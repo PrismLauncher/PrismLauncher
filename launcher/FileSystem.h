@@ -122,6 +122,14 @@ class copy : public QObject {
 };
 
 /**
+ * @brief moves a file by renaming it
+ * @param source source file path
+ * @param dest destination filepath
+ * 
+ */
+bool move(const QString&  source, const QString& dest);
+
+/**
  * Delete a folder recursively
  */
 bool deletePath(QString path);
