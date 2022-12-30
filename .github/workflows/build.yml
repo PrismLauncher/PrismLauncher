@@ -550,7 +550,6 @@ jobs:
         with:
           bundle: "Prism Launcher.flatpak"
           manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
-          cache-key: flatpak-${{ github.sha }}-x86_64
 
   nix:
     runs-on: ubuntu-latest
