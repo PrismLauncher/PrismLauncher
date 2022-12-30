@@ -57,4 +57,4 @@ PackedResourceType identify(QFileInfo file){
     }
     return PackedResourceType::UNKNOWN;
 }
-} 
+}
