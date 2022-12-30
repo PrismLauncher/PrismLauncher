@@ -363,6 +363,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/tasks/LocalShaderPackParseTask.cpp
     minecraft/mod/tasks/LocalWorldSaveParseTask.h
     minecraft/mod/tasks/LocalWorldSaveParseTask.cpp
+    minecraft/mod/tasks/LocalResourceParse.h
+    minecraft/mod/tasks/LocalResourceParse.cpp
 
     # Assets
     minecraft/AssetsUtils.h

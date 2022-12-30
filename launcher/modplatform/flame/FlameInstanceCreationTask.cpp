@@ -57,12 +57,8 @@
 #include <QFileInfo>
 
 #include "minecraft/World.h"
-#include "minecraft/mod/tasks/LocalDataPackParseTask.h"
-#include "minecraft/mod/tasks/LocalModParseTask.h"
-#include "minecraft/mod/tasks/LocalResourcePackParseTask.h"
-#include "minecraft/mod/tasks/LocalShaderPackParseTask.h"
-#include "minecraft/mod/tasks/LocalTexturePackParseTask.h"
-#include "minecraft/mod/tasks/LocalWorldSaveParseTask.h"
+#include "minecraft/mod/tasks/LocalResourceParse.h"
+
 
 const static QMap<QString, QString> forgemap = { { "1.2.5", "3.4.9.171" },
                                                  { "1.4.2", "6.0.1.355" },
@@ -561,42 +557,48 @@ void FlameCreationTask::validateZIPResouces()
             return localPath;
         };
 
-        QFileInfo localFileInfo(localPath);
-        if (localFileInfo.exists() && localFileInfo.isFile()) {
-            if (ResourcePackUtils::validate(localFileInfo)) {
-                qDebug() << fileName << "is a resource pack";
-                validatePath(fileName, targetFolder, "resourcepacks");
-            } else if (TexturePackUtils::validate(localFileInfo)) {
-                qDebug() << fileName << "is a pre 1.6 texture pack";
-                validatePath(fileName, targetFolder, "texturepacks");
-            } else if (DataPackUtils::validate(localFileInfo)) {
-                qDebug() << fileName << "is a data pack";
-                validatePath(fileName, targetFolder, "datapacks");
-            } else if (ModUtils::validate(localFileInfo)) {
-                qDebug() << fileName << "is a mod";
-                validatePath(fileName, targetFolder, "mods");
-            } else if (WorldSaveUtils::validate(localFileInfo)) {
-                qDebug() << fileName << "is a world save";
-                QString worldPath = validatePath(fileName, targetFolder, "saves");
+        auto installWorld = [this](QString worldPath){
+            qDebug() << "Installing World from" << worldPath;
+            QFileInfo worldFileInfo(worldPath);
+            World w(worldFileInfo);
+            if (!w.isValid()) {
+                qDebug() << "World at" << worldPath << "is not valid, skipping install.";
+            } else {
+                w.install(FS::PathCombine(m_stagingPath, "minecraft", "saves"));
+            }
+        };
 
-                qDebug() << "Installing World from" << worldPath;
-                QFileInfo worldFileInfo(worldPath);
-                World w(worldFileInfo);
-                if (!w.isValid()) {
-                    qDebug() << "World at" << worldPath << "is not valid, skipping install.";
-                } else {
-                    w.install(FS::PathCombine(m_stagingPath, "minecraft", "saves"));
-                }
-            } else if (ShaderPackUtils::validate(localFileInfo)) {
+        QFileInfo localFileInfo(localPath);
+        auto type = ResourceUtils::identify(localFileInfo);
+
+        QString worldPath;
+
+        switch (type) {
+            case PackedResourceType::ResourcePack :
+                validatePath(fileName, targetFolder, "resourcepacks");
+                break;
+            case PackedResourceType::TexturePack :
+                validatePath(fileName, targetFolder, "texturepacks");
+                break;
+            case PackedResourceType::DataPack :
+                validatePath(fileName, targetFolder, "datapacks");
+                break;
+            case PackedResourceType::Mod :
+                validatePath(fileName, targetFolder, "mods");
+                break;
+            case PackedResourceType::ShaderPack :
                 // in theroy flame API can't do this but who knows, that *may* change ?
                 // better to handle it if it *does* occure in the future
-                qDebug() << fileName << "is a shader pack";
                 validatePath(fileName, targetFolder, "shaderpacks");
-            } else {
+                break;
+            case PackedResourceType::WorldSave :
+                worldPath = validatePath(fileName, targetFolder, "saves");
+                installWorld(worldPath);
+                break;
+            case PackedResourceType::UNKNOWN :
+            default :
                 qDebug() << "Can't Identify" << fileName << "at" << localPath << ", leaving it where it is.";
-            }
-        } else {
-            qDebug() << "Can't find" << localPath << "to validate it, ignoring";
+                break;
         }
     }
 }
