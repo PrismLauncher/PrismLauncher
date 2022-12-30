@@ -403,9 +403,9 @@ static void getTrivialRemovals(const ComponentContainer & components, const Requ
         if(iter == reqs.cend())
         {
             toRemove.append(component->m_uid);
-        } else if (greedyRemove) {
+        } else if (greedyRemove && !component->isCustom()) {
 // ############################################################################################################
-// HACK HACK HACK HACK FIXME: this is a placeholder for removing intermediary to be added back later
+// HACK HACK HACK HACK FIXME: this is a placeholder for removing intermediaries to be added back later
             if (component->m_uid == "net.fabricmc.intermediary" || component->m_uid == "org.quiltmc.hashed")
             {
                 toRemove.append(component->m_uid);
