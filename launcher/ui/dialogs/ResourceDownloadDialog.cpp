@@ -64,7 +64,6 @@ ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, const std::share
     HelpButton->setAutoDefault(false);
 
     setWindowModality(Qt::WindowModal);
-    setWindowTitle(dialogTitle());
 }
 
 void ResourceDownloadDialog::accept()
@@ -206,6 +205,8 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
 ModDownloadDialog::ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModFolderModel>& mods, BaseInstance* instance)
     : ResourceDownloadDialog(parent, mods), m_instance(instance)
 {
+    setWindowTitle(dialogTitle());
+
     initializeContainer();
     connectButtons();
 

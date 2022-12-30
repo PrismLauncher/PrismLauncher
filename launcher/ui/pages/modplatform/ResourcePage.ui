@@ -49,11 +49,7 @@
     </widget>
    </item>
    <item row="0" column="0">
-    <widget class="QLineEdit" name="searchEdit">
-     <property name="placeholderText">
-      <string>Search for resources...</string>
-     </property>
-    </widget>
+    <widget class="QLineEdit" name="searchEdit"/>
    </item>
    <item row="2" column="0" colspan="4">
     <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0">
@@ -74,11 +70,7 @@
       <widget class="QComboBox" name="sortByBox"/>
      </item>
      <item row="1" column="2">
-      <widget class="QPushButton" name="resourceSelectionButton">
-       <property name="text">
-        <string>Select resource for download</string>
-       </property>
-      </widget>
+      <widget class="QPushButton" name="resourceSelectionButton"/>
      </item>
     </layout>
    </item>

@@ -57,6 +57,10 @@ void ResourcePage::openedImpl()
     if (!supportsFiltering())
         m_ui->resourceFilterButton->setVisible(false);
 
+    //: String in the search bar of the mod downloading dialog
+    m_ui->searchEdit->setPlaceholderText(tr("Search for %1...").arg(resourcesString()));
+    m_ui->resourceSelectionButton->setText(tr("Select %1 for download").arg(resourceString()));
+
     updateSelectionButton();
     triggerSearch();
 }

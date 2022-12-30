@@ -36,6 +36,9 @@ class ResourcePage : public QWidget, public BasePage {
     [[nodiscard]] virtual auto metaEntryBase() const -> QString = 0;
     [[nodiscard]] virtual auto debugName() const -> QString = 0;
 
+    //: The plural version of 'resource'
+    [[nodiscard]] virtual inline QString resourcesString() const { return tr("resources"); }
+    //: The singular version of 'resources'
     [[nodiscard]] virtual inline QString resourceString() const { return tr("resource"); }
 
     /* Features this resource's page supports */
