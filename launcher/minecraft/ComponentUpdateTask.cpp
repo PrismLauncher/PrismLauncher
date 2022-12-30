@@ -265,7 +265,7 @@ void ComponentUpdateTask::loadComponents(bool firstRun)
         case LoadResult::LoadedLocal:
         {
             // Everything got loaded. Advance to dependency resolution.
-            resolveDependencies(firstRun, d->mode == Mode::Launch || d->netmode == Net::Mode::Offline);
+            resolveDependencies(d->mode == Mode::Launch || d->netmode == Net::Mode::Offline, firstRun);
             break;
         }
         case LoadResult::RequiresRemote:
@@ -403,9 +403,9 @@ static void getTrivialRemovals(const ComponentContainer & components, const Requ
         if(iter == reqs.cend())
         {
             toRemove.append(component->m_uid);
-        } else if (greedyRemove) {
+        } else if (greedyRemove && !component->isCustom()) {
 // ############################################################################################################
-// HACK HACK HACK HACK FIXME: this is a placeholder for removing intermediary to be added back later
+// HACK HACK HACK HACK FIXME: this is a placeholder for removing intermediaries to be added back later
             if (component->m_uid == "net.fabricmc.intermediary" || component->m_uid == "org.quiltmc.hashed")
             {
                 toRemove.append(component->m_uid);
@@ -515,7 +515,7 @@ static bool getTrivialComponentChanges(const ComponentIndex & index, const Requi
 // FIXME, TODO: decouple dependency resolution from loading
 // FIXME: This works directly with the PackProfile internals. It shouldn't! It needs richer data types than PackProfile uses.
 // FIXME: throw all this away and use a graph
-void ComponentUpdateTask::resolveDependencies(bool firstRun, bool checkOnly)
+void ComponentUpdateTask::resolveDependencies(bool checkOnly, bool firstRun)
 {
     qDebug() << "Resolving dependencies";
     /*
@@ -702,7 +702,7 @@ void ComponentUpdateTask::checkIfAllFinished(bool firstRun)
     {
         // nothing bad happened... clear the temp load status and proceed with looking at dependencies
         d->remoteLoadStatusList.clear();
-        resolveDependencies(firstRun, d->mode == Mode::Launch);
+        resolveDependencies(d->mode == Mode::Launch, firstRun);
     }
     else
     {

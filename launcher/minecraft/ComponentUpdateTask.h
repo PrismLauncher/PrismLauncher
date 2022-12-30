@@ -26,7 +26,7 @@ protected:
 
 private:
     void loadComponents(bool firstRun);
-    void resolveDependencies(bool firstRun, bool checkOnly);
+    void resolveDependencies(bool checkOnly, bool firstRun);
 
     void remoteLoadSucceeded(size_t index, bool firstRun);
     void remoteLoadFailed(size_t index, const QString &msg, bool firstRun);
