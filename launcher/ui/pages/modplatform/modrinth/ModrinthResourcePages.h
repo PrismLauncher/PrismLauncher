@@ -43,6 +43,7 @@
 
 #include "ui/pages/modplatform/ModPage.h"
 #include "ui/pages/modplatform/ResourcePackPage.h"
+#include "ui/pages/modplatform/ShaderPackPage.h"
 
 namespace ResourceDownload {
 
@@ -90,6 +91,29 @@ class ModrinthResourcePackPage : public ResourcePackResourcePage {
 
     ModrinthResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance);
     ~ModrinthResourcePackPage() override = default;
+
+    [[nodiscard]] bool shouldDisplay() const override;
+
+    [[nodiscard]] inline auto displayName() const -> QString override { return Modrinth::displayName(); }
+    [[nodiscard]] inline auto icon() const -> QIcon override { return Modrinth::icon(); }
+    [[nodiscard]] inline auto id() const -> QString override { return Modrinth::id(); }
+    [[nodiscard]] inline auto debugName() const -> QString override { return Modrinth::debugName(); }
+    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
+
+    [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
+};
+
+class ModrinthShaderPackPage : public ShaderPackResourcePage {
+    Q_OBJECT
+
+   public:
+    static ModrinthShaderPackPage* create(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
+    {
+        return ShaderPackResourcePage::create<ModrinthShaderPackPage>(dialog, instance);
+    }
+
+    ModrinthShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance);
+    ~ModrinthShaderPackPage() override = default;
 
     [[nodiscard]] bool shouldDisplay() const override;
 

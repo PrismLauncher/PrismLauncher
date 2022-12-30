@@ -30,7 +30,7 @@ namespace ModPlatform {
 
 enum class ResourceProvider { MODRINTH, FLAME };
 
-enum class ResourceType { MOD, RESOURCE_PACK };
+enum class ResourceType { MOD, RESOURCE_PACK, SHADER_PACK };
 
 class ProviderCapabilities {
    public:

@@ -723,6 +723,7 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/ResourcePackPage.h
     ui/pages/instance/ResourcePackPage.cpp
     ui/pages/instance/ShaderPackPage.h
+    ui/pages/instance/ShaderPackPage.cpp
     ui/pages/instance/ModFolderPage.cpp
     ui/pages/instance/ModFolderPage.h
     ui/pages/instance/NotesPage.cpp
@@ -776,6 +777,9 @@ SET(LAUNCHER_SOURCES
 
     ui/pages/modplatform/ResourcePackPage.cpp
     ui/pages/modplatform/ResourcePackModel.cpp
+
+    ui/pages/modplatform/ShaderPackPage.cpp
+    ui/pages/modplatform/ShaderPackModel.cpp
 
     ui/pages/modplatform/atlauncher/AtlFilterModel.cpp
     ui/pages/modplatform/atlauncher/AtlFilterModel.h

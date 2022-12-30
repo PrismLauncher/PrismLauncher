@@ -113,6 +113,7 @@
 
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ShaderPackFolderModel.h"
 #include "minecraft/WorldList.h"
 
 #include "KonamiCode.h"

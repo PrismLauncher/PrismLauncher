@@ -70,6 +70,8 @@ class ModrinthAPI : public NetworkResourceAPI {
                 return "mod";
             case ModPlatform::ResourceType::RESOURCE_PACK:
                 return "resourcepack";
+            case ModPlatform::ResourceType::SHADER_PACK:
+                return "shader";
             default:
                 qWarning() << "Invalid resource type for Modrinth API!";
                 break;

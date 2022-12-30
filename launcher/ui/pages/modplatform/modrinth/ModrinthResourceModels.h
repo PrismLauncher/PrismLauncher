@@ -62,4 +62,22 @@ class ModrinthResourcePackModel : public ResourcePackResourceModel {
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 };
 
+class ModrinthShaderPackModel : public ShaderPackResourceModel {
+    Q_OBJECT
+
+   public:
+    ModrinthShaderPackModel(const BaseInstance&);
+    ~ModrinthShaderPackModel() override = default;
+
+   private:
+    [[nodiscard]] QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
+    [[nodiscard]] QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
+
+    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
+    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
+    void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
+
+    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
+};
+
 }  // namespace ResourceDownload
