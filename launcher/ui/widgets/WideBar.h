@@ -22,6 +22,7 @@ class WideBar : public QToolBar {
     void insertSeparator(QAction* before);
     void insertActionBefore(QAction* before, QAction* action);
     void insertActionAfter(QAction* after, QAction* action);
+    void insertWidgetBefore(QAction* before, QWidget* widget);
 
     QMenu* createContextMenu(QWidget* parent = nullptr, const QString& title = QString());
     void showVisibilityMenu(const QPoint&);

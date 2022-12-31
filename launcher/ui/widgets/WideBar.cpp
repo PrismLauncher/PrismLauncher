@@ -111,6 +111,16 @@ void WideBar::insertActionAfter(QAction* after, QAction* action)
     m_menu_state = MenuState::Dirty;
 }
 
+void WideBar::insertWidgetBefore(QAction* before, QWidget* widget)
+{
+    auto iter = getMatching(before);
+    if (iter == m_entries.end())
+        return;
+
+    BarEntry entry;
+    entry.bar_action = insertWidget(iter->bar_action, widget);
+}
+
 void WideBar::insertSpacer(QAction* action)
 {
     auto iter = getMatching(action);
