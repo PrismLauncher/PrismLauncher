@@ -1851,27 +1851,27 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
         switch (type) {
             case PackedResourceType::ResourcePack:
-            minecraftInst->resourcePackList()->installResource(localFileName);
-            break;
+                minecraftInst->resourcePackList()->installResource(localFileName);
+                break;
             case PackedResourceType::TexturePack:
-            minecraftInst->texturePackList()->installResource(localFileName);
-            break;
+                minecraftInst->texturePackList()->installResource(localFileName);
+                break;
             case PackedResourceType::DataPack:
-            qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
-            break;
+                qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
+                break;
             case PackedResourceType::Mod:
-            minecraftInst->loaderModList()->installMod(localFileName);
-            break;
+                minecraftInst->loaderModList()->installMod(localFileName);
+                break;
             case PackedResourceType::ShaderPack:
-            minecraftInst->shaderPackList()->installResource(localFileName);
-            break;
+                minecraftInst->shaderPackList()->installResource(localFileName);
+                break;
             case PackedResourceType::WorldSave:
-            minecraftInst->worldList()->installWorld(localFileName);
-            break;
+                minecraftInst->worldList()->installWorld(localFileInfo);
+                break;
             case PackedResourceType::UNKNOWN:
             default:
-            qDebug() << "Can't Identify" << localFileName << "Ignoring it.";
-            break;
+                qDebug() << "Can't Identify" << localFileName << "Ignoring it.";
+                break;
         }
     }
 }
