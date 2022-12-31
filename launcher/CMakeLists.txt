@@ -934,6 +934,7 @@ if(WIN32)
 endif()
 
 qt_wrap_ui(LAUNCHER_UI
+    ui/MainWindow.ui
     ui/setupwizard/PasteWizardPage.ui
     ui/pages/global/AccountListPage.ui
     ui/pages/global/JavaPage.ui

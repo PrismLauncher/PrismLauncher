@@ -10,6 +10,9 @@ class ActionButton : public QToolButton {
     ActionButton(QAction* action, QWidget* parent = nullptr) : QToolButton(parent), m_action(action)
     {
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        // workaround for breeze and breeze forks
+        setProperty("_kde_toolButton_alignment", Qt::AlignLeft);
 
         connect(action, &QAction::changed, this, &ActionButton::actionChanged);
         connect(this, &ActionButton::clicked, action, &QAction::trigger);
@@ -21,6 +24,10 @@ class ActionButton : public QToolButton {
     {
         setEnabled(m_action->isEnabled());
         setChecked(m_action->isChecked());
+        setMenu(m_action->menu());
+        if (menu()) {
+            setPopupMode(QToolButton::MenuButtonPopup);
+        }
         setCheckable(m_action->isCheckable());
         setText(m_action->text());
         setIcon(m_action->icon());
