@@ -259,8 +259,17 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_serverToJoin = parser.value("server");
     m_profileToUse = parser.value("profile");
     m_liveCheck = parser.isSet("alive");
-    m_zipToImport = parser.value("import");
+    
     m_instanceIdToShowWindowOf = parser.value("show");
+
+    for (auto zip_path : parser.values("import")){
+        m_zipsToImport.append(QUrl(zip_path));
+    }
+
+    for (auto zip_path : parser.positionalArguments()){ // treat unspesified positional arguments as import urls
+        m_zipsToImport.append(QUrl(zip_path));
+    }
+
 
     // error if --launch is missing with --server or --profile
     if((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty())
@@ -345,7 +354,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
 
     /*
-     * Establish the mechanism for communication with an already running PolyMC that uses the same data path.
+     * Establish the mechanism for communication with an already running PrismLauncher that uses the same data path.
      * If there is one, tell it what the user actually wanted to do and exit.
      * We want to initialize this before logging to avoid messing with the log of a potential already running copy.
      */
@@ -363,12 +372,14 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 activate.command = "activate";
                 m_peerInstance->sendMessage(activate.serialize(), timeout);
 
-                if(!m_zipToImport.isEmpty())
+                if(!m_zipsToImport.isEmpty())
                 {
-                    ApplicationMessage import;
-                    import.command = "import";
-                    import.args.insert("path", m_zipToImport.toString());
-                    m_peerInstance->sendMessage(import.serialize(), timeout);
+                    for (auto zip_url : m_zipsToImport) {
+                        ApplicationMessage import;
+                        import.command = "import";
+                        import.args.insert("path", zip_url.toString());
+                        m_peerInstance->sendMessage(import.serialize(), timeout);
+                    } 
                 }
             }
             else
@@ -938,7 +949,7 @@ bool Application::event(QEvent* event)
 
     if (event->type() == QEvent::FileOpen) {
         auto ev = static_cast<QFileOpenEvent*>(event);
-        m_mainWindow->droppedURLs({ ev->url() });
+        m_mainWindow->processURLs({ ev->url() });
     }
 
     return QApplication::event(event);
@@ -998,10 +1009,10 @@ void Application::performMainStartupAction()
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
     }
-    if(!m_zipToImport.isEmpty())
+    if(!m_zipsToImport.isEmpty())
     {
-        qDebug() << "<> Importing instance from zip:" << m_zipToImport;
-        m_mainWindow->droppedURLs({ m_zipToImport });
+        qDebug() << "<> Importing from zip:" << m_zipsToImport;
+        m_mainWindow->processURLs( m_zipsToImport );
     }
 }
 
@@ -1054,7 +1065,7 @@ void Application::messageReceived(const QByteArray& message)
             qWarning() << "Received" << command << "message without a zip path/URL.";
             return;
         }
-        m_mainWindow->droppedURLs({ QUrl(path) });
+        m_mainWindow->processURLs({ QUrl(path) });
     }
     else if(command == "launch")
     {

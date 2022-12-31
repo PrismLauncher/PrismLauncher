@@ -841,8 +841,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ExportInstanceDialog.h
     ui/dialogs/IconPickerDialog.cpp
     ui/dialogs/IconPickerDialog.h
-    ui/dialogs/ImportResourcePackDialog.cpp
-    ui/dialogs/ImportResourcePackDialog.h
+    ui/dialogs/ImportResourceDialog.cpp
+    ui/dialogs/ImportResourceDialog.h
     ui/dialogs/LoginDialog.cpp
     ui/dialogs/LoginDialog.h
     ui/dialogs/MSALoginDialog.cpp
@@ -992,7 +992,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/SkinUploadDialog.ui
     ui/dialogs/ExportInstanceDialog.ui
     ui/dialogs/IconPickerDialog.ui
-    ui/dialogs/ImportResourcePackDialog.ui
+    ui/dialogs/ImportResourceDialog.ui
     ui/dialogs/MSALoginDialog.ui
     ui/dialogs/OfflineLoginDialog.ui
     ui/dialogs/AboutDialog.ui

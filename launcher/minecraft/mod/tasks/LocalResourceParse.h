@@ -21,11 +21,17 @@
 
 #pragma once
 
+#include <set>
+
 #include <QDebug>
 #include <QFileInfo>
 #include <QObject>
 
 enum class PackedResourceType { DataPack, ResourcePack, TexturePack, ShaderPack, WorldSave, Mod, UNKNOWN };
 namespace ResourceUtils {
+static const std::set<PackedResourceType> ValidResourceTypes = { PackedResourceType::DataPack,    PackedResourceType::ResourcePack,
+                                                                 PackedResourceType::TexturePack, PackedResourceType::ShaderPack,
+                                                                 PackedResourceType::WorldSave,   PackedResourceType::Mod };
 PackedResourceType identify(QFileInfo file);
+QString getPackedTypeName(PackedResourceType type);
 }  // namespace ResourceUtils

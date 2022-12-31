@@ -109,13 +109,12 @@
 #include "ui/dialogs/UpdateDialog.h"
 #include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
-#include "ui/dialogs/ImportResourcePackDialog.h"
+#include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/themes/ITheme.h"
 
-#include <minecraft/mod/ResourcePackFolderModel.h>
-#include <minecraft/mod/tasks/LocalResourcePackParseTask.h>
-#include <minecraft/mod/TexturePackFolderModel.h>
-#include <minecraft/mod/tasks/LocalTexturePackParseTask.h>
+#include "minecraft/mod/tasks/LocalResourceParse.h"
+#include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/WorldList.h"
 
 #include "UpdateController.h"
 #include "KonamiCode.h"
@@ -954,7 +953,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         view->installEventFilter(this);
         view->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(view, &QWidget::customContextMenuRequested, this, &MainWindow::showInstanceContextMenu);
-        connect(view, &InstanceView::droppedURLs, this, &MainWindow::droppedURLs, Qt::QueuedConnection);
+        connect(view, &InstanceView::droppedURLs, this, &MainWindow::processURLs, Qt::QueuedConnection);
 
         proxymodel = new InstanceProxyModel(this);
         proxymodel->setSourceModel(APPLICATION->instances().get());
@@ -1813,10 +1812,12 @@ void MainWindow::on_actionAddInstance_triggered()
     addInstance();
 }
 
-void MainWindow::droppedURLs(QList<QUrl> urls)
+void MainWindow::processURLs(QList<QUrl> urls)
 {
     // NOTE: This loop only processes one dropped file!
     for (auto& url : urls) {
+        qDebug() << "Processing :" << url;
+
         // The isLocalFile() check below doesn't work as intended without an explicit scheme.
         if (url.scheme().isEmpty())
             url.setScheme("file");
@@ -1829,28 +1830,49 @@ void MainWindow::droppedURLs(QList<QUrl> urls)
         auto localFileName = url.toLocalFile();
         QFileInfo localFileInfo(localFileName);
 
-        bool isResourcePack = ResourcePackUtils::validate(localFileInfo);
-        bool isTexturePack = TexturePackUtils::validate(localFileInfo);
+        auto type = ResourceUtils::identify(localFileInfo);
 
-        if (!isResourcePack && !isTexturePack) {  // probably instance/modpack
+        // bool is_resource = type;
+
+        if (!(ResourceUtils::ValidResourceTypes.count(type) > 0)) {  // probably instance/modpack
             addInstance(localFileName);
-            break;
+            continue;
         }
 
-        ImportResourcePackDialog dlg(this);
+        ImportResourceDialog dlg(localFileName, type, this);
 
         if (dlg.exec() != QDialog::Accepted)
-            break;
+            continue;
 
-        qDebug() << "Adding resource/texture pack" << localFileName << "to" << dlg.selectedInstanceKey;
+        qDebug() << "Adding resource" << localFileName << "to" << dlg.selectedInstanceKey;
 
         auto inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
         auto minecraftInst = std::dynamic_pointer_cast<MinecraftInstance>(inst);
-        if (isResourcePack)
+
+        switch (type) {
+            case PackedResourceType::ResourcePack:
             minecraftInst->resourcePackList()->installResource(localFileName);
-        else if (isTexturePack)
+            break;
+            case PackedResourceType::TexturePack:
             minecraftInst->texturePackList()->installResource(localFileName);
-        break;
+            break;
+            case PackedResourceType::DataPack:
+            qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
+            break;
+            case PackedResourceType::Mod:
+            minecraftInst->loaderModList()->installMod(localFileName);
+            break;
+            case PackedResourceType::ShaderPack:
+            minecraftInst->shaderPackList()->installResource(localFileName);
+            break;
+            case PackedResourceType::WorldSave:
+            minecraftInst->worldList()->installWorld(localFileName);
+            break;
+            case PackedResourceType::UNKNOWN:
+            default:
+            qDebug() << "Can't Identify" << localFileName << "Ignoring it.";
+            break;
+        }
     }
 }
 
