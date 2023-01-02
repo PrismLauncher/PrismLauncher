@@ -500,8 +500,7 @@ void InstanceSettingsPage::changeInstanceAccount()
     QAction *sAction = (QAction *)sender();
 
     // Profile's associated Mojang username
-    if (sAction->data().type() != QVariant::Type::Int)
-        return;
+    Q_ASSERT(sAction->data().type() == QVariant::Type::Int);
 
     QVariant data = sAction->data();
     bool valid = false;
