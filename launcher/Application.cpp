@@ -263,11 +263,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_instanceIdToShowWindowOf = parser.value("show");
 
     for (auto zip_path : parser.values("import")){
-        m_zipsToImport.append(QUrl(zip_path));
+        m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
     }
 
     for (auto zip_path : parser.positionalArguments()){ // treat unspesified positional arguments as import urls
-        m_zipsToImport.append(QUrl(zip_path));
+        m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
     }
 
 
@@ -1065,7 +1065,7 @@ void Application::messageReceived(const QByteArray& message)
             qWarning() << "Received" << command << "message without a zip path/URL.";
             return;
         }
-        m_mainWindow->processURLs({ QUrl(path) });
+        m_mainWindow->processURLs({ QUrl::fromLocalFile(QFileInfo(path).absoluteFilePath()) });
     }
     else if(command == "launch")
     {

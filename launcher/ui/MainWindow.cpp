@@ -1827,7 +1827,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
             break;
         }
 
-        auto localFileName = url.toLocalFile();
+        auto localFileName = QDir::toNativeSeparators(url.toLocalFile()) ;
         QFileInfo localFileInfo(localFileName);
 
         auto type = ResourceUtils::identify(localFileInfo);
