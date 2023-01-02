@@ -115,15 +115,11 @@ void LaunchController::decideAccount()
     // Select the account to use. If the instance has a specific account set, that will be used. Otherwise, the default account will be used
     auto instanceAccountId = m_instance->settings()->get("InstanceAccountId").toString();
     auto instanceAccountIndex = accounts->findAccountByProfileId(instanceAccountId);
-    if (instanceAccountIndex == -1)
-    {
+    if (instanceAccountIndex == -1) {
         m_accountToUse = accounts->defaultAccount();
-    }
-    else
-    {
+    } else {
         m_accountToUse = accounts->at(instanceAccountIndex);
     }
-
 
     if (!m_accountToUse)
     {

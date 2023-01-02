@@ -283,8 +283,7 @@ void InstanceSettingsPage::applySettings()
     // Use an account for this instance
     bool useAccountForInstance = ui->instanceAccountGroupBox->isChecked();
     m_settings->set("UseAccountForInstance", useAccountForInstance);
-    if (!useAccountForInstance)
-    {
+    if (!useAccountForInstance) {
         m_settings->reset("InstanceAccountId");
     }
 
@@ -459,33 +458,33 @@ void InstanceSettingsPage::updateAccountsMenu()
 
     auto accounts = APPLICATION->accounts();
     int accountIndex = accounts->findAccountByProfileId(m_settings->get("InstanceAccountId").toString());
+    MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
 
-    if (accountIndex != -1)
-    {
-        auto account = accounts->at(accountIndex);
-        ui->instanceAccountSelector->setText(account->profileName());
-        ui->instanceAccountSelector->setIcon(account->getFace());
+    if (accountIndex != -1 && accounts->at(accountIndex)) {
+        defaultAccount = accounts->at(accountIndex);
+    }
+
+    if (defaultAccount) {
+        ui->instanceAccountSelector->setText(defaultAccount->profileName());
+        ui->instanceAccountSelector->setIcon(defaultAccount->getFace());
     } else {
         ui->instanceAccountSelector->setText(tr("No default account"));
         ui->instanceAccountSelector->setIcon(APPLICATION->getThemedIcon("noaccount"));
     }
 
-    for (int i = 0; i < accounts->count(); i++)
-    {
+    for (int i = 0; i < accounts->count(); i++) {
         MinecraftAccountPtr account = accounts->at(i);
-        QAction *action = new QAction(account->profileName(), this);
+        QAction* action = new QAction(account->profileName(), this);
         action->setData(i);
         action->setCheckable(true);
-        if (accountIndex == i)
-        {
+        if (accountIndex == i) {
             action->setChecked(true);
         }
 
         auto face = account->getFace();
-        if(!face.isNull()) {
+        if (!face.isNull()) {
             action->setIcon(face);
-        }
-        else {
+        } else {
             action->setIcon(APPLICATION->getThemedIcon("noaccount"));
         }
 
@@ -496,20 +495,14 @@ void InstanceSettingsPage::updateAccountsMenu()
 
 void InstanceSettingsPage::changeInstanceAccount()
 {
-    QAction *sAction = (QAction *)sender();
+    QAction* sAction = (QAction*)sender();
 
-    // Profile's associated Mojang username
     Q_ASSERT(sAction->data().type() == QVariant::Type::Int);
 
     QVariant data = sAction->data();
-    bool valid = false;
-    int index = data.toInt(&valid);
-    if(!valid) {
-        index = -1;
-    }
+    int index = data.toInt();
     auto accounts = APPLICATION->accounts();
     auto account = accounts->at(index);
-
     m_settings->set("InstanceAccountId", account->profileId());
 
     ui->instanceAccountSelector->setText(account->profileName());
