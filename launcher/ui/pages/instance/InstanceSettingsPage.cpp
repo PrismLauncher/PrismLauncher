@@ -80,7 +80,6 @@ bool InstanceSettingsPage::shouldDisplay() const
 InstanceSettingsPage::~InstanceSettingsPage()
 {
     delete ui;
-    delete accountMenu;
 }
 
 void InstanceSettingsPage::globalSettingsButtonClicked(bool)
