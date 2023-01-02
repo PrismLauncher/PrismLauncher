@@ -491,7 +491,7 @@ void InstanceSettingsPage::updateAccountsMenu()
         }
 
         accountMenu->addAction(action);
-        connect(action, SIGNAL(triggered(bool)), SLOT(changeInstanceAccount()));
+        connect(action, SIGNAL(triggered(bool)), this, SLOT(changeInstanceAccount()));
     }
 }
 
