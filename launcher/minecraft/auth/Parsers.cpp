@@ -1,5 +1,6 @@
 #include "Parsers.h"
 #include "Json.h"
+#include "Logging.h"
 
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -75,9 +76,7 @@ bool getBool(QJsonValue value, bool & out) {
 
 bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output, QString name) {
     qDebug() << "Parsing" << name <<":";
-#ifndef NDEBUG
-    qDebug() << data;
-#endif
+    qCDebug(authCredentials()) << data;
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if(jsonError.error) {
@@ -137,9 +136,7 @@ bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output, QString na
 
 bool parseMinecraftProfile(QByteArray & data, MinecraftProfile &output) {
     qDebug() << "Parsing Minecraft profile...";
-#ifndef NDEBUG
-    qDebug() << data;
-#endif
+    qCDebug(authCredentials()) << data;
 
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
@@ -275,9 +272,7 @@ decoded base64 "value":
 
 bool parseMinecraftProfileMojang(QByteArray & data, MinecraftProfile &output) {
     qDebug() << "Parsing Minecraft profile...";
-#ifndef NDEBUG
-    qDebug() << data;
-#endif
+    qCDebug(authCredentials()) << data;
 
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
@@ -389,9 +384,7 @@ bool parseMinecraftProfileMojang(QByteArray & data, MinecraftProfile &output) {
 
 bool parseMinecraftEntitlements(QByteArray & data, MinecraftEntitlement &output) {
     qDebug() << "Parsing Minecraft entitlements...";
-#ifndef NDEBUG
-    qDebug() << data;
-#endif
+    qCDebug(authCredentials()) << data;
 
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
@@ -424,9 +417,7 @@ bool parseMinecraftEntitlements(QByteArray & data, MinecraftEntitlement &output)
 
 bool parseRolloutResponse(QByteArray & data, bool& result) {
     qDebug() << "Parsing Rollout response...";
-#ifndef NDEBUG
-    qDebug() << data;
-#endif
+    qCDebug(authCredentials()) << data;
 
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
@@ -455,9 +446,7 @@ bool parseRolloutResponse(QByteArray & data, bool& result) {
 bool parseMojangResponse(QByteArray & data, Katabasis::Token &output) {
     QJsonParseError jsonError;
     qDebug() << "Parsing Mojang response...";
-#ifndef NDEBUG
-    qDebug() << data;
-#endif
+    qCDebug(authCredentials()) << data;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
     if(jsonError.error) {
         qWarning() << "Failed to parse response from api.minecraftservices.com/launcher/login as JSON: " << jsonError.errorString();

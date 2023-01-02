@@ -546,11 +546,10 @@ jobs:
           submodules: 'true'
       - name: Build Flatpak (Linux)
         if: inputs.build_type == 'Debug'
-        uses: flatpak/flatpak-github-actions/flatpak-builder@v4
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v5
         with:
           bundle: "Prism Launcher.flatpak"
           manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
-          cache-key: flatpak-${{ github.sha }}-x86_64
 
   nix:
     runs-on: ubuntu-latest
