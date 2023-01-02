@@ -514,7 +514,11 @@ void InstanceSettingsPage::changeInstanceAccount()
     m_settings->set("InstanceAccountId", account->profileId());
 
     ui->instanceAccountSelector->setText(account->profileName());
-    ui->instanceAccountSelector->setIcon(account->getFace());
+    if (auto face = account->getFace(); !face.isNull()) {
+        ui->instanceAccountSelector->setIcon(face);
+    } else {
+        ui->instanceAccountSelector->setIcon(APPLICATION->getThemedIcon("noaccount"));
+    }
 }
 
 void InstanceSettingsPage::on_maxMemSpinBox_valueChanged(int i)
