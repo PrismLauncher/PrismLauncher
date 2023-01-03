@@ -2,6 +2,8 @@
 
 #include <QAbstractListModel>
 
+#include "BaseInstance.h"
+
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 
@@ -38,6 +40,8 @@ class ModModel : public ResourceModel {
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override = 0;
 
    protected:
+    const BaseInstance& m_base_instance;
+
     std::shared_ptr<ModFilterWidget::Filter> m_filter = nullptr;
 };
 

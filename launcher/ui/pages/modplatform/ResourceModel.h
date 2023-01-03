@@ -5,7 +5,6 @@
 #include <QAbstractListModel>
 
 #include "QObjectPtr.h"
-#include "BaseInstance.h"
 
 #include "modplatform/ResourceAPI.h"
 
@@ -26,7 +25,7 @@ class ResourceModel : public QAbstractListModel {
     Q_PROPERTY(QString search_term MEMBER m_search_term WRITE setSearchTerm)
 
    public:
-    ResourceModel(BaseInstance const&, ResourceAPI* api);
+    ResourceModel(ResourceAPI* api);
     ~ResourceModel() override;
 
     [[nodiscard]] auto data(const QModelIndex&, int role) const -> QVariant override;
@@ -103,8 +102,6 @@ class ResourceModel : public QAbstractListModel {
     virtual void loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArray&);
 
    protected:
-    const BaseInstance& m_base_instance;
-
     /* Basic search parameters */
     enum class SearchState { None, CanFetchMore, ResetRequested, Finished } m_search_state = SearchState::None;
     int m_next_search_offset = 0;

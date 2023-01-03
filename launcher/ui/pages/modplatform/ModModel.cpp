@@ -7,7 +7,7 @@
 
 namespace ResourceDownload {
 
-ModModel::ModModel(BaseInstance const& base_inst, ResourceAPI* api) : ResourceModel(base_inst, api) {}
+ModModel::ModModel(BaseInstance const& base_inst, ResourceAPI* api) : ResourceModel(api), m_base_instance(base_inst) {}
 
 /******** Make data requests ********/
 
