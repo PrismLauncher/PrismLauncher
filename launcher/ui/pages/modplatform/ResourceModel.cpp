@@ -111,10 +111,8 @@ QString ResourceModel::debugName() const
 
 void ResourceModel::fetchMore(const QModelIndex& parent)
 {
-    if (parent.isValid())
+    if (parent.isValid() || m_search_state == SearchState::Finished)
         return;
-
-    Q_ASSERT(m_next_search_offset != 0);
 
     search();
 }
