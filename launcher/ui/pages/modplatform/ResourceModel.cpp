@@ -21,7 +21,7 @@ namespace ResourceDownload {
 
 QHash<ResourceModel*, bool> ResourceModel::s_running_models;
 
-ResourceModel::ResourceModel(BaseInstance const& base_inst, ResourceAPI* api) : QAbstractListModel(), m_base_instance(base_inst), m_api(api)
+ResourceModel::ResourceModel(ResourceAPI* api) : QAbstractListModel(), m_api(api)
 {
     s_running_models.insert(this, true);
 }
