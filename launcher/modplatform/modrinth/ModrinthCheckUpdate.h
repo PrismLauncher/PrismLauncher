@@ -19,5 +19,5 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
     void executeTask() override;
 
    private:
-    NetJob* m_net_job = nullptr;
+    NetJob::Ptr m_net_job = nullptr;
 };

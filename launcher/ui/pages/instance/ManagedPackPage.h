@@ -12,6 +12,8 @@
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlamePackIndex.h"
 
+#include "net/NetJob.h"
+
 #include "ui/pages/BasePage.h"
 
 #include <QWidget>

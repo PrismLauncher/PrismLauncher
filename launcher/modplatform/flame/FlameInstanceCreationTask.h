@@ -86,7 +86,7 @@ class FlameCreationTask final : public InstanceCreationTask {
     Flame::Manifest m_pack;
 
     // Handle to allow aborting
-    NetJob::Ptr m_process_update_file_info_job = nullptr;
+    Task::Ptr m_process_update_file_info_job = nullptr;
     NetJob::Ptr m_files_job = nullptr;
 
     QString m_managed_id, m_managed_version_id;

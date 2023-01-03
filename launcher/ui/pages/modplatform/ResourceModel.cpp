@@ -225,7 +225,7 @@ void ResourceModel::clearData()
     endResetModel();
 }
 
-void ResourceModel::runSearchJob(NetJob::Ptr ptr)
+void ResourceModel::runSearchJob(Task::Ptr ptr)
 {
     m_current_search_job = ptr;
     m_current_search_job->start();

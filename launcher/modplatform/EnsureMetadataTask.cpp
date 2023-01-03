@@ -13,8 +13,6 @@
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
-#include "net/NetJob.h"
-
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
 static ModrinthAPI modrinth_api;
@@ -107,7 +105,7 @@ void EnsureMetadataTask::executeTask()
         }
     }
 
-    NetJob::Ptr version_task;
+    Task::Ptr version_task;
 
     switch (m_provider) {
         case (ModPlatform::ResourceProvider::MODRINTH):
@@ -127,7 +125,7 @@ void EnsureMetadataTask::executeTask()
     };
 
     connect(version_task.get(), &Task::finished, this, [this, invalidade_leftover] {
-        NetJob::Ptr project_task;
+        Task::Ptr project_task;
 
         switch (m_provider) {
             case (ModPlatform::ResourceProvider::MODRINTH):
@@ -149,7 +147,7 @@ void EnsureMetadataTask::executeTask()
             m_current_task = nullptr;
         });
 
-        m_current_task = project_task.get();
+        m_current_task = project_task;
         project_task->start();
     });
 
@@ -164,7 +162,7 @@ void EnsureMetadataTask::executeTask()
         setStatus(tr("Requesting metadata information from %1 for '%2'...")
                       .arg(ProviderCaps.readableName(m_provider), m_mods.begin().value()->name()));
 
-    m_current_task = version_task.get();
+    m_current_task = version_task;
     version_task->start();
 }
 
@@ -210,7 +208,7 @@ void EnsureMetadataTask::emitFail(Mod* m, QString key, RemoveFromList remove)
 
 // Modrinth
 
-NetJob::Ptr EnsureMetadataTask::modrinthVersionsTask()
+Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 {
     auto hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
@@ -221,7 +219,7 @@ NetJob::Ptr EnsureMetadataTask::modrinthVersionsTask()
     if (!ver_task)
         return {};
 
-    connect(ver_task.get(), &NetJob::succeeded, this, [this, response] {
+    connect(ver_task.get(), &Task::succeeded, this, [this, response] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -260,14 +258,14 @@ NetJob::Ptr EnsureMetadataTask::modrinthVersionsTask()
     return ver_task;
 }
 
-NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
+Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
 {
     QHash<QString, QString> addonIds;
     for (auto const& data : m_temp_versions)
         addonIds.insert(data.addonId.toString(), data.hash);
 
     auto response = new QByteArray();
-    NetJob::Ptr proj_task;
+    Task::Ptr proj_task;
 
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
@@ -281,7 +279,7 @@ NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
     if (!proj_task)
         return {};
 
-    connect(proj_task.get(), &NetJob::succeeded, this, [this, response, addonIds] {
+    connect(proj_task.get(), &Task::succeeded, this, [this, response, addonIds] {
         QJsonParseError parse_error{};
         auto doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -335,7 +333,7 @@ NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
 }
 
 // Flame
-NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
+Task::Ptr EnsureMetadataTask::flameVersionsTask()
 {
     auto* response = new QByteArray();
 
@@ -400,7 +398,7 @@ NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
     return ver_task;
 }
 
-NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
+Task::Ptr EnsureMetadataTask::flameProjectsTask()
 {
     QHash<QString, QString> addonIds;
     for (auto const& hash : m_mods.keys()) {
@@ -414,7 +412,7 @@ NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
     }
 
     auto response = new QByteArray();
-    NetJob::Ptr proj_task;
+    Task::Ptr proj_task;
 
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
@@ -428,7 +426,7 @@ NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
     if (!proj_task)
         return {};
 
-    connect(proj_task.get(), &NetJob::succeeded, this, [this, response, addonIds] {
+    connect(proj_task.get(), &Task::succeeded, this, [this, response, addonIds] {
         QJsonParseError parse_error{};
         auto doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {

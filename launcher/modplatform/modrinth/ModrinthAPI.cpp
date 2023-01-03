@@ -4,7 +4,7 @@
 #include "Json.h"
 #include "net/Upload.h"
 
-auto ModrinthAPI::currentVersion(QString hash, QString hash_format, QByteArray* response) -> NetJob::Ptr
+Task::Ptr ModrinthAPI::currentVersion(QString hash, QString hash_format, QByteArray* response)
 {
     auto* netJob = new NetJob(QString("Modrinth::GetCurrentVersion"), APPLICATION->network());
 
@@ -16,7 +16,7 @@ auto ModrinthAPI::currentVersion(QString hash, QString hash_format, QByteArray* 
     return netJob;
 }
 
-auto ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_format, QByteArray* response) -> NetJob::Ptr
+Task::Ptr ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_format, QByteArray* response)
 {
     auto* netJob = new NetJob(QString("Modrinth::GetCurrentVersions"), APPLICATION->network());
 
@@ -35,11 +35,11 @@ auto ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_format
     return netJob;
 }
 
-auto ModrinthAPI::latestVersion(QString hash,
-                                QString hash_format,
-                                std::optional<std::list<Version>> mcVersions,
-                                std::optional<ModLoaderTypes> loaders,
-                                QByteArray* response) -> NetJob::Ptr
+Task::Ptr ModrinthAPI::latestVersion(QString hash,
+                                     QString hash_format,
+                                     std::optional<std::list<Version>> mcVersions,
+                                     std::optional<ModLoaderTypes> loaders,
+                                     QByteArray* response)
 {
     auto* netJob = new NetJob(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
 
@@ -67,11 +67,11 @@ auto ModrinthAPI::latestVersion(QString hash,
     return netJob;
 }
 
-auto ModrinthAPI::latestVersions(const QStringList& hashes,
-                                 QString hash_format,
-                                 std::optional<std::list<Version>> mcVersions,
-                                 std::optional<ModLoaderTypes> loaders,
-                                 QByteArray* response) -> NetJob::Ptr
+Task::Ptr ModrinthAPI::latestVersions(const QStringList& hashes,
+                                      QString hash_format,
+                                      std::optional<std::list<Version>> mcVersions,
+                                      std::optional<ModLoaderTypes> loaders,
+                                      QByteArray* response)
 {
     auto* netJob = new NetJob(QString("Modrinth::GetLatestVersions"), APPLICATION->network());
 
@@ -101,14 +101,17 @@ auto ModrinthAPI::latestVersions(const QStringList& hashes,
     return netJob;
 }
 
-NetJob::Ptr ModrinthAPI::getProjects(QStringList addonIds, QByteArray* response) const
+Task::Ptr ModrinthAPI::getProjects(QStringList addonIds, QByteArray* response) const
 {
     auto netJob = new NetJob(QString("Modrinth::GetProjects"), APPLICATION->network());
     auto searchUrl = getMultipleModInfoURL(addonIds);
 
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
 
-    QObject::connect(netJob, &NetJob::finished, [response, netJob] { delete response; netJob->deleteLater(); });
+    QObject::connect(netJob, &NetJob::finished, [response, netJob] {
+        delete response;
+        netJob->deleteLater();
+    });
 
     return netJob;
 }

@@ -7,7 +7,7 @@
 
 #include "net/Upload.h"
 
-auto FlameAPI::matchFingerprints(const QList<uint>& fingerprints, QByteArray* response) -> NetJob::Ptr
+Task::Ptr FlameAPI::matchFingerprints(const QList<uint>& fingerprints, QByteArray* response)
 {
     auto* netJob = new NetJob(QString("Flame::MatchFingerprints"), APPLICATION->network());
 
@@ -167,7 +167,7 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
     return ver;
 }
 
-NetJob::Ptr FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const
+Task::Ptr FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const
 {
     auto* netJob = new NetJob(QString("Flame::GetProjects"), APPLICATION->network());
 
@@ -190,7 +190,7 @@ NetJob::Ptr FlameAPI::getProjects(QStringList addonIds, QByteArray* response) co
     return netJob;
 }
 
-NetJob::Ptr FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response) const
+Task::Ptr FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response) const
 {
     auto* netJob = new NetJob(QString("Flame::GetFiles"), APPLICATION->network());
 

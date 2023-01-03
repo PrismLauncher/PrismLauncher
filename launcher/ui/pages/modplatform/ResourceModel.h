@@ -80,7 +80,7 @@ class ResourceModel : public QAbstractListModel {
     /** Resets the model's data. */
     void clearData();
 
-    void runSearchJob(NetJob::Ptr);
+    void runSearchJob(Task::Ptr);
     void runInfoJob(Task::Ptr);
 
     [[nodiscard]] auto getCurrentSortingMethodByIndex() const -> std::optional<ResourceAPI::SortingMethod>;
@@ -111,7 +111,7 @@ class ResourceModel : public QAbstractListModel {
     std::unique_ptr<ResourceAPI> m_api;
 
     // Job for searching for new entries
-    shared_qobject_ptr<NetJob> m_current_search_job;
+    shared_qobject_ptr<Task> m_current_search_job;
     // Job for fetching versions and extra info on existing entries
     ConcurrentTask m_current_info_job;
 
