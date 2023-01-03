@@ -4,12 +4,12 @@
 
 class NetworkResourceAPI : public ResourceAPI {
    public:
-    NetJob::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const override;
+    Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const override;
 
-    NetJob::Ptr getProject(QString addonId, QByteArray* response) const override;
+    Task::Ptr getProject(QString addonId, QByteArray* response) const override;
 
-    NetJob::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const override;
-    NetJob::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const override;
+    Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const override;
+    Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const override;
 
    protected:
     [[nodiscard]] virtual auto getSearchURL(SearchArgs const& args) const -> std::optional<QString> = 0;

@@ -5,7 +5,7 @@
 
 #include "modplatform/ModIndex.h"
 
-NetJob::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallbacks&& callbacks) const
+Task::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallbacks&& callbacks) const
 {
     auto search_url_optional = getSearchURL(args);
     if (!search_url_optional.has_value()) {
@@ -50,7 +50,7 @@ NetJob::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallback
     return netJob;
 }
 
-NetJob::Ptr NetworkResourceAPI::getProjectInfo(ProjectInfoArgs&& args, ProjectInfoCallbacks&& callbacks) const
+Task::Ptr NetworkResourceAPI::getProjectInfo(ProjectInfoArgs&& args, ProjectInfoCallbacks&& callbacks) const
 {
     auto response = new QByteArray();
     auto job = getProject(args.pack.addonId.toString(), response);
@@ -71,7 +71,7 @@ NetJob::Ptr NetworkResourceAPI::getProjectInfo(ProjectInfoArgs&& args, ProjectIn
     return job;
 }
 
-NetJob::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, VersionSearchCallbacks&& callbacks) const
+Task::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, VersionSearchCallbacks&& callbacks) const
 {
     auto versions_url_optional = getVersionsURL(args);
     if (!versions_url_optional.has_value())
@@ -104,7 +104,7 @@ NetJob::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, Ver
     return netJob;
 }
 
-NetJob::Ptr NetworkResourceAPI::getProject(QString addonId, QByteArray* response) const
+Task::Ptr NetworkResourceAPI::getProject(QString addonId, QByteArray* response) const
 {
     auto project_url_optional = getInfoURL(addonId);
     if (!project_url_optional.has_value())

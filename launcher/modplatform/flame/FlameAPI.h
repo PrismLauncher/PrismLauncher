@@ -10,9 +10,9 @@ class FlameAPI : public NetworkResourceAPI {
 
     auto getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion;
 
-    NetJob::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
-    NetJob::Ptr matchFingerprints(const QList<uint>& fingerprints, QByteArray* response);
-    NetJob::Ptr getFiles(const QStringList& fileIds, QByteArray* response) const;
+    Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
+    Task::Ptr matchFingerprints(const QList<uint>& fingerprints, QByteArray* response);
+    Task::Ptr getFiles(const QStringList& fileIds, QByteArray* response) const;
 
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 

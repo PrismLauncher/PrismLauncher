@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include <QDebug>
 #include <QList>
 #include <QString>
 
@@ -44,7 +45,7 @@
 #include "../Version.h"
 
 #include "modplatform/ModIndex.h"
-#include "net/NetJob.h"
+#include "tasks/Task.h"
 
 /* Simple class with a common interface for interacting with APIs */
 class ResourceAPI {
@@ -113,28 +114,28 @@ class ResourceAPI {
     [[nodiscard]] virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
 
    public slots:
-    [[nodiscard]] virtual NetJob::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const
+    [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const
     {
         qWarning() << "TODO";
         return nullptr;
     }
-    [[nodiscard]] virtual NetJob::Ptr getProject(QString addonId, QByteArray* response) const
+    [[nodiscard]] virtual Task::Ptr getProject(QString addonId, QByteArray* response) const
     {
         qWarning() << "TODO";
         return nullptr;
     }
-    [[nodiscard]] virtual NetJob::Ptr getProjects(QStringList addonIds, QByteArray* response) const
+    [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const
     {
         qWarning() << "TODO";
         return nullptr;
     }
 
-    [[nodiscard]] virtual NetJob::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const
+    [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const
     {
         qWarning() << "TODO";
         return nullptr;
     }
-    [[nodiscard]] virtual NetJob::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
+    [[nodiscard]] virtual Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
     {
         qWarning() << "TODO";
         return nullptr;

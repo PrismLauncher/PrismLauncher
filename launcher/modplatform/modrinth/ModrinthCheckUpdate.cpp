@@ -175,7 +175,7 @@ void ModrinthCheckUpdate::executeTask()
     setStatus(tr("Waiting for the API response from Modrinth..."));
     setProgress(1, 3);
 
-    m_net_job = job.get();
+    m_net_job = qSharedPointerObjectCast<NetJob, Task>(job);
     job->start();
 
     lock.exec();

@@ -28,11 +28,11 @@ class EnsureMetadataTask : public Task {
 
    private:
     // FIXME: Move to their own namespace
-    auto modrinthVersionsTask() -> NetJob::Ptr;
-    auto modrinthProjectsTask() -> NetJob::Ptr;
+    auto modrinthVersionsTask() -> Task::Ptr;
+    auto modrinthProjectsTask() -> Task::Ptr;
 
-    auto flameVersionsTask() -> NetJob::Ptr;
-    auto flameProjectsTask() -> NetJob::Ptr;
+    auto flameVersionsTask() -> Task::Ptr;
+    auto flameProjectsTask() -> Task::Ptr;
 
     // Helpers
     enum class RemoveFromList {
@@ -61,5 +61,5 @@ class EnsureMetadataTask : public Task {
 
     QHash<QString, ModPlatform::IndexedVersion> m_temp_versions;
     ConcurrentTask* m_hashing_task;
-    NetJob* m_current_task;
+    Task::Ptr m_current_task;
 };
