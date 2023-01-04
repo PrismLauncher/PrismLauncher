@@ -40,6 +40,11 @@ class ThemeManager {
     void applyCurrentlySelectedTheme();
     void setApplicationTheme(const QString& name);
 
+    /// <summary>
+    /// Returns the cat based on selected cat and with events (Birthday, XMas, etc.)
+    /// </summary>
+    /// <param name="catName">Optional, if you need a specific cat.</param>
+    /// <returns></returns>
     static QString getCatImage(QString catName = "");
 
    private:

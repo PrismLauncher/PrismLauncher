@@ -143,7 +143,7 @@ QString ThemeManager::getCatImage(QString catName)
     QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
     QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
     QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
-    QString cat = catName == "" ? APPLICATION->settings()->get("BackgroundCat").toString() : catName;
+    QString cat = !catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString();
     if (std::abs(now.daysTo(xmas)) <= 4) {
         cat += "-xmas";
     } else if (std::abs(now.daysTo(halloween)) <= 4) {
