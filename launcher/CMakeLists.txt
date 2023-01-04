@@ -1126,6 +1126,10 @@ target_link_libraries(Launcher_logic
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Qml
+    Qt${QT_VERSION_MAJOR}::Quick
+    Qt${QT_VERSION_MAJOR}::QuickControls2
+    Qt${QT_VERSION_MAJOR}::QuickWidgets
     Qt${QT_VERSION_MAJOR}::Widgets
     ${Launcher_QT_LIBS}
 )
