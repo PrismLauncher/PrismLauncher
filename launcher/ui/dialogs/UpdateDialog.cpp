@@ -41,7 +41,7 @@
 #include <Json.h>
 
 #include "BuildConfig.h"
-#include "HoeDown.h"
+#include "Markdown.h"
 
 UpdateDialog::UpdateDialog(bool hasUpdate, QWidget *parent) : QDialog(parent), ui(new Ui::UpdateDialog)
 {
@@ -89,8 +89,7 @@ void UpdateDialog::loadChangelog()
 
 QString reprocessMarkdown(QByteArray markdown)
 {
-    HoeDown hoedown;
-    QString output = hoedown.process(markdown);
+    QString output = markdownToHTML(markdown);
 
     // HACK: easier than customizing hoedown
     output.replace(QRegularExpression("GH-([0-9]+)"), "<a href=\"https://github.com/PrismLauncher/PrismLauncher/issues/\\1\">GH-\\1</a>");

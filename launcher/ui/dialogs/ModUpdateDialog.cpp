@@ -7,6 +7,7 @@
 
 #include "FileSystem.h"
 #include "Json.h"
+#include "Markdown.h"
 
 #include "tasks/ConcurrentTask.h"
 
@@ -17,7 +18,6 @@
 #include "modplatform/flame/FlameCheckUpdate.h"
 #include "modplatform/modrinth/ModrinthCheckUpdate.h"
 
-#include <HoeDown.h>
 #include <QTextBrowser>
 #include <QTreeWidgetItem>
 
@@ -369,14 +369,7 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
     QString text = info.changelog;
     switch (info.provider) {
         case ModPlatform::Provider::MODRINTH: {
-            HoeDown h;
-            // HoeDown bug?: \n aren't converted to <br>
-            text = h.process(info.changelog.toUtf8());
-
-            // Don't convert if there's an HTML tag right after (Qt rendering weirdness)
-            text.remove(QRegularExpression("(\n+)(?=<)"));
-            text.replace('\n', "<br>");
-
+            text = markdownToHTML(info.changelog.toUtf8());
             break;
         }
         default:
