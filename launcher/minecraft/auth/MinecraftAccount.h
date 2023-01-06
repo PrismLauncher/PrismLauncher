@@ -173,6 +173,10 @@ public: /* queries */
         return data.canMigrateToMSA;
     }
 
+    bool isMojangOrMSA() const {
+        return data.type == AccountType::Mojang || data.type == AccountType::MSA;
+    }
+
     bool isMSA() const {
         return data.type == AccountType::MSA;
     }

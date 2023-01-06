@@ -122,8 +122,17 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
 
     // override/replace existing account with the same profileId
     auto profileId = account->profileId();
-    if(profileId.size()) {
-        auto existingAccount = findAccountByProfileId(profileId);
+    if(profileId.size() && account->isMojangOrMSA()) {
+        int existingAccount = -1;
+        for (int i = 0; i < count(); i++) {
+            MinecraftAccountPtr existing = at(i);
+            if (existing->profileId() == profileId &&
+                existing->isMojangOrMSA()) {
+                existingAccount = i;
+                break;
+            }
+        }
+
         if(existingAccount != -1) {
             qDebug() << "Replacing old account with a new one with the same profile ID!";
 
@@ -525,9 +534,6 @@ bool AccountList::loadV2(QJsonObject& root) {
             if(!profileId.size()) {
                 continue;
             }
-            if(findAccountByProfileId(profileId) != -1) {
-                continue;
-            }
             connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
             connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
             m_accounts.append(account);
@@ -553,12 +559,6 @@ bool AccountList::loadV3(QJsonObject& root) {
         MinecraftAccountPtr account = MinecraftAccount::loadFromJsonV3(accountObj);
         if (account.get() != nullptr)
         {
-            auto profileId = account->profileId();
-            if(profileId.size()) {
-                if(findAccountByProfileId(profileId) != -1) {
-                    continue;
-                }
-            }
             connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
             connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
             m_accounts.append(account);
