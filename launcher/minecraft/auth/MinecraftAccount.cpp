@@ -92,7 +92,7 @@ MinecraftAccountPtr MinecraftAccount::createFromUsernameCustomYggdrasil(
     const QString &customServicesServerUrl
 )
 {
-    MinecraftAccountPtr account = new MinecraftAccount();
+    auto account = makeShared<MinecraftAccount>();
     account->data.type = AccountType::CustomYggdrasil;
     account->data.yggdrasilToken.extra["userName"] = username;
     account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
