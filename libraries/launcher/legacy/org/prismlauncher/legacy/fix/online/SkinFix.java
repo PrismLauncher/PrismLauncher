@@ -1,4 +1,4 @@
-package org.prismlauncher.fix.online;
+package org.prismlauncher.legacy.fix.online;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
@@ -12,10 +12,8 @@ import java.net.URLConnection;
 
 import javax.imageio.ImageIO;
 
-import org.prismlauncher.utils.api.MojangApi;
-import org.prismlauncher.utils.api.Texture;
-import org.prismlauncher.utils.url.CustomUrlConnection;
-import org.prismlauncher.utils.url.UrlUtils;
+import org.prismlauncher.legacy.utils.api.*;
+import org.prismlauncher.legacy.utils.url.*;
 
 final class SkinFix {
 

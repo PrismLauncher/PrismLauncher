@@ -33,15 +33,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.utils.api;
+package org.prismlauncher.legacy.utils.api;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 
-import org.prismlauncher.utils.Base64;
-import org.prismlauncher.utils.JsonParser;
+import org.prismlauncher.legacy.utils.*;
 
 /**
  * Basic access to Mojang's Minecraft API.

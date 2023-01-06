@@ -33,29 +33,33 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.utils.api;
+package org.prismlauncher.legacy.fix.online;
 
+import java.io.IOException;
+import java.net.Proxy;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 
-/**
- * Represents a texture from the Mojang API.
- */
-public final class Texture {
+import org.prismlauncher.legacy.utils.url.UrlUtils;
 
-    private final URL url;
-    private final boolean slim;
+final class Handler extends URLStreamHandler {
 
-    public Texture(URL url, boolean slim) {
-        this.url = url;
-        this.slim = slim;
+    @Override
+    protected URLConnection openConnection(URL address) throws IOException {
+        return openConnection(address, null);
     }
 
-    public URL getUrl() {
-        return url;
-    }
+    @Override
+    protected URLConnection openConnection(URL address, Proxy proxy) throws IOException {
+        URLConnection result;
 
-    public boolean isSlim() {
-        return slim;
+        // try skin fix
+        result = SkinFix.openConnection(address, proxy);
+        if (result != null)
+            return result;
+
+        return UrlUtils.openConnection(address, proxy);
     }
 
 }

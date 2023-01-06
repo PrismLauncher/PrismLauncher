@@ -33,16 +33,47 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.fix;
+package org.prismlauncher.legacy.utils.url;
 
-import org.prismlauncher.fix.online.OnlineFixes;
-import org.prismlauncher.utils.Parameters;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 
-public final class Fixes {
+public class CustomUrlConnection extends HttpURLConnection {
 
-    public static void apply(Parameters params) {
-        if ("true".equalsIgnoreCase(params.getString("onlineFixes", null)))
-            OnlineFixes.apply();
+    private InputStream in;
+
+    public CustomUrlConnection(byte[] data) {
+        this(new ByteArrayInputStream(data));
+    }
+
+    public CustomUrlConnection(InputStream in) {
+        super(null);
+        this.in = in;
+    }
+
+    @Override
+    public void connect() throws IOException {
+        responseCode = 200;
+    }
+
+    @Override
+    public void disconnect() {
+        try {
+            in.close();
+        } catch (IOException e) {
+        }
+    }
+
+    @Override
+    public InputStream getInputStream() throws IOException {
+        return in;
+    }
+
+    @Override
+    public boolean usingProxy() {
+        return false;
     }
 
 }

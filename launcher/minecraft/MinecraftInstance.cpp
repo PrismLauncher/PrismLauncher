@@ -440,7 +440,7 @@ QStringList MinecraftInstance::javaArguments()
 
     args << "-Duser.language=en";
 
-    if (javaVersion.isModular() && traits().contains("legacyServices") && settings()->get("OnlineFixes").toBool())
+    if (javaVersion.isModular() && shouldApplyOnlineFixes())
         // allow reflective access to java.net - required by the skin fix
         args << "--add-opens"
              << "java.base/java.net=ALL-UNNAMED";
@@ -448,12 +448,18 @@ QStringList MinecraftInstance::javaArguments()
     return args;
 }
 
-QString MinecraftInstance::getLauncher() {
+QString MinecraftInstance::getLauncher()
+{
     // use legacy launcher if the traits are set
     if (traits().contains("legacyLaunch") || traits().contains("alphaLaunch"))
         return "legacy";
 
     return "standard";
+}
+
+bool MinecraftInstance::shouldApplyOnlineFixes()
+{
+    return traits().contains("legacyServices") && settings()->get("OnlineFixes").toBool();
 }
 
 QMap<QString, QString> MinecraftInstance::getVariables()
@@ -665,7 +671,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
         launchScript += "traits " + trait + "\n";
     }
 
-    if (profile->getTraits().contains("legacyServices") && settings()->get("OnlineFixes").toBool())
+    if (shouldApplyOnlineFixes())
         launchScript += "onlineFixes true\n";
 
     launchScript += "launcher " + getLauncher() + "\n";

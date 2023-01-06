@@ -33,7 +33,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.utils.url;
+package org.prismlauncher.legacy.utils.url;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;

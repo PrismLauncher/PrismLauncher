@@ -53,11 +53,15 @@
  *      limitations under the License.
  */
 
-package org.prismlauncher.launcher.impl.legacy;
+package org.prismlauncher.legacy;
 
+import java.applet.Applet;
 import java.io.File;
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
 
@@ -69,7 +73,7 @@ import org.prismlauncher.utils.logging.Log;
 /**
  * Used to launch old versions that support applets.
  */
-public final class LegacyLauncher extends AbstractLauncher {
+final class LegacyLauncher extends AbstractLauncher {
 
     private final String user, session;
     private final String title;
@@ -94,11 +98,9 @@ public final class LegacyLauncher extends AbstractLauncher {
     @Override
     public void launch() throws Throwable {
         Class<?> main = ClassLoader.getSystemClassLoader().loadClass(mainClassName);
-        Field gameDirField = ReflectionUtils.findMinecraftGameDirField(main);
+        Field gameDirField = findMinecraftGameDirField(main);
 
-        if (gameDirField == null)
-            Log.warning("Could not find Minecraft folder field");
-        else {
+        if (gameDirField != null) {
             gameDirField.setAccessible(true);
             gameDirField.set(null, new File(gameDir));
         }
@@ -107,7 +109,7 @@ public final class LegacyLauncher extends AbstractLauncher {
             System.setProperty("minecraft.applet.TargetDirectory", gameDir);
 
             try {
-                LegacyFrame window = new LegacyFrame(title, ReflectionUtils.createAppletClass(appletClass));
+                LegacyFrame window = new LegacyFrame(title, createAppletClass(appletClass));
 
                 window.start(user, session, width, height, maximize, serverAddress, serverPort,
                         gameArgs.contains("--demo"));
@@ -121,6 +123,39 @@ public final class LegacyLauncher extends AbstractLauncher {
         // in all versions that support applets, these are ignored
         MethodHandle method = ReflectionUtils.findMainMethod(main);
         method.invokeExact(gameArgs.toArray(new String[0]));
+    }
+
+    private static Applet createAppletClass(String clazz) throws Throwable {
+        Class<?> appletClass = ClassLoader.getSystemClassLoader().loadClass(clazz);
+
+        MethodHandle appletConstructor = MethodHandles.lookup().findConstructor(appletClass, MethodType.methodType(void.class));
+        return (Applet) appletConstructor.invoke();
+    }
+
+    private static Field findMinecraftGameDirField(Class<?> clazz) {
+        Log.debug("Resolving minecraft game directory field");
+
+        // search for private static File
+        for (Field field : clazz.getDeclaredFields()) {
+            if (field.getType() != File.class) {
+                continue;
+            }
+
+            int fieldModifiers = field.getModifiers();
+
+            if (!Modifier.isStatic(fieldModifiers))
+                continue;
+
+            if (!Modifier.isPrivate(fieldModifiers))
+                continue;
+
+            if (Modifier.isFinal(fieldModifiers))
+                continue;
+
+            return field;
+        }
+
+        return null;
     }
 
 }

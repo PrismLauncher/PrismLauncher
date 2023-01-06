@@ -52,7 +52,7 @@
  *      limitations under the License.
  */
 
-package org.prismlauncher.launcher.impl.legacy;
+package org.prismlauncher.legacy;
 
 import java.applet.Applet;
 import java.awt.Dimension;
@@ -74,7 +74,7 @@ import org.prismlauncher.utils.logging.Log;
 
 import net.minecraft.Launcher;
 
-public final class LegacyFrame extends JFrame {
+final class LegacyFrame extends JFrame {
 
     private static final long serialVersionUID = 1L;
 

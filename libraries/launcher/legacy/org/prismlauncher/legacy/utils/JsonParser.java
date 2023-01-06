@@ -33,7 +33,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.utils;
+package org.prismlauncher.legacy.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,8 +45,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.prismlauncher.exception.JsonParseException;
 
 /**
  * Single-file JSON parser to allow for usage in versions without GSON.

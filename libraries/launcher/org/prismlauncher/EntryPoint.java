@@ -59,10 +59,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 import org.prismlauncher.exception.ParseException;
-import org.prismlauncher.fix.Fixes;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.impl.StandardLauncher;
-import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
+import org.prismlauncher.legacy.LegacyProxy;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.logging.Log;
 
@@ -108,7 +107,7 @@ public final class EntryPoint {
         }
 
         try {
-            Fixes.apply(params);
+            LegacyProxy.applyOnlineFixes(params);
 
             Launcher launcher;
             String type = params.getString("launcher");
@@ -119,7 +118,7 @@ public final class EntryPoint {
                     break;
 
                 case "legacy":
-                    launcher = new LegacyLauncher(params);
+                    launcher = LegacyProxy.createLauncher(params);
                     break;
 
                 default:
