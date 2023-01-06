@@ -40,10 +40,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 
-import org.prismlauncher.legacy.utils.*;
+import org.prismlauncher.legacy.utils.Base64;
+import org.prismlauncher.legacy.utils.JsonParser;
 
 /**
- * Basic access to Mojang's Minecraft API.
+ * Basic wrapper for Mojang's Minecraft API.
  */
 @SuppressWarnings("unchecked")
 public final class MojangApi {
@@ -55,18 +56,18 @@ public final class MojangApi {
         }
     }
 
-    public static Texture getTexture(String player, String name) throws IOException {
+    public static Texture getTexture(String player, String id) throws IOException {
         Map<String, Object> map = getTextures(player);
 
         if (map != null) {
-            map = (Map<String, Object>) map.get(name);
+            map = (Map<String, Object>) map.get(id);
             if (map == null)
                 return null;
 
             URL url = new URL((String) map.get("url"));
             boolean slim = false;
 
-            if (name.equals("SKIN")) {
+            if (id.equals("SKIN")) {
                 map = (Map<String, Object>) map.get("metadata");
                 if (map != null && "slim".equals(map.get("model")))
                     slim = true;

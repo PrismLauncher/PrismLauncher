@@ -47,7 +47,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Single-file JSON parser to allow for usage in versions without GSON.
+ * A lightweight portable JSON parser used instead of GSON since it is not
+ * available in a lot of versions.
  */
 public final class JsonParser {
 
@@ -55,15 +56,15 @@ public final class JsonParser {
     private char[] buffer;
     private int pos, length;
 
-    public static Object parse(String in) throws JsonParseException, IOException {
+    public static Object parse(String in) throws IOException {
         return parse(new StringReader(in));
     }
 
-    public static Object parse(InputStream in) throws JsonParseException, IOException {
+    public static Object parse(InputStream in) throws IOException {
         return parse(new InputStreamReader(in, StandardCharsets.UTF_8));
     }
 
-    public static Object parse(Reader in) throws JsonParseException, IOException {
+    public static Object parse(Reader in) throws IOException {
         return new JsonParser(in).readSingleValue();
     }
 
@@ -336,6 +337,7 @@ public final class JsonParser {
         if (character() == '0') {
             result.append((char) character());
             read();
+
             if (isDigit())
                 throw new JsonParseException("Found superfluous leading zero");
         } else if (!isDigit())
@@ -395,11 +397,10 @@ public final class JsonParser {
             if (read() == 'r' && read() == 'u' && read() == 'e') {
                 return true;
             }
-        } else if (character() == 'f') {
-            if (read() == 'a' && read() == 'l' && read() == 's' && read() == 'e') {
-                return false;
-            }
+        } else if (character() == 'f' && read() == 'a' && read() == 'l' && read() == 's' && read() == 'e') {
+            return false;
         }
+
         return null;
     }
 

@@ -71,7 +71,7 @@ import org.prismlauncher.utils.ReflectionUtils;
 import org.prismlauncher.utils.logging.Log;
 
 /**
- * Used to launch old versions that support applets.
+ * Used to launch old versions which support applets.
  */
 final class LegacyLauncher extends AbstractLauncher {
 
@@ -119,8 +119,8 @@ final class LegacyLauncher extends AbstractLauncher {
             }
         }
 
-        // find and invoke the main method, this time without size parameters
-        // in all versions that support applets, these are ignored
+        // find and invoke the main method, this time without size parameters - in all
+        // versions that support applets, these are ignored
         MethodHandle method = ReflectionUtils.findMainMethod(main);
         method.invokeExact(gameArgs.toArray(new String[0]));
     }
@@ -128,18 +128,16 @@ final class LegacyLauncher extends AbstractLauncher {
     private static Applet createAppletClass(String clazz) throws Throwable {
         Class<?> appletClass = ClassLoader.getSystemClassLoader().loadClass(clazz);
 
-        MethodHandle appletConstructor = MethodHandles.lookup().findConstructor(appletClass, MethodType.methodType(void.class));
+        MethodHandle appletConstructor = MethodHandles.lookup().findConstructor(appletClass,
+                MethodType.methodType(void.class));
         return (Applet) appletConstructor.invoke();
     }
 
     private static Field findMinecraftGameDirField(Class<?> clazz) {
-        Log.debug("Resolving minecraft game directory field");
-
         // search for private static File
         for (Field field : clazz.getDeclaredFields()) {
-            if (field.getType() != File.class) {
+            if (field.getType() != File.class)
                 continue;
-            }
 
             int fieldModifiers = field.getModifiers();
 

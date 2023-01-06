@@ -62,12 +62,12 @@ public final class OnlineFixes implements URLStreamHandlerFactory {
             return;
         }
 
-    	try {
+        try {
             URL.setURLStreamHandlerFactory(new OnlineFixes());
-    	} catch (Error e) {
+        } catch (Error e) {
             Log.warning("Cannot apply skin fix: URLStreamHandlerFactory is already set");
-			Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
-    	}
+            Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
+        }
     }
 
     @Override

@@ -4,6 +4,7 @@ import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.legacy.fix.online.OnlineFixes;
 import org.prismlauncher.utils.Parameters;
 
+// implementation of LegacyProxy
 public final class LegacyProxy {
 
     public static Launcher createLauncher(Parameters params) {

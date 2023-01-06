@@ -12,8 +12,10 @@ import java.net.URLConnection;
 
 import javax.imageio.ImageIO;
 
-import org.prismlauncher.legacy.utils.api.*;
-import org.prismlauncher.legacy.utils.url.*;
+import org.prismlauncher.legacy.utils.api.MojangApi;
+import org.prismlauncher.legacy.utils.api.Texture;
+import org.prismlauncher.legacy.utils.url.CustomUrlConnection;
+import org.prismlauncher.legacy.utils.url.UrlUtils;
 
 final class SkinFix {
 
@@ -25,7 +27,8 @@ final class SkinFix {
 
         String capeOwner = findCapeOwner(address);
         if (capeOwner != null) {
-            // since we do not need to process the image, open a direct connection bypassing Handler
+            // since we do not need to process the image, open a direct connection bypassing
+            // Handler
             Texture texture = MojangApi.getTexture(MojangApi.getUuid(capeOwner), "CAPE");
             if (texture == null)
                 return null;
@@ -45,7 +48,7 @@ final class SkinFix {
         try (InputStream in = connection.getInputStream()) {
             // thank you craftycodie!
             // this is heavily based on
-            // https://github.com/Mojang/LegacyLauncher/pull/33/files#diff-b61023785a9260651ca0a223573ea9acb5be5eec478bff626dafb7abe13ffebaR99
+            // https://github.com/craftycodie/MineOnline/blob/4f4f86f9d051e0a6fd7ff0b95b2a05f7437683d7/src/main/java/gg/codie/mineonline/gui/textures/TextureHelper.java#L17
             BufferedImage image = ImageIO.read(in);
             Graphics2D graphics = image.createGraphics();
             graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
@@ -59,7 +62,7 @@ final class SkinFix {
             }
 
             if (texture.isSlim()) {
-                // convert slim to wide
+                // convert slim to classic
                 subimage = image.getSubimage(45, 16, 9, 16);
                 graphics.drawImage(subimage, 46, 16, null);
 
@@ -72,7 +75,7 @@ final class SkinFix {
 
             graphics.dispose();
 
-            // crop the image
+            // crop the image - old versions disregard all secondary layers besides the hat
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             image = image.getSubimage(0, 0, 64, 32);
             ImageIO.write(image, "png", out);
