@@ -601,6 +601,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
+        m_settings->registerSetting("LoaderSyncEnabled", true);
 
         // Minecraft offline player name
         m_settings->registerSetting("LastOfflinePlayerName", "");

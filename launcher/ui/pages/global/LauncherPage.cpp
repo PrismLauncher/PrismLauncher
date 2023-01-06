@@ -161,8 +161,8 @@ void LauncherPage::on_instDirBrowseBtn_clicked()
             if (result == QMessageBox::Ok)
             {
                 ui->instDirTextBox->setText(cooked_dir);
-            } 
-        } 
+            }
+        }
         else
         {
             ui->instDirTextBox->setText(cooked_dir);
@@ -385,6 +385,7 @@ void LauncherPage::applySettings()
 
     // Mods
     s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
+    s->set("LoaderSyncEnabled", ui->syncLoaderBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {
@@ -403,17 +404,17 @@ void LauncherPage::loadSettings()
     m_currentUpdateChannel = s->get("UpdateChannel").toString();
     //FIXME: make generic
     auto theme = s->get("IconTheme").toString();
-    QStringList iconThemeOptions{"pe_colored", 
-                                 "pe_light", 
-                                 "pe_dark", 
-                                 "pe_blue", 
-                                 "breeze_light", 
-                                 "breeze_dark", 
-                                 "OSX", 
-                                 "iOS", 
-                                 "flat", 
-                                 "flat_white", 
-                                 "multimc", 
+    QStringList iconThemeOptions{"pe_colored",
+                                 "pe_light",
+                                 "pe_dark",
+                                 "pe_blue",
+                                 "breeze_light",
+                                 "breeze_dark",
+                                 "OSX",
+                                 "iOS",
+                                 "flat",
+                                 "flat_white",
+                                 "multimc",
                                  "custom"};
     ui->themeComboBox->setCurrentIndex(iconThemeOptions.indexOf(theme));
 
@@ -486,6 +487,8 @@ void LauncherPage::loadSettings()
     // Mods
     ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
+
+    ui->syncLoaderBtn->setChecked(s->get("LoaderSyncEnabled").toBool());
 }
 
 void LauncherPage::refreshFontPreview()

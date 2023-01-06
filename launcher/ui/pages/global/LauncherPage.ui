@@ -183,6 +183,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="syncLoaderBtn">
+            <property name="toolTip">
+             <string>When the game version is updated, update the mod loader too.</string>
+            </property>
+            <property name="text">
+             <string>Update loader version with game?</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

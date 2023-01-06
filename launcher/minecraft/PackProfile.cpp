@@ -45,6 +45,7 @@
 #include <QUuid>
 #include <QTimer>
 
+#include "Application.h"
 #include "Exception.h"
 #include "meta/VersionList.h"
 #include "minecraft/OneSixVersionFormat.h"
@@ -1133,6 +1134,9 @@ static BaseVersion* pickBest(Component* component, const QString& gameVersion)
 
 void PackProfile::updateLoaderVersions()
 {
+    if (!APPLICATION->settings()->get("LoaderSyncEnabled").toBool())
+        return;
+
     const QString gameVersion = getComponentVersion("net.minecraft");
     updateLoaderVersion("net.fabricmc.intermediary", gameVersion);
     updateLoaderVersion("org.quiltmc.hashed", gameVersion);
