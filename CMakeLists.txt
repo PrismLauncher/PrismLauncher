@@ -266,6 +266,9 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
 
     # Find ghc_filesystem
     find_package(ghc_filesystem QUIET)
+
+    # Find cmark
+    find_package(cmark QUIET)
 endif()
 
 include(ECMQtDeclareLoggingCategory)
@@ -406,6 +409,16 @@ if(NOT tomlplusplus_FOUND)
     add_subdirectory(libraries/tomlplusplus) # toml parser
 else()
     message(STATUS "Using system tomlplusplus")
+endif()
+if(NOT cmark_FOUND)
+    message(STATUS "Using bundled cmark")
+    set(CMARK_STATIC ON CACHE BOOL "Build static libcmark library" FORCE)
+    set(CMARK_SHARED OFF CACHE BOOL "Build shared libcmark library" FORCE)
+    set(CMARK_TESTS OFF CACHE BOOL "Build cmark tests and enable testing" FORCE)
+    add_subdirectory(libraries/cmark EXCLUDE_FROM_ALL) # Markdown parser
+    add_library(cmark::cmark ALIAS cmark_static)
+else()
+    message(STATUS "Using system cmark")
 endif()
 add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too much
 add_subdirectory(libraries/gamemode)

@@ -1043,7 +1043,7 @@ target_link_libraries(Launcher_logic
 )
 target_link_libraries(Launcher_logic
     QuaZip::QuaZip
-    cmark
+    cmark::cmark
     LocalPeer
     Launcher_rainbow
 )
