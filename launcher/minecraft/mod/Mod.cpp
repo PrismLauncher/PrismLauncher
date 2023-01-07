@@ -43,6 +43,7 @@
 
 #include "MetadataHandler.h"
 #include "Version.h"
+#include "minecraft/mod/ModDetails.h"
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
@@ -68,6 +69,10 @@ void Mod::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
         setStatus(ModStatus::Installed);
 
     m_local_details.metadata = metadata;
+}
+
+void Mod::setDetails(const ModDetails& details) {
+    m_local_details = details;
 }
 
 std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
@@ -203,4 +208,9 @@ auto Mod::provider() const -> std::optional<QString>
     if (metadata())
         return ProviderCaps.readableName(metadata()->provider);
     return {};
+}
+
+bool Mod::valid() const
+{
+    return !m_local_details.mod_id.isEmpty();
 }

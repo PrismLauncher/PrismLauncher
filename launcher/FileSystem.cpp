@@ -214,6 +214,22 @@ bool copy::operator()(const QString& offset, bool dryRun)
     return err.value() == 0;
 }
 
+bool move(const QString& source, const QString& dest)
+{
+    std::error_code err;
+
+    ensureFilePathExists(dest);
+    fs::rename(StringUtils::toStdString(source), StringUtils::toStdString(dest), err);
+
+    if (err) {
+        qWarning() << "Failed to move file:" << QString::fromStdString(err.message());
+        qDebug() << "Source file:" << source;
+        qDebug() << "Destination file:" << dest;
+    }
+
+    return err.value() == 0;
+}
+
 bool deletePath(QString path)
 {
     std::error_code err;

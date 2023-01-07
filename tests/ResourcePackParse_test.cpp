@@ -35,10 +35,11 @@ class ResourcePackParseTest : public QObject {
         QString zip_rp = FS::PathCombine(source, "test_resource_pack_idk.zip");
         ResourcePack pack { QFileInfo(zip_rp) };
 
-        ResourcePackUtils::processZIP(pack);
+        bool valid = ResourcePackUtils::processZIP(pack, ResourcePackUtils::ProcessingLevel::BasicInfoOnly);
 
         QVERIFY(pack.packFormat() == 3);
         QVERIFY(pack.description() == "um dois, feijão com arroz, três quatro, feijão no prato, cinco seis, café inglês, sete oito, comer biscoito, nove dez comer pastéis!!");
+        QVERIFY(valid == true);
     }
 
     void test_parseFolder()
@@ -48,10 +49,11 @@ class ResourcePackParseTest : public QObject {
         QString folder_rp = FS::PathCombine(source, "test_folder");
         ResourcePack pack { QFileInfo(folder_rp) };
 
-        ResourcePackUtils::processFolder(pack);
+        bool valid = ResourcePackUtils::processFolder(pack, ResourcePackUtils::ProcessingLevel::BasicInfoOnly);
 
         QVERIFY(pack.packFormat() == 1);
         QVERIFY(pack.description() == "Some resource pack maybe");
+        QVERIFY(valid == true);
     }
 
     void test_parseFolder2()
@@ -61,10 +63,11 @@ class ResourcePackParseTest : public QObject {
         QString folder_rp = FS::PathCombine(source, "another_test_folder");
         ResourcePack pack { QFileInfo(folder_rp) };
 
-        ResourcePackUtils::process(pack);
+        bool valid = ResourcePackUtils::process(pack, ResourcePackUtils::ProcessingLevel::BasicInfoOnly);
 
         QVERIFY(pack.packFormat() == 6);
         QVERIFY(pack.description() == "o quartel pegou fogo, policia deu sinal, acode acode acode a bandeira nacional");
+        QVERIFY(valid == false); // no assets dir
     }
 };
 

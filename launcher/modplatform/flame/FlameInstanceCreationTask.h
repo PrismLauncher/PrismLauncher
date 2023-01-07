@@ -77,6 +77,7 @@ class FlameCreationTask final : public InstanceCreationTask {
     void idResolverSucceeded(QEventLoop&);
     void setupDownloadJob(QEventLoop&);
     void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
+    void validateZIPResouces();
 
    private:
     QWidget* m_parent = nullptr;
@@ -89,6 +90,8 @@ class FlameCreationTask final : public InstanceCreationTask {
     NetJob::Ptr m_files_job = nullptr;
 
     QString m_managed_id, m_managed_version_id;
+
+    QList<std::pair<QString, QString>> m_ZIP_resources;
 
     std::optional<InstancePtr> m_instance;
 };

@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: 2022 Rachel Powers <508861+Ryex@users.noreply.github.com>
+//
 // SPDX-License-Identifier: GPL-3.0-only
+
 /*
- *  PolyMC - Minecraft Launcher
- *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,30 +24,30 @@
 #include <QDebug>
 #include <QObject>
 
-#include "minecraft/mod/TexturePack.h"
+#include "minecraft/mod/DataPack.h"
 
 #include "tasks/Task.h"
 
-namespace TexturePackUtils {
+namespace DataPackUtils {
 
 enum class ProcessingLevel { Full, BasicInfoOnly };
 
-bool process(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full);
+bool process(DataPack& pack, ProcessingLevel level = ProcessingLevel::Full);
 
-bool processZIP(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full);
-bool processFolder(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full);
+bool processZIP(DataPack& pack, ProcessingLevel level = ProcessingLevel::Full);
+bool processFolder(DataPack& pack, ProcessingLevel level = ProcessingLevel::Full);
 
-bool processPackTXT(TexturePack& pack, QByteArray&& raw_data);
-bool processPackPNG(TexturePack& pack, QByteArray&& raw_data);
+bool processMCMeta(DataPack& pack, QByteArray&& raw_data);
 
-/** Checks whether a file is valid as a texture pack or not. */
+/** Checks whether a file is valid as a data pack or not. */
 bool validate(QFileInfo file);
-}  // namespace TexturePackUtils
 
-class LocalTexturePackParseTask : public Task {
+}  // namespace DataPackUtils
+
+class LocalDataPackParseTask : public Task {
     Q_OBJECT
    public:
-    LocalTexturePackParseTask(int token, TexturePack& rp);
+    LocalDataPackParseTask(int token, DataPack& dp);
 
     [[nodiscard]] bool canAbort() const override { return true; }
     bool abort() override;
@@ -57,7 +59,7 @@ class LocalTexturePackParseTask : public Task {
    private:
     int m_token;
 
-    TexturePack& m_texture_pack;
+    DataPack& m_data_pack;
 
     bool m_aborted = false;
 };
