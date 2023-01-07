@@ -386,6 +386,11 @@
               <string>Rory ID 11 (flat edition, drawn by Ashtaka)</string>
              </property>
             </item>
+            <item>
+              <property name="text">
+                <string>Teawie (drawn by SympathyTea)</string>
+              </property>
+            </item>
            </widget>
           </item>
          </layout>
