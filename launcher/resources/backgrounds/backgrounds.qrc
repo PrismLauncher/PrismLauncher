@@ -14,5 +14,6 @@
         <file alias="rory-flat-bday">rory-flat-bday.png</file>
         <file alias="rory-flat-spooky">rory-flat-spooky.png</file>
         <file alias="teawie">teawie.png</file>
+        <file alias="teawie-spooky">teawie-spooky.png</file>
     </qresource>
 </RCC>
