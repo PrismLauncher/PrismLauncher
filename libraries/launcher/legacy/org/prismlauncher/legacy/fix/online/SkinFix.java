@@ -100,6 +100,9 @@ final class SkinFix {
     private static String findCapeOwner(URL address) {
         switch (address.getHost()) {
             case "www.minecraft.net":
+                if (!address.getPath().equals("/cloak/get.jsp"))
+                    return null;
+                
                 return stripIfPrefixed(address.getQuery(), "user=");
 
             case "s3.amazonaws.com":
