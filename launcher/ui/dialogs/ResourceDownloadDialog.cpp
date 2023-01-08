@@ -118,7 +118,8 @@ void ResourceDownloadDialog::confirm()
     confirm_dialog->retranslateUi(resourcesString());
 
     for (auto& task : keys) {
-        confirm_dialog->appendResource({ task, m_selected.find(task).value()->getFilename() });
+        auto selected = m_selected.constFind(task).value();
+        confirm_dialog->appendResource({ task, selected->getFilename(), selected->getCustomPath() });
     }
 
     if (confirm_dialog->exec()) {

@@ -32,6 +32,7 @@ class ResourceDownloadTask : public SequentialTask {
 public:
     explicit ResourceDownloadTask(ModPlatform::IndexedPack pack, ModPlatform::IndexedVersion version, const std::shared_ptr<ResourceFolderModel> packs, bool is_indexed = true);
     const QString& getFilename() const { return m_pack_version.fileName; }
+    const QString& getCustomPath() const { return m_pack_version.custom_target_folder; }
     const QVariant& getVersionID() const { return m_pack_version.fileId; }
 
 private:
@@ -43,9 +44,7 @@ private:
     LocalModUpdateTask::Ptr m_update_task;
 
     void downloadProgressChanged(qint64 current, qint64 total);
-
     void downloadFailed(QString reason);
-
     void downloadSucceeded();
 
     std::tuple<QString, QString> to_delete {"", ""};

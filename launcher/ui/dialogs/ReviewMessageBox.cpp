@@ -1,6 +1,8 @@
 #include "ReviewMessageBox.h"
 #include "ui_ReviewMessageBox.h"
 
+#include "Application.h"
+
 #include <QPushButton>
 
 ReviewMessageBox::ReviewMessageBox(QWidget* parent, QString const& title, QString const& icon)
@@ -10,6 +12,10 @@ ReviewMessageBox::ReviewMessageBox(QWidget* parent, QString const& title, QStrin
 
     auto back_button = ui->buttonBox->button(QDialogButtonBox::Cancel);
     back_button->setText(tr("Back"));
+
+    ui->modTreeWidget->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->modTreeWidget->header()->setStretchLastSection(false);
+    ui->modTreeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ReviewMessageBox::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ReviewMessageBox::reject);
@@ -35,6 +41,16 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
     filenameItem->setText(0, tr("Filename: %1").arg(info.filename));
 
     itemTop->insertChildren(0, { filenameItem });
+
+    if (!info.custom_file_path.isEmpty()) {
+        auto customPathItem = new QTreeWidgetItem(itemTop);
+        customPathItem->setText(0, tr("This download will be placed in: %1").arg(info.custom_file_path));
+
+        itemTop->insertChildren(1, { customPathItem });
+
+        itemTop->setIcon(1, QIcon(APPLICATION->getThemedIcon("status-yellow")));
+        itemTop->setToolTip(1, tr("This file will be downloaded to a folder location different from the default, possibly due to its loader requiring it."));
+    }
 
     ui->modTreeWidget->addTopLevelItem(itemTop);
 }
