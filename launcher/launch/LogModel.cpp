@@ -16,51 +16,50 @@ int LogModel::rowCount(const QModelIndex &parent) const
 QVariant LogModel::data(const QModelIndex &index, int role) const
 {
     if (index.row() < 0 || index.row() >= m_numLines)
-        return QVariant();
+        return {};
 
     auto row = index.row();
     auto realRow = (row + m_firstLine) % m_maxLines;
-    if (role == Qt::DisplayRole || role == Qt::EditRole)
-    {
-        return m_content[realRow].line;
-    }
-    if(role == LevelRole)
-    {
-        return m_content[realRow].level;
-    }
 
-    return QVariant();
+    if (role == Qt::DisplayRole || role == Qt::EditRole)
+        return m_content.at(realRow).line;
+    if (role == LevelRole)
+        return m_content.at(realRow).level;
+
+    return {};
 }
 
 void LogModel::append(MessageLevel::Enum level, QString line)
 {
     if(m_suspended)
-    {
         return;
-    }
-    int lineNum = (m_firstLine + m_numLines) % m_maxLines;
+
     // overflow
-    if(m_numLines == m_maxLines)
-    {
-        if(m_stopOnOverflow)
-        {
+    if(m_numLines == m_maxLines) {
+        if(m_stopOnOverflow) {
             // nothing more to do, the buffer is full
             return;
         }
+
         beginRemoveRows(QModelIndex(), 0, 0);
         m_firstLine = (m_firstLine + 1) % m_maxLines;
-        m_numLines --;
+        m_numLines--;
         endRemoveRows();
-    }
-    else if (m_numLines == m_maxLines - 1 && m_stopOnOverflow)
-    {
+    } else if (m_numLines == m_maxLines - 1 && m_stopOnOverflow) {
         level = MessageLevel::Fatal;
         line = m_overflowMessage;
     }
+
+    // If the level is still undetermined, try to guess it.
+    if (level == MessageLevel::StdErr || level == MessageLevel::StdOut || level == MessageLevel::Unknown)
+        level = MessageLevel::guessLevel(line, level);
+
+    int lineNum = (m_firstLine + m_numLines) % m_maxLines;
+    entry line_entry { line, level };
+
     beginInsertRows(QModelIndex(), m_numLines, m_numLines);
-    m_numLines ++;
-    m_content[lineNum].level = level;
-    m_content[lineNum].line = line;
+    m_content[lineNum] = line_entry;
+    m_numLines++;
     endInsertRows();
 }
 
