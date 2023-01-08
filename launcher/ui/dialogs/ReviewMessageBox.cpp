@@ -55,3 +55,11 @@ auto ReviewMessageBox::deselectedResources() -> QStringList
 
     return list;
 }
+
+void ReviewMessageBox::retranslateUi(QString resources_name)
+{
+    setWindowTitle(tr("Confirm %1 selection").arg(resources_name));
+
+    ui->explainLabel->setText(tr("You're about to download the following %1:").arg(resources_name));
+    ui->onlyCheckedLabel->setText(tr("Only %1 with a check will be downloaded!").arg(resources_name));
+}

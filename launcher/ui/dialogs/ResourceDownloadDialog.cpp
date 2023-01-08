@@ -99,7 +99,7 @@ void ResourceDownloadDialog::initializeContainer()
 void ResourceDownloadDialog::connectButtons()
 {
     auto OkButton = m_buttons.button(QDialogButtonBox::Ok);
-    OkButton->setToolTip(tr("Opens a new popup to review your selected %1 and confirm your selection. Shortcut: Ctrl+Return").arg(resourceString()));
+    OkButton->setToolTip(tr("Opens a new popup to review your selected %1 and confirm your selection. Shortcut: Ctrl+Return").arg(resourcesString()));
     connect(OkButton, &QPushButton::clicked, this, &ResourceDownloadDialog::confirm);
 
     auto CancelButton = m_buttons.button(QDialogButtonBox::Cancel);
@@ -114,7 +114,8 @@ void ResourceDownloadDialog::confirm()
     auto keys = m_selected.keys();
     keys.sort(Qt::CaseInsensitive);
 
-    auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourceString()));
+    auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
+    confirm_dialog->retranslateUi(resourcesString());
 
     for (auto& task : keys) {
         confirm_dialog->appendResource({ task, m_selected.find(task).value()->getFilename() });

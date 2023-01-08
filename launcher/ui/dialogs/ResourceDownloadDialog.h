@@ -52,9 +52,9 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     void connectButtons();
 
     //: String that gets appended to the download dialog title ("Download " + resourcesString())
-    [[nodiscard]] virtual QString resourceString() const { return tr("resources"); }
+    [[nodiscard]] virtual QString resourcesString() const { return tr("resources"); }
 
-    QString dialogTitle() override { return tr("Download %1").arg(resourceString()); };
+    QString dialogTitle() override { return tr("Download %1").arg(resourcesString()); };
 
     bool selectPage(QString pageId);
     ResourcePage* getSelectedPage();
@@ -99,7 +99,7 @@ class ModDownloadDialog final : public ResourceDownloadDialog {
     ~ModDownloadDialog() override = default;
 
     //: String that gets appended to the mod download dialog title ("Download " + resourcesString())
-    [[nodiscard]] QString resourceString() const override { return tr("mods"); }
+    [[nodiscard]] QString resourcesString() const override { return tr("mods"); }
     [[nodiscard]] QString geometrySaveKey() const override { return "ModDownloadGeometry"; }
 
     QList<BasePage*> getPages() override;
