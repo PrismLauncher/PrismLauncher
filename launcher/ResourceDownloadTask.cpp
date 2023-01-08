@@ -40,7 +40,17 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack pack,
     m_filesNetJob.reset(new NetJob(tr("Resource download"), APPLICATION->network()));
     m_filesNetJob->setStatus(tr("Downloading resource:\n%1").arg(m_pack_version.downloadUrl));
 
-    m_filesNetJob->addNetAction(Net::Download::makeFile(m_pack_version.downloadUrl, m_pack_model->dir().absoluteFilePath(getFilename())));
+    QDir dir { m_pack_model->dir() };
+    {
+        // FIXME: Make this more generic. May require adding additional info to IndexedVersion,
+        //        or adquiring a reference to the base instance.
+        if (!m_pack_version.custom_target_folder.isEmpty()) {
+            dir.cdUp();
+            dir.cd(m_pack_version.custom_target_folder);
+        }
+    }
+
+    m_filesNetJob->addNetAction(Net::Download::makeFile(m_pack_version.downloadUrl, dir.absoluteFilePath(getFilename())));
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &ResourceDownloadTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &ResourceDownloadTask::downloadProgressChanged);
     connect(m_filesNetJob.get(), &NetJob::failed, this, &ResourceDownloadTask::downloadFailed);
