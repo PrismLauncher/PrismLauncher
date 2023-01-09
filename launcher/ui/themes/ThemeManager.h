@@ -40,12 +40,13 @@ class ThemeManager {
     void applyCurrentlySelectedTheme();
     void setApplicationTheme(const QString& name);
 
+    static QString getCatImage(QString catName = "");
+
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     MainWindow* m_mainWindow;
-    bool m_firstThemeInitialized;
 
-    void InitializeThemes();
-    QString AddTheme(std::unique_ptr<ITheme> theme);
-    ITheme* GetTheme(QString themeId);
+    void initializeThemes();
+    QString addTheme(std::unique_ptr<ITheme> theme);
+    ITheme* getTheme(QString themeId);
 };

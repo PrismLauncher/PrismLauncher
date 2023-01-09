@@ -24,22 +24,20 @@ namespace Ui {
 class ThemeWizardPage;
 }
 
-class ThemeWizardPage : public BaseWizardPage
-{
+class ThemeWizardPage : public BaseWizardPage {
     Q_OBJECT
 
-public:
-    explicit ThemeWizardPage(QWidget *parent = nullptr);
+   public:
+    explicit ThemeWizardPage(QWidget* parent = nullptr);
     ~ThemeWizardPage();
 
-    void initializePage() override;
-    bool validatePage() override;
+    bool validatePage() override { return true; };
     void retranslate() override;
 
-private slots:
+   private slots:
     void updateIcons();
     void updateCat();
 
-private:
-    Ui::ThemeWizardPage *ui;
+   private:
+    Ui::ThemeWizardPage* ui;
 };

@@ -498,7 +498,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Theming
         m_settings->registerSetting("IconTheme", QString("pe_colored"));
-        m_settings->registerSetting("ApplicationTheme", QString("system"));
+        m_settings->registerSetting("ApplicationTheme");
         m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
         // Remembered state
@@ -890,8 +890,8 @@ bool Application::createSetupWizard()
         return false;
     }();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
-    bool themeInterventionRequired = settings()->get("ApplicationTheme") != "";
-    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired;
+    bool themeInterventionRequired = settings()->get("ApplicationTheme") == "";
+    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired;
 
     if(wizardRequired)
     {
@@ -913,6 +913,7 @@ bool Application::createSetupWizard()
 
         if (themeInterventionRequired)
         {
+            settings()->set("ApplicationTheme", QString("system")); // set default theme after going into theme wizard
             m_setupWizard->addPage(new ThemeWizardPage(m_setupWizard));
         }
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
