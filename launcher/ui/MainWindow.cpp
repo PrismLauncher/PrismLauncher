@@ -698,7 +698,7 @@ void MainWindow::repopulateAccountsMenu()
 
     if (accounts->count() <= 0)
     {
-        ui->actionNoAccountsAdded->setText( "No accounts added!");
+        ui->actionNoAccountsAdded->setText(tr("No accounts added!"));
         ui->actionNoAccountsAdded->setEnabled(false);
         accountMenu->addAction(ui->actionNoAccountsAdded);
         ui->accountsMenu->addAction(ui->actionNoAccountsAdded);
