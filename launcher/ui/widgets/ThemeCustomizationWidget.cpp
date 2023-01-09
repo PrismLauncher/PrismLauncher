@@ -72,10 +72,11 @@ void ThemeCustomizationWidget::showFeatures(ThemeFields features) {
 
 void ThemeCustomizationWidget::applyIconTheme(int index) {
     auto settings = APPLICATION->settings();
-    auto original = settings->get("IconTheme").toString();
-    settings->set("IconTheme", m_iconThemeOptions[index].first);
+    auto originalIconTheme = settings->get("IconTheme").toString();
+    auto& newIconTheme = m_iconThemeOptions[index].first;
+    settings->set("IconTheme", newIconTheme);
 
-    if (original != settings->get("IconTheme")) {
+    if (originalIconTheme != newIconTheme) {
         APPLICATION->applyCurrentlySelectedTheme();
     }
 
@@ -113,7 +114,8 @@ void ThemeCustomizationWidget::loadSettings()
 
     auto iconTheme = settings->get("IconTheme").toString();
     for (auto& iconThemeFromList : m_iconThemeOptions) {
-        ui->iconsComboBox->addItem(QIcon(QString(":/icons/%1/scalable/settings").arg(iconThemeFromList.first)), iconThemeFromList.second);
+        QIcon iconForComboBox = QIcon(QString(":/icons/%1/scalable/settings").arg(iconThemeFromList.first));
+        ui->iconsComboBox->addItem(iconForComboBox, iconThemeFromList.second);
         if (iconTheme == iconThemeFromList.first) {
             ui->iconsComboBox->setCurrentIndex(ui->iconsComboBox->count() - 1);
         }
@@ -134,8 +136,8 @@ void ThemeCustomizationWidget::loadSettings()
 
     auto cat = settings->get("BackgroundCat").toString();
     for (auto& catFromList : m_catOptions) {
-        ui->backgroundCatComboBox->addItem(QIcon(QString(":/backgrounds/%1").arg(ThemeManager::getCatImage(catFromList.first))),
-                                           catFromList.second);
+        QIcon catIcon = QIcon(QString(":/backgrounds/%1").arg(ThemeManager::getCatImage(catFromList.first)));
+        ui->backgroundCatComboBox->addItem(catIcon, catFromList.second);
         if (cat == catFromList.first) {
             ui->backgroundCatComboBox->setCurrentIndex(ui->backgroundCatComboBox->count() - 1);
         }

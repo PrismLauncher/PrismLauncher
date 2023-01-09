@@ -32,6 +32,16 @@
     </widget>
    </item>
    <item>
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Hint: The cat appears in the background and is not shown by default. It is only made visible when pressing the Cat button in the Toolbar.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="Line" name="line">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -41,7 +51,7 @@
    <item>
     <widget class="QLabel" name="label_4">
      <property name="text">
-      <string>Icon Preview:</string>
+      <string> Preview:</string>
      </property>
     </widget>
    </item>
@@ -316,6 +326,9 @@
        <width>0</width>
        <height>256</height>
       </size>
+     </property>
+     <property name="toolTip">
+      <string>The cat appears in the background and does not serve a purpose, it is purely visual.</string>
      </property>
      <property name="text">
       <string/>
