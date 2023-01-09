@@ -455,12 +455,8 @@ void VersionPage::on_actionChange_version_triggered()
         return;
 
     qDebug() << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
-    bool important = false;
-    if(uid == "net.minecraft")
-    {
-        important = true;
-    }
-    m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);
+    m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), uid == "net.minecraft");
+
     m_profile->resolve(Net::Mode::Online);
     m_container->refreshContainer();
 }

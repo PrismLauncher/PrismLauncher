@@ -166,8 +166,11 @@ private slots:
     void updateFailed(const QString & error);
     void componentDataChanged();
     void disableInteraction(bool disable);
+    void updateLoaderVersions();
 
 private:
+    void updateLoaderVersion(const QString& id, const QString& gameVersion);
+
     bool load();
     bool installJarMods_internal(QStringList filepaths);
     bool installCustomJar_internal(QString filepath);
