@@ -38,6 +38,7 @@
 #include <QAbstractListModel>
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
+#include "net/NetJob.h"
 #include "ui/pages/modplatform/modrinth/ModrinthPage.h"
 
 class ModPage;

@@ -106,8 +106,6 @@ MacSparkleUpdater::MacSparkleUpdater()
     priv->updaterObserver.callback = ^(bool canCheck) {
         emit canCheckForUpdatesChanged(canCheck);
     };
-
-    loadChannelsFromSettings();
 }
 
 MacSparkleUpdater::~MacSparkleUpdater()
@@ -165,7 +163,6 @@ void MacSparkleUpdater::setUpdateCheckInterval(double seconds)
 void MacSparkleUpdater::clearAllowedChannels()
 {
     priv->updaterDelegate.allowedChannels = [NSSet set];
-    APPLICATION->settings()->set("UpdateChannel", "");
 }
 
 void MacSparkleUpdater::setAllowedChannel(const QString &channel)
@@ -178,7 +175,6 @@ void MacSparkleUpdater::setAllowedChannel(const QString &channel)
 
     NSSet<NSString *> *nsChannels = [NSSet setWithObject:channel.toNSString()];
     priv->updaterDelegate.allowedChannels = nsChannels;
-    APPLICATION->settings()->set("UpdateChannel", channel);
 }
 
 void MacSparkleUpdater::setAllowedChannels(const QSet<QString> &channels)
@@ -199,7 +195,6 @@ void MacSparkleUpdater::setAllowedChannels(const QSet<QString> &channels)
     }
 
     priv->updaterDelegate.allowedChannels = nsChannels;
-    APPLICATION->settings()->set("UpdateChannel", channelsConfig.trimmed());
 }
 
 void MacSparkleUpdater::setBetaAllowed(bool allowed)
@@ -212,11 +207,4 @@ void MacSparkleUpdater::setBetaAllowed(bool allowed)
     {
         clearAllowedChannels();
     }
-}
-
-void MacSparkleUpdater::loadChannelsFromSettings()
-{
-    QStringList channelList = APPLICATION->settings()->get("UpdateChannel").toString().split(" ");
-    QSet<QString> channels(channelList.begin(), channelList.end());
-    setAllowedChannels(channels);
 }

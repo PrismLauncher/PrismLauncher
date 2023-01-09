@@ -36,6 +36,7 @@
 #include "MetaCacheSink.h"
 #include <QFile>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include "Application.h"
 
 namespace Net {

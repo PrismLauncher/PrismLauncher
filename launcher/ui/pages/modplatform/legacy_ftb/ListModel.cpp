@@ -35,6 +35,8 @@
 
 #include "ListModel.h"
 #include "Application.h"
+#include "net/HttpMetaCache.h"
+#include "net/NetJob.h"
 
 #include "StringUtils.h"
 #include <Version.h>

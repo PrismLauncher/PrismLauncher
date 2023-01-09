@@ -41,9 +41,11 @@
 
 #include <QDebug>
 #include <QJsonObject>
+#include <QHttpPart>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QFile>
+#include <QUrlQuery>
 
 std::array<PasteUpload::PasteTypeInfo, 4> PasteUpload::PasteTypes = {
     {{"0x0.st", "https://0x0.st", ""},
