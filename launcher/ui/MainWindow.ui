@@ -106,6 +106,9 @@
    <property name="floatable">
     <bool>false</bool>
    </property>
+   <property name="useDefaultAction" stdset="0">
+    <bool>true</bool>
+   </property>
    <attribute name="toolBarArea">
     <enum>RightToolBarArea</enum>
    </attribute>

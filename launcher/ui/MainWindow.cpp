@@ -174,6 +174,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             instanceToolbarSetting = APPLICATION->settings()->getSetting(setting_name);
 
         ui->instanceToolBar->setVisibilityState(instanceToolbarSetting->get().toByteArray());
+
     }
 
     // set the menu for the folders and help tool buttons
