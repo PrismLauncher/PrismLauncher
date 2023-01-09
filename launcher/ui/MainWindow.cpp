@@ -166,6 +166,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(renameButton, &QToolButton::clicked, this, &MainWindow::on_actionRenameInstance_triggered);
         ui->instanceToolBar->insertWidgetBefore(ui->actionLaunchInstance, renameButton);
 
+        ui->instanceToolBar->insertSeparator(ui->actionLaunchInstance);
+
         // restore the instance toolbar settings
         auto const setting_name = QString("WideBarVisibility_%1").arg(ui->instanceToolBar->objectName());
         if (!APPLICATION->settings()->contains(setting_name))

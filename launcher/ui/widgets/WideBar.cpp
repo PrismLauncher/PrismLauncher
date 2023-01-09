@@ -158,7 +158,9 @@ void WideBar::insertSeparator(QAction* before)
         return;
 
     BarEntry entry;
-    entry.bar_action = QToolBar::insertSeparator(before);
+    entry.bar_action = new QAction("", this);
+    entry.bar_action->setSeparator(true);
+    insertAction(iter->bar_action, entry.bar_action);
     entry.type = BarEntry::Type::Separator;
 
     m_entries.insert(iter, entry);
