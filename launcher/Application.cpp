@@ -62,11 +62,6 @@
 #include "ui/pages/global/APIPage.h"
 #include "ui/pages/global/CustomCommandsPage.h"
 
-#ifdef Q_OS_WIN
-#include "ui/WinDarkmode.h"
-#include <versionhelpers.h>
-#endif
-
 #include "ui/setupwizard/SetupWizard.h"
 #include "ui/setupwizard/LanguageWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
@@ -1353,16 +1348,7 @@ MainWindow* Application::showMainWindow(bool minimized)
         m_mainWindow = new MainWindow();
         m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
         m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
-#ifdef Q_OS_WIN
-        if (IsWindows10OrGreater())
-        {
-            if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-            } else {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
-            }
-        }
-#endif
+
         if(minimized)
         {
             m_mainWindow->showMinimized();
