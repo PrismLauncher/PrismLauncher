@@ -38,6 +38,7 @@ public:
 
 private slots:
     void updateIcons();
+    void updateCat();
 
 private:
     Ui::ThemeWizardPage *ui;

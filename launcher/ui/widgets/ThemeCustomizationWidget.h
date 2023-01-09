@@ -61,4 +61,5 @@ signals:
 private:
 
     QStringList m_iconThemeOptions{ "pe_colored", "pe_light", "pe_dark", "pe_blue", "breeze_light", "breeze_dark", "OSX", "iOS", "flat", "flat_white", "multimc", "custom" };
+    QStringList m_catOptions{ "kitteh", "rory", "rory-flat" };
 };

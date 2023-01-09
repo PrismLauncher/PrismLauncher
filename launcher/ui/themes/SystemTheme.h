@@ -36,9 +36,8 @@
 
 #include "ITheme.h"
 
-class SystemTheme: public ITheme
-{
-public:
+class SystemTheme : public ITheme {
+   public:
     SystemTheme();
     virtual ~SystemTheme() {}
     void apply() override;
@@ -52,7 +51,8 @@ public:
     QPalette colorScheme() override;
     double fadeAmount() override;
     QColor fadeColor() override;
-private:
+
+   private:
     QPalette systemPalette;
     QString systemTheme;
 };

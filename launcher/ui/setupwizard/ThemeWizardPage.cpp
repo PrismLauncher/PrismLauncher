@@ -23,31 +23,31 @@
 #include "ui/widgets/ThemeCustomizationWidget.h"
 #include "ui_ThemeCustomizationWidget.h"
 
-ThemeWizardPage::ThemeWizardPage(QWidget *parent) :
-BaseWizardPage(parent),
-ui(new Ui::ThemeWizardPage) {
+ThemeWizardPage::ThemeWizardPage(QWidget* parent) : BaseWizardPage(parent), ui(new Ui::ThemeWizardPage)
+{
     ui->setupUi(this);
 
-    ui->themeCustomizationWidget->showFeatures((ThemeFields)(ThemeFields::ICONS | ThemeFields::WIDGETS)); 
     connect(ui->themeCustomizationWidget, QOverload<int>::of(&ThemeCustomizationWidget::currentIconThemeChanged), this, &ThemeWizardPage::updateIcons);
+    connect(ui->themeCustomizationWidget, QOverload<int>::of(&ThemeCustomizationWidget::currentCatChanged), this, &ThemeWizardPage::updateCat);
 
     updateIcons();
+    updateCat();
 }
 
-ThemeWizardPage::~ThemeWizardPage() {
-delete ui;
-}
-
-void ThemeWizardPage::initializePage()
+ThemeWizardPage::~ThemeWizardPage()
 {
+    delete ui;
 }
+
+void ThemeWizardPage::initializePage() {}
 
 bool ThemeWizardPage::validatePage()
 {
     return true;
 }
 
-void ThemeWizardPage::updateIcons() {
+void ThemeWizardPage::updateIcons()
+{
     qDebug() << "Setting Icons";
     ui->previewIconButton0->setIcon(APPLICATION->getThemedIcon("new"));
     ui->previewIconButton1->setIcon(APPLICATION->getThemedIcon("centralmods"));
@@ -62,6 +62,25 @@ void ThemeWizardPage::updateIcons() {
     update();
     repaint();
     parentWidget()->update();
+}
+
+void ThemeWizardPage::updateCat()
+{
+    qDebug() << "Setting Cat";
+
+    QDateTime now = QDateTime::currentDateTime();
+    QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
+    QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
+    QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
+    QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
+    if (std::abs(now.daysTo(xmas)) <= 4) {
+        cat += "-xmas";
+    } else if (std::abs(now.daysTo(halloween)) <= 4) {
+        cat += "-spooky";
+    } else if (std::abs(now.daysTo(birthday)) <= 12) {
+        cat += "-bday";
+    }
+    ui->catImagePreviewButton->setIcon(QIcon(QString(R"(:/backgrounds/%1)").arg(cat)));
 }
 
 void ThemeWizardPage::retranslate()

@@ -35,9 +35,6 @@ class ThemeManager {
    public:
     ThemeManager(MainWindow* mainWindow);
 
-    // maybe make private? Or put in ctor?
-    void InitializeThemes();
-
     QList<ITheme*> getValidApplicationThemes();
     void setIconTheme(const QString& name);
     void applyCurrentlySelectedTheme();
@@ -48,6 +45,7 @@ class ThemeManager {
     MainWindow* m_mainWindow;
     bool m_firstThemeInitialized;
 
+    void InitializeThemes();
     QString AddTheme(std::unique_ptr<ITheme> theme);
     ITheme* GetTheme(QString themeId);
 };

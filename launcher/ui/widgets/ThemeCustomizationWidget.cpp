@@ -36,18 +36,40 @@ ThemeCustomizationWidget::~ThemeCustomizationWidget()
     delete ui;
 }
 
+/// <summary>
+/// The layout was not quite right, so currently this just disables the UI elements, which should be hidden instead
+/// TODO FIXME
+/// 
+/// Original Method One:
+/// ui->iconsComboBox->setVisible(features& ThemeFields::ICONS);
+/// ui->iconsLabel->setVisible(features& ThemeFields::ICONS);
+/// ui->widgetStyleComboBox->setVisible(features& ThemeFields::WIDGETS);
+/// ui->widgetThemeLabel->setVisible(features& ThemeFields::WIDGETS);
+/// ui->backgroundCatComboBox->setVisible(features& ThemeFields::CAT);
+/// ui->backgroundCatLabel->setVisible(features& ThemeFields::CAT);
+/// 
+/// original Method Two:
+///     if (!(features & ThemeFields::ICONS)) {
+///         ui->formLayout->setRowVisible(0, false);
+///     }
+///     if (!(features & ThemeFields::WIDGETS)) {
+///         ui->formLayout->setRowVisible(1, false);
+///     }
+///     if (!(features & ThemeFields::CAT)) {
+///         ui->formLayout->setRowVisible(2, false);
+///     }
+/// </summary>
+/// <param name="features"></param>
 void ThemeCustomizationWidget::showFeatures(ThemeFields features) {
-    ui->iconsComboBox->setVisible(features & ThemeFields::ICONS);
-    ui->iconsLabel->setVisible(features & ThemeFields::ICONS);
-    ui->widgetStyleComboBox->setVisible(features & ThemeFields::WIDGETS);
-    ui->widgetThemeLabel->setVisible(features & ThemeFields::WIDGETS);
-    ui->backgroundCatComboBox->setVisible(features & ThemeFields::CAT);
-    ui->backgroundCatLabel->setVisible(features & ThemeFields::CAT);
+    ui->iconsComboBox->setEnabled(features & ThemeFields::ICONS);
+    ui->iconsLabel->setEnabled(features & ThemeFields::ICONS);
+    ui->widgetStyleComboBox->setEnabled(features & ThemeFields::WIDGETS);
+    ui->widgetThemeLabel->setEnabled(features & ThemeFields::WIDGETS);
+    ui->backgroundCatComboBox->setEnabled(features & ThemeFields::CAT);
+    ui->backgroundCatLabel->setEnabled(features & ThemeFields::CAT);
 }
 
 void ThemeCustomizationWidget::applyIconTheme(int index) {
-    emit currentIconThemeChanged(index);
-
     auto settings = APPLICATION->settings();
     auto original = settings->get("IconTheme").toString();
     // FIXME: make generic
@@ -56,11 +78,11 @@ void ThemeCustomizationWidget::applyIconTheme(int index) {
     if (original != settings->get("IconTheme")) {
         APPLICATION->applyCurrentlySelectedTheme();
     }
+
+    emit currentIconThemeChanged(index);
 }
 
 void ThemeCustomizationWidget::applyWidgetTheme(int index) {
-    emit currentWidgetThemeChanged(index);
-
     auto settings = APPLICATION->settings();
     auto originalAppTheme = settings->get("ApplicationTheme").toString();
     auto newAppTheme = ui->widgetStyleComboBox->currentData().toString();
@@ -68,26 +90,15 @@ void ThemeCustomizationWidget::applyWidgetTheme(int index) {
         settings->set("ApplicationTheme", newAppTheme);
         APPLICATION->applyCurrentlySelectedTheme();
     }
+
+    emit currentWidgetThemeChanged(index);
 }
 
 void ThemeCustomizationWidget::applyCatTheme(int index) {
-    emit currentCatChanged(index);
-
     auto settings = APPLICATION->settings();
-    switch (index) {
-        case 0: // original cat
-            settings->set("BackgroundCat", "kitteh");
-            break;
-        case 1: // rory the cat
-            settings->set("BackgroundCat", "rory");
-            break;
-        case 2: // rory the cat flat edition
-            settings->set("BackgroundCat", "rory-flat");
-            break;
-        case 3:  // teawie
-            settings->set("BackgroundCat", "teawie");
-            break;
-    }
+    settings->set("BackgroundCat", m_catOptions[index]);
+
+    emit currentCatChanged(index);
 }
 
 void ThemeCustomizationWidget::applySettings()
@@ -101,8 +112,8 @@ void ThemeCustomizationWidget::loadSettings()
     auto settings = APPLICATION->settings();
 
     // FIXME: make generic
-    auto theme = settings->get("IconTheme").toString();
-    ui->iconsComboBox->setCurrentIndex(m_iconThemeOptions.indexOf(theme));
+    auto iconTheme = settings->get("IconTheme").toString();
+    ui->iconsComboBox->setCurrentIndex(m_iconThemeOptions.indexOf(iconTheme));
 
     {
         auto currentTheme = settings->get("ApplicationTheme").toString();
@@ -118,15 +129,7 @@ void ThemeCustomizationWidget::loadSettings()
     }
 
     auto cat = settings->get("BackgroundCat").toString();
-    if (cat == "kitteh") {
-        ui->backgroundCatComboBox->setCurrentIndex(0);
-    } else if (cat == "rory") {
-        ui->backgroundCatComboBox->setCurrentIndex(1);
-    } else if (cat == "rory-flat") {
-        ui->backgroundCatComboBox->setCurrentIndex(2);
-    } else if (cat == "teawie") {
-        ui->backgroundCatComboBox->setCurrentIndex(3);
-    }
+    ui->backgroundCatComboBox->setCurrentIndex(m_catOptions.indexOf(cat));
 }
 
 void ThemeCustomizationWidget::retranslate()
