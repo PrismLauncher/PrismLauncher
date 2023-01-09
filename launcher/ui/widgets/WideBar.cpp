@@ -7,15 +7,20 @@
 class ActionButton : public QToolButton {
     Q_OBJECT
    public:
-    ActionButton(QAction* action, QWidget* parent = nullptr) : QToolButton(parent), m_action(action)
+    ActionButton(QAction* action, QWidget* parent = nullptr, bool use_default_action = false) : QToolButton(parent),
+    m_action(action), m_use_default_action(use_default_action)
     {
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         // workaround for breeze and breeze forks
         setProperty("_kde_toolButton_alignment", Qt::AlignLeft);
 
+        if (m_use_default_action) {
+            setDefaultAction(action);
+        } else {
+            connect(this, &ActionButton::clicked, action, &QAction::trigger);
+        }
         connect(action, &QAction::changed, this, &ActionButton::actionChanged);
-        connect(this, &ActionButton::clicked, action, &QAction::trigger);
 
         actionChanged();
     };
@@ -23,21 +28,24 @@ class ActionButton : public QToolButton {
     void actionChanged()
     {
         setEnabled(m_action->isEnabled());
-        setChecked(m_action->isChecked());
-        setMenu(m_action->menu());
-        if (menu()) {
+        // better pop up mode
+        if (m_action->menu()) {
             setPopupMode(QToolButton::MenuButtonPopup);
         }
-        setCheckable(m_action->isCheckable());
-        setText(m_action->text());
-        setIcon(m_action->icon());
-        setToolTip(m_action->toolTip());
-        setHidden(!m_action->isVisible());
+        if (!m_use_default_action) {
+            setChecked(m_action->isChecked());
+            setCheckable(m_action->isCheckable());
+            setText(m_action->text());
+            setIcon(m_action->icon());
+            setToolTip(m_action->toolTip());
+            setHidden(!m_action->isVisible());
+        }
         setFocusPolicy(Qt::NoFocus);
     }
 
    private:
     QAction* m_action;
+    bool m_use_default_action;
 };
 
 WideBar::WideBar(const QString& title, QWidget* parent) : QToolBar(title, parent)
@@ -61,7 +69,7 @@ WideBar::WideBar(QWidget* parent) : QToolBar(parent)
 void WideBar::addAction(QAction* action)
 {
     BarEntry entry;
-    entry.bar_action = addWidget(new ActionButton(action, this));
+    entry.bar_action = addWidget(new ActionButton(action, this, m_use_default_action));
     entry.menu_action = action;
     entry.type = BarEntry::Type::Action;
 
@@ -93,7 +101,7 @@ void WideBar::insertActionBefore(QAction* before, QAction* action)
         return;
 
     BarEntry entry;
-    entry.bar_action = insertWidget(iter->bar_action, new ActionButton(action, this));
+    entry.bar_action = insertWidget(iter->bar_action, new ActionButton(action, this, m_use_default_action));
     entry.menu_action = action;
     entry.type = BarEntry::Type::Action;
 
@@ -109,7 +117,7 @@ void WideBar::insertActionAfter(QAction* after, QAction* action)
         return;
 
     BarEntry entry;
-    entry.bar_action = insertWidget((iter + 1)->bar_action, new ActionButton(action, this));
+    entry.bar_action = insertWidget((iter + 1)->bar_action, new ActionButton(action, this, m_use_default_action));
     entry.menu_action = action;
     entry.type = BarEntry::Type::Action;
 
