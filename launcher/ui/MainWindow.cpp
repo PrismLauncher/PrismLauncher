@@ -743,7 +743,7 @@ void MainWindow::repopulateAccountsMenu()
 
     ui->actionNoDefaultAccount = new QAction(this);
     ui->actionNoDefaultAccount->setObjectName(QStringLiteral("actionNoDefaultAccount"));
-    ui->actionNoDefaultAccount->setText("No Default Account");
+    ui->actionNoDefaultAccount->setText(tr("No Default Account"));
     ui->actionNoDefaultAccount->setCheckable(true);
     ui->actionNoDefaultAccount->setIcon(APPLICATION->getThemedIcon("noaccount"));
     ui->actionNoDefaultAccount->setData(-1);
