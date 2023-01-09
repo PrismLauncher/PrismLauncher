@@ -33,11 +33,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.legacy.utils;
+package org.prismlauncher.legacy.utils.json;
 
 import java.io.IOException;
 
-public class JsonParseException extends IOException {
+public final class JsonParseException extends IOException {
 
     private static final long serialVersionUID = 1L;
 

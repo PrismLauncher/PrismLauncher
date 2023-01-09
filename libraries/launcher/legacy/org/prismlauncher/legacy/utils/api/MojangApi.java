@@ -41,7 +41,7 @@ import java.net.URL;
 import java.util.Map;
 
 import org.prismlauncher.legacy.utils.Base64;
-import org.prismlauncher.legacy.utils.JsonParser;
+import org.prismlauncher.legacy.utils.json.JsonParser;
 
 /**
  * Basic wrapper for Mojang's Minecraft API.

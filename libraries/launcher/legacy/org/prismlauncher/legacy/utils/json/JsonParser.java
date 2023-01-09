@@ -33,7 +33,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.legacy.utils;
+package org.prismlauncher.legacy.utils.json;
 
 import java.io.IOException;
 import java.io.InputStream;

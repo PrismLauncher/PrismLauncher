@@ -40,9 +40,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
-public class CustomUrlConnection extends HttpURLConnection {
+public final class CustomUrlConnection extends HttpURLConnection {
 
-    private InputStream in;
+    private final InputStream in;
 
     public CustomUrlConnection(byte[] data) {
         this(new ByteArrayInputStream(data));
