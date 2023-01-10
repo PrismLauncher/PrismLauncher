@@ -286,75 +286,6 @@ void LauncherPage::applySettings()
     }
 
     s->set("UpdateChannel", m_currentUpdateChannel);
-    auto original = s->get("IconTheme").toString();
-    //FIXME: make generic
-    switch (ui->themeComboBox->currentIndex())
-    {
-    case 0:
-        s->set("IconTheme", "pe_colored");
-        break;
-    case 1:
-        s->set("IconTheme", "pe_light");
-        break;
-    case 2:
-        s->set("IconTheme", "pe_dark");
-        break;
-    case 3:
-        s->set("IconTheme", "pe_blue");
-        break;
-    case 4:
-        s->set("IconTheme", "breeze_light");
-        break;
-    case 5:
-        s->set("IconTheme", "breeze_dark");
-        break;
-    case 6:
-        s->set("IconTheme", "OSX");
-        break;
-    case 7:
-        s->set("IconTheme", "iOS");
-        break;
-    case 8:
-        s->set("IconTheme", "flat");
-        break;
-    case 9:
-        s->set("IconTheme", "flat_white");
-        break;
-    case 10:
-        s->set("IconTheme", "multimc");
-        break;
-    case 11:
-        s->set("IconTheme", "custom");
-        break;
-    }
-
-    if(original != s->get("IconTheme"))
-    {
-        APPLICATION->setIconTheme(s->get("IconTheme").toString());
-    }
-
-    auto originalAppTheme = s->get("ApplicationTheme").toString();
-    auto newAppTheme = ui->themeComboBoxColors->currentData().toString();
-    if(originalAppTheme != newAppTheme)
-    {
-        s->set("ApplicationTheme", newAppTheme);
-        APPLICATION->setApplicationTheme(newAppTheme, false);
-    }
-
-    switch (ui->themeBackgroundCat->currentIndex()) {
-    case 0: // original cat
-        s->set("BackgroundCat", "kitteh");
-        break;
-    case 1: // rory the cat
-        s->set("BackgroundCat", "rory");
-        break;
-    case 2: // rory the cat flat edition
-        s->set("BackgroundCat", "rory-flat");
-        break;
-    case 3: // teawie
-        s->set("BackgroundCat", "teawie");
-        break;
-    }
 
     s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
 
@@ -404,47 +335,6 @@ void LauncherPage::loadSettings()
     }
 
     m_currentUpdateChannel = s->get("UpdateChannel").toString();
-    //FIXME: make generic
-    auto theme = s->get("IconTheme").toString();
-    QStringList iconThemeOptions{"pe_colored", 
-                                 "pe_light", 
-                                 "pe_dark", 
-                                 "pe_blue", 
-                                 "breeze_light", 
-                                 "breeze_dark", 
-                                 "OSX", 
-                                 "iOS", 
-                                 "flat", 
-                                 "flat_white", 
-                                 "multimc", 
-                                 "custom"};
-    ui->themeComboBox->setCurrentIndex(iconThemeOptions.indexOf(theme));
-
-    auto cat = s->get("BackgroundCat").toString();
-    if (cat == "kitteh") {
-        ui->themeBackgroundCat->setCurrentIndex(0);
-    } else if (cat == "rory") {
-        ui->themeBackgroundCat->setCurrentIndex(1);
-    } else if (cat == "rory-flat") {
-        ui->themeBackgroundCat->setCurrentIndex(2);
-    } else if (cat == "teawie") {
-        ui->themeBackgroundCat->setCurrentIndex(3);
-    }
-
-    {
-        auto currentTheme = s->get("ApplicationTheme").toString();
-        auto themes = APPLICATION->getValidApplicationThemes();
-        int idx = 0;
-        for(auto &theme: themes)
-        {
-            ui->themeComboBoxColors->addItem(theme->name(), theme->id());
-            if(currentTheme == theme->id())
-            {
-                ui->themeComboBoxColors->setCurrentIndex(idx);
-            }
-            idx++;
-        }
-    }
 
     // Toolbar/menu bar settings (not applicable if native menu bar is present)
     ui->toolsBox->setEnabled(!QMenuBar().isNativeMenuBar());

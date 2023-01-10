@@ -111,6 +111,7 @@
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ImportResourcePackDialog.h"
 #include "ui/themes/ITheme.h"
+#include "ui/themes/ThemeManager.h"
 
 #include <minecraft/mod/ResourcePackFolderModel.h>
 #include <minecraft/mod/tasks/LocalResourcePackParseTask.h>
@@ -1346,7 +1347,7 @@ void MainWindow::updateThemeMenu()
         themeAction->setActionGroup(themesGroup);
 
         connect(themeAction, &QAction::triggered, [theme]() {
-            APPLICATION->setApplicationTheme(theme->id(),false);
+            APPLICATION->setApplicationTheme(theme->id());
             APPLICATION->settings()->set("ApplicationTheme", theme->id());
         });
     }
@@ -1652,32 +1653,9 @@ void MainWindow::onCatToggled(bool state)
     APPLICATION->settings()->set("TheCat", state);
 }
 
-namespace {
-template <typename T>
-T non_stupid_abs(T in)
-{
-    if (in < 0)
-        return -in;
-    return in;
-}
-}
-
 void MainWindow::setCatBackground(bool enabled)
 {
-    if (enabled)
-    {
-        QDateTime now = QDateTime::currentDateTime();
-        QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
-        QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
-        QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
-        QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
-        if (non_stupid_abs(now.daysTo(xmas)) <= 4) {
-            cat += "-xmas";
-        } else if (non_stupid_abs(now.daysTo(halloween)) <= 4) {
-            cat += "-spooky";
-        } else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
-            cat += "-bday";
-        }
+    if (enabled) {
         view->setStyleSheet(QString(R"(
 InstanceView
 {
@@ -1688,10 +1666,8 @@ InstanceView
     background-repeat: none;
     background-color:palette(base);
 })")
-                                .arg(cat));
-    }
-    else
-    {
+                                .arg(ThemeManager::getCatImage()));
+    } else {
         view->setStyleSheet(QString());
     }
 }

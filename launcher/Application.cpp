@@ -66,6 +66,7 @@
 #include "ui/setupwizard/LanguageWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
 #include "ui/setupwizard/PasteWizardPage.h"
+#include "ui/setupwizard/ThemeWizardPage.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 
@@ -497,7 +498,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Theming
         m_settings->registerSetting("IconTheme", QString("pe_colored"));
-        m_settings->registerSetting("ApplicationTheme", QString("system"));
+        m_settings->registerSetting("ApplicationTheme", QString());
         m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
         // Remembered state
@@ -846,10 +847,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     });
 
     {
-        setIconTheme(settings()->get("IconTheme").toString());
-        qDebug() << "<> Icon theme set.";
-        setApplicationTheme(settings()->get("ApplicationTheme").toString(), true);
-        qDebug() << "<> Application theme set.";
+        applyCurrentlySelectedTheme();
     }
 
     updateCapabilities();
@@ -892,7 +890,8 @@ bool Application::createSetupWizard()
         return false;
     }();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
-    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired;
+    bool themeInterventionRequired = settings()->get("ApplicationTheme") == "";
+    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired;
 
     if(wizardRequired)
     {
@@ -910,6 +909,12 @@ bool Application::createSetupWizard()
         if (pasteInterventionRequired)
         {
             m_setupWizard->addPage(new PasteWizardPage(m_setupWizard));
+        }
+
+        if (themeInterventionRequired)
+        {
+            settings()->set("ApplicationTheme", QString("system")); // set default theme after going into theme wizard
+            m_setupWizard->addPage(new ThemeWizardPage(m_setupWizard));
         }
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();
@@ -1118,9 +1123,14 @@ QList<ITheme*> Application::getValidApplicationThemes()
     return m_themeManager->getValidApplicationThemes();
 }
 
-void Application::setApplicationTheme(const QString& name, bool initial)
+void Application::applyCurrentlySelectedTheme()
 {
-    m_themeManager->setApplicationTheme(name, initial);
+    m_themeManager->applyCurrentlySelectedTheme();
+}
+
+void Application::setApplicationTheme(const QString& name)
+{
+    m_themeManager->setApplicationTheme(name);
 }
 
 void Application::setIconTheme(const QString& name)
