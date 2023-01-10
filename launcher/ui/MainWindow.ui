@@ -29,7 +29,7 @@
     </property>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="mainToolBar">
    <property name="windowTitle">
     <string>Main Toolbar</string>
