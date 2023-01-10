@@ -210,8 +210,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         // disabled until we have an instance selected
         ui->instanceToolBar->setEnabled(false);
-        ui->actionKillInstance->setEnabled(false);
-        ui->actionLaunchInstance->setEnabled(false);
         setInstanceActionsEnabled(false);
     }
 
