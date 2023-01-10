@@ -207,6 +207,10 @@ void WideBar::showVisibilityMenu(QPoint const& position)
 
         m_bar_menu->clear();
 
+        m_bar_menu->addActions(m_context_menu_actions);
+
+        m_bar_menu->addSeparator()->setText(tr("Customize toolbar actions"));
+
         for (auto& entry : m_entries) {
             if (entry.type != BarEntry::Type::Action)
                 continue;
@@ -231,6 +235,10 @@ void WideBar::showVisibilityMenu(QPoint const& position)
     }
 
     m_bar_menu->popup(mapToGlobal(position));
+}
+
+void WideBar::addContextMenuAction(QAction* action) {
+    m_context_menu_actions.append(action);
 }
 
 [[nodiscard]] QByteArray WideBar::getVisibilityState() const

@@ -30,6 +30,8 @@ class WideBar : public QToolBar {
     QMenu* createContextMenu(QWidget* parent = nullptr, const QString& title = QString());
     void showVisibilityMenu(const QPoint&);
 
+    void addContextMenuAction(QAction* action);
+
     // Ideally we would use a QBitArray for this, but it doesn't support string conversion,
     // so using it in settings is very messy.
 
@@ -51,6 +53,8 @@ class WideBar : public QToolBar {
 
    private:
     QList<BarEntry> m_entries;
+
+    QList<QAction*> m_context_menu_actions;
 
     bool m_use_default_action = false;
 
