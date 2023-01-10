@@ -76,6 +76,3 @@ QString getPackedTypeName(PackedResourceType type) {
 }
 
 }
-
-
-
