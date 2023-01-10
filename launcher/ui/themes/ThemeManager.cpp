@@ -28,14 +28,6 @@
 
 #include "Application.h"
 
-#ifdef Q_OS_WIN
-#include <windows.h>
-// this is needed for versionhelpers.h, it is also included in WinDarkmode, but we can't rely on that.
-// Ultimately this should be included in versionhelpers, but that is outside of the project.
-#include "ui/WinDarkmode.h"
-#include <versionhelpers.h>
-#endif
-
 ThemeManager::ThemeManager(MainWindow* mainWindow)
 {
     m_mainWindow = mainWindow;
@@ -140,15 +132,6 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
         auto& theme = themeIter->second;
         themeDebugLog() << "applying theme" << theme->name();
         theme->apply(initial);
-#ifdef Q_OS_WIN
-        if (m_mainWindow && IsWindows10OrGreater()) {
-            if (QString::compare(theme->id(), "dark") == 0) {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-            } else {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
-            }
-        }
-#endif
     } else {
         themeWarningLog() << "Tried to set invalid theme:" << name;
     }
