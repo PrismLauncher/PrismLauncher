@@ -56,6 +56,7 @@
 #include <shlobj.h>
 #include <shobjidl.h>
 #include <sys/utime.h>
+#include <versionhelpers.h>
 #include <windows.h>
 #include <winnls.h>
 #include <string>
@@ -234,6 +235,10 @@ bool trash(QString path, QString *pathInTrash = nullptr)
     // FIXME: Figure out trash in Flatpak. Qt seemingly doesn't use the Trash portal
     if (DesktopServices::isFlatpak())
         return false;
+#if defined Q_OS_WIN32
+    if (IsWindowsServer())
+        return false;
+#endif
     return QFile::moveToTrash(path, pathInTrash);
 #endif
 }
