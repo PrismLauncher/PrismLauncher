@@ -108,6 +108,7 @@
    <addaction name="actionReplace_Minecraft_jar"/>
    <addaction name="actionAdd_Agents"/>
    <addaction name="actionAdd_Empty"/>
+   <addaction name="actionImport_Components"/>
    <addaction name="separator"/>
    <addaction name="actionMinecraftFolder"/>
    <addaction name="actionLibrariesFolder"/>
@@ -226,10 +227,10 @@
   </action>
   <action name="actionAdd_Agents">
    <property name="text">
-	<string>Add Agents</string>
+    <string>Add Agents</string>
    </property>
    <property name="toolTip">
-	<string>Add Java agents.</string>
+    <string>Add Java agents.</string>
    </property>
   </action>
   <action name="actionAdd_Empty">
@@ -270,6 +271,14 @@
    </property>
    <property name="toolTip">
     <string>Open the instance's local libraries folder.</string>
+   </property>
+  </action>
+  <action name="actionImport_Components">
+   <property name="text">
+    <string>Import Components</string>
+   </property>
+   <property name="toolTip">
+    <string>Import existing component JSON files.</string>
    </property>
   </action>
  </widget>

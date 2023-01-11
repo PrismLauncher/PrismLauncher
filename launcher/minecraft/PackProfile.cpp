@@ -49,6 +49,7 @@
 #include "minecraft/OneSixVersionFormat.h"
 #include "FileSystem.h"
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/ProfileUtils.h"
 #include "Json.h"
 
 #include "PackProfile.h"
@@ -737,6 +738,11 @@ void PackProfile::installCustomJar(QString selectedFile)
     installCustomJar_internal(selectedFile);
 }
 
+void PackProfile::installComponents(QStringList selectedFiles)
+{
+    installComponents_internal(selectedFiles);
+}
+
 void PackProfile::installAgents(QStringList selectedFiles)
 {
     installAgents_internal(selectedFiles);
@@ -936,6 +942,32 @@ bool PackProfile::installCustomJar_internal(QString filepath)
 
     scheduleSave();
     invalidateLaunchProfile();
+    return true;
+}
+
+bool PackProfile::installComponents_internal(QStringList filepaths)
+{
+    const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
+    if (!FS::ensureFolderPathExists(patchDir))
+        return false;
+
+    for (const QString& source : filepaths) {
+        const QFileInfo sourceInfo(source);
+
+        auto versionFile = ProfileUtils::parseJsonFile(sourceInfo, false);
+        const QString target = FS::PathCombine(patchDir, versionFile->uid + ".json");
+
+        if (!QFile::copy(source, target))
+        {
+            return false;
+        }
+
+        appendComponent(new Component(this, versionFile->uid, versionFile));
+    }
+
+    scheduleSave();
+    invalidateLaunchProfile();
+
     return true;
 }
 

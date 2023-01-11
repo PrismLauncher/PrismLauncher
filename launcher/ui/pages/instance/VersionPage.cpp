@@ -282,6 +282,7 @@ void VersionPage::updateButtons(int row)
     ui->actionRevert->setEnabled(controlsEnabled && patch && patch->isRevertible());
     ui->actionDownload_All->setEnabled(controlsEnabled);
     ui->actionAdd_Empty->setEnabled(controlsEnabled);
+    ui->actionImport_Components->setEnabled(controlsEnabled);
     ui->actionReload->setEnabled(controlsEnabled);
     ui->actionInstall_mods->setEnabled(controlsEnabled);
     ui->actionReplace_Minecraft_jar->setEnabled(controlsEnabled);
@@ -375,6 +376,16 @@ void VersionPage::on_actionReplace_Minecraft_jar_triggered()
     updateButtons();
 }
 
+void VersionPage::on_actionImport_Components_triggered()
+{
+    QStringList list = GuiUtil::BrowseForFiles("component", tr("Select components"), tr("Components (*.json)"),
+                                               APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+
+    if (!list.isEmpty())
+        m_profile->installComponents(list);
+
+    updateButtons();
+}
 
 void VersionPage::on_actionAdd_Agents_triggered()
 {
