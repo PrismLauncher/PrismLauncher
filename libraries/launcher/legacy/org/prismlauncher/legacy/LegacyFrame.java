@@ -52,7 +52,7 @@
  *      limitations under the License.
  */
 
-package org.prismlauncher.launcher.impl.legacy;
+package org.prismlauncher.legacy;
 
 import java.applet.Applet;
 import java.awt.Dimension;
@@ -74,7 +74,7 @@ import org.prismlauncher.utils.logging.Log;
 
 import net.minecraft.Launcher;
 
-public final class LegacyFrame extends JFrame {
+final class LegacyFrame extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
@@ -131,7 +131,7 @@ public final class LegacyFrame extends JFrame {
 
         launcher.setParameter("username", user);
         launcher.setParameter("sessionid", session);
-        launcher.setParameter("stand-alone", true); // Show the quit button. TODO: why won't this work?
+        launcher.setParameter("stand-alone", true); // Show the quit button. This often doesn't seem to work.
         launcher.setParameter("haspaid", true); // Some old versions need this for world saves to work.
         launcher.setParameter("demo", demo);
         launcher.setParameter("fullscreen", false);

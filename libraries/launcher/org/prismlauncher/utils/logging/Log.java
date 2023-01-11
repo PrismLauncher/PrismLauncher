@@ -45,7 +45,7 @@ import java.io.PrintStream;
 public final class Log {
 
     // original before possibly overridden by MC
-	private static final PrintStream OUT = new PrintStream(System.out), ERR = new PrintStream(System.err);
+    private static final PrintStream OUT = new PrintStream(System.out), ERR = new PrintStream(System.err);
     private static final boolean DEBUG = Boolean.getBoolean("org.prismlauncher.debug");
 
     public static void launcher(String message) {
