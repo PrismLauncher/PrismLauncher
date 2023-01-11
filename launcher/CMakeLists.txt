@@ -973,8 +973,6 @@ SET(LAUNCHER_SOURCES
     ui/widgets/LanguageSelectionWidget.h
     ui/widgets/LineSeparator.cpp
     ui/widgets/LineSeparator.h
-    ui/widgets/LogView.cpp
-    ui/widgets/LogView.h
     ui/widgets/InfoFrame.cpp
     ui/widgets/InfoFrame.h
     ui/widgets/ModFilterWidget.cpp
@@ -1030,7 +1028,6 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/global/ExternalToolsPage.ui
     ui/pages/instance/ExternalResourcesPage.ui
     ui/pages/instance/NotesPage.ui
-    ui/pages/instance/LogPage.ui
     ui/pages/instance/ServersPage.ui
     ui/pages/instance/GameOptionsPage.ui
     ui/pages/instance/OtherLogsPage.ui

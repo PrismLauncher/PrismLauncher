@@ -35,73 +35,67 @@
 
 #pragma once
 
-#include <QWidget>
+#include <QQuickWidget>
 
+#include "Application.h"
 #include "BaseInstance.h"
-#include "launch/LaunchTask.h"
-#include "ui/pages/BasePage.h"
-#include <Application.h>
 
-namespace Ui
-{
-class LogPage;
-}
-class QTextCharFormat;
+#include "launch/LaunchTask.h"
+
+#include "ui/pages/BasePage.h"
+
 class LogFormatProxyModel;
 
-class LogPage : public QWidget, public BasePage
-{
+class LogPage : public QQuickWidget, public BasePage {
     Q_OBJECT
 
-public:
-    explicit LogPage(InstancePtr instance, QWidget *parent = 0);
-    virtual ~LogPage();
-    virtual QString displayName() const override
-    {
-        return tr("Minecraft Log");
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("log");
-    }
-    virtual QString id() const override
-    {
-        return "console";
-    }
-    virtual bool apply() override;
-    virtual QString helpPage() const override
-    {
-        return "Minecraft-Logs";
-    }
-    virtual bool shouldDisplay() const override;
-    void retranslate() override;
+   public:
+    explicit LogPage(InstancePtr instance, QWidget* parent = nullptr);
+    ~LogPage() override = default;
 
-private slots:
-    void on_btnPaste_clicked();
-    void on_btnCopy_clicked();
-    void on_btnClear_clicked();
-    void on_btnBottom_clicked();
+    [[nodiscard]] QString displayName() const override { return tr("Minecraft Log"); }
+    [[nodiscard]] QIcon icon() const override { return APPLICATION->getThemedIcon("log"); }
+    [[nodiscard]] QString id() const override { return "console"; }
+    [[nodiscard]] QString helpPage() const override { return "Minecraft-Logs"; }
 
-    void on_trackLogCheckbox_clicked(bool checked);
-    void on_wrapCheckbox_clicked(bool checked);
+    [[nodiscard]] bool shouldDisplay() const override;
 
-    void on_findButton_clicked();
-    void findActivated();
-    void findNextActivated();
-    void findPreviousActivated();
+    bool apply() override;
+    void retranslate() override {};
 
-    void onInstanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc);
+   private slots:
+    void onInstanceLaunchTaskChanged(LaunchTask::Ptr);
 
-private:
-    void modelStateToUI();
-    void UIToModelState();
-    void setInstanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc, bool initial);
+    void onStatusChanged(QQuickWidget::Status);
+    void onQuickWidgetReady();
 
-private:
-    Ui::LogPage *ui;
+    void wrapModeChanged(int new_state);
+    void suspendedChanged(bool new_state);
+    void useRegexChanged(bool new_state);
+
+    void copyPressed(QString);
+    void uploadPressed();
+    void clearPressed();
+
+    void searchRequested(QString search_string, bool reversed);
+
+   private:
+    void setInstanceLaunchTaskChanged(LaunchTask::Ptr proc, bool initial);
+
+    void loadSettings();
+    void saveSettings();
+
+   private:
     InstancePtr m_instance;
     shared_qobject_ptr<LaunchTask> m_process;
 
-    LogFormatProxyModel * m_proxy;
-    shared_qobject_ptr <LogModel> m_model;
+    LogFormatProxyModel* m_proxy;
+    shared_qobject_ptr<LogModel> m_model;
+
+    // pair <string searched, used regex or not in that search>
+    std::pair<QString, bool> m_search_request;
+    QVector<int> m_search_results;
+
+    int m_current_search_offset = 0;
+    bool m_use_regex_in_search = false;
 };

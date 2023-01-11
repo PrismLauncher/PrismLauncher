@@ -1,8 +1,17 @@
 #include "LogModel.h"
 
-LogModel::LogModel(QObject *parent):QAbstractListModel(parent)
+LogModel::LogModel(QObject *parent)
+    : QAbstractListModel(parent)
 {
     m_content.resize(m_maxLines);
+}
+
+QHash<int, QByteArray> LogModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[Qt::DisplayRole] = "line";
+    roles[LevelRole] = "level";
+    return roles;
 }
 
 int LogModel::rowCount(const QModelIndex &parent) const
@@ -94,6 +103,28 @@ QString LogModel::toPlainText()
     return out;
 }
 
+QVector<int> LogModel::search(QString text_to_search, bool use_regex) const
+{
+    QVector<int> matches;
+
+    if (use_regex) {
+        QRegularExpression regex{text_to_search};
+        regex.optimize();
+
+        for (int i = 0; i < m_numLines; i++) {
+            if (regex.match(m_content.at(i).line).hasMatch())
+                matches.append(i + 1);
+        }
+    } else {
+        for (int i = 0; i < m_numLines; i++) {
+            if (m_content.at(i).line.contains(text_to_search))
+                matches.append(i + 1);
+        }
+    }
+
+    return matches;
+}
+
 void LogModel::setMaxLines(int maxLines)
 {
     // no-op
@@ -150,17 +181,4 @@ void LogModel::setStopOnOverflow(bool stop)
 void LogModel::setOverflowMessage(const QString& overflowMessage)
 {
     m_overflowMessage = overflowMessage;
-}
-
-void LogModel::setLineWrap(bool state)
-{
-    if(m_lineWrap != state)
-    {
-        m_lineWrap = state;
-    }
-}
-
-bool LogModel::wrapLines() const
-{
-    return m_lineWrap;
 }

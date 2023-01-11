@@ -63,7 +63,8 @@ public:
     };
 
 public: /* methods */
-    static shared_qobject_ptr<LaunchTask> create(InstancePtr inst);
+    using Ptr = shared_qobject_ptr<LaunchTask>;
+    static LaunchTask::Ptr create(InstancePtr inst);
     virtual ~LaunchTask() {};
 
     void appendStep(shared_qobject_ptr<LaunchStep> step);

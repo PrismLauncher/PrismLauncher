@@ -37,24 +37,20 @@ public:
         }
     }
 
-    QColor getFront(int key)
+    [[nodiscard]] QColor getFront(int key) const
     {
-        auto iter = m_colors.find(key);
-        if(iter == m_colors.end())
-        {
-            return QColor();
-        }
-        return (*iter).front;
+        auto iter = m_colors.constFind(key);
+        if (iter != m_colors.constEnd())
+            return (*iter).front;
+        return {};
     }
 
-    QColor getBack(int key)
+    [[nodiscard]] QColor getBack(int key) const
     {
-        auto iter = m_colors.find(key);
-        if(iter == m_colors.end())
-        {
-            return QColor();
-        }
-        return (*iter).back;
+        auto iter = m_colors.constFind(key);
+        if (iter != m_colors.constEnd())
+            return (*iter).back;
+        return {};
     }
 
     /**
@@ -99,21 +95,20 @@ public:
         addColor((int)MessageLevel::Message, front);
     }
 
-    QColor getFront(MessageLevel::Enum level)
+    [[nodiscard]] QColor getFront(MessageLevel::Enum level) const
     {
-        if(!m_colors.contains((int) level))
-        {
-            return ColorCache::getFront((int)MessageLevel::Message);
-        }
-        return ColorCache::getFront((int)level);
+        if (m_colors.contains((int) level))
+            return ColorCache::getFront((int) level);
+        return ColorCache::getFront((int) MessageLevel::Message);
     }
 
-    QColor getBack(MessageLevel::Enum level)
+    [[nodiscard]] QColor getBack(MessageLevel::Enum level) const
     {
-        if(level == MessageLevel::Fatal)
-        {
-            return QColor(Qt::black);
+        if(level == MessageLevel::Fatal) {
+            QColor fatal { Qt::black };
+            fatal.setAlpha(200);
+            return fatal;
         }
-        return QColor(Qt::transparent);
+        return Qt::transparent;
     }
 };
