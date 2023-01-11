@@ -25,12 +25,12 @@ protected:
     void executeTask();
 
 private:
-    void loadComponents();
-    void resolveDependencies(bool checkOnly);
+    void loadComponents(bool firstRun);
+    void resolveDependencies(bool firstRun, bool checkOnly);
 
-    void remoteLoadSucceeded(size_t index);
-    void remoteLoadFailed(size_t index, const QString &msg);
-    void checkIfAllFinished();
+    void remoteLoadSucceeded(size_t index, bool firstRun);
+    void remoteLoadFailed(size_t index, const QString &msg, bool firstRun);
+    void checkIfAllFinished(bool firstRun);
 
 private:
     std::unique_ptr<ComponentUpdateTaskData> d;
