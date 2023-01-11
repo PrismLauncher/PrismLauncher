@@ -66,6 +66,10 @@ void SystemTheme::apply(bool initial)
     // or https://github.com/PrismLauncher/PrismLauncher/issues/490
     if (initial)
         return; 
+
+    this->changed_qqc_theme = !ThemeManager::usingQmlSystemTheme();
+    ThemeManager::writeGlobalQMLTheme();
+
     ITheme::apply(initial);
 }
 

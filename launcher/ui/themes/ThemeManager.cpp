@@ -17,16 +17,21 @@
  */
 #include "ThemeManager.h"
 
+#include <fstream>
+#include <iostream>
+
 #include <QApplication>
 #include <QDir>
 #include <QDirIterator>
 #include <QIcon>
+#include <QQuickStyle>
+
+#include "Application.h"
+
 #include "ui/themes/BrightTheme.h"
 #include "ui/themes/CustomTheme.h"
 #include "ui/themes/DarkTheme.h"
 #include "ui/themes/SystemTheme.h"
-
-#include "Application.h"
 
 ThemeManager::ThemeManager(MainWindow* mainWindow)
 {
@@ -84,7 +89,7 @@ void ThemeManager::initializeThemes()
             if (themeJson.exists()) {
                 // Load "theme.json" based themes
                 themeDebugLog() << "Loading JSON Theme from:" << themeJson.absoluteFilePath();
-                addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), themeJson, true));
+                addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), themeJson, dir, true));
             } else {
                 // Load pure QSS Themes
                 QDirIterator stylesheetFileIterator(dir.absoluteFilePath(""), { "*.qss", "*.css" }, QDir::Files);
@@ -92,7 +97,7 @@ void ThemeManager::initializeThemes()
                     QFile customThemeFile(stylesheetFileIterator.next());
                     QFileInfo customThemeFileInfo(customThemeFile);
                     themeDebugLog() << "Loading QSS Theme from:" << customThemeFileInfo.absoluteFilePath();
-                    addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), customThemeFileInfo, false));
+                    addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), customThemeFileInfo, dir, false));
                 }
             }
         }
@@ -137,6 +142,15 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
     }
 }
 
+bool ThemeManager::needsRestart() const
+{
+    auto theme_name = APPLICATION->settings()->get("ApplicationTheme").toString();
+    auto themeIter = m_themes.find(theme_name);
+    if (themeIter != m_themes.end())
+        return themeIter->second->changed_qqc_theme;
+    return false;
+}
+
 QString ThemeManager::getCatImage(QString catName)
 {
     QDateTime now = QDateTime::currentDateTime();
@@ -152,4 +166,61 @@ QString ThemeManager::getCatImage(QString catName)
         cat += "-bday";
     }
     return cat;
+}
+
+#define QML_THEME_FILE ".qml_theme"
+
+bool ThemeManager::s_is_qml_system_theme = false;
+
+void ThemeManager::bootstrapThemeEnvironment()
+{
+    auto initial_conf_path = qgetenv("QT_QUICK_CONTROLS_CONF");
+    QString current_conf_path;
+
+    { // Read the theme from the global file
+        std::ifstream qml_theme_file(QML_THEME_FILE);
+        std::string line;
+        if (qml_theme_file.is_open()) {
+            std::getline(qml_theme_file, line);
+            current_conf_path = QString::fromLocal8Bit(line.data());
+
+            qml_theme_file.close();
+        } else {
+            std::cout << "No QML theme file could be found!" << std::endl;
+        }
+    }
+
+    if (current_conf_path.isEmpty()) {
+        // System theme: Restore the previous value and leave the style unchanged
+        s_is_qml_system_theme = true;
+        if (!initial_conf_path.isEmpty())
+            qputenv("QT_QUICK_CONTROLS_CONF", initial_conf_path);
+        else
+            qunsetenv("QT_QUICK_CONTROLS_CONF");
+    } else {
+        // Not system theme: May be an actual path (custom theme), or one of the built-in ones
+        if (current_conf_path == FusionTheme::USE_FUSION_QML_GLOBAL_THEME) {
+            // One of the built-in themes, set the theme to Fusion
+            QQuickStyle::setStyle("Fusion");
+
+            return;
+        }
+
+        qputenv("QT_QUICK_CONTROLS_CONF", current_conf_path.toLocal8Bit());
+    }
+}
+
+void ThemeManager::writeGlobalQMLTheme(QString const& conf_file_path)
+{
+    QFile global_theme_file(QML_THEME_FILE);
+    global_theme_file.open(QFile::OpenModeFlag::WriteOnly | QFile::OpenModeFlag::Truncate);
+
+    if (conf_file_path.isEmpty())
+        themeDebugLog() << "Clearing QQC config...";
+    else
+        themeDebugLog() << "Setting QQC config to:" << conf_file_path;
+
+    global_theme_file.write(conf_file_path.toLocal8Bit());
+
+    global_theme_file.close();
 }

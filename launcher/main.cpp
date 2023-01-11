@@ -35,6 +35,8 @@
 
 #include "Application.h"
 
+#include "ui/themes/ThemeManager.h"
+
 // #define BREAK_INFINITE_LOOP
 // #define BREAK_EXCEPTION
 // #define BREAK_RETURN
@@ -42,6 +44,11 @@
 #ifdef BREAK_INFINITE_LOOP
 #include <thread>
 #include <chrono>
+#endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0) && QT_VERSION < QT_VERSION_CHECK(6, 4, 0)
+#include <QQuickWindow>
+#include <QSGRendererInterface>
 #endif
 
 int main(int argc, char *argv[])
@@ -62,6 +69,13 @@ int main(int argc, char *argv[])
 #if QT_VERSION <= QT_VERSION_CHECK(6, 0, 0)
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
+
+    ThemeManager::bootstrapThemeEnvironment();
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0) && QT_VERSION < QT_VERSION_CHECK(6, 4, 0)
+    // Avoids crash on Qt6 < 6.4
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::GraphicsApi::OpenGL);
 #endif
 
     // initialize Qt

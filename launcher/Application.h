@@ -126,6 +126,8 @@ public:
 
     void setApplicationTheme(const QString& name);
 
+    [[nodiscard]] bool needsRestartDueToTheme() const;
+
     shared_qobject_ptr<ExternalUpdater> updater() {
         return m_updater;
     }

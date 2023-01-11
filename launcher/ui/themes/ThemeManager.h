@@ -40,12 +40,25 @@ class ThemeManager {
     void applyCurrentlySelectedTheme(bool initial = false);
     void setApplicationTheme(const QString& name, bool initial = false);
 
+    [[nodiscard]] bool needsRestart() const;
+
     /// <summary>
     /// Returns the cat based on selected cat and with events (Birthday, XMas, etc.)
     /// </summary>
     /// <param name="catName">Optional, if you need a specific cat.</param>
     /// <returns></returns>
     static QString getCatImage(QString catName = "");
+
+
+
+    /** Sets up the environment variables required for QQC themes to work properly.
+     *  This MUST be called before the Qt Application object is created.
+     */
+    static void bootstrapThemeEnvironment();
+
+    static void writeGlobalQMLTheme(const QString& conf_file_path = "");
+
+    static bool usingQmlSystemTheme() { return s_is_qml_system_theme; }
 
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
@@ -54,4 +67,6 @@ class ThemeManager {
     void initializeThemes();
     QString addTheme(std::unique_ptr<ITheme> theme);
     ITheme* getTheme(QString themeId);
+
+    static bool s_is_qml_system_theme;
 };

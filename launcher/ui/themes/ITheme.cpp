@@ -33,19 +33,26 @@
  *      limitations under the License.
  */
 #include "ITheme.h"
-#include "rainbow.h"
-#include <QStyleFactory>
+
+#include <rainbow.h>
+
 #include <QDir>
+#include <QQuickStyle>
+#include <QStyleFactory>
+
 #include "Application.h"
 
 void ITheme::apply(bool)
 {
     APPLICATION->setStyleSheet(QString());
+
     QApplication::setStyle(QStyleFactory::create(qtTheme()));
-    if (hasColorScheme()) {
+
+    if (hasColorScheme())
         QApplication::setPalette(colorScheme());
-    }
+
     APPLICATION->setStyleSheet(appStyleSheet());
+
     QDir::setSearchPaths("theme", searchPaths());
 }
 

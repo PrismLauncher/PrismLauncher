@@ -90,6 +90,8 @@ void ThemeCustomizationWidget::applyWidgetTheme(int index) {
     if (originalAppTheme != newAppTheme) {
         settings->set("ApplicationTheme", newAppTheme);
         APPLICATION->applyCurrentlySelectedTheme();
+
+        ui->needsRestartLabel->setVisible(APPLICATION->needsRestartDueToTheme());
     }
 
     emit currentWidgetThemeChanged(index);
