@@ -707,6 +707,7 @@ SET(LAUNCHER_SOURCES
     resources/flat/flat.qrc
     resources/flat_white/flat_white.qrc
     resources/documents/documents.qrc
+    ui/QMLResources.qrc
     ../${Launcher_Branding_LogoQRC}
 
     # Icons
@@ -1090,6 +1091,7 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/iOS/iOS.qrc
     resources/flat/flat.qrc
     resources/documents/documents.qrc
+    ui/QMLResources.qrc
     ../${Launcher_Branding_LogoQRC}
 )
 
