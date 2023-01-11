@@ -1,5 +1,5 @@
-#include "ImportResourcePackDialog.h"
-#include "ui_ImportResourcePackDialog.h"
+#include "ImportResourceDialog.h"
+#include "ui_ImportResourceDialog.h"
 
 #include <QFileDialog>
 #include <QPushButton>
@@ -8,10 +8,11 @@
 #include "InstanceList.h"
 
 #include <InstanceList.h>
-#include "ui/instanceview/InstanceProxyModel.h"
 #include "ui/instanceview/InstanceDelegate.h"
+#include "ui/instanceview/InstanceProxyModel.h"
 
-ImportResourcePackDialog::ImportResourcePackDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ImportResourcePackDialog)
+ImportResourceDialog::ImportResourceDialog(QString file_path, PackedResourceType type, QWidget* parent)
+    : QDialog(parent), ui(new Ui::ImportResourceDialog), m_resource_type(type), m_file_path(file_path)
 {
     ui->setupUi(this);
     setWindowModality(Qt::WindowModal);
@@ -40,15 +41,19 @@ ImportResourcePackDialog::ImportResourcePackDialog(QWidget* parent) : QDialog(pa
     connect(contentsWidget, SIGNAL(doubleClicked(QModelIndex)), SLOT(activated(QModelIndex)));
     connect(contentsWidget->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
             SLOT(selectionChanged(QItemSelection, QItemSelection)));
+
+    ui->label->setText(
+        tr("Choose the instance you would like to import this %1 to.").arg(ResourceUtils::getPackedTypeName(m_resource_type)));
+    ui->label_file_path->setText(tr("File: %1").arg(m_file_path));
 }
 
-void ImportResourcePackDialog::activated(QModelIndex index)
+void ImportResourceDialog::activated(QModelIndex index)
 {
     selectedInstanceKey = index.data(InstanceList::InstanceIDRole).toString();
     accept();
 }
 
-void ImportResourcePackDialog::selectionChanged(QItemSelection selected, QItemSelection deselected)
+void ImportResourceDialog::selectionChanged(QItemSelection selected, QItemSelection deselected)
 {
     if (selected.empty())
         return;
@@ -59,7 +64,7 @@ void ImportResourcePackDialog::selectionChanged(QItemSelection selected, QItemSe
     }
 }
 
-ImportResourcePackDialog::~ImportResourcePackDialog()
+ImportResourceDialog::~ImportResourceDialog()
 {
     delete ui;
 }

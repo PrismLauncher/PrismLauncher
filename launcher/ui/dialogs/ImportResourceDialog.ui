@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ImportResourcePackDialog</class>
- <widget class="QDialog" name="ImportResourcePackDialog">
+ <class>ImportResourceDialog</class>
+ <widget class="QDialog" name="ImportResourceDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,13 +11,20 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Choose instance to import</string>
+   <string>Choose instance to import to</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
       <string>Choose the instance you would like to import this resource pack to.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_file_path">
+     <property name="text">
+      <string/>
      </property>
     </widget>
    </item>
@@ -41,7 +48,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>ImportResourcePackDialog</receiver>
+   <receiver>ImportResourceDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -57,7 +64,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>ImportResourcePackDialog</receiver>
+   <receiver>ImportResourceDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
