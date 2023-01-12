@@ -1332,6 +1332,39 @@ if(INSTALL_BUNDLE STREQUAL "full")
             PATTERN "*qcertonlybackend*" EXCLUDE
         )
     endif()
+    # QML plugins
+    install(
+        DIRECTORY "${QT_QML_DIR}/QtQml"
+        CONFIGURATIONS Debug RelWithDebInfo ""
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+    )
+    install(
+        DIRECTORY "${QT_QML_DIR}/QtQml"
+        CONFIGURATIONS Release MinSizeRel
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "d\\." EXCLUDE
+        REGEX "_debug\\." EXCLUDE
+        REGEX "\\.dSYM" EXCLUDE
+    )
+    # QtQuick plugins
+    install(
+        DIRECTORY "${QT_QML_DIR}/QtQuick"
+        CONFIGURATIONS Debug RelWithDebInfo ""
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+    )
+    install(
+        DIRECTORY "${QT_QML_DIR}/QtQuick"
+        CONFIGURATIONS Release MinSizeRel
+        DESTINATION ${PLUGIN_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "d\\." EXCLUDE
+        REGEX "_debug\\." EXCLUDE
+        REGEX "\\.dSYM" EXCLUDE
+    )
+
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"
