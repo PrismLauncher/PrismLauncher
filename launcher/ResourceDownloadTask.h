@@ -25,32 +25,32 @@
 #include "modplatform/ModIndex.h"
 #include "minecraft/mod/tasks/LocalModUpdateTask.h"
 
-class ModFolderModel;
+class ResourceFolderModel;
 
-class ModDownloadTask : public SequentialTask {
+class ResourceDownloadTask : public SequentialTask {
     Q_OBJECT
 public:
-    explicit ModDownloadTask(ModPlatform::IndexedPack mod, ModPlatform::IndexedVersion version, const std::shared_ptr<ModFolderModel> mods, bool is_indexed = true);
-    const QString& getFilename() const { return m_mod_version.fileName; }
+    explicit ResourceDownloadTask(ModPlatform::IndexedPack pack, ModPlatform::IndexedVersion version, const std::shared_ptr<ResourceFolderModel> packs, bool is_indexed = true);
+    const QString& getFilename() const { return m_pack_version.fileName; }
+    const QString& getCustomPath() const { return m_pack_version.custom_target_folder; }
+    const QVariant& getVersionID() const { return m_pack_version.fileId; }
 
 private:
-    ModPlatform::IndexedPack m_mod;
-    ModPlatform::IndexedVersion m_mod_version;
-    const std::shared_ptr<ModFolderModel> mods;
+    ModPlatform::IndexedPack m_pack;
+    ModPlatform::IndexedVersion m_pack_version;
+    const std::shared_ptr<ResourceFolderModel> m_pack_model;
 
     NetJob::Ptr m_filesNetJob;
     LocalModUpdateTask::Ptr m_update_task;
 
     void downloadProgressChanged(qint64 current, qint64 total);
-
     void downloadFailed(QString reason);
-
     void downloadSucceeded();
 
     std::tuple<QString, QString> to_delete {"", ""};
 
 private slots:
-    void hasOldMod(QString name, QString filename);
+    void hasOldResource(QString name, QString filename);
 };
 
 

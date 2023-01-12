@@ -49,7 +49,7 @@
 #include "BaseVersion.h"
 #include "MojangDownloadInfo.h"
 #include "net/Mode.h"
-#include "modplatform/ModAPI.h"
+#include "modplatform/ResourceAPI.h"
 
 class MinecraftInstance;
 struct PackProfileData;
@@ -145,7 +145,7 @@ public:
     // todo(merged): is this the best approach
     void appendComponent(ComponentPtr component);
 
-    ModAPI::ModLoaderTypes getModLoaders();
+    std::optional<ResourceAPI::ModLoaderTypes> getModLoaders();
 
 private:
     void scheduleSave();

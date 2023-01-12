@@ -52,7 +52,6 @@ class NetAction : public Task {
     virtual ~NetAction() = default;
 
     QUrl url() { return m_url; }
-    auto index() -> int { return m_index_within_job; }
 
     void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
 
@@ -74,9 +73,6 @@ class NetAction : public Task {
 
    public:
     shared_qobject_ptr<QNetworkAccessManager> m_network;
-
-    /// index within the parent job, FIXME: nuke
-    int m_index_within_job = 0;
 
     /// the network reply
     unique_qobject_ptr<QNetworkReply> m_reply;

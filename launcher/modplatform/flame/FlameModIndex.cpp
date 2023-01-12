@@ -11,7 +11,7 @@ static ModPlatform::ProviderCapabilities ProviderCaps;
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::requireInteger(obj, "id");
-    pack.provider = ModPlatform::Provider::FLAME;
+    pack.provider = ModPlatform::ResourceProvider::FLAME;
     pack.name = Json::requireString(obj, "name");
     pack.slug = Json::requireString(obj, "slug");
     pack.websiteUrl = Json::ensureString(Json::ensureObject(obj, "links"), "websiteUrl", "");
@@ -76,10 +76,10 @@ static QString enumToString(int hash_algorithm)
 void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        QJsonArray& arr,
                                        const shared_qobject_ptr<QNetworkAccessManager>& network,
-                                       BaseInstance* inst)
+                                       const BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    auto profile = (dynamic_cast<MinecraftInstance*>(inst))->getPackProfile();
+    auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
     QString mcVersion = profile->getComponentVersion("net.minecraft");
 
     for (auto versionIter : arr) {
@@ -127,7 +127,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     auto hash_list = Json::ensureArray(obj, "hashes");
     for (auto h : hash_list) {
         auto hash_entry = Json::ensureObject(h);
-        auto hash_types = ProviderCaps.hashType(ModPlatform::Provider::FLAME);
+        auto hash_types = ProviderCaps.hashType(ModPlatform::ResourceProvider::FLAME);
         auto hash_algo = enumToString(Json::ensureInteger(hash_entry, "algo", 1, "algorithm"));
         if (hash_types.contains(hash_algo)) {
             file.hash = Json::requireString(hash_entry, "value");

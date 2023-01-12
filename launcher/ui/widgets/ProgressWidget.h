@@ -27,10 +27,10 @@ class ProgressWidget : public QWidget {
 
    public slots:
     /** Watch the progress of a task. */
-    void watch(Task* task);
+    void watch(const Task* task);
 
     /** Watch the progress of a task, and start it if needed */
-    void start(Task* task);
+    void start(const Task* task);
 
     /** Blocking way of waiting for a task to finish. */
     bool exec(std::shared_ptr<Task> task);
@@ -50,7 +50,7 @@ class ProgressWidget : public QWidget {
    private:
     QLabel* m_label = nullptr;
     QProgressBar* m_bar = nullptr;
-    Task* m_task = nullptr;
+    const Task* m_task = nullptr;
 
     bool m_hide_if_inactive = false;
 };

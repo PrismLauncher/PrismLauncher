@@ -33,7 +33,7 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     if (pack.addonId.toString().isEmpty())
         pack.addonId = Json::requireString(obj, "id");
 
-    pack.provider = ModPlatform::Provider::MODRINTH;
+    pack.provider = ModPlatform::ResourceProvider::MODRINTH;
     pack.name = Json::requireString(obj, "title");
 
     pack.slug = Json::ensureString(obj, "slug", "");
@@ -95,10 +95,10 @@ void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
 void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        QJsonArray& arr,
                                        const shared_qobject_ptr<QNetworkAccessManager>& network,
-                                       BaseInstance* inst)
+                                       const BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    QString mcVersion = (static_cast<MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.minecraft");
+    QString mcVersion = (static_cast<const MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.minecraft");
 
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
@@ -179,7 +179,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
             file.hash = Json::requireString(hash_list, preferred_hash_type);
             file.hash_type = preferred_hash_type;
         } else {
-            auto hash_types = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH);
+            auto hash_types = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH);
             for (auto& hash_type : hash_types) {
                 if (hash_list.contains(hash_type)) {
                     file.hash = Json::requireString(hash_list, hash_type);

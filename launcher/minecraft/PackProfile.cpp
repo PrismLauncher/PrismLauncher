@@ -55,12 +55,13 @@
 #include "PackProfile_p.h"
 #include "ComponentUpdateTask.h"
 
-#include "modplatform/ModAPI.h"
+#include "Application.h"
+#include "modplatform/ResourceAPI.h"
 
-static const QMap<QString, ModAPI::ModLoaderType> modloaderMapping{
-    {"net.minecraftforge", ModAPI::Forge},
-    {"net.fabricmc.fabric-loader", ModAPI::Fabric},
-    {"org.quiltmc.quilt-loader", ModAPI::Quilt}
+static const QMap<QString, ResourceAPI::ModLoaderType> modloaderMapping{
+    {"net.minecraftforge", ResourceAPI::Forge},
+    {"net.fabricmc.fabric-loader", ResourceAPI::Fabric},
+    {"org.quiltmc.quilt-loader", ResourceAPI::Quilt}
 };
 
 PackProfile::PackProfile(MinecraftInstance * instance)
@@ -1066,19 +1067,22 @@ void PackProfile::disableInteraction(bool disable)
     }
 }
 
-ModAPI::ModLoaderTypes PackProfile::getModLoaders()
+std::optional<ResourceAPI::ModLoaderTypes> PackProfile::getModLoaders()
 {
-    ModAPI::ModLoaderTypes result = ModAPI::Unspecified;
+    ResourceAPI::ModLoaderTypes result;
+    bool has_any_loader = false;
 
-    QMapIterator<QString, ModAPI::ModLoaderType> i(modloaderMapping);
+    QMapIterator<QString, ResourceAPI::ModLoaderType> i(modloaderMapping);
 
-    while (i.hasNext())
-    {
+    while (i.hasNext()) {
         i.next();
-        Component* c = getComponent(i.key());
-        if (c != nullptr && c->isEnabled()) {
+        if (auto c = getComponent(i.key()); c != nullptr && c->isEnabled()) {
             result |= i.value();
+            has_any_loader = true;
         }
     }
+
+    if (!has_any_loader)
+        return {};
     return result;
 }

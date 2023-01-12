@@ -48,7 +48,7 @@ class PackwizTest : public QObject {
         QCOMPARE(metadata.hash_format, "sha512");
         QCOMPARE(metadata.hash, "c8fe6e15ddea32668822dddb26e1851e5f03834be4bcb2eff9c0da7fdc086a9b6cead78e31a44d3bc66335cba11144ee0337c6d5346f1ba63623064499b3188d");
 
-        QCOMPARE(metadata.provider, ModPlatform::Provider::MODRINTH);
+        QCOMPARE(metadata.provider, ModPlatform::ResourceProvider::MODRINTH);
         QCOMPARE(metadata.version(), "ug2qKTPR");
         QCOMPARE(metadata.mod_id(), "kYq5qkSL");
    }
@@ -76,7 +76,7 @@ class PackwizTest : public QObject {
         QCOMPARE(metadata.hash_format, "murmur2");
         QCOMPARE(metadata.hash, "1781245820");
 
-        QCOMPARE(metadata.provider, ModPlatform::Provider::FLAME);
+        QCOMPARE(metadata.provider, ModPlatform::ResourceProvider::FLAME);
         QCOMPARE(metadata.file_id, 3509043);
         QCOMPARE(metadata.project_id, 327154);
     }
