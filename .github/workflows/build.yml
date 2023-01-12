@@ -105,6 +105,7 @@ jobs:
       INSTALL_APPIMAGE_DIR: "install-appdir"
       BUILD_DIR: "build"
       CCACHE_VAR: ""
+      HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
 
     steps:
       ##
