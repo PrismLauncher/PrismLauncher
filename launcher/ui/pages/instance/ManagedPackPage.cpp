@@ -9,14 +9,13 @@
 #include <QProxyStyle>
 #include <QStyleFactory>
 
-#include <HoeDown.h>
-
 #include "Application.h"
 #include "BuildConfig.h"
 #include "InstanceImportTask.h"
 #include "InstanceList.h"
 #include "InstanceTask.h"
 #include "Json.h"
+#include "Markdown.h"
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
 
@@ -263,8 +262,7 @@ void ModrinthManagedPackPage::suggestVersion()
     auto index = ui->versionsComboBox->currentIndex();
     auto version = m_pack.versions.at(index);
 
-    HoeDown md_parser;
-    ui->changelogTextBrowser->setHtml(md_parser.process(version.changelog.toUtf8()));
+    ui->changelogTextBrowser->setHtml(markdownToHTML(version.changelog.toUtf8()));
 
     ManagedPackPage::suggestVersion();
 }

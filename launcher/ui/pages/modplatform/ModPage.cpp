@@ -43,13 +43,11 @@
 #include <QRegularExpression>
 #include <memory>
 
-#include <HoeDown.h>
-
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "ui/dialogs/ModDownloadDialog.h"
 #include "ui/widgets/ProjectItem.h"
-
+#include "Markdown.h"
 
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api)
     : QWidget(dialog)
@@ -427,11 +425,6 @@ void ModPage::updateUi()
 
     text += "<hr>";
 
-    HoeDown h;
-
-    // hoedown bug: it doesn't handle markdown surrounded by block tags (like center, div) so strip them
-    current.extraData.body.remove(QRegularExpression("<[^>]*(?:center|div)\\W*>"));
-
-    ui->packDescription->setHtml(text + (current.extraData.body.isEmpty() ? current.description : h.process(current.extraData.body.toUtf8())));
+    ui->packDescription->setHtml(text + (current.extraData.body.isEmpty() ? current.description : markdownToHTML(current.extraData.body)));
     ui->packDescription->flush();
 }

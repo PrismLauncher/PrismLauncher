@@ -18,11 +18,13 @@ See [github repo](https://github.com/FeralInteractive/gamemode).
 
 BSD-3-Clause licensed
 
-## hoedown
+## cmark
 
-Hoedown is a revived fork of Sundown, the Markdown parser based on the original code of the Upskirt library by Natacha Porté.
+The C reference implementation of CommonMark, a standardized Markdown spec.
 
-See [github repo](https://github.com/hoedown/hoedown).
+See [github_repo](https://github.com/commonmark/cmark).
+
+BSD2 licensed.
 
 ## javacheck
 

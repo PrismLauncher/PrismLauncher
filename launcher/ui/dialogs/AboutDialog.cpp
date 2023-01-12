@@ -39,11 +39,10 @@
 #include <QIcon>
 #include "Application.h"
 #include "BuildConfig.h"
+#include "Markdown.h"
 
 #include <net/NetJob.h>
 #include <qobject.h>
-
-#include "HoeDown.h"
 
 namespace {
 QString getLink(QString link, QString name) {
@@ -114,10 +113,9 @@ QString getCreditsHtml()
 
 QString getLicenseHtml()
 {
-    HoeDown hoedown;
     QFile dataFile(":/documents/COPYING.md");
     dataFile.open(QIODevice::ReadOnly);
-    QString output = hoedown.process(dataFile.readAll());
+    QString output = markdownToHTML(dataFile.readAll());
     return output;
 }
 

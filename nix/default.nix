@@ -18,6 +18,7 @@
 , extra-cmake-modules
 , tomlplusplus
 , ghc_filesystem
+, cmark
 , msaClientID ? ""
 , jdks ? [ jdk17 jdk8 ]
 
@@ -41,6 +42,7 @@ stdenv.mkDerivation rec {
     quazip
     ghc_filesystem
     tomlplusplus
+    cmark
   ] ++ lib.optional (lib.versionAtLeast qtbase.version "6") qtwayland;
 
   cmakeFlags = lib.optionals (msaClientID != "") [ "-DLauncher_MSA_CLIENT_ID=${msaClientID}" ]

@@ -136,6 +136,7 @@ jobs:
             quazip-qt6:p
             ccache:p
             qt6-5compat:p
+            cmark:p
 
       - name: Force newer ccache
         if: runner.os == 'Windows' && matrix.msystem == '' && inputs.build_type == 'Debug'

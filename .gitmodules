@@ -16,3 +16,6 @@
 [submodule "libraries/extra-cmake-modules"]
 	path = libraries/extra-cmake-modules
 	url = https://github.com/KDE/extra-cmake-modules
+[submodule "libraries/cmark"]
+	path = libraries/cmark
+	url = https://github.com/commonmark/cmark.git
