@@ -144,6 +144,7 @@ jobs:
             ccache:p
             qt6-5compat:p
             cmark:p
+            qt6-declarative:p
 
       - name: Force newer ccache
         if: runner.os == 'Windows' && matrix.msystem == '' && inputs.build_type == 'Debug'
@@ -199,11 +200,6 @@ jobs:
           brew update
           brew install ninja extra-cmake-modules
 
-      - name: Install Qt (Linux)
-        if: runner.os == 'Linux' && matrix.qt_ver != 6
-        run: |
-          sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
-
       - name: Install host Qt (Windows MSVC arm64)
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
         uses: jurplel/install-qt-action@v3
@@ -221,8 +217,13 @@ jobs:
            dir: ${{ github.workspace }}\HostQt
            set-env: false
 
-      - name: Install Qt (macOS, Linux, Qt 6 & Windows MSVC)
-        if: runner.os == 'Linux' && matrix.qt_ver == 6 || runner.os == 'macOS' || (runner.os == 'Windows' && matrix.msystem == '')
+      - name: Install Qt (Linux Qt5)
+        if: runner.os == 'Linux' && matrix.qt_ver != 6
+        run: |
+          sudo apt-get -y install ninja-build extra-cmake-modules scdoc qtbase5-dev qtdeclarative5-dev qtquickcontrols2-5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5 libqt5qml5 qml-module-qtquick-layouts qml-module-qtqml-models2
+
+      - name: Install Qt (macOS, Linux Qt6, & Windows MSVC)
+        if: (runner.os == 'Linux' && matrix.qt_ver == 6) || runner.os == 'macOS' || (runner.os == 'Windows' && matrix.msystem == '')
         uses: jurplel/install-qt-action@v3
         with:
            aqtversion: '==3.1.*'
@@ -493,6 +494,8 @@ jobs:
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib/server"
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib"
           export LD_LIBRARY_PATH
+
+          export QML_SOURCES_PATHS=./
 
           ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.prismlauncher.PrismLauncher.svg
 
