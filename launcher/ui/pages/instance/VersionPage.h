@@ -86,6 +86,7 @@ private slots:
     void on_actionMove_down_triggered();
     void on_actionAdd_to_Minecraft_jar_triggered();
     void on_actionReplace_Minecraft_jar_triggered();
+    void on_actionImport_Components_triggered();
     void on_actionAdd_Agents_triggered();
     void on_actionRevert_triggered();
     void on_actionEdit_triggered();
