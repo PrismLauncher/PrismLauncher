@@ -192,6 +192,10 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
 
+    // Use account for instance, this does not have a global override
+    m_settings->registerSetting("UseAccountForInstance", false);
+    m_settings->registerSetting("InstanceAccountId", "");
+
     qDebug() << "Instance-type specific settings were loaded!";
 
     setSpecificSettingsLoaded(true);
