@@ -246,12 +246,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Add the news label to the news toolbar.
     {
         m_newsChecker.reset(new NewsChecker(APPLICATION->network(), BuildConfig.NEWS_RSS_URL));
-        newsLabel = dynamic_cast<QToolButton*>(ui->newsToolBar->widgetForAction(ui->actionNewsLabel));
-
-        //add a spacer before the more news button
-        QWidget *spacer = new QWidget();
-        spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        ui->newsToolBar->insertWidget(ui->actionMoreNews, spacer);
+        newsLabel = new QToolButton();
+        newsLabel->setIcon(APPLICATION->getThemedIcon("news"));
+        newsLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        newsLabel->setFocusPolicy(Qt::NoFocus);
+        ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
 
         QObject::connect(newsLabel, &QAbstractButton::clicked, this, &MainWindow::newsButtonClicked);
         QObject::connect(m_newsChecker.get(), &NewsChecker::newsLoaded, this, &MainWindow::updateNewsLabel);

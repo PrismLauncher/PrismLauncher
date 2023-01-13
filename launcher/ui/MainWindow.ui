@@ -84,7 +84,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionNewsLabel"/>
    <addaction name="actionMoreNews"/>
   </widget>
   <widget class="WideBar" name="instanceToolBar">
@@ -222,15 +221,6 @@
    <addaction name="accountsMenu"/>
    <addaction name="helpMenu"/>
   </widget>
-  <action name="actionNewsLabel">
-   <property name="icon">
-    <iconset theme="news">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>News</string>
-   </property>
-  </action>
   <action name="actionMoreNews">
    <property name="icon">
     <iconset theme="news">
