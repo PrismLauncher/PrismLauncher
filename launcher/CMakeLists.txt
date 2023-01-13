@@ -631,7 +631,7 @@ SET(LAUNCHER_SOURCES
     DesktopServices.cpp
     VersionProxyModel.h
     VersionProxyModel.cpp
-    HoeDown.h
+    Markdown.h
 
     # Super secret!
     KonamiCode.h
@@ -1053,7 +1053,7 @@ target_link_libraries(Launcher_logic
 )
 target_link_libraries(Launcher_logic
     QuaZip::QuaZip
-    hoedown
+    cmark::cmark
     LocalPeer
     Launcher_rainbow
 )

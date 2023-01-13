@@ -39,6 +39,7 @@ modules:
     sources:
         - type: dir
           path: ../
+    builddir: true
   - name: openjdk
     buildsystem: simple
     build-commands:
