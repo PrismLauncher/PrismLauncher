@@ -466,7 +466,7 @@ void InstanceSettingsPage::updateAccountsMenu()
 
     if (defaultAccount) {
         ui->instanceAccountSelector->setText(defaultAccount->profileName());
-        ui->instanceAccountSelector->setIcon(defaultAccount->getFace());
+        ui->instanceAccountSelector->setIcon(getFaceForAccount(defaultAccount));
     } else {
         ui->instanceAccountSelector->setText(tr("No default account"));
         ui->instanceAccountSelector->setIcon(APPLICATION->getThemedIcon("noaccount"));
@@ -480,17 +480,19 @@ void InstanceSettingsPage::updateAccountsMenu()
         if (accountIndex == i) {
             action->setChecked(true);
         }
-
-        auto face = account->getFace();
-        if (!face.isNull()) {
-            action->setIcon(face);
-        } else {
-            action->setIcon(APPLICATION->getThemedIcon("noaccount"));
-        }
-
+        action->setIcon(getFaceForAccount(account));
         accountMenu->addAction(action);
         connect(action, SIGNAL(triggered(bool)), this, SLOT(changeInstanceAccount()));
     }
+}
+
+QIcon InstanceSettingsPage::getFaceForAccount(MinecraftAccountPtr account)
+{
+    if (auto face = account->getFace(); !face.isNull()) {
+        return face;
+    }
+
+    return APPLICATION->getThemedIcon("noaccount");
 }
 
 void InstanceSettingsPage::changeInstanceAccount()
@@ -506,11 +508,7 @@ void InstanceSettingsPage::changeInstanceAccount()
     m_settings->set("InstanceAccountId", account->profileId());
 
     ui->instanceAccountSelector->setText(account->profileName());
-    if (auto face = account->getFace(); !face.isNull()) {
-        ui->instanceAccountSelector->setIcon(face);
-    } else {
-        ui->instanceAccountSelector->setIcon(APPLICATION->getThemedIcon("noaccount"));
-    }
+    ui->instanceAccountSelector->setIcon(getFaceForAccount(account));
 }
 
 void InstanceSettingsPage::on_maxMemSpinBox_valueChanged(int i)

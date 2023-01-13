@@ -94,6 +94,7 @@ private slots:
     void globalSettingsButtonClicked(bool checked);
 
     void updateAccountsMenu();
+    QIcon getFaceForAccount(MinecraftAccountPtr account);
     void changeInstanceAccount();
 
 private:
