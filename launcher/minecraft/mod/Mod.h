@@ -71,6 +71,9 @@ public:
     void setStatus(ModStatus status);
     void setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata);
     void setMetadata(const Metadata::ModStruct& metadata) { setMetadata(std::make_shared<Metadata::ModStruct>(metadata)); }
+    void setDetails(const ModDetails& details);
+
+    bool valid() const override;
 
     [[nodiscard]] auto compare(Resource const& other, SortType type) const -> std::pair<int, bool> override;
     [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;

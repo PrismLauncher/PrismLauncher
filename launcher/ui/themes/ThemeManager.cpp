@@ -28,24 +28,16 @@
 
 #include "Application.h"
 
-#ifdef Q_OS_WIN
-#include <windows.h>
-// this is needed for versionhelpers.h, it is also included in WinDarkmode, but we can't rely on that.
-// Ultimately this should be included in versionhelpers, but that is outside of the project.
-#include "ui/WinDarkmode.h"
-#include <versionhelpers.h>
-#endif
-
 ThemeManager::ThemeManager(MainWindow* mainWindow)
 {
     m_mainWindow = mainWindow;
-    InitializeThemes();
+    initializeThemes();
 }
 
 /// @brief Adds the Theme to the list of themes
 /// @param theme The Theme to add
 /// @return Theme ID
-QString ThemeManager::AddTheme(std::unique_ptr<ITheme> theme)
+QString ThemeManager::addTheme(std::unique_ptr<ITheme> theme)
 {
     QString id = theme->id();
     m_themes.emplace(id, std::move(theme));
@@ -55,12 +47,12 @@ QString ThemeManager::AddTheme(std::unique_ptr<ITheme> theme)
 /// @brief Gets the Theme from the List via ID
 /// @param themeId Theme ID of theme to fetch
 /// @return Theme at themeId
-ITheme* ThemeManager::GetTheme(QString themeId)
+ITheme* ThemeManager::getTheme(QString themeId)
 {
     return m_themes[themeId].get();
 }
 
-void ThemeManager::InitializeThemes()
+void ThemeManager::initializeThemes()
 {
     // Icon themes
     {
@@ -75,10 +67,10 @@ void ThemeManager::InitializeThemes()
     // Initialize widget themes
     {
         themeDebugLog() << "<> Initializing Widget Themes";
-        themeDebugLog() << "Loading Built-in Theme:" << AddTheme(std::make_unique<SystemTheme>());
-        auto darkThemeId = AddTheme(std::make_unique<DarkTheme>());
+        themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>());
+        auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
         themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
-        themeDebugLog() << "Loading Built-in Theme:" << AddTheme(std::make_unique<BrightTheme>());
+        themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
 
         // TODO: need some way to differentiate same name themes in different subdirectories (maybe smaller grey text next to theme name in
         // dropdown?)
@@ -92,7 +84,7 @@ void ThemeManager::InitializeThemes()
             if (themeJson.exists()) {
                 // Load "theme.json" based themes
                 themeDebugLog() << "Loading JSON Theme from:" << themeJson.absoluteFilePath();
-                AddTheme(std::make_unique<CustomTheme>(GetTheme(darkThemeId), themeJson, true));
+                addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), themeJson, true));
             } else {
                 // Load pure QSS Themes
                 QDirIterator stylesheetFileIterator(dir.absoluteFilePath(""), { "*.qss", "*.css" }, QDir::Files);
@@ -100,7 +92,7 @@ void ThemeManager::InitializeThemes()
                     QFile customThemeFile(stylesheetFileIterator.next());
                     QFileInfo customThemeFileInfo(customThemeFile);
                     themeDebugLog() << "Loading QSS Theme from:" << customThemeFileInfo.absoluteFilePath();
-                    AddTheme(std::make_unique<CustomTheme>(GetTheme(darkThemeId), customThemeFileInfo, false));
+                    addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), customThemeFileInfo, false));
                 }
             }
         }
@@ -128,28 +120,36 @@ void ThemeManager::applyCurrentlySelectedTheme()
 {
     setIconTheme(APPLICATION->settings()->get("IconTheme").toString());
     themeDebugLog() << "<> Icon theme set.";
-    setApplicationTheme(APPLICATION->settings()->get("ApplicationTheme").toString(), true);
+    setApplicationTheme(APPLICATION->settings()->get("ApplicationTheme").toString());
     themeDebugLog() << "<> Application theme set.";
 }
 
-void ThemeManager::setApplicationTheme(const QString& name, bool initial)
+void ThemeManager::setApplicationTheme(const QString& name)
 {
     auto systemPalette = qApp->palette();
     auto themeIter = m_themes.find(name);
     if (themeIter != m_themes.end()) {
         auto& theme = themeIter->second;
         themeDebugLog() << "applying theme" << theme->name();
-        theme->apply(initial);
-#ifdef Q_OS_WIN
-        if (m_mainWindow && IsWindows10OrGreater()) {
-            if (QString::compare(theme->id(), "dark") == 0) {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-            } else {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
-            }
-        }
-#endif
+        theme->apply();
     } else {
         themeWarningLog() << "Tried to set invalid theme:" << name;
     }
+}
+
+QString ThemeManager::getCatImage(QString catName)
+{
+    QDateTime now = QDateTime::currentDateTime();
+    QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
+    QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
+    QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
+    QString cat = !catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString();
+    if (std::abs(now.daysTo(xmas)) <= 4) {
+        cat += "-xmas";
+    } else if (std::abs(now.daysTo(halloween)) <= 4) {
+        cat += "-spooky";
+    } else if (std::abs(now.daysTo(birthday)) <= 12) {
+        cat += "-bday";
+    }
+    return cat;
 }

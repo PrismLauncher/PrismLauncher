@@ -331,12 +331,18 @@ set(MINECRAFT_SOURCES
     minecraft/mod/Resource.cpp
     minecraft/mod/ResourceFolderModel.h
     minecraft/mod/ResourceFolderModel.cpp
+    minecraft/mod/DataPack.h
+    minecraft/mod/DataPack.cpp
     minecraft/mod/ResourcePack.h
     minecraft/mod/ResourcePack.cpp
     minecraft/mod/ResourcePackFolderModel.h
     minecraft/mod/ResourcePackFolderModel.cpp
     minecraft/mod/TexturePack.h
     minecraft/mod/TexturePack.cpp
+    minecraft/mod/ShaderPack.h
+    minecraft/mod/ShaderPack.cpp
+    minecraft/mod/WorldSave.h
+    minecraft/mod/WorldSave.cpp
     minecraft/mod/TexturePackFolderModel.h
     minecraft/mod/TexturePackFolderModel.cpp
     minecraft/mod/ShaderPackFolderModel.h
@@ -347,10 +353,18 @@ set(MINECRAFT_SOURCES
     minecraft/mod/tasks/LocalModParseTask.cpp
     minecraft/mod/tasks/LocalModUpdateTask.h
     minecraft/mod/tasks/LocalModUpdateTask.cpp
+    minecraft/mod/tasks/LocalDataPackParseTask.h
+    minecraft/mod/tasks/LocalDataPackParseTask.cpp
     minecraft/mod/tasks/LocalResourcePackParseTask.h
     minecraft/mod/tasks/LocalResourcePackParseTask.cpp
     minecraft/mod/tasks/LocalTexturePackParseTask.h
     minecraft/mod/tasks/LocalTexturePackParseTask.cpp
+    minecraft/mod/tasks/LocalShaderPackParseTask.h
+    minecraft/mod/tasks/LocalShaderPackParseTask.cpp
+    minecraft/mod/tasks/LocalWorldSaveParseTask.h
+    minecraft/mod/tasks/LocalWorldSaveParseTask.cpp
+    minecraft/mod/tasks/LocalResourceParse.h
+    minecraft/mod/tasks/LocalResourceParse.cpp
 
     # Assets
     minecraft/AssetsUtils.h
@@ -669,6 +683,8 @@ SET(LAUNCHER_SOURCES
     ui/setupwizard/LanguageWizardPage.h
     ui/setupwizard/PasteWizardPage.cpp
     ui/setupwizard/PasteWizardPage.h
+    ui/setupwizard/ThemeWizardPage.cpp
+    ui/setupwizard/ThemeWizardPage.h
 
     # GUI - themes
     ui/themes/FusionTheme.cpp
@@ -908,6 +924,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/ProgressWidget.cpp
     ui/widgets/WideBar.h
     ui/widgets/WideBar.cpp
+    ui/widgets/ThemeCustomizationWidget.h
+    ui/widgets/ThemeCustomizationWidget.cpp
 
     # GUI - instance group view
     ui/instanceview/InstanceProxyModel.cpp
@@ -923,18 +941,9 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/VisualGroup.h
 )
 
-if(WIN32)
-    set(LAUNCHER_SOURCES
-        ${LAUNCHER_SOURCES}
-
-        # GUI - dark titlebar for Windows 10/11
-        ui/WinDarkmode.h
-        ui/WinDarkmode.cpp
-    )
-endif()
-
 qt_wrap_ui(LAUNCHER_UI
     ui/setupwizard/PasteWizardPage.ui
+    ui/setupwizard/ThemeWizardPage.ui
     ui/pages/global/AccountListPage.ui
     ui/pages/global/JavaPage.ui
     ui/pages/global/LauncherPage.ui
@@ -967,6 +976,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/widgets/CustomCommands.ui
     ui/widgets/InfoFrame.ui
     ui/widgets/ModFilterWidget.ui
+    ui/widgets/ThemeCustomizationWidget.ui
     ui/dialogs/CopyInstanceDialog.ui
     ui/dialogs/ProfileSetupDialog.ui
     ui/dialogs/ProgressDialog.ui

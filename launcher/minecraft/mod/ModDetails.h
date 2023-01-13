@@ -81,7 +81,7 @@ struct ModDetails
     ModDetails() = default;
 
     /** Metadata should be handled manually to properly set the mod status. */
-    ModDetails(ModDetails& other)
+    ModDetails(const ModDetails& other)
         : mod_id(other.mod_id)
         , name(other.name)
         , version(other.version)
@@ -92,7 +92,7 @@ struct ModDetails
         , status(other.status)
     {}
 
-    ModDetails& operator=(ModDetails& other)
+    ModDetails& operator=(const ModDetails& other)
     {
         this->mod_id = other.mod_id;
         this->name = other.name;
@@ -106,7 +106,7 @@ struct ModDetails
         return *this;
     }
 
-    ModDetails& operator=(ModDetails&& other)
+    ModDetails& operator=(const ModDetails&& other)
     {
         this->mod_id = other.mod_id;
         this->name = other.name;

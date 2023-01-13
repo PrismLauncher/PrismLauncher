@@ -13,7 +13,8 @@
 SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 {
     setObjectName(QStringLiteral("SetupWizard"));
-    resize(615, 659);
+    resize(620, 660);
+    setMinimumSize(300, 400);
     // make it ugly everywhere to avoid variability in theming
     setWizardStyle(QWizard::ClassicStyle);
     setOptions(QWizard::NoCancelButton | QWizard::IndependentPages | QWizard::HaveCustomButton1);
