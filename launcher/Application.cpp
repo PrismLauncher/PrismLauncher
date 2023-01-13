@@ -266,7 +266,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
     }
 
-    for (auto zip_path : parser.positionalArguments()){ // treat unspesified positional arguments as import urls
+    // treat unspecified positional arguments as import urls
+    for (auto zip_path : parser.positionalArguments()) {
         m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
     }
 

@@ -1816,7 +1816,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
 {
     // NOTE: This loop only processes one dropped file!
     for (auto& url : urls) {
-        qDebug() << "Processing :" << url;
+        qDebug() << "Processing" << url;
 
         // The isLocalFile() check below doesn't work as intended without an explicit scheme.
         if (url.scheme().isEmpty())
@@ -1832,9 +1832,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
         auto type = ResourceUtils::identify(localFileInfo);
 
-        // bool is_resource = type;
-
-        if (!(ResourceUtils::ValidResourceTypes.count(type) > 0)) {  // probably instance/modpack
+        if (ResourceUtils::ValidResourceTypes.count(type) == 0) {  // probably instance/modpack
             addInstance(localFileName);
             continue;
         }
