@@ -289,43 +289,53 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
             return;
         }
 
+        QJsonArray entries;
+
         try {
-            QJsonArray entries;
             if (addonIds.size() == 1)
                 entries = { doc.object() };
             else
                 entries = Json::requireArray(doc);
-
-            for (auto entry : entries) {
-                auto entry_obj = Json::requireObject(entry);
-
-                ModPlatform::IndexedPack pack;
-                Modrinth::loadIndexedPack(pack, entry_obj);
-
-                auto hash = addonIds.find(pack.addonId.toString()).value();
-
-                auto mod_iter = m_mods.find(hash);
-                if (mod_iter == m_mods.end()) {
-                    qWarning() << "Invalid project id from the API response.";
-                    continue;
-                }
-
-                auto* mod = mod_iter.value();
-
-                try {
-                    setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod->name()));
-
-                    modrinthCallback(pack, m_temp_versions.find(hash).value(), mod);
-                } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
-
-                    emitFail(mod);
-                }
-            }
         } catch (Json::JsonException& e) {
             qDebug() << e.cause();
             qDebug() << doc;
+        }
+
+        for (auto entry : entries) {
+            ModPlatform::IndexedPack pack;
+
+            try {
+                auto entry_obj = Json::requireObject(entry);
+
+                Modrinth::loadIndexedPack(pack, entry_obj);
+            } catch (Json::JsonException& e) {
+                qDebug() << e.cause();
+                qDebug() << doc;
+
+                // Skip this entry, since it has problems
+                continue;
+            }
+
+            auto hash = addonIds.find(pack.addonId.toString()).value();
+
+            auto mod_iter = m_mods.find(hash);
+            if (mod_iter == m_mods.end()) {
+                qWarning() << "Invalid project id from the API response.";
+                continue;
+            }
+
+            auto* mod = mod_iter.value();
+
+            try {
+                setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod->name()));
+
+                modrinthCallback(pack, m_temp_versions.find(hash).value(), mod);
+            } catch (Json::JsonException& e) {
+                qDebug() << e.cause();
+                qDebug() << entries;
+
+                emitFail(mod);
+            }
         }
     });
 
