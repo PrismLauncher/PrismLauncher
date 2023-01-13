@@ -27,6 +27,7 @@
 static ModrinthAPI api;
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
+// https://docs.modrinth.com/api-spec/#tag/projects/operation/getProject
 void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::ensureString(obj, "project_id");
@@ -44,7 +45,7 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 
     pack.description = Json::ensureString(obj, "description", "");
 
-    pack.logoUrl = Json::requireString(obj, "icon_url");
+    pack.logoUrl = Json::ensureString(obj, "icon_url", "");
     pack.logoName = pack.addonId.toString();
 
     ModPlatform::ModpackAuthor modAuthor;
