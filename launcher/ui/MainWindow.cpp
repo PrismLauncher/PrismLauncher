@@ -1232,11 +1232,9 @@ void MainWindow::updateToolsMenu()
 {
     QToolButton *launchButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstance));
 
-    bool currentInstanceRunning = m_selectedInstance && m_selectedInstance->isRunning();
-
-    ui->actionLaunchInstance->setDisabled(!m_selectedInstance || currentInstanceRunning);
-    ui->actionLaunchInstanceOffline->setDisabled(!m_selectedInstance || currentInstanceRunning);
-    ui->actionLaunchInstanceDemo->setDisabled(!m_selectedInstance || currentInstanceRunning);
+    ui->actionLaunchInstance->setDisabled(!m_selectedInstance);
+    ui->actionLaunchInstanceOffline->setDisabled(!m_selectedInstance);
+    ui->actionLaunchInstanceDemo->setDisabled(!m_selectedInstance);
 
     QMenu *launchMenu = ui->actionLaunchInstance->menu();
     launchButton->setPopupMode(QToolButton::MenuButtonPopup);
@@ -2171,7 +2169,7 @@ void MainWindow::instanceActivated(QModelIndex index)
 
 void MainWindow::on_actionLaunchInstance_triggered()
 {
-    if(m_selectedInstance && !m_selectedInstance->isRunning())
+    if(m_selectedInstance)
     {
         APPLICATION->launch(m_selectedInstance);
     }

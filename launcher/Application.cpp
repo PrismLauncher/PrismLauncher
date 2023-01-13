@@ -1163,12 +1163,25 @@ bool Application::launch(
         MinecraftServerTargetPtr serverToJoin,
         MinecraftAccountPtr accountToUse
 ) {
+    //This can cause the instance to become corrupted
     if(m_updateRunning)
     {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
     }
     else if(instance->canLaunch())
     {
+        //This can cause the instance to become corrupted, but the default Minecraft launcher allows it :^)
+        if (instance->isRunning())
+        {
+            auto reply = QMessageBox::question(nullptr, tr("Warning"), tr("Are you sure you want to launch this instance again? Launching the same instance multiple times could corrupt it!"), QMessageBox::Yes | QMessageBox::No);
+            if(reply != QMessageBox::Yes)
+            {
+                return false;
+            }
+
+            qDebug() << "Launching an instance that was already running.";
+        }
+
         auto & extras = m_instanceExtras[instance->id()];
         auto & window = extras.window;
         if(window)
