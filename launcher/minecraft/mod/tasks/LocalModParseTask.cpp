@@ -16,7 +16,7 @@
 namespace {
 
 // NEW format
-// https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/6f62b37cea040daf350dc253eae6326dd9c822c3
+// https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/c8d8f1929aff9979e322af79a59ce81f3e02db6a
 
 // OLD format:
 // https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/5bf6a2d05145ec79387acc0d45c958642fb049fc
@@ -73,10 +73,11 @@ ModDetails ReadMCModInfo(QByteArray contents)
             version = Json::ensureString(val, "").toInt();
 
         if (version != 2) {
-            qCritical() << "BAD stuff happened to mod json:";
-            qCritical() << contents;
-            return {};
+            qWarning() << QString(R"(The value of 'modListVersion' is "%1" (expected "2")! The file may be corrupted.)").arg(version);
+            qWarning() << "The contents of 'mcmod.info' are as follows:";
+            qWarning() << contents;
         }
+
         auto arrVal = jsonDoc.object().value("modlist");
         if (arrVal.isUndefined()) {
             arrVal = jsonDoc.object().value("modList");
