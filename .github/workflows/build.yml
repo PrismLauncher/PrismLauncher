@@ -199,6 +199,7 @@ jobs:
         run: |
           brew update
           brew install ninja extra-cmake-modules
+          python3 -m pip install macholib
 
       - name: Install host Qt (Windows MSVC arm64)
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
