@@ -79,16 +79,17 @@ void Version::parse()
         return (( lastChar.isLetter() && currentChar.isDigit() ) || (lastChar.isDigit() && currentChar.isLetter()) );
     };
     for (int i = 0; i < m_string.size(); ++i) {
-        if(m_string[i].isDigit() || m_string[i].isLetter()){
-            if(i>0 && classChange(m_string[i-1], m_string[i])){
+        const auto& current_char = m_string.at(i);
+        if(current_char.isDigit() || current_char.isLetter()){
+            if(i>0 && classChange(m_string.at(i-1), current_char)){
                 if(!currentSection.isEmpty()){
                     m_sections.append(Section(currentSection));
                 }
                 currentSection = "";
             }
-            currentSection += m_string[i];
+            currentSection += current_char;
         }
-        else if(m_string[i] == '.' || m_string[i] == '-' || m_string[i] == '_'){
+        else if(current_char == '.' || current_char == '-' || current_char == '_'){
             if(!currentSection.isEmpty()){
                 m_sections.append(Section(currentSection));
             }
