@@ -74,12 +74,36 @@ bool Version::operator!=(const Version &other) const
 void Version::parse()
 {
     m_sections.clear();
-
-    // FIXME: this is bad. versions can contain a lot more separators...
-    QStringList parts = m_string.split('.');
-
-    for (const auto& part : parts)
-    {
-        m_sections.append(Section(part));
+    QString currentSection;
+    bool lastCharWasDigit = false;
+    for (int i = 0; i < m_string.size(); ++i) {
+        if(m_string[i].isDigit()){
+            if(!lastCharWasDigit){
+                if(!currentSection.isEmpty()){
+                    m_sections.append(Section(currentSection));
+                }
+                currentSection = "";
+            }
+            currentSection += m_string[i];
+            lastCharWasDigit = true;
+        }else if(m_string[i].isLetter()){
+            if(lastCharWasDigit){
+                if(!currentSection.isEmpty()){
+                    m_sections.append(Section(currentSection));
+                }
+                currentSection = "";
+            }
+            currentSection += m_string[i];
+            lastCharWasDigit = false;
+        }
+        else if(m_string[i] == '-' || m_string[i] == '_'){
+            if(!currentSection.isEmpty()){
+                m_sections.append(Section(currentSection));
+            }
+            currentSection = "";
+        }
+    }
+    if (!currentSection.isEmpty()) {
+        m_sections.append(Section(currentSection));
     }
 }
