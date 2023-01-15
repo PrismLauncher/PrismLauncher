@@ -75,26 +75,18 @@ void Version::parse()
 {
     m_sections.clear();
     QString currentSection;
-    bool lastCharWasDigit = false;
+    auto classChange = [] (QChar lastChar, QChar currentChar) {
+        return (( lastChar.isLetter() && currentChar.isDigit() ) || (lastChar.isDigit() && currentChar.isLetter()) );
+    };
     for (int i = 0; i < m_string.size(); ++i) {
-        if(m_string[i].isDigit()){
-            if(!lastCharWasDigit){
+        if(m_string[i].isDigit() || m_string[i].isLetter()){
+            if(i>0 && classChange(m_string[i-1], m_string[i])){
                 if(!currentSection.isEmpty()){
                     m_sections.append(Section(currentSection));
                 }
                 currentSection = "";
             }
             currentSection += m_string[i];
-            lastCharWasDigit = true;
-        }else if(m_string[i].isLetter()){
-            if(lastCharWasDigit){
-                if(!currentSection.isEmpty()){
-                    m_sections.append(Section(currentSection));
-                }
-                currentSection = "";
-            }
-            currentSection += m_string[i];
-            lastCharWasDigit = false;
         }
         else if(m_string[i] == '.' || m_string[i] == '-' || m_string[i] == '_'){
             if(!currentSection.isEmpty()){
