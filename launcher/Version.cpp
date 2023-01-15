@@ -96,7 +96,7 @@ void Version::parse()
             currentSection += m_string[i];
             lastCharWasDigit = false;
         }
-        else if(m_string[i] == '-' || m_string[i] == '_'){
+        else if(m_string[i] == '.' || m_string[i] == '-' || m_string[i] == '_'){
             if(!currentSection.isEmpty()){
                 m_sections.append(Section(currentSection));
             }
