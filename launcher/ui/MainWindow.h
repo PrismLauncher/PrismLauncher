@@ -80,7 +80,7 @@ public:
 
     void updatesAllowedChanged(bool allowed);
 
-    void droppedURLs(QList<QUrl> urls);
+    void processURLs(QList<QUrl> urls);
 signals:
     void isClosing();
 

@@ -50,7 +50,7 @@ bool processFolder(DataPack& pack, ProcessingLevel level)
     Q_ASSERT(pack.type() == ResourceType::FOLDER);
 
     auto mcmeta_invalid = [&pack]() {
-        qWarning() << "Resource pack at" << pack.fileinfo().filePath() << "does not have a valid pack.mcmeta";
+        qWarning() << "Data pack at" << pack.fileinfo().filePath() << "does not have a valid pack.mcmeta";
         return false;  // the mcmeta is not optional
     };
 
@@ -95,7 +95,7 @@ bool processZIP(DataPack& pack, ProcessingLevel level)
     QuaZipFile file(&zip);
 
     auto mcmeta_invalid = [&pack]() {
-        qWarning() << "Resource pack at" << pack.fileinfo().filePath() << "does not have a valid pack.mcmeta";
+        qWarning() << "Data pack at" << pack.fileinfo().filePath() << "does not have a valid pack.mcmeta";
         return false;  // the mcmeta is not optional
     };
 
