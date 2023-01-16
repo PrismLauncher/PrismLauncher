@@ -46,6 +46,8 @@
 
 #include "launch/LaunchTask.h"
 
+#include "settings/Setting.h"
+
 #include "ui/ColorCache.h"
 #include "ui/GuiUtil.h"
 
@@ -284,6 +286,7 @@ void LogPage::searchRequested(QString search_string, bool reverse)
     Q_ASSERT(no_errors);
 }
 
+static const QString s_wrap_mode_setting_name{ "MinecraftLogWrapMode" };
 void LogPage::loadSettings()
 {
     [[maybe_unused]] bool no_errors = true;
@@ -293,22 +296,21 @@ void LogPage::loadSettings()
         Q_ASSERT(no_errors);
     }
 
-    // TODO: Get saved state from last usage
+    auto settings_obj = m_instance->settings();
+    auto wrap_mode_setting = settings_obj->contains(s_wrap_mode_setting_name) ? settings_obj->getSetting(s_wrap_mode_setting_name)
+                                                                              : settings_obj->registerSetting(s_wrap_mode_setting_name, 0);
+
+    wrapModeChanged(wrap_mode_setting->get().toInt(&no_errors));
+    Q_ASSERT(no_errors);
 }
 
 void LogPage::saveSettings()
 {
-    // TODO: Save state for next usage
+    [[maybe_unused]] bool no_errors = true;
+
+    auto current_wrap_mode = rootObject()->property("wrapMode").toInt(&no_errors);
+    Q_ASSERT(no_errors);
+
+    auto settings_obj = m_instance->settings();
+    settings_obj->set(s_wrap_mode_setting_name, current_wrap_mode);
 }
-
-/*
-
-
-
-void LogPage::on_findButton_clicked()
-{
-    auto modifiers = QApplication::keyboardModifiers();
-    bool reverse = modifiers & Qt::ShiftModifier;
-    ui->text->findNext(ui->searchBar->text(), reverse);
-}
-*/
