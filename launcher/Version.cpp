@@ -1,6 +1,5 @@
 #include "Version.h"
 
-#include <QStringList>
 #include <QUrl>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
