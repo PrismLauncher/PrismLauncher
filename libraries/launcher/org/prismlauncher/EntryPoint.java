@@ -69,7 +69,6 @@ import org.prismlauncher.utils.logging.Log;
 public final class EntryPoint {
 
     public static void main(String[] args) {
-        UniversalLog4jInjector.inject();
         ExitCode code = listen();
 
         if (code != ExitCode.NORMAL) {

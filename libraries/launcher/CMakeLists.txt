@@ -15,9 +15,6 @@ set(SRC
     org/prismlauncher/launcher/impl/legacy/LegacyFrame.java
     org/prismlauncher/exception/ParameterNotFoundException.java
     org/prismlauncher/exception/ParseException.java
-    org/prismlauncher/log4jinjector/UniversalLog4jInjector.java
-    org/prismlauncher/log4jinjector/Log4jInjector20.java
-    org/prismlauncher/log4jinjector/Log4jInjector2171.java
     org/prismlauncher/utils/Parameters.java
     org/prismlauncher/utils/ReflectionUtils.java
     org/prismlauncher/utils/logging/Level.java
@@ -25,19 +22,5 @@ set(SRC
     net/minecraft/Launcher.java
 )
 
-set(
-    LOG4J_STUB_SRC
-    org/apache/logging/package-info.java
-    org/apache/logging/log4j/core/impl/Log4jContextFactory.java
-    org/apache/logging/log4j/core/Logger.java
-    org/apache/logging/log4j/core/LoggerContext.java
-    org/apache/logging/log4j/message/MessageFactory.java
-    org/apache/logging/log4j/spi/LoggerContext.java
-    org/apache/logging/log4j/spi/LoggerContextFactory.java
-    org/apache/logging/log4j/LogManager.java
-)
-
-add_jar(Log4JStub ${LOG4J_STUB_SRC})
-add_jar(NewLaunch ${SRC}
-        INCLUDE_JARS Log4JStub)
+add_jar(NewLaunch ${SRC} log4j2.xml)
 install_jar(NewLaunch "${JARS_DEST_DIR}")
