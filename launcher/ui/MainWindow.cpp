@@ -144,6 +144,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
     ui->setupUi(this);
 
+    setWindowIcon(APPLICATION->getThemedIcon("logo"));
+    setWindowTitle(APPLICATION->applicationDisplayName());
+#ifndef QT_NO_ACCESSIBILITY
+    setAccessibleName(BuildConfig.LAUNCHER_DISPLAYNAME);
+#endif
+
     // instance toolbar stuff
     {
         // Qt doesn't like vertical moving toolbars, so we have to force them...
