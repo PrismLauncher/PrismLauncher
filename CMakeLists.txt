@@ -331,6 +331,7 @@ if(UNIX AND APPLE)
     set(PLUGIN_DEST_DIR "${Launcher_Name}.app/Contents/MacOS")
     set(FRAMEWORK_DEST_DIR "${Launcher_Name}.app/Contents/Frameworks")
     set(RESOURCES_DEST_DIR "${Launcher_Name}.app/Contents/Resources")
+    set(QML_DEST_DIR "${RESOURCES_DEST_DIR}/qml")
     set(JARS_DEST_DIR "${Launcher_Name}.app/Contents/MacOS/jars")
 
     # Apps to bundle
@@ -394,6 +395,7 @@ elseif(WIN32)
     set(LIBRARY_DEST_DIR ".")
     set(PLUGIN_DEST_DIR ".")
     set(RESOURCES_DEST_DIR ".")
+    set(QML_DEST_DIR "qml")
     set(JARS_DEST_DIR "jars")
 
     # Apps to bundle

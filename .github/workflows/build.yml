@@ -113,6 +113,7 @@ jobs:
       BUILD_DIR: "build"
       CCACHE_VAR: ""
       HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+      QML_SOURCES_PATHS: "./"
 
     steps:
       ##
@@ -348,9 +349,22 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }}
 
-          cd ${{ env.INSTALL_DIR }}
+          cd "${{ env.INSTALL_DIR }}"
+
           chmod +x "PrismLauncher.app/Contents/MacOS/prismlauncher"
-          sudo codesign --sign - --deep --force --entitlements "../program_info/App.entitlements" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
+          export CODESIGN_LOC="PrismLauncher.app/Contents/MacOS/prismlauncher"
+
+          echo "Codesign"
+
+          # Sign stuff in Contents/Resources
+          find "PrismLauncher.app/Contents/Resources" -name '*.dylib' -exec codesign --sign - --deep --force --options runtime '{}' ';'
+
+          # Sign stuff in the other places
+          sudo codesign --sign - --deep --force --entitlements "../program_info/App.entitlements" --options runtime $CODESIGN_LOC
+
+          # Verify signature
+          sudo codesign --verify --deep --strict $CODESIGN_LOC --verbose=2
+
           mv "PrismLauncher.app" "Prism Launcher.app"
           tar -czf ../PrismLauncher.tar.gz *
 
@@ -495,8 +509,6 @@ jobs:
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib/server"
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib"
           export LD_LIBRARY_PATH
-
-          export QML_SOURCES_PATHS=./
 
           ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.prismlauncher.PrismLauncher.svg
 
