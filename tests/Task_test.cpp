@@ -1,4 +1,6 @@
 #include <QTest>
+#include <QTimer>
+#include <QThread>
 
 #include <tasks/ConcurrentTask.h>
 #include <tasks/MultipleOptionsTask.h>
@@ -10,6 +12,9 @@ class BasicTask : public Task {
     Q_OBJECT
 
     friend class TaskTest;
+
+   public:
+    BasicTask(bool show_debug_log = true) : Task(nullptr, show_debug_log) {}
 
    private:
     void executeTask() override
@@ -28,6 +33,41 @@ class BasicTask_MultiStep : public Task {
     auto isMultiStep() const -> bool override { return true; }
 
     void executeTask() override {};   
+};
+
+class BigConcurrentTask : public QThread {
+    Q_OBJECT
+
+    ConcurrentTask big_task;
+
+    void run() override
+    {
+        QTimer deadline;
+        deadline.setInterval(10000);
+        connect(&deadline, &QTimer::timeout, this, [this]{ passed_the_deadline = true; });
+        deadline.start();
+
+        static const unsigned s_num_tasks = 1 << 14;
+        auto sub_tasks = new BasicTask*[s_num_tasks];
+
+        for (unsigned i = 0; i < s_num_tasks; i++) {
+            sub_tasks[i] = new BasicTask(false);
+            big_task.addTask(sub_tasks[i]);
+        }
+
+        big_task.run();
+
+        while (!big_task.isFinished() && !passed_the_deadline)
+            QCoreApplication::processEvents();
+
+        emit finished();
+    }
+
+   public:
+    bool passed_the_deadline = false;
+
+   signals:
+    void finished();
 };
 
 class TaskTest : public QObject {
@@ -182,6 +222,23 @@ class TaskTest : public QObject {
         QVERIFY2(QTest::qWaitFor([&]() {
             return t.isFinished();
         }, 1000), "Task didn't finish as it should.");
+    }
+
+    void test_stackOverflowInConcurrentTask()
+    {
+        QEventLoop loop;
+
+        auto thread = new BigConcurrentTask;
+        thread->setStackSize(32 * 1024);
+
+        connect(thread, &BigConcurrentTask::finished, &loop, &QEventLoop::quit);
+
+        thread->start();
+
+        loop.exec();
+
+        QVERIFY(!thread->passed_the_deadline);
+        thread->deleteLater();
     }
 };
 
