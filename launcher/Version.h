@@ -115,7 +115,8 @@ private:
             } else if (numValid && other.m_isNull) {
                 return m_numPart != 0;
             } else if (m_isNull || other.m_isNull) {
-                return false;
+                if ((m_stringPart == ".") || (other.m_stringPart == ".")) return false;
+                return true;
             }
             if(numValid && other.numValid)
             {
