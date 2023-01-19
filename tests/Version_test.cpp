@@ -15,7 +15,6 @@
 
 #include <QTest>
 
-#include <TestUtil.h>
 #include <Version.h>
 
 class ModUtilsTest : public QObject
@@ -73,6 +72,8 @@ private slots:
 
         const auto v1 = Version(first);
         const auto v2 = Version(second);
+
+        qDebug() << v1 << "vs" << v2;
 
         QCOMPARE(v1 < v2, lessThan);
         QCOMPARE(v1 > v2, !lessThan && !equal);

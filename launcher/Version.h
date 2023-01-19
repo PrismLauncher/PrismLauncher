@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include <QDebug>
 #include <QString>
 #include <QStringView>
 #include <QList>
@@ -58,6 +59,8 @@ public:
     {
         return m_string;
     }
+
+    friend QDebug operator<<(QDebug debug, const Version& v);
 
 private:
     QString m_string;
@@ -143,7 +146,11 @@ private:
             }
         }
     };
+    
+
     QList<Section> m_sections;
 
     void parse();
 };
+
+
