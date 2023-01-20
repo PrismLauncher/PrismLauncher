@@ -1,67 +1,41 @@
 #include "Version.h"
 
 #include <QDebug>
-#include <QUrl>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#include <QUrl>
 
-Version::Version(const QString &str) : m_string(str)
+Version::Version(QString str) : m_string(std::move(str))
 {
     parse();
 }
 
-bool Version::operator<(const Version &other) const
+bool Version::operator<(const Version& other) const
 {
-    const int size = qMax(m_sections.size(), other.m_sections.size());
-    for (int i = 0; i < size; ++i)
-    {
-        const Section sec1 = (i >= m_sections.size()) ? Section("") : m_sections.at(i);
+    const auto size = qMax(m_sections.size(), other.m_sections.size());
+    for (int i = 0; i < size; ++i) {
+        const Section sec1 =
+            (i >= m_sections.size()) ? Section("") : m_sections.at(i);
         const Section sec2 =
             (i >= other.m_sections.size()) ? Section("") : other.m_sections.at(i);
+
         if (sec1 != sec2)
-        {
             return sec1 < sec2;
-        }
     }
 
     return false;
 }
-bool Version::operator<=(const Version &other) const
+bool Version::operator==(const Version& other) const
 {
-    return *this < other || *this == other;
-}
-bool Version::operator>(const Version &other) const
-{
-    const int size = qMax(m_sections.size(), other.m_sections.size());
-    for (int i = 0; i < size; ++i)
-    {
-        const Section sec1 = (i >= m_sections.size()) ? Section("") : m_sections.at(i);
+    const auto size = qMax(m_sections.size(), other.m_sections.size());
+    for (int i = 0; i < size; ++i) {
+        const Section sec1 =
+            (i >= m_sections.size()) ? Section("") : m_sections.at(i);
         const Section sec2 =
             (i >= other.m_sections.size()) ? Section("") : other.m_sections.at(i);
-        if (sec1 != sec2)
-        {
-            return sec1 > sec2;
-        }
-    }
 
-    return false;
-}
-bool Version::operator>=(const Version &other) const
-{
-    return *this > other || *this == other;
-}
-bool Version::operator==(const Version &other) const
-{
-    const int size = qMax(m_sections.size(), other.m_sections.size());
-    for (int i = 0; i < size; ++i)
-    {
-        const Section sec1 = (i >= m_sections.size()) ? Section("") : m_sections.at(i);
-        const Section sec2 =
-            (i >= other.m_sections.size()) ? Section("") : other.m_sections.at(i);
         if (sec1 != sec2)
-        {
             return false;
-        }
     }
 
     return true;
@@ -69,6 +43,18 @@ bool Version::operator==(const Version &other) const
 bool Version::operator!=(const Version &other) const
 {
     return !operator==(other);
+}
+bool Version::operator<=(const Version &other) const
+{
+    return *this < other || *this == other;
+}
+bool Version::operator>(const Version &other) const
+{
+    return !(*this <= other);
+}
+bool Version::operator>=(const Version &other) const
+{
+    return !(*this < other);
 }
 
 void Version::parse()
@@ -96,7 +82,7 @@ void Version::parse()
 }
 
 
-/// qDebug print support for the BlockedMod struct
+/// qDebug print support for the Version class
 QDebug operator<<(QDebug debug, const Version& v)
 {
     QDebugStateSaver saver(debug);

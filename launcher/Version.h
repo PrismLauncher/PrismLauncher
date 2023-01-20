@@ -45,8 +45,8 @@ class QUrl;
 class Version
 {
 public:
-    Version(const QString &str);
-    Version() {}
+    Version(QString str);
+    Version() = default;
 
     bool operator<(const Version &other) const;
     bool operator<=(const Version &other) const;
