@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2023 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -60,7 +61,7 @@ class Version {
 
    private:
     struct Section {
-        explicit Section(QString fullString) : m_isNull(true), m_fullString(std::move(fullString))
+        explicit Section(QString fullString) : m_fullString(std::move(fullString))
         {
             int cutoff = m_fullString.size();
             for (int i = 0; i < m_fullString.size(); i++) {
@@ -95,45 +96,54 @@ class Version {
 
         explicit Section() = default;
 
-        bool m_isNull = false;
-        int m_numPart = 0;
+        bool m_isNull = true;
 
+        int m_numPart = 0;
         QString m_stringPart;
+
         QString m_fullString;
+
+        [[nodiscard]] inline bool isAppendix() const { return m_stringPart.startsWith('+'); }
+        [[nodiscard]] inline bool isPreRelease() const { return m_stringPart.startsWith('-') && m_stringPart.length() > 1; }
 
         inline bool operator==(const Section& other) const
         {
             if (m_isNull && !other.m_isNull)
-                return other.m_numPart == 0;
-
+                return false;
             if (!m_isNull && other.m_isNull)
-                return m_numPart == 0;
-
-            if (m_isNull || other.m_isNull)
-                return (m_stringPart == ".") || (other.m_stringPart == ".");
-
-            if (!m_isNull && !other.m_isNull)
-                return (m_numPart == other.m_numPart) && (m_stringPart == other.m_stringPart);
-
-            return m_fullString == other.m_fullString;
-        }
-
-        inline bool operator<(const Section &other) const
-        {   
-            if (m_isNull && !other.m_isNull)
-                return other.m_numPart > 0;
-
-            if (!m_isNull && other.m_isNull)
-                return m_numPart < 0;
-
-            if (m_isNull || other.m_isNull)
-                return true;
+                return false;
 
             if (!m_isNull && !other.m_isNull) {
-                if(m_numPart < other.m_numPart)
+                return (m_numPart == other.m_numPart) && (m_stringPart == other.m_stringPart);
+            }
+
+            return true;
+        }
+
+        inline bool operator<(const Section& other) const
+        {   
+            static auto unequal_is_less = [](Section const& non_null) -> bool {
+                if (non_null.m_stringPart.isEmpty())
+                    return non_null.m_numPart == 0;
+                return (non_null.m_stringPart != QLatin1Char('.')) && non_null.isPreRelease();
+            };
+
+            if (!m_isNull && other.m_isNull)
+                return unequal_is_less(*this);
+            if (m_isNull && !other.m_isNull)
+                return !unequal_is_less(other);
+
+            if (!m_isNull && !other.m_isNull) {
+                if (m_numPart < other.m_numPart)
                     return true;
-                if(m_numPart == other.m_numPart && m_stringPart < other.m_stringPart)
+                if (m_numPart == other.m_numPart && m_stringPart < other.m_stringPart)
                     return true;
+
+                if (!m_stringPart.isEmpty() && other.m_stringPart.isEmpty())
+                    return false;
+                if (m_stringPart.isEmpty() && !other.m_stringPart.isEmpty())
+                    return true;
+
                 return false;
             }
 
