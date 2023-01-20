@@ -313,15 +313,13 @@ qint64 BaseInstance::lastLaunch() const
 
 void BaseInstance::setLastLaunch(qint64 val)
 {
-    //FIXME: if no change, do not set. setting involves saving a file.
-    m_settings->set("lastLaunchTime", val);
+    setSetting("lastLaunchTime", val);
     emit propertiesChanged(this);
 }
 
 void BaseInstance::setNotes(QString val)
 {
-    //FIXME: if no change, do not set. setting involves saving a file.
-    m_settings->set("notes", val);
+    setSetting("notes", val);
 }
 
 QString BaseInstance::notes() const
@@ -331,8 +329,7 @@ QString BaseInstance::notes() const
 
 void BaseInstance::setIconKey(QString val)
 {
-    //FIXME: if no change, do not set. setting involves saving a file.
-    m_settings->set("iconKey", val);
+    setSetting("iconKey", val);
     emit propertiesChanged(this);
 }
 
@@ -343,8 +340,7 @@ QString BaseInstance::iconKey() const
 
 void BaseInstance::setName(QString val)
 {
-    //FIXME: if no change, do not set. setting involves saving a file.
-    m_settings->set("name", val);
+    setSetting("name", val);
     emit propertiesChanged(this);
 }
 
@@ -367,6 +363,13 @@ QStringList BaseInstance::extraArguments()
 shared_qobject_ptr<LaunchTask> BaseInstance::getLaunchTask()
 {
     return m_launchProcess;
+}
+
+void BaseInstance::setSetting(const QString& key, const QVariant& value)
+{
+    if (m_settings->get(key) != value) {
+        m_settings->set(key, value);
+    }
 }
 
 void BaseInstance::updateRuntimeContext()

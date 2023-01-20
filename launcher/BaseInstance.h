@@ -128,6 +128,8 @@ public:
     QString name() const;
     void setName(QString val);
 
+    void setSetting(const QString& key, const QVariant& value);
+
     /// Value used for instance window titles
     QString windowTitle() const;
 
