@@ -17,15 +17,20 @@
 
 #include <Version.h>
 
-class ModUtilsTest : public QObject
-{
+class VersionTest : public QObject {
     Q_OBJECT
-    void setupVersions()
+
+    void addDataColumns()
     {
         QTest::addColumn<QString>("first");
         QTest::addColumn<QString>("second");
         QTest::addColumn<bool>("lessThan");
         QTest::addColumn<bool>("equal");
+    }
+
+    void setupVersions()
+    {
+        addDataColumns();
 
         QTest::newRow("equal, explicit") << "1.2.0" << "1.2.0" << false << true;
         QTest::newRow("equal, implicit 1") << "1.2" << "1.2.0" << false << true;
@@ -49,21 +54,91 @@ class ModUtilsTest : public QObject
         QTest::newRow("greaterThan, two-digit") << "1.42" << "1.41" << false << false;
     }
 
-private slots:
-    void initTestCase()
-    {
-
-    }
-    void cleanupTestCase()
-    {
-
-    }
-
+   private slots:
     void test_versionCompare_data()
     {
         setupVersions();
     }
+
     void test_versionCompare()
+    {
+        QFETCH(QString, first);
+        QFETCH(QString, second);
+        QFETCH(bool, lessThan);
+        QFETCH(bool, equal);
+
+        const auto v1 = Version(first);
+        const auto v2 = Version(second);
+
+        qDebug() << v1 << "vs" << v2;
+
+        QCOMPARE(v1 < v2, lessThan);
+        QCOMPARE(v1 > v2, !lessThan && !equal);
+        QCOMPARE(v1 == v2, equal);
+    }
+
+    void test_flexVerTestVector_data()
+    {
+        addDataColumns();
+
+        QDir test_vector_dir(QFINDTESTDATA("testdata/Version"));
+
+        QFile vector_file{test_vector_dir.absoluteFilePath("test_vectors.txt")};
+
+        vector_file.open(QFile::OpenModeFlag::ReadOnly);
+
+        int test_number = 0;
+        const QString test_name_template { "FlexVer test #%1 (%2)" };
+        for (auto line = vector_file.readLine(); !vector_file.atEnd(); line = vector_file.readLine()) {
+            line = line.simplified();
+            if (line.startsWith('#') || line.isEmpty())
+                continue;
+
+            test_number += 1;
+
+            auto split_line = line.split('<');
+            if (split_line.size() == 2) {
+                QString first{split_line.first().simplified()};
+                QString second{split_line.last().simplified()};
+
+                auto new_test_name = test_name_template.arg(QString::number(test_number), "lessThan").toLatin1().data();
+                QTest::newRow(new_test_name) << first << second << true << false;
+
+                continue;
+            }
+
+            split_line = line.split('=');
+            if (split_line.size() == 2) {
+                QString first{split_line.first().simplified()};
+                QString second{split_line.last().simplified()};
+
+                auto new_test_name = test_name_template.arg(QString::number(test_number), "equals").toLatin1().data();
+                QTest::newRow(new_test_name) << first << second << false << true;
+
+                continue;
+            }
+
+            split_line = line.split('>');
+            if (split_line.size() == 2) {
+                QString first{split_line.first().simplified()};
+                QString second{split_line.last().simplified()};
+
+                auto new_test_name = test_name_template.arg(QString::number(test_number), "greaterThan").toLatin1().data();
+                QTest::newRow(new_test_name) << first << second << false << false;
+
+                continue;
+            }
+
+            qCritical() << "Unexpected separator in the test vector: ";
+            qCritical() << line;
+
+            QVERIFY(0 != 0);
+        }
+
+        vector_file.close();
+    }
+
+    void test_flexVerTestVector()
     {
         QFETCH(QString, first);
         QFETCH(QString, second);
@@ -81,6 +156,6 @@ private slots:
     }
 };
 
-QTEST_GUILESS_MAIN(ModUtilsTest)
+QTEST_GUILESS_MAIN(VersionTest)
 
 #include "Version_test.moc"
