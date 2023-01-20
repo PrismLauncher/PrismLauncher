@@ -47,6 +47,7 @@ class BigConcurrentTask : public QThread {
         connect(&deadline, &QTimer::timeout, this, [this]{ passed_the_deadline = true; });
         deadline.start();
 
+        // NOTE: Arbitrary value that manages to trigger a problem when there is one.
         static const unsigned s_num_tasks = 1 << 14;
         auto sub_tasks = new BasicTask*[s_num_tasks];
 
@@ -229,6 +230,8 @@ class TaskTest : public QObject {
         QEventLoop loop;
 
         auto thread = new BigConcurrentTask;
+        // NOTE: This is an arbitrary value, big enough to not cause problems on normal execution, but low enough
+        //       so that the number of tasks that needs to get ran to potentially cause a problem isn't too big.
         thread->setStackSize(32 * 1024);
 
         connect(thread, &BigConcurrentTask::finished, &loop, &QEventLoop::quit);
