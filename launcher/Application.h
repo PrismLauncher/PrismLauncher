@@ -208,6 +208,7 @@ signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
     void globalSettingsClosed();
+    int currentCatChanged(int index);
 
 #ifdef Q_OS_MACOS
     void clickedOnDock();
