@@ -974,6 +974,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         ui->actionCAT->setChecked(cat_enable);
         // NOTE: calling the operator like that is an ugly hack to appease ancient gcc...
         connect(ui->actionCAT.operator->(), SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
+        connect(APPLICATION, &Application::currentCatChanged, this, &MainWindow::onCatChanged);
         setCatBackground(cat_enable);
     }
 
@@ -2074,6 +2075,10 @@ void MainWindow::newsButtonClicked()
     NewsDialog news_dialog(entries, this);
     news_dialog.toggleArticleList();
     news_dialog.exec();
+}
+
+void MainWindow::onCatChanged(int) {
+    setCatBackground(APPLICATION->settings()->get("TheCat").toBool());
 }
 
 void MainWindow::on_actionAbout_triggered()
