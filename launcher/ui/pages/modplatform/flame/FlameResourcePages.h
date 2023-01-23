@@ -1,4 +1,6 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
@@ -36,35 +38,48 @@
 
 #pragma once
 
-#include "modplatform/ModAPI.h"
+#include "Application.h"
+
+#include "modplatform/ResourceAPI.h"
+
 #include "ui/pages/modplatform/ModPage.h"
 
-#include "modplatform/flame/FlameAPI.h"
+namespace ResourceDownload {
+
+namespace Flame {
+static inline QString displayName() { return "CurseForge"; }
+static inline QIcon icon() { return APPLICATION->getThemedIcon("flame"); }
+static inline QString id() { return "curseforge"; }
+static inline QString debugName() { return "Flame"; }
+static inline QString metaEntryBase() { return "FlameMods"; }
+}
 
 class FlameModPage : public ModPage {
     Q_OBJECT
 
    public:
-    static FlameModPage* create(ModDownloadDialog* dialog, BaseInstance* instance)
+    static FlameModPage* create(ModDownloadDialog* dialog, BaseInstance& instance)
     {
         return ModPage::create<FlameModPage>(dialog, instance);
     }
 
-    FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance);
+    FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance);
     ~FlameModPage() override = default;
 
-    inline auto displayName() const -> QString override { return "CurseForge"; }
-    inline auto icon() const -> QIcon override { return APPLICATION->getThemedIcon("flame"); }
-    inline auto id() const -> QString override { return "curseforge"; }
-    inline auto helpPage() const -> QString override { return "Mod-platform"; }
+    [[nodiscard]] bool shouldDisplay() const override;
 
-    inline auto debugName() const -> QString override { return "Flame"; }
-    inline auto metaEntryBase() const -> QString override { return "FlameMods"; };
+    [[nodiscard]] inline auto displayName() const -> QString override { return Flame::displayName(); }
+    [[nodiscard]] inline auto icon() const -> QIcon override { return Flame::icon(); }
+    [[nodiscard]] inline auto id() const -> QString override { return Flame::id(); }
+    [[nodiscard]] inline auto debugName() const -> QString override { return Flame::debugName(); }
+    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
-    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders = ModAPI::Unspecified) const -> bool override;
+    [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
+
+    bool validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const override;
     bool optedOut(ModPlatform::IndexedVersion& ver) const override;
-
-    auto shouldDisplay() const -> bool override;
 
     void openUrl(const QUrl& url) override;
 };
+
+}  // namespace ResourceDownload

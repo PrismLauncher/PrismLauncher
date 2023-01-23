@@ -21,6 +21,8 @@
 #include <QTextBrowser>
 #include <QTreeWidgetItem>
 
+#include <optional>
+
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
 static std::list<Version> mcVersions(BaseInstance* inst)
@@ -28,7 +30,7 @@ static std::list<Version> mcVersions(BaseInstance* inst)
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }
 
-static ModAPI::ModLoaderTypes mcLoaders(BaseInstance* inst)
+static std::optional<ResourceAPI::ModLoaderTypes> mcLoaders(BaseInstance* inst)
 {
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getModLoaders() };
 }
@@ -212,14 +214,14 @@ auto ModUpdateDialog::ensureMetadata() -> bool
     bool confirm_rest = false;
     bool try_others_rest = false;
     bool skip_rest = false;
-    ModPlatform::Provider provider_rest = ModPlatform::Provider::MODRINTH;
+    ModPlatform::ResourceProvider provider_rest = ModPlatform::ResourceProvider::MODRINTH;
 
-    auto addToTmp = [&](Mod* m, ModPlatform::Provider p) {
+    auto addToTmp = [&](Mod* m, ModPlatform::ResourceProvider p) {
         switch (p) {
-            case ModPlatform::Provider::MODRINTH:
+            case ModPlatform::ResourceProvider::MODRINTH:
                 modrinth_tmp.push_back(m);
                 break;
-            case ModPlatform::Provider::FLAME:
+            case ModPlatform::ResourceProvider::FLAME:
                 flame_tmp.push_back(m);
                 break;
         }
@@ -264,10 +266,10 @@ auto ModUpdateDialog::ensureMetadata() -> bool
     }
 
     if (!modrinth_tmp.empty()) {
-        auto* modrinth_task = new EnsureMetadataTask(modrinth_tmp, index_dir, ModPlatform::Provider::MODRINTH);
+        auto* modrinth_task = new EnsureMetadataTask(modrinth_tmp, index_dir, ModPlatform::ResourceProvider::MODRINTH);
         connect(modrinth_task, &EnsureMetadataTask::metadataReady, [this](Mod* candidate) { onMetadataEnsured(candidate); });
         connect(modrinth_task, &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Mod* candidate) {
-            onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::Provider::MODRINTH);
+            onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::MODRINTH);
         });
 
         if (modrinth_task->getHashingTask())
@@ -277,10 +279,10 @@ auto ModUpdateDialog::ensureMetadata() -> bool
     }
 
     if (!flame_tmp.empty()) {
-        auto* flame_task = new EnsureMetadataTask(flame_tmp, index_dir, ModPlatform::Provider::FLAME);
+        auto* flame_task = new EnsureMetadataTask(flame_tmp, index_dir, ModPlatform::ResourceProvider::FLAME);
         connect(flame_task, &EnsureMetadataTask::metadataReady, [this](Mod* candidate) { onMetadataEnsured(candidate); });
         connect(flame_task, &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Mod* candidate) {
-            onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::Provider::FLAME);
+            onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::FLAME);
         });
 
         if (flame_task->getHashingTask())
@@ -306,28 +308,28 @@ void ModUpdateDialog::onMetadataEnsured(Mod* mod)
         return;
 
     switch (mod->metadata()->provider) {
-        case ModPlatform::Provider::MODRINTH:
+        case ModPlatform::ResourceProvider::MODRINTH:
             m_modrinth_to_update.push_back(mod);
             break;
-        case ModPlatform::Provider::FLAME:
+        case ModPlatform::ResourceProvider::FLAME:
             m_flame_to_update.push_back(mod);
             break;
     }
 }
 
-ModPlatform::Provider next(ModPlatform::Provider p)
+ModPlatform::ResourceProvider next(ModPlatform::ResourceProvider p)
 {
     switch (p) {
-        case ModPlatform::Provider::MODRINTH:
-            return ModPlatform::Provider::FLAME;
-        case ModPlatform::Provider::FLAME:
-            return ModPlatform::Provider::MODRINTH;
+        case ModPlatform::ResourceProvider::MODRINTH:
+            return ModPlatform::ResourceProvider::FLAME;
+        case ModPlatform::ResourceProvider::FLAME:
+            return ModPlatform::ResourceProvider::MODRINTH;
     }
 
-    return ModPlatform::Provider::FLAME;
+    return ModPlatform::ResourceProvider::FLAME;
 }
 
-void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::Provider first_choice)
+void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::ResourceProvider first_choice)
 {
     if (try_others) {
         auto index_dir = indexDir();
@@ -368,7 +370,7 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
 
     QString text = info.changelog;
     switch (info.provider) {
-        case ModPlatform::Provider::MODRINTH: {
+        case ModPlatform::ResourceProvider::MODRINTH: {
             text = markdownToHTML(info.changelog.toUtf8());
             break;
         }
@@ -386,9 +388,9 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
     ui->modTreeWidget->addTopLevelItem(item_top);
 }
 
-auto ModUpdateDialog::getTasks() -> const QList<ModDownloadTask*>
+auto ModUpdateDialog::getTasks() -> const QList<ResourceDownloadTask*>
 {
-    QList<ModDownloadTask*> list;
+    QList<ResourceDownloadTask*> list;
 
     auto* item = ui->modTreeWidget->topLevelItem(0);
 

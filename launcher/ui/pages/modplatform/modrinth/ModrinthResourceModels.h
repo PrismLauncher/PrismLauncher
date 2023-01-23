@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
@@ -18,27 +20,29 @@
 
 #pragma once
 
-#include "ModrinthModPage.h"
+#include "ui/pages/modplatform/ModModel.h"
+#include "ui/pages/modplatform/modrinth/ModrinthResourcePages.h"
 
-namespace Modrinth {
+namespace ResourceDownload {
 
-class ListModel : public ModPlatform::ListModel {
+class ModrinthModPage;
+
+class ModrinthModModel : public ModModel {
     Q_OBJECT
 
    public:
-    ListModel(ModrinthModPage* parent) : ModPlatform::ListModel(parent){};
-    ~ListModel() override = default;
+    ModrinthModModel(const BaseInstance&);
+    ~ModrinthModModel() override = default;
 
    private:
+    [[nodiscard]] QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
+    [[nodiscard]] QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
+
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
-    
-    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 
-    // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-    static const char* sorts[5];
-    inline auto getSorts() const -> const char** override { return sorts; };
+    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 };
 
-}  // namespace Modrinth
+}  // namespace ResourceDownload

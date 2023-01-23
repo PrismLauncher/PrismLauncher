@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
@@ -16,33 +18,33 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ModrinthModModel.h"
+#include "ModrinthResourceModels.h"
 
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
-namespace Modrinth {
+namespace ResourceDownload {
 
-// NOLINTNEXTLINE(modernize-avoid-c-arrays)
-const char* ListModel::sorts[5]{ "relevance", "downloads", "follows", "updated", "newest" };
+ModrinthModModel::ModrinthModModel(BaseInstance const& base) : ModModel(base, new ModrinthAPI) {}
 
-void ListModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
+void ModrinthModModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
-    Modrinth::loadIndexedPack(m, obj);
+    ::Modrinth::loadIndexedPack(m, obj);
 }
 
-void ListModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
+void ModrinthModModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
-    Modrinth::loadExtraPackData(m, obj);
+    ::Modrinth::loadExtraPackData(m, obj);
 }
 
-void ListModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
+void ModrinthModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), m_parent->m_instance);
+    ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
-auto ListModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
+auto ModrinthModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
     return obj.object().value("hits").toArray();
 }
 
-}  // namespace Modrinth
+}  // namespace ResourceDownload

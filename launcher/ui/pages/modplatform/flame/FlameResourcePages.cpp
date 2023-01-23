@@ -1,4 +1,6 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
@@ -34,37 +36,33 @@
  *      limitations under the License.
  */
 
-#include "FlameModPage.h"
-#include "ui_ModPage.h"
+#include "FlameResourcePages.h"
+#include "ui_ResourcePage.h"
 
-#include "FlameModModel.h"
-#include "ui/dialogs/ModDownloadDialog.h"
+#include "FlameResourceModels.h"
+#include "ui/dialogs/ResourceDownloadDialog.h"
 
-FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance* instance)
-    : ModPage(dialog, instance, new FlameAPI())
+namespace ResourceDownload {
+
+FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance)
+    : ModPage(dialog, instance)
 {
-    listModel = new FlameMod::ListModel(this);
-    ui->packView->setModel(listModel);
+    m_model = new FlameModModel(instance);
+    m_ui->packView->setModel(m_model);
 
-    // index is used to set the sorting with the flame api
-    ui->sortByBox->addItem(tr("Sort by Featured"));
-    ui->sortByBox->addItem(tr("Sort by Popularity"));
-    ui->sortByBox->addItem(tr("Sort by Last Updated"));
-    ui->sortByBox->addItem(tr("Sort by Name"));
-    ui->sortByBox->addItem(tr("Sort by Author"));
-    ui->sortByBox->addItem(tr("Sort by Downloads"));
+    addSortings();
 
     // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
     // so it's best not to connect them in the parent's contructor...
-    connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
-    connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameModPage::onSelectionChanged);
-    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameModPage::onVersionSelectionChanged);
-    connect(ui->modSelectionButton, &QPushButton::clicked, this, &FlameModPage::onModSelected);
+    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameModPage::onSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameModPage::onVersionSelectionChanged);
+    connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameModPage::onResourceSelected);
 
-    ui->packDescription->setMetaEntry(metaEntryBase());
+    m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
-auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders) const -> bool
+auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders) const -> bool
 {
     Q_UNUSED(loaders);
     return ver.mcVersion.contains(mineVer) && !ver.downloadUrl.isEmpty();
@@ -95,3 +93,5 @@ void FlameModPage::openUrl(const QUrl& url)
 
     ModPage::openUrl(url);
 }
+
+}  // namespace ResourceDownload

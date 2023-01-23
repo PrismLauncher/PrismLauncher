@@ -1,4 +1,6 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
@@ -35,32 +37,45 @@
 
 #pragma once
 
-#include "modplatform/ModAPI.h"
+#include "Application.h"
+
+#include "modplatform/ResourceAPI.h"
+
 #include "ui/pages/modplatform/ModPage.h"
 
-#include "modplatform/modrinth/ModrinthAPI.h"
+namespace ResourceDownload {
+
+namespace Modrinth {
+static inline QString displayName() { return "Modrinth"; }
+static inline QIcon icon() { return APPLICATION->getThemedIcon("modrinth"); }
+static inline QString id() { return "modrinth"; }
+static inline QString debugName() { return "Modrinth"; }
+static inline QString metaEntryBase() { return "ModrinthPacks"; }
+}
 
 class ModrinthModPage : public ModPage {
     Q_OBJECT
 
    public:
-    static ModrinthModPage* create(ModDownloadDialog* dialog, BaseInstance* instance)
+    static ModrinthModPage* create(ModDownloadDialog* dialog, BaseInstance& instance)
     {
         return ModPage::create<ModrinthModPage>(dialog, instance);
     }
 
-    ModrinthModPage(ModDownloadDialog* dialog, BaseInstance* instance);
+    ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instance);
     ~ModrinthModPage() override = default;
 
-    inline auto displayName() const -> QString override { return "Modrinth"; }
-    inline auto icon() const -> QIcon override { return APPLICATION->getThemedIcon("modrinth"); }
-    inline auto id() const -> QString override { return "modrinth"; }
-    inline auto helpPage() const -> QString override { return "Mod-platform"; }
+    [[nodiscard]] bool shouldDisplay() const override;
 
-    inline auto debugName() const -> QString override { return "Modrinth"; }
-    inline auto metaEntryBase() const -> QString override { return "ModrinthPacks"; };
+    [[nodiscard]] inline auto displayName() const -> QString override { return Modrinth::displayName(); }
+    [[nodiscard]] inline auto icon() const -> QIcon override { return Modrinth::icon(); }
+    [[nodiscard]] inline auto id() const -> QString override { return Modrinth::id(); }
+    [[nodiscard]] inline auto debugName() const -> QString override { return Modrinth::debugName(); }
+    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
 
-    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders = ModAPI::Unspecified) const -> bool override;
+    [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
-    auto shouldDisplay() const -> bool override;
+    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const -> bool override;
 };
+
+}  // namespace ResourceDownload
