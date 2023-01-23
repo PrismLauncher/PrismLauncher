@@ -110,14 +110,14 @@ void ConcurrentTask::startNext()
     setStepStatus(next->isMultiStep() ? next->getStepStatus() : next->getStatus());
     updateState();
 
+    QCoreApplication::processEvents();
+
     QMetaObject::invokeMethod(next.get(), &Task::start, Qt::QueuedConnection);
 
     // Allow going up the number of concurrent tasks in case of tasks being added in the middle of a running task.
     int num_starts = m_total_max_size - m_doing.size();
     for (int i = 0; i < num_starts; i++)
         QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
-
-    QCoreApplication::processEvents();
 }
 
 void ConcurrentTask::subTaskSucceeded(Task::Ptr task)
