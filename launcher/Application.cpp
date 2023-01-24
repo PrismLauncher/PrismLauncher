@@ -1525,7 +1525,8 @@ QString Application::getJarPath(QString jarFile)
         FS::PathCombine(m_rootPath, "share/" + BuildConfig.LAUNCHER_APP_BINARY_NAME),
 #endif
         FS::PathCombine(m_rootPath, "jars"),
-        FS::PathCombine(applicationDirPath(), "jars")
+        FS::PathCombine(applicationDirPath(), "jars"),
+        FS::PathCombine(applicationDirPath(), "..", "jars") // from inside build dir, for debuging
     };
     for(QString p : potentialPaths)
     {
