@@ -115,7 +115,7 @@ void ConcurrentTask::startNext()
     QMetaObject::invokeMethod(next.get(), &Task::start, Qt::QueuedConnection);
 
     // Allow going up the number of concurrent tasks in case of tasks being added in the middle of a running task.
-    int num_starts = m_total_max_size - m_doing.size();
+    int num_starts = qMin(m_queue.size(), m_total_max_size - m_doing.size());
     for (int i = 0; i < num_starts; i++)
         QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
 }
