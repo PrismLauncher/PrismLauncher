@@ -35,18 +35,23 @@ class ThemeManager {
    public:
     ThemeManager(MainWindow* mainWindow);
 
-    // maybe make private? Or put in ctor?
-    void InitializeThemes();
-
     QList<ITheme*> getValidApplicationThemes();
     void setIconTheme(const QString& name);
     void applyCurrentlySelectedTheme();
-    void setApplicationTheme(const QString& name, bool initial);
+    void setApplicationTheme(const QString& name);
+
+    /// <summary>
+    /// Returns the cat based on selected cat and with events (Birthday, XMas, etc.)
+    /// </summary>
+    /// <param name="catName">Optional, if you need a specific cat.</param>
+    /// <returns></returns>
+    static QString getCatImage(QString catName = "");
 
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     MainWindow* m_mainWindow;
 
-    QString AddTheme(std::unique_ptr<ITheme> theme);
-    ITheme* GetTheme(QString themeId);
+    void initializeThemes();
+    QString addTheme(std::unique_ptr<ITheme> theme);
+    ITheme* getTheme(QString themeId);
 };

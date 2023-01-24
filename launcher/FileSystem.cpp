@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -56,6 +57,7 @@
 #include <shlobj.h>
 #include <shobjidl.h>
 #include <sys/utime.h>
+#include <versionhelpers.h>
 #include <windows.h>
 #include <winnls.h>
 #include <string>
@@ -213,6 +215,22 @@ bool copy::operator()(const QString& offset, bool dryRun)
     return err.value() == 0;
 }
 
+bool move(const QString& source, const QString& dest)
+{
+    std::error_code err;
+
+    ensureFilePathExists(dest);
+    fs::rename(StringUtils::toStdString(source), StringUtils::toStdString(dest), err);
+
+    if (err) {
+        qWarning() << "Failed to move file:" << QString::fromStdString(err.message());
+        qDebug() << "Source file:" << source;
+        qDebug() << "Destination file:" << dest;
+    }
+
+    return err.value() == 0;
+}
+
 bool deletePath(QString path)
 {
     std::error_code err;
@@ -226,7 +244,7 @@ bool deletePath(QString path)
     return err.value() == 0;
 }
 
-bool trash(QString path, QString *pathInTrash = nullptr)
+bool trash(QString path, QString *pathInTrash)
 {
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     return false;
@@ -234,6 +252,10 @@ bool trash(QString path, QString *pathInTrash = nullptr)
     // FIXME: Figure out trash in Flatpak. Qt seemingly doesn't use the Trash portal
     if (DesktopServices::isFlatpak())
         return false;
+#if defined Q_OS_WIN32
+    if (IsWindowsServer())
+        return false;
+#endif
     return QFile::moveToTrash(path, pathInTrash);
 #endif
 }

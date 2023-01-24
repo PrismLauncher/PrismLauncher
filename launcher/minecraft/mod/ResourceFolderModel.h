@@ -10,6 +10,7 @@
 #include "Resource.h"
 
 #include "tasks/Task.h"
+#include "tasks/ConcurrentTask.h"
 
 class QSortFilterProxyModel;
 
@@ -197,6 +198,7 @@ class ResourceFolderModel : public QAbstractListModel {
     // Represents the relationship between a resource's internal ID and it's row position on the model.
     QMap<QString, int> m_resources_index;
 
+    ConcurrentTask m_helper_thread_task;
     QMap<int, Task::Ptr> m_active_parse_tasks;
     std::atomic<int> m_next_resolution_ticket = 0;
 };

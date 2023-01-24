@@ -61,7 +61,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ''
-            qt_version: '6.4.0'
+            qt_version: '6.4.2'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -73,7 +73,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: 'win64_msvc2019_arm64'
-            qt_version: '6.4.0'
+            qt_version: '6.4.2'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -105,6 +105,7 @@ jobs:
       INSTALL_APPIMAGE_DIR: "install-appdir"
       BUILD_DIR: "build"
       CCACHE_VAR: ""
+      HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
 
     steps:
       ##
@@ -135,6 +136,7 @@ jobs:
             quazip-qt6:p
             ccache:p
             qt6-5compat:p
+            cmark:p
 
       - name: Force newer ccache
         if: runner.os == 'Windows' && matrix.msystem == '' && inputs.build_type == 'Debug'
@@ -143,7 +145,7 @@ jobs:
 
       - name: Setup ccache
         if: (runner.os != 'Windows' || matrix.msystem == '') && inputs.build_type == 'Debug'
-        uses: hendrikmuhs/ccache-action@v1.2.5
+        uses: hendrikmuhs/ccache-action@v1.2.8
         with:
           key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}-${{ matrix.architecture }}
 
@@ -165,7 +167,7 @@ jobs:
 
       - name: Retrieve ccache cache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
-        uses: actions/cache@v3.0.11
+        uses: actions/cache@v3.2.3
         with:
           path: '${{ github.workspace }}\.ccache'
           key: ${{ matrix.os }}-mingw-w64
@@ -546,11 +548,10 @@ jobs:
           submodules: 'true'
       - name: Build Flatpak (Linux)
         if: inputs.build_type == 'Debug'
-        uses: flatpak/flatpak-github-actions/flatpak-builder@v4
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v5
         with:
           bundle: "Prism Launcher.flatpak"
           manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
-          cache-key: flatpak-${{ github.sha }}-x86_64
 
   nix:
     runs-on: ubuntu-latest

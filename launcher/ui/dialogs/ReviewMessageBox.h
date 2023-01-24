@@ -12,15 +12,18 @@ class ReviewMessageBox : public QDialog {
    public:
     static auto create(QWidget* parent, QString&& title, QString&& icon = "") -> ReviewMessageBox*;
 
-    using ModInformation = struct {
+    using ResourceInformation = struct res_info {
         QString name;  
         QString filename;  
+        QString custom_file_path {};
     };
 
-    void appendMod(ModInformation&& info);
-    auto deselectedMods() -> QStringList;
+    void appendResource(ResourceInformation&& info);
+    auto deselectedResources() -> QStringList;
 
-    ~ReviewMessageBox();
+    void retranslateUi(QString resources_name);
+
+    ~ReviewMessageBox() override;
 
    protected:
     ReviewMessageBox(QWidget* parent, const QString& title, const QString& icon);

@@ -28,6 +28,10 @@ class shared_qobject_ptr : public QSharedPointer<T> {
     constexpr shared_qobject_ptr(const shared_qobject_ptr<Derived>& other) : QSharedPointer<T>(other)
     {}
 
+    template <typename Derived>
+    constexpr shared_qobject_ptr(const QSharedPointer<Derived>& other) : QSharedPointer<T>(other)
+    {}
+
     void reset() { QSharedPointer<T>::reset(); }
     void reset(const shared_qobject_ptr<T>& other)
     {

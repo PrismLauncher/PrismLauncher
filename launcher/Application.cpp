@@ -62,15 +62,11 @@
 #include "ui/pages/global/APIPage.h"
 #include "ui/pages/global/CustomCommandsPage.h"
 
-#ifdef Q_OS_WIN
-#include "ui/WinDarkmode.h"
-#include <versionhelpers.h>
-#endif
-
 #include "ui/setupwizard/SetupWizard.h"
 #include "ui/setupwizard/LanguageWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
 #include "ui/setupwizard/PasteWizardPage.h"
+#include "ui/setupwizard/ThemeWizardPage.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 
@@ -150,19 +146,12 @@ static const QLatin1String liveCheckFile("live.check");
 PixmapCache* PixmapCache::s_instance = nullptr;
 
 namespace {
+
+/** This is used so that we can output to the log file in addition to the CLI. */
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    const char *levels = "DWCFIS";
-    const QString format("%1 %2 %3\n");
-
-    qint64 msecstotal = APPLICATION->timeSinceStart();
-    qint64 seconds = msecstotal / 1000;
-    qint64 msecs = msecstotal % 1000;
-    QString foo;
-    char buf[1025] = {0};
-    ::snprintf(buf, 1024, "%5lld.%03lld", seconds, msecs);
-
-    QString out = format.arg(buf).arg(levels[type]).arg(msg);
+    QString out = qFormatLogMessage(type, context, msg);
+    out += QChar::LineFeed;
 
     APPLICATION->logFile->write(out.toUtf8());
     APPLICATION->logFile->flush();
@@ -231,8 +220,18 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_serverToJoin = parser.value("server");
     m_profileToUse = parser.value("profile");
     m_liveCheck = parser.isSet("alive");
-    m_zipToImport = parser.value("import");
+    
     m_instanceIdToShowWindowOf = parser.value("show");
+
+    for (auto zip_path : parser.values("import")){
+        m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
+    }
+
+    // treat unspecified positional arguments as import urls
+    for (auto zip_path : parser.positionalArguments()) {
+        m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
+    }
+
 
     // error if --launch is missing with --server or --profile
     if((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty())
@@ -317,7 +316,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
 
     /*
-     * Establish the mechanism for communication with an already running PolyMC that uses the same data path.
+     * Establish the mechanism for communication with an already running PrismLauncher that uses the same data path.
      * If there is one, tell it what the user actually wanted to do and exit.
      * We want to initialize this before logging to avoid messing with the log of a potential already running copy.
      */
@@ -335,12 +334,14 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 activate.command = "activate";
                 m_peerInstance->sendMessage(activate.serialize(), timeout);
 
-                if(!m_zipToImport.isEmpty())
+                if(!m_zipsToImport.isEmpty())
                 {
-                    ApplicationMessage import;
-                    import.command = "import";
-                    import.args.insert("path", m_zipToImport.toString());
-                    m_peerInstance->sendMessage(import.serialize(), timeout);
+                    for (auto zip_url : m_zipsToImport) {
+                        ApplicationMessage import;
+                        import.command = "import";
+                        import.args.insert("path", zip_url.toString());
+                        m_peerInstance->sendMessage(import.serialize(), timeout);
+                    } 
                 }
             }
             else
@@ -396,6 +397,14 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             return;
         }
         qInstallMessageHandler(appDebugOutput);
+
+        qSetMessagePattern(
+                "%{time process}" " "
+                "%{if-debug}D%{endif}" "%{if-info}I%{endif}" "%{if-warning}W%{endif}" "%{if-critical}C%{endif}" "%{if-fatal}F%{endif}"
+                " " "|" " "
+                "%{if-category}[%{category}]: %{endif}"
+                "%{message}");
+
         qDebug() << "<> Log initialized.";
     }
 
@@ -462,7 +471,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Theming
         m_settings->registerSetting("IconTheme", QString("pe_colored"));
-        m_settings->registerSetting("ApplicationTheme", QString("system"));
+        m_settings->registerSetting("ApplicationTheme", QString());
         m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
         // Remembered state
@@ -811,10 +820,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     });
 
     {
-        setIconTheme(settings()->get("IconTheme").toString());
-        qDebug() << "<> Icon theme set.";
-        setApplicationTheme(settings()->get("ApplicationTheme").toString(), true);
-        qDebug() << "<> Application theme set.";
+        applyCurrentlySelectedTheme();
     }
 
     updateCapabilities();
@@ -857,7 +863,8 @@ bool Application::createSetupWizard()
         return false;
     }();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
-    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired;
+    bool themeInterventionRequired = settings()->get("ApplicationTheme") == "";
+    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired;
 
     if(wizardRequired)
     {
@@ -875,6 +882,12 @@ bool Application::createSetupWizard()
         if (pasteInterventionRequired)
         {
             m_setupWizard->addPage(new PasteWizardPage(m_setupWizard));
+        }
+
+        if (themeInterventionRequired)
+        {
+            settings()->set("ApplicationTheme", QString("system")); // set default theme after going into theme wizard
+            m_setupWizard->addPage(new ThemeWizardPage(m_setupWizard));
         }
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();
@@ -898,7 +911,7 @@ bool Application::event(QEvent* event)
 
     if (event->type() == QEvent::FileOpen) {
         auto ev = static_cast<QFileOpenEvent*>(event);
-        m_mainWindow->droppedURLs({ ev->url() });
+        m_mainWindow->processURLs({ ev->url() });
     }
 
     return QApplication::event(event);
@@ -958,10 +971,10 @@ void Application::performMainStartupAction()
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
     }
-    if(!m_zipToImport.isEmpty())
+    if(!m_zipsToImport.isEmpty())
     {
-        qDebug() << "<> Importing instance from zip:" << m_zipToImport;
-        m_mainWindow->droppedURLs({ m_zipToImport });
+        qDebug() << "<> Importing from zip:" << m_zipsToImport;
+        m_mainWindow->processURLs( m_zipsToImport );
     }
 }
 
@@ -1014,7 +1027,7 @@ void Application::messageReceived(const QByteArray& message)
             qWarning() << "Received" << command << "message without a zip path/URL.";
             return;
         }
-        m_mainWindow->droppedURLs({ QUrl(path) });
+        m_mainWindow->processURLs({ QUrl::fromLocalFile(QFileInfo(path).absoluteFilePath()) });
     }
     else if(command == "launch")
     {
@@ -1083,9 +1096,14 @@ QList<ITheme*> Application::getValidApplicationThemes()
     return m_themeManager->getValidApplicationThemes();
 }
 
-void Application::setApplicationTheme(const QString& name, bool initial)
+void Application::applyCurrentlySelectedTheme()
 {
-    m_themeManager->setApplicationTheme(name, initial);
+    m_themeManager->applyCurrentlySelectedTheme();
+}
+
+void Application::setApplicationTheme(const QString& name)
+{
+    m_themeManager->setApplicationTheme(name);
 }
 
 void Application::setIconTheme(const QString& name)
@@ -1313,16 +1331,7 @@ MainWindow* Application::showMainWindow(bool minimized)
         m_mainWindow = new MainWindow();
         m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
         m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
-#ifdef Q_OS_WIN
-        if (IsWindows10OrGreater())
-        {
-            if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-            } else {
-                WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
-            }
-        }
-#endif
+
         if(minimized)
         {
             m_mainWindow->showMinimized();

@@ -119,9 +119,11 @@ public:
 
     void setIconTheme(const QString& name);
 
+    void applyCurrentlySelectedTheme();
+
     QList<ITheme*> getValidApplicationThemes();
 
-    void setApplicationTheme(const QString& name, bool initial);
+    void setApplicationTheme(const QString& name);
 
     shared_qobject_ptr<ExternalUpdater> updater() {
         return m_updater;
@@ -207,6 +209,7 @@ signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
     void globalSettingsClosed();
+    int currentCatChanged(int index);
 
 #ifdef Q_OS_MACOS
     void clickedOnDock();
@@ -304,7 +307,7 @@ public:
     QString m_serverToJoin;
     QString m_profileToUse;
     bool m_liveCheck = false;
-    QUrl m_zipToImport;
+    QList<QUrl> m_zipsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
 };

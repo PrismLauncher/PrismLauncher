@@ -32,18 +32,16 @@ bool process(TexturePack& pack, ProcessingLevel level)
 {
     switch (pack.type()) {
         case ResourceType::FOLDER:
-            TexturePackUtils::processFolder(pack, level);
-            return true;
+            return TexturePackUtils::processFolder(pack, level);
         case ResourceType::ZIPFILE:
-            TexturePackUtils::processZIP(pack, level);
-            return true;
+            return TexturePackUtils::processZIP(pack, level);
         default:
             qWarning() << "Invalid type for resource pack parse task!";
             return false;
     }
 }
 
-void processFolder(TexturePack& pack, ProcessingLevel level)
+bool processFolder(TexturePack& pack, ProcessingLevel level)
 {
     Q_ASSERT(pack.type() == ResourceType::FOLDER);
 
@@ -51,39 +49,51 @@ void processFolder(TexturePack& pack, ProcessingLevel level)
     if (mcmeta_file_info.isFile()) {
         QFile mcmeta_file(mcmeta_file_info.filePath());
         if (!mcmeta_file.open(QIODevice::ReadOnly))
-            return;
+            return false;
 
         auto data = mcmeta_file.readAll();
 
-        TexturePackUtils::processPackTXT(pack, std::move(data));
+        bool packTXT_result = TexturePackUtils::processPackTXT(pack, std::move(data));
 
         mcmeta_file.close();
+        if (!packTXT_result) {
+            return false;
+        }
+    } else {
+        return false;
     }
 
     if (level == ProcessingLevel::BasicInfoOnly)
-        return;
+        return true;
 
     QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
     if (image_file_info.isFile()) {
         QFile mcmeta_file(image_file_info.filePath());
         if (!mcmeta_file.open(QIODevice::ReadOnly))
-            return;
+            return false;
 
         auto data = mcmeta_file.readAll();
 
-        TexturePackUtils::processPackPNG(pack, std::move(data));
+        bool packPNG_result = TexturePackUtils::processPackPNG(pack, std::move(data));
 
         mcmeta_file.close();
+        if (!packPNG_result) {
+            return false;
+        }
+    } else {
+        return false;
     }
+
+    return true;
 }
 
-void processZIP(TexturePack& pack, ProcessingLevel level)
+bool processZIP(TexturePack& pack, ProcessingLevel level)
 {
     Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
 
     QuaZip zip(pack.fileinfo().filePath());
     if (!zip.open(QuaZip::mdUnzip))
-        return;
+        return false;
 
     QuaZipFile file(&zip);
 
@@ -91,51 +101,62 @@ void processZIP(TexturePack& pack, ProcessingLevel level)
         if (!file.open(QIODevice::ReadOnly)) {
             qCritical() << "Failed to open file in zip.";
             zip.close();
-            return;
+            return false;
         }
 
         auto data = file.readAll();
 
-        TexturePackUtils::processPackTXT(pack, std::move(data));
+        bool packTXT_result = TexturePackUtils::processPackTXT(pack, std::move(data));
 
         file.close();
+        if (!packTXT_result) {
+            return false;
+        }
     }
 
     if (level == ProcessingLevel::BasicInfoOnly) {
         zip.close();
-        return;
+        return true;
     }
 
     if (zip.setCurrentFile("pack.png")) {
         if (!file.open(QIODevice::ReadOnly)) {
             qCritical() << "Failed to open file in zip.";
             zip.close();
-            return;
+            return false;
         }
 
         auto data = file.readAll();
 
-        TexturePackUtils::processPackPNG(pack, std::move(data));
+        bool packPNG_result = TexturePackUtils::processPackPNG(pack, std::move(data));
 
         file.close();
+        if (!packPNG_result) {
+            return false;
+        }
     }
 
     zip.close();
+
+    return true;
 }
 
-void processPackTXT(TexturePack& pack, QByteArray&& raw_data)
+bool processPackTXT(TexturePack& pack, QByteArray&& raw_data)
 {
     pack.setDescription(QString(raw_data));
+    return true;
 }
 
-void processPackPNG(TexturePack& pack, QByteArray&& raw_data)
+bool processPackPNG(TexturePack& pack, QByteArray&& raw_data)
 {
     auto img = QImage::fromData(raw_data);
     if (!img.isNull()) {
         pack.setImage(img);
     } else {
         qWarning() << "Failed to parse pack.png.";
+        return false;
     }
+    return true;
 }
 
 bool validate(QFileInfo file)

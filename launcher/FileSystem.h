@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -122,6 +123,14 @@ class copy : public QObject {
 };
 
 /**
+ * @brief moves a file by renaming it
+ * @param source source file path
+ * @param dest destination filepath
+ * 
+ */
+bool move(const QString&  source, const QString& dest);
+
+/**
  * Delete a folder recursively
  */
 bool deletePath(QString path);
@@ -129,7 +138,7 @@ bool deletePath(QString path);
 /**
  * Trash a folder / file
  */
-bool trash(QString path, QString *pathInTrash);
+bool trash(QString path, QString *pathInTrash = nullptr);
 
 QString PathCombine(const QString& path1, const QString& path2);
 QString PathCombine(const QString& path1, const QString& path2, const QString& path3);

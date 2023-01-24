@@ -143,5 +143,9 @@ bool Resource::enable(EnableAction action)
 bool Resource::destroy()
 {
     m_type = ResourceType::UNKNOWN;
+
+    if (FS::trash(m_file_info.filePath()))
+        return true;
+
     return FS::deletePath(m_file_info.filePath());
 }

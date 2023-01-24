@@ -50,7 +50,8 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     void filterTextChanged(const QString& newContents);
 
     virtual void addItem();
-    virtual void removeItem();
+    void removeItem();
+    virtual void removeItems(const QItemSelection &selection);
 
     virtual void enableItem();
     virtual void disableItem();

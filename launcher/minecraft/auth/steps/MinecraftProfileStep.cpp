@@ -2,6 +2,7 @@
 
 #include <QNetworkRequest>
 
+#include "Logging.h"
 #include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
@@ -40,9 +41,7 @@ void MinecraftProfileStep::onRequestDone(
     auto requestor = qobject_cast<AuthRequest *>(QObject::sender());
     requestor->deleteLater();
 
-#ifndef NDEBUG
-    qDebug() << data;
-#endif
+    qCDebug(authCredentials()) << data;
     if (error == QNetworkReply::ContentNotFoundError) {
         // NOTE: Succeed even if we do not have a profile. This is a valid account state.
         if(m_data->type == AccountType::Mojang) {
