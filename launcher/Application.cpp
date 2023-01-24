@@ -1548,9 +1548,7 @@ QString Application::getJarPath(QString jarFile)
 #endif
         FS::PathCombine(m_rootPath, "jars"),
         FS::PathCombine(applicationDirPath(), "jars"),
-#if !defined(NDEBUG)
         FS::PathCombine(applicationDirPath(), "..", "jars") // from inside build dir , for debuging
-#endif
     };
     for(QString p : potentialPaths)
     {
