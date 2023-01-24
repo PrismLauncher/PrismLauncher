@@ -260,7 +260,7 @@ void ResourceFolderModel::resolveResource(Resource* res)
         return;
     }
 
-    auto task = createParseTask(*res);
+    Task::Ptr task{ createParseTask(*res) };
     if (!task)
         return;
 
@@ -270,11 +270,11 @@ void ResourceFolderModel::resolveResource(Resource* res)
     m_active_parse_tasks.insert(ticket, task);
 
     connect(
-        task, &Task::succeeded, this, [=] { onParseSucceeded(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
+        task.get(), &Task::succeeded, this, [=] { onParseSucceeded(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
     connect(
-        task, &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
+        task.get(), &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
     connect(
-        task, &Task::finished, this, [=] { m_active_parse_tasks.remove(ticket); }, Qt::ConnectionType::QueuedConnection);
+        task.get(), &Task::finished, this, [=] { m_active_parse_tasks.remove(ticket); }, Qt::ConnectionType::QueuedConnection);
 
     m_helper_thread_task.addTask(task);
 
