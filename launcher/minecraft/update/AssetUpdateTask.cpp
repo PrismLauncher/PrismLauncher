@@ -24,7 +24,7 @@ void AssetUpdateTask::executeTask()
     auto assets = profile->getMinecraftAssets();
     QUrl indexUrl = assets->url;
     QString localPath = assets->id + ".json";
-    auto job = new NetJob(
+    auto job = makeShared<NetJob>(
         tr("Asset index for %1").arg(m_inst->name()),
         APPLICATION->network()
     );

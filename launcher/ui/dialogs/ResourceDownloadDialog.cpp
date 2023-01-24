@@ -147,7 +147,7 @@ void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack& pack, ModPlat
     removeResource(pack, ver);
 
     ver.is_currently_selected = true;
-    m_selected.insert(pack.name, new ResourceDownloadTask(pack, ver, getBaseModel(), is_indexed));
+    m_selected.insert(pack.name, makeShared<ResourceDownloadTask>(pack, ver, getBaseModel(), is_indexed));
 
     m_buttons.button(QDialogButtonBox::Ok)->setEnabled(!m_selected.isEmpty());
 }

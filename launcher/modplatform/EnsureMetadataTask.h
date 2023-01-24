@@ -60,6 +60,6 @@ class EnsureMetadataTask : public Task {
     ModPlatform::ResourceProvider m_provider;
 
     QHash<QString, ModPlatform::IndexedVersion> m_temp_versions;
-    ConcurrentTask* m_hashing_task;
+    ConcurrentTask::Ptr m_hashing_task;
     Task::Ptr m_current_task;
 };

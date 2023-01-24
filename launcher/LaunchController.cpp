@@ -382,15 +382,15 @@ void LaunchController::launchInstance()
             }
             resolved_servers = resolved_servers + "]\n\n";
         }
-        m_launcher->prependStep(new TextPrint(m_launcher.get(), resolved_servers, MessageLevel::Launcher));
+        m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), resolved_servers, MessageLevel::Launcher));
     } else {
         online_mode = m_demo ? "demo" : "offline";
     }
 
-    m_launcher->prependStep(new TextPrint(m_launcher.get(), "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
+    m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
 
     // Prepend Version
-    m_launcher->prependStep(new TextPrint(m_launcher.get(), BuildConfig.LAUNCHER_DISPLAYNAME + " version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::Launcher));
+    m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), BuildConfig.LAUNCHER_DISPLAYNAME + " version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::Launcher));
     m_launcher->start();
 }
 

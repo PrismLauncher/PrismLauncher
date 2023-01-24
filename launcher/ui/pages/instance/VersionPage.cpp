@@ -660,7 +660,7 @@ void VersionPage::onGameUpdateError(QString error)
     CustomMessageBox::selectable(this, tr("Error updating instance"), error, QMessageBox::Warning)->show();
 }
 
-Component * VersionPage::current()
+ComponentPtr VersionPage::current()
 {
     auto row = currentRow();
     if(row < 0)

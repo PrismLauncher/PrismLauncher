@@ -88,7 +88,7 @@ void InstanceImportTask::executeTask()
         entry->setStale(true);
         m_archivePath = entry->getFullPath();
 
-        m_filesNetJob = new NetJob(tr("Modpack download"), APPLICATION->network());
+        m_filesNetJob.reset(new NetJob(tr("Modpack download"), APPLICATION->network()));
         m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
 
         connect(m_filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
@@ -301,7 +301,7 @@ void InstanceImportTask::processFlame()
 
 void InstanceImportTask::processTechnic()
 {
-    shared_qobject_ptr<Technic::TechnicPackProcessor> packProcessor = new Technic::TechnicPackProcessor();
+    shared_qobject_ptr<Technic::TechnicPackProcessor> packProcessor{ new Technic::TechnicPackProcessor };
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &InstanceImportTask::emitSucceeded);
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &InstanceImportTask::emitFailed);
     packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath);

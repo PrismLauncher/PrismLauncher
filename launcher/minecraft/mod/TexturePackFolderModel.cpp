@@ -43,7 +43,7 @@ TexturePackFolderModel::TexturePackFolderModel(const QString &dir) : ResourceFol
 
 Task* TexturePackFolderModel::createUpdateTask()
 {
-    return new BasicFolderLoadTask(m_dir, [](QFileInfo const& entry) { return new TexturePack(entry); });
+    return new BasicFolderLoadTask(m_dir, [](QFileInfo const& entry) { return makeShared<TexturePack>(entry); });
 }
 
 Task* TexturePackFolderModel::createParseTask(Resource& resource)

@@ -20,11 +20,11 @@ Task::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallbacks&
     auto search_url = search_url_optional.value();
 
     auto response = new QByteArray();
-    auto netJob = new NetJob(QString("%1::Search").arg(debugName()), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
 
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(search_url), response));
 
-    QObject::connect(netJob, &NetJob::succeeded, [=]{
+    QObject::connect(netJob.get(), &NetJob::succeeded, [=]{
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -40,14 +40,14 @@ Task::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallbacks&
         callbacks.on_succeed(doc);
     });
 
-    QObject::connect(netJob, &NetJob::failed, [=](QString reason){
+    QObject::connect(netJob.get(), &NetJob::failed, [=](QString reason){
         int network_error_code = -1;
         if (auto* failed_action = netJob->getFailedActions().at(0); failed_action && failed_action->m_reply)
             network_error_code = failed_action->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
        callbacks.on_fail(reason, network_error_code); 
     });
-    QObject::connect(netJob, &NetJob::aborted, [=]{
+    QObject::connect(netJob.get(), &NetJob::aborted, [=]{
        callbacks.on_abort(); 
     });
 
@@ -83,12 +83,12 @@ Task::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, Versi
 
     auto versions_url = versions_url_optional.value();
 
-    auto netJob = new NetJob(QString("%1::Versions").arg(args.pack.name), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack.name), APPLICATION->network());
     auto response = new QByteArray();
 
     netJob->addNetAction(Net::Download::makeByteArray(versions_url, response));
 
-    QObject::connect(netJob, &NetJob::succeeded, [=] {
+    QObject::connect(netJob.get(), &NetJob::succeeded, [=] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -101,7 +101,7 @@ Task::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, Versi
         callbacks.on_succeed(doc, args.pack);
     });
 
-    QObject::connect(netJob, &NetJob::finished, [response] {
+    QObject::connect(netJob.get(), &NetJob::finished, [response] {
         delete response;
     });
 
@@ -116,11 +116,11 @@ Task::Ptr NetworkResourceAPI::getProject(QString addonId, QByteArray* response) 
 
     auto project_url = project_url_optional.value();
 
-    auto netJob = new NetJob(QString("%1::GetProject").arg(addonId), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("%1::GetProject").arg(addonId), APPLICATION->network());
 
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(project_url), response));
 
-    QObject::connect(netJob, &NetJob::finished, [response] {
+    QObject::connect(netJob.get(), &NetJob::finished, [response] {
         delete response;
     });
 

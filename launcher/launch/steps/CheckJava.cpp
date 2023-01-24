@@ -93,7 +93,7 @@ void CheckJava::executeTask()
         || storedArchitecture.size() == 0 || storedRealArchitecture.size() == 0
         || storedVendor.size() == 0)
     {
-        m_JavaChecker = new JavaChecker();
+        m_JavaChecker.reset(new JavaChecker);
         emit logLine(QString("Checking Java version..."), MessageLevel::Launcher);
         connect(m_JavaChecker.get(), &JavaChecker::checkFinished, this, &CheckJava::checkJavaFinished);
         m_JavaChecker->m_path = realJavaPath;

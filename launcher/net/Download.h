@@ -52,9 +52,6 @@ class Download : public NetAction {
     enum class Option { NoOptions = 0, AcceptLocalFiles = 1, MakeEternal = 2 };
     Q_DECLARE_FLAGS(Options, Option)
 
-   protected:
-    explicit Download();
-
    public:
     ~Download() override = default;
 

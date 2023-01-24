@@ -47,7 +47,7 @@ void PackFetchTask::fetch()
     publicPacks.clear();
     thirdPartyPacks.clear();
 
-    jobPtr = new NetJob("LegacyFTB::ModpackFetch", m_network);
+    jobPtr.reset(new NetJob("LegacyFTB::ModpackFetch", m_network));
 
     QUrl publicPacksUrl = QUrl(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/modpacks.xml");
     qDebug() << "Downloading public version info from" << publicPacksUrl.toString();

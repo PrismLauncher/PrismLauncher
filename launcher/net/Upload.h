@@ -45,6 +45,8 @@ namespace Net {
         Q_OBJECT
 
     public:
+        using Ptr = shared_qobject_ptr<Upload>;
+
         static Upload::Ptr makeByteArray(QUrl url, QByteArray *output, QByteArray m_post_data);
         auto abort() -> bool override;
         auto canAbort() const -> bool override { return true; };
