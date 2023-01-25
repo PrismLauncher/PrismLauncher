@@ -8,7 +8,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
-
+#include "net/NetJob.h"
 #include "net/Upload.h"
 
 Task::Ptr FlameAPI::matchFingerprints(const QList<uint>& fingerprints, QByteArray* response)

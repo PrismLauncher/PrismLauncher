@@ -44,6 +44,7 @@
 #include <QSortFilterProxyModel>
 #include <QDebug>
 #include <QSaveFile>
+#include <QStack>
 #include "StringUtils.h"
 #include "SeparatorPrefixTree.h"
 #include "Application.h"

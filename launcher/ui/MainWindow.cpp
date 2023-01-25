@@ -86,8 +86,7 @@
 #include <net/Download.h>
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
-#include <updater/DownloadTask.h>
-#include <updater/UpdateChecker.h>
+#include <updater/ExternalUpdater.h>
 #include <DesktopServices.h>
 #include "InstanceWindow.h"
 #include "InstancePageProvider.h"
@@ -102,11 +101,9 @@
 #include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/AboutDialog.h"
-#include "ui/dialogs/VersionSelectDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
-#include "ui/dialogs/UpdateDialog.h"
 #include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
@@ -117,7 +114,6 @@
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/WorldList.h"
 
-#include "UpdateController.h"
 #include "KonamiCode.h"
 
 #include "InstanceImportTask.h"
@@ -1061,9 +1057,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         updateNewsLabel();
     }
 
-
-    if(BuildConfig.UPDATER_ENABLED)
-    {
+    if (BuildConfig.UPDATER_ENABLED) {
         bool updatesAllowed = APPLICATION->updatesAreAllowed();
         updatesAllowedChanged(updatesAllowed);
 
@@ -1071,21 +1065,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         connect(ui->actionCheckUpdate.operator->(), &QAction::triggered, this, &MainWindow::checkForUpdates);
 
         // set up the updater object.
-        auto updater = APPLICATION->updateChecker();
-        connect(updater.get(), &UpdateChecker::updateAvailable, this, &MainWindow::updateAvailable);
-        connect(updater.get(), &UpdateChecker::noUpdateFound, this, &MainWindow::updateNotAvailable);
-        // if automatic update checks are allowed, start one.
-        if (APPLICATION->settings()->get("AutoUpdate").toBool() && updatesAllowed)
-        {
-            updater->checkForUpdate(APPLICATION->settings()->get("UpdateChannel").toString(), false);
-        }
+        auto updater = APPLICATION->updater();
 
-        if (APPLICATION->updateChecker()->getExternalUpdater())
-        {
-            connect(APPLICATION->updateChecker()->getExternalUpdater(),
-                    &ExternalUpdater::canCheckForUpdatesChanged,
-                    this,
-                    &MainWindow::updatesAllowedChanged);
+        if (updater) {
+            connect(updater.get(), &ExternalUpdater::canCheckForUpdatesChanged, this, &MainWindow::updatesAllowedChanged);
         }
     }
 
@@ -1563,32 +1546,6 @@ void MainWindow::updateNewsLabel()
     }
 }
 
-void MainWindow::updateAvailable(GoUpdate::Status status)
-{
-    if(!APPLICATION->updatesAreAllowed())
-    {
-        updateNotAvailable();
-        return;
-    }
-    UpdateDialog dlg(true, this);
-    UpdateAction action = (UpdateAction)dlg.exec();
-    switch (action)
-    {
-    case UPDATE_LATER:
-        qDebug() << "Update will be installed later.";
-        break;
-    case UPDATE_NOW:
-        downloadUpdates(status);
-        break;
-    }
-}
-
-void MainWindow::updateNotAvailable()
-{
-    UpdateDialog dlg(false, this);
-    dlg.exec();
-}
-
 QList<int> stringToIntList(const QString &string)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
@@ -1611,40 +1568,6 @@ QString intListToString(const QList<int> &list)
         slist.append(QString::number(list.at(i)));
     }
     return slist.join(',');
-}
-
-void MainWindow::downloadUpdates(GoUpdate::Status status)
-{
-    if(!APPLICATION->updatesAreAllowed())
-    {
-        return;
-    }
-    qDebug() << "Downloading updates.";
-    ProgressDialog updateDlg(this);
-    status.rootPath = APPLICATION->root();
-
-    auto dlPath = FS::PathCombine(APPLICATION->root(), "update", "XXXXXX");
-    if (!FS::ensureFilePathExists(dlPath))
-    {
-        CustomMessageBox::selectable(this, tr("Error"), tr("Couldn't create folder for update downloads:\n%1").arg(dlPath), QMessageBox::Warning)->show();
-    }
-    GoUpdate::DownloadTask updateTask(APPLICATION->network(), status, dlPath, &updateDlg);
-    // If the task succeeds, install the updates.
-    if (updateDlg.execWithTask(&updateTask))
-    {
-        /**
-         * NOTE: This disables launching instances until the update either succeeds (and this process exits)
-         * or the update fails (and the control leaves this scope).
-         */
-        APPLICATION->updateIsRunning(true);
-        UpdateController update(this, APPLICATION->root(), updateTask.updateFilesDir(), updateTask.operations());
-        update.installUpdates();
-        APPLICATION->updateIsRunning(false);
-    }
-    else
-    {
-        CustomMessageBox::selectable(this, tr("Error"), updateTask.failReason(), QMessageBox::Warning)->show();
-    }
 }
 
 void MainWindow::onCatToggled(bool state)
@@ -1983,8 +1906,7 @@ void MainWindow::checkForUpdates()
 {
     if(BuildConfig.UPDATER_ENABLED)
     {
-        auto updater = APPLICATION->updateChecker();
-        updater->checkForUpdate(APPLICATION->settings()->get("UpdateChannel").toString(), true);
+        APPLICATION->triggerUpdateCheck();
     }
     else
     {

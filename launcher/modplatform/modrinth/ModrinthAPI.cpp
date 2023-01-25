@@ -6,6 +6,7 @@
 
 #include "Application.h"
 #include "Json.h"
+#include "net/NetJob.h"
 #include "net/Upload.h"
 
 Task::Ptr ModrinthAPI::currentVersion(QString hash, QString hash_format, QByteArray* response)

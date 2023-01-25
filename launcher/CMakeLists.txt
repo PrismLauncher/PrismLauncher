@@ -161,12 +161,6 @@ set(LAUNCH_SOURCES
 
 # Old update system
 set(UPDATE_SOURCES
-    updater/GoUpdate.h
-    updater/GoUpdate.cpp
-    updater/UpdateChecker.h
-    updater/UpdateChecker.cpp
-    updater/DownloadTask.h
-    updater/DownloadTask.cpp
     updater/ExternalUpdater.h
 )
 
@@ -621,8 +615,6 @@ SET(LAUNCHER_SOURCES
     Application.cpp
     DataMigrationTask.h
     DataMigrationTask.cpp
-    UpdateController.cpp
-    UpdateController.h
     ApplicationMessage.h
     ApplicationMessage.cpp
 
@@ -868,8 +860,6 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ProgressDialog.h
     ui/dialogs/ReviewMessageBox.cpp
     ui/dialogs/ReviewMessageBox.h
-    ui/dialogs/UpdateDialog.cpp
-    ui/dialogs/UpdateDialog.h
     ui/dialogs/VersionSelectDialog.cpp
     ui/dialogs/VersionSelectDialog.h
     ui/dialogs/SkinUploadDialog.cpp
@@ -986,7 +976,6 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ProfileSetupDialog.ui
     ui/dialogs/ProgressDialog.ui
     ui/dialogs/NewInstanceDialog.ui
-    ui/dialogs/UpdateDialog.ui
     ui/dialogs/NewComponentDialog.ui
     ui/dialogs/NewsDialog.ui
     ui/dialogs/ProfileSelectDialog.ui

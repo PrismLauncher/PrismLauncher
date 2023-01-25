@@ -58,33 +58,6 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="updateChannelLabel">
-            <property name="text">
-             <string>Up&amp;date Channel:</string>
-            </property>
-            <property name="buddy">
-             <cstring>updateChannelComboBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="updateChannelComboBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="updateChannelDescLabel">
-            <property name="text">
-             <string>No channel selected.</string>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -440,7 +413,6 @@
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>autoUpdateCheckBox</tabstop>
-  <tabstop>updateChannelComboBox</tabstop>
   <tabstop>instDirTextBox</tabstop>
   <tabstop>instDirBrowseBtn</tabstop>
   <tabstop>modsDirTextBox</tabstop>
