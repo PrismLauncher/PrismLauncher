@@ -90,7 +90,7 @@ public:
     void installCustomJar(QString selectedFile);
 
     /// install MMC/Prism component files
-    void installComponents(QStringList selectedFiles);
+    bool installComponents(QStringList selectedFiles);
 
     /// install Java agent files
     void installAgents(QStringList selectedFiles);
@@ -177,7 +177,6 @@ private:
     bool load();
     bool installJarMods_internal(QStringList filepaths);
     bool installCustomJar_internal(QString filepath);
-    bool installComponents_internal(QStringList filepaths);
     bool installAgents_internal(QStringList filepaths);
     bool removeComponent_internal(ComponentPtr patch);
 

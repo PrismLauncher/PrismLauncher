@@ -384,8 +384,12 @@ void VersionPage::on_actionImport_Components_triggered()
     QStringList list = GuiUtil::BrowseForFiles("component", tr("Select components"), tr("Components (*.json)"),
                                                APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
-    if (!list.isEmpty())
-        m_profile->installComponents(list);
+    if (!list.isEmpty()) {
+        if (!m_profile->installComponents(list)) {
+            QMessageBox::warning(this, tr("Failed to import components"),
+                                 tr("Some components could not be imported. Check logs for details"));
+        }
+    }
 
     updateButtons();
 }

@@ -733,21 +733,47 @@ void PackProfile::invalidateLaunchProfile()
 
 void PackProfile::installJarMods(QStringList selectedFiles)
 {
+    // FIXME: get rid of _internal
     installJarMods_internal(selectedFiles);
 }
 
 void PackProfile::installCustomJar(QString selectedFile)
 {
+    // FIXME: get rid of _internal
     installCustomJar_internal(selectedFile);
 }
 
-void PackProfile::installComponents(QStringList selectedFiles)
+bool PackProfile::installComponents(QStringList selectedFiles)
 {
-    installComponents_internal(selectedFiles);
+    const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
+    if (!FS::ensureFolderPathExists(patchDir))
+        return false;
+
+    bool result = true;
+    for (const QString& source : selectedFiles) {
+        const QFileInfo sourceInfo(source);
+
+        auto versionFile = ProfileUtils::parseJsonFile(sourceInfo, false);
+        const QString target = FS::PathCombine(patchDir, versionFile->uid + ".json");
+
+        if (!QFile::copy(source, target)) {
+            qWarning() << "Component" << source << "could not be copied to target" << target;
+            result = false;
+            continue;
+        }
+
+        appendComponent(new Component(this, versionFile->uid, versionFile));
+    }
+
+    scheduleSave();
+    invalidateLaunchProfile();
+
+    return result;
 }
 
 void PackProfile::installAgents(QStringList selectedFiles)
 {
+    // FIXME: get rid of _internal
     installAgents_internal(selectedFiles);
 }
 
@@ -945,32 +971,6 @@ bool PackProfile::installCustomJar_internal(QString filepath)
 
     scheduleSave();
     invalidateLaunchProfile();
-    return true;
-}
-
-bool PackProfile::installComponents_internal(QStringList filepaths)
-{
-    const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
-    if (!FS::ensureFolderPathExists(patchDir))
-        return false;
-
-    for (const QString& source : filepaths) {
-        const QFileInfo sourceInfo(source);
-
-        auto versionFile = ProfileUtils::parseJsonFile(sourceInfo, false);
-        const QString target = FS::PathCombine(patchDir, versionFile->uid + ".json");
-
-        if (!QFile::copy(source, target))
-        {
-            return false;
-        }
-
-        appendComponent(new Component(this, versionFile->uid, versionFile));
-    }
-
-    scheduleSave();
-    invalidateLaunchProfile();
-
     return true;
 }
 
