@@ -81,16 +81,17 @@ bool PackInstallTask::abort()
 void PackInstallTask::executeTask()
 {
     qDebug() << "PackInstallTask::executeTask: " << QThread::currentThreadId();
-    auto *netJob = new NetJob("ATLauncher::VersionFetch", APPLICATION->network());
+    NetJob::Ptr netJob{ new NetJob("ATLauncher::VersionFetch", APPLICATION->network()) };
     auto searchUrl = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json")
             .arg(m_pack_safe_name).arg(m_version_name);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
+
+    QObject::connect(netJob.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
+    QObject::connect(netJob.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
+    QObject::connect(netJob.get(), &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
+
     jobPtr = netJob;
     jobPtr->start();
-
-    QObject::connect(netJob, &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
-    QObject::connect(netJob, &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
-    QObject::connect(netJob, &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
 }
 
 void PackInstallTask::onDownloadSucceeded()
@@ -552,7 +553,7 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
     file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
     file.close();
 
-    profile->appendComponent(new Component(profile.get(), target_id, f));
+    profile->appendComponent(ComponentPtr{ new Component(profile.get(), target_id, f) });
     return true;
 }
 
@@ -641,7 +642,7 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<
     file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
     file.close();
 
-    profile->appendComponent(new Component(profile.get(), target_id, f));
+    profile->appendComponent(ComponentPtr{ new Component(profile.get(), target_id, f) });
     return true;
 }
 
@@ -649,7 +650,7 @@ void PackInstallTask::installConfigs()
 {
     qDebug() << "PackInstallTask::installConfigs: " << QThread::currentThreadId();
     setStatus(tr("Downloading configs..."));
-    jobPtr = new NetJob(tr("Config download"), APPLICATION->network());
+    jobPtr.reset(new NetJob(tr("Config download"), APPLICATION->network()));
 
     auto path = QString("Configs/%1/%2.zip").arg(m_pack_safe_name).arg(m_version_name);
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.zip")
@@ -747,7 +748,7 @@ void PackInstallTask::downloadMods()
     setStatus(tr("Downloading mods..."));
 
     jarmods.clear();
-    jobPtr = new NetJob(tr("Mod download"), APPLICATION->network());
+    jobPtr.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
     for(const auto& mod : m_version.mods) {
         // skip non-client mods
         if(!mod.client) continue;

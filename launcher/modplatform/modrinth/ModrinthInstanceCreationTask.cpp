@@ -223,7 +223,7 @@ bool ModrinthCreationTask::createInstance()
     instance.setName(name());
     instance.saveNow();
 
-    m_files_job = new NetJob(tr("Mod download"), APPLICATION->network());
+    m_files_job.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
 
     for (auto file : m_files) {
         auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path);

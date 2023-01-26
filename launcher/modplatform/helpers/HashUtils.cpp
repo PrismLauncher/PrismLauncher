@@ -28,22 +28,22 @@ Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provid
 
 Hasher::Ptr createModrinthHasher(QString file_path)
 {
-    return new ModrinthHasher(file_path);
+    return makeShared<ModrinthHasher>(file_path);
 }
 
 Hasher::Ptr createFlameHasher(QString file_path)
 {
-    return new FlameHasher(file_path);
+    return makeShared<FlameHasher>(file_path);
 }
 
 Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider)
 {
-    return new BlockedModHasher(file_path, provider);
+    return makeShared<BlockedModHasher>(file_path, provider);
 }
 
 Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider, QString type)
 {
-    auto hasher = new BlockedModHasher(file_path, provider);
+    auto hasher = makeShared<BlockedModHasher>(file_path, provider);
     hasher->useHashType(type);
     return hasher;
 }

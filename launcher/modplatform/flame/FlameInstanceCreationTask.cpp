@@ -373,7 +373,7 @@ bool FlameCreationTask::createInstance()
         instance.setManagedPack("flame", m_managed_id, m_pack.name, m_managed_version_id, m_pack.version);
     instance.setName(name());
 
-    m_mod_id_resolver = new Flame::FileResolvingTask(APPLICATION->network(), m_pack);
+    m_mod_id_resolver.reset(new Flame::FileResolvingTask(APPLICATION->network(), m_pack));
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::succeeded, this, [this, &loop] { idResolverSucceeded(loop); });
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::failed, [&](QString reason) {
         m_mod_id_resolver.reset();
@@ -452,7 +452,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
 
 void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 {
-    m_files_job = new NetJob(tr("Mod download"), APPLICATION->network());
+    m_files_job.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
     for (const auto& result : m_mod_id_resolver->getResults().files) {
         QString filename = result.fileName;
         if (!result.required) {

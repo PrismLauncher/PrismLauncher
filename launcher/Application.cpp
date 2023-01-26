@@ -679,7 +679,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // initialize network access and proxy setup
     {
-        m_network = new QNetworkAccessManager();
+        m_network.reset(new QNetworkAccessManager());
         QString proxyTypeStr = settings()->get("ProxyType").toString();
         QString addr = settings()->get("ProxyAddr").toString();
         int port = settings()->get("ProxyPort").value<qint16>();

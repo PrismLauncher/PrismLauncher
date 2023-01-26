@@ -49,10 +49,10 @@ class BigConcurrentTask : public QThread {
 
         // NOTE: Arbitrary value that manages to trigger a problem when there is one.
         static const unsigned s_num_tasks = 1 << 14;
-        auto sub_tasks = new BasicTask*[s_num_tasks];
+        auto sub_tasks = new BasicTask::Ptr[s_num_tasks];
 
         for (unsigned i = 0; i < s_num_tasks; i++) {
-            sub_tasks[i] = new BasicTask(false);
+            sub_tasks[i] = makeShared<BasicTask>(false);
             big_task.addTask(sub_tasks[i]);
         }
 
@@ -119,21 +119,21 @@ class TaskTest : public QObject {
     }
 
     void test_basicConcurrentRun(){
-        BasicTask t1;
-        BasicTask t2;
-        BasicTask t3;
+        auto t1 = makeShared<BasicTask>();
+        auto t2 = makeShared<BasicTask>();
+        auto t3 = makeShared<BasicTask>();
 
         ConcurrentTask t;
 
-        t.addTask(&t1);
-        t.addTask(&t2);
-        t.addTask(&t3);
+        t.addTask(t1);
+        t.addTask(t2);
+        t.addTask(t3);
 
         QObject::connect(&t, &Task::finished, [&]{
                 QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been.");
-                QVERIFY(t1.wasSuccessful());
-                QVERIFY(t2.wasSuccessful());
-                QVERIFY(t3.wasSuccessful());
+                QVERIFY(t1->wasSuccessful());
+                QVERIFY(t2->wasSuccessful());
+                QVERIFY(t3->wasSuccessful());
         });
 
         t.start();
@@ -144,31 +144,39 @@ class TaskTest : public QObject {
 
     // Tests if starting new tasks after the 6 initial ones is working
     void test_moreConcurrentRun(){
-        BasicTask t1, t2, t3, t4, t5, t6, t7, t8, t9;
+        auto t1 = makeShared<BasicTask>();
+        auto t2 = makeShared<BasicTask>();
+        auto t3 = makeShared<BasicTask>();
+        auto t4 = makeShared<BasicTask>();
+        auto t5 = makeShared<BasicTask>();
+        auto t6 = makeShared<BasicTask>();
+        auto t7 = makeShared<BasicTask>();
+        auto t8 = makeShared<BasicTask>();
+        auto t9 = makeShared<BasicTask>();
 
         ConcurrentTask t;
 
-        t.addTask(&t1);
-        t.addTask(&t2);
-        t.addTask(&t3);
-        t.addTask(&t4);
-        t.addTask(&t5);
-        t.addTask(&t6);
-        t.addTask(&t7);
-        t.addTask(&t8);
-        t.addTask(&t9);
+        t.addTask(t1);
+        t.addTask(t2);
+        t.addTask(t3);
+        t.addTask(t4);
+        t.addTask(t5);
+        t.addTask(t6);
+        t.addTask(t7);
+        t.addTask(t8);
+        t.addTask(t9);
 
         QObject::connect(&t, &Task::finished, [&]{
                 QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been.");
-                QVERIFY(t1.wasSuccessful());
-                QVERIFY(t2.wasSuccessful());
-                QVERIFY(t3.wasSuccessful());
-                QVERIFY(t4.wasSuccessful());
-                QVERIFY(t5.wasSuccessful());
-                QVERIFY(t6.wasSuccessful());
-                QVERIFY(t7.wasSuccessful());
-                QVERIFY(t8.wasSuccessful());
-                QVERIFY(t9.wasSuccessful());
+                QVERIFY(t1->wasSuccessful());
+                QVERIFY(t2->wasSuccessful());
+                QVERIFY(t3->wasSuccessful());
+                QVERIFY(t4->wasSuccessful());
+                QVERIFY(t5->wasSuccessful());
+                QVERIFY(t6->wasSuccessful());
+                QVERIFY(t7->wasSuccessful());
+                QVERIFY(t8->wasSuccessful());
+                QVERIFY(t9->wasSuccessful());
         });
 
         t.start();
@@ -178,21 +186,21 @@ class TaskTest : public QObject {
     }
 
     void test_basicSequentialRun(){
-        BasicTask t1;
-        BasicTask t2;
-        BasicTask t3;
+        auto t1 = makeShared<BasicTask>();
+        auto t2 = makeShared<BasicTask>();
+        auto t3 = makeShared<BasicTask>();
 
         SequentialTask t;
 
-        t.addTask(&t1);
-        t.addTask(&t2);
-        t.addTask(&t3);
+        t.addTask(t1);
+        t.addTask(t2);
+        t.addTask(t3);
 
         QObject::connect(&t, &Task::finished, [&]{
                 QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been.");
-                QVERIFY(t1.wasSuccessful());
-                QVERIFY(t2.wasSuccessful());
-                QVERIFY(t3.wasSuccessful());
+                QVERIFY(t1->wasSuccessful());
+                QVERIFY(t2->wasSuccessful());
+                QVERIFY(t3->wasSuccessful());
         });
 
         t.start();
@@ -202,21 +210,21 @@ class TaskTest : public QObject {
     }
 
     void test_basicMultipleOptionsRun(){
-        BasicTask t1;
-        BasicTask t2;
-        BasicTask t3;
+        auto t1 = makeShared<BasicTask>();
+        auto t2 = makeShared<BasicTask>();
+        auto t3 = makeShared<BasicTask>();
 
         MultipleOptionsTask t;
 
-        t.addTask(&t1);
-        t.addTask(&t2);
-        t.addTask(&t3);
+        t.addTask(t1);
+        t.addTask(t2);
+        t.addTask(t3);
 
         QObject::connect(&t, &Task::finished, [&]{
                 QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been.");
-                QVERIFY(t1.wasSuccessful());
-                QVERIFY(!t2.wasSuccessful());
-                QVERIFY(!t3.wasSuccessful());
+                QVERIFY(t1->wasSuccessful());
+                QVERIFY(!t2->wasSuccessful());
+                QVERIFY(!t3->wasSuccessful());
         });
 
         t.start();

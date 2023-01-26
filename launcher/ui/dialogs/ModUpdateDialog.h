@@ -25,7 +25,7 @@ class ModUpdateDialog final : public ReviewMessageBox {
 
     void appendMod(const CheckUpdateTask::UpdatableMod& info);
 
-    const QList<ResourceDownloadTask*> getTasks();
+    const QList<ResourceDownloadTask::Ptr> getTasks();
     auto indexDir() const -> QDir { return m_mod_model->indexDir(); }
 
     auto noUpdates() const -> bool { return m_no_updates; };
@@ -41,8 +41,8 @@ class ModUpdateDialog final : public ReviewMessageBox {
    private:
     QWidget* m_parent;
 
-    ModrinthCheckUpdate* m_modrinth_check_task = nullptr;
-    FlameCheckUpdate* m_flame_check_task = nullptr;
+    shared_qobject_ptr<ModrinthCheckUpdate> m_modrinth_check_task;
+    shared_qobject_ptr<FlameCheckUpdate> m_flame_check_task;
 
     const std::shared_ptr<ModFolderModel> m_mod_model;
 
@@ -50,11 +50,11 @@ class ModUpdateDialog final : public ReviewMessageBox {
     QList<Mod*> m_modrinth_to_update;
     QList<Mod*> m_flame_to_update;
 
-    ConcurrentTask* m_second_try_metadata;
+    ConcurrentTask::Ptr m_second_try_metadata;
     QList<std::tuple<Mod*, QString>> m_failed_metadata;
     QList<std::tuple<Mod*, QString, QUrl>> m_failed_check_update;
 
-    QHash<QString, ResourceDownloadTask*> m_tasks;
+    QHash<QString, ResourceDownloadTask::Ptr> m_tasks;
     BaseInstance* m_instance;
 
     bool m_no_updates = false;

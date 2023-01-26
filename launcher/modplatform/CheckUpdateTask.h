@@ -22,10 +22,10 @@ class CheckUpdateTask : public Task {
         QString new_version;
         QString changelog;
         ModPlatform::ResourceProvider provider;
-        ResourceDownloadTask* download;
+        shared_qobject_ptr<ResourceDownloadTask> download;
 
        public:
-        UpdatableMod(QString name, QString old_h, QString old_v, QString new_v, QString changelog, ModPlatform::ResourceProvider p, ResourceDownloadTask* t)
+        UpdatableMod(QString name, QString old_h, QString old_v, QString new_v, QString changelog, ModPlatform::ResourceProvider p, shared_qobject_ptr<ResourceDownloadTask> t)
             : name(name), old_hash(old_h), old_version(old_v), new_version(new_v), changelog(changelog), provider(p), download(t)
         {}
     };

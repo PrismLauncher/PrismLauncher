@@ -109,14 +109,14 @@ void ListModel::request()
     modpacks.clear();
     endResetModel();
 
-    auto *netJob = new NetJob("Ftb::Request", APPLICATION->network());
+    auto netJob = makeShared<NetJob>("Ftb::Request", APPLICATION->network());
     auto url = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/all");
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), &response));
     jobPtr = netJob;
     jobPtr->start();
 
-    QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::requestFinished);
-    QObject::connect(netJob, &NetJob::failed, this, &ListModel::requestFailed);
+    QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::requestFinished);
+    QObject::connect(netJob.get(), &NetJob::failed, this, &ListModel::requestFailed);
 }
 
 void ListModel::abortRequest()
@@ -158,14 +158,14 @@ void ListModel::requestFailed(QString reason)
 
 void ListModel::requestPack()
 {
-    auto *netJob = new NetJob("Ftb::Search", APPLICATION->network());
+    auto netJob = makeShared<NetJob>("Ftb::Search", APPLICATION->network());
     auto searchUrl = QString(BuildConfig.MODPACKSCH_API_BASE_URL + "public/modpack/%1").arg(currentPack);
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();
 
-    QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::packRequestFinished);
-    QObject::connect(netJob, &NetJob::failed, this, &ListModel::packRequestFailed);
+    QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::packRequestFinished);
+    QObject::connect(netJob.get(), &NetJob::failed, this, &ListModel::packRequestFailed);
 }
 
 void ListModel::packRequestFinished()
@@ -281,16 +281,16 @@ void ListModel::requestLogo(QString logo, QString url)
 
     bool stale = entry->isStale();
 
-    NetJob *job = new NetJob(QString("ModpacksCH Icon Download %1").arg(logo), APPLICATION->network());
+    auto job = makeShared<NetJob>(QString("ModpacksCH Icon Download %1").arg(logo), APPLICATION->network());
     job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
-    QObject::connect(job, &NetJob::finished, this, [this, logo, fullPath, stale]
+    QObject::connect(job.get(), &NetJob::finished, this, [this, logo, fullPath, stale]
     {
         logoLoaded(logo, stale);
     });
 
-    QObject::connect(job, &NetJob::failed, this, [this, logo]
+    QObject::connect(job.get(), &NetJob::failed, this, [this, logo]
     {
         logoFailed(logo);
     });

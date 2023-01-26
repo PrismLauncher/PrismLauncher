@@ -962,12 +962,12 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
 
     // print a header
     {
-        process->appendStep(new TextPrint(pptr, "Minecraft folder is:\n" + gameRoot() + "\n\n", MessageLevel::Launcher));
+        process->appendStep(makeShared<TextPrint>(pptr, "Minecraft folder is:\n" + gameRoot() + "\n\n", MessageLevel::Launcher));
     }
 
     // check java
     {
-        process->appendStep(new CheckJava(pptr));
+        process->appendStep(makeShared<CheckJava>(pptr));
     }
 
     // check launch method
@@ -975,13 +975,13 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     QString method = launchMethod();
     if(!validMethods.contains(method))
     {
-        process->appendStep(new TextPrint(pptr, "Selected launch method \"" + method + "\" is not valid.\n", MessageLevel::Fatal));
+        process->appendStep(makeShared<TextPrint>(pptr, "Selected launch method \"" + method + "\" is not valid.\n", MessageLevel::Fatal));
         return process;
     }
 
     // create the .minecraft folder and server-resource-packs (workaround for Minecraft bug MCL-3732)
     {
-        process->appendStep(new CreateGameFolders(pptr));
+        process->appendStep(makeShared<CreateGameFolders>(pptr));
     }
 
     if (!serverToJoin && settings()->get("JoinServerOnLaunch").toBool())
@@ -993,7 +993,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     if(serverToJoin && serverToJoin->port == 25565)
     {
         // Resolve server address to join on launch
-        auto *step = new LookupServerAddress(pptr);
+        auto step = makeShared<LookupServerAddress>(pptr);
         step->setLookupAddress(serverToJoin->address);
         step->setOutputAddressPtr(serverToJoin);
         process->appendStep(step);
@@ -1002,7 +1002,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     // run pre-launch command if that's needed
     if(getPreLaunchCommand().size())
     {
-        auto step = new PreLaunchCommand(pptr);
+        auto step = makeShared<PreLaunchCommand>(pptr);
         step->setWorkingDirectory(gameRoot());
         process->appendStep(step);
     }
@@ -1011,43 +1011,43 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     if(session->status != AuthSession::PlayableOffline)
     {
         if(!session->demo) {
-            process->appendStep(new ClaimAccount(pptr, session));
+            process->appendStep(makeShared<ClaimAccount>(pptr, session));
         }
-        process->appendStep(new Update(pptr, Net::Mode::Online));
+        process->appendStep(makeShared<Update>(pptr, Net::Mode::Online));
     }
     else
     {
-        process->appendStep(new Update(pptr, Net::Mode::Offline));
+        process->appendStep(makeShared<Update>(pptr, Net::Mode::Offline));
     }
 
     // if there are any jar mods
     {
-        process->appendStep(new ModMinecraftJar(pptr));
+        process->appendStep(makeShared<ModMinecraftJar>(pptr));
     }
 
     // Scan mods folders for mods
     {
-        process->appendStep(new ScanModFolders(pptr));
+        process->appendStep(makeShared<ScanModFolders>(pptr));
     }
 
     // print some instance info here...
     {
-        process->appendStep(new PrintInstanceInfo(pptr, session, serverToJoin));
+        process->appendStep(makeShared<PrintInstanceInfo>(pptr, session, serverToJoin));
     }
 
     // extract native jars if needed
     {
-        process->appendStep(new ExtractNatives(pptr));
+        process->appendStep(makeShared<ExtractNatives>(pptr));
     }
 
     // reconstruct assets if needed
     {
-        process->appendStep(new ReconstructAssets(pptr));
+        process->appendStep(makeShared<ReconstructAssets>(pptr));
     }
 
     // verify that minimum Java requirements are met
     {
-        process->appendStep(new VerifyJavaInstall(pptr));
+        process->appendStep(makeShared<VerifyJavaInstall>(pptr));
     }
 
     {
@@ -1055,7 +1055,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
         auto method = launchMethod();
         if(method == "LauncherPart")
         {
-            auto step = new LauncherPartLaunch(pptr);
+            auto step = makeShared<LauncherPartLaunch>(pptr);
             step->setWorkingDirectory(gameRoot());
             step->setAuthSession(session);
             step->setServerToJoin(serverToJoin);
@@ -1063,7 +1063,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
         }
         else if (method == "DirectJava")
         {
-            auto step = new DirectJavaLaunch(pptr);
+            auto step = makeShared<DirectJavaLaunch>(pptr);
             step->setWorkingDirectory(gameRoot());
             step->setAuthSession(session);
             step->setServerToJoin(serverToJoin);
@@ -1074,7 +1074,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     // run post-exit command if that's needed
     if(getPostExitCommand().size())
     {
-        auto step = new PostLaunchCommand(pptr);
+        auto step = makeShared<PostLaunchCommand>(pptr);
         step->setWorkingDirectory(gameRoot());
         process->appendStep(step);
     }
@@ -1084,8 +1084,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     }
     if(m_settings->get("QuitAfterGameStop").toBool())
     {
-        auto step = new QuitAfterGameStop(pptr);
-        process->appendStep(step);
+        process->appendStep(makeShared<QuitAfterGameStop>(pptr));
     }
     m_launchProcess = process;
     emit launchTaskChanged(m_launchProcess);
