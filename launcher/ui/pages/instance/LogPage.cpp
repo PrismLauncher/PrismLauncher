@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,7 +40,7 @@
 
 #include "Application.h"
 
-#include <QIcon>
+#include <QIdentityProxyModel>
 #include <QScrollBar>
 #include <QShortcut>
 
@@ -277,28 +278,22 @@ void LogPage::on_btnPaste_clicked()
     //FIXME: turn this into a proper task and move the upload logic out of GuiUtil!
     m_model->append(
         MessageLevel::Launcher,
-        QString("%2: Log upload triggered at: %1").arg(
-            QDateTime::currentDateTime().toString(Qt::RFC2822Date),
-            BuildConfig.LAUNCHER_DISPLAYNAME
+        QString("Log upload triggered at: %1").arg(
+            QDateTime::currentDateTime().toString(Qt::RFC2822Date)
         )
     );
-    auto url = GuiUtil::uploadPaste(m_model->toPlainText(), this);
-    if(!url.isEmpty())
+    auto url = GuiUtil::uploadPaste(tr("Minecraft Log"), m_model->toPlainText(), this);
+    if(!url.has_value())
     {
-        m_model->append(
-            MessageLevel::Launcher,
-            QString("%2: Log uploaded to: %1").arg(
-                url,
-                BuildConfig.LAUNCHER_DISPLAYNAME
-            )
-        );
+        m_model->append(MessageLevel::Error, QString("Log upload canceled"));
+    }
+    else if (url->isNull())
+    {
+        m_model->append(MessageLevel::Error, QString("Log upload failed!"));
     }
     else
     {
-        m_model->append(
-            MessageLevel::Error,
-            QString("%1: Log upload failed!").arg(BuildConfig.LAUNCHER_DISPLAYNAME)
-        );
+        m_model->append(MessageLevel::Launcher, QString("Log uploaded to: %1").arg(url.value()));
     }
 }
 

@@ -44,6 +44,7 @@
 
 class QFileSystemModel;
 class QIdentityProxyModel;
+class QItemSelection;
 namespace Ui
 {
 class ScreenshotsPage;

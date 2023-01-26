@@ -17,6 +17,6 @@ void SequentialTask::startNext()
 
 void SequentialTask::updateState()
 {
-    setProgress(m_done.count(), m_total_size);
-    setStatus(tr("Executing task %1 out of %2").arg(QString::number(m_doing.count() + m_done.count()), QString::number(m_total_size)));
+    setProgress(m_done.count(), totalSize());
+    setStatus(tr("Executing task %1 out of %2").arg(QString::number(m_doing.count() + m_done.count()), QString::number(totalSize())));
 }

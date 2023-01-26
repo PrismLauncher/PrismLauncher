@@ -37,12 +37,13 @@
 
 #include <QWidget>
 
-#include "java/JavaChecker.h"
-#include "BaseInstance.h"
 #include <QObjectPtr.h>
-#include "ui/pages/BasePage.h"
-#include "JavaCommon.h"
+#include <QMenu>
 #include "Application.h"
+#include "BaseInstance.h"
+#include "JavaCommon.h"
+#include "java/JavaChecker.h"
+#include "ui/pages/BasePage.h"
 
 class JavaChecker;
 namespace Ui
@@ -92,9 +93,14 @@ private slots:
 
     void globalSettingsButtonClicked(bool checked);
 
+    void updateAccountsMenu();
+    QIcon getFaceForAccount(MinecraftAccountPtr account);
+    void changeInstanceAccount();
+
 private:
     Ui::InstanceSettingsPage *ui;
     BaseInstance *m_instance;
     SettingsObjectPtr m_settings;
     unique_qobject_ptr<JavaCommon::TestCheck> checker;
+    QMenu *accountMenu = nullptr;
 };

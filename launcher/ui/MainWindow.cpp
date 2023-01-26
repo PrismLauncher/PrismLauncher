@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -85,8 +86,7 @@
 #include <net/Download.h>
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
-#include <updater/DownloadTask.h>
-#include <updater/UpdateChecker.h>
+#include <updater/ExternalUpdater.h>
 #include <DesktopServices.h>
 #include "InstanceWindow.h"
 #include "InstancePageProvider.h"
@@ -101,22 +101,19 @@
 #include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/AboutDialog.h"
-#include "ui/dialogs/VersionSelectDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
-#include "ui/dialogs/UpdateDialog.h"
 #include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
-#include "ui/dialogs/ImportResourcePackDialog.h"
+#include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/themes/ITheme.h"
+#include "ui/themes/ThemeManager.h"
 
-#include <minecraft/mod/ResourcePackFolderModel.h>
-#include <minecraft/mod/tasks/LocalResourcePackParseTask.h>
-#include <minecraft/mod/TexturePackFolderModel.h>
-#include <minecraft/mod/tasks/LocalTexturePackParseTask.h>
+#include "minecraft/mod/tasks/LocalResourceParse.h"
+#include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/WorldList.h"
 
-#include "UpdateController.h"
 #include "KonamiCode.h"
 
 #include "InstanceImportTask.h"
@@ -490,7 +487,7 @@ public:
         if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
             helpMenu->addAction(actionReportBug);
         }
-        
+
         if(!BuildConfig.MATRIX_URL.isEmpty()) {
             helpMenu->addAction(actionMATRIX);
         }
@@ -953,7 +950,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         view->installEventFilter(this);
         view->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(view, &QWidget::customContextMenuRequested, this, &MainWindow::showInstanceContextMenu);
-        connect(view, &InstanceView::droppedURLs, this, &MainWindow::droppedURLs, Qt::QueuedConnection);
+        connect(view, &InstanceView::droppedURLs, this, &MainWindow::processURLs, Qt::QueuedConnection);
 
         proxymodel = new InstanceProxyModel(this);
         proxymodel->setSourceModel(APPLICATION->instances().get());
@@ -973,6 +970,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         ui->actionCAT->setChecked(cat_enable);
         // NOTE: calling the operator like that is an ugly hack to appease ancient gcc...
         connect(ui->actionCAT.operator->(), SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
+        connect(APPLICATION, &Application::currentCatChanged, this, &MainWindow::onCatChanged);
         setCatBackground(cat_enable);
     }
 
@@ -1059,9 +1057,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         updateNewsLabel();
     }
 
-
-    if(BuildConfig.UPDATER_ENABLED)
-    {
+    if (BuildConfig.UPDATER_ENABLED) {
         bool updatesAllowed = APPLICATION->updatesAreAllowed();
         updatesAllowedChanged(updatesAllowed);
 
@@ -1069,21 +1065,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         connect(ui->actionCheckUpdate.operator->(), &QAction::triggered, this, &MainWindow::checkForUpdates);
 
         // set up the updater object.
-        auto updater = APPLICATION->updateChecker();
-        connect(updater.get(), &UpdateChecker::updateAvailable, this, &MainWindow::updateAvailable);
-        connect(updater.get(), &UpdateChecker::noUpdateFound, this, &MainWindow::updateNotAvailable);
-        // if automatic update checks are allowed, start one.
-        if (APPLICATION->settings()->get("AutoUpdate").toBool() && updatesAllowed)
-        {
-            updater->checkForUpdate(APPLICATION->settings()->get("UpdateChannel").toString(), false);
-        }
+        auto updater = APPLICATION->updater();
 
-        if (APPLICATION->updateChecker()->getExternalUpdater())
-        {
-            connect(APPLICATION->updateChecker()->getExternalUpdater(),
-                    &ExternalUpdater::canCheckForUpdatesChanged,
-                    this,
-                    &MainWindow::updatesAllowedChanged);
+        if (updater) {
+            connect(updater.get(), &ExternalUpdater::canCheckForUpdatesChanged, this, &MainWindow::updatesAllowedChanged);
         }
     }
 
@@ -1345,7 +1330,7 @@ void MainWindow::updateThemeMenu()
         themeAction->setActionGroup(themesGroup);
 
         connect(themeAction, &QAction::triggered, [theme]() {
-            APPLICATION->setApplicationTheme(theme->id(),false);
+            APPLICATION->setApplicationTheme(theme->id());
             APPLICATION->settings()->set("ApplicationTheme", theme->id());
         });
     }
@@ -1561,32 +1546,6 @@ void MainWindow::updateNewsLabel()
     }
 }
 
-void MainWindow::updateAvailable(GoUpdate::Status status)
-{
-    if(!APPLICATION->updatesAreAllowed())
-    {
-        updateNotAvailable();
-        return;
-    }
-    UpdateDialog dlg(true, this);
-    UpdateAction action = (UpdateAction)dlg.exec();
-    switch (action)
-    {
-    case UPDATE_LATER:
-        qDebug() << "Update will be installed later.";
-        break;
-    case UPDATE_NOW:
-        downloadUpdates(status);
-        break;
-    }
-}
-
-void MainWindow::updateNotAvailable()
-{
-    UpdateDialog dlg(false, this);
-    dlg.exec();
-}
-
 QList<int> stringToIntList(const QString &string)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
@@ -1611,72 +1570,15 @@ QString intListToString(const QList<int> &list)
     return slist.join(',');
 }
 
-void MainWindow::downloadUpdates(GoUpdate::Status status)
-{
-    if(!APPLICATION->updatesAreAllowed())
-    {
-        return;
-    }
-    qDebug() << "Downloading updates.";
-    ProgressDialog updateDlg(this);
-    status.rootPath = APPLICATION->root();
-
-    auto dlPath = FS::PathCombine(APPLICATION->root(), "update", "XXXXXX");
-    if (!FS::ensureFilePathExists(dlPath))
-    {
-        CustomMessageBox::selectable(this, tr("Error"), tr("Couldn't create folder for update downloads:\n%1").arg(dlPath), QMessageBox::Warning)->show();
-    }
-    GoUpdate::DownloadTask updateTask(APPLICATION->network(), status, dlPath, &updateDlg);
-    // If the task succeeds, install the updates.
-    if (updateDlg.execWithTask(&updateTask))
-    {
-        /**
-         * NOTE: This disables launching instances until the update either succeeds (and this process exits)
-         * or the update fails (and the control leaves this scope).
-         */
-        APPLICATION->updateIsRunning(true);
-        UpdateController update(this, APPLICATION->root(), updateTask.updateFilesDir(), updateTask.operations());
-        update.installUpdates();
-        APPLICATION->updateIsRunning(false);
-    }
-    else
-    {
-        CustomMessageBox::selectable(this, tr("Error"), updateTask.failReason(), QMessageBox::Warning)->show();
-    }
-}
-
 void MainWindow::onCatToggled(bool state)
 {
     setCatBackground(state);
     APPLICATION->settings()->set("TheCat", state);
 }
 
-namespace {
-template <typename T>
-T non_stupid_abs(T in)
-{
-    if (in < 0)
-        return -in;
-    return in;
-}
-}
-
 void MainWindow::setCatBackground(bool enabled)
 {
-    if (enabled)
-    {
-        QDateTime now = QDateTime::currentDateTime();
-        QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
-        QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
-        QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
-        QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
-        if (non_stupid_abs(now.daysTo(xmas)) <= 4) {
-            cat += "-xmas";
-        } else if (non_stupid_abs(now.daysTo(halloween)) <= 4) {
-            cat += "-spooky";
-        } else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
-            cat += "-bday";
-        }
+    if (enabled) {
         view->setStyleSheet(QString(R"(
 InstanceView
 {
@@ -1687,10 +1589,8 @@ InstanceView
     background-repeat: none;
     background-color:palette(base);
 })")
-                                .arg(cat));
-    }
-    else
-    {
+                                .arg(ThemeManager::getCatImage()));
+    } else {
         view->setStyleSheet(QString());
     }
 }
@@ -1812,10 +1712,12 @@ void MainWindow::on_actionAddInstance_triggered()
     addInstance();
 }
 
-void MainWindow::droppedURLs(QList<QUrl> urls)
+void MainWindow::processURLs(QList<QUrl> urls)
 {
     // NOTE: This loop only processes one dropped file!
     for (auto& url : urls) {
+        qDebug() << "Processing" << url;
+
         // The isLocalFile() check below doesn't work as intended without an explicit scheme.
         if (url.scheme().isEmpty())
             url.setScheme("file");
@@ -1825,31 +1727,50 @@ void MainWindow::droppedURLs(QList<QUrl> urls)
             break;
         }
 
-        auto localFileName = url.toLocalFile();
+        auto localFileName = QDir::toNativeSeparators(url.toLocalFile()) ;
         QFileInfo localFileInfo(localFileName);
 
-        bool isResourcePack = ResourcePackUtils::validate(localFileInfo);
-        bool isTexturePack = TexturePackUtils::validate(localFileInfo);
+        auto type = ResourceUtils::identify(localFileInfo);
 
-        if (!isResourcePack && !isTexturePack) {  // probably instance/modpack
+        if (ResourceUtils::ValidResourceTypes.count(type) == 0) {  // probably instance/modpack
             addInstance(localFileName);
-            break;
+            continue;
         }
 
-        ImportResourcePackDialog dlg(this);
+        ImportResourceDialog dlg(localFileName, type, this);
 
         if (dlg.exec() != QDialog::Accepted)
-            break;
+            continue;
 
-        qDebug() << "Adding resource/texture pack" << localFileName << "to" << dlg.selectedInstanceKey;
+        qDebug() << "Adding resource" << localFileName << "to" << dlg.selectedInstanceKey;
 
         auto inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
         auto minecraftInst = std::dynamic_pointer_cast<MinecraftInstance>(inst);
-        if (isResourcePack)
-            minecraftInst->resourcePackList()->installResource(localFileName);
-        else if (isTexturePack)
-            minecraftInst->texturePackList()->installResource(localFileName);
-        break;
+
+        switch (type) {
+            case PackedResourceType::ResourcePack:
+                minecraftInst->resourcePackList()->installResource(localFileName);
+                break;
+            case PackedResourceType::TexturePack:
+                minecraftInst->texturePackList()->installResource(localFileName);
+                break;
+            case PackedResourceType::DataPack:
+                qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
+                break;
+            case PackedResourceType::Mod:
+                minecraftInst->loaderModList()->installMod(localFileName);
+                break;
+            case PackedResourceType::ShaderPack:
+                minecraftInst->shaderPackList()->installResource(localFileName);
+                break;
+            case PackedResourceType::WorldSave:
+                minecraftInst->worldList()->installWorld(localFileInfo);
+                break;
+            case PackedResourceType::UNKNOWN:
+            default:
+                qDebug() << "Can't Identify" << localFileName << "Ignoring it.";
+                break;
+        }
     }
 }
 
@@ -1985,8 +1906,7 @@ void MainWindow::checkForUpdates()
 {
     if(BuildConfig.UPDATER_ENABLED)
     {
-        auto updater = APPLICATION->updateChecker();
-        updater->checkForUpdate(APPLICATION->settings()->get("UpdateChannel").toString(), true);
+        APPLICATION->triggerUpdateCheck();
     }
     else
     {
@@ -2079,6 +1999,10 @@ void MainWindow::newsButtonClicked()
     news_dialog.exec();
 }
 
+void MainWindow::onCatChanged(int) {
+    setCatBackground(APPLICATION->settings()->get("TheCat").toBool());
+}
+
 void MainWindow::on_actionAbout_triggered()
 {
     AboutDialog dialog(this);
@@ -2093,21 +2017,23 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
     auto id = m_selectedInstance->id();
 
-    auto response =
-        CustomMessageBox::selectable(this, tr("CAREFUL!"),
-                                     tr("About to delete: %1\nThis may be permanent and will completely delete the instance.\n\nAre you sure?")
-                                         .arg(m_selectedInstance->name()),
-                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-            ->exec();
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
+                                                 tr("You are about to delete \"%1\".\n"
+                                                    "This may be permanent and will completely delete the instance.\n\n"
+                                                    "Are you sure?")
+                                                     .arg(m_selectedInstance->name()),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
 
-    if (response == QMessageBox::Yes) {
-        if (APPLICATION->instances()->trashInstance(id)) {
-            ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-            return;
-        }
+    if (response != QMessageBox::Yes)
+        return;
 
-        APPLICATION->instances()->deleteInstance(id);
+    if (APPLICATION->instances()->trashInstance(id)) {
+        ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
+        return;
     }
+
+    APPLICATION->instances()->deleteInstance(id);
 }
 
 void MainWindow::on_actionExportInstance_triggered()
@@ -2252,7 +2178,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
 
         QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.png");
-        
+
         QFile iconFile(iconPath);
         if (!iconFile.open(QFile::WriteOnly))
         {
@@ -2261,7 +2187,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
         bool success = icon->icon().pixmap(64, 64).save(&iconFile, "PNG");
         iconFile.close();
-        
+
         if (!success)
         {
             iconFile.remove();
@@ -2302,7 +2228,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
 
         QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.ico");
-        
+
         // part of fix for weird bug involving the window icon being replaced
         // dunno why it happens, but this 2-line fix seems to be enough, so w/e
         auto appIcon = APPLICATION->getThemedIcon("logo");
@@ -2325,7 +2251,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create icon for shortcut."));
             return;
         }
-        
+
         if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
                            QApplication::applicationFilePath(), { "--launch", m_selectedInstance->id() },
                            m_selectedInstance->name(), iconPath)) {

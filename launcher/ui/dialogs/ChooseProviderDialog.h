@@ -8,7 +8,7 @@ class ChooseProviderDialog;
 }
 
 namespace ModPlatform {
-enum class Provider;
+enum class ResourceProvider;
 }
 
 class Mod;
@@ -24,7 +24,7 @@ class ChooseProviderDialog : public QDialog {
 
         bool try_others = false;
 
-        ModPlatform::Provider chosen;
+        ModPlatform::ResourceProvider chosen;
     };
 
    public:
@@ -45,7 +45,7 @@ class ChooseProviderDialog : public QDialog {
     void addProviders();
     void disableInput();
 
-    auto getSelectedProvider() const -> ModPlatform::Provider;
+    auto getSelectedProvider() const -> ModPlatform::ResourceProvider;
 
    private:
     Ui::ChooseProviderDialog* ui;

@@ -24,47 +24,47 @@
 
 namespace ModPlatform {
 
-auto ProviderCapabilities::name(Provider p) -> const char*
+auto ProviderCapabilities::name(ResourceProvider p) -> const char*
 {
     switch (p) {
-        case Provider::MODRINTH:
+        case ResourceProvider::MODRINTH:
             return "modrinth";
-        case Provider::FLAME:
+        case ResourceProvider::FLAME:
             return "curseforge";
     }
     return {};
 }
-auto ProviderCapabilities::readableName(Provider p) -> QString
+auto ProviderCapabilities::readableName(ResourceProvider p) -> QString
 {
     switch (p) {
-        case Provider::MODRINTH:
+        case ResourceProvider::MODRINTH:
             return "Modrinth";
-        case Provider::FLAME:
+        case ResourceProvider::FLAME:
             return "CurseForge";
     }
     return {};
 }
-auto ProviderCapabilities::hashType(Provider p) -> QStringList
+auto ProviderCapabilities::hashType(ResourceProvider p) -> QStringList
 {
     switch (p) {
-        case Provider::MODRINTH:
+        case ResourceProvider::MODRINTH:
             return { "sha512", "sha1" };
-        case Provider::FLAME:
+        case ResourceProvider::FLAME:
             // Try newer formats first, fall back to old format
             return { "sha1", "md5", "murmur2" };
     }
     return {};
 }
 
-auto ProviderCapabilities::hash(Provider p, QIODevice* device, QString type) -> QString
+auto ProviderCapabilities::hash(ResourceProvider p, QIODevice* device, QString type) -> QString
 {
     QCryptographicHash::Algorithm algo = QCryptographicHash::Sha1;
     switch (p) {
-        case Provider::MODRINTH: {
+        case ResourceProvider::MODRINTH: {
             algo = (type == "sha1") ? QCryptographicHash::Sha1 : QCryptographicHash::Sha512;
             break;
         }
-        case Provider::FLAME:
+        case ResourceProvider::FLAME:
             algo = (type == "sha1") ? QCryptographicHash::Sha1 : QCryptographicHash::Md5;
             break;
     }

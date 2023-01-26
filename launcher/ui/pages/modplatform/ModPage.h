@@ -1,105 +1,76 @@
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
 #pragma once
 
 #include <QWidget>
 
-#include "Application.h"
-#include "modplatform/ModAPI.h"
 #include "modplatform/ModIndex.h"
-#include "ui/pages/BasePage.h"
+
+#include "ui/pages/modplatform/ResourcePage.h"
 #include "ui/pages/modplatform/ModModel.h"
 #include "ui/widgets/ModFilterWidget.h"
-#include "ui/widgets/ProgressWidget.h"
+
+namespace Ui {
+class ResourcePage;
+}
+
+namespace ResourceDownload {
 
 class ModDownloadDialog;
 
-namespace Ui {
-class ModPage;
-}
-
 /* This page handles most logic related to browsing and selecting mods to download. */
-class ModPage : public QWidget, public BasePage {
+class ModPage : public ResourcePage {
     Q_OBJECT
 
    public:
     template<typename T>
-    static T* create(ModDownloadDialog* dialog, BaseInstance* instance)
+    static T* create(ModDownloadDialog* dialog, BaseInstance& instance)
     {
         auto page = new T(dialog, instance);
+        auto model = static_cast<ModModel*>(page->getModel());
 
-        auto filter_widget = ModFilterWidget::create(static_cast<MinecraftInstance*>(instance)->getPackProfile()->getComponentVersion("net.minecraft"), page);
+        auto filter_widget = ModFilterWidget::create(static_cast<MinecraftInstance&>(instance).getPackProfile()->getComponentVersion("net.minecraft"), page);
         page->setFilterWidget(filter_widget);
+        model->setFilter(page->getFilter());
+
+        connect(model, &ResourceModel::versionListUpdated, page, &ResourcePage::updateVersionList);
+        connect(model, &ResourceModel::projectInfoUpdated, page, &ResourcePage::updateUi);
 
         return page;
     }
 
-    ~ModPage() override;
+    ~ModPage() override = default;
 
-    /* Affects what the user sees */
-    auto displayName() const -> QString override = 0;
-    auto icon() const -> QIcon override = 0;
-    auto id() const -> QString override = 0;
-    auto helpPage() const -> QString override = 0;
+    //: The plural version of 'mod'
+    [[nodiscard]] inline QString resourcesString() const override { return tr("mods"); }
+    //: The singular version of 'mods'
+    [[nodiscard]] inline QString resourceString() const override { return tr("mod"); }
 
-    /* Used internally */
-    virtual auto metaEntryBase() const -> QString = 0;
-    virtual auto debugName() const -> QString = 0;
+    [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
 
+    void addResourceToDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&) override;
 
-    void retranslate() override;
+    virtual auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const -> bool = 0;
 
-    void updateUi();
-
-    auto shouldDisplay() const -> bool override = 0;
-    virtual auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, ModAPI::ModLoaderTypes loaders = ModAPI::Unspecified) const -> bool = 0;
-    virtual bool optedOut(ModPlatform::IndexedVersion& ver) const { return false; };
-
-    auto apiProvider() -> ModAPI* { return api.get(); };
+    [[nodiscard]] bool supportsFiltering() const override { return true; };
     auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
-    auto getDialog() const -> const ModDownloadDialog* { return dialog; }
-
-    /** Get the current term in the search bar. */
-    auto getSearchTerm() const -> QString;
-    /** Programatically set the term in the search bar. */
-    void setSearchTerm(QString);
-
     void setFilterWidget(unique_qobject_ptr<ModFilterWidget>&);
 
-    auto getCurrent() -> ModPlatform::IndexedPack& { return current; }
-    void updateModVersions(int prev_count = -1);
-
-    void openedImpl() override;
-    auto eventFilter(QObject* watched, QEvent* event) -> bool override;
-
-    BaseInstance* m_instance;
+   public slots:
+    void updateVersionList() override;
 
    protected:
-    ModPage(ModDownloadDialog* dialog, BaseInstance* instance, ModAPI* api);
-    void updateSelectionButton();
+    ModPage(ModDownloadDialog* dialog, BaseInstance& instance);
 
    protected slots:
     virtual void filterMods();
-    void triggerSearch();
-    void onSelectionChanged(QModelIndex first, QModelIndex second);
-    void onVersionSelectionChanged(QString data);
-    void onModSelected();
-    virtual void openUrl(const QUrl& url);
+    void triggerSearch() override;
 
    protected:
-    Ui::ModPage* ui = nullptr;
-    ModDownloadDialog* dialog = nullptr;
-
     unique_qobject_ptr<ModFilterWidget> m_filter_widget;
     std::shared_ptr<ModFilterWidget::Filter> m_filter;
-
-    ProgressWidget m_fetch_progress;
-
-    ModPlatform::ListModel* listModel = nullptr;
-    ModPlatform::IndexedPack current;
-
-    std::unique_ptr<ModAPI> api;
-
-    int selectedVersion = -1;
-
-    // Used to do instant searching with a delay to cache quick changes
-    QTimer m_search_timer;
 };
+
+}  // namespace ResourceDownload

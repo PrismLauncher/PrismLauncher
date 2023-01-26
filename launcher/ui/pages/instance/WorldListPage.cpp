@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +36,7 @@
  */
 
 #include "WorldListPage.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui_WorldListPage.h"
 #include "minecraft/WorldList.h"
 
@@ -43,9 +45,9 @@
 #include <QKeyEvent>
 #include <QClipboard>
 #include <QMessageBox>
+#include <QSortFilterProxyModel>
 #include <QTreeView>
 #include <QInputDialog>
-#include <QProcess>
 #include <Qt>
 
 #include "tools/MCEditTool.h"
@@ -192,12 +194,14 @@ void WorldListPage::on_actionRemove_triggered()
     if(!proxiedIndex.isValid())
         return;
 
-    auto result = QMessageBox::question(this,
-                tr("Are you sure?"),
-                tr("This will remove the selected world permenantly.\n"
-                    "The world will be gone forever (A LONG TIME).\n"
-                    "\n"
-                    "Do you want to continue?"));
+    auto result = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
+                                               tr("You are about to delete \"%1\".\n"
+                                                  "The world may be gone forever (A LONG TIME).\n\n"
+                                                  "Are you sure?")
+                                                   .arg(m_worlds->allWorlds().at(proxiedIndex.row()).name()),
+                                               QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                      ->exec();
+
     if(result != QMessageBox::Yes)
     {
         return;

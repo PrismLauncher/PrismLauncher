@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QLoggingCategory>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>

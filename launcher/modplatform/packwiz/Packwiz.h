@@ -49,7 +49,7 @@ class V1 {
         QString hash {};
 
         // [update]
-        ModPlatform::Provider provider {};
+        ModPlatform::ResourceProvider provider {};
         QVariant file_id {};
         QVariant project_id {};
 

@@ -1,12 +1,12 @@
 #pragma once
 
 #include <QString>
-#include <QMap>
+#include <QHash>
 #include <QByteArray>
 
 struct ApplicationMessage {
     QString command;
-    QMap<QString, QString> args;
+    QHash<QString, QString> args;
 
     QByteArray serialize();
     void parse(const QByteArray & input);

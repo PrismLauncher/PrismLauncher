@@ -32,10 +32,14 @@
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDialogButtonBox>
+#include <QDir>
+#include <QDirIterator>
 #include <QDragEnterEvent>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMimeData>
 #include <QPushButton>
+#include <QMimeData>
 #include <QStandardPaths>
 
 BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods)
@@ -88,7 +92,7 @@ void BlockedModsDialog::dropEvent(QDropEvent* e)
         if (url.scheme().isEmpty()) { // ensure isLocalFile() works correctly
             url.setScheme("file");
         }
-        
+
         if (!url.isLocalFile()) { // can't drop external files here.
             continue;
         }
@@ -230,7 +234,7 @@ void BlockedModsDialog::addHashTask(QString path)
 /// @param path the path to the local file being hashed
 void BlockedModsDialog::buildHashTask(QString path)
 {
-    auto hash_task = Hashing::createBlockedModHasher(path, ModPlatform::Provider::FLAME, "sha1");
+    auto hash_task = Hashing::createBlockedModHasher(path, ModPlatform::ResourceProvider::FLAME, "sha1");
 
     qDebug() << "[Blocked Mods Dialog] Creating Hash task for path: " << path;
 

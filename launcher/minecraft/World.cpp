@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -545,6 +546,10 @@ bool World::replace(World &with)
 bool World::destroy()
 {
     if(!is_valid) return false;
+
+    if (FS::trash(m_containerFile.filePath()))
+        return true;
+
     if (m_containerFile.isDir())
     {
         QDir d(m_containerFile.filePath());

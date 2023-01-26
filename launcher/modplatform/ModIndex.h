@@ -28,17 +28,16 @@ class QIODevice;
 
 namespace ModPlatform {
 
-enum class Provider {
-    MODRINTH,
-    FLAME
-};
+enum class ResourceProvider { MODRINTH, FLAME };
+
+enum class ResourceType { MOD, RESOURCE_PACK };
 
 class ProviderCapabilities {
    public:
-    auto name(Provider) -> const char*;
-    auto readableName(Provider) -> QString;
-    auto hashType(Provider) -> QStringList;
-    auto hash(Provider, QIODevice*, QString type = "") -> QString;
+    auto name(ResourceProvider) -> const char*;
+    auto readableName(ResourceProvider) -> QString;
+    auto hashType(ResourceProvider) -> QStringList;
+    auto hash(ResourceProvider, QIODevice*, QString type = "") -> QString;
 };
 
 struct ModpackAuthor {
@@ -66,6 +65,10 @@ struct IndexedVersion {
     QString hash;
     bool is_preferred = true;
     QString changelog;
+
+    // For internal use, not provided by APIs
+    bool is_currently_selected = false;
+    QString custom_target_folder;
 };
 
 struct ExtraPackData {
@@ -81,7 +84,7 @@ struct ExtraPackData {
 
 struct IndexedPack {
     QVariant addonId;
-    Provider provider;
+    ResourceProvider provider;
     QString name;
     QString slug;
     QString description;
@@ -96,9 +99,26 @@ struct IndexedPack {
     // Don't load by default, since some modplatform don't have that info
     bool extraDataLoaded = true;
     ExtraPackData extraData;
+
+    // For internal use, not provided by APIs
+    [[nodiscard]] bool isVersionSelected(size_t index) const
+    {
+        if (!versionsLoaded)
+            return false;
+
+        return versions.at(index).is_currently_selected;
+    }
+    [[nodiscard]] bool isAnyVersionSelected() const
+    {
+        if (!versionsLoaded)
+            return false;
+
+        return std::any_of(versions.constBegin(), versions.constEnd(),
+                [](auto const& v) { return v.is_currently_selected; });
+    }
 };
 
 }  // namespace ModPlatform
 
 Q_DECLARE_METATYPE(ModPlatform::IndexedPack)
-Q_DECLARE_METATYPE(ModPlatform::Provider)
+Q_DECLARE_METATYPE(ModPlatform::ResourceProvider)

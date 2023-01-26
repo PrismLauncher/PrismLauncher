@@ -67,9 +67,9 @@ void ChooseProviderDialog::confirmAll()
     accept();
 }
 
-auto ChooseProviderDialog::getSelectedProvider() const -> ModPlatform::Provider
+auto ChooseProviderDialog::getSelectedProvider() const -> ModPlatform::ResourceProvider
 {
-    return ModPlatform::Provider(m_providers.checkedId());
+    return ModPlatform::ResourceProvider(m_providers.checkedId());
 }
 
 void ChooseProviderDialog::addProviders()
@@ -77,7 +77,7 @@ void ChooseProviderDialog::addProviders()
     int btn_index = 0;
     QRadioButton* btn;
 
-    for (auto& provider : { ModPlatform::Provider::MODRINTH, ModPlatform::Provider::FLAME }) {
+    for (auto& provider : { ModPlatform::ResourceProvider::MODRINTH, ModPlatform::ResourceProvider::FLAME }) {
         btn = new QRadioButton(ProviderCaps.readableName(provider), this);
         m_providers.addButton(btn, btn_index++);
         ui->providersLayout->addWidget(btn);
