@@ -189,15 +189,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     }
 
-    // set the menu for the folders and help tool buttons
+    // set the menu for the folders help, and accounts tool buttons
     {
         auto foldersMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionFoldersButton));
-        foldersMenuButton->setMenu(ui->foldersMenu);
+        ui->actionFoldersButton->setMenu(ui->foldersMenu);
         foldersMenuButton->setPopupMode(QToolButton::InstantPopup);
 
         helpMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionHelpButton));
-        helpMenuButton->setMenu(ui->helpMenu);
+        ui->actionHelpButton->setMenu(ui->helpMenu);
         helpMenuButton->setPopupMode(QToolButton::InstantPopup);
+
+        auto accountMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionAccountsButton));
+        ui->actionAccountsButton->setMenu(ui->accountsMenu);
+        accountMenuButton->setPopupMode(QToolButton::InstantPopup);
     }
 
     // hide, disable and show stuff
@@ -209,9 +213,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         ui->actionCheckUpdate->setVisible(BuildConfig.UPDATER_ENABLED);
 
+#ifndef Q_OS_MAC
         ui->actionAddToPATH->setVisible(false);
-#ifdef Q_OS_MAC
-        ui->actionAddToPATH->setVisible(true);
 #endif
 
         // disabled until we have an instance selected
@@ -338,15 +341,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->mainToolBar->insertWidget(ui->actionAccountsButton, spacer);
 
-    accountMenu = new QMenu(this);
     // Use undocumented property... https://stackoverflow.com/questions/7121718/create-a-scrollbar-in-a-submenu-qt
-    accountMenu->setStyleSheet("QMenu { menu-scrollable: 1; }");
+    ui->accountsMenu->setStyleSheet("QMenu { menu-scrollable: 1; }");
 
     repopulateAccountsMenu();
-
-    accountMenuButton = dynamic_cast<QToolButton *>(ui->mainToolBar->widgetForAction(ui->actionAccountsButton));
-    accountMenuButton->setMenu(accountMenu);
-    accountMenuButton->setPopupMode(QToolButton::InstantPopup);
 
     // Update the menu when the active account changes.
     // Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit.
@@ -434,10 +432,10 @@ void MainWindow::retranslateUi()
     MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
     if(defaultAccount) {
         auto profileLabel = profileInUseFilter(defaultAccount->profileName(), defaultAccount->isInUse());
-        accountMenuButton->setText(profileLabel);
+        ui->actionAccountsButton->setText(profileLabel);
     }
     else {
-        accountMenuButton->setText(tr("Accounts"));
+        ui->actionAccountsButton->setText(tr("Accounts"));
     }
 
     if (m_selectedInstance) {
@@ -687,7 +685,6 @@ void MainWindow::updateThemeMenu()
 
 void MainWindow::repopulateAccountsMenu()
 {
-    accountMenu->clear();
     ui->accountsMenu->clear();
 
     auto accounts = APPLICATION->accounts();
@@ -697,18 +694,16 @@ void MainWindow::repopulateAccountsMenu()
     if (defaultAccount)
     {
         // this can be called before accountMenuButton exists
-        if (accountMenuButton)
+        if (ui->actionAccountsButton)
         {
             auto profileLabel = profileInUseFilter(defaultAccount->profileName(), defaultAccount->isInUse());
-            accountMenuButton->setText(profileLabel);
+            ui->actionAccountsButton->setText(profileLabel);
         }
     }
 
     if (accounts->count() <= 0)
     {
-        ui->actionNoAccountsAdded->setText(tr("No accounts added!"));
         ui->actionNoAccountsAdded->setEnabled(false);
-        accountMenu->addAction(ui->actionNoAccountsAdded);
         ui->accountsMenu->addAction(ui->actionNoAccountsAdded);
     }
     else
@@ -740,33 +735,21 @@ void MainWindow::repopulateAccountsMenu()
                 action->setShortcut(QKeySequence(tr("Ctrl+%1").arg(i + 1)));
             }
 
-            accountMenu->addAction(action);
             ui->accountsMenu->addAction(action);
             connect(action, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
         }
     }
 
-    accountMenu->addSeparator();
     ui->accountsMenu->addSeparator();
 
-    ui->actionNoDefaultAccount = new QAction(this);
-    ui->actionNoDefaultAccount->setObjectName(QStringLiteral("actionNoDefaultAccount"));
-    ui->actionNoDefaultAccount->setText(tr("No Default Account"));
-    ui->actionNoDefaultAccount->setCheckable(true);
-    ui->actionNoDefaultAccount->setIcon(APPLICATION->getThemedIcon("noaccount"));
     ui->actionNoDefaultAccount->setData(-1);
-    ui->actionNoDefaultAccount->setShortcut(QKeySequence(tr("Ctrl+0")));
-    if (!defaultAccount) {
-        ui->actionNoDefaultAccount->setChecked(true);
-    }
+    ui->actionNoDefaultAccount->setChecked(!defaultAccount);
 
-    accountMenu->addAction(ui->actionNoDefaultAccount);
     ui->accountsMenu->addAction(ui->actionNoDefaultAccount);
+
     connect(ui->actionNoDefaultAccount, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
 
-    accountMenu->addSeparator();
     ui->accountsMenu->addSeparator();
-    accountMenu->addAction(ui->actionManageAccounts);
     ui->accountsMenu->addAction(ui->actionManageAccounts);
 }
 
@@ -811,20 +794,20 @@ void MainWindow::defaultAccountChanged()
     if (account && account->profileName() != "")
     {
         auto profileLabel = profileInUseFilter(account->profileName(), account->isInUse());
-        accountMenuButton->setText(profileLabel);
+        ui->actionAccountsButton->setText(profileLabel);
         auto face = account->getFace();
         if(face.isNull()) {
-            accountMenuButton->setIcon(APPLICATION->getThemedIcon("noaccount"));
+            ui->actionAccountsButton->setIcon(APPLICATION->getThemedIcon("noaccount"));
         }
         else {
-            accountMenuButton->setIcon(face);
+            ui->actionAccountsButton->setIcon(face);
         }
         return;
     }
 
     // Set the icon to the "no account" icon.
-    accountMenuButton->setIcon(APPLICATION->getThemedIcon("noaccount"));
-    accountMenuButton->setText(tr("Accounts"));
+    ui->actionAccountsButton->setIcon(APPLICATION->getThemedIcon("noaccount"));
+    ui->actionAccountsButton->setText(tr("Accounts"));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)

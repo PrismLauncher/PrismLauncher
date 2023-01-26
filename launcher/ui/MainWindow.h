@@ -239,10 +239,8 @@ private:
     QToolButton *newsLabel = nullptr;
     QLabel *m_statusLeft = nullptr;
     QLabel *m_statusCenter = nullptr;
-    QMenu *accountMenu = nullptr;
     LabeledToolButton *changeIconButton = nullptr;
     LabeledToolButton *renameButton = nullptr;
-    QToolButton *accountMenuButton = nullptr;
     QToolButton *helpMenuButton = nullptr;
     KonamiCode * secretEventFilter = nullptr;
 

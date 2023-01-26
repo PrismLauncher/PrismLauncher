@@ -487,12 +487,18 @@
    </property>
   </action>
   <action name="actionNoDefaultAccount">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset theme="noaccount">
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>No Default Account</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+0</string>
    </property>
   </action>
   <action name="actionCloseWindow">
