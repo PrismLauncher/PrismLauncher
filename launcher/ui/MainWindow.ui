@@ -578,7 +578,7 @@
     <string>&amp;Matrix Space</string>
    </property>
    <property name="toolTip">
-    <string>Open %1 Matrix space</string>
+    <string>Open %1 Matrix space.</string>
    </property>
   </action>
   <action name="actionREDDIT">
