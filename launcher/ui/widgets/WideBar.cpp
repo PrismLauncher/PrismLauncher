@@ -132,8 +132,7 @@ void WideBar::insertWidgetBefore(QAction* before, QWidget* widget)
     if (iter == m_entries.end())
         return;
 
-    BarEntry entry;
-    entry.bar_action = insertWidget(iter->bar_action, widget);
+    insertWidget(iter->bar_action, widget);
 }
 
 void WideBar::insertSpacer(QAction* action)
