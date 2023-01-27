@@ -336,7 +336,7 @@
     <string>&amp;Kill</string>
    </property>
    <property name="toolTip">
-    <string>Kill the running instance</string>
+    <string>Kill the running instance.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+K</string>
