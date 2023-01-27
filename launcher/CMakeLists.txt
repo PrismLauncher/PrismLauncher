@@ -937,6 +937,7 @@ SET(LAUNCHER_SOURCES
 )
 
 qt_wrap_ui(LAUNCHER_UI
+    ui/MainWindow.ui
     ui/setupwizard/PasteWizardPage.ui
     ui/setupwizard/ThemeWizardPage.ui
     ui/pages/global/AccountListPage.ui
