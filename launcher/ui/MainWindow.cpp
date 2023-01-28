@@ -192,7 +192,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         foldersMenuButton->setPopupMode(QToolButton::InstantPopup);
 
         helpMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionHelpButton));
-        ui->actionHelpButton->setMenu(ui->helpMenu);
+        ui->actionHelpButton->setMenu(new QMenu(this));
+        ui->actionHelpButton->menu()->addActions(ui->helpMenu->actions());
+        ui->actionHelpButton->menu()->removeAction(ui->actionCheckUpdate);
         helpMenuButton->setPopupMode(QToolButton::InstantPopup);
 
         auto accountMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionAccountsButton));

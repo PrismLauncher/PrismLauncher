@@ -621,9 +621,6 @@
    </property>
   </action>
   <action name="actionAddToPATH">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
    <property name="icon">
     <iconset theme="custom-commands">
      <normaloff>.</normaloff>.</iconset>
@@ -633,9 +630,6 @@
    </property>
    <property name="toolTip">
     <string>Install a %1 symlink to /usr/local/bin</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
    </property>
   </action>
   <action name="actionFoldersButton">
