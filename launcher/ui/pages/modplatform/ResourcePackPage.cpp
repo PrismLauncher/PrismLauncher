@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include "ResourcePackPage.h"
 #include "ui_ResourcePage.h"
 
