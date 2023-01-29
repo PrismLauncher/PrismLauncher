@@ -26,6 +26,7 @@
 
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourcePackFolderModel.h"
+#include "minecraft/mod/TexturePackFolderModel.h"
 #include "minecraft/mod/ShaderPackFolderModel.h"
 
 #include "ui/dialogs/ReviewMessageBox.h"
@@ -253,6 +254,32 @@ QList<BasePage*> ResourcePackDownloadDialog::getPages()
     pages.append(ModrinthResourcePackPage::create(this, *m_instance));
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(FlameResourcePackPage::create(this, *m_instance));
+
+    return pages;
+}
+
+
+TexturePackDownloadDialog::TexturePackDownloadDialog(QWidget* parent,
+                                                     const std::shared_ptr<TexturePackFolderModel>& resource_packs,
+                                                     BaseInstance* instance)
+    : ResourceDownloadDialog(parent, resource_packs), m_instance(instance)
+{
+    setWindowTitle(dialogTitle());
+
+    initializeContainer();
+    connectButtons();
+
+    if (!geometrySaveKey().isEmpty())
+        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toByteArray()));
+}
+
+QList<BasePage*> TexturePackDownloadDialog::getPages()
+{
+    QList<BasePage*> pages;
+
+    pages.append(ModrinthTexturePackPage::create(this, *m_instance));
+    if (APPLICATION->capabilities() & Application::SupportsFlame)
+        pages.append(FlameTexturePackPage::create(this, *m_instance));
 
     return pages;
 }

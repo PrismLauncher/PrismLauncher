@@ -44,7 +44,7 @@
 
 #include "ui/pages/modplatform/ModPage.h"
 #include "ui/pages/modplatform/ResourcePackPage.h"
-#include "ui/pages/modplatform/ShaderPackPage.h"
+#include "ui/pages/modplatform/TexturePackPage.h"
 
 namespace ResourceDownload {
 
@@ -95,6 +95,33 @@ class FlameResourcePackPage : public ResourcePackResourcePage {
 
     FlameResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance);
     ~FlameResourcePackPage() override = default;
+
+    [[nodiscard]] bool shouldDisplay() const override;
+
+    [[nodiscard]] inline auto displayName() const -> QString override { return Flame::displayName(); }
+    [[nodiscard]] inline auto icon() const -> QIcon override { return Flame::icon(); }
+    [[nodiscard]] inline auto id() const -> QString override { return Flame::id(); }
+    [[nodiscard]] inline auto debugName() const -> QString override { return Flame::debugName(); }
+    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
+
+    [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
+
+    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
+
+    void openUrl(const QUrl& url) override;
+};
+
+class FlameTexturePackPage : public TexturePackResourcePage {
+    Q_OBJECT
+
+   public:
+    static FlameTexturePackPage* create(TexturePackDownloadDialog* dialog, BaseInstance& instance)
+    {
+        return TexturePackResourcePage::create<FlameTexturePackPage>(dialog, instance);
+    }
+
+    FlameTexturePackPage(TexturePackDownloadDialog* dialog, BaseInstance& instance);
+    ~FlameTexturePackPage() override = default;
 
     [[nodiscard]] bool shouldDisplay() const override;
 

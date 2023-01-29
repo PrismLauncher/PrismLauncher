@@ -720,6 +720,7 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/ManagedPackPage.cpp
     ui/pages/instance/ManagedPackPage.h
     ui/pages/instance/TexturePackPage.h
+    ui/pages/instance/TexturePackPage.cpp
     ui/pages/instance/ResourcePackPage.h
     ui/pages/instance/ResourcePackPage.cpp
     ui/pages/instance/ShaderPackPage.h
@@ -777,6 +778,10 @@ SET(LAUNCHER_SOURCES
 
     ui/pages/modplatform/ResourcePackPage.cpp
     ui/pages/modplatform/ResourcePackModel.cpp
+
+    # Needed for MOC to find them without a corresponding .cpp
+    ui/pages/modplatform/TexturePackPage.h
+    ui/pages/modplatform/TexturePackModel.cpp
 
     ui/pages/modplatform/ShaderPackPage.cpp
     ui/pages/modplatform/ShaderPackModel.cpp

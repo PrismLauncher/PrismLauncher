@@ -9,7 +9,7 @@
 
 namespace ResourceDownload {
 
-ResourcePackResourcePage::ResourcePackResourcePage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
+ResourcePackResourcePage::ResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance)
     : ResourcePage(dialog, instance)
 {
     connect(m_ui->searchButton, &QPushButton::clicked, this, &ResourcePackResourcePage::triggerSearch);

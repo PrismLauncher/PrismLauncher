@@ -36,6 +36,7 @@ class QDialogButtonBox;
 class ResourceDownloadTask;
 class ResourceFolderModel;
 class ResourcePackFolderModel;
+class TexturePackFolderModel;
 class ShaderPackFolderModel;
 
 namespace ResourceDownload {
@@ -122,6 +123,25 @@ class ResourcePackDownloadDialog final : public ResourceDownloadDialog {
     //: String that gets appended to the resource pack download dialog title ("Download " + resourcesString())
     [[nodiscard]] QString resourcesString() const override { return tr("resource packs"); }
     [[nodiscard]] QString geometrySaveKey() const override { return "RPDownloadGeometry"; }
+
+    QList<BasePage*> getPages() override;
+
+   private:
+    BaseInstance* m_instance;
+};
+
+class TexturePackDownloadDialog final : public ResourceDownloadDialog {
+    Q_OBJECT
+
+   public:
+    explicit TexturePackDownloadDialog(QWidget* parent,
+                                        const std::shared_ptr<TexturePackFolderModel>& resource_packs,
+                                        BaseInstance* instance);
+    ~TexturePackDownloadDialog() override = default;
+
+    //: String that gets appended to the texture pack download dialog title ("Download " + resourcesString())
+    [[nodiscard]] QString resourcesString() const override { return tr("texture packs"); }
+    [[nodiscard]] QString geometrySaveKey() const override { return "TPDownloadGeometry"; }
 
     QList<BasePage*> getPages() override;
 

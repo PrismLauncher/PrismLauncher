@@ -69,6 +69,28 @@ auto ModrinthResourcePackModel::documentToArray(QJsonDocument& obj) const -> QJs
     return obj.object().value("hits").toArray();
 }
 
+ModrinthTexturePackModel::ModrinthTexturePackModel(const BaseInstance& base)  : TexturePackResourceModel(base, new ModrinthAPI){}
+
+void ModrinthTexturePackModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
+{
+    ::Modrinth::loadIndexedPack(m, obj);
+}
+
+void ModrinthTexturePackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
+{
+    ::Modrinth::loadExtraPackData(m, obj);
+}
+
+void ModrinthTexturePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
+{
+    ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
+}
+
+auto ModrinthTexturePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
+{
+    return obj.object().value("hits").toArray();
+}
+
 ModrinthShaderPackModel::ModrinthShaderPackModel(const BaseInstance& base)  : ShaderPackResourceModel(base, new ModrinthAPI){}
 
 void ModrinthShaderPackModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)

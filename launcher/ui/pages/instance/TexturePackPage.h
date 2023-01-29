@@ -39,18 +39,12 @@
 #include "ui_ExternalResourcesPage.h"
 
 #include "minecraft/mod/TexturePackFolderModel.h"
-#include "minecraft/mod/TexturePack.h"
 
 class TexturePackPage : public ExternalResourcesPage
 {
     Q_OBJECT
 public:
-    explicit TexturePackPage(MinecraftInstance *instance, std::shared_ptr<TexturePackFolderModel> model, QWidget *parent = 0)
-        : ExternalResourcesPage(instance, model, parent)
-    {
-        ui->actionViewConfigs->setVisible(false);
-    }
-    virtual ~TexturePackPage() {}
+    explicit TexturePackPage(MinecraftInstance *instance, std::shared_ptr<TexturePackFolderModel> model, QWidget* parent = nullptr);
 
     QString displayName() const override { return tr("Texture packs"); }
     QIcon icon() const override { return APPLICATION->getThemedIcon("resourcepacks"); }
@@ -63,13 +57,6 @@ public:
     }
 
    public slots:
-    bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override
-    {
-        auto sourceCurrent = m_filterModel->mapToSource(current);
-        int row = sourceCurrent.row();
-        auto& rp = static_cast<TexturePack&>(m_model->at(row));
-        ui->frame->updateWithTexturePack(rp);
-
-        return true;
-    }
+    bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override;
+    void downloadTPs();
 };

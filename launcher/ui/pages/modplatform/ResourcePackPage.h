@@ -39,7 +39,7 @@ class ResourcePackResourcePage : public ResourcePage {
     [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
 
    protected:
-    ResourcePackResourcePage(ResourcePackDownloadDialog* dialog, BaseInstance& instance);
+    ResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);
 
    protected slots:
     void triggerSearch() override;
