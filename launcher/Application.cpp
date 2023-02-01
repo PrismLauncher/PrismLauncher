@@ -77,6 +77,7 @@
 #include "ApplicationMessage.h"
 
 #include <iostream>
+#include <mutex>
 
 #include <QAccessible>
 #include <QCommandLineParser>
@@ -150,7 +151,8 @@ namespace {
 /** This is used so that we can output to the log file in addition to the CLI. */
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    const std::lock_guard<std::mutex> lock(APPLICATION->loggerMutex); // synchronized, QFile logFile is not thread-safe
+    static std::mutex loggerMutex;
+    const std::lock_guard<std::mutex> lock(loggerMutex); // synchronized, QFile logFile is not thread-safe
 
     QString out = qFormatLogMessage(type, context, msg);
     out += QChar::LineFeed;
