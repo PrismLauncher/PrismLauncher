@@ -510,6 +510,13 @@ jobs:
         with:
           name: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
           path: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
+
+      - name: ccache stats (Windows MinGW-w64)
+        if: runner.os == 'Windows' && matrix.msystem != ''
+        shell: msys2 {0}
+        run: |
+          ccache -s
+
   snap:
     runs-on: ubuntu-20.04
     steps:
