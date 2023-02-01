@@ -45,6 +45,7 @@
 #include <QUrl>
 
 #include <BaseInstance.h>
+#include <mutex>
 
 #include "minecraft/launch/MinecraftServerTarget.h"
 
@@ -310,4 +311,5 @@ public:
     QList<QUrl> m_zipsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
+    std::mutex loggerMutex;
 };
