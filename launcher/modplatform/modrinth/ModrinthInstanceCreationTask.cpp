@@ -225,10 +225,19 @@ bool ModrinthCreationTask::createInstance()
 
     m_files_job.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
 
+    auto root_modpack_path = FS::PathCombine(m_stagingPath, ".minecraft");
+    auto root_modpack_url = QUrl::fromLocalFile(root_modpack_path);
+
     for (auto file : m_files) {
-        auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path);
-        qDebug() << "Will try to download" << file.downloads.front() << "to" << path;
-        auto dl = Net::Download::makeFile(file.downloads.dequeue(), path);
+        auto file_path = FS::PathCombine(root_modpack_path, file.path);
+        if (!root_modpack_url.isParentOf(QUrl::fromLocalFile(file_path))) {
+            // This means we somehow got out of the root folder, so abort here to prevent exploits
+            setError(tr("One of the files has a path that leads to an arbitrary location (%1). This is a security risk and isn't allowed.").arg(file.path));
+            return false;
+        }
+
+        qDebug() << "Will try to download" << file.downloads.front() << "to" << file_path;
+        auto dl = Net::Download::makeFile(file.downloads.dequeue(), file_path);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         m_files_job->addNetAction(dl);
 
@@ -236,8 +245,8 @@ bool ModrinthCreationTask::createInstance()
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
-            connect(dl.get(), &NetAction::failed, [this, &file, path, param] {
-                auto ndl = Net::Download::makeFile(file.downloads.dequeue(), path);
+            connect(dl.get(), &NetAction::failed, [this, &file, file_path, param] {
+                auto ndl = Net::Download::makeFile(file.downloads.dequeue(), file_path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 m_files_job->addNetAction(ndl);
                 if (auto shared = param.lock()) shared->succeeded();
