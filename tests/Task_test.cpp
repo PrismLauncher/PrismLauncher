@@ -7,6 +7,8 @@
 #include <tasks/SequentialTask.h>
 #include <tasks/Task.h>
 
+#include <array>
+
 /* Does nothing. Only used for testing. */
 class BasicTask : public Task {
     Q_OBJECT
@@ -35,10 +37,23 @@ class BasicTask_MultiStep : public Task {
     void executeTask() override {};   
 };
 
-class BigConcurrentTask : public QThread {
+class BigConcurrentTask : public ConcurrentTask {
     Q_OBJECT
 
-    ConcurrentTask big_task;
+    void startNext() override
+    {
+        // This is here only to help fill the stack a bit more quickly (if there's an issue, of course :^))
+        // Each tasks thus adds 1024 * 4 bytes to the stack, at the very least.
+        [[maybe_unused]] volatile std::array<uint32_t, 1024> some_data_on_the_stack {};
+
+        ConcurrentTask::startNext();
+    }
+};
+
+class BigConcurrentTaskThread : public QThread {
+    Q_OBJECT
+
+    BigConcurrentTask big_task;
 
     void run() override
     {
@@ -48,7 +63,9 @@ class BigConcurrentTask : public QThread {
         deadline.start();
 
         // NOTE: Arbitrary value that manages to trigger a problem when there is one.
-        static const unsigned s_num_tasks = 1 << 14;
+        //       Considering each tasks, in a problematic state, adds 1024 * 4 bytes to the stack,
+        //       this number is enough to fill up 16 MiB of stack, more than enough to cause a problem.
+        static const unsigned s_num_tasks = 1 << 12;
         auto sub_tasks = new BasicTask::Ptr[s_num_tasks];
 
         for (unsigned i = 0; i < s_num_tasks; i++) {
@@ -237,12 +254,9 @@ class TaskTest : public QObject {
     {
         QEventLoop loop;
 
-        auto thread = new BigConcurrentTask;
-        // NOTE: This is an arbitrary value, big enough to not cause problems on normal execution, but low enough
-        //       so that the number of tasks that needs to get ran to potentially cause a problem isn't too big.
-        thread->setStackSize(32 * 1024);
+        auto thread = new BigConcurrentTaskThread;
 
-        connect(thread, &BigConcurrentTask::finished, &loop, &QEventLoop::quit);
+        connect(thread, &BigConcurrentTaskThread::finished, &loop, &QEventLoop::quit);
 
         thread->start();
 
