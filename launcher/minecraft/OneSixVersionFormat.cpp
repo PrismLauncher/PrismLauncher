@@ -123,7 +123,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
         out->uid = root.value("fileId").toString();
     }
 
-    const QRegularExpression valid_uid_regex{ QRegularExpression::anchoredPattern(QStringLiteral(R"(\w+(?:\.\w+)*)")) };
+    const QRegularExpression valid_uid_regex{ QRegularExpression::anchoredPattern(QStringLiteral(R"([a-zA-Z0-9-_]+(?:\.[a-zA-Z0-9-_]+)*)")) };
     if (!valid_uid_regex.match(out->uid).hasMatch()) {
         qCritical() << "The component's 'uid' contains illegal characters! UID:" << out->uid;
         out->addProblem(
