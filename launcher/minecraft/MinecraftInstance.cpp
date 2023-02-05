@@ -461,8 +461,8 @@ QMap<QString, QString> MinecraftInstance::getVariables()
     QMap<QString, QString> out;
     out.insert("INST_NAME", name());
     out.insert("INST_ID", id());
-    out.insert("INST_DIR", QDir(instanceRoot()).absolutePath());
-    out.insert("INST_MC_DIR", QDir(gameRoot()).absolutePath());
+    out.insert("INST_DIR", QDir::toNativeSeparators(QDir(instanceRoot()).absolutePath()));
+    out.insert("INST_MC_DIR", QDir::toNativeSeparators(QDir(gameRoot()).absolutePath()));
     out.insert("INST_JAVA", settings()->get("JavaPath").toString());
     out.insert("INST_JAVA_ARGS", javaArguments().join(' '));
     return out;
