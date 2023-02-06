@@ -575,7 +575,7 @@ jobs:
           submodules: 'true'
       - name: Install nix
         if: inputs.build_type == 'Debug'
-        uses: cachix/install-nix-action@v18
+        uses: cachix/install-nix-action@v19
         with:
           install_url: https://nixos.org/nix/install
           extra_nix_config: |
