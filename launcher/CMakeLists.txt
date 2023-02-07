@@ -559,7 +559,7 @@ set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLShareCode.h
 )
 
-set(LINKDAEMON_SOURCES
+set(LINKEXE_SOURCES
     filelink/FileLink.h
     filelink/FileLink.cpp
 )
@@ -1113,7 +1113,7 @@ install(TARGETS ${Launcher_Name}
 )
 
 if(WIN32)
-    add_library(filelink_logic STATIC ${LINKDAEMON_SOURCES})
+    add_library(filelink_logic STATIC ${LINKEXE_SOURCES})
     target_include_directories(filelink_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(filelink_logic
         systeminfo
@@ -1144,10 +1144,11 @@ if(WIN32)
         SET_TARGET_PROPERTIES("${Launcher_Name}_filelink" PROPERTIES INSTALL_RPATH "${Launcher_BINARY_RPATH}")
     endif()
 
+    # may be unnessacery with manifest
     if(CMAKE_GENERATOR MATCHES "Visual Studio")
         SET_TARGET_PROPERTIES("${Launcher_Name}_filelink" PROPERTIES LINK_FLAGS "/level='requireAdministrator' /uiAccess='false' /SUBSYSTEM:CONSOLE")
-    else()
-        SET_TARGET_PROPERTIES("${Launcher_Name}_filelink" PROPERTIES LINK_FLAGS "/MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\" /SUBSYSTEM:CONSOLE")
+    # else()  # link arg /MANIFESTUAC only works with MSVC
+    #     SET_TARGET_PROPERTIES("${Launcher_Name}_filelink" PROPERTIES LINK_FLAGS "/MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\" /SUBSYSTEM:CONSOLE")
     endif()
 
 
