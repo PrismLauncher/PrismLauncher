@@ -85,6 +85,10 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     ui->copyServersCheckbox->setChecked(m_selectedOptions.isCopyServersEnabled());
     ui->copyModsCheckbox->setChecked(m_selectedOptions.isCopyModsEnabled());
     ui->copyScreenshotsCheckbox->setChecked(m_selectedOptions.isCopyScreenshotsEnabled());
+    
+    ui->linkFilesGroup->setChecked(m_selectedOptions.isLinkFilesEnabled());
+    ui->hardLinksCheckbox->setChecked(m_selectedOptions.isUseHardLinksEnabled());
+    ui->linkWorldsCheckbox->setChecked(m_selectedOptions.isLinkWorldsEnabled());
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()
@@ -219,4 +223,19 @@ void CopyInstanceDialog::on_copyScreenshotsCheckbox_stateChanged(int state)
 {
     m_selectedOptions.enableCopyScreenshots(state == Qt::Checked);
     updateSelectAllCheckbox();
+}
+
+void CopyInstanceDialog::on_linkFilesGroup_toggled(bool checked)
+{
+    m_selectedOptions.enableLinkFiles(checked);
+}
+
+void CopyInstanceDialog::on_hardLinksCheckbox_stateChanged(int state)
+{
+    m_selectedOptions.enableUseHardLinks(state == Qt::Checked);
+}
+
+void CopyInstanceDialog::on_linkWorldsCheckbox_stateChanged(int state)
+{
+    m_selectedOptions.enableLinkWorlds(state == Qt::Checked);
 }

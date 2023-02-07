@@ -248,6 +248,295 @@ slots:
     {
         QCOMPARE(FS::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
     }
+
+
+    void test_link()
+    {
+        QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
+        auto f = [&folder]()
+        {
+            QTemporaryDir tempDir;
+            tempDir.setAutoRemove(true);
+            qDebug() << "From:" << folder << "To:" << tempDir.path();
+
+            QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
+            qDebug() << tempDir.path();
+            qDebug() << target_dir.path();
+            FS::create_link lnk(folder, target_dir.path());
+            lnk.linkRecursively(false);
+            lnk.debug(true);
+            if(!lnk()){
+#if defined Q_OS_WIN32
+                qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
+                QVERIFY(lnk.getLastOSError() == 1314);
+                return;
+#endif
+                qDebug() << "Link Failed!" << lnk.getLastOSError();
+            }
+
+            for(auto entry: target_dir.entryList())
+            {
+                qDebug() << entry;
+                QFileInfo entry_lnk_info(target_dir.filePath(entry));
+                QVERIFY(!entry_lnk_info.isSymbolicLink());
+            }
+
+            QFileInfo lnk_info(target_dir.path());
+            QVERIFY(lnk_info.exists());
+            QVERIFY(lnk_info.isSymbolicLink());
+
+            QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
+            QVERIFY(target_dir.entryList().contains("assets"));
+        };
+
+        // first try variant without trailing /
+        QVERIFY(!folder.endsWith('/'));
+        f();
+
+        // then variant with trailing /
+        folder.append('/');
+        QVERIFY(folder.endsWith('/'));
+        f();
+    }
+
+    void test_hard_link()
+    {
+        QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
+        auto f = [&folder]()
+        {
+            QTemporaryDir tempDir;
+            tempDir.setAutoRemove(true);
+            qDebug() << "From:" << folder << "To:" << tempDir.path();
+
+            QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
+            qDebug() << tempDir.path();
+            qDebug() << target_dir.path();
+            FS::create_link lnk(folder, target_dir.path());
+            lnk.useHardLinks(true);
+            lnk.debug(true);
+            if(!lnk()){
+                qDebug() << "Link Failed!" << lnk.getLastOSError();
+            }
+
+            for(auto entry: target_dir.entryList())
+            {
+                qDebug() << entry;
+                QFileInfo entry_lnk_info(target_dir.filePath(entry));
+                QVERIFY(!entry_lnk_info.isSymbolicLink());
+                QFileInfo entry_orig_info(QDir(folder).filePath(entry));
+                if (!entry_lnk_info.isDir()) {
+                    qDebug() << "hard link equivalency?" << entry_lnk_info.absoluteFilePath() << "vs" << entry_orig_info.absoluteFilePath();
+                    QVERIFY(std::filesystem::equivalent(entry_lnk_info.filesystemAbsoluteFilePath(), entry_orig_info.filesystemAbsoluteFilePath()));
+                } 
+            }
+
+            QFileInfo lnk_info(target_dir.path());
+            QVERIFY(lnk_info.exists());
+            QVERIFY(!lnk_info.isSymbolicLink());
+
+            QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
+            QVERIFY(target_dir.entryList().contains("assets"));
+        };
+
+        // first try variant without trailing /
+        QVERIFY(!folder.endsWith('/'));
+        f();
+
+        // then variant with trailing /
+        folder.append('/');
+        QVERIFY(folder.endsWith('/'));
+        f();
+    }
+
+    void test_link_with_blacklist()
+    {
+        QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
+        auto f = [&folder]()
+        {
+            QTemporaryDir tempDir;
+            tempDir.setAutoRemove(true);
+            qDebug() << "From:" << folder << "To:" << tempDir.path();
+
+            QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
+            qDebug() << tempDir.path();
+            qDebug() << target_dir.path();
+            FS::create_link lnk(folder, target_dir.path());
+            lnk.matcher(new RegexpMatcher("[.]?mcmeta"));
+            lnk.linkRecursively(true);
+            lnk.debug(true);
+            if(!lnk()){
+#if defined Q_OS_WIN32
+                qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
+                QVERIFY(lnk.getLastOSError() == 1314);
+                return;
+#endif
+                qDebug() << "Link Failed!" << lnk.getLastOSError();
+            }
+
+            for(auto entry: target_dir.entryList())
+            {
+                qDebug() << entry;
+                QFileInfo entry_lnk_info(target_dir.filePath(entry));
+                QVERIFY(entry_lnk_info.isSymbolicLink());
+            }
+
+            QFileInfo lnk_info(target_dir.path());
+            QVERIFY(lnk_info.exists());
+            QVERIFY(lnk_info.isSymbolicLink());
+
+            QVERIFY(!target_dir.entryList().contains("pack.mcmeta"));
+            QVERIFY(target_dir.entryList().contains("assets"));
+        };
+
+        // first try variant without trailing /
+        QVERIFY(!folder.endsWith('/'));
+        f();
+
+        // then variant with trailing /
+        folder.append('/');
+        QVERIFY(folder.endsWith('/'));
+        f();
+    }
+
+    void test_link_with_whitelist()
+    {
+        QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
+        auto f = [&folder]()
+        {
+            QTemporaryDir tempDir;
+            tempDir.setAutoRemove(true);
+            qDebug() << "From:" << folder << "To:" << tempDir.path();
+
+            QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
+            qDebug() << tempDir.path();
+            qDebug() << target_dir.path();
+            FS::create_link lnk(folder, target_dir.path());
+            lnk.matcher(new RegexpMatcher("[.]?mcmeta"));
+            lnk.whitelist(true);
+            lnk.linkRecursively(true);
+            lnk.debug(true);
+            if(!lnk()){
+#if defined Q_OS_WIN32
+                qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
+                QVERIFY(lnk.getLastOSError() == 1314);
+                return;
+#endif
+                qDebug() << "Link Failed!" << lnk.getLastOSError();
+            }
+
+            for(auto entry: target_dir.entryList())
+            {
+                qDebug() << entry;
+                QFileInfo entry_lnk_info(target_dir.filePath(entry));
+                QVERIFY(entry_lnk_info.isSymbolicLink());
+            }
+
+            QFileInfo lnk_info(target_dir.path());
+            QVERIFY(lnk_info.exists());
+            QVERIFY(lnk_info.isSymbolicLink());
+
+            QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
+            QVERIFY(!target_dir.entryList().contains("assets"));
+        };
+
+        // first try variant without trailing /
+        QVERIFY(!folder.endsWith('/'));
+        f();
+
+        // then variant with trailing /
+        folder.append('/');
+        QVERIFY(folder.endsWith('/'));
+        f();
+    }
+
+    void test_link_with_dot_hidden()
+    {
+        QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
+        auto f = [&folder]()
+        {
+            QTemporaryDir tempDir;
+            tempDir.setAutoRemove(true);
+            qDebug() << "From:" << folder << "To:" << tempDir.path();
+
+            QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
+            qDebug() << tempDir.path();
+            qDebug() << target_dir.path();
+            FS::create_link lnk(folder, target_dir.path());
+            lnk.linkRecursively(true);
+            lnk.debug(true);
+            if(!lnk()){
+#if defined Q_OS_WIN32
+                qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
+                QVERIFY(lnk.getLastOSError() == 1314);
+                return;
+#endif
+                qDebug() << "Link Failed!" << lnk.getLastOSError();
+            }
+
+            auto filter = QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden;
+
+            for (auto entry: target_dir.entryList(filter)) {
+                qDebug() << entry;
+                QFileInfo entry_lnk_info(target_dir.filePath(entry));
+                QVERIFY(entry_lnk_info.isSymbolicLink());
+            }
+
+            QFileInfo lnk_info(target_dir.path());
+            QVERIFY(lnk_info.exists());
+            QVERIFY(lnk_info.isSymbolicLink());
+
+            QVERIFY(target_dir.entryList(filter).contains(".secret_folder"));
+            target_dir.cd(".secret_folder");
+            QVERIFY(target_dir.entryList(filter).contains(".secret_file.txt"));
+        };
+
+        // first try variant without trailing /
+        QVERIFY(!folder.endsWith('/'));
+        f();
+
+        // then variant with trailing /
+        folder.append('/');
+        QVERIFY(folder.endsWith('/'));
+        f();
+    }
+
+    void test_link_single_file()
+    {
+        QTemporaryDir tempDir;
+        tempDir.setAutoRemove(true);
+
+        {
+            QString file = QFINDTESTDATA("testdata/FileSystem/test_folder/pack.mcmeta");
+
+            qDebug() << "From:" << file << "To:" << tempDir.path();
+
+            QDir target_dir(FS::PathCombine(tempDir.path(), "pack.mcmeta"));
+            qDebug() << tempDir.path();
+            qDebug() << target_dir.path();
+            FS::create_link lnk(file, target_dir.filePath("pack.mcmeta"));
+            lnk.debug(true);
+            if(!lnk()){
+#if defined Q_OS_WIN32
+                qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
+                QVERIFY(lnk.getLastOSError() == 1314);
+                return;
+#endif
+                qDebug() << "Link Failed!" << lnk.getLastOSError();
+            }
+
+            auto filter = QDir::Filter::Files;
+
+            for (auto entry: target_dir.entryList(filter)) {
+                qDebug() << entry;
+            }
+
+            QFileInfo lnk_info(target_dir.filePath("pack.mcmeta"));
+            QVERIFY(lnk_info.exists());
+            QVERIFY(lnk_info.isSymbolicLink());
+
+            QVERIFY(target_dir.entryList(filter).contains("pack.mcmeta"));
+        }
+    }
 };
 
 QTEST_GUILESS_MAIN(FileSystemTest)

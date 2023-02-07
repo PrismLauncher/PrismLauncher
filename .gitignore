@@ -12,6 +12,8 @@ html/
 CMakeLists.txt.user
 CMakeLists.txt.user.*
 CMakeSettings.json
+/CMakeFiles
+CMakeCache.txt
 /.project
 /.settings
 /.idea

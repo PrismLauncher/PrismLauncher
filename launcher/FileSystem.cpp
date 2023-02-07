@@ -152,9 +152,11 @@ bool ensureFolderPathExists(QString foldernamepath)
     return success;
 }
 
-/// @brief Copies a directory and it's contents from src to dest
-/// @param offset subdirectory form src to copy to dest
-/// @return if there was an error during the filecopy
+/**
+ * @brief Copies a directory and it's contents from src to dest
+ * @param offset subdirectory form src to copy to dest
+ * @return if there was an error during the filecopy
+ */
 bool copy::operator()(const QString& offset, bool dryRun)
 {
     using copy_opts = fs::copy_options;
@@ -211,6 +213,85 @@ bool copy::operator()(const QString& offset, bool dryRun)
     // If the root src is not a directory, the previous iterator won't run.
     if (!fs::is_directory(StringUtils::toStdString(src)))
         copy_file(src, "");
+
+    return err.value() == 0;
+}
+
+
+/**
+ * @brief links a directory and it's contents from src to dest
+ * @param offset subdirectory form src to link to dest
+ * @return if there was an error during the attempt to link
+ */
+bool create_link::operator()(const QString& offset, bool dryRun)
+{
+    m_linked = 0;  // reset counter
+
+    auto src = PathCombine(m_src.absolutePath(), offset);
+    auto dst = PathCombine(m_dst.absolutePath(), offset);
+
+    std::error_code err;
+
+    // you can't hard link a directory so make sure if we deal with a directory we do so recursively
+    if (m_useHardLinks)
+        m_recursive = true;
+
+    // Function that'll do the actual linking
+    auto link_file = [&](QString src_path, QString relative_dst_path) {
+        if (m_matcher && (m_matcher->matches(relative_dst_path) != m_whitelist))
+            return;
+
+        auto dst_path = PathCombine(dst, relative_dst_path);
+        if (!dryRun) {
+            
+            ensureFilePathExists(dst_path);
+            if (m_useHardLinks) {
+                if (m_debug)
+                    qDebug() << "making hard link:" << src_path << "to" << dst_path;
+                fs::create_hard_link(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), err);
+            } else if (fs::is_directory(StringUtils::toStdString(src_path))) {
+                if (m_debug)
+                    qDebug() << "making directory_symlink:" << src_path << "to" << dst_path;
+                fs::create_directory_symlink(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), err);
+            } else {
+                if (m_debug)
+                    qDebug() << "making symlink:" << src_path << "to" << dst_path;
+                fs::create_symlink(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), err);
+            }
+           
+        }
+        if (err) {
+            qWarning() << "Failed to link files:" << QString::fromStdString(err.message());
+            qDebug() << "Source file:" << src_path;
+            qDebug() << "Destination file:" << dst_path;
+            qDebug() << "Error catagory:" << err.category().name();
+            qDebug() << "Error code:" << err.value();
+            m_last_os_err = err.value();
+            emit linkFailed(src_path, dst_path,  err);
+        } else {
+            m_linked++;
+            emit fileLinked(relative_dst_path);
+        }
+        
+    };
+    
+    if ((!m_recursive) || !fs::is_directory(StringUtils::toStdString(src))) {
+        if (m_debug)
+            qDebug() << "linking single file or dir:" << src << "to" << dst;
+        link_file(src, "");
+    } else {
+        if (m_debug)
+            qDebug() << "linking recursivly:" << src << "to" << dst;
+        QDir src_dir(src);
+        QDirIterator source_it(src, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::Subdirectories);
+
+        while (source_it.hasNext()) {
+            auto src_path = source_it.next();
+            auto relative_path = src_dir.relativeFilePath(src_path);
+
+            link_file(src_path, relative_path);
+        }
+    }
 
     return err.value() == 0;
 }

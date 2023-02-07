@@ -93,6 +93,21 @@ bool InstanceCopyPrefs::isCopyScreenshotsEnabled() const
     return copyScreenshots;
 }
 
+bool InstanceCopyPrefs::isLinkFilesEnabled() const
+{
+    return linkFiles;
+}
+
+bool InstanceCopyPrefs::isUseHardLinksEnabled() const
+{
+    return useHardLinks;
+}
+
+bool InstanceCopyPrefs::isLinkWorldsEnabled() const
+{
+    return linkWorlds;
+}
+
 // ======= Setters =======
 void InstanceCopyPrefs::enableCopySaves(bool b)
 {
@@ -132,4 +147,19 @@ void InstanceCopyPrefs::enableCopyMods(bool b)
 void InstanceCopyPrefs::enableCopyScreenshots(bool b)
 {
     copyScreenshots = b;
+}
+
+void InstanceCopyPrefs::enableLinkFiles(bool b)
+{
+    linkFiles = b;
+}
+
+void InstanceCopyPrefs::enableUseHardLinks(bool b)
+{
+    useHardLinks = b;
+}
+
+void InstanceCopyPrefs::enableLinkWorlds(bool b)
+{
+    linkWorlds = b;
 }

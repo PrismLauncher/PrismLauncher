@@ -77,7 +77,9 @@ bool ensureFilePathExists(QString filenamepath);
  */
 bool ensureFolderPathExists(QString filenamepath);
 
-/// @brief Copies a directory and it's contents from src to dest
+/**
+ * @brief Copies a directory and it's contents from src to dest
+ */ 
 class copy : public QObject {
     Q_OBJECT
    public:
@@ -120,6 +122,70 @@ class copy : public QObject {
     QDir m_src;
     QDir m_dst;
     int m_copied;
+};
+
+/**
+ * @brief Copies a directory and it's contents from src to dest
+ */ 
+class create_link : public QObject {
+    Q_OBJECT
+   public:
+    create_link(const QString& src, const QString& dst, QObject* parent = nullptr) : QObject(parent)
+    {
+        m_src.setPath(src);
+        m_dst.setPath(dst);
+    }
+    create_link& useHardLinks(const bool useHard)
+    {
+        m_useHardLinks = useHard;
+        return *this;
+    }
+    create_link& matcher(const IPathMatcher* filter)
+    {
+        m_matcher = filter;
+        return *this;
+    }
+    create_link& whitelist(bool whitelist)
+    {
+        m_whitelist = whitelist;
+        return *this;
+    }
+    create_link& linkRecursively(bool recursive)
+    {
+        m_recursive = recursive;
+        return *this;
+    }
+    create_link& debug(bool d)
+    {
+        m_debug = d;
+        return *this;
+    }
+
+    int getLastOSError() {
+        return m_last_os_err;
+    }
+
+    bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
+
+    int totalLinked() { return m_linked; }
+
+   signals:
+    void fileLinked(const QString& relativeName);
+    void linkFailed(const QString& srcName, const QString& dstName, std::error_code err);
+
+   private:
+    bool operator()(const QString& offset, bool dryRun = false);
+
+   private:
+    bool m_useHardLinks = false;
+    const IPathMatcher* m_matcher = nullptr;
+    bool m_whitelist = false;
+    bool m_recursive = true;
+    QDir m_src;
+    QDir m_dst;
+    int m_linked;
+    bool m_debug = false;
+    int m_last_os_err = 0;
 };
 
 /**

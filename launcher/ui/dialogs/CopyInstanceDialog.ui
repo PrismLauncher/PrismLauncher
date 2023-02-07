@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>341</width>
-    <height>399</height>
+    <width>525</width>
+    <height>581</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -136,70 +136,126 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="copyOptionsLayout">
-     <item row="6" column="1">
-      <widget class="QCheckBox" name="copyModsCheckbox">
+    <widget class="QGroupBox" name="copyOptionsGroup">
+     <property name="title">
+      <string>Instance copy options</string>
+     </property>
+     <layout class="QGridLayout" name="copyOptionsLayout">
+      <item row="6" column="1">
+       <widget class="QCheckBox" name="copyModsCheckbox">
+        <property name="toolTip">
+         <string>Disabling this will still keep the mod loader (ex: Fabric, Quilt, etc.) but erase the mods folder and their configs.</string>
+        </property>
+        <property name="text">
+         <string>Copy mods</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QCheckBox" name="copyGameOptionsCheckbox">
+        <property name="toolTip">
+         <string>Copy the in-game options like FOV, max framerate, etc.</string>
+        </property>
+        <property name="text">
+         <string>Copy game options</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="copySavesCheckbox">
+        <property name="text">
+         <string>Copy saves</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="copyShaderPacksCheckbox">
+        <property name="text">
+         <string>Copy shader packs</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCheckBox" name="copyServersCheckbox">
+        <property name="text">
+         <string>Copy servers</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QCheckBox" name="copyResPacksCheckbox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Copy resource packs</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="keepPlaytimeCheckbox">
+        <property name="text">
+         <string>Keep play time</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="copyScreenshotsCheckbox">
+        <property name="text">
+         <string>Copy screenshots</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="copyModeLayout">
+     <item>
+      <widget class="QGroupBox" name="linkFilesGroup">
        <property name="toolTip">
-        <string>Disabling this will still keep the mod loader (ex: Fabric, Quilt, etc.) but erase the mods folder and their configs.</string>
+        <string>Use symbolic links instead of copying files.</string>
        </property>
-       <property name="text">
-        <string>Copy mods</string>
+       <property name="title">
+        <string>Link files instead of copying them</string>
        </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QCheckBox" name="copyGameOptionsCheckbox">
-       <property name="toolTip">
-        <string>Copy the in-game options like FOV, max framerate, etc.</string>
+       <property name="flat">
+        <bool>false</bool>
        </property>
-       <property name="text">
-        <string>Copy game options</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QCheckBox" name="copySavesCheckbox">
-       <property name="text">
-        <string>Copy saves</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QCheckBox" name="copyShaderPacksCheckbox">
-       <property name="text">
-        <string>Copy shader packs</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QCheckBox" name="copyServersCheckbox">
-       <property name="text">
-        <string>Copy servers</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QCheckBox" name="copyResPacksCheckbox">
-       <property name="enabled">
+       <property name="checkable">
         <bool>true</bool>
        </property>
-       <property name="text">
-        <string>Copy resource packs</string>
+       <property name="checked">
+        <bool>false</bool>
        </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QCheckBox" name="keepPlaytimeCheckbox">
-       <property name="text">
-        <string>Keep play time</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QCheckBox" name="copyScreenshotsCheckbox">
-       <property name="text">
-        <string>Copy screenshots</string>
-       </property>
+       <layout class="QVBoxLayout" name="linkOptionsLayout">
+        <item>
+         <widget class="QCheckBox" name="hardLinksCheckbox">
+          <property name="toolTip">
+           <string>Use hard links instead of symbolic links</string>
+          </property>
+          <property name="text">
+           <string>Use hard links</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="linkWorldsCheckbox">
+          <property name="toolTip">
+           <string>World save data will be linked and thus shared between instances.</string>
+          </property>
+          <property name="text">
+           <string>Link worlds</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <property name="tristate">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>
@@ -210,7 +266,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
@@ -220,10 +276,20 @@
   <tabstop>iconButton</tabstop>
   <tabstop>instNameTextBox</tabstop>
   <tabstop>groupBox</tabstop>
+  <tabstop>selectAllCheckbox</tabstop>
+  <tabstop>keepPlaytimeCheckbox</tabstop>
+  <tabstop>copyScreenshotsCheckbox</tabstop>
+  <tabstop>copySavesCheckbox</tabstop>
+  <tabstop>copyShaderPacksCheckbox</tabstop>
+  <tabstop>copyGameOptionsCheckbox</tabstop>
+  <tabstop>copyServersCheckbox</tabstop>
+  <tabstop>copyResPacksCheckbox</tabstop>
+  <tabstop>copyModsCheckbox</tabstop>
+  <tabstop>linkFilesGroup</tabstop>
+  <tabstop>hardLinksCheckbox</tabstop>
+  <tabstop>linkWorldsCheckbox</tabstop>
  </tabstops>
- <resources>
-  <include location="../../graphics.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>
@@ -232,8 +298,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>254</x>
-     <y>316</y>
+     <x>263</x>
+     <y>571</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -248,8 +314,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>322</x>
-     <y>316</y>
+     <x>331</x>
+     <y>571</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

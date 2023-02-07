@@ -559,6 +559,11 @@ set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLShareCode.h
 )
 
+set(LINKDAEMON_SOURCES
+    filelink/FileLink.h
+    filelink/FileLink.cpp
+)
+
 ######## Logging categories ########
 
 ecm_qt_declare_logging_category(CORE_SOURCES
@@ -1106,6 +1111,53 @@ install(TARGETS ${Launcher_Name}
     RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
     FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
 )
+
+if(WIN32)
+    add_library(filelink_logic STATIC ${LINKDAEMON_SOURCES})
+    target_include_directories(filelink_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(filelink_logic
+        systeminfo
+        BuildConfig
+        Qt${QT_VERSION_MAJOR}::Widgets
+        ghcFilesystem::ghc_filesystem
+    )
+    target_link_libraries(filelink_logic
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Xml
+        Qt${QT_VERSION_MAJOR}::Network
+        Qt${QT_VERSION_MAJOR}::Concurrent
+        Qt${QT_VERSION_MAJOR}::Gui
+        Qt${QT_VERSION_MAJOR}::Widgets
+        ${Launcher_QT_LIBS}
+    )
+
+    add_executable("${Launcher_Name}_filelink" WIN32 filelink/main.cpp)
+
+    target_sources("${Launcher_Name}_filelink" PRIVATE filelink/filelink.exe.manifest)
+
+    target_link_libraries("${Launcher_Name}_filelink" filelink_logic)
+
+    if(DEFINED Launcher_APP_BINARY_NAME)
+        set_target_properties("${Launcher_Name}_filelink" PROPERTIES OUTPUT_NAME "${Launcher_APP_BINARY_NAME}_filelink")
+    endif()
+    if(DEFINED Launcher_BINARY_RPATH)
+        SET_TARGET_PROPERTIES("${Launcher_Name}_filelink" PROPERTIES INSTALL_RPATH "${Launcher_BINARY_RPATH}")
+    endif()
+
+    if(CMAKE_GENERATOR MATCHES "Visual Studio")
+        SET_TARGET_PROPERTIES("${Launcher_Name}_filelink" PROPERTIES LINK_FLAGS "/level='requireAdministrator' /uiAccess='false' /SUBSYSTEM:CONSOLE")
+    else()
+        SET_TARGET_PROPERTIES("${Launcher_Name}_filelink" PROPERTIES LINK_FLAGS "/MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\" /SUBSYSTEM:CONSOLE")
+    endif()
+
+
+    install(TARGETS "${Launcher_Name}_filelink"
+        BUNDLE DESTINATION "." COMPONENT Runtime
+        LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
+        RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
+        FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
+    )
+endif()
 
 if (UNIX AND APPLE)
     # Add Sparkle updater

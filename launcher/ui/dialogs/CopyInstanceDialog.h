@@ -55,6 +55,9 @@ slots:
     void on_copyServersCheckbox_stateChanged(int state);
     void on_copyModsCheckbox_stateChanged(int state);
     void on_copyScreenshotsCheckbox_stateChanged(int state);
+    void on_linkFilesGroup_toggled(bool checked);
+    void on_hardLinksCheckbox_stateChanged(int state);
+    void on_linkWorldsCheckbox_stateChanged(int state);
 
 private:
     void checkAllCheckboxes(const bool& b);

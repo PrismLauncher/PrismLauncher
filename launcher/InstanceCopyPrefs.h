@@ -19,6 +19,9 @@ struct InstanceCopyPrefs {
     [[nodiscard]] bool isCopyServersEnabled() const;
     [[nodiscard]] bool isCopyModsEnabled() const;
     [[nodiscard]] bool isCopyScreenshotsEnabled() const;
+    [[nodiscard]] bool isLinkFilesEnabled() const;
+    [[nodiscard]] bool isUseHardLinksEnabled() const;
+    [[nodiscard]] bool isLinkWorldsEnabled() const;
     // Setters
     void enableCopySaves(bool b);
     void enableKeepPlaytime(bool b);
@@ -28,6 +31,9 @@ struct InstanceCopyPrefs {
     void enableCopyServers(bool b);
     void enableCopyMods(bool b);
     void enableCopyScreenshots(bool b);
+    void enableLinkFiles(bool b);
+    void enableUseHardLinks(bool b);
+    void enableLinkWorlds(bool b);
 
    protected: // data
     bool copySaves = true;
@@ -38,4 +44,7 @@ struct InstanceCopyPrefs {
     bool copyServers = true;
     bool copyMods = true;
     bool copyScreenshots = true;
+    bool linkFiles = false;
+    bool useHardLinks = false;
+    bool linkWorlds = true;
 };
