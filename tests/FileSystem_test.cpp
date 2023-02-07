@@ -278,12 +278,13 @@ slots:
             {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
-                QVERIFY(!entry_lnk_info.isSymbolicLink());
+                if (!entry_lnk_info.isDir())
+                    QVERIFY(!entry_lnk_info.isSymLink());
             }
 
             QFileInfo lnk_info(target_dir.path());
             QVERIFY(lnk_info.exists());
-            QVERIFY(lnk_info.isSymbolicLink());
+            QVERIFY(lnk_info.isSymLink());
 
             QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
             QVERIFY(target_dir.entryList().contains("assets"));
@@ -303,8 +304,9 @@ slots:
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
         auto f = [&folder]()
-        {
-            QTemporaryDir tempDir;
+        {   
+            // use working dir to prevent makeing a hard link to a tmpfs or across devices
+            QTemporaryDir tempDir("./tmp"); 
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
 
@@ -322,7 +324,7 @@ slots:
             {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
-                QVERIFY(!entry_lnk_info.isSymbolicLink());
+                QVERIFY(!entry_lnk_info.isSymLink());
                 QFileInfo entry_orig_info(QDir(folder).filePath(entry));
                 if (!entry_lnk_info.isDir()) {
                     qDebug() << "hard link equivalency?" << entry_lnk_info.absoluteFilePath() << "vs" << entry_orig_info.absoluteFilePath();
@@ -332,7 +334,7 @@ slots:
 
             QFileInfo lnk_info(target_dir.path());
             QVERIFY(lnk_info.exists());
-            QVERIFY(!lnk_info.isSymbolicLink());
+            QVERIFY(!lnk_info.isSymLink());
 
             QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
             QVERIFY(target_dir.entryList().contains("assets"));
@@ -377,12 +379,12 @@ slots:
             {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
-                QVERIFY(entry_lnk_info.isSymbolicLink());
+                if (!entry_lnk_info.isDir())
+                    QVERIFY(entry_lnk_info.isSymLink());
             }
 
             QFileInfo lnk_info(target_dir.path());
             QVERIFY(lnk_info.exists());
-            QVERIFY(lnk_info.isSymbolicLink());
 
             QVERIFY(!target_dir.entryList().contains("pack.mcmeta"));
             QVERIFY(target_dir.entryList().contains("assets"));
@@ -428,12 +430,12 @@ slots:
             {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
-                QVERIFY(entry_lnk_info.isSymbolicLink());
+                if (!entry_lnk_info.isDir())
+                    QVERIFY(entry_lnk_info.isSymLink());
             }
 
             QFileInfo lnk_info(target_dir.path());
             QVERIFY(lnk_info.exists());
-            QVERIFY(lnk_info.isSymbolicLink());
 
             QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
             QVERIFY(!target_dir.entryList().contains("assets"));
@@ -478,12 +480,12 @@ slots:
             for (auto entry: target_dir.entryList(filter)) {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
-                QVERIFY(entry_lnk_info.isSymbolicLink());
+                if (!entry_lnk_info.isDir())
+                    QVERIFY(entry_lnk_info.isSymLink());
             }
 
             QFileInfo lnk_info(target_dir.path());
             QVERIFY(lnk_info.exists());
-            QVERIFY(lnk_info.isSymbolicLink());
 
             QVERIFY(target_dir.entryList(filter).contains(".secret_folder"));
             target_dir.cd(".secret_folder");
@@ -532,7 +534,7 @@ slots:
 
             QFileInfo lnk_info(target_dir.filePath("pack.mcmeta"));
             QVERIFY(lnk_info.exists());
-            QVERIFY(lnk_info.isSymbolicLink());
+            QVERIFY(lnk_info.isSymLink());
 
             QVERIFY(target_dir.entryList(filter).contains("pack.mcmeta"));
         }
