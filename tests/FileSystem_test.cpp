@@ -3,6 +3,26 @@
 #include <QStandardPaths>
 
 #include <FileSystem.h>
+#include <StringUtils.h>
+
+// Snippet from https://github.com/gulrak/filesystem#using-it-as-single-file-header
+
+#ifdef __APPLE__
+#include <Availability.h> // for deployment target to support pre-catalina targets without std::fs
+#endif // __APPLE__
+
+#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || (defined(__cplusplus) && __cplusplus >= 201703L)) && defined(__has_include)
+#if __has_include(<filesystem>) && (!defined(__MAC_OS_X_VERSION_MIN_REQUIRED) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 101500)
+#define GHC_USE_STD_FS
+#include <filesystem>
+namespace fs = std::filesystem;
+#endif // MacOS min version check
+#endif // Other OSes version check
+
+#ifndef GHC_USE_STD_FS
+#include <ghc/filesystem.hpp>
+namespace fs = ghc::filesystem;
+#endif
 
 #include <pathmatcher/RegexpMatcher.h>
 
@@ -328,7 +348,10 @@ slots:
                 QFileInfo entry_orig_info(QDir(folder).filePath(entry));
                 if (!entry_lnk_info.isDir()) {
                     qDebug() << "hard link equivalency?" << entry_lnk_info.absoluteFilePath() << "vs" << entry_orig_info.absoluteFilePath();
-                    QVERIFY(std::filesystem::equivalent(entry_lnk_info.filesystemAbsoluteFilePath(), entry_orig_info.filesystemAbsoluteFilePath()));
+                    QVERIFY(fs::equivalent(
+                        fs::path(StringUtils::toStdString(entry_lnk_info.absoluteFilePath())),
+                        fs::path(StringUtils::toStdString(entry_orig_info.absoluteFilePath()))
+                    ));
                 } 
             }
 
