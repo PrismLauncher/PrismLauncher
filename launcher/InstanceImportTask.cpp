@@ -361,7 +361,7 @@ void InstanceImportTask::processModrinth()
     } else {
         QString pack_id;
         if (!m_sourceUrl.isEmpty()) {
-            QRegularExpression regex(R"(data\/(.*)\/versions)");
+            QRegularExpression regex(R"(data\/([^\/]*)\/versions)");
             pack_id = regex.match(m_sourceUrl.toString()).captured(1);
         }
 
