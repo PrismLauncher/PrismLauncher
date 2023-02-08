@@ -562,6 +562,13 @@ set(ATLAUNCHER_SOURCES
 set(LINKEXE_SOURCES
     filelink/FileLink.h
     filelink/FileLink.cpp
+    FileSystem.h
+    FileSystem.cpp
+    Exception.h
+    StringUtils.h
+    StringUtils.cpp
+    DesktopServices.h
+    DesktopServices.cpp
 )
 
 ######## Logging categories ########
@@ -1126,8 +1133,6 @@ if(WIN32)
         Qt${QT_VERSION_MAJOR}::Xml
         Qt${QT_VERSION_MAJOR}::Network
         Qt${QT_VERSION_MAJOR}::Concurrent
-        Qt${QT_VERSION_MAJOR}::Gui
-        Qt${QT_VERSION_MAJOR}::Widgets
         ${Launcher_QT_LIBS}
     )
 

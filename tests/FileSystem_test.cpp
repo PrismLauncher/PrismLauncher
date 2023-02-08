@@ -2,6 +2,8 @@
 #include <QTemporaryDir>
 #include <QStandardPaths>
 
+#include <tasks/Task.h>
+
 #include <FileSystem.h>
 #include <StringUtils.h>
 
@@ -25,6 +27,66 @@ namespace fs = ghc::filesystem;
 #endif
 
 #include <pathmatcher/RegexpMatcher.h>
+
+
+
+class LinkTask : public Task {
+    Q_OBJECT
+
+    friend class FileSystemTest;
+
+    LinkTask(QString src, QString dst)
+    {
+        m_lnk = new FS::create_link(src, dst, this);
+        m_lnk->debug(true);
+    }
+
+    void matcher(const IPathMatcher *filter)
+    {
+        m_lnk->matcher(filter);
+    }
+
+    void linkRecursively(bool recursive) 
+    {
+        m_lnk->linkRecursively(recursive);
+        m_linkRecursive = recursive;
+    }
+
+    void whitelist(bool b)
+    {
+        m_lnk->whitelist(b);
+    }
+
+   private:
+    void executeTask() override
+    {
+        if(!(*m_lnk)()){
+#if defined Q_OS_WIN32
+            if (!m_useHard) {
+                qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
+
+                qDebug() << "atempting to run with privelage";
+                connect(m_lnk, &FS::create_link::finishedPrivlaged, this, [&](){
+                    emitSucceeded();
+                });
+                m_lnk->runPrivlaged();
+            } else {
+                 qDebug() << "Link Failed!" << m_lnk->getOSError().value() << m_lnk->getOSError().message().c_str();
+            }      
+#else
+            qDebug() << "Link Failed!" << m_lnk->getOSError().value() << m_lnk->getOSError().message().c_str();
+#endif
+        } else {
+            emitSucceeded();
+        }
+        
+    };
+
+    FS::create_link *m_lnk;
+    bool m_useHard = false;
+    bool m_linkRecursive = true;
+};
+
 
 class FileSystemTest : public QObject
 {
@@ -273,7 +335,7 @@ slots:
     void test_link()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder]()
+        auto f = [&folder, this]()
         {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
@@ -282,17 +344,17 @@ slots:
             QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
             qDebug() << tempDir.path();
             qDebug() << target_dir.path();
-            FS::create_link lnk(folder, target_dir.path());
-            lnk.linkRecursively(false);
-            lnk.debug(true);
-            if(!lnk()){
-#if defined Q_OS_WIN32
-                qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
-                QVERIFY(lnk.getLastOSError() == 1314);
-                return;
-#endif
-                qDebug() << "Link Failed!" << lnk.getLastOSError();
-            }
+
+            LinkTask lnk_tsk(folder, target_dir.path());
+            lnk_tsk.linkRecursively(false);
+            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
+                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
+            });
+            lnk_tsk.start();
+
+            QVERIFY2(QTest::qWaitFor([&]() {
+                return lnk_tsk.isFinished();
+            }, 100000), "Task didn't finish as it should.");
 
             for(auto entry: target_dir.entryList())
             {
@@ -337,7 +399,7 @@ slots:
             lnk.useHardLinks(true);
             lnk.debug(true);
             if(!lnk()){
-                qDebug() << "Link Failed!" << lnk.getLastOSError();
+                qDebug() << "Link Failed!" << lnk.getOSError().value() << lnk.getOSError().message().c_str();
             }
 
             for(auto entry: target_dir.entryList())
@@ -385,18 +447,19 @@ slots:
             QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
             qDebug() << tempDir.path();
             qDebug() << target_dir.path();
-            FS::create_link lnk(folder, target_dir.path());
-            lnk.matcher(new RegexpMatcher("[.]?mcmeta"));
-            lnk.linkRecursively(true);
-            lnk.debug(true);
-            if(!lnk()){
-#if defined Q_OS_WIN32
-                qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
-                QVERIFY(lnk.getLastOSError() == 1314);
-                return;
-#endif
-                qDebug() << "Link Failed!" << lnk.getLastOSError();
-            }
+
+            LinkTask lnk_tsk(folder, target_dir.path());
+            lnk_tsk.matcher(new RegexpMatcher("[.]?mcmeta"));
+            lnk_tsk.linkRecursively(true);
+            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
+                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
+            });
+            lnk_tsk.start();
+
+            QVERIFY2(QTest::qWaitFor([&]() {
+                return lnk_tsk.isFinished();
+            }, 100000), "Task didn't finish as it should.");
+
 
             for(auto entry: target_dir.entryList())
             {
@@ -435,19 +498,19 @@ slots:
             QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
             qDebug() << tempDir.path();
             qDebug() << target_dir.path();
-            FS::create_link lnk(folder, target_dir.path());
-            lnk.matcher(new RegexpMatcher("[.]?mcmeta"));
-            lnk.whitelist(true);
-            lnk.linkRecursively(true);
-            lnk.debug(true);
-            if(!lnk()){
-#if defined Q_OS_WIN32
-                qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
-                QVERIFY(lnk.getLastOSError() == 1314);
-                return;
-#endif
-                qDebug() << "Link Failed!" << lnk.getLastOSError();
-            }
+
+            LinkTask lnk_tsk(folder, target_dir.path());
+            lnk_tsk.matcher(new RegexpMatcher("[.]?mcmeta"));
+            lnk_tsk.linkRecursively(true);
+            lnk_tsk.whitelist(true);
+            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
+                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
+            });
+            lnk_tsk.start();
+
+            QVERIFY2(QTest::qWaitFor([&]() {
+                return lnk_tsk.isFinished();
+            }, 100000), "Task didn't finish as it should.");
 
             for(auto entry: target_dir.entryList())
             {
@@ -486,17 +549,17 @@ slots:
             QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
             qDebug() << tempDir.path();
             qDebug() << target_dir.path();
-            FS::create_link lnk(folder, target_dir.path());
-            lnk.linkRecursively(true);
-            lnk.debug(true);
-            if(!lnk()){
-#if defined Q_OS_WIN32
-                qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
-                QVERIFY(lnk.getLastOSError() == 1314);
-                return;
-#endif
-                qDebug() << "Link Failed!" << lnk.getLastOSError();
-            }
+
+            LinkTask lnk_tsk(folder, target_dir.path());
+            lnk_tsk.linkRecursively(true);
+            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
+                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
+            });
+            lnk_tsk.start();
+
+            QVERIFY2(QTest::qWaitFor([&]() {
+                return lnk_tsk.isFinished();
+            }, 100000), "Task didn't finish as it should.");
 
             auto filter = QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden;
 
@@ -538,16 +601,16 @@ slots:
             QDir target_dir(FS::PathCombine(tempDir.path(), "pack.mcmeta"));
             qDebug() << tempDir.path();
             qDebug() << target_dir.path();
-            FS::create_link lnk(file, target_dir.filePath("pack.mcmeta"));
-            lnk.debug(true);
-            if(!lnk()){
-#if defined Q_OS_WIN32
-                qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
-                QVERIFY(lnk.getLastOSError() == 1314);
-                return;
-#endif
-                qDebug() << "Link Failed!" << lnk.getLastOSError();
-            }
+
+            LinkTask lnk_tsk(file,  target_dir.filePath("pack.mcmeta"));
+            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
+                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
+            });
+            lnk_tsk.start();
+
+            QVERIFY2(QTest::qWaitFor([&]() {
+                return lnk_tsk.isFinished();
+            }, 100000), "Task didn't finish as it should.");
 
             auto filter = QDir::Filter::Files;
 

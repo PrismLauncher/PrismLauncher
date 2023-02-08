@@ -39,9 +39,13 @@
 #include "Exception.h"
 #include "pathmatcher/IPathMatcher.h"
 
+#include <system_error>
+
 #include <QDir>
 #include <QFlags>
 #include <QObject>
+#include <QThread>
+#include <QLocalServer>
 
 namespace FS {
 
@@ -124,16 +128,45 @@ class copy : public QObject {
     int m_copied;
 };
 
+struct LinkPair {
+    QString src;
+    QString dst;
+};
+
+class ExternalLinkFileProcess : public QThread
+{
+    Q_OBJECT
+   public:
+    ExternalLinkFileProcess(QString server, QObject* parent = nullptr) : QThread(parent), m_server(server) {}
+
+    void run() override {
+        runLinkFile();
+        emit processExited();
+    }
+
+   signals:
+    void processExited();
+
+   private:
+    void runLinkFile();
+
+    QString m_server;
+};
+
 /**
- * @brief Copies a directory and it's contents from src to dest
+ * @brief links (a file / a directory and it's contents) from src to dest
  */ 
 class create_link : public QObject {
     Q_OBJECT
    public:
+    create_link(const QList<LinkPair> path_pairs, QObject* parent = nullptr) : QObject(parent)
+    {
+        m_path_pairs.append(path_pairs);
+    }
     create_link(const QString& src, const QString& dst, QObject* parent = nullptr) : QObject(parent)
     {
-        m_src.setPath(src);
-        m_dst.setPath(dst);
+        LinkPair pair = {src, dst};
+        m_path_pairs.append(pair);
     }
     create_link& useHardLinks(const bool useHard)
     {
@@ -161,31 +194,39 @@ class create_link : public QObject {
         return *this;
     }
 
-    int getLastOSError() {
-        return m_last_os_err;
+    std::error_code getOSError() {
+        return m_os_err;
     }
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
+
+    bool runPrivlaged() { return runPrivlaged(QString()); }
+    bool runPrivlaged(const QString& offset);
 
     int totalLinked() { return m_linked; }
 
    signals:
     void fileLinked(const QString& relativeName);
     void linkFailed(const QString& srcName, const QString& dstName, std::error_code err);
+    void finishedPrivlaged();
 
    private:
     bool operator()(const QString& offset, bool dryRun = false);
+    bool make_link(const QString& src_path, const QString& dst_path, const QString& offset, bool dryRun);
 
    private:
     bool m_useHardLinks = false;
     const IPathMatcher* m_matcher = nullptr;
     bool m_whitelist = false;
     bool m_recursive = true;
-    QDir m_src;
-    QDir m_dst;
+
+    QList<LinkPair> m_path_pairs;
+
     int m_linked;
     bool m_debug = false;
-    int m_last_os_err = 0;
+    std::error_code m_os_err;
+
+    QLocalServer m_linkServer;
 };
 
 /**

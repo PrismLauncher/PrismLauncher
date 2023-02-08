@@ -36,6 +36,8 @@
 
 #include "FileSystem.h"
 
+#include "BuildConfig.h"
+
 #include <QDebug>
 #include <QDir>
 #include <QDirIterator>
@@ -45,6 +47,7 @@
 #include <QStandardPaths>
 #include <QTextStream>
 #include <QUrl>
+#include <QtNetwork>
 
 #include "DesktopServices.h"
 #include "StringUtils.h"
@@ -61,6 +64,11 @@
 #include <windows.h>
 #include <winnls.h>
 #include <string>
+//for ShellExecute
+#include <shlobj.h>
+//#include <shlwapi.h>
+#include <objbase.h>
+#include <Shellapi.h>
 #else
 #include <utime.h>
 #endif
@@ -218,19 +226,29 @@ bool copy::operator()(const QString& offset, bool dryRun)
 }
 
 
+bool create_link::operator()(const QString& offset, bool dryRun) 
+{
+
+    for (auto pair : m_path_pairs) {
+        if (!make_link(pair.src, pair.dst, offset, dryRun)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 /**
  * @brief links a directory and it's contents from src to dest
  * @param offset subdirectory form src to link to dest
  * @return if there was an error during the attempt to link
  */
-bool create_link::operator()(const QString& offset, bool dryRun)
+bool create_link::make_link(const QString& srcPath, const QString& dstPath, const QString& offset, bool dryRun)
 {
     m_linked = 0;  // reset counter
 
-    auto src = PathCombine(m_src.absolutePath(), offset);
-    auto dst = PathCombine(m_dst.absolutePath(), offset);
-
-    std::error_code err;
+    auto src = PathCombine(QDir(srcPath).absolutePath(), offset);
+    auto dst = PathCombine(QDir(dstPath).absolutePath(), offset);
 
     // you can't hard link a directory so make sure if we deal with a directory we do so recursively
     if (m_useHardLinks)
@@ -248,26 +266,25 @@ bool create_link::operator()(const QString& offset, bool dryRun)
             if (m_useHardLinks) {
                 if (m_debug)
                     qDebug() << "making hard link:" << src_path << "to" << dst_path;
-                fs::create_hard_link(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), err);
+                fs::create_hard_link(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), m_os_err);
             } else if (fs::is_directory(StringUtils::toStdString(src_path))) {
                 if (m_debug)
                     qDebug() << "making directory_symlink:" << src_path << "to" << dst_path;
-                fs::create_directory_symlink(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), err);
+                fs::create_directory_symlink(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), m_os_err);
             } else {
                 if (m_debug)
                     qDebug() << "making symlink:" << src_path << "to" << dst_path;
-                fs::create_symlink(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), err);
+                fs::create_symlink(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), m_os_err);
             }
            
         }
-        if (err) {
-            qWarning() << "Failed to link files:" << QString::fromStdString(err.message());
+        if (m_os_err) {
+            qWarning() << "Failed to link files:" << QString::fromStdString(m_os_err.message());
             qDebug() << "Source file:" << src_path;
             qDebug() << "Destination file:" << dst_path;
-            qDebug() << "Error catagory:" << err.category().name();
-            qDebug() << "Error code:" << err.value();
-            m_last_os_err = err.value();
-            emit linkFailed(src_path, dst_path,  err);
+            qDebug() << "Error catagory:" << m_os_err.category().name();
+            qDebug() << "Error code:" << m_os_err.value();
+            emit linkFailed(src_path, dst_path,  m_os_err);
         } else {
             m_linked++;
             emit fileLinked(relative_dst_path);
@@ -290,10 +307,103 @@ bool create_link::operator()(const QString& offset, bool dryRun)
             auto relative_path = src_dir.relativeFilePath(src_path);
 
             link_file(src_path, relative_path);
+            if (m_os_err) return false;
         }
     }
 
-    return err.value() == 0;
+    return m_os_err.value() == 0;
+}
+
+bool create_link::runPrivlaged(const QString& offset)
+{
+
+    QString serverName = BuildConfig.LAUNCHER_APP_BINARY_NAME + "_filelink_server" + StringUtils::getRandomAlphaNumeric(8);
+
+    connect(&m_linkServer, &QLocalServer::newConnection, this, [&](){
+
+        qDebug() << "Client connected, sending out pairs";
+        // construct block of data to send
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_5_15); // choose correct version better?
+
+        qint32 blocksize = quint32(sizeof(quint32));
+        for (auto pair : m_path_pairs) {
+            blocksize += quint32(pair.src.size()); 
+            blocksize += quint32(pair.dst.size());
+        }
+        qDebug() << "About to write block of size:" << blocksize;
+        out << blocksize;
+
+        out << quint32(m_path_pairs.length());
+        for (auto pair : m_path_pairs) {
+            out << pair.src;   
+            out << pair.dst;
+        }
+
+        QLocalSocket *clientConnection = m_linkServer.nextPendingConnection();
+        connect(clientConnection, &QLocalSocket::disconnected,
+                clientConnection, &QLocalSocket::deleteLater);
+
+        qint64 byteswritten = clientConnection->write(block);
+        bool bytesflushed = clientConnection->flush();
+        qDebug() << "block flushed" << byteswritten << bytesflushed;
+        //clientConnection->disconnectFromServer();
+    });
+
+    qDebug() << "Listening on pipe" << serverName;
+    if (!m_linkServer.listen(serverName)) {
+        qDebug() << "Unable to start local pipe server on" << serverName << ":" << m_linkServer.errorString();
+        return false;
+    }
+
+    ExternalLinkFileProcess *linkFileProcess = new ExternalLinkFileProcess(serverName, this);
+    connect(linkFileProcess, &ExternalLinkFileProcess::processExited, this, [&](){
+        emit finishedPrivlaged();
+    });
+    connect(linkFileProcess, &ExternalLinkFileProcess::finished, linkFileProcess, &QObject::deleteLater);
+
+    linkFileProcess->start();
+
+    // linkFileProcess->wait();
+
+    return true;
+}
+
+
+void ExternalLinkFileProcess::runLinkFile() {
+    QString fileLinkExe = PathCombine(QCoreApplication::instance()->applicationDirPath(),  BuildConfig.LAUNCHER_APP_BINARY_NAME + "_filelink");
+    QString params = "-s " + m_server;
+
+#if defined Q_OS_WIN32
+    SHELLEXECUTEINFO ShExecInfo;
+    HRESULT hr;
+
+    fileLinkExe = fileLinkExe + ".exe";
+
+    qDebug() << "Running: runas" << fileLinkExe << params;
+
+    LPCWSTR programNameWin = (const wchar_t*) fileLinkExe.utf16();
+    LPCWSTR paramsWin = (const wchar_t*) params.utf16();
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/shellapi/ns-shellapi-shellexecuteinfoa
+    ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+    ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+    ShExecInfo.hwnd = NULL; // Optional. A handle to the owner window, used to display and position any UI that the system might produce while executing this function.
+    ShExecInfo.lpVerb = L"runas"; // elevate to admin, show UAC
+    ShExecInfo.lpFile = programNameWin;
+    ShExecInfo.lpParameters = paramsWin;
+    ShExecInfo.lpDirectory = NULL;
+    ShExecInfo.nShow = SW_NORMAL;
+    ShExecInfo.hInstApp = NULL;
+
+    ShellExecuteEx(&ShExecInfo);
+
+    WaitForSingleObject(ShExecInfo.hProcess, INFINITE);
+    CloseHandle(ShExecInfo.hProcess);
+#endif
+
+    qDebug() << "Process exited";
 }
 
 bool move(const QString& source, const QString& dest)

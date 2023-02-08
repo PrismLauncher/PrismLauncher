@@ -32,6 +32,11 @@
 #include <QDateTime>
 #include <QUrl>
 #include <QDateTime>
+#include <QDataStream>
+#include <QLocalSocket>
+
+#define PRISM_EXTERNAL_EXE
+#include "FileSystem.h"
 
 class FileLinkApp : public QCoreApplication
 {
@@ -43,7 +48,17 @@ public:
     virtual ~FileLinkApp();
 
 private:
+
+    void joinServer(QString server);
+    void readPathPairs();
+    void runLink();
+
     QDateTime m_startTime;
+    QLocalSocket socket;
+    QDataStream in;
+    quint32 blockSize;
+
+    QList<FS::LinkPair> m_path_pairs;
 
 #if defined Q_OS_WIN32
     // used on Windows to attach the standard IO streams

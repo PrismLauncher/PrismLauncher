@@ -1,5 +1,7 @@
 #include "StringUtils.h"
 
+#include <QRandomGenerator>
+
 /// If you're wondering where these came from exactly, then know you're not the only one =D
 
 /// TAKEN FROM Qt, because it doesn't expose it intelligently
@@ -73,4 +75,17 @@ int StringUtils::naturalCompare(const QString& s1, const QString& s2, Qt::CaseSe
 
     // The two strings are the same (02 == 2) so fall back to the normal sort
     return QString::compare(s1, s2, cs);
+}
+
+QString StringUtils::getRandomAlphaNumeric(const int length)
+{
+    const QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+    QString randomString;
+    for(int i=0; i < length; ++i)
+    {
+        int index = QRandomGenerator::global()->bounded(0, possibleCharacters.length());
+        QChar nextChar = possibleCharacters.at(index);
+        randomString.append(nextChar);
+    }
+    return randomString;
 }
