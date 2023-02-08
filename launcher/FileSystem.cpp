@@ -420,7 +420,7 @@ void create_link::runPrivlaged(const QString& offset)
         qint64 byteswritten = clientConnection->write(block);
         bool bytesflushed = clientConnection->flush();
         qDebug() << "block flushed" << byteswritten << bytesflushed;
-        //clientConnection->disconnectFromServer();
+
     });
 
     qDebug() << "Listening on pipe" << serverName;
@@ -436,7 +436,6 @@ void create_link::runPrivlaged(const QString& offset)
     linkFileProcess->start();
 
 }
-
 
 void ExternalLinkFileProcess::runLinkFile() {
     QString fileLinkExe = PathCombine(QCoreApplication::instance()->applicationDirPath(),  BuildConfig.LAUNCHER_APP_BINARY_NAME + "_filelink");
@@ -463,7 +462,7 @@ void ExternalLinkFileProcess::runLinkFile() {
     ShExecInfo.lpFile = programNameWin;
     ShExecInfo.lpParameters = paramsWin;
     ShExecInfo.lpDirectory = NULL;
-    ShExecInfo.nShow = SW_NORMAL;
+    ShExecInfo.nShow = SW_HIDE;
     ShExecInfo.hInstApp = NULL;
 
     ShellExecuteEx(&ShExecInfo);

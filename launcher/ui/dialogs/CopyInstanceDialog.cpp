@@ -88,7 +88,7 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     
     ui->linkFilesGroup->setChecked(m_selectedOptions.isLinkFilesEnabled());
     ui->hardLinksCheckbox->setChecked(m_selectedOptions.isUseHardLinksEnabled());
-    ui->linkWorldsCheckbox->setChecked(m_selectedOptions.isLinkWorldsEnabled());
+    ui->dontLinkSavesCheckbox->setChecked(m_selectedOptions.isDontLinkSavesEnabled());
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()
@@ -179,6 +179,7 @@ void CopyInstanceDialog::on_selectAllCheckbox_stateChanged(int state)
 void CopyInstanceDialog::on_copySavesCheckbox_stateChanged(int state)
 {
     m_selectedOptions.enableCopySaves(state == Qt::Checked);
+    ui->dontLinkSavesCheckbox->setChecked((state == Qt::Checked) && ui->dontLinkSavesCheckbox->isChecked());
     updateSelectAllCheckbox();
 }
 
@@ -235,7 +236,7 @@ void CopyInstanceDialog::on_hardLinksCheckbox_stateChanged(int state)
     m_selectedOptions.enableUseHardLinks(state == Qt::Checked);
 }
 
-void CopyInstanceDialog::on_linkWorldsCheckbox_stateChanged(int state)
+void CopyInstanceDialog::on_dontLinkSavesCheckbox_stateChanged(int state)
 {
-    m_selectedOptions.enableLinkWorlds(state == Qt::Checked);
+    m_selectedOptions.enableDontLinkSaves(state == Qt::Checked);
 }

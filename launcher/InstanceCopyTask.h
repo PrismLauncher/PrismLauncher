@@ -30,4 +30,7 @@ private:
     QFutureWatcher<bool> m_copyFutureWatcher;
     std::unique_ptr<IPathMatcher> m_matcher;
     bool m_keepPlaytime;
+    bool m_useLinks = false;
+    bool m_useHardLinks = false;
+    bool m_copySaves = true;
 };

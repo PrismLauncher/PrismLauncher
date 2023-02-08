@@ -211,16 +211,21 @@ class create_link : public QObject {
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
+    int totalLinked() { return m_linked; }
+
+
     void runPrivlaged() { runPrivlaged(QString()); }
     void runPrivlaged(const QString& offset);
 
-    int totalLinked() { return m_linked; }
+    QList<LinkResult> getResults() { return m_path_results; }
+
 
    signals:
     void fileLinked(const QString& srcName, const QString& dstName);
     void linkFailed(const QString& srcName, const QString& dstName, const QString& err_msg, int err_value);
-    void finishedPrivlaged(bool gotResults);
     void finished();
+    void finishedPrivlaged(bool gotResults);
+
 
    private:
     bool operator()(const QString& offset, bool dryRun = false);

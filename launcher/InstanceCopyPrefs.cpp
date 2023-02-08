@@ -103,9 +103,9 @@ bool InstanceCopyPrefs::isUseHardLinksEnabled() const
     return useHardLinks;
 }
 
-bool InstanceCopyPrefs::isLinkWorldsEnabled() const
+bool InstanceCopyPrefs::isDontLinkSavesEnabled() const
 {
-    return linkWorlds;
+    return dontLinkSaves;
 }
 
 // ======= Setters =======
@@ -159,7 +159,7 @@ void InstanceCopyPrefs::enableUseHardLinks(bool b)
     useHardLinks = b;
 }
 
-void InstanceCopyPrefs::enableLinkWorlds(bool b)
+void InstanceCopyPrefs::enableDontLinkSaves(bool b)
 {
-    linkWorlds = b;
+    dontLinkSaves = b;
 }

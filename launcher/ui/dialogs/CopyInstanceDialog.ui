@@ -240,17 +240,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="linkWorldsCheckbox">
+         <widget class="QCheckBox" name="dontLinkSavesCheckbox">
           <property name="toolTip">
-           <string>World save data will be linked and thus shared between instances.</string>
+           <string>If "copy saves" is selected world save data will be copied instead of linked and thus not shared between instances.</string>
           </property>
           <property name="text">
-           <string>Link worlds</string>
+           <string>Don't link saves</string>
           </property>
           <property name="checked">
-           <bool>true</bool>
-          </property>
-          <property name="tristate">
            <bool>false</bool>
           </property>
          </widget>
