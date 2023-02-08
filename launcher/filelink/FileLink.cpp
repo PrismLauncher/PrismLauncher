@@ -23,6 +23,8 @@
 #include "FileLink.h"
 #include "BuildConfig.h"
 
+#include "StringUtils.h"
+
 
 #include <iostream>
 
@@ -43,6 +45,24 @@
 #include <stdio.h>
 #endif
 
+// Snippet from https://github.com/gulrak/filesystem#using-it-as-single-file-header
+
+#ifdef __APPLE__
+#include <Availability.h> // for deployment target to support pre-catalina targets without std::fs
+#endif // __APPLE__
+
+#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || (defined(__cplusplus) && __cplusplus >= 201703L)) && defined(__has_include)
+#if __has_include(<filesystem>) && (!defined(__MAC_OS_X_VERSION_MIN_REQUIRED) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 101500)
+#define GHC_USE_STD_FS
+#include <filesystem>
+namespace fs = std::filesystem;
+#endif // MacOS min version check
+#endif // Other OSes version check
+
+#ifndef GHC_USE_STD_FS
+#include <ghc/filesystem.hpp>
+namespace fs = ghc::filesystem;
+#endif
 
 
 
@@ -82,7 +102,8 @@ FileLinkApp::FileLinkApp(int &argc, char **argv) : QCoreApplication(argc, argv),
     parser.setApplicationDescription(QObject::tr("a batch MKLINK program for windows to be used with prismlauncher"));
 
     parser.addOptions({
-        {{"s", "server"}, "Join the specified server on launch", "pipe name"}
+        {{"s", "server"}, "Join the specified server on launch", "pipe name"},
+        {{"H", "hard"}, "use hard links insted of symbolic", "true/false"}
     });
     parser.addHelpOption();
     parser.addVersionOption();
@@ -90,6 +111,7 @@ FileLinkApp::FileLinkApp(int &argc, char **argv) : QCoreApplication(argc, argv),
     parser.process(arguments());
 
     QString serverToJoin = parser.value("server");
+    m_useHardLinks = QVariant(parser.value("hard")).toBool();
 
     qDebug() << "link program launched";
 
@@ -109,7 +131,7 @@ void FileLinkApp::joinServer(QString server)
     blockSize = 0; 
 
     in.setDevice(&socket);
-    in.setVersion(QDataStream::Qt_5_15);
+    in.setVersion(QDataStream::Qt_5_0);
 
     connect(&socket, &QLocalSocket::connected, this, [&](){
         qDebug() << "connected to server";
@@ -120,25 +142,27 @@ void FileLinkApp::joinServer(QString server)
     connect(&socket, &QLocalSocket::errorOccurred, this, [&](QLocalSocket::LocalSocketError socketError){
         switch (socketError) {
         case QLocalSocket::ServerNotFoundError:
-            qDebug() << tr("The host was not found. Please make sure "
-                            "that the server is running and that the "
-                            "server name is correct.");
+            qDebug() << ("The host was not found. Please make sure "
+                        "that the server is running and that the "
+                        "server name is correct.");
             break;
         case QLocalSocket::ConnectionRefusedError:
-            qDebug() << tr("The connection was refused by the peer. "
-                            "Make sure the server is running, "
-                            "and check that the server name "
-                            "is correct.");
+            qDebug() << ("The connection was refused by the peer. "
+                        "Make sure the server is running, "
+                        "and check that the server name "
+                        "is correct.");
             break;
         case QLocalSocket::PeerClosedError:
+            qDebug() << ("The connection was closed by the peer. ");
             break;
         default:
-            qDebug() << tr("The following error occurred: %1.").arg(socket.errorString());
+            qDebug() << "The following error occurred: " << socket.errorString();
         }
     });
 
     connect(&socket, &QLocalSocket::disconnected, this, [&](){
-        qDebug() << "dissconnected from server";
+        qDebug() << "dissconnected from server, should exit";
+        exit();
     });
 
     socket.connectToServer(server);
@@ -147,20 +171,82 @@ void FileLinkApp::joinServer(QString server)
 }
 
 void FileLinkApp::runLink()
-{
-    qDebug() << "creating link";
-    FS::create_link lnk(m_path_pairs);
-    lnk.debug(true);
-    if (!lnk()) {
-        qDebug() << "Link Failed!" << lnk.getOSError().value() << lnk.getOSError().message().c_str();
+{   
+
+    std::error_code os_err;
+
+    qDebug() << "creating links";
+
+    for (auto link : m_links_to_make) {
+
+        QString src_path = link.src;
+        QString dst_path = link.dst;
+
+        FS::ensureFilePathExists(dst_path);
+        if (m_useHardLinks) {
+            qDebug() << "making hard link:" << src_path << "to" << dst_path;
+            fs::create_hard_link(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), os_err);
+        } else if (fs::is_directory(StringUtils::toStdString(src_path))) {
+            qDebug() << "making directory_symlink:" << src_path << "to" << dst_path;
+            fs::create_directory_symlink(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), os_err);
+        } else {
+            qDebug() << "making symlink:" << src_path << "to" << dst_path;
+            fs::create_symlink(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), os_err);
+        }    
+
+        if (os_err) {
+            qWarning() << "Failed to link files:" << QString::fromStdString(os_err.message());
+            qDebug() << "Source file:" << src_path;
+            qDebug() << "Destination file:" << dst_path;
+            qDebug() << "Error catagory:" << os_err.category().name();
+            qDebug() << "Error code:" << os_err.value();
+
+            FS::LinkResult result = {src_path, dst_path, QString::fromStdString(os_err.message()), os_err.value()};
+            m_path_results.append(result);
+        } else {
+            FS::LinkResult result = {src_path, dst_path};
+            m_path_results.append(result);
+        }
     }
-    //exit();
-    qDebug() << "done, should exit";
+
+    sendResults();
+    qDebug() << "done, should exit soon";
+    
+}
+
+void FileLinkApp::sendResults()
+{
+    // construct block of data to send
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_0);
+
+    qint32 blocksize = quint32(sizeof(quint32));
+    for (auto result : m_path_results) {
+        blocksize += quint32(result.src.size());
+        blocksize += quint32(result.dst.size());
+        blocksize += quint32(result.err_msg.size());
+        blocksize += quint32(sizeof(quint32));
+    }
+    qDebug() << "About to write block of size:" << blocksize;
+    out << blocksize;
+
+    out << quint32(m_path_results.length());
+    for (auto result : m_path_results) {
+        out << result.src;
+        out << result.dst;
+        out << result.err_msg;
+        out << quint32(result.err_value);
+    }
+
+    qint64 byteswritten = socket.write(block);
+    bool bytesflushed = socket.flush();
+    qDebug() << "block flushed" << byteswritten << bytesflushed;
 }
 
 void FileLinkApp::readPathPairs()
 {   
-    m_path_pairs.clear();
+    m_links_to_make.clear();
     qDebug() << "Reading path pairs from server";
     qDebug() << "bytes avalible" << socket.bytesAvailable();
     if (blockSize == 0) {
@@ -176,16 +262,16 @@ void FileLinkApp::readPathPairs()
     if (socket.bytesAvailable() < blockSize || in.atEnd())
         return;
     
-    quint32 numPairs;
-    in >> numPairs;
-    qDebug() << "numPairs" << numPairs;
+    quint32 numLinks;
+    in >> numLinks;
+    qDebug() << "numLinks" << numLinks;
 
-    for(int i = 0; i < numPairs; i++) {
+    for(int i = 0; i < numLinks; i++) {
         FS::LinkPair pair;
         in >> pair.src;
         in >> pair.dst;
         qDebug() << "link" << pair.src << "to" << pair.dst;
-        m_path_pairs.append(pair);
+        m_links_to_make.append(pair);
     }
 
     runLink();

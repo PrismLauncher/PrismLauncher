@@ -133,13 +133,22 @@ struct LinkPair {
     QString dst;
 };
 
-class ExternalLinkFileProcess : public QThread
-{
+struct LinkResult {
+    QString src;
+    QString dst;
+    QString err_msg;
+    int err_value;
+};
+
+class ExternalLinkFileProcess : public QThread {
     Q_OBJECT
    public:
-    ExternalLinkFileProcess(QString server, QObject* parent = nullptr) : QThread(parent), m_server(server) {}
+    ExternalLinkFileProcess(QString server, bool useHardLinks, QObject* parent = nullptr)
+        : QThread(parent), m_server(server), m_useHardLinks(useHardLinks)
+    {}
 
-    void run() override {
+    void run() override
+    {
         runLinkFile();
         emit processExited();
     }
@@ -149,6 +158,8 @@ class ExternalLinkFileProcess : public QThread
 
    private:
     void runLinkFile();
+
+    bool m_useHardLinks = false;
 
     QString m_server;
 };
@@ -200,19 +211,21 @@ class create_link : public QObject {
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
-    bool runPrivlaged() { return runPrivlaged(QString()); }
-    bool runPrivlaged(const QString& offset);
+    void runPrivlaged() { runPrivlaged(QString()); }
+    void runPrivlaged(const QString& offset);
 
     int totalLinked() { return m_linked; }
 
    signals:
-    void fileLinked(const QString& relativeName);
-    void linkFailed(const QString& srcName, const QString& dstName, std::error_code err);
-    void finishedPrivlaged();
+    void fileLinked(const QString& srcName, const QString& dstName);
+    void linkFailed(const QString& srcName, const QString& dstName, const QString& err_msg, int err_value);
+    void finishedPrivlaged(bool gotResults);
+    void finished();
 
    private:
     bool operator()(const QString& offset, bool dryRun = false);
-    bool make_link(const QString& src_path, const QString& dst_path, const QString& offset, bool dryRun);
+    void make_link_list(const QString& offset);
+    bool make_links();
 
    private:
     bool m_useHardLinks = false;
@@ -221,6 +234,8 @@ class create_link : public QObject {
     bool m_recursive = true;
 
     QList<LinkPair> m_path_pairs;
+    QList<LinkResult> m_path_results;
+    QList<LinkPair> m_links_to_make;
 
     int m_linked;
     bool m_debug = false;
