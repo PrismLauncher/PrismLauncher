@@ -144,7 +144,7 @@ class ExternalLinkFileProcess : public QThread {
     Q_OBJECT
    public:
     ExternalLinkFileProcess(QString server, bool useHardLinks, QObject* parent = nullptr)
-        : QThread(parent), m_server(server), m_useHardLinks(useHardLinks)
+        : QThread(parent), m_useHardLinks(useHardLinks), m_server(server)
     {}
 
     void run() override

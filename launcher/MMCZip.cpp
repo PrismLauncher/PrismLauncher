@@ -94,20 +94,23 @@ bool MMCZip::mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &containe
     return true;
 }
 
-bool MMCZip::compressDirFiles(QuaZip *zip, QString dir, QFileInfoList files)
+bool MMCZip::compressDirFiles(QuaZip *zip, QString dir, QFileInfoList files, bool followSymlinks)
 {
     QDir directory(dir);
     if (!directory.exists()) return false;
 
     for (auto e : files) {
         auto filePath = directory.relativeFilePath(e.absoluteFilePath());
-        if( !JlCompress::compressFile(zip, e.absoluteFilePath(), filePath)) return false;
+        auto srcPath = e.absoluteFilePath();
+        if (followSymlinks)
+            srcPath = e.canonicalFilePath();
+        if( !JlCompress::compressFile(zip, srcPath, filePath)) return false;
     }
 
     return true;
 }
 
-bool MMCZip::compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files)
+bool MMCZip::compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, bool followSymlinks)
 {
     QuaZip zip(fileCompressed);
     QDir().mkpath(QFileInfo(fileCompressed).absolutePath());
