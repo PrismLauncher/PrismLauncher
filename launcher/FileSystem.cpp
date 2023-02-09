@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2022 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +36,9 @@
  */
 
 #include "FileSystem.h"
+#include <qdebug.h>
+#include <qfileinfo.h>
+#include <qstorageinfo.h>
 
 #include "BuildConfig.h"
 
@@ -48,6 +52,7 @@
 #include <QTextStream>
 #include <QUrl>
 #include <QtNetwork>
+#include <system_error>
 
 #include "DesktopServices.h"
 #include "StringUtils.h"
@@ -89,6 +94,18 @@ namespace fs = std::filesystem;
 #ifndef GHC_USE_STD_FS
 #include <ghc/filesystem.hpp>
 namespace fs = ghc::filesystem;
+#endif
+
+
+// clone
+#if defined(Q_OS_LINUX)
+#include <linux/fs.h>
+#include <fcntl.h>      /* Definition of FICLONE* constants */
+#include <sys/ioctl.h>
+#include <errno.h>
+#elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+#include <sys/attr.h>
+#include <sys/clonefile.h>
 #endif
 
 namespace FS {
@@ -829,6 +846,195 @@ bool overrideFolder(QString overwritten_path, QString override_path)
     }
 
     return err.value() == 0;
+}
+
+
+/**
+ * @brief colect information about the filesystem under a file
+ * 
+ */
+FilesystemInfo statFS(QString path)
+{
+
+    FilesystemInfo info;
+
+    QStorageInfo storage_info(path);
+
+    QString fsTypeName = QString::fromStdString(storage_info.fileSystemType().toStdString());
+
+    for (auto fs_type_pair : s_filesystem_type_names_inverse.toStdMap()) {
+        auto fs_type_name = fs_type_pair.first;
+        auto fs_type = fs_type_pair.second;
+
+        if(fsTypeName.contains(fs_type_name.toLower())) {
+            info.fsType = fs_type;
+            break;
+        }
+    }
+
+    info.blockSize = storage_info.blockSize();
+    info.bytesAvailable = storage_info.bytesAvailable();
+    info.bytesFree = storage_info.bytesFree();
+    info.bytesTotal = storage_info.bytesTotal();
+
+    info.name = storage_info.name();
+    info.rootPath = storage_info.rootPath();
+
+    return info;
+}
+
+/**
+ * @brief if the Filesystem is reflink/clone capable 
+ * 
+ */
+bool canCloneOnFS(const QString& path)
+{   
+    FilesystemInfo info = statFS(path);
+    return canCloneOnFS(info);
+}
+bool canCloneOnFS(const FilesystemInfo& info)
+{
+    return canCloneOnFS(info.fsType);
+}
+bool canCloneOnFS(FilesystemType type)
+{
+    return s_clone_filesystems.contains(type);
+}
+
+/**
+ * @brief if the Filesystem is reflink/clone capable and both paths are on the same device
+ * 
+ */
+bool canClone(const QString& src, const QString& dst)
+{
+    auto srcVInfo = statFS(src);
+    auto dstVInfo = statFS(dst);
+
+    bool sameDevice = srcVInfo.rootPath == dstVInfo.rootPath;
+
+    return sameDevice && canCloneOnFS(srcVInfo) && canCloneOnFS(dstVInfo);
+}
+
+/**
+ * @brief reflink/clones a directory and it's contents from src to dest
+ * @param offset subdirectory form src to copy to dest
+ * @return if there was an error during the filecopy
+ */
+bool clone::operator()(const QString& offset, bool dryRun)
+{
+
+    if (!canClone(m_src.absolutePath(), m_dst.absolutePath())) {
+        qWarning() << "Can not clone: not same device or not clone/reflink filesystem";
+        qDebug() << "Source path:" << m_src.absolutePath();
+        qDebug() << "Destination path:" << m_dst.absolutePath();
+        emit cloneFailed(m_src.absolutePath(), m_dst.absolutePath());
+        return false;
+    }
+
+    m_cloned = 0;  // reset counter
+
+    auto src = PathCombine(m_src.absolutePath(), offset);
+    auto dst = PathCombine(m_dst.absolutePath(), offset);
+
+    std::error_code err;
+
+    // Function that'll do the actual cloneing
+    auto cloneFile = [&](QString src_path, QString relative_dst_path) {
+        if (m_matcher && (m_matcher->matches(relative_dst_path) != m_whitelist))
+            return;
+
+        auto dst_path = PathCombine(dst, relative_dst_path);
+        if (!dryRun) {
+            ensureFilePathExists(dst_path);
+            clone_file(src_path, dst_path, err);
+        }
+        if (err) {
+            qWarning() << "Failed to clone files:" << QString::fromStdString(err.message());
+            qDebug() << "Source file:" << src_path;
+            qDebug() << "Destination file:" << dst_path;
+        }
+        m_cloned++;
+        emit fileCloned(src_path, dst_path);
+    };
+
+    // We can't use copy_opts::recursive because we need to take into account the
+    // blacklisted paths, so we iterate over the source directory, and if there's no blacklist
+    // match, we copy the file.
+    QDir src_dir(src);
+    QDirIterator source_it(src, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::Subdirectories);
+
+    while (source_it.hasNext()) {
+        auto src_path = source_it.next();
+        auto relative_path = src_dir.relativeFilePath(src_path);
+
+        cloneFile(src_path, relative_path);
+    }
+
+    // If the root src is not a directory, the previous iterator won't run.
+    if (!fs::is_directory(StringUtils::toStdString(src)))
+        cloneFile(src, "");
+
+    return err.value() == 0;
+}
+
+/**
+ * @brief clone/reflink file from src to dst
+ * 
+ */
+bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
+{   
+    auto src_path = StringUtils::toStdString(QFileInfo(src).absoluteFilePath());
+    auto dst_path = StringUtils::toStdString(QFileInfo(dst).absoluteFilePath());
+
+#if defined(Q_OS_WIN)
+    qWarning("clone/reflink not supported on windows!");
+    ec = std::make_error_code(std::errc::not_supported);
+    return false;
+#elif defined(Q_OS_LINUX)
+
+    // https://man7.org/linux/man-pages/man2/ioctl_ficlone.2.html
+
+    int src_fd = open(src_path.c_str(), O_RDONLY);
+    if(!src_fd) {
+        qWarning() << "Failed to open file:" << src_path.c_str();
+        qDebug() << "Error:" << strerror(errno);
+        ec = std::make_error_code(static_cast<std::errc>(errno));
+        return false;
+    }
+    int dst_fd = open(dst_path.c_str(), O_WRONLY | O_TRUNC);
+    if(!dst_fd) {
+        qWarning() << "Failed to open file:" << dst_path.c_str();
+        qDebug() << "Error:" << strerror(errno);
+        ec = std::make_error_code(static_cast<std::errc>(errno));
+        return false;
+    }
+    // attempt to clone
+    if(!ioctl(dst_fd,  FICLONE, src_fd)){
+        qWarning() << "Failed to clone file:" << src_path.c_str() << "to" << dst_path.c_str();
+        qDebug() << "Error:" << strerror(errno);
+        ec = std::make_error_code(static_cast<std::errc>(errno));
+        return false;
+    }
+
+#elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+    // TODO: use clonefile
+    // clonefile(const char * src, const char * dst, int flags);
+    // https://www.manpagez.com/man/2/clonefile/
+
+    if (!clonefile(src_path.c_str(), dst_path.c_str(), 0)) {
+        qWarning() << "Failed to clone file:" << src_path.c_str() << "to" << dst_path.c_str();
+        qDebug() << "Error:" << strerror(errno);
+        ec = std::make_error_code(static_cast<std::errc>(errno));
+        return false;
+    }
+
+#else
+    qWarning("clone/reflink not supported! unknown OS");
+    ec = std::make_error_code(std::errc::not_supported);
+    return false;
+#endif
+
+    return true;
 }
 
 }

@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2022 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -313,4 +314,144 @@ bool overrideFolder(QString overwritten_path, QString override_path);
  * Creates a shortcut to the specified target file at the specified destination path.
  */
 bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon);
+
+enum class FilesystemType {
+    FAT,
+    NTFS,
+    EXT,
+    EXT_2_OLD,
+    EXT_2_3_4,
+    XFS,
+    BTRFS,
+    NFS,
+    ZFS,
+    APFS,
+    HFS,
+    HFSPLUS,
+    HFSX,
+    UNKNOWN
+};
+
+static const QMap<FilesystemType, QString> s_filesystem_type_names = {
+    {FilesystemType::FAT,    QString("FAT")},
+    {FilesystemType::NTFS,   QString("NTFS")},
+    {FilesystemType::EXT,    QString("EXT")},
+    {FilesystemType::EXT_2_OLD,    QString("EXT2_OLD")},
+    {FilesystemType::EXT_2_3_4,    QString("EXT2/3/4")},
+    {FilesystemType::XFS,    QString("XFS")},
+    {FilesystemType::BTRFS,  QString("BTRFS")},
+    {FilesystemType::NFS,    QString("NFS")},
+    {FilesystemType::ZFS,    QString("ZFS")},
+    {FilesystemType::APFS,   QString("APFS")},
+    {FilesystemType::HFS,    QString("HFS")},
+    {FilesystemType::HFSPLUS, QString("HFSPLUS")},
+    {FilesystemType::HFSX,    QString("HFSX")},
+    {FilesystemType::UNKNOWN, QString("UNKNOWN")}
+};
+
+static const QMap<QString, FilesystemType> s_filesystem_type_names_inverse = {
+    {QString("FAT"), FilesystemType::FAT},
+    {QString("NTFS"), FilesystemType::NTFS},
+    {QString("EXT2_OLD"), FilesystemType::EXT_2_OLD},
+    {QString("EXT2"), FilesystemType::EXT_2_3_4},
+    {QString("EXT3"), FilesystemType::EXT_2_3_4},
+    {QString("EXT4"), FilesystemType::EXT_2_3_4},
+    {QString("EXT"), FilesystemType::EXT},
+    {QString("XFS"), FilesystemType::XFS},
+    {QString("BTRFS"), FilesystemType::BTRFS},
+    {QString("NFS"), FilesystemType::NFS},
+    {QString("ZFS"), FilesystemType::ZFS},
+    {QString("APFS"), FilesystemType::APFS},
+    {QString("HFSPLUS"), FilesystemType::HFSPLUS},
+    {QString("HFSX"), FilesystemType::HFSX},
+    {QString("HFS"), FilesystemType::HFS},
+    {QString("UNKNOWN"), FilesystemType::UNKNOWN}
+};
+
+inline QString getFilesystemTypeName(FilesystemType type) {
+    return s_filesystem_type_names.constFind(type).value();
+}
+
+struct FilesystemInfo {
+    FilesystemType fsType = FilesystemType::UNKNOWN;
+    int     blockSize;
+    qint64 	bytesAvailable;
+    qint64 	bytesFree;
+    qint64 	bytesTotal;
+    QString name;
+    QString rootPath;
+};
+
+/**
+ * @brief colect information about the filesystem under a file
+ * 
+ */
+FilesystemInfo statFS(QString path);
+
+
+static const QList<FilesystemType> s_clone_filesystems = {
+    FilesystemType::BTRFS, FilesystemType::APFS, FilesystemType::ZFS, FilesystemType::XFS
+};
+
+/**
+ * @brief if the Filesystem is reflink/clone capable 
+ * 
+ */
+bool canCloneOnFS(const QString& path);
+bool canCloneOnFS(const FilesystemInfo& info);
+bool canCloneOnFS(FilesystemType type);
+
+/**
+ * @brief if the Filesystem is reflink/clone capable and both are on the same device
+ * 
+ */
+bool canClone(const QString& src, const QString& dst);
+
+/**
+ * @brief Copies a directory and it's contents from src to dest
+ */ 
+class clone : public QObject {
+    Q_OBJECT
+   public:
+    clone(const QString& src, const QString& dst, QObject* parent = nullptr) : QObject(parent)
+    {
+        m_src.setPath(src);
+        m_dst.setPath(dst);
+    }
+    clone& matcher(const IPathMatcher* filter)
+    {
+        m_matcher = filter;
+        return *this;
+    }
+    clone& whitelist(bool whitelist)
+    {
+        m_whitelist = whitelist;
+        return *this;
+    }
+
+    bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
+
+    int totalCloned() { return m_cloned; }
+
+   signals:
+    void fileCloned(const QString& src, const QString& dst);
+    void cloneFailed(const QString& src, const QString& dst);
+
+   private:
+    bool operator()(const QString& offset, bool dryRun = false);
+
+   private:
+    const IPathMatcher* m_matcher = nullptr;
+    bool m_whitelist = false;
+    QDir m_src;
+    QDir m_dst;
+    int m_cloned;
+};
+
+/**
+ * @brief clone/reflink file from src to dst
+ * 
+ */
+bool clone_file(const QString& src, const QString& dst, std::error_code& ec);
+
 }
