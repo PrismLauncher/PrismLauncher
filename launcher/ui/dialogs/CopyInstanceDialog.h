@@ -56,9 +56,9 @@ slots:
     void on_copyServersCheckbox_stateChanged(int state);
     void on_copyModsCheckbox_stateChanged(int state);
     void on_copyScreenshotsCheckbox_stateChanged(int state);
-    void on_linkFilesGroup_toggled(bool checked);
-    void on_recursiveLinkCheckbox_stateChanged(int state);
+    void on_symbolicLinksCheckbox_stateChanged(int state);
     void on_hardLinksCheckbox_stateChanged(int state);
+    void on_recursiveLinkCheckbox_stateChanged(int state);
     void on_dontLinkSavesCheckbox_stateChanged(int state);
     void on_useCloneCheckbox_stateChanged(int state);
 
@@ -66,6 +66,7 @@ private:
     void checkAllCheckboxes(const bool& b);
     void updateSelectAllCheckbox();
     void updateUseCloneCheckbox();
+    void updateLinkOptions();
 
     /* data */
     Ui::CopyInstanceDialog *ui;
@@ -73,4 +74,5 @@ private:
     InstancePtr m_original;
     InstanceCopyPrefs m_selectedOptions;
     bool m_cloneSupported = false;
+    bool m_linkSupported = false;
 };

@@ -330,6 +330,7 @@ enum class FilesystemType {
     HFSPLUS,
     HFSX,
     FUSEBLK,
+    F2FS,
     UNKNOWN
 };
 
@@ -348,6 +349,7 @@ static const QMap<FilesystemType, QString> s_filesystem_type_names = {
     {FilesystemType::HFSPLUS, QString("HFSPLUS")},
     {FilesystemType::HFSX,    QString("HFSX")},
     {FilesystemType::FUSEBLK, QString("FUSEBLK")},
+    {FilesystemType::F2FS, QString("F2FS")},
     {FilesystemType::UNKNOWN, QString("UNKNOWN")}
 };
 
@@ -368,6 +370,7 @@ static const QMap<QString, FilesystemType> s_filesystem_type_names_inverse = {
     {QString("HFSX"), FilesystemType::HFSX},
     {QString("HFS"), FilesystemType::HFS},
     {QString("FUSEBLK"), FilesystemType::FUSEBLK},
+    {QString("F2FS"), FilesystemType::F2FS},
     {QString("UNKNOWN"), FilesystemType::UNKNOWN}
 };
 
@@ -405,7 +408,7 @@ bool canCloneOnFS(const FilesystemInfo& info);
 bool canCloneOnFS(FilesystemType type);
 
 /**
- * @brief if the Filesystem is reflink/clone capable and both are on the same device
+ * @brief if the Filesystems are reflink/clone capable and both are on the same device
  * 
  */
 bool canClone(const QString& src, const QString& dst);
@@ -456,5 +459,24 @@ class clone : public QObject {
  * 
  */
 bool clone_file(const QString& src, const QString& dst, std::error_code& ec);
+
+
+static const QList<FilesystemType> s_non_link_filesystems = {
+    FilesystemType::FAT,
+};
+
+/**
+ * @brief if the Filesystem is symlink capable 
+ * 
+ */
+bool canLinkOnFS(const QString& path);
+bool canLinkOnFS(const FilesystemInfo& info);
+bool canLinkOnFS(FilesystemType type);
+
+/**
+ * @brief if the Filesystem is symlink capable on both ends
+ * 
+ */
+bool canLink(const QString& src, const QString& dst);
 
 }

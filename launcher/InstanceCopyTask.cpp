@@ -13,7 +13,7 @@ InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, const InstanceCopyP
     QString filters = prefs.getSelectedFiltersAsRegex();
 
     
-    m_useLinks = prefs.isLinkFilesEnabled();
+    m_useLinks = prefs.isUseSymLinksEnabled();
     m_linkRecursively = prefs.isLinkRecursivelyEnabled();
     m_useHardLinks = prefs.isLinkRecursivelyEnabled() && prefs.isUseHardLinksEnabled();
     m_copySaves = prefs.isLinkRecursivelyEnabled() && prefs.isDontLinkSavesEnabled() && prefs.isCopySavesEnabled();

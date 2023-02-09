@@ -1053,4 +1053,32 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
     return true;
 }
 
+
+/**
+ * @brief if the Filesystem is symlink capable 
+ * 
+ */
+bool canLinkOnFS(const QString& path)
+{
+    FilesystemInfo info = statFS(path);
+    return canLinkOnFS(info);
+}
+bool canLinkOnFS(const FilesystemInfo& info)
+{
+    return canLinkOnFS(info.fsType);
+}
+bool canLinkOnFS(FilesystemType type)
+{
+    return !s_non_link_filesystems.contains(type);
+}
+/**
+ * @brief if the Filesystem is symlink capable on both ends
+ * 
+ */
+bool canLink(const QString& src, const QString& dst)
+{
+    return  canLinkOnFS(src) && canLinkOnFS(dst);
+}
+
+
 }

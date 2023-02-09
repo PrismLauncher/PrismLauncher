@@ -93,9 +93,9 @@ bool InstanceCopyPrefs::isCopyScreenshotsEnabled() const
     return copyScreenshots;
 }
 
-bool InstanceCopyPrefs::isLinkFilesEnabled() const
+bool InstanceCopyPrefs::isUseSymLinksEnabled() const
 {
-    return linkFiles;
+    return useSymLinks;
 }
 
 bool InstanceCopyPrefs::isUseHardLinksEnabled() const
@@ -159,9 +159,9 @@ void InstanceCopyPrefs::enableCopyScreenshots(bool b)
     copyScreenshots = b;
 }
 
-void InstanceCopyPrefs::enableLinkFiles(bool b)
+void InstanceCopyPrefs::enableUseSymLinks(bool b)
 {
-    linkFiles = b;
+    useSymLinks = b;
 }
 
 void InstanceCopyPrefs::enableLinkRecursively(bool b)
