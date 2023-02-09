@@ -23,6 +23,7 @@ struct InstanceCopyPrefs {
     [[nodiscard]] bool isLinkRecursivelyEnabled() const;
     [[nodiscard]] bool isUseHardLinksEnabled() const;
     [[nodiscard]] bool isDontLinkSavesEnabled() const;
+    [[nodiscard]] bool isUseCloneEnabled() const;
     // Setters
     void enableCopySaves(bool b);
     void enableKeepPlaytime(bool b);
@@ -36,6 +37,7 @@ struct InstanceCopyPrefs {
     void enableLinkRecursively(bool b);
     void enableUseHardLinks(bool b);
     void enableDontLinkSaves(bool b);
+    void enableUseClone(bool b);
 
    protected: // data
     bool copySaves = true;
@@ -50,4 +52,5 @@ struct InstanceCopyPrefs {
     bool linkRecursively = false;
     bool useHardLinks = false;
     bool dontLinkSaves = false;
+    bool useClone = false;
 };

@@ -113,6 +113,11 @@ bool InstanceCopyPrefs::isDontLinkSavesEnabled() const
     return dontLinkSaves;
 }
 
+bool InstanceCopyPrefs::isUseCloneEnabled() const
+{
+    return useClone;
+}
+
 // ======= Setters =======
 void InstanceCopyPrefs::enableCopySaves(bool b)
 {
@@ -172,4 +177,9 @@ void InstanceCopyPrefs::enableUseHardLinks(bool b)
 void InstanceCopyPrefs::enableDontLinkSaves(bool b)
 {
     dontLinkSaves = b;
+}
+
+void InstanceCopyPrefs::enableUseClone(bool b)
+{
+    useClone = b;
 }

@@ -17,6 +17,7 @@ InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, const InstanceCopyP
     m_linkRecursively = prefs.isLinkRecursivelyEnabled();
     m_useHardLinks = prefs.isLinkRecursivelyEnabled() && prefs.isUseHardLinksEnabled();
     m_copySaves = prefs.isLinkRecursivelyEnabled() && prefs.isDontLinkSavesEnabled() && prefs.isCopySavesEnabled();
+    m_useClone = prefs.isUseCloneEnabled();
 
     if (!filters.isEmpty())
     {
@@ -40,7 +41,12 @@ void InstanceCopyTask::executeTask()
     };
 
     m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this, copySaves]{
-        if (m_useLinks) {
+        if (m_useClone) {
+            FS::clone folderClone(m_origInstance->instanceRoot(), m_stagingPath);
+            folderClone.matcher(m_matcher.get());
+
+            return folderClone();
+        } else if (m_useLinks) {
             FS::create_link folderLink(m_origInstance->instanceRoot(), m_stagingPath);
             folderLink.linkRecursively(m_linkRecursively).useHardLinks(m_useHardLinks).matcher(m_matcher.get());
 
@@ -83,7 +89,8 @@ void InstanceCopyTask::executeTask()
                 }      
 #else
                 qDebug() << "Link Failed!" << folderLink.getOSError().value() << folderLink.getOSError().message().c_str();
-#endif          return false;
+#endif          
+                return false;
             }
             
             if (m_copySaves) {

@@ -34,4 +34,5 @@ private:
     bool m_useHardLinks = false;
     bool m_copySaves = false;
     bool m_linkRecursively = false;
+    bool m_useClone = false;
 };

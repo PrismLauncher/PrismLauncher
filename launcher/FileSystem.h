@@ -329,6 +329,7 @@ enum class FilesystemType {
     HFS,
     HFSPLUS,
     HFSX,
+    FUSEBLK,
     UNKNOWN
 };
 
@@ -346,6 +347,7 @@ static const QMap<FilesystemType, QString> s_filesystem_type_names = {
     {FilesystemType::HFS,    QString("HFS")},
     {FilesystemType::HFSPLUS, QString("HFSPLUS")},
     {FilesystemType::HFSX,    QString("HFSX")},
+    {FilesystemType::FUSEBLK, QString("FUSEBLK")},
     {FilesystemType::UNKNOWN, QString("UNKNOWN")}
 };
 
@@ -365,6 +367,7 @@ static const QMap<QString, FilesystemType> s_filesystem_type_names_inverse = {
     {QString("HFSPLUS"), FilesystemType::HFSPLUS},
     {QString("HFSX"), FilesystemType::HFSX},
     {QString("HFS"), FilesystemType::HFS},
+    {QString("FUSEBLK"), FilesystemType::FUSEBLK},
     {QString("UNKNOWN"), FilesystemType::UNKNOWN}
 };
 

@@ -46,6 +46,7 @@
 #include "icons/IconList.h"
 #include "BaseInstance.h"
 #include "InstanceList.h"
+#include "FileSystem.h"
 
 CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     :QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
@@ -85,11 +86,22 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     ui->copyServersCheckbox->setChecked(m_selectedOptions.isCopyServersEnabled());
     ui->copyModsCheckbox->setChecked(m_selectedOptions.isCopyModsEnabled());
     ui->copyScreenshotsCheckbox->setChecked(m_selectedOptions.isCopyScreenshotsEnabled());
-    
+
     ui->linkFilesGroup->setChecked(m_selectedOptions.isLinkFilesEnabled());
     ui->recursiveLinkCheckbox->setChecked(m_selectedOptions.isLinkRecursivelyEnabled());
     ui->hardLinksCheckbox->setChecked(m_selectedOptions.isUseHardLinksEnabled());
     ui->dontLinkSavesCheckbox->setChecked(m_selectedOptions.isDontLinkSavesEnabled());
+
+    auto detectedOS = FS::statFS(m_original->instanceRoot()).fsType;
+    m_cloneSupported = FS::canCloneOnFS(detectedOS);
+
+    if (m_cloneSupported) {
+        ui->cloneSupportedLabel->setText(tr("Clone / Reflink is supported on (%1)").arg(FS::getFilesystemTypeName(detectedOS)));
+    } else {
+        ui->cloneSupportedLabel->setText(tr("Clone / Reflink not supported on (%1)").arg(FS::getFilesystemTypeName(detectedOS)));
+    }
+
+    updateUseCloneCheckbox();
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()
@@ -150,6 +162,12 @@ void CopyInstanceDialog::updateSelectAllCheckbox()
     ui->selectAllCheckbox->blockSignals(true);
     ui->selectAllCheckbox->setChecked(m_selectedOptions.allTrue());
     ui->selectAllCheckbox->blockSignals(false);
+}
+
+void CopyInstanceDialog::updateUseCloneCheckbox()
+{
+    ui->useCloneCheckbox->setEnabled(m_cloneSupported && !ui->linkFilesGroup->isChecked());
+    ui->useCloneCheckbox->setChecked(m_cloneSupported && m_selectedOptions.isUseCloneEnabled());
 }
 
 void CopyInstanceDialog::on_iconButton_clicked()
@@ -230,6 +248,7 @@ void CopyInstanceDialog::on_copyScreenshotsCheckbox_stateChanged(int state)
 void CopyInstanceDialog::on_linkFilesGroup_toggled(bool checked)
 {
     m_selectedOptions.enableLinkFiles(checked);
+    updateUseCloneCheckbox();
 }
 
 void CopyInstanceDialog::on_recursiveLinkCheckbox_stateChanged(int state)
@@ -253,4 +272,11 @@ void CopyInstanceDialog::on_hardLinksCheckbox_stateChanged(int state)
 void CopyInstanceDialog::on_dontLinkSavesCheckbox_stateChanged(int state)
 {
     m_selectedOptions.enableDontLinkSaves(state == Qt::Checked);
+}
+
+void CopyInstanceDialog::on_useCloneCheckbox_stateChanged(int state)
+{
+    m_selectedOptions.enableUseClone(m_cloneSupported && (state == Qt::Checked));
+    ui->linkFilesGroup->setEnabled(!m_selectedOptions.isUseCloneEnabled());
+    updateUseCloneCheckbox();
 }

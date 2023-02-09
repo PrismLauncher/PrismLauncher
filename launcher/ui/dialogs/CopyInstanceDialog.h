@@ -16,6 +16,7 @@
 #pragma once
 
 #include <QDialog>
+#include "BaseInstance.h"
 #include "BaseVersion.h"
 #include "InstanceCopyPrefs.h"
 
@@ -59,13 +60,17 @@ slots:
     void on_recursiveLinkCheckbox_stateChanged(int state);
     void on_hardLinksCheckbox_stateChanged(int state);
     void on_dontLinkSavesCheckbox_stateChanged(int state);
+    void on_useCloneCheckbox_stateChanged(int state);
 
 private:
     void checkAllCheckboxes(const bool& b);
     void updateSelectAllCheckbox();
+    void updateUseCloneCheckbox();
+
     /* data */
     Ui::CopyInstanceDialog *ui;
     QString InstIconKey;
     InstancePtr m_original;
     InstanceCopyPrefs m_selectedOptions;
+    bool m_cloneSupported = false;
 };

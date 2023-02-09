@@ -103,6 +103,7 @@ namespace fs = ghc::filesystem;
 #include <fcntl.h>      /* Definition of FICLONE* constants */
 #include <sys/ioctl.h>
 #include <errno.h>
+#include <unistd.h>
 #elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
 #include <sys/attr.h>
 #include <sys/clonefile.h>
@@ -880,6 +881,9 @@ FilesystemInfo statFS(QString path)
     info.name = storage_info.name();
     info.rootPath = storage_info.rootPath();
 
+    qDebug() << "Pulling filesystem info for" << info.rootPath;
+    qDebug() << "Filesystem: " << fsTypeName << "detected" << getFilesystemTypeName(info.fsType);
+
     return info;
 }
 
@@ -995,25 +999,36 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
     // https://man7.org/linux/man-pages/man2/ioctl_ficlone.2.html
 
     int src_fd = open(src_path.c_str(), O_RDONLY);
-    if(!src_fd) {
+    if(src_fd == -1) {
         qWarning() << "Failed to open file:" << src_path.c_str();
         qDebug() << "Error:" << strerror(errno);
         ec = std::make_error_code(static_cast<std::errc>(errno));
         return false;
     }
-    int dst_fd = open(dst_path.c_str(), O_WRONLY | O_TRUNC);
-    if(!dst_fd) {
+    int dst_fd = open(dst_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if(dst_fd == -1) {
         qWarning() << "Failed to open file:" << dst_path.c_str();
         qDebug() << "Error:" << strerror(errno);
         ec = std::make_error_code(static_cast<std::errc>(errno));
+        close(src_fd);
         return false;
     }
     // attempt to clone
-    if(!ioctl(dst_fd,  FICLONE, src_fd)){
+    if(ioctl(dst_fd,  FICLONE, src_fd) == -1){
         qWarning() << "Failed to clone file:" << src_path.c_str() << "to" << dst_path.c_str();
         qDebug() << "Error:" << strerror(errno);
         ec = std::make_error_code(static_cast<std::errc>(errno));
+        close(src_fd);
+        close(dst_fd);
         return false;
+    }
+    if(close(src_fd)) {
+        qWarning() << "Failed to close file:" << src_path.c_str();
+        qDebug() << "Error:" << strerror(errno);
+    }
+    if(close(dst_fd)) {
+        qWarning() << "Failed to close file:" << dst_path.c_str();
+        qDebug() << "Error:" << strerror(errno);
     }
 
 #elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
@@ -1021,7 +1036,8 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
     // clonefile(const char * src, const char * dst, int flags);
     // https://www.manpagez.com/man/2/clonefile/
 
-    if (!clonefile(src_path.c_str(), dst_path.c_str(), 0)) {
+    qDebug() << "attempting file clone via clonefile" << src << "to" << dst;
+    if (clonefile(src_path.c_str(), dst_path.c_str(), 0) == -1) {
         qWarning() << "Failed to clone file:" << src_path.c_str() << "to" << dst_path.c_str();
         qDebug() << "Error:" << strerror(errno);
         ec = std::make_error_code(static_cast<std::errc>(errno));
