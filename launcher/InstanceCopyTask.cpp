@@ -12,9 +12,11 @@ InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, const InstanceCopyP
 
     QString filters = prefs.getSelectedFiltersAsRegex();
 
+    
     m_useLinks = prefs.isLinkFilesEnabled();
-    m_useHardLinks = prefs.isUseHardLinksEnabled();
-    m_copySaves = prefs.isDontLinkSavesEnabled() && prefs.isCopySavesEnabled();
+    m_linkRecursively = prefs.isLinkRecursivelyEnabled();
+    m_useHardLinks = prefs.isLinkRecursivelyEnabled() && prefs.isUseHardLinksEnabled();
+    m_copySaves = prefs.isLinkRecursivelyEnabled() && prefs.isDontLinkSavesEnabled() && prefs.isCopySavesEnabled();
 
     if (!filters.isEmpty())
     {
@@ -32,7 +34,7 @@ void InstanceCopyTask::executeTask()
 
     auto copySaves = [&](){
         FS::copy savesCopy(FS::PathCombine(m_origInstance->instanceRoot(), "saves") , FS::PathCombine(m_stagingPath, "saves"));
-        savesCopy.followSymlinks(false);
+        savesCopy.followSymlinks(true);
 
         return savesCopy();
     };
@@ -40,7 +42,7 @@ void InstanceCopyTask::executeTask()
     m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this, copySaves]{
         if (m_useLinks) {
             FS::create_link folderLink(m_origInstance->instanceRoot(), m_stagingPath);
-            folderLink.linkRecursively(true).useHardLinks(m_useHardLinks).matcher(m_matcher.get());
+            folderLink.linkRecursively(m_linkRecursively).useHardLinks(m_useHardLinks).matcher(m_matcher.get());
 
             bool there_were_errors = false;
 

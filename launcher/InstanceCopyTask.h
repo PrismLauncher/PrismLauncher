@@ -32,5 +32,6 @@ private:
     bool m_keepPlaytime;
     bool m_useLinks = false;
     bool m_useHardLinks = false;
-    bool m_copySaves = true;
+    bool m_copySaves = false;
+    bool m_linkRecursively = false;
 };

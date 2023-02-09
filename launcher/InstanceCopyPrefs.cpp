@@ -103,6 +103,11 @@ bool InstanceCopyPrefs::isUseHardLinksEnabled() const
     return useHardLinks;
 }
 
+bool InstanceCopyPrefs::isLinkRecursivelyEnabled() const
+{
+    return linkRecursively;
+}
+
 bool InstanceCopyPrefs::isDontLinkSavesEnabled() const
 {
     return dontLinkSaves;
@@ -152,6 +157,11 @@ void InstanceCopyPrefs::enableCopyScreenshots(bool b)
 void InstanceCopyPrefs::enableLinkFiles(bool b)
 {
     linkFiles = b;
+}
+
+void InstanceCopyPrefs::enableLinkRecursively(bool b)
+{
+    linkRecursively = b;
 }
 
 void InstanceCopyPrefs::enableUseHardLinks(bool b)

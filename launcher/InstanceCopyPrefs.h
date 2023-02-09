@@ -20,6 +20,7 @@ struct InstanceCopyPrefs {
     [[nodiscard]] bool isCopyModsEnabled() const;
     [[nodiscard]] bool isCopyScreenshotsEnabled() const;
     [[nodiscard]] bool isLinkFilesEnabled() const;
+    [[nodiscard]] bool isLinkRecursivelyEnabled() const;
     [[nodiscard]] bool isUseHardLinksEnabled() const;
     [[nodiscard]] bool isDontLinkSavesEnabled() const;
     // Setters
@@ -32,6 +33,7 @@ struct InstanceCopyPrefs {
     void enableCopyMods(bool b);
     void enableCopyScreenshots(bool b);
     void enableLinkFiles(bool b);
+    void enableLinkRecursively(bool b);
     void enableUseHardLinks(bool b);
     void enableDontLinkSaves(bool b);
 
@@ -45,6 +47,7 @@ struct InstanceCopyPrefs {
     bool copyMods = true;
     bool copyScreenshots = true;
     bool linkFiles = false;
+    bool linkRecursively = false;
     bool useHardLinks = false;
     bool dontLinkSaves = false;
 };

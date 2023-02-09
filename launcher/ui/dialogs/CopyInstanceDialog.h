@@ -56,6 +56,7 @@ slots:
     void on_copyModsCheckbox_stateChanged(int state);
     void on_copyScreenshotsCheckbox_stateChanged(int state);
     void on_linkFilesGroup_toggled(bool checked);
+    void on_recursiveLinkCheckbox_stateChanged(int state);
     void on_hardLinksCheckbox_stateChanged(int state);
     void on_dontLinkSavesCheckbox_stateChanged(int state);
 

@@ -210,6 +210,16 @@
     </widget>
    </item>
    <item>
+    <widget class="QLabel" name="advancedOptionsLabel">
+     <property name="text">
+      <string>Advanced Copy Options</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QVBoxLayout" name="copyModeLayout">
      <item>
       <widget class="QGroupBox" name="linkFilesGroup">
@@ -230,7 +240,17 @@
        </property>
        <layout class="QVBoxLayout" name="linkOptionsLayout">
         <item>
+         <widget class="QCheckBox" name="recursiveLinkCheckbox">
+          <property name="text">
+           <string>Link files recursively</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QCheckBox" name="hardLinksCheckbox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="toolTip">
            <string>Use hard links instead of symbolic links</string>
           </property>
@@ -242,7 +262,7 @@
         <item>
          <widget class="QCheckBox" name="dontLinkSavesCheckbox">
           <property name="toolTip">
-           <string>If "copy saves" is selected world save data will be copied instead of linked and thus not shared between instances.</string>
+           <string>If &quot;copy saves&quot; is selected world save data will be copied instead of linked and thus not shared between instances.</string>
           </property>
           <property name="text">
            <string>Don't link saves</string>
@@ -283,8 +303,9 @@
   <tabstop>copyResPacksCheckbox</tabstop>
   <tabstop>copyModsCheckbox</tabstop>
   <tabstop>linkFilesGroup</tabstop>
+  <tabstop>recursiveLinkCheckbox</tabstop>
   <tabstop>hardLinksCheckbox</tabstop>
-  <tabstop>linkWorldsCheckbox</tabstop>
+  <tabstop>dontLinkSavesCheckbox</tabstop>
  </tabstops>
  <resources/>
  <connections>

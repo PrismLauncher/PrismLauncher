@@ -87,6 +87,7 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     ui->copyScreenshotsCheckbox->setChecked(m_selectedOptions.isCopyScreenshotsEnabled());
     
     ui->linkFilesGroup->setChecked(m_selectedOptions.isLinkFilesEnabled());
+    ui->recursiveLinkCheckbox->setChecked(m_selectedOptions.isLinkRecursivelyEnabled());
     ui->hardLinksCheckbox->setChecked(m_selectedOptions.isUseHardLinksEnabled());
     ui->dontLinkSavesCheckbox->setChecked(m_selectedOptions.isDontLinkSavesEnabled());
 }
@@ -231,9 +232,22 @@ void CopyInstanceDialog::on_linkFilesGroup_toggled(bool checked)
     m_selectedOptions.enableLinkFiles(checked);
 }
 
+void CopyInstanceDialog::on_recursiveLinkCheckbox_stateChanged(int state)
+{
+    m_selectedOptions.enableLinkRecursively(state == Qt::Checked);
+    if (state != Qt::Checked) {
+        ui->hardLinksCheckbox->setChecked(false);
+        ui->dontLinkSavesCheckbox->setChecked(false);
+    }
+
+}
+
 void CopyInstanceDialog::on_hardLinksCheckbox_stateChanged(int state)
 {
     m_selectedOptions.enableUseHardLinks(state == Qt::Checked);
+    if (state == Qt::Checked && !ui->recursiveLinkCheckbox->isChecked()) {
+        ui->recursiveLinkCheckbox->setChecked(true);
+    }
 }
 
 void CopyInstanceDialog::on_dontLinkSavesCheckbox_stateChanged(int state)
