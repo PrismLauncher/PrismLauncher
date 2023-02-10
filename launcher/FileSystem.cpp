@@ -38,6 +38,7 @@
 #include "FileSystem.h"
 #include <qdebug.h>
 #include <qfileinfo.h>
+#include <qnamespace.h>
 #include <qstorageinfo.h>
 
 #include "BuildConfig.h"
@@ -587,9 +588,13 @@ int PathDepth(const QString& path)
 
     QFileInfo info(path);
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    auto parts = QDir::toNativeSeparators(info.path()).split(QDir::separator(), QString::SkipEmptyParts);
+#else
     auto parts = QDir::toNativeSeparators(info.path()).split(QDir::separator(), Qt::SkipEmptyParts);
+#endif
 
-    int numParts = QDir::toNativeSeparators(info.path()).split(QDir::separator(), Qt::SkipEmptyParts).length();
+    int numParts = parts.length();
     numParts -= parts.count(".");
     numParts -= parts.count("..") * 2;
     
@@ -606,7 +611,12 @@ QString PathTruncate(const QString& path, int depth)
         return PathTruncate(trunc, depth);
     }
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    auto parts = QDir::toNativeSeparators(trunc).split(QDir::separator(), QString::SkipEmptyParts);
+#else
     auto parts = QDir::toNativeSeparators(trunc).split(QDir::separator(), Qt::SkipEmptyParts);
+#endif
+
     if (parts.startsWith(".") && !path.startsWith(".")) {
         parts.removeFirst();
     }
