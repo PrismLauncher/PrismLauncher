@@ -1191,6 +1191,7 @@ bool winbtrfs_clone(const std::wstring& src_path, const std::wstring& dst_path, 
 
 bool refs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec)
 {
+#if defined(FSCTL_DUPLICATE_EXTENTS_TO_FILE)
     //https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_duplicate_extents_to_file
     //https://github.com/microsoft/CopyOnWrite/blob/main/lib/Windows/WindowsCopyOnWriteFilesystem.cs#L94
     std::wstring existingFile = src_path.c_str();
@@ -1220,7 +1221,11 @@ bool refs_clone(const std::wstring& src_path, const std::wstring& dst_path, std:
     CloseHandle(hExistingFile);
 
     return (result != 0);
-
+#else
+    ec = std::make_error_code(std::errc::not_supported);
+    qWarning() << "not built with refs support";
+    return false;
+#endif
 }
 
 
@@ -1270,7 +1275,7 @@ bool macos_bsd_clonefile(const std::string& src_path, const std::string& dst_pat
     // clonefile(const char * src, const char * dst, int flags);
     // https://www.manpagez.com/man/2/clonefile/
 
-    qDebug() << "attempting file clone via clonefile" << src << "to" << dst;
+    qDebug() << "attempting file clone via clonefile" << src_path.c_str() << "to" << dst_path.c_str();
     if (clonefile(src_path.c_str(), dst_path.c_str(), 0) == -1) {
         qWarning() << "Failed to clone file:" << src_path.c_str() << "to" << dst_path.c_str();
         qDebug() << "Error:" << strerror(errno);
