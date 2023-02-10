@@ -4,13 +4,14 @@
 #include "NullInstance.h"
 #include "pathmatcher/RegexpMatcher.h"
 #include <QtConcurrentRun>
+#include <QDebug>
 
 InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, const InstanceCopyPrefs& prefs)
 {
     m_origInstance = origInstance;
     m_keepPlaytime = prefs.isKeepPlaytimeEnabled();
 
-    QString filters = prefs.getSelectedFiltersAsRegex();
+    
 
     
     m_useLinks = prefs.isUseSymLinksEnabled();
@@ -18,6 +19,14 @@ InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, const InstanceCopyP
     m_useHardLinks = prefs.isLinkRecursivelyEnabled() && prefs.isUseHardLinksEnabled();
     m_copySaves = prefs.isLinkRecursivelyEnabled() && prefs.isDontLinkSavesEnabled() && prefs.isCopySavesEnabled();
     m_useClone = prefs.isUseCloneEnabled();
+    
+    QString filters = prefs.getSelectedFiltersAsRegex();
+    if (m_useLinks || m_useHardLinks) {
+        if (!filters.isEmpty()) filters += "|";
+        filters += "instance.cfg";
+    } 
+
+    qDebug() << "CopyFilters:" << filters;
 
     if (!filters.isEmpty())
     {
@@ -46,9 +55,10 @@ void InstanceCopyTask::executeTask()
             folderClone.matcher(m_matcher.get());
 
             return folderClone();
-        } else if (m_useLinks) {
+        } else if (m_useLinks || m_useHardLinks) {
             FS::create_link folderLink(m_origInstance->instanceRoot(), m_stagingPath);
-            folderLink.linkRecursively(m_linkRecursively).useHardLinks(m_useHardLinks).matcher(m_matcher.get());
+            int depth = m_linkRecursively ? -1 : 0; // we need to at least link the top level instead of the instance folder
+            folderLink.linkRecursively(true).setMaxDepth(depth).useHardLinks(m_useHardLinks).matcher(m_matcher.get());
 
             bool there_were_errors = false;
 

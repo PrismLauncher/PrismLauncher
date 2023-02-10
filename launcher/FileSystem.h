@@ -200,6 +200,11 @@ class create_link : public QObject {
         m_recursive = recursive;
         return *this;
     }
+    create_link& setMaxDepth(int depth)
+    {
+        m_max_depth = depth;
+        return *this;
+    }
     create_link& debug(bool d)
     {
         m_debug = d;
@@ -239,6 +244,9 @@ class create_link : public QObject {
     bool m_whitelist = false;
     bool m_recursive = true;
 
+    /// @brief >= -1 = infinite, 0 = link files at src/* to dest/*, 1 = link files at src/*/* to dest/*/*, etc.
+    int m_max_depth = -1;
+
     QList<LinkPair> m_path_pairs;
     QList<LinkResult> m_path_results;
     QList<LinkPair> m_links_to_make;
@@ -272,7 +280,25 @@ QString PathCombine(const QString& path1, const QString& path2);
 QString PathCombine(const QString& path1, const QString& path2, const QString& path3);
 QString PathCombine(const QString& path1, const QString& path2, const QString& path3, const QString& path4);
 
-QString AbsolutePath(QString path);
+QString AbsolutePath(const QString& path);
+
+/**
+ * @brief depth of path. "foo.txt" -> 0 , "bar/foo.txt" -> 1, /baz/bar/foo.txt -> 2, etc.
+ * 
+ * @param path path to measure
+ * @return int number of componants before base path
+ */
+int PathDepth(const QString& path);
+
+
+/**
+ * @brief  cut off segments of path untill it is a max of length depth
+ * 
+ * @param path path to truncate
+ * @param depth max depth of new path
+ * @return QString truncated path
+ */
+QString PathTruncate(const QString& path, int depth);
 
 /**
  * Resolve an executable

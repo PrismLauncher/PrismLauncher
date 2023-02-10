@@ -171,17 +171,18 @@ void CopyInstanceDialog::updateSelectAllCheckbox()
 
 void CopyInstanceDialog::updateUseCloneCheckbox()
 {
-    ui->useCloneCheckbox->setEnabled(m_cloneSupported && !ui->linkFilesGroup->isChecked());
-    ui->useCloneCheckbox->setChecked(m_cloneSupported && m_selectedOptions.isUseCloneEnabled());
+    ui->useCloneCheckbox->setEnabled(m_cloneSupported && !ui->symbolicLinksCheckbox->isChecked() && !ui->hardLinksCheckbox->isChecked());
+    ui->useCloneCheckbox->setChecked(m_cloneSupported && m_selectedOptions.isUseCloneEnabled() && !ui->symbolicLinksCheckbox->isChecked() &&
+                                     !ui->hardLinksCheckbox->isChecked());
 }
 
 void CopyInstanceDialog::updateLinkOptions()
 {
-    ui->symbolicLinksCheckbox->setEnabled(m_linkSupported && !ui->hardLinksCheckbox->isChecked());
-    ui->hardLinksCheckbox->setEnabled(m_linkSupported && !ui->symbolicLinksCheckbox->isChecked());
+    ui->symbolicLinksCheckbox->setEnabled(m_linkSupported && !ui->hardLinksCheckbox->isChecked() && !ui->useCloneCheckbox->isChecked());
+    ui->hardLinksCheckbox->setEnabled(m_linkSupported && !ui->symbolicLinksCheckbox->isChecked() && !ui->useCloneCheckbox->isChecked());
 
-    ui->symbolicLinksCheckbox->setChecked(m_linkSupported && m_selectedOptions.isUseSymLinksEnabled());
-    ui->hardLinksCheckbox->setChecked(m_linkSupported && m_selectedOptions.isUseHardLinksEnabled());
+    ui->symbolicLinksCheckbox->setChecked(m_linkSupported && m_selectedOptions.isUseSymLinksEnabled() && !ui->useCloneCheckbox->isChecked());
+    ui->hardLinksCheckbox->setChecked(m_linkSupported && m_selectedOptions.isUseHardLinksEnabled() && !ui->useCloneCheckbox->isChecked());
 
     bool linksInUse = (ui->symbolicLinksCheckbox->isChecked() || ui->hardLinksCheckbox->isChecked());
     ui->recursiveLinkCheckbox->setEnabled(m_linkSupported && linksInUse && !ui->hardLinksCheckbox->isChecked());
@@ -278,16 +279,14 @@ void CopyInstanceDialog::on_hardLinksCheckbox_stateChanged(int state)
     if (state == Qt::Checked && !ui->recursiveLinkCheckbox->isChecked()) {
         ui->recursiveLinkCheckbox->setChecked(true);
     }
+    updateUseCloneCheckbox();
     updateLinkOptions();
 }
 
 void CopyInstanceDialog::on_recursiveLinkCheckbox_stateChanged(int state)
 {
     m_selectedOptions.enableLinkRecursively(state == Qt::Checked);
-    if (state != Qt::Checked) {
-        ui->hardLinksCheckbox->setChecked(false);
-        ui->dontLinkSavesCheckbox->setChecked(false);
-    }
+    updateLinkOptions();
 
 }
 
@@ -299,6 +298,6 @@ void CopyInstanceDialog::on_dontLinkSavesCheckbox_stateChanged(int state)
 void CopyInstanceDialog::on_useCloneCheckbox_stateChanged(int state)
 {
     m_selectedOptions.enableUseClone(m_cloneSupported && (state == Qt::Checked));
-    ui->linkFilesGroup->setEnabled(!m_selectedOptions.isUseCloneEnabled());
     updateUseCloneCheckbox();
+    updateLinkOptions();
 }

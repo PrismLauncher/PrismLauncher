@@ -242,6 +242,14 @@ bool copy::operator()(const QString& offset, bool dryRun)
     return err.value() == 0;
 }
 
+/// qDebug print support for the LinkPair struct
+QDebug operator<<(QDebug debug, const LinkPair& lp)
+{
+    QDebugStateSaver saver(debug);
+
+    debug.nospace() << "LinkPair{ src: " << lp.src << " , dst: " << lp.dst << " }";
+    return debug;
+}
 
 bool create_link::operator()(const QString& offset, bool dryRun) 
 {
@@ -265,7 +273,7 @@ bool create_link::operator()(const QString& offset, bool dryRun)
  * @param offset subdirectory form src to link to dest
  * @return if there was an error during the attempt to link
  */
-void create_link::make_link_list( const QString& offset)
+void create_link::make_link_list(const QString& offset)
 {
     for (auto pair : m_path_pairs) {
         const QString& srcPath = pair.src;
@@ -297,13 +305,25 @@ void create_link::make_link_list( const QString& offset)
             link_file(src, "");
         } else {
             if (m_debug)
-                qDebug() << "linking recursivly:" << src << "to" << dst;
+                qDebug() << "linking recursivly:" << src << "to" << dst << "max_depth:" << m_max_depth;
             QDir src_dir(src);
             QDirIterator source_it(src, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::Subdirectories);
+
+            QStringList linkedPaths;
 
             while (source_it.hasNext()) {
                 auto src_path = source_it.next();
                 auto relative_path = src_dir.relativeFilePath(src_path);
+
+                if (m_max_depth >= 0 && PathDepth(relative_path) > m_max_depth){
+                    relative_path = PathTruncate(relative_path, m_max_depth);
+                    src_path = src_dir.filePath(relative_path);
+                    if (linkedPaths.contains(src_path)) {
+                        continue;
+                    }
+                }
+
+                linkedPaths.append(src_path);
 
                 link_file(src_path, relative_path);
             }
@@ -312,7 +332,7 @@ void create_link::make_link_list( const QString& offset)
 }
 
 bool create_link::make_links()
-{
+{   
     for (auto link : m_links_to_make) {
 
         QString src_path = link.src;
@@ -556,9 +576,47 @@ QString PathCombine(const QString& path1, const QString& path2, const QString& p
     return PathCombine(PathCombine(path1, path2, path3), path4);
 }
 
-QString AbsolutePath(QString path)
+QString AbsolutePath(const QString& path)
 {
     return QFileInfo(path).absolutePath();
+}
+
+int PathDepth(const QString& path)
+{
+    if (path.isEmpty()) return 0;
+
+    QFileInfo info(path);
+
+    auto parts = QDir::toNativeSeparators(info.path()).split(QDir::separator(), Qt::SkipEmptyParts);
+
+    int numParts = QDir::toNativeSeparators(info.path()).split(QDir::separator(), Qt::SkipEmptyParts).length();
+    numParts -= parts.count(".");
+    numParts -= parts.count("..") * 2;
+    
+    return numParts;
+}
+
+QString PathTruncate(const QString& path, int depth)
+{
+    if (path.isEmpty() || (depth < 0) ) return "";
+
+    QString trunc = QFileInfo(path).path();
+
+    if (PathDepth(trunc) > depth ) {
+        return PathTruncate(trunc, depth);
+    }
+
+    auto parts = QDir::toNativeSeparators(trunc).split(QDir::separator(), Qt::SkipEmptyParts);
+    if (parts.startsWith(".") && !path.startsWith(".")) {
+        parts.removeFirst();
+    }
+    if (path.startsWith(QDir::separator())) {
+        parts.prepend("");
+    }
+
+    trunc = parts.join(QDir::separator());
+
+    return trunc;
 }
 
 QString ResolveExecutable(QString path)

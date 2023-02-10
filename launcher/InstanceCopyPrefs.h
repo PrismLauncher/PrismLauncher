@@ -10,6 +10,7 @@ struct InstanceCopyPrefs {
    public:
     [[nodiscard]] bool allTrue() const;
     [[nodiscard]] QString getSelectedFiltersAsRegex() const;
+    [[nodiscard]] QString getSelectedFiltersAsRegex(const QStringList& additionalFilters) const;
     // Getters
     [[nodiscard]] bool isCopySavesEnabled() const;
     [[nodiscard]] bool isKeepPlaytimeEnabled() const;

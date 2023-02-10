@@ -102,8 +102,13 @@ bool MMCZip::compressDirFiles(QuaZip *zip, QString dir, QFileInfoList files, boo
     for (auto e : files) {
         auto filePath = directory.relativeFilePath(e.absoluteFilePath());
         auto srcPath = e.absoluteFilePath();
-        if (followSymlinks)
-            srcPath = e.canonicalFilePath();
+        if (followSymlinks) {
+            if (e.isSymLink()) {
+                srcPath = e.symLinkTarget();
+            } else {
+                srcPath = e.canonicalFilePath();
+            }
+        }
         if( !JlCompress::compressFile(zip, srcPath, filePath)) return false;
     }
 
@@ -119,7 +124,7 @@ bool MMCZip::compressDirFiles(QString fileCompressed, QString dir, QFileInfoList
         return false;
     }
 
-    auto result = compressDirFiles(&zip, dir, files);
+    auto result = compressDirFiles(&zip, dir, files, followSymlinks);
 
     zip.close();
     if(zip.getZipError()!=0) {

@@ -57,6 +57,11 @@ class LinkTask : public Task {
         m_lnk->whitelist(b);
     }
 
+    void setMaxDepth(int depth)
+    {
+        m_lnk->setMaxDepth(depth);
+    }
+
    private:
     void executeTask() override
     {
@@ -629,6 +634,149 @@ slots:
 
             QVERIFY(target_dir.entryList(filter).contains("pack.mcmeta"));
         }
+    }
+
+    void test_link_with_max_depth()
+    {
+        QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
+        auto f = [&folder, this]()
+        {
+            QTemporaryDir tempDir;
+            tempDir.setAutoRemove(true);
+            qDebug() << "From:" << folder << "To:" << tempDir.path();
+
+            QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
+            qDebug() << tempDir.path();
+            qDebug() << target_dir.path();
+
+            LinkTask lnk_tsk(folder, target_dir.path());
+            lnk_tsk.linkRecursively(true);
+            lnk_tsk.setMaxDepth(0);
+            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
+                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
+            });
+            lnk_tsk.start();
+
+            QVERIFY2(QTest::qWaitFor([&]() {
+                return lnk_tsk.isFinished();
+            }, 100000), "Task didn't finish as it should.");
+
+            QVERIFY(!QFileInfo(target_dir.path()).isSymLink());
+
+            auto filter = QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden;
+            for(auto entry: target_dir.entryList(filter))
+            {
+                qDebug() << entry;
+                if (entry == "." || entry == "..") continue;
+                QFileInfo entry_lnk_info(target_dir.filePath(entry));
+                QVERIFY(entry_lnk_info.isSymLink());
+            }
+
+            QFileInfo lnk_info(target_dir.path());
+            QVERIFY(lnk_info.exists());
+            QVERIFY(!lnk_info.isSymLink());
+
+            QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
+            QVERIFY(target_dir.entryList().contains("assets"));
+
+
+        };
+
+        // first try variant without trailing /
+        QVERIFY(!folder.endsWith('/'));
+        f();
+
+        // then variant with trailing /
+        folder.append('/');
+        QVERIFY(folder.endsWith('/'));
+        f();
+    }
+
+    void test_link_with_no_max_depth()
+    {
+        QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
+        auto f = [&folder]()
+        {
+            QTemporaryDir tempDir;
+            tempDir.setAutoRemove(true);
+            qDebug() << "From:" << folder << "To:" << tempDir.path();
+
+            QDir target_dir(FS::PathCombine(tempDir.path(), "test_folder"));
+            qDebug() << tempDir.path();
+            qDebug() << target_dir.path();
+
+            LinkTask lnk_tsk(folder, target_dir.path());
+            lnk_tsk.linkRecursively(true);
+            lnk_tsk.setMaxDepth(-1);
+            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
+                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
+            });
+            lnk_tsk.start();
+
+            QVERIFY2(QTest::qWaitFor([&]() {
+                return lnk_tsk.isFinished();
+            }, 100000), "Task didn't finish as it should.");
+
+
+            std::function<void(QString)> verify_check = [&](QString check_path) {
+                QDir check_dir(check_path);
+                auto filter = QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden;
+                for(auto entry: check_dir.entryList(filter))
+                {
+                    QFileInfo entry_lnk_info(check_dir.filePath(entry));
+                    qDebug() << entry << check_dir.filePath(entry);
+                    if (!entry_lnk_info.isDir()){
+                        QVERIFY(entry_lnk_info.isSymLink());
+                    } else if (entry != "." && entry != "..") {
+                        qDebug() << "Decending tree to verify symlinks:" << check_dir.filePath(entry);
+                        verify_check(entry_lnk_info.filePath());
+                    }
+                }
+            };
+            
+            verify_check(target_dir.path());
+            
+
+            QFileInfo lnk_info(target_dir.path());
+            QVERIFY(lnk_info.exists());
+
+            QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
+            QVERIFY(target_dir.entryList().contains("assets"));
+        };
+
+        // first try variant without trailing /
+        QVERIFY(!folder.endsWith('/'));
+        f();
+
+        // then variant with trailing /
+        folder.append('/');
+        QVERIFY(folder.endsWith('/'));
+        f();
+    }
+
+    void test_path_depth() {
+        QCOMPARE_EQ(FS::PathDepth(""), 0);
+        QCOMPARE_EQ(FS::PathDepth("."), 0);
+        QCOMPARE_EQ(FS::PathDepth("foo.txt"), 0);
+        QCOMPARE_EQ(FS::PathDepth("./foo.txt"), 0);
+        QCOMPARE_EQ(FS::PathDepth("./bar/foo.txt"), 1);
+        QCOMPARE_EQ(FS::PathDepth("../bar/foo.txt"), 0);
+        QCOMPARE_EQ(FS::PathDepth("/bar/foo.txt"), 1);
+        QCOMPARE_EQ(FS::PathDepth("baz/bar/foo.txt"), 2);
+        QCOMPARE_EQ(FS::PathDepth("/baz/bar/foo.txt"), 2);
+        QCOMPARE_EQ(FS::PathDepth("./baz/bar/foo.txt"), 2);
+        QCOMPARE_EQ(FS::PathDepth("/baz/../bar/foo.txt"), 1);
+    }
+
+    void test_path_trunc() {
+        QCOMPARE_EQ(FS::PathTruncate("", 0), "");
+        QCOMPARE_EQ(FS::PathTruncate("foo.txt", 0), "");
+        QCOMPARE_EQ(FS::PathTruncate("foo.txt", 1), "");
+        QCOMPARE_EQ(FS::PathTruncate("./bar/foo.txt", 0), "./bar");
+        QCOMPARE_EQ(FS::PathTruncate("./bar/foo.txt", 1), "./bar");
+        QCOMPARE_EQ(FS::PathTruncate("/bar/foo.txt", 1), "/bar");
+        QCOMPARE_EQ(FS::PathTruncate("bar/foo.txt", 1), "bar");
+        QCOMPARE_EQ(FS::PathTruncate("baz/bar/foo.txt", 2), "baz/bar");
     }
 };
 
