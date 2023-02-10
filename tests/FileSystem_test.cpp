@@ -755,28 +755,28 @@ slots:
     }
 
     void test_path_depth() {
-        QCOMPARE_EQ(FS::PathDepth(""), 0);
-        QCOMPARE_EQ(FS::PathDepth("."), 0);
-        QCOMPARE_EQ(FS::PathDepth("foo.txt"), 0);
-        QCOMPARE_EQ(FS::PathDepth("./foo.txt"), 0);
-        QCOMPARE_EQ(FS::PathDepth("./bar/foo.txt"), 1);
-        QCOMPARE_EQ(FS::PathDepth("../bar/foo.txt"), 0);
-        QCOMPARE_EQ(FS::PathDepth("/bar/foo.txt"), 1);
-        QCOMPARE_EQ(FS::PathDepth("baz/bar/foo.txt"), 2);
-        QCOMPARE_EQ(FS::PathDepth("/baz/bar/foo.txt"), 2);
-        QCOMPARE_EQ(FS::PathDepth("./baz/bar/foo.txt"), 2);
-        QCOMPARE_EQ(FS::PathDepth("/baz/../bar/foo.txt"), 1);
+        QCOMPARE(FS::PathDepth(""), 0);
+        QCOMPARE(FS::PathDepth("."), 0);
+        QCOMPARE(FS::PathDepth("foo.txt"), 0);
+        QCOMPARE(FS::PathDepth("./foo.txt"), 0);
+        QCOMPARE(FS::PathDepth("./bar/foo.txt"), 1);
+        QCOMPARE(FS::PathDepth("../bar/foo.txt"), 0);
+        QCOMPARE(FS::PathDepth("/bar/foo.txt"), 1);
+        QCOMPARE(FS::PathDepth("baz/bar/foo.txt"), 2);
+        QCOMPARE(FS::PathDepth("/baz/bar/foo.txt"), 2);
+        QCOMPARE(FS::PathDepth("./baz/bar/foo.txt"), 2);
+        QCOMPARE(FS::PathDepth("/baz/../bar/foo.txt"), 1);
     }
 
     void test_path_trunc() {
-        QCOMPARE_EQ(FS::PathTruncate("", 0), "");
-        QCOMPARE_EQ(FS::PathTruncate("foo.txt", 0), "");
-        QCOMPARE_EQ(FS::PathTruncate("foo.txt", 1), "");
-        QCOMPARE_EQ(FS::PathTruncate("./bar/foo.txt", 0), "./bar");
-        QCOMPARE_EQ(FS::PathTruncate("./bar/foo.txt", 1), "./bar");
-        QCOMPARE_EQ(FS::PathTruncate("/bar/foo.txt", 1), "/bar");
-        QCOMPARE_EQ(FS::PathTruncate("bar/foo.txt", 1), "bar");
-        QCOMPARE_EQ(FS::PathTruncate("baz/bar/foo.txt", 2), "baz/bar");
+        QCOMPARE(FS::PathTruncate("", 0), "");
+        QCOMPARE(FS::PathTruncate("foo.txt", 0), "");
+        QCOMPARE(FS::PathTruncate("foo.txt", 1), "");
+        QCOMPARE(FS::PathTruncate("./bar/foo.txt", 0), "./bar");
+        QCOMPARE(FS::PathTruncate("./bar/foo.txt", 1), "./bar");
+        QCOMPARE(FS::PathTruncate("/bar/foo.txt", 1), "/bar");
+        QCOMPARE(FS::PathTruncate("bar/foo.txt", 1), "bar");
+        QCOMPARE(FS::PathTruncate("baz/bar/foo.txt", 2), "baz/bar");
     }
 };
 
