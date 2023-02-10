@@ -433,7 +433,7 @@ void create_link::runPrivlaged(const QString& offset)
             in >> numResults;
             qDebug() << "numResults" << numResults;
 
-            for(int i = 0; i < numResults; i++) {
+            for(quint32 i = 0; i < numResults; i++) {
                 FS::LinkResult result;
                 in >> result.src;
                 in >> result.dst;
@@ -484,7 +484,6 @@ void ExternalLinkFileProcess::runLinkFile() {
 
 #if defined Q_OS_WIN32
     SHELLEXECUTEINFO ShExecInfo;
-    HRESULT hr;
 
     fileLinkExe = fileLinkExe + ".exe";
 
@@ -620,7 +619,7 @@ QString PathTruncate(const QString& path, int depth)
     if (parts.startsWith(".") && !path.startsWith(".")) {
         parts.removeFirst();
     }
-    if (path.startsWith(QDir::separator())) {
+    if (QDir::toNativeSeparators(path).startsWith(QDir::separator())) {
         parts.prepend("");
     }
 

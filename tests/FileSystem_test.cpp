@@ -1,4 +1,5 @@
 #include <QTest>
+#include <QDir>
 #include <QTemporaryDir>
 #include <QStandardPaths>
 
@@ -769,14 +770,17 @@ slots:
     }
 
     void test_path_trunc() {
-        QCOMPARE(FS::PathTruncate("", 0), "");
-        QCOMPARE(FS::PathTruncate("foo.txt", 0), "");
-        QCOMPARE(FS::PathTruncate("foo.txt", 1), "");
-        QCOMPARE(FS::PathTruncate("./bar/foo.txt", 0), "./bar");
-        QCOMPARE(FS::PathTruncate("./bar/foo.txt", 1), "./bar");
-        QCOMPARE(FS::PathTruncate("/bar/foo.txt", 1), "/bar");
-        QCOMPARE(FS::PathTruncate("bar/foo.txt", 1), "bar");
-        QCOMPARE(FS::PathTruncate("baz/bar/foo.txt", 2), "baz/bar");
+        QCOMPARE(FS::PathTruncate("", 0), QDir::toNativeSeparators(""));
+        QCOMPARE(FS::PathTruncate("foo.txt", 0), QDir::toNativeSeparators(""));
+        QCOMPARE(FS::PathTruncate("foo.txt", 1), QDir::toNativeSeparators(""));
+        QCOMPARE(FS::PathTruncate("./bar/foo.txt", 0), QDir::toNativeSeparators("./bar"));
+        QCOMPARE(FS::PathTruncate("./bar/foo.txt", 1), QDir::toNativeSeparators("./bar"));
+        QCOMPARE(FS::PathTruncate("/bar/foo.txt", 1), QDir::toNativeSeparators("/bar"));
+        QCOMPARE(FS::PathTruncate("bar/foo.txt", 1), QDir::toNativeSeparators("bar"));
+        QCOMPARE(FS::PathTruncate("baz/bar/foo.txt", 2), QDir::toNativeSeparators("baz/bar"));
+#if defined(Q_OS_WIN)
+        QCOMPARE(FS::PathTruncate("C:\\bar\\foo.txt", 1), QDir::toNativeSeparators("C:\\bar"));
+#endif
     }
 };
 
