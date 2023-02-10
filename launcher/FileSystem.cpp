@@ -108,6 +108,13 @@ namespace fs = ghc::filesystem;
 #elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
 #include <sys/attr.h>
 #include <sys/clonefile.h>
+#elif defined(Q_OS_WIN)
+// winbtrfs clone vs rundll32 shellbtrfs.dll,ReflinkCopy
+#include <windows.h>
+#include <stdio.h>
+#include <tchar.h>
+// refs
+#include <winioctl.h>
 #endif
 
 namespace FS {
@@ -916,25 +923,44 @@ bool overrideFolder(QString overwritten_path, QString override_path)
     return err.value() == 0;
 }
 
+/**
+ * @brief path to the near ancestor that exsists
+ * 
+ */
+QString NearestExistentAncestor(const QString& path)
+{
+    if(QFileInfo::exists(path)) return path;
+
+    QDir dir(path);
+    if(!dir.makeAbsolute()) return {};
+    do
+    {
+        dir.setPath(QDir::cleanPath(dir.filePath(QStringLiteral(".."))));
+    }
+    while(!dir.exists() && !dir.isRoot());
+
+    return dir.exists() ? dir.path() : QString();
+}
 
 /**
  * @brief colect information about the filesystem under a file
  * 
  */
-FilesystemInfo statFS(QString path)
+FilesystemInfo statFS(const QString& path)
 {
 
     FilesystemInfo info;
 
-    QStorageInfo storage_info(path);
+    QStorageInfo storage_info(NearestExistentAncestor(path));
 
     QString fsTypeName = QString::fromStdString(storage_info.fileSystemType().toStdString());
+    qDebug() << "Qt reports Filesystem at" << path << "root:" << storage_info.rootPath() << "as" << fsTypeName;
 
     for (auto fs_type_pair : s_filesystem_type_names_inverse.toStdMap()) {
         auto fs_type_name = fs_type_pair.first;
         auto fs_type = fs_type_pair.second;
 
-        if(fsTypeName.contains(fs_type_name.toLower())) {
+        if(fsTypeName.toLower().contains(fs_type_name.toLower())) {
             info.fsType = fs_type;
             break;
         }
@@ -947,9 +973,6 @@ FilesystemInfo statFS(QString path)
 
     info.name = storage_info.name();
     info.rootPath = storage_info.rootPath();
-
-    qDebug() << "Pulling filesystem info for" << info.rootPath;
-    qDebug() << "Filesystem: " << fsTypeName << "detected" << getFilesystemTypeName(info.fsType);
 
     return info;
 }
@@ -1054,15 +1077,156 @@ bool clone::operator()(const QString& offset, bool dryRun)
  */
 bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
 {   
-    auto src_path = StringUtils::toStdString(QFileInfo(src).absoluteFilePath());
-    auto dst_path = StringUtils::toStdString(QFileInfo(dst).absoluteFilePath());
+    auto src_path = StringUtils::toStdString(QDir::toNativeSeparators(QFileInfo(src).absoluteFilePath()));
+    auto dst_path = StringUtils::toStdString(QDir::toNativeSeparators(QFileInfo(dst).absoluteFilePath()));
 
 #if defined(Q_OS_WIN)
-    qWarning("clone/reflink not supported on windows!");
-    ec = std::make_error_code(std::errc::not_supported);
-    return false;
+    FilesystemInfo srcinfo = statFS(src);
+    if (srcinfo.fsType == FilesystemType::BTRFS) {
+        FilesystemInfo dstinfo = statFS(dst);
+        if (dstinfo.fsType != FilesystemType::BTRFS || (srcinfo.rootPath != dstinfo.rootPath)){
+            qWarning() << "winbtrfs clone must be to the same device! src and dst root paths do not match.";
+            qWarning() << "check out https://github.com/maharmstone/btrfs for btrfs support!";
+            ec = std::make_error_code(std::errc::not_supported);
+            return false;
+        }
+
+        qWarning() << "clone/reflink of btrfs on windows! assuming winbtrfs is in use and calling shellbtrfs.dll via rundll32.exe";
+
+        if (!winbtrfs_clone(src_path, dst_path, ec))
+            return false;
+
+        // There is no return value from rundll32.exe so we must check if the file exsists ourselves
+
+        QFileInfo dstInfo(dst);
+        if (!dstInfo.exists() || !dstInfo.isFile() || dstInfo.isSymLink()) {
+            // shellbtrfs.dll,ReflinkCopyW is curently broken https://github.com/maharmstone/btrfs/issues/556
+            // lets try a little workaround
+            // find the misnamed file
+            qDebug() << dst << "is missing. ReflinkCopyW may still be broken, trying workaround.";
+            QString badDst = QDir(dstInfo.absolutePath()).path() + dstInfo.fileName();
+            qDebug() << "trying" << badDst;
+            QFileInfo badDstInfo(badDst);
+            if (badDstInfo.exists() && badDstInfo.isFile()) {
+                qDebug() << badDst << "exists! moving it to the correct location.";
+                if(!move(badDstInfo.absoluteFilePath(), dstInfo.absoluteFilePath())) {
+                    qDebug() << "move from" << badDst << "to" << dst << "failed";
+                    ec = std::make_error_code(std::errc::no_such_file_or_directory);
+                    return false;
+                }
+            } else {
+                // oof, clone failure?
+                qWarning() << "clone/reflink on winbtrfs did not succeed: file" << dst << "does not appear to exsist";
+                ec = std::make_error_code(std::errc::no_such_file_or_directory);
+                return false;
+            }  
+        }
+
+    } else if (srcinfo.fsType == FilesystemType::REFS) {
+        qWarning() << "clone/reflink not yet supported on windows ReFS!";
+        ec = std::make_error_code(std::errc::not_supported);
+        return false;
+    } else {
+        qWarning() << "clone/reflink not supported on windows outside of winbtrfs or ReFS!";
+        qWarning() << "check out https://github.com/maharmstone/btrfs for btrfs support!";
+        ec = std::make_error_code(std::errc::not_supported);
+        return false;
+    }
 #elif defined(Q_OS_LINUX)
 
+    if(!linux_ficlone(src_path, dst_path, ec))
+        return false;
+
+#elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+   
+    if(!macos_bsd_clonefile(src_path, dst_path, ec))
+        return false;
+
+#else
+    qWarning() << "clone/reflink not supported! unknown OS";
+    ec = std::make_error_code(std::errc::not_supported);
+    return false;
+#endif
+
+    return true;
+}
+
+#if defined(Q_OS_WIN)
+typedef void (__stdcall *f_ReflinkCopyW)(HWND hwnd, HINSTANCE hinst, LPWSTR lpszCmdLine, int nCmdShow);
+
+bool winbtrfs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec)
+{
+    // https://github.com/maharmstone/btrfs
+    QString cmdLine = QString("\"%1\" \"%2\"").arg(src_path, dst_path);
+
+    std::wstring wstr = cmdLine.toStdWString(); // temp buffer to copy the data and avoid side effect of non const cast
+
+    LPWSTR cmdLineWin = (wchar_t*)wstr.c_str();
+
+    // https://github.com/maharmstone/btrfs/blob/9da54911dd6f3713a1c4c7be40338a3da126f4e6/src/shellext/contextmenu.cpp#L1609
+    HINSTANCE shellbtrfsDLL = LoadLibrary(L"shellbtrfs.dll");
+
+    if (shellbtrfsDLL == NULL) {
+        ec = std::make_error_code(std::errc::not_supported);
+        qWarning() << "cannot locate the shellbtrfs.dll file, reflink copy not supported";
+        return false;
+    }
+
+    f_ReflinkCopyW ReflinkCopyW = (f_ReflinkCopyW)GetProcAddress(shellbtrfsDLL, "ReflinkCopyW");
+
+    if (!ReflinkCopyW) {
+        ec = std::make_error_code(std::errc::not_supported);
+        qWarning() << "cannot locate the ReflinkCopyW function from shellbtrfs.dll, reflink copy not supported";
+        return false;
+    }
+
+    qDebug() << "Calling ReflinkCopyW from shellbtrfs.dll with:" << cmdLine;
+
+    ReflinkCopyW(0, 0, cmdLineWin, 1);
+
+    FreeLibrary(shellbtrfsDLL);
+
+    return true;
+}
+
+bool refs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec)
+{
+    //https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_duplicate_extents_to_file
+    //https://github.com/microsoft/CopyOnWrite/blob/main/lib/Windows/WindowsCopyOnWriteFilesystem.cs#L94
+    std::wstring existingFile = src_path.c_str();
+    std::wstring newLink = dst_path.c_str();
+
+    
+    HANDLE hExistingFile = CreateFile(src_path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+    if (hExistingFile == INVALID_HANDLE_VALUE)
+    {
+        return false;
+    }
+
+    HANDLE hNewFile = CreateFile(dst_path.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, 0, NULL);
+    if (hNewFile == INVALID_HANDLE_VALUE)
+    {
+        CloseHandle(hExistingFile);
+        return false;
+    }
+
+    DWORD bytesReturned;
+
+    // FIXME: ReFS requires that cloned regions reside on a disk cluster boundary.
+    // FIXME: ERROR_BLOCK_TOO_MANY_REFERENCES can occure https://docs.microsoft.com/en-us/windows-server/storage/refs/block-cloning#functionality-restrictions-and-remarks
+    BOOL result = DeviceIoControl(hExistingFile, FSCTL_DUPLICATE_EXTENTS_TO_FILE, hNewFile, sizeof(hNewFile), NULL, 0, &bytesReturned, NULL);
+
+    CloseHandle(hNewFile);
+    CloseHandle(hExistingFile);
+
+    return (result != 0);
+
+}
+
+
+#elif defined(Q_OS_LINUX)
+bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std::error_code& ec)
+{
     // https://man7.org/linux/man-pages/man2/ioctl_ficlone.2.html
 
     int src_fd = open(src_path.c_str(), O_RDONLY);
@@ -1097,9 +1261,12 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
         qWarning() << "Failed to close file:" << dst_path.c_str();
         qDebug() << "Error:" << strerror(errno);
     }
+    return true;
+}
 
 #elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-    // TODO: use clonefile
+bool macos_bsd_clonefile(const std::string& src_path, const std::string& dst_path, std::error_code& ec)
+{
     // clonefile(const char * src, const char * dst, int flags);
     // https://www.manpagez.com/man/2/clonefile/
 
@@ -1110,16 +1277,9 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
         ec = std::make_error_code(static_cast<std::errc>(errno));
         return false;
     }
-
-#else
-    qWarning("clone/reflink not supported! unknown OS");
-    ec = std::make_error_code(std::errc::not_supported);
-    return false;
-#endif
-
     return true;
 }
-
+#endif
 
 /**
  * @brief if the Filesystem is symlink capable 

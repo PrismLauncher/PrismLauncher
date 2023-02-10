@@ -344,6 +344,7 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
 enum class FilesystemType {
     FAT,
     NTFS,
+    REFS,
     EXT,
     EXT_2_OLD,
     EXT_2_3_4,
@@ -363,6 +364,7 @@ enum class FilesystemType {
 static const QMap<FilesystemType, QString> s_filesystem_type_names = {
     {FilesystemType::FAT,    QString("FAT")},
     {FilesystemType::NTFS,   QString("NTFS")},
+    {FilesystemType::REFS,   QString("REFS")},
     {FilesystemType::EXT,    QString("EXT")},
     {FilesystemType::EXT_2_OLD,    QString("EXT2_OLD")},
     {FilesystemType::EXT_2_3_4,    QString("EXT2/3/4")},
@@ -382,6 +384,7 @@ static const QMap<FilesystemType, QString> s_filesystem_type_names = {
 static const QMap<QString, FilesystemType> s_filesystem_type_names_inverse = {
     {QString("FAT"), FilesystemType::FAT},
     {QString("NTFS"), FilesystemType::NTFS},
+    {QString("REFS"), FilesystemType::REFS},
     {QString("EXT2_OLD"), FilesystemType::EXT_2_OLD},
     {QString("EXT2"), FilesystemType::EXT_2_3_4},
     {QString("EXT3"), FilesystemType::EXT_2_3_4},
@@ -415,14 +418,20 @@ struct FilesystemInfo {
 };
 
 /**
+ * @brief path to the near ancestor that exsists
+ * 
+ */
+QString NearestExistentAncestor(const QString& path);
+
+/**
  * @brief colect information about the filesystem under a file
  * 
  */
-FilesystemInfo statFS(QString path);
+FilesystemInfo statFS(const QString& path);
 
 
 static const QList<FilesystemType> s_clone_filesystems = {
-    FilesystemType::BTRFS, FilesystemType::APFS, FilesystemType::ZFS, FilesystemType::XFS
+    FilesystemType::BTRFS, FilesystemType::APFS, FilesystemType::ZFS, FilesystemType::XFS, FilesystemType::REFS
 };
 
 /**
@@ -486,6 +495,14 @@ class clone : public QObject {
  */
 bool clone_file(const QString& src, const QString& dst, std::error_code& ec);
 
+#if defined(Q_OS_WIN)
+bool winbtrfs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);
+bool refs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);
+#elif defined(Q_OS_LINUX)
+bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std::error_code& ec);
+#elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+bool macos_bsd_clonefile(const std::string& src_path, const std::string& dst_path, std::error_code& ec);
+#endif
 
 static const QList<FilesystemType> s_non_link_filesystems = {
     FilesystemType::FAT,
