@@ -498,10 +498,6 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec);
 
 #if defined(Q_OS_WIN)
 
-#ifndef FSCTL_DUPLICATE_EXTENTS_TO_FILE
-#define FSCTL_DUPLICATE_EXTENTS_TO_FILE CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 209, METHOD_BUFFERED, FILE_WRITE_DATA )
-#endif
-
 bool winbtrfs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);
 bool refs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);
 bool ioctl_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);

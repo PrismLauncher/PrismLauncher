@@ -117,7 +117,44 @@ namespace fs = ghc::filesystem;
 #include <fileapi.h>
 // refs
 #include <winioctl.h>
+#   if defined(__MINGW32__)
+#       include <crtdbg.h>
+#   endif
 #endif
+
+#if defined(Q_OS_WIN) && defined(__MINGW32__)
+
+typedef struct _DUPLICATE_EXTENTS_DATA {
+    HANDLE FileHandle;
+    LARGE_INTEGER SourceFileOffset;
+    LARGE_INTEGER TargetFileOffset;
+    LARGE_INTEGER ByteCount;
+} DUPLICATE_EXTENTS_DATA, *PDUPLICATE_EXTENTS_DATA;
+
+typedef struct _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER {
+    WORD   ChecksumAlgorithm;   // Checksum algorithm. e.g. CHECKSUM_TYPE_UNCHANGED, CHECKSUM_TYPE_NONE, CHECKSUM_TYPE_CRC32
+    WORD   Reserved;            // Must be 0
+    DWORD Flags;                // FSCTL_INTEGRITY_FLAG_xxx
+    DWORD ChecksumChunkSizeInBytes;
+    DWORD ClusterSizeInBytes;
+} FSCTL_GET_INTEGRITY_INFORMATION_BUFFER, *PFSCTL_GET_INTEGRITY_INFORMATION_BUFFER;
+
+typedef struct _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER {
+    WORD   ChecksumAlgorithm;   // Checksum algorithm. e.g. CHECKSUM_TYPE_UNCHANGED, CHECKSUM_TYPE_NONE, CHECKSUM_TYPE_CRC32
+    WORD   Reserved;            // Must be 0
+    DWORD Flags;                // FSCTL_INTEGRITY_FLAG_xxx
+} FSCTL_SET_INTEGRITY_INFORMATION_BUFFER, *PFSCTL_SET_INTEGRITY_INFORMATION_BUFFER;
+
+#define FSCTL_DUPLICATE_EXTENTS_TO_FILE     CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 209, METHOD_BUFFERED, FILE_WRITE_DATA )
+#define FSCTL_GET_INTEGRITY_INFORMATION     CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 159, METHOD_BUFFERED, FILE_ANY_ACCESS)                  // FSCTL_GET_INTEGRITY_INFORMATION_BUFFER
+#define FSCTL_SET_INTEGRITY_INFORMATION     CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 160, METHOD_BUFFERED, FILE_READ_DATA | FILE_WRITE_DATA) // FSCTL_SET_INTEGRITY_INFORMATION_BUFFER
+
+
+#define ERROR_NOT_CAPABLE                775L
+#define ERROR_BLOCK_TOO_MANY_REFERENCES  347L
+
+#endif
+
 
 namespace FS {
 
@@ -1279,7 +1316,7 @@ bool refs_clone(const std::wstring& src_path, const std::wstring& dst_path, std:
         return false;
     }
 
-    long sourceFileLength = sourceFileLengthStruct.QuadPart;
+    DWORD sourceFileLength = sourceFileLengthStruct.QuadPart;
 
     // Set the destination on-disk size the same as the source.
     FILE_END_OF_FILE_INFO fileSizeInfo{sourceFileLength};
