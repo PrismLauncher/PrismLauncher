@@ -55,6 +55,12 @@ void ScanModFolders::executeTask()
     if(!cores->update()) {
         m_coreModsDone = true;
     }
+
+    auto nils = m_inst->nilModList();
+    connect(nils.get(), &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone);
+    if(!nils->update()) {
+        m_nilModsDone = true;
+    }
     checkDone();
 }
 
@@ -70,9 +76,15 @@ void ScanModFolders::coreModsDone()
     checkDone();
 }
 
+void ScanModFolders::nilModsDone()
+{
+    m_nilModsDone = true;
+    checkDone();
+}
+
 void ScanModFolders::checkDone()
 {
-    if(m_modsDone && m_coreModsDone) {
+    if(m_modsDone && m_coreModsDone && m_nilModsDone) {
         emitSucceeded();
     }
 }
