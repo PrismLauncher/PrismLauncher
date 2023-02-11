@@ -285,6 +285,48 @@ ModDetails ReadLiteModInfo(QByteArray contents)
     return details;
 }
 
+// https://git.sleeping.town/unascribed/NilLoader/src/commit/d7fc87b255fc31019ff90f80d45894927fac6efc/src/main/java/nilloader/api/NilMetadata.java#L64
+ModDetails ReadNilModInfo(QByteArray contents, QString fname)
+{
+    ModDetails details;
+
+    // this is a css file (why) but we only care about a couple key/value pairs from it
+    // hence this instead of a css parser lib
+    // could be made a lot better but it works(tm)
+    // (does css require properties to be on their own lines? if so, the code can get less horrible looking)
+    QString contentStr = QString(contents).trimmed();
+    int firstidx = contentStr.indexOf("@nilmod");
+    firstidx = contentStr.indexOf("{", firstidx);
+    int lastidx = contentStr.indexOf("}", firstidx);
+    int nameidx = contentStr.indexOf("name:", firstidx);
+    int descidx = contentStr.indexOf("description:", firstidx);
+    int authorsidx = contentStr.indexOf("authors:", firstidx);
+    int versionidx = contentStr.indexOf("version:", firstidx);
+
+    if (nameidx != -1 && nameidx < lastidx) {
+        nameidx = contentStr.indexOf('"', nameidx);
+        details.name = contentStr.mid(nameidx + 1, contentStr.indexOf('"', nameidx + 1) - nameidx - 1);
+    }
+    if (descidx != -1 && descidx < lastidx) {
+        descidx = contentStr.indexOf('"', descidx);
+        details.description = contentStr.mid(descidx + 1, contentStr.indexOf('"', descidx + 1) - descidx - 1);
+    }
+    if (authorsidx != -1 && authorsidx < lastidx) {
+        authorsidx = contentStr.indexOf('"', authorsidx);
+        details.authors.append(contentStr.mid(authorsidx + 1, contentStr.indexOf('"', authorsidx + 1) - authorsidx - 1));
+    }
+    if (versionidx != -1 && versionidx < lastidx) {
+        versionidx = contentStr.indexOf('"', versionidx);
+        details.version = contentStr.mid(versionidx + 1, contentStr.indexOf('"', versionidx + 1) - versionidx - 1);
+    } else {
+        details.version = "?";
+    }
+
+    details.mod_id = fname.remove(".nilmod.css");
+
+    return details;
+}
+
 bool process(Mod& mod, ProcessingLevel level)
 {
     switch (mod.type()) {
@@ -401,6 +443,36 @@ bool processZIP(Mod& mod, ProcessingLevel level)
 
         mod.setDetails(details);
         return true;
+    } else if (zip.setCurrentFile("META-INF/nil/mappings.json")) {
+        // nilloader uses the filename of the metadata file for the modid, so we can't know the exact filename
+        // thankfully, there is a good file to use as a canary so we don't look for nil meta all the time
+
+        QStringList foundNilMetas;
+        for (auto& fname : zip.getFileNameList()) {
+            if (fname.endsWith(".nilmod.css")) {
+                foundNilMetas.append(fname);
+            }
+        }
+
+        if (foundNilMetas.size() > 1 && foundNilMetas.at(0) == "nilloader.nilmod.css") {
+            // nilmods can shade nilloader to be able to run as a standalone agent - which includes nilloader's own meta file
+            // so if there is more than one meta file, ignore nilloader's meta, since it's not the actual mod
+            foundNilMetas.removeFirst();
+        }
+
+        if (zip.setCurrentFile(foundNilMetas.at(0))) {
+            if (!file.open(QIODevice::ReadOnly)) {
+                zip.close();
+                return false;
+            }
+
+            details = ReadNilModInfo(file.readAll(), foundNilMetas.at(0));
+            file.close();
+            zip.close();
+
+            mod.setDetails(details);
+            return true;
+        }
     }
 
     zip.close();
