@@ -409,6 +409,7 @@ inline QString getFilesystemTypeName(FilesystemType type) {
 
 struct FilesystemInfo {
     FilesystemType fsType = FilesystemType::UNKNOWN;
+    QString fsTypeName;
     int     blockSize;
     qint64 	bytesAvailable;
     qint64 	bytesFree;
@@ -496,8 +497,17 @@ class clone : public QObject {
 bool clone_file(const QString& src, const QString& dst, std::error_code& ec);
 
 #if defined(Q_OS_WIN)
+
+#ifndef FSCTL_DUPLICATE_EXTENTS_TO_FILE
+#define FSCTL_DUPLICATE_EXTENTS_TO_FILE CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 209, METHOD_BUFFERED, FILE_WRITE_DATA )
+#endif
+
 bool winbtrfs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);
 bool refs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);
+bool ioctl_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);
+
+#define USE_IOCTL_CLONE true
+
 #elif defined(Q_OS_LINUX)
 bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std::error_code& ec);
 #elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)

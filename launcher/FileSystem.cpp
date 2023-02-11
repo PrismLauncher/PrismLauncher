@@ -59,6 +59,7 @@
 #include "StringUtils.h"
 
 #if defined Q_OS_WIN32
+#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <objbase.h>
 #include <objidl.h>
@@ -113,6 +114,7 @@ namespace fs = ghc::filesystem;
 #include <windows.h>
 #include <stdio.h>
 #include <tchar.h>
+#include <fileapi.h>
 // refs
 #include <winioctl.h>
 #endif
@@ -953,14 +955,13 @@ FilesystemInfo statFS(const QString& path)
 
     QStorageInfo storage_info(NearestExistentAncestor(path));
 
-    QString fsTypeName = QString::fromStdString(storage_info.fileSystemType().toStdString());
-    qDebug() << "Qt reports Filesystem at" << path << "root:" << storage_info.rootPath() << "as" << fsTypeName;
+    info.fsTypeName = QString::fromStdString(storage_info.fileSystemType().toStdString());
 
     for (auto fs_type_pair : s_filesystem_type_names_inverse.toStdMap()) {
         auto fs_type_name = fs_type_pair.first;
         auto fs_type = fs_type_pair.second;
 
-        if(fsTypeName.toLower().contains(fs_type_name.toLower())) {
+        if(info.fsTypeName.toLower().contains(fs_type_name.toLower())) {
             info.fsType = fs_type;
             break;
         }
@@ -1043,7 +1044,7 @@ bool clone::operator()(const QString& offset, bool dryRun)
             clone_file(src_path, dst_path, err);
         }
         if (err) {
-            qWarning() << "Failed to clone files:" << QString::fromStdString(err.message());
+            qDebug() << "Failed to clone files:" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
             qDebug() << "Destination file:" << dst_path;
         }
@@ -1082,8 +1083,23 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
 
 #if defined(Q_OS_WIN)
     FilesystemInfo srcinfo = statFS(src);
-    if (srcinfo.fsType == FilesystemType::BTRFS) {
-        FilesystemInfo dstinfo = statFS(dst);
+    FilesystemInfo dstinfo = statFS(dst);
+
+    if (((srcinfo.fsType == FilesystemType::BTRFS && dstinfo.fsType == FilesystemType::BTRFS) ||
+         (srcinfo.fsType == FilesystemType::REFS && dstinfo.fsType == FilesystemType::REFS)) &&
+        USE_IOCTL_CLONE)
+    {
+        if (srcinfo.rootPath != dstinfo.rootPath) {
+            qWarning() << "clones must be to the same device! src and dst root paths do not match.";
+            ec = std::make_error_code(std::errc::not_supported);
+            return false;
+        }
+
+        qDebug() << "ioctl clone" << src << "to" << dst;
+        if (!ioctl_clone(src_path, dst_path, ec))
+            return false;
+
+    } else if (srcinfo.fsType == FilesystemType::BTRFS) {
         if (dstinfo.fsType != FilesystemType::BTRFS || (srcinfo.rootPath != dstinfo.rootPath)){
             qWarning() << "winbtrfs clone must be to the same device! src and dst root paths do not match.";
             qWarning() << "check out https://github.com/maharmstone/btrfs for btrfs support!";
@@ -1091,12 +1107,12 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
             return false;
         }
 
-        qWarning() << "clone/reflink of btrfs on windows! assuming winbtrfs is in use and calling shellbtrfs.dll via rundll32.exe";
+        qDebug() << "clone/reflink of btrfs on windows! assuming winbtrfs is in use and calling shellbtrfs.dll,ReflinkCopyW";
 
         if (!winbtrfs_clone(src_path, dst_path, ec))
             return false;
 
-        // There is no return value from rundll32.exe so we must check if the file exsists ourselves
+        // There is no return value from ReflinkCopyW so we must check if the file exsists ourselves
 
         QFileInfo dstInfo(dst);
         if (!dstInfo.exists() || !dstInfo.isFile() || dstInfo.isSymLink()) {
@@ -1116,16 +1132,24 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
                 }
             } else {
                 // oof, clone failure?
-                qWarning() << "clone/reflink on winbtrfs did not succeed: file" << dst << "does not appear to exsist";
+                qDebug() << "clone/reflink on winbtrfs did not succeed: file" << dst << "does not appear to exist";
                 ec = std::make_error_code(std::errc::no_such_file_or_directory);
                 return false;
             }  
         }
 
     } else if (srcinfo.fsType == FilesystemType::REFS) {
-        qWarning() << "clone/reflink not yet supported on windows ReFS!";
-        ec = std::make_error_code(std::errc::not_supported);
-        return false;
+        if (dstinfo.fsType != FilesystemType::REFS || (srcinfo.rootPath != dstinfo.rootPath)){
+            qWarning() << "ReFS clone must be to the same device! src and dst root paths do not match.";
+            ec = std::make_error_code(std::errc::not_supported);
+            return false;
+        }
+
+        qDebug() << "clone/reflink of ReFS on windows!";
+
+        if (!refs_clone(src_path, dst_path, ec))
+            return false;
+
     } else {
         qWarning() << "clone/reflink not supported on windows outside of winbtrfs or ReFS!";
         qWarning() << "check out https://github.com/maharmstone/btrfs for btrfs support!";
@@ -1153,6 +1177,14 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
 
 #if defined(Q_OS_WIN)
 typedef void (__stdcall *f_ReflinkCopyW)(HWND hwnd, HINSTANCE hinst, LPWSTR lpszCmdLine, int nCmdShow);
+
+const long WinMaxChunkSize = 1L << 31;  // 2GB
+
+static long RoundUpToPowerOf2(long originalValue, long roundingMultiplePowerOf2)
+{
+    long mask = roundingMultiplePowerOf2 - 1;
+    return (originalValue + mask) & ~mask;
+}
 
 bool winbtrfs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec)
 {
@@ -1194,33 +1226,118 @@ bool refs_clone(const std::wstring& src_path, const std::wstring& dst_path, std:
 #if defined(FSCTL_DUPLICATE_EXTENTS_TO_FILE)
     //https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_duplicate_extents_to_file
     //https://github.com/microsoft/CopyOnWrite/blob/main/lib/Windows/WindowsCopyOnWriteFilesystem.cs#L94
-    std::wstring existingFile = src_path.c_str();
-    std::wstring newLink = dst_path.c_str();
+    QString qSourcePath = StringUtils::fromStdString(src_path);
+    QString sourceVolumePath = statFS(qSourcePath).rootPath;
+    std::wstring source_volume_path = StringUtils::toStdString(sourceVolumePath);
 
+    unsigned long sectorsPerCluster;
+    unsigned long bytesPerSector;
+    unsigned long numberOfFreeClusters;
+    unsigned long totalNumberOfClusters;
+
+    if(!GetDiskFreeSpace(source_volume_path.c_str(), &sectorsPerCluster, &bytesPerSector, &numberOfFreeClusters, &totalNumberOfClusters )){
+        ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to get disk info for source volume" << sourceVolumePath;
+        return false;
+    }
+
+    long srcClusterSize = (long)(sectorsPerCluster * bytesPerSector);
     
-    HANDLE hExistingFile = CreateFile(src_path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
-    if (hExistingFile == INVALID_HANDLE_VALUE)
+    HANDLE hSourceFile = CreateFile(src_path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+    if (hSourceFile == INVALID_HANDLE_VALUE)
     {
+        ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to open source file" << src_path.c_str();
         return false;
     }
 
-    HANDLE hNewFile = CreateFile(dst_path.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, 0, NULL);
-    if (hNewFile == INVALID_HANDLE_VALUE)
+    HANDLE hDestFile = CreateFile(dst_path.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, 0, NULL);
+    if (hDestFile == INVALID_HANDLE_VALUE)
     {
-        CloseHandle(hExistingFile);
+        ec =  std::error_code(GetLastError(), std::system_category());
+        CloseHandle(hSourceFile);
+        qDebug() << "Failed to open dest file" << dst_path.c_str();
         return false;
     }
 
-    DWORD bytesReturned;
+    DWORD bytesReturned = 0;
 
-    // FIXME: ReFS requires that cloned regions reside on a disk cluster boundary.
-    // FIXME: ERROR_BLOCK_TOO_MANY_REFERENCES can occure https://docs.microsoft.com/en-us/windows-server/storage/refs/block-cloning#functionality-restrictions-and-remarks
-    BOOL result = DeviceIoControl(hExistingFile, FSCTL_DUPLICATE_EXTENTS_TO_FILE, hNewFile, sizeof(hNewFile), NULL, 0, &bytesReturned, NULL);
+    // Set the destination to be sparse while we clone.
+    // Important to avoid allocating zero-backed real storage when calling SetFileInformationByHandle()
+    // below which will just be released when cloning file extents.
+    
+    if (!DeviceIoControl(hDestFile, FSCTL_SET_SPARSE, nullptr, 0, nullptr, 0, &bytesReturned, nullptr)) {
+        qDebug() << "Failed to set file sparseness for destination file" << dst_path.c_str();
+        ec =  std::error_code(GetLastError(), std::system_category());
+        return false;
+    }
 
-    CloseHandle(hNewFile);
-    CloseHandle(hExistingFile);
+    LARGE_INTEGER sourceFileLengthStruct;
+    if (!GetFileSizeEx(hSourceFile, &sourceFileLengthStruct)) {
+        ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to get file info for source file" << src_path.c_str();
+        return false;
+    }
 
-    return (result != 0);
+    long sourceFileLength = sourceFileLengthStruct.QuadPart;
+
+    // Set the destination on-disk size the same as the source.
+    FILE_END_OF_FILE_INFO fileSizeInfo{sourceFileLength};
+    if (!SetFileInformationByHandle(hDestFile, FILE_INFO_BY_HANDLE_CLASS::FileEndOfFileInfo,
+            &fileSizeInfo, sizeof(FILE_END_OF_FILE_INFO)))
+    {
+        ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to set end of file on destination file" << dst_path.c_str();
+        return false;
+    }
+
+    DUPLICATE_EXTENTS_DATA duplicateExtentsData = DUPLICATE_EXTENTS_DATA{ hSourceFile };
+
+    long fileSizeRoundedUpToClusterBoundary = RoundUpToPowerOf2(sourceFileLength, srcClusterSize);
+    long sourceOffset = 0;
+    while(sourceOffset < sourceFileLength)
+    {
+        duplicateExtentsData.SourceFileOffset.QuadPart = sourceOffset;
+        duplicateExtentsData.TargetFileOffset.QuadPart = sourceOffset;
+        long thisChunkSize = std::min(fileSizeRoundedUpToClusterBoundary - sourceOffset, WinMaxChunkSize);
+        duplicateExtentsData.ByteCount.QuadPart = thisChunkSize;
+
+        DWORD numBytesReturned = 0;
+        bool ioctlResult = DeviceIoControl(
+                hDestFile,
+                FSCTL_DUPLICATE_EXTENTS_TO_FILE,
+                &duplicateExtentsData,
+                sizeof(DUPLICATE_EXTENTS_DATA),
+                nullptr,
+                0,
+                &numBytesReturned,
+                nullptr);
+        if (!ioctlResult)
+        {   
+            DWORD err = GetLastError();
+            ec =  std::error_code(err, std::system_category());
+            QString additionalMessage;
+            if (err == ERROR_BLOCK_TOO_MANY_REFERENCES)
+            {   
+                static const int MaxClonesPerFile = 8175;
+                additionalMessage = QString(
+                    " This is ERROR_BLOCK_TOO_MANY_REFERENCES and may mean you have surpassed the maximum "
+                    "allowed %1 references for a single file. "
+                    "See https://docs.microsoft.com/en-us/windows-server/storage/refs/block-cloning#functionality-restrictions-and-remarks"
+                ).arg(MaxClonesPerFile);
+                     
+            }
+            qWarning() << "Failed copy-on-write cloning from source file" << src_path.c_str() << "to" << dst_path.c_str() << "." << additionalMessage;
+            return false;
+        }
+
+        sourceOffset += thisChunkSize;
+    }
+
+    CloseHandle(hDestFile);
+    CloseHandle(hSourceFile);
+
+    return true;
 #else
     ec = std::make_error_code(std::errc::not_supported);
     qWarning() << "not built with refs support";
@@ -1228,6 +1345,181 @@ bool refs_clone(const std::wstring& src_path, const std::wstring& dst_path, std:
 #endif
 }
 
+bool ioctl_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec)
+{
+    /**
+     * This algorithm inspired from https://github.com/0xbadfca11/reflink
+     * LICENSE MIT
+     * 
+     */
+
+    HANDLE hSourceFile = CreateFileW(src_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+	if (hSourceFile == INVALID_HANDLE_VALUE)
+	{
+		ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to open source file" << src_path.c_str();
+        return false;
+	}
+
+	ULONG fs_flags;
+	if (!GetVolumeInformationByHandleW(hSourceFile, nullptr, 0, nullptr, nullptr, &fs_flags, nullptr, 0))
+	{
+        ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to get Filesystem information for " << src_path.c_str();
+        CloseHandle(hSourceFile);
+		return false;
+	}
+	if (!(fs_flags & FILE_SUPPORTS_BLOCK_REFCOUNTING))
+	{
+		SetLastError(ERROR_NOT_CAPABLE);
+		ec =  std::error_code(GetLastError(), std::system_category());
+        qWarning() << "Filesystem at " << src_path.c_str() << " does not support reflink";
+        CloseHandle(hSourceFile);
+        return false;
+	}
+
+	FILE_END_OF_FILE_INFO sourceFileLength;
+	if (!GetFileSizeEx(hSourceFile, &sourceFileLength.EndOfFile))
+	{
+		ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to size of source file" << src_path.c_str();
+        CloseHandle(hSourceFile);
+        return false;
+	}
+	FILE_BASIC_INFO sourceFileBasicInfo;
+	if (!GetFileInformationByHandleEx(hSourceFile, FileBasicInfo, &sourceFileBasicInfo, sizeof(sourceFileBasicInfo)))
+	{
+        ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to source file info" << src_path.c_str();
+        CloseHandle(hSourceFile);
+		return false;
+	}
+	ULONG junk;
+	FSCTL_GET_INTEGRITY_INFORMATION_BUFFER sourceFileIntegrity;
+	if (!DeviceIoControl(hSourceFile, FSCTL_GET_INTEGRITY_INFORMATION, nullptr, 0, &sourceFileIntegrity, sizeof(sourceFileIntegrity), &junk, nullptr))
+	{
+        ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to source file integrity info" << src_path.c_str();
+        CloseHandle(hSourceFile);
+		return false;
+	}
+
+	HANDLE hDestFile = CreateFileW(dst_path.c_str(), GENERIC_READ | GENERIC_WRITE | DELETE, 0, nullptr, CREATE_NEW, 0, hSourceFile);
+
+	if (hDestFile == INVALID_HANDLE_VALUE)
+	{
+		ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to open dest file" << dst_path.c_str();
+        CloseHandle(hSourceFile);
+		return false;
+	}
+	FILE_DISPOSITION_INFO destFileDispose = { TRUE };
+	if (!SetFileInformationByHandle(hDestFile, FileDispositionInfo, &destFileDispose, sizeof(destFileDispose)))
+	{
+        ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to set dest file info" << dst_path.c_str();
+        CloseHandle(hSourceFile);
+        CloseHandle(hDestFile);
+		return false;
+	}
+
+	if (!DeviceIoControl(hDestFile, FSCTL_SET_SPARSE, nullptr, 0, nullptr, 0, &junk, nullptr))
+	{
+        ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to set dest sparseness" << dst_path.c_str();
+        CloseHandle(hSourceFile);
+        CloseHandle(hDestFile);
+		return false;
+	}
+	FSCTL_SET_INTEGRITY_INFORMATION_BUFFER setDestFileintegrity = { sourceFileIntegrity.ChecksumAlgorithm, sourceFileIntegrity.Reserved, sourceFileIntegrity.Flags };
+	if (!DeviceIoControl(hDestFile, FSCTL_SET_INTEGRITY_INFORMATION, &setDestFileintegrity, sizeof(setDestFileintegrity), nullptr, 0, nullptr, nullptr))
+	{
+        ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to set dest file integrity info" << dst_path.c_str();
+        CloseHandle(hSourceFile);
+        CloseHandle(hDestFile);
+		return false;
+	}
+	if (!SetFileInformationByHandle(hDestFile, FileEndOfFileInfo, &sourceFileLength, sizeof(sourceFileLength)))
+	{
+        ec =  std::error_code(GetLastError(), std::system_category());
+        qDebug() << "Failed to set dest file size" << dst_path.c_str();
+        CloseHandle(hSourceFile);
+        CloseHandle(hDestFile);
+		return false;
+	}
+
+	const LONG64 splitThreshold = (1LL << 32) - sourceFileIntegrity.ClusterSizeInBytes;
+
+	DUPLICATE_EXTENTS_DATA dupExtent;
+	dupExtent.FileHandle = hSourceFile;
+	for (LONG64 offset = 0, remain = RoundUpToPowerOf2(sourceFileLength.EndOfFile.QuadPart, sourceFileIntegrity.ClusterSizeInBytes); remain > 0; offset += splitThreshold, remain -= splitThreshold)
+	{
+		dupExtent.SourceFileOffset.QuadPart = dupExtent.TargetFileOffset.QuadPart = offset;
+		dupExtent.ByteCount.QuadPart = std::min(splitThreshold, remain);
+
+		_ASSERTE(dupExtent.SourceFileOffset.QuadPart % sourceFileIntegrity.ClusterSizeInBytes == 0);
+		_ASSERTE(dupExtent.ByteCount.QuadPart % sourceFileIntegrity.ClusterSizeInBytes == 0);
+		_ASSERTE(dupExtent.ByteCount.QuadPart <= UINT32_MAX);
+		_RPT3(_CRT_WARN, "Remain=%llx\nOffset=%llx\nLength=%llx\n\n", remain, dupExtent.SourceFileOffset.QuadPart, dupExtent.ByteCount.QuadPart);
+
+		if (!DeviceIoControl(hDestFile, FSCTL_DUPLICATE_EXTENTS_TO_FILE, &dupExtent, sizeof(dupExtent), nullptr, 0, &junk, nullptr))
+		{
+            DWORD err = GetLastError();
+            QString additionalMessage;
+            if (err == ERROR_BLOCK_TOO_MANY_REFERENCES)
+            {   
+                static const int MaxClonesPerFile = 8175;
+                additionalMessage = QString(
+                    " This is ERROR_BLOCK_TOO_MANY_REFERENCES and may mean you have surpassed the maximum "
+                    "allowed %1 references for a single file. "
+                    "See https://docs.microsoft.com/en-us/windows-server/storage/refs/block-cloning#functionality-restrictions-and-remarks"
+                ).arg(MaxClonesPerFile);
+                     
+            }
+			ec =  std::error_code(err, std::system_category());
+            qDebug() << "Failed copy-on-write cloning of" << src_path.c_str() << "to" << dst_path.c_str() << "with error" << err << additionalMessage;
+            CloseHandle(hSourceFile);
+            CloseHandle(hDestFile);
+			return false;
+		}
+	}
+
+	if (!(sourceFileBasicInfo.FileAttributes & FILE_ATTRIBUTE_SPARSE_FILE))
+	{
+		FILE_SET_SPARSE_BUFFER setDestSparse = { FALSE };
+		if (!DeviceIoControl(hDestFile, FSCTL_SET_SPARSE, &setDestSparse, sizeof(setDestSparse), nullptr, 0, &junk, nullptr))
+		{
+            qDebug() << "Failed to set dest file sparseness" << dst_path.c_str();
+            CloseHandle(hSourceFile);
+            CloseHandle(hDestFile);
+			return false;
+		}
+	}
+
+	sourceFileBasicInfo.CreationTime.QuadPart = 0;
+	if (!SetFileInformationByHandle(hDestFile, FileBasicInfo, &sourceFileBasicInfo, sizeof(sourceFileBasicInfo)))
+	{
+        qDebug() << "Failed to set dest file creation time" << dst_path.c_str();
+        CloseHandle(hSourceFile);
+        CloseHandle(hDestFile);
+		return false;
+	}
+	if (!FlushFileBuffers(hDestFile))
+	{
+        qDebug() << "Failed to flush dest file buffer" << dst_path.c_str();
+        CloseHandle(hSourceFile);
+        CloseHandle(hDestFile);
+		return false;
+	}
+	destFileDispose = { FALSE };
+	bool result = !!SetFileInformationByHandle(hDestFile, FileDispositionInfo, &destFileDispose, sizeof(destFileDispose));
+
+    CloseHandle(hSourceFile);
+    CloseHandle(hDestFile);
+
+    return result;
+}
 
 #elif defined(Q_OS_LINUX)
 bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std::error_code& ec)
@@ -1236,14 +1528,14 @@ bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std
 
     int src_fd = open(src_path.c_str(), O_RDONLY);
     if(src_fd == -1) {
-        qWarning() << "Failed to open file:" << src_path.c_str();
+        qDebug() << "Failed to open file:" << src_path.c_str();
         qDebug() << "Error:" << strerror(errno);
         ec = std::make_error_code(static_cast<std::errc>(errno));
         return false;
     }
     int dst_fd = open(dst_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if(dst_fd == -1) {
-        qWarning() << "Failed to open file:" << dst_path.c_str();
+        qDebug() << "Failed to open file:" << dst_path.c_str();
         qDebug() << "Error:" << strerror(errno);
         ec = std::make_error_code(static_cast<std::errc>(errno));
         close(src_fd);
@@ -1251,7 +1543,7 @@ bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std
     }
     // attempt to clone
     if(ioctl(dst_fd,  FICLONE, src_fd) == -1){
-        qWarning() << "Failed to clone file:" << src_path.c_str() << "to" << dst_path.c_str();
+        qDebug() << "Failed to clone file:" << src_path.c_str() << "to" << dst_path.c_str();
         qDebug() << "Error:" << strerror(errno);
         ec = std::make_error_code(static_cast<std::errc>(errno));
         close(src_fd);
@@ -1259,11 +1551,11 @@ bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std
         return false;
     }
     if(close(src_fd)) {
-        qWarning() << "Failed to close file:" << src_path.c_str();
+        qDebug() << "Failed to close file:" << src_path.c_str();
         qDebug() << "Error:" << strerror(errno);
     }
     if(close(dst_fd)) {
-        qWarning() << "Failed to close file:" << dst_path.c_str();
+        qDebug() << "Failed to close file:" << dst_path.c_str();
         qDebug() << "Error:" << strerror(errno);
     }
     return true;
@@ -1277,7 +1569,7 @@ bool macos_bsd_clonefile(const std::string& src_path, const std::string& dst_pat
 
     qDebug() << "attempting file clone via clonefile" << src_path.c_str() << "to" << dst_path.c_str();
     if (clonefile(src_path.c_str(), dst_path.c_str(), 0) == -1) {
-        qWarning() << "Failed to clone file:" << src_path.c_str() << "to" << dst_path.c_str();
+        qDebug() << "Failed to clone file:" << src_path.c_str() << "to" << dst_path.c_str();
         qDebug() << "Error:" << strerror(errno);
         ec = std::make_error_code(static_cast<std::errc>(errno));
         return false;
