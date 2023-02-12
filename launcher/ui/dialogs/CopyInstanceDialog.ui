@@ -269,7 +269,7 @@
              <bool>true</bool>
             </property>
             <property name="toolTip">
-             <string>Use hard links instead of symbolic links</string>
+             <string>Use hard links instead of symbolic links.</string>
             </property>
             <property name="text">
              <string>Use hard links</string>
@@ -306,6 +306,9 @@
            <widget class="QCheckBox" name="symbolicLinksCheckbox">
             <property name="text">
              <string>Use symbloic links</string>
+            </property>
+            <property name="toolTip">
+             <string>Use symbolic links instead of copying files.</string>
             </property>
            </widget>
           </item>

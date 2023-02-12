@@ -93,16 +93,24 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     ui->recursiveLinkCheckbox->setChecked(m_selectedOptions.isLinkRecursivelyEnabled());
     ui->dontLinkSavesCheckbox->setChecked(m_selectedOptions.isDontLinkSavesEnabled());
 
-    auto detectedOS = FS::statFS(m_original->instanceRoot()).fsType;
+    auto detectedFS = FS::statFS(m_original->instanceRoot()).fsType;
 
-    m_cloneSupported = FS::canCloneOnFS(detectedOS);
-    m_linkSupported = FS::canLinkOnFS(detectedOS);
+    m_cloneSupported = FS::canCloneOnFS(detectedFS);
+    m_linkSupported = FS::canLinkOnFS(detectedFS);
 
     if (m_cloneSupported) {
-        ui->cloneSupportedLabel->setText(tr("Reflinks are supported on %1").arg(FS::getFilesystemTypeName(detectedOS)));
+        ui->cloneSupportedLabel->setText(tr("Reflinks are supported on %1").arg(FS::getFilesystemTypeName(detectedFS)));
     } else {
-        ui->cloneSupportedLabel->setText(tr("Reflinks aren't supported on %1").arg(FS::getFilesystemTypeName(detectedOS)));
+        ui->cloneSupportedLabel->setText(tr("Reflinks aren't supported on %1").arg(FS::getFilesystemTypeName(detectedFS)));
     }
+
+#if defined(Q_OS_WIN)
+    ui->symbolicLinksCheckbox->setIcon(style()->standardIcon(QStyle::SP_VistaShield));
+    ui->symbolicLinksCheckbox->setToolTip(
+        tr("Use symbolic links instead of copying files.") +
+        tr("\nOn windows symbolic links may require admin permision to create.")
+    );
+#endif
 
     updateLinkOptions();
     updateUseCloneCheckbox();
@@ -189,6 +197,11 @@ void CopyInstanceDialog::updateLinkOptions()
     ui->dontLinkSavesCheckbox->setEnabled(m_linkSupported && linksInUse);
     ui->recursiveLinkCheckbox->setChecked(m_linkSupported && linksInUse && m_selectedOptions.isLinkRecursivelyEnabled());
     ui->dontLinkSavesCheckbox->setChecked(m_linkSupported && linksInUse && m_selectedOptions.isDontLinkSavesEnabled());
+
+#if defined(Q_OS_WIN)
+    auto OkButton = ui->buttonBox->button(QDialogButtonBox::Ok);
+    OkButton->setIcon(m_selectedOptions.isUseSymLinksEnabled() ? style()->standardIcon(QStyle::SP_VistaShield) : QIcon());
+#endif
 }
 
 void CopyInstanceDialog::on_iconButton_clicked()

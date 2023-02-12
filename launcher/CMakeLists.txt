@@ -1149,14 +1149,6 @@ if(WIN32)
         SET_TARGET_PROPERTIES("${Launcher_Name}_filelink" PROPERTIES INSTALL_RPATH "${Launcher_BINARY_RPATH}")
     endif()
 
-    # may be unnessacery with manifest
-    if(CMAKE_GENERATOR MATCHES "Visual Studio")
-        SET_TARGET_PROPERTIES("${Launcher_Name}_filelink" PROPERTIES LINK_FLAGS "/level='requireAdministrator' /uiAccess='false' /SUBSYSTEM:CONSOLE")
-    # else()  # link arg /MANIFESTUAC only works with MSVC
-    #     SET_TARGET_PROPERTIES("${Launcher_Name}_filelink" PROPERTIES LINK_FLAGS "/MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\" /SUBSYSTEM:CONSOLE")
-    endif()
-
-
     install(TARGETS "${Launcher_Name}_filelink"
         BUNDLE DESTINATION "." COMPONENT Runtime
         LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
