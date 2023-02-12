@@ -1641,5 +1641,9 @@ bool canLink(const QString& src, const QString& dst)
     return  canLinkOnFS(src) && canLinkOnFS(dst);
 }
 
+uintmax_t hardLinkCount(const QString& path)
+{
+    return fs::hard_link_count(StringUtils::toStdString(path));
+}
 
 }

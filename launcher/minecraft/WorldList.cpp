@@ -128,6 +128,10 @@ bool WorldList::isValid()
     return m_dir.exists() && m_dir.isReadable();
 }
 
+QString WorldList::instDirPath() const {
+    return QFileInfo(m_dir.filePath("../..")).absoluteFilePath();
+}
+
 bool WorldList::deleteWorld(int index)
 {
     if (index >= worlds.size() || index < 0)
@@ -173,7 +177,7 @@ bool WorldList::resetIcon(int row)
 
 int WorldList::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid()? 0 : 4;
+    return parent.isValid()? 0 : 5;
 }
 
 QVariant WorldList::data(const QModelIndex &index, int role) const
@@ -207,6 +211,14 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
         case SizeColumn:
             return locale.formattedDataSize(world.bytes());
 
+        case InfoColumn:
+            if (world.isSymLinkUnder(instDirPath())) {
+                return tr("This world is symbolicly linked from elsewhere.");
+            }
+            if (world.isMoreThanOneHardLink()) {
+                return tr("\nThis world is hard linked elsewhere.");
+            }
+            return "";
         default:
             return QVariant();
         }
@@ -222,7 +234,16 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
         }
 
     case Qt::ToolTipRole:
-    {
+    {   
+        if (column == InfoColumn) {
+            if (world.isSymLinkUnder(instDirPath())) {
+                return tr("Warning: This world is symbolicly linked from elsewhere. Editing it will also change the origonal") +
+                       tr("\nCanonical Path: %1").arg(world.canonicalFilePath());
+            }
+            if (world.isMoreThanOneHardLink()) {
+                return tr("Warning: This world is hard linked elsewhere. Editing it will also change the origonal");
+            }
+        }
         return world.folderName();
     }
     case ObjectRole:
@@ -274,6 +295,9 @@ QVariant WorldList::headerData(int section, Qt::Orientation orientation, int rol
         case SizeColumn:
             //: World size on disk
             return tr("Size");
+        case InfoColumn:
+            //: special warnings?
+            return tr("Info");
         default:
             return QVariant();
         }
@@ -289,6 +313,8 @@ QVariant WorldList::headerData(int section, Qt::Orientation orientation, int rol
             return tr("Date and time the world was last played.");
         case SizeColumn:
             return tr("Size of the world on disk.");
+        case InfoColumn:
+            return tr("Information and warnings about the world.");
         default:
             return QVariant();
         }

@@ -107,6 +107,7 @@ WorldListPage::WorldListPage(BaseInstance *inst, std::shared_ptr<WorldList> worl
     auto head = ui->worldTreeView->header();
     head->setSectionResizeMode(0, QHeaderView::Stretch);
     head->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    head->setSectionResizeMode(4, QHeaderView::ResizeToContents);
 
     connect(ui->worldTreeView->selectionModel(), &QItemSelectionModel::currentChanged, this, &WorldListPage::worldChanged);
     worldChanged(QModelIndex(), QModelIndex());

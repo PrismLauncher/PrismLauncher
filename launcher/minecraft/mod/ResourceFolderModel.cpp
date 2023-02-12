@@ -2,10 +2,14 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <QFileInfo>
+#include <QIcon>
 #include <QMimeData>
+#include <QStyle>
 #include <QThreadPool>
 #include <QUrl>
 
+#include "Application.h"
 #include "FileSystem.h"
 
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"
@@ -417,7 +421,25 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                     return {};
             }
         case Qt::ToolTipRole:
+            if (column == NAME_COLUMN) {
+                if (at(row).isSymLinkUnder(instDirPath())) {
+                    return m_resources[row]->internal_id() +
+                        tr("\nWarning: This resource is symbolicly linked from elsewhere. Editing it will also change the origonal") +
+                        tr("\nCanonical Path: %1").arg(at(row).fileinfo().canonicalFilePath());;
+                }
+                if (at(row).isMoreThanOneHardLink()) {
+                    return m_resources[row]->internal_id() +
+                        tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the origonal");
+                }
+            }
+            
             return m_resources[row]->internal_id();
+        case Qt::DecorationRole: {
+            if (column == NAME_COLUMN && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
+                return APPLICATION->getThemedIcon("status-yellow");
+
+            return {};
+        }
         case Qt::CheckStateRole:
             switch (column) {
                 case ACTIVE_COLUMN:
@@ -530,4 +552,8 @@ void ResourceFolderModel::enableInteraction(bool enabled)
     if (compare_result.second || sortOrder() != Qt::DescendingOrder)
         return (compare_result.first < 0);
     return (compare_result.first > 0);
+}
+
+QString ResourceFolderModel::instDirPath() const {
+    return QFileInfo(m_dir.filePath("../..")).absoluteFilePath();
 }

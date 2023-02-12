@@ -528,4 +528,6 @@ bool canLinkOnFS(FilesystemType type);
  */
 bool canLink(const QString& src, const QString& dst);
 
+uintmax_t hardLinkCount(const QString& path);
+
 }

@@ -125,6 +125,8 @@ class ResourceFolderModel : public QAbstractListModel {
         [[nodiscard]] bool lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const override;
     };
 
+    QString instDirPath() const;
+
    public slots:
     void enableInteraction(bool enabled);
     void disableInteraction(bool disabled) { enableInteraction(!disabled); }

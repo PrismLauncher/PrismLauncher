@@ -33,7 +33,8 @@ public:
         NameColumn,
         GameModeColumn,
         LastPlayedColumn,
-        SizeColumn
+        SizeColumn,
+        InfoColumn
     };
 
     enum Roles
@@ -111,6 +112,8 @@ public:
     {
         return m_dir;
     }
+
+    QString instDirPath() const;
 
     const QList<World> &allWorlds() const
     {
