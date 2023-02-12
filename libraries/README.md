@@ -140,3 +140,11 @@ A TOML language parser. Used by Forge 1.14+ to store mod metadata.
 See [github repo](https://github.com/marzer/tomlplusplus).
 
 Licenced under the MIT licence.
+
+## qdcss
+
+A quick and dirty css parser, used by NilLoader to store mod metadata.
+
+Translated (and heavily trimmed down) from [the original Java code](https://github.com/unascribed/NilLoader/blob/trunk/src/main/java/nilloader/api/lib/qdcss/QDCSS.java) from NilLoader
+
+Licensed under LGPL version 3.

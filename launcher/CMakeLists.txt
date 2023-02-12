@@ -1025,6 +1025,7 @@ target_link_libraries(Launcher_logic
     nbt++
     ${ZLIB_LIBRARIES}
     tomlplusplus::tomlplusplus
+    qdcss
     BuildConfig
     Katabasis
     Qt${QT_VERSION_MAJOR}::Widgets

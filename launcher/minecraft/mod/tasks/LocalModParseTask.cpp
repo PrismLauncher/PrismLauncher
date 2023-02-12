@@ -3,6 +3,7 @@
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 #include <toml++/toml.h>
+#include <qdcss.h>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -290,37 +291,21 @@ ModDetails ReadNilModInfo(QByteArray contents, QString fname)
 {
     ModDetails details;
 
-    // this is a css file (why) but we only care about a couple key/value pairs from it
-    // hence this instead of a css parser lib
-    // could be made a lot better but it works(tm)
-    // (does css require properties to be on their own lines? if so, the code can get less horrible looking)
-    QString contentStr = QString(contents).trimmed();
-    int firstidx = contentStr.indexOf("@nilmod");
-    firstidx = contentStr.indexOf("{", firstidx);
-    int lastidx = contentStr.indexOf("}", firstidx);
-    int nameidx = contentStr.indexOf("name:", firstidx);
-    int descidx = contentStr.indexOf("description:", firstidx);
-    int authorsidx = contentStr.indexOf("authors:", firstidx);
-    int versionidx = contentStr.indexOf("version:", firstidx);
+    QDCSS cssData = QDCSS(contents);
+    auto name = cssData.get("@nilmod.name");
+    auto desc = cssData.get("@nilmod.description");
+    auto authors = cssData.get("@nilmod.authors");
 
-    if (nameidx != -1 && nameidx < lastidx) {
-        nameidx = contentStr.indexOf('"', nameidx);
-        details.name = contentStr.mid(nameidx + 1, contentStr.indexOf('"', nameidx + 1) - nameidx - 1);
+    if (name->has_value()) {
+        details.name = name->value();
     }
-    if (descidx != -1 && descidx < lastidx) {
-        descidx = contentStr.indexOf('"', descidx);
-        details.description = contentStr.mid(descidx + 1, contentStr.indexOf('"', descidx + 1) - descidx - 1);
+    if (desc->has_value()) {
+        details.description = desc->value();
     }
-    if (authorsidx != -1 && authorsidx < lastidx) {
-        authorsidx = contentStr.indexOf('"', authorsidx);
-        details.authors.append(contentStr.mid(authorsidx + 1, contentStr.indexOf('"', authorsidx + 1) - authorsidx - 1));
+    if (authors->has_value()) {
+        details.authors.append(authors->value());
     }
-    if (versionidx != -1 && versionidx < lastidx) {
-        versionidx = contentStr.indexOf('"', versionidx);
-        details.version = contentStr.mid(versionidx + 1, contentStr.indexOf('"', versionidx + 1) - versionidx - 1);
-    } else {
-        details.version = "?";
-    }
+    details.version = cssData.get("@nilmod.version")->value_or("?");
 
     details.mod_id = fname.remove(".nilmod.css");
 
