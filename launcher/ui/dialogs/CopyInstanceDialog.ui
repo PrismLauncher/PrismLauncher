@@ -305,7 +305,7 @@
           <item row="2" column="0">
            <widget class="QCheckBox" name="symbolicLinksCheckbox">
             <property name="text">
-             <string>Use symbloic links</string>
+             <string>Use symbolic links</string>
             </property>
             <property name="toolTip">
              <string>Use symbolic links instead of copying files.</string>

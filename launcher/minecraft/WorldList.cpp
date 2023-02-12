@@ -213,7 +213,7 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
 
         case InfoColumn:
             if (world.isSymLinkUnder(instDirPath())) {
-                return tr("This world is symbolicly linked from elsewhere.");
+                return tr("This world is symbolically linked from elsewhere.");
             }
             if (world.isMoreThanOneHardLink()) {
                 return tr("\nThis world is hard linked elsewhere.");
@@ -237,11 +237,11 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
     {   
         if (column == InfoColumn) {
             if (world.isSymLinkUnder(instDirPath())) {
-                return tr("Warning: This world is symbolicly linked from elsewhere. Editing it will also change the origonal") +
+                return tr("Warning: This world is symbolically linked from elsewhere. Editing it will also change the original") +
                        tr("\nCanonical Path: %1").arg(world.canonicalFilePath());
             }
             if (world.isMoreThanOneHardLink()) {
-                return tr("Warning: This world is hard linked elsewhere. Editing it will also change the origonal");
+                return tr("Warning: This world is hard linked elsewhere. Editing it will also change the original");
             }
         }
         return world.folderName();
