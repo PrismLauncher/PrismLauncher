@@ -1135,7 +1135,7 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::nilModList() const
     if (!m_nil_mod_list)
     {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_nil_mod_list.reset(new ModFolderModel(nilModsDir(), is_indexed));
+        m_nil_mod_list.reset(new ModFolderModel(nilModsDir(), is_indexed, false));
         m_nil_mod_list->disableInteraction(isRunning());
         connect(this, &BaseInstance::runningStatusChanged, m_nil_mod_list.get(), &ModFolderModel::disableInteraction);
     }

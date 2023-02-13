@@ -90,7 +90,7 @@ class NilModFolderPage : public ModFolderPage {
     virtual QString displayName() const override { return tr("Nilmods"); }
     virtual QIcon icon() const override { return APPLICATION->getThemedIcon("coremods"); }
     virtual QString id() const override { return "nilmods"; }
-    virtual QString helpPage() const override { return "Nil-mods"; }
+    virtual QString helpPage() const override { return "Nilmods"; }
 
     virtual bool shouldDisplay() const override;
 };

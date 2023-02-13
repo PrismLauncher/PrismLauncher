@@ -280,5 +280,5 @@ NilModFolderPage::NilModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolder
 
 bool NilModFolderPage::shouldDisplay() const
 {
-    return !m_model->dir().isEmpty();
+    return m_model->dir().exists();
 }

@@ -24,7 +24,8 @@ class QSortFilterProxyModel;
 class ResourceFolderModel : public QAbstractListModel {
     Q_OBJECT
    public:
-    ResourceFolderModel(QDir, QObject* parent = nullptr);
+    ResourceFolderModel(QDir, bool, QObject* parent = nullptr);
+    ResourceFolderModel(QDir dir, QObject* parent = nullptr) : ResourceFolderModel(dir, true, parent) {};
     ~ResourceFolderModel() override;
 
     /** Starts watching the paths for changes.
