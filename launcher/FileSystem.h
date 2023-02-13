@@ -361,12 +361,20 @@ enum class FilesystemType {
     UNKNOWN
 };
 
+/**
+ * @brief Ordered Mapping of enum types to reported filesystem names
+ * this maping is non exsaustive, it just attempts to capture the filesystems which could be reasonalbly be in use .
+ * all string values are in uppercase, use `QString.toUpper()` or equivalent during lookup.
+ * 
+ * QMap is ordered
+ * 
+ */
 static const QMap<FilesystemType, QString> s_filesystem_type_names = {
     {FilesystemType::FAT,    QString("FAT")},
     {FilesystemType::NTFS,   QString("NTFS")},
     {FilesystemType::REFS,   QString("REFS")},
     {FilesystemType::EXT,    QString("EXT")},
-    {FilesystemType::EXT_2_OLD,    QString("EXT2_OLD")},
+    {FilesystemType::EXT_2_OLD,    QString("EXT_2_OLD")},
     {FilesystemType::EXT_2_3_4,    QString("EXT2/3/4")},
     {FilesystemType::XFS,    QString("XFS")},
     {FilesystemType::BTRFS,  QString("BTRFS")},
@@ -381,15 +389,27 @@ static const QMap<FilesystemType, QString> s_filesystem_type_names = {
     {FilesystemType::UNKNOWN, QString("UNKNOWN")}
 };
 
+
+/**
+ * @brief Ordered Mapping of reported filesystem names to enum types
+ * this maping is non exsaustive, it just attempts to capture the many way these filesystems could be reported.
+ * all keys are in uppercase, use `QString.toUpper()` or equivalent during lookup.
+ * 
+ * QMap is ordered
+ * 
+ */
 static const QMap<QString, FilesystemType> s_filesystem_type_names_inverse = {
     {QString("FAT"), FilesystemType::FAT},
     {QString("NTFS"), FilesystemType::NTFS},
     {QString("REFS"), FilesystemType::REFS},
     {QString("EXT2_OLD"), FilesystemType::EXT_2_OLD},
+    {QString("EXT_2_OLD"), FilesystemType::EXT_2_OLD},
     {QString("EXT2"), FilesystemType::EXT_2_3_4},
     {QString("EXT3"), FilesystemType::EXT_2_3_4},
     {QString("EXT4"), FilesystemType::EXT_2_3_4},
-    {QString("EXT"), FilesystemType::EXT},
+    {QString("EXT2/3/4"), FilesystemType::EXT_2_3_4},
+    {QString("EXT_2_3_4"), FilesystemType::EXT_2_3_4},
+    {QString("EXT"), FilesystemType::EXT}, // must come after all other EXT variants to prevent greedy detection
     {QString("XFS"), FilesystemType::XFS},
     {QString("BTRFS"), FilesystemType::BTRFS},
     {QString("NFS"), FilesystemType::NFS},
@@ -403,9 +423,32 @@ static const QMap<QString, FilesystemType> s_filesystem_type_names_inverse = {
     {QString("UNKNOWN"), FilesystemType::UNKNOWN}
 };
 
-inline QString getFilesystemTypeName(FilesystemType type) {
-    return s_filesystem_type_names.constFind(type).value();
-}
+/**
+ * @brief Get the string name of Filesystem enum object
+ * 
+ * @param type 
+ * @return QString 
+ */
+QString getFilesystemTypeName(FilesystemType type);
+
+/**
+ * @brief Get the Filesystem enum object from a name
+ *  Does a lookup of the type name and returns an exact match  
+ *
+ * @param name 
+ * @return FilesystemType 
+ */
+FilesystemType getFilesystemType(const QString& name);
+
+/**
+ * @brief Get the Filesystem enum object from a name
+ *  Does a fuzzy lookup of the type name and returns an apropreate match
+ * 
+ * @param name 
+ * @return FilesystemType 
+ */
+FilesystemType getFilesystemTypeFuzzy(const QString& name);
+
 
 struct FilesystemInfo {
     FilesystemType fsType = FilesystemType::UNKNOWN;
@@ -430,9 +473,9 @@ QString NearestExistentAncestor(const QString& path);
  */
 FilesystemInfo statFS(const QString& path);
 
-
-static const QList<FilesystemType> s_clone_filesystems = {
-    FilesystemType::BTRFS, FilesystemType::APFS, FilesystemType::ZFS, FilesystemType::XFS, FilesystemType::REFS
+static const QList<FilesystemType> s_clone_filesystems = { 
+    FilesystemType::BTRFS, FilesystemType::APFS, FilesystemType::ZFS,
+    FilesystemType::XFS, FilesystemType::REFS 
 };
 
 /**
@@ -497,13 +540,7 @@ class clone : public QObject {
 bool clone_file(const QString& src, const QString& dst, std::error_code& ec);
 
 #if defined(Q_OS_WIN)
-
-bool winbtrfs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);
-bool refs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);
-bool ioctl_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);
-
-#define USE_IOCTL_CLONE true
-
+bool win_ioctl_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec);
 #elif defined(Q_OS_LINUX)
 bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std::error_code& ec);
 #elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)

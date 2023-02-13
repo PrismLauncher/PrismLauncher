@@ -962,6 +962,37 @@ bool overrideFolder(QString overwritten_path, QString override_path)
     return err.value() == 0;
 }
 
+QString getFilesystemTypeName(FilesystemType type) {
+    auto iter = s_filesystem_type_names.constFind(type);
+    if (iter != s_filesystem_type_names.constEnd()){
+        return iter.value();
+    }
+    return getFilesystemTypeName(FilesystemType::UNKNOWN); 
+}
+
+FilesystemType getFilesystemTypeFuzzy(const QString& name)
+{
+    auto iter = s_filesystem_type_names_inverse.constFind(name.toUpper());
+    if (iter != s_filesystem_type_names_inverse.constEnd()){
+        return iter.value();
+    }
+    return FilesystemType::UNKNOWN;       
+}
+
+FilesystemType getFilesystemType(const QString& name)
+{   
+    for (auto fs_type_pair : s_filesystem_type_names_inverse.toStdMap()) {
+        auto fs_type_name = fs_type_pair.first;
+        auto fs_type = fs_type_pair.second;
+
+        if(name.toUpper().contains(fs_type_name.toUpper())) {
+            return fs_type;
+     
+        }
+    }
+    return FilesystemType::UNKNOWN;
+}
+
 /**
  * @brief path to the near ancestor that exsists
  * 
@@ -994,15 +1025,7 @@ FilesystemInfo statFS(const QString& path)
 
     info.fsTypeName = QString::fromStdString(storage_info.fileSystemType().toStdString());
 
-    for (auto fs_type_pair : s_filesystem_type_names_inverse.toStdMap()) {
-        auto fs_type_name = fs_type_pair.first;
-        auto fs_type = fs_type_pair.second;
-
-        if(info.fsTypeName.toLower().contains(fs_type_name.toLower())) {
-            info.fsType = fs_type;
-            break;
-        }
-    }
+    info.fsType = getFilesystemTypeFuzzy(info.fsTypeName);
 
     info.blockSize = storage_info.blockSize();
     info.bytesAvailable = storage_info.bytesAvailable();
@@ -1029,7 +1052,7 @@ bool canCloneOnFS(const FilesystemInfo& info)
     return canCloneOnFS(info.fsType);
 }
 bool canCloneOnFS(FilesystemType type)
-{
+{   
     return s_clone_filesystems.contains(type);
 }
 
@@ -1081,7 +1104,7 @@ bool clone::operator()(const QString& offset, bool dryRun)
             clone_file(src_path, dst_path, err);
         }
         if (err) {
-            qDebug() << "Failed to clone files:" << QString::fromStdString(err.message());
+            qDebug() << "Failed to clone files: error" << err.value() << "message" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
             qDebug() << "Destination file:" << dst_path;
         }
@@ -1118,268 +1141,60 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
     auto src_path = StringUtils::toStdString(QDir::toNativeSeparators(QFileInfo(src).absoluteFilePath()));
     auto dst_path = StringUtils::toStdString(QDir::toNativeSeparators(QFileInfo(dst).absoluteFilePath()));
 
-#if defined(Q_OS_WIN)
     FilesystemInfo srcinfo = statFS(src);
     FilesystemInfo dstinfo = statFS(dst);
 
-    if (((srcinfo.fsType == FilesystemType::BTRFS && dstinfo.fsType == FilesystemType::BTRFS) ||
-         (srcinfo.fsType == FilesystemType::REFS && dstinfo.fsType == FilesystemType::REFS)) &&
-        USE_IOCTL_CLONE)
+    
+
+    if ((srcinfo.rootPath != dstinfo.rootPath) || (srcinfo.fsType != dstinfo.fsType))
     {
-        if (srcinfo.rootPath != dstinfo.rootPath) {
-            qWarning() << "clones must be to the same device! src and dst root paths do not match.";
-            ec = std::make_error_code(std::errc::not_supported);
-            return false;
-        }
-
-        qDebug() << "ioctl clone" << src << "to" << dst;
-        if (!ioctl_clone(src_path, dst_path, ec))
-            return false;
-
-    } else if (srcinfo.fsType == FilesystemType::BTRFS) {
-        if (dstinfo.fsType != FilesystemType::BTRFS || (srcinfo.rootPath != dstinfo.rootPath)){
-            qWarning() << "winbtrfs clone must be to the same device! src and dst root paths do not match.";
-            qWarning() << "check out https://github.com/maharmstone/btrfs for btrfs support!";
-            ec = std::make_error_code(std::errc::not_supported);
-            return false;
-        }
-
-        qDebug() << "clone/reflink of btrfs on windows! assuming winbtrfs is in use and calling shellbtrfs.dll,ReflinkCopyW";
-
-        if (!winbtrfs_clone(src_path, dst_path, ec))
-            return false;
-
-        // There is no return value from ReflinkCopyW so we must check if the file exsists ourselves
-
-        QFileInfo dstInfo(dst);
-        if (!dstInfo.exists() || !dstInfo.isFile() || dstInfo.isSymLink()) {
-            // shellbtrfs.dll,ReflinkCopyW is curently broken https://github.com/maharmstone/btrfs/issues/556
-            // lets try a little workaround
-            // find the misnamed file
-            qDebug() << dst << "is missing. ReflinkCopyW may still be broken, trying workaround.";
-            QString badDst = QDir(dstInfo.absolutePath()).path() + dstInfo.fileName();
-            qDebug() << "trying" << badDst;
-            QFileInfo badDstInfo(badDst);
-            if (badDstInfo.exists() && badDstInfo.isFile()) {
-                qDebug() << badDst << "exists! moving it to the correct location.";
-                if(!move(badDstInfo.absoluteFilePath(), dstInfo.absoluteFilePath())) {
-                    qDebug() << "move from" << badDst << "to" << dst << "failed";
-                    ec = std::make_error_code(std::errc::no_such_file_or_directory);
-                    return false;
-                }
-            } else {
-                // oof, clone failure?
-                qDebug() << "clone/reflink on winbtrfs did not succeed: file" << dst << "does not appear to exist";
-                ec = std::make_error_code(std::errc::no_such_file_or_directory);
-                return false;
-            }  
-        }
-
-    } else if (srcinfo.fsType == FilesystemType::REFS) {
-        if (dstinfo.fsType != FilesystemType::REFS || (srcinfo.rootPath != dstinfo.rootPath)){
-            qWarning() << "ReFS clone must be to the same device! src and dst root paths do not match.";
-            ec = std::make_error_code(std::errc::not_supported);
-            return false;
-        }
-
-        qDebug() << "clone/reflink of ReFS on windows!";
-
-        if (!refs_clone(src_path, dst_path, ec))
-            return false;
-
-    } else {
-        qWarning() << "clone/reflink not supported on windows outside of winbtrfs or ReFS!";
-        qWarning() << "check out https://github.com/maharmstone/btrfs for btrfs support!";
         ec = std::make_error_code(std::errc::not_supported);
+        qWarning() << "reflink/clone must be to the same device and filesystem! src and dst root filesystems do not match.";
         return false;
     }
+
+#if defined(Q_OS_WIN)
+
+    if (!win_ioctl_clone(src_path, dst_path, ec)) {
+        qDebug() << "failed win_ioctl_clone";
+        qWarning() << "clone/reflink not supported on windows outside of btrfs or ReFS!";
+        qWarning() << "check out https://github.com/maharmstone/btrfs for btrfs support!";
+        return false;
+    }
+
+    
+
 #elif defined(Q_OS_LINUX)
 
-    if(!linux_ficlone(src_path, dst_path, ec))
+    if(!linux_ficlone(src_path, dst_path, ec)) {
+        qDebug() << "failed linux_ficlone:";
         return false;
-
+    }
+        
 #elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
    
-    if(!macos_bsd_clonefile(src_path, dst_path, ec))
+    if(!macos_bsd_clonefile(src_path, dst_path, ec)) {
+        qDebug() << "failed macos_bsd_clonefile:";
         return false;
-
+    }
+        
 #else
+
     qWarning() << "clone/reflink not supported! unknown OS";
     ec = std::make_error_code(std::errc::not_supported);
     return false;
+
 #endif
 
     return true;
 }
 
 #if defined(Q_OS_WIN)
-typedef void (__stdcall *f_ReflinkCopyW)(HWND hwnd, HINSTANCE hinst, LPWSTR lpszCmdLine, int nCmdShow);
-
-const long WinMaxChunkSize = 1L << 31;  // 2GB
 
 static long RoundUpToPowerOf2(long originalValue, long roundingMultiplePowerOf2)
 {
     long mask = roundingMultiplePowerOf2 - 1;
     return (originalValue + mask) & ~mask;
-}
-
-bool winbtrfs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec)
-{
-    // https://github.com/maharmstone/btrfs
-    QString cmdLine = QString("\"%1\" \"%2\"").arg(src_path, dst_path);
-
-    std::wstring wstr = cmdLine.toStdWString(); // temp buffer to copy the data and avoid side effect of non const cast
-
-    LPWSTR cmdLineWin = (wchar_t*)wstr.c_str();
-
-    // https://github.com/maharmstone/btrfs/blob/9da54911dd6f3713a1c4c7be40338a3da126f4e6/src/shellext/contextmenu.cpp#L1609
-    HINSTANCE shellbtrfsDLL = LoadLibrary(L"shellbtrfs.dll");
-
-    if (shellbtrfsDLL == NULL) {
-        ec = std::make_error_code(std::errc::not_supported);
-        qWarning() << "cannot locate the shellbtrfs.dll file, reflink copy not supported";
-        return false;
-    }
-
-    f_ReflinkCopyW ReflinkCopyW = (f_ReflinkCopyW)GetProcAddress(shellbtrfsDLL, "ReflinkCopyW");
-
-    if (!ReflinkCopyW) {
-        ec = std::make_error_code(std::errc::not_supported);
-        qWarning() << "cannot locate the ReflinkCopyW function from shellbtrfs.dll, reflink copy not supported";
-        return false;
-    }
-
-    qDebug() << "Calling ReflinkCopyW from shellbtrfs.dll with:" << cmdLine;
-
-    ReflinkCopyW(0, 0, cmdLineWin, 1);
-
-    FreeLibrary(shellbtrfsDLL);
-
-    return true;
-}
-
-bool refs_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec)
-{
-#if defined(FSCTL_DUPLICATE_EXTENTS_TO_FILE)
-    //https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_duplicate_extents_to_file
-    //https://github.com/microsoft/CopyOnWrite/blob/main/lib/Windows/WindowsCopyOnWriteFilesystem.cs#L94
-    QString qSourcePath = StringUtils::fromStdString(src_path);
-    QString sourceVolumePath = statFS(qSourcePath).rootPath;
-    std::wstring source_volume_path = StringUtils::toStdString(sourceVolumePath);
-
-    unsigned long sectorsPerCluster;
-    unsigned long bytesPerSector;
-    unsigned long numberOfFreeClusters;
-    unsigned long totalNumberOfClusters;
-
-    if(!GetDiskFreeSpace(source_volume_path.c_str(), &sectorsPerCluster, &bytesPerSector, &numberOfFreeClusters, &totalNumberOfClusters )){
-        ec =  std::error_code(GetLastError(), std::system_category());
-        qDebug() << "Failed to get disk info for source volume" << sourceVolumePath;
-        return false;
-    }
-
-    long srcClusterSize = (long)(sectorsPerCluster * bytesPerSector);
-    
-    HANDLE hSourceFile = CreateFile(src_path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
-    if (hSourceFile == INVALID_HANDLE_VALUE)
-    {
-        ec =  std::error_code(GetLastError(), std::system_category());
-        qDebug() << "Failed to open source file" << src_path.c_str();
-        return false;
-    }
-
-    HANDLE hDestFile = CreateFile(dst_path.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, 0, NULL);
-    if (hDestFile == INVALID_HANDLE_VALUE)
-    {
-        ec =  std::error_code(GetLastError(), std::system_category());
-        CloseHandle(hSourceFile);
-        qDebug() << "Failed to open dest file" << dst_path.c_str();
-        return false;
-    }
-
-    DWORD bytesReturned = 0;
-
-    // Set the destination to be sparse while we clone.
-    // Important to avoid allocating zero-backed real storage when calling SetFileInformationByHandle()
-    // below which will just be released when cloning file extents.
-    
-    if (!DeviceIoControl(hDestFile, FSCTL_SET_SPARSE, nullptr, 0, nullptr, 0, &bytesReturned, nullptr)) {
-        qDebug() << "Failed to set file sparseness for destination file" << dst_path.c_str();
-        ec =  std::error_code(GetLastError(), std::system_category());
-        return false;
-    }
-
-    LARGE_INTEGER sourceFileLengthStruct;
-    if (!GetFileSizeEx(hSourceFile, &sourceFileLengthStruct)) {
-        ec =  std::error_code(GetLastError(), std::system_category());
-        qDebug() << "Failed to get file info for source file" << src_path.c_str();
-        return false;
-    }
-
-    DWORD sourceFileLength = sourceFileLengthStruct.QuadPart;
-
-    // Set the destination on-disk size the same as the source.
-    FILE_END_OF_FILE_INFO fileSizeInfo{sourceFileLength};
-    if (!SetFileInformationByHandle(hDestFile, FILE_INFO_BY_HANDLE_CLASS::FileEndOfFileInfo,
-            &fileSizeInfo, sizeof(FILE_END_OF_FILE_INFO)))
-    {
-        ec =  std::error_code(GetLastError(), std::system_category());
-        qDebug() << "Failed to set end of file on destination file" << dst_path.c_str();
-        return false;
-    }
-
-    DUPLICATE_EXTENTS_DATA duplicateExtentsData = DUPLICATE_EXTENTS_DATA{ hSourceFile };
-
-    long fileSizeRoundedUpToClusterBoundary = RoundUpToPowerOf2(sourceFileLength, srcClusterSize);
-    long sourceOffset = 0;
-    while(sourceOffset < sourceFileLength)
-    {
-        duplicateExtentsData.SourceFileOffset.QuadPart = sourceOffset;
-        duplicateExtentsData.TargetFileOffset.QuadPart = sourceOffset;
-        long thisChunkSize = std::min(fileSizeRoundedUpToClusterBoundary - sourceOffset, WinMaxChunkSize);
-        duplicateExtentsData.ByteCount.QuadPart = thisChunkSize;
-
-        DWORD numBytesReturned = 0;
-        bool ioctlResult = DeviceIoControl(
-                hDestFile,
-                FSCTL_DUPLICATE_EXTENTS_TO_FILE,
-                &duplicateExtentsData,
-                sizeof(DUPLICATE_EXTENTS_DATA),
-                nullptr,
-                0,
-                &numBytesReturned,
-                nullptr);
-        if (!ioctlResult)
-        {   
-            DWORD err = GetLastError();
-            ec =  std::error_code(err, std::system_category());
-            QString additionalMessage;
-            if (err == ERROR_BLOCK_TOO_MANY_REFERENCES)
-            {   
-                static const int MaxClonesPerFile = 8175;
-                additionalMessage = QString(
-                    " This is ERROR_BLOCK_TOO_MANY_REFERENCES and may mean you have surpassed the maximum "
-                    "allowed %1 references for a single file. "
-                    "See https://docs.microsoft.com/en-us/windows-server/storage/refs/block-cloning#functionality-restrictions-and-remarks"
-                ).arg(MaxClonesPerFile);
-                     
-            }
-            qWarning() << "Failed copy-on-write cloning from source file" << src_path.c_str() << "to" << dst_path.c_str() << "." << additionalMessage;
-            return false;
-        }
-
-        sourceOffset += thisChunkSize;
-    }
-
-    CloseHandle(hDestFile);
-    CloseHandle(hSourceFile);
-
-    return true;
-#else
-    ec = std::make_error_code(std::errc::not_supported);
-    qWarning() << "not built with refs support";
-    return false;
-#endif
 }
 
 bool ioctl_clone(const std::wstring& src_path, const std::wstring& dst_path, std::error_code& ec)
@@ -1388,6 +1203,9 @@ bool ioctl_clone(const std::wstring& src_path, const std::wstring& dst_path, std
      * This algorithm inspired from https://github.com/0xbadfca11/reflink
      * LICENSE MIT
      * 
+     *  Additional references
+     *  https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_duplicate_extents_to_file
+     *  https://github.com/microsoft/CopyOnWrite/blob/main/lib/Windows/WindowsCopyOnWriteFilesystem.cs#L94
      */
 
     HANDLE hSourceFile = CreateFileW(src_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
@@ -1495,11 +1313,6 @@ bool ioctl_clone(const std::wstring& src_path, const std::wstring& dst_path, std
 		dupExtent.SourceFileOffset.QuadPart = dupExtent.TargetFileOffset.QuadPart = offset;
 		dupExtent.ByteCount.QuadPart = std::min(splitThreshold, remain);
 
-		_ASSERTE(dupExtent.SourceFileOffset.QuadPart % sourceFileIntegrity.ClusterSizeInBytes == 0);
-		_ASSERTE(dupExtent.ByteCount.QuadPart % sourceFileIntegrity.ClusterSizeInBytes == 0);
-		_ASSERTE(dupExtent.ByteCount.QuadPart <= UINT32_MAX);
-		_RPT3(_CRT_WARN, "Remain=%llx\nOffset=%llx\nLength=%llx\n\n", remain, dupExtent.SourceFileOffset.QuadPart, dupExtent.ByteCount.QuadPart);
-
 		if (!DeviceIoControl(hDestFile, FSCTL_DUPLICATE_EXTENTS_TO_FILE, &dupExtent, sizeof(dupExtent), nullptr, 0, &junk, nullptr))
 		{
             DWORD err = GetLastError();
@@ -1559,6 +1372,7 @@ bool ioctl_clone(const std::wstring& src_path, const std::wstring& dst_path, std
 }
 
 #elif defined(Q_OS_LINUX)
+
 bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std::error_code& ec)
 {
     // https://man7.org/linux/man-pages/man2/ioctl_ficlone.2.html
@@ -1599,6 +1413,7 @@ bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std
 }
 
 #elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+
 bool macos_bsd_clonefile(const std::string& src_path, const std::string& dst_path, std::error_code& ec)
 {
     // clonefile(const char * src, const char * dst, int flags);
