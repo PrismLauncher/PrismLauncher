@@ -79,6 +79,7 @@
 #include <iostream>
 #include <mutex>
 
+#include <QFileOpenEvent>
 #include <QAccessible>
 #include <QCommandLineParser>
 #include <QDir>
