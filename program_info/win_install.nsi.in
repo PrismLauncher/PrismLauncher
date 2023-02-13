@@ -336,9 +336,9 @@ SectionEnd
 !define APPICON "$INSTDIR\${APPEXE},0"
 !define APPDESCRIPTION "@Launcher_DisplayName@"
 !define APPNAME "@Launcher_DisplayName@"
-!define APPCMDTEXT "Minecraft Modpack"
+!define APPCMDTEXT "@Launcher_DisplayName@"
 
-Section -ShellAssoc
+Section /o "Shell Association (Open-With dialog)" SHELL_ASSOC
 
   !insertmacro APP_SETUP `${APPDESCRIPTION}` `${APPICON}` `${APPID}` `${APPCMDTEXT}` `${APPEXE}` `${APPCMDTEXT}` '$INSTDIR\${APPEXE} -I "%1"'
   
