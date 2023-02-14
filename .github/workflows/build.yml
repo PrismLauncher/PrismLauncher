@@ -15,6 +15,12 @@ on:
       SPARKLE_ED25519_KEY:
         description: Private key for signing Sparkle updates
         required: false
+      WINDOWS_CODESIGN_CERT:
+        description: Certificate for signing Windows builds
+        required: false
+      WINDOWS_CODESIGN_PASSWORD:
+        description: Password for signing Windows builds
+        required: false
       CACHIX_AUTH_TOKEN:
         description: Private token for authenticating against Cachix cache
         required: false
@@ -40,6 +46,7 @@ jobs:
           - os: windows-2022
             name: "Windows-MinGW-w64"
             msystem: clang64
+            vcvars_arch: 'amd64_x86'
 
           - os: windows-2022
             name: "Windows-MSVC-Legacy"
@@ -225,7 +232,7 @@ jobs:
            cache: ${{ inputs.is_qt_cached }}
 
       - name: Install MSVC (Windows MSVC)
-        if: runner.os == 'Windows' && matrix.msystem == ''
+        if: runner.os == 'Windows'  # We want this for MinGW builds as well, as we need SignTool
         uses: ilammy/msvc-dev-cmd@v1
         with:
           vsversion: 2022
@@ -377,6 +384,19 @@ jobs:
             Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll -Destination libssl-1_1.dll
           }
 
+      - name: Fetch codesign certificate (Windows)
+        if: runner.os == 'Windows'
+        shell: bash  # yes, we are not using MSYS2 or PowerShell here
+        run: |
+          echo '${{ secrets.WINDOWS_CODESIGN_CERT }}' | base64 --decode > codesign.pfx
+
+      - name: Sign executable (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          cd ${{ env.INSTALL_DIR }}
+          # We ship the exact same executable for portable and non-portable editions, so signing just once is fine
+          SignTool sign /fd sha256 /td sha256 /f ../codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com prismlauncher.exe
+
       - name: Package (Windows MinGW-w64, portable)
         if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
@@ -395,6 +415,11 @@ jobs:
         run: |
           cd ${{ env.INSTALL_DIR }}
           makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
+
+      - name: Sign installer (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          SignTool sign /fd sha256 /td sha256 /f codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com PrismLauncher-Setup.exe
 
       - name: Package (Linux)
         if: runner.os == 'Linux'
