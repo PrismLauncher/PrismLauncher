@@ -275,7 +275,8 @@ bool MMCZip::findFilesInZip(QuaZip * zip, const QString & what, QStringList & re
 // ours
 std::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString & subdir, const QString &target)
 {
-    QDir directory(target);
+    auto absDirectoryUrl = QUrl::fromLocalFile(target);
+
     QStringList extracted;
 
     qDebug() << "Extracting subdir" << subdir << "from" << zip->getZipName() << "to" << target;
@@ -305,6 +306,11 @@ std::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString & su
         name.remove(0, subdir.size());
         auto original_name = name;
 
+        // Fix subdirs/files ending with a / getting transformed into absolute paths
+        if(name.startsWith('/')){
+            name = name.mid(1);
+        }
+
         // Fix weird "folders with a single file get squashed" thing
         QString path;
         if(name.contains('/') && !name.endsWith('/')){
@@ -317,11 +323,16 @@ std::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString & su
         QString absFilePath;
         if(name.isEmpty())
         {
-            absFilePath = directory.absoluteFilePath(name) + "/";
+            absFilePath = FS::PathCombine(target, "/");  // FIXME this seems weird
         }
         else
         {
-            absFilePath = directory.absoluteFilePath(path + name);
+            absFilePath = FS::PathCombine(target, path + name);
+        }
+
+        if (!absDirectoryUrl.isParentOf(QUrl::fromLocalFile(absFilePath))) {
+            qWarning() << "Extracting" << name << "was cancelled, because it was effectively outside of the target path" << target;
+            return std::nullopt;
         }
 
         if (!JlCompress::extractFile(zip, "", absFilePath))
