@@ -37,6 +37,7 @@
 #include <QPushButton>
 
 #include "Application.h"
+#include "BuildConfig.h"
 #include "CopyInstanceDialog.h"
 #include "ui_CopyInstanceDialog.h"
 
@@ -47,6 +48,7 @@
 #include "BaseInstance.h"
 #include "InstanceList.h"
 #include "FileSystem.h"
+#include "DesktopServices.h"
 
 CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     :QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
@@ -114,6 +116,9 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
 
     updateLinkOptions();
     updateUseCloneCheckbox();
+
+    auto HelpButton = ui->buttonBox->button(QDialogButtonBox::Help);
+    connect(HelpButton, &QPushButton::clicked, this, &CopyInstanceDialog::help);
     
 }
 
@@ -155,6 +160,12 @@ QString CopyInstanceDialog::instGroup() const
 const InstanceCopyPrefs& CopyInstanceDialog::getChosenOptions() const
 {
     return m_selectedOptions;
+}
+
+
+void CopyInstanceDialog::help()
+{
+    DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg("instance-copy")));
 }
 
 void CopyInstanceDialog::checkAllCheckboxes(const bool& b)

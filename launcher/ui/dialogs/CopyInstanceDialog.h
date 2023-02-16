@@ -42,6 +42,9 @@ public:
     QString iconKey() const;
     const InstanceCopyPrefs& getChosenOptions() const;
 
+public slots:
+    void help();
+
 private
 slots:
     void on_iconButton_clicked();
