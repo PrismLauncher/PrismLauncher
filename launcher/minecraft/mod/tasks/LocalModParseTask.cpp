@@ -434,15 +434,10 @@ bool processZIP(Mod& mod, ProcessingLevel level)
 
         QStringList foundNilMetas;
         for (auto& fname : zip.getFileNameList()) {
-            if (fname.endsWith(".nilmod.css")) {
+            // nilmods can shade nilloader to be able to run as a standalone agent - which includes nilloader's own meta file
+            if (fname.endsWith(".nilmod.css") && fname != "nilloader.nilmod.css") {
                 foundNilMetas.append(fname);
             }
-        }
-
-        if (foundNilMetas.size() > 1 && foundNilMetas.at(0) == "nilloader.nilmod.css") {
-            // nilmods can shade nilloader to be able to run as a standalone agent - which includes nilloader's own meta file
-            // so if there is more than one meta file, ignore nilloader's meta, since it's not the actual mod
-            foundNilMetas.removeFirst();
         }
 
         if (zip.setCurrentFile(foundNilMetas.at(0))) {
