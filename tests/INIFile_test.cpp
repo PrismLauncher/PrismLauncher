@@ -1,6 +1,9 @@
 #include <QTest>
 
+#include <QList>
+#include <QVariant>
 #include <settings/INIFile.h>
+
 
 class IniFileTest : public QObject
 {
@@ -52,8 +55,39 @@ slots:
         // load
         INIFile f2;
         f2.loadFile(filename);
-        QCOMPARE(a, f2.get("a","NOT SET").toString());
-        QCOMPARE(b, f2.get("b","NOT SET").toString());
+        QCOMPARE(f2.get("a","NOT SET").toString(), a);
+        QCOMPARE(f2.get("b","NOT SET").toString(), b);
+    }
+
+    void test_SaveLoadLists()
+    {
+        QString slist_strings = "[\"a\",\"b\",\"c\"]";
+        QStringList list_strings = {"a", "b", "c"};
+
+        QString slist_numbers = "[1,2,3,10]";
+        QList<int> list_numbers = {1, 2, 3, 10};
+
+        QString filename = "test_SaveLoadLists.ini";
+
+        INIFile f;
+        f.setList("list_strings", list_strings);
+        f.setList("list_numbers", list_numbers);
+        f.saveFile(filename);
+
+        // load
+        INIFile f2;
+        f2.loadFile(filename);
+
+        QStringList out_list_strings = f2.getList<QString>("list_strings", QStringList());
+        qDebug() << "OutStringList" << out_list_strings;
+        
+        QList<int> out_list_numbers = f2.getList<int>("list_numbers", QList<int>());
+        qDebug() << "OutNumbersList" << out_list_numbers;
+
+        QCOMPARE(f2.get("list_strings","NOT SET").toString(), slist_strings);
+        QCOMPARE(out_list_strings, list_strings);
+        QCOMPARE(f2.get("list_numbers","NOT SET").toString(), slist_numbers);
+        QCOMPARE(out_list_numbers, list_numbers);
     }
 };
 

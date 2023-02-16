@@ -40,6 +40,8 @@
 #include <QDir>
 #include <QDebug>
 #include <QRegularExpression>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include "settings/INISettingsObject.h"
 #include "settings/Setting.h"
@@ -63,6 +65,8 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     m_settings->registerSetting("lastLaunchTime", 0);
     m_settings->registerSetting("totalTimePlayed", 0);
     m_settings->registerSetting("lastTimePlayed", 0);
+
+    m_settings->registerSetting("linkedInstancesList", "[]");
 
     // Game time override
     auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
@@ -180,6 +184,38 @@ int BaseInstance::getConsoleMaxLines() const
 bool BaseInstance::shouldStopOnConsoleOverflow() const
 {
     return m_settings->get("ConsoleOverflowStop").toBool();
+}
+
+QStringList BaseInstance::getLinkedInstances() const
+{
+    return m_settings->getList<QString>("linkedInstancesList");
+}
+
+void BaseInstance::setLinkedInstances(const QStringList& list)
+{
+    auto linkedInstancesList = m_settings->getList<QString>("linkedInstancesList");
+    m_settings->setList("linkedInstancesList", list);
+}
+
+void BaseInstance::addLinkedInstanceId(const QString& id)
+{
+    auto linkedInstancesList = m_settings->getList<QString>("linkedInstancesList");
+    linkedInstancesList.append(id);
+    setLinkedInstances(linkedInstancesList);
+}
+
+bool BaseInstance::removeLinkedInstanceId(const QString& id)
+{
+    auto linkedInstancesList = m_settings->getList<QString>("linkedInstancesList");
+    int numRemoved = linkedInstancesList.removeAll(id);
+    setLinkedInstances(linkedInstancesList);
+    return numRemoved > 0;
+}
+
+bool BaseInstance::isLinkedToInstanceId(const QString& id) const
+{
+    auto linkedInstancesList = m_settings->getList<QString>("linkedInstancesList");
+    return linkedInstancesList.contains(id);
 }
 
 void BaseInstance::iconUpdated(QString key)

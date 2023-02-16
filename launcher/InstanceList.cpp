@@ -129,6 +129,16 @@ QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
     return mimeData;
 }
 
+QStringList InstanceList::getLinkedInstancesById(const QString &id) const
+{
+    QStringList linkedInstances;
+    for (auto inst : m_instances) {
+        if (inst->isLinkedToInstanceId(id))
+            linkedInstances.append(inst->id());
+    }
+    return linkedInstances;
+}
+
 int InstanceList::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);

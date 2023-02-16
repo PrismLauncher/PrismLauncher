@@ -19,6 +19,9 @@
 #include <QVariant>
 #include <QIODevice>
 
+#include <QJsonDocument>
+#include <QJsonArray>
+
 // Sectionless INI parser (for instance config files)
 class INIFile : public QMap<QString, QVariant>
 {
@@ -33,4 +36,36 @@ public:
     void set(QString key, QVariant val);
     static QString unescape(QString orig);
     static QString escape(QString orig);
+
+    void setList(QString key, QVariantList val);
+    template <typename T> void setList(QString key, QList<T> val)
+    {
+        QVariantList variantList;
+        variantList.reserve(val.size());
+        for (const T& v : val)
+        {
+            variantList.append(v);
+        }
+
+        this->setList(key, variantList);
+    }
+
+    QVariantList getList(QString key, QVariantList def) const;
+    template <typename T> QList<T>  getList(QString key, QList<T> def) const
+    {   
+        if (this->contains(key)) {
+            QVariant src = this->operator[](key);
+            QVariantList variantList = QJsonDocument::fromJson(src.toByteArray()).toVariant().toList();
+
+            QList<T>TList;
+            TList.reserve(variantList.size());
+            for (const QVariant& v : variantList)
+            {
+                TList.append(v.value<T>());
+            }
+            return TList;
+        }
+
+        return def;   
+    }
 };

@@ -137,6 +137,8 @@ void InstanceCopyTask::copyFinished()
     if(!m_keepPlaytime) {
         inst->resetTimePlayed();
     }
+    if (m_useLinks)
+        inst->addLinkedInstanceId(m_origInstance->id());
     emitSucceeded();
 }
 

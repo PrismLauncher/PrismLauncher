@@ -183,3 +183,21 @@ void INIFile::set(QString key, QVariant val)
 {
     this->operator[](key) = val;
 }
+
+void INIFile::setList(QString key, QVariantList val)
+{
+    QString stringList = QJsonDocument(QVariant(val).toJsonArray()).toJson(QJsonDocument::Compact);
+
+    this->operator[](key) = stringList;
+}
+
+QVariantList INIFile::getList(QString key, QVariantList def) const
+{
+    if (this->contains(key)) {
+        auto src = this->operator[](key);
+
+        return QJsonDocument::fromJson(src.toByteArray()).toVariant().toList();
+    }
+
+    return def;
+}
