@@ -1476,7 +1476,13 @@ bool canLink(const QString& src, const QString& dst)
 
 uintmax_t hardLinkCount(const QString& path)
 {
-    return fs::hard_link_count(StringUtils::toStdString(path));
+    std::error_code err;
+    int count = fs::hard_link_count(StringUtils::toStdString(path),  err);
+    if (err) {
+         qWarning() << "Failed to count hard links for" << path << ":" << QString::fromStdString(err.message());
+         count = 0;
+    }
+    return count;
 }
 
 }
