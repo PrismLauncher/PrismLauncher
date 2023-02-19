@@ -1,75 +1,36 @@
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
 #pragma once
 
 #include "modplatform/ModIndex.h"
-#include "modplatform/helpers/NetworkModAPI.h"
+#include "modplatform/helpers/NetworkResourceAPI.h"
 
-class FlameAPI : public NetworkModAPI {
+class FlameAPI : public NetworkResourceAPI {
    public:
-    auto matchFingerprints(const QList<uint>& fingerprints, QByteArray* response) -> NetJob::Ptr;
     auto getModFileChangelog(int modId, int fileId) -> QString;
     auto getModDescription(int modId) -> QString;
 
     auto getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion;
 
-    auto getProjects(QStringList addonIds, QByteArray* response) const -> NetJob* override;
-    auto getFiles(const QStringList& fileIds, QByteArray* response) const -> NetJob*;
+    Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
+    Task::Ptr matchFingerprints(const QList<uint>& fingerprints, QByteArray* response);
+    Task::Ptr getFiles(const QStringList& fileIds, QByteArray* response) const;
+
+    [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
    private:
-    inline auto getSortFieldInt(QString sortString) const -> int
+    static int getClassId(ModPlatform::ResourceType type)
     {
-        return sortString == "Featured"         ? 1
-               : sortString == "Popularity"     ? 2
-               : sortString == "LastUpdated"    ? 3
-               : sortString == "Name"           ? 4
-               : sortString == "Author"         ? 5
-               : sortString == "TotalDownloads" ? 6
-               : sortString == "Category"       ? 7
-               : sortString == "GameVersion"    ? 8
-                                                : 1;
+        switch (type) {
+            default:
+            case ModPlatform::ResourceType::MOD:
+                return 6;
+        }
     }
 
-   private:
-    inline auto getModSearchURL(SearchArgs& args) const -> QString override
-    {
-        auto gameVersionStr = args.versions.size() != 0 ? QString("gameVersion=%1").arg(args.versions.front().toString()) : QString();
-
-        return QString(
-                   "https://api.curseforge.com/v1/mods/search?"
-                   "gameId=432&"
-                   "classId=6&"
-
-                   "index=%1&"
-                   "pageSize=25&"
-                   "searchFilter=%2&"
-                   "sortField=%3&"
-                   "sortOrder=desc&"
-                   "modLoaderType=%4&"
-                   "%5")
-            .arg(args.offset)
-            .arg(args.search)
-            .arg(getSortFieldInt(args.sorting))
-            .arg(getMappedModLoader(args.loaders))
-            .arg(gameVersionStr);
-    };
-
-    inline auto getModInfoURL(QString& id) const -> QString override
-    {
-        return QString("https://api.curseforge.com/v1/mods/%1").arg(id);
-    };
-
-    inline auto getVersionsURL(VersionSearchArgs& args) const -> QString override
-    {
-        QString gameVersionQuery = args.mcVersions.size() == 1 ? QString("gameVersion=%1&").arg(args.mcVersions.front().toString()) : "";
-        QString modLoaderQuery = QString("modLoaderType=%1&").arg(getMappedModLoader(args.loaders));
-
-        return QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&%2%3")
-            .arg(args.addonId)
-            .arg(gameVersionQuery)
-            .arg(modLoaderQuery);
-    };
-
-   public:
-    static auto getMappedModLoader(const ModLoaderTypes loaders) -> int
+    static int getMappedModLoader(ModLoaderTypes loaders)
     {
         // https://docs.curseforge.com/?http#tocS_ModLoaderType
         if (loaders & Forge)
@@ -81,4 +42,43 @@ class FlameAPI : public NetworkModAPI {
             return 4;  // Quilt would probably be 5
         return 0;
     }
+
+   private:
+    [[nodiscard]] std::optional<QString> getSearchURL(SearchArgs const& args) const override
+    {
+        auto gameVersionStr = args.versions.has_value() ? QString("gameVersion=%1").arg(args.versions.value().front().toString()) : QString();
+
+        QStringList get_arguments;
+        get_arguments.append(QString("classId=%1").arg(getClassId(args.type)));
+        get_arguments.append(QString("index=%1").arg(args.offset));
+        get_arguments.append("pageSize=25");
+        if (args.search.has_value())
+            get_arguments.append(QString("searchFilter=%1").arg(args.search.value()));
+        if (args.sorting.has_value())
+            get_arguments.append(QString("sortField=%1").arg(args.sorting.value().index));
+        get_arguments.append("sortOrder=desc");
+        if (args.loaders.has_value())
+            get_arguments.append(QString("modLoaderType=%1").arg(getMappedModLoader(args.loaders.value())));
+        get_arguments.append(gameVersionStr);
+
+        return "https://api.curseforge.com/v1/mods/search?gameId=432&" + get_arguments.join('&');
+    };
+
+    [[nodiscard]] std::optional<QString> getInfoURL(QString const& id) const override
+    {
+        return QString("https://api.curseforge.com/v1/mods/%1").arg(id);
+    };
+
+    [[nodiscard]] std::optional<QString> getVersionsURL(VersionSearchArgs const& args) const override
+    {
+        QString url{QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&").arg(args.pack.addonId.toString())};
+
+        QStringList get_parameters;
+        if (args.mcVersions.has_value())
+            get_parameters.append(QString("gameVersion=%1").arg(args.mcVersions.value().front().toString()));
+        if (args.loaders.has_value())
+            get_parameters.append(QString("modLoaderType=%1").arg(getMappedModLoader(args.loaders.value())));
+
+        return url + get_parameters.join('&');
+    };
 };

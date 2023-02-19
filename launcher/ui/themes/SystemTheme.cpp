@@ -34,24 +34,22 @@
  */
 #include "SystemTheme.h"
 #include <QApplication>
+#include <QDebug>
 #include <QStyle>
 #include <QStyleFactory>
-#include <QDebug>
 #include "ThemeManager.h"
 
 SystemTheme::SystemTheme()
 {
     themeDebugLog() << "Determining System Theme...";
-    const auto & style = QApplication::style();
+    const auto& style = QApplication::style();
     systemPalette = style->standardPalette();
     QString lowerThemeName = style->objectName();
     themeDebugLog() << "System theme seems to be:" << lowerThemeName;
     QStringList styles = QStyleFactory::keys();
-    for(auto &st: styles)
-    {
+    for (auto& st : styles) {
         themeDebugLog() << "Considering theme from theme factory:" << st.toLower();
-        if(st.toLower() == lowerThemeName)
-        {
+        if (st.toLower() == lowerThemeName) {
             systemTheme = st;
             themeDebugLog() << "System theme has been determined to be:" << systemTheme;
             return;
@@ -62,14 +60,9 @@ SystemTheme::SystemTheme()
     themeDebugLog() << "System theme not found, defaulted to Fusion";
 }
 
-void SystemTheme::apply(bool initial)
+void SystemTheme::apply()
 {
-    // if we are applying the system theme as the first theme, just don't touch anything. it's for the better...
-    if(initial)
-    {
-        return;
-    }
-    ITheme::apply(initial);
+    ITheme::apply();
 }
 
 QString SystemTheme::id()
@@ -104,7 +97,7 @@ double SystemTheme::fadeAmount()
 
 QColor SystemTheme::fadeColor()
 {
-    return QColor(128,128,128);
+    return QColor(128, 128, 128);
 }
 
 bool SystemTheme::hasStyleSheet()

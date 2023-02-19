@@ -32,11 +32,11 @@ enum class ProcessingLevel { Full, BasicInfoOnly };
 
 bool process(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full);
 
-void processZIP(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full);
-void processFolder(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full);
+bool processZIP(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full);
+bool processFolder(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full);
 
-void processPackTXT(TexturePack& pack, QByteArray&& raw_data);
-void processPackPNG(TexturePack& pack, QByteArray&& raw_data);
+bool processPackTXT(TexturePack& pack, QByteArray&& raw_data);
+bool processPackPNG(TexturePack& pack, QByteArray&& raw_data);
 
 /** Checks whether a file is valid as a texture pack or not. */
 bool validate(QFileInfo file);

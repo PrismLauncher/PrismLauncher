@@ -13,5 +13,17 @@
         <file alias="rory-flat-xmas">rory-flat-xmas.png</file>
         <file alias="rory-flat-bday">rory-flat-bday.png</file>
         <file alias="rory-flat-spooky">rory-flat-spooky.png</file>
+        <!-- teawie images -->
+        <!-- copyright (c) SympathyTea 2023 -->
+        <!-- these are licensed under the CC BY-SA 4.0 and have been unmodified aside from downscaling -->
+        <!-- the full license with appropriate notices is avalible at https://creativecommons.org/licenses/by-sa/4.0/ -->
+        <file alias="teawie">teawie.png</file>
+        <!-- https://commons.wikimedia.org/wiki/File:Teawie.png -->
+        <file alias="teawie-xmas">teawie-xmas.png</file>
+        <!-- https://commons.wikimedia.org/wiki/File:Teawie_Holiday.png -->
+        <file alias="teawie-bday">teawie-bday.png</file>
+        <!-- https://commons.wikimedia.org/wiki/File:Teawie_Party.png -->
+        <file alias="teawie-spooky">teawie-spooky.png</file>
+        <!-- https://commons.wikimedia.org/wiki/File:Teawie_Halloween.png -->
     </qresource>
 </RCC>

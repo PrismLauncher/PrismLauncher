@@ -11,12 +11,13 @@
 
 #include "FileSystem.h"
 #include "Json.h"
+#include "minecraft/mod/ModDetails.h"
 #include "settings/INIFile.h"
 
-namespace {
+namespace ModUtils {
 
 // NEW format
-// https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/6f62b37cea040daf350dc253eae6326dd9c822c3
+// https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/c8d8f1929aff9979e322af79a59ce81f3e02db6a
 
 // OLD format:
 // https://github.com/MinecraftForge/FML/wiki/FML-mod-information-file/5bf6a2d05145ec79387acc0d45c958642fb049fc
@@ -73,10 +74,11 @@ ModDetails ReadMCModInfo(QByteArray contents)
             version = Json::ensureString(val, "").toInt();
 
         if (version != 2) {
-            qCritical() << "BAD stuff happened to mod json:";
-            qCritical() << contents;
-            return {};
+            qWarning() << QString(R"(The value of 'modListVersion' is "%1" (expected "2")! The file may be corrupted.)").arg(version);
+            qWarning() << "The contents of 'mcmod.info' are as follows:";
+            qWarning() << contents;
         }
+
         auto arrVal = jsonDoc.object().value("modlist");
         if (arrVal.isUndefined()) {
             arrVal = jsonDoc.object().value("modList");
@@ -283,35 +285,46 @@ ModDetails ReadLiteModInfo(QByteArray contents)
     return details;
 }
 
-}  // namespace
-
-LocalModParseTask::LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile)
-    : Task(nullptr, false), m_token(token), m_type(type), m_modFile(modFile), m_result(new Result())
-{}
-
-void LocalModParseTask::processAsZip()
+bool process(Mod& mod, ProcessingLevel level)
 {
-    QuaZip zip(m_modFile.filePath());
+    switch (mod.type()) {
+        case ResourceType::FOLDER:
+            return processFolder(mod, level);
+        case ResourceType::ZIPFILE:
+            return processZIP(mod, level);
+        case ResourceType::LITEMOD:
+            return processLitemod(mod);
+        default:
+            qWarning() << "Invalid type for mod parse task!";
+            return false;
+    }
+}
+
+bool processZIP(Mod& mod, ProcessingLevel level)
+{
+    ModDetails details;
+
+    QuaZip zip(mod.fileinfo().filePath());
     if (!zip.open(QuaZip::mdUnzip))
-        return;
+        return false;
 
     QuaZipFile file(&zip);
 
     if (zip.setCurrentFile("META-INF/mods.toml")) {
         if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
-            return;
+            return false;
         }
 
-        m_result->details = ReadMCModTOML(file.readAll());
+        details = ReadMCModTOML(file.readAll());
         file.close();
 
         // to replace ${file.jarVersion} with the actual version, as needed
-        if (m_result->details.version == "${file.jarVersion}") {
+        if (details.version == "${file.jarVersion}") {
             if (zip.setCurrentFile("META-INF/MANIFEST.MF")) {
                 if (!file.open(QIODevice::ReadOnly)) {
                     zip.close();
-                    return;
+                    return false;
                 }
 
                 // quick and dirty line-by-line parser
@@ -330,92 +343,130 @@ void LocalModParseTask::processAsZip()
                     manifestVersion = "NONE";
                 }
 
-                m_result->details.version = manifestVersion;
+                details.version = manifestVersion;
 
                 file.close();
             }
         }
 
         zip.close();
-        return;
+        mod.setDetails(details);
+
+        return true;
     } else if (zip.setCurrentFile("mcmod.info")) {
         if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
-            return;
+            return false;
         }
 
-        m_result->details = ReadMCModInfo(file.readAll());
+        details = ReadMCModInfo(file.readAll());
         file.close();
         zip.close();
-        return;
+
+        mod.setDetails(details);
+        return true;
     } else if (zip.setCurrentFile("quilt.mod.json")) {
         if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
-            return;
+            return false;
         }
 
-        m_result->details = ReadQuiltModInfo(file.readAll());
+        details = ReadQuiltModInfo(file.readAll());
         file.close();
         zip.close();
-        return;
+
+        mod.setDetails(details);
+        return true;
     } else if (zip.setCurrentFile("fabric.mod.json")) {
         if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
-            return;
+            return false;
         }
 
-        m_result->details = ReadFabricModInfo(file.readAll());
+        details = ReadFabricModInfo(file.readAll());
         file.close();
         zip.close();
-        return;
+
+        mod.setDetails(details);
+        return true;
     } else if (zip.setCurrentFile("forgeversion.properties")) {
         if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
-            return;
+            return false;
         }
 
-        m_result->details = ReadForgeInfo(file.readAll());
+        details = ReadForgeInfo(file.readAll());
         file.close();
         zip.close();
-        return;
+
+        mod.setDetails(details);
+        return true;
     }
 
     zip.close();
+    return false;  // no valid mod found in archive
 }
 
-void LocalModParseTask::processAsFolder()
+bool processFolder(Mod& mod, ProcessingLevel level)
 {
-    QFileInfo mcmod_info(FS::PathCombine(m_modFile.filePath(), "mcmod.info"));
-    if (mcmod_info.isFile()) {
+    ModDetails details;
+
+    QFileInfo mcmod_info(FS::PathCombine(mod.fileinfo().filePath(), "mcmod.info"));
+    if (mcmod_info.exists() && mcmod_info.isFile()) {
         QFile mcmod(mcmod_info.filePath());
         if (!mcmod.open(QIODevice::ReadOnly))
-            return;
+            return false;
         auto data = mcmod.readAll();
         if (data.isEmpty() || data.isNull())
-            return;
-        m_result->details = ReadMCModInfo(data);
+            return false;
+        details = ReadMCModInfo(data);
+
+        mod.setDetails(details);
+        return true;
     }
+
+    return false;  // no valid mcmod.info file found
 }
 
-void LocalModParseTask::processAsLitemod()
+bool processLitemod(Mod& mod, ProcessingLevel level)
 {
-    QuaZip zip(m_modFile.filePath());
+    ModDetails details;
+
+    QuaZip zip(mod.fileinfo().filePath());
     if (!zip.open(QuaZip::mdUnzip))
-        return;
+        return false;
 
     QuaZipFile file(&zip);
 
     if (zip.setCurrentFile("litemod.json")) {
         if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
-            return;
+            return false;
         }
 
-        m_result->details = ReadLiteModInfo(file.readAll());
+        details = ReadLiteModInfo(file.readAll());
         file.close();
+
+        mod.setDetails(details);
+        return true;
     }
     zip.close();
+
+    return false;  // no valid litemod.json found in archive
 }
+
+/** Checks whether a file is valid as a mod or not. */
+bool validate(QFileInfo file)
+{
+    Mod mod{ file };
+    return ModUtils::process(mod, ProcessingLevel::BasicInfoOnly) && mod.valid();
+}
+
+}  // namespace ModUtils
+
+LocalModParseTask::LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile)
+    : Task(nullptr, false), m_token(token), m_type(type), m_modFile(modFile), m_result(new Result())
+{}
 
 bool LocalModParseTask::abort()
 {
@@ -425,19 +476,10 @@ bool LocalModParseTask::abort()
 
 void LocalModParseTask::executeTask()
 {
-    switch (m_type) {
-        case ResourceType::ZIPFILE:
-            processAsZip();
-            break;
-        case ResourceType::FOLDER:
-            processAsFolder();
-            break;
-        case ResourceType::LITEMOD:
-            processAsLitemod();
-            break;
-        default:
-            break;
-    }
+    Mod mod{ m_modFile };
+    ModUtils::process(mod, ModUtils::ProcessingLevel::Full);
+
+    m_result->details = mod.details();
 
     if (m_aborted)
         emit finished();

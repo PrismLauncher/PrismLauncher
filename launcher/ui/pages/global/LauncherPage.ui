@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>514</width>
+    <width>511</width>
     <height>629</height>
    </rect>
   </property>
@@ -38,7 +38,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="featuresTab">
       <attribute name="title">
@@ -55,33 +55,6 @@
            <widget class="QCheckBox" name="autoUpdateCheckBox">
             <property name="text">
              <string>Check for updates automatically</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="updateChannelLabel">
-            <property name="text">
-             <string>Up&amp;date Channel:</string>
-            </property>
-            <property name="buddy">
-             <cstring>updateChannelComboBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="updateChannelComboBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="updateChannelDescLabel">
-            <property name="text">
-             <string>No channel selected.</string>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -243,150 +216,9 @@
          <property name="title">
           <string>Theme</string>
          </property>
-         <layout class="QFormLayout" name="formLayout">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>&amp;Icons</string>
-            </property>
-            <property name="buddy">
-             <cstring>themeComboBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="themeComboBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::StrongFocus</enum>
-            </property>
-            <item>
-             <property name="text">
-              <string>Simple (Colored Icons)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Simple (Light Icons)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Simple (Dark Icons)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Simple (Blue Icons)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Breeze Light</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Breeze Dark</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">OSX</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">iOS</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Flat</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Flat (White)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Legacy</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Custom</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>&amp;Colors</string>
-            </property>
-            <property name="buddy">
-             <cstring>themeComboBoxColors</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="themeComboBoxColors">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::StrongFocus</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>C&amp;at</string>
-            </property>
-            <property name="buddy">
-             <cstring>themeBackgroundCat</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="themeBackgroundCat">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::StrongFocus</enum>
-            </property>
-            <item>
-             <property name="text">
-              <string>Background Cat (from MultiMC)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Rory ID 11 (drawn by Ashtaka)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Rory ID 11 (flat edition, drawn by Ashtaka)</string>
-             </property>
-            </item>
-           </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="ThemeCustomizationWidget" name="themeCustomizationWidget" native="true"/>
           </item>
          </layout>
         </widget>
@@ -570,10 +402,17 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ThemeCustomizationWidget</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/ThemeCustomizationWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>autoUpdateCheckBox</tabstop>
-  <tabstop>updateChannelComboBox</tabstop>
   <tabstop>instDirTextBox</tabstop>
   <tabstop>instDirBrowseBtn</tabstop>
   <tabstop>modsDirTextBox</tabstop>
@@ -582,8 +421,6 @@
   <tabstop>iconsDirBrowseBtn</tabstop>
   <tabstop>sortLastLaunchedBtn</tabstop>
   <tabstop>sortByNameBtn</tabstop>
-  <tabstop>themeComboBox</tabstop>
-  <tabstop>themeComboBoxColors</tabstop>
   <tabstop>showConsoleCheck</tabstop>
   <tabstop>autoCloseConsoleCheck</tabstop>
   <tabstop>showConsoleErrorCheck</tabstop>

@@ -86,14 +86,14 @@ void ListModel::request()
     modpacks.clear();
     endResetModel();
 
-    auto *netJob = new NetJob("Atl::Request", APPLICATION->network());
+    auto netJob = makeShared<NetJob>("Atl::Request", APPLICATION->network());
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/json/packsnew.json");
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), &response));
     jobPtr = netJob;
     jobPtr->start();
 
-    QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::requestFinished);
-    QObject::connect(netJob, &NetJob::failed, this, &ListModel::requestFailed);
+    QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::requestFinished);
+    QObject::connect(netJob.get(), &NetJob::failed, this, &ListModel::requestFailed);
 }
 
 void ListModel::requestFinished()

@@ -155,7 +155,7 @@ void ListModel::fetchMore(const QModelIndex& parent)
 
 void ListModel::performPaginatedSearch()
 {
-    NetJob* netJob = new NetJob("Flame::Search", APPLICATION->network());
+    auto netJob = makeShared<NetJob>("Flame::Search", APPLICATION->network());
     auto searchUrl = QString(
                          "https://api.curseforge.com/v1/mods/search?"
                          "gameId=432&"
@@ -172,8 +172,8 @@ void ListModel::performPaginatedSearch()
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();
-    QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::searchRequestFinished);
-    QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
+    QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);
+    QObject::connect(netJob.get(), &NetJob::failed, this, &ListModel::searchRequestFailed);
 }
 
 void ListModel::searchWithTerm(const QString& term, int sort)

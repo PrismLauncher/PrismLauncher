@@ -172,7 +172,7 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings, const 
             auto libraryObject = Json::ensureObject(library, {}, "");
             auto libraryName = Json::ensureString(libraryObject, "name", "", "");
 
-            if (libraryName.startsWith("net.minecraftforge:forge:") && libraryName.contains('-'))
+            if ((libraryName.startsWith("net.minecraftforge:forge:")  || libraryName.startsWith("net.minecraftforge:fmlloader:")) && libraryName.contains('-'))
             {
                 QString libraryVersion = libraryName.section(':', 2);
                 if (!libraryVersion.startsWith("1.7.10-"))

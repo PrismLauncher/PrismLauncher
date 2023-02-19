@@ -49,7 +49,7 @@
 #include "BaseVersion.h"
 #include "MojangDownloadInfo.h"
 #include "net/Mode.h"
-#include "modplatform/ModAPI.h"
+#include "modplatform/ResourceAPI.h"
 
 class MinecraftInstance;
 struct PackProfileData;
@@ -136,16 +136,16 @@ signals:
 
 public:
     /// get the profile component by id
-    Component * getComponent(const QString &id);
+    ComponentPtr getComponent(const QString &id);
 
     /// get the profile component by index
-    Component * getComponent(int index);
+    ComponentPtr getComponent(int index);
 
     /// Add the component to the internal list of patches
     // todo(merged): is this the best approach
     void appendComponent(ComponentPtr component);
 
-    ModAPI::ModLoaderTypes getModLoaders();
+    std::optional<ResourceAPI::ModLoaderTypes> getModLoaders();
 
 private:
     void scheduleSave();

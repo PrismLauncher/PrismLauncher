@@ -7,7 +7,10 @@
 #include "FileSystem.h"
 #include "Json.h"
 
-#include "ModDownloadTask.h"
+#include "ResourceDownloadTask.h"
+
+#include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ResourceFolderModel.h"
 
 static FlameAPI api;
 
@@ -126,7 +129,8 @@ void FlameCheckUpdate::executeTask()
         setStatus(tr("Getting API response from CurseForge for '%1'...").arg(mod->name()));
         setProgress(i++, m_mods.size());
 
-        auto latest_ver = api.getLatestVersion({ mod->metadata()->project_id.toString(), m_game_versions, m_loaders });
+        ModPlatform::IndexedPack pack{ mod->metadata()->project_id.toString() };
+        auto latest_ver = api.getLatestVersion({ pack, m_game_versions, m_loaders });
 
         // Check if we were aborted while getting the latest version
         if (m_was_aborted) {
@@ -160,7 +164,7 @@ void FlameCheckUpdate::executeTask()
             for (auto& author : mod->authors())
                 pack.authors.append({ author });
             pack.description = mod->description();
-            pack.provider = ModPlatform::Provider::FLAME;
+            pack.provider = ModPlatform::ResourceProvider::FLAME;
 
             auto old_version = mod->version();
             if (old_version.isEmpty() && mod->status() != ModStatus::NotInstalled) {
@@ -168,10 +172,10 @@ void FlameCheckUpdate::executeTask()
                 old_version = current_ver.version;
             }
 
-            auto download_task = new ModDownloadTask(pack, latest_ver, m_mods_folder);
+            auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver, m_mods_folder);
             m_updatable.emplace_back(pack.name, mod->metadata()->hash, old_version, latest_ver.version,
                                      api.getModFileChangelog(latest_ver.addonId.toInt(), latest_ver.fileId.toInt()),
-                                     ModPlatform::Provider::FLAME, download_task);
+                                     ModPlatform::ResourceProvider::FLAME, download_task);
         }
     }
 

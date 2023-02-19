@@ -49,14 +49,9 @@
 
 namespace Net {
 
-Download::Download() : NetAction()
-{
-    m_state = State::Inactive;
-}
-
 auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
 {
-    auto* dl = new Download();
+    auto dl = makeShared<Download>();
     dl->m_url = url;
     dl->m_options = options;
     auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
@@ -67,7 +62,7 @@ auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Down
 
 auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> Download::Ptr
 {
-    auto* dl = new Download();
+    auto dl = makeShared<Download>();
     dl->m_url = url;
     dl->m_options = options;
     dl->m_sink.reset(new ByteArraySink(output));
@@ -76,7 +71,7 @@ auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> D
 
 auto Download::makeFile(QUrl url, QString path, Options options) -> Download::Ptr
 {
-    auto* dl = new Download();
+    auto dl = makeShared<Download>();
     dl->m_url = url;
     dl->m_options = options;
     dl->m_sink.reset(new FileSink(path));

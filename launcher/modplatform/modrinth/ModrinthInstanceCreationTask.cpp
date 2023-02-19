@@ -202,14 +202,14 @@ bool ModrinthCreationTask::createInstance()
 
     auto components = instance.getPackProfile();
     components->buildingFromScratch();
-    components->setComponentVersion("net.minecraft", minecraftVersion, true);
+    components->setComponentVersion("net.minecraft", m_minecraft_version, true);
 
-    if (!fabricVersion.isEmpty())
-        components->setComponentVersion("net.fabricmc.fabric-loader", fabricVersion);
-    if (!quiltVersion.isEmpty())
-        components->setComponentVersion("org.quiltmc.quilt-loader", quiltVersion);
-    if (!forgeVersion.isEmpty())
-        components->setComponentVersion("net.minecraftforge", forgeVersion);
+    if (!m_fabric_version.isEmpty())
+        components->setComponentVersion("net.fabricmc.fabric-loader", m_fabric_version);
+    if (!m_quilt_version.isEmpty())
+        components->setComponentVersion("org.quiltmc.quilt-loader", m_quilt_version);
+    if (!m_forge_version.isEmpty())
+        components->setComponentVersion("net.minecraftforge", m_forge_version);
 
     if (m_instIcon != "default") {
         instance.setIconKey(m_instIcon);
@@ -217,16 +217,27 @@ bool ModrinthCreationTask::createInstance()
         instance.setIconKey("modrinth");
     }
 
-    instance.setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
+    // Don't add managed info to packs without an ID (most likely imported from ZIP)
+    if (!m_managed_id.isEmpty())
+        instance.setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
     instance.setName(name());
     instance.saveNow();
 
-    m_files_job = new NetJob(tr("Mod download"), APPLICATION->network());
+    m_files_job.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
+
+    auto root_modpack_path = FS::PathCombine(m_stagingPath, ".minecraft");
+    auto root_modpack_url = QUrl::fromLocalFile(root_modpack_path);
 
     for (auto file : m_files) {
-        auto path = FS::PathCombine(m_stagingPath, ".minecraft", file.path);
-        qDebug() << "Will try to download" << file.downloads.front() << "to" << path;
-        auto dl = Net::Download::makeFile(file.downloads.dequeue(), path);
+        auto file_path = FS::PathCombine(root_modpack_path, file.path);
+        if (!root_modpack_url.isParentOf(QUrl::fromLocalFile(file_path))) {
+            // This means we somehow got out of the root folder, so abort here to prevent exploits
+            setError(tr("One of the files has a path that leads to an arbitrary location (%1). This is a security risk and isn't allowed.").arg(file.path));
+            return false;
+        }
+
+        qDebug() << "Will try to download" << file.downloads.front() << "to" << file_path;
+        auto dl = Net::Download::makeFile(file.downloads.dequeue(), file_path);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         m_files_job->addNetAction(dl);
 
@@ -234,8 +245,8 @@ bool ModrinthCreationTask::createInstance()
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
-            connect(dl.get(), &NetAction::failed, [this, &file, path, param] {
-                auto ndl = Net::Download::makeFile(file.downloads.dequeue(), path);
+            connect(dl.get(), &NetAction::failed, [this, &file, file_path, param] {
+                auto ndl = Net::Download::makeFile(file.downloads.dequeue(), file_path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 m_files_job->addNetAction(ndl);
                 if (auto shared = param.lock()) shared->succeeded();
@@ -277,7 +288,7 @@ bool ModrinthCreationTask::createInstance()
     return ended_well;
 }
 
-bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<Modrinth::File>& files, bool set_managed_info, bool show_optional_dialog)
+bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<Modrinth::File>& files, bool set_internal_data, bool show_optional_dialog)
 {
     try {
         auto doc = Json::requireDocument(index_path);
@@ -289,7 +300,7 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
                 throw JSONValidationError("Unknown game: " + game);
             }
 
-            if (set_managed_info) {
+            if (set_internal_data) {
                 if (m_managed_version_id.isEmpty())
                     m_managed_version_id = Json::ensureString(obj, "versionId", {}, "Managed ID");
                 m_managed_name = Json::ensureString(obj, "name", {}, "Managed Name");
@@ -365,19 +376,21 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
                 files.push_back(file);
             }
 
-            auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
-            for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
-                QString name = it.key();
-                if (name == "minecraft") {
-                    minecraftVersion = Json::requireString(*it, "Minecraft version");
-                } else if (name == "fabric-loader") {
-                    fabricVersion = Json::requireString(*it, "Fabric Loader version");
-                } else if (name == "quilt-loader") {
-                    quiltVersion = Json::requireString(*it, "Quilt Loader version");
-                } else if (name == "forge") {
-                    forgeVersion = Json::requireString(*it, "Forge version");
-                } else {
-                    throw JSONValidationError("Unknown dependency type: " + name);
+            if (set_internal_data) {
+                auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
+                for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
+                    QString name = it.key();
+                    if (name == "minecraft") {
+                        m_minecraft_version = Json::requireString(*it, "Minecraft version");
+                    } else if (name == "fabric-loader") {
+                        m_fabric_version = Json::requireString(*it, "Fabric Loader version");
+                    } else if (name == "quilt-loader") {
+                        m_quilt_version = Json::requireString(*it, "Quilt Loader version");
+                    } else if (name == "forge") {
+                        m_forge_version = Json::requireString(*it, "Forge version");
+                    } else {
+                        throw JSONValidationError("Unknown dependency type: " + name);
+                    }
                 }
             }
         } else {

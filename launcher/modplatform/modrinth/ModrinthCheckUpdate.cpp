@@ -4,11 +4,14 @@
 
 #include "Json.h"
 
-#include "ModDownloadTask.h"
+#include "ResourceDownloadTask.h"
 
 #include "modplatform/helpers/HashUtils.h"
 
 #include "tasks/ConcurrentTask.h"
+
+#include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ResourceFolderModel.h"
 
 static ModrinthAPI api;
 static ModPlatform::ProviderCapabilities ProviderCaps;
@@ -34,7 +37,7 @@ void ModrinthCheckUpdate::executeTask()
 
     // Create all hashes
     QStringList hashes;
-    auto best_hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
+    auto best_hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
     ConcurrentTask hashing_task(this, "MakeModrinthHashesTask", 10);
     for (auto* mod : m_mods) {
@@ -108,11 +111,13 @@ void ModrinthCheckUpdate::executeTask()
                 // Sometimes a version may have multiple files, one with "forge" and one with "fabric",
                 // so we may want to filter it
                 QString loader_filter;
-                static auto flags = { ModAPI::ModLoaderType::Forge, ModAPI::ModLoaderType::Fabric, ModAPI::ModLoaderType::Quilt };
-                for (auto flag : flags) {
-                    if (m_loaders.testFlag(flag)) {
-                        loader_filter = api.getModLoaderString(flag);
-                        break;
+                if (m_loaders.has_value()) {
+                    static auto flags = { ResourceAPI::ModLoaderType::Forge, ResourceAPI::ModLoaderType::Fabric, ResourceAPI::ModLoaderType::Quilt };
+                    for (auto flag : flags) {
+                        if (m_loaders.value().testFlag(flag)) {
+                            loader_filter = api.getModLoaderString(flag);
+                            break;
+                        }
                     }
                 }
 
@@ -152,12 +157,12 @@ void ModrinthCheckUpdate::executeTask()
                     for (auto& author : mod->authors())
                         pack.authors.append({ author });
                     pack.description = mod->description();
-                    pack.provider = ModPlatform::Provider::MODRINTH;
+                    pack.provider = ModPlatform::ResourceProvider::MODRINTH;
 
-                    auto download_task = new ModDownloadTask(pack, project_ver, m_mods_folder);
+                    auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_mods_folder);
 
                     m_updatable.emplace_back(pack.name, hash, mod->version(), project_ver.version_number, project_ver.changelog,
-                                             ModPlatform::Provider::MODRINTH, download_task);
+                                             ModPlatform::ResourceProvider::MODRINTH, download_task);
                 }
             }
         } catch (Json::JsonException& e) {
@@ -170,7 +175,7 @@ void ModrinthCheckUpdate::executeTask()
     setStatus(tr("Waiting for the API response from Modrinth..."));
     setProgress(1, 3);
 
-    m_net_job = job.get();
+    m_net_job = qSharedPointerObjectCast<NetJob, Task>(job);
     job->start();
 
     lock.exec();

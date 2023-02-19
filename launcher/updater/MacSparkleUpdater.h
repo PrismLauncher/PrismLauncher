@@ -119,8 +119,6 @@ private:
     class Private;
 
     Private *priv;
-
-    void loadChannelsFromSettings();
 };
 
 #endif //LAUNCHER_MACSPARKLEUPDATER_H

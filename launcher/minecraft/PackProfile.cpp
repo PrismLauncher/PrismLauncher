@@ -55,12 +55,13 @@
 #include "PackProfile_p.h"
 #include "ComponentUpdateTask.h"
 
-#include "modplatform/ModAPI.h"
+#include "Application.h"
+#include "modplatform/ResourceAPI.h"
 
-static const QMap<QString, ModAPI::ModLoaderType> modloaderMapping{
-    {"net.minecraftforge", ModAPI::Forge},
-    {"net.fabricmc.fabric-loader", ModAPI::Fabric},
-    {"org.quiltmc.quilt-loader", ModAPI::Quilt}
+static const QMap<QString, ResourceAPI::ModLoaderType> modloaderMapping{
+    {"net.minecraftforge", ResourceAPI::Forge},
+    {"net.fabricmc.fabric-loader", ResourceAPI::Fabric},
+    {"org.quiltmc.quilt-loader", ResourceAPI::Quilt}
 };
 
 PackProfile::PackProfile(MinecraftInstance * instance)
@@ -129,7 +130,7 @@ static ComponentPtr componentFromJsonV1(PackProfile * parent, const QString & co
     // critical
     auto uid = Json::requireString(obj.value("uid"));
     auto filePath = componentJsonPattern.arg(uid);
-    auto component = new Component(parent, uid);
+    auto component = makeShared<Component>(parent, uid);
     component->m_version = Json::ensureString(obj.value("version"));
     component->m_dependencyOnly = Json::ensureBoolean(obj.value("dependencyOnly"), false);
     component->m_important = Json::ensureBoolean(obj.value("important"), false);
@@ -517,23 +518,23 @@ bool PackProfile::revertToBase(int index)
     return true;
 }
 
-Component * PackProfile::getComponent(const QString &id)
+ComponentPtr PackProfile::getComponent(const QString &id)
 {
     auto iter = d->componentIndex.find(id);
     if (iter == d->componentIndex.end())
     {
         return nullptr;
     }
-    return (*iter).get();
+    return (*iter);
 }
 
-Component * PackProfile::getComponent(int index)
+ComponentPtr PackProfile::getComponent(int index)
 {
     if(index < 0 || index >= d->components.size())
     {
         return nullptr;
     }
-    return d->components[index].get();
+    return d->components[index];
 }
 
 QVariant PackProfile::data(const QModelIndex &index, int role) const
@@ -764,7 +765,7 @@ bool PackProfile::installEmpty(const QString& uid, const QString& name)
     file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
     file.close();
 
-    appendComponent(new Component(this, f->uid, f));
+    appendComponent(makeShared<Component>(this, f->uid, f));
     scheduleSave();
     invalidateLaunchProfile();
     return true;
@@ -871,7 +872,7 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
         file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
         file.close();
 
-        appendComponent(new Component(this, f->uid, f));
+        appendComponent(makeShared<Component>(this, f->uid, f));
     }
     scheduleSave();
     invalidateLaunchProfile();
@@ -932,7 +933,7 @@ bool PackProfile::installCustomJar_internal(QString filepath)
     file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
     file.close();
 
-    appendComponent(new Component(this, f->uid, f));
+    appendComponent(makeShared<Component>(this, f->uid, f));
 
     scheduleSave();
     invalidateLaunchProfile();
@@ -988,7 +989,7 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
         patchFile.write(OneSixVersionFormat::versionFileToJson(versionFile).toJson());
         patchFile.close();
 
-        appendComponent(new Component(this, versionFile->uid, versionFile));
+        appendComponent(makeShared<Component>(this, versionFile->uid, versionFile));
     }
 
     scheduleSave();
@@ -1037,7 +1038,7 @@ bool PackProfile::setComponentVersion(const QString& uid, const QString& version
     else
     {
         // add new
-        auto component = new Component(this, uid);
+        auto component = makeShared<Component>(this, uid);
         component->m_version = version;
         component->m_important = important;
         appendComponent(component);
@@ -1066,19 +1067,22 @@ void PackProfile::disableInteraction(bool disable)
     }
 }
 
-ModAPI::ModLoaderTypes PackProfile::getModLoaders()
+std::optional<ResourceAPI::ModLoaderTypes> PackProfile::getModLoaders()
 {
-    ModAPI::ModLoaderTypes result = ModAPI::Unspecified;
+    ResourceAPI::ModLoaderTypes result;
+    bool has_any_loader = false;
 
-    QMapIterator<QString, ModAPI::ModLoaderType> i(modloaderMapping);
+    QMapIterator<QString, ResourceAPI::ModLoaderType> i(modloaderMapping);
 
-    while (i.hasNext())
-    {
+    while (i.hasNext()) {
         i.next();
-        Component* c = getComponent(i.key());
-        if (c != nullptr && c->isEnabled()) {
+        if (auto c = getComponent(i.key()); c != nullptr && c->isEnabled()) {
             result |= i.value();
+            has_any_loader = true;
         }
     }
+
+    if (!has_any_loader)
+        return {};
     return result;
 }

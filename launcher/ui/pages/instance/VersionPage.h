@@ -99,7 +99,7 @@ private slots:
     void updateVersionControls();
 
 private:
-    Component * current();
+    ComponentPtr current();
     int currentRow();
     void updateButtons(int row = -1);
     void preselect(int row = 0);

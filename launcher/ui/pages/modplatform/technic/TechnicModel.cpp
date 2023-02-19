@@ -112,7 +112,7 @@ void Technic::ListModel::searchWithTerm(const QString& term)
 
 void Technic::ListModel::performSearch()
 {
-    NetJob *netJob = new NetJob("Technic::Search", APPLICATION->network());
+    auto netJob = makeShared<NetJob>("Technic::Search", APPLICATION->network());
     QString searchUrl = "";
     if (currentSearchTerm.isEmpty()) {
         searchUrl = QString("%1trending?build=%2")
@@ -137,8 +137,8 @@ void Technic::ListModel::performSearch()
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();
-    QObject::connect(netJob, &NetJob::succeeded, this, &ListModel::searchRequestFinished);
-    QObject::connect(netJob, &NetJob::failed, this, &ListModel::searchRequestFailed);
+    QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);
+    QObject::connect(netJob.get(), &NetJob::failed, this, &ListModel::searchRequestFailed);
 }
 
 void Technic::ListModel::searchRequestFinished()

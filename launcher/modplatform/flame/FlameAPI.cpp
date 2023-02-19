@@ -1,15 +1,19 @@
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include "FlameAPI.h"
 #include "FlameModIndex.h"
 
 #include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
-
+#include "net/NetJob.h"
 #include "net/Upload.h"
 
-auto FlameAPI::matchFingerprints(const QList<uint>& fingerprints, QByteArray* response) -> NetJob::Ptr
+Task::Ptr FlameAPI::matchFingerprints(const QList<uint>& fingerprints, QByteArray* response)
 {
-    auto* netJob = new NetJob(QString("Flame::MatchFingerprints"), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("Flame::MatchFingerprints"), APPLICATION->network());
 
     QJsonObject body_obj;
     QJsonArray fingerprints_arr;
@@ -24,7 +28,7 @@ auto FlameAPI::matchFingerprints(const QList<uint>& fingerprints, QByteArray* re
 
     netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/fingerprints"), response, body_raw));
 
-    QObject::connect(netJob, &NetJob::finished, [response] { delete response; });
+    QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
 
     return netJob;
 }
@@ -106,13 +110,19 @@ auto FlameAPI::getModDescription(int modId) -> QString
 
 auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion
 {
+    auto versions_url_optional = getVersionsURL(args);
+    if (!versions_url_optional.has_value())
+        return {};
+
+    auto versions_url = versions_url_optional.value();
+
     QEventLoop loop;
 
-    auto netJob = new NetJob(QString("Flame::GetLatestVersion(%1)").arg(args.addonId), APPLICATION->network());
+    auto netJob = new NetJob(QString("Flame::GetLatestVersion(%1)").arg(args.pack.name), APPLICATION->network());
     auto response = new QByteArray();
     ModPlatform::IndexedVersion ver;
 
-    netJob->addNetAction(Net::Download::makeByteArray(getVersionsURL(args), response));
+    netJob->addNetAction(Net::Download::makeByteArray(versions_url, response));
 
     QObject::connect(netJob, &NetJob::succeeded, [response, args, &ver] {
         QJsonParseError parse_error{};
@@ -161,9 +171,9 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
     return ver;
 }
 
-auto FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const -> NetJob*
+Task::Ptr FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const
 {
-    auto* netJob = new NetJob(QString("Flame::GetProjects"), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("Flame::GetProjects"), APPLICATION->network());
 
     QJsonObject body_obj;
     QJsonArray addons_arr;
@@ -178,15 +188,15 @@ auto FlameAPI::getProjects(QStringList addonIds, QByteArray* response) const -> 
 
     netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/mods"), response, body_raw));
 
-    QObject::connect(netJob, &NetJob::finished, [response, netJob] { delete response; netJob->deleteLater(); });
-    QObject::connect(netJob, &NetJob::failed, [body_raw] { qDebug() << body_raw; });
+    QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
+    QObject::connect(netJob.get(), &NetJob::failed, [body_raw] { qDebug() << body_raw; });
 
     return netJob;
 }
 
-auto FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response) const -> NetJob*
+Task::Ptr FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response) const
 {
-    auto* netJob = new NetJob(QString("Flame::GetFiles"), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("Flame::GetFiles"), APPLICATION->network());
 
     QJsonObject body_obj;
     QJsonArray files_arr;
@@ -201,8 +211,23 @@ auto FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response) const 
 
     netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/mods/files"), response, body_raw));
 
-    QObject::connect(netJob, &NetJob::finished, [response, netJob] { delete response; netJob->deleteLater(); });
-    QObject::connect(netJob, &NetJob::failed, [body_raw] { qDebug() << body_raw; });
+    QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
+    QObject::connect(netJob.get(), &NetJob::failed, [body_raw] { qDebug() << body_raw; });
 
     return netJob;
+}
+
+// https://docs.curseforge.com/?python#tocS_ModsSearchSortField
+static QList<ResourceAPI::SortingMethod> s_sorts = { { 1, "Featured", QObject::tr("Sort by Featured") },
+                                                     { 2, "Popularity", QObject::tr("Sort by Popularity") },
+                                                     { 3, "LastUpdated", QObject::tr("Sort by Last Updated") },
+                                                     { 4, "Name", QObject::tr("Sort by Name") },
+                                                     { 5, "Author", QObject::tr("Sort by Author") },
+                                                     { 6, "TotalDownloads", QObject::tr("Sort by Downloads") },
+                                                     { 7, "Category", QObject::tr("Sort by Category") },
+                                                     { 8, "GameVersion", QObject::tr("Sort by Game Version") } };
+
+QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
+{
+    return s_sorts;
 }

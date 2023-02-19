@@ -112,7 +112,15 @@ void LaunchController::decideAccount()
         }
     }
 
-    m_accountToUse = accounts->defaultAccount();
+    // Select the account to use. If the instance has a specific account set, that will be used. Otherwise, the default account will be used
+    auto instanceAccountId = m_instance->settings()->get("InstanceAccountId").toString();
+    auto instanceAccountIndex = accounts->findAccountByProfileId(instanceAccountId);
+    if (instanceAccountIndex == -1) {
+        m_accountToUse = accounts->defaultAccount();
+    } else {
+        m_accountToUse = accounts->at(instanceAccountIndex);
+    }
+
     if (!m_accountToUse)
     {
         // If no default account is set, ask the user which one to use.
@@ -374,15 +382,15 @@ void LaunchController::launchInstance()
             }
             resolved_servers = resolved_servers + "]\n\n";
         }
-        m_launcher->prependStep(new TextPrint(m_launcher.get(), resolved_servers, MessageLevel::Launcher));
+        m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), resolved_servers, MessageLevel::Launcher));
     } else {
         online_mode = m_demo ? "demo" : "offline";
     }
 
-    m_launcher->prependStep(new TextPrint(m_launcher.get(), "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
+    m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
 
     // Prepend Version
-    m_launcher->prependStep(new TextPrint(m_launcher.get(), BuildConfig.LAUNCHER_DISPLAYNAME + " version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::Launcher));
+    m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), BuildConfig.LAUNCHER_DISPLAYNAME + " version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::Launcher));
     m_launcher->start();
 }
 

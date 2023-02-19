@@ -49,17 +49,22 @@
 
 #include "JavaCommon.h"
 #include "Application.h"
+#include "minecraft/auth/AccountList.h"
 
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 #include "FileSystem.h"
-
 
 InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
     : QWidget(parent), ui(new Ui::InstanceSettingsPage), m_instance(inst)
 {
     m_settings = inst->settings();
     ui->setupUi(this);
+
+    accountMenu = new QMenu(this);
+    // Use undocumented property... https://stackoverflow.com/questions/7121718/create-a-scrollbar-in-a-submenu-qt
+    accountMenu->setStyleSheet("QMenu { menu-scrollable: 1; }");
+    ui->instanceAccountSelector->setMenu(accountMenu);
 
     connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
     connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
@@ -276,8 +281,15 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("JoinServerOnLaunchAddress");
     }
 
-	bool onlineFixes = ui->onlineFixes->isChecked();
-	m_settings->set("OnlineFixes", onlineFixes);
+    // Use an account for this instance
+    bool useAccountForInstance = ui->instanceAccountGroupBox->isChecked();
+    m_settings->set("UseAccountForInstance", useAccountForInstance);
+    if (!useAccountForInstance) {
+        m_settings->reset("InstanceAccountId");
+    }
+
+    bool onlineFixes = ui->onlineFixes->isChecked();
+    m_settings->set("OnlineFixes", onlineFixes);
 
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
@@ -377,8 +389,11 @@ void InstanceSettingsPage::loadSettings()
     ui->serverJoinGroupBox->setChecked(m_settings->get("JoinServerOnLaunch").toBool());
     ui->serverJoinAddress->setText(m_settings->get("JoinServerOnLaunchAddress").toString());
 
-	ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
-	ui->onlineFixes->setVisible(m_instance->traits().contains("legacyServices"));
+    ui->instanceAccountGroupBox->setChecked(m_settings->get("UseAccountForInstance").toBool());
+    updateAccountsMenu();
+
+    ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
+    ui->onlineFixes->setVisible(m_instance->traits().contains("legacyServices"));
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
@@ -442,6 +457,65 @@ void InstanceSettingsPage::on_javaTestBtn_clicked()
         ui->minMemSpinBox->value(), ui->maxMemSpinBox->value(), ui->permGenSpinBox->value()));
     connect(checker.get(), SIGNAL(finished()), SLOT(checkerFinished()));
     checker->run();
+}
+
+void InstanceSettingsPage::updateAccountsMenu()
+{
+    accountMenu->clear();
+
+    auto accounts = APPLICATION->accounts();
+    int accountIndex = accounts->findAccountByProfileId(m_settings->get("InstanceAccountId").toString());
+    MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
+
+    if (accountIndex != -1 && accounts->at(accountIndex)) {
+        defaultAccount = accounts->at(accountIndex);
+    }
+
+    if (defaultAccount) {
+        ui->instanceAccountSelector->setText(defaultAccount->profileName());
+        ui->instanceAccountSelector->setIcon(getFaceForAccount(defaultAccount));
+    } else {
+        ui->instanceAccountSelector->setText(tr("No default account"));
+        ui->instanceAccountSelector->setIcon(APPLICATION->getThemedIcon("noaccount"));
+    }
+
+    for (int i = 0; i < accounts->count(); i++) {
+        MinecraftAccountPtr account = accounts->at(i);
+        QAction* action = new QAction(account->profileName(), this);
+        action->setData(i);
+        action->setCheckable(true);
+        if (accountIndex == i) {
+            action->setChecked(true);
+        }
+        action->setIcon(getFaceForAccount(account));
+        accountMenu->addAction(action);
+        connect(action, SIGNAL(triggered(bool)), this, SLOT(changeInstanceAccount()));
+    }
+}
+
+QIcon InstanceSettingsPage::getFaceForAccount(MinecraftAccountPtr account)
+{
+    if (auto face = account->getFace(); !face.isNull()) {
+        return face;
+    }
+
+    return APPLICATION->getThemedIcon("noaccount");
+}
+
+void InstanceSettingsPage::changeInstanceAccount()
+{
+    QAction* sAction = (QAction*)sender();
+
+    Q_ASSERT(sAction->data().type() == QVariant::Type::Int);
+
+    QVariant data = sAction->data();
+    int index = data.toInt();
+    auto accounts = APPLICATION->accounts();
+    auto account = accounts->at(index);
+    m_settings->set("InstanceAccountId", account->profileId());
+
+    ui->instanceAccountSelector->setText(account->profileName());
+    ui->instanceAccountSelector->setIcon(getFaceForAccount(account));
 }
 
 void InstanceSettingsPage::on_maxMemSpinBox_valueChanged(int i)

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,8 +49,8 @@
 
 #include "ui/GuiUtil.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/ModDownloadDialog.h"
 #include "ui/dialogs/ModUpdateDialog.h"
+#include "ui/dialogs/ResourceDownloadDialog.h"
 
 #include "DesktopServices.h"
 
@@ -58,7 +59,7 @@
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/ModFolderModel.h"
 
-#include "modplatform/ModAPI.h"
+#include "modplatform/ResourceAPI.h"
 
 #include "Version.h"
 #include "tasks/ConcurrentTask.h"
@@ -139,13 +140,8 @@ bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelI
     return true;
 }
 
-void ModFolderPage::removeItem()
+void ModFolderPage::removeItems(const QItemSelection &selection)
 {
-
-    if (!m_controlsEnabled)
-        return;
-
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     m_model->deleteMods(selection.indexes());
 }
 
@@ -157,12 +153,12 @@ void ModFolderPage::installMods()
         return;  // this is a null instance or a legacy instance
 
     auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
-    if (profile->getModLoaders() == ModAPI::Unspecified) {
+    if (!profile->getModLoaders().has_value()) {
         QMessageBox::critical(this, tr("Error"), tr("Please install a mod loader first!"));
         return;
     }
 
-    ModDownloadDialog mdownload(m_model, this, m_instance);
+    ResourceDownload::ModDownloadDialog mdownload(this, m_model, m_instance);
     if (mdownload.exec()) {
         ConcurrentTask* tasks = new ConcurrentTask(this);
         connect(tasks, &Task::failed, [this, tasks](QString reason) {

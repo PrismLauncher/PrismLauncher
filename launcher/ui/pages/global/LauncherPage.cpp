@@ -44,14 +44,13 @@
 #include <QTextCharFormat>
 #include <QMenuBar>
 
-#include "updater/UpdateChecker.h"
-
 #include "settings/SettingsObject.h"
 #include <FileSystem.h>
 #include "Application.h"
 #include "BuildConfig.h"
 #include "DesktopServices.h"
 #include "ui/themes/ITheme.h"
+#include "updater/ExternalUpdater.h"
 
 #include <QApplication>
 #include <QProcess>
@@ -80,32 +79,12 @@ LauncherPage::LauncherPage(QWidget *parent) : QWidget(parent), ui(new Ui::Launch
     m_languageModel = APPLICATION->translations();
     loadSettings();
 
-    if(BuildConfig.UPDATER_ENABLED)
-    {
-        QObject::connect(APPLICATION->updateChecker().get(), &UpdateChecker::channelListLoaded, this, &LauncherPage::refreshUpdateChannelList);
+    ui->updateSettingsBox->setHidden(!APPLICATION->updater());
 
-        if (APPLICATION->updateChecker()->hasChannels())
-        {
-            refreshUpdateChannelList();
-        }
-        else
-        {
-            APPLICATION->updateChecker()->updateChanList(false);
-        }
-
-        if (APPLICATION->updateChecker()->getExternalUpdater())
-        {
-            ui->updateChannelComboBox->setVisible(false);
-            ui->updateChannelDescLabel->setVisible(false);
-            ui->updateChannelLabel->setVisible(false);
-        }
-    }
-    else
-    {
-        ui->updateSettingsBox->setHidden(true);
-    }
     connect(ui->fontSizeBox, SIGNAL(valueChanged(int)), SLOT(refreshFontPreview()));
     connect(ui->consoleFont, SIGNAL(currentFontChanged(QFont)), SLOT(refreshFontPreview()));
+
+    connect(ui->themeCustomizationWidget, &ThemeCustomizationWidget::currentCatChanged, APPLICATION, &Application::currentCatChanged);
 }
 
 LauncherPage::~LauncherPage()
@@ -198,159 +177,14 @@ void LauncherPage::on_metadataDisableBtn_clicked()
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
 }
 
-void LauncherPage::refreshUpdateChannelList()
-{
-    // Stop listening for selection changes. It's going to change a lot while we update it and
-    // we don't need to update the
-    // description label constantly.
-    QObject::disconnect(ui->updateChannelComboBox, SIGNAL(currentIndexChanged(int)), this,
-                        SLOT(updateChannelSelectionChanged(int)));
-
-    QList<UpdateChecker::ChannelListEntry> channelList = APPLICATION->updateChecker()->getChannelList();
-    ui->updateChannelComboBox->clear();
-    int selection = -1;
-    for (int i = 0; i < channelList.count(); i++)
-    {
-        UpdateChecker::ChannelListEntry entry = channelList.at(i);
-
-        // When it comes to selection, we'll rely on the indexes of a channel entry being the
-        // same in the
-        // combo box as it is in the update checker's channel list.
-        // This probably isn't very safe, but the channel list doesn't change often enough (or
-        // at all) for
-        // this to be a big deal. Hope it doesn't break...
-        ui->updateChannelComboBox->addItem(entry.name);
-
-        // If the update channel we just added was the selected one, set the current index in
-        // the combo box to it.
-        if (entry.id == m_currentUpdateChannel)
-        {
-            qDebug() << "Selected index" << i << "channel id" << m_currentUpdateChannel;
-            selection = i;
-        }
-    }
-
-    ui->updateChannelComboBox->setCurrentIndex(selection);
-
-    // Start listening for selection changes again and update the description label.
-    QObject::connect(ui->updateChannelComboBox, SIGNAL(currentIndexChanged(int)), this,
-                     SLOT(updateChannelSelectionChanged(int)));
-    refreshUpdateChannelDesc();
-
-    // Now that we've updated the channel list, we can enable the combo box.
-    // It starts off disabled so that if the channel list hasn't been loaded, it will be
-    // disabled.
-    ui->updateChannelComboBox->setEnabled(true);
-}
-
-void LauncherPage::updateChannelSelectionChanged(int index)
-{
-    refreshUpdateChannelDesc();
-}
-
-void LauncherPage::refreshUpdateChannelDesc()
-{
-    // Get the channel list.
-    QList<UpdateChecker::ChannelListEntry> channelList = APPLICATION->updateChecker()->getChannelList();
-    int selectedIndex = ui->updateChannelComboBox->currentIndex();
-    if (selectedIndex < 0)
-    {
-        return;
-    }
-    if (selectedIndex < channelList.count())
-    {
-        // Find the channel list entry with the given index.
-        UpdateChecker::ChannelListEntry selected = channelList.at(selectedIndex);
-
-        // Set the description text.
-        ui->updateChannelDescLabel->setText(selected.description);
-
-        // Set the currently selected channel ID.
-        m_currentUpdateChannel = selected.id;
-    }
-}
-
 void LauncherPage::applySettings()
 {
     auto s = APPLICATION->settings();
 
     // Updates
-    if (BuildConfig.UPDATER_ENABLED && APPLICATION->updateChecker()->getExternalUpdater())
+    if (APPLICATION->updater())
     {
-        APPLICATION->updateChecker()->getExternalUpdater()->setAutomaticallyChecksForUpdates(
-                ui->autoUpdateCheckBox->isChecked());
-    }
-    else
-    {
-        s->set("AutoUpdate", ui->autoUpdateCheckBox->isChecked());
-    }
-
-    s->set("UpdateChannel", m_currentUpdateChannel);
-    auto original = s->get("IconTheme").toString();
-    //FIXME: make generic
-    switch (ui->themeComboBox->currentIndex())
-    {
-    case 0:
-        s->set("IconTheme", "pe_colored");
-        break;
-    case 1:
-        s->set("IconTheme", "pe_light");
-        break;
-    case 2:
-        s->set("IconTheme", "pe_dark");
-        break;
-    case 3:
-        s->set("IconTheme", "pe_blue");
-        break;
-    case 4:
-        s->set("IconTheme", "breeze_light");
-        break;
-    case 5:
-        s->set("IconTheme", "breeze_dark");
-        break;
-    case 6:
-        s->set("IconTheme", "OSX");
-        break;
-    case 7:
-        s->set("IconTheme", "iOS");
-        break;
-    case 8:
-        s->set("IconTheme", "flat");
-        break;
-    case 9:
-        s->set("IconTheme", "flat_white");
-        break;
-    case 10:
-        s->set("IconTheme", "multimc");
-        break;
-    case 11:
-        s->set("IconTheme", "custom");
-        break;
-    }
-
-    if(original != s->get("IconTheme"))
-    {
-        APPLICATION->setIconTheme(s->get("IconTheme").toString());
-    }
-
-    auto originalAppTheme = s->get("ApplicationTheme").toString();
-    auto newAppTheme = ui->themeComboBoxColors->currentData().toString();
-    if(originalAppTheme != newAppTheme)
-    {
-        s->set("ApplicationTheme", newAppTheme);
-        APPLICATION->setApplicationTheme(newAppTheme, false);
-    }
-
-    switch (ui->themeBackgroundCat->currentIndex()) {
-    case 0: // original cat
-        s->set("BackgroundCat", "kitteh");
-        break;
-    case 1: // rory the cat
-        s->set("BackgroundCat", "rory");
-        break;
-    case 2: // rory the cat flat edition
-        s->set("BackgroundCat", "rory-flat");
-        break;
+        APPLICATION->updater()->setAutomaticallyChecksForUpdates(ui->autoUpdateCheckBox->isChecked());
     }
 
     s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
@@ -390,56 +224,11 @@ void LauncherPage::loadSettings()
 {
     auto s = APPLICATION->settings();
     // Updates
-    if (BuildConfig.UPDATER_ENABLED && APPLICATION->updateChecker()->getExternalUpdater())
+    if (APPLICATION->updater())
     {
-        ui->autoUpdateCheckBox->setChecked(
-                APPLICATION->updateChecker()->getExternalUpdater()->getAutomaticallyChecksForUpdates());
-    }
-    else
-    {
-        ui->autoUpdateCheckBox->setChecked(s->get("AutoUpdate").toBool());
+        ui->autoUpdateCheckBox->setChecked(APPLICATION->updater()->getAutomaticallyChecksForUpdates());
     }
 
-    m_currentUpdateChannel = s->get("UpdateChannel").toString();
-    //FIXME: make generic
-    auto theme = s->get("IconTheme").toString();
-    QStringList iconThemeOptions{"pe_colored", 
-                                 "pe_light", 
-                                 "pe_dark", 
-                                 "pe_blue", 
-                                 "breeze_light", 
-                                 "breeze_dark", 
-                                 "OSX", 
-                                 "iOS", 
-                                 "flat", 
-                                 "flat_white", 
-                                 "multimc", 
-                                 "custom"};
-    ui->themeComboBox->setCurrentIndex(iconThemeOptions.indexOf(theme));
-
-    auto cat = s->get("BackgroundCat").toString();
-    if (cat == "kitteh") {
-        ui->themeBackgroundCat->setCurrentIndex(0);
-    } else if (cat == "rory") {
-        ui->themeBackgroundCat->setCurrentIndex(1);
-    } else if (cat == "rory-flat") {
-        ui->themeBackgroundCat->setCurrentIndex(2);
-    }
-
-    {
-        auto currentTheme = s->get("ApplicationTheme").toString();
-        auto themes = APPLICATION->getValidApplicationThemes();
-        int idx = 0;
-        for(auto &theme: themes)
-        {
-            ui->themeComboBoxColors->addItem(theme->name(), theme->id());
-            if(currentTheme == theme->id())
-            {
-                ui->themeComboBoxColors->setCurrentIndex(idx);
-            }
-            idx++;
-        }
-    }
 
     // Toolbar/menu bar settings (not applicable if native menu bar is present)
     ui->toolsBox->setEnabled(!QMenuBar().isNativeMenuBar());

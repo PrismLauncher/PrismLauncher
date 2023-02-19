@@ -318,13 +318,29 @@ void VersionPage::on_actionReload_triggered()
 
 void VersionPage::on_actionRemove_triggered()
 {
-    if (ui->packageView->currentIndex().isValid())
+    if (!ui->packageView->currentIndex().isValid())
     {
-        // FIXME: use actual model, not reloading.
-        if (!m_profile->remove(ui->packageView->currentIndex().row()))
-        {
-            QMessageBox::critical(this, tr("Error"), tr("Couldn't remove file"));
-        }
+        return;
+    }
+    int index = ui->packageView->currentIndex().row();
+    auto component = m_profile->getComponent(index);
+    if (component->isCustom())
+    {
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
+                                                     tr("You are about to remove \"%1\".\n"
+                                                        "This is permanent and will completely remove the custom component.\n\n"
+                                                        "Are you sure?")
+                                                         .arg(component->getName()),
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
+    // FIXME: use actual model, not reloading.
+    if (!m_profile->remove(index))
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Couldn't remove file"));
     }
     updateButtons();
     reloadPackProfile();
@@ -644,7 +660,7 @@ void VersionPage::onGameUpdateError(QString error)
     CustomMessageBox::selectable(this, tr("Error updating instance"), error, QMessageBox::Warning)->show();
 }
 
-Component * VersionPage::current()
+ComponentPtr VersionPage::current()
 {
     auto row = currentRow();
     if(row < 0)
@@ -707,6 +723,19 @@ void VersionPage::on_actionRevert_triggered()
     {
         return;
     }
+    auto component = m_profile->getComponent(version);
+
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Reversion"),
+                                                 tr("You are about to revert \"%1\".\n"
+                                                    "This is permanent and will completely revert your customizations.\n\n"
+                                                    "Are you sure?")
+                                                     .arg(component->getName()),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
+
+    if (response != QMessageBox::Yes)
+        return;
+
     if(!m_profile->revertToBase(version))
     {
         // TODO: some error box here

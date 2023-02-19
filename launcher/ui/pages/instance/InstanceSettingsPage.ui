@@ -609,6 +609,45 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="instanceAccountGroupBox">
+         <property name="title">
+          <string>Override default account</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_15">
+          <item>
+           <layout class="QGridLayout" name="instanceAccountLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="instanceAccountNameLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Account:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QToolButton" name="instanceAccountSelector">
+              <property name="popupMode">
+               <enum>QToolButton::InstantPopup</enum>
+              </property>
+              <property name="toolButtonStyle">
+               <enum>Qt::ToolButtonTextBesideIcon</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         <widget class="QCheckBox" name="onlineFixes">
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fixes usages of old online services which are no longer operating by emulating them or redirecting to their modern counterparts.&lt;/p&gt;&lt;p&gt;This currently only allows modern skins to be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>

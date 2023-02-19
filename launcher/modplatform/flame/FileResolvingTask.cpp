@@ -23,7 +23,7 @@ void Flame::FileResolvingTask::executeTask()
 {
     setStatus(tr("Resolving mod IDs..."));
     setProgress(0, 3);
-    m_dljob = new NetJob("Mod id resolver", m_network);
+    m_dljob.reset(new NetJob("Mod id resolver", m_network));
     result.reset(new QByteArray());
     //build json data to send
     QJsonObject object;
@@ -43,7 +43,7 @@ void Flame::FileResolvingTask::netJobFinished()
 {
     setProgress(1, 3);
     // job to check modrinth for blocked projects
-    m_checkJob = new NetJob("Modrinth check", m_network);
+    m_checkJob.reset(new NetJob("Modrinth check", m_network));
     blockedProjects = QMap<File *,QByteArray *>();
 
     QJsonDocument doc;

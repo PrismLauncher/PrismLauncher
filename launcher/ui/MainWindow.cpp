@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,6 +43,7 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
+#include "ui_MainWindow.h"
 
 #include <QVariant>
 #include <QUrl>
@@ -85,8 +87,7 @@
 #include <net/Download.h>
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
-#include <updater/DownloadTask.h>
-#include <updater/UpdateChecker.h>
+#include <updater/ExternalUpdater.h>
 #include <DesktopServices.h>
 #include "InstanceWindow.h"
 #include "InstancePageProvider.h"
@@ -101,22 +102,19 @@
 #include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/AboutDialog.h"
-#include "ui/dialogs/VersionSelectDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
-#include "ui/dialogs/UpdateDialog.h"
 #include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
-#include "ui/dialogs/ImportResourcePackDialog.h"
+#include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/themes/ITheme.h"
+#include "ui/themes/ThemeManager.h"
 
-#include <minecraft/mod/ResourcePackFolderModel.h>
-#include <minecraft/mod/tasks/LocalResourcePackParseTask.h>
-#include <minecraft/mod/TexturePackFolderModel.h>
-#include <minecraft/mod/tasks/LocalTexturePackParseTask.h>
+#include "minecraft/mod/tasks/LocalResourceParse.h"
+#include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/WorldList.h"
 
-#include "UpdateController.h"
 #include "KonamiCode.h"
 
 #include "InstanceImportTask.h"
@@ -138,785 +136,112 @@ QString profileInUseFilter(const QString & profile, bool used)
 }
 }
 
-// WHY: to hold the pre-translation strings together with the T pointer, so it can be retranslated without a lot of ugly code
-template <typename T>
-class Translated
-{
-public:
-    Translated(){}
-    Translated(QWidget *parent)
-    {
-        m_contained = new T(parent);
-    }
-    void setTooltipId(const char * tooltip)
-    {
-        m_tooltip = tooltip;
-    }
-    void setTextId(const char * text)
-    {
-        m_text = text;
-    }
-    operator T*()
-    {
-        return m_contained;
-    }
-    T * operator->()
-    {
-        return m_contained;
-    }
-    void retranslate()
-    {
-        if(m_text)
-        {
-            QString result;
-            result = QApplication::translate("MainWindow", m_text);
-            if(result.contains("%1")) {
-                result = result.arg(BuildConfig.LAUNCHER_DISPLAYNAME);
-            }
-            m_contained->setText(result);
-        }
-        if(m_tooltip)
-        {
-            QString result;
-            result = QApplication::translate("MainWindow", m_tooltip);
-            if(result.contains("%1")) {
-                result = result.arg(BuildConfig.LAUNCHER_DISPLAYNAME);
-            }
-            m_contained->setToolTip(result);
-        }
-    }
-private:
-    T * m_contained = nullptr;
-    const char * m_text = nullptr;
-    const char * m_tooltip = nullptr;
-};
-using TranslatedAction = Translated<QAction>;
-using TranslatedToolButton = Translated<QToolButton>;
-
-class TranslatedToolbar
-{
-public:
-    TranslatedToolbar(){}
-    TranslatedToolbar(QWidget *parent)
-    {
-        m_contained = new QToolBar(parent);
-    }
-    void setWindowTitleId(const char * title)
-    {
-        m_title = title;
-    }
-    operator QToolBar*()
-    {
-        return m_contained;
-    }
-    QToolBar * operator->()
-    {
-        return m_contained;
-    }
-    void retranslate()
-    {
-        if(m_title)
-        {
-            m_contained->setWindowTitle(QApplication::translate("MainWindow", m_title));
-        }
-    }
-private:
-    QToolBar * m_contained = nullptr;
-    const char * m_title = nullptr;
-};
-
-class MainWindow::Ui
-{
-public:
-    TranslatedAction actionAddInstance;
-    //TranslatedAction actionRefresh;
-    TranslatedAction actionCheckUpdate;
-    TranslatedAction actionSettings;
-    TranslatedAction actionMoreNews;
-    TranslatedAction actionManageAccounts;
-    TranslatedAction actionLaunchInstance;
-    TranslatedAction actionKillInstance;
-    TranslatedAction actionRenameInstance;
-    TranslatedAction actionChangeInstGroup;
-    TranslatedAction actionChangeInstIcon;
-    TranslatedAction actionEditInstance;
-    TranslatedAction actionViewSelectedInstFolder;
-    TranslatedAction actionDeleteInstance;
-    TranslatedAction actionCAT;
-    TranslatedAction actionCopyInstance;
-    TranslatedAction actionLaunchInstanceOffline;
-    TranslatedAction actionLaunchInstanceDemo;
-    TranslatedAction actionExportInstance;
-    TranslatedAction actionCreateInstanceShortcut;
-    QVector<TranslatedAction *> all_actions;
-
-    LabeledToolButton *renameButton = nullptr;
-    LabeledToolButton *changeIconButton = nullptr;
-
-    QMenu * foldersMenu = nullptr;
-    TranslatedToolButton foldersMenuButton;
-    TranslatedAction actionViewInstanceFolder;
-    TranslatedAction actionViewCentralModsFolder;
-
-    QMenu * editMenu = nullptr;
-    TranslatedAction actionUndoTrashInstance;
-
-    QMenu * helpMenu = nullptr;
-    TranslatedToolButton helpMenuButton;
-    TranslatedAction actionClearMetadata;
-    #ifdef Q_OS_MAC
-    TranslatedAction actionAddToPATH;
-    #endif
-    TranslatedAction actionReportBug;
-    TranslatedAction actionDISCORD;
-    TranslatedAction actionMATRIX;
-    TranslatedAction actionREDDIT;
-    TranslatedAction actionAbout;
-
-    TranslatedAction actionNoAccountsAdded;
-    TranslatedAction actionNoDefaultAccount;
-
-    TranslatedAction actionLockToolbars;
-
-    TranslatedAction actionChangeTheme;
-
-    QVector<TranslatedToolButton *> all_toolbuttons;
-
-    QWidget *centralWidget = nullptr;
-    QHBoxLayout *horizontalLayout = nullptr;
-    QStatusBar *statusBar = nullptr;
-
-    QMenuBar *menuBar = nullptr;
-    QMenu *fileMenu;
-    QMenu *viewMenu;
-    QMenu *profileMenu;
-
-    TranslatedAction actionCloseWindow;
-
-    TranslatedAction actionOpenWiki;
-    TranslatedAction actionNewsMenuBar;
-
-    TranslatedToolbar mainToolBar;
-    TranslatedToolbar instanceToolBar;
-    TranslatedToolbar newsToolBar;
-    QVector<TranslatedToolbar *> all_toolbars;
-
-    void createMainToolbarActions(MainWindow *MainWindow)
-    {
-        actionAddInstance = TranslatedAction(MainWindow);
-        actionAddInstance->setObjectName(QStringLiteral("actionAddInstance"));
-        actionAddInstance->setIcon(APPLICATION->getThemedIcon("new"));
-        actionAddInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Add Instanc&e..."));
-        actionAddInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Add a new instance."));
-        actionAddInstance->setShortcut(QKeySequence::New);
-        all_actions.append(&actionAddInstance);
-
-        actionViewInstanceFolder = TranslatedAction(MainWindow);
-        actionViewInstanceFolder->setObjectName(QStringLiteral("actionViewInstanceFolder"));
-        actionViewInstanceFolder->setIcon(APPLICATION->getThemedIcon("viewfolder"));
-        actionViewInstanceFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&View Instance Folder"));
-        actionViewInstanceFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the instance folder in a file browser."));
-        all_actions.append(&actionViewInstanceFolder);
-
-        actionViewCentralModsFolder = TranslatedAction(MainWindow);
-        actionViewCentralModsFolder->setObjectName(QStringLiteral("actionViewCentralModsFolder"));
-        actionViewCentralModsFolder->setIcon(APPLICATION->getThemedIcon("centralmods"));
-        actionViewCentralModsFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "View &Central Mods Folder"));
-        actionViewCentralModsFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the central mods folder in a file browser."));
-        all_actions.append(&actionViewCentralModsFolder);
-
-        foldersMenu = new QMenu(MainWindow);
-        foldersMenu->setTitle(tr("F&olders"));
-        foldersMenu->setToolTipsVisible(true);
-
-        foldersMenu->addAction(actionViewInstanceFolder);
-        foldersMenu->addAction(actionViewCentralModsFolder);
-
-        foldersMenuButton = TranslatedToolButton(MainWindow);
-        foldersMenuButton.setTextId(QT_TRANSLATE_NOOP("MainWindow", "F&olders"));
-        foldersMenuButton.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open one of the folders shared between instances."));
-        foldersMenuButton->setMenu(foldersMenu);
-        foldersMenuButton->setPopupMode(QToolButton::InstantPopup);
-        foldersMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        foldersMenuButton->setIcon(APPLICATION->getThemedIcon("viewfolder"));
-        foldersMenuButton->setFocusPolicy(Qt::NoFocus);
-        all_toolbuttons.append(&foldersMenuButton);
-
-        actionSettings = TranslatedAction(MainWindow);
-        actionSettings->setObjectName(QStringLiteral("actionSettings"));
-        actionSettings->setIcon(APPLICATION->getThemedIcon("settings"));
-        actionSettings->setMenuRole(QAction::PreferencesRole);
-        actionSettings.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Setti&ngs..."));
-        actionSettings.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change settings."));
-        actionSettings->setShortcut(QKeySequence::Preferences);
-        all_actions.append(&actionSettings);
-
-        actionUndoTrashInstance = TranslatedAction(MainWindow);
-        actionUndoTrashInstance->setObjectName(QStringLiteral("actionUndoTrashInstance"));
-        actionUndoTrashInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Undo Last Instance Deletion"));
-        actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        actionUndoTrashInstance->setShortcut(QKeySequence::Undo);
-        all_actions.append(&actionUndoTrashInstance);
-
-        actionClearMetadata = TranslatedAction(MainWindow);
-        actionClearMetadata->setObjectName(QStringLiteral("actionClearMetadata"));
-        actionClearMetadata->setIcon(APPLICATION->getThemedIcon("refresh"));
-        actionClearMetadata.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Clear Metadata Cache"));
-        actionClearMetadata.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Clear cached metadata"));
-        all_actions.append(&actionClearMetadata);
-
-        #ifdef Q_OS_MAC
-        actionAddToPATH = TranslatedAction(MainWindow);
-        actionAddToPATH->setObjectName(QStringLiteral("actionAddToPATH"));
-        actionAddToPATH.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Install to &PATH"));
-        actionAddToPATH.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Install a prismlauncher symlink to /usr/local/bin"));
-        all_actions.append(&actionAddToPATH);
-        #endif
-
-        if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
-            actionReportBug = TranslatedAction(MainWindow);
-            actionReportBug->setObjectName(QStringLiteral("actionReportBug"));
-            actionReportBug->setIcon(APPLICATION->getThemedIcon("bug"));
-            actionReportBug.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Report a &Bug..."));
-            actionReportBug.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the bug tracker to report a bug with %1."));
-            all_actions.append(&actionReportBug);
-        }
-
-        if(!BuildConfig.MATRIX_URL.isEmpty()) {
-            actionMATRIX = TranslatedAction(MainWindow);
-            actionMATRIX->setObjectName(QStringLiteral("actionMATRIX"));
-            actionMATRIX->setIcon(APPLICATION->getThemedIcon("matrix"));
-            actionMATRIX.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Matrix Space"));
-            actionMATRIX.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open %1 Matrix space"));
-            all_actions.append(&actionMATRIX);
-        }
-
-        if (!BuildConfig.DISCORD_URL.isEmpty()) {
-            actionDISCORD = TranslatedAction(MainWindow);
-            actionDISCORD->setObjectName(QStringLiteral("actionDISCORD"));
-            actionDISCORD->setIcon(APPLICATION->getThemedIcon("discord"));
-            actionDISCORD.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Discord Guild"));
-            actionDISCORD.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open %1 Discord guild."));
-            all_actions.append(&actionDISCORD);
-        }
-
-        if (!BuildConfig.SUBREDDIT_URL.isEmpty()) {
-            actionREDDIT = TranslatedAction(MainWindow);
-            actionREDDIT->setObjectName(QStringLiteral("actionREDDIT"));
-            actionREDDIT->setIcon(APPLICATION->getThemedIcon("reddit-alien"));
-            actionREDDIT.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Sub&reddit"));
-            actionREDDIT.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open %1 subreddit."));
-            all_actions.append(&actionREDDIT);
-        }
-
-        actionAbout = TranslatedAction(MainWindow);
-        actionAbout->setObjectName(QStringLiteral("actionAbout"));
-        actionAbout->setIcon(APPLICATION->getThemedIcon("about"));
-        actionAbout->setMenuRole(QAction::AboutRole);
-        actionAbout.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&About %1"));
-        actionAbout.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "View information about %1."));
-        all_actions.append(&actionAbout);
-
-        if(BuildConfig.UPDATER_ENABLED)
-        {
-            actionCheckUpdate = TranslatedAction(MainWindow);
-            actionCheckUpdate->setObjectName(QStringLiteral("actionCheckUpdate"));
-            actionCheckUpdate->setIcon(APPLICATION->getThemedIcon("checkupdate"));
-            actionCheckUpdate.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Update..."));
-            actionCheckUpdate.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Check for new updates for %1."));
-            actionCheckUpdate->setMenuRole(QAction::ApplicationSpecificRole);
-            all_actions.append(&actionCheckUpdate);
-        }
-
-        actionCAT = TranslatedAction(MainWindow);
-        actionCAT->setObjectName(QStringLiteral("actionCAT"));
-        actionCAT->setCheckable(true);
-        actionCAT->setIcon(APPLICATION->getThemedIcon("cat"));
-        actionCAT.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Meow"));
-        actionCAT.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "It's a fluffy kitty :3"));
-        actionCAT->setPriority(QAction::LowPriority);
-        all_actions.append(&actionCAT);
-
-        // profile menu and its actions
-        actionManageAccounts = TranslatedAction(MainWindow);
-        actionManageAccounts->setObjectName(QStringLiteral("actionManageAccounts"));
-        actionManageAccounts.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Manage Accounts..."));
-        // FIXME: no tooltip!
-        actionManageAccounts->setCheckable(false);
-        actionManageAccounts->setIcon(APPLICATION->getThemedIcon("accounts"));
-        all_actions.append(&actionManageAccounts);
-
-        actionLockToolbars = TranslatedAction(MainWindow);
-        actionLockToolbars->setObjectName(QStringLiteral("actionLockToolbars"));
-        actionLockToolbars.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Lock Toolbars"));
-        actionLockToolbars->setCheckable(true);
-        all_actions.append(&actionLockToolbars);
-
-        actionChangeTheme = TranslatedAction(MainWindow);
-        actionChangeTheme->setObjectName(QStringLiteral("actionChangeTheme"));
-        actionChangeTheme.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Themes"));
-        all_actions.append(&actionChangeTheme);
-    }
-
-    void createMainToolbar(QMainWindow *MainWindow)
-    {
-        mainToolBar = TranslatedToolbar(MainWindow);
-        mainToolBar->setVisible(menuBar->isNativeMenuBar() || !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
-        mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
-        mainToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-        mainToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        mainToolBar->setFloatable(false);
-        mainToolBar.setWindowTitleId(QT_TRANSLATE_NOOP("MainWindow", "Main Toolbar"));
-
-        mainToolBar->addAction(actionAddInstance);
-
-        mainToolBar->addSeparator();
-
-        QWidgetAction* foldersButtonAction = new QWidgetAction(MainWindow);
-        foldersButtonAction->setDefaultWidget(foldersMenuButton);
-        mainToolBar->addAction(foldersButtonAction);
-
-        mainToolBar->addAction(actionSettings);
-
-        helpMenu = new QMenu(MainWindow);
-        helpMenu->setToolTipsVisible(true);
-
-        helpMenu->addAction(actionClearMetadata);
-
-        #ifdef Q_OS_MAC
-        helpMenu->addAction(actionAddToPATH);
-        #endif
-
-        if (!BuildConfig.BUG_TRACKER_URL.isEmpty()) {
-            helpMenu->addAction(actionReportBug);
-        }
-        
-        if(!BuildConfig.MATRIX_URL.isEmpty()) {
-            helpMenu->addAction(actionMATRIX);
-        }
-
-        if (!BuildConfig.DISCORD_URL.isEmpty()) {
-            helpMenu->addAction(actionDISCORD);
-        }
-
-        if (!BuildConfig.SUBREDDIT_URL.isEmpty()) {
-            helpMenu->addAction(actionREDDIT);
-        }
-
-        helpMenu->addAction(actionAbout);
-
-        helpMenuButton = TranslatedToolButton(MainWindow);
-        helpMenuButton.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Help"));
-        helpMenuButton.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Get help with %1 or Minecraft."));
-        helpMenuButton->setMenu(helpMenu);
-        helpMenuButton->setPopupMode(QToolButton::InstantPopup);
-        helpMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        helpMenuButton->setIcon(APPLICATION->getThemedIcon("help"));
-        helpMenuButton->setFocusPolicy(Qt::NoFocus);
-        all_toolbuttons.append(&helpMenuButton);
-        QWidgetAction* helpButtonAction = new QWidgetAction(MainWindow);
-        helpButtonAction->setDefaultWidget(helpMenuButton);
-        mainToolBar->addAction(helpButtonAction);
-
-        if(BuildConfig.UPDATER_ENABLED)
-        {
-            mainToolBar->addAction(actionCheckUpdate);
-        }
-
-        mainToolBar->addSeparator();
-
-        mainToolBar->addAction(actionCAT);
-
-        all_toolbars.append(&mainToolBar);
-        MainWindow->addToolBar(Qt::TopToolBarArea, mainToolBar);
-    }
-
-    void createMenuBar(QMainWindow *MainWindow)
-    {
-        menuBar = new QMenuBar(MainWindow);
-        menuBar->setVisible(APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
-
-        fileMenu = menuBar->addMenu(tr("&File"));
-        // Workaround for QTBUG-94802 (https://bugreports.qt.io/browse/QTBUG-94802); also present for other menus
-        fileMenu->setSeparatorsCollapsible(false);
-        fileMenu->addAction(actionAddInstance);
-        fileMenu->addAction(actionLaunchInstance);
-        fileMenu->addAction(actionKillInstance);
-        fileMenu->addAction(actionCloseWindow);
-        fileMenu->addSeparator();
-        fileMenu->addAction(actionEditInstance);
-        fileMenu->addAction(actionChangeInstGroup);
-        fileMenu->addAction(actionViewSelectedInstFolder);
-        fileMenu->addAction(actionExportInstance);
-        fileMenu->addAction(actionCopyInstance);
-        fileMenu->addAction(actionDeleteInstance);
-        fileMenu->addAction(actionCreateInstanceShortcut);
-        fileMenu->addSeparator();
-        fileMenu->addAction(actionSettings);
-
-        editMenu = menuBar->addMenu(tr("&Edit"));
-        editMenu->addAction(actionUndoTrashInstance);
-
-        viewMenu = menuBar->addMenu(tr("&View"));
-        viewMenu->setSeparatorsCollapsible(false);
-        viewMenu->addAction(actionChangeTheme);
-        viewMenu->addSeparator();
-        viewMenu->addAction(actionCAT);
-        viewMenu->addSeparator();
-
-        viewMenu->addAction(actionLockToolbars);
-
-        menuBar->addMenu(foldersMenu);
-
-        profileMenu = menuBar->addMenu(tr("&Accounts"));
-        profileMenu->setSeparatorsCollapsible(false);
-        profileMenu->addAction(actionManageAccounts);
-
-        helpMenu = menuBar->addMenu(tr("&Help"));
-        helpMenu->setSeparatorsCollapsible(false);
-        helpMenu->addAction(actionClearMetadata);
-        #ifdef Q_OS_MAC
-        helpMenu->addAction(actionAddToPATH);
-        #endif
-        helpMenu->addSeparator();
-        helpMenu->addAction(actionAbout);
-        helpMenu->addAction(actionOpenWiki);
-        helpMenu->addAction(actionNewsMenuBar);
-        helpMenu->addSeparator();
-        if (!BuildConfig.BUG_TRACKER_URL.isEmpty())
-            helpMenu->addAction(actionReportBug);
-        if (!BuildConfig.MATRIX_URL.isEmpty())
-            helpMenu->addAction(actionMATRIX);
-        if (!BuildConfig.DISCORD_URL.isEmpty())
-            helpMenu->addAction(actionDISCORD);
-        if (!BuildConfig.SUBREDDIT_URL.isEmpty())
-            helpMenu->addAction(actionREDDIT);
-        if(BuildConfig.UPDATER_ENABLED)
-        {
-            helpMenu->addSeparator();
-            helpMenu->addAction(actionCheckUpdate);
-        }
-        MainWindow->setMenuBar(menuBar);
-    }
-
-    void createMenuActions(MainWindow *MainWindow)
-    {
-        actionCloseWindow = TranslatedAction(MainWindow);
-        actionCloseWindow->setObjectName(QStringLiteral("actionCloseWindow"));
-        actionCloseWindow.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Close &Window"));
-        actionCloseWindow.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Close the current window"));
-        actionCloseWindow->setShortcut(QKeySequence::Close);
-        connect(actionCloseWindow, &QAction::triggered, APPLICATION, &Application::closeCurrentWindow);
-        all_actions.append(&actionCloseWindow);
-
-        actionOpenWiki = TranslatedAction(MainWindow);
-        actionOpenWiki->setObjectName(QStringLiteral("actionOpenWiki"));
-        actionOpenWiki.setTextId(QT_TRANSLATE_NOOP("MainWindow", "%1 &Help"));
-        actionOpenWiki.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the %1 wiki"));
-        actionOpenWiki->setIcon(APPLICATION->getThemedIcon("help"));
-        connect(actionOpenWiki, &QAction::triggered, MainWindow, &MainWindow::on_actionOpenWiki_triggered);
-        all_actions.append(&actionOpenWiki);
-
-        actionNewsMenuBar = TranslatedAction(MainWindow);
-        actionNewsMenuBar->setObjectName(QStringLiteral("actionNewsMenuBar"));
-        actionNewsMenuBar.setTextId(QT_TRANSLATE_NOOP("MainWindow", "%1 &News"));
-        actionNewsMenuBar.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the %1 wiki"));
-        actionNewsMenuBar->setIcon(APPLICATION->getThemedIcon("news"));
-        connect(actionNewsMenuBar, &QAction::triggered, MainWindow, &MainWindow::on_actionMoreNews_triggered);
-        all_actions.append(&actionNewsMenuBar);
-    }
-
-    // "Instance actions" are actions that require an instance to be selected (i.e. "new instance" is not here)
-    // Actions that also require other conditions (e.g. a running instance) won't be changed.
-    void setInstanceActionsEnabled(bool enabled)
-    {
-        actionEditInstance->setEnabled(enabled);
-        actionChangeInstGroup->setEnabled(enabled);
-        actionViewSelectedInstFolder->setEnabled(enabled);
-        actionExportInstance->setEnabled(enabled);
-        actionDeleteInstance->setEnabled(enabled);
-        actionCopyInstance->setEnabled(enabled);
-        actionCreateInstanceShortcut->setEnabled(enabled);
-    }
-
-    void createStatusBar(QMainWindow *MainWindow)
-    {
-        statusBar = new QStatusBar(MainWindow);
-        statusBar->setObjectName(QStringLiteral("statusBar"));
-        MainWindow->setStatusBar(statusBar);
-    }
-
-    void createNewsToolbar(QMainWindow *MainWindow)
-    {
-        newsToolBar = TranslatedToolbar(MainWindow);
-        newsToolBar->setObjectName(QStringLiteral("newsToolBar"));
-        newsToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-        newsToolBar->setIconSize(QSize(16, 16));
-        newsToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        newsToolBar->setFloatable(false);
-        newsToolBar->setWindowTitle(QT_TRANSLATE_NOOP("MainWindow", "News Toolbar"));
-
-        actionMoreNews = TranslatedAction(MainWindow);
-        actionMoreNews->setObjectName(QStringLiteral("actionMoreNews"));
-        actionMoreNews->setIcon(APPLICATION->getThemedIcon("news"));
-        actionMoreNews.setTextId(QT_TRANSLATE_NOOP("MainWindow", "More news..."));
-        actionMoreNews.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the development blog to read more news about %1."));
-        all_actions.append(&actionMoreNews);
-        newsToolBar->addAction(actionMoreNews);
-
-        all_toolbars.append(&newsToolBar);
-        MainWindow->addToolBar(Qt::BottomToolBarArea, newsToolBar);
-    }
-
-    void createInstanceActions(QMainWindow *MainWindow)
-    {
-        // NOTE: not added to toolbar, but used for instance context menu (right click)
-        actionChangeInstIcon = TranslatedAction(MainWindow);
-        actionChangeInstIcon->setObjectName(QStringLiteral("actionChangeInstIcon"));
-        actionChangeInstIcon->setIcon(QIcon(":/icons/instances/grass"));
-        actionChangeInstIcon->setIconVisibleInMenu(true);
-        actionChangeInstIcon.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Change Icon"));
-        actionChangeInstIcon.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the selected instance's icon."));
-        all_actions.append(&actionChangeInstIcon);
-
-        changeIconButton = new LabeledToolButton(MainWindow);
-        changeIconButton->setObjectName(QStringLiteral("changeIconButton"));
-        changeIconButton->setIcon(APPLICATION->getThemedIcon("news"));
-        changeIconButton->setToolTip(actionChangeInstIcon->toolTip());
-        changeIconButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-        // NOTE: not added to toolbar, but used for instance context menu (right click)
-        actionRenameInstance = TranslatedAction(MainWindow);
-        actionRenameInstance->setObjectName(QStringLiteral("actionRenameInstance"));
-        actionRenameInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Rename"));
-        actionRenameInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Rename the selected instance."));
-        actionRenameInstance->setIcon(APPLICATION->getThemedIcon("rename"));
-        all_actions.append(&actionRenameInstance);
-
-        // the rename label is inside the rename tool button
-        renameButton = new LabeledToolButton(MainWindow);
-        renameButton->setObjectName(QStringLiteral("renameButton"));
-        renameButton->setToolTip(actionRenameInstance->toolTip());
-        renameButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-        actionLaunchInstance = TranslatedAction(MainWindow);
-        actionLaunchInstance->setObjectName(QStringLiteral("actionLaunchInstance"));
-        actionLaunchInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Launch"));
-        actionLaunchInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Launch the selected instance."));
-        actionLaunchInstance->setIcon(APPLICATION->getThemedIcon("launch"));
-        all_actions.append(&actionLaunchInstance);
-
-        actionLaunchInstanceOffline = TranslatedAction(MainWindow);
-        actionLaunchInstanceOffline->setObjectName(QStringLiteral("actionLaunchInstanceOffline"));
-        actionLaunchInstanceOffline.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Launch &Offline"));
-        actionLaunchInstanceOffline.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Launch the selected instance in offline mode."));
-        all_actions.append(&actionLaunchInstanceOffline);
-
-        actionLaunchInstanceDemo = TranslatedAction(MainWindow);
-        actionLaunchInstanceDemo->setObjectName(QStringLiteral("actionLaunchInstanceDemo"));
-        actionLaunchInstanceDemo.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Launch &Demo"));
-        actionLaunchInstanceDemo.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Launch the selected instance in demo mode."));
-        all_actions.append(&actionLaunchInstanceDemo);
-
-        actionKillInstance = TranslatedAction(MainWindow);
-        actionKillInstance->setObjectName(QStringLiteral("actionKillInstance"));
-        actionKillInstance->setDisabled(true);
-        actionKillInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Kill"));
-        actionKillInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Kill the running instance"));
-        actionKillInstance->setShortcut(QKeySequence(tr("Ctrl+K")));
-        actionKillInstance->setIcon(APPLICATION->getThemedIcon("status-bad"));
-        all_actions.append(&actionKillInstance);
-
-        actionEditInstance = TranslatedAction(MainWindow);
-        actionEditInstance->setObjectName(QStringLiteral("actionEditInstance"));
-        actionEditInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Edit..."));
-        actionEditInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the instance settings, mods and versions."));
-        actionEditInstance->setShortcut(QKeySequence(tr("Ctrl+I")));
-        actionEditInstance->setIcon(APPLICATION->getThemedIcon("settings-configure"));
-        all_actions.append(&actionEditInstance);
-
-        actionChangeInstGroup = TranslatedAction(MainWindow);
-        actionChangeInstGroup->setObjectName(QStringLiteral("actionChangeInstGroup"));
-        actionChangeInstGroup.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Change Group..."));
-        actionChangeInstGroup.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Change the selected instance's group."));
-        actionChangeInstGroup->setShortcut(QKeySequence(tr("Ctrl+G")));
-        actionChangeInstGroup->setIcon(APPLICATION->getThemedIcon("tag"));
-        all_actions.append(&actionChangeInstGroup);
-
-        actionViewSelectedInstFolder = TranslatedAction(MainWindow);
-        actionViewSelectedInstFolder->setObjectName(QStringLiteral("actionViewSelectedInstFolder"));
-        actionViewSelectedInstFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "&Folder"));
-        actionViewSelectedInstFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's root folder in a file browser."));
-        actionViewSelectedInstFolder->setIcon(APPLICATION->getThemedIcon("viewfolder"));
-        all_actions.append(&actionViewSelectedInstFolder);
-
-        actionExportInstance = TranslatedAction(MainWindow);
-        actionExportInstance->setObjectName(QStringLiteral("actionExportInstance"));
-        actionExportInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "E&xport..."));
-        actionExportInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Export the selected instance as a zip file."));
-        actionExportInstance->setShortcut(QKeySequence(tr("Ctrl+E")));
-        actionExportInstance->setIcon(APPLICATION->getThemedIcon("export"));
-        all_actions.append(&actionExportInstance);
-
-        actionDeleteInstance = TranslatedAction(MainWindow);
-        actionDeleteInstance->setObjectName(QStringLiteral("actionDeleteInstance"));
-        actionDeleteInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Dele&te"));
-        actionDeleteInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Delete the selected instance."));
-        actionDeleteInstance->setShortcuts({QKeySequence(tr("Backspace")), QKeySequence::Delete});
-        actionDeleteInstance->setAutoRepeat(false);
-        actionDeleteInstance->setIcon(APPLICATION->getThemedIcon("delete"));
-        all_actions.append(&actionDeleteInstance);
-
-        actionCopyInstance = TranslatedAction(MainWindow);
-        actionCopyInstance->setObjectName(QStringLiteral("actionCopyInstance"));
-        actionCopyInstance.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Cop&y..."));
-        actionCopyInstance.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Copy the selected instance."));
-        actionCopyInstance->setShortcut(QKeySequence(tr("Ctrl+D")));
-        actionCopyInstance->setIcon(APPLICATION->getThemedIcon("copy"));
-        all_actions.append(&actionCopyInstance);
-
-        actionCreateInstanceShortcut = TranslatedAction(MainWindow);
-        actionCreateInstanceShortcut->setObjectName(QStringLiteral("actionCreateInstanceShortcut"));
-        actionCreateInstanceShortcut.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Create Shortcut"));
-        actionCreateInstanceShortcut.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Creates a shortcut on your desktop to launch the selected instance."));
-        actionCreateInstanceShortcut->setIcon(APPLICATION->getThemedIcon("shortcut"));
-        all_actions.append(&actionCreateInstanceShortcut);
-
-        setInstanceActionsEnabled(false);
-    }
-
-    void createInstanceToolbar(QMainWindow *MainWindow)
-    {
-        instanceToolBar = TranslatedToolbar(MainWindow);
-        instanceToolBar->setObjectName(QStringLiteral("instanceToolBar"));
-        // disabled until we have an instance selected
-        instanceToolBar->setEnabled(false);
-        // Qt doesn't like vertical moving toolbars, so we have to force them...
-        // See https://github.com/PolyMC/PolyMC/issues/493
-        connect(instanceToolBar, &QToolBar::orientationChanged, [=](Qt::Orientation){ instanceToolBar->setOrientation(Qt::Vertical); });
-        instanceToolBar->setAllowedAreas(Qt::LeftToolBarArea | Qt::RightToolBarArea);
-        instanceToolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        instanceToolBar->setIconSize(QSize(16, 16));
-
-        instanceToolBar->setFloatable(false);
-        instanceToolBar->setWindowTitle(QT_TRANSLATE_NOOP("MainWindow", "Instance Toolbar"));
-
-        instanceToolBar->addWidget(changeIconButton);
-        instanceToolBar->addWidget(renameButton);
-
-        instanceToolBar->addSeparator();
-
-        instanceToolBar->addAction(actionLaunchInstance);
-        instanceToolBar->addAction(actionKillInstance);
-
-        instanceToolBar->addSeparator();
-
-        instanceToolBar->addAction(actionEditInstance);
-        instanceToolBar->addAction(actionChangeInstGroup);
-
-        instanceToolBar->addAction(actionViewSelectedInstFolder);
-
-        instanceToolBar->addAction(actionExportInstance);
-        instanceToolBar->addAction(actionCopyInstance);
-        instanceToolBar->addAction(actionDeleteInstance);
-
-        instanceToolBar->addAction(actionCreateInstanceShortcut); // TODO find better position for this
-
-        QLayout * lay = instanceToolBar->layout();
-        for(int i = 0; i < lay->count(); i++)
-        {
-            QLayoutItem * item = lay->itemAt(i);
-            if (item->widget()->metaObject()->className() == QString("QToolButton"))
-            {
-                item->setAlignment(Qt::AlignLeft);
-            }
-        }
-
-        all_toolbars.append(&instanceToolBar);
-        MainWindow->addToolBar(Qt::RightToolBarArea, instanceToolBar);
-    }
-
-    void setupUi(MainWindow *MainWindow)
-    {
-        if (MainWindow->objectName().isEmpty())
-        {
-            MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        }
-        MainWindow->resize(800, 600);
-        MainWindow->setWindowIcon(APPLICATION->getThemedIcon("logo"));
-        MainWindow->setWindowTitle(APPLICATION->applicationDisplayName());
-#ifndef QT_NO_ACCESSIBILITY
-        MainWindow->setAccessibleName(BuildConfig.LAUNCHER_DISPLAYNAME);
-#endif
-
-        createMainToolbarActions(MainWindow);
-        createMenuActions(MainWindow);
-        createInstanceActions(MainWindow);
-
-        createMenuBar(MainWindow);
-
-        createMainToolbar(MainWindow);
-
-        centralWidget = new QWidget(MainWindow);
-        centralWidget->setObjectName(QStringLiteral("centralWidget"));
-        horizontalLayout = new QHBoxLayout(centralWidget);
-        horizontalLayout->setSpacing(0);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        horizontalLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
-        horizontalLayout->setContentsMargins(0, 0, 0, 0);
-        MainWindow->setCentralWidget(centralWidget);
-
-        createStatusBar(MainWindow);
-        createNewsToolbar(MainWindow);
-        createInstanceToolbar(MainWindow);
-
-        MainWindow->updateToolsMenu();
-        MainWindow->updateThemeMenu();
-
-        retranslateUi(MainWindow);
-
-        QMetaObject::connectSlotsByName(MainWindow);
-    } // setupUi
-
-    void retranslateUi(MainWindow *MainWindow)
-    {
-        // all the actions
-        for(auto * item: all_actions)
-        {
-            item->retranslate();
-        }
-        for(auto * item: all_toolbars)
-        {
-            item->retranslate();
-        }
-        for(auto * item: all_toolbuttons)
-        {
-            item->retranslate();
-        }
-        // submenu buttons
-        foldersMenuButton->setText(tr("Folders"));
-        helpMenuButton->setText(tr("Help"));
-
-        // playtime counter
-        if (MainWindow->m_statusCenter)
-        {
-            MainWindow->updateStatusCenter();
-        }
-    } // retranslateUi
-};
-
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow::Ui)
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
+    setWindowIcon(APPLICATION->getThemedIcon("logo"));
+    setWindowTitle(APPLICATION->applicationDisplayName());
+#ifndef QT_NO_ACCESSIBILITY
+    setAccessibleName(BuildConfig.LAUNCHER_DISPLAYNAME);
+#endif
+
+    // instance toolbar stuff
+    {
+        // Qt doesn't like vertical moving toolbars, so we have to force them...
+        // See https://github.com/PolyMC/PolyMC/issues/493
+        connect(ui->instanceToolBar, &QToolBar::orientationChanged,
+                [=](Qt::Orientation) { ui->instanceToolBar->setOrientation(Qt::Vertical); });
+
+        // if you try to add a widget to a toolbar in a .ui file
+        // qt designer will delete it when you save the file >:(
+        changeIconButton = new LabeledToolButton(this);
+        changeIconButton->setObjectName(QStringLiteral("changeIconButton"));
+        changeIconButton->setIcon(APPLICATION->getThemedIcon("news"));
+        changeIconButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        connect(changeIconButton, &QToolButton::clicked, this, &MainWindow::on_actionChangeInstIcon_triggered);
+        ui->instanceToolBar->insertWidgetBefore(ui->actionLaunchInstance, changeIconButton);
+
+        renameButton = new LabeledToolButton(this);
+        renameButton->setObjectName(QStringLiteral("renameButton"));
+        renameButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        connect(renameButton, &QToolButton::clicked, this, &MainWindow::on_actionRenameInstance_triggered);
+        ui->instanceToolBar->insertWidgetBefore(ui->actionLaunchInstance, renameButton);
+
+        ui->instanceToolBar->insertSeparator(ui->actionLaunchInstance);
+
+        // restore the instance toolbar settings
+        auto const setting_name = QString("WideBarVisibility_%1").arg(ui->instanceToolBar->objectName());
+        if (!APPLICATION->settings()->contains(setting_name))
+            instanceToolbarSetting = APPLICATION->settings()->registerSetting(setting_name);
+        else
+            instanceToolbarSetting = APPLICATION->settings()->getSetting(setting_name);
+
+        ui->instanceToolBar->setVisibilityState(instanceToolbarSetting->get().toByteArray());
+
+        ui->instanceToolBar->addContextMenuAction(ui->newsToolBar->toggleViewAction());
+        ui->instanceToolBar->addContextMenuAction(ui->instanceToolBar->toggleViewAction());
+        ui->instanceToolBar->addContextMenuAction(ui->actionLockToolbars);
+
+    }
+
+    // set the menu for the folders help, and accounts tool buttons
+    {
+        auto foldersMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionFoldersButton));
+        ui->actionFoldersButton->setMenu(ui->foldersMenu);
+        foldersMenuButton->setPopupMode(QToolButton::InstantPopup);
+
+        helpMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionHelpButton));
+        ui->actionHelpButton->setMenu(new QMenu(this));
+        ui->actionHelpButton->menu()->addActions(ui->helpMenu->actions());
+        ui->actionHelpButton->menu()->removeAction(ui->actionCheckUpdate);
+        helpMenuButton->setPopupMode(QToolButton::InstantPopup);
+
+        auto accountMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionAccountsButton));
+        ui->actionAccountsButton->setMenu(ui->accountsMenu);
+        accountMenuButton->setPopupMode(QToolButton::InstantPopup);
+    }
+
+    // hide, disable and show stuff
+    {
+        ui->actionReportBug->setVisible(!BuildConfig.BUG_TRACKER_URL.isEmpty());
+        ui->actionMATRIX->setVisible(!BuildConfig.MATRIX_URL.isEmpty());
+        ui->actionDISCORD->setVisible(!BuildConfig.DISCORD_URL.isEmpty());
+        ui->actionREDDIT->setVisible(!BuildConfig.SUBREDDIT_URL.isEmpty());
+
+        ui->actionCheckUpdate->setVisible(BuildConfig.UPDATER_ENABLED);
+
+#ifndef Q_OS_MAC
+        ui->actionAddToPATH->setVisible(false);
+#endif
+
+        // disabled until we have an instance selected
+        ui->instanceToolBar->setEnabled(false);
+        setInstanceActionsEnabled(false);
+    }
+
+    // add the toolbar toggles to the view menu
+    ui->viewMenu->addAction(ui->instanceToolBar->toggleViewAction());
+    ui->viewMenu->addAction(ui->newsToolBar->toggleViewAction());
+
+    updateThemeMenu();
+    updateMainToolBar();
     // OSX magic.
     setUnifiedTitleAndToolBarOnMac(true);
 
     // Global shortcuts
     {
+        // you can't set QKeySequence::StandardKey shortcuts in qt designer >:(
+        ui->actionAddInstance->setShortcut(QKeySequence::New);
+        ui->actionSettings->setShortcut(QKeySequence::Preferences);
+        ui->actionUndoTrashInstance->setShortcut(QKeySequence::Undo);
+        ui->actionDeleteInstance->setShortcuts({ QKeySequence(tr("Backspace")), QKeySequence::Delete });
+        ui->actionCloseWindow->setShortcut(QKeySequence::Close);
+        connect(ui->actionCloseWindow, &QAction::triggered, APPLICATION, &Application::closeCurrentWindow);
+
         // FIXME: This is kinda weird. and bad. We need some kind of managed shutdown.
         auto q = new QShortcut(QKeySequence::Quit, this);
-        connect(q, SIGNAL(activated()), qApp, SLOT(quit()));
+        connect(q, &QShortcut::activated, APPLICATION, &Application::quit);
     }
 
     // Konami Code
@@ -934,6 +259,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         newsLabel->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         newsLabel->setFocusPolicy(Qt::NoFocus);
         ui->newsToolBar->insertWidget(ui->actionMoreNews, newsLabel);
+
         QObject::connect(newsLabel, &QAbstractButton::clicked, this, &MainWindow::newsButtonClicked);
         QObject::connect(m_newsChecker.get(), &NewsChecker::newsLoaded, this, &MainWindow::updateNewsLabel);
         updateNewsLabel();
@@ -953,7 +279,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         view->installEventFilter(this);
         view->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(view, &QWidget::customContextMenuRequested, this, &MainWindow::showInstanceContextMenu);
-        connect(view, &InstanceView::droppedURLs, this, &MainWindow::droppedURLs, Qt::QueuedConnection);
+        connect(view, &InstanceView::droppedURLs, this, &MainWindow::processURLs, Qt::QueuedConnection);
 
         proxymodel = new InstanceProxyModel(this);
         proxymodel->setSourceModel(APPLICATION->instances().get());
@@ -969,10 +295,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     }
     // The cat background
     {
+        // set the cat action priority here so you can still see the action in qt designer
+        ui->actionCAT->setPriority(QAction::LowPriority);
         bool cat_enable = APPLICATION->settings()->get("TheCat").toBool();
         ui->actionCAT->setChecked(cat_enable);
-        // NOTE: calling the operator like that is an ugly hack to appease ancient gcc...
-        connect(ui->actionCAT.operator->(), SIGNAL(toggled(bool)), SLOT(onCatToggled(bool)));
+        connect(ui->actionCAT, &QAction::toggled, this, &MainWindow::onCatToggled);
+        connect(APPLICATION, &Application::currentCatChanged, this, &MainWindow::onCatChanged);
         setCatBackground(cat_enable);
     }
 
@@ -1009,24 +337,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
     // Add "manage accounts" button, right align
     QWidget *spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->mainToolBar->addWidget(spacer);
+    ui->mainToolBar->insertWidget(ui->actionAccountsButton, spacer);
 
-    accountMenu = new QMenu(this);
     // Use undocumented property... https://stackoverflow.com/questions/7121718/create-a-scrollbar-in-a-submenu-qt
-    accountMenu->setStyleSheet("QMenu { menu-scrollable: 1; }");
+    ui->accountsMenu->setStyleSheet("QMenu { menu-scrollable: 1; }");
 
     repopulateAccountsMenu();
-
-    accountMenuButton = new QToolButton(this);
-    accountMenuButton->setMenu(accountMenu);
-    accountMenuButton->setPopupMode(QToolButton::InstantPopup);
-    accountMenuButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    accountMenuButton->setIcon(APPLICATION->getThemedIcon("noaccount"));
-
-    QWidgetAction *accountMenuButtonAction = new QWidgetAction(this);
-    accountMenuButtonAction->setDefaultWidget(accountMenuButton);
-
-    ui->mainToolBar->addAction(accountMenuButtonAction);
 
     // Update the menu when the active account changes.
     // Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit.
@@ -1059,35 +375,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new MainWindow
         updateNewsLabel();
     }
 
-
-    if(BuildConfig.UPDATER_ENABLED)
-    {
+    if (BuildConfig.UPDATER_ENABLED) {
         bool updatesAllowed = APPLICATION->updatesAreAllowed();
         updatesAllowedChanged(updatesAllowed);
 
-        // NOTE: calling the operator like that is an ugly hack to appease ancient gcc...
-        connect(ui->actionCheckUpdate.operator->(), &QAction::triggered, this, &MainWindow::checkForUpdates);
+        connect(ui->actionCheckUpdate, &QAction::triggered, this, &MainWindow::checkForUpdates);
 
         // set up the updater object.
-        auto updater = APPLICATION->updateChecker();
-        connect(updater.get(), &UpdateChecker::updateAvailable, this, &MainWindow::updateAvailable);
-        connect(updater.get(), &UpdateChecker::noUpdateFound, this, &MainWindow::updateNotAvailable);
-        // if automatic update checks are allowed, start one.
-        if (APPLICATION->settings()->get("AutoUpdate").toBool() && updatesAllowed)
-        {
-            updater->checkForUpdate(APPLICATION->settings()->get("UpdateChannel").toString(), false);
-        }
+        auto updater = APPLICATION->updater();
 
-        if (APPLICATION->updateChecker()->getExternalUpdater())
-        {
-            connect(APPLICATION->updateChecker()->getExternalUpdater(),
-                    &ExternalUpdater::canCheckForUpdatesChanged,
-                    this,
-                    &MainWindow::updatesAllowedChanged);
+        if (updater) {
+            connect(updater.get(), &ExternalUpdater::canCheckForUpdatesChanged, this, &MainWindow::updatesAllowedChanged);
         }
     }
 
-    connect(ui->actionUndoTrashInstance.operator->(), &QAction::triggered, this, &MainWindow::undoTrashInstance);
+    connect(ui->actionUndoTrashInstance, &QAction::triggered, this, &MainWindow::undoTrashInstance);
 
     setSelectedInstanceById(APPLICATION->settings()->get("SelectedInstance").toString());
 
@@ -1115,10 +417,10 @@ void MainWindow::retranslateUi()
     MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
     if(defaultAccount) {
         auto profileLabel = profileInUseFilter(defaultAccount->profileName(), defaultAccount->isInUse());
-        accountMenuButton->setText(profileLabel);
+        ui->actionAccountsButton->setText(profileLabel);
     }
     else {
-        accountMenuButton->setText(tr("Accounts"));
+        ui->actionAccountsButton->setText(tr("Accounts"));
     }
 
     if (m_selectedInstance) {
@@ -1128,6 +430,20 @@ void MainWindow::retranslateUi()
     }
 
     ui->retranslateUi(this);
+
+    changeIconButton->setToolTip(ui->actionChangeInstIcon->toolTip());
+    renameButton->setToolTip(ui->actionRenameInstance->toolTip());
+
+    // replace the %1 with the launcher display name in some actions
+    if (helpMenuButton->toolTip().contains("%1"))
+        helpMenuButton->setToolTip(helpMenuButton->toolTip().arg(BuildConfig.LAUNCHER_DISPLAYNAME));
+
+    for (auto action : ui->helpMenu->actions()) {
+        if (action->text().contains("%1"))
+            action->setText(action->text().arg(BuildConfig.LAUNCHER_DISPLAYNAME));
+        if (action->toolTip().contains("%1"))
+            action->setToolTip(action->toolTip().arg(BuildConfig.LAUNCHER_DISPLAYNAME));
+    }
 }
 
 MainWindow::~MainWindow()
@@ -1167,13 +483,16 @@ void MainWindow::showInstanceContextMenu(const QPoint &pos)
     bool onInstance = view->indexAt(pos).isValid();
     if (onInstance)
     {
-        actions = ui->instanceToolBar->actions();
+        // reuse the file menu actions
+        actions = ui->fileMenu->actions();
 
-        // replace the change icon widget with an actual action
-        actions.replace(0, ui->actionChangeInstIcon);
+        // remove the add instance action, launcher settings action and close action
+        actions.removeFirst();
+        actions.removeLast();
+        actions.removeLast();
 
-        // replace the rename widget with an actual action
-        actions.replace(1, ui->actionRenameInstance);
+        actions.prepend(ui->actionChangeInstIcon);
+        actions.prepend(ui->actionRenameInstance);
 
         // add header
         actions.prepend(actionSep);
@@ -1229,8 +548,6 @@ void MainWindow::updateMainToolBar()
 
 void MainWindow::updateToolsMenu()
 {
-    QToolButton *launchButton = dynamic_cast<QToolButton*>(ui->instanceToolBar->widgetForAction(ui->actionLaunchInstance));
-
     bool currentInstanceRunning = m_selectedInstance && m_selectedInstance->isRunning();
 
     ui->actionLaunchInstance->setDisabled(!m_selectedInstance || currentInstanceRunning);
@@ -1238,7 +555,6 @@ void MainWindow::updateToolsMenu()
     ui->actionLaunchInstanceDemo->setDisabled(!m_selectedInstance || currentInstanceRunning);
 
     QMenu *launchMenu = ui->actionLaunchInstance->menu();
-    launchButton->setPopupMode(QToolButton::MenuButtonPopup);
     if (launchMenu)
     {
         launchMenu->clear();
@@ -1247,7 +563,6 @@ void MainWindow::updateToolsMenu()
     {
         launchMenu = new QMenu(this);
     }
-
     QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
     normalLaunch->setShortcut(QKeySequence::Open);
     QAction *normalLaunchOffline = launchMenu->addAction(tr("Launch Offline"));
@@ -1345,7 +660,7 @@ void MainWindow::updateThemeMenu()
         themeAction->setActionGroup(themesGroup);
 
         connect(themeAction, &QAction::triggered, [theme]() {
-            APPLICATION->setApplicationTheme(theme->id(),false);
+            APPLICATION->setApplicationTheme(theme->id());
             APPLICATION->settings()->set("ApplicationTheme", theme->id());
         });
     }
@@ -1355,8 +670,7 @@ void MainWindow::updateThemeMenu()
 
 void MainWindow::repopulateAccountsMenu()
 {
-    accountMenu->clear();
-    ui->profileMenu->clear();
+    ui->accountsMenu->clear();
 
     auto accounts = APPLICATION->accounts();
     MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
@@ -1365,23 +679,17 @@ void MainWindow::repopulateAccountsMenu()
     if (defaultAccount)
     {
         // this can be called before accountMenuButton exists
-        if (accountMenuButton)
+        if (ui->actionAccountsButton)
         {
             auto profileLabel = profileInUseFilter(defaultAccount->profileName(), defaultAccount->isInUse());
-            accountMenuButton->setText(profileLabel);
+            ui->actionAccountsButton->setText(profileLabel);
         }
     }
 
     if (accounts->count() <= 0)
     {
-        ui->all_actions.removeAll(&ui->actionNoAccountsAdded);
-        ui->actionNoAccountsAdded = TranslatedAction(this);
-        ui->actionNoAccountsAdded->setObjectName(QStringLiteral("actionNoAccountsAdded"));
-        ui->actionNoAccountsAdded.setTextId(QT_TRANSLATE_NOOP("MainWindow", "No accounts added!"));
         ui->actionNoAccountsAdded->setEnabled(false);
-        accountMenu->addAction(ui->actionNoAccountsAdded);
-        ui->profileMenu->addAction(ui->actionNoAccountsAdded);
-        ui->all_actions.append(&ui->actionNoAccountsAdded);
+        ui->accountsMenu->addAction(ui->actionNoAccountsAdded);
     }
     else
     {
@@ -1412,37 +720,22 @@ void MainWindow::repopulateAccountsMenu()
                 action->setShortcut(QKeySequence(tr("Ctrl+%1").arg(i + 1)));
             }
 
-            accountMenu->addAction(action);
-            ui->profileMenu->addAction(action);
+            ui->accountsMenu->addAction(action);
             connect(action, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
         }
     }
 
-    accountMenu->addSeparator();
-    ui->profileMenu->addSeparator();
+    ui->accountsMenu->addSeparator();
 
-    ui->all_actions.removeAll(&ui->actionNoDefaultAccount);
-    ui->actionNoDefaultAccount = TranslatedAction(this);
-    ui->actionNoDefaultAccount->setObjectName(QStringLiteral("actionNoDefaultAccount"));
-    ui->actionNoDefaultAccount.setTextId(QT_TRANSLATE_NOOP("MainWindow", "No Default Account"));
-    ui->actionNoDefaultAccount->setCheckable(true);
-    ui->actionNoDefaultAccount->setIcon(APPLICATION->getThemedIcon("noaccount"));
     ui->actionNoDefaultAccount->setData(-1);
-    ui->actionNoDefaultAccount->setShortcut(QKeySequence(tr("Ctrl+0")));
-    if (!defaultAccount) {
-        ui->actionNoDefaultAccount->setChecked(true);
-    }
+    ui->actionNoDefaultAccount->setChecked(!defaultAccount);
 
-    accountMenu->addAction(ui->actionNoDefaultAccount);
-    ui->profileMenu->addAction(ui->actionNoDefaultAccount);
+    ui->accountsMenu->addAction(ui->actionNoDefaultAccount);
+
     connect(ui->actionNoDefaultAccount, SIGNAL(triggered(bool)), SLOT(changeActiveAccount()));
-    ui->all_actions.append(&ui->actionNoDefaultAccount);
-    ui->actionNoDefaultAccount.retranslate();
 
-    accountMenu->addSeparator();
-    ui->profileMenu->addSeparator();
-    accountMenu->addAction(ui->actionManageAccounts);
-    ui->profileMenu->addAction(ui->actionManageAccounts);
+    ui->accountsMenu->addSeparator();
+    ui->accountsMenu->addAction(ui->actionManageAccounts);
 }
 
 void MainWindow::updatesAllowedChanged(bool allowed)
@@ -1486,20 +779,20 @@ void MainWindow::defaultAccountChanged()
     if (account && account->profileName() != "")
     {
         auto profileLabel = profileInUseFilter(account->profileName(), account->isInUse());
-        accountMenuButton->setText(profileLabel);
+        ui->actionAccountsButton->setText(profileLabel);
         auto face = account->getFace();
         if(face.isNull()) {
-            accountMenuButton->setIcon(APPLICATION->getThemedIcon("noaccount"));
+            ui->actionAccountsButton->setIcon(APPLICATION->getThemedIcon("noaccount"));
         }
         else {
-            accountMenuButton->setIcon(face);
+            ui->actionAccountsButton->setIcon(face);
         }
         return;
     }
 
     // Set the icon to the "no account" icon.
-    accountMenuButton->setIcon(APPLICATION->getThemedIcon("noaccount"));
-    accountMenuButton->setText(tr("Accounts"));
+    ui->actionAccountsButton->setIcon(APPLICATION->getThemedIcon("noaccount"));
+    ui->actionAccountsButton->setText(tr("Accounts"));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *ev)
@@ -1561,32 +854,6 @@ void MainWindow::updateNewsLabel()
     }
 }
 
-void MainWindow::updateAvailable(GoUpdate::Status status)
-{
-    if(!APPLICATION->updatesAreAllowed())
-    {
-        updateNotAvailable();
-        return;
-    }
-    UpdateDialog dlg(true, this);
-    UpdateAction action = (UpdateAction)dlg.exec();
-    switch (action)
-    {
-    case UPDATE_LATER:
-        qDebug() << "Update will be installed later.";
-        break;
-    case UPDATE_NOW:
-        downloadUpdates(status);
-        break;
-    }
-}
-
-void MainWindow::updateNotAvailable()
-{
-    UpdateDialog dlg(false, this);
-    dlg.exec();
-}
-
 QList<int> stringToIntList(const QString &string)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
@@ -1611,72 +878,15 @@ QString intListToString(const QList<int> &list)
     return slist.join(',');
 }
 
-void MainWindow::downloadUpdates(GoUpdate::Status status)
-{
-    if(!APPLICATION->updatesAreAllowed())
-    {
-        return;
-    }
-    qDebug() << "Downloading updates.";
-    ProgressDialog updateDlg(this);
-    status.rootPath = APPLICATION->root();
-
-    auto dlPath = FS::PathCombine(APPLICATION->root(), "update", "XXXXXX");
-    if (!FS::ensureFilePathExists(dlPath))
-    {
-        CustomMessageBox::selectable(this, tr("Error"), tr("Couldn't create folder for update downloads:\n%1").arg(dlPath), QMessageBox::Warning)->show();
-    }
-    GoUpdate::DownloadTask updateTask(APPLICATION->network(), status, dlPath, &updateDlg);
-    // If the task succeeds, install the updates.
-    if (updateDlg.execWithTask(&updateTask))
-    {
-        /**
-         * NOTE: This disables launching instances until the update either succeeds (and this process exits)
-         * or the update fails (and the control leaves this scope).
-         */
-        APPLICATION->updateIsRunning(true);
-        UpdateController update(this, APPLICATION->root(), updateTask.updateFilesDir(), updateTask.operations());
-        update.installUpdates();
-        APPLICATION->updateIsRunning(false);
-    }
-    else
-    {
-        CustomMessageBox::selectable(this, tr("Error"), updateTask.failReason(), QMessageBox::Warning)->show();
-    }
-}
-
 void MainWindow::onCatToggled(bool state)
 {
     setCatBackground(state);
     APPLICATION->settings()->set("TheCat", state);
 }
 
-namespace {
-template <typename T>
-T non_stupid_abs(T in)
-{
-    if (in < 0)
-        return -in;
-    return in;
-}
-}
-
 void MainWindow::setCatBackground(bool enabled)
 {
-    if (enabled)
-    {
-        QDateTime now = QDateTime::currentDateTime();
-        QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
-        QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
-        QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
-        QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
-        if (non_stupid_abs(now.daysTo(xmas)) <= 4) {
-            cat += "-xmas";
-        } else if (non_stupid_abs(now.daysTo(halloween)) <= 4) {
-            cat += "-spooky";
-        } else if (non_stupid_abs(now.daysTo(birthday)) <= 12) {
-            cat += "-bday";
-        }
+    if (enabled) {
         view->setStyleSheet(QString(R"(
 InstanceView
 {
@@ -1687,10 +897,8 @@ InstanceView
     background-repeat: none;
     background-color:palette(base);
 })")
-                                .arg(cat));
-    }
-    else
-    {
+                                .arg(ThemeManager::getCatImage()));
+    } else {
         view->setStyleSheet(QString());
     }
 }
@@ -1812,10 +1020,12 @@ void MainWindow::on_actionAddInstance_triggered()
     addInstance();
 }
 
-void MainWindow::droppedURLs(QList<QUrl> urls)
+void MainWindow::processURLs(QList<QUrl> urls)
 {
     // NOTE: This loop only processes one dropped file!
     for (auto& url : urls) {
+        qDebug() << "Processing" << url;
+
         // The isLocalFile() check below doesn't work as intended without an explicit scheme.
         if (url.scheme().isEmpty())
             url.setScheme("file");
@@ -1825,31 +1035,50 @@ void MainWindow::droppedURLs(QList<QUrl> urls)
             break;
         }
 
-        auto localFileName = url.toLocalFile();
+        auto localFileName = QDir::toNativeSeparators(url.toLocalFile()) ;
         QFileInfo localFileInfo(localFileName);
 
-        bool isResourcePack = ResourcePackUtils::validate(localFileInfo);
-        bool isTexturePack = TexturePackUtils::validate(localFileInfo);
+        auto type = ResourceUtils::identify(localFileInfo);
 
-        if (!isResourcePack && !isTexturePack) {  // probably instance/modpack
+        if (ResourceUtils::ValidResourceTypes.count(type) == 0) {  // probably instance/modpack
             addInstance(localFileName);
-            break;
+            continue;
         }
 
-        ImportResourcePackDialog dlg(this);
+        ImportResourceDialog dlg(localFileName, type, this);
 
         if (dlg.exec() != QDialog::Accepted)
-            break;
+            continue;
 
-        qDebug() << "Adding resource/texture pack" << localFileName << "to" << dlg.selectedInstanceKey;
+        qDebug() << "Adding resource" << localFileName << "to" << dlg.selectedInstanceKey;
 
         auto inst = APPLICATION->instances()->getInstanceById(dlg.selectedInstanceKey);
         auto minecraftInst = std::dynamic_pointer_cast<MinecraftInstance>(inst);
-        if (isResourcePack)
-            minecraftInst->resourcePackList()->installResource(localFileName);
-        else if (isTexturePack)
-            minecraftInst->texturePackList()->installResource(localFileName);
-        break;
+
+        switch (type) {
+            case PackedResourceType::ResourcePack:
+                minecraftInst->resourcePackList()->installResource(localFileName);
+                break;
+            case PackedResourceType::TexturePack:
+                minecraftInst->texturePackList()->installResource(localFileName);
+                break;
+            case PackedResourceType::DataPack:
+                qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
+                break;
+            case PackedResourceType::Mod:
+                minecraftInst->loaderModList()->installMod(localFileName);
+                break;
+            case PackedResourceType::ShaderPack:
+                minecraftInst->shaderPackList()->installResource(localFileName);
+                break;
+            case PackedResourceType::WorldSave:
+                minecraftInst->worldList()->installWorld(localFileInfo);
+                break;
+            case PackedResourceType::UNKNOWN:
+            default:
+                qDebug() << "Can't Identify" << localFileName << "Ignoring it.";
+                break;
+        }
     }
 }
 
@@ -1880,7 +1109,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
         m_selectedInstance->setIconKey(dlg.selectedIconKey);
         auto icon = APPLICATION->icons()->getIcon(dlg.selectedIconKey);
         ui->actionChangeInstIcon->setIcon(icon);
-        ui->changeIconButton->setIcon(icon);
+        changeIconButton->setIcon(icon);
     }
 }
 
@@ -1890,7 +1119,7 @@ void MainWindow::iconUpdated(QString icon)
     {
         auto icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
         ui->actionChangeInstIcon->setIcon(icon);
-        ui->changeIconButton->setIcon(icon);
+        changeIconButton->setIcon(icon);
     }
 }
 
@@ -1899,7 +1128,7 @@ void MainWindow::updateInstanceToolIcon(QString new_icon)
     m_currentInstIcon = new_icon;
     auto icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
     ui->actionChangeInstIcon->setIcon(icon);
-    ui->changeIconButton->setIcon(icon);
+    changeIconButton->setIcon(icon);
 }
 
 void MainWindow::setSelectedInstanceById(const QString &id)
@@ -1985,8 +1214,7 @@ void MainWindow::checkForUpdates()
 {
     if(BuildConfig.UPDATER_ENABLED)
     {
-        auto updater = APPLICATION->updateChecker();
-        updater->checkForUpdate(APPLICATION->settings()->get("UpdateChannel").toString(), true);
+        APPLICATION->triggerUpdateCheck();
     }
     else
     {
@@ -2079,6 +1307,10 @@ void MainWindow::newsButtonClicked()
     news_dialog.exec();
 }
 
+void MainWindow::onCatChanged(int) {
+    setCatBackground(APPLICATION->settings()->get("TheCat").toBool());
+}
+
 void MainWindow::on_actionAbout_triggered()
 {
     AboutDialog dialog(this);
@@ -2093,21 +1325,23 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
     auto id = m_selectedInstance->id();
 
-    auto response =
-        CustomMessageBox::selectable(this, tr("CAREFUL!"),
-                                     tr("About to delete: %1\nThis may be permanent and will completely delete the instance.\n\nAre you sure?")
-                                         .arg(m_selectedInstance->name()),
-                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-            ->exec();
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
+                                                 tr("You are about to delete \"%1\".\n"
+                                                    "This may be permanent and will completely delete the instance.\n\n"
+                                                    "Are you sure?")
+                                                     .arg(m_selectedInstance->name()),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
 
-    if (response == QMessageBox::Yes) {
-        if (APPLICATION->instances()->trashInstance(id)) {
-            ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-            return;
-        }
+    if (response != QMessageBox::Yes)
+        return;
 
-        APPLICATION->instances()->deleteInstance(id);
+    if (APPLICATION->instances()->trashInstance(id)) {
+        ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
+        return;
     }
+
+    APPLICATION->instances()->deleteInstance(id);
 }
 
 void MainWindow::on_actionExportInstance_triggered()
@@ -2141,6 +1375,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     // Save the window state and geometry.
     APPLICATION->settings()->set("MainWindowState", saveState().toBase64());
     APPLICATION->settings()->set("MainWindowGeometry", saveGeometry().toBase64());
+    instanceToolbarSetting->set(ui->instanceToolBar->getVisibilityState());
     event->accept();
     emit isClosing();
 }
@@ -2252,7 +1487,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
 
         QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.png");
-        
+
         QFile iconFile(iconPath);
         if (!iconFile.open(QFile::WriteOnly))
         {
@@ -2261,7 +1496,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
         bool success = icon->icon().pixmap(64, 64).save(&iconFile, "PNG");
         iconFile.close();
-        
+
         if (!success)
         {
             iconFile.remove();
@@ -2302,7 +1537,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         }
 
         QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.ico");
-        
+
         // part of fix for weird bug involving the window icon being replaced
         // dunno why it happens, but this 2-line fix seems to be enough, so w/e
         auto appIcon = APPLICATION->getThemedIcon("logo");
@@ -2325,7 +1560,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create icon for shortcut."));
             return;
         }
-        
+
         if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
                            QApplication::applicationFilePath(), { "--launch", m_selectedInstance->id() },
                            m_selectedInstance->name(), iconPath)) {
@@ -2374,7 +1609,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
     if (m_selectedInstance)
     {
         ui->instanceToolBar->setEnabled(true);
-        ui->setInstanceActionsEnabled(true);
+        setInstanceActionsEnabled(true);
         ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
         ui->actionLaunchInstanceOffline->setEnabled(m_selectedInstance->canLaunch());
         ui->actionLaunchInstanceDemo->setEnabled(m_selectedInstance->canLaunch());
@@ -2387,7 +1622,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
 
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
-        ui->renameButton->setText(m_selectedInstance->name());
+        renameButton->setText(m_selectedInstance->name());
         m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
         updateStatusCenter();
         updateInstanceToolIcon(m_selectedInstance->iconKey());
@@ -2401,7 +1636,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
     else
     {
         ui->instanceToolBar->setEnabled(false);
-        ui->setInstanceActionsEnabled(false);
+        setInstanceActionsEnabled(false);
         ui->actionLaunchInstance->setEnabled(false);
         ui->actionLaunchInstanceOffline->setEnabled(false);
         ui->actionLaunchInstanceDemo->setEnabled(false);
@@ -2434,9 +1669,9 @@ void MainWindow::selectionBad()
 
     statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
-    ui->setInstanceActionsEnabled(false);
+    setInstanceActionsEnabled(false);
     updateToolsMenu();
-    ui->renameButton->setText(tr("Rename Instance"));
+    renameButton->setText(tr("Rename Instance"));
     updateInstanceToolIcon("grass");
 
     // ...and then see if we can enable the previously selected instance
@@ -2490,6 +1725,18 @@ void MainWindow::updateStatusCenter()
     if (timePlayed > 0) {
         m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
     }
+}
+// "Instance actions" are actions that require an instance to be selected (i.e. "new instance" is not here)
+// Actions that also require other conditions (e.g. a running instance) won't be changed.
+void MainWindow::setInstanceActionsEnabled(bool enabled)
+{
+    ui->actionEditInstance->setEnabled(enabled);
+    ui->actionChangeInstGroup->setEnabled(enabled);
+    ui->actionViewSelectedInstFolder->setEnabled(enabled);
+    ui->actionExportInstance->setEnabled(enabled);
+    ui->actionDeleteInstance->setEnabled(enabled);
+    ui->actionCopyInstance->setEnabled(enabled);
+    ui->actionCreateInstanceShortcut->setEnabled(enabled);
 }
 
 void MainWindow::refreshCurrentInstance(bool running)

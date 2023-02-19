@@ -36,9 +36,10 @@ class TexturePackParseTest : public QObject {
         QString zip_rp = FS::PathCombine(source, "test_texture_pack_idk.zip");
         TexturePack pack { QFileInfo(zip_rp) };
 
-        TexturePackUtils::processZIP(pack);
+        bool valid = TexturePackUtils::processZIP(pack);
 
         QVERIFY(pack.description() == "joe biden, wake up");
+        QVERIFY(valid == true);
     }
 
     void test_parseFolder()
@@ -48,9 +49,10 @@ class TexturePackParseTest : public QObject {
         QString folder_rp = FS::PathCombine(source, "test_texturefolder");
         TexturePack pack { QFileInfo(folder_rp) };
 
-        TexturePackUtils::processFolder(pack);
+        bool valid = TexturePackUtils::processFolder(pack, TexturePackUtils::ProcessingLevel::BasicInfoOnly);
 
         QVERIFY(pack.description() == "Some texture pack surely");
+        QVERIFY(valid == true);
     }
 
     void test_parseFolder2()
@@ -60,9 +62,10 @@ class TexturePackParseTest : public QObject {
         QString folder_rp = FS::PathCombine(source, "another_test_texturefolder");
         TexturePack pack { QFileInfo(folder_rp) };
 
-        TexturePackUtils::process(pack);
+        bool valid = TexturePackUtils::process(pack, TexturePackUtils::ProcessingLevel::BasicInfoOnly);
 
         QVERIFY(pack.description() == "quieres\nfor real");
+        QVERIFY(valid == true);
     }
 };
 

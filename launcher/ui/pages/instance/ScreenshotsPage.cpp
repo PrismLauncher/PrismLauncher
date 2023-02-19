@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -379,6 +380,24 @@ void ScreenshotsPage::on_actionUpload_triggered()
     if (selection.isEmpty())
         return;
 
+
+    QString text;
+    if (selection.size() > 1)
+        text = tr("You are about to upload %1 screenshots.\n\n"
+                  "Are you sure?")
+                   .arg(selection.size());
+    else
+        text =
+            tr("You are about to upload the selected screenshot.\n\n"
+               "Are you sure?");
+
+    auto response = CustomMessageBox::selectable(this, "Confirm Upload", text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No,
+                                                 QMessageBox::No)
+                        ->exec();
+
+    if (response != QMessageBox::Yes)
+        return;
+
     QList<ScreenShot::Ptr> uploaded;
     auto job = NetJob::Ptr(new NetJob("Screenshot Upload", APPLICATION->network()));
     if(selection.size() < 2)
@@ -491,17 +510,32 @@ void ScreenshotsPage::on_actionCopy_File_s_triggered()
 
 void ScreenshotsPage::on_actionDelete_triggered()
 {
-    auto mbox = CustomMessageBox::selectable(
-        this, tr("Are you sure?"), tr("This will delete all selected screenshots."),
-        QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No);
-    std::unique_ptr<QMessageBox> box(mbox);
+    auto selected = ui->listView->selectionModel()->selectedIndexes();
 
-    if (box->exec() != QMessageBox::Yes)
+    int count = ui->listView->selectionModel()->selectedRows().size();
+    QString text;
+    if (count > 1)
+        text = tr("You are about to delete %1 screenshots.\n"
+                  "This may be permanent and they will be gone from the folder.\n\n"
+                  "Are you sure?")
+                   .arg(count);
+    else
+        text = tr("You are about to delete the selected screenshot.\n"
+                  "This may be permanent and it will be gone from the folder.\n\n"
+                  "Are you sure?")
+                   .arg(count);
+
+    auto response =
+        CustomMessageBox::selectable(this, tr("Confirm Deletion"), text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No)->exec();
+
+    if (response != QMessageBox::Yes)
         return;
 
-    auto selected = ui->listView->selectionModel()->selectedIndexes();
     for (auto item : selected)
     {
+        if (FS::trash(m_model->filePath(item)))
+            continue;
+
         m_model->remove(item);
     }
 }

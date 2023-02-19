@@ -412,8 +412,6 @@ QList<QString> JavaUtils::FindJavaPaths()
 #elif defined(Q_OS_LINUX)
 QList<QString> JavaUtils::FindJavaPaths()
 {
-    qDebug() << "Linux Java detection incomplete - defaulting to \"java\"";
-
     QList<QString> javas;
     javas.append(this->GetDefaultJava()->path);
     auto scanJavaDir = [&](const QString & dirPath)
@@ -421,20 +419,11 @@ QList<QString> JavaUtils::FindJavaPaths()
         QDir dir(dirPath);
         if(!dir.exists())
             return;
-        auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+        auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
         for(auto & entry: entries)
         {
-
             QString prefix;
-            if(entry.isAbsolute())
-            {
-                prefix = entry.absoluteFilePath();
-            }
-            else
-            {
-                prefix = entry.filePath();
-            }
-
+            prefix = entry.canonicalFilePath();
             javas.append(FS::PathCombine(prefix, "jre/bin/java"));
             javas.append(FS::PathCombine(prefix, "bin/java"));
         }
