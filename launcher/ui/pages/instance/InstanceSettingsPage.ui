@@ -648,6 +648,9 @@
            </layout>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="onlineFixes">
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fixes usages of old online services which are no longer operating by emulating them or redirecting to their modern counterparts.&lt;/p&gt;&lt;p&gt;This currently only allows modern skins to be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
