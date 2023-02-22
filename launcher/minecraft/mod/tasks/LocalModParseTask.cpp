@@ -432,21 +432,22 @@ bool processZIP(Mod& mod, ProcessingLevel level)
         // nilloader uses the filename of the metadata file for the modid, so we can't know the exact filename
         // thankfully, there is a good file to use as a canary so we don't look for nil meta all the time
 
-        QStringList foundNilMetas;
+        QString foundNilMeta;
         for (auto& fname : zip.getFileNameList()) {
             // nilmods can shade nilloader to be able to run as a standalone agent - which includes nilloader's own meta file
             if (fname.endsWith(".nilmod.css") && fname != "nilloader.nilmod.css") {
-                foundNilMetas.append(fname);
+                foundNilMeta = fname;
+                break;
             }
         }
 
-        if (zip.setCurrentFile(foundNilMetas.at(0))) {
+        if (zip.setCurrentFile(foundNilMeta)) {
             if (!file.open(QIODevice::ReadOnly)) {
                 zip.close();
                 return false;
             }
 
-            details = ReadNilModInfo(file.readAll(), foundNilMetas.at(0));
+            details = ReadNilModInfo(file.readAll(), foundNilMeta);
             file.close();
             zip.close();
 

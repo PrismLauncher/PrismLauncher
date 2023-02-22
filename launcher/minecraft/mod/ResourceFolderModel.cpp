@@ -12,7 +12,7 @@
 
 #include "tasks/Task.h"
 
-ResourceFolderModel::ResourceFolderModel(QDir dir, bool create_dir, QObject* parent) : QAbstractListModel(parent), m_dir(dir), m_watcher(this)
+ResourceFolderModel::ResourceFolderModel(QDir dir, QObject* parent, bool create_dir) : QAbstractListModel(parent), m_dir(dir), m_watcher(this)
 {
     if (create_dir) {
         FS::ensureFolderPathExists(m_dir.absolutePath());
