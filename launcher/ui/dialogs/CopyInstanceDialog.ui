@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>527</width>
-    <height>699</height>
+    <width>531</width>
+    <height>653</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -113,34 +113,18 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="selectAllButtonLayout">
-     <item>
-      <widget class="QCheckBox" name="selectAllCheckbox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="text">
-        <string>Select all</string>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
     <widget class="QGroupBox" name="copyOptionsGroup">
      <property name="title">
       <string>Instance Copy Options</string>
      </property>
      <layout class="QGridLayout" name="copyOptionsLayout">
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="keepPlaytimeCheckbox">
+        <property name="text">
+         <string>Keep play time</string>
+        </property>
+       </widget>
+      </item>
       <item row="6" column="1">
        <widget class="QCheckBox" name="copyModsCheckbox">
         <property name="toolTip">
@@ -151,6 +135,16 @@
         </property>
        </widget>
       </item>
+      <item row="6" column="0">
+       <widget class="QCheckBox" name="copyResPacksCheckbox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Copy resource packs</string>
+        </property>
+       </widget>
+      </item>
       <item row="5" column="0">
        <widget class="QCheckBox" name="copyGameOptionsCheckbox">
         <property name="toolTip">
@@ -158,13 +152,6 @@
         </property>
         <property name="text">
          <string>Copy game options</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QCheckBox" name="copySavesCheckbox">
-        <property name="text">
-         <string>Copy saves</string>
         </property>
        </widget>
       </item>
@@ -182,20 +169,10 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
-       <widget class="QCheckBox" name="copyResPacksCheckbox">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="copySavesCheckbox">
         <property name="text">
-         <string>Copy resource packs</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="keepPlaytimeCheckbox">
-        <property name="text">
-         <string>Keep play time</string>
+         <string>Copy saves</string>
         </property>
        </widget>
       </item>
@@ -206,7 +183,33 @@
         </property>
        </widget>
       </item>
+      <item row="7" column="1">
+       <widget class="QCheckBox" name="selectAllCheckbox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>Select all</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
     </widget>
    </item>
    <item>
@@ -250,7 +253,7 @@
          </widget>
         </item>
         <item>
-         <layout class="QGridLayout" name="linkOptionsGridLayout" rowstretch="0,0,0,0,0,0" columnstretch="0,0" rowminimumheight="0,0,0,0,0,0" columnminimumwidth="0,0">
+         <layout class="QGridLayout" name="linkOptionsGridLayout" rowstretch="0,0,0,0" columnstretch="0,0" rowminimumheight="0,0,0,0" columnminimumwidth="0,0">
           <property name="leftMargin">
            <number>6</number>
           </property>
@@ -263,23 +266,13 @@
           <property name="bottomMargin">
            <number>6</number>
           </property>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="hardLinksCheckbox">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="toolTip">
-             <string>Use hard links instead of symbolic links.</string>
-            </property>
-            <property name="text">
-             <string>Use hard links</string>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="1">
            <widget class="QCheckBox" name="recursiveLinkCheckbox">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Link each resource individually instead of linking whole folders at once</string>
             </property>
             <property name="text">
              <string>Link files recursively</string>
@@ -302,13 +295,26 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="symbolicLinksCheckbox">
-            <property name="text">
-             <string>Use symbolic links</string>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="hardLinksCheckbox">
+            <property name="enabled">
+             <bool>true</bool>
             </property>
             <property name="toolTip">
+             <string>Use hard links instead of copying files.</string>
+            </property>
+            <property name="text">
+             <string>Use hard links</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="symbolicLinksCheckbox">
+            <property name="toolTip">
              <string>Use symbolic links instead of copying files.</string>
+            </property>
+            <property name="text">
+             <string>Use symbolic links</string>
             </property>
            </widget>
           </item>
@@ -373,7 +379,6 @@
   <tabstop>iconButton</tabstop>
   <tabstop>instNameTextBox</tabstop>
   <tabstop>groupBox</tabstop>
-  <tabstop>selectAllCheckbox</tabstop>
   <tabstop>keepPlaytimeCheckbox</tabstop>
   <tabstop>copyScreenshotsCheckbox</tabstop>
   <tabstop>copySavesCheckbox</tabstop>

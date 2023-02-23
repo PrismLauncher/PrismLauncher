@@ -72,15 +72,15 @@ class LinkTask : public Task {
                 qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
 
                 qDebug() << "atempting to run with privelage";
-                connect(m_lnk, &FS::create_link::finishedPrivlaged, this, [&](bool gotResults){
+                connect(m_lnk, &FS::create_link::finishedPrivileged, this, [&](bool gotResults){
                     if (gotResults) {
                         emitSucceeded();
                     } else {
-                        qDebug() << "Privlaged run exited without results!";
+                        qDebug() << "Privileged run exited without results!";
                         emitFailed();
                     }
                 });
-                m_lnk->runPrivlaged();
+                m_lnk->runPrivileged();
             } else {
                 qDebug() << "Link Failed!" << m_lnk->getOSError().value() << m_lnk->getOSError().message().c_str();
             }      

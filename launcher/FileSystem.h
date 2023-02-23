@@ -220,8 +220,8 @@ class create_link : public QObject {
     int totalLinked() { return m_linked; }
 
 
-    void runPrivlaged() { runPrivlaged(QString()); }
-    void runPrivlaged(const QString& offset);
+    void runPrivileged() { runPrivileged(QString()); }
+    void runPrivileged(const QString& offset);
 
     QList<LinkResult> getResults() { return m_path_results; }
 
@@ -230,7 +230,7 @@ class create_link : public QObject {
     void fileLinked(const QString& srcName, const QString& dstName);
     void linkFailed(const QString& srcName, const QString& dstName, const QString& err_msg, int err_value);
     void finished();
-    void finishedPrivlaged(bool gotResults);
+    void finishedPrivileged(bool gotResults);
 
 
    private:

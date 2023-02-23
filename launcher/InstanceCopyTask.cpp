@@ -72,14 +72,14 @@ void InstanceCopyTask::executeTask()
                     QEventLoop loop;
                     bool got_priv_results = false;
 
-                    connect(&folderLink, &FS::create_link::finishedPrivlaged, this, [&](bool gotResults){
+                    connect(&folderLink, &FS::create_link::finishedPrivileged, this, [&](bool gotResults){
                         if (!gotResults) {
-                            qDebug() << "Privlaged run exited without results!";
+                            qDebug() << "Privileged run exited without results!";
                         }
                         got_priv_results = gotResults;
                         loop.quit();
                     });
-                    folderLink.runPrivlaged();
+                    folderLink.runPrivileged();
 
                     loop.exec(); // wait for the finished signal
 

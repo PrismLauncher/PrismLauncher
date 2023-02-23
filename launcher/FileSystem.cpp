@@ -36,10 +36,6 @@
  */
 
 #include "FileSystem.h"
-#include <qdebug.h>
-#include <qfileinfo.h>
-#include <qnamespace.h>
-#include <qstorageinfo.h>
 
 #include "BuildConfig.h"
 
@@ -48,6 +44,7 @@
 #include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
+#include <QStorageInfo>
 #include <QSaveFile>
 #include <QStandardPaths>
 #include <QTextStream>
@@ -435,7 +432,7 @@ bool create_link::make_links()
     return true;
 }
 
-void create_link::runPrivlaged(const QString& offset)
+void create_link::runPrivileged(const QString& offset)
 {
     m_linked = 0;  // reset counter
     m_path_results.clear();
@@ -506,10 +503,10 @@ void create_link::runPrivlaged(const QString& offset)
                 in >>  err_value;
                 result.err_value = err_value;
                 if (result.err_value) {
-                    qDebug() << "privlaged link fail" << result.src << "to" << result.dst << "code" << result.err_value << result.err_msg;
+                    qDebug() << "privileged link fail" << result.src << "to" << result.dst << "code" << result.err_value << result.err_msg;
                     emit linkFailed(result.src, result.dst, result.err_msg, result.err_value);
                 } else {
-                    qDebug() << "privlaged link success" << result.src << "to" << result.dst;
+                    qDebug() << "privileged link success" << result.src << "to" << result.dst;
                     m_linked++;
                     emit fileLinked(result.src, result.dst);
                 }
@@ -533,7 +530,7 @@ void create_link::runPrivlaged(const QString& offset)
     }
 
     ExternalLinkFileProcess* linkFileProcess = new ExternalLinkFileProcess(serverName, m_useHardLinks, this);
-    connect(linkFileProcess, &ExternalLinkFileProcess::processExited, this, [&]() { emit finishedPrivlaged(gotResults); });
+    connect(linkFileProcess, &ExternalLinkFileProcess::processExited, this, [&]() { emit finishedPrivileged(gotResults); });
     connect(linkFileProcess, &ExternalLinkFileProcess::finished, linkFileProcess, &QObject::deleteLater);
 
     linkFileProcess->start();
@@ -1041,7 +1038,7 @@ FilesystemInfo statFS(const QString& path)
 
     QStorageInfo storage_info(NearestExistentAncestor(path));
 
-    info.fsTypeName = QString::fromStdString(storage_info.fileSystemType().toStdString());
+    info.fsTypeName = storage_info.fileSystemType();
 
     info.fsType = getFilesystemTypeFuzzy(info.fsTypeName);
 
