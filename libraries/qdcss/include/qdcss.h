@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 kumquat-ir 66188216+kumquat-ir@users.noreply.github.com
+//
+// SPDX-License-Identifier: LGPL-3.0-only
+
 #ifndef QDCSS_H
 #define QDCSS_H
 
