@@ -30,5 +30,5 @@ inline QString fromStdString(string s)
 
 int naturalCompare(const QString& s1, const QString& s2, Qt::CaseSensitivity cs);
 
-QString getRandomAlphaNumeric(const int length);
+QString getRandomAlphaNumeric();
 }  // namespace StringUtils

@@ -1,6 +1,6 @@
 #include "StringUtils.h"
 
-#include <QRandomGenerator>
+#include <QUuid>
 
 /// If you're wondering where these came from exactly, then know you're not the only one =D
 
@@ -77,15 +77,7 @@ int StringUtils::naturalCompare(const QString& s1, const QString& s2, Qt::CaseSe
     return QString::compare(s1, s2, cs);
 }
 
-QString StringUtils::getRandomAlphaNumeric(const int length)
+QString StringUtils::getRandomAlphaNumeric()
 {
-    const QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-    QString randomString;
-    for(int i=0; i < length; ++i)
-    {
-        int index = QRandomGenerator::global()->bounded(0, possibleCharacters.length());
-        QChar nextChar = possibleCharacters.at(index);
-        randomString.append(nextChar);
-    }
-    return randomString;
+    return QUuid::createUuid().toString(QUuid::Id128);
 }

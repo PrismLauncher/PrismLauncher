@@ -875,7 +875,7 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 
 QString InstanceList::getStagedInstancePath()
 {
-    QString key = QUuid::createUuid().toString().remove("{").remove("}");
+    QString key = QUuid::createUuid().toString(QUuid::WithoutBraces);
     QString tempDir = ".LAUNCHER_TEMP/";
     QString relPath = FS::PathCombine(tempDir, key);
     QDir rootPath(m_instDir);

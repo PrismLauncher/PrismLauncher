@@ -442,7 +442,7 @@ void create_link::runPrivileged(const QString& offset)
 
     make_link_list(offset);
 
-    QString serverName = BuildConfig.LAUNCHER_APP_BINARY_NAME + "_filelink_server" + StringUtils::getRandomAlphaNumeric(8);
+    QString serverName = BuildConfig.LAUNCHER_APP_BINARY_NAME + "_filelink_server" + StringUtils::getRandomAlphaNumeric();
 
     connect(&m_linkServer, &QLocalServer::newConnection, this, [&](){
 
