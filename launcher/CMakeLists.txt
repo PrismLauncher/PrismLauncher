@@ -248,6 +248,8 @@ set(MINECRAFT_SOURCES
     minecraft/gameoptions/GameOptions.cpp
     minecraft/gameoptions/GameOptionsSchema.h
     minecraft/gameoptions/GameOptionsSchema.cpp
+    minecraft/gameoptions/GameOptionDelegate.h
+    minecraft/gameoptions/GameOptionDelegate.cpp
 
     minecraft/update/AssetUpdateTask.h
     minecraft/update/AssetUpdateTask.cpp

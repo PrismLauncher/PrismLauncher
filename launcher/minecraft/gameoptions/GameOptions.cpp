@@ -110,6 +110,9 @@ bool load(const QString& path,
             }
         } else if (item.key.startsWith("key_")) {
             item.type = OptionType::KeyBind;
+        } else {
+            // this is really ugly, please suggest how to truncate the start and end
+            item.value = item.value.remove(item.value.length()-1, 1).remove(0, 1);
         }
 
         // adds reference to known option from gameOptionsSchema if avaiable to get display name and other metadata
@@ -210,9 +213,9 @@ Qt::ItemFlags GameOptions::flags(const QModelIndex& index) const
     }
 
     flags = flags | Qt::ItemFlag::ItemIsEditable;
-    if (column == Column::Value || column == Column::DefaultValue) {
+    /*if (column == Column::Value || column == Column::DefaultValue) {
         flags = flags | Qt::ItemFlag::ItemIsUserCheckable;
-    }
+    }*/
     if (column == Column::DefaultValue) {
         flags = flags & ~Qt::ItemFlag::ItemIsEnabled;
     }

@@ -38,7 +38,7 @@
 #include "GameOptionsPage.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/gameoptions/GameOptions.h"
-#include "ui_GameOptionsPage.h"
+#include "minecraft/gameoptions/GameOptionDelegate.h"
 
 GameOptionsPage::GameOptionsPage(MinecraftInstance* inst, QWidget* parent) : QWidget(parent), ui(new Ui::GameOptionsPage)
 {
@@ -46,6 +46,8 @@ GameOptionsPage::GameOptionsPage(MinecraftInstance* inst, QWidget* parent) : QWi
     ui->tabWidget->tabBar()->hide();
     m_model = inst->gameOptionsModel();
     ui->optionsView->setModel(m_model.get());
+    ui->optionsView->setItemDelegateForColumn(2, new GameOptionDelegate(ui->optionsView, m_model->getContents()));
+    ui->optionsView->setEditTriggers(QAbstractItemView::AllEditTriggers);
     auto head = ui->optionsView->header();
     head->setDefaultSectionSize(250);
     if (head->count()) {

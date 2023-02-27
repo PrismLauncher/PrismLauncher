@@ -78,6 +78,8 @@ class GameOptions : public QAbstractItemModel {
     bool reload();
     bool save();
 
+    std::vector<GameOptionItem>* getContents(){ return &contents; };
+
    private:
     std::vector<GameOptionItem> contents;
     bool loaded = false;
