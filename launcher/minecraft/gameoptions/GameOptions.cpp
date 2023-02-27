@@ -47,7 +47,11 @@ static Qt::CheckState boolToState(bool b)
 };
 
 namespace {
-bool load(const QString& path, std::vector<GameOptionItem>& contents, int& version)
+bool load(const QString& path,
+          std::vector<GameOptionItem>& contents,
+          int& version,
+          QMap<QString, std::shared_ptr<GameOption>>* &knownOptions,
+          QList<std::shared_ptr<KeyBindData>>* &keybindingOptions)
 {
     contents.clear();
     QFile file(path);
@@ -55,6 +59,9 @@ bool load(const QString& path, std::vector<GameOptionItem>& contents, int& versi
         qWarning() << "Failed to read options file.";
         return false;
     }
+
+    knownOptions = GameOptionsSchema::getKnownOptions();
+    keybindingOptions = GameOptionsSchema::getKeyBindOptions();
 
     version = 0;
     while (!file.atEnd()) {
@@ -101,7 +108,12 @@ bool load(const QString& path, std::vector<GameOptionItem>& contents, int& versi
                 qDebug() << "Array has entry" << part;
                 item.children.append(child);
             }
+        } else if (item.key.startsWith("key_")) {
+            item.type = OptionType::KeyBind;
         }
+
+        // adds reference to known option from gameOptionsSchema if avaiable to get display name and other metadata
+        item.knownOption = knownOptions->find(item.key) != knownOptions->end() ? knownOptions->find(item.key).value() : nullptr;
         contents.emplace_back(item);
     }
     qDebug() << "Loaded" << path << "with version:" << version;
@@ -242,7 +254,11 @@ QVariant GameOptions::data(const QModelIndex& index, int role) const
                     return contents[row].key;
                 }
                 case Column::Description: {
-                    return "Description goes here!";
+                    if (contents[row].knownOption != nullptr) {
+                        return contents[row].knownOption->description;
+                    } else {
+                        return QVariant();
+                    }
                 }
                 case Column::Value: {
                     switch (contents[row].type) {
@@ -259,6 +275,13 @@ QVariant GameOptions::data(const QModelIndex& index, int role) const
                             return contents[row].floatValue;
                         }
                         case OptionType::KeyBind: {
+                            for (auto& keyBinding : *keybindingOptions) {
+                                // this could become a std::find_if eventually, if someone wants to bother making it that.
+                                if (keyBinding->minecraftKeyCode == contents[row].value) {
+                                    return keyBinding->displayName; // + " (" + contents[row].value + ")";
+                                }
+                            }
+
                             return contents[row].value;
                         }
                         default: {
@@ -267,25 +290,36 @@ QVariant GameOptions::data(const QModelIndex& index, int role) const
                     }
                 }
                 case Column::DefaultValue: {
-                    switch (contents[row].type) {
-                        case OptionType::String: {
-                            return contents[row].value;
+                    if (contents[row].knownOption != nullptr) {
+                        switch (contents[row].type) {
+                            case OptionType::String: {
+                                return contents[row].knownOption->getDefaultString();
+                            }
+                            case OptionType::Int: {
+                                return contents[row].knownOption->getDefaultInt();
+                            }
+                            case OptionType::Bool: {
+                                return contents[row].knownOption->getDefaultBool();
+                            }
+                            case OptionType::Float: {
+                                return contents[row].knownOption->getDefaultFloat();
+                            }
+                            case OptionType::KeyBind: {
+                                for (auto& keyBinding : *keybindingOptions) {
+                                    // this could become a std::find_if eventually, if someone wants to bother making it that.
+                                    if (keyBinding->minecraftKeyCode == contents[row].knownOption->getDefaultString()) {
+                                        return keyBinding->displayName;  // + " (" + contents[row].knownOption->getDefaultString() + ")";
+                                    }
+                                }
+
+                                return contents[row].knownOption->getDefaultString();
+                            }
+                            default: {
+                                return QVariant();
+                            }
                         }
-                        case OptionType::Int: {
-                            return contents[row].intValue;
-                        }
-                        case OptionType::Bool: {
-                            return contents[row].boolValue;
-                        }
-                        case OptionType::Float: {
-                            return contents[row].floatValue;
-                        }
-                        case OptionType::KeyBind: {
-                            return contents[row].value;
-                        }
-                        default: {
-                            return QVariant();
-                        }
+                    } else {
+                        return QVariant();
                     }
                 }
                 default: {
@@ -303,7 +337,9 @@ QVariant GameOptions::data(const QModelIndex& index, int role) const
                     }
                 }
                 case Column::DefaultValue: {
-                        return boolToState(contents[row].boolValue);
+                    if (contents[row].knownOption != nullptr && contents[row].type == OptionType::Bool) {
+                        // checkboxes are tristate, this 1(true) needs to be 2 for fully checked
+                        return contents[row].knownOption->getDefaultBool() * 2;
                     } else {
                         return QVariant();
                     }
@@ -389,7 +425,7 @@ bool GameOptions::isLoaded() const
 bool GameOptions::reload()
 {
     beginResetModel();
-    loaded = load(path, contents, version);
+    loaded = load(path, contents, version, knownOptions, keybindingOptions);
     endResetModel();
     return loaded;
 }

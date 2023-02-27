@@ -39,7 +39,7 @@
 #include <QString>
 #include <map>
 
-enum class OptionType { String, Int, Float, Bool, KeyBind };
+#include "GameOptionsSchema.h"
 
 struct GameOptionChildItem {
     QString value;
@@ -53,6 +53,7 @@ struct GameOptionItem {
     float floatValue;
     QString value;
     OptionType type;
+    std::shared_ptr<GameOption> knownOption;
     QList<GameOptionChildItem> children;
 };
 
@@ -82,4 +83,7 @@ class GameOptions : public QAbstractItemModel {
     bool loaded = false;
     QString path;
     int version = 0;
+
+    QMap<QString, std::shared_ptr<GameOption>>* knownOptions;
+    QList<std::shared_ptr<KeyBindData>>* keybindingOptions;
 };
