@@ -2,6 +2,8 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2023 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2023 TheLastRar <TheLastRar@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -67,4 +69,7 @@ class GameOptionsPage : public QWidget, public BasePage {
    private:  // data
     Ui::GameOptionsPage* ui = nullptr;
     std::shared_ptr<GameOptions> m_model;
+
+   private Q_SLOTS:
+    void OptionDoubleClicked(const QModelIndex& index);
 };

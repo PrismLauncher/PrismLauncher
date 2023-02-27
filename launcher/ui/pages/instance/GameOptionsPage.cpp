@@ -2,6 +2,8 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2023 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2023 TheLastRar <TheLastRar@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,12 +47,14 @@ GameOptionsPage::GameOptionsPage(MinecraftInstance* inst, QWidget* parent) : QWi
     m_model = inst->gameOptionsModel();
     ui->optionsView->setModel(m_model.get());
     auto head = ui->optionsView->header();
+    head->setDefaultSectionSize(250);
     if (head->count()) {
-        head->setSectionResizeMode(0, QHeaderView::ResizeToContents);
         for (int i = 1; i < head->count(); i++) {
             head->setSectionResizeMode(i, QHeaderView::Stretch);
         }
+        head->setSectionResizeMode(head->count() -1, QHeaderView::Stretch);
     }
+    connect(ui->optionsView, &QTreeView::doubleClicked, this, &GameOptionsPage::OptionDoubleClicked);
 }
 
 GameOptionsPage::~GameOptionsPage()
@@ -71,4 +75,22 @@ void GameOptionsPage::closedImpl()
 void GameOptionsPage::retranslate()
 {
     ui->retranslateUi(this);
+}
+
+// QTreeView's double click checks if the cell clicked on has children
+// but a typical tree model would only have children in the first column
+// Workaround this by calling expand ourself
+void GameOptionsPage::OptionDoubleClicked(const QModelIndex& index)
+{
+    if (!index.isValid() || index.column() == 0)
+        return;
+
+    const QModelIndex firstColumn = ui->optionsView->model()->index(index.row(), 0, index.parent());
+    if (!ui->optionsView->model()->hasChildren(firstColumn))
+        return;
+
+    if (ui->optionsView->isExpanded(firstColumn))
+        ui->optionsView->collapse(firstColumn);
+    else
+        ui->optionsView->expand(firstColumn);
 }
