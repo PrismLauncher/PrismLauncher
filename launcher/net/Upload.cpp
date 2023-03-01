@@ -3,6 +3,7 @@
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -219,7 +220,12 @@ namespace Net {
         if (APPLICATION->capabilities() & Application::SupportsFlame
                 && request.url().host().contains("api.curseforge.com")) {
             request.setRawHeader("x-api-key", APPLICATION->getFlameAPIKey().toUtf8());
+        } else if (request.url().host().contains("api.modrinth.com")) {
+            QString token = APPLICATION->getModrinthAPIToken();
+            if (!token.isNull())
+                request.setRawHeader("Authorization", token.toUtf8());
         }
+
         //TODO other types of post requests ?
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
         QNetworkReply* rep = m_network->post(request, m_post_data);
