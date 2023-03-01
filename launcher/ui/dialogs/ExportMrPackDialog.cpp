@@ -23,6 +23,16 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
     : QDialog(parent), instance(instance), ui(new Ui::ExportMrPackDialog)
 {
     ui->setupUi(this);
+    ui->name->setText(instance->name());
+}
+
+void ExportMrPackDialog::done(int result) {
+    if (result != Accepted) {
+        QDialog::done(result);
+        return;
+    }
+    QDialog::done(result);
+
 }
 
 ExportMrPackDialog::~ExportMrPackDialog()

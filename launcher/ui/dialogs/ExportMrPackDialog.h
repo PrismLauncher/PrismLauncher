@@ -32,6 +32,8 @@ class ExportMrPackDialog : public QDialog {
     explicit ExportMrPackDialog(InstancePtr instance, QWidget* parent = nullptr);
     ~ExportMrPackDialog();
 
+    void done(int result) override;
+
    private:
     InstancePtr instance;
     Ui::ExportMrPackDialog* ui;
