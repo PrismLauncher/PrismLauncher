@@ -1,7 +1,10 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
+
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -49,6 +52,7 @@
 #include "minecraft/OneSixVersionFormat.h"
 #include "FileSystem.h"
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/ProfileUtils.h"
 #include "Json.h"
 
 #include "PackProfile.h"
@@ -730,16 +734,47 @@ void PackProfile::invalidateLaunchProfile()
 
 void PackProfile::installJarMods(QStringList selectedFiles)
 {
+    // FIXME: get rid of _internal
     installJarMods_internal(selectedFiles);
 }
 
 void PackProfile::installCustomJar(QString selectedFile)
 {
+    // FIXME: get rid of _internal
     installCustomJar_internal(selectedFile);
+}
+
+bool PackProfile::installComponents(QStringList selectedFiles)
+{
+    const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
+    if (!FS::ensureFolderPathExists(patchDir))
+        return false;
+
+    bool result = true;
+    for (const QString& source : selectedFiles) {
+        const QFileInfo sourceInfo(source);
+
+        auto versionFile = ProfileUtils::parseJsonFile(sourceInfo, false);
+        const QString target = FS::PathCombine(patchDir, versionFile->uid + ".json");
+
+        if (!QFile::copy(source, target)) {
+            qWarning() << "Component" << source << "could not be copied to target" << target;
+            result = false;
+            continue;
+        }
+
+        appendComponent(new Component(this, versionFile->uid, versionFile));
+    }
+
+    scheduleSave();
+    invalidateLaunchProfile();
+
+    return result;
 }
 
 void PackProfile::installAgents(QStringList selectedFiles)
 {
+    // FIXME: get rid of _internal
     installAgents_internal(selectedFiles);
 }
 

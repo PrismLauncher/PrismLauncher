@@ -1,8 +1,11 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
+
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -282,6 +285,7 @@ void VersionPage::updateButtons(int row)
     ui->actionRevert->setEnabled(controlsEnabled && patch && patch->isRevertible());
     ui->actionDownload_All->setEnabled(controlsEnabled);
     ui->actionAdd_Empty->setEnabled(controlsEnabled);
+    ui->actionImport_Components->setEnabled(controlsEnabled);
     ui->actionReload->setEnabled(controlsEnabled);
     ui->actionInstall_mods->setEnabled(controlsEnabled);
     ui->actionReplace_Minecraft_jar->setEnabled(controlsEnabled);
@@ -375,6 +379,20 @@ void VersionPage::on_actionReplace_Minecraft_jar_triggered()
     updateButtons();
 }
 
+void VersionPage::on_actionImport_Components_triggered()
+{
+    QStringList list = GuiUtil::BrowseForFiles("component", tr("Select components"), tr("Components (*.json)"),
+                                               APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+
+    if (!list.isEmpty()) {
+        if (!m_profile->installComponents(list)) {
+            QMessageBox::warning(this, tr("Failed to import components"),
+                                 tr("Some components could not be imported. Check logs for details"));
+        }
+    }
+
+    updateButtons();
+}
 
 void VersionPage::on_actionAdd_Agents_triggered()
 {
