@@ -44,6 +44,11 @@
 
 namespace ResourceDownload {
 
+static bool isOptedOut(ModPlatform::IndexedVersion const& ver)
+{
+    return ver.downloadUrl.isEmpty();
+}
+
 FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance)
     : ModPage(dialog, instance)
 {
@@ -70,13 +75,8 @@ auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString min
 
 bool FlameModPage::optedOut(ModPlatform::IndexedVersion& ver) const
 {
-    return ver.downloadUrl.isEmpty();
+    return isOptedOut(ver);
 }
-
-// I don't know why, but doing this on the parent class makes it so that
-// other mod providers start loading before being selected, at least with
-// my Qt, so we need to implement this in every derived class...
-auto FlameModPage::shouldDisplay() const -> bool { return true; }
 
 void FlameModPage::openUrl(const QUrl& url)
 {
@@ -93,5 +93,90 @@ void FlameModPage::openUrl(const QUrl& url)
 
     ModPage::openUrl(url);
 }
+
+FlameResourcePackPage::FlameResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
+    : ResourcePackResourcePage(dialog, instance)
+{
+    m_model = new FlameResourcePackModel(instance);
+    m_ui->packView->setModel(m_model);
+
+    addSortings();
+
+    // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
+    // so it's best not to connect them in the parent's contructor...
+    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameResourcePackPage::onSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameResourcePackPage::onVersionSelectionChanged);
+    connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameResourcePackPage::onResourceSelected);
+
+    m_ui->packDescription->setMetaEntry(metaEntryBase());
+}
+
+bool FlameResourcePackPage::optedOut(ModPlatform::IndexedVersion& ver) const
+{
+    return isOptedOut(ver);
+}
+
+void FlameResourcePackPage::openUrl(const QUrl& url)
+{
+    if (url.scheme().isEmpty()) {
+        QString query = url.query(QUrl::FullyDecoded);
+
+        if (query.startsWith("remoteUrl=")) {
+            // attempt to resolve url from warning page
+            query.remove(0, 10);
+            ResourcePackResourcePage::openUrl({QUrl::fromPercentEncoding(query.toUtf8())}); // double decoding is necessary
+            return;
+        }
+    }
+
+    ResourcePackResourcePage::openUrl(url);
+}
+
+FlameTexturePackPage::FlameTexturePackPage(TexturePackDownloadDialog* dialog, BaseInstance& instance)
+    : TexturePackResourcePage(dialog, instance)
+{
+    m_model = new FlameTexturePackModel(instance);
+    m_ui->packView->setModel(m_model);
+
+    addSortings();
+
+    // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
+    // so it's best not to connect them in the parent's contructor...
+    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameTexturePackPage::onSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameTexturePackPage::onVersionSelectionChanged);
+    connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameTexturePackPage::onResourceSelected);
+
+    m_ui->packDescription->setMetaEntry(metaEntryBase());
+}
+
+bool FlameTexturePackPage::optedOut(ModPlatform::IndexedVersion& ver) const
+{
+    return isOptedOut(ver);
+}
+
+void FlameTexturePackPage::openUrl(const QUrl& url)
+{
+    if (url.scheme().isEmpty()) {
+        QString query = url.query(QUrl::FullyDecoded);
+
+        if (query.startsWith("remoteUrl=")) {
+            // attempt to resolve url from warning page
+            query.remove(0, 10);
+            ResourcePackResourcePage::openUrl({QUrl::fromPercentEncoding(query.toUtf8())}); // double decoding is necessary
+            return;
+        }
+    }
+
+    TexturePackResourcePage::openUrl(url);
+}
+
+// I don't know why, but doing this on the parent class makes it so that
+// other mod providers start loading before being selected, at least with
+// my Qt, so we need to implement this in every derived class...
+auto FlameModPage::shouldDisplay() const -> bool { return true; }
+auto FlameResourcePackPage::shouldDisplay() const -> bool { return true; }
+auto FlameTexturePackPage::shouldDisplay() const -> bool { return true; }
 
 }  // namespace ResourceDownload

@@ -27,6 +27,8 @@ class FlameAPI : public NetworkResourceAPI {
             default:
             case ModPlatform::ResourceType::MOD:
                 return 6;
+            case ModPlatform::ResourceType::RESOURCE_PACK:
+                return 12;
         }
     }
 
