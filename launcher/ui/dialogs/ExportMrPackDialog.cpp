@@ -86,15 +86,15 @@ void ExportMrPackDialog::runExport()
         return;
     }
 
-    QuaZipFile indexFile(&zip);
-    indexFile.setFileName("modrinth.index.json");
-    if (!indexFile.open(QuaZipFile::NewOnly)) {
-        QFile::remove(output);
-        QMessageBox::warning(this, tr("Unable to export modpack"), tr("Could not create index"));
-        return;
+    {
+        QuaZipFile indexFile(&zip);
+        if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
+            QFile::remove(output);
+            QMessageBox::warning(this, tr("Unable to export modpack"), tr("Could not create index"));
+            return;
+        }
+        indexFile.write(generateIndex());
     }
-    indexFile.write(generateIndex());
-    indexFile.close();
 
     // should exist
     QDir dotMinecraft(instance->gameRoot());
