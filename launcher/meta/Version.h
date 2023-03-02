@@ -16,6 +16,7 @@
 #pragma once
 
 #include "BaseVersion.h"
+#include "../Version.h"
 
 #include <QJsonObject>
 #include <QStringList>
@@ -84,6 +85,8 @@ public:
     void parse(const QJsonObject &obj) override;
 
     QString localFilename() const override;
+
+    [[nodiscard]] ::Version toComparableVersion() const;
 
 public: // for usage by format parsers only
     void setType(const QString &type);

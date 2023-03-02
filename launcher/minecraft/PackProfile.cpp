@@ -763,7 +763,7 @@ bool PackProfile::installComponents(QStringList selectedFiles)
             continue;
         }
 
-        appendComponent(new Component(this, versionFile->uid, versionFile));
+        appendComponent(makeShared<Component>(this, versionFile->uid, versionFile));
     }
 
     scheduleSave();

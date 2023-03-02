@@ -98,7 +98,7 @@ class ResourceModel : public QAbstractListModel {
 
     /** Functions to load data into a pack.
      *
-     *  Those are needed for the same reason as ddocumentToArray, and NEED to be re-implemented in the same way.
+     *  Those are needed for the same reason as documentToArray, and NEED to be re-implemented in the same way.
      */
 
     virtual void loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&);
