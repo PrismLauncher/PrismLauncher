@@ -131,5 +131,5 @@ QByteArray ExportMrPackDialog::generateIndex()
         obj["dependencies"] = dependencies;
     }
 
-    return QJsonDocument(obj).toJson();
+    return QJsonDocument(obj).toJson(QJsonDocument::Compact);
 }
