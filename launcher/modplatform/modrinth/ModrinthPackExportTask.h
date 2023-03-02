@@ -18,27 +18,27 @@
 
 #pragma once
 
-#include <QDialog>
 #include "BaseInstance.h"
-#include "PackIgnoreProxy.h"
+#include "MMCZip.h"
+#include "tasks/Task.h"
 
-namespace Ui {
-class ExportMrPackDialog;
-}
-
-class ExportMrPackDialog : public QDialog {
-    Q_OBJECT
-
+class ModrinthPackExportTask : public Task {
    public:
-    explicit ExportMrPackDialog(InstancePtr instance, QWidget* parent = nullptr);
-    ~ExportMrPackDialog();
+    ModrinthPackExportTask(const QString& name,
+                           const QString& version,
+                           const QString& summary,
+                           InstancePtr instance,
+                           const QString& output,
+                           MMCZip::FilterFunction filter);
 
-    void done(int result) override;
+   protected:
+    void executeTask() override;
 
    private:
+    const QString name, version, summary;
     const InstancePtr instance;
-    Ui::ExportMrPackDialog* ui;
-    PackIgnoreProxy* proxy;
+    const QString output;
+    const MMCZip::FilterFunction filter;
 
-    void runExport();
+    QByteArray generateIndex();
 };

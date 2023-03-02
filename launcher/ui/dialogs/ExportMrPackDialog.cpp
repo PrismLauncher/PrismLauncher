@@ -17,16 +17,16 @@
  */
 
 #include "ExportMrPackDialog.h"
-#include <QJsonDocument>
-#include "FileSystem.h"
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
+#include "ui/dialogs/ProgressDialog.h"
 #include "ui_ExportMrPackDialog.h"
 
 #include <QFileDialog>
 #include <QFileSystemModel>
+#include <QJsonDocument>
 #include <QMessageBox>
+#include "FileSystem.h"
 #include "MMCZip.h"
+#include "modplatform/modrinth/ModrinthPackExportTask.h"
 
 ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
     : QDialog(parent), instance(instance), ui(new Ui::ExportMrPackDialog)
@@ -72,64 +72,10 @@ void ExportMrPackDialog::runExport()
     if (output.isEmpty())
         return;
 
-    QFileInfoList files;
-    if (!MMCZip::collectFileListRecursively(instance->gameRoot(), nullptr, &files,
-                                            [this](const QString& path) { return proxy->blockedPaths().covers(path); })) {
-        QMessageBox::warning(this, tr("Unable to export modpack"), tr("Could not collect list of files"));
-        return;
-    }
+    ModrinthPackExportTask task(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
+                                [this](const QString& path) { return proxy->blockedPaths().covers(path); });
 
-    QuaZip zip(output);
-    if (!zip.open(QuaZip::mdCreate)) {
-        QFile::remove(output);
-        QMessageBox::warning(this, tr("Unable to export modpack"), tr("Could not create file"));
-        return;
-    }
-
-    {
-        QuaZipFile indexFile(&zip);
-        if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
-            QFile::remove(output);
-            QMessageBox::warning(this, tr("Unable to export modpack"), tr("Could not create index"));
-            return;
-        }
-        indexFile.write(generateIndex());
-    }
-
-    // should exist
-    QDir dotMinecraft(instance->gameRoot());
-
-    for (const QFileInfo& file : files)
-        if (!JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + dotMinecraft.relativeFilePath(file.absoluteFilePath())))
-            QMessageBox::warning(this, tr("Unable to export modpack"), tr("Could not compress %1").arg(file.absoluteFilePath()));
-
-    zip.close();
-
-    if (zip.getZipError() != 0) {
-        QFile::remove(output);
-        QMessageBox::warning(this, tr("Unable to export modpack"), tr("A zip error occured"));
-        return;
-    }
-}
-
-QByteArray ExportMrPackDialog::generateIndex()
-{
-    QJsonObject obj;
-    obj["formatVersion"] = 1;
-    obj["game"] = "minecraft";
-    obj["name"] = ui->name->text();
-    obj["versionId"] = ui->version->text();
-    obj["summary"] = ui->summary->text();
-
-    MinecraftInstance* mc = dynamic_cast<MinecraftInstance*>(instance.get());
-    if (mc) {
-        auto profile = mc->getPackProfile();
-        auto minecraft = profile->getComponent("net.minecraft");
-
-        QJsonObject dependencies;
-        dependencies["minecraft"] = minecraft->m_version;
-        obj["dependencies"] = dependencies;
-    }
-
-    return QJsonDocument(obj).toJson(QJsonDocument::Compact);
+    ProgressDialog progress(this);
+    progress.setSkipButton(true, tr("Abort"));
+    progress.execWithTask(&task);
 }
