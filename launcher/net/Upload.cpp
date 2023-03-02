@@ -217,10 +217,11 @@ namespace Net {
         }
 
         request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
+        // TODO remove duplication and use constant
         if (APPLICATION->capabilities() & Application::SupportsFlame
-                && request.url().host().contains("api.curseforge.com")) {
+                && request.url().host() == "api.curseforge.com") {
             request.setRawHeader("x-api-key", APPLICATION->getFlameAPIKey().toUtf8());
-        } else if (request.url().host().contains("api.modrinth.com")) {
+        } else if (request.url().host() == "api.modrinth.com") {
             QString token = APPLICATION->getModrinthAPIToken();
             if (!token.isNull())
                 request.setRawHeader("Authorization", token.toUtf8());
