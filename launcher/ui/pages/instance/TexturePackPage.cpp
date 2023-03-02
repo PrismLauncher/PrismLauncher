@@ -48,8 +48,8 @@
 TexturePackPage::TexturePackPage(MinecraftInstance* instance, std::shared_ptr<TexturePackFolderModel> model, QWidget* parent)
     : ExternalResourcesPage(instance, model, parent)
 {
-    ui->actionDownloadItem->setText(tr("Download TPs"));
-    ui->actionDownloadItem->setToolTip(tr("Download TPs from online platforms"));
+    ui->actionDownloadItem->setText(tr("Download packs"));
+    ui->actionDownloadItem->setToolTip(tr("Download texture packs from online platforms"));
     ui->actionDownloadItem->setEnabled(true);
     connect(ui->actionDownloadItem, &QAction::triggered, this, &TexturePackPage::downloadTPs);
     ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
