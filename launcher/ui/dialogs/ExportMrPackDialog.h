@@ -39,4 +39,7 @@ class ExportMrPackDialog : public QDialog {
     InstancePtr instance;
     Ui::ExportMrPackDialog* ui;
     PackIgnoreProxy* proxy;
+
+    void runExport();
+    QByteArray generateIndex();
 };

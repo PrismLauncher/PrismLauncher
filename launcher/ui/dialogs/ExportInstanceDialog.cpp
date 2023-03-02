@@ -123,7 +123,7 @@ bool ExportInstanceDialog::doExport()
 
     const QString output = QFileDialog::getSaveFileName(
         this, tr("Export %1").arg(m_instance->name()),
-        FS::PathCombine(QDir::homePath(), name + ".zip"), "Zip (*.zip)", nullptr, QFileDialog::DontConfirmOverwrite);
+        FS::PathCombine(QDir::homePath(), name + ".zip"), "Zip (*.zip)", nullptr);
     if (output.isEmpty())
     {
         return false;
