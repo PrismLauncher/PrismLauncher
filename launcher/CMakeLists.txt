@@ -667,6 +667,7 @@ SET(LAUNCHER_SOURCES
     SkinUtils.cpp
     SkinUtils.h
     PackIgnoreProxy.cpp
+    PackIgnoreProxy.h
 
     # GUI - setup wizard
     ui/setupwizard/SetupWizard.h
