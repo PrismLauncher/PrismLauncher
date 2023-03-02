@@ -17,6 +17,7 @@
  */
 
 #include "ExportMrPackDialog.h"
+#include <QFileSystemModel>
 #include "ui_ExportMrPackDialog.h"
 
 ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
@@ -24,15 +25,29 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
 {
     ui->setupUi(this);
     ui->name->setText(instance->name());
+
+    auto model = new QFileSystemModel(this);
+    // use the game root - everything outside cannot be exported
+    QString root = instance->gameRoot();
+    proxy = new PackIgnoreProxy(root, this);
+    proxy->setSourceModel(model);
+    ui->treeView->setModel(proxy);
+    ui->treeView->setRootIndex(proxy->mapFromSource(model->index(root)));
+    ui->treeView->sortByColumn(0, Qt::AscendingOrder);
+    model->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
+    model->setRootPath(root);
+    auto headerView = ui->treeView->header();
+    headerView->setSectionResizeMode(QHeaderView::ResizeToContents);
+    headerView->setSectionResizeMode(0, QHeaderView::Stretch);
 }
 
-void ExportMrPackDialog::done(int result) {
+void ExportMrPackDialog::done(int result)
+{
     if (result != Accepted) {
         QDialog::done(result);
         return;
     }
     QDialog::done(result);
-
 }
 
 ExportMrPackDialog::~ExportMrPackDialog()

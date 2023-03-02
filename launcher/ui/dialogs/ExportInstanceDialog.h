@@ -18,9 +18,9 @@
 #include <QDialog>
 #include <QModelIndex>
 #include <memory>
+#include "PackIgnoreProxy.h"
 
 class BaseInstance;
-class PackIgnoreProxy;
 typedef std::shared_ptr<BaseInstance> InstancePtr;
 
 namespace Ui
