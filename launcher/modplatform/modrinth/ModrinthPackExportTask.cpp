@@ -17,6 +17,7 @@
  */
 
 #include "ModrinthPackExportTask.h"
+#include <qtconcurrentrun.h>
 #include <QFileInfoList>
 #include <QMessageBox>
 #include "MMCZip.h"
@@ -34,57 +35,59 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
 
 void ModrinthPackExportTask::executeTask()
 {
-    QFileInfoList files;
-    if (!MMCZip::collectFileListRecursively(instance->gameRoot(), nullptr, &files, filter)) {
-        emitFailed(tr("Could not collect list of files"));
-        return;
-    }
-
-    setStatus("Adding files...");
-
-    QuaZip zip(output);
-    if (!zip.open(QuaZip::mdCreate)) {
-        QFile::remove(output);
-        emitFailed(tr("Could not create file"));
-        return;
-    }
-
-    {
-        QuaZipFile indexFile(&zip);
-        if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
-            QFile::remove(output);
-
-            emitFailed(tr("Could not create index"));
+    QtConcurrent::run(QThreadPool::globalInstance(), [this] {
+        QFileInfoList files;
+        if (!MMCZip::collectFileListRecursively(instance->gameRoot(), nullptr, &files, filter)) {
+            emitFailed(tr("Could not collect list of files"));
             return;
         }
-        indexFile.write(generateIndex());
-    }
 
-    // should exist
-    QDir dotMinecraft(instance->gameRoot());
+        setStatus("Adding files...");
 
-    {
-        size_t i = 0;
-        for (const QFileInfo& file : files) {
-            setProgress(i, files.length());
-            if (!JlCompress::compressFile(&zip, file.absoluteFilePath(),
-                                          "overrides/" + dotMinecraft.relativeFilePath(file.absoluteFilePath()))) {
-                emitFailed(tr("Could not compress %1").arg(file.absoluteFilePath()));
+        QuaZip zip(output);
+        if (!zip.open(QuaZip::mdCreate)) {
+            QFile::remove(output);
+            emitFailed(tr("Could not create file"));
+            return;
+        }
+
+        {
+            QuaZipFile indexFile(&zip);
+            if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
+                QFile::remove(output);
+
+                emitFailed(tr("Could not create index"));
                 return;
             }
-            i++;
+            indexFile.write(generateIndex());
         }
-    }
 
-    zip.close();
+        // should exist
+        QDir dotMinecraft(instance->gameRoot());
 
-    if (zip.getZipError() != 0) {
-        QFile::remove(output);
-        emitFailed(tr("A zip error occured"));
-        return;
-    }
+        {
+            size_t i = 0;
+            for (const QFileInfo& file : files) {
+                setProgress(i, files.length());
+                if (!JlCompress::compressFile(&zip, file.absoluteFilePath(),
+                                              "overrides/" + dotMinecraft.relativeFilePath(file.absoluteFilePath()))) {
+                    emitFailed(tr("Could not compress %1").arg(file.absoluteFilePath()));
+                    return;
+                }
+                i++;
+            }
+        }
 
-	emitSucceeded();
+        zip.close();
+
+        if (zip.getZipError() != 0) {
+            QFile::remove(output);
+            emitFailed(tr("A zip error occured"));
+            return;
+        }
+
+        emitSucceeded();
+    });
 }
 
 QByteArray ModrinthPackExportTask::generateIndex()

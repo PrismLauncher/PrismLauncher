@@ -56,26 +56,22 @@ ExportMrPackDialog::~ExportMrPackDialog()
 
 void ExportMrPackDialog::done(int result)
 {
-    if (result == Accepted)
-        runExport();
+    if (result == Accepted) {
+        const QString filename = FS::RemoveInvalidFilenameChars(ui->name->text());
+        const QString output =
+            QFileDialog::getSaveFileName(this, tr("Export %1").arg(ui->name->text()), FS::PathCombine(QDir::homePath(), filename + ".mrpack"),
+                                        "Modrinth modpack (*.mrpack *.zip)", nullptr);
+
+        if (output.isEmpty())
+            return;
+
+        ModrinthPackExportTask task(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
+                                    [this](const QString& path) { return proxy->blockedPaths().covers(path); });
+
+        ProgressDialog progress(this);
+        progress.setSkipButton(true, tr("Abort"));
+        progress.execWithTask(&task);
+    }
 
     QDialog::done(result);
-}
-
-void ExportMrPackDialog::runExport()
-{
-    const QString filename = FS::RemoveInvalidFilenameChars(ui->name->text());
-    const QString output =
-        QFileDialog::getSaveFileName(this, tr("Export %1").arg(ui->name->text()), FS::PathCombine(QDir::homePath(), filename + ".mrpack"),
-                                     "Modrinth modpack (*.mrpack *.zip)", nullptr);
-
-    if (output.isEmpty())
-        return;
-
-    ModrinthPackExportTask task(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
-                                [this](const QString& path) { return proxy->blockedPaths().covers(path); });
-
-    ProgressDialog progress(this);
-    progress.setSkipButton(true, tr("Abort"));
-    progress.execWithTask(&task);
 }
