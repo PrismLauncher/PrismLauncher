@@ -40,5 +40,10 @@ class ModrinthPackExportTask : public Task {
     const QString output;
     const MMCZip::FilterFunction filter;
 
-    QByteArray generateIndex();
+    struct ResolvedFile {
+        QString sha1, sha512, url;
+        int size;
+    };
+
+    QByteArray generateIndex(const QMap<QString, ResolvedFile>& urls);
 };

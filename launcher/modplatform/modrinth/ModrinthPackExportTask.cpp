@@ -17,12 +17,17 @@
  */
 
 #include "ModrinthPackExportTask.h"
-#include <qtconcurrentrun.h>
+
+#include <qcryptographichash.h>
+#include <QFileInfo>
 #include <QFileInfoList>
 #include <QMessageBox>
+#include <QtConcurrent>
+#include "Json.h"
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 
 ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                const QString& version,
@@ -35,12 +40,75 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
 
 void ModrinthPackExportTask::executeTask()
 {
-    QtConcurrent::run(QThreadPool::globalInstance(), [this] {
-        QFileInfoList files;
-        if (!MMCZip::collectFileListRecursively(instance->gameRoot(), nullptr, &files, filter)) {
-            emitFailed(tr("Could not collect list of files"));
-            return;
+    setStatus(tr("Searching for files..."));
+
+    QFileInfoList files;
+    if (!MMCZip::collectFileListRecursively(instance->gameRoot(), nullptr, &files, filter)) {
+        emitFailed(tr("Could not collect list of files"));
+        return;
+    }
+
+    QDir mc(instance->gameRoot());
+
+    ModrinthAPI api;
+
+    static const QStringList prefixes({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
+    // hash -> file
+    QMap<QString, QString> hashes;
+
+    for (QFileInfo file : files) {
+        QString relative = mc.relativeFilePath(file.absoluteFilePath());
+        // require sensible file types
+        if (!(relative.endsWith(".zip") || relative.endsWith(".jar") || relative.endsWith(".litemod")))
+            continue;
+
+        if (!std::any_of(prefixes.begin(), prefixes.end(),
+                         [&relative](const QString& prefix) { return relative.startsWith(prefix + QDir::separator()); }))
+            continue;
+
+        QCryptographicHash hash(QCryptographicHash::Algorithm::Sha512);
+
+        QFile openFile(file.absoluteFilePath());
+        if (!openFile.open(QFile::ReadOnly)) {
+            qWarning() << "Could not open" << file << "for hashing";
+            continue;
         }
+
+        if (!hash.addData(&openFile)) {
+            qWarning() << "Could not add hash data for" << file;
+            continue;
+        }
+
+        hashes[hash.result().toHex()] = relative;
+    }
+
+    QByteArray* response = new QByteArray;
+    Task::Ptr versionsTask = api.currentVersions(hashes.keys(), "sha512", response);
+    connect(versionsTask.get(), &NetJob::succeeded, this, [this, mc, files, hashes, response, versionsTask]() {
+        // file -> url
+        QMap<QString, ResolvedFile> resolved;
+
+        try {
+            QJsonDocument doc = Json::requireDocument(*response);
+            for (auto iter = hashes.keyBegin(); iter != hashes.keyEnd(); iter++) {
+                QJsonObject obj = doc[*iter].toObject();
+                if (obj.isEmpty())
+                    continue;
+
+                QJsonArray files = obj["files"].toArray();
+                if (auto fileIter = std::find_if(files.begin(), files.end(),
+                                                 [&iter](const QJsonValue& file) { return file["hashes"]["sha512"] == *iter; });
+                    fileIter != files.end()) {
+                    // map the file to the url
+                    resolved[hashes[*iter]] = ResolvedFile{ fileIter->toObject()["hashes"].toObject()["sha1"].toString(), *iter,
+                                                            fileIter->toObject()["url"].toString(), fileIter->toObject()["size"].toInt() };
+                }
+            }
+        } catch (Json::JsonException& e) {
+            qWarning() << "Failed to parse versions response" << e.what();
+        }
+
+        delete response;
 
         setStatus("Adding files...");
 
@@ -55,25 +123,19 @@ void ModrinthPackExportTask::executeTask()
             QuaZipFile indexFile(&zip);
             if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
                 QFile::remove(output);
-
                 emitFailed(tr("Could not create index"));
                 return;
             }
-            indexFile.write(generateIndex());
+            indexFile.write(generateIndex(resolved));
         }
-
-        // should exist
-        QDir dotMinecraft(instance->gameRoot());
 
         {
             size_t i = 0;
             for (const QFileInfo& file : files) {
                 setProgress(i, files.length());
-                if (!JlCompress::compressFile(&zip, file.absoluteFilePath(),
-                                              "overrides/" + dotMinecraft.relativeFilePath(file.absoluteFilePath()))) {
-                    emitFailed(tr("Could not compress %1").arg(file.absoluteFilePath()));
-                    return;
-                }
+                QString relative = mc.relativeFilePath(file.absoluteFilePath());
+                if (!resolved.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative))
+                    qWarning() << "Could not compress" << file;
                 i++;
             }
         }
@@ -88,9 +150,11 @@ void ModrinthPackExportTask::executeTask()
 
         emitSucceeded();
     });
+    connect(versionsTask.get(), &NetJob::failed, this, [this](const QString& reason) { emitFailed(reason); });
+    versionsTask->start();
 }
 
-QByteArray ModrinthPackExportTask::generateIndex()
+QByteArray ModrinthPackExportTask::generateIndex(const QMap<QString, ResolvedFile>& urls)
 {
     QJsonObject obj;
     obj["formatVersion"] = 1;
@@ -120,6 +184,27 @@ QByteArray ModrinthPackExportTask::generateIndex()
             dependencies["forge"] = forge->m_version;
         obj["dependencies"] = dependencies;
     }
+
+    QJsonArray files;
+    QMapIterator<QString, ResolvedFile> iterator(urls);
+    while (iterator.hasNext()) {
+        iterator.next();
+
+        const ResolvedFile& value = iterator.value();
+
+        QJsonObject file;
+        file["path"] = iterator.key();
+        file["downloads"] = QJsonArray({ iterator.value().url });
+
+        QJsonObject hashes;
+        hashes["sha1"] = value.sha1;
+        hashes["sha512"] = value.sha512;
+        file["hashes"] = hashes;
+        file["fileSize"] = value.size;
+
+        files << file;
+    }
+    obj["files"] = files;
 
     return QJsonDocument(obj).toJson(QJsonDocument::Compact);
 }
