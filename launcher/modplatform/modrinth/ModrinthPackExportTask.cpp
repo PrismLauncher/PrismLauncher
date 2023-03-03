@@ -102,10 +102,22 @@ QByteArray ModrinthPackExportTask::generateIndex()
     MinecraftInstance* mc = dynamic_cast<MinecraftInstance*>(instance.get());
     if (mc) {
         auto profile = mc->getPackProfile();
+        // collect all supported components
         auto minecraft = profile->getComponent("net.minecraft");
+        auto quilt = profile->getComponent("org.quiltmc.quilt-loader");
+        auto fabric = profile->getComponent("net.fabricmc.fabric-loader");
+        auto forge = profile->getComponent("net.minecraftforge");
 
+        // convert all available components to mrpack dependencies
         QJsonObject dependencies;
-        dependencies["minecraft"] = minecraft->m_version;
+        if (minecraft != nullptr)
+            dependencies["minecraft"] = minecraft->m_version;
+        if (quilt != nullptr)
+            dependencies["quilt-loader"] = quilt->m_version;
+        if (fabric != nullptr)
+            dependencies["fabric-loader"] = fabric->m_version;
+        if (forge != nullptr)
+            dependencies["forge"] = forge->m_version;
         obj["dependencies"] = dependencies;
     }
 
