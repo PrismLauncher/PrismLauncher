@@ -60,7 +60,7 @@ void ExportMrPackDialog::done(int result)
         const QString filename = FS::RemoveInvalidFilenameChars(ui->name->text());
         const QString output =
             QFileDialog::getSaveFileName(this, tr("Export %1").arg(ui->name->text()), FS::PathCombine(QDir::homePath(), filename + ".mrpack"),
-                                        "Modrinth modpack (*.mrpack *.zip)", nullptr);
+                                        "Modrinth pack (*.mrpack *.zip)", nullptr);
 
         if (output.isEmpty())
             return;
