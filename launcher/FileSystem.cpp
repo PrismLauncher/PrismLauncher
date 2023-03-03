@@ -44,9 +44,9 @@
 #include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
-#include <QStorageInfo>
 #include <QSaveFile>
 #include <QStandardPaths>
+#include <QStorageInfo>
 #include <QTextStream>
 #include <QUrl>
 #include <QtNetwork>
@@ -68,10 +68,10 @@
 #include <windows.h>
 #include <winnls.h>
 #include <string>
-//for ShellExecute
-#include <shlobj.h>
-#include <objbase.h>
+// for ShellExecute
 #include <Shellapi.h>
+#include <objbase.h>
+#include <shlobj.h>
 #else
 #include <utime.h>
 #endif
@@ -79,47 +79,46 @@
 // Snippet from https://github.com/gulrak/filesystem#using-it-as-single-file-header
 
 #ifdef __APPLE__
-#include <Availability.h> // for deployment target to support pre-catalina targets without std::fs
-#endif // __APPLE__
+#include <Availability.h>  // for deployment target to support pre-catalina targets without std::fs
+#endif                     // __APPLE__
 
 #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || (defined(__cplusplus) && __cplusplus >= 201703L)) && defined(__has_include)
 #if __has_include(<filesystem>) && (!defined(__MAC_OS_X_VERSION_MIN_REQUIRED) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 101500)
 #define GHC_USE_STD_FS
 #include <filesystem>
 namespace fs = std::filesystem;
-#endif // MacOS min version check
-#endif // Other OSes version check
+#endif  // MacOS min version check
+#endif  // Other OSes version check
 
 #ifndef GHC_USE_STD_FS
 #include <ghc/filesystem.hpp>
 namespace fs = ghc::filesystem;
 #endif
 
-
 // clone
 #if defined(Q_OS_LINUX)
-#include <linux/fs.h>
-#include <fcntl.h>      /* Definition of FICLONE* constants */
-#include <sys/ioctl.h>
 #include <errno.h>
+#include <fcntl.h> /* Definition of FICLONE* constants */
+#include <linux/fs.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
 #include <sys/attr.h>
 #include <sys/clonefile.h>
 #elif defined(Q_OS_WIN)
 // winbtrfs clone vs rundll32 shellbtrfs.dll,ReflinkCopy
-#include <windows.h>
+#include <fileapi.h>
 #include <stdio.h>
 #include <tchar.h>
-#include <fileapi.h>
+#include <windows.h>
 // refs
 #include <winioctl.h>
-#   if defined(__MINGW32__)
-#       include <crtdbg.h>
-#   endif
+#if defined(__MINGW32__)
+#include <crtdbg.h>
+#endif
 #endif
 
-#if defined(Q_OS_WIN) 
+#if defined(Q_OS_WIN)
 
 #if defined(__MINGW32__)
 
@@ -131,45 +130,44 @@ typedef struct _DUPLICATE_EXTENTS_DATA {
 } DUPLICATE_EXTENTS_DATA, *PDUPLICATE_EXTENTS_DATA;
 
 typedef struct _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER {
-    WORD   ChecksumAlgorithm;   // Checksum algorithm. e.g. CHECKSUM_TYPE_UNCHANGED, CHECKSUM_TYPE_NONE, CHECKSUM_TYPE_CRC32
-    WORD   Reserved;            // Must be 0
-    DWORD Flags;                // FSCTL_INTEGRITY_FLAG_xxx
+    WORD ChecksumAlgorithm;  // Checksum algorithm. e.g. CHECKSUM_TYPE_UNCHANGED, CHECKSUM_TYPE_NONE, CHECKSUM_TYPE_CRC32
+    WORD Reserved;           // Must be 0
+    DWORD Flags;             // FSCTL_INTEGRITY_FLAG_xxx
     DWORD ChecksumChunkSizeInBytes;
     DWORD ClusterSizeInBytes;
 } FSCTL_GET_INTEGRITY_INFORMATION_BUFFER, *PFSCTL_GET_INTEGRITY_INFORMATION_BUFFER;
 
-
 typedef struct _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER {
-    WORD   ChecksumAlgorithm;   // Checksum algorithm. e.g. CHECKSUM_TYPE_UNCHANGED, CHECKSUM_TYPE_NONE, CHECKSUM_TYPE_CRC32
-    WORD   Reserved;            // Must be 0
-    DWORD Flags;                // FSCTL_INTEGRITY_FLAG_xxx
+    WORD ChecksumAlgorithm;  // Checksum algorithm. e.g. CHECKSUM_TYPE_UNCHANGED, CHECKSUM_TYPE_NONE, CHECKSUM_TYPE_CRC32
+    WORD Reserved;           // Must be 0
+    DWORD Flags;             // FSCTL_INTEGRITY_FLAG_xxx
 } FSCTL_SET_INTEGRITY_INFORMATION_BUFFER, *PFSCTL_SET_INTEGRITY_INFORMATION_BUFFER;
 
 #endif
 
-
 #ifndef FSCTL_DUPLICATE_EXTENTS_TO_FILE
-#define FSCTL_DUPLICATE_EXTENTS_TO_FILE     CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 209, METHOD_BUFFERED, FILE_WRITE_DATA )
+#define FSCTL_DUPLICATE_EXTENTS_TO_FILE CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 209, METHOD_BUFFERED, FILE_WRITE_DATA)
 #endif
 
 #ifndef FSCTL_GET_INTEGRITY_INFORMATION
-#define FSCTL_GET_INTEGRITY_INFORMATION     CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 159, METHOD_BUFFERED, FILE_ANY_ACCESS)           // FSCTL_GET_INTEGRITY_INFORMATION_BUFFER
+#define FSCTL_GET_INTEGRITY_INFORMATION \
+    CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 159, METHOD_BUFFERED, FILE_ANY_ACCESS)  // FSCTL_GET_INTEGRITY_INFORMATION_BUFFER
 #endif
 
 #ifndef FSCTL_SET_INTEGRITY_INFORMATION
-#define FSCTL_SET_INTEGRITY_INFORMATION     CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 160, METHOD_BUFFERED, FILE_READ_DATA | FILE_WRITE_DATA) // FSCTL_SET_INTEGRITY_INFORMATION_BUFFER
+#define FSCTL_SET_INTEGRITY_INFORMATION \
+    CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 160, METHOD_BUFFERED, FILE_READ_DATA | FILE_WRITE_DATA)  // FSCTL_SET_INTEGRITY_INFORMATION_BUFFER
 #endif
 
 #ifndef ERROR_NOT_CAPABLE
-#define ERROR_NOT_CAPABLE                775L
+#define ERROR_NOT_CAPABLE 775L
 #endif
 
 #ifndef ERROR_BLOCK_TOO_MANY_REFERENCES
-#define ERROR_BLOCK_TOO_MANY_REFERENCES  347L
+#define ERROR_BLOCK_TOO_MANY_REFERENCES 347L
 #endif
 
 #endif
-
 
 namespace FS {
 
@@ -313,22 +311,21 @@ QDebug operator<<(QDebug debug, const LinkPair& lp)
     return debug;
 }
 
-bool create_link::operator()(const QString& offset, bool dryRun) 
+bool create_link::operator()(const QString& offset, bool dryRun)
 {
     m_linked = 0;  // reset counter
     m_path_results.clear();
     m_links_to_make.clear();
 
     m_path_results.clear();
-    
+
     make_link_list(offset);
-    
+
     if (!dryRun)
         return make_links();
 
     return true;
 }
-
 
 /**
  * @brief make a list off all the  links ot make
@@ -354,13 +351,12 @@ void create_link::make_link_list(const QString& offset)
                 qDebug() << "path" << relative_dst_path << "in black list or not in whitelist";
                 return;
             }
-                
 
             auto dst_path = PathCombine(dst, relative_dst_path);
-            LinkPair link = {src_path, dst_path};
-            m_links_to_make.append(link); 
+            LinkPair link = { src_path, dst_path };
+            m_links_to_make.append(link);
         };
-        
+
         if ((!m_recursive) || !fs::is_directory(StringUtils::toStdString(src))) {
             if (m_debug)
                 qDebug() << "linking single file or dir:" << src << "to" << dst;
@@ -377,7 +373,7 @@ void create_link::make_link_list(const QString& offset)
                 auto src_path = source_it.next();
                 auto relative_path = src_dir.relativeFilePath(src_path);
 
-                if (m_max_depth >= 0 && PathDepth(relative_path) > m_max_depth){
+                if (m_max_depth >= 0 && PathDepth(relative_path) > m_max_depth) {
                     relative_path = PathTruncate(relative_path, m_max_depth);
                     src_path = src_dir.filePath(relative_path);
                     if (linkedPaths.contains(src_path)) {
@@ -390,13 +386,12 @@ void create_link::make_link_list(const QString& offset)
                 link_file(src_path, relative_path);
             }
         }
-    }  
+    }
 }
 
 bool create_link::make_links()
-{   
+{
     for (auto link : m_links_to_make) {
-
         QString src_path = link.src;
         QString dst_path = link.dst;
 
@@ -414,7 +409,6 @@ bool create_link::make_links()
                 qDebug() << "making symlink:" << src_path << "to" << dst_path;
             fs::create_symlink(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), m_os_err);
         }
-           
 
         if (m_os_err) {
             qWarning() << "Failed to link files:" << QString::fromStdString(m_os_err.message());
@@ -427,7 +421,8 @@ bool create_link::make_links()
             m_linked++;
             emit fileLinked(src_path, dst_path);
         }
-        if (m_os_err) return false;
+        if (m_os_err)
+            return false;
     }
     return true;
 }
@@ -444,17 +439,16 @@ void create_link::runPrivileged(const QString& offset)
 
     QString serverName = BuildConfig.LAUNCHER_APP_BINARY_NAME + "_filelink_server" + StringUtils::getRandomAlphaNumeric();
 
-    connect(&m_linkServer, &QLocalServer::newConnection, this, [&](){
-
+    connect(&m_linkServer, &QLocalServer::newConnection, this, [&]() {
         qDebug() << "Client connected, sending out pairs";
         // construct block of data to send
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_5_0); // choose correct version better?
+        out.setVersion(QDataStream::Qt_5_0);  // choose correct version better?
 
         qint32 blocksize = quint32(sizeof(quint32));
         for (auto link : m_links_to_make) {
-            blocksize += quint32(link.src.size()); 
+            blocksize += quint32(link.src.size());
             blocksize += quint32(link.dst.size());
         }
         qDebug() << "About to write block of size:" << blocksize;
@@ -462,15 +456,14 @@ void create_link::runPrivileged(const QString& offset)
 
         out << quint32(m_links_to_make.length());
         for (auto link : m_links_to_make) {
-            out << link.src;   
+            out << link.src;
             out << link.dst;
         }
 
-        QLocalSocket *clientConnection = m_linkServer.nextPendingConnection();
-        connect(clientConnection, &QLocalSocket::disconnected,
-                clientConnection, &QLocalSocket::deleteLater);
-        
-        connect(clientConnection, &QLocalSocket::readyRead, this, [&, clientConnection](){
+        QLocalSocket* clientConnection = m_linkServer.nextPendingConnection();
+        connect(clientConnection, &QLocalSocket::disconnected, clientConnection, &QLocalSocket::deleteLater);
+
+        connect(clientConnection, &QLocalSocket::readyRead, this, [&, clientConnection]() {
             QDataStream in;
             quint32 blockSize = 0;
             in.setDevice(clientConnection);
@@ -489,18 +482,18 @@ void create_link::runPrivileged(const QString& offset)
             qDebug() << "bytes avalible" << clientConnection->bytesAvailable();
             if (clientConnection->bytesAvailable() < blockSize || in.atEnd())
                 return;
-            
+
             quint32 numResults;
             in >> numResults;
             qDebug() << "numResults" << numResults;
 
-            for(quint32 i = 0; i < numResults; i++) {
+            for (quint32 i = 0; i < numResults; i++) {
                 FS::LinkResult result;
                 in >> result.src;
                 in >> result.dst;
                 in >> result.err_msg;
                 qint32 err_value;
-                in >>  err_value;
+                in >> err_value;
                 result.err_value = err_value;
                 if (result.err_value) {
                     qDebug() << "privileged link fail" << result.src << "to" << result.dst << "code" << result.err_value << result.err_msg;
@@ -520,7 +513,6 @@ void create_link::runPrivileged(const QString& offset)
         qint64 byteswritten = clientConnection->write(block);
         bool bytesflushed = clientConnection->flush();
         qDebug() << "block flushed" << byteswritten << bytesflushed;
-
     });
 
     qDebug() << "Listening on pipe" << serverName;
@@ -534,11 +526,12 @@ void create_link::runPrivileged(const QString& offset)
     connect(linkFileProcess, &ExternalLinkFileProcess::finished, linkFileProcess, &QObject::deleteLater);
 
     linkFileProcess->start();
-
 }
 
-void ExternalLinkFileProcess::runLinkFile() {
-    QString fileLinkExe = PathCombine(QCoreApplication::instance()->applicationDirPath(),  BuildConfig.LAUNCHER_APP_BINARY_NAME + "_filelink");
+void ExternalLinkFileProcess::runLinkFile()
+{
+    QString fileLinkExe =
+        PathCombine(QCoreApplication::instance()->applicationDirPath(), BuildConfig.LAUNCHER_APP_BINARY_NAME + "_filelink");
     QString params = "-s " + m_server;
 
     params += " -H " + QVariant(m_useHardLinks).toString();
@@ -550,14 +543,15 @@ void ExternalLinkFileProcess::runLinkFile() {
 
     qDebug() << "Running: runas" << fileLinkExe << params;
 
-    LPCWSTR programNameWin = (const wchar_t*) fileLinkExe.utf16();
-    LPCWSTR paramsWin = (const wchar_t*) params.utf16();
+    LPCWSTR programNameWin = (const wchar_t*)fileLinkExe.utf16();
+    LPCWSTR paramsWin = (const wchar_t*)params.utf16();
 
     // https://learn.microsoft.com/en-us/windows/win32/api/shellapi/ns-shellapi-shellexecuteinfoa
     ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
     ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-    ShExecInfo.hwnd = NULL; // Optional. A handle to the owner window, used to display and position any UI that the system might produce while executing this function.
-    ShExecInfo.lpVerb = L"runas"; // elevate to admin, show UAC
+    ShExecInfo.hwnd = NULL;  // Optional. A handle to the owner window, used to display and position any UI that the system might produce
+                             // while executing this function.
+    ShExecInfo.lpVerb = L"runas";  // elevate to admin, show UAC
     ShExecInfo.lpFile = programNameWin;
     ShExecInfo.lpParameters = paramsWin;
     ShExecInfo.lpDirectory = NULL;
@@ -602,7 +596,7 @@ bool deletePath(QString path)
     return err.value() == 0;
 }
 
-bool trash(QString path, QString *pathInTrash)
+bool trash(QString path, QString* pathInTrash)
 {
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     return false;
@@ -644,7 +638,8 @@ QString AbsolutePath(const QString& path)
 
 int PathDepth(const QString& path)
 {
-    if (path.isEmpty()) return 0;
+    if (path.isEmpty())
+        return 0;
 
     QFileInfo info(path);
 
@@ -657,17 +652,18 @@ int PathDepth(const QString& path)
     int numParts = parts.length();
     numParts -= parts.count(".");
     numParts -= parts.count("..") * 2;
-    
+
     return numParts;
 }
 
 QString PathTruncate(const QString& path, int depth)
 {
-    if (path.isEmpty() || (depth < 0) ) return "";
+    if (path.isEmpty() || (depth < 0))
+        return "";
 
     QString trunc = QFileInfo(path).path();
 
-    if (PathDepth(trunc) > depth ) {
+    if (PathDepth(trunc) > depth) {
         return PathTruncate(trunc, depth);
     }
 
@@ -786,11 +782,7 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
 
     stream << "#!/bin/bash"
            << "\n";
-    stream << "\""
-           << target
-           << "\" "
-           << argstring
-           << "\n";
+    stream << "\"" << target << "\" " << argstring << "\n";
 
     stream.flush();
     f.close();
@@ -813,8 +805,7 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
            << "\n";
     stream << "Exec=\"" << target.toLocal8Bit() << "\"" << argstring.toLocal8Bit() << "\n";
     stream << "Name=" << name.toLocal8Bit() << "\n";
-    if (!icon.isEmpty())
-    {
+    if (!icon.isEmpty()) {
         stream << "Icon=" << icon.toLocal8Bit() << "\n";
     }
 
@@ -827,55 +818,45 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
 #elif defined(Q_OS_WIN)
     QFileInfo targetInfo(target);
 
-    if (!targetInfo.exists())
-    {
+    if (!targetInfo.exists()) {
         qWarning() << "Target file does not exist!";
         return false;
     }
 
     target = targetInfo.absoluteFilePath();
 
-    if (target.length() >= MAX_PATH)
-    {
+    if (target.length() >= MAX_PATH) {
         qWarning() << "Target file path is too long!";
         return false;
     }
 
-    if (!icon.isEmpty() && icon.length() >= MAX_PATH)
-    {
+    if (!icon.isEmpty() && icon.length() >= MAX_PATH) {
         qWarning() << "Icon path is too long!";
         return false;
     }
 
     destination += ".lnk";
 
-    if (destination.length() >= MAX_PATH)
-    {
+    if (destination.length() >= MAX_PATH) {
         qWarning() << "Destination path is too long!";
         return false;
     }
 
     QString argStr;
     int argCount = args.count();
-    for (int i = 0; i < argCount; i++)
-    {
-        if (args[i].contains(' '))
-        {
+    for (int i = 0; i < argCount; i++) {
+        if (args[i].contains(' ')) {
             argStr.append('"').append(args[i]).append('"');
-        }
-        else
-        {
+        } else {
             argStr.append(args[i]);
         }
 
-        if (i < argCount - 1)
-        {
+        if (i < argCount - 1) {
             argStr.append(" ");
         }
     }
 
-    if (argStr.length() >= MAX_PATH)
-    {
+    if (argStr.length() >= MAX_PATH) {
         qWarning() << "Arguments string is too long!";
         return false;
     }
@@ -884,8 +865,7 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
 
     // ...yes, you need to initialize the entire COM stack just to make a shortcut
     hres = CoInitialize(nullptr);
-    if (FAILED(hres))
-    {
+    if (FAILED(hres)) {
         qWarning() << "Failed to initialize COM!";
         return false;
     }
@@ -896,8 +876,7 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
 
     // create an IShellLink instance - this stores the shortcut's attributes
     hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&psl);
-    if (SUCCEEDED(hres))
-    {
+    if (SUCCEEDED(hres)) {
         wmemset(wsz, 0, MAX_PATH);
         target.toWCharArray(wsz);
         psl->SetPath(wsz);
@@ -908,10 +887,9 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
 
         wmemset(wsz, 0, MAX_PATH);
         targetInfo.absolutePath().toWCharArray(wsz);
-        psl->SetWorkingDirectory(wsz); // "Starts in" attribute
+        psl->SetWorkingDirectory(wsz);  // "Starts in" attribute
 
-        if (!icon.isEmpty())
-        {
+        if (!icon.isEmpty()) {
             wmemset(wsz, 0, MAX_PATH);
             icon.toWCharArray(wsz);
             psl->SetIconLocation(wsz, 0);
@@ -921,27 +899,21 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
         // this is the interface that will actually let us save the shortcut to disk!
         IPersistFile* ppf;
         hres = psl->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf);
-        if (SUCCEEDED(hres))
-        {
+        if (SUCCEEDED(hres)) {
             wmemset(wsz, 0, MAX_PATH);
             destination.toWCharArray(wsz);
             hres = ppf->Save(wsz, TRUE);
-            if (FAILED(hres))
-            {
+            if (FAILED(hres)) {
                 qWarning() << "IPresistFile->Save() failed";
                 qWarning() << "hres = " << hres;
             }
             ppf->Release();
-        }
-        else
-        {
+        } else {
             qWarning() << "Failed to query IPersistFile interface from IShellLink instance";
             qWarning() << "hres = " << hres;
         }
         psl->Release();
-    }
-    else
-    {
+    } else {
         qWarning() << "Failed to create IShellLink instance";
         qWarning() << "hres = " << hres;
     }
@@ -977,32 +949,32 @@ bool overrideFolder(QString overwritten_path, QString override_path)
     return err.value() == 0;
 }
 
-QString getFilesystemTypeName(FilesystemType type) {
+QString getFilesystemTypeName(FilesystemType type)
+{
     auto iter = s_filesystem_type_names.constFind(type);
-    if (iter != s_filesystem_type_names.constEnd()){
+    if (iter != s_filesystem_type_names.constEnd()) {
         return iter.value();
     }
-    return getFilesystemTypeName(FilesystemType::UNKNOWN); 
+    return getFilesystemTypeName(FilesystemType::UNKNOWN);
 }
 
 FilesystemType getFilesystemTypeFuzzy(const QString& name)
 {
     auto iter = s_filesystem_type_names_inverse.constFind(name.toUpper());
-    if (iter != s_filesystem_type_names_inverse.constEnd()){
+    if (iter != s_filesystem_type_names_inverse.constEnd()) {
         return iter.value();
     }
-    return FilesystemType::UNKNOWN;       
+    return FilesystemType::UNKNOWN;
 }
 
 FilesystemType getFilesystemType(const QString& name)
-{   
+{
     for (auto fs_type_pair : s_filesystem_type_names_inverse.toStdMap()) {
         auto fs_type_name = fs_type_pair.first;
         auto fs_type = fs_type_pair.second;
 
-        if(name.toUpper().contains(fs_type_name.toUpper())) {
+        if (name.toUpper().contains(fs_type_name.toUpper())) {
             return fs_type;
-     
         }
     }
     return FilesystemType::UNKNOWN;
@@ -1010,30 +982,29 @@ FilesystemType getFilesystemType(const QString& name)
 
 /**
  * @brief path to the near ancestor that exsists
- * 
+ *
  */
 QString NearestExistentAncestor(const QString& path)
 {
-    if(QFileInfo::exists(path)) return path;
+    if (QFileInfo::exists(path))
+        return path;
 
     QDir dir(path);
-    if(!dir.makeAbsolute()) return {};
-    do
-    {
+    if (!dir.makeAbsolute())
+        return {};
+    do {
         dir.setPath(QDir::cleanPath(dir.filePath(QStringLiteral(".."))));
-    }
-    while(!dir.exists() && !dir.isRoot());
+    } while (!dir.exists() && !dir.isRoot());
 
     return dir.exists() ? dir.path() : QString();
 }
 
 /**
  * @brief colect information about the filesystem under a file
- * 
+ *
  */
 FilesystemInfo statFS(const QString& path)
 {
-
     FilesystemInfo info;
 
     QStorageInfo storage_info(NearestExistentAncestor(path));
@@ -1054,11 +1025,11 @@ FilesystemInfo statFS(const QString& path)
 }
 
 /**
- * @brief if the Filesystem is reflink/clone capable 
- * 
+ * @brief if the Filesystem is reflink/clone capable
+ *
  */
 bool canCloneOnFS(const QString& path)
-{   
+{
     FilesystemInfo info = statFS(path);
     return canCloneOnFS(info);
 }
@@ -1067,13 +1038,13 @@ bool canCloneOnFS(const FilesystemInfo& info)
     return canCloneOnFS(info.fsType);
 }
 bool canCloneOnFS(FilesystemType type)
-{   
+{
     return s_clone_filesystems.contains(type);
 }
 
 /**
  * @brief if the Filesystem is reflink/clone capable and both paths are on the same device
- * 
+ *
  */
 bool canClone(const QString& src, const QString& dst)
 {
@@ -1092,7 +1063,6 @@ bool canClone(const QString& src, const QString& dst)
  */
 bool clone::operator()(const QString& offset, bool dryRun)
 {
-
     if (!canClone(m_src.absolutePath(), m_dst.absolutePath())) {
         qWarning() << "Can not clone: not same device or not clone/reflink filesystem";
         qDebug() << "Source path:" << m_src.absolutePath();
@@ -1149,20 +1119,17 @@ bool clone::operator()(const QString& offset, bool dryRun)
 
 /**
  * @brief clone/reflink file from src to dst
- * 
+ *
  */
 bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
-{   
+{
     auto src_path = StringUtils::toStdString(QDir::toNativeSeparators(QFileInfo(src).absoluteFilePath()));
     auto dst_path = StringUtils::toStdString(QDir::toNativeSeparators(QFileInfo(dst).absoluteFilePath()));
 
     FilesystemInfo srcinfo = statFS(src);
     FilesystemInfo dstinfo = statFS(dst);
 
-    
-
-    if ((srcinfo.rootPath != dstinfo.rootPath) || (srcinfo.fsType != dstinfo.fsType))
-    {
+    if ((srcinfo.rootPath != dstinfo.rootPath) || (srcinfo.fsType != dstinfo.fsType)) {
         ec = std::make_error_code(std::errc::not_supported);
         qWarning() << "reflink/clone must be to the same device and filesystem! src and dst root filesystems do not match.";
         return false;
@@ -1177,22 +1144,20 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
         return false;
     }
 
-    
-
 #elif defined(Q_OS_LINUX)
 
-    if(!linux_ficlone(src_path, dst_path, ec)) {
+    if (!linux_ficlone(src_path, dst_path, ec)) {
         qDebug() << "failed linux_ficlone:";
         return false;
     }
-        
+
 #elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-   
-    if(!macos_bsd_clonefile(src_path, dst_path, ec)) {
+
+    if (!macos_bsd_clonefile(src_path, dst_path, ec)) {
         qDebug() << "failed macos_bsd_clonefile:";
         return false;
     }
-        
+
 #else
 
     qWarning() << "clone/reflink not supported! unknown OS";
@@ -1217,168 +1182,156 @@ bool win_ioctl_clone(const std::wstring& src_path, const std::wstring& dst_path,
     /**
      * This algorithm inspired from https://github.com/0xbadfca11/reflink
      * LICENSE MIT
-     * 
+     *
      *  Additional references
      *  https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_duplicate_extents_to_file
      *  https://github.com/microsoft/CopyOnWrite/blob/main/lib/Windows/WindowsCopyOnWriteFilesystem.cs#L94
      */
 
     HANDLE hSourceFile = CreateFileW(src_path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
-	if (hSourceFile == INVALID_HANDLE_VALUE)
-	{
-		ec =  std::error_code(GetLastError(), std::system_category());
+    if (hSourceFile == INVALID_HANDLE_VALUE) {
+        ec = std::error_code(GetLastError(), std::system_category());
         qDebug() << "Failed to open source file" << src_path.c_str();
         return false;
-	}
+    }
 
-	ULONG fs_flags;
-	if (!GetVolumeInformationByHandleW(hSourceFile, nullptr, 0, nullptr, nullptr, &fs_flags, nullptr, 0))
-	{
-        ec =  std::error_code(GetLastError(), std::system_category());
+    ULONG fs_flags;
+    if (!GetVolumeInformationByHandleW(hSourceFile, nullptr, 0, nullptr, nullptr, &fs_flags, nullptr, 0)) {
+        ec = std::error_code(GetLastError(), std::system_category());
         qDebug() << "Failed to get Filesystem information for " << src_path.c_str();
         CloseHandle(hSourceFile);
-		return false;
-	}
-	if (!(fs_flags & FILE_SUPPORTS_BLOCK_REFCOUNTING))
-	{
-		SetLastError(ERROR_NOT_CAPABLE);
-		ec =  std::error_code(GetLastError(), std::system_category());
+        return false;
+    }
+    if (!(fs_flags & FILE_SUPPORTS_BLOCK_REFCOUNTING)) {
+        SetLastError(ERROR_NOT_CAPABLE);
+        ec = std::error_code(GetLastError(), std::system_category());
         qWarning() << "Filesystem at " << src_path.c_str() << " does not support reflink";
         CloseHandle(hSourceFile);
         return false;
-	}
+    }
 
-	FILE_END_OF_FILE_INFO sourceFileLength;
-	if (!GetFileSizeEx(hSourceFile, &sourceFileLength.EndOfFile))
-	{
-		ec =  std::error_code(GetLastError(), std::system_category());
+    FILE_END_OF_FILE_INFO sourceFileLength;
+    if (!GetFileSizeEx(hSourceFile, &sourceFileLength.EndOfFile)) {
+        ec = std::error_code(GetLastError(), std::system_category());
         qDebug() << "Failed to size of source file" << src_path.c_str();
         CloseHandle(hSourceFile);
         return false;
-	}
-	FILE_BASIC_INFO sourceFileBasicInfo;
-	if (!GetFileInformationByHandleEx(hSourceFile, FileBasicInfo, &sourceFileBasicInfo, sizeof(sourceFileBasicInfo)))
-	{
-        ec =  std::error_code(GetLastError(), std::system_category());
+    }
+    FILE_BASIC_INFO sourceFileBasicInfo;
+    if (!GetFileInformationByHandleEx(hSourceFile, FileBasicInfo, &sourceFileBasicInfo, sizeof(sourceFileBasicInfo))) {
+        ec = std::error_code(GetLastError(), std::system_category());
         qDebug() << "Failed to source file info" << src_path.c_str();
         CloseHandle(hSourceFile);
-		return false;
-	}
-	ULONG junk;
-	FSCTL_GET_INTEGRITY_INFORMATION_BUFFER sourceFileIntegrity;
-	if (!DeviceIoControl(hSourceFile, FSCTL_GET_INTEGRITY_INFORMATION, nullptr, 0, &sourceFileIntegrity, sizeof(sourceFileIntegrity), &junk, nullptr))
-	{
-        ec =  std::error_code(GetLastError(), std::system_category());
+        return false;
+    }
+    ULONG junk;
+    FSCTL_GET_INTEGRITY_INFORMATION_BUFFER sourceFileIntegrity;
+    if (!DeviceIoControl(hSourceFile, FSCTL_GET_INTEGRITY_INFORMATION, nullptr, 0, &sourceFileIntegrity, sizeof(sourceFileIntegrity), &junk,
+                         nullptr)) {
+        ec = std::error_code(GetLastError(), std::system_category());
         qDebug() << "Failed to source file integrity info" << src_path.c_str();
         CloseHandle(hSourceFile);
-		return false;
-	}
+        return false;
+    }
 
-	HANDLE hDestFile = CreateFileW(dst_path.c_str(), GENERIC_READ | GENERIC_WRITE | DELETE, 0, nullptr, CREATE_NEW, 0, hSourceFile);
+    HANDLE hDestFile = CreateFileW(dst_path.c_str(), GENERIC_READ | GENERIC_WRITE | DELETE, 0, nullptr, CREATE_NEW, 0, hSourceFile);
 
-	if (hDestFile == INVALID_HANDLE_VALUE)
-	{
-		ec =  std::error_code(GetLastError(), std::system_category());
+    if (hDestFile == INVALID_HANDLE_VALUE) {
+        ec = std::error_code(GetLastError(), std::system_category());
         qDebug() << "Failed to open dest file" << dst_path.c_str();
         CloseHandle(hSourceFile);
-		return false;
-	}
-	FILE_DISPOSITION_INFO destFileDispose = { TRUE };
-	if (!SetFileInformationByHandle(hDestFile, FileDispositionInfo, &destFileDispose, sizeof(destFileDispose)))
-	{
-        ec =  std::error_code(GetLastError(), std::system_category());
+        return false;
+    }
+    FILE_DISPOSITION_INFO destFileDispose = { TRUE };
+    if (!SetFileInformationByHandle(hDestFile, FileDispositionInfo, &destFileDispose, sizeof(destFileDispose))) {
+        ec = std::error_code(GetLastError(), std::system_category());
         qDebug() << "Failed to set dest file info" << dst_path.c_str();
         CloseHandle(hSourceFile);
         CloseHandle(hDestFile);
-		return false;
-	}
+        return false;
+    }
 
-	if (!DeviceIoControl(hDestFile, FSCTL_SET_SPARSE, nullptr, 0, nullptr, 0, &junk, nullptr))
-	{
-        ec =  std::error_code(GetLastError(), std::system_category());
+    if (!DeviceIoControl(hDestFile, FSCTL_SET_SPARSE, nullptr, 0, nullptr, 0, &junk, nullptr)) {
+        ec = std::error_code(GetLastError(), std::system_category());
         qDebug() << "Failed to set dest sparseness" << dst_path.c_str();
         CloseHandle(hSourceFile);
         CloseHandle(hDestFile);
-		return false;
-	}
-	FSCTL_SET_INTEGRITY_INFORMATION_BUFFER setDestFileintegrity = { sourceFileIntegrity.ChecksumAlgorithm, sourceFileIntegrity.Reserved, sourceFileIntegrity.Flags };
-	if (!DeviceIoControl(hDestFile, FSCTL_SET_INTEGRITY_INFORMATION, &setDestFileintegrity, sizeof(setDestFileintegrity), nullptr, 0, nullptr, nullptr))
-	{
-        ec =  std::error_code(GetLastError(), std::system_category());
+        return false;
+    }
+    FSCTL_SET_INTEGRITY_INFORMATION_BUFFER setDestFileintegrity = { sourceFileIntegrity.ChecksumAlgorithm, sourceFileIntegrity.Reserved,
+                                                                    sourceFileIntegrity.Flags };
+    if (!DeviceIoControl(hDestFile, FSCTL_SET_INTEGRITY_INFORMATION, &setDestFileintegrity, sizeof(setDestFileintegrity), nullptr, 0,
+                         nullptr, nullptr)) {
+        ec = std::error_code(GetLastError(), std::system_category());
         qDebug() << "Failed to set dest file integrity info" << dst_path.c_str();
         CloseHandle(hSourceFile);
         CloseHandle(hDestFile);
-		return false;
-	}
-	if (!SetFileInformationByHandle(hDestFile, FileEndOfFileInfo, &sourceFileLength, sizeof(sourceFileLength)))
-	{
-        ec =  std::error_code(GetLastError(), std::system_category());
+        return false;
+    }
+    if (!SetFileInformationByHandle(hDestFile, FileEndOfFileInfo, &sourceFileLength, sizeof(sourceFileLength))) {
+        ec = std::error_code(GetLastError(), std::system_category());
         qDebug() << "Failed to set dest file size" << dst_path.c_str();
         CloseHandle(hSourceFile);
         CloseHandle(hDestFile);
-		return false;
-	}
+        return false;
+    }
 
-	const LONG64 splitThreshold = (1LL << 32) - sourceFileIntegrity.ClusterSizeInBytes;
+    const LONG64 splitThreshold = (1LL << 32) - sourceFileIntegrity.ClusterSizeInBytes;
 
-	DUPLICATE_EXTENTS_DATA dupExtent;
-	dupExtent.FileHandle = hSourceFile;
-	for (LONG64 offset = 0, remain = RoundUpToPowerOf2(sourceFileLength.EndOfFile.QuadPart, sourceFileIntegrity.ClusterSizeInBytes); remain > 0; offset += splitThreshold, remain -= splitThreshold)
-	{
-		dupExtent.SourceFileOffset.QuadPart = dupExtent.TargetFileOffset.QuadPart = offset;
-		dupExtent.ByteCount.QuadPart = std::min(splitThreshold, remain);
+    DUPLICATE_EXTENTS_DATA dupExtent;
+    dupExtent.FileHandle = hSourceFile;
+    for (LONG64 offset = 0, remain = RoundUpToPowerOf2(sourceFileLength.EndOfFile.QuadPart, sourceFileIntegrity.ClusterSizeInBytes);
+         remain > 0; offset += splitThreshold, remain -= splitThreshold) {
+        dupExtent.SourceFileOffset.QuadPart = dupExtent.TargetFileOffset.QuadPart = offset;
+        dupExtent.ByteCount.QuadPart = std::min(splitThreshold, remain);
 
-		if (!DeviceIoControl(hDestFile, FSCTL_DUPLICATE_EXTENTS_TO_FILE, &dupExtent, sizeof(dupExtent), nullptr, 0, &junk, nullptr))
-		{
+        if (!DeviceIoControl(hDestFile, FSCTL_DUPLICATE_EXTENTS_TO_FILE, &dupExtent, sizeof(dupExtent), nullptr, 0, &junk, nullptr)) {
             DWORD err = GetLastError();
             QString additionalMessage;
-            if (err == ERROR_BLOCK_TOO_MANY_REFERENCES)
-            {   
+            if (err == ERROR_BLOCK_TOO_MANY_REFERENCES) {
                 static const int MaxClonesPerFile = 8175;
-                additionalMessage = QString(
-                    " This is ERROR_BLOCK_TOO_MANY_REFERENCES and may mean you have surpassed the maximum "
-                    "allowed %1 references for a single file. "
-                    "See https://docs.microsoft.com/en-us/windows-server/storage/refs/block-cloning#functionality-restrictions-and-remarks"
-                ).arg(MaxClonesPerFile);
-                     
+                additionalMessage =
+                    QString(
+                        " This is ERROR_BLOCK_TOO_MANY_REFERENCES and may mean you have surpassed the maximum "
+                        "allowed %1 references for a single file. "
+                        "See "
+                        "https://docs.microsoft.com/en-us/windows-server/storage/refs/block-cloning#functionality-restrictions-and-remarks")
+                        .arg(MaxClonesPerFile);
             }
-			ec =  std::error_code(err, std::system_category());
-            qDebug() << "Failed copy-on-write cloning of" << src_path.c_str() << "to" << dst_path.c_str() << "with error" << err << additionalMessage;
+            ec = std::error_code(err, std::system_category());
+            qDebug() << "Failed copy-on-write cloning of" << src_path.c_str() << "to" << dst_path.c_str() << "with error" << err
+                     << additionalMessage;
             CloseHandle(hSourceFile);
             CloseHandle(hDestFile);
-			return false;
-		}
-	}
+            return false;
+        }
+    }
 
-	if (!(sourceFileBasicInfo.FileAttributes & FILE_ATTRIBUTE_SPARSE_FILE))
-	{
-		FILE_SET_SPARSE_BUFFER setDestSparse = { FALSE };
-		if (!DeviceIoControl(hDestFile, FSCTL_SET_SPARSE, &setDestSparse, sizeof(setDestSparse), nullptr, 0, &junk, nullptr))
-		{
+    if (!(sourceFileBasicInfo.FileAttributes & FILE_ATTRIBUTE_SPARSE_FILE)) {
+        FILE_SET_SPARSE_BUFFER setDestSparse = { FALSE };
+        if (!DeviceIoControl(hDestFile, FSCTL_SET_SPARSE, &setDestSparse, sizeof(setDestSparse), nullptr, 0, &junk, nullptr)) {
             qDebug() << "Failed to set dest file sparseness" << dst_path.c_str();
             CloseHandle(hSourceFile);
             CloseHandle(hDestFile);
-			return false;
-		}
-	}
+            return false;
+        }
+    }
 
-	sourceFileBasicInfo.CreationTime.QuadPart = 0;
-	if (!SetFileInformationByHandle(hDestFile, FileBasicInfo, &sourceFileBasicInfo, sizeof(sourceFileBasicInfo)))
-	{
+    sourceFileBasicInfo.CreationTime.QuadPart = 0;
+    if (!SetFileInformationByHandle(hDestFile, FileBasicInfo, &sourceFileBasicInfo, sizeof(sourceFileBasicInfo))) {
         qDebug() << "Failed to set dest file creation time" << dst_path.c_str();
         CloseHandle(hSourceFile);
         CloseHandle(hDestFile);
-		return false;
-	}
-	if (!FlushFileBuffers(hDestFile))
-	{
+        return false;
+    }
+    if (!FlushFileBuffers(hDestFile)) {
         qDebug() << "Failed to flush dest file buffer" << dst_path.c_str();
         CloseHandle(hSourceFile);
         CloseHandle(hDestFile);
-		return false;
-	}
-	destFileDispose = { FALSE };
-	bool result = !!SetFileInformationByHandle(hDestFile, FileDispositionInfo, &destFileDispose, sizeof(destFileDispose));
+        return false;
+    }
+    destFileDispose = { FALSE };
+    bool result = !!SetFileInformationByHandle(hDestFile, FileDispositionInfo, &destFileDispose, sizeof(destFileDispose));
 
     CloseHandle(hSourceFile);
     CloseHandle(hDestFile);
@@ -1393,14 +1346,14 @@ bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std
     // https://man7.org/linux/man-pages/man2/ioctl_ficlone.2.html
 
     int src_fd = open(src_path.c_str(), O_RDONLY);
-    if(src_fd == -1) {
+    if (src_fd == -1) {
         qDebug() << "Failed to open file:" << src_path.c_str();
         qDebug() << "Error:" << strerror(errno);
         ec = std::make_error_code(static_cast<std::errc>(errno));
         return false;
     }
     int dst_fd = open(dst_path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    if(dst_fd == -1) {
+    if (dst_fd == -1) {
         qDebug() << "Failed to open file:" << dst_path.c_str();
         qDebug() << "Error:" << strerror(errno);
         ec = std::make_error_code(static_cast<std::errc>(errno));
@@ -1408,7 +1361,7 @@ bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std
         return false;
     }
     // attempt to clone
-    if(ioctl(dst_fd,  FICLONE, src_fd) == -1){
+    if (ioctl(dst_fd, FICLONE, src_fd) == -1) {
         qDebug() << "Failed to clone file:" << src_path.c_str() << "to" << dst_path.c_str();
         qDebug() << "Error:" << strerror(errno);
         ec = std::make_error_code(static_cast<std::errc>(errno));
@@ -1416,11 +1369,11 @@ bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std
         close(dst_fd);
         return false;
     }
-    if(close(src_fd)) {
+    if (close(src_fd)) {
         qDebug() << "Failed to close file:" << src_path.c_str();
         qDebug() << "Error:" << strerror(errno);
     }
-    if(close(dst_fd)) {
+    if (close(dst_fd)) {
         qDebug() << "Failed to close file:" << dst_path.c_str();
         qDebug() << "Error:" << strerror(errno);
     }
@@ -1446,8 +1399,8 @@ bool macos_bsd_clonefile(const std::string& src_path, const std::string& dst_pat
 #endif
 
 /**
- * @brief if the Filesystem is symlink capable 
- * 
+ * @brief if the Filesystem is symlink capable
+ *
  */
 bool canLinkOnFS(const QString& path)
 {
@@ -1464,22 +1417,22 @@ bool canLinkOnFS(FilesystemType type)
 }
 /**
  * @brief if the Filesystem is symlink capable on both ends
- * 
+ *
  */
 bool canLink(const QString& src, const QString& dst)
 {
-    return  canLinkOnFS(src) && canLinkOnFS(dst);
+    return canLinkOnFS(src) && canLinkOnFS(dst);
 }
 
 uintmax_t hardLinkCount(const QString& path)
 {
     std::error_code err;
-    int count = fs::hard_link_count(StringUtils::toStdString(path),  err);
+    int count = fs::hard_link_count(StringUtils::toStdString(path), err);
     if (err) {
-         qWarning() << "Failed to count hard links for" << path << ":" << QString::fromStdString(err.message());
-         count = 0;
+        qWarning() << "Failed to count hard links for" << path << ":" << QString::fromStdString(err.message());
+        count = 0;
     }
     return count;
 }
 
-}
+}  // namespace FS
