@@ -424,12 +424,13 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
             if (column == NAME_COLUMN) {
                 if (at(row).isSymLinkUnder(instDirPath())) {
                     return m_resources[row]->internal_id() +
-                        tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original") +
-                        tr("\nCanonical Path: %1").arg(at(row).fileinfo().canonicalFilePath());;
+                        tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
+                           "\nCanonical Path: %1")
+                            .arg(at(row).fileinfo().canonicalFilePath());;
                 }
                 if (at(row).isMoreThanOneHardLink()) {
                     return m_resources[row]->internal_id() +
-                        tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original");
+                        tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
                 }
             }
             

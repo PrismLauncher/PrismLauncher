@@ -10,10 +10,6 @@ InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, const InstanceCopyP
 {
     m_origInstance = origInstance;
     m_keepPlaytime = prefs.isKeepPlaytimeEnabled();
-
-    
-
-    
     m_useLinks = prefs.isUseSymLinksEnabled();
     m_linkRecursively = prefs.isLinkRecursivelyEnabled();
     m_useHardLinks = prefs.isLinkRecursivelyEnabled() && prefs.isUseHardLinksEnabled();

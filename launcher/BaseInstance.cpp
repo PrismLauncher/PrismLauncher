@@ -66,7 +66,7 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     m_settings->registerSetting("totalTimePlayed", 0);
     m_settings->registerSetting("lastTimePlayed", 0);
 
-    m_settings->registerSetting("linkedInstancesList", "[]");
+    m_settings->registerSetting("linkedInstances", "[]");
 
     // Game time override
     auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);
@@ -188,34 +188,34 @@ bool BaseInstance::shouldStopOnConsoleOverflow() const
 
 QStringList BaseInstance::getLinkedInstances() const
 {
-    return m_settings->getList<QString>("linkedInstancesList");
+    return m_settings->getList<QString>("linkedInstances");
 }
 
 void BaseInstance::setLinkedInstances(const QStringList& list)
 {
-    auto linkedInstancesList = m_settings->getList<QString>("linkedInstancesList");
-    m_settings->setList("linkedInstancesList", list);
+    auto linkedInstances = m_settings->getList<QString>("linkedInstances");
+    m_settings->setList("linkedInstances", list);
 }
 
 void BaseInstance::addLinkedInstanceId(const QString& id)
 {
-    auto linkedInstancesList = m_settings->getList<QString>("linkedInstancesList");
-    linkedInstancesList.append(id);
-    setLinkedInstances(linkedInstancesList);
+    auto linkedInstances = m_settings->getList<QString>("linkedInstances");
+    linkedInstances.append(id);
+    setLinkedInstances(linkedInstances);
 }
 
 bool BaseInstance::removeLinkedInstanceId(const QString& id)
 {
-    auto linkedInstancesList = m_settings->getList<QString>("linkedInstancesList");
-    int numRemoved = linkedInstancesList.removeAll(id);
-    setLinkedInstances(linkedInstancesList);
+    auto linkedInstances = m_settings->getList<QString>("linkedInstances");
+    int numRemoved = linkedInstances.removeAll(id);
+    setLinkedInstances(linkedInstances);
     return numRemoved > 0;
 }
 
 bool BaseInstance::isLinkedToInstanceId(const QString& id) const
 {
-    auto linkedInstancesList = m_settings->getList<QString>("linkedInstancesList");
-    return linkedInstancesList.contains(id);
+    auto linkedInstances = m_settings->getList<QString>("linkedInstances");
+    return linkedInstances.contains(id);
 }
 
 void BaseInstance::iconUpdated(QString key)
