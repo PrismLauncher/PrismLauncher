@@ -18,7 +18,7 @@
 #include <QDialog>
 #include <QModelIndex>
 #include <memory>
-#include "PackIgnoreProxy.h"
+#include "FileIgnoreProxy.h"
 
 class BaseInstance;
 typedef std::shared_ptr<BaseInstance> InstancePtr;
@@ -47,7 +47,7 @@ private:
 private:
     Ui::ExportInstanceDialog *ui;
     InstancePtr m_instance;
-    PackIgnoreProxy * proxyModel;
+    FileIgnoreProxy * proxyModel;
 
 private slots:
     void rowsInserted(QModelIndex parent, int top, int bottom);

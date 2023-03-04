@@ -37,7 +37,7 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
     auto model = new QFileSystemModel(this);
     // use the game root - everything outside cannot be exported
     QString root = instance->gameRoot();
-    proxy = new PackIgnoreProxy(root, this);
+    proxy = new FileIgnoreProxy(root, this);
     proxy->setSourceModel(model);
     ui->treeView->setModel(proxy);
     ui->treeView->setRootIndex(proxy->mapFromSource(model->index(root)));
@@ -58,16 +58,15 @@ void ExportMrPackDialog::done(int result)
 {
     if (result == Accepted) {
         const QString filename = FS::RemoveInvalidFilenameChars(ui->name->text());
-        const QString output =
-            QFileDialog::getSaveFileName(this, tr("Export %1").arg(ui->name->text()), FS::PathCombine(QDir::homePath(), filename + ".mrpack"),
-                                        "Modrinth pack (*.mrpack *.zip)", nullptr);
+        const QString output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(ui->name->text()),
+                                                            FS::PathCombine(QDir::homePath(), filename + ".mrpack"),
+                                                            "Modrinth pack (*.mrpack *.zip)", nullptr);
 
         if (output.isEmpty())
             return;
 
         ModrinthPackExportTask task(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
                                     [this](const QString& path) { return proxy->blockedPaths().covers(path); });
-
         ProgressDialog progress(this);
         progress.setSkipButton(true, tr("Abort"));
         if (progress.execWithTask(&task) != QDialog::Accepted)

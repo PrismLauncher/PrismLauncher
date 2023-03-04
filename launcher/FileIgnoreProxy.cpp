@@ -34,7 +34,7 @@
  *      limitations under the License.
  */
 
-#include "PackIgnoreProxy.h"
+#include "FileIgnoreProxy.h"
 
 #include <QDebug>
 #include <QFileSystemModel>
@@ -44,9 +44,9 @@
 #include "SeparatorPrefixTree.h"
 #include "StringUtils.h"
 
-PackIgnoreProxy::PackIgnoreProxy(QString root, QObject* parent) : QSortFilterProxyModel(parent), root(root) {}
+FileIgnoreProxy::FileIgnoreProxy(QString root, QObject* parent) : QSortFilterProxyModel(parent), root(root) {}
 // NOTE: Sadly, we have to do sorting ourselves.
-bool PackIgnoreProxy::lessThan(const QModelIndex& left, const QModelIndex& right) const
+bool FileIgnoreProxy::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
     QFileSystemModel* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
     if (!fsm) {
@@ -79,7 +79,7 @@ bool PackIgnoreProxy::lessThan(const QModelIndex& left, const QModelIndex& right
     return QSortFilterProxyModel::lessThan(left, right);
 }
 
-Qt::ItemFlags PackIgnoreProxy::flags(const QModelIndex& index) const
+Qt::ItemFlags FileIgnoreProxy::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
@@ -96,7 +96,7 @@ Qt::ItemFlags PackIgnoreProxy::flags(const QModelIndex& index) const
     return flags;
 }
 
-QVariant PackIgnoreProxy::data(const QModelIndex& index, int role) const
+QVariant FileIgnoreProxy::data(const QModelIndex& index, int role) const
 {
     QModelIndex sourceIndex = mapToSource(index);
 
@@ -116,7 +116,7 @@ QVariant PackIgnoreProxy::data(const QModelIndex& index, int role) const
     return sourceIndex.data(role);
 }
 
-bool PackIgnoreProxy::setData(const QModelIndex& index, const QVariant& value, int role)
+bool FileIgnoreProxy::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (index.column() == 0 && role == Qt::CheckStateRole) {
         Qt::CheckState state = static_cast<Qt::CheckState>(value.toInt());
@@ -127,7 +127,7 @@ bool PackIgnoreProxy::setData(const QModelIndex& index, const QVariant& value, i
     return QSortFilterProxyModel::sourceModel()->setData(sourceIndex, value, role);
 }
 
-QString PackIgnoreProxy::relPath(const QString& path) const
+QString FileIgnoreProxy::relPath(const QString& path) const
 {
     QString prefix = QDir().absoluteFilePath(root);
     prefix += '/';
@@ -137,7 +137,7 @@ QString PackIgnoreProxy::relPath(const QString& path) const
     return path.mid(prefix.size());
 }
 
-bool PackIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
+bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
 {
     QFileSystemModel* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
 
@@ -225,7 +225,7 @@ bool PackIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
     return true;
 }
 
-bool PackIgnoreProxy::shouldExpand(QModelIndex index)
+bool FileIgnoreProxy::shouldExpand(QModelIndex index)
 {
     QModelIndex sourceIndex = mapToSource(index);
     QFileSystemModel* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
@@ -240,7 +240,7 @@ bool PackIgnoreProxy::shouldExpand(QModelIndex index)
     return false;
 }
 
-void PackIgnoreProxy::setBlockedPaths(QStringList paths)
+void FileIgnoreProxy::setBlockedPaths(QStringList paths)
 {
     beginResetModel();
     blocked.clear();
@@ -248,12 +248,12 @@ void PackIgnoreProxy::setBlockedPaths(QStringList paths)
     endResetModel();
 }
 
-const SeparatorPrefixTree<'/'>& PackIgnoreProxy::blockedPaths() const
+const SeparatorPrefixTree<'/'>& FileIgnoreProxy::blockedPaths() const
 {
     return blocked;
 }
 
-bool PackIgnoreProxy::filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const
+bool FileIgnoreProxy::filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const
 {
     Q_UNUSED(source_parent)
 

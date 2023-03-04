@@ -20,7 +20,7 @@
 
 #include <QDialog>
 #include "BaseInstance.h"
-#include "PackIgnoreProxy.h"
+#include "FileIgnoreProxy.h"
 
 namespace Ui {
 class ExportMrPackDialog;
@@ -38,5 +38,5 @@ class ExportMrPackDialog : public QDialog {
    private:
     const InstancePtr instance;
     Ui::ExportMrPackDialog* ui;
-    PackIgnoreProxy* proxy;
+    FileIgnoreProxy* proxy;
 };

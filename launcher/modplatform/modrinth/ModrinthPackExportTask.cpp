@@ -27,6 +27,7 @@
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "minecraft/mod/Mod.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 
 const QStringList ModrinthPackExportTask::PREFIXES = QStringList({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
@@ -47,13 +48,14 @@ void ModrinthPackExportTask::executeTask()
     collectFiles();
 
     QByteArray* response = new QByteArray;
-    task = api.currentVersions(fileHashes.values(), "sha512", response);
+    task = api.currentVersions(pendingHashes.values(), "sha512", response);
     connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
     connect(task.get(), &NetJob::failed, this, &ModrinthPackExportTask::emitFailed);
     task->start();
 }
 
-bool ModrinthPackExportTask::abort() {
+bool ModrinthPackExportTask::abort()
+{
     if (!task.isNull() && task->abort()) {
         task = nullptr;
         emitFailed(tr("Aborted"));
@@ -71,7 +73,8 @@ void ModrinthPackExportTask::collectFiles()
         return;
     }
 
-    fileHashes.clear();
+    pendingHashes.clear();
+    resolvedFiles.clear();
 
     QDir mc(instance->gameRoot());
     for (QFileInfo file : files) {
@@ -97,18 +100,16 @@ void ModrinthPackExportTask::collectFiles()
             continue;
         }
 
-        fileHashes[relative] = hash.result().toHex();
+        pendingHashes[relative] = hash.result().toHex();
     }
 }
 
 void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
 {
-    QMap<QString, ResolvedFile> resolved;
-
     try {
         QJsonDocument doc = Json::requireDocument(*response);
 
-        QMapIterator<QString, QString> iterator(fileHashes);
+        QMapIterator<QString, QString> iterator(pendingHashes);
         while (iterator.hasNext()) {
             iterator.next();
 
@@ -121,18 +122,20 @@ void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
                                              [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
                 fileIter != files.end()) {
                 // map the file to the url
-                resolved[iterator.key()] = ResolvedFile{ fileIter->toObject()["hashes"].toObject()["sha1"].toString(), iterator.value(),
-                                                         fileIter->toObject()["url"].toString(), fileIter->toObject()["size"].toInt() };
+                resolvedFiles[iterator.key()] =
+                    ResolvedFile{ fileIter->toObject()["hashes"].toObject()["sha1"].toString(), iterator.value(),
+                                  fileIter->toObject()["url"].toString(), fileIter->toObject()["size"].toInt() };
             }
         }
     } catch (Json::JsonException& e) {
         qWarning() << "Failed to parse versions response" << e.what();
     }
+    pendingHashes.clear();
 
-    buildZip(resolved);
+    buildZip();
 }
 
-void ModrinthPackExportTask::buildZip(const QMap<QString, ResolvedFile>& resolvedFiles)
+void ModrinthPackExportTask::buildZip()
 {
     setStatus("Adding files...");
     QuaZip zip(output);
@@ -148,7 +151,7 @@ void ModrinthPackExportTask::buildZip(const QMap<QString, ResolvedFile>& resolve
         emitFailed(tr("Could not create index"));
         return;
     }
-    indexFile.write(generateIndex(resolvedFiles));
+    indexFile.write(generateIndex());
 
     QDir mc(instance->gameRoot());
     size_t i = 0;
@@ -171,7 +174,7 @@ void ModrinthPackExportTask::buildZip(const QMap<QString, ResolvedFile>& resolve
     emitSucceeded();
 }
 
-QByteArray ModrinthPackExportTask::generateIndex(const QMap<QString, ResolvedFile>& resolvedFiles)
+QByteArray ModrinthPackExportTask::generateIndex()
 {
     QJsonObject obj;
     obj["formatVersion"] = 1;

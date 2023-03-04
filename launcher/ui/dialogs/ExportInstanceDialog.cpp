@@ -57,7 +57,7 @@ ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget *parent
     ui->setupUi(this);
     auto model = new QFileSystemModel(this);
     auto root = instance->instanceRoot();
-    proxyModel = new PackIgnoreProxy(root, this);
+    proxyModel = new FileIgnoreProxy(root, this);
     loadPackIgnore();
     proxyModel->setSourceModel(model);
     ui->treeView->setModel(proxyModel);

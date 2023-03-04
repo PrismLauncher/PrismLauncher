@@ -39,11 +39,11 @@
 #include <QSortFilterProxyModel>
 #include "SeparatorPrefixTree.h"
 
-class PackIgnoreProxy : public QSortFilterProxyModel {
+class FileIgnoreProxy : public QSortFilterProxyModel {
     Q_OBJECT
 
    public:
-    PackIgnoreProxy(QString root, QObject* parent);
+    FileIgnoreProxy(QString root, QObject* parent);
     // NOTE: Sadly, we have to do sorting ourselves.
     bool lessThan(const QModelIndex& left, const QModelIndex& right) const;
 

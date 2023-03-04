@@ -666,8 +666,8 @@ SET(LAUNCHER_SOURCES
     # FIXME: maybe find a better home for this.
     SkinUtils.cpp
     SkinUtils.h
-    PackIgnoreProxy.cpp
-    PackIgnoreProxy.h
+    FileIgnoreProxy.cpp
+    FileIgnoreProxy.h
 
     # GUI - setup wizard
     ui/setupwizard/SetupWizard.h

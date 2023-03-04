@@ -37,6 +37,11 @@ class ModrinthPackExportTask : public Task {
     bool abort() override;
 
    private:
+    struct ResolvedFile {
+        QString sha1, sha512, url;
+        int size;
+    };
+
     static const QStringList PREFIXES;
 
     // inputs
@@ -47,17 +52,13 @@ class ModrinthPackExportTask : public Task {
 
     ModrinthAPI api;
     QFileInfoList files;
-    QMap<QString, QString> fileHashes;
+    QMap<QString, QString> pendingHashes;
+    QMap<QString, ResolvedFile> resolvedFiles;
     Task::Ptr task;
-
-    struct ResolvedFile {
-        QString sha1, sha512, url;
-        int size;
-    };
 
     void collectFiles();
     void parseApiResponse(QByteArray* response);
-    void buildZip(const QMap<QString, ResolvedFile>& resolvedFiles);
+    void buildZip();
 
-    QByteArray generateIndex(const QMap<QString, ResolvedFile>& resolvedFiles);
+    QByteArray generateIndex();
 };
