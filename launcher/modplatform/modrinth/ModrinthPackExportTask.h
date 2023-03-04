@@ -34,6 +34,7 @@ class ModrinthPackExportTask : public Task {
 
    protected:
     void executeTask() override;
+    bool abort() override;
 
    private:
     static const QStringList PREFIXES;
@@ -47,6 +48,7 @@ class ModrinthPackExportTask : public Task {
     ModrinthAPI api;
     QFileInfoList files;
     QMap<QString, QString> fileHashes;
+    Task::Ptr task;
 
     struct ResolvedFile {
         QString sha1, sha512, url;

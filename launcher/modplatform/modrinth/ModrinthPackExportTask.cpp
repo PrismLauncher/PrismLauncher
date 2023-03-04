@@ -47,10 +47,16 @@ void ModrinthPackExportTask::executeTask()
     collectFiles();
 
     QByteArray* response = new QByteArray;
-    Task::Ptr versionsTask = api.currentVersions(fileHashes.values(), "sha512", response);
-    connect(versionsTask.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
-    connect(versionsTask.get(), &NetJob::failed, this, &ModrinthPackExportTask::emitFailed);
-    versionsTask->start();
+    task = api.currentVersions(fileHashes.values(), "sha512", response);
+    connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
+    connect(task.get(), &NetJob::failed, this, &ModrinthPackExportTask::emitFailed);
+    task->start();
+}
+
+bool ModrinthPackExportTask::abort() {
+    if (!task.isNull())
+        return task->abort();
+    return false;
 }
 
 void ModrinthPackExportTask::collectFiles()
