@@ -54,8 +54,12 @@ void ModrinthPackExportTask::executeTask()
 }
 
 bool ModrinthPackExportTask::abort() {
-    if (!task.isNull())
-        return task->abort();
+    if (!task.isNull() && task->abort()) {
+        task = nullptr;
+        emitFailed(tr("Aborted"));
+        return true;
+    }
+
     return false;
 }
 

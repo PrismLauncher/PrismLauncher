@@ -70,7 +70,8 @@ void ExportMrPackDialog::done(int result)
 
         ProgressDialog progress(this);
         progress.setSkipButton(true, tr("Abort"));
-        progress.execWithTask(&task);
+        if (progress.execWithTask(&task) != QDialog::Accepted)
+            return;
     }
 
     QDialog::done(result);
