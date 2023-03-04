@@ -20,6 +20,7 @@
 
 #include "BaseInstance.h"
 #include "MMCZip.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
 
 class ModrinthPackExportTask : public Task {
@@ -35,15 +36,26 @@ class ModrinthPackExportTask : public Task {
     void executeTask() override;
 
    private:
+    static const QStringList PREFIXES;
+
+    // inputs
     const QString name, version, summary;
     const InstancePtr instance;
     const QString output;
     const MMCZip::FilterFunction filter;
+
+    ModrinthAPI api;
+    QFileInfoList files;
+    QMap<QString, QString> fileHashes;
 
     struct ResolvedFile {
         QString sha1, sha512, url;
         int size;
     };
 
-    QByteArray generateIndex(const QMap<QString, ResolvedFile>& urls);
+    void collectFiles();
+    void parseApiResponse(QByteArray* response);
+    void buildZip(const QMap<QString, ResolvedFile>& resolvedFiles);
+
+    QByteArray generateIndex(const QMap<QString, ResolvedFile>& resolvedFiles);
 };

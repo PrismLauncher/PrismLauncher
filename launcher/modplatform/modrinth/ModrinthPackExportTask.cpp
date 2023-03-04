@@ -29,6 +29,8 @@
 #include "minecraft/PackProfile.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 
+const QStringList ModrinthPackExportTask::PREFIXES = QStringList({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
+
 ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                const QString& version,
                                                const QString& summary,
@@ -41,28 +43,34 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
 void ModrinthPackExportTask::executeTask()
 {
     setStatus(tr("Searching for files..."));
+    setProgress(0, 0);
+    collectFiles();
 
-    QFileInfoList files;
+    QByteArray* response = new QByteArray;
+    Task::Ptr versionsTask = api.currentVersions(fileHashes.values(), "sha512", response);
+    connect(versionsTask.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
+    connect(versionsTask.get(), &NetJob::failed, this, &ModrinthPackExportTask::emitFailed);
+    versionsTask->start();
+}
+
+void ModrinthPackExportTask::collectFiles()
+{
+    files.clear();
     if (!MMCZip::collectFileListRecursively(instance->gameRoot(), nullptr, &files, filter)) {
         emitFailed(tr("Could not collect list of files"));
         return;
     }
 
+    fileHashes.clear();
+
     QDir mc(instance->gameRoot());
-
-    ModrinthAPI api;
-
-    static const QStringList prefixes({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
-    // hash -> file
-    QMap<QString, QString> hashes;
-
     for (QFileInfo file : files) {
         QString relative = mc.relativeFilePath(file.absoluteFilePath());
         // require sensible file types
         if (!(relative.endsWith(".zip") || relative.endsWith(".jar") || relative.endsWith(".litemod")))
             continue;
 
-        if (!std::any_of(prefixes.begin(), prefixes.end(),
+        if (!std::any_of(PREFIXES.begin(), PREFIXES.end(),
                          [&relative](const QString& prefix) { return relative.startsWith(prefix + QDir::separator()); }))
             continue;
 
@@ -79,82 +87,81 @@ void ModrinthPackExportTask::executeTask()
             continue;
         }
 
-        hashes[hash.result().toHex()] = relative;
+        fileHashes[relative] = hash.result().toHex();
     }
-
-    QByteArray* response = new QByteArray;
-    Task::Ptr versionsTask = api.currentVersions(hashes.keys(), "sha512", response);
-    connect(versionsTask.get(), &NetJob::succeeded, this, [this, mc, files, hashes, response, versionsTask]() {
-        // file -> url
-        QMap<QString, ResolvedFile> resolved;
-
-        try {
-            QJsonDocument doc = Json::requireDocument(*response);
-            for (auto iter = hashes.keyBegin(); iter != hashes.keyEnd(); iter++) {
-                QJsonObject obj = doc[*iter].toObject();
-                if (obj.isEmpty())
-                    continue;
-
-                QJsonArray files = obj["files"].toArray();
-                if (auto fileIter = std::find_if(files.begin(), files.end(),
-                                                 [&iter](const QJsonValue& file) { return file["hashes"]["sha512"] == *iter; });
-                    fileIter != files.end()) {
-                    // map the file to the url
-                    resolved[hashes[*iter]] = ResolvedFile{ fileIter->toObject()["hashes"].toObject()["sha1"].toString(), *iter,
-                                                            fileIter->toObject()["url"].toString(), fileIter->toObject()["size"].toInt() };
-                }
-            }
-        } catch (Json::JsonException& e) {
-            qWarning() << "Failed to parse versions response" << e.what();
-        }
-
-        delete response;
-
-        setStatus("Adding files...");
-
-        QuaZip zip(output);
-        if (!zip.open(QuaZip::mdCreate)) {
-            QFile::remove(output);
-            emitFailed(tr("Could not create file"));
-            return;
-        }
-
-        {
-            QuaZipFile indexFile(&zip);
-            if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
-                QFile::remove(output);
-                emitFailed(tr("Could not create index"));
-                return;
-            }
-            indexFile.write(generateIndex(resolved));
-        }
-
-        {
-            size_t i = 0;
-            for (const QFileInfo& file : files) {
-                setProgress(i, files.length());
-                QString relative = mc.relativeFilePath(file.absoluteFilePath());
-                if (!resolved.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative))
-                    qWarning() << "Could not compress" << file;
-                i++;
-            }
-        }
-
-        zip.close();
-
-        if (zip.getZipError() != 0) {
-            QFile::remove(output);
-            emitFailed(tr("A zip error occured"));
-            return;
-        }
-
-        emitSucceeded();
-    });
-    connect(versionsTask.get(), &NetJob::failed, this, [this](const QString& reason) { emitFailed(reason); });
-    versionsTask->start();
 }
 
-QByteArray ModrinthPackExportTask::generateIndex(const QMap<QString, ResolvedFile>& urls)
+void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
+{
+    QMap<QString, ResolvedFile> resolved;
+
+    try {
+        QJsonDocument doc = Json::requireDocument(*response);
+
+        QMapIterator<QString, QString> iterator(fileHashes);
+        while (iterator.hasNext()) {
+            iterator.next();
+
+            QJsonObject obj = doc[iterator.value()].toObject();
+            if (obj.isEmpty())
+                continue;
+
+            QJsonArray files = obj["files"].toArray();
+            if (auto fileIter = std::find_if(files.begin(), files.end(),
+                                             [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
+                fileIter != files.end()) {
+                // map the file to the url
+                resolved[iterator.key()] = ResolvedFile{ fileIter->toObject()["hashes"].toObject()["sha1"].toString(), iterator.value(),
+                                                         fileIter->toObject()["url"].toString(), fileIter->toObject()["size"].toInt() };
+            }
+        }
+    } catch (Json::JsonException& e) {
+        qWarning() << "Failed to parse versions response" << e.what();
+    }
+
+    buildZip(resolved);
+}
+
+void ModrinthPackExportTask::buildZip(const QMap<QString, ResolvedFile>& resolvedFiles)
+{
+    setStatus("Adding files...");
+    QuaZip zip(output);
+    if (!zip.open(QuaZip::mdCreate)) {
+        QFile::remove(output);
+        emitFailed(tr("Could not create file"));
+        return;
+    }
+
+    QuaZipFile indexFile(&zip);
+    if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
+        QFile::remove(output);
+        emitFailed(tr("Could not create index"));
+        return;
+    }
+    indexFile.write(generateIndex(resolvedFiles));
+
+    QDir mc(instance->gameRoot());
+    size_t i = 0;
+    for (const QFileInfo& file : files) {
+        setProgress(i, files.length());
+        QString relative = mc.relativeFilePath(file.absoluteFilePath());
+        if (!resolvedFiles.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative))
+            qWarning() << "Could not compress" << file;
+        i++;
+    }
+
+    zip.close();
+
+    if (zip.getZipError() != 0) {
+        QFile::remove(output);
+        emitFailed(tr("A zip error occured"));
+        return;
+    }
+
+    emitSucceeded();
+}
+
+QByteArray ModrinthPackExportTask::generateIndex(const QMap<QString, ResolvedFile>& resolvedFiles)
 {
     QJsonObject obj;
     obj["formatVersion"] = 1;
@@ -186,7 +193,7 @@ QByteArray ModrinthPackExportTask::generateIndex(const QMap<QString, ResolvedFil
     }
 
     QJsonArray files;
-    QMapIterator<QString, ResolvedFile> iterator(urls);
+    QMapIterator<QString, ResolvedFile> iterator(resolvedFiles);
     while (iterator.hasNext()) {
         iterator.next();
 
