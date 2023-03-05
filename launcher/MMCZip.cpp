@@ -320,7 +320,7 @@ std::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString & su
         if (relative_file_name.isEmpty()) {
             target_file_path = target + '/';
         } else {
-            target_file_path = FS::PathCombine(target_top_dir.path(), sub_path, relative_file_name);
+            target_file_path = FS::PathCombine(target_top_dir.toLocalFile(), sub_path, relative_file_name);
             if (relative_file_name.endsWith('/') && !target_file_path.endsWith('/'))
                 target_file_path += '/';
         }
