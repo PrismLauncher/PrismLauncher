@@ -217,11 +217,11 @@ namespace Net {
         }
 
         request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
-        // TODO remove duplication and use constant
-        if (APPLICATION->capabilities() & Application::SupportsFlame
-                && request.url().host() == "api.curseforge.com") {
+        // TODO remove duplication
+        if (APPLICATION->capabilities() & Application::SupportsFlame && request.url().host() == QUrl(BuildConfig.FLAME_BASE_URL).host()) {
             request.setRawHeader("x-api-key", APPLICATION->getFlameAPIKey().toUtf8());
-        } else if (request.url().host() == "api.modrinth.com") {
+        } else if (request.url().host() == QUrl(BuildConfig.MODRINTH_PROD_URL).host() ||
+                   request.url().host() == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
             QString token = APPLICATION->getModrinthAPIToken();
             if (!token.isNull())
                 request.setRawHeader("Authorization", token.toUtf8());
