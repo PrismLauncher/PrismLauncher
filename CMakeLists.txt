@@ -443,7 +443,6 @@ add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
 if (NOT ghc_filesystem_FOUND)
     message(STATUS "Using bundled ghc_filesystem")
     add_subdirectory(libraries/filesystem) # Implementation of std::filesystem for old C++, for usage in old macOS
-    add_library(ghcFilesystem::ghc_filesystem ALIAS ghc_filesystem)
 else()
     message(STATUS "Using system ghc_filesystem")
 endif()
