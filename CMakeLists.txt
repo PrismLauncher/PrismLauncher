@@ -448,6 +448,7 @@ if (NOT ghc_filesystem_FOUND)
 else()
     message(STATUS "Using system ghc_filesystem")
 endif()
+add_subdirectory(libraries/qdcss) # css parser
 
 ############################### Built Artifacts ###############################
 

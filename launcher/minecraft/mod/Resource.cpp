@@ -37,6 +37,9 @@ void Resource::parseFile()
         if (file_name.endsWith(".zip") || file_name.endsWith(".jar")) {
             m_type = ResourceType::ZIPFILE;
             file_name.chop(4);
+        } else if (file_name.endsWith(".nilmod")) {
+            m_type = ResourceType::ZIPFILE;
+            file_name.chop(7);
         } else if (file_name.endsWith(".litemod")) {
             m_type = ResourceType::LITEMOD;
             file_name.chop(8);
