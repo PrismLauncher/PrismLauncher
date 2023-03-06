@@ -55,6 +55,7 @@ class ModrinthPackExportTask : public Task {
     QMap<QString, QString> pendingHashes;
     QMap<QString, ResolvedFile> resolvedFiles;
     Task::Ptr task;
+    bool pendingAbort = false;
 
     void collectFiles();
     void parseApiResponse(QByteArray* response);

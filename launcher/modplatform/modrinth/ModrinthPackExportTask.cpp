@@ -19,6 +19,7 @@
 #include "ModrinthPackExportTask.h"
 
 #include <qcryptographichash.h>
+#include <qtconcurrentrun.h>
 #include <QFileInfo>
 #include <QFileInfoList>
 #include <QMessageBox>
@@ -56,13 +57,17 @@ void ModrinthPackExportTask::executeTask()
 
 bool ModrinthPackExportTask::abort()
 {
-    if (!task.isNull() && task->abort()) {
+    if (task != nullptr) {
+        if (!task->abort())
+            return false;
+
         task = nullptr;
         emitFailed(tr("Aborted"));
         return true;
     }
 
-    return false;
+    pendingAbort = true;
+    return true;
 }
 
 void ModrinthPackExportTask::collectFiles()
@@ -106,6 +111,8 @@ void ModrinthPackExportTask::collectFiles()
 
 void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
 {
+    task = nullptr;
+
     try {
         QJsonDocument doc = Json::requireDocument(*response);
 
@@ -137,41 +144,54 @@ void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
 
 void ModrinthPackExportTask::buildZip()
 {
-    setStatus("Adding files...");
-    QuaZip zip(output);
-    if (!zip.open(QuaZip::mdCreate)) {
-        QFile::remove(output);
-        emitFailed(tr("Could not create file"));
-        return;
-    }
+    QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
+        setStatus("Adding files...");
+        QuaZip zip(output);
+        if (!zip.open(QuaZip::mdCreate)) {
+            QFile::remove(output);
+            emitFailed(tr("Could not create file"));
+            return;
+        }
 
-    QuaZipFile indexFile(&zip);
-    if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
-        QFile::remove(output);
-        emitFailed(tr("Could not create index"));
-        return;
-    }
-    indexFile.write(generateIndex());
+        if (pendingAbort) {
+            emitFailed(tr("Aborted"));
+            return;
+        }
 
-    QDir mc(instance->gameRoot());
-    size_t i = 0;
-    for (const QFileInfo& file : files) {
-        setProgress(i, files.length());
-        QString relative = mc.relativeFilePath(file.absoluteFilePath());
-        if (!resolvedFiles.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative))
-            qWarning() << "Could not compress" << file;
-        i++;
-    }
+        QuaZipFile indexFile(&zip);
+        if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
+            QFile::remove(output);
+            emitFailed(tr("Could not create index"));
+            return;
+        }
+        indexFile.write(generateIndex());
 
-    zip.close();
+        QDir mc(instance->gameRoot());
+        size_t i = 0;
+        for (const QFileInfo& file : files) {
+            if (pendingAbort) {
+                QFile::remove(output);
+                emitFailed(tr("Aborted"));
+                return;
+            }
 
-    if (zip.getZipError() != 0) {
-        QFile::remove(output);
-        emitFailed(tr("A zip error occured"));
-        return;
-    }
+            setProgress(i, files.length());
+            QString relative = mc.relativeFilePath(file.absoluteFilePath());
+            if (!resolvedFiles.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative))
+                qWarning() << "Could not compress" << file;
+            i++;
+        }
 
-    emitSucceeded();
+        zip.close();
+
+        if (zip.getZipError() != 0) {
+            QFile::remove(output);
+            emitFailed(tr("A zip error occured"));
+            return;
+        }
+
+        emitSucceeded();
+    });
 }
 
 QByteArray ModrinthPackExportTask::generateIndex()
