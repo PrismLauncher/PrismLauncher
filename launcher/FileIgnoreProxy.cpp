@@ -248,11 +248,6 @@ void FileIgnoreProxy::setBlockedPaths(QStringList paths)
     endResetModel();
 }
 
-const SeparatorPrefixTree<'/'>& FileIgnoreProxy::blockedPaths() const
-{
-    return blocked;
-}
-
 bool FileIgnoreProxy::filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const
 {
     Q_UNUSED(source_parent)

@@ -39,11 +39,26 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
     QString root = instance->gameRoot();
     proxy = new FileIgnoreProxy(root, this);
     proxy->setSourceModel(model);
+
+    QDir::Filters filter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
+
+    for (QString file : QDir(root).entryList(filter)) {
+        if (!(file == "mods" || file == "coremods" || file == "datapacks" || file == "config" || file == "options.txt" ||
+              file == "servers.dat"))
+            proxy->blockedPaths().insert(file);
+    }
+
+    QDir modsIndex(instance->gameRoot() + "/mods/.index");
+    if (modsIndex.exists())
+        proxy->blockedPaths().insert("mods/.index");
+
     ui->treeView->setModel(proxy);
     ui->treeView->setRootIndex(proxy->mapFromSource(model->index(root)));
     ui->treeView->sortByColumn(0, Qt::AscendingOrder);
-    model->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
+
+    model->setFilter(filter);
     model->setRootPath(root);
+
     auto headerView = ui->treeView->header();
     headerView->setSectionResizeMode(QHeaderView::ResizeToContents);
     headerView->setSectionResizeMode(0, QHeaderView::Stretch);

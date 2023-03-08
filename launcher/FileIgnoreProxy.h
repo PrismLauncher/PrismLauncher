@@ -60,7 +60,8 @@ class FileIgnoreProxy : public QSortFilterProxyModel {
 
     void setBlockedPaths(QStringList paths);
 
-    const SeparatorPrefixTree<'/'>& blockedPaths() const;
+    inline const SeparatorPrefixTree<'/'>& blockedPaths() const { return blocked; }
+    inline SeparatorPrefixTree<'/'>& blockedPaths() { return blocked; }
 
    protected:
     bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const;
