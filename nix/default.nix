@@ -46,7 +46,7 @@ stdenv.mkDerivation rec {
   ] ++ lib.optional (lib.versionAtLeast qtbase.version "6") qtwayland;
 
   cmakeFlags = lib.optionals (msaClientID != "") [ "-DLauncher_MSA_CLIENT_ID=${msaClientID}" ]
-    ++ lib.optionals (lib.versionAtLeast qtbase.version "6") [ "-DLauncher_QT_VERSION_MAJOR=6" ];
+    ++ lib.optionals (lib.versionOlder qtbase.version "6") [ "-DLauncher_QT_VERSION_MAJOR=5" ];
   dontWrapQtApps = true;
 
   postUnpack = ''
