@@ -174,7 +174,7 @@ set(Launcher_SUBREDDIT_URL "https://www.reddit.com/r/PrismLauncher/" CACHE STRIN
 
 # Builds
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
-set(Launcher_QT_VERSION_MAJOR "5" CACHE STRING "Major Qt version to build against")
+set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build against")
 
 # API Keys
 # NOTE: These API keys are here for convenience. If you rebrand this software or intend to break the terms of service

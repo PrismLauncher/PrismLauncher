@@ -32,6 +32,7 @@ modules:
     config-opts:
       - -DLauncher_BUILD_PLATFORM=flatpak
       - -DCMAKE_BUILD_TYPE=Debug
+      - -DLauncher_QT_VERSION_MAJOR=5
     build-options:
       env:
         JAVA_HOME: /usr/lib/sdk/openjdk17/jvm/openjdk-17
