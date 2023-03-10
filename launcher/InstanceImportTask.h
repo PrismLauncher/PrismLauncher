@@ -81,7 +81,6 @@ private slots:
     void downloadProgressChanged(qint64 current, qint64 total);
     void downloadAborted();
     void extractFinished();
-    void extractAborted();
 
 private: /* data */
     NetJob::Ptr m_filesNetJob;

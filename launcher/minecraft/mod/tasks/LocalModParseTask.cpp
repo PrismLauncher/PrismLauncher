@@ -3,6 +3,7 @@
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 #include <toml++/toml.h>
+#include <qdcss.h>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -285,6 +286,32 @@ ModDetails ReadLiteModInfo(QByteArray contents)
     return details;
 }
 
+// https://git.sleeping.town/unascribed/NilLoader/src/commit/d7fc87b255fc31019ff90f80d45894927fac6efc/src/main/java/nilloader/api/NilMetadata.java#L64
+ModDetails ReadNilModInfo(QByteArray contents, QString fname)
+{
+    ModDetails details;
+
+    QDCSS cssData = QDCSS(contents);
+    auto name = cssData.get("@nilmod.name");
+    auto desc = cssData.get("@nilmod.description");
+    auto authors = cssData.get("@nilmod.authors");
+
+    if (name->has_value()) {
+        details.name = name->value();
+    }
+    if (desc->has_value()) {
+        details.description = desc->value();
+    }
+    if (authors->has_value()) {
+        details.authors.append(authors->value());
+    }
+    details.version = cssData.get("@nilmod.version")->value_or("?");
+
+    details.mod_id = fname.remove(".nilmod.css");
+
+    return details;
+}
+
 bool process(Mod& mod, ProcessingLevel level)
 {
     switch (mod.type()) {
@@ -401,6 +428,32 @@ bool processZIP(Mod& mod, ProcessingLevel level)
 
         mod.setDetails(details);
         return true;
+    } else if (zip.setCurrentFile("META-INF/nil/mappings.json")) {
+        // nilloader uses the filename of the metadata file for the modid, so we can't know the exact filename
+        // thankfully, there is a good file to use as a canary so we don't look for nil meta all the time
+
+        QString foundNilMeta;
+        for (auto& fname : zip.getFileNameList()) {
+            // nilmods can shade nilloader to be able to run as a standalone agent - which includes nilloader's own meta file
+            if (fname.endsWith(".nilmod.css") && fname != "nilloader.nilmod.css") {
+                foundNilMeta = fname;
+                break;
+            }
+        }
+
+        if (zip.setCurrentFile(foundNilMeta)) {
+            if (!file.open(QIODevice::ReadOnly)) {
+                zip.close();
+                return false;
+            }
+
+            details = ReadNilModInfo(file.readAll(), foundNilMeta);
+            file.close();
+            zip.close();
+
+            mod.setDetails(details);
+            return true;
+        }
     }
 
     zip.close();

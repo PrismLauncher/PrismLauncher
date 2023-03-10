@@ -81,3 +81,16 @@ class CoreModFolderPage : public ModFolderPage {
 
     virtual bool shouldDisplay() const override;
 };
+
+class NilModFolderPage : public ModFolderPage {
+   public:
+    explicit NilModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent = 0);
+    virtual ~NilModFolderPage() = default;
+
+    virtual QString displayName() const override { return tr("Nilmods"); }
+    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("coremods"); }
+    virtual QString id() const override { return "nilmods"; }
+    virtual QString helpPage() const override { return "Nilmods"; }
+
+    virtual bool shouldDisplay() const override;
+};

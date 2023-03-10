@@ -66,7 +66,12 @@ bool InstanceImportTask::abort()
 
     if (m_filesNetJob)
         m_filesNetJob->abort();
-    m_extractFuture.cancel();
+    if (m_extractFuture.isRunning()) {
+        // NOTE: The tasks created by QtConcurrent::run() can't actually get cancelled,
+        // but we can use this call to check the state when the extraction finishes.
+        m_extractFuture.cancel();
+        m_extractFuture.waitForFinished();
+    }
 
     return Task::abort();
 }
@@ -185,18 +190,20 @@ void InstanceImportTask::processZipPack()
     // make sure we extract just the pack
     m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractSubDir, m_packZip.get(), root, extractDir.absolutePath());
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &InstanceImportTask::extractFinished);
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &InstanceImportTask::extractAborted);
     m_extractFutureWatcher.setFuture(m_extractFuture);
 }
 
 void InstanceImportTask::extractFinished()
 {
     m_packZip.reset();
-    if (!m_extractFuture.result())
-    {
+
+    if (m_extractFuture.isCanceled())
+        return;
+    if (!m_extractFuture.result().has_value()) {
         emitFailed(tr("Failed to extract modpack"));
         return;
     }
+
     QDir extractDir(m_stagingPath);
 
     qDebug() << "Fixing permissions for extracted pack files...";
@@ -248,11 +255,6 @@ void InstanceImportTask::extractFinished()
             emitFailed(tr("Archive does not contain a recognized modpack type."));
             return;
     }
-}
-
-void InstanceImportTask::extractAborted()
-{
-    emitAborted();
 }
 
 void InstanceImportTask::processFlame()

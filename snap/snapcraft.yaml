@@ -39,6 +39,7 @@ parts:
       - "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
       - "-DENABLE_LTO=ON"
       - "-DLauncher_BUILD_PLATFORM=snap"
+      - "-DLauncher_QT_VERSION_MAJOR=5"
 
 apps:
   prismlauncher:

@@ -7,6 +7,7 @@
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
  *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -225,7 +226,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_serverToJoin = parser.value("server");
     m_profileToUse = parser.value("profile");
     m_liveCheck = parser.isSet("alive");
-    
+
     m_instanceIdToShowWindowOf = parser.value("show");
 
     for (auto zip_path : parser.values("import")){
@@ -346,7 +347,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                         import.command = "import";
                         import.args.insert("path", zip_url.toString());
                         m_peerInstance->sendMessage(import.serialize(), timeout);
-                    } 
+                    }
                 }
             }
             else
@@ -611,6 +612,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("UpdateDialogGeometry", "");
 
         m_settings->registerSetting("ModDownloadGeometry", "");
+        m_settings->registerSetting("RPDownloadGeometry", "");
+        m_settings->registerSetting("TPDownloadGeometry", "");
+        m_settings->registerSetting("ShaderDownloadGeometry", "");
 
         // HACK: This code feels so stupid is there a less stupid way of doing this?
         {
@@ -657,6 +661,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 m_settings->set("FlameKeyOverride", flameKey);
             m_settings->reset("CFKeyOverride");
         }
+        m_settings->registerSetting("ModrinthToken", "");
         m_settings->registerSetting("UserAgentOverride", "");
 
         // Init page provider
@@ -1543,6 +1548,15 @@ QString Application::getFlameAPIKey()
     }
 
     return BuildConfig.FLAME_API_KEY;
+}
+
+QString Application::getModrinthAPIToken()
+{
+    QString tokenOverride = m_settings->get("ModrinthToken").toString();
+    if (!tokenOverride.isEmpty())
+        return tokenOverride;
+
+    return QString();
 }
 
 QString Application::getUserAgent()

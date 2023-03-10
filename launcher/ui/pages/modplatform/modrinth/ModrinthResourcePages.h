@@ -42,6 +42,9 @@
 #include "modplatform/ResourceAPI.h"
 
 #include "ui/pages/modplatform/ModPage.h"
+#include "ui/pages/modplatform/ResourcePackPage.h"
+#include "ui/pages/modplatform/TexturePackPage.h"
+#include "ui/pages/modplatform/ShaderPackPage.h"
 
 namespace ResourceDownload {
 
@@ -76,6 +79,75 @@ class ModrinthModPage : public ModPage {
     [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
     auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const -> bool override;
+};
+
+class ModrinthResourcePackPage : public ResourcePackResourcePage {
+    Q_OBJECT
+
+   public:
+    static ModrinthResourcePackPage* create(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
+    {
+        return ResourcePackResourcePage::create<ModrinthResourcePackPage>(dialog, instance);
+    }
+
+    ModrinthResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance);
+    ~ModrinthResourcePackPage() override = default;
+
+    [[nodiscard]] bool shouldDisplay() const override;
+
+    [[nodiscard]] inline auto displayName() const -> QString override { return Modrinth::displayName(); }
+    [[nodiscard]] inline auto icon() const -> QIcon override { return Modrinth::icon(); }
+    [[nodiscard]] inline auto id() const -> QString override { return Modrinth::id(); }
+    [[nodiscard]] inline auto debugName() const -> QString override { return Modrinth::debugName(); }
+    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
+
+    [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
+};
+
+class ModrinthTexturePackPage : public TexturePackResourcePage {
+    Q_OBJECT
+
+   public:
+    static ModrinthTexturePackPage* create(TexturePackDownloadDialog* dialog, BaseInstance& instance)
+    {
+        return TexturePackResourcePage::create<ModrinthTexturePackPage>(dialog, instance);
+    }
+
+    ModrinthTexturePackPage(TexturePackDownloadDialog* dialog, BaseInstance& instance);
+    ~ModrinthTexturePackPage() override = default;
+
+    [[nodiscard]] bool shouldDisplay() const override;
+
+    [[nodiscard]] inline auto displayName() const -> QString override { return Modrinth::displayName(); }
+    [[nodiscard]] inline auto icon() const -> QIcon override { return Modrinth::icon(); }
+    [[nodiscard]] inline auto id() const -> QString override { return Modrinth::id(); }
+    [[nodiscard]] inline auto debugName() const -> QString override { return Modrinth::debugName(); }
+    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
+
+    [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
+};
+
+class ModrinthShaderPackPage : public ShaderPackResourcePage {
+    Q_OBJECT
+
+   public:
+    static ModrinthShaderPackPage* create(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
+    {
+        return ShaderPackResourcePage::create<ModrinthShaderPackPage>(dialog, instance);
+    }
+
+    ModrinthShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance);
+    ~ModrinthShaderPackPage() override = default;
+
+    [[nodiscard]] bool shouldDisplay() const override;
+
+    [[nodiscard]] inline auto displayName() const -> QString override { return Modrinth::displayName(); }
+    [[nodiscard]] inline auto icon() const -> QIcon override { return Modrinth::icon(); }
+    [[nodiscard]] inline auto id() const -> QString override { return Modrinth::id(); }
+    [[nodiscard]] inline auto debugName() const -> QString override { return Modrinth::debugName(); }
+    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Modrinth::metaEntryBase(); }
+
+    [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
 };
 
 }  // namespace ResourceDownload

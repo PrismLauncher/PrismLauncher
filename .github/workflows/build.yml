@@ -158,7 +158,7 @@ jobs:
 
       - name: Retrieve ccache cache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
-        uses: actions/cache@v3.2.5
+        uses: actions/cache@v3.3.0
         with:
           path: '${{ github.workspace }}\.ccache'
           key: ${{ matrix.os }}-mingw-w64-ccache-${{ github.run_id }}
@@ -608,7 +608,7 @@ jobs:
           submodules: 'true'
       - name: Install nix
         if: inputs.build_type == 'Debug'
-        uses: cachix/install-nix-action@v19
+        uses: cachix/install-nix-action@v20
         with:
           install_url: https://nixos.org/nix/install
           extra_nix_config: |

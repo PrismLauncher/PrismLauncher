@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -113,10 +114,15 @@ void Download::executeTask()
     }
 
     request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
-    if (APPLICATION->capabilities() & Application::SupportsFlame
-            && request.url().host().contains("api.curseforge.com")) {
+    // TODO remove duplication
+    if (APPLICATION->capabilities() & Application::SupportsFlame && request.url().host() == QUrl(BuildConfig.FLAME_BASE_URL).host()) {
         request.setRawHeader("x-api-key", APPLICATION->getFlameAPIKey().toUtf8());
-    };
+    } else if (request.url().host() == QUrl(BuildConfig.MODRINTH_PROD_URL).host() ||
+               request.url().host() == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
+        QString token = APPLICATION->getModrinthAPIToken();
+        if (!token.isNull())
+            request.setRawHeader("Authorization", token.toUtf8());
+    }
 
     QNetworkReply* rep = m_network->get(request);
 

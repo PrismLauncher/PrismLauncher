@@ -275,7 +275,7 @@ bool MMCZip::findFilesInZip(QuaZip * zip, const QString & what, QStringList & re
 // ours
 std::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString & subdir, const QString &target)
 {
-    auto absDirectoryUrl = QUrl::fromLocalFile(target);
+    auto target_top_dir = QUrl::fromLocalFile(target);
 
     QStringList extracted;
 
@@ -295,58 +295,53 @@ std::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString & su
         return std::nullopt;
     }
 
-    do
-    {
-        QString name = zip->getCurrentFileName();
-        if(!name.startsWith(subdir))
-        {
+    do {
+        QString file_name = zip->getCurrentFileName();
+        if (!file_name.startsWith(subdir))
             continue;
-        }
 
-        name.remove(0, subdir.size());
-        auto original_name = name;
+        auto relative_file_name = QDir::fromNativeSeparators(file_name.remove(0, subdir.size()));
+        auto original_name = relative_file_name;
 
         // Fix subdirs/files ending with a / getting transformed into absolute paths
-        if(name.startsWith('/')){
-            name = name.mid(1);
-        }
+        if (relative_file_name.startsWith('/'))
+            relative_file_name = relative_file_name.mid(1);
 
         // Fix weird "folders with a single file get squashed" thing
-        QString path;
-        if(name.contains('/') && !name.endsWith('/')){
-            path = name.section('/', 0, -2) + "/";
-            FS::ensureFolderPathExists(FS::PathCombine(target, path));
+        QString sub_path;
+        if (relative_file_name.contains('/') && !relative_file_name.endsWith('/')) {
+            sub_path = relative_file_name.section('/', 0, -2) + '/';
+            FS::ensureFolderPathExists(FS::PathCombine(target, sub_path));
 
-            name = name.split('/').last();
+            relative_file_name = relative_file_name.split('/').last();
         }
 
-        QString absFilePath;
-        if(name.isEmpty())
-        {
-            absFilePath = FS::PathCombine(target, "/");  // FIXME this seems weird
-        }
-        else
-        {
-            absFilePath = FS::PathCombine(target, path + name);
+        QString target_file_path;
+        if (relative_file_name.isEmpty()) {
+            target_file_path = target + '/';
+        } else {
+            target_file_path = FS::PathCombine(target_top_dir.toLocalFile(), sub_path, relative_file_name);
+            if (relative_file_name.endsWith('/') && !target_file_path.endsWith('/'))
+                target_file_path += '/';
         }
 
-        if (!absDirectoryUrl.isParentOf(QUrl::fromLocalFile(absFilePath))) {
-            qWarning() << "Extracting" << name << "was cancelled, because it was effectively outside of the target path" << target;
+        if (!target_top_dir.isParentOf(QUrl::fromLocalFile(target_file_path))) {
+            qWarning() << "Extracting" << relative_file_name << "was cancelled, because it was effectively outside of the target path" << target;
             return std::nullopt;
         }
 
-        if (!JlCompress::extractFile(zip, "", absFilePath))
-        {
-            qWarning() << "Failed to extract file" << original_name << "to" << absFilePath;
+        if (!JlCompress::extractFile(zip, "", target_file_path)) {
+            qWarning() << "Failed to extract file" << original_name << "to" << target_file_path;
             JlCompress::removeFile(extracted);
             return std::nullopt;
         }
 
-        extracted.append(absFilePath);
-        QFile::setPermissions(absFilePath, QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser);
+        extracted.append(target_file_path);
+        QFile::setPermissions(target_file_path, QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser);
 
-        qDebug() << "Extracted file" << name << "to" << absFilePath;
+        qDebug() << "Extracted file" << relative_file_name << "to" << target_file_path;
     } while (zip->goToNextFile());
+
     return extracted;
 }
 

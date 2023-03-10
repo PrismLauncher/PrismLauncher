@@ -36,9 +36,10 @@ public:
         values.append(new VersionPage(onesix.get()));
         values.append(ManagedPackPage::createPage(onesix.get()));
         auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList());
-        modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
+        modsPage->setFilter("%1 (*.zip *.jar *.litemod *.nilmod)");
         values.append(modsPage);
         values.append(new CoreModFolderPage(onesix.get(), onesix->coreModList()));
+        values.append(new NilModFolderPage(onesix.get(), onesix->nilModList()));
         values.append(new ResourcePackPage(onesix.get(), onesix->resourcePackList()));
         values.append(new TexturePackPage(onesix.get(), onesix->texturePackList()));
         values.append(new ShaderPackPage(onesix.get(), onesix->shaderPackList()));
