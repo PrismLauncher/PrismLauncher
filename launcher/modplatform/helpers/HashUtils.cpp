@@ -79,7 +79,7 @@ void FlameHasher::executeTask()
     // CF-specific
     auto should_filter_out = [](char c) { return (c == 9 || c == 10 || c == 13 || c == 32); };
 
-    std::ifstream file_stream(StringUtils::toStdString(m_path), std::ifstream::binary);
+    std::ifstream file_stream(StringUtils::toStdString(m_path).c_str(), std::ifstream::binary);
     // TODO: This is very heavy work, but apparently QtConcurrent can't use move semantics, so we can't boop this to another thread.
     // How do we make this non-blocking then?
     m_hash = QString::number(MurmurHash2(std::move(file_stream), 4 * MiB, should_filter_out));
