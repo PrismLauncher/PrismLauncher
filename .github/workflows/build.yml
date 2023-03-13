@@ -550,31 +550,6 @@ jobs:
         run: |
           ccache -s
 
-  snap:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        if: inputs.build_type == 'Debug'
-        uses: actions/checkout@v3
-        with:
-          submodules: 'true'
-      - name: Set short version
-        shell: bash
-        if: inputs.build_type == 'Debug'
-        run: |
-          ver_short=`git rev-parse --short HEAD`
-          echo "VERSION=$ver_short" >> $GITHUB_ENV
-      - name: Package Snap (Linux)
-        id: snapcraft
-        if: inputs.build_type == 'Debug'
-        uses: snapcore/action-build@v1
-      - name: Upload Snap (Linux)
-        if: inputs.build_type == 'Debug'
-        uses: actions/upload-artifact@v3
-        with:
-          name: prismlauncher_${{ env.VERSION }}_amd64.snap
-          path: ${{ steps.snapcraft.outputs.snap }}
-
   flatpak:
     runs-on: ubuntu-latest
     container:
