@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>531</width>
-    <height>653</height>
+    <width>575</width>
+    <height>695</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -334,10 +334,26 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="toolTip">
+           <string>Files cloned with reflinks take up no extra space until they are modified.</string>
+          </property>
           <property name="text">
            <string>Clone instead of copying</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <spacer name="CoWSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item>
          <widget class="QLabel" name="cloneSupportedLabel">
