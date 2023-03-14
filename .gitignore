@@ -24,6 +24,7 @@ build
 
 # direnv / Nix
 .direnv/
+.pre-commit-config.yaml
 
 # Install dirs
 install

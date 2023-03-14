@@ -4,6 +4,11 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    pre-commit-hooks = {
+      url = "github:cachix/pre-commit-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -18,6 +23,7 @@
     self,
     nixpkgs,
     flake-utils,
+    pre-commit-hooks,
     libnbtplusplus,
     ...
   }: let
@@ -43,12 +49,35 @@
     flake-utils.lib.eachSystem supportedSystems (system: let
       pkgs = nixpkgs.legacyPackages.${system};
     in {
+      checks = {
+        pre-commit-check = pre-commit-hooks.lib.${system}.run {
+          src = ./.;
+          hooks = {
+            markdownlint.enable = true;
+            alejandra.enable = true;
+
+            clang-format = {
+              enable =
+                false; # As most of the codebase is **not** formatted, we don't want clang-format yet
+              types_or = ["c" "c++"];
+            };
+          };
+        };
+      };
+
       packages = let
         packages = packagesFn pkgs;
       in
         packages // {default = packages.prismlauncher;};
 
       devShells.default = pkgs.mkShell {
+        inherit (self.checks.${system}.pre-commit-check) shellHook;
+        packages = with pkgs; [
+          nodePackages.markdownlint-cli
+          alejandra
+          clang-tools
+        ];
+
         inputsFrom = [self.packages.${system}.default];
         buildInputs = with pkgs; [ccache ninja];
       };
