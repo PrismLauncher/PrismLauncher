@@ -37,7 +37,7 @@
       aarch64-linux
     ];
 
-    packagesFn = pkgs: rec {
+    packagesFn = pkgs: {
       prismlauncher-qt5 = pkgs.libsForQt5.callPackage ./nix {
         inherit version self libnbtplusplus;
       };
@@ -81,7 +81,8 @@
         inputsFrom = [self.packages.${system}.default];
         buildInputs = with pkgs; [ccache ninja];
       };
-
-      overlay = final: packagesFn;
-    });
+    })
+    // {
+      overlays.default = final: _: (packagesFn final);
+    };
 }
