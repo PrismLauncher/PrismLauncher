@@ -54,7 +54,9 @@
           src = ./.;
           hooks = {
             markdownlint.enable = true;
+
             alejandra.enable = true;
+            deadnix.enable = true;
 
             clang-format = {
               enable =
@@ -75,6 +77,7 @@
         packages = with pkgs; [
           nodePackages.markdownlint-cli
           alejandra
+          deadnix
           clang-tools
         ];
 
