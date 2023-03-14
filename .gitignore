@@ -11,10 +11,12 @@ html/
 *.pro.user
 CMakeLists.txt.user
 CMakeLists.txt.user.*
+CMakeSettings.json
 /.project
 /.settings
 /.idea
 /.vscode
+/.vs
 cmake-build-*/
 Debug
 
