@@ -516,6 +516,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("InstanceDir", "instances");
         m_settings->registerSetting({"CentralModsDir", "ModsDir"}, "mods");
         m_settings->registerSetting("IconsDir", "icons");
+        m_settings->registerSetting("DownloadsDir", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
 
         // Editors
         m_settings->registerSetting("JsonEditor", QString());

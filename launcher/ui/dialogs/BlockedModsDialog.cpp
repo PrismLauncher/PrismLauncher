@@ -184,7 +184,7 @@ void BlockedModsDialog::directoryChanged(QString path)
 /// @brief add the user downloads folder and the global mods folder to the filesystem watcher
 void BlockedModsDialog::setupWatch()
 {
-    const QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+    const QString downloadsFolder = APPLICATION->settings()->get("DownloadsDir").toString();
     const QString modsFolder = APPLICATION->settings()->get("CentralModsDir").toString();
     m_watcher.addPath(downloadsFolder);
     m_watcher.addPath(modsFolder);
