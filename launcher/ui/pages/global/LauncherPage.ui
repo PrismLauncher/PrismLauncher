@@ -130,7 +130,10 @@
           <item row="3" column="0">
            <widget class="QLabel" name="labelDownloadsDir">
             <property name="text">
-             <string>Downloads:</string>
+             <string>&amp;Downloads:</string>
+            </property>
+            <property name="buddy">
+             <cstring>downloadsDirTextBox</cstring>
             </property>
            </widget>
           </item>
