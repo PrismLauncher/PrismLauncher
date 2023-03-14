@@ -22,6 +22,9 @@ Debug
 build
 /build-*
 
+# direnv / Nix
+.direnv/
+
 # Install dirs
 install
 /install-*

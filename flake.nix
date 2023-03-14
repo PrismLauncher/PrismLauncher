@@ -48,6 +48,11 @@
       in
         packages // {default = packages.prismlauncher;};
 
+      devShells.default = pkgs.mkShell {
+        inputsFrom = [self.packages.${system}.default];
+        buildInputs = with pkgs; [ccache ninja];
+      };
+
       overlay = final: packagesFn;
     });
 }
