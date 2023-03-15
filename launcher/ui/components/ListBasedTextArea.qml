@@ -88,8 +88,6 @@ Rectangle {
         flickDeceleration: 5000
         flickableDirection: Flickable.HorizontalAndVerticalFlick
 
-        delegate: textDelegate
-
         highlight: Rectangle {
             color: "#1aff0000"
             border { color: "red" }
@@ -138,15 +136,76 @@ Rectangle {
 
         Component.onCompleted: updateContentWidth()
 
+        // Why is there a Loader?
+        //
+        // Because we want to be able to smoothly scroll a list with many thousands of entries, and to do that,
+        // each entry must be very cheap to create. However, our entries inherently need to do a bunch of stuff,
+        // from styling background rects to handling selection. So, the final thing that needs to show up to the
+        // user is not as cheap to instantiate as we'd like.
+        //
+        // On the other hand, if the user is scrolling so fast that delegate instantiation is a bottleneck, they most
+        // likely aren't even anything besides the scrolling, and so stuff like selection highligting and background
+        // filling can wait a bit.
+        //
+        // So, the following solution to have a smooth scrolling without sacrificing too much UX involves first loading
+        // a very simple Text element with only the basics, and once enough time has passed without the item going
+        // out of view, a heavier, more feature-complete version is instantiated in its place.
+
+        delegate: Loader {
+            property int m_index: index
+            property string m_line: line
+            property font m_text_font: text_font
+            property color m_foreground_color: foreground_color
+            property color m_background_color: background_color
+
+            sourceComponent: simpleTextDelegate
+            function changeSource() {
+                sourceComponent = textDelegate
+            }
+
+            Component.onCompleted: updateSourceTimer.start()
+
+            Timer {
+                id: updateSourceTimer
+
+                // NOTE: Arbitrary value, but seems to be good enough
+                interval: 200
+                repeat: false
+                onTriggered: changeSource()
+            }
+        }
+
+        Component {
+            id: simpleTextDelegate
+
+            Text {
+                property string line: m_line
+                property font text_font: m_text_font
+                property color foreground_color: m_foreground_color
+
+                // NOTE: This is to compensate the margin from the full TextArea
+                leftPadding: 4
+                padding: 0
+                width: view.contentWidth
+                renderType: Text.NativeRendering
+
+                text: line
+                font: text_font
+                color: foreground_color
+
+                wrapMode: view.wrapMode
+            }
+        }
+
         Component {
             id: textDelegate
 
             TextArea {
-                required property int index
-                required property string line
-                required property font text_font
-                required property color foreground_color
-                required property color background_color
+                property int index: m_index
+                property string line: m_line
+                property font text_font: m_text_font
+                property color foreground_color: m_foreground_color
+                property color background_color: m_background_color
 
                 function updateSelection() {
                     const s_index = selectionArea.start_index;
@@ -197,7 +256,7 @@ Rectangle {
                 color: foreground_color
                 background: Rectangle {
                     // NOTE: The 8 is completely arbitrary and its only purpose is to make the rectangle look a bit nicer :)
-                    width: parent.contentWidth + 8
+                    width: view.contentWidth + 8
                     color: background_color
                 }
 
@@ -312,7 +371,7 @@ Rectangle {
             const index = view.indexAtRelative(x, y);
             if (index === -1)
                 return [];
-            const item = view.itemAtIndex(index);
+            const item = view.itemAtIndex(index).item;
             const relItemX = item.x - view.contentX;
             const relItemY = item.y - view.contentY;
             const pos = item.positionAt(x - relItemX, y - relItemY);
