@@ -103,22 +103,34 @@ QString LogModel::toPlainText()
     return out;
 }
 
-QVector<int> LogModel::search(QString text_to_search, bool use_regex) const
+QVector<std::tuple<int, int, int>> LogModel::search(QString text_to_search, bool use_regex) const
 {
-    QVector<int> matches;
+    QVector<std::tuple<int, int, int>> matches;
 
     if (use_regex) {
         QRegularExpression regex{text_to_search};
         regex.optimize();
 
+        if (!regex.errorString().isEmpty()) {
+            qCritical() << "Error in regex pattern:" << regex.errorString();
+            return {};
+        }
+
         for (int i = 0; i < m_numLines; i++) {
-            if (regex.match(m_content.at(i).line).hasMatch())
-                matches.append(i + 1);
+            if (auto match = regex.match(m_content.at(i).line); match.hasMatch()) {
+                for (int k = 0; k <= match.lastCapturedIndex(); k++)
+                    matches.append(std::make_tuple(i + 1, match.capturedStart(k), match.capturedEnd(k)));
+            }
         }
     } else {
         for (int i = 0; i < m_numLines; i++) {
-            if (m_content.at(i).line.contains(text_to_search))
-                matches.append(i + 1);
+            auto line = m_content.at(i).line;
+            int begin = -1;
+            do {
+                begin = line.indexOf(text_to_search, begin + 1);
+                if (begin >= 0)
+                    matches.append(std::make_tuple(i + 1, begin, begin + text_to_search.length()));
+            } while (begin >= 0);
         }
     }
 

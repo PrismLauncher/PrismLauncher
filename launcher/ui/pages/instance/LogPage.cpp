@@ -271,6 +271,8 @@ void LogPage::searchRequested(QString search_string, bool reverse)
     }
 
     int next_line = -1;
+    int begin_index = -1;
+    int end_index = -1;
 
     if (!m_search_results.isEmpty()) {
         if (reverse)
@@ -278,11 +280,16 @@ void LogPage::searchRequested(QString search_string, bool reverse)
         else
             m_current_search_offset = positiveModulo(m_current_search_offset + 1, m_search_results.size());
 
-        if (m_current_search_offset < m_search_results.size())
-            next_line = m_search_results.at(m_current_search_offset);
+        if (m_current_search_offset < m_search_results.size()) {
+            auto search_result = m_search_results.at(m_current_search_offset);
+            next_line = std::get<0>(search_result);
+            begin_index = std::get<1>(search_result);
+            end_index = std::get<2>(search_result);
+        }
     }
 
-    [[maybe_unused]] bool no_errors = QMetaObject::invokeMethod(rootObject(), "goToLine", Q_ARG(QVariant, next_line));
+    [[maybe_unused]] bool no_errors = QMetaObject::invokeMethod(rootObject(), "goToLine", Q_ARG(QVariant, next_line),
+                                                                Q_ARG(QVariant, begin_index), Q_ARG(QVariant, end_index));
     Q_ASSERT(no_errors);
 }
 

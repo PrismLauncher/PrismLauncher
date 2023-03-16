@@ -30,7 +30,7 @@ Components.ThemedControl {
     function gotSourceModel() { suspended_checkbox.enabled = true; }
     function lostSourceModel() { suspended_checkbox.enabled = false; }
 
-    function goToLine(line_number) { logView.goToLine(line_number, true); }
+    function goToLine(line_number, highlight_start, highlight_end) { logView.goToLine(line_number, highlight_start, highlight_end); }
     function search(reverse) { page.onSearchRequested(search_input_field.text, reverse); }
 
     SystemPalette { id: active_palette; colorGroup: SystemPalette.Active }

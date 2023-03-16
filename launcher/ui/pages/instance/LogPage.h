@@ -94,7 +94,7 @@ class LogPage : public QQuickWidget, public BasePage {
 
     // pair <string searched, used regex or not in that search>
     std::pair<QString, bool> m_search_request;
-    QVector<int> m_search_results;
+    QVector<std::tuple<int, int, int>> m_search_results;
 
     int m_current_search_offset = 0;
     bool m_use_regex_in_search = false;

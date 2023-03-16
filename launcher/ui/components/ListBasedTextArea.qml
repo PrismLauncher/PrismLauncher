@@ -22,21 +22,14 @@ Rectangle {
     // FIXME: Create a QML type to handle clipboard and use that instead
     signal requestedCopyToClipboard(string text)
 
-    // TODO: Also highlight the specific text that matches the sequence
-    function goToLine(line_number, highlight_entry) {
-        if (line_number <= 0 || line_number > model.rowCount()) {
-            view.currentIndex = -1;
+    function goToLine(line_number, highlight_start, highlight_end) {
+        if (line_number <= 0 || line_number > model.rowCount())
             return;
-        }
-
-        if (highlight_entry) {
-            view.highlightFollowsCurrentItem = true;
-            view.currentIndex = line_number - 1;
-        } else {
-            view.currentIndex = -1;
-        }
 
         view.positionViewAtIndex(line_number - 1, ListView.Beginning);
+
+        const container_item = view.itemAtIndex(line_number - 1);
+        container_item.setSelection(highlight_start, highlight_end);
     }
 
     function goToTop() { view.positionViewAtBeginning(); }
@@ -52,7 +45,6 @@ Rectangle {
             return view.itemAtIndex(indexes[0].row).item.selectedText;
 
         for (var index = indexes[0].row; index <= indexes[1].row; index++) {
-            console.log(index);
             const item = view.itemAtIndex(index).item;
 
             // FIXME: This "approximates" the user selection on entries outside the current view. It should not :p
@@ -86,16 +78,8 @@ Rectangle {
 
         boundsBehavior: Flickable.StopAtBounds
 
-        highlightMoveDuration: 1
-        highlightMoveVelocity: -1
-
         flickDeceleration: 5000
         flickableDirection: Flickable.HorizontalAndVerticalFlick
-
-        highlight: Rectangle {
-            color: "#1aff0000"
-            border { color: "red" }
-        }
 
         footerPositioning: ListView.PullBackFooter
         footer: Rectangle {
@@ -162,12 +146,35 @@ Rectangle {
             property color m_foreground_color: foreground_color
             property color m_background_color: background_color
 
+            property int selection_start: 0
+            property int selection_end: 0
+
+            function setSelection(start, end) {
+                selection_start = start
+                selection_end = end
+
+                if (sourceComponent === textDelegate)
+                    applySelection();
+            }
+
+            function applySelection() {
+                if (selection_start != selection_end) {
+                    selectionArea.selectionChanged();
+                    item.select(selection_start, selection_end);
+                }
+            }
+
             sourceComponent: simpleTextDelegate
             function changeSource() {
                 sourceComponent = textDelegate
             }
 
             Component.onCompleted: updateSourceTimer.start()
+
+            onLoaded: () => {
+                if (sourceComponent === textDelegate)
+                    applySelection();
+            }
 
             Timer {
                 id: updateSourceTimer

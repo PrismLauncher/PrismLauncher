@@ -28,10 +28,10 @@ class LogModel : public QAbstractListModel {
 
     QString toPlainText();
 
-    /** Returns a vector of line numbers that match the given text.
+    /** Returns a vector of line numbers, beginning index, and end index that match the given text.
      *  If 'use_regex' is true, consider the text as a regex expression instead.
      */
-    [[nodiscard]] QVector<int> search(QString, bool use_regex) const;
+    [[nodiscard]] QVector<std::tuple<int, int, int>> search(QString, bool use_regex) const;
 
     int getMaxLines();
     void setMaxLines(int maxLines);
