@@ -48,8 +48,12 @@ Rectangle {
         const indexes = Array.from(selectionModel.selectedIndexes);
         indexes.sort(function (a, b) { return a.row - b.row; });
 
-        for (const index of indexes) {
-            const item = view.itemAtIndex(index.row);
+        if (indexes.length == 1)
+            return view.itemAtIndex(indexes[0].row).item.selectedText;
+
+        for (var index = indexes[0].row; index <= indexes[1].row; index++) {
+            console.log(index);
+            const item = view.itemAtIndex(index).item;
 
             // FIXME: This "approximates" the user selection on entries outside the current view. It should not :p
             if (!item)
@@ -219,14 +223,18 @@ Rectangle {
                         deselect();
 
                         // Removes this item from the current selections
-                        const model_index = selectionModel.model.index(index, 0);
-                        if (selectionModel.selectedIndexes.includes(model_index))
-                            selectionModel.select(model_index, ItemSelectionModel.Deselect);
+                        selectionModel.select(view.model.index(index, 0), ItemSelectionModel.Deselect);
                         return;
 
                     // If the item is inside the selection, and isn't any of the edges of it
                     } else if (index > s_index && index < e_index) {
                         selectAll();
+
+                        // OPTIMIZATION: We'll put much less stress on selectionModel if we only keep track of
+                        // the first and last selected items, and infer from that the remaining selection between.
+
+                        selectionModel.select(view.model.index(index, 0), ItemSelectionModel.Deselect);
+                        return;
 
                     // If the item is the beginning and ending of the selection
                     } else if (index === s_index && index === e_index) {
@@ -371,9 +379,14 @@ Rectangle {
             const index = view.indexAtRelative(x, y);
             if (index === -1)
                 return [];
-            const item = view.itemAtIndex(index).item;
-            const relItemX = item.x - view.contentX;
-            const relItemY = item.y - view.contentY;
+
+            const container_item = view.itemAtIndex(index);
+            const item = container_item.item;
+            if (!(item instanceof TextArea))
+                return [];
+
+            const relItemX = container_item.x - view.contentX;
+            const relItemY = container_item.y - view.contentY;
             const pos = item.positionAt(x - relItemX, y - relItemY);
 
             return [index, pos];
