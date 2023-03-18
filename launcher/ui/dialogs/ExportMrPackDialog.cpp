@@ -17,7 +17,6 @@
  */
 
 #include "ExportMrPackDialog.h"
-#include "Application.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ExportMrPackDialog.h"
@@ -35,6 +34,7 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
 {
     ui->setupUi(this);
     ui->name->setText(instance->name());
+    ui->summary->setText(instance->notes().split(QRegExp("\\r?\\n"))[0]);
 
     auto model = new QFileSystemModel(this);
     // use the game root - everything outside cannot be exported
