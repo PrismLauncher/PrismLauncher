@@ -204,7 +204,8 @@ QByteArray ModrinthPackExportTask::generateIndex()
     obj["game"] = "minecraft";
     obj["name"] = name;
     obj["versionId"] = version;
-    obj["summary"] = summary;
+    if (!summary.isEmpty())
+        obj["summary"] = summary;
 
     MinecraftInstance* mc = dynamic_cast<MinecraftInstance*>(instance.get());
     if (mc) {
