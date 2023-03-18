@@ -17,6 +17,8 @@
  */
 
 #include "ExportMrPackDialog.h"
+#include "Application.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ExportMrPackDialog.h"
 
@@ -82,6 +84,20 @@ void ExportMrPackDialog::done(int result)
 
         ModrinthPackExportTask task(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
                                     [this](const QString& path) { return proxy->blockedPaths().covers(path); });
+
+        connect(&task, &Task::failed,
+                [this](const QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+
+        connect(&task, &Task::succeeded, [this, &task]() {
+            QStringList warnings = task.warnings();
+            if (warnings.count() > 0)
+                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+        });
+        connect(&task, &Task::aborted, [this] {
+            CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."), QMessageBox::Information)
+                ->show();
+        });
+
         ProgressDialog progress(this);
         progress.setSkipButton(true, tr("Abort"));
         if (progress.execWithTask(&task) != QDialog::Accepted)

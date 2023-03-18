@@ -18,8 +18,7 @@
 
 #include "ModrinthPackExportTask.h"
 
-#include <qcryptographichash.h>
-#include <qtconcurrentrun.h>
+#include <QCryptographicHash>
 #include <QFileInfo>
 #include <QFileInfoList>
 #include <QMessageBox>
@@ -28,7 +27,6 @@
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "minecraft/mod/Mod.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 
 const QStringList ModrinthPackExportTask::PREFIXES = QStringList({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
@@ -62,7 +60,7 @@ bool ModrinthPackExportTask::abort()
             return false;
 
         task = nullptr;
-        emitFailed(tr("Aborted"));
+        emitAborted();
         return true;
     }
 
@@ -154,14 +152,16 @@ void ModrinthPackExportTask::buildZip()
         }
 
         if (pendingAbort) {
-            emitFailed(tr("Aborted"));
+            QMetaObject::invokeMethod(
+                this, [this]() { emitAborted(); }, Qt::QueuedConnection);
             return;
         }
 
         QuaZipFile indexFile(&zip);
         if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
             QFile::remove(output);
-            emitFailed(tr("Could not create index"));
+            QMetaObject::invokeMethod(
+                this, [this]() { emitFailed(tr("Could not create index")); }, Qt::QueuedConnection);
             return;
         }
         indexFile.write(generateIndex());
@@ -171,7 +171,8 @@ void ModrinthPackExportTask::buildZip()
         for (const QFileInfo& file : files) {
             if (pendingAbort) {
                 QFile::remove(output);
-                emitFailed(tr("Aborted"));
+                QMetaObject::invokeMethod(
+                    this, [this]() { emitAborted(); }, Qt::QueuedConnection);
                 return;
             }
 
@@ -186,11 +187,13 @@ void ModrinthPackExportTask::buildZip()
 
         if (zip.getZipError() != 0) {
             QFile::remove(output);
-            emitFailed(tr("A zip error occured"));
+            QMetaObject::invokeMethod(
+                this, [this]() { emitFailed(tr("A zip error occurred")); }, Qt::QueuedConnection);
             return;
         }
 
-        emitSucceeded();
+        QMetaObject::invokeMethod(
+            this, [this]() { emitSucceeded(); }, Qt::QueuedConnection);
     });
 }
 
