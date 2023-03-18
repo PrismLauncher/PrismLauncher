@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (c) 2022 Lenny McLennington <lenny@sneed.church>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -147,6 +148,8 @@ void APIPage::loadSettings()
     ui->metaURL->setText(metaURL);
     QString flameKey = s->get("FlameKeyOverride").toString();
     ui->flameKey->setText(flameKey);
+    QString modrinthToken = s->get("ModrinthToken").toString();
+    ui->modrinthToken->setText(modrinthToken);
     QString customUserAgent = s->get("UserAgentOverride").toString();
     ui->userAgentLineEdit->setText(customUserAgent);
 }
@@ -177,6 +180,8 @@ void APIPage::applySettings()
     s->set("MetaURLOverride", metaURL);
     QString flameKey = ui->flameKey->text();
     s->set("FlameKeyOverride", flameKey);
+    QString modrinthToken = ui->modrinthToken->text();
+    s->set("ModrinthToken", modrinthToken);
     s->set("UserAgentOverride", ui->userAgentLineEdit->text());
 }
 

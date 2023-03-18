@@ -11,16 +11,22 @@ html/
 *.pro.user
 CMakeLists.txt.user
 CMakeLists.txt.user.*
+CMakeSettings.json
 /.project
 /.settings
 /.idea
 /.vscode
+/.vs
 cmake-build-*/
 Debug
 
 # Build dirs
 build
 /build-*
+
+# direnv / Nix
+.direnv/
+.pre-commit-config.yaml
 
 # Install dirs
 install

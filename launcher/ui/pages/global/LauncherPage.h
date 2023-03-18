@@ -88,6 +88,7 @@ slots:
     void on_instDirBrowseBtn_clicked();
     void on_modsDirBrowseBtn_clicked();
     void on_iconsDirBrowseBtn_clicked();
+    void on_downloadsDirBrowseBtn_clicked();
     void on_metadataDisableBtn_clicked();
 
     /*!

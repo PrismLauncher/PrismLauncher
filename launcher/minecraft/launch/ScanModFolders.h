@@ -33,10 +33,12 @@ public:
 private slots:
     void coreModsDone();
     void modsDone();
+    void nilModsDone();
 private:
     void checkDone();
 
 private: // DATA
     bool m_modsDone = false;
+    bool m_nilModsDone = false;
     bool m_coreModsDone = false;
 };

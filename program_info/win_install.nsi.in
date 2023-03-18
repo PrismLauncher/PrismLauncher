@@ -114,7 +114,8 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@
 ;--------------------------------
 ; Shell Associate Macros
 
-!macro APP_SETUP DESCRIPTION ICON APP_ID APP_NAME APP_EXE COMMANDTEXT COMMAND ; VERB APP_COMPANY
+!macro APP_SETUP_Def DESCRIPTION ICON APP_ID APP_NAME APP_EXE COMMANDTEXT COMMAND
+
   ; setup APP_ID
   WriteRegStr ShCtx "Software\Classes\${APP_ID}" "" `${DESCRIPTION}`
   WriteRegStr ShCtx "Software\Classes\${APP_ID}\DefaultIcon" "" `${ICON}`
@@ -123,24 +124,28 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@
   WriteRegStr ShCtx "Software\Classes\${APP_ID}\shell\open" "" `${COMMANDTEXT}`
   WriteRegStr ShCtx "Software\Classes\${APP_ID}\shell\open\command" "" `${COMMAND}`
 
-  ; if you want the app to use it's own implementation of a verb
-  ;WriteRegStr ShCtx "Software\Classes\${APP_ID}\shell\${VERB}" "" "${DESCRIPTION}"
-  ;WriteRegStr ShCtx "Software\Classes\${APP_ID}\shell\${VERB}\command" "" `${COMMAND}`
-
   WriteRegStr ShCtx "Software\Classes\Applications\${APP_EXE}\shell\open\command" "" `${COMMAND}`
   WriteRegStr ShCtx "Software\Classes\Applications\${APP_EXE}" "FriendlyAppName" `${APP_NAME}` ; [Optional]
-  ;WriteRegStr ShCtx "Software\Classes\Applications\${APP_EXE}" "ApplicationCompany" `${APP_COMPANY}` ; [Optional]
-  ;WriteRegNone ShCtx "Software\Classes\Applications\${APP_EXE}\SupportedTypes" ".${EXT}" ; [Optional] Only allow "Open With" with specific extension(s) on WinXP+
-
-  # Register "Default Programs" [Optional]
-  !ifdef REGISTER_DEFAULTPROGRAMS
-  WriteRegStr ShCtx "Software\Classes\Applications\${APP_EXE}\Capabilities" "ApplicationDescription" `${DESCRIPTION}`
-  WriteRegStr ShCtx "Software\RegisteredApplications" `${APP_NAME}` "Software\Classes\Applications\${APP_EXE}\Capabilities"
-  !endif
 
 !macroend
 
-!macro APP_ASSOCIATE EXT APP_ID APP_EXE OVERWIRTE
+!macro APP_SETUP DESCRIPTION ICON APP_ID APP_NAME APP_EXE COMMANDTEXT COMMAND
+
+  !insertmacro APP_SETUP_Def `${DESCRIPTION}` `${ICON}` `${APP_ID}` `${APP_NAME}` `${APP_EXE}` `${COMMANDTEXT}` `${COMMAND}`
+
+!macroend
+
+!macro APP_SETUP_DEFAULT DESCRIPTION ICON APP_ID APP_NAME APP_EXE COMMANDTEXT COMMAND
+
+  !insertmacro APP_SETUP_Def `${DESCRIPTION}` `${ICON}` `${APP_ID}` `${APP_NAME}` `${APP_EXE}` `${COMMANDTEXT}` `${COMMAND}`
+
+  # Register "Default Programs" 
+  WriteRegStr ShCtx "Software\Classes\Applications\${APP_EXE}\Capabilities" "ApplicationDescription" `${DESCRIPTION}`
+  WriteRegStr ShCtx "Software\RegisteredApplications" `${APP_NAME}` "Software\Classes\Applications\${APP_EXE}\Capabilities"
+
+!macroend
+
+!macro APP_ASSOCIATE_Def EXT APP_ID APP_EXE OVERWIRTE
   ; Backup the previously associated file class
   ${If} ${OVERWIRTE} == true
   ReadRegStr $R0 ShCtx "Software\Classes\${EXT}" ""
@@ -151,10 +156,20 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@
   WriteRegNone ShCtx "Software\Classes\${EXT}\OpenWithList" "${APP_EXE}" ; Win2000+
   WriteRegNone ShCtx "Software\Classes\${EXT}\OpenWithProgids" "${APP_ID}" ; WinXP+
 
-  # Register "Default Programs" [Optional]
-  !ifdef REGISTER_DEFAULTPROGRAMS
+!macroend
+
+!macro APP_ASSOCIATE EXT APP_ID APP_EXE OVERWIRTE
+
+  !insertmacro APP_ASSOCIATE_Def `${EXT}` `${APP_ID}` `${APP_EXE}` `${OVERWIRTE}`
+
+!macroend
+
+!macro APP_ASSOCIATE_DEFAULT EXT APP_ID APP_EXE OVERWIRTE
+
+  !insertmacro APP_ASSOCIATE_Def `${EXT}` `${APP_ID}` `${APP_EXE}` `${OVERWIRTE}`
+
+  # Register "Default Programs"
   WriteRegStr ShCtx "Software\Classes\Applications\${APP_EXE}\Capabilities\FileAssociations" "${EXT}" "${APP_ID}"
-  !endif
 
 !macroend
 
@@ -191,12 +206,10 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@
   DeleteRegKey /IfEmpty HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\${EXT}\OpenWithProgids"
   DeleteRegKey /IfEmpty HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\${EXT}\OpenWithList"
   DeleteRegKey /IfEmpty HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\${EXT}"
-  ;DeleteRegKey HKCU "Software\Microsoft\Windows\Roaming\OpenWith\FileExts\.${EXT}"
-  ;DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs\.${EXT}"
 
 !macroend
 
-!macro APP_TEARDOWN APP_ID APP_NAME APP_EXE
+!macro APP_TEARDOWN_Def APP_ID APP_NAME APP_EXE
 
   # Unregister file type
   ClearErrors
@@ -208,13 +221,6 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@
   # Unregister "Open With"
   DeleteRegKey ShCtx "Software\Classes\Applications\${APP_EXE}"
 
-  # Unregister "Default Programs"
-  !ifdef REGISTER_DEFAULTPROGRAMS
-  DeleteRegValue ShCtx "Software\RegisteredApplications" `${APP_NAME}`
-  DeleteRegKey ShCtx "Software\Classes\Applications\${APP_EXE}\Capabilities"
-  DeleteRegKey /IfEmpty ShCtx "Software\Classes\Applications\${APP_EXE}"
-  !endif
-
   DeleteRegKey ShCtx `Software\Classes\${APP_ID}`
   DeleteRegKey ShCtx "Software\Classes\Applications\${APP_EXE}"
 
@@ -224,6 +230,23 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@
   DeleteRegValue HKCU "Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache" "$INSTDIR\${APP_EXE}.ApplicationCompany"
   DeleteRegValue HKCU "Software\Microsoft\Windows\ShellNoRoam\MUICache" "$INSTDIR\${APP_EXE}" ; WinXP
   DeleteRegValue HKCU "Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store" "$INSTDIR\${APP_EXE}"
+
+!macroend
+
+!macro APP_TEARDOWN APP_ID APP_NAME APP_EXE
+
+  !insertmacro APP_TEARDOWN_Def `${APP_ID}` `${APP_NAME}` `${APP_EXE}`
+
+!macroend
+
+!macro APP_TEARDOWN_DEFAULT APP_ID APP_NAME APP_EXE
+
+  !insertmacro APP_TEARDOWN_Def `${APP_ID}` `${APP_NAME}` `${APP_EXE}`
+  
+  # Unregister "Default Programs"
+  DeleteRegValue ShCtx "Software\RegisteredApplications" `${APP_NAME}`
+  DeleteRegKey ShCtx "Software\Classes\Applications\${APP_EXE}\Capabilities"
+  DeleteRegKey /IfEmpty ShCtx "Software\Classes\Applications\${APP_EXE}"
 
 !macroend
 
@@ -308,21 +331,19 @@ Section /o "Desktop Shortcut" DESKTOP_SHORTCUTS
 SectionEnd
 
 
-!define APP_ID "@Launcher_CommonName@.App"
-!define APP_EXE "@Launcher_APP_BINARY_NAME@.exe"
-!define APP_ICON "$INSTDIR\${APP_EXE},0"
-!define APP_DESCRIPTION "@Launcher_DisplayName@"
-!define APP_NAME "@Launcher_DisplayName@"
-!define APP_CMD_TEXT "Minecraft Modpack"
+!define APPID "@Launcher_CommonName@.App"
+!define APPEXE "@Launcher_APP_BINARY_NAME@.exe"
+!define APPICON "$INSTDIR\${APPEXE},0"
+!define APPDESCRIPTION "@Launcher_DisplayName@"
+!define APPNAME "@Launcher_DisplayName@"
+!define APPCMDTEXT "@Launcher_DisplayName@"
 
-!define REGISTER_DEFAULTPROGRAMS ; value doesn't matter
+Section /o "Shell Association (Open-With dialog)" SHELL_ASSOC
 
-Section -ShellAssoc
-
-  !insertmacro APP_SETUP `${APP_DESCRIPTION}` `${APP_ICON}` `${APP_ID}` `${APP_CMD_TEXT}` `${APP_EXE}` `${APP_CMD_TEXT}` '$INSTDIR\${APP_EXE} -I "%1"'
+  !insertmacro APP_SETUP `${APPDESCRIPTION}` `${APPICON}` `${APPID}` `${APPCMDTEXT}` `${APPEXE}` `${APPCMDTEXT}` '$INSTDIR\${APPEXE} -I "%1"'
   
-  !insertmacro APP_ASSOCIATE ".zip" `${APP_ID}` `${APP_EXE}` false
-  !insertmacro APP_ASSOCIATE ".mrpack" `${APP_ID}` `${APP_EXE}` true
+  !insertmacro APP_ASSOCIATE_DEFAULT ".mrpack" `${APPID}` `${APPEXE}` true
+  !insertmacro APP_ASSOCIATE ".zip" `${APPID}` `${APPEXE}` false
 
   !insertmacro NotifyShell_AssocChanged
 SectionEnd
@@ -361,10 +382,10 @@ SectionEnd
 
 Section -un.ShellAssoc
   
-  !insertmacro APP_TEARDOWN `${APP_ID}` `${APP_NAME}` `${APP_EXE}`
+  !insertmacro APP_TEARDOWN_DEFAULT `${APPID}` `${APPNAME}` `${APPEXE}`
 
-  !insertmacro APP_UNASSOCIATE ".zip" `${APP_ID}`
-  !insertmacro APP_UNASSOCIATE ".mrpack" `${APP_ID}`
+  !insertmacro APP_UNASSOCIATE ".zip" `${APPID}`
+  !insertmacro APP_UNASSOCIATE ".mrpack" `${APPID}`
 
   !insertmacro NotifyShell_AssocChanged
 SectionEnd
