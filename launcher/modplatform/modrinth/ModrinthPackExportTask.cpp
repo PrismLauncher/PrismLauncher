@@ -152,8 +152,7 @@ void ModrinthPackExportTask::buildZip()
         }
 
         if (pendingAbort) {
-            QMetaObject::invokeMethod(
-                this, [this]() { emitAborted(); }, Qt::QueuedConnection);
+            QMetaObject::invokeMethod(this, &ModrinthPackExportTask::emitAborted, Qt::QueuedConnection);
             return;
         }
 
@@ -171,8 +170,7 @@ void ModrinthPackExportTask::buildZip()
         for (const QFileInfo& file : files) {
             if (pendingAbort) {
                 QFile::remove(output);
-                QMetaObject::invokeMethod(
-                    this, [this]() { emitAborted(); }, Qt::QueuedConnection);
+                QMetaObject::invokeMethod(this, &ModrinthPackExportTask::emitAborted, Qt::QueuedConnection);
                 return;
             }
 
@@ -192,8 +190,7 @@ void ModrinthPackExportTask::buildZip()
             return;
         }
 
-        QMetaObject::invokeMethod(
-            this, [this]() { emitSucceeded(); }, Qt::QueuedConnection);
+        QMetaObject::invokeMethod(this, &ModrinthPackExportTask::emitSucceeded, Qt::QueuedConnection);
     });
 }
 
@@ -226,6 +223,7 @@ QByteArray ModrinthPackExportTask::generateIndex()
             dependencies["fabric-loader"] = fabric->m_version;
         if (forge != nullptr)
             dependencies["forge"] = forge->m_version;
+
         obj["dependencies"] = dependencies;
     }
 
